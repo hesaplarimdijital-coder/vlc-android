@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation project(':application:vlc-android')
+    implementation project(':application:nagmedar-data')
 
     implementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     implementation 'androidx.compose.ui:ui'

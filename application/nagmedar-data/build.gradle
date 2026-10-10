@@ -1,0 +1,56 @@
+// Nağmedar's own data (ADR-08): podcasts, radio stations, lyrics cache and per-file settings
+// in Room. The medialibrary keeps indexing media; DataStore/shared preferences keep settings.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
+}
+
+android {
+    namespace = 'app.nagmedar.data'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    sourceSets {
+        // exported Room schemas are the reference for the migration tests
+        test.assets.srcDirs += files("$projectDir/schemas")
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+ksp {
+    arg('room.schemaLocation', "$projectDir/schemas")
+}
+
+dependencies {
+    implementation "androidx.room:room-runtime:$rootProject.ext.roomVersion"
+    implementation "androidx.room:room-ktx:$rootProject.ext.roomVersion"
+    ksp "androidx.room:room-compiler:$rootProject.ext.roomVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
+    testImplementation "androidx.test:core:$rootProject.ext.testCore"
+    testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+    testImplementation "androidx.room:room-testing:$rootProject.ext.roomVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"
+}

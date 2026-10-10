@@ -94,7 +94,7 @@ jobs:
           else
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
-              :application:tools:testDebugUnitTest \
+              :application:tools:testDebugUnitTest :application:nagmedar-data:testDebugUnitTest \
               -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           fi
 
@@ -117,9 +117,13 @@ jobs:
           TOKEN: ${{ github.token }}
         run: |
           src=application/nagmedar-ui/build/outputs/screenshots
-          [ -d "$src" ] || exit 0
+          # exported Room schemas, to be committed under application/nagmedar-data/schemas
+          schemas=application/nagmedar-data/schemas
+          [ -d "$src" ] || [ -d "$schemas" ] || exit 0
           out="$RUNNER_TEMP/screenshots"
-          rm -rf "$out" && mkdir -p "$out" && cp -r "$src"/. "$out"/
+          rm -rf "$out" && mkdir -p "$out"
+          [ -d "$src" ] && cp -r "$src"/. "$out"/
+          [ -d "$schemas" ] && cp -r "$schemas" "$out"/schemas
           cd "$out"
           git init -q && git checkout -q --orphan ci/screenshots
           git add -A && git commit -q -m "Screenshots for ${GITHUB_SHA::7}"
