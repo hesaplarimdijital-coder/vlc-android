@@ -7,8 +7,10 @@
 
 #include <libavformat/avformat.h>
 #include <libavutil/ffversion.h>
+#include <libusb.h>
 
 #include "dvconvert.h"
+#include "usb_audio.h"
 #include "whisper_lab.h"
 
 #define LIBDOVI_VERSION "dovi_tool 2.3.4"
@@ -88,11 +90,20 @@ static void whisper_progress(void *opaque, double fraction, const char *stage)
     report(opaque, fraction, stage);
 }
 
+static void usb_progress(void *opaque, double fraction, int64_t frames, int64_t errors)
+{
+    char msg[96];
+    snprintf(msg, sizeof(msg), "%lld frames, %lld errors", (long long)frames, (long long)errors);
+    report(opaque, fraction, msg);
+}
+
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_version(JNIEnv *env, jclass cls)
 {
     (void)cls;
+    const struct libusb_version *usb = libusb_get_version();
     char text[256];
-    snprintf(text, sizeof(text), "FFmpeg %s · %s · %s", FFMPEG_VERSION, LIBDOVI_VERSION, WHISPER_LABEL);
+    snprintf(text, sizeof(text), "FFmpeg %s · %s · %s · libusb %u.%u.%u", FFMPEG_VERSION, LIBDOVI_VERSION, WHISPER_LABEL,
+             usb->major, usb->minor, usb->micro);
     return utf8(env, text);
 }
 
@@ -134,4 +145,19 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, j
     (*env)->ReleaseStringUTFChars(env, input, in);
     (*env)->ReleaseStringUTFChars(env, language, lang);
     return result;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_usbDescribe(JNIEnv *env, jclass cls, jint fd)
+{
+    (void)cls;
+    return take(env, usb_audio_describe(fd));
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_usbTone(JNIEnv *env, jclass cls, jint fd, jint rate, jint bits,
+                                                                  jdouble seconds, jdouble frequency, jobject listener)
+{
+    (void)cls;
+    g_cancel = 0;
+    Callback cb = callback(env, listener);
+    return take(env, usb_audio_tone(fd, (unsigned)rate, bits, seconds, frequency, usb_progress, &cb, &g_cancel));
 }

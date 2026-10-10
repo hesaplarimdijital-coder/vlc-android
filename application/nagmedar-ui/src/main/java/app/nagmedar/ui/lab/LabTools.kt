@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.annotation.StringRes
 import app.nagmedar.lab.DvConversion
 import app.nagmedar.lab.NativeLab
+import app.nagmedar.lab.UsbAudioLab
 import app.nagmedar.lab.WhisperLab
 import app.nagmedar.ui.R
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +62,9 @@ object LabTools {
     private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf("mkv" to "MKV", "mp4" to "MP4"))
     private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { it.name to it.label })
     private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("60" to "1 dk", "600" to "10 dk"))
+    private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf("96000" to "96 kHz", "44100" to "44,1 kHz", "192000" to "192 kHz"))
+    private val usbBits = LabOption("bits", R.string.nag_lab_option_bits, listOf("24" to "24 bit", "16" to "16 bit", "32" to "32 bit"))
+    private val usbDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("10" to "10 sn", "600" to "10 dk"))
 
     val all: List<LabTool> = listOf(
         LabTool("SP-01", R.string.nag_lab_audio_report, R.string.nag_lab_audio_report_desc) { run ->
@@ -68,6 +72,15 @@ object LabTools {
         },
         LabTool("SP-01", R.string.nag_lab_bit_perfect, R.string.nag_lab_bit_perfect_desc) { run ->
             withContext(Dispatchers.Default) { AudioReport.tryBitPerfect(run.activity) }
+        },
+        LabTool("SP-02", R.string.nag_lab_usb_describe, R.string.nag_lab_usb_describe_desc) { run ->
+            UsbAudioLab.describe(run.activity)
+        },
+        LabTool(
+            "SP-02", R.string.nag_lab_usb_tone, R.string.nag_lab_usb_tone_desc,
+            options = listOf(usbRate, usbBits, usbDuration), cancellable = true,
+        ) { run ->
+            UsbAudioLab.tone(run.activity, run.option("rate").toInt(), run.option("bits").toInt(), run.option("seconds").toDouble(), run.progress)
         },
         LabTool(
             "SP-03", R.string.nag_lab_dv_convert, R.string.nag_lab_dv_convert_desc, input = LabInput.MediaAndOutput,

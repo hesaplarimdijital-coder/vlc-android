@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-03 Dolby Vision conversion, SP-05 whisper).
+# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper).
 #
 #   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert command
 #                              (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp for arm64-v8a and
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb for arm64-v8a and
 #                              libnagmedar_lab.so into application/nagmedar-lab (needs ANDROID_NDK)
 #
 # Sources are cloned at the versions in versions.env into $NAGMEDAR_NATIVE_WORK
@@ -99,12 +99,13 @@ build_whisper() { # extra cmake args...
 }
 
 build_lab() { # extra cmake args...
+    fetch libusb "$LIBUSB_URL" "$LIBUSB_REF"
     log "libnagmedar_lab ($TARGET)"
     local dir="$WORK/build-$TARGET/lab"
     cmake -S "$ROOT/native/lab" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DDEPS_PREFIX="$PREFIX" \
-        "$@" > "$dir.configure.log" 2>&1 || fail_log "lab configure ($TARGET)" "$dir.configure.log"
+        -DLIBUSB_SOURCE="$WORK/src/libusb" "$@" > "$dir.configure.log" 2>&1 || fail_log "lab configure ($TARGET)" "$dir.configure.log"
     cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libnagmedar_lab ($TARGET)" "$dir.build.log"
-    grep -E "warning:" "$dir.build.log" | head -20 || true
+    grep -E "warning:" "$dir.build.log" | grep -v "/src/libusb/" | head -20 || true
 }
 
 host() {

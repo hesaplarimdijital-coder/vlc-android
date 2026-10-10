@@ -172,10 +172,16 @@
     <string name="nag_lab_media3_legacy">Classic</string>
     <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_stop">Stop</string>
-    <string name="nag_lab_native_missing">This build has no native lab library (Dolby Vision and whisper tools). Use the APK from CI.</string>
+    <string name="nag_lab_native_missing">This build has no native lab library (USB, Dolby Vision and whisper tools). Use the APK from CI.</string>
     <string name="nag_lab_option_duration">Duration</string>
     <string name="nag_lab_option_container">Container</string>
     <string name="nag_lab_option_model">Model</string>
+    <string name="nag_lab_option_rate">Sample rate</string>
+    <string name="nag_lab_option_bits">Bit depth</string>
+    <string name="nag_lab_usb_describe">USB DAC formats</string>
+    <string name="nag_lab_usb_describe_desc">Reads the DAC\'s USB Audio Class descriptors directly: formats, clock and sample rates.</string>
+    <string name="nag_lab_usb_tone">Direct USB output test</string>
+    <string name="nag_lab_usb_tone_desc">Plays a 1 kHz tone straight to the DAC with libusb, around the Android mixer. Android\'s own USB output pauses meanwhile.</string>
     <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
     <string name="nag_lab_dv_convert_desc">Pick a remux, then where to save the result: the base layer is copied as is, the enhancement layer dropped, the RPU converted.</string>
     <string name="nag_lab_whisper">Subtitles from speech (whisper)</string>

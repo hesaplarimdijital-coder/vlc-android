@@ -1,7 +1,7 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp; SP-03/05) for arm64, with
-#            host tests of the Dolby Vision converter and the whisper pipeline.
+# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05) for
+#            arm64, with host tests of the Dolby Vision converter and the whisper pipeline.
 #            Cached until native/lab or buildsystem/nagmedar-native changes.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded) and an unsigned release
 #            (compile check) against the published libVLC 4 AAR, without native
@@ -53,7 +53,7 @@ env:
 
 jobs:
   lab-native:
-    name: Laboratuvar native (SP-03/05)
+    name: Laboratuvar native (SP-02/03/05)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:

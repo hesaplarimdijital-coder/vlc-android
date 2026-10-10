@@ -1,7 +1,7 @@
 package app.nagmedar.lab
 
 /**
- * libnagmedar_lab.so: FFmpeg, libdovi and whisper.cpp, linked privately so they never
+ * libnagmedar_lab.so: FFmpeg, libdovi, whisper.cpp and libusb, linked privately so they never
  * meet libvlc's own copies. Every call is blocking and runs on a background thread; [cancel]
  * stops the running one. Results are JSON objects (see native/lab).
  */
@@ -26,4 +26,9 @@ object NativeLab {
     /** SP-05: transcribe the first audio track of [input] with the ggml model at [model]. */
     @JvmStatic external fun whisper(model: String, input: String, language: String, maxSeconds: Double, threads: Int, listener: Progress?): String
 
+    /** SP-02: formats, clock and rates of the USB audio device behind [fd]. */
+    @JvmStatic external fun usbDescribe(fd: Int): String
+
+    /** SP-02: a -6 dBFS sine straight to the USB DAC behind [fd]. */
+    @JvmStatic external fun usbTone(fd: Int, rate: Int, bits: Int, seconds: Double, frequency: Double, listener: Progress?): String
 }

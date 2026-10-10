@@ -172,10 +172,16 @@
     <string name="nag_lab_media3_legacy">Klasik</string>
     <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_stop">Durdur</string>
-    <string name="nag_lab_native_missing">Bu sürümde yerel laboratuvar kitaplığı yok (Dolby Vision ve whisper araçları). CI\'dan alınan APK\'yı kullanın.</string>
+    <string name="nag_lab_native_missing">Bu sürümde yerel laboratuvar kitaplığı yok (USB, Dolby Vision ve whisper araçları). CI\'dan alınan APK\'yı kullanın.</string>
     <string name="nag_lab_option_duration">Süre</string>
     <string name="nag_lab_option_container">Kap</string>
     <string name="nag_lab_option_model">Model</string>
+    <string name="nag_lab_option_rate">Örnekleme hızı</string>
+    <string name="nag_lab_option_bits">Bit derinliği</string>
+    <string name="nag_lab_usb_describe">USB DAC biçimleri</string>
+    <string name="nag_lab_usb_describe_desc">DAC\'ın USB Audio Class tanımlayıcılarını doğrudan okur: biçimler, saat ve örnekleme hızları.</string>
+    <string name="nag_lab_usb_tone">Doğrudan USB çıkış testi</string>
+    <string name="nag_lab_usb_tone_desc">Android mikserini atlayıp libusb ile DAC\'a 1 kHz ton çalar. Bu sırada Android\'in kendi USB çıkışı durur.</string>
     <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
     <string name="nag_lab_dv_convert_desc">Önce remux\'u, sonra sonucun kaydedileceği yeri seçin: temel katman olduğu gibi kopyalanır, geliştirme katmanı atılır, RPU dönüştürülür.</string>
     <string name="nag_lab_whisper">Konuşmadan altyazı (whisper)</string>
