@@ -1,6 +1,6 @@
 # Nağmedar CI
 #
-# app      : every push / PR. Builds the debug APK (uploaded) and an unsigned release
+# app      : every push / PR. Builds the arm64 debug APK (uploaded) and an unsigned release
 #            (compile check) against the published libVLC 4 AAR, without native
 #            compilation, on the hosted runner's Android SDK. Compiler errors become
 #            check-run annotations; the native source chain is reported as a notice.
@@ -84,9 +84,12 @@ jobs:
 
       - name: Derleme (${{ matrix.variant }})
         run: |
-          task=assembleDebug
-          [ "${{ matrix.variant }}" = release ] && task=assembleRelease
-          ./gradlew ":application:app:$task" --console=plain 2>&1 | tee build.log
+          if [ "${{ matrix.variant }}" = release ]; then
+            ./gradlew :application:app:assembleRelease --console=plain 2>&1 | tee build.log
+          else
+            # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
+            ./gradlew :application:app:assembleDebug -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee build.log
+          fi
 
       - name: Hataları işaretle
         if: failure()
