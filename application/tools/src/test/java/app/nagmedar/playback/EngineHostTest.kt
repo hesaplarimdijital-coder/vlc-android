@@ -10,8 +10,8 @@ class EngineHostTest {
 
     private class FakeEngine(override val engineId: EngineId, private val accepts: (EngineMedia) -> Boolean) : PlaybackEngine {
         var playing = false
-        var volume = 100
-        var rate = 1f
+        var level = 100
+        var speed = 1f
         var stops = 0
 
         override fun canPlay(media: EngineMedia) = accepts(media)
@@ -34,14 +34,14 @@ class EngineHostTest {
         override fun setTime(time: Long, fast: Boolean) = Unit
         override fun getCurrentTime() = 0L
         override fun getLength() = 0L
-        override fun getRate() = rate
+        override fun getRate() = speed
         override fun setRate(rate: Float, save: Boolean) {
-            this.rate = rate
+            speed = rate
         }
 
-        override fun getVolume() = volume
+        override fun getVolume() = level
         override fun setVolume(volume: Int): Int {
-            this.volume = volume
+            level = volume
             return 0
         }
 
@@ -83,22 +83,22 @@ class EngineHostTest {
         val host = EngineHost(EngineRouter(listOf(audio, vlc))) { from, to -> changes += from to to }
         assertSame(audio, host.current)
 
-        audio.volume = 64
-        audio.rate = 1.25f
+        audio.level = 64
+        audio.speed = 1.25f
         audio.play()
         // a stream goes to libVLC: the audio engine stops, libVLC takes its volume and rate
         assertSame(vlc, host.prepareFor(stream))
         assertEquals(EngineId.NagmedarAudio to EngineId.LibVlc, changes.last())
         assertEquals(1, audio.stops)
         assertTrue(!audio.isPlaying())
-        assertEquals(64, vlc.volume)
-        assertEquals(1.25f, vlc.rate)
+        assertEquals(64, vlc.level)
+        assertEquals(1.25f, vlc.speed)
 
         // back to local music: the state flows the other way
-        vlc.volume = 30
+        vlc.level = 30
         assertSame(audio, host.prepareFor(localFlac))
         assertEquals(EngineId.LibVlc to EngineId.NagmedarAudio, changes.last())
-        assertEquals(30, audio.volume)
+        assertEquals(30, audio.level)
 
         // same engine again: no hand-over
         val before = changes.size
