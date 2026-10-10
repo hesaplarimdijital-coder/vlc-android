@@ -32,6 +32,13 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            all {
+                maxHeapSize = '2g'
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
         }
     }
 }
@@ -54,4 +61,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
+    testImplementation "androidx.test:core:$rootProject.ext.testCore"
+    testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+    testImplementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
+    testImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
 }

@@ -83,7 +83,7 @@ fun <T> DenseTable(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimens.rowHeight.coerceAtMost(36.dp))
+                .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
                 .padding(horizontal = dimens.pagePadding - 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -123,7 +123,7 @@ private fun <T> RowScope.HeaderCell(column: TableColumn<T>, index: Int, sort: Ta
     Row(
         modifier = Modifier
             .cell(this, column.width)
-            .heightIn(min = 24.dp)
+            .heightIn(min = NagTheme.dimens.minTarget)
             .background(if (clickable) stateBackground(state) else colors.background, RoundedCornerShape(4.dp))
             .then(
                 if (clickable) Modifier.nagClickable(interaction, {
