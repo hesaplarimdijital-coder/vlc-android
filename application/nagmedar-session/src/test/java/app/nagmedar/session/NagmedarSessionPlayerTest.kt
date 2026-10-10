@@ -34,8 +34,10 @@ class NagmedarSessionPlayerTest {
         override var isSeekable = true
         override var positionMs = 42_000L
         override var durationMs = 200_001L
-        override var speed = 1f
-        override var repeatMode = Player.REPEAT_MODE_OFF
+        var speedValue = 1f
+        var repeatValue = Player.REPEAT_MODE_OFF
+        override val speed get() = speedValue
+        override val repeatMode get() = repeatValue
         override var shuffling = false
         override var canRepeat = true
         override var canShuffle = true
