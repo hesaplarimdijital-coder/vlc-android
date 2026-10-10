@@ -1,8 +1,8 @@
 # Nağmedar CI
 #
 # app      : every push / PR. Builds the debug APK against the published libVLC 4
-#            AAR (no native compilation), uploads the APK, and turns compiler
-#            errors into check-run annotations.
+#            AAR (no native compilation) on the hosted runner's Android SDK,
+#            uploads the APK, and turns compiler errors into check-run annotations.
 # release  : manual or v* tags. Signed release APKs when the keystore secrets exist
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
 #            otherwise it is skipped with a notice.
@@ -37,22 +37,28 @@ defaults:
     shell: bash
 
 env:
-  VLC_ANDROID_IMAGE: registry.videolan.org/vlc-debian-android:20260610055743
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
+  # get-vlc.sh applies VLC patches with "git am", which needs a committer identity.
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
 
 jobs:
   app:
     name: Uygulama · debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    container:
-      image: registry.videolan.org/vlc-debian-android:20260610055743
-      options: --user root
     steps:
       - uses: actions/checkout@v4
 
-      - name: Git güvenli dizin
-        run: git config --global --add safe.directory '*'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK ve NDK
+        run: ./buildsystem/ci/setup-android.sh
 
       - name: Gradle önbelleği
         uses: actions/cache@v4
@@ -67,8 +73,8 @@ jobs:
       - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
         run: ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
 
-      - name: Derleme (assembleDebug)
-        run: ./gradlew assembleDebug -PforceVlc4=true --console=plain 2>&1 | tee build.log
+      - name: Derleme (debug APK)
+        run: ./gradlew :application:app:assembleDebug -PforceVlc4=true --console=plain 2>&1 | tee build.log
 
       - name: Hataları işaretle
         if: failure()
@@ -97,20 +103,21 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.release || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 150
-    container:
-      image: registry.videolan.org/vlc-debian-android:20260610055743
-      options: --user root
     env:
       HAS_KEYSTORE: ${{ secrets.NAGMEDAR_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Anahtar deposu yoksa atla
         if: env.HAS_KEYSTORE != 'true'
         run: echo "::notice title=Release::NAGMEDAR_KEYSTORE_BASE64 tanımlı değil; imzalı release atlandı."
       - name: Hazırlık
         if: env.HAS_KEYSTORE == 'true'
         run: |
-          git config --global --add safe.directory '*'
+          ./buildsystem/ci/setup-android.sh
           ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
       - name: İmzalı derleme
         if: env.HAS_KEYSTORE == 'true'
@@ -120,7 +127,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.NAGMEDAR_KEY_ALIAS }}
         run: |
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/nagmedar.keystore"
-          ./gradlew assembleSignedRelease -PforceVlc4=true --console=plain \
+          ./gradlew :application:app:assembleSignedRelease -PforceVlc4=true --console=plain \
             -PkeyStoreFile="$RUNNER_TEMP/nagmedar.keystore" -Pstorealias="$KEY_ALIAS" 2>&1 | tee build.log
           rm -f "$RUNNER_TEMP/nagmedar.keystore"
       - name: Hataları işaretle
