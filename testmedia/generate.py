@@ -51,7 +51,15 @@ def log(msg):
 def run(*cmd, **kw):
     cmd = [str(c) for c in cmd]
     log('  $ ' + ' '.join(cmd if len(' '.join(cmd)) < 400 else cmd[:12] + ['…']))
-    return subprocess.run(cmd, check=True, **kw)
+    result = subprocess.run(cmd, capture_output=True, text=True, errors='replace', **kw)
+    if result.stdout:
+        print(result.stdout, end='', flush=True)
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr, flush=True)
+    if result.returncode != 0:
+        raise RuntimeError(f'{os.path.basename(cmd[0])} exited with {result.returncode}: '
+                           + (result.stderr or result.stdout or '').strip()[-1500:])
+    return result
 
 
 def ffmpeg(*args):
@@ -602,6 +610,9 @@ def main():
         except Exception as e:  # keep going: verify.py reports what is missing
             log(f'  ! {name} failed: {e}')
             failed.append(name)
+            if os.environ.get('GITHUB_ACTIONS'):
+                text = str(e).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                print(f'::error title=Test medyası {name}::{text}', flush=True)
     if failed:
         log('failed steps: ' + ', '.join(failed))
         sys.exit(1)
