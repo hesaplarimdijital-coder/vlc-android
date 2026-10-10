@@ -1,5 +1,8 @@
 # Nağmedar CI
 #
+# lab-native: the native lab library (FFmpeg, libdovi; SP-03) for arm64, with host tests of
+#            the Dolby Vision converter.
+#            Cached until native/lab or buildsystem/nagmedar-native changes.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded) and an unsigned release
 #            (compile check) against the published libVLC 4 AAR, without native
 #            compilation, on the hosted runner's Android SDK. The debug leg also runs the
@@ -49,8 +52,63 @@ env:
   GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
 
 jobs:
+  lab-native:
+    name: Laboratuvar native (SP-03)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Önbellek
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: application/nagmedar-lab/src/main/jniLibs
+          key: lab-native-${{ hashFiles('native/lab/**', 'buildsystem/nagmedar-native/**') }}
+
+      - uses: actions/setup-java@v5
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Araçlar
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mkvtoolnix ffmpeg nasm
+          mkdir -p "$RUNNER_TEMP/bin"
+          gh release download 2.3.4 --repo quietvoid/dovi_tool \
+            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Host derlemesi ve testleri (SP-03)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host"
+          ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"
+
+      - name: Android NDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./buildsystem/ci/setup-android.sh
+
+      - name: arm64 derlemesi
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./buildsystem/nagmedar-native/build.sh android "$RUNNER_TEMP/native-android"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lab-jnilibs
+          path: application/nagmedar-lab/src/main/jniLibs
+          if-no-files-found: error
+
   app:
     name: Uygulama · ${{ matrix.variant }}
+    needs: lab-native
+    # the app still builds when the lab libraries fail; the Lab screen then says they are missing
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -61,6 +119,13 @@ jobs:
         variant: [debug, release]
     steps:
       - uses: actions/checkout@v5
+
+      - name: Laboratuvar kitaplıkları
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: lab-jnilibs
+          path: application/nagmedar-lab/src/main/jniLibs
 
       - uses: actions/setup-java@v5
         with:
@@ -95,7 +160,7 @@ jobs:
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
               :application:tools:testDebugUnitTest :application:nagmedar-data:testDebugUnitTest \
-              :application:nagmedar-session:testDebugUnitTest \
+              :application:nagmedar-session:testDebugUnitTest :application:nagmedar-lab:testDebugUnitTest \
               -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           fi
 

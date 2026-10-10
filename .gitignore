@@ -82,3 +82,7 @@ lib/
 # test media output (S-1401) and Python caches
 /out/
 __pycache__/
+
+# native lab libraries built by CI (buildsystem/nagmedar-native)
+/application/nagmedar-lab/src/main/jniLibs/
+/native/.work/

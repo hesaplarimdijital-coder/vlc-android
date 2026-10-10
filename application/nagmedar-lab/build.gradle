@@ -1,0 +1,40 @@
+// Native lab tools of the MVP0 spikes (SP-02 USB audio, SP-03 Dolby Vision conversion,
+// SP-05 whisper). libnagmedar_lab.so is built by buildsystem/nagmedar-native and dropped
+// into src/main/jniLibs by CI; without it the tools report that the build lacks them.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.lab'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    testOptions {
+        unitTests {
+            all {
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.json:json:20231013"
+}

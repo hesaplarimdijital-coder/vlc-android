@@ -171,6 +171,12 @@
     <string name="nag_lab_media3_desc">Lock screen, notification, Bluetooth and Android Auto controls go through the Media3 session. Applies the next time playback starts after the player was closed.</string>
     <string name="nag_lab_media3_legacy">Classic</string>
     <string name="nag_lab_media3_on">Media3</string>
+    <string name="nag_lab_stop">Stop</string>
+    <string name="nag_lab_native_missing">This build has no native lab library (Dolby Vision tool). Use the APK from CI.</string>
+    <string name="nag_lab_option_duration">Duration</string>
+    <string name="nag_lab_option_container">Container</string>
+    <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
+    <string name="nag_lab_dv_convert_desc">Pick a remux, then where to save the result: the base layer is copied as is, the enhancement layer dropped, the RPU converted.</string>
     <string name="nag_lab_run">Run</string>
     <string name="nag_lab_running">Running…</string>
     <string name="nag_lab_copy">Copy</string>
