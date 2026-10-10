@@ -6,6 +6,7 @@
 #     layer's timestamps intact, no enhancement layer and every other track kept.
 #   - SP-05: whisper_lab_cli decodes and transcribes a tone with whisper.cpp's test model.
 set -euo pipefail
+trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 PREFIX=$(realpath -m "${1:?prefix}")
@@ -31,7 +32,9 @@ for container in mkv mp4; do
     echo "== SP-03: convert to $container"
     extra=()
     [ "$container" = mp4 ] && extra=(--mp4)
-    "$PREFIX/bin/dvconvert" "$T/p7.mkv" "$T/out.$container" "${extra[@]}" > "$T/stats.json" 2> /dev/null
+    # a failed conversion still writes its stats; the checks below report the error
+    "$PREFIX/bin/dvconvert" "$T/p7.mkv" "$T/out.$container" "${extra[@]}" > "$T/stats.json" 2> "$T/dvconvert.log" || true
+    [ -s "$T/out.$container" ] || { echo "dvconvert wrote nothing: $(cat "$T/stats.json") $(tail -c 500 "$T/dvconvert.log")"; exit 1; }
     ffprobe -v error -print_format json -show_streams -show_chapters "$T/out.$container" > "$T/probe.json"
     ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/p7.mkv" > "$T/pts_in.json"
     ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/out.$container" > "$T/pts_out.json"

@@ -87,8 +87,12 @@ jobs:
       - name: Host derlemesi ve testleri (SP-03, SP-05)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host"
-          ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"
+          set -o pipefail
+          { ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host" &&
+            ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"; } 2>&1 | tee "$RUNNER_TEMP/host.log" || {
+            echo "::error title=Host günlüğü::$(tail -c 3000 "$RUNNER_TEMP/host.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+            exit 1
+          }
 
       - name: Android NDK
         if: steps.cache.outputs.cache-hit != 'true'
@@ -96,7 +100,12 @@ jobs:
 
       - name: arm64 derlemesi
         if: steps.cache.outputs.cache-hit != 'true'
-        run: ./buildsystem/nagmedar-native/build.sh android "$RUNNER_TEMP/native-android"
+        run: |
+          set -o pipefail
+          ./buildsystem/nagmedar-native/build.sh android "$RUNNER_TEMP/native-android" 2>&1 | tee "$RUNNER_TEMP/android.log" || {
+            echo "::error title=arm64 günlüğü::$(tail -c 3000 "$RUNNER_TEMP/android.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+            exit 1
+          }
 
       - uses: actions/upload-artifact@v4
         with:
