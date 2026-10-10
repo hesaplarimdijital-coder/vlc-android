@@ -23,7 +23,7 @@ import sys
 import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, 'lib'))
+sys.path.insert(0, os.path.join(HERE, 'tools'))
 
 import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
