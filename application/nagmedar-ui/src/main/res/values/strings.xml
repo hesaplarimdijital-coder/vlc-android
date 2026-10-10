@@ -156,4 +156,16 @@
     <string name="nag_settings_version">Version %1$s · libVLC %2$s</string>
     <string name="nag_shortcut_unbound">Not assigned</string>
     <string name="nag_classic_interface">Classic interface</string>
+    <!-- Settings > Lab (MVP0 spikes) -->
+    <string name="nag_settings_lab">Lab</string>
+    <string name="nag_lab_intro">Tools of the MVP0 experiments that need this device. Each one writes a report to copy or share.</string>
+    <string name="nag_lab_audio_report">Audio output report</string>
+    <string name="nag_lab_audio_report_desc">Outputs, sample rates, encodings and bit-perfect mixers. Connect the USB DAC first.</string>
+    <string name="nag_lab_bit_perfect">Try bit-perfect mode</string>
+    <string name="nag_lab_bit_perfect_desc">Sets the USB DAC\'s bit-perfect mixer for media, reads it back and clears it again.</string>
+    <string name="nag_lab_run">Run</string>
+    <string name="nag_lab_running">Running…</string>
+    <string name="nag_lab_copy">Copy</string>
+    <string name="nag_lab_share">Share</string>
+    <string name="nag_lab_close">Close</string>
 </resources>

@@ -21,6 +21,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,11 +43,16 @@ import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
+import app.nagmedar.ui.lab.LabTool
+import app.nagmedar.ui.lab.LabTools
+import app.nagmedar.ui.lab.ReportDialog
+import app.nagmedar.ui.lab.findActivity
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
+import kotlinx.coroutines.launch
 import org.videolan.vlc.BuildConfig
 
 /** Index of the keyboard shortcut section in [SettingsScreen]'s list, for "Keyboard shortcuts" (Ctrl+/). */
@@ -122,7 +132,52 @@ fun SettingsScreen(
                 }
             }
         }
+        item { LabSection() }
     }
+}
+
+/**
+ * Settings > Lab: the MVP0 spike experiments that need the real device (USB DAC, TV over HDMI).
+ * Each one produces a text report to copy or share.
+ */
+@Composable
+private fun LabSection() {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var running by remember { mutableStateOf<LabTool?>(null) }
+    var result by remember { mutableStateOf<Pair<String, String>?>(null) }
+    SettingsSection(stringResource(R.string.nag_settings_lab)) {
+        Text(stringResource(R.string.nag_lab_intro), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+        Spacer(Modifier.height(dimens.gapS))
+        LabTools.all.forEach { tool ->
+            val title = stringResource(tool.title)
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = dimens.rowHeight).padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f).padding(end = dimens.gapM)) {
+                    Text("${tool.spike} · $title", style = NagTheme.type.bodyStrong, color = colors.text)
+                    Text(stringResource(tool.description), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+                }
+                NagButton(
+                    text = stringResource(if (running === tool) R.string.nag_lab_running else R.string.nag_lab_run),
+                    onClick = {
+                        val activity = context.findActivity() ?: return@NagButton
+                        running = tool
+                        scope.launch {
+                            val report = runCatching { tool.run(activity) }.getOrElse { "${it::class.java.simpleName}: ${it.message}" }
+                            running = null
+                            result = title to report
+                        }
+                    },
+                    enabled = running == null,
+                )
+            }
+        }
+    }
+    result?.let { (title, report) -> ReportDialog(title, report, onDismiss = { result = null }) }
 }
 
 @Composable
