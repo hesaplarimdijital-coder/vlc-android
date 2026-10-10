@@ -330,6 +330,9 @@
     <string name="authors">Authors</string>
     <string name="about_copyright" translatable="false">Copyleft &#169; 1996&#8211;2026 by VideoLAN and the VLC authors\nNağmedar changes &#169; 2026 the Nağmedar contributors</string>
     <string name="nagmedar_source_url" translatable="false">https://github.com/hesaplarimdijital-coder/vlc-android</string>
+    <string name="nagmedar_new_interface">New interface (preview)</string>
+    <string name="nagmedar_new_interface_short">New interface</string>
+    <string name="nagmedar_new_interface_summary">Desktop-class Nağmedar interface with sidebar, menus and keyboard shortcuts</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and VLC Authors.</string>

@@ -3,6 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:targetApi="n_mr1" >
     <shortcut
+        android:shortcutId="nagmedar_shell"
+        android:enabled="true"
+        android:icon="@drawable/ic_nagmedar_mark"
+        android:shortcutShortLabel="@string/nagmedar_new_interface_short"
+        android:shortcutLongLabel="@string/nagmedar_new_interface">
+        <intent
+            android:action="nagmedar.shortcut.shell"
+            android:targetPackage="app.nagmedar"
+            android:targetClass="app.nagmedar.ui.NagmedarActivity" />
+    </shortcut>
+    <shortcut
         android:shortcutId="last_playlist"
         android:enabled="true"
         android:icon="@drawable/ic_shortcut_resume_playback"

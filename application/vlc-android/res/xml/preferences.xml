@@ -85,6 +85,11 @@
 
     <PreferenceCategory android:title="@string/extra_prefs_category">
         <Preference
+                android:title="@string/nagmedar_new_interface"
+                android:summary="@string/nagmedar_new_interface_summary"
+                android:key="nagmedar_shell"
+                android:icon="@drawable/ic_nagmedar_mark"/>
+        <Preference
                 android:title="@string/interface_prefs_screen"
                 android:key="ui_category"
                 android:icon="@drawable/ic_ui"

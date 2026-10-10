@@ -219,6 +219,8 @@ const val SCHEME_PACKAGE = "package"
 
 // Class names
 const val START_ACTIVITY = "org.videolan.vlc.StartActivity"
+/** Compose interface of :application:nagmedar-ui, started by class name from the classic UI. */
+const val NAGMEDAR_SHELL_ACTIVITY = "app.nagmedar.ui.NagmedarActivity"
 const val COMPATERROR_ACTIVITY = "org.videolan.vlc.gui.CompatErrorActivity"
 const val TV_SEARCH_ACTIVITY = "org.videolan.television.ui.SearchActivity"
 const val MOBILE_SEARCH_ACTIVITY = "org.videolan.vlc.gui.SearchActivity"

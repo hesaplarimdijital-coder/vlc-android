@@ -36,6 +36,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import org.videolan.libvlc.util.AndroidUtil
 import org.videolan.medialibrary.interfaces.Medialibrary
+import org.videolan.resources.NAGMEDAR_SHELL_ACTIVITY
 import org.videolan.resources.util.parcelable
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.KEY_AUDIO_LAST_PLAYLIST
@@ -167,6 +168,7 @@ class PreferencesFragment : BasePreferenceFragment(), SharedPreferences.OnShared
             "audio_category" -> loadFragment(PreferencesAudio())
             "equalizer" -> startActivity(Intent(requireActivity().applicationContext, EqualizerSettingsActivity::class.java))
             "licenses" -> startActivity(Intent(requireActivity(), LibrariesActivity::class.java))
+            "nagmedar_shell" -> startActivity(Intent().setClassName(requireContext(), NAGMEDAR_SHELL_ACTIVITY))
             "adv_category" -> loadFragment(PreferencesAdvanced())
             "casting_category" -> loadFragment(PreferencesCasting())
             "parental_control" -> {

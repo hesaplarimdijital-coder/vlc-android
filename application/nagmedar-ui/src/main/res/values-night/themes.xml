@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nagmedar_window_background">#111418</color>
+
+    <style name="Theme.Nagmedar" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/nagmedar_window_background</item>
+        <item name="android:colorBackground">@color/nagmedar_window_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
