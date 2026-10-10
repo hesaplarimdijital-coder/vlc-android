@@ -40,6 +40,8 @@ class ShellScreenshotTest {
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, start: Destination = Destination.Movies) {
+        // the test activity's theme has an action bar; the app's theme has none
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {

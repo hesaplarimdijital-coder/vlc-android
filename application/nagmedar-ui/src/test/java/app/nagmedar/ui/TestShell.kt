@@ -33,6 +33,7 @@ import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.screens.PlaceholderScreen
+import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
@@ -133,7 +134,7 @@ fun SamplePlayerBar(kind: NavKind) {
             Modifier.fillMaxWidth().height(if (kind == NavKind.Sidebar) 72.dp else NagTheme.dimens.miniPlayerHeight).padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(Modifier.size(44.dp).background(colors.surfaceRaised, RoundedCornerShape(6.dp)))
+            Artwork(media = null, size = 44.dp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text("Sabaha kadar", style = NagTheme.type.bodyStrong, color = colors.text)

@@ -3,6 +3,7 @@ package app.nagmedar.ui.playback
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,7 +64,16 @@ fun Artwork(media: MediaWrapper?, size: Dp, modifier: Modifier = Modifier, corne
         value = media?.let { ThumbnailsProvider.obtainBitmap(it, px)?.asImageBitmap() }
     }
     val shape = RoundedCornerShape(corner)
-    Box(modifier.size(size).clip(shape).background(colors.surfaceRaised), contentAlignment = Alignment.Center) {
+    val placeholder = bitmap == null
+    Box(
+        modifier
+            .size(size)
+            .clip(shape)
+            .background(colors.surfaceRaised)
+            // without artwork the tile needs an edge: on the light theme it is as light as the bar
+            .then(if (placeholder) Modifier.border(1.dp, colors.border, shape) else Modifier),
+        contentAlignment = Alignment.Center,
+    ) {
         val image = bitmap
         if (image != null) {
             Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
