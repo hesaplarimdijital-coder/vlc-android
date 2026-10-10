@@ -209,15 +209,16 @@ class ComponentStatesTest {
         val hover = crop(sample)
         parkMouse()
 
-        compose.runOnIdle { inputModeManager.requestInputMode(ComposeInputMode.Keyboard) }
-        sample.target(this).requestFocus()
-        val focus = crop(sample)
-        compose.runOnIdle { focusManager.clearFocus(force = true) }
-
+        // pressed before focused, so no focus ring is left over in the pressed picture
         sample.target(this).performTouchInput { down(center) }
         compose.mainClock.advanceTimeBy(250) // presses inside scrolling lists are reported after the tap timeout
         val pressed = crop(sample)
         sample.target(this).performTouchInput { cancel() }
+
+        compose.runOnIdle { inputModeManager.requestInputMode(ComposeInputMode.Keyboard) }
+        sample.target(this).requestFocus()
+        val focus = crop(sample)
+        compose.runOnIdle { focusManager.clearFocus(force = true) }
         return listOf(normal, hover, focus, pressed)
     }
 
@@ -227,6 +228,9 @@ class ComponentStatesTest {
             NagmedarTheme(themeMode = theme, inputMode = InputMode.Pointer) { Gallery() }
         }
         compose.waitForIdle()
+        // a tap on the empty margin first puts the window in touch mode, as any real touch would: in keyboard
+        // mode the first press would also focus its button
+        compose.onRoot().performTouchInput { click(Offset(2f, 2f)) }
         val rows = samples.map { it to captureStates(it) }
         val colors = if (theme == ThemeMode.Light) NagPalette.light(Accent.Blue) else NagPalette.dark(Accent.Blue)
         ShellScreenshotTest.save(file, sheet(rows, colors.background, colors.text, colors.textTertiary))
