@@ -55,8 +55,13 @@ jobs:
       - name: Üret
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python3 testmedia/generate.py out/testmedia --work "$RUNNER_TEMP/work" \
-            $([ "$SKIP_HEAVY" = true ] && echo --skip-heavy)
+          set -o pipefail
+          args=()
+          [ "$SKIP_HEAVY" = true ] && args+=(--skip-heavy)
+          python3 testmedia/generate.py out/testmedia --work "$RUNNER_TEMP/work" "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/generate.log" || {
+            echo "::error title=Üretim günlüğü::$(tail -c 2500 "$RUNNER_TEMP/generate.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+            exit 1
+          }
 
       - name: Doğrula
         run: |
