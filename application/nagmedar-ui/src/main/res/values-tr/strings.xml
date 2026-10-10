@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nagmedar_shell_title">Nağmedar</string>
+    <string name="nagmedar_shell_preview">Yeni arayüz (önizleme)</string>
+
+    <!-- Gezinme -->
+    <string name="nag_section_library">Kütüphane</string>
+    <string name="nag_section_sources">Kaynaklar</string>
+    <string name="nag_section_tools">Araçlar</string>
+    <string name="nag_section_playlists">Çalma listeleri</string>
+    <string name="nag_nav_home">Ana sayfa</string>
+    <string name="nag_nav_movies">Filmler</string>
+    <string name="nag_nav_series">Diziler</string>
+    <string name="nag_nav_video">Video</string>
+    <string name="nag_nav_music">Müzik</string>
+    <string name="nag_nav_podcasts">Podcastler</string>
+    <string name="nag_nav_podcasts_short">Podcast</string>
+    <string name="nag_nav_radio">Radyo</string>
+    <string name="nag_nav_device">Bu cihaz</string>
+    <string name="nag_nav_network">Ağ</string>
+    <string name="nag_nav_streams">Akışlar</string>
+    <string name="nag_nav_tv_lab">TV Lab</string>
+    <string name="nag_nav_convert">Dönüştür</string>
+    <string name="nag_nav_downloads">İndirmeler</string>
+    <string name="nag_nav_playlists">Çalma listeleri</string>
+    <string name="nag_nav_settings">Ayarlar</string>
+    <string name="nag_nav_more">Daha fazla</string>
+    <string name="nag_main_navigation">Ana gezinme</string>
+    <string name="nag_sidebar">Kenar çubuğu</string>
+    <string name="nag_sidebar_collapse">Kenar çubuğunu daralt</string>
+    <string name="nag_sidebar_expand">Kenar çubuğunu genişlet</string>
+    <string name="nag_network_detail">SMB · DLNA · WebDAV</string>
+
+    <!-- Menü çubuğu -->
+    <string name="nag_menu_bar">Uygulama menüsü</string>
+    <string name="nag_menu_media">Medya</string>
+    <string name="nag_menu_playback">Oynatma</string>
+    <string name="nag_menu_audio">Ses</string>
+    <string name="nag_menu_video">Video</string>
+    <string name="nag_menu_subtitle">Altyazı</string>
+    <string name="nag_menu_tools">Araçlar</string>
+    <string name="nag_menu_view">Görünüm</string>
+    <string name="nag_menu_help">Yardım</string>
+    <string name="nag_search_hint">Sanatçı, albüm, parça ya da komut</string>
+    <string name="nag_search">Ara veya komut çalıştır</string>
+
+    <!-- Yer tutucular -->
+    <string name="nag_coming_title">%1$s %2$s ile geliyor</string>
+    <string name="nag_coming_movies">Afişler, teknik bilgiler ve TV uyumluluğuyla filmler.</string>
+    <string name="nag_coming_series">Sezonlara göre gruplanmış diziler ve bölüm ilerlemesi.</string>
+    <string name="nag_coming_podcasts">Abonelikler, yeni bölümler ve indirmeler.</string>
+    <string name="nag_coming_radio">İnternet radyosu dizini, favoriler ve kayıtlar.</string>
+    <string name="nag_coming_device">Bu cihazdaki ve harici disklerdeki klasörler.</string>
+    <string name="nag_coming_network">SMB, DLNA ve WebDAV paylaşımları.</string>
+    <string name="nag_coming_streams">Ağ akışları ve kayıtlı adresler.</string>
+    <string name="nag_coming_tv_lab">Dosyaları TV\'niz için analiz edin, kalite kaybı olmadan remux edin.</string>
+    <string name="nag_coming_convert">Kayıpsız remux ve dönüştürme işleri.</string>
+    <string name="nag_coming_downloads">Podcast bölümleri, altyazılar ve diğer indirmeler.</string>
+    <string name="nag_coming_playlists">Çalma listeleri ve akıllı listeler.</string>
+    <string name="nag_open_classic">Klasik arayüzü aç</string>
+
+    <!-- Kütüphane -->
+    <string name="nag_home_continue">İzlemeye devam et</string>
+    <string name="nag_home_recent_music">Son çalınan müzik</string>
+    <string name="nag_home_empty">Henüz bir şey oynatılmadı. Kütüphane klasörlerinizi taradıktan sonra videolarınız ve müziğiniz burada görünür.</string>
+    <string name="nag_videos_count">%1$d video</string>
+    <string name="nag_tracks_count">%1$d parça</string>
+    <string name="nag_library_loading">Kütüphane yükleniyor…</string>
+    <string name="nag_library_empty_video">Henüz video yok. Klasik arayüzde Ayarlar → Medya kütüphanesi klasörleri bölümünden klasör ekleyin.</string>
+    <string name="nag_library_empty_music">Henüz müzik yok. Klasik arayüzde Ayarlar → Medya kütüphanesi klasörleri bölümünden klasör ekleyin.</string>
+    <string name="nag_unknown_artist">Bilinmeyen sanatçı</string>
+    <string name="nag_column_title">Ad</string>
+    <string name="nag_column_duration">Süre</string>
+    <string name="nag_column_resolution">Çözünürlük</string>
+    <string name="nag_column_artist">Sanatçı</string>
+    <string name="nag_column_album">Albüm</string>
+
+    <!-- Oynatıcı -->
+    <string name="nag_now_playing">Şimdi çalıyor</string>
+    <string name="nag_nothing_playing">Çalan bir şey yok</string>
+    <string name="nag_play">Oynat</string>
+    <string name="nag_pause">Duraklat</string>
+    <string name="nag_previous">Önceki parça</string>
+    <string name="nag_next">Sonraki parça</string>
+    <string name="nag_open_player">Oynatıcıyı aç</string>
+    <string name="nag_position">Parça konumu</string>
+
+    <!-- Ayarlar -->
+    <string name="nag_settings_appearance">Görünüm</string>
+    <string name="nag_settings_theme">Tema</string>
+    <string name="nag_theme_system">Sistem</string>
+    <string name="nag_theme_light">Açık</string>
+    <string name="nag_theme_dark">Koyu</string>
+    <string name="nag_theme_oled">OLED siyah</string>
+    <string name="nag_settings_accent">Vurgu rengi</string>
+    <string name="nag_accent_blue">Mavi</string>
+    <string name="nag_accent_amber">Kehribar</string>
+    <string name="nag_accent_green">Yeşil</string>
+    <string name="nag_accent_coral">Mercan</string>
+    <string name="nag_settings_input">Giriş</string>
+    <string name="nag_settings_density">Arayüz yoğunluğu</string>
+    <string name="nag_density_auto">Otomatik (fare ya da dokunmaya göre)</string>
+    <string name="nag_density_touch">Dokunmatik</string>
+    <string name="nag_density_pointer">Fare ve klavye</string>
+    <string name="nag_settings_about">Hakkında</string>
+    <string name="nag_settings_classic_settings">Tüm ayarlar (klasik arayüz)</string>
+    <string name="nag_settings_licences">Lisanslar</string>
+
+    <!-- Shortcuts and actions -->
+    <string name="nag_shuffle">Karıştır</string>
+    <string name="nag_repeat">Tekrarla</string>
+    <string name="nag_key_space">Boşluk</string>
+    <string name="nag_sc_open_file">Dosya aç…</string>
+    <string name="nag_sc_open_network">Ağ akışı aç…</string>
+    <string name="nag_sc_new_window">Yeni pencerede aç</string>
+    <string name="nag_sc_media_info">Medya bilgisi</string>
+    <string name="nag_sc_play_pause">Oynat / duraklat</string>
+    <string name="nag_sc_stop">Durdur</string>
+    <string name="nag_sc_previous">Önceki</string>
+    <string name="nag_sc_next">Sonraki</string>
+    <string name="nag_sc_back_3s">3 sn geri</string>
+    <string name="nag_sc_forward_3s">3 sn ileri</string>
+    <string name="nag_sc_back_10s">10 sn geri</string>
+    <string name="nag_sc_forward_10s">10 sn ileri</string>
+    <string name="nag_sc_back_1m">1 dk geri</string>
+    <string name="nag_sc_forward_1m">1 dk ileri</string>
+    <string name="nag_sc_next_frame">Sonraki kare</string>
+    <string name="nag_sc_previous_frame">Önceki kare</string>
+    <string name="nag_sc_slower">Yavaşlat</string>
+    <string name="nag_sc_faster">Hızlandır</string>
+    <string name="nag_sc_normal_speed">Normal hız</string>
+    <string name="nag_sc_volume_up">Sesi artır</string>
+    <string name="nag_sc_volume_down">Sesi azalt</string>
+    <string name="nag_sc_mute">Sessiz</string>
+    <string name="nag_sc_audio_delay_down">Ses gecikmesi −50 ms</string>
+    <string name="nag_sc_audio_delay_up">Ses gecikmesi +50 ms</string>
+    <string name="nag_sc_next_audio_track">Sonraki ses izi</string>
+    <string name="nag_sc_fullscreen">Tam ekran</string>
+    <string name="nag_sc_snapshot">Ekran görüntüsü al</string>
+    <string name="nag_sc_effects">Efektler ve filtreler</string>
+    <string name="nag_sc_next_subtitle">Sonraki altyazı</string>
+    <string name="nag_sc_subtitle_delay_down">Altyazı gecikmesi −50 ms</string>
+    <string name="nag_sc_subtitle_delay_up">Altyazı gecikmesi +50 ms</string>
+    <string name="nag_sc_add_subtitle">Altyazı dosyası ekle…</string>
+    <string name="nag_sc_toggle_sidebar">Kenar çubuğunu göster veya gizle</string>
+    <string name="nag_sc_play_queue">Oynatma sırası</string>
+    <string name="nag_sc_shortcut_list">Klavye kısayolları</string>
+    <string name="nag_settings_shortcuts">Klavye kısayolları</string>
+    <string name="nag_shortcuts_player_only">Oynatıcıda</string>
+    <string name="nag_more_actions">Diğer işlemler</string>
+    <string name="nag_play_next">Sonra çal</string>
+    <string name="nag_add_to_queue">Oynatma sırasına ekle</string>
+    <string name="nag_unavailable_mvp">Sonraki bir sürümde geliyor</string>
+    <string name="nag_view_grid">Izgara görünümü</string>
+    <string name="nag_view_list">Liste görünümü</string>
+    <string name="nag_settings_version">Sürüm %1$s · libVLC %2$s</string>
+    <string name="nag_shortcut_unbound">Atanmadı</string>
+    <string name="nag_classic_interface">Klasik arayüz</string>
+</resources>

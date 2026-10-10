@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nagmedar_shell_title">Nağmedar</string>
+    <string name="nagmedar_shell_preview">New interface (preview)</string>
+
+    <!-- Navigation -->
+    <string name="nag_section_library">Library</string>
+    <string name="nag_section_sources">Sources</string>
+    <string name="nag_section_tools">Tools</string>
+    <string name="nag_section_playlists">Playlists</string>
+    <string name="nag_nav_home">Home</string>
+    <string name="nag_nav_movies">Movies</string>
+    <string name="nag_nav_series">Series</string>
+    <string name="nag_nav_video">Video</string>
+    <string name="nag_nav_music">Music</string>
+    <string name="nag_nav_podcasts">Podcasts</string>
+    <string name="nag_nav_podcasts_short">Podcast</string>
+    <string name="nag_nav_radio">Radio</string>
+    <string name="nag_nav_device">This device</string>
+    <string name="nag_nav_network">Network</string>
+    <string name="nag_nav_streams">Streams</string>
+    <string name="nag_nav_tv_lab">TV Lab</string>
+    <string name="nag_nav_convert">Convert</string>
+    <string name="nag_nav_downloads">Downloads</string>
+    <string name="nag_nav_playlists">Playlists</string>
+    <string name="nag_nav_settings">Settings</string>
+    <string name="nag_nav_more">More</string>
+    <string name="nag_main_navigation">Main navigation</string>
+    <string name="nag_sidebar">Sidebar</string>
+    <string name="nag_sidebar_collapse">Collapse sidebar</string>
+    <string name="nag_sidebar_expand">Expand sidebar</string>
+    <string name="nag_network_detail">SMB · DLNA · WebDAV</string>
+
+    <!-- Menu bar -->
+    <string name="nag_menu_bar">Application menu</string>
+    <string name="nag_menu_media">Media</string>
+    <string name="nag_menu_playback">Playback</string>
+    <string name="nag_menu_audio">Audio</string>
+    <string name="nag_menu_video">Video</string>
+    <string name="nag_menu_subtitle">Subtitle</string>
+    <string name="nag_menu_tools">Tools</string>
+    <string name="nag_menu_view">View</string>
+    <string name="nag_menu_help">Help</string>
+    <string name="nag_search_hint">Artist, album, track or command</string>
+    <string name="nag_search">Search or run a command</string>
+
+    <!-- Placeholders -->
+    <string name="nag_coming_title">%1$s arrives in %2$s</string>
+    <string name="nag_coming_movies">Movies with posters, technical details and TV compatibility.</string>
+    <string name="nag_coming_series">Series grouped by season, with episode progress.</string>
+    <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
+    <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
+    <string name="nag_coming_device">Folders on this device and on external drives.</string>
+    <string name="nag_coming_network">SMB, DLNA and WebDAV shares.</string>
+    <string name="nag_coming_streams">Network streams and saved addresses.</string>
+    <string name="nag_coming_tv_lab">Analyse files for your TV and remux them without quality loss.</string>
+    <string name="nag_coming_convert">Lossless remux and conversion jobs.</string>
+    <string name="nag_coming_downloads">Podcast episodes, subtitles and other downloads.</string>
+    <string name="nag_coming_playlists">Playlists and smart playlists.</string>
+    <string name="nag_open_classic">Open the classic interface</string>
+
+    <!-- Library -->
+    <string name="nag_home_continue">Continue watching</string>
+    <string name="nag_home_recent_music">Recently played music</string>
+    <string name="nag_home_empty">Nothing played yet. Your videos and music appear here once the library has scanned your folders.</string>
+    <string name="nag_videos_count">%1$d videos</string>
+    <string name="nag_tracks_count">%1$d tracks</string>
+    <string name="nag_library_loading">Loading the library…</string>
+    <string name="nag_library_empty_video">No videos yet. Add folders in the classic interface under Settings → Media library folders.</string>
+    <string name="nag_library_empty_music">No music yet. Add folders in the classic interface under Settings → Media library folders.</string>
+    <string name="nag_unknown_artist">Unknown artist</string>
+    <string name="nag_column_title">Title</string>
+    <string name="nag_column_duration">Duration</string>
+    <string name="nag_column_resolution">Resolution</string>
+    <string name="nag_column_artist">Artist</string>
+    <string name="nag_column_album">Album</string>
+
+    <!-- Player -->
+    <string name="nag_now_playing">Now playing</string>
+    <string name="nag_nothing_playing">Nothing is playing</string>
+    <string name="nag_play">Play</string>
+    <string name="nag_pause">Pause</string>
+    <string name="nag_previous">Previous track</string>
+    <string name="nag_next">Next track</string>
+    <string name="nag_open_player">Open the player</string>
+    <string name="nag_position">Track position</string>
+
+    <!-- Settings -->
+    <string name="nag_settings_appearance">Appearance</string>
+    <string name="nag_settings_theme">Theme</string>
+    <string name="nag_theme_system">System</string>
+    <string name="nag_theme_light">Light</string>
+    <string name="nag_theme_dark">Dark</string>
+    <string name="nag_theme_oled">OLED black</string>
+    <string name="nag_settings_accent">Accent colour</string>
+    <string name="nag_accent_blue">Blue</string>
+    <string name="nag_accent_amber">Amber</string>
+    <string name="nag_accent_green">Green</string>
+    <string name="nag_accent_coral">Coral</string>
+    <string name="nag_settings_input">Input</string>
+    <string name="nag_settings_density">Interface density</string>
+    <string name="nag_density_auto">Automatic (follows mouse or touch)</string>
+    <string name="nag_density_touch">Touch</string>
+    <string name="nag_density_pointer">Mouse and keyboard</string>
+    <string name="nag_settings_about">About</string>
+    <string name="nag_settings_classic_settings">All settings (classic interface)</string>
+    <string name="nag_settings_licences">Licences</string>
+
+    <!-- Shortcuts and actions -->
+    <string name="nag_shuffle">Shuffle</string>
+    <string name="nag_repeat">Repeat</string>
+    <string name="nag_key_space">Space</string>
+    <string name="nag_sc_open_file">Open file…</string>
+    <string name="nag_sc_open_network">Open network stream…</string>
+    <string name="nag_sc_new_window">Open in new window</string>
+    <string name="nag_sc_media_info">Media information</string>
+    <string name="nag_sc_play_pause">Play / pause</string>
+    <string name="nag_sc_stop">Stop</string>
+    <string name="nag_sc_previous">Previous</string>
+    <string name="nag_sc_next">Next</string>
+    <string name="nag_sc_back_3s">Jump back 3 s</string>
+    <string name="nag_sc_forward_3s">Jump forward 3 s</string>
+    <string name="nag_sc_back_10s">Jump back 10 s</string>
+    <string name="nag_sc_forward_10s">Jump forward 10 s</string>
+    <string name="nag_sc_back_1m">Jump back 1 min</string>
+    <string name="nag_sc_forward_1m">Jump forward 1 min</string>
+    <string name="nag_sc_next_frame">Next frame</string>
+    <string name="nag_sc_previous_frame">Previous frame</string>
+    <string name="nag_sc_slower">Slower</string>
+    <string name="nag_sc_faster">Faster</string>
+    <string name="nag_sc_normal_speed">Normal speed</string>
+    <string name="nag_sc_volume_up">Volume up</string>
+    <string name="nag_sc_volume_down">Volume down</string>
+    <string name="nag_sc_mute">Mute</string>
+    <string name="nag_sc_audio_delay_down">Audio delay −50 ms</string>
+    <string name="nag_sc_audio_delay_up">Audio delay +50 ms</string>
+    <string name="nag_sc_next_audio_track">Next audio track</string>
+    <string name="nag_sc_fullscreen">Fullscreen</string>
+    <string name="nag_sc_snapshot">Take snapshot</string>
+    <string name="nag_sc_effects">Effects and filters</string>
+    <string name="nag_sc_next_subtitle">Next subtitle track</string>
+    <string name="nag_sc_subtitle_delay_down">Subtitle delay −50 ms</string>
+    <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
+    <string name="nag_sc_add_subtitle">Add subtitle file…</string>
+    <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
+    <string name="nag_sc_play_queue">Play queue</string>
+    <string name="nag_sc_shortcut_list">Keyboard shortcuts</string>
+    <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
+    <string name="nag_shortcuts_player_only">In the player</string>
+    <string name="nag_more_actions">More actions</string>
+    <string name="nag_play_next">Play next</string>
+    <string name="nag_add_to_queue">Add to play queue</string>
+    <string name="nag_unavailable_mvp">Arrives in a later version</string>
+    <string name="nag_view_grid">Grid view</string>
+    <string name="nag_view_list">List view</string>
+    <string name="nag_settings_version">Version %1$s · libVLC %2$s</string>
+    <string name="nag_shortcut_unbound">Not assigned</string>
+    <string name="nag_classic_interface">Classic interface</string>
+</resources>
