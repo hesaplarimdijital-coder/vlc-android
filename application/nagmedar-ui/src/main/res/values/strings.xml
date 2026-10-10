@@ -167,6 +167,10 @@
     <string name="nag_lab_display_report_desc">Modes, refresh rates, HDR types and EDID of every display. Connect the TV first.</string>
     <string name="nag_lab_refresh_rate">Try 23.976 Hz on the TV</string>
     <string name="nag_lab_refresh_rate_desc">Shows a black screen on the external display, asks for the 24p mode and reports what the TV did.</string>
+    <string name="nag_lab_media3">Media session</string>
+    <string name="nag_lab_media3_desc">Lock screen, notification, Bluetooth and Android Auto controls go through the Media3 session. Applies the next time playback starts after the player was closed.</string>
+    <string name="nag_lab_media3_legacy">Classic</string>
+    <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_run">Run</string>
     <string name="nag_lab_running">Running…</string>
     <string name="nag_lab_copy">Copy</string>

@@ -24,5 +24,6 @@ include ':application:tools', ':application:resources', ':application:mediadb', 
 include ':application:vlc-android'
 include ':application:nagmedar-ui'
 include ':application:nagmedar-data'
+include ':application:nagmedar-session'
 include ':application:moviepedia'
 include ':application:remote-access-client'

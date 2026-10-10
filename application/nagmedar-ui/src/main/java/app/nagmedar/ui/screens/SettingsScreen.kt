@@ -53,6 +53,8 @@ import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
+import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
+import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
 /** Index of the keyboard shortcut section in [SettingsScreen]'s list, for "Keyboard shortcuts" (Ctrl+/). */
@@ -148,9 +150,21 @@ private fun LabSection() {
     val scope = rememberCoroutineScope()
     var running by remember { mutableStateOf<LabTool?>(null) }
     var result by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val vlcSettings = remember(context) { Settings.getInstance(context) }
+    var media3Session by remember { mutableStateOf(vlcSettings.getBoolean(NAGMEDAR_MEDIA3_SESSION, false)) }
     SettingsSection(stringResource(R.string.nag_settings_lab)) {
         Text(stringResource(R.string.nag_lab_intro), style = NagTheme.type.labelSmall, color = colors.textTertiary)
         Spacer(Modifier.height(dimens.gapS))
+        SettingRow("S-502 · " + stringResource(R.string.nag_lab_media3), subtitle = stringResource(R.string.nag_lab_media3_desc)) {
+            SegmentedChoice(
+                options = listOf(false to stringResource(R.string.nag_lab_media3_legacy), true to stringResource(R.string.nag_lab_media3_on)),
+                selected = media3Session,
+                onSelect = { enabled ->
+                    media3Session = enabled
+                    vlcSettings.edit().putBoolean(NAGMEDAR_MEDIA3_SESSION, enabled).apply()
+                },
+            )
+        }
         LabTools.all.forEach { tool ->
             val title = stringResource(tool.title)
             Row(

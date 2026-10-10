@@ -167,6 +167,10 @@
     <string name="nag_lab_display_report_desc">Her ekranın modları, yenileme hızları, HDR türleri ve EDID bilgisi. Önce TV\'yi bağlayın.</string>
     <string name="nag_lab_refresh_rate">TV\'de 23,976 Hz dene</string>
     <string name="nag_lab_refresh_rate_desc">Harici ekranda siyah bir ekran açar, 24p modunu ister ve TV\'nin ne yaptığını raporlar.</string>
+    <string name="nag_lab_media3">Medya oturumu</string>
+    <string name="nag_lab_media3_desc">Kilit ekranı, bildirim, Bluetooth ve Android Auto denetimleri Media3 oturumundan geçer. Oynatıcı kapatılıp oynatma yeniden başladığında geçerli olur.</string>
+    <string name="nag_lab_media3_legacy">Klasik</string>
+    <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_run">Çalıştır</string>
     <string name="nag_lab_running">Çalışıyor…</string>
     <string name="nag_lab_copy">Kopyala</string>

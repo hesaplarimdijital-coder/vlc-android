@@ -1,0 +1,45 @@
+// Nağmedar's Media3 media session (S-502, ADR-05): a SimpleBasePlayer that mirrors the
+// PlaybackService for controllers (lock screen, notification, Bluetooth, Android Auto, DeX
+// taskbar) and routes their commands back. The service decides whether it is used.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.session'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    api "androidx.media3:media3-session:$rootProject.ext.media3Version"
+    api "androidx.media3:media3-common:$rootProject.ext.media3Version"
+    // the legacy session token for MediaBrowserServiceCompat and the MediaStyle notification
+    api "androidx.media:media:$rootProject.ext.mediaVersion"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
+    testImplementation "androidx.test:core:$rootProject.ext.testCore"
+    testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+}

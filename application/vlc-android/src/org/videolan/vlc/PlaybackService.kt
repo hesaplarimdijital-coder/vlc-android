@@ -139,6 +139,10 @@ import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.registerReceiverCompat
 import org.videolan.resources.util.startForegroundCompat
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
+import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
+import app.nagmedar.session.Media3SessionHost
+import app.nagmedar.session.SessionAction
+import org.videolan.vlc.media.PlaybackSessionSource
 import org.videolan.tools.DrawableCache
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SEEK_BUTTONS
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SPEED_BUTTONS
@@ -243,6 +247,13 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     // Playback management
     internal lateinit var mediaSession: MediaSessionCompat
+
+    /** Legacy session callback; the Media3 session (S-502) sends its commands here too. */
+    internal val sessionCallback by lazy(LazyThreadSafetyMode.NONE) { MediaSessionCallback(this) }
+
+    /** Media3 session when Settings > Lab > Media session is on; the legacy session then stays inactive. */
+    private var media3: Media3SessionHost? = null
+    private var media3Active = false
 
     @Volatile
     private var notificationShowing = false
@@ -917,6 +928,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         super.onDestroy()
         browserCallback.removeCallbacks()
         if (!settings.getBoolean(AUDIO_RESUME_PLAYBACK, true)) (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationIds.PLAYBACK.id)
+        media3?.release()
+        media3 = null
         if (this::mediaSession.isInitialized) mediaSession.release()
         //Call it once mediaSession is null, to not publish playback state
         stop(systemExit = true)
@@ -1037,7 +1050,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val coverOnLockscreen = settings.getBoolean(LOCKSCREEN_COVER, true)
             val seekInCompactView = settings.getBoolean(SHOW_SEEK_IN_COMPACT_NOTIFICATION, false)
             val playing = isPlaying
-            val sessionToken = mediaSession.sessionToken
+            val sessionToken = media3?.compatToken ?: mediaSession.sessionToken
             val ctx = this@PlaybackService
             val metaData = mediaSession.controller.metadata
             lifecycleScope.launch(Dispatchers.Default) {
@@ -1138,8 +1151,14 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 .build()
         mediaSession = MediaSessionCompat(this, "VLC", mbrName, mbrIntent).apply {
             setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
-            setCallback(MediaSessionCallback(this@PlaybackService))
+            setCallback(sessionCallback)
             setPlaybackState(playbackState)
+        }
+        if (settings.getBoolean(NAGMEDAR_MEDIA3_SESSION, false)) {
+            val host = Media3SessionHost(this, PlaybackSessionSource(this), sessionPendingIntent)
+            media3 = host
+            sessionToken = host.compatToken
+            return
         }
         try {
             mediaSession.isActive = true
@@ -1253,6 +1272,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             return@withContext bob.build()
         }
         if (this@PlaybackService::mediaSession.isInitialized) mediaSession.setMetadata(bob)
+        media3?.invalidate()
     }
 
     private fun publishState(position: Long? = null) {
@@ -1312,11 +1332,20 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             })
         }
         val mediaIsActive = state != PlaybackStateCompat.STATE_STOPPED
-        val update = mediaSession.isActive != mediaIsActive
+        val media3 = media3
+        val update = (if (media3 != null) media3Active else mediaSession.isActive) != mediaIsActive
         updateMediaQueueSlidingWindow()
-        mediaSession.setPlaybackState(pscb.build())
+        val playbackState = pscb.build()
+        mediaSession.setPlaybackState(playbackState)
         enabledActions = actions
-        mediaSession.isActive = mediaIsActive
+        if (media3 == null) {
+            mediaSession.isActive = mediaIsActive
+        } else {
+            // the legacy session only keeps the state for the notification; Media3 publishes it
+            media3Active = mediaIsActive
+            media3.setActions(playbackState.customActions.map { SessionAction(it.action, it.name.toString(), it.icon) })
+            media3.invalidate()
+        }
         mediaSession.setQueueTitle(getString(R.string.music_now_playing))
         if (update) {
             if (mediaIsActive) sendStartSessionIdIntent()

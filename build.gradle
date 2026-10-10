@@ -125,6 +125,7 @@ ext {
     navigationComposeVersion = '2.8.4'
     lifecycleComposeVersion = '2.8.7'
     nagmedarRobolectricVersion = '4.14.1'
+    media3Version = '1.4.1'
     publishScriptPath = '../../buildsystem/publish.gradle'
 //    versionCode scheme is T M NN RR AA
 //    T: Target/Flavour (1 for Android, 2 for Chrome?)
