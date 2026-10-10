@@ -1,0 +1,161 @@
+# Nağmedar CI
+#
+# app      : every push / PR. Builds the debug APK against the published libVLC 4
+#            AAR (no native compilation), uploads the APK, and turns compiler
+#            errors into check-run annotations.
+# release  : manual or v* tags. Signed release APKs when the keystore secrets exist
+#            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
+#            otherwise it is skipped with a notice.
+# native   : manual only. Rebuilds libVLC from source for one ABI inside the
+#            VideoLAN Docker image (slow; uses prebuilt contribs when available).
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'İmzalı release APK üret'
+        type: boolean
+        default: false
+      native_abi:
+        description: 'Native libVLC derlemesi (yok: yapılmaz)'
+        type: choice
+        options: [yok, arm64, arm, x86_64]
+        default: yok
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  VLC_ANDROID_IMAGE: registry.videolan.org/vlc-debian-android:20260610055743
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
+
+jobs:
+  app:
+    name: Uygulama · debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    container:
+      image: registry.videolan.org/vlc-debian-android:20260610055743
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Git güvenli dizin
+        run: git config --global --add safe.directory '*'
+
+      - name: Gradle önbelleği
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            gradle-9.3.1
+          key: gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties', 'buildsystem/compile.sh') }}
+          restore-keys: gradle-
+
+      - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
+        run: ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
+
+      - name: Derleme (assembleDebug)
+        run: ./gradlew assembleDebug -PforceVlc4=true --console=plain 2>&1 | tee build.log
+
+      - name: Hataları işaretle
+        if: failure()
+        run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      - name: Test raporları
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+            **/build/outputs/roborazzi/
+          if-no-files-found: ignore
+
+      - name: APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nagmedar-debug-apk
+          path: application/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+  release:
+    name: İmzalı release APK
+    if: github.event_name == 'workflow_dispatch' && inputs.release || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    container:
+      image: registry.videolan.org/vlc-debian-android:20260610055743
+      options: --user root
+    env:
+      HAS_KEYSTORE: ${{ secrets.NAGMEDAR_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anahtar deposu yoksa atla
+        if: env.HAS_KEYSTORE != 'true'
+        run: echo "::notice title=Release::NAGMEDAR_KEYSTORE_BASE64 tanımlı değil; imzalı release atlandı."
+      - name: Hazırlık
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          git config --global --add safe.directory '*'
+          ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
+      - name: İmzalı derleme
+        if: env.HAS_KEYSTORE == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.NAGMEDAR_KEYSTORE_BASE64 }}
+          PASSWORD_KEYSTORE: ${{ secrets.NAGMEDAR_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.NAGMEDAR_KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/nagmedar.keystore"
+          ./gradlew assembleSignedRelease -PforceVlc4=true --console=plain \
+            -PkeyStoreFile="$RUNNER_TEMP/nagmedar.keystore" -Pstorealias="$KEY_ALIAS" 2>&1 | tee build.log
+          rm -f "$RUNNER_TEMP/nagmedar.keystore"
+      - name: Hataları işaretle
+        if: failure()
+        run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+      - name: APK
+        if: env.HAS_KEYSTORE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nagmedar-release-apk
+          path: application/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+  native:
+    name: Native libVLC (${{ inputs.native_abi }})
+    if: github.event_name == 'workflow_dispatch' && inputs.native_abi != 'yok'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    container:
+      image: registry.videolan.org/vlc-debian-android:20260610055743
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: libVLC derlemesi
+        run: |
+          git config --global --add safe.directory '*'
+          ./buildsystem/compile.sh -l -vlc4 -t -a ${{ inputs.native_abi }} 2>&1 | tee native.log
+      - name: Hataları işaretle
+        if: failure()
+        run: python3 buildsystem/ci/annotate_gradle_errors.py native.log
+      - name: AAR ve .so
+        uses: actions/upload-artifact@v4
+        with:
+          name: libvlc-${{ inputs.native_abi }}
+          path: |
+            libvlcjni/libvlc/build/outputs/aar/*.aar
+            .dbg/**/*.so
+          if-no-files-found: warn
