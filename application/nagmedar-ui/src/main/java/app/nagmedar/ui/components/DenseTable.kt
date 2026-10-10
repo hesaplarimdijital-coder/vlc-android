@@ -120,11 +120,13 @@ private fun <T> RowScope.HeaderCell(column: TableColumn<T>, index: Int, sort: Ta
     val state = interaction.collectState()
     val active = sort?.column == index
     val clickable = onSortChange != null && column.sortable
+    val shape = RoundedCornerShape(4.dp)
     Row(
         modifier = Modifier
             .cell(this, column.width)
             .heightIn(min = NagTheme.dimens.minTarget)
-            .background(if (clickable) stateBackground(state) else colors.background, RoundedCornerShape(4.dp))
+            .focusRing(state, shape)
+            .background(if (clickable) stateBackground(state) else colors.background, shape)
             .then(
                 if (clickable) Modifier.nagClickable(interaction, {
                     onSortChange?.invoke(TableSort(index, if (active) !(sort?.ascending ?: true) else true))

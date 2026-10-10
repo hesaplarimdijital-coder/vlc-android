@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,7 +78,9 @@ fun NagButton(
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val background = when {
-        primary && state.pressed -> colors.accent.copy(alpha = 0.85f)
+        // the accent moves toward its text colour: darker on the dark themes, lighter on the light one
+        primary && state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
+        primary && state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
         primary -> colors.accent
         else -> stateBackground(state, rest = colors.surfaceRaised)
     }

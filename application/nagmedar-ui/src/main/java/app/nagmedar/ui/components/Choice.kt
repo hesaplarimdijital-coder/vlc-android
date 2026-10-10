@@ -80,6 +80,7 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
                 modifier = Modifier
                     .size(NagTheme.dimens.minTarget.coerceAtLeast(32.dp))
                     .focusRing(state, CircleShape)
+                    .background(stateBackground(state), CircleShape) // hover and press: a halo around the swatch
                     .pointerHoverIcon(PointerIcon.Hand)
                     .semantics { contentDescription = label }
                     .selectable(selected = isSelected, interactionSource = interaction, indication = null, role = Role.RadioButton) {

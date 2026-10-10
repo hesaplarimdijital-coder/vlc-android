@@ -110,7 +110,7 @@ fun MenuPopup(
 }
 
 @Composable
-private fun MenuItemRow(item: MenuEntry.Item, onClick: () -> Unit) {
+internal fun MenuItemRow(item: MenuEntry.Item, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors

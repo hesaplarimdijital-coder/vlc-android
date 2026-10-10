@@ -2,6 +2,8 @@ package app.nagmedar.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,6 +75,8 @@ fun HorizontalSplitPane(
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val visual = interaction.collectState()
+    // pressed while a pointer is down on the divider: the drag detector reports no presses
+    var held by remember { mutableStateOf(false) }
     val handleWidth = if (NagTheme.dimens.minTarget > 24.dp) 16.dp else 8.dp
 
     Layout(
@@ -100,6 +105,19 @@ fun HorizontalSplitPane(
                         }
                         true
                     }
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            held = true
+                            try {
+                                do {
+                                    val event = awaitPointerEvent()
+                                } while (event.changes.any { it.pressed })
+                            } finally {
+                                held = false
+                            }
+                        }
+                    }
                     .pointerInput(state) {
                         detectHorizontalDragGestures { change, dragAmount ->
                             change.consume()
@@ -108,7 +126,7 @@ fun HorizontalSplitPane(
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                val active = visual.hovered || visual.focused || visual.pressed
+                val active = visual.hovered || visual.focused || held
                 Box(
                     Modifier
                         .width(if (active) 3.dp else 1.dp)
