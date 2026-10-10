@@ -3,6 +3,7 @@ package app.nagmedar.lab
 import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,8 +42,18 @@ object DvConversion {
                     NativeLab.dvConvert(src.procPath(), dst.procPath(), maxSeconds, mp4, progress)
                 }
             }
-            report(JSONObject(json), inName, outName, maxSeconds, mp4)
+            val result = JSONObject(json)
+            // a failed, refused (profile 5) or cancelled conversion leaves a partial file; without an RPU the
+            // output is still a complete HDR10 remux and stays
+            val deleted = isPartial(result) &&
+                runCatching { DocumentsContract.deleteDocument(context.contentResolver, output) }.getOrDefault(false)
+            report(result, inName, outName, maxSeconds, mp4) + if (deleted) "\nYarım kalan çıktı dosyası silindi.\n" else ""
         }
+
+    fun isPartial(r: JSONObject): Boolean {
+        val error = r.optString("error")
+        return error.isNotEmpty() && !error.startsWith("no Dolby Vision RPU found")
+    }
 
     fun report(r: JSONObject, inName: String, outName: String, maxSeconds: Double, mp4: Boolean): String = buildString {
         appendLine("Nağmedar Dolby Vision dönüştürme raporu (SP-03)")

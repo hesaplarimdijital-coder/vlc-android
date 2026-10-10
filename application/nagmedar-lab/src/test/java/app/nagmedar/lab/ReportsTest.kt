@@ -1,6 +1,7 @@
 package app.nagmedar.lab
 
 import org.json.JSONObject
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -35,6 +36,14 @@ class ReportsTest {
         assertTrue(text, text.contains("Dönüştürülen RPU: 259, başarısız: 0"))
         assertTrue(text, text.contains("Atılan EL NAL: 795"))
         assertTrue(text, text.contains("ilk 60 sn"))
+    }
+
+    @Test
+    fun onlyFailedConversionsCountAsPartial() {
+        assertFalse(DvConversion.isPartial(JSONObject(dv)))
+        assertFalse(DvConversion.isPartial(JSONObject(dv).put("error", "no Dolby Vision RPU found: the output is the HDR10 base layer only")))
+        assertTrue(DvConversion.isPartial(JSONObject(dv).put("error", "profile 5 cannot become 8.1: its base layer is not HDR10-compatible")))
+        assertTrue(DvConversion.isPartial(JSONObject(dv).put("error", "cancelled")))
     }
 
     @Test
