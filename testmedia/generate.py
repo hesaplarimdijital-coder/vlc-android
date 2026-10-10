@@ -182,7 +182,7 @@ class Builder:
         else:
             log('  ! mkvmerge missing: muxing with ffmpeg (no Dolby Vision configuration record)')
             args = ['-fflags', '+genpts', '-r', fps, '-i', hevc]
-            files = [e[-1] for e in extra_inputs]
+            files = [e[-1] for e in extra_inputs if e[0] != '--chapters']
             for f in files:
                 args += ['-i', f]
             args += ['-map', '0:v']
@@ -254,6 +254,60 @@ class Builder:
         out_hevc = self.tmp('dv_p81_4k.hevc')
         run('dovi_tool', 'inject-rpu', '-i', hevc, '--rpu-in', rpu, '-o', out_hevc)
         self.mkv_from_hevc(self.path('video/dv_p8.1_2160p23976_hevc10.mkv'), out_hevc, FPS_2398)
+
+    def dolby_vision_p5(self):
+        """Profile 5 RPU (no reshaping) on the test pattern. A real profile 5 base layer is IPTPQc2, this one
+        is not, so a correct player shows wrong colours here: the sample tests detection and the decoder path
+        (and that SP-03 refuses to convert it), not the picture."""
+        frames = 120
+        hevc = self.hevc_base('dv_p5_base_4k', 3840, 2160, FPS_2398, frames, 'DV P5 · sentetik · renkler yanlış',
+                              'range=full:repeat-headers=1')
+        config = self.tmp('dv_p5.json')
+        with open(config, 'w') as fh:
+            json.dump({
+                'cm_version': 'V40',
+                'profile': '5',
+                'length': frames,
+                'level6': {'max_display_mastering_luminance': 1000, 'min_display_mastering_luminance': 1,
+                           'max_content_light_level': 1000, 'max_frame_average_light_level': 400},
+                'shots': [{'start': s, 'duration': d, 'metadata_blocks': [{'Level1': {'min_pq': 0, 'max_pq': mx, 'avg_pq': av}}]}
+                          for s, d, mx, av in [(0, 60, 2081, 819), (60, 60, 3079, 1580)]],
+            }, fh)
+        rpu = self.tmp('dv_p5_rpu.bin')
+        run('dovi_tool', 'generate', '-j', config, '-o', rpu)
+        out_hevc = self.tmp('dv_p5_4k.hevc')
+        run('dovi_tool', 'inject-rpu', '-i', hevc, '--rpu-in', rpu, '-o', out_hevc)
+        self.mkv_from_hevc(self.path('video/dv_p5_2160p23976_hevc10.mkv'), out_hevc, FPS_2398, transfer=None)
+
+    def dolby_vision_p7(self):
+        """Profile 7 MEL (base and enhancement layer in one stream, as on UHD Blu-ray remuxes) from dovi_tool's
+        test assets (MIT): 256x144, 259 frames. $DOVI_TOOL_ASSETS points at dovi_tool's assets/hevc_tests."""
+        assets = os.environ.get('DOVI_TOOL_ASSETS', '')
+        el = os.path.join(assets, 'regular_start_code_4_muxed_el.hevc')
+        mel = os.path.join(assets, 'regular_rpu_mel.bin')
+        if not (os.path.exists(el) and os.path.exists(mel)):
+            raise RuntimeError('DOVI_TOOL_ASSETS must point at dovi_tool 2.3.4 assets/hevc_tests '
+                               '(regular_start_code_4_muxed_el.hevc, regular_rpu_mel.bin)')
+        hevc = self.tmp('dv_p7_mel.hevc')
+        run('dovi_tool', 'inject-rpu', '-i', el, '--rpu-in', mel, '-o', hevc)
+        audio = self.tmp('eac3_51.eac3')
+        if not os.path.exists(audio):
+            ffmpeg('-i', self.surround(seconds=10), '-c:a', 'eac3', '-b:a', '768k', audio)
+        subs = self.tmp('dv_p7.srt')
+        with open(subs, 'w', encoding='utf-8') as fh:
+            fh.write('1\n00:00:01,000 --> 00:00:04,000\nDönüştürmeden sonra bu altyazı kalmalı.\n\n'
+                     '2\n00:00:05,000 --> 00:00:09,000\nSes izi ve bölümler de korunmalı.\n')
+        chapters = self.tmp('dv_p7_chapters.xml')
+        with open(chapters, 'w', encoding='utf-8') as fh:
+            fh.write('<?xml version="1.0" encoding="UTF-8"?>\n<Chapters><EditionEntry>'
+                     '<ChapterAtom><ChapterTimeStart>00:00:00.000</ChapterTimeStart><ChapterDisplay><ChapterString>Bir</ChapterString></ChapterDisplay></ChapterAtom>'
+                     '<ChapterAtom><ChapterTimeStart>00:00:05.000</ChapterTimeStart><ChapterDisplay><ChapterString>İki</ChapterString></ChapterDisplay></ChapterAtom>'
+                     '</EditionEntry></Chapters>\n')
+        self.mkv_from_hevc(self.path('video/dv_p7_mel_144p23976_hevc10.mkv'), hevc, FPS_2398, extra_inputs=[
+            ('--language', '0:tur', '--track-name', '0:E-AC-3 5.1', audio),
+            ('--language', '0:tur', '--sub-charset', '0:UTF-8', subs),
+            ('--chapters', chapters),
+        ])
 
     def hlg(self):
         hevc = self.hevc_base('hlg_1080p50', 1920, 1080, '50', 250, 'HLG · BT.2020 · 50p',
@@ -581,6 +635,7 @@ class Builder:
 
 STEPS = {
     'hdr10': Builder.hdr10, 'hdr10plus': Builder.hdr10plus, 'dv-p81': Builder.dolby_vision_p81,
+    'dv-p5': Builder.dolby_vision_p5, 'dv-p7': Builder.dolby_vision_p7,
     'hlg': Builder.hlg, 'stress': Builder.stress, 'interlaced': Builder.interlaced, 'av1': Builder.av1,
     'subtitles': Builder.subtitles, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
     'surround': Builder.surround_codecs, 'dsd': Builder.dsd, 'lyrics': Builder.lyrics, 'gapless': Builder.gapless,

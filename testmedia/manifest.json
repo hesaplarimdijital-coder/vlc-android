@@ -116,6 +116,87 @@
       }
     },
     {
+      "id": "dv-p5-2160p23976",
+      "kind": "generated",
+      "step": "dv-p5",
+      "file": "video/dv_p5_2160p23976_hevc10.mkv",
+      "tests": "Dolby Vision profile 5 signalling: an RPU from dovi_tool generate (profile 5, no reshaping) and the profile 5 configuration record, on an ordinary test pattern with full-range, unspecified colour. The base layer is not real IPTPQc2, so colours are wrong on purpose: the sample tests detection, the decoder path and that SP-03 refuses the conversion. Colour accuracy needs dv-p5-real.",
+      "stories": [
+        "S-507",
+        "SP-03"
+      ],
+      "expect": {
+        "duration": [
+          4.9,
+          5.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160
+          }
+        ],
+        "stream_side_data": [
+          {
+            "side_data_type": "DOVI configuration record",
+            "dv_profile": 5,
+            "dv_bl_signal_compatibility_id": 0,
+            "rpu_present_flag": 1,
+            "el_present_flag": 0
+          }
+        ],
+        "frame_side_data": [
+          "Dolby Vision RPU Data"
+        ],
+        "dovi_profile": 5
+      }
+    },
+    {
+      "id": "dv-p7-mel-144p23976",
+      "kind": "generated",
+      "step": "dv-p7",
+      "file": "video/dv_p7_mel_144p23976_hevc10.mkv",
+      "tests": "Dolby Vision profile 7 MEL with base and enhancement layer in one HEVC stream, as in UHD Blu-ray remuxes (dovi_tool's MIT test assets, 256x144, 259 frames), with an E-AC-3 5.1 track, a Turkish SRT and two chapters: the input of the SP-03 P7 to P8.1 conversion, which must keep the other tracks.",
+      "stories": [
+        "SP-03",
+        "S-507",
+        "S-1406"
+      ],
+      "expect": {
+        "duration": [
+          10.6,
+          11.0
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "width": 256,
+            "height": 144
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "eac3",
+            "channels": 6
+          },
+          {
+            "codec_type": "subtitle",
+            "codec_name": "subrip"
+          }
+        ],
+        "chapters": 2,
+        "stream_side_data": [
+          {
+            "side_data_type": "DOVI configuration record",
+            "dv_profile": 7
+          }
+        ],
+        "dovi_profile": 7
+      }
+    },
+    {
       "id": "hlg-1080p50",
       "kind": "generated",
       "step": "hlg",
@@ -665,9 +746,9 @@
       }
     },
     {
-      "id": "dv-p5",
+      "id": "dv-p5-real",
       "kind": "manual",
-      "tests": "Dolby Vision profile 5 (IPTPQc2 base layer, no HDR10 fallback): reshaping, the purple-green tint when it is missing (S-507).",
+      "tests": "Dolby Vision profile 5 from a real stream (IPTPQc2 base layer, no HDR10 fallback): reshaping and colours, the purple-green tint when it is missing (S-507). The generated dv-p5-2160p23976 only covers the signalling.",
       "how": "dovi_tool cannot generate profile 5. Cut one minute from a streaming download you own: mkvmerge -o dv_p5.mkv --split parts:00:10:00-00:11:00 source.mkv",
       "stories": [
         "S-507",
@@ -677,7 +758,7 @@
     {
       "id": "dv-p7-fel",
       "kind": "manual",
-      "tests": "Dolby Vision profile 7 FEL/MEL from a UHD Blu-ray remux: the P7 to P8.1 conversion (SP-03) and the B4 behaviour.",
+      "tests": "Dolby Vision profile 7 FEL from a UHD Blu-ray remux: the P7 to P8.1 conversion of a full enhancement layer (SP-03) and the B4 behaviour. The generated dv-p7-mel-144p23976 covers MEL.",
       "how": "Cut one minute from one of your remuxes: mkvmerge -o dv_p7.mkv --split parts:00:20:00-00:21:00 film.mkv. dovi_tool info -s on the extracted RPU tells FEL from MEL.",
       "stories": [
         "SP-03",

@@ -61,7 +61,7 @@ def same(expected, actual):
         try:  # frame rates: 24000/1001 and 2997/125 are the same rate
             return abs(_fraction(expected) - _fraction(actual)) < 1e-3
         except (ValueError, ZeroDivisionError):
-            return False
+            pass  # not a number: a MIME type such as font/ttf, compared as text below
     if isinstance(expected, list) and len(expected) == 2 and all(isinstance(v, (int, float)) for v in expected):
         try:
             return expected[0] <= float(actual) <= expected[1]
