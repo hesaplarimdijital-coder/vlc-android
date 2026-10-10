@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
+import app.nagmedar.playback.EngineId
+import app.nagmedar.playback.EngineMedia
+import app.nagmedar.playback.PlaybackEngine
 import androidx.annotation.MainThread
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
@@ -28,7 +31,8 @@ import org.videolan.vlc.repository.EqualizerRepository
 import org.videolan.vlc.repository.SlaveRepository
 import kotlin.math.absoluteValue
 
-class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.EventListener, CoroutineScope {
+/** The libVLC player; Nağmedar's PlaybackEngine contract (S-501) is the transport subset PlaylistManager uses. */
+class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.EventListener, CoroutineScope, PlaybackEngine {
     override val coroutineContext = Dispatchers.Main.immediate + SupervisorJob()
 
     //    private val exceptionHandler by lazy(LazyThreadSafetyMode.NONE) { CoroutineExceptionHandler { _, _ -> onPlayerError() } }
@@ -54,11 +58,16 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun getMedia(): IMedia? = mediaplayer.media
 
-    fun play() {
+    override val engineId = EngineId.LibVlc
+
+    /** libVLC plays everything: video, streams, radio, podcasts and, until the audio engine lands, music. */
+    override fun canPlay(media: EngineMedia) = true
+
+    override fun play() {
         if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.play()
     }
 
-    fun pause(): Boolean {
+    override fun pause(): Boolean {
         if (isPlaying() && mediaplayer.hasMedia() && pausable) {
             mediaplayer.pause()
             return true
@@ -66,7 +75,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         return false
     }
 
-    fun stop() {
+    override fun stop() {
         if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.stop()
         setPlaybackStopped()
     }
@@ -117,13 +126,13 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         if (seekable && mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.position = position
     }
 
-    fun setTime(time: Long, fast:Boolean = false) {
+    override fun setTime(time: Long, fast: Boolean) {
         if (seekable && mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.setTime(time, fast)
     }
 
-    fun isPlaying() = playbackState == PlaybackStateCompat.STATE_PLAYING
+    override fun isPlaying() = playbackState == PlaybackStateCompat.STATE_PLAYING
 
-    fun isPaused() = playbackState == PlaybackStateCompat.STATE_PAUSED
+    override fun isPaused() = playbackState == PlaybackStateCompat.STATE_PAUSED
 
     fun isVideoPlaying() = !mediaplayer.isReleased && mediaplayer.vlcVout.areViewsAttached()
 
@@ -162,7 +171,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun getSpuDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.spuDelay else 0L
 
-    fun getRate() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased && playbackState != PlaybackStateCompat.STATE_STOPPED) mediaplayer.rate else 1.0f
+    override fun getRate() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased && playbackState != PlaybackStateCompat.STATE_STOPPED) mediaplayer.rate else 1.0f
 
     fun setSpuDelay(delay: Long) = !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setSpuDelay(delay)
 
@@ -197,6 +206,8 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         if (!mediaplayer.isReleased) mediaplayer.setRenderer(renderer)
         hasRenderer = renderer !== null
     }
+
+    override fun release() = release(mediaplayer)
 
     fun release(player: MediaPlayer = mediaplayer) {
         player.setEventListener(null)
@@ -240,11 +251,11 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         switchToVideo = false
     }
 
-    fun getCurrentTime() = progress.value?.time ?: 0L
+    override fun getCurrentTime() = progress.value?.time ?: 0L
 
-    fun getLength() = progress.value?.length ?: 0L
+    override fun getLength() = progress.value?.length ?: 0L
 
-    fun setRate(rate: Float, save: Boolean) {
+    override fun setRate(rate: Float, save: Boolean) {
         if (mediaplayer.isReleased) return
         mediaplayer.rate = rate
         speed.postValue(rate)
@@ -299,9 +310,9 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         if (!mediaplayer.isReleased)  mediaplayer.title = title
     }
 
-    fun getVolume() = if (!mediaplayer.isReleased) mediaplayer.volume else 100
+    override fun getVolume() = if (!mediaplayer.isReleased) mediaplayer.volume else 100
 
-    fun setVolume(volume: Int) = if (!mediaplayer.isReleased) mediaplayer.setVolume(volume) else -1
+    override fun setVolume(volume: Int) = if (!mediaplayer.isReleased) mediaplayer.setVolume(volume) else -1
 
     suspend fun expand(): IMediaList? {
         return mediaplayer.media?.let {

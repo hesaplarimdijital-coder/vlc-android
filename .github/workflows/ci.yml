@@ -94,6 +94,7 @@ jobs:
           else
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
+              :application:tools:testDebugUnitTest \
               -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           fi
 

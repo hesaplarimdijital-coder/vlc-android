@@ -98,6 +98,8 @@ import org.videolan.vlc.util.setResumeProgram
 import org.videolan.vlc.util.updateNextProgramAfterThumbnailGeneration
 import org.videolan.vlc.util.updateWithMLMeta
 import org.videolan.vlc.util.validateLocation
+import app.nagmedar.playback.EngineHost
+import app.nagmedar.playback.EngineRouter
 import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Stack
@@ -129,6 +131,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
 
     private val medialibrary by lazy(LazyThreadSafetyMode.NONE) { Medialibrary.getInstance() }
     val player by lazy(LazyThreadSafetyMode.NONE) { PlayerController(service.applicationContext) }
+
+    /**
+     * Engine selection (S-501, ADR-05). libVLC is the only engine today, so every item stays on
+     * [player]; the Nağmedar audio engine of MVP2 registers here and takes local music.
+     */
+    val engines by lazy(LazyThreadSafetyMode.NONE) { EngineHost(EngineRouter(listOf(player))) }
     private val settings by lazy(LazyThreadSafetyMode.NONE) { Settings.getInstance(service) }
     private val ctx by lazy(LazyThreadSafetyMode.NONE) { service.applicationContext }
     var currentIndex = -1
@@ -580,6 +588,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
             }
             media.setEventListener(this@PlaylistManager)
+            engines.prepareFor(mw.toEngineMedia())
             player.startPlayback(media, mediaplayerEventListener, start)
             player.setSlaves(media, mw)
             if (browserAudioActive) player.setVolume(0)
