@@ -9,8 +9,10 @@
 #include <libavutil/ffversion.h>
 
 #include "dvconvert.h"
+#include "whisper_lab.h"
 
 #define LIBDOVI_VERSION "dovi_tool 2.3.4"
+#define WHISPER_LABEL "whisper.cpp 1.9.5"
 
 static volatile int g_cancel;
 
@@ -81,11 +83,16 @@ static void dv_progress(void *opaque, double done, double total, int64_t bytes)
     report(opaque, total > 0 ? done / total : 0, msg);
 }
 
+static void whisper_progress(void *opaque, double fraction, const char *stage)
+{
+    report(opaque, fraction, stage);
+}
+
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_version(JNIEnv *env, jclass cls)
 {
     (void)cls;
     char text[256];
-    snprintf(text, sizeof(text), "FFmpeg %s · %s", FFMPEG_VERSION, LIBDOVI_VERSION);
+    snprintf(text, sizeof(text), "FFmpeg %s · %s · %s", FFMPEG_VERSION, LIBDOVI_VERSION, WHISPER_LABEL);
     return utf8(env, text);
 }
 
@@ -109,5 +116,22 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_dvConvert(JNIEnv *env,
     jstring result = take(env, dvc_stats_json(&stats, in, out));
     (*env)->ReleaseStringUTFChars(env, input, in);
     (*env)->ReleaseStringUTFChars(env, output, out);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, jclass cls, jstring model, jstring input,
+                                                                   jstring language, jdouble max_seconds, jint threads,
+                                                                   jobject listener)
+{
+    (void)cls;
+    g_cancel = 0;
+    const char *m = (*env)->GetStringUTFChars(env, model, NULL);
+    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
+    const char *lang = (*env)->GetStringUTFChars(env, language, NULL);
+    Callback cb = callback(env, listener);
+    jstring result = take(env, whisper_lab_run(m, in, lang, max_seconds, threads, whisper_progress, &cb, &g_cancel));
+    (*env)->ReleaseStringUTFChars(env, model, m);
+    (*env)->ReleaseStringUTFChars(env, input, in);
+    (*env)->ReleaseStringUTFChars(env, language, lang);
     return result;
 }

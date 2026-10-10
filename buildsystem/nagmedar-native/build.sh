@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-03 Dolby Vision conversion).
+# Native part of Settings > Lab (SP-03 Dolby Vision conversion, SP-05 whisper).
 #
 #   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert command
 #                              (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg and libdovi for arm64-v8a and
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp for arm64-v8a and
 #                              libnagmedar_lab.so into application/nagmedar-lab (needs ANDROID_NDK)
 #
 # Sources are cloned at the versions in versions.env into $NAGMEDAR_NATIVE_WORK
@@ -85,6 +85,19 @@ build_dovi() { # cargo target or empty
     cp "$out/libdolby_vision.a" "$PREFIX/lib/libdovi.a"
 }
 
+build_whisper() { # extra cmake args...
+    fetch whisper "$WHISPER_URL" "$WHISPER_REF"
+    if [ -f "$PREFIX/lib/libwhisper.a" ]; then return; fi
+    log "whisper.cpp $WHISPER_REF ($TARGET)"
+    local dir="$WORK/build-$TARGET/whisper"
+    cmake -S "$WORK/src/whisper" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+        -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWHISPER_BUILD_EXAMPLES=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_SERVER=OFF \
+        -DGGML_OPENMP=OFF -DGGML_NATIVE=OFF -DCMAKE_C_FLAGS=-fvisibility=hidden -DCMAKE_CXX_FLAGS=-fvisibility=hidden \
+        "$@" > "$dir.configure.log" 2>&1 || fail_log "whisper.cpp configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "whisper.cpp build ($TARGET)" "$dir.build.log"
+    cmake --install "$dir" > /dev/null
+}
+
 build_lab() { # extra cmake args...
     log "libnagmedar_lab ($TARGET)"
     local dir="$WORK/build-$TARGET/lab"
@@ -97,7 +110,9 @@ build_lab() { # extra cmake args...
 host() {
     build_ffmpeg --cc="${CC:-cc}"
     build_dovi ""
+    build_whisper
     build_lab
+    cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
     log "dvconvert (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/dvconvert" -I"$PREFIX/include" \
         "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" \
@@ -118,6 +133,8 @@ android() {
     rustup target add aarch64-linux-android > /dev/null
     CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$cc" AR_aarch64_linux_android="$tc/bin/llvm-ar" \
         CC_aarch64_linux_android="$cc" build_dovi aarch64-linux-android
+    # ARMv8.2 dot product and FP16: every big core since 2018, the Dimensity 9400+ included
+    build_whisper "${ndk_cmake[@]}" -DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16
     build_lab "${ndk_cmake[@]}"
     local out="$ROOT/application/nagmedar-lab/src/main/jniLibs/arm64-v8a"
     mkdir -p "$out"

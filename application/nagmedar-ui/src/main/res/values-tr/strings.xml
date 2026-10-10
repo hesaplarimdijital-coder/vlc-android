@@ -172,11 +172,14 @@
     <string name="nag_lab_media3_legacy">Klasik</string>
     <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_stop">Durdur</string>
-    <string name="nag_lab_native_missing">Bu sürümde yerel laboratuvar kitaplığı yok (Dolby Vision aracı). CI\'dan alınan APK\'yı kullanın.</string>
+    <string name="nag_lab_native_missing">Bu sürümde yerel laboratuvar kitaplığı yok (Dolby Vision ve whisper araçları). CI\'dan alınan APK\'yı kullanın.</string>
     <string name="nag_lab_option_duration">Süre</string>
     <string name="nag_lab_option_container">Kap</string>
+    <string name="nag_lab_option_model">Model</string>
     <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
     <string name="nag_lab_dv_convert_desc">Önce remux\'u, sonra sonucun kaydedileceği yeri seçin: temel katman olduğu gibi kopyalanır, geliştirme katmanı atılır, RPU dönüştürülür.</string>
+    <string name="nag_lab_whisper">Konuşmadan altyazı (whisper)</string>
+    <string name="nag_lab_whisper_desc">Dosyanın başını bu cihazda Türkçe metne döker ve hızı raporlar. Model bir kez indirilir.</string>
     <string name="nag_lab_run">Çalıştır</string>
     <string name="nag_lab_running">Çalışıyor…</string>
     <string name="nag_lab_copy">Kopyala</string>

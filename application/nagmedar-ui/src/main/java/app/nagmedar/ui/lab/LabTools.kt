@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.annotation.StringRes
 import app.nagmedar.lab.DvConversion
 import app.nagmedar.lab.NativeLab
+import app.nagmedar.lab.WhisperLab
 import app.nagmedar.ui.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -58,6 +59,8 @@ object LabTools {
 
     private val dvDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("60" to "60 sn", "0" to "Tümü"))
     private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf("mkv" to "MKV", "mp4" to "MP4"))
+    private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { it.name to it.label })
+    private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("60" to "1 dk", "600" to "10 dk"))
 
     val all: List<LabTool> = listOf(
         LabTool("SP-01", R.string.nag_lab_audio_report, R.string.nag_lab_audio_report_desc) { run ->
@@ -79,6 +82,12 @@ object LabTools {
             suspendCancellableCoroutine { continuation ->
                 DisplayReport.tryRefreshRate(run.activity) { result -> if (continuation.isActive) continuation.resume(result) }
             }
+        },
+        LabTool(
+            "SP-05", R.string.nag_lab_whisper, R.string.nag_lab_whisper_desc, input = LabInput.Media,
+            options = listOf(whisperModel, whisperDuration), cancellable = true,
+        ) { run ->
+            WhisperLab.run(run.activity, run.input!!, WhisperLab.Model.valueOf(run.option("model")), run.option("seconds").toDouble(), run.progress)
         },
     )
 }

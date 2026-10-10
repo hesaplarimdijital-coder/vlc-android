@@ -4,6 +4,7 @@
 #   - SP-03: a profile 7 MEL stream built from dovi_tool's test assets, with audio, subtitles
 #     and chapters, is converted to MKV and MP4; the result must be profile 8.1 with the base
 #     layer's timestamps intact, no enhancement layer and every other track kept.
+#   - SP-05: whisper_lab_cli decodes and transcribes a tone with whisper.cpp's test model.
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
@@ -79,3 +80,23 @@ if problems:
 print(f"ok: {container}, {stats['rpus_converted']} RPUs, {stats['el_nals_dropped']} EL NALs dropped")
 PY
 done
+
+echo "== SP-05: whisper pipeline smoke test"
+ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 -c:a libmp3lame "$T/tone.mp3" 2> /dev/null || ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 "$T/tone.wav"
+input=$(ls "$T"/tone.* | head -1)
+"$PREFIX/bin/whisper_lab_cli" "$WORK/src/whisper/models/for-tests-ggml-tiny.bin" "$input" tr 5 > "$T/whisper.json" 2> /dev/null
+python3 - "$T/whisper.json" <<'PY'
+import json, sys
+r = json.load(open(sys.argv[1]))
+problems = []
+if r['error']:
+    problems.append('error: ' + r['error'])
+if not 4.9 <= r['audio_seconds'] <= 5.1:
+    problems.append(f"audio_seconds {r['audio_seconds']}")
+if r['inference_seconds'] <= 0:
+    problems.append('no inference time')
+if problems:
+    print('::error title=SP-05 whisper::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: whisper decoded {r['audio_seconds']} s, inference {r['inference_seconds']:.2f} s, {r['system']}")
+PY
