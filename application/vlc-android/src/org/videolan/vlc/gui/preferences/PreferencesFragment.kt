@@ -54,6 +54,7 @@ import org.videolan.tools.Settings.isPinCodeSet
 import org.videolan.tools.VIDEO_RESUME_PLAYBACK
 import org.videolan.vlc.R
 import org.videolan.vlc.gui.EqualizerSettingsActivity
+import org.videolan.vlc.gui.LibrariesActivity
 import org.videolan.vlc.gui.PinCodeActivity
 import org.videolan.vlc.gui.PinCodeReason
 import org.videolan.vlc.gui.SecondaryActivity
@@ -165,6 +166,7 @@ class PreferencesFragment : BasePreferenceFragment(), SharedPreferences.OnShared
             "subtitles_category" -> loadFragment(PreferencesSubtitles())
             "audio_category" -> loadFragment(PreferencesAudio())
             "equalizer" -> startActivity(Intent(requireActivity().applicationContext, EqualizerSettingsActivity::class.java))
+            "licenses" -> startActivity(Intent(requireActivity(), LibrariesActivity::class.java))
             "adv_category" -> loadFragment(PreferencesAdvanced())
             "casting_category" -> loadFragment(PreferencesCasting())
             "parental_control" -> {

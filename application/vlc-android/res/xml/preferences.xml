@@ -135,6 +135,10 @@
                 android:key="adv_category"
                 android:icon="@drawable/ic_pref_advanced_settings"
                 android:fragment="org.videolan.television.ui.preferences.PreferencesAdvanced"/>
+        <Preference
+                android:title="@string/libraries"
+                android:key="licenses"
+                android:icon="@drawable/ic_sources"/>
 
     </PreferenceCategory>
 

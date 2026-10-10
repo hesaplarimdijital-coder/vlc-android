@@ -16,6 +16,11 @@
       "license"  : "apache2.0"
     },
     {
+      "title"    : "dovi_tool",
+      "copyright": "Copyright © 2021-2026 quietvoid",
+      "license"  : "mit"
+    },
+    {
       "title"    : "FFmpeg",
       "copyright": "Copyright © 2000-2017 the FFmpeg developers",
       "license"  : "lgpl2.1"
@@ -156,6 +161,11 @@
       "license"  : "bsd3"
     },
     {
+      "title"    : "libusb",
+      "copyright": "Copyright © 2001-2026 the libusb authors",
+      "license"  : "lgpl2.1"
+    },
+    {
       "title"    : "libVLC",
       "copyright": "Copyright © 1998 VLC authors and VideoLAN",
       "license"  : "lgpl2.1"
@@ -244,6 +254,16 @@
       "title"    : "Taglib",
       "copyright": "Copyright © 2002-2008 Scott Wheeler et al.",
       "license"  : "lgpl2.1"
+    },
+    {
+      "title"    : "VLC for Android",
+      "copyright": "Copyright © 1996-2026 VideoLAN and the VLC authors",
+      "license"  : "gpl2"
+    },
+    {
+      "title"    : "whisper.cpp",
+      "copyright": "Copyright © 2023-2026 the ggml authors",
+      "license"  : "mit"
     },
     {
       "title"    : "x264",
