@@ -1,3 +1,61 @@
+# Nağmedar
+
+Nağmedar is a desktop-class media player for Android tablets, phones and Samsung DeX, based on
+[VLC for Android](https://code.videolan.org/videolan/vlc-android) by VideoLAN. It runs on libVLC 4.
+
+Nağmedar is free software under the [GPLv2 (or later)](COPYING), like VLC for Android; the VLC
+authors keep their copyright and are credited in the app (About → Authors, Settings → Licences).
+
+## Source chain
+
+The app, the JNI layer and the VLC engine come from three linked sources, each pinned to a tested
+commit:
+
+| Link | Source | Pinned by |
+| --- | --- | --- |
+| Application | this repository (`master`) | — |
+| libvlcjni | branch `libvlcjni/nagmedar` of this repository, a copy of [VideoLAN's libvlcjni](https://code.videolan.org/videolan/libvlcjni) made by the *libvlcjni aynası* workflow | `LIBVLCJNI_TESTED_HASH` in `buildsystem/compile.sh` |
+| VLC | [hesaplarimdijital-coder/vlc](https://github.com/hesaplarimdijital-coder/vlc) | `VLC_TESTED_HASH` in libvlcjni's `buildsystem/get-vlc.sh`, plus libvlcjni's VLC patches |
+
+`buildsystem/compile.sh` reads the links from the environment, so each can point to another fork:
+
+| Variable | Default |
+| --- | --- |
+| `LIBVLCJNI_REPOSITORY` | `https://code.videolan.org/videolan/libvlcjni.git` |
+| `LIBVLCJNI_BRANCH_OVERRIDE` | `master` (VLC 4) / `libvlcjni-3.x` (VLC 3) |
+| `VLC_REPOSITORY` | `https://github.com/hesaplarimdijital-coder/vlc.git` |
+
+libvlcjni's `get-vlc.sh` clones VideoLAN's VLC URL; `compile.sh` makes git fetch it from
+`VLC_REPOSITORY` instead (a per-process `url.<fork>.insteadOf` rule) and records the fork as the
+clone's `origin`. The VLC fork must contain `VLC_TESTED_HASH`; do not rewrite its history.
+
+To change the engine: commit to the VLC fork, then update libvlcjni (`libvlcjni/nagmedar`) to
+point at it, then bump `LIBVLCJNI_TESTED_HASH` here.
+
+## Build
+
+Every push to `master` runs GitHub Actions (`.github/workflows/ci.yml`):
+
+- **Uygulama · debug**: debug APK, uploaded as the `nagmedar-debug-apk` artifact;
+- **Uygulama · release**: unsigned release build as a compile check;
+- **İmzalı release APK** (manual or `v*` tags): signed APKs when the `NAGMEDAR_KEYSTORE_BASE64`,
+  `NAGMEDAR_KEYSTORE_PASSWORD` and `NAGMEDAR_KEY_ALIAS` secrets exist;
+- **Native libVLC** (manual): rebuilds libVLC for one ABI in VideoLAN's Docker image.
+
+Compiler errors are reported as annotations on the commit. Locally:
+
+```sh
+export ANDROID_SDK=/path/to/sdk ANDROID_NDK=/path/to/sdk/ndk/28.2.13676358
+./buildsystem/compile.sh --init          # libvlcjni, VLC sources, Gradle wrapper
+./gradlew :application:app:assembleDebug # app against the libVLC 4 AAR from Maven
+```
+
+VLC 4 is the default; `compile.sh -vlc3` and `-PforceVlc3` select the VLC 3 branch.
+
+---
+
+The rest of this file is the upstream VLC for Android README.
+
 # VLC for Android
 
 This is the official **Android** port of [VLC](https://videolan.org/vlc/).

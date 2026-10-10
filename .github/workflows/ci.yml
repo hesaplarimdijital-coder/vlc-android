@@ -3,7 +3,7 @@
 # app      : every push / PR. Builds the debug APK (uploaded) and an unsigned release
 #            (compile check) against the published libVLC 4 AAR, without native
 #            compilation, on the hosted runner's Android SDK. Compiler errors become
-#            check-run annotations.
+#            check-run annotations; the native source chain is reported as a notice.
 # release  : manual or v* tags. Signed release APKs when the keystore secrets exist
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
 #            otherwise it is skipped with a notice.
@@ -77,6 +77,10 @@ jobs:
 
       - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
         run: ./buildsystem/compile.sh --init 2>&1 | tee init.log
+
+      - name: Kaynak zinciri
+        if: matrix.variant == 'debug'
+        run: ./buildsystem/ci/source_chain.sh
 
       - name: Derleme (${{ matrix.variant }})
         run: |

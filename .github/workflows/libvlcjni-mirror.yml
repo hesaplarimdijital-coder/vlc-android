@@ -1,0 +1,49 @@
+# libvlcjni aynası
+#
+# VideoLAN publishes libvlcjni only on code.videolan.org. This job copies it into
+# branches of this repository so that the native chain can be forked on GitHub:
+#
+#   libvlcjni/upstream-master   VideoLAN master (refreshed on every run)
+#   libvlcjni/upstream-3.x      VideoLAN libvlcjni-3.x (refreshed on every run)
+#   libvlcjni/nagmedar          Nağmedar's libvlcjni. Created once from the commit
+#                               pinned in buildsystem/compile.sh, never overwritten.
+
+name: libvlcjni aynası
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/libvlcjni-mirror.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    name: libvlcjni → GitHub
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Yansıt
+        shell: bash
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          set -eo pipefail
+          tested=$(sed -n 's/^ *LIBVLCJNI_TESTED_HASH=\([0-9a-f]\{40\}\).*/\1/p' buildsystem/compile.sh | head -1)
+          [ -n "$tested" ] || { echo "::error title=libvlcjni::LIBVLCJNI_TESTED_HASH bulunamadı"; exit 1; }
+          git clone --bare https://code.videolan.org/videolan/libvlcjni.git "$RUNNER_TEMP/libvlcjni.git"
+          cd "$RUNNER_TEMP/libvlcjni.git"
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push "$remote" \
+            "+refs/heads/master:refs/heads/libvlcjni/upstream-master" \
+            "+refs/heads/libvlcjni-3.x:refs/heads/libvlcjni/upstream-3.x"
+          if git ls-remote --exit-code "$remote" refs/heads/libvlcjni/nagmedar > /dev/null; then
+            echo "::notice title=libvlcjni::libvlcjni/nagmedar zaten var, değiştirilmedi"
+          else
+            git push "$remote" "${tested}:refs/heads/libvlcjni/nagmedar"
+            echo "::notice title=libvlcjni::libvlcjni/nagmedar ${tested} commit'inden oluşturuldu"
+          fi
