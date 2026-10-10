@@ -21,16 +21,19 @@ commit:
 
 | Variable | Default |
 | --- | --- |
-| `LIBVLCJNI_REPOSITORY` | `https://code.videolan.org/videolan/libvlcjni.git` |
-| `LIBVLCJNI_BRANCH_OVERRIDE` | `master` (VLC 4) / `libvlcjni-3.x` (VLC 3) |
-| `VLC_REPOSITORY` | `https://github.com/hesaplarimdijital-coder/vlc.git` |
+| `LIBVLCJNI_REPOSITORY` | `https://github.com/hesaplarimdijital-coder/vlc-android.git` |
+| `LIBVLCJNI_BRANCH_OVERRIDE` | `libvlcjni/nagmedar` (VLC 4) / `libvlcjni/upstream-3.x` (VLC 3) |
+| `VLC_REPOSITORY` | `https://github.com/hesaplarimdijital-coder/vlc.git` (VLC 4) / VideoLAN's VLC (VLC 3) |
 
-libvlcjni's `get-vlc.sh` clones VideoLAN's VLC URL; `compile.sh` makes git fetch it from
-`VLC_REPOSITORY` instead (a per-process `url.<fork>.insteadOf` rule) and records the fork as the
-clone's `origin`. The VLC fork must contain `VLC_TESTED_HASH`; do not rewrite its history.
+`compile.sh` passes `VLC_REPOSITORY` to libvlcjni's `get-vlc.sh --vlcgit`, which clones its
+`master` and resets it to `VLC_TESTED_HASH`; the fork's `master` must contain that commit, so do
+not rewrite its history. The *libvlcjni aynası* workflow refreshes `libvlcjni/upstream-*` from
+VideoLAN on demand and never touches `libvlcjni/nagmedar`.
 
-To change the engine: commit to the VLC fork, then update libvlcjni (`libvlcjni/nagmedar`) to
-point at it, then bump `LIBVLCJNI_TESTED_HASH` here.
+To change the engine: commit to the VLC fork, then on `libvlcjni/nagmedar` move
+`VLC_TESTED_HASH` (and the patches) to it, then bump `LIBVLCJNI_TESTED_HASH` here. To build from
+VideoLAN's libvlcjni instead, set `LIBVLCJNI_REPOSITORY=https://code.videolan.org/videolan/libvlcjni.git`
+and `LIBVLCJNI_BRANCH_OVERRIDE=master`.
 
 ## Build
 

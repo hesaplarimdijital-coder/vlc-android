@@ -287,33 +287,24 @@ fi
 ####################
 
 
-if [ "$FORCE_VLC_4" = 1 ]; then
-    LIBVLCJNI_TESTED_HASH=a8d53a9151d7e4a9a5dfd0a5eb1cd92669afdc21
-    LIBVLCJNI_BRANCH="master"
-else
-    LIBVLCJNI_TESTED_HASH=0b8dc65efb203c86a0476bc337ddd99ecf1c0ef6
-    LIBVLCJNI_BRANCH="libvlcjni-3.x"
-fi
-
 # Source chain (see README): vlc-android (this repository) -> libvlcjni, pinned to
 # LIBVLCJNI_TESTED_HASH -> vlc, pinned by libvlcjni's get-vlc.sh (VLC_TESTED_HASH).
-# Each link can be pointed at a fork through the environment.
-: ${LIBVLCJNI_REPOSITORY:=https://code.videolan.org/videolan/libvlcjni.git}
-: ${VLC_REPOSITORY:=https://github.com/hesaplarimdijital-coder/vlc.git}
+# libvlcjni lives in branches of this repository (copied from code.videolan.org by
+# the "libvlcjni aynası" workflow); VLC comes from the user's fork. Each link can be
+# pointed elsewhere through the environment.
+if [ "$FORCE_VLC_4" = 1 ]; then
+    LIBVLCJNI_TESTED_HASH=a8d53a9151d7e4a9a5dfd0a5eb1cd92669afdc21
+    LIBVLCJNI_BRANCH="libvlcjni/nagmedar"
+    : ${VLC_REPOSITORY:=https://github.com/hesaplarimdijital-coder/vlc.git}
+else
+    LIBVLCJNI_TESTED_HASH=0b8dc65efb203c86a0476bc337ddd99ecf1c0ef6
+    LIBVLCJNI_BRANCH="libvlcjni/upstream-3.x"
+    # the VLC fork follows master only; VLC 3 comes from VideoLAN's 3.0.x branch
+    : ${VLC_REPOSITORY:=https://code.videolan.org/videolan/vlc.git}
+fi
+: ${LIBVLCJNI_REPOSITORY:=https://github.com/hesaplarimdijital-coder/vlc-android.git}
 if [ -n "$LIBVLCJNI_BRANCH_OVERRIDE" ]; then
     LIBVLCJNI_BRANCH="$LIBVLCJNI_BRANCH_OVERRIDE"
-fi
-# get-vlc.sh clones VideoLAN's VLC URL; git rewrites it to VLC_REPOSITORY for the
-# commands started by this script (GIT_CONFIG_* adds config without touching ~/.gitconfig).
-VLC_UPSTREAM_URL=https://code.videolan.org/videolan/vlc.git
-if [ "$VLC_REPOSITORY" != "$VLC_UPSTREAM_URL" ]; then
-    git_config_index=${GIT_CONFIG_COUNT:-0}
-    eval "GIT_CONFIG_KEY_${git_config_index}=\"url.\${VLC_REPOSITORY}.insteadOf\""
-    eval "GIT_CONFIG_VALUE_${git_config_index}=\"\${VLC_UPSTREAM_URL}\""
-    export "GIT_CONFIG_KEY_${git_config_index}" "GIT_CONFIG_VALUE_${git_config_index}"
-    GIT_CONFIG_COUNT=$((git_config_index + 1))
-    export GIT_CONFIG_COUNT
-    diagnostic "VLC sources: ${VLC_UPSTREAM_URL} is fetched from ${VLC_REPOSITORY}"
 fi
 
 : ${VLC_LIBJNI_PATH:="$(pwd -P)/libvlcjni"}
@@ -376,7 +367,7 @@ fi
 
 # If you want to use an existing vlc dir add its path to an VLC_SRC_DIR env var
 if [ -z "$VLC_SRC_DIR" ]; then
-    get_vlc_args=
+    get_vlc_args="--vlcgit ${VLC_REPOSITORY}"
     if [ "$BYPASS_VLC_SRC_CHECKS" = 1 ]; then
         get_vlc_args="${get_vlc_args} -b"
     fi
@@ -385,10 +376,6 @@ if [ -z "$VLC_SRC_DIR" ]; then
     fi
 
     (cd ${VLC_LIBJNI_PATH} && ./buildsystem/get-vlc.sh ${get_vlc_args})
-    # record where the sources really came from (the URL rewrite only lives in this process)
-    if [ "$VLC_REPOSITORY" != "$VLC_UPSTREAM_URL" ] && [ -d "${VLC_LIBJNI_PATH}/vlc/.git" ]; then
-        git -C "${VLC_LIBJNI_PATH}/vlc" remote set-url origin "$VLC_REPOSITORY"
-    fi
 fi
 
 # Always clone VLC when using --init since we'll need to package some files
