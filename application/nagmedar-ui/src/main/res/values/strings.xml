@@ -163,6 +163,10 @@
     <string name="nag_lab_audio_report_desc">Outputs, sample rates, encodings and bit-perfect mixers. Connect the USB DAC first.</string>
     <string name="nag_lab_bit_perfect">Try bit-perfect mode</string>
     <string name="nag_lab_bit_perfect_desc">Sets the USB DAC\'s bit-perfect mixer for media, reads it back and clears it again.</string>
+    <string name="nag_lab_display_report">Display report</string>
+    <string name="nag_lab_display_report_desc">Modes, refresh rates, HDR types and EDID of every display. Connect the TV first.</string>
+    <string name="nag_lab_refresh_rate">Try 23.976 Hz on the TV</string>
+    <string name="nag_lab_refresh_rate_desc">Shows a black screen on the external display, asks for the 24p mode and reports what the TV did.</string>
     <string name="nag_lab_run">Run</string>
     <string name="nag_lab_running">Running…</string>
     <string name="nag_lab_copy">Copy</string>

@@ -163,6 +163,10 @@
     <string name="nag_lab_audio_report_desc">Çıkışlar, örnekleme hızları, kodlamalar ve bit-perfect mikserler. Önce USB DAC\'ı bağlayın.</string>
     <string name="nag_lab_bit_perfect">Bit-perfect modunu dene</string>
     <string name="nag_lab_bit_perfect_desc">USB DAC\'ın bit-perfect mikserini medya için ayarlar, geri okur ve yeniden kaldırır.</string>
+    <string name="nag_lab_display_report">Ekran raporu</string>
+    <string name="nag_lab_display_report_desc">Her ekranın modları, yenileme hızları, HDR türleri ve EDID bilgisi. Önce TV\'yi bağlayın.</string>
+    <string name="nag_lab_refresh_rate">TV\'de 23,976 Hz dene</string>
+    <string name="nag_lab_refresh_rate_desc">Harici ekranda siyah bir ekran açar, 24p modunu ister ve TV\'nin ne yaptığını raporlar.</string>
     <string name="nag_lab_run">Çalıştır</string>
     <string name="nag_lab_running">Çalışıyor…</string>
     <string name="nag_lab_copy">Kopyala</string>

@@ -4,7 +4,9 @@ import android.app.Activity
 import androidx.annotation.StringRes
 import app.nagmedar.ui.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
 
 /**
  * An experiment of an MVP0 spike that has to run on the user's device (Settings > Lab).
@@ -26,6 +28,14 @@ object LabTools {
         },
         LabTool("SP-01", R.string.nag_lab_bit_perfect, R.string.nag_lab_bit_perfect_desc) { activity ->
             withContext(Dispatchers.Default) { AudioReport.tryBitPerfect(activity) }
+        },
+        LabTool("SP-04", R.string.nag_lab_display_report, R.string.nag_lab_display_report_desc) { activity ->
+            DisplayReport.build(activity)
+        },
+        LabTool("SP-04", R.string.nag_lab_refresh_rate, R.string.nag_lab_refresh_rate_desc) { activity ->
+            suspendCancellableCoroutine { continuation ->
+                DisplayReport.tryRefreshRate(activity) { result -> if (continuation.isActive) continuation.resume(result) }
+            }
         },
     )
 }
