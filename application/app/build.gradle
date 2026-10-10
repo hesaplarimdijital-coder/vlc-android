@@ -178,6 +178,7 @@ android {
 
 dependencies {
     implementation project(':application:vlc-android')
+    implementation project(':application:nagmedar-ui')
     implementation project(':application:television')
     implementation project(':application:remote-access-server')
     testImplementation project(':application:television')

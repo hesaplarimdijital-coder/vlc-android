@@ -1,0 +1,57 @@
+// Nağmedar desktop-class UI (Jetpack Compose). Screens move here one by one from the
+// XML/DataBinding UI in :application:vlc-android (ADR-02); playback keeps using the
+// existing PlaybackService and medialibrary.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+
+android {
+    namespace = 'app.nagmedar.ui'
+
+    defaultConfig {
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+dependencies {
+    implementation project(':application:vlc-android')
+
+    implementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.runtime:runtime-livedata'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    implementation "androidx.activity:activity-compose:$rootProject.ext.activityComposeVersion"
+    implementation "androidx.navigation:navigation-compose:$rootProject.ext.navigationComposeVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$rootProject.ext.lifecycleComposeVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$rootProject.ext.lifecycleComposeVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+}

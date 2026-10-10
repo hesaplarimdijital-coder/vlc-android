@@ -12,6 +12,7 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:$android_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlin_version"
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.34.0'
     }
@@ -118,6 +119,11 @@ ext {
     testRunner = '1.4.0'
     orchestrator = '1.4.2'
     testCore = '1.5.0'
+    // Nağmedar Compose UI (application/nagmedar-ui)
+    composeBomVersion = '2024.12.01'
+    activityComposeVersion = '1.9.3'
+    navigationComposeVersion = '2.8.4'
+    lifecycleComposeVersion = '2.8.7'
     publishScriptPath = '../../buildsystem/publish.gradle'
 //    versionCode scheme is T M NN RR AA
 //    T: Target/Flavour (1 for Android, 2 for Chrome?)
