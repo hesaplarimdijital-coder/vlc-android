@@ -9,7 +9,8 @@ plugins {
     id("com.android.settings") version '9.1.1'
 }
 
-def vlcMajorVersion = hasProperty('forceVlc4') && getProperty('forceVlc4') ? 4 : 3
+// Nağmedar builds against libVLC 4 by default; -PforceVlc3 selects the VLC 3 branch.
+def vlcMajorVersion = hasProperty('forceVlc3') ? 3 : 4
 
 android {
     minSdk = vlcMajorVersion == 3 ? 17 : 23

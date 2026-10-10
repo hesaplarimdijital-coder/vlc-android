@@ -1,8 +1,9 @@
 # Nağmedar CI
 #
-# app      : every push / PR. Builds the debug APK against the published libVLC 4
-#            AAR (no native compilation) on the hosted runner's Android SDK,
-#            uploads the APK, and turns compiler errors into check-run annotations.
+# app      : every push / PR. Builds the debug APK (uploaded) and an unsigned release
+#            (compile check) against the published libVLC 4 AAR, without native
+#            compilation, on the hosted runner's Android SDK. Compiler errors become
+#            check-run annotations.
 # release  : manual or v* tags. Signed release APKs when the keystore secrets exist
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
 #            otherwise it is skipped with a notice.
@@ -46,9 +47,13 @@ env:
 
 jobs:
   app:
-    name: Uygulama · debug APK
+    name: Uygulama · ${{ matrix.variant }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [debug, release]
     steps:
       - uses: actions/checkout@v5
 
@@ -71,10 +76,13 @@ jobs:
           restore-keys: gradle-
 
       - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
-        run: ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
+        run: ./buildsystem/compile.sh --init 2>&1 | tee init.log
 
-      - name: Derleme (debug APK)
-        run: ./gradlew :application:app:assembleDebug -PforceVlc4=true --console=plain 2>&1 | tee build.log
+      - name: Derleme (${{ matrix.variant }})
+        run: |
+          task=assembleDebug
+          [ "${{ matrix.variant }}" = release ] && task=assembleRelease
+          ./gradlew ":application:app:$task" --console=plain 2>&1 | tee build.log
 
       - name: Hataları işaretle
         if: failure()
@@ -84,7 +92,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.variant }}
           path: |
             **/build/reports/tests/
             **/build/test-results/
@@ -92,6 +100,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: APK
+        if: matrix.variant == 'debug'
         uses: actions/upload-artifact@v4
         with:
           name: nagmedar-debug-apk
@@ -118,7 +127,7 @@ jobs:
         if: env.HAS_KEYSTORE == 'true'
         run: |
           ./buildsystem/ci/setup-android.sh
-          ./buildsystem/compile.sh --init -vlc4 2>&1 | tee init.log
+          ./buildsystem/compile.sh --init 2>&1 | tee init.log
       - name: İmzalı derleme
         if: env.HAS_KEYSTORE == 'true'
         env:
@@ -127,7 +136,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.NAGMEDAR_KEY_ALIAS }}
         run: |
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/nagmedar.keystore"
-          ./gradlew :application:app:assembleSignedRelease -PforceVlc4=true --console=plain \
+          ./gradlew :application:app:assembleSignedRelease --console=plain \
             -PkeyStoreFile="$RUNNER_TEMP/nagmedar.keystore" -Pstorealias="$KEY_ALIAS" 2>&1 | tee build.log
           rm -f "$RUNNER_TEMP/nagmedar.keystore"
       - name: Hataları işaretle
@@ -154,7 +163,7 @@ jobs:
       - name: libVLC derlemesi
         run: |
           git config --global --add safe.directory '*'
-          ./buildsystem/compile.sh -l -vlc4 -t -a ${{ inputs.native_abi }} 2>&1 | tee native.log
+          ./buildsystem/compile.sh -l -t -a ${{ inputs.native_abi }} 2>&1 | tee native.log
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py native.log

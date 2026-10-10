@@ -61,9 +61,12 @@ allprojects {
 
 ext {
     appId = "app.nagmedar" // Nağmedar; code namespaces stay org.videolan.*
-    versionCode = 3070130
-    vlcMajorVersion = project.hasProperty('forceVlc4') && project.getProperty('forceVlc4') ? 4 : 3
-    versionName = vlcMajorVersion == 3 ? '3.7.2 Beta 3' : '4.0.0-preview - ' + versionCode
+    // Nağmedar 0.1.0. versionCode = 4000000 + major * 10000 + minor * 100 + patch; the 4000000
+    // base keeps it above the VLC 3.x codes that StartActivity's settings migrations compare against.
+    versionCode = 4000100
+    // libVLC 4 by default; -PforceVlc3 selects the VLC 3 branch (-PforceVlc4 is accepted and ignored)
+    vlcMajorVersion = project.hasProperty('forceVlc3') ? 3 : 4
+    versionName = vlcMajorVersion == 3 ? '0.1.0-vlc3' : '0.1.0'
     remoteAccessVersion = '0.24.0'
     libvlcVersion = vlcMajorVersion == 3 ? '3.7.7' :'4.0.0-eap29'
     medialibraryVersion = (vlcMajorVersion == 3 ? '0.13.24' : '0.13.22-vlc4')

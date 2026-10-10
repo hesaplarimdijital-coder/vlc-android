@@ -23,6 +23,8 @@ fail()
 
 RELEASE=0
 RESET=0
+# Nağmedar builds against libVLC 4 by default; -vlc3 selects the VLC 3 branch.
+FORCE_VLC_4=1
 # Indicates the license of contribs
 AVLC_CONTRIB_LICENSE=g
 while [ $# -gt 0 ]; do
@@ -40,6 +42,7 @@ while [ $# -gt 0 ]; do
             echo "Use -l to build only LibVLC"
             echo "Use -ml to build only the medialibrary"
             echo "Use -b to bypass libvlc source checks (vlc custom sources)"
+            echo "Use -vlc3 to build against VLC 3 (default: VLC 4)"
             echo "Use -t to use prebuilt contribs for LibVLC"
             echo "Use -m2 to set the maven local repository path to use"
             echo "Use --static-cpp to use the static C++ runtime"
@@ -109,6 +112,9 @@ while [ $# -gt 0 ]; do
             ;;
         -vlc4)
             FORCE_VLC_4=1
+            ;;
+        -vlc3)
+            FORCE_VLC_4=0
             ;;
         --static-cpp)
             AVLC_STATIC_CXX=1
@@ -272,6 +278,8 @@ fi
 
 if [ "$FORCE_VLC_4" = 1 ]; then
     gradle_prop="-PforceVlc4=true"
+else
+    gradle_prop="-PforceVlc3=true"
 fi
 
 ####################
