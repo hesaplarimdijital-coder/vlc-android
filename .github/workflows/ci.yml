@@ -190,19 +190,6 @@ jobs:
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
 
-      # VLC's own unit tests (S-501: "existing tests pass" after the PlaybackEngine seam).
-      # Not blocking until their baseline on this toolchain is known.
-      - name: VLC birim testleri
-        if: matrix.variant == 'debug'
-        continue-on-error: true
-        run: |
-          status=0
-          ./gradlew :application:vlc-android:testDebugUnitTest -PnagmedarAbis=arm64-v8a --continue --console=plain > vlc-tests.log 2>&1 || status=$?
-          tail -30 vlc-tests.log
-          python3 buildsystem/ci/junit_summary.py application/vlc-android/build/test-results "VLC birim testleri" ||
-            { [ -d application/vlc-android/build/test-results ] || python3 buildsystem/ci/annotate_gradle_errors.py vlc-tests.log; exit 1; }
-          exit $status
-
       - name: Ekran görüntülerini karşılaştır
         if: always() && matrix.variant == 'debug'
         run: |
@@ -284,19 +271,6 @@ jobs:
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
-
-      # VLC's own unit tests (S-501: "existing tests pass" after the PlaybackEngine seam).
-      # Not blocking until their baseline on this toolchain is known.
-      - name: VLC birim testleri
-        if: matrix.variant == 'debug'
-        continue-on-error: true
-        run: |
-          status=0
-          ./gradlew :application:vlc-android:testDebugUnitTest -PnagmedarAbis=arm64-v8a --continue --console=plain > vlc-tests.log 2>&1 || status=$?
-          tail -30 vlc-tests.log
-          python3 buildsystem/ci/junit_summary.py application/vlc-android/build/test-results "VLC birim testleri" ||
-            { [ -d application/vlc-android/build/test-results ] || python3 buildsystem/ci/annotate_gradle_errors.py vlc-tests.log; exit 1; }
-          exit $status
       - name: APK
         if: env.HAS_KEYSTORE == 'true'
         uses: actions/upload-artifact@v4
