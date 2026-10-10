@@ -56,6 +56,8 @@ jobs:
     name: Laboratuvar native (SP-02/03/05)
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
 
@@ -86,11 +88,22 @@ jobs:
 
       - name: Host derlemesi ve testleri (SP-03, SP-05)
         if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test
+          TOKEN: ${{ github.token }}
         run: |
           set -o pipefail
           { ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host" &&
             ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"; } 2>&1 | tee "$RUNNER_TEMP/host.log" || {
             echo "::error title=Host günlüğü::$(tail -c 3000 "$RUNNER_TEMP/host.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+            # the failed test's files (small: the test streams are about 100 kB) on the ci/debug-native branch
+            if [ -d "$NAGMEDAR_TEST_DIR" ] && [ "$GITHUB_EVENT_NAME" = push ]; then
+              cp "$RUNNER_TEMP/host.log" "$NAGMEDAR_TEST_DIR/"
+              cd "$NAGMEDAR_TEST_DIR" && find . -type f -size +50M -delete
+              git init -q && git checkout -q --orphan ci/debug-native
+              git add -A && git commit -q -m "Native host test files for ${GITHUB_SHA::7}"
+              git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/debug-native || true
+            fi
             exit 1
           }
 

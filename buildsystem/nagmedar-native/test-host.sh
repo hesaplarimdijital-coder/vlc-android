@@ -12,8 +12,17 @@ ROOT=$(cd "$HERE/../.." && pwd)
 PREFIX=$(realpath -m "${1:?prefix}")
 WORK=${NAGMEDAR_NATIVE_WORK:-$ROOT/native/.work}
 ASSETS="$WORK/src/dovi_tool/assets/hevc_tests"
-T=$(mktemp -d)
-trap 'rm -rf "$T"' EXIT
+# NAGMEDAR_TEST_DIR keeps the test files (CI pushes them to ci/debug-native when a test fails)
+if [ -n "${NAGMEDAR_TEST_DIR:-}" ]; then
+    T=$NAGMEDAR_TEST_DIR
+    rm -rf "$T" && mkdir -p "$T"
+else
+    T=$(mktemp -d)
+    trap 'rm -rf "$T"' EXIT
+fi
+
+# one annotation line: GitHub reads %0A as a line break
+annotate() { sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}'; }
 
 echo "== SP-03: profile 7 test stream"
 dovi_tool inject-rpu -i "$ASSETS/regular_start_code_4_muxed_el.hevc" --rpu-in "$ASSETS/regular_rpu_mel.bin" -o "$T/p7.hevc" > /dev/null
@@ -32,9 +41,13 @@ for container in mkv mp4; do
     echo "== SP-03: convert to $container"
     extra=()
     [ "$container" = mp4 ] && extra=(--mp4)
-    # a failed conversion still writes its stats; the checks below report the error
-    "$PREFIX/bin/dvconvert" "$T/p7.mkv" "$T/out.$container" "${extra[@]}" > "$T/stats.json" 2> "$T/dvconvert.log" || true
-    [ -s "$T/out.$container" ] || { echo "dvconvert wrote nothing: $(cat "$T/stats.json") $(tail -c 500 "$T/dvconvert.log")"; exit 1; }
+    if ! "$PREFIX/bin/dvconvert" "$T/p7.mkv" "$T/out.$container" "${extra[@]}" > "$T/stats.json" 2> "$T/dvconvert.log"; then
+        # the converter prints its stats (with the error) even when it fails; the log has FFmpeg's reason
+        log=$(tr '\r' '\n' < "$T/dvconvert.log" | grep -v ' MB$' | tail -c 1500)
+        echo "::error title=SP-03 $container::$( { cat "$T/stats.json"; echo "$log"; } | annotate)"
+        exit 1
+    fi
+    echo "stats: $(cat "$T/stats.json")"
     ffprobe -v error -print_format json -show_streams -show_chapters "$T/out.$container" > "$T/probe.json"
     ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/p7.mkv" > "$T/pts_in.json"
     ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/out.$container" > "$T/pts_out.json"
