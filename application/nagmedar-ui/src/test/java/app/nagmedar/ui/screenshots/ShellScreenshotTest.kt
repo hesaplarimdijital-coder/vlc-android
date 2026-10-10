@@ -1,14 +1,13 @@
 package app.nagmedar.ui.screenshots
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.shell.Destination
@@ -29,13 +28,16 @@ import java.io.FileOutputStream
  * S-1402: the shell in the five width classes, light and dark, in Turkish. The PNGs land in
  * build/outputs/screenshots; CI compares them with src/test/screenshots and reports the
  * differences (buildsystem/ci/screenshot_report.py).
+ *
+ * The window is drawn into a bitmap directly: captureToImage() waits for a frame callback that
+ * Robolectric's paused main looper never delivers.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ShellScreenshotTest {
 
     @get:Rule
-    val compose = createComposeRule()
+    val compose = createAndroidComposeRule<ComponentActivity>()
 
     private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, start: Destination = Destination.Movies) {
         compose.setContent {
@@ -46,7 +48,10 @@ class ShellScreenshotTest {
             }
         }
         compose.waitForIdle()
-        save(name, compose.onRoot().captureToImage().asAndroidBitmap())
+        val window = compose.activity.window.decorView
+        val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
+        compose.runOnIdle { window.draw(Canvas(bitmap)) }
+        save(name, bitmap)
     }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")

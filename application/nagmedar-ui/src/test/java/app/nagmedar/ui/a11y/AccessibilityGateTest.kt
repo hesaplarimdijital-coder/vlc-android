@@ -1,5 +1,9 @@
 package app.nagmedar.ui.a11y
 
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.input.InputMode as ComposeInputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -20,6 +24,7 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -41,8 +46,11 @@ class AccessibilityGateTest {
     @get:Rule
     val compose = createComposeRule()
 
+    private lateinit var inputModeManager: InputModeManager
+
     private fun render(widthClass: WidthClass, input: InputMode, start: Destination) {
         compose.setContent {
+            inputModeManager = LocalInputModeManager.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 TestShell(widthClass, startDestination = start)
             }
@@ -94,10 +102,15 @@ class AccessibilityGateTest {
         checkNames()
     }
 
-    @OptIn(ExperimentalTestApi::class)
+    @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun tabMovesFocusThroughControls() {
         render(WidthClass.Large, InputMode.Pointer, Destination.Movies)
+        // A hardware Tab first takes the window out of touch mode (ViewRootImpl does this before
+        // the key reaches Compose); injected test keys skip that step, so do it here. Clickables
+        // are focusable only outside touch mode.
+        compose.runOnIdle { inputModeManager.requestInputMode(ComposeInputMode.Keyboard) }
+        compose.runOnIdle { assertEquals("keyboard input mode", ComposeInputMode.Keyboard, inputModeManager.inputMode) }
         val seen = mutableSetOf<Int>()
         repeat(6) {
             compose.onRoot().performKeyInput { pressKey(Key.Tab) }

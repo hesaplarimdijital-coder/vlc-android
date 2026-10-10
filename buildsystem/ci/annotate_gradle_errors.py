@@ -103,8 +103,12 @@ def main(paths):
             props += ',col=%s' % e['col']
         print('::%s %s::%s' % (kind, props, esc(e['msg'])))
     tests = failed_tests(lines)
-    for name, detail in tests[:10]:
-        print('::error title=Test %s::%s' % (esc_prop(name), esc(detail or name)))
+    if tests:
+        # one line with every failed test, then the details; overflow goes to warning slots
+        print('::error title=%d failed tests::%s' % (len(tests), esc(', '.join(n for n, _ in tests))[:3000]))
+        for i, (name, detail) in enumerate(tests[:7 + MAX_WARNINGS]):
+            kind = 'error' if i < 7 else 'warning'
+            print('::%s title=Test %s::%s' % (kind, esc_prop(name), esc(detail or name)))
     for block in what_went_wrong(lines)[:2]:
         print('::error title=Gradle::%s' % esc(block))
     if not errors and not tests and not what_went_wrong(lines):
