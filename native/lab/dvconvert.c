@@ -66,6 +66,166 @@ static int buf_put_be(ByteBuf *b, uint32_t v, int bytes)
 static int nal_type(const uint8_t *nal) { return (nal[0] >> 1) & 0x3F; }
 static int nal_layer(const uint8_t *nal) { return ((nal[0] & 1) << 5) | (nal[1] >> 3); }
 
+/* ---- decoding timestamps ------------------------------------------------------------------
+ * Matroska stores presentation times only. Without an HEVC decoder libavformat cannot learn the
+ * reorder depth and hands out dts = pts, which goes backwards at every B-frame. The converter
+ * therefore derives dts itself, as FFmpeg's muxer once did: the smallest of the last depth + 1
+ * presentation times, primed with times one frame apart before the first one. The depth comes
+ * from the sequence parameter set (sps_max_num_reorder_pics of the highest sub-layer). */
+
+#define MAX_REORDER 16
+
+typedef struct Bits {
+    const uint8_t *data;
+    size_t size, pos; /* pos in bits */
+    int overrun;
+} Bits;
+
+static unsigned bits_read(Bits *b, int n)
+{
+    unsigned v = 0;
+    while (n-- > 0) {
+        if (b->pos >= b->size * 8) {
+            b->overrun = 1;
+            return 0;
+        }
+        v = (v << 1) | ((b->data[b->pos >> 3] >> (7 - (b->pos & 7))) & 1);
+        b->pos++;
+    }
+    return v;
+}
+
+static void bits_skip(Bits *b, size_t n)
+{
+    b->pos += n;
+    if (b->pos > b->size * 8)
+        b->overrun = 1;
+}
+
+static unsigned bits_ue(Bits *b)
+{
+    int zeros = 0;
+    while (!b->overrun && bits_read(b, 1) == 0 && zeros < 31)
+        zeros++;
+    return ((1u << zeros) - 1) + bits_read(b, zeros);
+}
+
+/* sps_max_num_reorder_pics of an SPS NAL unit (header included), or -1 */
+static int sps_reorder_depth(const uint8_t *nal, size_t size)
+{
+    uint8_t rbsp[512];
+    size_t n = 0;
+    for (size_t i = 2; i < size && n < sizeof(rbsp); i++) {
+        if (i + 2 < size && nal[i] == 0 && nal[i + 1] == 0 && nal[i + 2] == 3) {
+            rbsp[n++] = 0;
+            if (n < sizeof(rbsp))
+                rbsp[n++] = 0;
+            i += 2; /* skip the emulation prevention byte */
+            continue;
+        }
+        rbsp[n++] = nal[i];
+    }
+    Bits b = {rbsp, n, 0, 0};
+    bits_skip(&b, 4); /* sps_video_parameter_set_id */
+    int max_sub_layers_minus1 = (int)bits_read(&b, 3);
+    bits_skip(&b, 1);
+    bits_skip(&b, 96); /* general profile, tier, level */
+    int sub_profile[8] = {0}, sub_level[8] = {0};
+    for (int i = 0; i < max_sub_layers_minus1; i++) {
+        sub_profile[i] = (int)bits_read(&b, 1);
+        sub_level[i] = (int)bits_read(&b, 1);
+    }
+    if (max_sub_layers_minus1 > 0)
+        bits_skip(&b, 2 * (size_t)(8 - max_sub_layers_minus1));
+    for (int i = 0; i < max_sub_layers_minus1; i++)
+        bits_skip(&b, (sub_profile[i] ? 88 : 0) + (sub_level[i] ? 8 : 0));
+    bits_ue(&b); /* sps_seq_parameter_set_id */
+    if (bits_ue(&b) == 3) /* chroma_format_idc */
+        bits_skip(&b, 1);
+    bits_ue(&b); /* width */
+    bits_ue(&b); /* height */
+    if (bits_read(&b, 1)) /* conformance window */
+        for (int i = 0; i < 4; i++)
+            bits_ue(&b);
+    bits_ue(&b); /* bit_depth_luma_minus8 */
+    bits_ue(&b); /* bit_depth_chroma_minus8 */
+    bits_ue(&b); /* log2_max_pic_order_cnt_lsb_minus4 */
+    int all_layers = (int)bits_read(&b, 1);
+    unsigned reorder = 0;
+    for (int i = all_layers ? 0 : max_sub_layers_minus1; i <= max_sub_layers_minus1; i++) {
+        bits_ue(&b); /* sps_max_dec_pic_buffering_minus1 */
+        reorder = bits_ue(&b);
+        bits_ue(&b); /* sps_max_latency_increase_plus1 */
+    }
+    return b.overrun || reorder > MAX_REORDER ? -1 : (int)reorder;
+}
+
+/* reorder depth from the base layer's SPS in hvcC or Annex B extradata, or -1 */
+static int extradata_reorder_depth(const uint8_t *ex, int size)
+{
+    if (!ex || size < 4)
+        return -1;
+    if (size >= 23 && ex[0] == 1) {
+        const uint8_t *p = ex + 23, *end = ex + size;
+        for (int a = 0; a < ex[22] && end - p >= 3; a++) {
+            int type = p[0] & 0x3F, count = (p[1] << 8) | p[2];
+            p += 3;
+            for (int i = 0; i < count && end - p >= 2; i++) {
+                int len = (p[0] << 8) | p[1];
+                p += 2;
+                if (len > end - p)
+                    return -1;
+                if (type == 33 && len > 2 && nal_layer(p) == 0)
+                    return sps_reorder_depth(p, (size_t)len);
+                p += len;
+            }
+        }
+        return -1;
+    }
+    for (int i = 0; i + 3 < size; i++) {
+        if (ex[i] == 0 && ex[i + 1] == 0 && ex[i + 2] == 1) {
+            const uint8_t *nal = ex + i + 3;
+            int len = size - (i + 3);
+            for (int j = i + 3; j + 2 < size; j++)
+                if (ex[j] == 0 && ex[j + 1] == 0 && (ex[j + 2] == 1 || (j + 3 < size && ex[j + 2] == 0 && ex[j + 3] == 1))) {
+                    len = j - (i + 3);
+                    break;
+                }
+            if (len > 2 && nal_type(nal) == 33 && nal_layer(nal) == 0)
+                return sps_reorder_depth(nal, (size_t)len);
+        }
+    }
+    return -1;
+}
+
+typedef struct DtsGen {
+    int depth;
+    int primed;
+    int64_t buf[MAX_REORDER + 1];
+    int64_t last;
+} DtsGen;
+
+static int64_t dts_next(DtsGen *g, int64_t pts, int64_t duration)
+{
+    if (!g->primed) {
+        for (int i = 1; i <= g->depth; i++)
+            g->buf[i] = pts + (i - g->depth - 1) * duration;
+        g->primed = 1;
+        g->last = INT64_MIN;
+    }
+    g->buf[0] = pts;
+    for (int i = 0; i < g->depth && g->buf[i] > g->buf[i + 1]; i++) {
+        int64_t t = g->buf[i];
+        g->buf[i] = g->buf[i + 1];
+        g->buf[i + 1] = t;
+    }
+    int64_t dts = g->buf[0];
+    if (g->last != INT64_MIN && dts <= g->last)
+        dts = g->last + 1; /* a deeper reorder than the SPS says: keep dts increasing */
+    g->last = dts;
+    return dts;
+}
+
 typedef struct Ctx {
     DvcStats *stats;
     int length_size; /* NAL length field size in the source packets, 0 = Annex B */
@@ -317,6 +477,18 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
     const uint8_t *ex = ist_video->codecpar->extradata;
     ctx.length_size = (ist_video->codecpar->extradata_size >= 23 && ex[0] == 1) ? (ex[21] & 3) + 1 : 0;
 
+    /* Matroska has no decoding timestamps (see dts_next) */
+    int regen_dts = ic->iformat && strstr(ic->iformat->name, "matroska") != NULL;
+    DtsGen dts_gen = {0};
+    int64_t frame_duration = 1;
+    if (regen_dts) {
+        int depth = extradata_reorder_depth(ex, ist_video->codecpar->extradata_size);
+        dts_gen.depth = depth >= 0 ? depth : 4; /* no SPS in the header: more than x265's and Blu-ray encoders' usual 2-3 */
+        AVRational fps = ist_video->avg_frame_rate.num ? ist_video->avg_frame_rate : ist_video->r_frame_rate;
+        if (fps.num && fps.den)
+            frame_duration = FFMAX(1, av_rescale_q(1, av_inv_q(fps), ist_video->time_base));
+    }
+
     if ((ret = avformat_alloc_output_context2(&oc, NULL, mp4 ? "mp4" : "matroska", output)) < 0) {
         fail(s, "create output", ret);
         goto end;
@@ -454,6 +626,8 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
                 pkt->pts = pkt->dts = av_rescale_q(frame_index, av_inv_q(fps), ist->time_base);
                 pkt->duration = av_rescale_q(1, av_inv_q(fps), ist->time_base);
             }
+            if (regen_dts && pkt->pts != AV_NOPTS_VALUE)
+                pkt->dts = dts_next(&dts_gen, pkt->pts, pkt->duration > 0 ? pkt->duration : frame_duration);
             frame_index++;
             s->video_packets++;
             int64_t ts = pkt->pts != AV_NOPTS_VALUE ? pkt->pts : pkt->dts;
