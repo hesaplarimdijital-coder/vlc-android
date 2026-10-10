@@ -70,6 +70,25 @@ def what_went_wrong(lines):
     return blocks
 
 
+TEST_FAILED = re.compile(r'^(?P<cls>[\w.$]+) > (?P<test>.+) FAILED$')
+
+
+def failed_tests(lines):
+    """Gradle test logging: 'Class > method FAILED' followed by the indented exception."""
+    found = []
+    for i, raw in enumerate(lines):
+        m = TEST_FAILED.match(raw.rstrip('\n'))
+        if not m:
+            continue
+        detail = []
+        for nxt in lines[i + 1:i + 16]:
+            if not nxt.startswith((' ', '\t')):
+                break
+            detail.append(nxt.strip())
+        found.append((m.group('cls').split('.')[-1] + '.' + m.group('test'), '\n'.join(detail)[:2500]))
+    return found
+
+
 def main(paths):
     lines = []
     for p in paths:
@@ -83,9 +102,12 @@ def main(paths):
         if e['col']:
             props += ',col=%s' % e['col']
         print('::%s %s::%s' % (kind, props, esc(e['msg'])))
+    tests = failed_tests(lines)
+    for name, detail in tests[:10]:
+        print('::error title=Test %s::%s' % (esc_prop(name), esc(detail or name)))
     for block in what_went_wrong(lines)[:2]:
         print('::error title=Gradle::%s' % esc(block))
-    if not errors and not what_went_wrong(lines):
+    if not errors and not tests and not what_went_wrong(lines):
         tail = ''.join(lines[-40:])
         print('::error title=Build log tail::%s' % esc(tail[-3000:]))
     print('annotated %d compiler errors' % len(errors))

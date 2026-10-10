@@ -2,8 +2,11 @@
 #
 # app      : every push / PR. Builds the arm64 debug APK (uploaded) and an unsigned release
 #            (compile check) against the published libVLC 4 AAR, without native
-#            compilation, on the hosted runner's Android SDK. Compiler errors become
-#            check-run annotations; the native source chain is reported as a notice.
+#            compilation, on the hosted runner's Android SDK. The debug leg also runs the
+#            Nağmedar UI tests (tokens, shortcuts, layout state, accessibility gate,
+#            screenshots), compares the screenshots with src/test/screenshots and, on
+#            master, pushes them to the ci/screenshots branch for review. Compiler errors
+#            and test failures become check-run annotations.
 # release  : manual or v* tags. Signed release APKs when the keystore secrets exist
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
 #            otherwise it is skipped with a notice.
@@ -50,6 +53,8 @@ jobs:
     name: Uygulama · ${{ matrix.variant }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -88,12 +93,36 @@ jobs:
             ./gradlew :application:app:assembleRelease --console=plain 2>&1 | tee build.log
           else
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
-            ./gradlew :application:app:assembleDebug -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee build.log
+            ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
+              -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           fi
 
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      - name: Ekran görüntülerini karşılaştır
+        if: always() && matrix.variant == 'debug'
+        run: |
+          pip install --quiet pillow
+          python3 buildsystem/ci/screenshot_report.py \
+            application/nagmedar-ui/build/outputs/screenshots \
+            application/nagmedar-ui/src/test/screenshots \
+            application/nagmedar-ui/build/outputs/screenshots/diff
+
+      - name: Ekran görüntülerini ci/screenshots dalına koy
+        if: always() && matrix.variant == 'debug' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          src=application/nagmedar-ui/build/outputs/screenshots
+          [ -d "$src" ] || exit 0
+          out="$RUNNER_TEMP/screenshots"
+          rm -rf "$out" && mkdir -p "$out" && cp -r "$src"/. "$out"/
+          cd "$out"
+          git init -q && git checkout -q --orphan ci/screenshots
+          git add -A && git commit -q -m "Screenshots for ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/screenshots
 
       - name: Test raporları
         if: always()
