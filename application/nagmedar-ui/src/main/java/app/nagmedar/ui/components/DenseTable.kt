@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.theme.NagTheme
 
 /** Width of a table column: a share of the free space or a fixed size. */
@@ -59,6 +60,7 @@ data class TableSort(val column: Int, val ascending: Boolean)
 /**
  * Dense, desktop-style table (S-202): sticky header with sortable columns, 32 dp rows in
  * pointer mode (taller in touch mode), hover and selection states, keyboard focus per row.
+ * [rowMenu] gives every row a context menu (right click, long press, Menu key).
  */
 @Composable
 fun <T> DenseTable(
@@ -71,6 +73,8 @@ fun <T> DenseTable(
     selectedKey: Any? = null,
     sort: TableSort? = null,
     onSortChange: ((TableSort) -> Unit)? = null,
+    rowMenu: ((T, Int) -> List<MenuEntry>)? = null,
+    rowMenuLabel: String? = null,
     contentPadding: PaddingValues = PaddingValues(bottom = 8.dp),
 ) {
     val colors = NagTheme.colors
@@ -90,13 +94,20 @@ fun <T> DenseTable(
         HorizontalRule()
         LazyColumn(state = state, modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
             itemsIndexed(rows, key = { _, item -> key(item) }) { index, item ->
-                TableRow(
-                    columns = columns,
-                    item = item,
-                    selected = selectedKey != null && key(item) == selectedKey,
-                    onClick = { onRowClick(item, index) },
-                    modifier = Modifier,
-                )
+                val row = @Composable {
+                    TableRow(
+                        columns = columns,
+                        item = item,
+                        selected = selectedKey != null && key(item) == selectedKey,
+                        onClick = { onRowClick(item, index) },
+                        modifier = Modifier,
+                    )
+                }
+                if (rowMenu != null) {
+                    ContextMenuArea(entries = { rowMenu(item, index) }, accessibilityLabel = rowMenuLabel) { row() }
+                } else {
+                    row()
+                }
             }
         }
     }
