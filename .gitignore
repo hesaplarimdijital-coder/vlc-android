@@ -78,3 +78,7 @@ libvlcpp.pc
 lib/
 /buildsystem/automation/certificates/
 /buildsystem/.check-commits/
+
+# test media output (S-1401) and Python caches
+/out/
+__pycache__/

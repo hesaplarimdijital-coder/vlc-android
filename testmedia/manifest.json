@@ -1,0 +1,716 @@
+{
+  "version": 1,
+  "description": "Nağmedar test media set (S-1401). 'generated' samples are built by generate.py from test patterns, tones and our own captions; 'manual' ones cannot be synthesised and are cut from your own discs or files (never committed). Stories are backlog ids; E07, E10, E11 refer to whole epics (subtitles, music, podcasts and radio).",
+  "samples": [
+    {
+      "id": "hdr10-2160p23976",
+      "kind": "generated",
+      "step": "hdr10",
+      "file": "video/hdr10_2160p23976_hevc10_eac3.mkv",
+      "tests": "4K HEVC Main 10 with HDR10 static metadata (ST 2086 1000 cd/m², MaxCLL 1000, MaxFALL 400) at 23.976 fps; E-AC-3 5.1 for passthrough; a PQ ramp strip shows where the display clips.",
+      "stories": [
+        "S-506",
+        "S-508",
+        "S-612",
+        "SP-04",
+        "S-1404"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "profile": "Main 10",
+            "width": 3840,
+            "height": 2160,
+            "pix_fmt": "yuv420p10le",
+            "color_transfer": "smpte2084",
+            "color_primaries": "bt2020",
+            "avg_frame_rate": "24000/1001"
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "eac3",
+            "channels": 6,
+            "sample_rate": "48000"
+          }
+        ],
+        "frame_side_data": [
+          "Mastering display metadata",
+          "Content light level metadata"
+        ]
+      }
+    },
+    {
+      "id": "hdr10plus-2160p23976",
+      "kind": "generated",
+      "step": "hdr10plus",
+      "file": "video/hdr10plus_2160p23976_hevc10.mkv",
+      "tests": "The HDR10 stream with HDR10+ (SMPTE 2094-40) dynamic metadata in three scenes of 80 frames (dark, bright, mid): tone mapping should change at 3.3 s and 6.7 s.",
+      "stories": [
+        "S-506",
+        "SP-04"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "color_transfer": "smpte2084"
+          }
+        ],
+        "frame_side_data": [
+          "HDR Dynamic Metadata SMPTE2094-40 (HDR10+)"
+        ],
+        "hdr10plus_frames": 240
+      }
+    },
+    {
+      "id": "dv-p81-2160p23976",
+      "kind": "generated",
+      "step": "dv-p81",
+      "file": "video/dv_p8.1_2160p23976_hevc10.mkv",
+      "tests": "Dolby Vision profile 8.1 (HDR10-compatible base layer, RPU from dovi_tool generate, three shots) with the configuration record in Matroska BlockAdditionMapping, as mkvmerge writes it.",
+      "stories": [
+        "S-506",
+        "S-507",
+        "SP-03",
+        "SP-04"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160
+          }
+        ],
+        "stream_side_data": [
+          {
+            "side_data_type": "DOVI configuration record",
+            "dv_profile": 8,
+            "dv_bl_signal_compatibility_id": 1,
+            "rpu_present_flag": 1,
+            "el_present_flag": 0
+          }
+        ],
+        "frame_side_data": [
+          "Dolby Vision RPU Data"
+        ],
+        "dovi_profile": 8
+      }
+    },
+    {
+      "id": "hlg-1080p50",
+      "kind": "generated",
+      "step": "hlg",
+      "file": "video/hlg_1080p50_hevc10.mkv",
+      "tests": "HLG (ARIB STD-B67) BT.2020 HEVC Main 10 at 50 fps: HLG detection and SDR fallback.",
+      "stories": [
+        "S-506"
+      ],
+      "expect": {
+        "duration": [
+          4.9,
+          5.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "pix_fmt": "yuv420p10le",
+            "color_transfer": "arib-std-b67",
+            "color_primaries": "bt2020",
+            "avg_frame_rate": "50/1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stress-2160p23976-100mbps",
+      "kind": "generated",
+      "step": "stress",
+      "heavy": true,
+      "file": "video/stress_2160p23976_hevc10_100mbps.mkv",
+      "tests": "15 s of grain at about 100 Mbit/s (peaks 120): read throughput from an external USB disk and decoder headroom, the conditions behind the stutter on the LG B4.",
+      "stories": [
+        "S-1404",
+        "S-1406",
+        "SP-04"
+      ],
+      "expect": {
+        "duration": [
+          14.9,
+          15.2
+        ],
+        "bit_rate_min": 70000000,
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "color_transfer": "smpte2084"
+          }
+        ]
+      }
+    },
+    {
+      "id": "interlaced-1080i25",
+      "kind": "generated",
+      "step": "interlaced",
+      "file": "video/interlaced_1080i25_h264_ac3.mkv",
+      "tests": "Interlaced H.264 1080i25 (top field first) with AC-3: deinterlacing modes.",
+      "stories": [
+        "S-505"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080,
+            "field_order": "tt"
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "ac3",
+            "channels": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "av1-1080p24-10bit",
+      "kind": "generated",
+      "step": "av1",
+      "file": "video/av1_1080p24_10bit_opus.mkv",
+      "tests": "AV1 Main 10 with Opus: hardware AV1 decoding on the Dimensity 9400+ and the software fallback.",
+      "stories": [
+        "S-506"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "av1",
+            "pix_fmt": "yuv420p10le"
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "opus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "subtitles-1080p24",
+      "kind": "generated",
+      "step": "subtitles",
+      "file": "video/subtitles_1080p24_h264.mkv",
+      "tests": "Four subtitle tracks: Turkish SRT (default), Turkish ASS with styles, positioning, karaoke and an attached font, English PGS, English forced signs; three chapters. Two tracks at once (S-503), forced tracks, PGS rendering, sync tools.",
+      "stories": [
+        "S-503",
+        "E07"
+      ],
+      "expect": {
+        "duration": [
+          29.9,
+          30.2
+        ],
+        "chapters": 3,
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264"
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "aac"
+          },
+          {
+            "codec_type": "subtitle",
+            "codec_name": "subrip",
+            "tags.language": "tur",
+            "disposition.default": 1
+          },
+          {
+            "codec_type": "subtitle",
+            "codec_name": "ass",
+            "tags.language": "tur"
+          },
+          {
+            "codec_type": "subtitle",
+            "codec_name": "hdmv_pgs_subtitle",
+            "tags.language": "eng"
+          },
+          {
+            "codec_type": "subtitle",
+            "codec_name": "subrip",
+            "tags.language": "eng",
+            "disposition.forced": 1
+          },
+          {
+            "codec_type": "attachment",
+            "tags.mimetype": "font/ttf"
+          }
+        ]
+      }
+    },
+    {
+      "id": "subtitles-sidecars",
+      "kind": "generated",
+      "step": "subtitles",
+      "files": [
+        "video/subtitles_1080p24_h264.tr.srt",
+        "video/subtitles_1080p24_h264.en.srt",
+        "video/subtitles_1080p24_h264.tr.ass"
+      ],
+      "tests": "External subtitles next to the video: Turkish SRT in Windows-1254 with CRLF (encoding detection), English SRT in UTF-8 with BOM, Turkish ASS.",
+      "stories": [
+        "S-702",
+        "E07"
+      ],
+      "expect": {
+        "text": [
+          {
+            "file": "video/subtitles_1080p24_h264.tr.srt",
+            "encoding": "cp1254",
+            "contains": [
+              "Işığı",
+              "Şu dağın",
+              "İğneyle"
+            ],
+            "crlf": true
+          },
+          {
+            "file": "video/subtitles_1080p24_h264.en.srt",
+            "encoding": "utf-8-sig",
+            "contains": [
+              "Northern Light"
+            ]
+          },
+          {
+            "file": "video/subtitles_1080p24_h264.tr.ass",
+            "encoding": "utf-8",
+            "contains": [
+              "[Events]",
+              "\\k50"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "flac-hires",
+      "kind": "generated",
+      "step": "flac",
+      "files": [
+        "audio/flac_16bit_44100.flac",
+        "audio/flac_24bit_96000.flac",
+        "audio/flac_24bit_192000.flac"
+      ],
+      "tests": "FLAC 16/44.1, 24/96 and 24/192 with tags and cover. Left 1 kHz, right 440 Hz; from 15 s the right channel holds only a -110 dBFS 3 kHz tone, which survives only a 24-bit path (null test for bit-perfect output).",
+      "stories": [
+        "S-1405",
+        "SP-01",
+        "SP-02",
+        "S-903"
+      ],
+      "expect": {
+        "duration": [
+          19.9,
+          20.1
+        ],
+        "streams": [
+          {
+            "codec_type": "audio",
+            "codec_name": "flac",
+            "channels": 2
+          },
+          {
+            "codec_type": "video",
+            "disposition.attached_pic": 1
+          }
+        ],
+        "tags": {
+          "album": "Ölçüm Kayıtları",
+          "artist": "Nağmedar Test Orkestrası"
+        },
+        "per_file": {
+          "audio/flac_16bit_44100.flac": {
+            "sample_rate": "44100",
+            "bits_per_raw_sample": "16"
+          },
+          "audio/flac_24bit_96000.flac": {
+            "sample_rate": "96000",
+            "bits_per_raw_sample": "24"
+          },
+          "audio/flac_24bit_192000.flac": {
+            "sample_rate": "192000",
+            "bits_per_raw_sample": "24"
+          }
+        }
+      }
+    },
+    {
+      "id": "flac-5.1",
+      "kind": "generated",
+      "step": "flac",
+      "file": "audio/flac_24bit_96000_5.1.flac",
+      "tests": "Multichannel FLAC 24/96 5.1, every channel its own tone (220, 330 … 770 Hz): channel order, downmix, multichannel USB DACs.",
+      "stories": [
+        "S-508",
+        "SP-02",
+        "S-903"
+      ],
+      "expect": {
+        "streams": [
+          {
+            "codec_type": "audio",
+            "codec_name": "flac",
+            "channels": 6,
+            "sample_rate": "96000",
+            "bits_per_raw_sample": "24"
+          }
+        ]
+      }
+    },
+    {
+      "id": "codecs-music",
+      "kind": "generated",
+      "step": "codecs",
+      "files": [
+        "audio/alac_24bit_48000.m4a",
+        "audio/aac_lc_256k_44100.m4a",
+        "audio/opus_160k_48000.opus",
+        "audio/mp3_320k_lyrics.mp3"
+      ],
+      "tests": "ALAC 24-bit, AAC-LC, Opus and MP3 with ID3 USLT and SYLT lyrics and a cover.",
+      "stories": [
+        "E10",
+        "S-1405"
+      ],
+      "expect": {
+        "per_file": {
+          "audio/alac_24bit_48000.m4a": {
+            "codec_name": "alac",
+            "bits_per_raw_sample": "24"
+          },
+          "audio/aac_lc_256k_44100.m4a": {
+            "codec_name": "aac",
+            "profile": "LC"
+          },
+          "audio/opus_160k_48000.opus": {
+            "codec_name": "opus"
+          },
+          "audio/mp3_320k_lyrics.mp3": {
+            "codec_name": "mp3",
+            "id3": {
+              "USLT": 1,
+              "SYLT": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "surround-passthrough",
+      "kind": "generated",
+      "step": "surround",
+      "files": [
+        "audio/ac3_5.1_640k.mka",
+        "audio/eac3_5.1_768k.mka",
+        "audio/truehd_5.1_48000.mka",
+        "audio/dts_core_5.1_48000.mka"
+      ],
+      "tests": "AC-3, E-AC-3, TrueHD (24-bit) and DTS core in 5.1: passthrough over HDMI to the TV or an AVR, and decoding fallback.",
+      "stories": [
+        "S-508",
+        "S-1406"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "per_file": {
+          "audio/ac3_5.1_640k.mka": {
+            "codec_name": "ac3",
+            "channels": 6
+          },
+          "audio/eac3_5.1_768k.mka": {
+            "codec_name": "eac3",
+            "channels": 6
+          },
+          "audio/truehd_5.1_48000.mka": {
+            "codec_name": "truehd",
+            "channels": 6,
+            "bits_per_raw_sample": "24"
+          },
+          "audio/dts_core_5.1_48000.mka": {
+            "codec_name": "dts",
+            "channels": 6
+          }
+        }
+      }
+    },
+    {
+      "id": "dsd64",
+      "kind": "generated",
+      "step": "dsd",
+      "file": "audio/dsd64_stereo.dsf",
+      "tests": "DSF DSD64 (2.8224 MHz) stereo: 1 kHz left, 440 Hz right at -6 dB from a second-order modulator. DoP and PCM conversion.",
+      "stories": [
+        "S-1405",
+        "SP-02",
+        "S-903"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.1
+        ],
+        "streams": [
+          {
+            "codec_type": "audio",
+            "codec_name": "dsd_lsbf_planar",
+            "channels": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "lyrics",
+      "kind": "generated",
+      "step": "lyrics",
+      "files": [
+        "audio/lyrics/sozlu_test.flac",
+        "audio/lyrics/sozlu_test.lrc"
+      ],
+      "tests": "Synchronised lyrics: FLAC with a LYRICS tag in LRC form and a sidecar .lrc with word timings (enhanced LRC).",
+      "stories": [
+        "E10"
+      ],
+      "expect": {
+        "tags_file": "audio/lyrics/sozlu_test.flac",
+        "tags": {
+          "LYRICS": "[00:01.00]Sabaha kadar yanar ışıklar"
+        },
+        "text": [
+          {
+            "file": "audio/lyrics/sozlu_test.lrc",
+            "encoding": "utf-8",
+            "contains": [
+              "[ar:Nağmedar Test Orkestrası]",
+              "<00:12.50>"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gapless-album",
+      "kind": "generated",
+      "step": "gapless",
+      "files": [
+        "audio/gapless/01 Birinci bölüm.flac",
+        "audio/gapless/02 İkinci bölüm.flac",
+        "audio/gapless/03 Üçüncü bölüm.flac",
+        "audio/gapless/01 Birinci bölüm.mp3",
+        "audio/gapless/01 Birinci bölüm.m4a",
+        "audio/gapless/01 Birinci bölüm.opus",
+        "audio/gapless/boşluksuz.m3u8"
+      ],
+      "tests": "One 30 s phase-continuous glide cut into three tracks at exact samples, in FLAC, MP3 (LAME delay/padding), AAC (edit list) and Opus (pre-skip): any gap or click between tracks is audible.",
+      "stories": [
+        "E10"
+      ],
+      "expect": {
+        "per_file": {
+          "audio/gapless/02 İkinci bölüm.flac": {
+            "codec_name": "flac",
+            "duration": [
+              9.99,
+              10.01
+            ],
+            "tags.track": "2/3"
+          }
+        },
+        "text": [
+          {
+            "file": "audio/gapless/boşluksuz.m3u8",
+            "encoding": "utf-8",
+            "contains": [
+              "#EXTM3U",
+              "03 Üçüncü bölüm.flac"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue-album",
+      "kind": "generated",
+      "step": "cue",
+      "files": [
+        "audio/cue/album.flac",
+        "audio/cue/album.cue",
+        "audio/cue/album.cp1254.cue"
+      ],
+      "tests": "Single-file album with a CUE sheet (three tracks, a pregap on track 2) in UTF-8 with BOM and in Windows-1254.",
+      "stories": [
+        "E10"
+      ],
+      "expect": {
+        "text": [
+          {
+            "file": "audio/cue/album.cue",
+            "encoding": "utf-8-sig",
+            "contains": [
+              "TRACK 03 AUDIO",
+              "Çıkış"
+            ]
+          },
+          {
+            "file": "audio/cue/album.cp1254.cue",
+            "encoding": "cp1254",
+            "contains": [
+              "Çıkış"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "podcast-feed",
+      "kind": "generated",
+      "step": "podcast",
+      "files": [
+        "podcast/feed.xml",
+        "podcast/episode-01.mp3",
+        "podcast/episode-01.chapters.json"
+      ],
+      "tests": "RSS feed with iTunes and Podcasting 2.0 tags, an episode with ID3 chapters (CTOC/CHAP) and a JSON chapters file.",
+      "stories": [
+        "E11"
+      ],
+      "expect": {
+        "xml": "podcast/feed.xml",
+        "json": "podcast/episode-01.chapters.json",
+        "per_file": {
+          "podcast/episode-01.mp3": {
+            "codec_name": "mp3",
+            "id3": {
+              "CHAP": 3,
+              "CTOC": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "radio-playlists",
+      "kind": "generated",
+      "step": "radio",
+      "files": [
+        "radio/stations.m3u8",
+        "radio/station.pls"
+      ],
+      "tests": "Station lists in M3U8 (with logo and group) and PLS.",
+      "stories": [
+        "E11"
+      ],
+      "expect": {
+        "text": [
+          {
+            "file": "radio/stations.m3u8",
+            "encoding": "utf-8",
+            "contains": [
+              "#EXTINF"
+            ]
+          },
+          {
+            "file": "radio/station.pls",
+            "encoding": "utf-8",
+            "contains": [
+              "NumberOfEntries=1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "dv-p5",
+      "kind": "manual",
+      "tests": "Dolby Vision profile 5 (IPTPQc2 base layer, no HDR10 fallback): reshaping, the purple-green tint when it is missing (S-507).",
+      "how": "dovi_tool cannot generate profile 5. Cut one minute from a streaming download you own: mkvmerge -o dv_p5.mkv --split parts:00:10:00-00:11:00 source.mkv",
+      "stories": [
+        "S-507",
+        "SP-03"
+      ]
+    },
+    {
+      "id": "dv-p7-fel",
+      "kind": "manual",
+      "tests": "Dolby Vision profile 7 FEL/MEL from a UHD Blu-ray remux: the P7 to P8.1 conversion (SP-03) and the B4 behaviour.",
+      "how": "Cut one minute from one of your remuxes: mkvmerge -o dv_p7.mkv --split parts:00:20:00-00:21:00 film.mkv. dovi_tool info -s on the extracted RPU tells FEL from MEL.",
+      "stories": [
+        "SP-03",
+        "S-1406"
+      ]
+    },
+    {
+      "id": "dts-hd-ma",
+      "kind": "manual",
+      "tests": "DTS-HD Master Audio and DTS:X: passthrough and core fallback.",
+      "how": "No free encoder exists. Cut a minute from a remux: mkvmerge -o dtshd.mka -D -S --split parts:00:05:00-00:06:00 film.mkv",
+      "stories": [
+        "S-508"
+      ]
+    },
+    {
+      "id": "truehd-atmos",
+      "kind": "manual",
+      "tests": "TrueHD with Atmos: passthrough to the TV/AVR, and the TrueHD 7.1 core when decoded.",
+      "how": "Cut a minute from a remux with an Atmos track (as above).",
+      "stories": [
+        "S-508",
+        "S-1406"
+      ]
+    },
+    {
+      "id": "vobsub",
+      "kind": "manual",
+      "tests": "DVD VobSub (.idx/.sub) subtitles.",
+      "how": "Extract from a DVD rip you own: mkvextract film.mkv tracks 3:subs.idx",
+      "stories": [
+        "E07"
+      ]
+    }
+  ]
+}

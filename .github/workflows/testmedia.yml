@@ -1,0 +1,89 @@
+# S-1401: builds the test media set from testmedia/manifest.json, checks every sample
+# and publishes it as the "nagmedar-test-media" artifact. Runs when testmedia/ changes
+# or by hand; the output is cached until the generator or the manifest changes.
+name: Test medya seti
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'testmedia/**'
+      - '.github/workflows/testmedia.yml'
+  workflow_dispatch:
+    inputs:
+      heavy:
+        description: '4K 100 Mbit/s yük testi örneğini de üret (yaklaşık 190 MB)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  media:
+    name: Test medya seti
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      SKIP_HEAVY: ${{ github.event_name == 'workflow_dispatch' && !inputs.heavy }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Araçlar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg mkvtoolnix python3-numpy python3-pil
+          pip install --quiet --break-system-packages mutagen
+          mkdir -p "$RUNNER_TEMP/bin"
+          gh release download 2.3.4 --repo quietvoid/dovi_tool \
+            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
+          gh release download 1.7.2 --repo quietvoid/hdr10plus_tool \
+            --pattern 'hdr10plus_tool-1.7.2-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          ffmpeg -hide_banner -version | head -1
+          mkvmerge --version
+
+      - name: Önbellek
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: out/testmedia
+          key: testmedia-${{ hashFiles('testmedia/**', 'application/nagmedar-ui/src/main/res/font/*') }}-heavy-${{ env.SKIP_HEAVY != 'true' }}
+
+      - name: Üret
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python3 testmedia/generate.py out/testmedia --work "$RUNNER_TEMP/work" \
+            $([ "$SKIP_HEAVY" = true ] && echo --skip-heavy)
+
+      - name: Doğrula
+        run: |
+          python3 testmedia/verify.py out/testmedia \
+            $([ "$SKIP_HEAVY" = true ] && echo --allow-missing stress-2160p23976-100mbps)
+
+      - name: Özet
+        if: always()
+        run: |
+          if [ -f out/testmedia/index.md ]; then
+            { echo "## Test medya seti"; echo; echo "Boyut: $(du -sh out/testmedia | cut -f1)"; echo; cat out/testmedia/index.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          python3 - <<'PY'
+          import json, os
+          path = 'out/testmedia/index.json'
+          if os.path.exists(path):
+              for s in json.load(open(path))['samples']:
+                  if s.get('problems'):
+                      print('::error title=Test medyası %s::%s' % (s['id'], '; '.join(s['problems'])[:900].replace('\n', ' ')))
+          PY
+
+      - name: Yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nagmedar-test-media
+          path: out/testmedia
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: ignore
