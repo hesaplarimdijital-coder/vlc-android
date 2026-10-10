@@ -131,7 +131,7 @@ class MainActivity : ContentActivity(),
         }
 
         lifecycleScope.launch {
-            if (!BuildConfig.DEBUG) return@launch
+            if (!BuildConfig.DEBUG || !AutoUpdate.ENABLED) return@launch
             AutoUpdate.clean(this@MainActivity.application)
             if (!settings.getBoolean(KEY_SHOW_UPDATE, true)) return@launch
             if (!settings.contains(KEY_SHOW_UPDATE)) {

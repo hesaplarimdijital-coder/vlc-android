@@ -48,6 +48,8 @@ import java.io.BufferedWriter
 import java.io.File
 
 object FeedbackUtil {
+    private const val STORE_LISTINGS_ENABLED = false
+
     /**
      * Send an email with the given parameters
      *
@@ -91,7 +93,7 @@ object FeedbackUtil {
             emailIntent.type = "application/zip"
 
             val htmlBody = HtmlCompat.fromHtml(body, HtmlCompat.FROM_HTML_MODE_LEGACY)
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(supportType.email))
+            if (supportType.email.isNotEmpty()) emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(supportType.email))
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, generateSubject(subject, feedbackType))
             emailIntent.putExtra(Intent.EXTRA_TEXT, htmlBody)
             emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -171,12 +173,21 @@ object FeedbackUtil {
         append("____________________________\r\n")
     }
 
+    /**
+     * Feedback recipients. Nağmedar reports must not go to VideoLAN's support addresses,
+     * so no recipient is preset: the user picks one in their mail app.
+     */
     enum class SupportType(val email: String) {
-        SUPPORT_EMAIL("android-support@videolan.org"),
-        CRASH_REPORT_EMAIL("vlc.crashreport+androidcrash@gmail.com")
+        SUPPORT_EMAIL(""),
+        CRASH_REPORT_EMAIL("")
     }
 
+    /**
+     * Store listing to rate the app, keyed by installer. Nağmedar is distributed as an APK
+     * and has no store listing, so the VLC listings are not offered.
+     */
     fun getInstallSource(context: Context): Pair<String, String>? {
+        if (!STORE_LISTINGS_ENABLED) return null
         val installerInfo: String = try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
             else

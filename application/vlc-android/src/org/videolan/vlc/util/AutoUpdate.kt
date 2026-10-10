@@ -56,6 +56,12 @@ object AutoUpdate {
     private const val TAG = "AutoUpdate"
 
     /**
+     * The updater installs VideoLAN's nightly builds, which are a different app than Nağmedar.
+     * It stays off until Nağmedar has its own update channel.
+     */
+    const val ENABLED = false
+
+    /**
      * Checks if an update is available in the nightlies
      *
      * @param context [Application] used to get the settings
@@ -63,6 +69,7 @@ object AutoUpdate {
      * @param listener Function called when an update is found
      */
     suspend fun checkUpdate(context: Application, skipChecks:Boolean = false, listener: (String, Date) -> Unit) = withContext(Dispatchers.IO) {
+        if (!ENABLED) return@withContext
         //limit to debug builds (nightlies are included)
         if (!BuildConfig.DEBUG && !skipChecks) return@withContext
 
