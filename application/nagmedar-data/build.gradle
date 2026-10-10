@@ -52,5 +52,4 @@ dependencies {
     testImplementation "androidx.test:core:$rootProject.ext.testCore"
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
     testImplementation "androidx.room:room-testing:$rootProject.ext.roomVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"
 }

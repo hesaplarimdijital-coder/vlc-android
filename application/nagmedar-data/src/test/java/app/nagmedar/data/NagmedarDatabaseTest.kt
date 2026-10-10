@@ -35,7 +35,7 @@ class NagmedarDatabaseTest {
     fun close() = db.close()
 
     @Test
-    fun podcastEpisodesFollowTheirFeed() = runBlocking {
+    fun podcastEpisodesFollowTheirFeed() {
         val podcasts = db.podcasts()
         val feedId = podcasts.subscribe(PodcastFeed(feedUrl = "https://example.org/feed.xml", title = "Örnek Podcast"))
         val feed = podcasts.feedByUrl("https://example.org/feed.xml")!!
@@ -60,17 +60,17 @@ class NagmedarDatabaseTest {
         // unsubscribing removes the episodes
         podcasts.unsubscribe(feed)
         assertTrue(podcasts.episodeList(feedId).isEmpty())
-        assertTrue(podcasts.feeds().first().isEmpty())
+        assertTrue(runBlocking { podcasts.feeds().first() }.isEmpty())
     }
 
     @Test
-    fun radioStationsAreSavedOncePerDirectoryEntry() = runBlocking {
+    fun radioStationsAreSavedOncePerDirectoryEntry() {
         val radio = db.radio()
         val id = radio.save(RadioStation(stationUuid = "uuid-1", name = "Radyo", streamUrl = "https://radio.example/a"))
         radio.setFavorite(id, true)
         radio.markPlayed(id, at = 42)
-        assertEquals(listOf("Radyo"), radio.favorites().first().map { it.name })
-        assertEquals(42L, radio.recent(10).first().single().lastPlayedAt)
+        assertEquals(listOf("Radyo"), runBlocking { radio.favorites().first() }.map { it.name })
+        assertEquals(42L, runBlocking { radio.recent(10).first() }.single().lastPlayedAt)
         assertNotNull(radio.byUuid("uuid-1"))
         // stations added by hand have no directory id; several of them may coexist
         radio.save(RadioStation(name = "Elle 1", streamUrl = "https://a"))
@@ -79,7 +79,7 @@ class NagmedarDatabaseTest {
     }
 
     @Test
-    fun lyricsAreKeyedByTrackAndSource() = runBlocking {
+    fun lyricsAreKeyedByTrackAndSource() {
         val lyrics = db.lyrics()
         val key = LyricsKey.of(" Ada Karan ", "Sabaha Kadar", "Gece Mavisi", 241_900)
         assertEquals("ada karan|sabaha kadar|gece mavisi|241", key)
@@ -94,7 +94,7 @@ class NagmedarDatabaseTest {
     }
 
     @Test
-    fun mediaSettingsArePerFile() = runBlocking {
+    fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
         settings.save(MediaSettings(uri, audioDelayMs = -120, subtitleEncoding = "Windows-1254"))
