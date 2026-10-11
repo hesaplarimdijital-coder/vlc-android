@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,11 +38,8 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.SwatchChoice
-import app.nagmedar.ui.input.ShortcutGroup
-import app.nagmedar.ui.input.ShortcutRegistry
-import app.nagmedar.ui.input.ShortcutScope
+import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.lab.LabSection
-import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
@@ -64,6 +60,8 @@ fun SettingsScreen(
     onOpenLicences: () -> Unit,
     onShowFirstRun: () -> Unit,
     listState: LazyListState = rememberLazyListState(),
+    /** Takes back a reset, a preset or an import of the shortcuts (S-402). */
+    undo: UndoBarState? = null,
 ) {
     val dimens = NagTheme.dimens
     LazyColumn(
@@ -90,7 +88,7 @@ fun SettingsScreen(
                 Text(stringResource(R.string.nag_density_auto), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
             }
         }
-        item { ShortcutsSection() }
+        item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {
@@ -183,37 +181,6 @@ private fun MediaSessionSwitch() {
                 vlcSettings.edit().putBoolean(NAGMEDAR_MEDIA3_SESSION, enabled).apply()
             },
         )
-    }
-}
-
-@Composable
-private fun ShortcutsSection() {
-    val colors = NagTheme.colors
-    val resources = LocalContext.current.resources
-    SettingsSection(stringResource(R.string.nag_settings_shortcuts)) {
-        ShortcutGroup.entries.forEach { group ->
-            val shortcuts = ShortcutRegistry.defaults.filter { it.group == group }
-            if (shortcuts.isEmpty()) return@forEach
-            Text(
-                stringResource(group.title),
-                style = NagTheme.type.label,
-                color = colors.textSecondary,
-                modifier = Modifier.padding(top = NagTheme.dimens.gapM, bottom = 4.dp),
-            )
-            shortcuts.forEach { shortcut ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(stringResource(shortcut.label), style = NagTheme.type.body, color = colors.text, modifier = Modifier.weight(1f))
-                    if (shortcut.scope == ShortcutScope.Player) {
-                        Text(stringResource(R.string.nag_shortcuts_player_only), style = NagTheme.type.caption, color = colors.textTertiary,
-                            modifier = Modifier.padding(end = 8.dp))
-                    }
-                    KeyCap(shortcut.chord.label(resources))
-                }
-            }
-        }
     }
 }
 

@@ -66,6 +66,8 @@ class NagmedarActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // the shortcut editor is recording keys (S-402)
+        if (ShortcutRegistry.recording) return super.dispatchKeyEvent(event)
         val down = event.action == KeyEvent.ACTION_DOWN
         if (menuBarKey.onKey(event.keyCode, down) && actions?.toggleMenuBar() == true) return true
         val rtl = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
@@ -84,10 +86,16 @@ class NagmedarActivity : ComponentActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
-        if (shortcut != null && !shortcut.chord.hasModifier && actions?.perform(shortcut.id) == true) return true
+        // the plain arrows move the focus in the shell; bound to a shortcut (mpv's seek) they act in the player
+        if (!ShortcutRegistry.recording && !(isArrow(keyCode) && !event.hasModifiers())) {
+            val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
+            if (shortcut != null && shortcut.chord?.hasModifier != true && actions?.perform(shortcut.id) == true) return true
+        }
         return super.onKeyDown(keyCode, event)
     }
+
+    private fun isArrow(keyCode: Int) = keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
+        keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onProvideKeyboardShortcuts(data: MutableList<KeyboardShortcutGroup>, menu: Menu?, deviceId: Int) {

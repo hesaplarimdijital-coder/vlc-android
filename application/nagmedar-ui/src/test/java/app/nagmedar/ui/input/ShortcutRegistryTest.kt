@@ -17,7 +17,7 @@ class ShortcutRegistryTest {
     @Test
     fun noChordIsBoundTwice() {
         val conflicts = ShortcutRegistry.conflicts()
-        assertTrue(conflicts.joinToString { (a, b) -> "${a.id}/${b.id}: ${a.chord.label()}" }, conflicts.isEmpty())
+        assertTrue(conflicts.joinToString { (a, b) -> "${a.id}/${b.id}: ${a.chord?.label()}" }, conflicts.isEmpty())
     }
 
     @Test

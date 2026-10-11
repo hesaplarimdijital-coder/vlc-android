@@ -194,6 +194,7 @@ private fun NagmedarMain(
                             onOpenLicences = { context.startActivity(Intent(context, LibrariesActivity::class.java)) },
                             onShowFirstRun = { prefs.updateFirstRunDone(false) },
                             listState = settingsList,
+                            undo = undo,
                         )
                         Destination.More -> MoreScreen(
                             destinations = Destination.overflow(

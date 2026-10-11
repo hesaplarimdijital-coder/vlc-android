@@ -7,6 +7,9 @@ import android.view.KeyboardShortcutInfo
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.isAltPressed
@@ -105,14 +108,16 @@ data class Shortcut(
     val id: ShortcutId,
     val group: ShortcutGroup,
     @StringRes val label: Int,
-    val chord: KeyChord,
+    /** The keys; null when the user took them away (S-402). */
+    val chord: KeyChord?,
     val scope: ShortcutScope = ShortcutScope.Global,
 )
 
 /**
  * Single source of keyboard shortcuts (S-401, ADR-04). Defaults follow VLC desktop, plus the
- * Nağmedar additions of the mockups (Ctrl+K command palette, Ctrl+, settings). Menus, tooltips,
- * the Meta+/ system list and the settings screen all read this table.
+ * Nağmedar additions of the mockups (Ctrl+K command palette, Ctrl+, settings); the user's keys
+ * (S-402) lie over them. Menus, tooltips, the Meta+/ system list and the settings screen all read
+ * this table.
  */
 object ShortcutRegistry {
 
@@ -169,17 +174,41 @@ object ShortcutRegistry {
 
     private val byId = defaults.associateBy { it.id }
 
-    operator fun get(id: ShortcutId): Shortcut = byId.getValue(id)
+    /**
+     * The user's keys over [defaults] (S-402): a chord, or null for none. Compose state, so menus,
+     * tooltips, the palette and the shortcut list follow a change at once.
+     */
+    var overrides: Map<ShortcutId, KeyChord?> by mutableStateOf(emptyMap())
 
-    fun chordLabel(id: ShortcutId, resources: Resources? = null): String = get(id).chord.label(resources)
+    /** While the shortcut editor records keys, they are not shortcuts. */
+    @Volatile
+    var recording: Boolean = false
+
+    /** The table in use: [defaults] with [overrides]. */
+    val shortcuts: List<Shortcut>
+        get() {
+            val user = overrides
+            return if (user.isEmpty()) defaults else defaults.map { if (it.id in user) it.copy(chord = user[it.id]) else it }
+        }
+
+    operator fun get(id: ShortcutId): Shortcut {
+        val user = overrides
+        val shortcut = byId.getValue(id)
+        return if (id in user) shortcut.copy(chord = user[id]) else shortcut
+    }
+
+    /** The shipped shortcut of [id], whatever the user changed. */
+    fun default(id: ShortcutId): Shortcut = byId.getValue(id)
+
+    fun chordLabel(id: ShortcutId, resources: Resources? = null): String? = get(id).chord?.label(resources)
 
     /** Shortcut for [event] among those active in [scopes]; null when the key is not bound. */
     fun match(event: KeyEvent, scopes: Set<ShortcutScope> = setOf(ShortcutScope.Global)): Shortcut? =
-        defaults.firstOrNull { it.scope in scopes && it.chord.matches(event) }
+        shortcuts.firstOrNull { it.scope in scopes && it.chord?.matches(event) == true }
 
-    /** Pairs of shortcuts bound to the same chord; must stay empty (ShortcutRegistryTest). */
-    fun conflicts(shortcuts: List<Shortcut> = defaults): List<Pair<Shortcut, Shortcut>> =
-        shortcuts.groupBy { it.chord }.values.filter { it.size > 1 }.flatMap { group ->
+    /** Pairs of shortcuts bound to the same chord; the shipped table has none (ShortcutRegistryTest). */
+    fun conflicts(shortcuts: List<Shortcut> = this.shortcuts): List<Pair<Shortcut, Shortcut>> =
+        shortcuts.filter { it.chord != null }.groupBy { it.chord }.values.filter { it.size > 1 }.flatMap { group ->
             group.indices.flatMap { i -> (i + 1 until group.size).map { j -> group[i] to group[j] } }
         }
 
@@ -187,8 +216,9 @@ object ShortcutRegistry {
     @RequiresApi(24)
     fun keyboardShortcutGroups(resources: Resources): List<KeyboardShortcutGroup> =
         ShortcutGroup.entries.mapNotNull { group ->
-            val items = defaults.filter { it.group == group }.map { shortcut ->
-                KeyboardShortcutInfo(resources.getString(shortcut.label), shortcut.chord.key.nativeKeyCode, shortcut.chord.androidModifiers)
+            val items = shortcuts.filter { it.group == group }.mapNotNull { shortcut ->
+                val chord = shortcut.chord ?: return@mapNotNull null
+                KeyboardShortcutInfo(resources.getString(shortcut.label), chord.key.nativeKeyCode, chord.androidModifiers)
             }
             if (items.isEmpty()) null else KeyboardShortcutGroup(resources.getString(group.title), items)
         }

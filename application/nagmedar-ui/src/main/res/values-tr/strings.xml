@@ -238,6 +238,47 @@
     <string name="nag_sc_shortcut_list">Klavye kısayolları</string>
     <string name="nag_settings_shortcuts">Klavye kısayolları</string>
     <string name="nag_shortcuts_player_only">Oynatıcıda</string>
+    <!-- Kısayol düzenleyici (S-402) -->
+    <string name="nag_sc_preset">Ön ayar</string>
+    <string name="nag_sc_preset_vlc">VLC</string>
+    <string name="nag_sc_preset_mpv">mpv</string>
+    <string name="nag_sc_preset_hint">Seçmek tüm tuşları değiştirir; geri alınabilir</string>
+    <string name="nag_sc_custom">Kendi düzeniniz; bir ön ayar seçmek tüm tuşları değiştirir</string>
+    <string name="nag_sc_preset_done">%s ön ayarı uygulandı</string>
+    <string name="nag_sc_export">Dışa aktar…</string>
+    <string name="nag_sc_import">İçe aktar…</string>
+    <string name="nag_sc_reset_all">Tümünü sıfırla</string>
+    <string name="nag_sc_reset_done">Kısayollar varsayılana döndü</string>
+    <string name="nag_sc_exported">Kısayollar dışa aktarıldı</string>
+    <string name="nag_sc_export_failed">Dosya yazılamadı</string>
+    <string name="nag_sc_import_failed">Bu dosya bir Nağmedar kısayol dosyası değil</string>
+    <plurals name="nag_sc_imported">
+        <item quantity="one">%d kısayol içe aktarıldı</item>
+        <item quantity="other">%d kısayol içe aktarıldı</item>
+    </plurals>
+    <plurals name="nag_sc_import_skipped">
+        <item quantity="one">%d satır atlandı</item>
+        <item quantity="other">%d satır atlandı</item>
+    </plurals>
+    <plurals name="nag_sc_conflicts">
+        <item quantity="one">%d çakışma: aynı tuşlar iki kısayolda</item>
+        <item quantity="other">%d çakışma: aynı tuşlar iki kısayolda</item>
+    </plurals>
+    <string name="nag_sc_conflict_pair">%1$s: “%2$s” ve “%3$s”</string>
+    <string name="nag_sc_conflict">%1$s şu an “%2$s” kısayolunda. Atarsanız “%2$s” tuşsuz kalır.</string>
+    <string name="nag_sc_assign_anyway">Yine de ata</string>
+    <string name="nag_sc_cancel">Vazgeç</string>
+    <string name="nag_sc_close">Tamam</string>
+    <string name="nag_sc_default">Varsayılan: %s</string>
+    <string name="nag_sc_none">Tuş yok</string>
+    <string name="nag_sc_press">Tuşlara basın…</string>
+    <string name="nag_sc_press_hint">Yeni tuşlara basın · Esc vazgeçer · Backspace tuşu kaldırır</string>
+    <string name="nag_sc_change_label">%s: tuşu değiştir</string>
+    <string name="nag_sc_restore_label">%s: varsayılana döndür</string>
+    <string name="nag_sc_remove_label">%s: tuşu kaldır</string>
+    <string name="nag_sc_reserved_system">Bu tuşlar sistemin; kısayol olamaz.</string>
+    <string name="nag_sc_reserved_menu">F10 menü çubuğunu açar; kısayol olamaz.</string>
+    <string name="nag_sc_reserved_navigation">Tab, Enter ve Esc pencerede gezinmek içindir; tek başlarına kısayol olamaz.</string>
     <string name="nag_more_actions">Diğer işlemler</string>
     <string name="nag_play_next">Sonra çal</string>
     <string name="nag_add_to_queue">Oynatma sırasına ekle</string>

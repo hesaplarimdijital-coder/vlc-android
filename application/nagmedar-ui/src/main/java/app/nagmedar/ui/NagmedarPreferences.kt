@@ -8,6 +8,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.ui.input.KeyChord
+import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.ShortcutOverrides
+import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
@@ -44,6 +48,14 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     /** S-305: what was run from the command palette, the latest first. */
     var recentCommands by mutableStateOf(prefs.getString(KEY_PALETTE_RECENT, null)?.split('\n')?.filter { it.isNotEmpty() }.orEmpty())
         private set
+
+    /** S-402: the user's keys over the shipped shortcuts; the shortcut table follows them. */
+    var shortcutOverrides by mutableStateOf(ShortcutOverrides.parse(prefs.getString(KEY_SHORTCUTS, null)))
+        private set
+
+    init {
+        ShortcutRegistry.overrides = shortcutOverrides
+    }
 
     /** S-309: tree URIs of the folders chosen with the system picker. */
     var safFolders by mutableStateOf(prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty())
@@ -89,6 +101,12 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         prefs.edit().putStringSet(NAGMEDAR_SAF_FOLDERS, HashSet(safFolders)).apply()
     }
 
+    fun updateShortcutOverrides(value: Map<ShortcutId, KeyChord?>) {
+        shortcutOverrides = value
+        ShortcutRegistry.overrides = value
+        prefs.edit().putString(KEY_SHORTCUTS, ShortcutOverrides.format(value)).apply()
+    }
+
     fun rememberCommand(id: String) {
         recentCommands = (listOf(id) + recentCommands.filter { it != id }).take(RECENT_COMMANDS)
         prefs.edit().putString(KEY_PALETTE_RECENT, recentCommands.joinToString("\n")).apply()
@@ -108,6 +126,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         const val KEY_SIDEBAR_COLLAPSED = "nagmedar_sidebar_collapsed"
         const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
         const val KEY_PALETTE_RECENT = "nagmedar_palette_recent"
+        const val KEY_SHORTCUTS = "nagmedar_shortcuts"
         const val RECENT_COMMANDS = 8
     }
 }

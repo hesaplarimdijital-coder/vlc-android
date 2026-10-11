@@ -66,7 +66,7 @@ class MenuBarTest {
             val shortcuts = ShortcutRegistry.defaults.filter { it.group == group }
             val items = spec.entries().filterIsInstance<MenuEntry.Item>()
             assertEquals(shortcuts.map { res.getString(it.label) }, items.map { it.label })
-            assertEquals(shortcuts.map { it.chord.label(res) }, items.map { it.shortcut })
+            assertEquals(shortcuts.map { it.chord?.label(res) }, items.map { it.shortcut })
             assertTrue(group.name, items.isNotEmpty())
         }
         specs[1].entries().filterIsInstance<MenuEntry.Item>().first().onClick()

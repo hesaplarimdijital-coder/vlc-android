@@ -17,11 +17,11 @@ fun menuBarSpecs(
     extras: (ShortcutGroup) -> List<MenuEntry> = { emptyList() },
 ): List<MenuSpec> = ShortcutGroup.entries.map { group ->
     MenuSpec(res.getString(group.title)) {
-        ShortcutRegistry.defaults.filter { it.group == group }.map { shortcut ->
+        ShortcutRegistry.shortcuts.filter { it.group == group }.map { shortcut ->
             MenuEntry.Item(
                 label = res.getString(shortcut.label),
                 onClick = { perform(shortcut.id) },
-                shortcut = shortcut.chord.label(res),
+                shortcut = shortcut.chord?.label(res),
                 enabled = available(shortcut.id),
             )
         } + extras(group)

@@ -238,6 +238,47 @@
     <string name="nag_sc_shortcut_list">Keyboard shortcuts</string>
     <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
     <string name="nag_shortcuts_player_only">In the player</string>
+    <!-- Shortcut editor (S-402) -->
+    <string name="nag_sc_preset">Preset</string>
+    <string name="nag_sc_preset_vlc">VLC</string>
+    <string name="nag_sc_preset_mpv">mpv</string>
+    <string name="nag_sc_preset_hint">Choosing one changes every key; it can be undone</string>
+    <string name="nag_sc_custom">Your own layout; choosing a preset changes every key</string>
+    <string name="nag_sc_preset_done">%s preset applied</string>
+    <string name="nag_sc_export">Export…</string>
+    <string name="nag_sc_import">Import…</string>
+    <string name="nag_sc_reset_all">Reset all</string>
+    <string name="nag_sc_reset_done">Shortcuts back to their defaults</string>
+    <string name="nag_sc_exported">Shortcuts exported</string>
+    <string name="nag_sc_export_failed">The file could not be written</string>
+    <string name="nag_sc_import_failed">This is not a Nağmedar shortcut file</string>
+    <plurals name="nag_sc_imported">
+        <item quantity="one">%d shortcut imported</item>
+        <item quantity="other">%d shortcuts imported</item>
+    </plurals>
+    <plurals name="nag_sc_import_skipped">
+        <item quantity="one">%d line skipped</item>
+        <item quantity="other">%d lines skipped</item>
+    </plurals>
+    <plurals name="nag_sc_conflicts">
+        <item quantity="one">%d conflict: the same keys on two shortcuts</item>
+        <item quantity="other">%d conflicts: the same keys on two shortcuts</item>
+    </plurals>
+    <string name="nag_sc_conflict_pair">%1$s: “%2$s” and “%3$s”</string>
+    <string name="nag_sc_conflict">%1$s now belongs to “%2$s”. Assigning it leaves “%2$s” without keys.</string>
+    <string name="nag_sc_assign_anyway">Assign anyway</string>
+    <string name="nag_sc_cancel">Cancel</string>
+    <string name="nag_sc_close">OK</string>
+    <string name="nag_sc_default">Default: %s</string>
+    <string name="nag_sc_none">No keys</string>
+    <string name="nag_sc_press">Press keys…</string>
+    <string name="nag_sc_press_hint">Press the new keys · Esc cancels · Backspace removes the keys</string>
+    <string name="nag_sc_change_label">%s: change the keys</string>
+    <string name="nag_sc_restore_label">%s: back to the default</string>
+    <string name="nag_sc_remove_label">%s: remove the keys</string>
+    <string name="nag_sc_reserved_system">These keys belong to the system; they cannot be a shortcut.</string>
+    <string name="nag_sc_reserved_menu">F10 opens the menu bar; it cannot be a shortcut.</string>
+    <string name="nag_sc_reserved_navigation">Tab, Enter and Esc move around the window; alone they cannot be a shortcut.</string>
     <string name="nag_more_actions">More actions</string>
     <string name="nag_play_next">Play next</string>
     <string name="nag_add_to_queue">Add to play queue</string>

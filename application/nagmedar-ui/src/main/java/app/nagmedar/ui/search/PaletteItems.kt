@@ -22,13 +22,13 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
 /** The shortcuts [available] now, with their menu and keys; the palette's own shortcut is left out. */
 fun commandItems(res: Resources, available: (ShortcutId) -> Boolean, perform: (ShortcutId) -> Unit): List<PaletteItem> =
-    ShortcutRegistry.defaults.filter { it.id != ShortcutId.CommandPalette && available(it.id) }.map { shortcut ->
+    ShortcutRegistry.shortcuts.filter { it.id != ShortcutId.CommandPalette && available(it.id) }.map { shortcut ->
         PaletteItem(
             id = "command:${shortcut.id.name}",
             kind = PaletteKind.Command,
             label = res.getString(shortcut.label),
             detail = res.getString(shortcut.group.title),
-            shortcut = shortcut.chord.label(res),
+            shortcut = shortcut.chord?.label(res),
             icon = groupIcon(shortcut.group),
             run = { perform(shortcut.id) },
         )
