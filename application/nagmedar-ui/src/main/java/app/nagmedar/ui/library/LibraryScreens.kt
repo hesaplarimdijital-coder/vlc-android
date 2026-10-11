@@ -553,7 +553,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                 sort = sort,
                 onSortChange = { sort = it },
                 onRowClick = { _, index -> PlaybackActions.playList(context, sorted, index) },
-                rowMenu = { media, index -> mediaMenu(context, media) { PlaybackActions.playList(context, sorted, index) } },
+                rowMenu = { media, index -> mediaMenu(context, media, play = { PlaybackActions.playList(context, sorted, index) }) },
                 rowMenuLabel = stringResource(R.string.nag_more_actions),
             )
         }
