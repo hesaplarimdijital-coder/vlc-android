@@ -62,18 +62,37 @@
     <!-- Library -->
     <string name="nag_home_continue">Continue watching</string>
     <string name="nag_home_recent_music">Recently played music</string>
-    <string name="nag_home_empty">Nothing played yet. Your videos and music appear here once the library has scanned your folders.</string>
+    <string name="nag_home_nothing_title">Nothing played yet</string>
+    <string name="nag_home_nothing_desc">What you watch and listen to appears here, to carry on where you left off.</string>
+    <string name="nag_home_browse_movies">Browse movies</string>
+    <string name="nag_home_browse_music">Browse music</string>
     <string name="nag_videos_count">%1$d videos</string>
     <string name="nag_tracks_count">%1$d tracks</string>
     <string name="nag_library_loading">Loading the library…</string>
-    <string name="nag_library_empty_video">No videos yet. Add folders in the classic interface under Settings → Media library folders.</string>
-    <string name="nag_library_empty_music">No music yet. Add folders in the classic interface under Settings → Media library folders.</string>
     <string name="nag_unknown_artist">Unknown artist</string>
     <string name="nag_column_title">Title</string>
     <string name="nag_column_duration">Duration</string>
     <string name="nag_column_resolution">Resolution</string>
     <string name="nag_column_artist">Artist</string>
     <string name="nag_column_album">Album</string>
+
+    <!-- States (S-308) -->
+    <string name="nag_state_empty_title">No folders yet</string>
+    <string name="nag_state_empty_desc">Choose your film and music folders, or scan a connected drive.</string>
+    <string name="nag_state_add_folder">Add folder</string>
+    <string name="nag_state_scan_drive">Scan %1$s</string>
+    <string name="nag_state_scanning">Scanning the library</string>
+    <string name="nag_state_discovering">Looking for media folders</string>
+    <string name="nag_state_scan_detail">Keeps going in the background · what is found plays right away</string>
+    <string name="nag_state_no_videos_title">No videos yet</string>
+    <string name="nag_state_no_videos_desc">Videos in your library folders appear here as they are scanned.</string>
+    <string name="nag_state_no_music_title">No music yet</string>
+    <string name="nag_state_no_music_desc">Music in your library folders appears here as it is scanned.</string>
+    <string name="nag_state_permission_title">Access to media files</string>
+    <string name="nag_state_permission_desc">Scanning happens on this device only; no file is uploaded.</string>
+    <string name="nag_state_grant">Allow</string>
+    <string name="nag_state_folder_only">Choose a folder only</string>
+    <string name="nag_state_progress">%1$s / %2$s</string>
 
     <!-- Player -->
     <string name="nag_now_playing">Now playing</string>
@@ -114,6 +133,7 @@
     <string name="nag_sc_open_network">Open network stream…</string>
     <string name="nag_sc_new_window">Open in new window</string>
     <string name="nag_sc_media_info">Media information</string>
+    <string name="nag_sc_undo">Undo</string>
     <string name="nag_sc_play_pause">Play / pause</string>
     <string name="nag_sc_stop">Stop</string>
     <string name="nag_sc_previous">Previous</string>

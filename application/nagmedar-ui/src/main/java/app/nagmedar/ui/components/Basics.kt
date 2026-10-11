@@ -62,7 +62,10 @@ fun NagIconButton(
     }
 }
 
-/** Text button. [primary] fills it with the accent colour. */
+/**
+ * Text button. [primary] fills it with the accent colour, or with [fill] and [onFill] when a
+ * state asks for its own (the success state's green button).
+ */
 @Composable
 fun NagButton(
     text: String,
@@ -71,20 +74,24 @@ fun NagButton(
     icon: ImageVector? = null,
     primary: Boolean = false,
     enabled: Boolean = true,
+    fill: Color? = null,
+    onFill: Color? = null,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    val primaryFill = fill ?: colors.accent
+    val primaryContent = onFill ?: colors.onAccent
     val background = when {
-        // the accent moves toward its text colour: darker on the dark themes, lighter on the light one
-        primary && state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
-        primary && state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
-        primary -> colors.accent
+        // the fill moves toward its text colour: darker on the dark themes, lighter on the light one
+        primary && state.pressed -> lerp(primaryFill, primaryContent, 0.24f)
+        primary && state.hovered -> lerp(primaryFill, primaryContent, 0.12f)
+        primary -> primaryFill
         else -> stateBackground(state, rest = colors.surfaceRaised)
     }
-    val content = if (primary) colors.onAccent else colors.text
+    val content = if (primary) primaryContent else colors.text
     Row(
         modifier = modifier
             .defaultMinSize(minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))

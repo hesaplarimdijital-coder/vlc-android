@@ -2,6 +2,10 @@ package app.nagmedar.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.components.alertBackground
+import app.nagmedar.ui.components.successOnFill
+import app.nagmedar.ui.components.tone
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -48,6 +52,28 @@ class PaletteContrastTest {
             check(failures, name, "on selection", c.onSelection, c.selection)
             check(failures, name, "tertiary on selection", c.textTertiary, c.selection)
             check(failures, name, "danger on raised", c.danger, c.surfaceRaised)
+        }
+        assertTrue(failures.joinToString("\n"), failures.isEmpty())
+    }
+
+    /** S-308: badges, icon tiles, alerts, the success button and the undo bar. */
+    @Test
+    fun stateTones() {
+        val failures = mutableListOf<String>()
+        for ((name, c) in palettes()) {
+            for (tone in StateTone.entries) {
+                val t = c.tone(tone)
+                check(failures, name, "$tone content on its container", t.content, t.container)
+                check(failures, name, "$tone content on surface", t.content, c.surface)
+                check(failures, name, "$tone content on background", t.content, c.background)
+                check(failures, name, "$tone content on its alert", t.content, c.alertBackground(tone))
+                check(failures, name, "secondary on $tone alert", c.textSecondary, c.alertBackground(tone))
+                // icons are graphics: 3:1 (WCAG 1.4.11)
+                check(failures, name, "$tone icon on its tile", t.icon, t.iconContainer, minimum = 3.0)
+            }
+            check(failures, name, "text on success fill", successOnFill(c), c.success)
+            check(failures, name, "undo bar text", c.onInverseSurface, c.inverseSurface)
+            check(failures, name, "undo bar action", c.inverseAccent, c.inverseSurface)
         }
         assertTrue(failures.joinToString("\n"), failures.isEmpty())
     }

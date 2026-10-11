@@ -4,6 +4,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
@@ -47,7 +49,8 @@ class ShellNavigator(private val navController: NavHostController) {
 /**
  * The adaptive shell (S-301): bottom bar on compact windows, a rail on medium and expanded
  * windows, a menu bar with a collapsible sidebar on large and extra-large windows. The
- * navigation graph lives in the content slot of [ShellLayout] and survives width changes.
+ * navigation graph lives in the content slot of [ShellLayout] and survives width changes;
+ * [overlay] is drawn over the current screen (undo bars).
  */
 @Composable
 fun NagmedarShell(
@@ -61,6 +64,7 @@ fun NagmedarShell(
     screen: @Composable (Destination, ShellNavigator) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    overlay: @Composable BoxScope.() -> Unit = {},
 ) {
     val navigator = remember(navController) { ShellNavigator(navController) }
     val entry by navController.currentBackStackEntryAsState()
@@ -97,19 +101,24 @@ fun NagmedarShell(
         },
         player = { player(navKind) },
         content = {
-            CompositionLocalProvider(LocalNavKind provides navKind) {
-            NavHost(
-                navController = navController,
-                startDestination = Destination.Home.route,
-                enterTransition = { fadeIn(animationSpec = tween(120)) },
-                exitTransition = { fadeOut(animationSpec = tween(90)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(120)) },
-                popExitTransition = { fadeOut(animationSpec = tween(90)) },
-            ) {
-                Destination.entries.forEach { destination ->
-                    composable(destination.route) { currentScreen(destination, navigator) }
+            Box(Modifier.fillMaxSize()) {
+                CompositionLocalProvider(LocalNavKind provides navKind) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = Destination.Home.route,
+                        modifier = Modifier.fillMaxSize(),
+                        enterTransition = { fadeIn(animationSpec = tween(120)) },
+                        exitTransition = { fadeOut(animationSpec = tween(90)) },
+                        popEnterTransition = { fadeIn(animationSpec = tween(120)) },
+                        popExitTransition = { fadeOut(animationSpec = tween(90)) },
+                    ) {
+                        Destination.entries.forEach { destination ->
+                            composable(destination.route) { currentScreen(destination, navigator) }
+                        }
+                    }
                 }
-            }
+                // undo bars and other messages float over the screen, above the player bar
+                overlay()
             }
         },
     )

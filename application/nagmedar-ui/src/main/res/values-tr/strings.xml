@@ -62,18 +62,37 @@
     <!-- Kütüphane -->
     <string name="nag_home_continue">İzlemeye devam et</string>
     <string name="nag_home_recent_music">Son çalınan müzik</string>
-    <string name="nag_home_empty">Henüz bir şey oynatılmadı. Kütüphane klasörlerinizi taradıktan sonra videolarınız ve müziğiniz burada görünür.</string>
+    <string name="nag_home_nothing_title">Henüz bir şey oynatılmadı</string>
+    <string name="nag_home_nothing_desc">İzlediğiniz ve dinlediğiniz şeyler, kaldığınız yerden sürdürmek için burada görünür.</string>
+    <string name="nag_home_browse_movies">Filmlere göz at</string>
+    <string name="nag_home_browse_music">Müziğe göz at</string>
     <string name="nag_videos_count">%1$d video</string>
     <string name="nag_tracks_count">%1$d parça</string>
     <string name="nag_library_loading">Kütüphane yükleniyor…</string>
-    <string name="nag_library_empty_video">Henüz video yok. Klasik arayüzde Ayarlar → Medya kütüphanesi klasörleri bölümünden klasör ekleyin.</string>
-    <string name="nag_library_empty_music">Henüz müzik yok. Klasik arayüzde Ayarlar → Medya kütüphanesi klasörleri bölümünden klasör ekleyin.</string>
     <string name="nag_unknown_artist">Bilinmeyen sanatçı</string>
     <string name="nag_column_title">Ad</string>
     <string name="nag_column_duration">Süre</string>
     <string name="nag_column_resolution">Çözünürlük</string>
     <string name="nag_column_artist">Sanatçı</string>
     <string name="nag_column_album">Albüm</string>
+
+    <!-- Durumlar (S-308) -->
+    <string name="nag_state_empty_title">Henüz klasör eklenmedi</string>
+    <string name="nag_state_empty_desc">Film ve müzik klasörlerinizi seçin ya da bağlı diski tarayın.</string>
+    <string name="nag_state_add_folder">Klasör ekle</string>
+    <string name="nag_state_scan_drive">%1$s diskini tara</string>
+    <string name="nag_state_scanning">Kütüphane taranıyor</string>
+    <string name="nag_state_discovering">Medya klasörleri aranıyor</string>
+    <string name="nag_state_scan_detail">Arka planda sürer · bulunanlar hemen oynatılabilir</string>
+    <string name="nag_state_no_videos_title">Henüz video yok</string>
+    <string name="nag_state_no_videos_desc">Kütüphane klasörlerinizdeki videolar tarandıkça burada görünür.</string>
+    <string name="nag_state_no_music_title">Henüz müzik yok</string>
+    <string name="nag_state_no_music_desc">Kütüphane klasörlerinizdeki müzik tarandıkça burada görünür.</string>
+    <string name="nag_state_permission_title">Medya dosyalarına erişim</string>
+    <string name="nag_state_permission_desc">Tarama yalnızca cihazda yapılır; hiçbir dosya yüklenmez.</string>
+    <string name="nag_state_grant">İzin ver</string>
+    <string name="nag_state_folder_only">Yalnızca klasör seç</string>
+    <string name="nag_state_progress">%1$s / %2$s</string>
 
     <!-- Oynatıcı -->
     <string name="nag_now_playing">Şimdi çalıyor</string>
@@ -114,6 +133,7 @@
     <string name="nag_sc_open_network">Ağ akışı aç…</string>
     <string name="nag_sc_new_window">Yeni pencerede aç</string>
     <string name="nag_sc_media_info">Medya bilgisi</string>
+    <string name="nag_sc_undo">Geri al</string>
     <string name="nag_sc_play_pause">Oynat / duraklat</string>
     <string name="nag_sc_stop">Durdur</string>
     <string name="nag_sc_previous">Önceki</string>

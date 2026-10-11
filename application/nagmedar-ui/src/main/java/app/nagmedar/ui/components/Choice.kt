@@ -2,6 +2,7 @@ package app.nagmedar.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -117,5 +119,49 @@ fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? =
         }
         Spacer(Modifier.width(dimens.gapL))
         control()
+    }
+}
+
+/** On/off switch with its label; the whole row toggles it (the states' "Resume automatically"). */
+@Composable
+fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val shape = RoundedCornerShape(dimens.radiusControl)
+    Row(
+        modifier = modifier
+            .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
+            .focusRing(state, shape)
+            .background(stateBackground(state), shape)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interaction, enabled)
+            .toggleable(
+                value = checked,
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            )
+            .padding(horizontal = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(width = 38.dp, height = 24.dp)
+                .background(if (checked) colors.accent else colors.borderStrong, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Box(
+                Modifier
+                    .padding(start = if (checked) 18.dp else 4.dp)
+                    .size(16.dp)
+                    .background(if (checked) colors.onAccent else colors.textSecondary, CircleShape),
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(label, style = NagTheme.type.body, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
     }
 }

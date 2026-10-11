@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,6 +25,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
@@ -49,6 +48,9 @@ import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.StateAction
+import app.nagmedar.ui.components.StatePanel
+import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.components.collectState
@@ -61,12 +63,14 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.TAG_ITEM
 import org.videolan.vlc.gui.InfoActivity
 import org.videolan.vlc.media.MediaUtils
+import kotlinx.coroutines.delay
 
 private enum class ViewMode { Grid, Table }
 
@@ -89,40 +93,76 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit): List<Men
 
 // ---------------------------------------------------------------- Home
 
+/** While the medialibrary scans, the screens reload this often so new media appear. */
+private const val RELOAD_WHILE_SCANNING_MS = 4_000L
+
+/** Loads with [load] now and, while a scan runs, again every few seconds. */
+private suspend fun <T> ProduceStateScope<T?>.loadWhileScanning(scanning: Boolean, load: suspend () -> T) {
+    while (true) {
+        value = load()
+        if (!scanning) break
+        delay(RELOAD_WHILE_SCANNING_MS)
+    }
+}
+
+private class HomeContent(val videos: List<MediaWrapper>, val tracks: List<MediaWrapper>, val libraryEmpty: Boolean)
+
 @Composable
-fun HomeScreen(repository: MediaRepository) {
+fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (Destination) -> Unit) {
     val context = LocalContext.current
     val dimens = NagTheme.dimens
-    val videos by produceState<List<MediaWrapper>?>(null) { value = repository.recentVideos() }
-    val tracks by produceState<List<MediaWrapper>?>(null) { value = repository.recentAudio() }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = dimens.gapXl)) {
-        item { PageHeader(title = stringResource(R.string.nag_nav_home)) }
-        val loadedVideos = videos
-        val loadedTracks = tracks
-        if (loadedVideos == null || loadedTracks == null) {
-            item { CenteredMessage(stringResource(R.string.nag_library_loading)) }
-            return@LazyColumn
+    val scan = rememberScanState()
+    val home by produceState<HomeContent?>(null, scan.active) {
+        loadWhileScanning(scan.active) {
+            val counts = repository.counts()
+            HomeContent(repository.recentVideos(), repository.recentAudio(), counts.videos + counts.tracks == 0)
         }
-        if (loadedVideos.isEmpty() && loadedTracks.isEmpty()) {
-            item { CenteredMessage(stringResource(R.string.nag_home_empty)) }
-            return@LazyColumn
-        }
-        if (loadedVideos.isNotEmpty()) {
-            item { ShelfTitle(stringResource(R.string.nag_home_continue)) }
-            item {
-                LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
-                    itemsIndexed(loadedVideos, key = { _, m -> m.id }) { _, media ->
-                        VideoCard(media, Modifier.width(240.dp)) { PlaybackActions.playVideo(context, media) }
-                    }
+    }
+    val loaded = home
+    Column(Modifier.fillMaxSize()) {
+        PageHeader(title = stringResource(R.string.nag_nav_home))
+        LibraryContent(
+            loading = loaded == null,
+            empty = loaded?.libraryEmpty == true,
+            scan = scan,
+            emptyTitle = stringResource(R.string.nag_state_empty_title),
+            emptyDescription = stringResource(R.string.nag_state_empty_desc),
+            onAddFolder = onAddFolder,
+        ) {
+            val videos = loaded?.videos.orEmpty()
+            val tracks = loaded?.tracks.orEmpty()
+            if (videos.isEmpty() && tracks.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    StatePanel(
+                        tone = StateTone.Neutral,
+                        icon = NagIcons.Play,
+                        title = stringResource(R.string.nag_home_nothing_title),
+                        description = stringResource(R.string.nag_home_nothing_desc),
+                        primary = StateAction(stringResource(R.string.nag_home_browse_movies)) { onBrowse(Destination.Movies) },
+                        secondary = StateAction(stringResource(R.string.nag_home_browse_music)) { onBrowse(Destination.Music) },
+                    )
                 }
-            }
-        }
-        if (loadedTracks.isNotEmpty()) {
-            item { ShelfTitle(stringResource(R.string.nag_home_recent_music)) }
-            item {
-                LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
-                    itemsIndexed(loadedTracks, key = { _, m -> m.id }) { index, media ->
-                        TrackCard(media, Modifier.width(150.dp)) { PlaybackActions.playList(context, loadedTracks, index) }
+            } else {
+                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = dimens.gapXl)) {
+                    if (videos.isNotEmpty()) {
+                        item { ShelfTitle(stringResource(R.string.nag_home_continue)) }
+                        item {
+                            LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
+                                itemsIndexed(videos, key = { _, m -> m.id }) { _, media ->
+                                    VideoCard(media, Modifier.width(240.dp)) { PlaybackActions.playVideo(context, media) }
+                                }
+                            }
+                        }
+                    }
+                    if (tracks.isNotEmpty()) {
+                        item { ShelfTitle(stringResource(R.string.nag_home_recent_music)) }
+                        item {
+                            LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
+                                itemsIndexed(tracks, key = { _, m -> m.id }) { index, media ->
+                                    TrackCard(media, Modifier.width(150.dp)) { PlaybackActions.playList(context, tracks, index) }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -142,20 +182,12 @@ private fun ShelfTitle(text: String) {
     )
 }
 
-@Composable
-private fun CenteredMessage(text: String) {
-    Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
-        Text(text, style = NagTheme.type.body, color = NagTheme.colors.textSecondary, textAlign = TextAlign.Center)
-    }
-}
-
 // ---------------------------------------------------------------- Movies
 
 @Composable
-fun MoviesScreen(repository: MediaRepository) {
-    val context = LocalContext.current
-    val dimens = NagTheme.dimens
-    val videos by produceState<List<MediaWrapper>?>(null) { value = repository.videos() }
+fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
+    val scan = rememberScanState()
+    val videos by produceState<List<MediaWrapper>?>(null, scan.active) { loadWhileScanning(scan.active) { repository.videos() } }
     val pointer = NagTheme.inputMode == InputMode.Pointer
     var mode by rememberSaveable { mutableStateOf(if (pointer) ViewMode.Table else ViewMode.Grid) }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
@@ -166,43 +198,67 @@ fun MoviesScreen(repository: MediaRepository) {
             title = stringResource(R.string.nag_nav_movies),
             subtitle = list?.let { stringResource(R.string.nag_videos_count, it.size) },
         ) {
-            NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), { mode = ViewMode.Grid }, selected = mode == ViewMode.Grid)
-            NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), { mode = ViewMode.Table }, selected = mode == ViewMode.Table)
+            if (!list.isNullOrEmpty()) {
+                NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), { mode = ViewMode.Grid }, selected = mode == ViewMode.Grid)
+                NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), { mode = ViewMode.Table }, selected = mode == ViewMode.Table)
+            }
         }
-        when {
-            list == null -> CenteredMessage(stringResource(R.string.nag_library_loading))
-            list.isEmpty() -> CenteredMessage(stringResource(R.string.nag_library_empty_video))
-            mode == ViewMode.Grid -> LazyVerticalGrid(
-                columns = GridCells.Adaptive(if (pointer) 190.dp else 220.dp),
-                contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
-                horizontalArrangement = Arrangement.spacedBy(dimens.gapL),
-                verticalArrangement = Arrangement.spacedBy(dimens.gapL),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                itemsIndexed(list, key = { _, m -> m.id }) { _, media ->
-                    val play = { PlaybackActions.playVideo(context, media) }
-                    ContextMenuArea(entries = { mediaMenu(context, media, play) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
-                        VideoCard(media, Modifier.fillMaxWidth(), onClick = play)
-                    }
+        LibraryContent(
+            loading = list == null,
+            empty = list?.isEmpty() == true,
+            scan = scan,
+            emptyTitle = stringResource(R.string.nag_state_no_videos_title),
+            emptyDescription = stringResource(R.string.nag_state_no_videos_desc),
+            onAddFolder = onAddFolder,
+        ) {
+            MoviesContent(list.orEmpty(), mode, sort, { sort = it }, selected, { selected = it })
+        }
+    }
+}
+
+@Composable
+private fun MoviesContent(
+    list: List<MediaWrapper>,
+    mode: ViewMode,
+    sort: TableSort?,
+    onSortChange: (TableSort) -> Unit,
+    selected: Long?,
+    onSelect: (Long) -> Unit,
+) {
+    val context = LocalContext.current
+    val dimens = NagTheme.dimens
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    when (mode) {
+        ViewMode.Grid -> LazyVerticalGrid(
+            columns = GridCells.Adaptive(if (pointer) 190.dp else 220.dp),
+            contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+            horizontalArrangement = Arrangement.spacedBy(dimens.gapL),
+            verticalArrangement = Arrangement.spacedBy(dimens.gapL),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            itemsIndexed(list, key = { _, m -> m.id }) { _, media ->
+                val play = { PlaybackActions.playVideo(context, media) }
+                ContextMenuArea(entries = { mediaMenu(context, media, play) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                    VideoCard(media, Modifier.fillMaxWidth(), onClick = play)
                 }
             }
-            else -> {
-                val sorted = remember(list, sort) { sortVideos(list, sort) }
-                DenseTable(
-                    columns = videoColumns(),
-                    rows = sorted,
-                    key = { it.id },
-                    selectedKey = selected,
-                    sort = sort,
-                    onSortChange = { sort = it },
-                    onRowClick = { media, _ ->
-                        selected = media.id
-                        PlaybackActions.playVideo(context, media)
-                    },
-                    rowMenu = { media, _ -> mediaMenu(context, media) { PlaybackActions.playVideo(context, media) } },
-                    rowMenuLabel = stringResource(R.string.nag_more_actions),
-                )
-            }
+        }
+        ViewMode.Table -> {
+            val sorted = remember(list, sort) { sortVideos(list, sort) }
+            DenseTable(
+                columns = videoColumns(),
+                rows = sorted,
+                key = { it.id },
+                selectedKey = selected,
+                sort = sort,
+                onSortChange = onSortChange,
+                onRowClick = { media, _ ->
+                    onSelect(media.id)
+                    PlaybackActions.playVideo(context, media)
+                },
+                rowMenu = { media, _ -> mediaMenu(context, media) { PlaybackActions.playVideo(context, media) } },
+                rowMenuLabel = stringResource(R.string.nag_more_actions),
+            )
         }
     }
 }
@@ -303,42 +359,46 @@ private fun TrackCard(media: MediaWrapper, modifier: Modifier = Modifier, onClic
 // ---------------------------------------------------------------- Music
 
 @Composable
-fun MusicScreen(repository: MediaRepository) {
+fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val context = LocalContext.current
-    val tracks by produceState<List<MediaWrapper>?>(null) { value = repository.tracks() }
+    val scan = rememberScanState()
+    val tracks by produceState<List<MediaWrapper>?>(null, scan.active) { loadWhileScanning(scan.active) { repository.tracks() } }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
     val list = tracks
     val unknown = stringResource(R.string.nag_unknown_artist)
     Column(Modifier.fillMaxSize()) {
         PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = list?.let { stringResource(R.string.nag_tracks_count, it.size) })
-        when {
-            list == null -> CenteredMessage(stringResource(R.string.nag_library_loading))
-            list.isEmpty() -> CenteredMessage(stringResource(R.string.nag_library_empty_music))
-            else -> {
-                val sorted = remember(list, sort) { sortTracks(list, sort) }
-                val titleCol = stringResource(R.string.nag_column_title)
-                val artistCol = stringResource(R.string.nag_column_artist)
-                val albumCol = stringResource(R.string.nag_column_album)
-                val durationCol = stringResource(R.string.nag_column_duration)
-                val columns = remember(titleCol, artistCol, albumCol, durationCol, unknown) {
-                    listOf(
-                        TableColumn<MediaWrapper>(titleCol, ColumnWidth.Weight(1.4f)) { it.title ?: "" },
-                        TableColumn<MediaWrapper>(artistCol, ColumnWidth.Weight(1f)) { it.artistName ?: unknown },
-                        TableColumn<MediaWrapper>(albumCol, ColumnWidth.Weight(1f)) { it.albumName ?: "" },
-                        TableColumn<MediaWrapper>(durationCol, ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { formatDuration(it.length) },
-                    )
-                }
-                DenseTable(
-                    columns = columns,
-                    rows = sorted,
-                    key = { it.id },
-                    sort = sort,
-                    onSortChange = { sort = it },
-                    onRowClick = { _, index -> PlaybackActions.playList(context, sorted, index) },
-                    rowMenu = { media, index -> mediaMenu(context, media) { PlaybackActions.playList(context, sorted, index) } },
-                    rowMenuLabel = stringResource(R.string.nag_more_actions),
+        LibraryContent(
+            loading = list == null,
+            empty = list?.isEmpty() == true,
+            scan = scan,
+            emptyTitle = stringResource(R.string.nag_state_no_music_title),
+            emptyDescription = stringResource(R.string.nag_state_no_music_desc),
+            onAddFolder = onAddFolder,
+        ) {
+            val sorted = remember(list, sort) { sortTracks(list.orEmpty(), sort) }
+            val titleCol = stringResource(R.string.nag_column_title)
+            val artistCol = stringResource(R.string.nag_column_artist)
+            val albumCol = stringResource(R.string.nag_column_album)
+            val durationCol = stringResource(R.string.nag_column_duration)
+            val columns = remember(titleCol, artistCol, albumCol, durationCol, unknown) {
+                listOf(
+                    TableColumn<MediaWrapper>(titleCol, ColumnWidth.Weight(1.4f)) { it.title ?: "" },
+                    TableColumn<MediaWrapper>(artistCol, ColumnWidth.Weight(1f)) { it.artistName ?: unknown },
+                    TableColumn<MediaWrapper>(albumCol, ColumnWidth.Weight(1f)) { it.albumName ?: "" },
+                    TableColumn<MediaWrapper>(durationCol, ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { formatDuration(it.length) },
                 )
             }
+            DenseTable(
+                columns = columns,
+                rows = sorted,
+                key = { it.id },
+                sort = sort,
+                onSortChange = { sort = it },
+                onRowClick = { _, index -> PlaybackActions.playList(context, sorted, index) },
+                rowMenu = { media, index -> mediaMenu(context, media) { PlaybackActions.playList(context, sorted, index) } },
+                rowMenuLabel = stringResource(R.string.nag_more_actions),
+            )
         }
     }
 }

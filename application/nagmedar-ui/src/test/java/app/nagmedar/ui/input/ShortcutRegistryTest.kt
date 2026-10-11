@@ -63,6 +63,8 @@ class ShortcutRegistryTest {
     fun eventsMatchShortcuts() {
         val ctrlK = KeyEvent(AndroidKeyEvent(0, 0, AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_K, 0, AndroidKeyEvent.META_CTRL_ON or AndroidKeyEvent.META_CTRL_LEFT_ON))
         assertEquals(ShortcutId.CommandPalette, ShortcutRegistry.match(ctrlK)?.id)
+        val ctrlZ = KeyEvent(AndroidKeyEvent(0, 0, AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_Z, 0, AndroidKeyEvent.META_CTRL_ON or AndroidKeyEvent.META_CTRL_LEFT_ON))
+        assertEquals(ShortcutId.Undo, ShortcutRegistry.match(ctrlZ)?.id)
         val space = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_SPACE))
         assertEquals(ShortcutId.PlayPause, ShortcutRegistry.match(space)?.id)
         // G is a player shortcut: not matched in the global scope

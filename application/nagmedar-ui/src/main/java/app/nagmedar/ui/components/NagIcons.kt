@@ -71,6 +71,16 @@ object NagIcons {
     val Waveform: ImageVector by lazy { icon("Waveform", stroke("M2.5 7v2M5 5v6M7.5 3v10M10 5.5v5M12.5 7v2")) }
     val Keyboard: ImageVector by lazy { icon("Keyboard", stroke("M3,4H13A1.5,1.5 0 0 1 14.5,5.5V10.5A1.5,1.5 0 0 1 13,12H3A1.5,1.5 0 0 1 1.5,10.5V5.5A1.5,1.5 0 0 1 3,4Z"), stroke("M4 6.5h.5M6.5 6.5h.5M9 6.5h.5M11.5 6.5h.5M5 9.5h6")) }
     val SidebarToggle: ImageVector by lazy { icon("SidebarToggle", stroke("M3.5,2.5H12.5A1.5,1.5 0 0 1 14,4V12A1.5,1.5 0 0 1 12.5,13.5H3.5A1.5,1.5 0 0 1 2,12V4A1.5,1.5 0 0 1 3.5,2.5Z"), stroke("M6 2.5v11")) }
+    val FolderAdd: ImageVector by lazy { icon("FolderAdd", stroke("M2.5 4.5a1 1 0 0 1 1-1h3L8 5h4.5a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1zM8 7.5v4M6 9.5h4")) }
+    val Shield: ImageVector by lazy { icon("Shield", stroke("M8 1.8 13 4v4c0 3-2.2 5.2-5 6.2-2.8-1-5-3.2-5-6.2V4zM6 8l1.5 1.5L10.5 6.5")) }
+    val ErrorCircle: ImageVector by lazy { icon("ErrorCircle", stroke("M2.5,8a5.5,5.5 0 1 0 11,0a5.5,5.5 0 1 0 -11,0Z"), stroke("M6 6l4 4M10 6l-4 4")) }
+    val SuccessCircle: ImageVector by lazy { icon("SuccessCircle", stroke("M2.5,8a5.5,5.5 0 1 0 11,0a5.5,5.5 0 1 0 -11,0Z"), stroke("M5.5 8.2l1.8 1.8 3.3-3.6")) }
+    val Warning: ImageVector by lazy { icon("Warning", stroke("M8 2.5 14 13H2z"), stroke("M8 6.5v3M8 11.2v.3")) }
+    val DriveRemoved: ImageVector by lazy { icon("DriveRemoved", stroke("M2 9h12v4.5H2zM3.5 9 5 3.5h6L12.5 9M5 11.2h.01")) }
+    val DiskFull: ImageVector by lazy { icon("DiskFull", stroke("M2 9h12v4.5H2zM3.5 9 5 3.5h6L12.5 9M8 5.5v2")) }
+    val NetworkOff: ImageVector by lazy { icon("NetworkOff", stroke("M2 6.5a9 9 0 0 1 12 0M4.2 9a5.8 5.8 0 0 1 7.6 0M8 12.5h.01M3 3l10 10")) }
+    val SearchOff: ImageVector by lazy { icon("SearchOff", stroke("M2.5,7a4.5,4.5 0 1 0 9,0a4.5,4.5 0 1 0 -9,0Z"), stroke("m10.5 10.5 3 3M5.5 7h3")) }
+    val Lock: ImageVector by lazy { icon("Lock", stroke("M4.7,7H11.3A1.2,1.2 0 0 1 12.5,8.2V12.3A1.2,1.2 0 0 1 11.3,13.5H4.7A1.2,1.2 0 0 1 3.5,12.3V8.2A1.2,1.2 0 0 1 4.7,7Z"), stroke("M5.5 7V5a2.5 2.5 0 0 1 5 0v2")) }
 }
 
 private class IconPart(val d: String, val filled: Boolean)

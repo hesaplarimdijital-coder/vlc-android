@@ -52,6 +52,11 @@ data class NagColors(
     val brandBlue: Color,
     val brandCoral: Color,
     val scrim: Color,
+    /** Undo bar and other surfaces that stand out against the theme: light on the dark themes, dark on the light one. */
+    val inverseSurface: Color,
+    val onInverseSurface: Color,
+    /** Accent for text on [inverseSurface] (the undo bar's "Undo"). */
+    val inverseAccent: Color,
 )
 
 object NagPalette {
@@ -88,6 +93,9 @@ object NagPalette {
         brandBlue = Color(0xFF8AB0FF),
         brandCoral = Color(0xFFFF7A6E),
         scrim = Color(0x99000000),
+        inverseSurface = Color(0xFFE6E9ED),
+        onInverseSurface = Color(0xFF14181C),
+        inverseAccent = mixSrgb(accent.base, Color.Black, 0.5f),
     )
 
     fun oled(accent: Accent) = dark(accent).copy(
@@ -130,6 +138,9 @@ object NagPalette {
             brandBlue = Color(0xFF4E78D8),
             brandCoral = Color(0xFFE0574B),
             scrim = Color(0x6612161B),
+            inverseSurface = Color(0xFF1F252C),
+            onInverseSurface = Color(0xFFE6E9ED),
+            inverseAccent = accent.base,
         )
     }
 

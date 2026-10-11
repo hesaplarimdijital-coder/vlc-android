@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,12 +18,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.UndoBarHost
+import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.rememberUndoBarState
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -69,10 +75,12 @@ fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {
     val navController = rememberNavController()
     val navigator = remember(navController) { ShellNavigator(navController) }
     val settingsList = rememberLazyListState()
+    val undo = rememberUndoBarState()
     var shortcutListRequests by remember { mutableIntStateOf(0) }
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, onOpenFile) { shortcutListRequests++ }
+        AppActions(context, prefs, navigator, undo, onOpenFile) { shortcutListRequests++ }
     }
+    val addFolder = { openClassic(context, SecondaryActivity.STORAGE_BROWSER) }
     LaunchedEffect(actions) { onActionsReady(actions) }
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests > 0) settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
@@ -103,11 +111,14 @@ fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {
                     if (navKind == NavKind.Sidebar) TransportBar(nowPlaying) else MiniPlayer(nowPlaying)
                 },
                 navController = navController,
+                overlay = {
+                    UndoBarHost(undo, Modifier.align(Alignment.BottomCenter).padding(16.dp))
+                },
                 screen = { destination, shellNavigator ->
                     when (destination) {
-                        Destination.Home -> HomeScreen(repository)
-                        Destination.Movies -> MoviesScreen(repository)
-                        Destination.Music -> MusicScreen(repository)
+                        Destination.Home -> HomeScreen(repository, onAddFolder = addFolder, onBrowse = shellNavigator::navigate)
+                        Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
+                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -169,6 +180,7 @@ class AppActions(
     private val context: Context,
     private val prefs: NagmedarPreferences,
     private val navigator: ShellNavigator,
+    private val undo: UndoBarState,
     private val openFile: () -> Unit,
     private val showShortcutList: () -> Unit,
 ) {
@@ -188,6 +200,7 @@ class AppActions(
         when (id) {
             ShortcutId.OpenFile -> openFile()
             ShortcutId.OpenNetwork -> openClassic(context, SecondaryActivity.STREAMS)
+            ShortcutId.Undo -> return undo.undoLatest()
             ShortcutId.PlayPause -> PlaybackActions.togglePlayPause()
             ShortcutId.Stop -> service?.stop()
             ShortcutId.Previous -> PlaybackActions.previous()

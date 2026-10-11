@@ -90,7 +90,7 @@ enum class ShortcutGroup(@StringRes val title: Int) {
 enum class ShortcutScope { Global, Player }
 
 enum class ShortcutId {
-    OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo,
+    OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack,
@@ -122,6 +122,7 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.OpenNetwork, ShortcutGroup.Media, R.string.nag_sc_open_network, KeyChord(Key.N, ctrl = true)),
         Shortcut(ShortcutId.OpenInNewWindow, ShortcutGroup.Media, R.string.nag_sc_new_window, KeyChord(Key.N, ctrl = true, shift = true)),
         Shortcut(ShortcutId.MediaInfo, ShortcutGroup.Media, R.string.nag_sc_media_info, KeyChord(Key.I, ctrl = true)),
+        Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true)),
         // Playback
         Shortcut(ShortcutId.PlayPause, ShortcutGroup.Playback, R.string.nag_sc_play_pause, KeyChord(Key.Spacebar)),
         Shortcut(ShortcutId.Stop, ShortcutGroup.Playback, R.string.nag_sc_stop, KeyChord(Key.S)),

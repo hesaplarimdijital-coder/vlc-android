@@ -71,6 +71,17 @@ ICONS = {
     'Waveform': '<path d="M2.5 7v2M5 5v6M7.5 3v10M10 5.5v5M12.5 7v2"/>',
     'Keyboard': '<rect x="1.5" y="4" width="13" height="8" rx="1.5"/><path d="M4 6.5h.5M6.5 6.5h.5M9 6.5h.5M11.5 6.5h.5M5 9.5h6"/>',
     'SidebarToggle': '<rect x="2" y="2.5" width="12" height="11" rx="1.5"/><path d="M6 2.5v11"/>',
+    # S-308 states board
+    'FolderAdd': '<path d="M2.5 4.5a1 1 0 0 1 1-1h3L8 5h4.5a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1zM8 7.5v4M6 9.5h4"/>',
+    'Shield': '<path d="M8 1.8 13 4v4c0 3-2.2 5.2-5 6.2-2.8-1-5-3.2-5-6.2V4zM6 8l1.5 1.5L10.5 6.5"/>',
+    'ErrorCircle': '<circle cx="8" cy="8" r="5.5"/><path d="M6 6l4 4M10 6l-4 4"/>',
+    'SuccessCircle': '<circle cx="8" cy="8" r="5.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6"/>',
+    'Warning': '<path d="M8 2.5 14 13H2z"/><path d="M8 6.5v3M8 11.2v.3"/>',
+    'DriveRemoved': '<path d="M2 9h12v4.5H2zM3.5 9 5 3.5h6L12.5 9M5 11.2h.01"/>',
+    'DiskFull': '<path d="M2 9h12v4.5H2zM3.5 9 5 3.5h6L12.5 9M8 5.5v2"/>',
+    'NetworkOff': '<path d="M2 6.5a9 9 0 0 1 12 0M4.2 9a5.8 5.8 0 0 1 7.6 0M8 12.5h.01M3 3l10 10"/>',
+    'SearchOff': '<circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3M5.5 7h3"/>',
+    'Lock': '<rect x="3.5" y="7" width="9" height="6.5" rx="1.2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>',
 }
 
 
