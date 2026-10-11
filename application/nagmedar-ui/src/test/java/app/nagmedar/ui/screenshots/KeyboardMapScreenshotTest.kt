@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.withKeyDown
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.R
 import app.nagmedar.ui.input.KeyLayout
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -68,7 +69,8 @@ class KeyboardMapScreenshotTest {
             }
         }
         compose.waitForIdle()
-        compose.onNode(hasText("Klavye haritası") and hasClickAction()).performClick()
+        // the button by its name in the test's language
+        compose.onNode(hasText(compose.activity.getString(R.string.nag_kb_show)) and hasClickAction()).performClick()
         compose.waitForIdle()
         then()
         compose.waitForIdle()
