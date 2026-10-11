@@ -224,6 +224,7 @@ fun MoviesLibrary(
         val source = openFolder?.items ?: library.movies
         val shown = remember(source, filters, order, tech) { source.filtered(filters, tech).ordered(order, tech) }
         val shelf = if (filters.isEmpty() && openFolder == null) library.continueMovies else emptyList()
+        val shelfHeader: @Composable () -> Unit = { ContinueShelf(shelf, tech, onPlay) }
         when {
             view == MoviesView.Folders && openFolder == null -> FolderGrid(library.folders, tech, filters, onOpenFolder)
             shown.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -246,7 +247,7 @@ fun MoviesLibrary(
                 onCloseDetails = onCloseDetails,
                 onPlay = onPlay,
                 menu = menu,
-                gridHeader = if (shelf.isEmpty()) null else @Composable { ContinueShelf(shelf, tech, onPlay) },
+                gridHeader = shelfHeader.takeIf { shelf.isNotEmpty() },
             )
         }
     }
