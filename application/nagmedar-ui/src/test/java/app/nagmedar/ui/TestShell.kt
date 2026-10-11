@@ -16,24 +16,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
-import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
-import app.nagmedar.ui.components.NagSlider
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.playback.MiniPlayer
+import app.nagmedar.ui.playback.PlayerBarActions
+import app.nagmedar.ui.playback.PlayerBarInfo
+import app.nagmedar.ui.playback.TransportBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
@@ -125,28 +127,45 @@ fun SampleScreen(destination: Destination) {
     }
 }
 
+/** What the sample bars play. */
+val samplePlayerInfo = PlayerBarInfo(
+    title = "Sabaha Kadar",
+    subtitle = "Ada Karan · Gece Mavisi",
+    isVideo = false,
+    playing = true,
+    lengthMs = 258_000,
+    format = "FLAC 24/96",
+    volume = 70,
+)
+
+/** Player actions that do nothing: the shell's screenshots only show the bars. */
+object NoPlayerActions : PlayerBarActions {
+    override fun openPlayer() = Unit
+
+    override fun togglePlayPause() = Unit
+
+    override fun previous() = Unit
+
+    override fun next() = Unit
+
+    override fun seekTo(fraction: Float) = Unit
+
+    override fun stop() = Unit
+
+    override fun shuffle() = Unit
+
+    override fun cycleRepeat() = Unit
+
+    override fun setVolume(volume: Int) = Unit
+}
+
+/** The real player bars (S-304) with [samplePlayerInfo], 42 % played. */
 @Composable
-fun SamplePlayerBar(kind: NavKind) {
-    val colors = NagTheme.colors
-    Column(Modifier.fillMaxWidth().background(colors.chrome)) {
-        HorizontalRule()
-        Row(
-            Modifier.fillMaxWidth().height(if (kind == NavKind.Sidebar) 72.dp else NagTheme.dimens.miniPlayerHeight).padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Artwork(media = null, size = 44.dp)
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text("Sabaha kadar", style = NagTheme.type.bodyStrong, color = colors.text)
-                Text("Ada Karan · Gece Mavisi", style = NagTheme.type.labelSmall, color = colors.textTertiary)
-            }
-            if (kind == NavKind.Sidebar) {
-                NagSlider(value = 0.42f, onValueChange = {}, modifier = Modifier.weight(1.4f))
-                Spacer(Modifier.width(12.dp))
-            }
-            NagIconButton(NagIcons.Previous, "Önceki parça", {})
-            NagIconButton(NagIcons.Pause, "Duraklat", {})
-            NagIconButton(NagIcons.Next, "Sonraki parça", {})
-        }
+fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions) {
+    val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
+    if (kind == NavKind.Sidebar) {
+        TransportBar(info, { 0.42f }, actions, artwork)
+    } else {
+        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar)
     }
 }

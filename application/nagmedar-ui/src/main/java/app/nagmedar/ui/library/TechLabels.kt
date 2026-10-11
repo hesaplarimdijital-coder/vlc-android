@@ -91,6 +91,22 @@ fun audioCodecLabel(track: AudioTech): String = when {
     }
 }
 
+/**
+ * What a music player shows of a track: "FLAC 24/96", "PCM 16/44.1" for lossless ones, "MP3 320
+ * kb/s" for lossy ones, the codec alone when the rest is unknown.
+ */
+fun audioFormatLabel(track: AudioTech): String {
+    val codec = audioCodecLabel(track)
+    return when {
+        track.lossless && track.bits > 0 && track.sampleRate > 0 -> "$codec ${track.bits}/${kiloHertz(track.sampleRate)}"
+        track.bitrate > 0 -> "$codec ${track.bitrate / 1000} kb/s"
+        else -> codec
+    }
+}
+
+/** 44100 → "44.1", 96000 → "96". */
+private fun kiloHertz(rate: Int): String = if (rate % 1000 == 0) "${rate / 1000}" else "%.1f".format(Locale.ROOT, rate / 1000.0)
+
 /** The short audio word of a card: "Atmos" when the main track has it, its codec otherwise. */
 fun audioShortLabel(track: AudioTech): String = if (track.atmos) "Atmos" else audioCodecLabel(track)
 

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.data.MediaTechEntry
@@ -168,4 +169,17 @@ fun rememberTech(items: List<VideoItem>?): State<Map<String, MediaTech>> {
     }
     val flow = remember(repository) { repository?.all ?: flowOf(emptyMap()) }
     return flow.collectAsState(initial = emptyMap())
+}
+
+/** The cached probe of one file ([key], a media URI), probing it when it has none; null meanwhile. */
+@Composable
+fun rememberTechOf(key: String?): MediaTech? {
+    val context = LocalContext.current
+    val repository = remember(context) { runCatching { TechRepository.get(context) }.getOrNull() }
+    LaunchedEffect(repository, key) {
+        if (repository != null && key != null) repository.probeMissing(listOf(key))
+    }
+    val flow = remember(repository) { repository?.all ?: flowOf(emptyMap()) }
+    val all by flow.collectAsState(initial = emptyMap())
+    return key?.let { all[it] }
 }

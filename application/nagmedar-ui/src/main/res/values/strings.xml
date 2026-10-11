@@ -167,6 +167,10 @@
     <string name="nag_next">Next track</string>
     <string name="nag_open_player">Open the player</string>
     <string name="nag_position">Track position</string>
+    <string name="nag_stop">Stop</string>
+    <string name="nag_volume">Volume</string>
+    <string name="nag_mute">Mute</string>
+    <string name="nag_unmute">Unmute</string>
 
     <!-- Settings -->
     <string name="nag_settings_appearance">Appearance</string>

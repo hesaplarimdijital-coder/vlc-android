@@ -47,9 +47,8 @@ import app.nagmedar.ui.library.SeriesScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
-import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlaybackActions
-import app.nagmedar.ui.playback.TransportBar
+import app.nagmedar.ui.playback.PlayerBar
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
@@ -157,9 +156,7 @@ private fun NagmedarMain(
                 badges = counts,
                 onSearch = { actions.perform(ShortcutId.CommandPalette) },
                 menus = { MenuBarMenus(menuSpecs(context, actions)) },
-                player = { navKind ->
-                    if (navKind == NavKind.Sidebar) TransportBar(nowPlaying) else MiniPlayer(nowPlaying)
-                },
+                player = { navKind -> PlayerBar(navKind, nowPlaying) },
                 navController = navController,
                 overlay = {
                     UndoBarHost(undo, Modifier.align(Alignment.BottomCenter).padding(16.dp))

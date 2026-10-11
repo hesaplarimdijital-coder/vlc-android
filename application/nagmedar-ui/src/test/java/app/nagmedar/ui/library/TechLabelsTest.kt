@@ -1,5 +1,6 @@
 package app.nagmedar.ui.library
 
+import app.nagmedar.lab.AudioTech
 import app.nagmedar.lab.Resolution
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -85,5 +86,18 @@ class TechLabelsTest {
         )
         assertEquals("dts", tech.mainAudio()!!.codec)
         assertEquals(Resolution.UHD, resolutionOf(3840, 2160))
+    }
+
+    /** S-304: the format a player bar shows. */
+    @Test
+    fun musicFormats() {
+        fun track(codec: String, rate: Int, bits: Int, bitrate: Long = 0) =
+            AudioTech(codec, "", 2, "stereo", rate, bits, bitrate, "", "", true, false, false)
+        assertEquals("FLAC 24/96", audioFormatLabel(track("flac", 96000, 24)))
+        assertEquals("FLAC 16/44.1", audioFormatLabel(track("flac", 44100, 16)))
+        assertEquals("PCM 24/192", audioFormatLabel(track("pcm_s24le", 192000, 24)))
+        assertEquals("ALAC 24/88.2", audioFormatLabel(track("alac", 88200, 24)))
+        assertEquals("MP3 320 kb/s", audioFormatLabel(track("mp3", 44100, 0, 320_000)))
+        assertEquals("AAC", audioFormatLabel(track("aac", 44100, 0)))
     }
 }

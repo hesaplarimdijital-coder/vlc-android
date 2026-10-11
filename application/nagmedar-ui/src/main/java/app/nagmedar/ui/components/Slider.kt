@@ -1,6 +1,7 @@
 package app.nagmedar.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -37,8 +39,11 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
+import kotlin.math.roundToInt
 
 /**
  * Horizontal slider for 0..1 values (seek bar, volume, equaliser bands).
@@ -58,6 +63,8 @@ fun NagSlider(
     wheelStep: Float = 0.02f,
     keyStep: Float = 0.01f,
     onValueChangeFinished: (() -> Unit)? = null,
+    /** With a pointer, what the track means under it ("2:09" on a seek bar), shown above it. */
+    hoverLabel: ((Float) -> String)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -66,6 +73,8 @@ fun NagSlider(
     var widthPx by remember { mutableFloatStateOf(1f) }
     var dragging by remember { mutableStateOf(false) }
     var dragValue by remember { mutableFloatStateOf(value) }
+    var hoverAt by remember { mutableStateOf<Float?>(null) }
+    var labelSize by remember { mutableStateOf(IntSize.Zero) }
     val shown = if (dragging) dragValue else value.coerceIn(0f, 1f)
     val latestValue by rememberUpdatedState(value)
     val latestOnChange by rememberUpdatedState(onValueChange)
@@ -122,7 +131,11 @@ fun NagSlider(
                                 dragValue = (change.position.x / widthPx).coerceIn(0f, 1f)
                                 latestOnChange(dragValue)
                                 change.consume()
+                            } else if (!change.pressed) {
+                                hoverAt = (change.position.x / widthPx).coerceIn(0f, 1f)
                             }
+                            PointerEventType.Enter -> hoverAt = (change.position.x / widthPx).coerceIn(0f, 1f)
+                            PointerEventType.Exit -> hoverAt = null
                             PointerEventType.Release -> if (dragging) {
                                 dragging = false
                                 latestOnFinished?.invoke()
@@ -160,6 +173,26 @@ fun NagSlider(
         }
         if (state.focused) {
             Box(Modifier.fillMaxWidth().height(touchHeight).focusRing(state, RoundedCornerShape(dimens.radiusSmall)))
+        }
+        val at = hoverAt
+        if (hoverLabel != null && at != null && enabled && !dragging) {
+            // above the track, centred on the pointer, kept over the track's length
+            Text(
+                hoverLabel(at),
+                style = NagTheme.type.mono,
+                color = colors.text,
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .onSizeChanged { labelSize = it }
+                    .offset {
+                        val x = (widthPx * at - labelSize.width / 2f).roundToInt()
+                        IntOffset(x.coerceIn(0, (widthPx.roundToInt() - labelSize.width).coerceAtLeast(0)), -labelSize.height - 2.dp.roundToPx())
+                    }
+                    .background(colors.surfaceRaised, RoundedCornerShape(4.dp))
+                    .border(1.dp, colors.borderStrong, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
         }
     }
 }

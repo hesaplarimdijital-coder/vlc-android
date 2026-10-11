@@ -167,6 +167,10 @@
     <string name="nag_next">Sonraki parça</string>
     <string name="nag_open_player">Oynatıcıyı aç</string>
     <string name="nag_position">Parça konumu</string>
+    <string name="nag_stop">Durdur</string>
+    <string name="nag_volume">Ses düzeyi</string>
+    <string name="nag_mute">Sesi kapat</string>
+    <string name="nag_unmute">Sesi aç</string>
 
     <!-- Ayarlar -->
     <string name="nag_settings_appearance">Görünüm</string>
