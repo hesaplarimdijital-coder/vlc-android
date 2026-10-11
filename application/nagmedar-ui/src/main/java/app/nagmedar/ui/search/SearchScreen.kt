@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -403,7 +404,7 @@ private fun marked(text: String, query: SearchQuery): AnnotatedString {
 }
 
 @Composable
-private fun HitRow(onClick: () -> Unit, label: String, content: @Composable () -> Unit) {
+private fun HitRow(onClick: () -> Unit, label: String, content: @Composable RowScope.() -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(NagTheme.dimens.radiusControl)
