@@ -587,4 +587,19 @@
     <string name="nag_search_syntax_kind_example">type:film north</string>
     <string name="nag_search_syntax_phrase_example">\"northern lights\"</string>
     <string name="nag_search_syntax_exclude_example">-trailer</string>
+
+    <!-- S-601: the desktop controls over the video -->
+    <string name="nag_player_close">Close the player</string>
+    <string name="nag_player_position">Playback position</string>
+    <string name="nag_player_chapter">Chapter %1$d</string>
+    <string name="nag_player_chapter_named">Chapter %1$d — %2$s</string>
+    <string name="nag_player_exit_fullscreen">Exit fullscreen</string>
+    <string name="nag_player_speed">Speed</string>
+    <string name="nag_player_audio_track">Audio track</string>
+    <string name="nag_player_no_audio">No audio track</string>
+    <string name="nag_player_subtitles">Subtitles</string>
+    <string name="nag_player_subtitles_off">Off</string>
+    <string name="nag_player_ab_set_a">A-B loop: set point A</string>
+    <string name="nag_player_ab_set_b">A-B loop: set point B</string>
+    <string name="nag_player_ab_off">Turn the A-B loop off</string>
 </resources>

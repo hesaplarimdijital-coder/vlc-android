@@ -22,6 +22,7 @@ Sözlüğü testler denetler:
 | film | film | | movie | İngilizcede “Films”, “a film's menu” |
 | dizi | series | | TV show | Tekili ve çoğulu aynı: “1 series”, “4 series” |
 | bölüm | episode | | | Adlardan tanınır: S01E02, 1x02, “1. Sezon 2. Bölüm” |
+| bölüm (filmde) | chapter | | | Bir filmin bölümleri de “bölüm”; yer ayırır: zaman çizelgesinde “Bölüm 14 — Şafak” |
 | sezon | season | | | |
 | parça | track | şarkı | song | Müzikte tek öğe; arama kutusunda da “parça” |
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
@@ -33,6 +34,8 @@ Sözlüğü testler denetler:
 | Hemen sonra oynat | Play next | sonra çal | | Seçileni çalanın hemen arkasına koyar; “Sıraya ekle” en sona |
 | oynat | play | | | “Çal” yalnızca müziğe özgü yerlerde: “Şimdi çalıyor”, “Son çalınan müzik”, “Test sesini çal” |
 | oynatıcı | player | | | |
+| A-B tekrarı | A-B loop | | A-B repeat | A noktası, B noktası; düğmesi sırayla A’yı, B’yi koyar, sonra kapatır |
+| tam ekran | fullscreen | | | “Tam ekrandan çık” / “Exit fullscreen” |
 | altyazı | subtitle | alt yazı | caption | Tek sözcük |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | loudness | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz” |

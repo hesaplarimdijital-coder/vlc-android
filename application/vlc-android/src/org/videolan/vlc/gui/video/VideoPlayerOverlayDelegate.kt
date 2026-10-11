@@ -440,6 +440,11 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      * show overlay
      */
     fun showOverlayTimeout(timeout: Int) {
+        // Nağmedar (S-601): with a mouse, the desktop controls show instead
+        player.chrome?.takeIf { it.active }?.let { chrome ->
+            chrome.show()
+            return
+        }
         player.service?.let { service ->
             if (player.tipsDelegate.currentTip != null) return
             if (player.isInPictureInPictureMode) return

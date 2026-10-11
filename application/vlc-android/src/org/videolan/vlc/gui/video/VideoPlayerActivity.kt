@@ -328,6 +328,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     val tipsDelegate: VideoTipsDelegate by lazy(LazyThreadSafetyMode.NONE) { VideoTipsDelegate(this@VideoPlayerActivity) }
     var isTv: Boolean = false
 
+    /** Nağmedar (S-601): the desktop controls over the video, when the app has the new interface. */
+    var chrome: PlayerChrome? = null
+        private set
+
     private val dialogsDelegate = DialogDelegate()
     private var baseContextWrappingDelegate: AppCompatDelegate? = null
     var waitingForPin = false
@@ -608,6 +612,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
         // Extra initialization when no secondary display is detected
         isTv = Settings.showTvUi
+        // Nağmedar (S-601): with a mouse, the desktop controls stand for the overlay
+        if (displayManager.isPrimary && !isTv && !isBenchmark) chrome = PlayerChrome.create()?.also { it.attach(this, rootView as FrameLayout) }
         if (displayManager.isPrimary) {
             // Orientation
             // Tips
@@ -1025,6 +1031,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     override fun onDestroy() {
         super.onDestroy()
+        chrome?.detach()
+        chrome = null
         playlistModel?.run {
             dataset.removeObserver(playlistObserver)
             onCleared()
@@ -1232,6 +1240,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        // Nağmedar (S-601): the mouse moving over the video brings the desktop controls
+        chrome?.onMotion(event)
         // Nağmedar (S-408): the wheel and the middle button
         if (!isLoading && PlayerMouse.handle(this, event)) return true
         val result = !isLoading && ::touchDelegate.isInitialized && touchDelegate.dispatchGenericMotionEvent(event)
@@ -1530,6 +1540,37 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     /** Nağmedar (S-408): the middle button mutes and brings the sound back. */
     internal fun toggleMuteFromMouse() = updateMute()
 
+    /** Nağmedar (S-601): the volume as the desktop controls show it, in percent (above 100 with audio boost). */
+    val volumePercent: Int
+        get() {
+            val service = service ?: return 0
+            if (isMute) return 0
+            if (service.volume > 100 || audioMax <= 0) return service.volume
+            return (audiomanager.getStreamVolume(AudioManager.STREAM_MUSIC) * 100f / audioMax).roundToInt()
+        }
+
+    /** Nağmedar (S-601): whether the sound is off. */
+    val muted: Boolean
+        get() = isMute
+
+    /** Nağmedar (S-601): the highest volume the desktop controls may set, in percent. */
+    val maxVolumePercent: Int
+        get() = if (isAudioBoostEnabled) 200 else 100
+
+    /** Nağmedar (S-601): sets the volume from the desktop controls, as the wheel and the keys do. */
+    fun setVolumePercent(percent: Int) {
+        if (isMute && percent > 0) mute(false)
+        setAudioVolume((percent.coerceIn(0, maxVolumePercent) * audioMax / 100f).roundToInt())
+    }
+
+    /** Nağmedar (S-601): the desktop controls' speaker. */
+    fun toggleMute() = updateMute()
+
+    /** Nağmedar (S-601): the desktop controls' ±10 s, as the keys seek. */
+    fun seekBy(deltaMs: Int) {
+        if (::touchDelegate.isInitialized) touchDelegate.seekDelta(deltaMs)
+    }
+
     private fun volumeUp() {
         if (isMute) {
             updateMute()
@@ -1825,6 +1866,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
         service?.isInPiPMode?.value = isInPictureInPictureMode
         service?.mediaplayer?.updateVideoSurfaces()
+        chrome?.onPictureInPicture(isInPictureInPictureMode)
     }
 
     internal fun sendMouseEvent(action: Int, x: Int, y: Int) {
@@ -1834,6 +1876,12 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     /**
      * show/hide the overlay
      */
+
+    /** Nağmedar (S-601): a mouse's press goes to the desktop controls, a finger's to the classic overlay. */
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        chrome?.onMotion(event)
+        return super.dispatchTouchEvent(event)
+    }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return service != null && touchDelegate.onTouchEvent(event)

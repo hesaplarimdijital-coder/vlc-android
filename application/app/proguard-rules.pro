@@ -111,3 +111,6 @@
 -dontwarn retrofit2.-KotlinExtensions
 
 -keep class com.google.android.material.** { *; }
+
+# Nağmedar (S-601): the video player finds the new interface's desktop controls by name
+-keep class app.nagmedar.ui.player.DesktopPlayerChrome { <init>(); }

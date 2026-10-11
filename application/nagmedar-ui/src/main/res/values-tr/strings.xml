@@ -587,4 +587,19 @@
     <string name="nag_search_syntax_kind_example">tür:film kuzey</string>
     <string name="nag_search_syntax_phrase_example">\"kuzey ışığı\"</string>
     <string name="nag_search_syntax_exclude_example">-fragman</string>
+
+    <!-- S-601: videonun üzerindeki masaüstü denetimleri -->
+    <string name="nag_player_close">Oynatıcıyı kapat</string>
+    <string name="nag_player_position">Oynatma konumu</string>
+    <string name="nag_player_chapter">Bölüm %1$d</string>
+    <string name="nag_player_chapter_named">Bölüm %1$d — %2$s</string>
+    <string name="nag_player_exit_fullscreen">Tam ekrandan çık</string>
+    <string name="nag_player_speed">Hız</string>
+    <string name="nag_player_audio_track">Ses izi</string>
+    <string name="nag_player_no_audio">Ses izi yok</string>
+    <string name="nag_player_subtitles">Altyazı</string>
+    <string name="nag_player_subtitles_off">Kapalı</string>
+    <string name="nag_player_ab_set_a">A-B tekrarı: A noktasını koy</string>
+    <string name="nag_player_ab_set_b">A-B tekrarı: B noktasını koy</string>
+    <string name="nag_player_ab_off">A-B tekrarını kapat</string>
 </resources>
