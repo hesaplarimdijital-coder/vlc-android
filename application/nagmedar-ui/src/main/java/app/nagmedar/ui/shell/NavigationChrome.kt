@@ -99,7 +99,6 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .focusRing(state, pill)
             .semantics { this.selected = selected }
             .nagClickable(interaction, onClick, role = Role.Tab),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -176,7 +175,6 @@ private fun RailItem(destination: Destination, selected: Boolean, onClick: () ->
         modifier = Modifier
             .width(dimens.railWidth)
             .heightIn(min = dimens.minTarget.coerceAtLeast(52.dp))
-            .focusRing(state, pill)
             .semantics { this.selected = selected }
             .nagClickable(interaction, onClick, role = Role.Tab)
             .padding(vertical = 4.dp),

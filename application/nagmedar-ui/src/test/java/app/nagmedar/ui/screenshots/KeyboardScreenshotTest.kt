@@ -12,7 +12,6 @@ import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.requestFocus
@@ -74,6 +73,6 @@ class KeyboardScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("keyboard-phone-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch) {
-        compose.onNode(hasContentDescription("Ara") and hasClickAction())
+        compose.onNode(hasText("Müzik") and hasClickAction())
     }
 }

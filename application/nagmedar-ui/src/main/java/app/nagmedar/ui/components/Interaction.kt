@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -63,14 +66,13 @@ fun Modifier.nagClickable(
     role: Role? = Role.Button,
     onClickLabel: String? = null,
     /**
-     * A second action on double click (play a selected item); a single click then waits for it.
-     * From the keyboard (S-407) Enter does it at once, as on desktops, and Space selects.
+     * A second action on double click (play a selected item); a single click acts at once. From
+     * the keyboard (S-407) Enter does it, as on desktops, and Space does the click (selects).
      */
     onDoubleClick: (() -> Unit)? = null,
 ): Modifier = this
     .pointerHoverIcon(PointerIcon.Hand)
     .hoverable(interactionSource, enabled)
-    .then(if (onDoubleClick != null && enabled) Modifier.onPreviewKeyEvent { event -> enterOpens(event, onDoubleClick) } else Modifier)
     .then(
         if (onDoubleClick == null) {
             Modifier.clickable(
@@ -86,10 +88,20 @@ fun Modifier.nagClickable(
         },
     )
 
-/** Enter (or the number pad's) opens what has a double-click action, when released; true when it was Enter. */
-private fun enterOpens(event: KeyEvent, open: () -> Unit): Boolean {
-    if (event.key != Key.Enter && event.key != Key.NumPadEnter) return false
-    if (event.type == KeyEventType.KeyUp) open()
+/**
+ * The keys of an item in a list (S-407), as desktops have them: Enter (or the number pad's) opens
+ * it, Space selects it (with Ctrl it adds or removes it, with Shift it takes the range), each when
+ * released. True when the key was one of them, so the player's Space does not play or pause too.
+ */
+private fun listKeys(event: KeyEvent, clickModifiers: ClickModifiers, select: () -> Unit, open: () -> Unit): Boolean {
+    when (event.key) {
+        Key.Enter, Key.NumPadEnter -> if (event.type == KeyEventType.KeyUp) open()
+        Key.Spacebar -> if (event.type == KeyEventType.KeyUp) {
+            clickModifiers.pressed(ctrl = event.isCtrlPressed || event.isMetaPressed, shift = event.isShiftPressed)
+            select()
+        }
+        else -> return false
+    }
     return true
 }
 
@@ -106,7 +118,8 @@ private fun Modifier.doubleClickable(
     onDoubleClick: () -> Unit,
 ): Modifier = composed {
     val last = remember { longArrayOf(0L) }
-    clickable(
+    val clickModifiers = LocalClickModifiers.current
+    (if (enabled) Modifier.onPreviewKeyEvent { event -> listKeys(event, clickModifiers, onClick, onDoubleClick) } else Modifier).clickable(
         interactionSource = interactionSource,
         indication = null,
         enabled = enabled,
