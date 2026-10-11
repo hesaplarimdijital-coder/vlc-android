@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -54,7 +55,6 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuEntry
-import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
@@ -79,8 +79,6 @@ import org.videolan.resources.TAG_ITEM
 import org.videolan.vlc.gui.InfoActivity
 import org.videolan.vlc.media.MediaUtils
 import kotlinx.coroutines.delay
-
-private enum class ViewMode { Grid, Table }
 
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
@@ -108,7 +106,7 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
 private const val RELOAD_WHILE_SCANNING_MS = 4_000L
 
 /** Loads with [load] now and, while a scan runs, again every few seconds. */
-private suspend fun <T> ProduceStateScope<T?>.loadWhileScanning(scanning: Boolean, load: suspend () -> T) {
+internal suspend fun <T> ProduceStateScope<T?>.loadWhileScanning(scanning: Boolean, load: suspend () -> T) {
     while (true) {
         value = load()
         if (!scanning) break
@@ -197,65 +195,6 @@ private fun ShelfTitle(text: String) {
 
 // ---------------------------------------------------------------- Movies
 
-@Composable
-fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
-    val context = LocalContext.current
-    val scan = rememberScanState()
-    val access = LocalLibraryAccess.current
-    val videos by produceState<List<MediaWrapper>?>(null, scan.active, access?.media, access?.folders) {
-        loadWhileScanning(scan.active) { repository.videos() }
-    }
-    val items = remember(videos) { videos?.map { it.toVideoItem() } }
-    val tech by rememberTech(items)
-    val pointer = NagTheme.inputMode == InputMode.Pointer
-    var mode by rememberSaveable { mutableStateOf(if (pointer) ViewMode.Table else ViewMode.Grid) }
-    var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
-    var selected by rememberSaveable { mutableStateOf<String?>(null) }
-    var detailsRequested by rememberSaveable { mutableStateOf(false) }
-    val list = items
-    Column(Modifier.fillMaxSize()) {
-        PageHeader(
-            title = stringResource(R.string.nag_nav_movies),
-            subtitle = list?.let { stringResource(R.string.nag_videos_count, it.size) },
-        ) {
-            if (!list.isNullOrEmpty()) {
-                NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), { mode = ViewMode.Grid }, selected = mode == ViewMode.Grid)
-                NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), { mode = ViewMode.Table }, selected = mode == ViewMode.Table)
-            }
-        }
-        LibraryContent(
-            loading = list == null,
-            empty = list?.isEmpty() == true,
-            scan = scan,
-            emptyTitle = stringResource(R.string.nag_state_no_videos_title),
-            emptyDescription = stringResource(R.string.nag_state_no_videos_desc),
-            onAddFolder = onAddFolder,
-        ) {
-            MoviesContent(
-                items = list.orEmpty(),
-                tech = tech,
-                techState = { item -> techStateOf(item, tech) },
-                grid = mode == ViewMode.Grid,
-                sort = sort,
-                onSortChange = { sort = it },
-                selected = selected,
-                onSelect = { selected = it.key },
-                detailsRequested = detailsRequested,
-                onShowDetails = {
-                    selected = it.key
-                    detailsRequested = true
-                },
-                onCloseDetails = {
-                    selected = null
-                    detailsRequested = false
-                },
-                onPlay = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } },
-                menu = { item, play, info -> item.media?.let { mediaMenu(context, it, play, info) }.orEmpty() },
-            )
-        }
-    }
-}
-
 /** Probed, still probing, or never: the native probe is missing from this build. */
 fun techStateOf(item: VideoItem, tech: Map<String, MediaTech>): TechState = when {
     tech.containsKey(item.key) -> TechState.Ready
@@ -287,6 +226,8 @@ fun MoviesContent(
     onCloseDetails: () -> Unit,
     onPlay: (VideoItem) -> Unit,
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
+    /** Scrolls with the grid above the cards (the "Devam et" shelf); the table has none. */
+    gridHeader: (@Composable () -> Unit)? = null,
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val selectedItem = items.firstOrNull { it.key == selected }
@@ -298,7 +239,7 @@ fun MoviesContent(
                 val click: (VideoItem) -> Unit = { item -> if (pointer) onSelect(item) else onPlay(item) }
                 val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
                 if (grid) {
-                    VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails)
+                    VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader)
                 } else {
                     VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails)
                 }
@@ -340,6 +281,7 @@ private fun VideoGrid(
     menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
     onPlay: (VideoItem) -> Unit,
     onShowDetails: (VideoItem) -> Unit,
+    header: (@Composable () -> Unit)?,
 ) {
     val dimens = NagTheme.dimens
     val pointer = NagTheme.inputMode == InputMode.Pointer
@@ -350,6 +292,7 @@ private fun VideoGrid(
         verticalArrangement = Arrangement.spacedBy(dimens.gapL),
         modifier = Modifier.fillMaxSize(),
     ) {
+        if (header != null) item(key = "header", span = { GridItemSpan(maxLineSpan) }) { header() }
         itemsIndexed(items, key = { _, item -> item.key }) { _, item ->
             ContextMenuArea(
                 entries = { menu(item, { onPlay(item) }, { onShowDetails(item) }) },
@@ -431,7 +374,7 @@ private fun sortVideos(list: List<VideoItem>, sort: TableSort?, tech: Map<String
 }
 
 /** Saves a table sort as one Int: column * 2 + 1 when ascending, -1 for no sort. */
-private val TableSortSaver = Saver<TableSort?, Int>(
+internal val TableSortSaver = Saver<TableSort?, Int>(
     save = { sort -> sort?.let { it.column * 2 + if (it.ascending) 1 else 0 } ?: -1 },
     restore = { saved -> if (saved < 0) null else TableSort(saved / 2, saved % 2 == 1) },
 )

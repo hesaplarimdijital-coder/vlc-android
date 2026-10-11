@@ -43,6 +43,7 @@ import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.MusicScreen
+import app.nagmedar.ui.library.SeriesScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
@@ -166,6 +167,7 @@ private fun NagmedarMain(
                     when (destination) {
                         Destination.Home -> HomeScreen(repository, onAddFolder = addFolder, onBrowse = shellNavigator::navigate)
                         Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
+                        Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,

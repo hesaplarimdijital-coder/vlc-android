@@ -47,7 +47,6 @@
     <!-- Yer tutucular -->
     <string name="nag_coming_title">%1$s %2$s ile geliyor</string>
     <string name="nag_coming_movies">Afişler, teknik bilgiler ve TV uyumluluğuyla filmler.</string>
-    <string name="nag_coming_series">Sezonlara göre gruplanmış diziler ve bölüm ilerlemesi.</string>
     <string name="nag_coming_podcasts">Abonelikler, yeni bölümler ve indirmeler.</string>
     <string name="nag_coming_radio">İnternet radyosu dizini, favoriler ve kayıtlar.</string>
     <string name="nag_coming_device">Bu cihazdaki ve harici disklerdeki klasörler.</string>
@@ -301,4 +300,53 @@
     <string name="nag_tech_commentary">Yorum</string>
     <string name="nag_tech_probing">Dosya okunuyor… ayrıntılar birazdan görünür.</string>
     <string name="nag_tech_unavailable">Bu sürüm teknik ayrıntıları okuyamıyor (medya inceleme kitaplığı yok).</string>
+
+    <!-- S-801: video library -->
+    <string name="nag_view_folders">Klasörler</string>
+    <string name="nag_sort_by">Sırala: %1$s</string>
+    <string name="nag_order_added">Eklenme</string>
+    <string name="nag_order_title">Ad</string>
+    <string name="nag_order_duration">Süre</string>
+    <string name="nag_order_resolution">Çözünürlük</string>
+    <string name="nag_filter_all">Tümü</string>
+    <string name="nag_filter_uhd">4K</string>
+    <string name="nag_filter_hdr">HDR</string>
+    <string name="nag_filter_dv">Dolby Vision</string>
+    <string name="nag_filter_atmos">Atmos</string>
+    <string name="nag_filter_turkish_subtitles">Türkçe altyazılı</string>
+    <string name="nag_filter_unwatched">İzlenmedi</string>
+    <string name="nag_no_matching_films">Bu filtrelere uyan film yok</string>
+    <string name="nag_clear_filters">Filtreleri temizle</string>
+    <string name="nag_video_continue">Devam et</string>
+    <string name="nag_folders_back">Klasörlere dön</string>
+    <string name="nag_series_all">Tüm diziler</string>
+    <string name="nag_next_episode">Sıradaki: %1$s</string>
+    <string name="nag_all_watched">Hepsi izlendi</string>
+    <string name="nag_series_back">Dizilere dön</string>
+    <string name="nag_watched_count">%1$d / %2$d izlendi</string>
+    <string name="nag_continue_episode">Devam et · %1$s</string>
+    <string name="nag_season_label">Sezon %1$d</string>
+    <string name="nag_watched">İzlendi</string>
+    <string name="nag_no_series_title">Henüz dizi yok</string>
+    <string name="nag_no_series_desc">Bölümler S01E02, 1x02 ya da “1. Sezon 2. Bölüm” gibi adlarından ya da Sezon klasörlerinden tanınır.</string>
+    <plurals name="nag_films_count">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d film</item>
+    </plurals>
+    <plurals name="nag_folders_count">
+        <item quantity="one">%d klasör</item>
+        <item quantity="other">%d klasör</item>
+    </plurals>
+    <plurals name="nag_series_count">
+        <item quantity="one">%d dizi</item>
+        <item quantity="other">%d dizi</item>
+    </plurals>
+    <plurals name="nag_episodes_count">
+        <item quantity="one">%d bölüm</item>
+        <item quantity="other">%d bölüm</item>
+    </plurals>
+    <plurals name="nag_seasons_count">
+        <item quantity="one">%d sezon</item>
+        <item quantity="other">%d sezon</item>
+    </plurals>
 </resources>

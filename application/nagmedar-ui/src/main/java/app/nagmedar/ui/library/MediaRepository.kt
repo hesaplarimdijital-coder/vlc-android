@@ -2,11 +2,14 @@ package app.nagmedar.ui.library
 
 import android.content.Context
 import app.nagmedar.ui.onboarding.MediaAccess
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.util.getFromMl
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.Settings
+import java.io.File
 
 /**
  * Read access to the existing medialibrary for the new screens. Queries run on the IO
@@ -22,6 +25,28 @@ class MediaRepository(private val context: Context) {
     suspend fun tracks(): List<MediaWrapper> = context.getFromMl {
         getAudio(Medialibrary.SORT_ARTIST, false, Settings.includeMissing, false)?.toList().orEmpty()
     } + picked(MediaWrapper.TYPE_AUDIO)
+
+    /**
+     * The videos as library items (S-801), with the languages of the subtitle files next to
+     * them: each folder is listed once.
+     */
+    suspend fun videoItems(): List<VideoItem> {
+        val videos = videos()
+        return withContext(Dispatchers.IO) {
+            val listings = HashMap<String, List<String>>()
+            videos.map { media ->
+                val path = media.uri.takeIf { it.scheme == "file" }?.path
+                val sidecars = if (path == null) {
+                    emptySet()
+                } else {
+                    val folder = path.substringBeforeLast('/')
+                    val files = listings.getOrPut(folder) { File(folder).list()?.toList().orEmpty() }
+                    Sidecars.languages(path.substringAfterLast('/'), files)
+                }
+                media.toVideoItem(sidecars)
+            }
+        }
+    }
 
     suspend fun recentVideos(): List<MediaWrapper> = context.getFromMl { recentVideos?.toList().orEmpty() }
 

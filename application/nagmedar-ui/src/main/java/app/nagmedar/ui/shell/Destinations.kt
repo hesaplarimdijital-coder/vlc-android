@@ -25,7 +25,7 @@ enum class Destination(
 ) {
     Home("home", R.string.nag_nav_home, NavSection.Library),
     Movies("movies", R.string.nag_nav_movies, NavSection.Library),
-    Series("series", R.string.nag_nav_series, NavSection.Library, R.string.nag_coming_series, "MVP1"),
+    Series("series", R.string.nag_nav_series, NavSection.Library),
     Music("music", R.string.nag_nav_music, NavSection.Library),
     Podcasts("podcasts", R.string.nag_nav_podcasts, NavSection.Library, R.string.nag_coming_podcasts, "MVP4"),
     Radio("radio", R.string.nag_nav_radio, NavSection.Library, R.string.nag_coming_radio, "MVP4"),

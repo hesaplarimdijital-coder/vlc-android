@@ -43,12 +43,25 @@ data class VideoItem(
     val width: Int,
     val height: Int,
     val media: MediaWrapper? = null,
+    /** The file's path, for episode and folder names (S-801). */
+    val path: String = "",
+    /** When the medialibrary added it, for "Sırala: Eklenme". */
+    val addedAt: Long = 0,
+    /** How often it was watched to the end. */
+    val playCount: Long = 0,
+    /** Languages of the subtitle files next to it (ISO 639-2, "und" when the name has none). */
+    val sidecarSubtitles: Set<String> = emptySet(),
 ) {
     /** Where playback resumes, for "Kaldığı yer". */
     val resumeMs: Long get() = (durationMs * progress).toLong()
+
+    /** The folder it is in. */
+    val folder: String get() = path.substringBeforeLast('/', "")
+
+    val watched: Boolean get() = playCount > 0
 }
 
-fun MediaWrapper.toVideoItem() = VideoItem(
+fun MediaWrapper.toVideoItem(sidecars: Set<String> = emptySet()) = VideoItem(
     key = uri.toString(),
     title = title ?: uri.lastPathSegment.orEmpty(),
     durationMs = length,
@@ -56,6 +69,10 @@ fun MediaWrapper.toVideoItem() = VideoItem(
     width = width,
     height = height,
     media = this,
+    path = uri.path.orEmpty(),
+    addedAt = insertionDate,
+    playCount = seen,
+    sidecarSubtitles = sidecars,
 )
 
 /**

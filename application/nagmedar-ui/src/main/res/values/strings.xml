@@ -47,7 +47,6 @@
     <!-- Placeholders -->
     <string name="nag_coming_title">%1$s arrives in %2$s</string>
     <string name="nag_coming_movies">Movies with posters, technical details and TV compatibility.</string>
-    <string name="nag_coming_series">Series grouped by season, with episode progress.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
     <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
@@ -301,4 +300,53 @@
     <string name="nag_tech_commentary">Commentary</string>
     <string name="nag_tech_probing">Reading the file… the details appear in a moment.</string>
     <string name="nag_tech_unavailable">This build cannot read the technical details (the media probe library is missing).</string>
+
+    <!-- S-801: video library -->
+    <string name="nag_view_folders">Folders</string>
+    <string name="nag_sort_by">Sort: %1$s</string>
+    <string name="nag_order_added">Date added</string>
+    <string name="nag_order_title">Title</string>
+    <string name="nag_order_duration">Length</string>
+    <string name="nag_order_resolution">Resolution</string>
+    <string name="nag_filter_all">All</string>
+    <string name="nag_filter_uhd">4K</string>
+    <string name="nag_filter_hdr">HDR</string>
+    <string name="nag_filter_dv">Dolby Vision</string>
+    <string name="nag_filter_atmos">Atmos</string>
+    <string name="nag_filter_turkish_subtitles">Turkish subtitles</string>
+    <string name="nag_filter_unwatched">Unwatched</string>
+    <string name="nag_no_matching_films">No films match these filters</string>
+    <string name="nag_clear_filters">Clear the filters</string>
+    <string name="nag_video_continue">Continue watching</string>
+    <string name="nag_folders_back">Back to the folders</string>
+    <string name="nag_series_all">All series</string>
+    <string name="nag_next_episode">Up next: %1$s</string>
+    <string name="nag_all_watched">All watched</string>
+    <string name="nag_series_back">Back to the series</string>
+    <string name="nag_watched_count">%1$d of %2$d watched</string>
+    <string name="nag_continue_episode">Continue · %1$s</string>
+    <string name="nag_season_label">Season %1$d</string>
+    <string name="nag_watched">Watched</string>
+    <string name="nag_no_series_title">No series yet</string>
+    <string name="nag_no_series_desc">Episodes are recognised by names like S01E02, 1x02 or “Season 1 Episode 2”, or by Season folders.</string>
+    <plurals name="nag_films_count">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d films</item>
+    </plurals>
+    <plurals name="nag_folders_count">
+        <item quantity="one">%d folder</item>
+        <item quantity="other">%d folders</item>
+    </plurals>
+    <plurals name="nag_series_count">
+        <item quantity="one">%d series</item>
+        <item quantity="other">%d series</item>
+    </plurals>
+    <plurals name="nag_episodes_count">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="nag_seasons_count">
+        <item quantity="one">%d season</item>
+        <item quantity="other">%d seasons</item>
+    </plurals>
 </resources>
