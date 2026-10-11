@@ -69,6 +69,7 @@ import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.techBadge
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -313,15 +314,16 @@ fun MiniPlayer(
                         )
                     }
                 }
-                if (extras) NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous)
+                if (extras) NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, shortcut = ShortcutId.Previous)
                 NagIconButton(
                     if (info.playing) NagIcons.Pause else NagIcons.Play,
                     stringResource(if (info.playing) R.string.nag_pause else R.string.nag_play),
                     actions::togglePlayPause,
                     tint = colors.text,
+                    shortcut = ShortcutId.PlayPause,
                 )
-                NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next)
-                if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop)
+                NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
+                if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
             if (floating) ProgressLine(progress)
         }
@@ -415,11 +417,11 @@ fun TransportBar(
             Spacer(Modifier.width(dimens.gapL))
             Column(Modifier.widthIn(min = 360.dp, max = 640.dp).weight(1.4f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NagIconButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, selected = info.shuffling)
-                    NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous)
+                    NagIconButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, selected = info.shuffling, shortcut = ShortcutId.Shuffle)
+                    NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, shortcut = ShortcutId.Previous)
                     PlayPauseButton(info.playing, actions::togglePlayPause)
-                    NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next)
-                    NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_repeat), actions::cycleRepeat, selected = info.repeating)
+                    NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
+                    NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_repeat), actions::cycleRepeat, selected = info.repeating, shortcut = ShortcutId.Repeat)
                 }
                 SeekRow(info.lengthMs, progress, actions::seekTo, Modifier.fillMaxWidth())
             }
@@ -469,6 +471,7 @@ private fun VolumeControl(volume: Int, onVolume: (Int) -> Unit) {
             onVolume(level)
         },
         selected = muted,
+        shortcut = ShortcutId.Mute,
     )
     NagSlider(
         value = level.coerceIn(0, 100) / 100f,
@@ -492,6 +495,7 @@ private fun PlayPauseButton(playing: Boolean, onClick: () -> Unit) {
             onClick = onClick,
             size = size,
             tint = colors.onAccent,
+            shortcut = ShortcutId.PlayPause,
         )
     }
 }

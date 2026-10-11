@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
@@ -35,6 +36,10 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var density by mutableStateOf(prefs.enumValue(KEY_DENSITY, DensityPreference.Auto))
         private set
     var sidebarCollapsed by mutableStateOf(prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false))
+        private set
+
+    /** S-404: how long the mouse rests before a tooltip shows. */
+    var tooltipDelay by mutableStateOf(prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal))
         private set
 
     /** S-309: the first-run flow was completed or skipped. */
@@ -74,6 +79,11 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     fun updateDensity(value: DensityPreference) {
         density = value
         prefs.edit().putString(KEY_DENSITY, value.name).apply()
+    }
+
+    fun updateTooltipDelay(value: TooltipDelay) {
+        tooltipDelay = value
+        prefs.edit().putString(KEY_TOOLTIP_DELAY, value.name).apply()
     }
 
     fun updateSidebarCollapsed(value: Boolean) {
@@ -124,6 +134,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         const val KEY_ACCENT = "nagmedar_accent"
         const val KEY_DENSITY = "nagmedar_density"
         const val KEY_SIDEBAR_COLLAPSED = "nagmedar_sidebar_collapsed"
+        const val KEY_TOOLTIP_DELAY = "nagmedar_tooltip_delay"
         const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
         const val KEY_PALETTE_RECENT = "nagmedar_palette_recent"
         const val KEY_SHORTCUTS = "nagmedar_shortcuts"

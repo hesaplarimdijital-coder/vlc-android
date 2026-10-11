@@ -190,6 +190,13 @@
     <string name="nag_settings_input">Giriş</string>
     <string name="nag_settings_density">Arayüz yoğunluğu</string>
     <string name="nag_density_auto">Otomatik (fare ya da dokunmaya göre)</string>
+    <!-- İpuçları (S-404) -->
+    <string name="nag_settings_tooltips">İpucu gecikmesi</string>
+    <string name="nag_settings_tooltips_hint">Fare bir düğmenin üzerinde durunca adı ve kısayolu görünür</string>
+    <string name="nag_tooltips_off">Kapalı</string>
+    <string name="nag_tooltips_short">Kısa</string>
+    <string name="nag_tooltips_normal">Normal</string>
+    <string name="nag_tooltips_long">Uzun</string>
     <string name="nag_density_touch">Dokunmatik</string>
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>

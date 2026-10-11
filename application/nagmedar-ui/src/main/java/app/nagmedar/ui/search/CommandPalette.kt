@@ -51,6 +51,8 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -314,6 +316,7 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
             .background(if (selected) colors.selection else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
             .hoverable(hover)
+            .pointerHoverIcon(PointerIcon.Hand)
             .clickable(onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = 10.dp, vertical = 4.dp),

@@ -102,6 +102,8 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
                 ) {
                     if (isSelected) Icon(NagIcons.Check, contentDescription = null, tint = Color(0xFF0E1420), modifier = Modifier.size(14.dp))
                 }
+                // a colour has no words: a resting mouse brings its name (S-404)
+                HoverTooltip(state.hovered && !state.pressed, label)
             }
         }
     }

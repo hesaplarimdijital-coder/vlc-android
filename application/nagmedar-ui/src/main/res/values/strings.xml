@@ -190,6 +190,13 @@
     <string name="nag_settings_input">Input</string>
     <string name="nag_settings_density">Interface density</string>
     <string name="nag_density_auto">Automatic (follows mouse or touch)</string>
+    <!-- Tooltips (S-404) -->
+    <string name="nag_settings_tooltips">Tooltip delay</string>
+    <string name="nag_settings_tooltips_hint">Resting the mouse on a button shows its name and keys</string>
+    <string name="nag_tooltips_off">Off</string>
+    <string name="nag_tooltips_short">Short</string>
+    <string name="nag_tooltips_normal">Normal</string>
+    <string name="nag_tooltips_long">Long</string>
     <string name="nag_density_touch">Touch</string>
     <string name="nag_density_pointer">Mouse and keyboard</string>
     <string name="nag_settings_about">About</string>

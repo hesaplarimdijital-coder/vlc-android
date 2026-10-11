@@ -23,13 +23,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.theme.NagTheme
 
-/** Square icon button with hover, press and focus states. Its size never drops below the touch or pointer target. */
+/**
+ * Square icon button with hover, press and focus states. Its size never drops below the touch or
+ * pointer target. A mouse resting on it shows its name and, for a [shortcut], the keys (S-404).
+ */
 @Composable
 fun NagIconButton(
     icon: ImageVector,
@@ -41,10 +47,12 @@ fun NagIconButton(
     size: Dp = NagTheme.dimens.minTarget.coerceAtLeast(NagTheme.dimens.controlHeight),
     iconSize: Dp = NagTheme.dimens.icon,
     tint: Color = if (selected) NagTheme.colors.onSelection else NagTheme.colors.textSecondary,
+    shortcut: ShortcutId? = null,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(NagTheme.dimens.radiusControl)
+    val keys = shortcut?.let { ShortcutRegistry.chordLabel(it, LocalContext.current.resources) }
     Box(
         modifier = modifier
             .size(size)
@@ -59,6 +67,7 @@ fun NagIconButton(
             tint = if (enabled) tint else tint.copy(alpha = 0.4f),
             modifier = Modifier.size(iconSize),
         )
+        HoverTooltip(state.hovered && !state.pressed, contentDescription, keys)
     }
 }
 

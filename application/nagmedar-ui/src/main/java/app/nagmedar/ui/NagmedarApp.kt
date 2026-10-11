@@ -32,6 +32,7 @@ import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.LocalTooltipDelay
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
@@ -165,7 +166,11 @@ private fun NagmedarMain(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
         val nowPlaying = rememberNowPlaying()
-        CompositionLocalProvider(LocalLibraryAccess provides libraryAccess, LocalPaneWidths provides prefs) {
+        CompositionLocalProvider(
+            LocalLibraryAccess provides libraryAccess,
+            LocalPaneWidths provides prefs,
+            LocalTooltipDelay provides prefs.tooltipDelay.millis,
+        ) {
             NagmedarShell(
                 widthClass = widthClass,
                 sidebarCollapsed = prefs.sidebarCollapsed,

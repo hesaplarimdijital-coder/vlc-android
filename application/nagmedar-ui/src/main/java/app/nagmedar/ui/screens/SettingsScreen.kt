@@ -38,6 +38,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.SwatchChoice
+import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.theme.Accent
@@ -86,6 +87,18 @@ fun SettingsScreen(
                     )
                 }
                 Text(stringResource(R.string.nag_density_auto), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
+                SettingRow(stringResource(R.string.nag_settings_tooltips), subtitle = stringResource(R.string.nag_settings_tooltips_hint)) {
+                    SegmentedChoice(
+                        options = listOf(
+                            TooltipDelay.Off to stringResource(R.string.nag_tooltips_off),
+                            TooltipDelay.Short to stringResource(R.string.nag_tooltips_short),
+                            TooltipDelay.Normal to stringResource(R.string.nag_tooltips_normal),
+                            TooltipDelay.Long to stringResource(R.string.nag_tooltips_long),
+                        ),
+                        selected = prefs.tooltipDelay,
+                        onSelect = prefs::updateTooltipDelay,
+                    )
+                }
             }
         }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }

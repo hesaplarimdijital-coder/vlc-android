@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.HoverTooltip
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.PaneDivider
@@ -49,6 +50,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.theme.NagTheme
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
@@ -309,6 +311,7 @@ private fun SidebarColumn(
                     icon = if (collapsed) NagIcons.ChevronRight else NagIcons.ChevronLeft,
                     contentDescription = stringResource(if (collapsed) R.string.nag_sidebar_expand else R.string.nag_sidebar_collapse),
                     onClick = onToggleCollapsed,
+                    shortcut = ShortcutId.ToggleSidebar,
                 )
             }
             if (collapsed) {
@@ -366,6 +369,9 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
             if (badge != null) {
                 Text(badge, style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1)
             }
+        } else {
+            // only the icon shows: a resting mouse brings the name (S-404)
+            HoverTooltip(state.hovered && !state.pressed, label, badge)
         }
     }
 }
