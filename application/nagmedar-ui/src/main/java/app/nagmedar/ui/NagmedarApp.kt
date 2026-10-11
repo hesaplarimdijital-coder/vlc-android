@@ -72,7 +72,9 @@ import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
+import app.nagmedar.ui.screens.AboutScreen
 import app.nagmedar.ui.screens.SettingsScreen
+import app.nagmedar.ui.screens.rememberThirdParties
 import app.nagmedar.ui.input.DropPlan
 import app.nagmedar.ui.input.DropTargets
 import app.nagmedar.ui.input.DroppedFile
@@ -106,7 +108,6 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.StartActivity
-import org.videolan.vlc.gui.LibrariesActivity
 import org.videolan.vlc.gui.SecondaryActivity
 import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.media.MediaUtils
@@ -258,10 +259,11 @@ private fun NagmedarMain(
                         Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
+                        Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
-                            onOpenLicences = { context.startActivity(Intent(context, LibrariesActivity::class.java)) },
+                            onOpenAbout = { shellNavigator.navigate(Destination.About) },
                             onShowFirstRun = { prefs.updateFirstRunDone(false) },
                             listState = settingsList,
                             undo = undo,
@@ -312,6 +314,11 @@ private fun NagmedarMain(
             },
         )
     }
+}
+
+/** A web page in the browser (S-209: the source code, the licences); nothing when there is none. */
+fun openLink(context: Context, url: String) {
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
 }
 
 /**

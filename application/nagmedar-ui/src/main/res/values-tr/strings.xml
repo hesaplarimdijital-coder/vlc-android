@@ -216,7 +216,6 @@
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>
     <string name="nag_settings_classic_settings">Tüm ayarlar (klasik arayüz)</string>
-    <string name="nag_settings_licences">Lisanslar</string>
 
     <!-- Shortcuts and actions -->
     <string name="nag_shuffle">Karıştır</string>
@@ -382,6 +381,34 @@
         <item quantity="other">%d öğe</item>
     </plurals>
     <string name="nag_select">Seç</string>
+    <!-- Hakkında ve lisanslar (S-209) -->
+    <string name="nag_about_open">Hakkında ve lisanslar</string>
+    <string name="nag_about_versions">Sürüm %1$s · libVLC %2$s · medialibrary %3$s</string>
+    <string name="nag_about_tagline">VideoLAN\'ın VLC for Android\'i üzerine kurulu özgür bir medya oynatıcı: her dosyayı ve akışı oynatır, masaüstünde ve dokunmatikte aynı rahatlıkla.</string>
+    <string name="nag_about_free_title">Özgür yazılım</string>
+    <string name="nag_about_free_text">Nağmedar, GNU Genel Kamu Lisansı\'nın 2. sürümü ya da (seçiminize göre) daha sonraki bir sürümüyle dağıtılır: kaynak kodunu alabilir, inceleyebilir, değiştirebilir ve paylaşabilirsiniz. Hiçbir garanti verilmez.</string>
+    <string name="nag_about_source">Kaynak kodu</string>
+    <string name="nag_about_gpl">GPL metni</string>
+    <string name="nag_about_gpl_title">GNU Genel Kamu Lisansı 2.0</string>
+    <string name="nag_about_issues">Sorun bildir</string>
+    <string name="nag_about_people_title">Katkıda bulunanlar</string>
+    <string name="nag_about_people_vlc">VideoLAN ve VLC yazarları</string>
+    <string name="nag_about_people_vlc_desc">VLC for Android, libVLC ve medialibrary: Nağmedar\'ın üzerine kurulduğu her şey</string>
+    <string name="nag_about_people_nagmedar">Nağmedar katkıcıları</string>
+    <string name="nag_about_people_nagmedar_desc">Bu çatalın arayüzü, laboratuvarı ve yerel eklentileri</string>
+    <string name="nag_about_all_contributors">Tüm katkıcılar</string>
+    <string name="nag_about_libraries_title">Üçüncü taraf yazılımlar</string>
+    <plurals name="nag_about_libraries_count">
+        <item quantity="one">%d kütüphane</item>
+        <item quantity="other">%d kütüphane</item>
+    </plurals>
+    <string name="nag_about_libraries_hint">Nağmedar\'ın içindeki kütüphaneler ve lisansları; birine dokunun ya da tıklayın, lisansı açılsın.</string>
+    <string name="nag_about_filter">Kütüphane ya da lisans ara</string>
+    <string name="nag_about_none_found">Eşleşen kütüphane yok</string>
+    <string name="nag_about_opened">Açık</string>
+    <string name="nag_about_closed">Kapalı</string>
+    <string name="nag_about_no_text">Kamu malı: lisans metni yok.</string>
+    <string name="nag_about_full_license">Lisansın tamamı</string>
     <string name="nag_more_actions">Diğer işlemler</string>
     <string name="nag_play_next">Sonra çal</string>
     <string name="nag_add_to_queue">Oynatma sırasına ekle</string>

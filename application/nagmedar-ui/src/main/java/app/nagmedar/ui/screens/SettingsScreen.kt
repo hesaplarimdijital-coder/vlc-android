@@ -61,7 +61,8 @@ const val SETTINGS_SHORTCUTS_ITEM = 3
 fun SettingsScreen(
     prefs: NagmedarPreferences,
     onOpenClassicSettings: () -> Unit,
-    onOpenLicences: () -> Unit,
+    /** S-209: about and licences. */
+    onOpenAbout: () -> Unit,
     onShowFirstRun: () -> Unit,
     listState: LazyListState = rememberLazyListState(),
     /** Takes back a reset, a preset or an import of the shortcuts (S-402). */
@@ -103,8 +104,8 @@ fun SettingsScreen(
                 )
                 Spacer(Modifier.height(dimens.gapM))
                 Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                    NagButton(stringResource(R.string.nag_about_open), onOpenAbout, primary = true)
                     NagButton(stringResource(R.string.nag_settings_classic_settings), onOpenClassicSettings)
-                    NagButton(stringResource(R.string.nag_settings_licences), onOpenLicences)
                 }
             }
         }
