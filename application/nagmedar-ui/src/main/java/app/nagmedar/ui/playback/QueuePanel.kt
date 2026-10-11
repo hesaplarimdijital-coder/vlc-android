@@ -183,6 +183,7 @@ fun QueuePanel(
                         onRemove = { remove(index) },
                         // by touch the swipe; with a pointer the menu and Delete
                         swipe = touch,
+                        color = colors.chrome,
                         actions = listOfNotNull(
                             CustomAccessibilityAction(up) { moveUp(); true }.takeIf { position > 0 },
                             CustomAccessibilityAction(down) { moveDown(); true }.takeIf { position < upcoming.lastIndex },

@@ -66,6 +66,8 @@ fun SwipeToRemove(
     swipe: Boolean = true,
     /** The item's other actions for screen readers. */
     actions: List<CustomAccessibilityAction> = emptyList(),
+    /** What the item is drawn on: it slides over the danger colour as an opaque row. */
+    color: Color = NagTheme.colors.background,
     content: @Composable () -> Unit,
 ) {
     val colors = NagTheme.colors
@@ -99,6 +101,7 @@ fun SwipeToRemove(
         Box(
             Modifier
                 .offset { IntOffset(offset.value.roundToInt(), 0) }
+                .background(color)
                 .pointerInput(swipe, toStart) {
                     if (!swipe) return@pointerInput
                     awaitEachGesture {
