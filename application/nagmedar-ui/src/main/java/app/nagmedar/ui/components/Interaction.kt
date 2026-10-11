@@ -17,6 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
@@ -56,11 +62,15 @@ fun Modifier.nagClickable(
     enabled: Boolean = true,
     role: Role? = Role.Button,
     onClickLabel: String? = null,
-    /** A second action on double click (play a selected item); a single click then waits for it. */
+    /**
+     * A second action on double click (play a selected item); a single click then waits for it.
+     * From the keyboard (S-407) Enter does it at once, as on desktops, and Space selects.
+     */
     onDoubleClick: (() -> Unit)? = null,
 ): Modifier = this
     .pointerHoverIcon(PointerIcon.Hand)
     .hoverable(interactionSource, enabled)
+    .then(if (onDoubleClick != null && enabled) Modifier.onPreviewKeyEvent { event -> enterOpens(event, onDoubleClick) } else Modifier)
     .then(
         if (onDoubleClick == null) {
             Modifier.clickable(
@@ -75,6 +85,13 @@ fun Modifier.nagClickable(
             Modifier.doubleClickable(interactionSource, enabled, onClickLabel, role, onClick, onDoubleClick)
         },
     )
+
+/** Enter (or the number pad's) opens what has a double-click action, when released; true when it was Enter. */
+private fun enterOpens(event: KeyEvent, open: () -> Unit): Boolean {
+    if (event.key != Key.Enter && event.key != Key.NumPadEnter) return false
+    if (event.type == KeyEventType.KeyUp) open()
+    return true
+}
 
 /**
  * A click that acts at once and a second click within the double-tap time that opens: desktop

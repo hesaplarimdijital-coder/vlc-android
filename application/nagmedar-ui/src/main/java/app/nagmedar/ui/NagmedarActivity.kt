@@ -157,8 +157,15 @@ class NagmedarActivity : ComponentActivity() {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
             if (shortcut != null && (shortcut.chord?.hasModifier != true || shortcut.textFirst) && actions?.perform(shortcut.id) == true) return true
         }
-        // an Esc nothing else used lets go of the screen's selection (S-405)
-        if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers() && actions?.escape() == true) return true
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
+            // an Esc nothing else used lets go of the screen's selection (S-405), else goes back (S-407):
+            // closes the details, leaves a folder, returns to the screen before; never leaves the app
+            if (actions?.escape() == true) return true
+            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+                onBackPressedDispatcher.onBackPressed()
+                return true
+            }
+        }
         return super.onKeyDown(keyCode, event)
     }
 

@@ -61,6 +61,7 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
 import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.library.audioFormatLabel
 import app.nagmedar.ui.library.formatDuration
@@ -279,6 +280,7 @@ fun MiniPlayer(
                         Modifier
                             .fillMaxSize()
                             .padding(vertical = 4.dp)
+                            .focusRing(openState, RoundedCornerShape(dimens.radiusControl))
                             .background(if (openState.hovered) colors.hover else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
                             .nagClickable(open, actions::openPlayer, onClickLabel = stringResource(R.string.nag_open_player)),
                         verticalAlignment = Alignment.CenterVertically,
@@ -402,6 +404,7 @@ fun TransportBar(
             Row(
                 modifier = Modifier
                     .weight(1f)
+                    .focusRing(openState, RoundedCornerShape(dimens.radiusControl))
                     .background(if (openState.hovered) colors.hover else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
                     .nagClickable(open, actions::openPlayer, onClickLabel = openLabel)
                     .padding(4.dp),

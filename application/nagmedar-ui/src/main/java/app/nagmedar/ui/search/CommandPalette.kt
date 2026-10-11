@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -317,6 +318,8 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             .background(if (selected) colors.selection else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
             .hoverable(hover)
             .pointerHoverIcon(PointerIcon.Hand)
+            // the field moves through the rows (↑↓); Tab changes the scope, so rows take no focus
+            .focusProperties { canFocus = false }
             .clickable(onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = 10.dp, vertical = 4.dp),
