@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.library.MovieFilter
 import app.nagmedar.ui.library.MovieOrder
 import app.nagmedar.ui.library.MovieSamples
@@ -30,7 +31,10 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** S-801: films with chips, the shelf and folders; series and one show; in a DeX window and on a phone. */
+/**
+ * S-801: films with chips, the shelf and folders; series and one show; in a DeX window and on a
+ * phone. S-405: three films selected, the selection bar above them.
+ */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class VideoLibraryScreenshotTest {
@@ -56,7 +60,13 @@ class VideoLibraryScreenshotTest {
     }
 
     @Composable
-    private fun films(view: MoviesView, filters: Set<MovieFilter> = emptySet(), folder: String? = null, order: MovieOrder = MovieOrder.Added) {
+    private fun films(
+        view: MoviesView,
+        filters: Set<MovieFilter> = emptySet(),
+        folder: String? = null,
+        order: MovieOrder = MovieOrder.Added,
+        selection: MultiSelection? = null,
+    ) {
         val library = MovieSamples.library
         MoviesHeader(library, view, {}, order, {}, {})
         MoviesLibrary(
@@ -75,7 +85,13 @@ class VideoLibraryScreenshotTest {
             onShowDetails = {},
             onPlay = {},
             menu = { _, _, _ -> emptyList() },
+            selection = selection,
         )
+    }
+
+    /** Three films selected with Ctrl and Shift (S-405). */
+    private fun threeSelected() = MultiSelection().apply {
+        select(setOf(MovieSamples.sessizLiman.key, MovieSamples.demirVadi.key, MovieSamples.camSehir.key))
     }
 
     @Composable
@@ -106,6 +122,21 @@ class VideoLibraryScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun filmsPhone() = capture("films-phone-dark", ThemeMode.Dark, InputMode.Touch) { films(MoviesView.Grid) }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun filmsSelectedDark() = capture("films-selection-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
+        films(MoviesView.Grid, selection = threeSelected())
+    }
+
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun filmsSelectedTableLight() = capture("films-selection-tablet-light", ThemeMode.Light, InputMode.Pointer) {
+        films(MoviesView.Table, selection = threeSelected())
+    }
+
+    @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
+    fun filmsSelectedPhone() = capture("films-selection-phone-dark", ThemeMode.Dark, InputMode.Touch) {
+        films(MoviesView.Grid, selection = threeSelected())
+    }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun seriesDark() = capture("series-dex-dark", ThemeMode.Dark, InputMode.Pointer) { series() }

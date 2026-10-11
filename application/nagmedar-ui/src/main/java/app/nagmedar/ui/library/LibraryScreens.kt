@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
@@ -50,8 +52,13 @@ import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
+import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MultiSelection
+import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.SelectionBar
+import app.nagmedar.ui.components.SelectionCommands
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
@@ -59,6 +66,9 @@ import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.rememberMultiSelection
+import app.nagmedar.ui.components.rememberRubberBand
+import app.nagmedar.ui.components.rubberBandOverlay
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
@@ -241,6 +251,8 @@ fun VideoDetailsPanes(
 /**
  * The movies as a grid of cards or a dense table (S-802). With a pointer a click selects and a
  * double click plays; by touch a tap plays; the menu's "Medya bilgisi" asks for the details.
+ * With a [selection] (S-405), Ctrl+click, Shift+click, Ctrl+A and a rubber band over the grid
+ * select several.
  */
 @Composable
 fun MoviesContent(
@@ -256,14 +268,25 @@ fun MoviesContent(
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
     /** Scrolls with the grid above the cards (the "Devam et" shelf); the table has none. */
     gridHeader: (@Composable () -> Unit)? = null,
+    selection: MultiSelection? = null,
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
-    val click: (VideoItem) -> Unit = { item -> if (pointer) onSelect(item) else onPlay(item) }
+    val modifiers = LocalClickModifiers.current
+    val click: (VideoItem, List<VideoItem>) -> Unit = { item, shown ->
+        if (pointer) {
+            val (ctrl, shift) = modifiers.take()
+            selection?.click(item.key, shown.map { it.key }, ctrl, shift)
+            onSelect(item)
+        } else {
+            onPlay(item)
+        }
+    }
     val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
+    val isSelected: (VideoItem) -> Boolean = { item -> selection?.contains(item.key) ?: (item.key == selected) }
     if (grid) {
-        VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader)
+        VideoGrid(items, tech, isSelected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader, selection)
     } else {
-        VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails)
+        VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails, selection)
     }
 }
 
@@ -271,24 +294,29 @@ fun MoviesContent(
 private fun VideoGrid(
     items: List<VideoItem>,
     tech: Map<String, MediaTech>,
-    selected: String?,
-    onClick: (VideoItem) -> Unit,
+    isSelected: (VideoItem) -> Boolean,
+    onClick: (VideoItem, List<VideoItem>) -> Unit,
     onDoubleClick: ((VideoItem) -> Unit)?,
     menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
     onPlay: (VideoItem) -> Unit,
     onShowDetails: (VideoItem) -> Unit,
     header: (@Composable () -> Unit)?,
+    selection: MultiSelection?,
 ) {
     val dimens = NagTheme.dimens
     val pointer = NagTheme.inputMode == InputMode.Pointer
+    val band = rememberRubberBand()
+    if (selection != null) SelectionCommands(selection, items.map { it.key })
     LazyVerticalGrid(
         columns = GridCells.Adaptive(if (pointer) 190.dp else 220.dp),
         contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
         horizontalArrangement = Arrangement.spacedBy(dimens.gapL),
         verticalArrangement = Arrangement.spacedBy(dimens.gapL),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(if (selection != null && pointer) band.area(selection).rubberBandOverlay(band) else Modifier),
     ) {
-        if (header != null) item(key = "header", span = { GridItemSpan(maxLineSpan) }) { header() }
+        if (header != null) item(key = "header", span = { GridItemSpan(maxLineSpan) }) { Box(band.keepOut("header")) { header() } }
         itemsIndexed(items, key = { _, item -> item.key }) { _, item ->
             ContextMenuArea(
                 entries = { menu(item, { onPlay(item) }, { onShowDetails(item) }) },
@@ -297,9 +325,9 @@ private fun VideoGrid(
                 VideoCard(
                     item,
                     tech[item.key],
-                    Modifier.fillMaxWidth(),
-                    selected = item.key == selected,
-                    onClick = { onClick(item) },
+                    Modifier.fillMaxWidth().then(band.item(item.key)),
+                    selected = isSelected(item),
+                    onClick = { onClick(item, items) },
                     onDoubleClick = onDoubleClick?.let { open -> { open(item) } },
                 )
             }
@@ -314,21 +342,24 @@ private fun VideoTable(
     sort: TableSort?,
     onSortChange: (TableSort) -> Unit,
     selected: String?,
-    onClick: (VideoItem) -> Unit,
+    onClick: (VideoItem, List<VideoItem>) -> Unit,
     onDoubleClick: ((VideoItem) -> Unit)?,
     menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
     onPlay: (VideoItem) -> Unit,
     onShowDetails: (VideoItem) -> Unit,
+    selection: MultiSelection?,
 ) {
     val sorted = remember(items, sort, tech) { sortVideos(items, sort, tech) }
+    if (selection != null) SelectionCommands(selection, sorted.map { it.key })
     DenseTable(
         columns = videoColumns(tech),
         rows = sorted,
         key = { it.key },
         selectedKey = selected,
+        selectedKeys = selection?.keys,
         sort = sort,
         onSortChange = onSortChange,
-        onRowClick = { item, _ -> onClick(item) },
+        onRowClick = { item, _ -> onClick(item, sorted) },
         onRowDoubleClick = onDoubleClick?.let { open -> { item, _ -> open(item) } },
         rowMenu = { item, _ -> menu(item, { onPlay(item) }, { onShowDetails(item) }) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
@@ -460,6 +491,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
         loadWhileScanning(scan.active) { repository.tracks() }
     }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
+    val selection = rememberMultiSelection()
     val list = tracks
     val unknown = stringResource(R.string.nag_unknown_artist)
     Column(Modifier.fillMaxSize()) {
@@ -485,16 +517,44 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     TableColumn<MediaWrapper>(durationCol, ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { formatDuration(it.length) },
                 )
             }
-            DenseTable(
-                columns = columns,
-                rows = sorted,
-                key = { it.id },
-                sort = sort,
-                onSortChange = { sort = it },
-                onRowClick = { _, index -> PlaybackActions.playList(context, sorted, index) },
-                rowMenu = { media, index -> mediaMenu(context, media, play = { PlaybackActions.playList(context, sorted, index) }) },
-                rowMenuLabel = stringResource(R.string.nag_more_actions),
-            )
+            // with a pointer a click selects (Ctrl, Shift, Ctrl+A for several) and a double click plays (S-405)
+            val pointer = NagTheme.inputMode == InputMode.Pointer
+            val modifiers = LocalClickModifiers.current
+            LaunchedEffect(sorted) { selection.retain(sorted.map { it.id }) }
+            SelectionCommands(selection, sorted.map { it.id })
+            Column(Modifier.fillMaxSize()) {
+                if (selection.count > 1) {
+                    val chosen = sorted.filter { it.id in selection }
+                    SelectionBar(
+                        text = pluralStringResource(R.plurals.nag_selected_tracks, chosen.size, chosen.size),
+                        onClear = selection::clear,
+                        clearLabel = stringResource(R.string.nag_selection_clear),
+                        modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
+                    ) {
+                        NagButton(stringResource(R.string.nag_selection_play), { PlaybackActions.playList(context, chosen, 0) }, primary = true)
+                        NagButton(stringResource(R.string.nag_selection_queue), { PlaybackActions.appendList(context, chosen) })
+                    }
+                }
+                DenseTable(
+                    columns = columns,
+                    rows = sorted,
+                    key = { it.id },
+                    selectedKeys = selection.keys,
+                    sort = sort,
+                    onSortChange = { sort = it },
+                    onRowClick = { media, index ->
+                        if (pointer) {
+                            val (ctrl, shift) = modifiers.take()
+                            selection.click(media.id, sorted.map { it.id }, ctrl, shift)
+                        } else {
+                            PlaybackActions.playList(context, sorted, index)
+                        }
+                    },
+                    onRowDoubleClick = if (pointer) ({ _, index -> PlaybackActions.playList(context, sorted, index) }) else null,
+                    rowMenu = { media, index -> mediaMenu(context, media, play = { PlaybackActions.playList(context, sorted, index) }) },
+                    rowMenuLabel = stringResource(R.string.nag_more_actions),
+                )
+            }
         }
     }
 }

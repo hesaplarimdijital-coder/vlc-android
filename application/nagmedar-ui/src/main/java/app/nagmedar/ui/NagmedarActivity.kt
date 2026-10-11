@@ -74,7 +74,8 @@ class NagmedarActivity : ComponentActivity() {
         if (actions?.menuBarKey(event.keyCode, down, rtl) == true) return true
         if (event.action == KeyEvent.ACTION_DOWN && (event.isCtrlPressed || event.isAltPressed || event.isMetaPressed)) {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
-            if (shortcut != null && actions?.perform(shortcut.id) == true) return true
+            // Ctrl+A and Ctrl+Z go to a focused text field first (onKeyDown)
+            if (shortcut != null && !shortcut.textFirst && actions?.perform(shortcut.id) == true) return true
         }
         return super.dispatchKeyEvent(event)
     }
@@ -89,8 +90,10 @@ class NagmedarActivity : ComponentActivity() {
         // the plain arrows move the focus in the shell; bound to a shortcut (mpv's seek) they act in the player
         if (!ShortcutRegistry.recording && !(isArrow(keyCode) && event.hasNoModifiers())) {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
-            if (shortcut != null && shortcut.chord?.hasModifier != true && actions?.perform(shortcut.id) == true) return true
+            if (shortcut != null && (shortcut.chord?.hasModifier != true || shortcut.textFirst) && actions?.perform(shortcut.id) == true) return true
         }
+        // an Esc nothing else used lets go of the screen's selection (S-405)
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers() && actions?.escape() == true) return true
         return super.onKeyDown(keyCode, event)
     }
 

@@ -212,6 +212,19 @@
     <string name="nag_sc_new_window">Open in new window</string>
     <string name="nag_sc_media_info">Media information</string>
     <string name="nag_sc_undo">Undo</string>
+    <!-- Multiple selection (S-405) -->
+    <string name="nag_sc_select_all">Select all</string>
+    <plurals name="nag_selected_films">
+        <item quantity="one">%d film selected</item>
+        <item quantity="other">%d films selected</item>
+    </plurals>
+    <plurals name="nag_selected_tracks">
+        <item quantity="one">%d track selected</item>
+        <item quantity="other">%d tracks selected</item>
+    </plurals>
+    <string name="nag_selection_play">Play</string>
+    <string name="nag_selection_queue">Add to queue</string>
+    <string name="nag_selection_clear">Clear the selection</string>
     <string name="nag_sc_play_pause">Play / pause</string>
     <string name="nag_sc_stop">Stop</string>
     <string name="nag_sc_previous">Previous</string>

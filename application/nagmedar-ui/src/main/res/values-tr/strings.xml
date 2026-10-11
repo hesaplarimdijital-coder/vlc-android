@@ -212,6 +212,19 @@
     <string name="nag_sc_new_window">Yeni pencerede aç</string>
     <string name="nag_sc_media_info">Medya bilgisi</string>
     <string name="nag_sc_undo">Geri al</string>
+    <!-- Çoklu seçim (S-405) -->
+    <string name="nag_sc_select_all">Tümünü seç</string>
+    <plurals name="nag_selected_films">
+        <item quantity="one">%d film seçili</item>
+        <item quantity="other">%d film seçili</item>
+    </plurals>
+    <plurals name="nag_selected_tracks">
+        <item quantity="one">%d parça seçili</item>
+        <item quantity="other">%d parça seçili</item>
+    </plurals>
+    <string name="nag_selection_play">Oynat</string>
+    <string name="nag_selection_queue">Sıraya ekle</string>
+    <string name="nag_selection_clear">Seçimi kaldır</string>
     <string name="nag_sc_play_pause">Oynat / duraklat</string>
     <string name="nag_sc_stop">Durdur</string>
     <string name="nag_sc_previous">Önceki</string>

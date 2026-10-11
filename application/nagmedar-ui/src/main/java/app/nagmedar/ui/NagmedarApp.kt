@@ -32,7 +32,10 @@ import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.LocalTooltipDelay
+import app.nagmedar.ui.components.ScreenCommands
+import app.nagmedar.ui.components.TrackClickModifiers
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
@@ -113,7 +116,10 @@ fun NagmedarApp(
                 .windowInsetsPadding(WindowInsets.safeDrawing),
         ) {
             if (prefs.firstRunDone) {
-                NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown)
+                // Ctrl and Shift held with a click select several items (S-405)
+                TrackClickModifiers {
+                    NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown)
+                }
             } else {
                 FirstRunHost(prefs, onDone = {})
             }
@@ -139,8 +145,9 @@ private fun NagmedarMain(
     val menuBar = rememberMenuBarState()
     var paletteOpen by remember { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    val screenCommands = remember { ScreenCommands() }
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, menuBar, onOpenFile, openPalette = { paletteOpen = true }) { shortcutListRequests++ }
+        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, onOpenFile, openPalette = { paletteOpen = true }) { shortcutListRequests++ }
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
@@ -170,6 +177,7 @@ private fun NagmedarMain(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,
             LocalTooltipDelay provides prefs.tooltipDelay.millis,
+            LocalScreenCommands provides screenCommands,
         ) {
             NagmedarShell(
                 widthClass = widthClass,
@@ -279,6 +287,7 @@ class AppActions(
     private val navigator: ShellNavigator,
     private val undo: UndoBarState,
     private val menuBar: MenuBarState,
+    private val screenCommands: ScreenCommands,
     private val openFile: () -> Unit,
     private val openPalette: () -> Unit,
     private val showShortcutList: () -> Unit,
@@ -290,6 +299,9 @@ class AppActions(
 
     /** The window's keys while the menu bar has the keyboard. */
     fun menuBarKey(keyCode: Int, down: Boolean, rtl: Boolean): Boolean = menuBar.onKey(keyCode, down, rtl)
+
+    /** An Esc nothing else used: the screen lets go of its selection (S-405). */
+    fun escape(): Boolean = screenCommands.escape()
 
     fun leaveMenuBar() {
         if (menuBar.hasKeyboard) menuBar.leave()
@@ -311,6 +323,7 @@ class AppActions(
             ShortcutId.CommandPalette -> openPalette()
             ShortcutId.OpenNetwork -> openClassic(context, SecondaryActivity.STREAMS)
             ShortcutId.Undo -> return undo.undoLatest()
+            ShortcutId.SelectAll -> return screenCommands.selectAll()
             ShortcutId.PlayPause -> PlaybackActions.togglePlayPause()
             ShortcutId.Stop -> service?.stop()
             ShortcutId.Previous -> PlaybackActions.previous()

@@ -61,6 +61,9 @@ object PlaybackActions {
 
     fun playList(context: Context, list: List<MediaWrapper>, position: Int) = MediaUtils.openList(context, list, position)
 
+    /** Adds [list] after what is playing (S-405: the selection bar's "Sıraya ekle"). */
+    fun appendList(context: Context, list: List<MediaWrapper>) = MediaUtils.appendMedia(context, list)
+
     fun togglePlayPause() {
         val service = PlaybackService.instance ?: return
         if (service.isPlaying) service.pause() else service.play()

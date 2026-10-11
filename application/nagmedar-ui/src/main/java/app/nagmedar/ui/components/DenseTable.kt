@@ -71,6 +71,8 @@ fun <T> DenseTable(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     selectedKey: Any? = null,
+    /** Several rows selected (S-405); [selectedKey] counts when null. */
+    selectedKeys: Set<Any>? = null,
     sort: TableSort? = null,
     onSortChange: ((TableSort) -> Unit)? = null,
     rowMenu: ((T, Int) -> List<MenuEntry>)? = null,
@@ -100,7 +102,7 @@ fun <T> DenseTable(
                     TableRow(
                         columns = columns,
                         item = item,
-                        selected = selectedKey != null && key(item) == selectedKey,
+                        selected = selectedKeys?.contains(key(item)) ?: (selectedKey != null && key(item) == selectedKey),
                         onClick = { onRowClick(item, index) },
                         onDoubleClick = onRowDoubleClick?.let { open -> { open(item, index) } },
                         modifier = Modifier,

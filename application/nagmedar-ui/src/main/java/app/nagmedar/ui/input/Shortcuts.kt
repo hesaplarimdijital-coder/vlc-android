@@ -93,7 +93,7 @@ enum class ShortcutGroup(@StringRes val title: Int) {
 enum class ShortcutScope { Global, Player }
 
 enum class ShortcutId {
-    OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo,
+    OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack,
@@ -111,6 +111,8 @@ data class Shortcut(
     /** The keys; null when the user took them away (S-402). */
     val chord: KeyChord?,
     val scope: ShortcutScope = ShortcutScope.Global,
+    /** A focused text field uses the keys first (Ctrl+A, Ctrl+Z): the shortcut only gets them when it did not. */
+    val textFirst: Boolean = false,
 )
 
 /**
@@ -127,7 +129,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.OpenNetwork, ShortcutGroup.Media, R.string.nag_sc_open_network, KeyChord(Key.N, ctrl = true)),
         Shortcut(ShortcutId.OpenInNewWindow, ShortcutGroup.Media, R.string.nag_sc_new_window, KeyChord(Key.N, ctrl = true, shift = true)),
         Shortcut(ShortcutId.MediaInfo, ShortcutGroup.Media, R.string.nag_sc_media_info, KeyChord(Key.I, ctrl = true)),
-        Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true)),
+        Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true), textFirst = true),
+        Shortcut(ShortcutId.SelectAll, ShortcutGroup.Media, R.string.nag_sc_select_all, KeyChord(Key.A, ctrl = true), textFirst = true),
         // Playback
         Shortcut(ShortcutId.PlayPause, ShortcutGroup.Playback, R.string.nag_sc_play_pause, KeyChord(Key.Spacebar)),
         Shortcut(ShortcutId.Stop, ShortcutGroup.Playback, R.string.nag_sc_stop, KeyChord(Key.S)),

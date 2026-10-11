@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -55,16 +56,19 @@ import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.SegmentedChoice
+import app.nagmedar.ui.components.SelectionBar
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.playback.Artwork
@@ -96,7 +100,9 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     var order by rememberSaveable { mutableStateOf(MovieOrder.Added) }
     var folder by rememberSaveable { mutableStateOf<String?>(null) }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
-    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    // one selected film has its details; several have the selection bar (S-405)
+    val selection = rememberMultiSelection()
+    val selected = selection.keys.singleOrNull() as? String
     var detailsRequested by rememberSaveable { mutableStateOf(false) }
     val play: (VideoItem) -> Unit = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } }
     BackHandler(enabled = folder != null) { folder = null }
@@ -107,7 +113,7 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
         tech = tech,
         onPlay = play,
         onCloseDetails = {
-            selected = null
+            selection.clear()
             detailsRequested = false
         },
     ) {
@@ -133,13 +139,17 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     sort = sort,
                     onSortChange = { sort = it },
                     selected = selected,
-                    onSelect = { selected = it.key },
+                    // the selection took the click already
+                    onSelect = {},
                     onShowDetails = {
-                        selected = it.key
+                        selection.click(it.key, listOf(it.key))
                         detailsRequested = true
                     },
                     onPlay = play,
                     menu = { item, playItem, info -> item.media?.let { mediaMenu(context, it, playItem, info) }.orEmpty() },
+                    selection = selection,
+                    onPlayAll = { films -> PlaybackActions.playList(context, films.mapNotNull { it.media }, 0) },
+                    onQueueAll = { films -> PlaybackActions.appendList(context, films.mapNotNull { it.media }) },
                 )
             }
         }
@@ -227,6 +237,10 @@ fun MoviesLibrary(
     onShowDetails: (VideoItem) -> Unit,
     onPlay: (VideoItem) -> Unit,
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
+    /** Several films selected (S-405), with the bar's actions on them. */
+    selection: MultiSelection? = null,
+    onPlayAll: (List<VideoItem>) -> Unit = {},
+    onQueueAll: (List<VideoItem>) -> Unit = {},
 ) {
     val dimens = NagTheme.dimens
     val openFolder = library.folders.firstOrNull { it.path == folder }
@@ -242,6 +256,22 @@ fun MoviesLibrary(
         }
         val source = openFolder?.items ?: library.movies
         val shown = remember(source, filters, order, tech) { source.filtered(filters, tech).ordered(order, tech) }
+        if (selection != null) {
+            // a filter or a scan takes away what is no longer listed
+            LaunchedEffect(shown) { selection.retain(shown.map { it.key }) }
+            if (selection.count > 1) {
+                val chosen = shown.filter { it.key in selection }
+                SelectionBar(
+                    text = pluralStringResource(R.plurals.nag_selected_films, chosen.size, chosen.size),
+                    onClear = selection::clear,
+                    clearLabel = stringResource(R.string.nag_selection_clear),
+                    modifier = Modifier.padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
+                ) {
+                    NagButton(stringResource(R.string.nag_selection_play), { onPlayAll(chosen) }, primary = true)
+                    NagButton(stringResource(R.string.nag_selection_queue), { onQueueAll(chosen) })
+                }
+            }
+        }
         val shelf = if (filters.isEmpty() && openFolder == null) library.continueMovies else emptyList()
         val shelfHeader: @Composable () -> Unit = { ContinueShelf(shelf, tech, onPlay) }
         when {
@@ -264,6 +294,7 @@ fun MoviesLibrary(
                 onPlay = onPlay,
                 menu = menu,
                 gridHeader = shelfHeader.takeIf { shelf.isNotEmpty() },
+                selection = selection,
             )
         }
     }
