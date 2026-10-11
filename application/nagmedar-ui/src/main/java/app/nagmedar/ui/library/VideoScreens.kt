@@ -51,6 +51,7 @@ import app.nagmedar.lab.MediaTech
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.FilterChip
+import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
@@ -68,6 +69,8 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalNavKind
+import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
@@ -148,18 +151,27 @@ internal fun MoviesHeader(
             pluralStringResource(R.plurals.nag_folders_count, it.folders.size, it.folders.size)
     }
     val orderLabels = orderLabels()
+    val sortLabel = stringResource(R.string.nag_sort_by, orderLabels.getValue(order))
+    val sortEntries = { MovieOrder.entries.map { MenuEntry.Item(orderLabels.getValue(it), { onOrderChange(it) }, checked = it == order) } }
+    // a phone has room for icons only
+    val compact = LocalNavKind.current == NavKind.BottomBar
     PageHeader(title = stringResource(R.string.nag_nav_movies), subtitle = subtitle) {
         if (!library?.movies.isNullOrEmpty()) {
-            NagButton(stringResource(R.string.nag_state_add_folder), onAddFolder, icon = NagIcons.Plus)
-            Spacer(Modifier.width(NagTheme.dimens.gapXs))
+            if (compact) {
+                NagIconButton(NagIcons.Plus, stringResource(R.string.nag_state_add_folder), onAddFolder)
+            } else {
+                NagButton(stringResource(R.string.nag_state_add_folder), onAddFolder, icon = NagIcons.Plus)
+                Spacer(Modifier.width(NagTheme.dimens.gapXs))
+            }
             NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), { onViewChange(MoviesView.Grid) }, selected = view == MoviesView.Grid)
             NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), { onViewChange(MoviesView.Table) }, selected = view == MoviesView.Table)
             NagIconButton(NagIcons.Folder, stringResource(R.string.nag_view_folders), { onViewChange(MoviesView.Folders) }, selected = view == MoviesView.Folders)
-            Spacer(Modifier.width(NagTheme.dimens.gapXs))
-            MenuButton(
-                stringResource(R.string.nag_sort_by, orderLabels.getValue(order)),
-                entries = { MovieOrder.entries.map { MenuEntry.Item(orderLabels.getValue(it), { onOrderChange(it) }, checked = it == order) } },
-            )
+            if (compact) {
+                IconMenuButton(NagIcons.Sort, sortLabel, sortEntries)
+            } else {
+                Spacer(Modifier.width(NagTheme.dimens.gapXs))
+                MenuButton(sortLabel, entries = sortEntries)
+            }
         }
     }
 }
@@ -500,6 +512,7 @@ private fun ShowDetail(
     val dimens = NagTheme.dimens
     val next = show.next
     val episodes = show.seasons.firstOrNull { it.number == season }?.episodes ?: show.seasons.first().episodes
+    val compact = LocalNavKind.current == NavKind.BottomBar
     Column(Modifier.fillMaxSize().testTag("show")) {
         Row(
             Modifier.fillMaxWidth().padding(start = dimens.pagePadding - 8.dp, end = dimens.pagePadding, top = dimens.gapS, bottom = dimens.gapS),
@@ -516,9 +529,17 @@ private fun ShowDetail(
                         stringResource(R.string.nag_watched_count, show.watched, show.episodes.size),
                     style = NagTheme.type.body,
                     color = colors.textTertiary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (next != null) {
+            if (next != null && !compact) {
+                NagButton(stringResource(R.string.nag_continue_episode, next.code), { onPlay(next.item) }, icon = NagIcons.Play, primary = true)
+            }
+        }
+        // a phone gives the title the whole row and the button its own
+        if (next != null && compact) {
+            Box(Modifier.padding(start = dimens.pagePadding, end = dimens.pagePadding, bottom = dimens.gapS)) {
                 NagButton(stringResource(R.string.nag_continue_episode, next.code), { onPlay(next.item) }, icon = NagIcons.Play, primary = true)
             }
         }
@@ -549,6 +570,8 @@ private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onC
     val state = interaction.collectState()
     val shape = RoundedCornerShape(dimens.radiusControl)
     val item = episode.item
+    // "Bölüm 3" when the file names no title
+    val number = stringResource(R.string.nag_episode_number, episode.info.episode)
     Row(
         Modifier
             .fillMaxWidth()
@@ -572,7 +595,7 @@ private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onC
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(episode.code, style = NagTheme.type.mono, color = if (current) colors.onSelection else colors.accentText)
                 Spacer(Modifier.width(8.dp))
-                Text(episode.info.title.ifEmpty { item.title }, style = NagTheme.type.bodyStrong,
+                Text(episode.info.title.ifEmpty { number }, style = NagTheme.type.bodyStrong,
                     color = if (current) colors.onSelection else colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Text(

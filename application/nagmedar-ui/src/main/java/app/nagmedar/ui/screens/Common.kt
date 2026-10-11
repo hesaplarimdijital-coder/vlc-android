@@ -64,14 +64,21 @@ fun PageHeader(
         if (showTitle) {
             Text(title, style = NagTheme.type.display, color = NagTheme.colors.text, maxLines = 1,
                 modifier = Modifier.semantics { heading() })
-            if (subtitle != null) {
-                Spacer(Modifier.width(dimens.gapS))
-                Text(subtitle, style = NagTheme.type.body, color = NagTheme.colors.textTertiary, maxLines = 1)
-            }
-        } else if (subtitle != null) {
-            Text(subtitle, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1)
+            if (subtitle != null) Spacer(Modifier.width(dimens.gapS))
         }
-        Spacer(Modifier.weight(1f))
+        // the actions keep their room; a long subtitle is cut short instead
+        if (subtitle != null) {
+            Text(
+                subtitle,
+                style = if (showTitle) NagTheme.type.body else NagTheme.type.labelSmall,
+                color = NagTheme.colors.textTertiary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.gapXs), content = actions)
     }
 }

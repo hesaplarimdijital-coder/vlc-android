@@ -321,6 +321,7 @@
     <string name="nag_folders_back">Back to the folders</string>
     <string name="nag_series_all">All series</string>
     <string name="nag_next_episode">Up next: %1$s</string>
+    <string name="nag_episode_number">Episode %1$d</string>
     <string name="nag_all_watched">All watched</string>
     <string name="nag_series_back">Back to the series</string>
     <string name="nag_watched_count">%1$d of %2$d watched</string>

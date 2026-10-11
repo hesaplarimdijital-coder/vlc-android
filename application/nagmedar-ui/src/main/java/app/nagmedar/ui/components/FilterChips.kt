@@ -114,3 +114,21 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
             minWidth = 180.dp)
     }
 }
+
+/** An icon that opens a menu of [entries] under itself: "Sırala" where a phone has no room for words. */
+@Composable
+fun IconMenuButton(icon: ImageVector, contentDescription: String, entries: () -> List<MenuEntry>, modifier: Modifier = Modifier) {
+    val menu = rememberMenuState()
+    var height by remember { mutableIntStateOf(0) }
+    Box(modifier) {
+        NagIconButton(
+            icon,
+            contentDescription,
+            { menu.open(IntOffset(0, height + 4)) },
+            modifier = Modifier.onGloballyPositioned { height = it.size.height },
+            selected = menu.isOpen,
+        )
+        MenuPopup(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) entries() else emptyList(), offset = menu.offset ?: IntOffset.Zero,
+            minWidth = 180.dp)
+    }
+}

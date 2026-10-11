@@ -321,6 +321,7 @@
     <string name="nag_folders_back">Klasörlere dön</string>
     <string name="nag_series_all">Tüm diziler</string>
     <string name="nag_next_episode">Sıradaki: %1$s</string>
+    <string name="nag_episode_number">Bölüm %1$d</string>
     <string name="nag_all_watched">Hepsi izlendi</string>
     <string name="nag_series_back">Dizilere dön</string>
     <string name="nag_watched_count">%1$d / %2$d izlendi</string>
