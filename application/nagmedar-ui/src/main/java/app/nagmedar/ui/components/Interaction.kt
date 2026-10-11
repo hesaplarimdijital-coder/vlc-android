@@ -1,9 +1,9 @@
 package app.nagmedar.ui.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.os.SystemClock
+import android.view.ViewConfiguration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,7 +12,9 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -74,7 +76,10 @@ fun Modifier.nagClickable(
         },
     )
 
-@OptIn(ExperimentalFoundationApi::class)
+/**
+ * A click that acts at once and a second click within the double-tap time that opens: desktop
+ * lists select on the first click and do not wait to see whether a second one comes.
+ */
 private fun Modifier.doubleClickable(
     interactionSource: MutableInteractionSource,
     enabled: Boolean,
@@ -82,15 +87,25 @@ private fun Modifier.doubleClickable(
     role: Role?,
     onClick: () -> Unit,
     onDoubleClick: () -> Unit,
-): Modifier = combinedClickable(
-    interactionSource = interactionSource,
-    indication = null,
-    enabled = enabled,
-    onClickLabel = onClickLabel,
-    role = role,
-    onDoubleClick = onDoubleClick,
-    onClick = onClick,
-)
+): Modifier = composed {
+    val last = remember { longArrayOf(0L) }
+    clickable(
+        interactionSource = interactionSource,
+        indication = null,
+        enabled = enabled,
+        onClickLabel = onClickLabel,
+        role = role,
+    ) {
+        val now = SystemClock.uptimeMillis()
+        if (last[0] != 0L && now - last[0] <= ViewConfiguration.getDoubleTapTimeout()) {
+            last[0] = 0L
+            onDoubleClick()
+        } else {
+            last[0] = now
+            onClick()
+        }
+    }
+}
 
 /** 2 dp focus ring in the accent colour, drawn only while the element has keyboard focus. */
 @Composable
