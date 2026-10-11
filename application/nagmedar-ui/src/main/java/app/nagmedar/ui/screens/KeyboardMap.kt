@@ -55,6 +55,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.FilterChip
@@ -423,7 +424,9 @@ private fun MapKeyCap(
         Text(
             label,
             style = when {
-                named || unit < 30.dp -> NagTheme.type.caption
+                // a phone's keys: "F12" and "Meta" still fit
+                unit < 30.dp -> NagTheme.type.caption.copy(fontSize = 9.sp, lineHeight = 11.sp)
+                named -> NagTheme.type.caption
                 else -> NagTheme.type.label
             },
             color = text,
