@@ -12,6 +12,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
@@ -24,6 +25,8 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,7 +46,7 @@ class TooltipTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private var delay by mutableStateOf(TooltipDelay.Normal.millis)
+    private var delay by mutableStateOf<Long?>(TooltipDelay.Normal.millis)
 
     private fun button() {
         compose.setContent {
@@ -61,19 +64,30 @@ class TooltipTest {
 
     private val playButton get() = compose.onNodeWithContentDescription("Oynat")
 
+    private fun tooltipShown() = compose.onAllNodesWithText("Boşluk").fetchSemanticsNodes().isNotEmpty()
+
     @Test
     fun aRestingMouseShowsTheNameAndTheKeys() {
         button()
         playButton.performMouseInput { moveTo(center) }
-        compose.mainClock.advanceTimeBy(300)
-        compose.onNodeWithText("Boşluk").assertDoesNotExist()
-        compose.mainClock.advanceTimeBy(400)
+        compose.mainClock.advanceTimeBy(700)
+        assertTrue("shown after the delay", tooltipShown())
         compose.onNodeWithText("Oynat").assertExists()
-        compose.onNodeWithText("Boşluk").assertExists()
         // the mouse leaves for the padding around the button
         playButton.performMouseInput { moveTo(Offset(-20f, -20f)) }
         compose.mainClock.advanceTimeBy(100)
-        compose.onNodeWithText("Boşluk").assertDoesNotExist()
+        assertFalse("gone when the mouse leaves", tooltipShown())
+    }
+
+    @Test
+    fun itWaitsForTheDelay() {
+        delay = 5_000
+        button()
+        playButton.performMouseInput { moveTo(center) }
+        compose.mainClock.advanceTimeBy(1_000)
+        assertFalse("not before the delay", tooltipShown())
+        compose.mainClock.advanceTimeBy(5_000)
+        assertTrue("shown after the delay", tooltipShown())
     }
 
     @Test
@@ -81,7 +95,7 @@ class TooltipTest {
         button()
         playButton.performTouchInput { down(center) }
         compose.mainClock.advanceTimeBy(1500)
-        compose.onNodeWithText("Boşluk").assertDoesNotExist()
+        assertFalse("touch shows none", tooltipShown())
         playButton.performTouchInput { up() }
     }
 
@@ -91,7 +105,7 @@ class TooltipTest {
         button()
         playButton.performMouseInput { moveTo(center) }
         compose.mainClock.advanceTimeBy(2000)
-        compose.onNodeWithText("Boşluk").assertDoesNotExist()
+        assertFalse("off shows none", tooltipShown())
     }
 
     @Test
