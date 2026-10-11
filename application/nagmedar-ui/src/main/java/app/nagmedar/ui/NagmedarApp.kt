@@ -233,8 +233,15 @@ class AppActions(
 ) {
     private var volumeBeforeMute = 100
 
-    /** Alt or F10 (S-302): the keyboard goes to the menu bar, or back from it. */
-    fun toggleMenuBar() = menuBar.onAlt()
+    /** Alt or F10 (S-302): the keyboard goes to the menu bar, or back from it; false without a menu bar. */
+    fun toggleMenuBar(): Boolean = menuBar.onAlt()
+
+    /** The window's keys while the menu bar has the keyboard. */
+    fun menuBarKey(keyCode: Int, down: Boolean, rtl: Boolean): Boolean = menuBar.onKey(keyCode, down, rtl)
+
+    fun leaveMenuBar() {
+        if (menuBar.hasKeyboard) menuBar.leave()
+    }
 
     fun isAvailable(id: ShortcutId): Boolean = ShortcutRegistry[id].scope == ShortcutScope.Global && id !in comingLater
 

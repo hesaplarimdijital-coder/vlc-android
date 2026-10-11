@@ -1,7 +1,11 @@
 package app.nagmedar.ui.shell
 
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
@@ -28,6 +32,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -38,8 +43,8 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /**
  * S-302: the menu bar has the eight menus, each item named and keyed from the shortcut table; it
- * shows only with a pointer; Alt takes the keyboard into it, the arrows move through titles and
- * menus, Escape returns to the title and Alt leaves.
+ * shows only with a pointer; Alt gives it the keyboard without moving the window's focus, the
+ * arrows move through titles and menus, Escape returns to the title and Alt gives the keyboard back.
  */
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -117,31 +122,47 @@ class MenuBarTest {
         compose.runOnIdle { inputModeManager.requestInputMode(ComposeInputMode.Keyboard) }
     }
 
+    /** A key of the window, as the activity passes it to the bar: pressed and released. */
+    private fun MenuBarState.press(keyCode: Int, rtl: Boolean = false): Boolean {
+        var used = false
+        compose.runOnIdle {
+            used = onKey(keyCode, down = true, rtl = rtl)
+            onKey(keyCode, down = false, rtl = rtl)
+        }
+        compose.waitForIdle()
+        return used
+    }
+
+    /** The focused nodes of the window (and of an open menu). */
+    private fun focused() = compose.onAllNodes(isFocused()).fetchSemanticsNodes().map { it.id }
+
     @Test
     fun altAndTheArrowsWalkTheMenus() {
         val state = MenuBarState()
         menus(state)
-        compose.runOnIdle { state.onAlt() }
+        val before = focused()
+        compose.runOnIdle { assertTrue(state.onAlt()) }
         compose.waitForIdle()
-        compose.onNodeWithText("Medya").assertIsFocused()
+        // the first title has the keyboard; the window's focus stays where it was
+        assertEquals(0, state.highlighted)
+        assertEquals(before, focused())
 
-        compose.onNodeWithText("Medya").performKeyInput { pressKey(Key.DirectionRight) }
-        compose.waitForIdle()
-        compose.onNodeWithText("Oynatma").assertIsFocused()
+        assertTrue(state.press(KeyEvent.KEYCODE_DPAD_RIGHT))
+        assertEquals(1, state.highlighted)
 
         // Down opens the menu with its first item focused
-        compose.onNodeWithText("Oynatma").performKeyInput { pressKey(Key.DirectionDown) }
-        compose.waitForIdle()
+        assertTrue(state.press(KeyEvent.KEYCODE_DPAD_DOWN))
         assertEquals(1, state.open)
         compose.onNodeWithText("Oynatma 1").assertIsFocused()
 
-        // Right goes on to the next menu
+        // Right goes on to the next menu, whose title takes the keyboard
         compose.onNodeWithText("Oynatma 1").performKeyInput { pressKey(Key.DirectionRight) }
         compose.waitForIdle()
         assertEquals(2, state.open)
+        assertEquals(2, state.highlighted)
         compose.onNodeWithText("Ses 1").assertIsFocused()
 
-        // Down and Enter choose
+        // Down and Enter choose, and the bar gives the keyboard back
         compose.onNodeWithText("Ses 1").performKeyInput { pressKey(Key.DirectionDown) }
         compose.waitForIdle()
         compose.onNodeWithText("Ses 2").assertIsFocused()
@@ -149,16 +170,18 @@ class MenuBarTest {
         compose.waitForIdle()
         assertEquals(listOf("Ses 2"), chosen)
         assertEquals(-1, state.open)
+        assertEquals(-1, state.highlighted)
+        assertEquals(before, focused())
     }
 
     @Test
     fun escapeReturnsToTheTitleAndAltLeaves() {
         val state = MenuBarState()
         menus(state)
+        val before = focused()
         compose.runOnIdle { state.onAlt() }
-        compose.waitForIdle()
-        compose.onNodeWithText("Medya").performKeyInput { pressKey(Key.DirectionDown) }
-        compose.waitForIdle()
+        state.press(KeyEvent.KEYCODE_ENTER)
+        compose.onNodeWithText("Medya 1").assertIsFocused()
         compose.onNodeWithText("Medya 1").performKeyInput { pressKey(Key.DirectionLeft) }
         compose.waitForIdle()
         // Left from the first menu goes round to the last
@@ -166,9 +189,56 @@ class MenuBarTest {
         compose.onNodeWithText("Ses 1").performKeyInput { pressKey(Key.Escape) }
         compose.waitForIdle()
         assertEquals(-1, state.open)
-        compose.onNodeWithText("Ses").assertIsFocused()
-        compose.runOnIdle { state.onAlt() }
+        assertEquals(2, state.highlighted)
+        // Alt again gives the keyboard back to what had it
+        compose.runOnIdle { assertTrue(state.onAlt()) }
         compose.waitForIdle()
-        assertTrue(compose.onAllNodes(isFocused()).fetchSemanticsNodes().isEmpty())
+        assertEquals(-1, state.highlighted)
+        assertEquals(before, focused())
+    }
+
+    @Test
+    fun theBarTakesOnlyItsKeys() {
+        val state = MenuBarState()
+        // no bar on screen (touch): Alt is not the bar's
+        assertFalse(state.onAlt())
+        menus(state)
+        val before = focused()
+        // without Alt the window's keys are not the bar's
+        assertFalse(state.press(KeyEvent.KEYCODE_DPAD_RIGHT))
+        compose.runOnIdle { state.onAlt() }
+        // modifiers pass, so Alt can be released and Ctrl held
+        compose.runOnIdle { assertFalse(state.onKey(KeyEvent.KEYCODE_SHIFT_LEFT, down = true)) }
+        // Left from the first title goes round; right to left the arrows turn round
+        assertTrue(state.press(KeyEvent.KEYCODE_DPAD_LEFT))
+        assertEquals(2, state.highlighted)
+        assertTrue(state.press(KeyEvent.KEYCODE_DPAD_LEFT, rtl = true))
+        assertEquals(0, state.highlighted)
+        // Escape leaves
+        assertTrue(state.press(KeyEvent.KEYCODE_ESCAPE))
+        assertEquals(-1, state.highlighted)
+        // any other key leaves and goes on to the window
+        compose.runOnIdle { state.onAlt() }
+        assertFalse(state.press(KeyEvent.KEYCODE_K))
+        assertEquals(-1, state.highlighted)
+        assertEquals(before, focused())
+    }
+
+    @Test
+    fun theBarLeavesWhenItGoes() {
+        val state = MenuBarState()
+        var shown by mutableStateOf(true)
+        val specs = listOf(MenuSpec("Medya") { listOf(MenuEntry.Item("Medya 1", {})) })
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                Row { if (shown) MenuBarMenus(specs, state) }
+            }
+        }
+        compose.runOnIdle { assertTrue(state.onAlt()) }
+        // the window turned to touch: the bar is gone and gives the keyboard back
+        shown = false
+        compose.waitForIdle()
+        assertEquals(-1, state.highlighted)
+        assertFalse(state.onAlt())
     }
 }

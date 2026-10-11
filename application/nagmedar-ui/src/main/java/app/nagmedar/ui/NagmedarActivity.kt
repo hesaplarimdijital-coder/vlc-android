@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.Menu
+import android.view.MotionEvent
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,7 +35,7 @@ class NagmedarActivity : ComponentActivity() {
 
     private var actions: AppActions? = null
 
-    /** Alt alone or F10 takes the keyboard to the menu bar (S-302). */
+    /** Alt alone or F10 takes the keyboard to the menu bar and back (S-302). */
     private val menuBarKey = MenuBarKey()
 
     /** Screen asked for by a launcher shortcut (S-309), until the shell has shown it. */
@@ -64,15 +66,21 @@ class NagmedarActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (menuBarKey.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN) && actions != null) {
-            actions?.toggleMenuBar()
-            return true
-        }
+        val down = event.action == KeyEvent.ACTION_DOWN
+        if (menuBarKey.onKey(event.keyCode, down) && actions?.toggleMenuBar() == true) return true
+        val rtl = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+        if (actions?.menuBarKey(event.keyCode, down, rtl) == true) return true
         if (event.action == KeyEvent.ACTION_DOWN && (event.isCtrlPressed || event.isAltPressed || event.isMetaPressed)) {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
             if (shortcut != null && actions?.perform(shortcut.id) == true) return true
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        // a click elsewhere takes the keyboard from the menu bar
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) actions?.leaveMenuBar()
+        return super.dispatchTouchEvent(event)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

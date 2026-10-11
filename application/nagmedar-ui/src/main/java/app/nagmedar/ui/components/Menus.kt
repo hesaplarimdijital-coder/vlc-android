@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.InputMode
@@ -45,7 +48,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -59,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import app.nagmedar.ui.input.MenuBarKey
 import app.nagmedar.ui.theme.NagTheme
 
 /** One line of a menu bar drop-down or a context menu. */
@@ -96,21 +99,32 @@ fun MenuPopup(
     focusFirst: Boolean = false,
     /** The menu bar's: Left and Right go to the menu before or after (-1, +1). */
     onMove: ((Int) -> Unit)? = null,
-    /** Escape; [onDismiss] when not given. */
+    /**
+     * The menu bar's: Escape, which then returns to the menu's title. The menu handles Escape and
+     * Back itself then, and has the focus even when the pointer opened it, so its keys reach it.
+     */
     onEscape: (() -> Unit)? = null,
+    /** The menu bar's: Alt alone or F10, which leave the bar. */
+    onAlt: (() -> Unit)? = null,
 ) {
     if (!visible || entries.isEmpty()) return
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val ownKeys = onEscape != null
     Popup(
         popupPositionProvider = remember(offset) { ClampedOffsetPositionProvider(offset) },
         onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true),
+        properties = PopupProperties(focusable = true, dismissOnBackPress = !ownKeys),
     ) {
+        val menu = remember { FocusRequester() }
         val first = remember { FocusRequester() }
+        val last = remember { FocusRequester() }
+        val altKey = remember { MenuBarKey() }
+        var menuFocused by remember { mutableStateOf(false) }
         val firstEnabled = entries.indexOfFirst { it is MenuEntry.Item && it.enabled }
+        val lastEnabled = entries.indexOfLast { it is MenuEntry.Item && it.enabled }
         Column(
             modifier = Modifier
                 .widthIn(min = minWidth, max = 420.dp)
@@ -119,32 +133,64 @@ fun MenuPopup(
                 .background(colors.surfaceRaised, shape)
                 .border(1.dp, colors.borderStrong, shape)
                 .onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                    val down = event.type == KeyEventType.KeyDown
+                    if (onAlt != null && altKey.onKey(event.nativeKeyEvent.keyCode, down)) {
+                        onAlt()
+                        return@onPreviewKeyEvent true
+                    }
                     when (event.key) {
-                        Key.Escape -> {
-                            (onEscape ?: onDismiss)()
+                        // acted on when released, so the release does not reach the window below
+                        Key.Escape, Key.Back -> {
+                            if (!down) (if (event.key == Key.Escape) onEscape ?: onDismiss else onDismiss)()
                             true
                         }
-                        Key.DirectionLeft -> onMove?.let { it(if (rtl) 1 else -1) } != null
-                        Key.DirectionRight -> onMove?.let { it(if (rtl) -1 else 1) } != null
+                        Key.DirectionLeft, Key.DirectionRight -> {
+                            val move = onMove ?: return@onPreviewKeyEvent false
+                            if (down) move(if ((event.key == Key.DirectionRight) != rtl) 1 else -1)
+                            true
+                        }
+                        // opened by the pointer, the menu has the focus: Down and Up go to its first or last item
+                        Key.DirectionDown, Key.DirectionUp -> {
+                            if (!menuFocused || firstEnabled < 0) return@onPreviewKeyEvent false
+                            if (down) (if (event.key == Key.DirectionDown) first else last).requestFocus()
+                            true
+                        }
                         else -> false
                     }
                 }
+                .then(
+                    if (ownKeys) {
+                        Modifier
+                            .onFocusChanged { menuFocused = it.isFocused }
+                            .focusRequester(menu)
+                            .focusTarget()
+                    } else {
+                        Modifier
+                    },
+                )
                 .verticalScroll(rememberScrollState())
                 .padding(4.dp),
         ) {
             entries.forEachIndexed { index, entry ->
                 when (entry) {
-                    is MenuEntry.Item -> MenuItemRow(entry, if (index == firstEnabled) Modifier.focusRequester(first) else Modifier) {
-                        onDismiss()
-                        entry.onClick()
+                    is MenuEntry.Item -> {
+                        val modifier = Modifier
+                            .then(if (index == firstEnabled) Modifier.focusRequester(first) else Modifier)
+                            .then(if (index == lastEnabled) Modifier.focusRequester(last) else Modifier)
+                        MenuItemRow(entry, modifier) {
+                            onDismiss()
+                            entry.onClick()
+                        }
                     }
                     MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
                 }
             }
         }
-        if (focusFirst && firstEnabled >= 0) {
-            LaunchedEffect(Unit) { first.requestFocus() }
+        LaunchedEffect(Unit) {
+            when {
+                focusFirst && firstEnabled >= 0 -> first.requestFocus()
+                ownKeys -> menu.requestFocus()
+            }
         }
     }
 }
@@ -190,8 +236,10 @@ internal fun MenuItemRow(item: MenuEntry.Item, modifier: Modifier = Modifier, on
 }
 
 /**
- * The menu bar's state (S-302): the open menu, whether it was opened from the keyboard, and the
- * Alt key's requests to take the keyboard focus into the bar or out of it.
+ * The menu bar's state (S-302). Like a desktop menu bar, Alt does not move the window's focus:
+ * it highlights the first title, and while a title is [highlighted] the window's keys come here
+ * ([onKey]) — Left and Right move between the titles, Down, Up, Enter or Space open the menu with
+ * its first item focused, Escape or Alt again give the keyboard back to whatever had it.
  */
 @Stable
 class MenuBarState {
@@ -203,22 +251,81 @@ class MenuBarState {
     var fromKeyboard by mutableStateOf(false)
         private set
 
-    internal var altPresses by mutableIntStateOf(0)
+    /** The title the keyboard is on, -1 when the bar does not have the keyboard. */
+    var highlighted by mutableIntStateOf(-1)
         private set
 
-    /** Alt alone (or F10): to the first menu title, or back out when the bar has the focus. */
-    fun onAlt() {
-        altPresses++
+    /** The number of menus on screen; 0 while the bar is not shown (touch). */
+    internal var count by mutableIntStateOf(0)
+
+    /** A title has the keyboard (Alt, F10, or Escape from a menu). */
+    val hasKeyboard: Boolean get() = highlighted >= 0
+
+    /** Alt alone or F10: highlights the first title, or gives the keyboard back. False when no bar is shown. */
+    fun onAlt(): Boolean {
+        when {
+            highlighted >= 0 || open >= 0 -> leave()
+            count > 0 -> highlighted = 0
+            else -> return false
+        }
+        return true
+    }
+
+    /**
+     * A key of the window ([KeyEvent] key code) while a title has the keyboard and no menu is open;
+     * true when it was the bar's. Any other key gives the keyboard back and goes on to the window.
+     */
+    fun onKey(keyCode: Int, down: Boolean, rtl: Boolean = false): Boolean {
+        if (highlighted < 0 || open >= 0 || count == 0 || KeyEvent.isModifierKey(keyCode)) return false
+        val step = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT -> if (rtl) 1 else -1
+            KeyEvent.KEYCODE_DPAD_RIGHT -> if (rtl) -1 else 1
+            else -> 0
+        }
+        val opens = keyCode in OpenKeys
+        val leaves = keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_BACK
+        if (!down) {
+            // Escape and Back act when released, so the release does not reach the window
+            if (leaves) leave()
+            return step != 0 || opens || leaves
+        }
+        when {
+            step != 0 -> highlighted = (highlighted + step).mod(count)
+            opens -> open(highlighted, keyboard = true)
+            leaves -> Unit
+            else -> {
+                leave()
+                return false
+            }
+        }
+        return true
     }
 
     fun open(index: Int, keyboard: Boolean) {
         open = index
         fromKeyboard = keyboard
+        highlighted = if (keyboard || highlighted >= 0) index else -1
     }
 
-    fun close() {
+    /** Escape in a menu: it closes and its title keeps the keyboard. */
+    fun backToTitle() {
+        if (open >= 0) highlighted = open
         open = -1
         fromKeyboard = false
+    }
+
+    /** Closes the menu and gives the keyboard back. */
+    fun leave() {
+        open = -1
+        fromKeyboard = false
+        highlighted = -1
+    }
+
+    private companion object {
+        val OpenKeys = setOf(
+            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_SPACE,
+        )
     }
 }
 
@@ -227,24 +334,18 @@ fun rememberMenuBarState(): MenuBarState = remember { MenuBarState() }
 
 /**
  * The drop-down menus of the menu bar (Medya, Oynatma, …). Hovering another title while a menu
- * is open switches to it. From the keyboard (S-302): Alt goes to the first title and back out,
- * Left and Right move between titles and between open menus, Down, Enter or Space open a menu
- * with its first item focused, Escape closes it and returns to its title.
+ * is open switches to it. From the keyboard (S-302) see [MenuBarState]; in an open menu Up and
+ * Down move between the items, Left and Right go to the menu before or after, Escape returns to
+ * its title and Alt leaves the bar.
  */
 @Composable
 fun RowScope.MenuBarMenus(menus: List<MenuSpec>, state: MenuBarState = rememberMenuBarState()) {
-    val focusManager = LocalFocusManager.current
     val inputModes = LocalInputModeManager.current
-    val titles = remember(menus.size) { List(menus.size) { FocusRequester() } }
-    var focusedTitle by remember { mutableIntStateOf(-1) }
-    val inBar = focusedTitle >= 0 || state.open >= 0
-    LaunchedEffect(state.altPresses) {
-        if (state.altPresses == 0) return@LaunchedEffect
-        if (inBar) {
-            state.close()
-            focusManager.clearFocus()
-        } else {
-            titles.firstOrNull()?.requestFocus()
+    DisposableEffect(state, menus.size) {
+        state.count = menus.size
+        onDispose {
+            state.count = 0
+            state.leave()
         }
     }
     menus.forEachIndexed { index, menu ->
@@ -254,38 +355,29 @@ fun RowScope.MenuBarMenus(menus: List<MenuSpec>, state: MenuBarState = rememberM
                 text = menu.title,
                 open = state.open == index,
                 onClick = {
-                    if (state.open == index) state.close() else state.open(index, keyboard = inputModes.inputMode == InputMode.Keyboard)
+                    if (state.open == index) state.leave() else state.open(index, keyboard = inputModes.inputMode == InputMode.Keyboard)
                 },
                 onHover = { if (state.open >= 0 && state.open != index) state.open(index, keyboard = false) },
-                modifier = Modifier
-                    .focusRequester(titles[index])
-                    .onFocusChanged { focus ->
-                        if (focus.isFocused) {
-                            focusedTitle = index
-                        } else if (focusedTitle == index) {
-                            focusedTitle = -1
-                        }
+                highlighted = if (state.hasKeyboard) state.highlighted == index else null,
+                // a title reached with Tab opens with Down too
+                modifier = Modifier.onKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown) {
+                        state.open(index, keyboard = true)
+                        true
+                    } else {
+                        false
                     }
-                    .onKeyEvent { event ->
-                        if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown) {
-                            state.open(index, keyboard = true)
-                            true
-                        } else {
-                            false
-                        }
-                    },
+                },
             )
             MenuPopup(
                 visible = state.open == index,
-                onDismiss = { if (state.open == index) state.close() },
+                onDismiss = { if (state.open == index) state.leave() },
                 entries = if (state.open == index) menu.entries() else emptyList(),
                 offset = IntOffset(0, titleHeight + 2),
                 focusFirst = state.fromKeyboard,
                 onMove = { step -> state.open((index + step).mod(menus.size), keyboard = true) },
-                onEscape = {
-                    state.close()
-                    titles[index].requestFocus()
-                },
+                onEscape = { state.backToTitle() },
+                onAlt = { state.leave() },
             )
         }
     }
@@ -335,22 +427,31 @@ internal fun LaunchHover(hovered: Boolean, onHover: () -> Unit) {
 
 /** Title of a menu bar menu. */
 @Composable
-fun MenuTitle(text: String, open: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, onHover: () -> Unit = {}) {
+fun MenuTitle(
+    text: String,
+    open: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onHover: () -> Unit = {},
+    /** The keyboard is on this title (Alt); null when the ring follows the focus. */
+    highlighted: Boolean? = null,
+) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    val lit = open || highlighted == true
     LaunchHover(state.hovered, onHover)
     Box(
         modifier = modifier
             .heightIn(min = dimens.controlHeight.coerceAtLeast(dimens.minTarget))
-            .focusRing(state, shape)
-            .background(if (open) colors.hover else stateBackground(state), shape)
+            .then(if (highlighted ?: state.focused) Modifier.border(2.dp, colors.focusRing, shape) else Modifier)
+            .background(if (lit) colors.hover else stateBackground(state), shape)
             .nagClickable(interaction, onClick)
             .padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = NagTheme.type.body, color = if (open) colors.text else colors.textSecondary, maxLines = 1)
+        Text(text, style = NagTheme.type.body, color = if (lit) colors.text else colors.textSecondary, maxLines = 1)
     }
 }

@@ -2,6 +2,7 @@ package app.nagmedar.ui.screenshots
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuItemRow
 import app.nagmedar.ui.components.MenuSpec
@@ -46,8 +49,8 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-302: the eight menus of the menu bar side by side, items and keys from the shortcut table,
- * those the player handles or a later MVP brings dimmed as in the app; and a large window by
- * touch, whose bar has no menus.
+ * those the player handles or a later MVP brings dimmed as in the app; a title highlighted from
+ * the keyboard; and a large window by touch, whose bar has no menus.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -117,6 +120,19 @@ class MenuBarScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
     fun menusLight() = capture("menubar-menus-light", ThemeMode.Light, InputMode.Pointer) { Menus() }
+
+    /** Alt and Right: the second title has the keyboard, the window's focus stays where it was. */
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun altHighlightsATitle() {
+        val state = MenuBarState()
+        capture("menubar-alt-dark", ThemeMode.Dark, InputMode.Pointer) {
+            TestShell(WidthClass.Large, startDestination = Destination.Music, menuBar = state)
+            LaunchedEffect(Unit) {
+                state.onAlt()
+                state.onKey(KeyEvent.KEYCODE_DPAD_RIGHT, down = true)
+            }
+        }
+    }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun largeByTouch() = capture("menubar-large-touch-dark", ThemeMode.Dark, InputMode.Touch) {
