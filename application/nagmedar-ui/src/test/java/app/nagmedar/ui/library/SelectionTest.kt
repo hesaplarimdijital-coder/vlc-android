@@ -76,7 +76,7 @@ class SelectionTest {
 
     private fun item(title: String) = compose.onNode(hasText(title) and hasClickAction())
 
-    private fun clickOn(title: String, vararg held: Key) {
+    private fun clickOn(title: String, held: List<Key> = emptyList()) {
         item(title).performMultiModalInput {
             key { held.forEach { keyDown(it) } }
             mouse { click(center) }
@@ -88,15 +88,15 @@ class SelectionTest {
     private fun checkSeveral() {
         clickOn("Kuzey Işığı")
         assertEquals(setOf(key("Kuzey Işığı")), selection.keys)
-        clickOn("Demir Vadi", Key.CtrlLeft)
+        clickOn("Demir Vadi", listOf(Key.CtrlLeft))
         assertEquals(setOf(key("Kuzey Işığı"), key("Demir Vadi")), selection.keys)
         // Shift: from the last item clicked, in the order shown
-        clickOn("Kırık Pusula", Key.ShiftLeft)
+        clickOn("Kırık Pusula", listOf(Key.ShiftLeft))
         assertEquals(setOf(key("Demir Vadi"), key("Mavi Kanal"), key("Kırık Pusula")), selection.keys)
         item("Mavi Kanal").assertIsSelected()
         item("Kuzey Işığı").assertIsNotSelected()
         // Ctrl on a selected one takes it out
-        clickOn("Mavi Kanal", Key.CtrlLeft)
+        clickOn("Mavi Kanal", listOf(Key.CtrlLeft))
         assertEquals(setOf(key("Demir Vadi"), key("Kırık Pusula")), selection.keys)
         assertTrue(played.isEmpty())
     }
