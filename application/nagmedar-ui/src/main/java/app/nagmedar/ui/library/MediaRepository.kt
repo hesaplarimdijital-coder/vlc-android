@@ -1,30 +1,43 @@
 package app.nagmedar.ui.library
 
 import android.content.Context
+import app.nagmedar.ui.onboarding.MediaAccess
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.util.getFromMl
+import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.Settings
 
 /**
  * Read access to the existing medialibrary for the new screens. Queries run on the IO
- * dispatcher and wait for the medialibrary to start if needed (getFromMl).
+ * dispatcher and wait for the medialibrary to start if needed (getFromMl). Without media
+ * permission the folders picked with the system picker stand in for it (S-309).
  */
 class MediaRepository(private val context: Context) {
 
     suspend fun videos(): List<MediaWrapper> = context.getFromMl {
         getVideos(Medialibrary.SORT_ALPHA, false, Settings.includeMissing, false)?.toList().orEmpty()
-    }
+    } + picked(MediaWrapper.TYPE_VIDEO)
 
     suspend fun tracks(): List<MediaWrapper> = context.getFromMl {
         getAudio(Medialibrary.SORT_ARTIST, false, Settings.includeMissing, false)?.toList().orEmpty()
-    }
+    } + picked(MediaWrapper.TYPE_AUDIO)
 
     suspend fun recentVideos(): List<MediaWrapper> = context.getFromMl { recentVideos?.toList().orEmpty() }
 
     suspend fun recentAudio(): List<MediaWrapper> = context.getFromMl { recentAudio?.toList().orEmpty() }
 
-    suspend fun counts(): LibraryCounts = context.getFromMl { LibraryCounts(videoCount, audioCount) }
+    suspend fun counts(): LibraryCounts {
+        val indexed = context.getFromMl { LibraryCounts(videoCount, audioCount) }
+        if (MediaAccess.hasMediaAccess(context)) return indexed
+        return LibraryCounts(indexed.videos + picked(MediaWrapper.TYPE_VIDEO).size, indexed.tracks + picked(MediaWrapper.TYPE_AUDIO).size)
+    }
+
+    private suspend fun picked(type: Int): List<MediaWrapper> {
+        if (MediaAccess.hasMediaAccess(context)) return emptyList()
+        val folders = Settings.getInstance(context).getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
+        return if (folders.isEmpty()) emptyList() else SafLibrary.media(context, folders, type)
+    }
 }
 
 data class LibraryCounts(val videos: Int, val tracks: Int)

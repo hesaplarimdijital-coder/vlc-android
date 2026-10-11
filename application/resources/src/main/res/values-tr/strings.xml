@@ -1424,7 +1424,9 @@
     <string name="feedback_email_warning_explanation">Geri bildiriminizi paylaşmanın en kolay yolu %1$s özelliğini kullanmaktır.\nBunu yapmak için ayarlardan uzaktan erişimi etkinleştirin, yönergeyi izleyin ve menüdeki %2$s kaydını seçin.</string>
     <string name="feedback_email_warning_remote_action">Ayarları aç</string>
     <string name="feedback_email_warning_try_anyway">Yine de dene</string>
-        <string name="nagmedar_new_interface">Yeni arayüz (önizleme)</string>
-    <string name="nagmedar_new_interface_short">Yeni arayüz</string>
-    <string name="nagmedar_new_interface_summary">Kenar çubuğu, menüler ve klavye kısayollarıyla masaüstü sınıfı Nağmedar arayüzü</string>
+    <string name="nagmedar_new_interface">Nağmedar arayüzü</string>
+    <string name="nagmedar_new_interface_short">Nağmedar</string>
+    <string name="nagmedar_new_interface_summary">Kenar çubuğu, menüler ve klavye kısayollarıyla masaüstü sınıfı arayüz; uygulama simgesi bunu açar</string>
+    <string name="nagmedar_classic_interface">Klasik arayüz</string>
+    <string name="nagmedar_classic_interface_short">Klasik</string>
 </resources>

@@ -112,7 +112,8 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
     val context = LocalContext.current
     val dimens = NagTheme.dimens
     val scan = rememberScanState()
-    val home by produceState<HomeContent?>(null, scan.active) {
+    val access = LocalLibraryAccess.current
+    val home by produceState<HomeContent?>(null, scan.active, access?.media, access?.folders) {
         loadWhileScanning(scan.active) {
             val counts = repository.counts()
             HomeContent(repository.recentVideos(), repository.recentAudio(), counts.videos + counts.tracks == 0)
@@ -187,7 +188,10 @@ private fun ShelfTitle(text: String) {
 @Composable
 fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val scan = rememberScanState()
-    val videos by produceState<List<MediaWrapper>?>(null, scan.active) { loadWhileScanning(scan.active) { repository.videos() } }
+    val access = LocalLibraryAccess.current
+    val videos by produceState<List<MediaWrapper>?>(null, scan.active, access?.media, access?.folders) {
+        loadWhileScanning(scan.active) { repository.videos() }
+    }
     val pointer = NagTheme.inputMode == InputMode.Pointer
     var mode by rememberSaveable { mutableStateOf(if (pointer) ViewMode.Table else ViewMode.Grid) }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
@@ -362,7 +366,10 @@ private fun TrackCard(media: MediaWrapper, modifier: Modifier = Modifier, onClic
 fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val context = LocalContext.current
     val scan = rememberScanState()
-    val tracks by produceState<List<MediaWrapper>?>(null, scan.active) { loadWhileScanning(scan.active) { repository.tracks() } }
+    val access = LocalLibraryAccess.current
+    val tracks by produceState<List<MediaWrapper>?>(null, scan.active, access?.media, access?.folders) {
+        loadWhileScanning(scan.active) { repository.tracks() }
+    }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
     val list = tracks
     val unknown = stringResource(R.string.nag_unknown_artist)

@@ -53,6 +53,7 @@ import org.videolan.resources.EXTRA_TARGET
 import org.videolan.resources.EXTRA_UPGRADE
 import org.videolan.resources.MOBILE_MAIN_ACTIVITY
 import org.videolan.resources.MOBILE_SEARCH_ACTIVITY
+import org.videolan.resources.NAGMEDAR_SHELL_ACTIVITY
 import org.videolan.resources.PREF_FIRST_RUN
 import org.videolan.resources.TV_MAIN_ACTIVITY
 import org.videolan.resources.TV_ONBOARDING_ACTIVITY
@@ -67,6 +68,10 @@ import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_FRAGMENT_ID
 import org.videolan.tools.KEY_NAVIGATOR_SCREEN_UNSTABLE
 import org.videolan.tools.KEY_TV_ONBOARDING_DONE
+import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
+import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
+import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
 import org.videolan.tools.PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER
 import org.videolan.tools.PREF_TV_UI
 import org.videolan.tools.Settings
@@ -262,6 +267,8 @@ class StartActivity : FragmentActivity() {
                 }
             } else if(action != null && action== "vlc.remoteaccess.share") {
                 startActivity(Intent().apply { component = ComponentName(this@StartActivity, "org.videolan.vlc.remoteaccessserver.gui.remoteaccess.RemoteAccessShareActivity") })
+            } else if (action == NAGMEDAR_ACTION_CLASSIC) {
+                startApplication(tv, firstRun, upgrade, 0, removeOldDevices, classic = true)
             } else {
                 val target = idFromShortcut
                 val service = PlaybackService.instance
@@ -295,8 +302,12 @@ class StartActivity : FragmentActivity() {
         }
     }
 
-    private fun startApplication(tv: Boolean, firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices:Boolean = false) {
+    private fun startApplication(tv: Boolean, firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices:Boolean = false, classic: Boolean = false) {
         val settings = Settings.getInstance(this@StartActivity)
+        if (!tv && !classic && settings.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true)) {
+            startNagmedar(firstRun, upgrade, target, removeDevices)
+            return
+        }
         val onboarding = !settings.getBoolean(if (tv) KEY_TV_ONBOARDING_DONE else ONBOARDING_DONE_KEY, false)
         // Start Medialibrary from background to workaround Dispatchers.Main causing ANR
         // cf https://github.com/Kotlin/kotlinx.coroutines/issues/878
@@ -322,6 +333,36 @@ class StartActivity : FragmentActivity() {
         } else {
             if (!tv) startOnboarding() else startActivity(Intent(Intent.ACTION_VIEW).apply { setClassName(applicationContext, TV_ONBOARDING_ACTIVITY) })
         }
+    }
+
+    /**
+     * S-309: the launcher opens the Nağmedar interface. Until its first-run flow is done, that
+     * flow asks for media access and starts the medialibrary with the chosen sources; afterwards
+     * the medialibrary starts here, as for the classic interface.
+     */
+    private fun startNagmedar(firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices: Boolean) {
+        if (Settings.getInstance(this).getBoolean(NAGMEDAR_FIRST_RUN_DONE, false)) {
+            Thread {
+                AppScope.launch {
+                    // workaround for a Android 9 bug, as in startApplication
+                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P && !awaitAppIsForegroung()) return@launch
+                    this@StartActivity.startMedialibrary(firstRun, upgrade, true, removeDevices)
+                }
+            }.start()
+        }
+        // an open Nağmedar window gets the new screen instead of a second window on top
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setClassName(applicationContext, NAGMEDAR_SHELL_ACTIVITY)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(EXTRA_FIRST_RUN, firstRun)
+            .putExtra(EXTRA_UPGRADE, upgrade)
+        when (target) {
+            R.id.nav_video -> "movies"
+            R.id.nav_audio -> "music"
+            R.id.nav_directories -> "device"
+            else -> null
+        }?.let { intent.putExtra(NAGMEDAR_EXTRA_DESTINATION, it) }
+        startActivity(intent)
     }
 
     private fun startPlaybackFromApp(intent: Intent) = lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {

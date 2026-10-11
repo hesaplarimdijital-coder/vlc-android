@@ -1,5 +1,6 @@
 package app.nagmedar.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +12,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import app.nagmedar.ui.input.ShortcutRegistry
+import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.vlc.media.MediaUtils
 import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 
@@ -27,6 +32,9 @@ class NagmedarActivity : ComponentActivity() {
 
     private var actions: AppActions? = null
 
+    /** Screen asked for by a launcher shortcut (S-309), until the shell has shown it. */
+    private var destination by mutableStateOf<String?>(null)
+
     private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) MediaUtils.openUri(this, uri)
     }
@@ -34,12 +42,21 @@ class NagmedarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
         setContent {
             NagmedarApp(
                 onOpenFile = { openDocument.launch(arrayOf("video/*", "audio/*", "application/x-mpegurl", "application/octet-stream")) },
                 onActionsReady = { actions = it },
+                requestedDestination = destination,
+                onDestinationShown = { destination = null },
             )
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)?.let { destination = it }
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

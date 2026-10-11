@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -32,6 +33,21 @@ import app.nagmedar.ui.theme.NagTheme
 import org.videolan.vlc.MediaParsingService
 import org.videolan.vlc.ScanProgress
 import kotlin.math.abs
+
+/**
+ * Whether the app may read media files, and the folders picked instead (S-309). Without either,
+ * an empty library asks for access rather than for folders.
+ */
+@Immutable
+class LibraryAccess(
+    val media: Boolean,
+    val folders: Set<String>,
+    val requestMedia: () -> Unit,
+    val pickFolder: () -> Unit,
+)
+
+/** Provided by NagmedarApp; absent in tests and previews, where the library has access. */
+val LocalLibraryAccess = compositionLocalOf<LibraryAccess?> { null }
 
 /** The medialibrary's scan as the library screens show it. */
 @Immutable
@@ -93,9 +109,10 @@ private fun scanTitle(scan: ScanState): String = stringResource(
 )
 
 /**
- * What a library screen shows (S-308): placeholders while it loads or while a scan has found
- * nothing yet, the empty state with its next step, or [content], with a scan strip on top
- * while the medialibrary is still scanning.
+ * What a library screen shows (S-308): the permission state when the app may read nothing
+ * (S-309), placeholders while it loads or while a scan has found nothing yet, the empty state
+ * with its next step, or [content], with a scan strip on top while the medialibrary is still
+ * scanning.
  */
 @Composable
 fun LibraryContent(
@@ -108,7 +125,18 @@ fun LibraryContent(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val access = LocalLibraryAccess.current
     when {
+        empty && access != null && !access.media && access.folders.isEmpty() -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            StatePanel(
+                tone = StateTone.Info,
+                icon = NagIcons.Shield,
+                title = stringResource(R.string.nag_state_permission_title),
+                description = stringResource(R.string.nag_state_permission_desc),
+                primary = StateAction(stringResource(R.string.nag_state_grant), access.requestMedia),
+                secondary = StateAction(stringResource(R.string.nag_state_folder_only), access.pickFolder),
+            )
+        }
         loading || (empty && scan.active) -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoadingState(
                 title = scanTitle(scan),

@@ -60,6 +60,7 @@ fun SettingsScreen(
     prefs: NagmedarPreferences,
     onOpenClassicSettings: () -> Unit,
     onOpenLicences: () -> Unit,
+    onShowFirstRun: () -> Unit,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val dimens = NagTheme.dimens
@@ -115,6 +116,22 @@ fun SettingsScreen(
             }
         }
         item { ShortcutsSection() }
+        item {
+            SettingsSection(stringResource(R.string.nag_settings_start)) {
+                SettingRow(stringResource(R.string.nag_settings_launcher)) {
+                    SegmentedChoice(
+                        options = listOf(
+                            true to stringResource(R.string.nagmedar_shell_title),
+                            false to stringResource(R.string.nag_classic_interface),
+                        ),
+                        selected = prefs.launchNewUi,
+                        onSelect = prefs::updateLaunchNewUi,
+                    )
+                }
+                Spacer(Modifier.height(dimens.gapS))
+                NagButton(stringResource(R.string.nag_settings_first_run_again), onShowFirstRun)
+            }
+        }
         item {
             SettingsSection(stringResource(R.string.nag_settings_about)) {
                 Text(

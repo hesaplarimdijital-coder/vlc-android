@@ -11,6 +11,9 @@ import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
+import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
+import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
+import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.Settings
 
 /**
@@ -27,6 +30,18 @@ class NagmedarPreferences(private val prefs: SharedPreferences) {
     var density by mutableStateOf(prefs.enumValue(KEY_DENSITY, DensityPreference.Auto))
         private set
     var sidebarCollapsed by mutableStateOf(prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false))
+        private set
+
+    /** S-309: the first-run flow was completed or skipped. */
+    var firstRunDone by mutableStateOf(prefs.getBoolean(NAGMEDAR_FIRST_RUN_DONE, false))
+        private set
+
+    /** S-309: the launcher icon opens this interface (true) or the classic one. */
+    var launchNewUi by mutableStateOf(prefs.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true))
+        private set
+
+    /** S-309: tree URIs of the folders chosen with the system picker. */
+    var safFolders by mutableStateOf(prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty())
         private set
 
     fun updateThemeMode(value: ThemeMode) {
@@ -47,6 +62,26 @@ class NagmedarPreferences(private val prefs: SharedPreferences) {
     fun updateSidebarCollapsed(value: Boolean) {
         sidebarCollapsed = value
         prefs.edit().putBoolean(KEY_SIDEBAR_COLLAPSED, value).apply()
+    }
+
+    fun updateFirstRunDone(value: Boolean) {
+        firstRunDone = value
+        prefs.edit().putBoolean(NAGMEDAR_FIRST_RUN_DONE, value).apply()
+    }
+
+    fun updateLaunchNewUi(value: Boolean) {
+        launchNewUi = value
+        prefs.edit().putBoolean(NAGMEDAR_LAUNCH_NEW_UI, value).apply()
+    }
+
+    fun addSafFolder(uri: String) {
+        safFolders = safFolders + uri
+        prefs.edit().putStringSet(NAGMEDAR_SAF_FOLDERS, HashSet(safFolders)).apply()
+    }
+
+    fun removeSafFolder(uri: String) {
+        safFolders = safFolders - uri
+        prefs.edit().putStringSet(NAGMEDAR_SAF_FOLDERS, HashSet(safFolders)).apply()
     }
 
     companion object {

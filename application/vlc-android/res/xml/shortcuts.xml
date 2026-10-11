@@ -3,15 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:targetApi="n_mr1" >
     <shortcut
-        android:shortcutId="nagmedar_shell"
+        android:shortcutId="nagmedar_classic"
         android:enabled="true"
         android:icon="@drawable/ic_nagmedar_mark"
-        android:shortcutShortLabel="@string/nagmedar_new_interface_short"
-        android:shortcutLongLabel="@string/nagmedar_new_interface">
+        android:shortcutShortLabel="@string/nagmedar_classic_interface_short"
+        android:shortcutLongLabel="@string/nagmedar_classic_interface">
+        <!-- S-309: the launcher icon opens the Nağmedar interface; this opens the classic one -->
         <intent
-            android:action="nagmedar.shortcut.shell"
+            android:action="nagmedar.shortcut.classic"
             android:targetPackage="app.nagmedar"
-            android:targetClass="app.nagmedar.ui.NagmedarActivity" />
+            android:targetClass="org.videolan.vlc.StartActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="last_playlist"

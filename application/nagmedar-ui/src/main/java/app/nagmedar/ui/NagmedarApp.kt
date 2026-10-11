@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -36,9 +38,14 @@ import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.rememberInputModeState
 import app.nagmedar.ui.input.trackInputMode
 import app.nagmedar.ui.library.HomeScreen
+import app.nagmedar.ui.library.LibraryAccess
+import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.MusicScreen
+import app.nagmedar.ui.onboarding.FirstRunHost
+import app.nagmedar.ui.onboarding.rememberAccessController
+import app.nagmedar.ui.onboarding.scanSources
 import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.TransportBar
@@ -54,6 +61,8 @@ import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
+import org.videolan.resources.AndroidDevices
+import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.LibrariesActivity
@@ -62,15 +71,47 @@ import org.videolan.vlc.gui.preferences.PreferencesActivity
 
 /**
  * Root of the new interface: theme from the preferences, density from the last input device,
- * the adaptive shell and the screens of this build. [onOpenFile] starts the system file picker;
- * [onActionsReady] hands the shortcut actions to the activity, which routes key events to them.
+ * the first-run flow until it is done (S-309), then the adaptive shell and the screens of this
+ * build. [onOpenFile] starts the system file picker; [onActionsReady] hands the shortcut
+ * actions to the activity, which routes key events to them. [requestedDestination] is a route
+ * asked for by a launcher shortcut; [onDestinationShown] clears it.
  */
 @Composable
-fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {}) {
-    val context = LocalContext.current
+fun NagmedarApp(
+    onOpenFile: () -> Unit,
+    onActionsReady: (AppActions) -> Unit = {},
+    requestedDestination: String? = null,
+    onDestinationShown: () -> Unit = {},
+) {
     val prefs = rememberNagmedarPreferences()
     val inputMode = rememberInputModeState()
     val mode = inputMode.effective(prefs.density)
+    NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(NagTheme.colors.background)
+                .trackInputMode(inputMode)
+                .windowInsetsPadding(WindowInsets.safeDrawing),
+        ) {
+            if (prefs.firstRunDone) {
+                NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown)
+            } else {
+                FirstRunHost(prefs, onDone = {})
+            }
+        }
+    }
+}
+
+@Composable
+private fun NagmedarMain(
+    prefs: NagmedarPreferences,
+    onOpenFile: () -> Unit,
+    onActionsReady: (AppActions) -> Unit,
+    requestedDestination: String?,
+    onDestinationShown: () -> Unit,
+) {
+    val context = LocalContext.current
     val repository = remember { MediaRepository(context.applicationContext) }
     val navController = rememberNavController()
     val navigator = remember(navController) { ShellNavigator(navController) }
@@ -80,26 +121,29 @@ fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {
     val actions = remember(context, prefs, navigator) {
         AppActions(context, prefs, navigator, undo, onOpenFile) { shortcutListRequests++ }
     }
-    val addFolder = { openClassic(context, SecondaryActivity.STORAGE_BROWSER) }
+    // media access asked for from the library starts the scan of this device's storage
+    val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
+    val libraryAccess = LibraryAccess(access.mediaAccess, access.folders, access::requestMedia, access::pickFolder)
+    // without media access a folder is picked with the system picker; with it, the medialibrary's folders open
+    val addFolder = { if (access.mediaAccess) openClassic(context, SecondaryActivity.STORAGE_BROWSER) else access.pickFolder() }
     LaunchedEffect(actions) { onActionsReady(actions) }
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests > 0) settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
     }
-    val counts by produceState<Map<Destination, String>>(emptyMap()) {
+    LaunchedEffect(requestedDestination) {
+        val destination = Destination.entries.firstOrNull { it.route == requestedDestination } ?: return@LaunchedEffect
+        navigator.navigate(destination)
+        onDestinationShown()
+    }
+    val counts by produceState<Map<Destination, String>>(emptyMap(), access.mediaAccess, access.folders) {
         val c = repository.counts()
         value = mapOf(Destination.Movies to c.videos.toString(), Destination.Music to c.tracks.toString())
     }
 
-    NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode) {
-        BoxWithConstraints(
-            Modifier
-                .fillMaxSize()
-                .background(NagTheme.colors.background)
-                .trackInputMode(inputMode)
-                .windowInsetsPadding(WindowInsets.safeDrawing),
-        ) {
-            val widthClass = WidthClass.fromWidth(maxWidth.value)
-            val nowPlaying = rememberNowPlaying()
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val widthClass = WidthClass.fromWidth(maxWidth.value)
+        val nowPlaying = rememberNowPlaying()
+        CompositionLocalProvider(LocalLibraryAccess provides libraryAccess) {
             NagmedarShell(
                 widthClass = widthClass,
                 sidebarCollapsed = prefs.sidebarCollapsed,
@@ -123,6 +167,7 @@ fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
                             onOpenLicences = { context.startActivity(Intent(context, LibrariesActivity::class.java)) },
+                            onShowFirstRun = { prefs.updateFirstRunDone(false) },
                             listState = settingsList,
                         )
                         Destination.More -> MoreScreen(
@@ -145,10 +190,13 @@ fun NagmedarApp(onOpenFile: () -> Unit, onActionsReady: (AppActions) -> Unit = {
     }
 }
 
-/** Opens the classic interface, on a given screen of SecondaryActivity when [fragment] is set. */
+/**
+ * Opens the classic interface, on a given screen of SecondaryActivity when [fragment] is set.
+ * StartActivity is asked for the classic interface explicitly: the launcher's default is this one.
+ */
 fun openClassic(context: Context, fragment: String?) {
     val intent = if (fragment == null) {
-        Intent(context, StartActivity::class.java)
+        Intent(context, StartActivity::class.java).setAction(NAGMEDAR_ACTION_CLASSIC)
     } else {
         Intent(context, SecondaryActivity::class.java).putExtra(SecondaryActivity.KEY_FRAGMENT, fragment)
     }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.produceState
 import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.StartActivity
 import org.videolan.vlc.media.MediaUtils
@@ -75,7 +76,10 @@ object PlaybackActions {
         if (service != null && service.currentMediaWrapper?.type == MediaWrapper.TYPE_VIDEO) {
             service.switchToVideo()
         } else {
-            context.startActivity(Intent(context, StartActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            // the launcher's default is the new interface: ask StartActivity for the classic one
+            context.startActivity(
+                Intent(context, StartActivity::class.java).setAction(NAGMEDAR_ACTION_CLASSIC).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
         }
     }
 }
