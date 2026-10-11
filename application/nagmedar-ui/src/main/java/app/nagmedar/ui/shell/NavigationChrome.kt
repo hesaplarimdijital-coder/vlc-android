@@ -372,9 +372,9 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
 
 // ---------------------------------------------------------------- top bars
 
-/** Compact and medium top bar: page title and search. */
+/** Compact and medium top bar: page title and search ([onSearch] null: none, on the search page itself). */
 @Composable
-fun PageTopBar(title: String, onSearch: () -> Unit, modifier: Modifier = Modifier) {
+fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(modifier.fillMaxWidth().background(colors.background)) {
@@ -384,7 +384,7 @@ fun PageTopBar(title: String, onSearch: () -> Unit, modifier: Modifier = Modifie
         ) {
             Text(title, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f))
-            NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch)
+            if (onSearch != null) NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch)
         }
     }
 }

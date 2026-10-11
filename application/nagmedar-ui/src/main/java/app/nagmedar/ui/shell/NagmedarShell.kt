@@ -86,7 +86,7 @@ fun NagmedarShell(
                     search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
                 )
             } else {
-                PageTopBar(title = stringResource(current.label), onSearch = onSearch)
+                PageTopBar(title = stringResource(current.label), onSearch = onSearch.takeIf { current != Destination.Search })
             }
         },
         navigation = {

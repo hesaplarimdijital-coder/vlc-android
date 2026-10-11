@@ -88,6 +88,18 @@ class SearchScreenTest {
     }
 
     @Test
+    fun episodesComeWithTheirShowInItsOrder() {
+        val data = SearchSamples.data
+        val episodes = searchLibrary(data, "kuzey", includeNetwork = false).episodes.map { data.episodeLabel(it.key) }
+        assertEquals(
+            listOf("Kuzey Rüzgârı · S01E01 · Başlangıç", "Kuzey Rüzgârı · S01E02", "Kuzey Rüzgârı · S01E03"),
+            episodes.take(3),
+        )
+        // the number finds an episode too
+        assertEquals(listOf("Kuzey Rüzgârı · S02E02 · Fener"), searchLibrary(data, "s02e02", includeNetwork = false).episodes.map { data.episodeLabel(it.key) })
+    }
+
+    @Test
     fun chipsKeepOneKind() {
         page()
         query = "kuzey"

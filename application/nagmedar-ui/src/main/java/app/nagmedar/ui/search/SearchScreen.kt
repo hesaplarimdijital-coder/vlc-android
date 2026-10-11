@@ -67,6 +67,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.library.Episode
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.Sidecars
 import app.nagmedar.ui.library.VideoItem
@@ -100,15 +101,27 @@ class SearchData(
     val tracks: List<TrackItem>,
     val subtitles: List<Triple<VideoItem, String, List<SubtitleCue>>> = emptyList(),
 ) {
-    /** The show of each episode by key: "Kuzey Rüzgârı" is searched and shown with its episodes. */
-    internal val shows: Map<String, String> = buildVideoLibrary(videos).shows
-        .flatMap { show -> show.episodes.map { it.item.key to show.title } }
+    /** Each episode with its show by key, in the library's order (show, season, episode). */
+    private val episodes: Map<String, Pair<String, Episode>> = buildVideoLibrary(videos).shows
+        .flatMap { show -> show.episodes.map { it.item.key to (show.title to it) } }
         .toMap()
 
+    private val episodeOrder: Map<String, Int> = episodes.keys.withIndex().associate { (index, key) -> key to index }
+
+    /** "Kuzey Rüzgârı · S01E02 · Fener": an episode as the page shows it; null for a film. */
+    fun episodeLabel(key: String): String? = episodes[key]?.let { (show, episode) ->
+        listOfNotNull(show, episode.code, episode.info.title.takeIf { it.isNotEmpty() }).joinToString(" · ")
+    }
+
+    /** Where an episode comes in the library, for hits that are as good as each other. */
+    internal fun episodeOrder(key: String): Int = episodeOrder[key] ?: Int.MAX_VALUE
+
+    // an episode is searched with its show and number: "kuzey s01e02" finds it
     internal val videoIndex: List<Searchable<VideoItem>> = videos.map { video ->
-        val show = shows[video.key]
-        if (show != null) {
-            Searchable(video, SearchKind.Episode, "$show ${video.title}")
+        val episode = episodes[video.key]
+        if (episode != null) {
+            val (show, ep) = episode
+            Searchable(video, SearchKind.Episode, listOf(show, ep.code, ep.info.title).filter { it.isNotEmpty() }.joinToString(" "))
         } else {
             Searchable(video, SearchKind.Film, video.title, video.folder.substringAfterLast('/'))
         }
@@ -151,7 +164,10 @@ fun searchLibrary(data: SearchData, raw: String, includeNetwork: Boolean): Searc
     return SearchResults(
         query = query,
         films = shownVideos.filter { it.kind == SearchKind.Film }.map { it.value },
-        episodes = shownVideos.filter { it.kind == SearchKind.Episode }.map { it.value },
+        // episodes as good as each other come in the show's order, not by the length of their names
+        episodes = shownVideos.filter { it.kind == SearchKind.Episode }
+            .sortedWith(compareByDescending<SearchHit<VideoItem>> { (it.score + 99) / 100 }.thenBy { data.episodeOrder(it.value.key) })
+            .map { it.value },
         tracks = shownTracks.map { it.value },
         cues = cues,
         hiddenOnNetwork = hidden,
@@ -313,7 +329,7 @@ fun SearchContent(
         val limit = if (scope == SearchScope.All) 5 else Int.MAX_VALUE
         section(R.string.nag_search_films, films, limit, { "film-${it.key}" }) { VideoHit(it, it.title, tech[it.key], results.query) { onPlayVideo(it) } }
         section(R.string.nag_search_episodes, episodes, limit, { "episode-${it.key}" }) {
-            VideoHit(it, listOfNotNull(data.shows[it.key], it.title).joinToString(" · "), tech[it.key], results.query) { onPlayVideo(it) }
+            VideoHit(it, data.episodeLabel(it.key) ?: it.title, tech[it.key], results.query) { onPlayVideo(it) }
         }
         section(R.string.nag_search_music, tracks, limit, { "track-${it.key}" }) { TrackHit(it, results.query) { onPlayTrack(it, tracks) } }
         section(R.string.nag_search_said, cues, limit, { "cue-${it.video.key}-${it.file}-${it.cue.startMs}" }) {
