@@ -20,6 +20,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
@@ -32,6 +34,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.input.menuBarSpecs
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlayerBarActions
@@ -83,7 +86,12 @@ fun TestShell(
         widthClass = widthClass,
         sidebarCollapsed = sidebarCollapsed,
         onSidebarCollapsedChange = {},
-        badges = mapOf(Destination.Movies to "128", Destination.Music to "4 812", Destination.Podcasts to "4 yeni"),
+        // sample counts; the podcasts' "new" is the sample's own word (S-1501: the screens in English too)
+        badges = mapOf(
+            Destination.Movies to "128",
+            Destination.Music to "4 812",
+            Destination.Podcasts to if (currentLocale().language == "tr") "4 yeni" else "4 new",
+        ),
         onSearch = {},
         menus = {
             // the app's menus, from the shortcut table (S-302)
@@ -103,15 +111,15 @@ fun TestShell(
 fun SampleScreen(destination: Destination) {
     when (destination) {
         Destination.Movies -> Column(Modifier.fillMaxSize()) {
-            PageHeader(title = "Filmler", subtitle = "128 video") {
-                NagIconButton(NagIcons.Grid, "Izgara görünümü", {})
-                NagIconButton(NagIcons.ListView, "Liste görünümü", {}, selected = true)
+            PageHeader(title = stringResource(R.string.nag_nav_movies), subtitle = pluralStringResource(R.plurals.nag_films_count, 128, 128)) {
+                NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), {})
+                NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), {}, selected = true)
             }
             DenseTable(
                 columns = listOf(
-                    TableColumn<SampleMovie>("Ad", ColumnWidth.Weight(1f)) { it.title },
-                    TableColumn<SampleMovie>("Çözünürlük", ColumnWidth.Fixed(140.dp), mono = true) { it.resolution },
-                    TableColumn<SampleMovie>("Süre", ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { it.duration },
+                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_title), ColumnWidth.Weight(1f)) { it.title },
+                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_resolution), ColumnWidth.Fixed(140.dp), mono = true) { it.resolution },
+                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_duration), ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { it.duration },
                 ),
                 rows = sampleMovies,
                 key = { it.title },
@@ -122,7 +130,7 @@ fun SampleScreen(destination: Destination) {
             )
         }
         Destination.Home -> Column(Modifier.fillMaxSize()) {
-            PageHeader(title = "Ana sayfa")
+            PageHeader(title = stringResource(R.string.nag_nav_home))
             Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 sampleMovies.take(3).forEach { movie ->
                     Column(Modifier.width(200.dp)) {

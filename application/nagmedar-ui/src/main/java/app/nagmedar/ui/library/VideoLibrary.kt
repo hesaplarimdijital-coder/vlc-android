@@ -125,7 +125,7 @@ data class VideoFolder(val path: String, val name: String, val items: List<Video
 
 /** The video library split for the screens: films, shows, folders of films. */
 class VideoLibrary(val movies: List<VideoItem>, val shows: List<Show>, val folders: List<VideoFolder>) {
-    /** Films in progress, newest first: the "Devam et" shelf. */
+    /** Films in progress, newest first: the "İzlemeye devam et" shelf. */
     val continueMovies: List<VideoItem> get() = movies.filter { it.progress > 0f }.sortedByDescending { it.addedAt }
 
     companion object {

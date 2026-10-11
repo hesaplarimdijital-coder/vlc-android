@@ -66,11 +66,13 @@ enum class Destination(
             About -> NagIcons.Info
         }
 
-    /** Shorter label for the compact bottom bar. */
+    /**
+     * Shorter label for the bottom bar and the rail, where words are narrow; the same word as the
+     * sidebar's and the page's title, only shorter (S-1501).
+     */
     @get:StringRes
     val shortLabel: Int
         get() = when (this) {
-            Movies -> R.string.nag_nav_video
             Podcasts -> R.string.nag_nav_podcasts_short
             else -> label
         }

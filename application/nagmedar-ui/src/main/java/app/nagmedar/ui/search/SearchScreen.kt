@@ -72,6 +72,7 @@ import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.Sidecars
 import app.nagmedar.ui.library.VideoItem
 import app.nagmedar.ui.library.buildVideoLibrary
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.rememberTech
 import app.nagmedar.ui.library.techSummary
@@ -355,7 +356,7 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.section(
     item(key = "header-$title") {
         Row(Modifier.widthIn(max = ContentWidth).fillMaxWidth().padding(top = 12.dp, bottom = 2.dp)) {
             Text(
-                stringResource(title).uppercase(java.util.Locale.forLanguageTag("tr")) + " · " + hits.size,
+                stringResource(title).uppercase(currentLocale()) + " · " + hits.size,
                 style = NagTheme.type.caption,
                 color = NagTheme.colors.textTertiary,
                 modifier = Modifier.semantics { heading() },
@@ -509,7 +510,7 @@ private fun NetworkCard(count: Int, onShow: () -> Unit) {
     }
 }
 
-/** "tür:film 4k", "tam ifade", -fragman, and the Turkish letters. */
+/** "tür:film kuzey", "tam ifade", -fragman (in English type:film north…), and the Turkish letters. */
 @Composable
 private fun SyntaxHelp(modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
@@ -523,9 +524,9 @@ private fun SyntaxHelp(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(stringResource(R.string.nag_search_syntax), style = NagTheme.type.bodyStrong, color = colors.text)
-        SyntaxLine("tür:film kuzey", stringResource(R.string.nag_search_syntax_kind))
-        SyntaxLine("\"kuzey ışığı\"", stringResource(R.string.nag_search_syntax_phrase))
-        SyntaxLine("-fragman", stringResource(R.string.nag_search_syntax_exclude))
+        SyntaxLine(stringResource(R.string.nag_search_syntax_kind_example), stringResource(R.string.nag_search_syntax_kind))
+        SyntaxLine(stringResource(R.string.nag_search_syntax_phrase_example), stringResource(R.string.nag_search_syntax_phrase))
+        SyntaxLine(stringResource(R.string.nag_search_syntax_exclude_example), stringResource(R.string.nag_search_syntax_exclude))
         Text(stringResource(R.string.nag_search_syntax_letters), style = NagTheme.type.labelSmall, color = colors.textTertiary)
     }
 }

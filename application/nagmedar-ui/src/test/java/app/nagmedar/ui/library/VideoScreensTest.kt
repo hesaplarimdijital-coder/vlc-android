@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** S-801: filter chips, folders and the "Devam et" shelf of the films; shows, seasons and episodes. */
+/** S-801: filter chips, folders and the "İzlemeye devam et" shelf of the films; shows, seasons and episodes. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
@@ -156,7 +156,7 @@ class VideoScreensTest {
     @Test
     fun showsSayWhatComesNext() {
         series()
-        // Kuzey Rüzgârı is in progress: in "Devam et" and in "Tüm diziler"
+        // Kuzey Rüzgârı is in progress: in "İzlemeye devam et" and in "Tüm diziler"
         assertEquals(2, shown("Kuzey Rüzgârı"))
         assertEquals(2, shown("Sıradaki: S02E02"))
         compose.onNodeWithText("Sıradaki: S01E01").assertExists()

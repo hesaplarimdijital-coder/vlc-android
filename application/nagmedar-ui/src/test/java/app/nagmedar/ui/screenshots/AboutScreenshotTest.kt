@@ -72,4 +72,8 @@ class AboutScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("about-phone-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch)
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun phoneEnglish() = capture("about-phone-dark-en", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch)
 }

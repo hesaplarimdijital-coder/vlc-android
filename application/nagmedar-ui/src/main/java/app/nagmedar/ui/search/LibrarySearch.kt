@@ -9,10 +9,10 @@ package app.nagmedar.ui.search
 
 /** What a hit is: the groups of the page. */
 enum class SearchKind(vararg val words: String) {
-    Film("film", "filmler", "movie", "video"),
-    Episode("dizi", "diziler", "bolum", "episode", "series"),
-    Music("muzik", "sarki", "parca", "music", "track"),
-    Subtitle("altyazi", "altyazilar", "subtitle"),
+    Film("film", "filmler", "films", "movie", "movies", "video"),
+    Episode("dizi", "diziler", "bolum", "bolumler", "episode", "episodes", "series"),
+    Music("muzik", "parca", "parcalar", "sarki", "music", "track", "tracks", "song", "songs"),
+    Subtitle("altyazi", "altyazilar", "subtitle", "subtitles"),
 }
 
 /** A query taken apart; every part is folded with [foldForSearch]. */

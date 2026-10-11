@@ -85,4 +85,8 @@ class PaletteScreenshotTest {
         "palette-phone-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, "",
         listOf("media:sabaha", "screen:${Destination.Settings.route}", "command:${ShortcutId.OpenFile.name}"),
     )
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun dexEnglish() = capture("palette-dex-dark-en", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "open", emptyList())
 }

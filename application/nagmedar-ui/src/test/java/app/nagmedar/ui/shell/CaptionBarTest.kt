@@ -91,7 +91,7 @@ class CaptionBarTest {
     fun theTopBarIsTheCaptionBarOfANarrowWindow() {
         shell(WidthClass.Medium, ThemeMode.Light, InputMode.Pointer)
         val window = view.width
-        val search = compose.onNode(hasContentDescription("Ara veya komut çalıştır") and hasClickAction()).fetchSemanticsNode().boundsInRoot
+        val search = compose.onNode(hasContentDescription("Ara ya da komut çalıştır") and hasClickAction()).fetchSemanticsNode().boundsInRoot
         assertTrue("clear of the buttons: ${search.right}", search.right <= window - 144f)
         assertTrue(excluded(search.center.x, search.center.y))
         // the top bar's title, above the page's own

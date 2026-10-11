@@ -76,6 +76,8 @@ class TechLabelsTest {
         assertEquals("Eng", languageShort("eng", en))
         assertNull(languageShort("und", tr))
         assertNull(languageShort("", tr))
+        // S-1501: a code with no name is shown in Latin capitals, not Turkish ones (QAI, not QAİ)
+        assertEquals("QAI", languageShort("qai", tr))
     }
 
     @Test

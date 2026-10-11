@@ -1,8 +1,10 @@
 package app.nagmedar.ui.lab
 
 import android.app.Activity
+import android.content.res.Resources
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.core.os.ConfigurationCompat
 import app.nagmedar.lab.DvConversion
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.UsbAudioLab
@@ -11,6 +13,8 @@ import app.nagmedar.ui.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.coroutines.resume
 
 /** What a tool needs picked before it runs. */
@@ -24,10 +28,32 @@ enum class LabInput {
     MediaAndOutput,
 }
 
+/** A value of an option, and how its button names it in the interface's language (S-1501). */
+class LabChoice(val value: String, val label: (Resources) -> String)
+
 /** A choice shown on the tool's row; values are passed to [LabTool.run] by [key]. */
-class LabOption(val key: String, @StringRes val label: Int, val choices: List<Pair<String, String>>) {
-    val default get() = choices.first().first
+class LabOption(val key: String, @StringRes val label: Int, val choices: List<LabChoice>) {
+    val default get() = choices.first().value
+
+    /** The values and their names, for the row's buttons. */
+    fun named(resources: Resources): List<Pair<String, String>> = choices.map { it.value to it.label(resources) }
 }
+
+private fun Resources.locale(): Locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
+
+/** "10 sn", "10 s". */
+private fun seconds(count: Int) = LabChoice("$count") { it.getString(R.string.nag_duration_seconds, count) }
+
+/** "10 dk", "10 min"; the value in seconds. */
+private fun minutes(count: Int) = LabChoice("${count * 60}") { it.getString(R.string.nag_duration_minutes, count) }
+
+/** "44,1 kHz" in Turkish, "44.1 kHz" in English; the value in Hz. */
+private fun kiloHertz(hertz: Int) = LabChoice("$hertz") { res ->
+    NumberFormat.getNumberInstance(res.locale()).apply { maximumFractionDigits = 1 }.format(hertz / 1000.0) + " kHz"
+}
+
+/** A name that is the same in every language: "MKV", "24 bit". */
+private fun fixed(value: String, name: String) = LabChoice(value) { name }
 
 /** Everything a running tool gets: the picked files, the chosen options and a progress sink. */
 class LabRun(
@@ -58,13 +84,16 @@ class LabTool(
 
 object LabTools {
 
-    private val dvDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("60" to "60 sn", "0" to "Tümü"))
-    private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf("mkv" to "MKV", "mp4" to "MP4"))
-    private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { it.name to it.label })
-    private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("60" to "1 dk", "600" to "10 dk"))
-    private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf("96000" to "96 kHz", "44100" to "44,1 kHz", "192000" to "192 kHz"))
-    private val usbBits = LabOption("bits", R.string.nag_lab_option_bits, listOf("24" to "24 bit", "16" to "16 bit", "32" to "32 bit"))
-    private val usbDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf("10" to "10 sn", "600" to "10 dk"))
+    private val dvDuration = LabOption(
+        "seconds", R.string.nag_lab_option_duration,
+        listOf(seconds(60), LabChoice("0") { it.getString(R.string.nag_filter_all) }),
+    )
+    private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf(fixed("mkv", "MKV"), fixed("mp4", "MP4")))
+    private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { fixed(it.name, it.label) })
+    private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(minutes(1), minutes(10)))
+    private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf(kiloHertz(96000), kiloHertz(44100), kiloHertz(192000)))
+    private val usbBits = LabOption("bits", R.string.nag_lab_option_bits, listOf(fixed("24", "24 bit"), fixed("16", "16 bit"), fixed("32", "32 bit")))
+    private val usbDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(seconds(10), minutes(10)))
 
     val all: List<LabTool> = listOf(
         LabTool("SP-01", R.string.nag_lab_audio_report, R.string.nag_lab_audio_report_desc) { run ->

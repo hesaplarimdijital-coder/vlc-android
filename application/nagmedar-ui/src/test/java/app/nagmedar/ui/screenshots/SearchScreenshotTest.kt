@@ -80,4 +80,11 @@ class SearchScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun syntax() = capture("search-empty-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
+
+    /** S-1501: in English, the results (English capitals: FILMS) and the syntax. */
+    @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
+    fun tabletEnglish() = capture("search-tablet-dark-en", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "kuzey")
+
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun syntaxEnglish() = capture("search-empty-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
 }

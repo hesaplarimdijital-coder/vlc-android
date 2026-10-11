@@ -171,7 +171,7 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
                         tool.options.forEach { option ->
                             val key = "${tool.title}:${option.key}"
                             SegmentedChoice(
-                                options = option.choices,
+                                options = option.named(context.resources),
                                 selected = choices[key] ?: option.default,
                                 onSelect = { choices[key] = it },
                             )

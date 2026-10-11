@@ -92,6 +92,13 @@ class ShellScreenshotTest {
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun placeholderLarge() = capture("large-dark-tvlab", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, Destination.TvLab)
 
+    /** S-1501: the shell in English, in a DeX window and on a phone. */
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun largeDarkEnglish() = capture("large-dark-en", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer)
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun compactLightEnglish() = capture("compact-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch)
+
     companion object {
         private val dir = File(System.getProperty("nagmedar.screenshotDir") ?: "build/outputs/screenshots")
 

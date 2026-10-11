@@ -76,6 +76,7 @@ import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.VerticalRule
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
@@ -296,7 +297,7 @@ private fun GroupHeader(group: PaletteGroup) {
     val colors = NagTheme.colors
     val title = if (group.kind == null) stringResource(R.string.nag_palette_recent) else stringResource(group.kind.title)
     Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp)) {
-        Text(title.uppercase(java.util.Locale.forLanguageTag("tr")), style = NagTheme.type.caption, color = colors.textTertiary,
+        Text(title.uppercase(currentLocale()), style = NagTheme.type.caption, color = colors.textTertiary,
             modifier = Modifier.weight(1f).semantics { heading() })
         Text("${group.total}", style = NagTheme.type.mono, color = colors.textTertiary)
     }

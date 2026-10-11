@@ -77,4 +77,8 @@ class MoviesScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun phoneGridDark() = capture("movies-phone-dark", ThemeMode.Dark, InputMode.Touch, grid = true, null)
+
+    /** S-1501: in English, the details' labels and language names too. */
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun gridWithDetailsEnglish() = capture("movies-dex-details-dark-en", ThemeMode.Dark, InputMode.Pointer, grid = true, MovieSamples.kuzeyIsigi.key)
 }

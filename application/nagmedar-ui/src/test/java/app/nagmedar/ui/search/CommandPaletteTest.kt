@@ -135,6 +135,16 @@ class CommandPaletteTest {
         assertEquals(1, ran.size)
     }
 
+    /** S-1501: in English the groups' titles are English capitals: MEDIA, not MEDİA. */
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun inEnglishTheTitlesAreEnglishCapitals() {
+        palette()
+        compose.onNodeWithContentDescription("Search commands, screens, settings or media").performTextInput("kuzey")
+        compose.waitForIdle()
+        compose.onNodeWithText("MEDIA").assertExists()
+        compose.onNodeWithText("MEDİA").assertDoesNotExist()
+    }
+
     @Test
     fun prefixesAndTabNarrowTheSearch() {
         palette()

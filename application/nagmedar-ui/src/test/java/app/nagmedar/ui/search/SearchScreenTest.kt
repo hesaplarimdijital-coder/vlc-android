@@ -67,7 +67,7 @@ class SearchScreenTest {
     fun withoutAQueryTheSyntaxIsShown() {
         page()
         compose.onNodeWithText("Arama sözdizimi").assertExists()
-        compose.onNodeWithText("Film, dizi, şarkı ya da replik ara").assertExists()
+        compose.onNodeWithText("Film, dizi, parça ya da replik ara").assertExists()
     }
 
     @Test
@@ -134,6 +134,19 @@ class SearchScreenTest {
         compose.onNodeWithText("SÖYLENENLERDE · 1").assertExists()
         compose.onNode(hasText("Işıklar söndüğünde", substring = true) and hasClickAction()).performClick()
         assertEquals(listOf("cue:Kuzey Işığı@62345"), played)
+    }
+
+    /** S-1501: in English the syntax's examples are English, and the groups' titles English capitals (FILMS, not FİLMS). */
+    @Test @Config(qualifiers = "en-w1280dp-h1200dp-mdpi")
+    fun inEnglishTheSyntaxAndTheTitlesAreEnglish() {
+        page()
+        compose.onNodeWithText("type:film north").assertExists()
+        compose.onNodeWithText("\"northern lights\"").assertExists()
+        compose.onNodeWithText("-trailer").assertExists()
+        query = "type:films kuzey"
+        compose.waitForIdle()
+        assertEquals(1, shown("FILMS ·"))
+        assertEquals(0, shown("FİLMS"))
     }
 
     @Test

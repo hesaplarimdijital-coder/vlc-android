@@ -9,9 +9,8 @@
     <string name="nag_section_tools">Tools</string>
     <string name="nag_section_playlists">Playlists</string>
     <string name="nag_nav_home">Home</string>
-    <string name="nag_nav_movies">Movies</string>
+    <string name="nag_nav_movies">Films</string>
     <string name="nag_nav_series">Series</string>
-    <string name="nag_nav_video">Video</string>
     <string name="nag_nav_music">Music</string>
     <string name="nag_nav_podcasts">Podcasts</string>
     <string name="nag_nav_podcasts_short">Podcast</string>
@@ -47,7 +46,7 @@
 
     <!-- Placeholders -->
     <string name="nag_coming_title">%1$s arrives in %2$s</string>
-    <string name="nag_coming_movies">Movies with posters, technical details and TV compatibility.</string>
+    <string name="nag_coming_movies">Films with posters, technical details and TV compatibility.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
     <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
@@ -60,14 +59,16 @@
     <string name="nag_open_classic">Open the classic interface</string>
 
     <!-- Library -->
-    <string name="nag_home_continue">Continue watching</string>
+    <string name="nag_continue_watching">Continue watching</string>
     <string name="nag_home_recent_music">Recently played music</string>
     <string name="nag_home_nothing_title">Nothing played yet</string>
     <string name="nag_home_nothing_desc">What you watch and listen to appears here, to carry on where you left off.</string>
-    <string name="nag_home_browse_movies">Browse movies</string>
+    <string name="nag_home_browse_movies">Browse films</string>
     <string name="nag_home_browse_music">Browse music</string>
-    <string name="nag_videos_count">%1$d videos</string>
-    <string name="nag_tracks_count">%1$d tracks</string>
+    <plurals name="nag_tracks_count">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
     <string name="nag_library_loading">Loading the library…</string>
     <string name="nag_unknown_artist">Unknown artist</string>
     <string name="nag_column_title">Title</string>
@@ -125,7 +126,7 @@
     <string name="nag_fr_folder_remove">Remove %1$s</string>
     <string name="nag_fr_sources_label">Sources</string>
     <string name="nag_fr_sources_title">Where should we look for your media?</string>
-    <string name="nag_fr_sources_desc">Pick as many as you like; you can change them later under Settings › Library.</string>
+    <string name="nag_fr_sources_desc">Choose as many as you like; you can change them later under Settings › Library.</string>
     <string name="nag_fr_source_device">Media on this device</string>
     <string name="nag_fr_source_needs_access">Needs media access</string>
     <string name="nag_fr_source_drive_desc">External drive found · %1$s</string>
@@ -143,7 +144,7 @@
     <string name="nag_fr_audio_heard">I heard it</string>
     <string name="nag_fr_audio_not_heard">I didn\'t</string>
     <string name="nag_fr_audio_ok">The audio output is ready.</string>
-    <string name="nag_fr_audio_help">Check the volume and the output device. With a USB DAC connected, pick the output under Settings › Audio.</string>
+    <string name="nag_fr_audio_help">Check the volume and the output device. With a USB DAC connected, choose the output under Settings › Audio.</string>
     <string name="nag_fr_notif_label">Notifications</string>
     <string name="nag_fr_notif_title">Playback notifications</string>
     <string name="nag_fr_notif_desc">Playback controls on the lock screen and in the notification; scan and download progress.</string>
@@ -237,7 +238,6 @@
         <item quantity="other">%d tracks selected</item>
     </plurals>
     <string name="nag_selection_play">Play</string>
-    <string name="nag_selection_queue">Add to queue</string>
     <string name="nag_selection_clear">Clear the selection</string>
     <!-- Drag and drop (S-406) -->
     <string name="nag_drop_here">Drop to play</string>
@@ -294,7 +294,7 @@
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
     <string name="nag_sc_add_subtitle">Add subtitle file…</string>
     <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
-    <string name="nag_sc_play_queue">Play queue</string>
+    <string name="nag_sc_play_queue">Up next</string>
     <string name="nag_sc_shortcut_list">Keyboard shortcuts</string>
     <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
     <string name="nag_shortcuts_player_only">In the player</string>
@@ -350,6 +350,7 @@
     <string name="nag_kb_choose">Click or press a key</string>
     <string name="nag_kb_free">%1$s · free</string>
     <string name="nag_kb_one">%1$s · %2$s</string>
+    <string name="nag_kb_in_player">%1$s (in the player)</string>
     <string name="nag_kb_conflict">%1$s · conflict: %2$s</string>
     <string name="nag_kb_nothing">%1$s · cannot be a shortcut with this layout</string>
     <string name="nag_kb_legend_bound">Shortcut</string>
@@ -409,9 +410,14 @@
     <string name="nag_about_closed">Closed</string>
     <string name="nag_about_no_text">Public domain: no licence text.</string>
     <string name="nag_about_full_license">The full licence</string>
+    <string name="nag_about_copyright">Copyleft © 1996–2026 by VideoLAN and the VLC authors\nNağmedar changes © 2026 the Nağmedar contributors</string>
+    <string name="nag_license_bsd3">3-clause BSD</string>
+    <string name="nag_license_gsm">GSM permissive</string>
+    <string name="nag_license_old_mit">Old MIT</string>
+    <string name="nag_license_public_domain">Public domain</string>
     <string name="nag_more_actions">More actions</string>
     <string name="nag_play_next">Play next</string>
-    <string name="nag_add_to_queue">Add to play queue</string>
+    <string name="nag_add_to_queue">Add to queue</string>
     <string name="nag_unavailable_mvp">Arrives in a later version</string>
     <string name="nag_view_grid">Grid view</string>
     <string name="nag_view_list">List view</string>
@@ -445,7 +451,7 @@
     <string name="nag_lab_usb_tone">Direct USB output test</string>
     <string name="nag_lab_usb_tone_desc">Plays a 1 kHz tone straight to the DAC with libusb, around the Android mixer. Android\'s own USB output pauses meanwhile.</string>
     <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
-    <string name="nag_lab_dv_convert_desc">Pick a remux, then where to save the result: the base layer is copied as is, the enhancement layer dropped, the RPU converted.</string>
+    <string name="nag_lab_dv_convert_desc">Choose a remux, then where to save the result: the base layer is copied as is, the enhancement layer dropped, the RPU converted.</string>
     <string name="nag_lab_whisper">Subtitles from speech (whisper)</string>
     <string name="nag_lab_whisper_desc">Transcribes the start of a file in Turkish on this device and reports the speed. The model is downloaded once.</string>
     <string name="nag_lab_run">Run</string>
@@ -459,6 +465,7 @@
     <string name="nag_column_audio">Audio</string>
     <string name="nag_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="nag_duration_minutes">%1$d min</string>
+    <string name="nag_duration_seconds">%1$d s</string>
     <string name="nag_details_title">Details</string>
     <string name="nag_details_close">Close the details</string>
     <string name="nag_details_back">Back to the list</string>
@@ -468,7 +475,7 @@
     <string name="nag_details_resume">Resume</string>
     <string name="nag_tech_title">Technical</string>
     <string name="nag_tech_video">Video</string>
-    <string name="nag_tech_frame_rate">Frames</string>
+    <string name="nag_tech_frame_rate">Frame rate</string>
     <string name="nag_tech_range">HDR</string>
     <string name="nag_tech_audio">Audio %1$d</string>
     <string name="nag_tech_subtitles">Subtitles</string>
@@ -485,7 +492,7 @@
     <string name="nag_sort_by">Sort: %1$s</string>
     <string name="nag_order_added">Date added</string>
     <string name="nag_order_title">Title</string>
-    <string name="nag_order_duration">Length</string>
+    <string name="nag_order_duration">Duration</string>
     <string name="nag_order_resolution">Resolution</string>
     <string name="nag_filter_all">All</string>
     <string name="nag_filter_uhd">4K</string>
@@ -496,7 +503,6 @@
     <string name="nag_filter_unwatched">Unwatched</string>
     <string name="nag_no_matching_films">No films match these filters</string>
     <string name="nag_clear_filters">Clear the filters</string>
-    <string name="nag_video_continue">Continue watching</string>
     <string name="nag_folders_back">Back to the folders</string>
     <string name="nag_series_all">All series</string>
     <string name="nag_next_episode">Up next: %1$s</string>
@@ -552,7 +558,7 @@
         <item quantity="other">%d results</item>
     </plurals>
     <!-- Search page (S-311) -->
-    <string name="nag_search_placeholder">Search films, series, songs or lines</string>
+    <string name="nag_search_placeholder">Search films, series, tracks or lines</string>
     <string name="nag_search_clear">Clear the search</string>
     <plurals name="nag_search_count">
         <item quantity="one">%2$d result for “%1$s”</item>
@@ -574,8 +580,11 @@
     <string name="nag_search_said">What is said</string>
     <string name="nag_search_subtitles">Subtitles</string>
     <string name="nag_search_syntax">Search syntax</string>
-    <string name="nag_search_syntax_kind">one kind (film, dizi, müzik, altyazı)</string>
+    <string name="nag_search_syntax_kind">one kind (film, series, music, subtitle)</string>
     <string name="nag_search_syntax_phrase">exact phrase</string>
     <string name="nag_search_syntax_exclude">leave out</string>
     <string name="nag_search_syntax_letters">Turkish letters match: “ışık” = “isik”</string>
+    <string name="nag_search_syntax_kind_example">type:film north</string>
+    <string name="nag_search_syntax_phrase_example">\"northern lights\"</string>
+    <string name="nag_search_syntax_exclude_example">-trailer</string>
 </resources>

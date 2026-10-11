@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -61,6 +62,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.lab.ReportDialog
+import app.nagmedar.ui.search.foldForSearch
 import app.nagmedar.ui.shell.BrandMark
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -92,12 +94,32 @@ fun readThirdParties(json: String): List<ThirdParty> {
     }
 }
 
-/** Whether [query] names the library or its licence, ignoring case. */
-internal fun ThirdParty.matches(query: String): Boolean {
-    val q = query.trim()
+/**
+ * Whether [query] names the library, its copyright or its licence, as listed or as its chip names
+ * it ([licenseLabel]); folded the Turkish way, so "kamu mali" finds "Kamu malı".
+ */
+internal fun ThirdParty.matches(query: String, licenseLabel: String? = null): Boolean {
+    val q = foldForSearch(query).trim()
     if (q.isEmpty()) return true
-    return title.contains(q, ignoreCase = true) || license?.name?.contains(q, ignoreCase = true) == true ||
-        license?.id?.contains(q, ignoreCase = true) == true || copyright.contains(q, ignoreCase = true)
+    return listOfNotNull(title, copyright, license?.name, license?.id, licenseLabel).any { foldForSearch(it).contains(q) }
+}
+
+/** "Apache 2.0 license" → "Apache 2.0", "LGPL v2.1 or later" → "LGPL v2.1+": a licence's name, short. */
+internal fun compactLicenseName(name: String): String =
+    name.trim().replace(Regex("""\s+licen[cs]e$""", RegexOption.IGNORE_CASE), "").replace(Regex("""\s+or later$"""), "+")
+
+/**
+ * How a licence's chip names it (S-1501): short, and in the interface's language where the name
+ * has words of its own ("Kamu malı", "3 maddeli BSD"); the others are names, the same in both.
+ */
+@Composable
+@ReadOnlyComposable
+internal fun licenseLabel(license: License): String = when (license.id) {
+    "bsd3" -> stringResource(R.string.nag_license_bsd3)
+    "gsm" -> stringResource(R.string.nag_license_gsm)
+    "harfbuzz" -> stringResource(R.string.nag_license_old_mit)
+    "publicdomain" -> stringResource(R.string.nag_license_public_domain)
+    else -> compactLicenseName(license.name)
 }
 
 @Composable
@@ -135,7 +157,8 @@ fun AboutScreen(
     var query by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(emptySet<String>()) }
     var gplShown by rememberSaveable { mutableStateOf(false) }
-    val shown = remember(libraries, query) { libraries.orEmpty().filter { it.matches(query) } }
+    val labels = libraries.orEmpty().mapNotNull { it.license }.distinctBy { it.id }.associate { it.id to licenseLabel(it) }
+    val shown = remember(libraries, query, labels) { libraries.orEmpty().filter { it.matches(query, labels[it.license?.id]) } }
     val toggle: (String) -> Unit = { title -> expanded = if (title in expanded) expanded - title else expanded + title }
     val wide = currentWidthClass() >= WidthClass.Expanded
     val sourceUrl = stringResource(R.string.nagmedar_source_url)
@@ -290,7 +313,7 @@ private fun People(onAll: () -> Unit) {
             Person(stringResource(R.string.nag_about_people_vlc), stringResource(R.string.nag_about_people_vlc_desc))
             Person(stringResource(R.string.nag_about_people_nagmedar), stringResource(R.string.nag_about_people_nagmedar_desc))
             HorizontalRule()
-            Text(stringResource(R.string.about_copyright), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+            Text(stringResource(R.string.nag_about_copyright), style = NagTheme.type.labelSmall, color = colors.textTertiary)
         }
     }
 }
@@ -368,7 +391,7 @@ private fun LibraryRow(library: ThirdParty, open: Boolean, onToggle: () -> Unit,
             }
             if (license != null) {
                 Spacer(Modifier.width(8.dp))
-                LicenseChip(license.name)
+                LicenseChip(licenseLabel(license))
             }
             Icon(
                 if (open) NagIcons.ChevronUp else NagIcons.ChevronDown,

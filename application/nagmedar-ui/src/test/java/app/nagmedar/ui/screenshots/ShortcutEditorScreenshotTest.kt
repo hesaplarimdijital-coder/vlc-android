@@ -86,4 +86,12 @@ class ShortcutEditorScreenshotTest {
         "shortcuts-phone-light", ThemeMode.Light, InputMode.Touch,
         ShortcutPreset.Mpv.overrides + (ShortcutId.Repeat to KeyChord(Key.M)),
     )
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun dexEnglish() = capture(
+        "shortcuts-dex-dark-en", ThemeMode.Dark, InputMode.Pointer,
+        mapOf(ShortcutId.Stop to KeyChord(Key.Q, ctrl = true)),
+        recording = ShortcutId.Next,
+    )
 }

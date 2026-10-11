@@ -224,7 +224,7 @@ private fun filterLabel(filter: MovieFilter): String = stringResource(
 /**
  * The films below the header (S-801): the filter chips ("Tümü", "4K", "HDR", "Dolby Vision",
  * "Atmos", "Türkçe altyazılı", "İzlenmedi"), then the folders, or the films of every folder or of
- * one, as cards with the "Devam et" shelf on top, or as the dense table.
+ * one, as cards with the "İzlemeye devam et" shelf on top, or as the dense table.
  */
 @Composable
 fun MoviesLibrary(
@@ -274,7 +274,7 @@ fun MoviesLibrary(
                     modifier = Modifier.padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
                 ) {
                     NagButton(stringResource(R.string.nag_selection_play), { onPlayAll(chosen) }, primary = true)
-                    NagButton(stringResource(R.string.nag_selection_queue), { onQueueAll(chosen) })
+                    NagButton(stringResource(R.string.nag_add_to_queue), { onQueueAll(chosen) })
                 }
             }
         }
@@ -306,13 +306,13 @@ fun MoviesLibrary(
     }
 }
 
-/** "Devam et": the films in progress, in a row that scrolls with the grid. */
+/** "İzlemeye devam et": the films in progress, in a row that scrolls with the grid. */
 @Composable
 fun ContinueShelf(items: List<VideoItem>, tech: Map<String, MediaTech>, onPlay: (VideoItem) -> Unit) {
     val dimens = NagTheme.dimens
     Column(Modifier.fillMaxWidth().testTag("continue")) {
         Text(
-            stringResource(R.string.nag_video_continue),
+            stringResource(R.string.nag_continue_watching),
             style = NagTheme.type.title,
             color = NagTheme.colors.text,
             modifier = Modifier.padding(bottom = dimens.gapS).semantics { heading() },
@@ -477,7 +477,7 @@ private fun ShowGrid(shows: List<Show>, onOpen: (String) -> Unit) {
         if (going.isNotEmpty()) {
             item(key = "continue", span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    stringResource(R.string.nag_video_continue),
+                    stringResource(R.string.nag_continue_watching),
                     style = NagTheme.type.title,
                     color = NagTheme.colors.text,
                     modifier = Modifier.semantics { heading() },

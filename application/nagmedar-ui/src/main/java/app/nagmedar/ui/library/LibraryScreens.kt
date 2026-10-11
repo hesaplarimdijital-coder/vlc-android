@@ -180,7 +180,7 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
             } else {
                 LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = dimens.gapXl)) {
                     if (videoItems.isNotEmpty()) {
-                        item { ShelfTitle(stringResource(R.string.nag_home_continue)) }
+                        item { ShelfTitle(stringResource(R.string.nag_continue_watching)) }
                         item {
                             LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
                                 itemsIndexed(videoItems, key = { _, item -> item.key }) { _, item ->
@@ -281,7 +281,7 @@ fun MoviesContent(
     onShowDetails: (VideoItem) -> Unit,
     onPlay: (VideoItem) -> Unit,
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
-    /** Scrolls with the grid above the cards (the "Devam et" shelf); the table has none. */
+    /** Scrolls with the grid above the cards (the "İzlemeye devam et" shelf); the table has none. */
     gridHeader: (@Composable () -> Unit)? = null,
     selection: MultiSelection? = null,
 ) {
@@ -559,7 +559,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val list = tracks
     val unknown = stringResource(R.string.nag_unknown_artist)
     Column(Modifier.fillMaxSize()) {
-        PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = list?.let { stringResource(R.string.nag_tracks_count, it.size) })
+        PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = list?.let { pluralStringResource(R.plurals.nag_tracks_count, it.size, it.size) })
         LibraryContent(
             loading = list == null,
             empty = list?.isEmpty() == true,
@@ -598,7 +598,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                         modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
                     ) {
                         NagButton(stringResource(R.string.nag_selection_play), { PlaybackActions.playList(context, chosen, 0) }, primary = true)
-                        NagButton(stringResource(R.string.nag_selection_queue), { PlaybackActions.appendList(context, chosen) })
+                        NagButton(stringResource(R.string.nag_add_to_queue), { PlaybackActions.appendList(context, chosen) })
                     }
                 }
                 DenseTable(

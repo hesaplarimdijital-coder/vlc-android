@@ -116,4 +116,8 @@ class TouchScreenshotTest {
             )
         }
     }
+
+    /** S-1501: Sıradaki in English (Up next). */
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun queuePhoneEnglish() = capture("queue-phone-light-en", ThemeMode.Light, InputMode.Touch) { QueueShell(WidthClass.Compact, compact = true) }
 }

@@ -221,8 +221,9 @@ fun KeyboardMap(table: List<Shortcut>, modifier: Modifier = Modifier) {
         val chord = mods.chord(key)
         val name = chord.label(res)
         val on = byChord[chord].orEmpty()
-        fun title(shortcut: Shortcut) = res.getString(shortcut.label) +
-            if (shortcut.scope == ShortcutScope.Player) " (" + res.getString(R.string.nag_shortcuts_player_only).lowercase() + ")" else ""
+        fun title(shortcut: Shortcut) = res.getString(shortcut.label).let { label ->
+            if (shortcut.scope == ShortcutScope.Player) res.getString(R.string.nag_kb_in_player, label) else label
+        }
         val reserved = reservedReason(chord)
         return when {
             on.size > 1 -> res.getString(R.string.nag_kb_conflict, name, on.joinToString(", ") { title(it) })

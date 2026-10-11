@@ -93,4 +93,8 @@ class KeyboardMapScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("keymap-phone-dark", ThemeMode.Dark, InputMode.Touch, keyboard = null)
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun phoneEnglish() = capture("keymap-phone-dark-en", ThemeMode.Dark, InputMode.Touch, keyboard = null)
 }

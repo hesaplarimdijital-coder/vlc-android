@@ -161,7 +161,7 @@ fun languageShort(code: String, locale: Locale): String? {
     if (tag.isEmpty() || tag == "und" || tag == "mis" || tag == "zxx" || tag == "mul") return null
     val language = languageCodes[tag] ?: tag
     val name = Locale(language).getDisplayLanguage(locale)
-    if (name.isEmpty() || name.equals(language, ignoreCase = true)) return tag.uppercase(locale).take(3)
+    if (name.isEmpty() || name.equals(language, ignoreCase = true)) return tag.uppercase(Locale.ROOT).take(3)
     return name.take(3).replaceFirstChar { it.titlecase(locale) }
 }
 

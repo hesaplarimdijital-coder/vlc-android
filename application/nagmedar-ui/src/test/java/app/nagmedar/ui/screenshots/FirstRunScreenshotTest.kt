@@ -78,4 +78,8 @@ class FirstRunScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun dexWindow() = capture("first-run-dex", FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, input = InputMode.Pointer)
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w390dp-h844dp-hdpi")
+    fun sourcesEnglish() = capture("first-run-2-sources-en", FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true })
 }

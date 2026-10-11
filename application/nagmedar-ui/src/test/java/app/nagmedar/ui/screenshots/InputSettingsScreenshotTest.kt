@@ -62,4 +62,8 @@ class InputSettingsScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w390dp-h860dp-hdpi")
     fun phone() = capture("settings-input-phone-dark", ThemeMode.Dark, InputMode.Touch, changed = false)
+
+    /** S-1501: in English. */
+    @Test @Config(qualifiers = "en-w800dp-h560dp-mdpi")
+    fun tabletEnglish() = capture("settings-input-tablet-light-en", ThemeMode.Light, InputMode.Touch, changed = false)
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -102,5 +103,32 @@ class AboutScreenTest {
         compose.onNodeWithContentDescription("Kütüphane ya da lisans ara").performTextInput("x")
         compose.waitForIdle()
         compose.onNodeWithText("Eşleşen kütüphane yok").assertExists()
+    }
+
+    /** S-1501: a licence's chip names it short, in Turkish where the name has words, and is found so. */
+    @Test
+    fun licencesAreNamedShortAndInTurkish() {
+        val byId = libraries.mapNotNull { it.license }.associateBy { it.id }
+        assertEquals("Apache 2.0", compactLicenseName(byId.getValue("apache2.0").name))
+        assertEquals("LGPL v2.1+", compactLicenseName(byId.getValue("lgpl2.1").name))
+        assertEquals("GPL v2+", compactLicenseName(byId.getValue("gpl2").name))
+        assertEquals("SIL Open Font License 1.1", compactLicenseName(byId.getValue("ofl").name))
+        about()
+        compose.onNodeWithContentDescription("Kütüphane ya da lisans ara").performTextInput("kamu mali")
+        compose.waitForIdle()
+        // the two public-domain libraries, found by their chip's Turkish name
+        assertEquals(2, compose.onAllNodesWithText("Kamu malı").fetchSemanticsNodes().size)
+        compose.onNodeWithText("Copyleft © 1996–2026 VideoLAN ve VLC yazarları", substring = true).assertExists()
+    }
+
+    /** S-1501: the page in English. */
+    @Test @Config(qualifiers = "en-w411dp-h2000dp-mdpi")
+    fun inEnglishToo() {
+        about()
+        compose.onNodeWithText("Version 1.2.3 · libVLC 4.0.0 · medialibrary 0.13.0").assertExists()
+        compose.onNodeWithText("Copyleft © 1996–2026 by VideoLAN and the VLC authors", substring = true).assertExists()
+        compose.onNodeWithContentDescription("Find a library or a licence").performTextInput("public")
+        compose.waitForIdle()
+        assertEquals(2, compose.onAllNodesWithText("Public domain").fetchSemanticsNodes().size)
     }
 }
