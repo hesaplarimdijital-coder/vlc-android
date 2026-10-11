@@ -25,7 +25,9 @@ package org.videolan.vlc
 
 import android.content.ComponentName
 import android.content.Context
+import android.app.ActivityOptions
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -72,6 +74,7 @@ import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
+import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER
 import org.videolan.tools.PREF_TV_UI
 import org.videolan.tools.Settings
@@ -362,7 +365,13 @@ class StartActivity : FragmentActivity() {
             R.id.nav_directories -> "device"
             else -> null
         }?.let { intent.putExtra(NAGMEDAR_EXTRA_DESTINATION, it) }
-        startActivity(intent)
+        // S-409: a desktop window opens where it was last (DeX, freeform windows)
+        val bounds = Settings.getInstance(this).getString(NAGMEDAR_WINDOW_BOUNDS, null)?.let(Rect::unflattenFromString)
+        if (bounds != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            startActivity(intent, ActivityOptions.makeBasic().setLaunchBounds(bounds).toBundle())
+        } else {
+            startActivity(intent)
+        }
     }
 
     private fun startPlaybackFromApp(intent: Intent) = lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {

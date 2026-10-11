@@ -1,6 +1,7 @@
 package app.nagmedar.ui
 
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,6 +26,8 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
+import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
 import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 
@@ -122,6 +125,26 @@ class NagmedarActivity : ComponentActivity() {
     private fun keepAccess(uri: Uri) {
         if (uri.scheme != "content") return
         runCatching { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        saveWindowBounds()
+    }
+
+    /** S-409: a desktop window's place and size, for the launcher to open it there again. */
+    private fun saveWindowBounds() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || !isInMultiWindowMode) return
+        val bounds = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds
+        } else {
+            val at = IntArray(2)
+            window.decorView.getLocationOnScreen(at)
+            Rect(at[0], at[1], at[0] + window.decorView.width, at[1] + window.decorView.height)
+        }
+        // a window folded to nothing is not a size to come back to
+        if (bounds.width() < 320 || bounds.height() < 240) return
+        Settings.getInstance(this).edit().putString(NAGMEDAR_WINDOW_BOUNDS, bounds.flattenToString()).apply()
     }
 
     override fun onNewIntent(intent: Intent) {

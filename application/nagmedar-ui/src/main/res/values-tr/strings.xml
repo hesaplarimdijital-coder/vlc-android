@@ -207,6 +207,11 @@
     <string name="nag_middle_play_pause">Oynat / duraklat</string>
     <string name="nag_middle_mute">Sessiz</string>
     <string name="nag_middle_none">Hiçbiri</string>
+    <!-- Pencere (S-409) -->
+    <string name="nag_settings_player_fullscreen">Oynatıcı tam ekran açılsın</string>
+    <string name="nag_settings_player_fullscreen_hint">Masaüstü penceresinden (DeX) açılan video ekranı kaplar; Android 14 ve sonrası. Nağmedar penceresi son bıraktığınız yerde ve boyutta açılır.</string>
+    <string name="nag_choice_yes">Evet</string>
+    <string name="nag_choice_no">Hayır</string>
     <string name="nag_density_touch">Dokunmatik</string>
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>

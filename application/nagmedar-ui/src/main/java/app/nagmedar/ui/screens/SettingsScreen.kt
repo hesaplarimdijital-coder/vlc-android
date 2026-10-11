@@ -114,7 +114,10 @@ fun SettingsScreen(
     }
 }
 
-/** Input (S-201, S-404, S-408): density, the tooltip delay, and what the mouse does in the player. */
+/**
+ * Input (S-201, S-404, S-408, S-409): density, the tooltip delay, the player's window on desktops,
+ * and what the mouse does in the player.
+ */
 @Composable
 internal fun InputSection(prefs: NagmedarPreferences) {
     SettingsSection(stringResource(R.string.nag_settings_input)) {
@@ -140,6 +143,14 @@ internal fun InputSection(prefs: NagmedarPreferences) {
                 ),
                 selected = prefs.tooltipDelay,
                 onSelect = prefs::updateTooltipDelay,
+            )
+        }
+        // S-409: the player's window on desktops
+        SettingRow(stringResource(R.string.nag_settings_player_fullscreen), subtitle = stringResource(R.string.nag_settings_player_fullscreen_hint)) {
+            SegmentedChoice(
+                options = listOf(true to stringResource(R.string.nag_choice_yes), false to stringResource(R.string.nag_choice_no)),
+                selected = prefs.playerFullscreen,
+                onSelect = prefs::updatePlayerFullscreen,
             )
         }
         // S-408: the mouse in the video player

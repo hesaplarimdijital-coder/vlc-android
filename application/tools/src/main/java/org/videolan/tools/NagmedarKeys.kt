@@ -34,3 +34,9 @@ const val NAGMEDAR_MIDDLE_CLICK = "nagmedar_middle_click"
 const val NAGMEDAR_MIDDLE_PLAY_PAUSE = "play_pause"
 const val NAGMEDAR_MIDDLE_MUTE = "mute"
 const val NAGMEDAR_MIDDLE_NONE = "none"
+
+/** S-409: where Nağmedar's desktop window last was ("left top right bottom"), to open there again. */
+const val NAGMEDAR_WINDOW_BOUNDS = "nagmedar_window_bounds"
+
+/** S-409: the video player opened from a desktop window asks to fill the screen (Android 14 and later). */
+const val NAGMEDAR_PLAYER_FULLSCREEN = "nagmedar_player_fullscreen"

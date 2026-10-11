@@ -21,6 +21,7 @@ import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
 import org.videolan.tools.NAGMEDAR_MIDDLE_CLICK
 import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
+import org.videolan.tools.NAGMEDAR_PLAYER_FULLSCREEN
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WHEEL_SEEKS
 import org.videolan.tools.Settings
@@ -48,6 +49,15 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     /** S-408: what the middle button does in the video player. */
     var middleClick by mutableStateOf(prefs.getString(NAGMEDAR_MIDDLE_CLICK, null) ?: NAGMEDAR_MIDDLE_PLAY_PAUSE)
         private set
+
+    /** S-409: the video player opened from a desktop window asks to fill the screen. */
+    var playerFullscreen by mutableStateOf(prefs.getBoolean(NAGMEDAR_PLAYER_FULLSCREEN, true))
+        private set
+
+    fun updatePlayerFullscreen(value: Boolean) {
+        playerFullscreen = value
+        prefs.edit().putBoolean(NAGMEDAR_PLAYER_FULLSCREEN, value).apply()
+    }
 
     fun updateWheelSeeks(value: Boolean) {
         wheelSeeks = value

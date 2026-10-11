@@ -11,6 +11,14 @@
             android:label="@string/nagmedar_shell_title"
             android:resizeableActivity="true"
             android:theme="@style/Theme.Nagmedar"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <!-- S-409: a desktop window opens at a desktop size; the launcher then opens it where it was last -->
+            <layout
+                android:defaultWidth="1280dp"
+                android:defaultHeight="800dp"
+                android:gravity="center"
+                android:minWidth="480dp"
+                android:minHeight="360dp" />
+        </activity>
     </application>
 </manifest>

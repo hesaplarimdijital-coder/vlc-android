@@ -207,6 +207,11 @@
     <string name="nag_middle_play_pause">Play / pause</string>
     <string name="nag_middle_mute">Mute</string>
     <string name="nag_middle_none">Nothing</string>
+    <!-- Window (S-409) -->
+    <string name="nag_settings_player_fullscreen">Player opens full screen</string>
+    <string name="nag_settings_player_fullscreen_hint">A video opened from a desktop window (DeX) fills the screen; Android 14 and later. Nağmedar\'s window opens where and as large as you left it.</string>
+    <string name="nag_choice_yes">Yes</string>
+    <string name="nag_choice_no">No</string>
     <string name="nag_density_touch">Touch</string>
     <string name="nag_density_pointer">Mouse and keyboard</string>
     <string name="nag_settings_about">About</string>

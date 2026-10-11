@@ -549,6 +549,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         rootView = findViewById(R.id.player_root)
         // Nağmedar (S-406): subtitles and media dropped on the window
         PlayerDropListener.attach(this)
+        // Nağmedar (S-409): opened in a desktop window, the player asks to fill the screen
+        if (savedInstanceState == null) PlayerWindow.askForFullscreen(this, settings)
 
 
         overlayDelegate.playlist = findViewById(R.id.video_playlist)
