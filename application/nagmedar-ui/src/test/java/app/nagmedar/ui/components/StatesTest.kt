@@ -115,22 +115,25 @@ class StatesTest {
         assertTrue("${unnamed.size} clickables without a name", unnamed.isEmpty())
     }
 
+    /*
+     * The bars are added before the content is set, and time moves only through advanceTimeBy:
+     * the bar's countdown is a coroutine delay, which the test clock drives but waitForIdle does
+     * not wait for.
+     */
     private fun renderUndo(state: UndoBarState) {
-        compose.mainClock.autoAdvance = false
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 Box(Modifier.fillMaxSize().padding(40.dp), contentAlignment = Alignment.BottomCenter) { UndoBarHost(state) }
             }
         }
-        compose.mainClock.advanceTimeByFrame()
+        compose.waitForIdle()
     }
 
     @Test
     fun undoBarLeavesAfterEightSeconds() {
         val state = UndoBarState()
+        state.show("3 parça sıradan kaldırıldı", "Geri al", shortcut = "Ctrl+Z") {}
         renderUndo(state)
-        compose.runOnUiThread { state.show("3 parça sıradan kaldırıldı", "Geri al", shortcut = "Ctrl+Z") {} }
-        compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithText("3 parça sıradan kaldırıldı").assertExists()
         compose.mainClock.advanceTimeBy(UndoBarState.VISIBLE_MILLIS - 500)
         compose.onNodeWithText("3 parça sıradan kaldırıldı").assertExists()
@@ -141,9 +144,8 @@ class StatesTest {
     @Test
     fun undoBarWaitsWhileThePointerRestsOnIt() {
         val state = UndoBarState()
+        state.show("Gecikme −350 ms olarak kaydedildi", "Geri al") {}
         renderUndo(state)
-        compose.runOnUiThread { state.show("Gecikme −350 ms olarak kaydedildi", "Geri al") {} }
-        compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithText("Gecikme −350 ms olarak kaydedildi").performMouseInput { moveTo(center) }
         compose.mainClock.advanceTimeBy(12_000)
         compose.onNodeWithText("Gecikme −350 ms olarak kaydedildi").assertExists()
@@ -156,9 +158,8 @@ class StatesTest {
     @Test
     fun undoBarIsALiveRegion() {
         val state = UndoBarState()
+        state.show("3 parça sıradan kaldırıldı", "Geri al") {}
         renderUndo(state)
-        compose.runOnUiThread { state.show("3 parça sıradan kaldırıldı", "Geri al") {} }
-        compose.mainClock.advanceTimeByFrame()
         val announced = compose.onAllNodes(liveRegion).fetchSemanticsNodes()
         assertEquals(1, announced.size)
     }

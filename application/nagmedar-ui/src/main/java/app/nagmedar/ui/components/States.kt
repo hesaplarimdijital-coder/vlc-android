@@ -309,7 +309,8 @@ fun LoadingState(
         if (posters > 0) {
             Row(Modifier.fillMaxWidth().clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 repeat(posters) { index ->
-                    SkeletonBlock(Modifier.weight(1f).aspectRatio(2f / 3f), shimmer = index == 0)
+                    // posters are 2:3; the dense card size crops them to 3:4 so the progress line fits
+                    SkeletonBlock(Modifier.weight(1f).aspectRatio(if (dense) 3f / 4f else 2f / 3f), shimmer = index == 0)
                 }
             }
             Spacer(Modifier.height(10.dp))
