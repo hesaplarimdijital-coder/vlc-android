@@ -9,6 +9,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
@@ -38,6 +39,7 @@ import org.robolectric.annotation.GraphicsMode
  * S-308: every state shows the next step and is announced to screen readers; the undo bar stays
  * eight seconds, waits while the pointer rests on it, and Ctrl+Z takes back the newest change.
  */
+@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class StatesTest {
