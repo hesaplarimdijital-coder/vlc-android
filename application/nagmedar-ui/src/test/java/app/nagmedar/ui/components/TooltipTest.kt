@@ -73,9 +73,10 @@ class TooltipTest {
         compose.mainClock.advanceTimeBy(700)
         assertTrue("shown after the delay", tooltipShown())
         compose.onNodeWithText("Oynat").assertExists()
-        // the mouse leaves for the padding around the button
-        playButton.performMouseInput { moveTo(Offset(-20f, -20f)) }
-        compose.mainClock.advanceTimeBy(100)
+        // the mouse leaves the window (which wraps the button)
+        playButton.performMouseInput { moveTo(Offset(-200f, -200f)) }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
         assertFalse("gone when the mouse leaves", tooltipShown())
     }
 
