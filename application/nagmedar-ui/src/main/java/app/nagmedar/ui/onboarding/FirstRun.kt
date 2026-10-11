@@ -107,16 +107,19 @@ class FirstRunState(start: FirstRunStep = FirstRunStep.Access) {
         return true
     }
 
+    /** The removable drives left ticked; the device's own storage is [deviceSelected]. */
+    private fun chosenDrives(drives: List<StorageSource>) = drives.filter { it.removable && drivesSelected[it.path] != false }
+
     /** Paths the medialibrary should scan: this device when it can, and the drives left ticked. */
     fun scanPaths(devicePath: String, drives: List<StorageSource>): List<String> = buildList {
         if (deviceSelected && mediaAccess) add(devicePath)
-        if (mediaAccess) drives.filter { drivesSelected[it.path] != false }.forEach { add(it.path) }
+        if (mediaAccess) chosenDrives(drives).forEach { add(it.path) }
     }
 
     /** Sources counted on the Sources step's button. */
     fun sourceCount(drives: List<StorageSource>, folders: Set<String>): Int =
         (if (deviceSelected && mediaAccess) 1 else 0) +
-            (if (mediaAccess) drives.count { drivesSelected[it.path] != false } else 0) +
+            (if (mediaAccess) chosenDrives(drives).size else 0) +
             folders.size + (if (networkShares) 1 else 0) + (if (onlineSources) 1 else 0)
 }
 

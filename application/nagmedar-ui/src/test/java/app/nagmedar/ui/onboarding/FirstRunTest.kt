@@ -147,13 +147,16 @@ class FirstRunTest {
     @Test
     fun scanPathsNeedMediaAccess() {
         val state = FirstRunState()
+        // storageSources() lists the device's own storage first; it is the "this device" row
+        val sources = listOf(StorageSource("/storage/emulated/0", "", removable = false, totalBytes = 0), drive)
         state.mediaAccess = false
-        assertEquals(emptyList<String>(), state.scanPaths("/storage/emulated/0", listOf(drive)))
+        assertEquals(emptyList<String>(), state.scanPaths("/storage/emulated/0", sources))
         state.mediaAccess = true
-        assertEquals(listOf("/storage/emulated/0", drive.path), state.scanPaths("/storage/emulated/0", listOf(drive)))
+        assertEquals(listOf("/storage/emulated/0", drive.path), state.scanPaths("/storage/emulated/0", sources))
+        assertEquals(3, state.sourceCount(sources, emptySet()))
         state.deviceSelected = false
         state.drivesSelected[drive.path] = false
-        assertEquals(emptyList<String>(), state.scanPaths("/storage/emulated/0", listOf(drive)))
+        assertEquals(emptyList<String>(), state.scanPaths("/storage/emulated/0", sources))
     }
 
     @Test
