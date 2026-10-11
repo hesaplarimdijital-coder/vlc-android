@@ -87,7 +87,7 @@ class NagmedarActivity : ComponentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         // the plain arrows move the focus in the shell; bound to a shortcut (mpv's seek) they act in the player
-        if (!ShortcutRegistry.recording && !(isArrow(keyCode) && !event.hasModifiers())) {
+        if (!ShortcutRegistry.recording && !(isArrow(keyCode) && event.hasNoModifiers())) {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
             if (shortcut != null && shortcut.chord?.hasModifier != true && actions?.perform(shortcut.id) == true) return true
         }
