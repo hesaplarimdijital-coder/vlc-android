@@ -51,31 +51,57 @@ data class KeyChord(
             (if (meta) AndroidKeyEvent.META_META_ON else 0)
 }
 
-private fun keyName(key: Key, resources: Resources?): String = when (key) {
-    Key.Spacebar -> resources?.getString(R.string.nag_key_space) ?: "Space"
-    Key.DirectionLeft -> "←"
-    Key.DirectionRight -> "→"
-    Key.DirectionUp -> "↑"
-    Key.DirectionDown -> "↓"
-    Key.Enter -> "Enter"
-    Key.Escape -> "Esc"
-    Key.Delete -> "Del"
-    Key.Comma -> ","
-    Key.Slash -> "/"
-    Key.LeftBracket -> "["
-    Key.RightBracket -> "]"
-    Key.Equals -> "="
-    Key.F1 -> "F1"
-    Key.F11 -> "F11"
-    else -> {
-        val code = key.nativeKeyCode
-        when (code) {
-            in AndroidKeyEvent.KEYCODE_A..AndroidKeyEvent.KEYCODE_Z -> ('A' + (code - AndroidKeyEvent.KEYCODE_A)).toString()
-            in AndroidKeyEvent.KEYCODE_0..AndroidKeyEvent.KEYCODE_9 -> ('0' + (code - AndroidKeyEvent.KEYCODE_0)).toString()
-            else -> AndroidKeyEvent.keyCodeToString(code).removePrefix("KEYCODE_")
-        }
+private fun keyName(key: Key, resources: Resources?): String {
+    if (key == Key.Spacebar) return resources?.getString(R.string.nag_key_space) ?: "Space"
+    val code = key.nativeKeyCode
+    return when (code) {
+        in AndroidKeyEvent.KEYCODE_A..AndroidKeyEvent.KEYCODE_Z -> ('A' + (code - AndroidKeyEvent.KEYCODE_A)).toString()
+        in AndroidKeyEvent.KEYCODE_0..AndroidKeyEvent.KEYCODE_9 -> ('0' + (code - AndroidKeyEvent.KEYCODE_0)).toString()
+        in AndroidKeyEvent.KEYCODE_F1..AndroidKeyEvent.KEYCODE_F12 -> "F${code - AndroidKeyEvent.KEYCODE_F1 + 1}"
+        in AndroidKeyEvent.KEYCODE_NUMPAD_0..AndroidKeyEvent.KEYCODE_NUMPAD_9 -> "Num ${code - AndroidKeyEvent.KEYCODE_NUMPAD_0}"
+        else -> keySymbols[code] ?: AndroidKeyEvent.keyCodeToString(code).removePrefix("KEYCODE_")
     }
 }
+
+/** What the keys without a letter or a number are called on a keycap. */
+private val keySymbols: Map<Int, String> = mapOf(
+    AndroidKeyEvent.KEYCODE_DPAD_LEFT to "←",
+    AndroidKeyEvent.KEYCODE_DPAD_RIGHT to "→",
+    AndroidKeyEvent.KEYCODE_DPAD_UP to "↑",
+    AndroidKeyEvent.KEYCODE_DPAD_DOWN to "↓",
+    AndroidKeyEvent.KEYCODE_ENTER to "Enter",
+    AndroidKeyEvent.KEYCODE_ESCAPE to "Esc",
+    AndroidKeyEvent.KEYCODE_TAB to "Tab",
+    AndroidKeyEvent.KEYCODE_DEL to "Backspace",
+    AndroidKeyEvent.KEYCODE_FORWARD_DEL to "Del",
+    AndroidKeyEvent.KEYCODE_INSERT to "Ins",
+    AndroidKeyEvent.KEYCODE_MOVE_HOME to "Home",
+    AndroidKeyEvent.KEYCODE_MOVE_END to "End",
+    AndroidKeyEvent.KEYCODE_PAGE_UP to "PgUp",
+    AndroidKeyEvent.KEYCODE_PAGE_DOWN to "PgDn",
+    AndroidKeyEvent.KEYCODE_COMMA to ",",
+    AndroidKeyEvent.KEYCODE_PERIOD to ".",
+    AndroidKeyEvent.KEYCODE_SLASH to "/",
+    AndroidKeyEvent.KEYCODE_BACKSLASH to "\\",
+    AndroidKeyEvent.KEYCODE_SEMICOLON to ";",
+    AndroidKeyEvent.KEYCODE_APOSTROPHE to "'",
+    AndroidKeyEvent.KEYCODE_GRAVE to "`",
+    AndroidKeyEvent.KEYCODE_MINUS to "-",
+    AndroidKeyEvent.KEYCODE_EQUALS to "=",
+    AndroidKeyEvent.KEYCODE_PLUS to "+",
+    AndroidKeyEvent.KEYCODE_LEFT_BRACKET to "[",
+    AndroidKeyEvent.KEYCODE_RIGHT_BRACKET to "]",
+    AndroidKeyEvent.KEYCODE_NUMPAD_ADD to "Num +",
+    AndroidKeyEvent.KEYCODE_NUMPAD_SUBTRACT to "Num -",
+    AndroidKeyEvent.KEYCODE_NUMPAD_MULTIPLY to "Num *",
+    AndroidKeyEvent.KEYCODE_NUMPAD_DIVIDE to "Num /",
+    AndroidKeyEvent.KEYCODE_NUMPAD_DOT to "Num .",
+    AndroidKeyEvent.KEYCODE_NUMPAD_ENTER to "Num Enter",
+    AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE to "⏯",
+    AndroidKeyEvent.KEYCODE_MEDIA_STOP to "⏹",
+    AndroidKeyEvent.KEYCODE_MEDIA_NEXT to "⏭",
+    AndroidKeyEvent.KEYCODE_MEDIA_PREVIOUS to "⏮",
+)
 
 /** Groups follow the menu bar of the mockups; each group is one menu and one section of the shortcut list. */
 enum class ShortcutGroup(@StringRes val title: Int) {
