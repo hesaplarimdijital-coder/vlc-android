@@ -5,8 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -97,11 +99,13 @@ class PlayerBarsTest {
 
     private val actions = Recorder()
     private lateinit var inputModeManager: InputModeManager
+    private lateinit var focusManager: FocusManager
 
     private fun bar(kind: NavKind, input: InputMode) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 inputModeManager = LocalInputModeManager.current
+                focusManager = LocalFocusManager.current
                 SamplePlayerBar(kind, actions = actions)
             }
         }
@@ -143,8 +147,9 @@ class PlayerBarsTest {
         compose.waitForIdle()
         compose.onNodeWithText("2:09").assertExists()
         compose.onNodeWithText("4:18").assertExists()
-        // away from the bar the controls go
-        compose.onRoot().performMouseInput { moveTo(bottomCenter - Offset(0f, 10f)) }
+        // away from the bar (the window wraps it: outside the window) and without the focus, the controls go
+        compose.runOnIdle { focusManager.clearFocus() }
+        compose.onRoot().performMouseInput { moveTo(Offset(-40f, -40f)) }
         compose.waitForIdle()
         compose.onNodeWithContentDescription("Durdur").assertDoesNotExist()
         compose.onNodeWithText("Ada Karan · Gece Mavisi · FLAC 24/96").assertExists()
