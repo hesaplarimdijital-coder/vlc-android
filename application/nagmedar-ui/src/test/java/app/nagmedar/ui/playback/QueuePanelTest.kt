@@ -7,7 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -38,6 +41,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /** A queue in a list, for the panel's tests and screenshots. */
 class FakeQueue(entries: List<QueueEntry>, current: Int) : QueueActions {
@@ -87,7 +91,7 @@ class FakeQueue(entries: List<QueueEntry>, current: Int) : QueueActions {
  * the undo bar brings it back, the handle moves; with a pointer Alt+↑/↓, Delete and the menu do it;
  * "Temizle" takes what comes next; Esc closes; screen readers move and remove.
  */
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w411dp-h891dp-mdpi")
@@ -99,14 +103,18 @@ class QueuePanelTest {
     private val queue = FakeQueue(FakeQueue.sample, current = 0)
     private val undo = UndoBarState()
     private var closed = false
+    private lateinit var inputModes: InputModeManager
 
     private fun panel(input: InputMode) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
+                inputModes = LocalInputModeManager.current
                 QueuePanel(queue.entries, queue.current, queue, onClose = { closed = true }, modifier = Modifier.fillMaxSize(), undo = undo)
             }
         }
         compose.waitForIdle()
+        // a hardware key takes the window out of touch mode; injected keys do not
+        if (input == InputMode.Pointer) compose.runOnIdle { inputModes.requestInputMode(ComposeInputMode.Keyboard) }
     }
 
     private fun row(title: String) = compose.onNodeWithTag("queue-$title")
@@ -132,7 +140,8 @@ class QueuePanelTest {
     @Test
     fun aSwipeRemovesAndTheUndoBarBringsItBack() {
         panel(InputMode.Touch)
-        row("Liman Işıkları").performTouchInput { swipeLeft(startX = right - 10f, endX = left + width * 0.2f, durationMillis = 300) }
+        // from the middle of the row: its end is the handle, which drags
+        row("Liman Işıkları").performTouchInput { swipeLeft(startX = width * 0.7f, endX = left + width * 0.1f, durationMillis = 300) }
         compose.waitForIdle()
         assertEquals(listOf("Sabaha Kadar", "Fener", "Açılış", "Sis"), queue.titles)
         assertEquals("“Liman Işıkları” sıradan kaldırıldı", undo.messages.last().text)

@@ -75,8 +75,9 @@ class TouchScreenshotTest {
         "queue-tablet-dark", ThemeMode.Dark, InputMode.Touch,
         then = {
             // a row half swiped, its finger still down: "Kaldır" under it
+            // from the middle of the row: its end is the handle, which drags
             compose.onNodeWithTag("queue-Liman Işıkları").performTouchInput {
-                down(centerRight - Offset(10f, 0f))
+                down(Offset(width * 0.7f, centerY))
                 repeat(6) { moveBy(Offset(-width * 0.05f, 0f)) }
             }
         },

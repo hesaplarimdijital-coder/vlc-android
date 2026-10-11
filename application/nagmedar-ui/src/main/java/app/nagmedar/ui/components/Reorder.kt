@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -35,6 +36,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.math.max
 import kotlin.math.min
 
@@ -77,8 +79,8 @@ class ReorderState internal constructor(val list: LazyListState) {
     internal var listTop = 0f
     internal var listHeight = 0
 
-    /** The finger, in the list's coordinates. */
-    internal var pointer = 0f
+    /** The finger, in the list's coordinates: near an edge the list scrolls. */
+    internal var pointer by mutableFloatStateOf(0f)
 
     internal fun start(key: Any): Boolean {
         val item = list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == key } ?: return false
@@ -156,17 +158,24 @@ fun Modifier.reorderList(state: ReorderState): Modifier = composed {
     val edge = with(LocalDensity.current) { 56.dp.toPx() }
     val fastest = with(LocalDensity.current) { 20.dp.toPx() }
     LaunchedEffect(state, state.dragging) {
-        while (state.dragging) {
-            val speed = when {
-                state.pointer < edge -> -fastest * ((edge - state.pointer) / edge).coerceIn(0f, 1f)
-                state.pointer > state.listHeight - edge -> fastest * ((state.pointer - (state.listHeight - edge)) / edge).coerceIn(0f, 1f)
+        if (!state.dragging) return@LaunchedEffect
+        // a frame at a time while the finger is near an edge; nothing while it is not
+        snapshotFlow {
+            val pointer = state.pointer
+            when {
+                pointer < edge -> -fastest * ((edge - pointer) / edge).coerceIn(0f, 1f)
+                pointer > state.listHeight - edge -> fastest * ((pointer - (state.listHeight - edge)) / edge).coerceIn(0f, 1f)
                 else -> 0f
             }
-            if (speed != 0f) {
+        }.collectLatest { speed ->
+            if (speed == 0f) return@collectLatest
+            while (true) {
                 val consumed = state.list.scrollBy(speed)
-                if (consumed != 0f) state.scrolledBy(consumed)
+                // the list's end: nothing more to scroll
+                if (consumed == 0f) break
+                state.scrolledBy(consumed)
+                withFrameNanos { }
             }
-            withFrameNanos { }
         }
     }
     onGloballyPositioned { state.listTop = it.positionInRoot().y }.onSizeChanged { state.listHeight = it.height }
