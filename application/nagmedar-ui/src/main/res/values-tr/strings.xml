@@ -340,6 +340,22 @@
     <string name="nag_sc_reserved_system">Bu tuşlar sistemin; kısayol olamaz.</string>
     <string name="nag_sc_reserved_menu">F10 menü çubuğunu açar; kısayol olamaz.</string>
     <string name="nag_sc_reserved_navigation">Tab, Enter ve Esc pencerede gezinmek içindir; tek başlarına kısayol olamaz.</string>
+    <!-- Klavye haritası (S-410) -->
+    <string name="nag_kb_show">Klavye haritası</string>
+    <string name="nag_kb_hide">Haritayı gizle</string>
+    <string name="nag_kb_hint">Ctrl, Shift ya da Alt\'ı seçin ya da basılı tutun: o tuşlarla çalışan kısayollar renklenir. Bir tuşa tıklayınca ya da harita seçiliyken basınca ne yaptığı yazılır.</string>
+    <string name="nag_kb_hint_touch">Ctrl, Shift ya da Alt\'ı seçin: o tuşlarla çalışan kısayollar renklenir. Klavye bağlıysa haritayı Tab ile seçip bir tuşa basınca ne yaptığı yazılır.</string>
+    <string name="nag_kb_keyboard">Klavye: %1$s · tuşlar üzerlerinde yazdığı gibi</string>
+    <string name="nag_kb_keyboard_unnamed">Bağlı klavye · tuşlar üzerlerinde yazdığı gibi</string>
+    <string name="nag_kb_no_keyboard">Bağlı klavye yok · tuşlar bir ABD klavyesindeki gibi</string>
+    <string name="nag_kb_choose">Bir tuşa tıklayın ya da basın</string>
+    <string name="nag_kb_free">%1$s · boş</string>
+    <string name="nag_kb_one">%1$s · %2$s</string>
+    <string name="nag_kb_conflict">%1$s · çakışma: %2$s</string>
+    <string name="nag_kb_nothing">%1$s · bu düzende kısayol olamaz</string>
+    <string name="nag_kb_legend_bound">Kısayol</string>
+    <string name="nag_kb_legend_conflict">Çakışma</string>
+    <string name="nag_kb_legend_reserved">Sistemin ya da pencerenin</string>
     <string name="nag_more_actions">Diğer işlemler</string>
     <string name="nag_play_next">Sonra çal</string>
     <string name="nag_add_to_queue">Oynatma sırasına ekle</string>

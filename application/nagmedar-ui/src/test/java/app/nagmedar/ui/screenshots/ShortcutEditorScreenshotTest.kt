@@ -45,7 +45,7 @@ class ShortcutEditorScreenshotTest {
 
     @After
     fun reset() {
-        ShortcutRegistry.recording = false
+        ShortcutRegistry.resume()
     }
 
     private fun capture(name: String, theme: ThemeMode, input: InputMode, overrides: Map<ShortcutId, KeyChord?>, recording: ShortcutId? = null) {

@@ -6,6 +6,7 @@ import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +17,6 @@ import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
 import app.nagmedar.ui.R
 
@@ -31,10 +31,17 @@ data class KeyChord(
 ) {
     val hasModifier: Boolean get() = ctrl || alt || meta
 
-    fun matches(event: KeyEvent): Boolean = event.key == key && event.isCtrlPressed == ctrl &&
+    /** Whether [event] is these keys: the key by its place (S-410), see [PhysicalKeys]. */
+    fun matches(event: KeyEvent): Boolean = matches(PhysicalKeys.keyOf(event), event)
+
+    /** Whether [key] (the table's key of [event]) and the modifiers of [event] are these keys. */
+    internal fun matches(key: Key, event: KeyEvent): Boolean = key == this.key && event.isCtrlPressed == ctrl &&
         event.isShiftPressed == shift && event.isAltPressed == alt && event.isMetaPressed == meta
 
-    /** "Ctrl+Shift+N", "Space", "Alt+→" — the same text in menus, tooltips and the shortcut list. */
+    /**
+     * "Ctrl+Shift+N", "Space", "Alt+→" — the same text in menus, tooltips and the shortcut list;
+     * with a hardware keyboard, its keycap: "Ctrl+Ö" for Ctrl+, on Türkçe Q (S-410).
+     */
     fun label(resources: Resources? = null): String = buildString {
         if (ctrl) append("Ctrl+")
         if (alt) append("Alt+")
@@ -51,9 +58,16 @@ data class KeyChord(
             (if (meta) AndroidKeyEvent.META_META_ON else 0)
 }
 
-private fun keyName(key: Key, resources: Resources?): String {
+/** What the key is called on a keycap: what the keyboard in use prints on it, else its US name. */
+internal fun keyName(key: Key, resources: Resources?): String {
     if (key == Key.Spacebar) return resources?.getString(R.string.nag_key_space) ?: "Space"
     val code = key.nativeKeyCode
+    PhysicalKeys.printed(code)?.let { return it }
+    return usKeyName(code)
+}
+
+/** The key's name on a US keyboard. */
+internal fun usKeyName(code: Int): String {
     return when (code) {
         in AndroidKeyEvent.KEYCODE_A..AndroidKeyEvent.KEYCODE_Z -> ('A' + (code - AndroidKeyEvent.KEYCODE_A)).toString()
         in AndroidKeyEvent.KEYCODE_0..AndroidKeyEvent.KEYCODE_9 -> ('0' + (code - AndroidKeyEvent.KEYCODE_0)).toString()
@@ -101,6 +115,16 @@ private val keySymbols: Map<Int, String> = mapOf(
     AndroidKeyEvent.KEYCODE_MEDIA_STOP to "⏹",
     AndroidKeyEvent.KEYCODE_MEDIA_NEXT to "⏭",
     AndroidKeyEvent.KEYCODE_MEDIA_PREVIOUS to "⏮",
+    // the key map's keys (S-410)
+    AndroidKeyEvent.KEYCODE_CTRL_LEFT to "Ctrl",
+    AndroidKeyEvent.KEYCODE_CTRL_RIGHT to "Ctrl",
+    AndroidKeyEvent.KEYCODE_SHIFT_LEFT to "Shift",
+    AndroidKeyEvent.KEYCODE_SHIFT_RIGHT to "Shift",
+    AndroidKeyEvent.KEYCODE_ALT_LEFT to "Alt",
+    AndroidKeyEvent.KEYCODE_ALT_RIGHT to "Alt",
+    AndroidKeyEvent.KEYCODE_META_LEFT to "Meta",
+    AndroidKeyEvent.KEYCODE_META_RIGHT to "Meta",
+    AndroidKeyEvent.KEYCODE_CAPS_LOCK to "Caps Lock",
 )
 
 /** Groups follow the menu bar of the mockups; each group is one menu and one section of the shortcut list. */
@@ -209,9 +233,22 @@ object ShortcutRegistry {
      */
     var overrides: Map<ShortcutId, KeyChord?> by mutableStateOf(emptyMap())
 
-    /** While the shortcut editor records keys, they are not shortcuts. */
-    @Volatile
-    var recording: Boolean = false
+    /** What keeps keys from being shortcuts: the shortcut editor recording them, the key map trying them (S-410). */
+    private val pausedBy = HashSet<Any>()
+
+    /** While the shortcut editor records keys or the key map tries them, they are not shortcuts. */
+    val recording: Boolean get() = synchronized(pausedBy) { pausedBy.isNotEmpty() }
+
+    /** [owner] takes the keys ([paused]) or gives them back. */
+    fun pause(owner: Any, paused: Boolean) {
+        synchronized(pausedBy) { if (paused) pausedBy += owner else pausedBy -= owner }
+    }
+
+    /** Tests: nothing takes the keys. */
+    @VisibleForTesting
+    internal fun resume() {
+        synchronized(pausedBy) { pausedBy.clear() }
+    }
 
     /** The table in use: [defaults] with [overrides]. */
     val shortcuts: List<Shortcut>
@@ -232,8 +269,10 @@ object ShortcutRegistry {
     fun chordLabel(id: ShortcutId, resources: Resources? = null): String? = get(id).chord?.label(resources)
 
     /** Shortcut for [event] among those active in [scopes]; null when the key is not bound. */
-    fun match(event: KeyEvent, scopes: Set<ShortcutScope> = setOf(ShortcutScope.Global)): Shortcut? =
-        shortcuts.firstOrNull { it.scope in scopes && it.chord?.matches(event) == true }
+    fun match(event: KeyEvent, scopes: Set<ShortcutScope> = setOf(ShortcutScope.Global)): Shortcut? {
+        val key = PhysicalKeys.keyOf(event)
+        return shortcuts.firstOrNull { it.scope in scopes && it.chord?.matches(key, event) == true }
+    }
 
     /** Pairs of shortcuts bound to the same chord; the shipped table has none (ShortcutRegistryTest). */
     fun conflicts(shortcuts: List<Shortcut> = this.shortcuts): List<Pair<Shortcut, Shortcut>> =
@@ -241,13 +280,17 @@ object ShortcutRegistry {
             group.indices.flatMap { i -> (i + 1 until group.size).map { j -> group[i] to group[j] } }
         }
 
-    /** The keyboard shortcut helper list (Meta+/ or the system's keyboard shortcuts screen). */
+    /**
+     * The keyboard shortcut helper list (Meta+/ or the system's keyboard shortcuts screen). Each key
+     * goes as the key code it is on [deviceId]'s keyboard (S-410), so the list shows its keycap.
+     */
     @RequiresApi(24)
-    fun keyboardShortcutGroups(resources: Resources): List<KeyboardShortcutGroup> =
+    fun keyboardShortcutGroups(resources: Resources, deviceId: Int? = null): List<KeyboardShortcutGroup> =
         ShortcutGroup.entries.mapNotNull { group ->
             val items = shortcuts.filter { it.group == group }.mapNotNull { shortcut ->
                 val chord = shortcut.chord ?: return@mapNotNull null
-                KeyboardShortcutInfo(resources.getString(shortcut.label), chord.key.nativeKeyCode, chord.androidModifiers)
+                val code = PhysicalKeys.codeFor(chord.key.nativeKeyCode, deviceId)
+                KeyboardShortcutInfo(resources.getString(shortcut.label), code, chord.androidModifiers)
             }
             if (items.isEmpty()) null else KeyboardShortcutGroup(resources.getString(group.title), items)
         }

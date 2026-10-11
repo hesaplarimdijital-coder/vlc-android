@@ -340,6 +340,22 @@
     <string name="nag_sc_reserved_system">These keys belong to the system; they cannot be a shortcut.</string>
     <string name="nag_sc_reserved_menu">F10 opens the menu bar; it cannot be a shortcut.</string>
     <string name="nag_sc_reserved_navigation">Tab, Enter and Esc move around the window; alone they cannot be a shortcut.</string>
+    <!-- Keyboard map (S-410) -->
+    <string name="nag_kb_show">Keyboard map</string>
+    <string name="nag_kb_hide">Hide the map</string>
+    <string name="nag_kb_hint">Choose or hold Ctrl, Shift or Alt to colour the shortcuts that go with them. Click a key, or press one while the map is selected, to see what it does.</string>
+    <string name="nag_kb_hint_touch">Choose Ctrl, Shift or Alt to colour the shortcuts that go with them. With a keyboard, select the map with Tab and press a key to see what it does.</string>
+    <string name="nag_kb_keyboard">Keyboard: %1$s · keys as printed on them</string>
+    <string name="nag_kb_keyboard_unnamed">Connected keyboard · keys as printed on them</string>
+    <string name="nag_kb_no_keyboard">No keyboard connected · keys as on a US keyboard</string>
+    <string name="nag_kb_choose">Click or press a key</string>
+    <string name="nag_kb_free">%1$s · free</string>
+    <string name="nag_kb_one">%1$s · %2$s</string>
+    <string name="nag_kb_conflict">%1$s · conflict: %2$s</string>
+    <string name="nag_kb_nothing">%1$s · cannot be a shortcut with this layout</string>
+    <string name="nag_kb_legend_bound">Shortcut</string>
+    <string name="nag_kb_legend_conflict">Conflict</string>
+    <string name="nag_kb_legend_reserved">The system\'s or the window\'s</string>
     <string name="nag_more_actions">More actions</string>
     <string name="nag_play_next">Play next</string>
     <string name="nag_add_to_queue">Add to play queue</string>

@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +42,7 @@ import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
-import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +65,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.KeyChord
+import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.Shortcut
 import app.nagmedar.ui.input.ShortcutFile
 import app.nagmedar.ui.input.ShortcutGroup
@@ -91,7 +93,8 @@ private class Taken(val id: ShortcutId, val chord: KeyChord, val other: Shortcut
  * keys. A click (or Enter) on the keys records new ones; Esc gives up and Backspace takes the keys
  * away. Keys that are another shortcut's are assigned only after a warning, the system's and the
  * window's own never. The VLC and mpv presets, a reset and the import come with an undo; the table
- * is exported to and imported from a JSON file.
+ * is exported to and imported from a JSON file. Keys go by their place (S-410): pressed on Türkçe Q
+ * or on a US keyboard, the same key is the same shortcut; the keyboard map shows where they are.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -110,12 +113,14 @@ fun ShortcutEditor(
     var recording by remember { mutableStateOf<ShortcutId?>(null) }
     var taken by remember { mutableStateOf<Taken?>(null) }
     var refused by remember { mutableStateOf<Pair<ShortcutId, Int>?>(null) }
+    var mapShown by rememberSaveable { mutableStateOf(false) }
 
     // while keys are recorded they are not shortcuts
     val isRecording = recording != null
+    val owner = remember { Any() }
     DisposableEffect(isRecording) {
-        ShortcutRegistry.recording = isRecording
-        onDispose { ShortcutRegistry.recording = false }
+        ShortcutRegistry.pause(owner, isRecording)
+        onDispose { ShortcutRegistry.pause(owner, false) }
     }
 
     /** Applies [next]; [message] offers to take it back. */
@@ -192,7 +197,14 @@ fun ShortcutEditor(
                 { change(emptyMap(), res.getString(R.string.nag_sc_reset_done)) },
                 enabled = overrides.isNotEmpty(),
             )
+            // S-410: where the shortcuts are on the keyboard in use
+            NagButton(
+                stringResource(if (mapShown) R.string.nag_kb_hide else R.string.nag_kb_show),
+                { mapShown = !mapShown },
+                icon = NagIcons.Keyboard,
+            )
         }
+        if (mapShown) KeyboardMap(table, Modifier.padding(vertical = dimens.gapS))
         if (conflicts.isNotEmpty()) {
             Notice(
                 pluralStringResource(R.plurals.nag_sc_conflicts, conflicts.size, conflicts.size) + "\n" +
@@ -339,11 +351,14 @@ private fun ChordButton(
                 if (event.type == KeyEventType.KeyDown) {
                     val code = event.nativeKeyEvent.keyCode
                     val plain = !event.isCtrlPressed && !event.isAltPressed && !event.isMetaPressed && !event.isShiftPressed
+                    // the key by its place (S-410): the same keys on Türkçe Q and on a US keyboard
+                    val key = PhysicalKeys.keyOf(event)
                     when {
                         AndroidKeyEvent.isModifierKey(code) -> Unit
                         plain && code == AndroidKeyEvent.KEYCODE_ESCAPE -> onCancel()
                         plain && code == AndroidKeyEvent.KEYCODE_DEL -> onRemove()
-                        else -> onKeys(KeyChord(event.key, ctrl = event.isCtrlPressed, shift = event.isShiftPressed, alt = event.isAltPressed, meta = event.isMetaPressed))
+                        key.nativeKeyCode == AndroidKeyEvent.KEYCODE_UNKNOWN -> Unit
+                        else -> onKeys(KeyChord(key, ctrl = event.isCtrlPressed, shift = event.isShiftPressed, alt = event.isAltPressed, meta = event.isMetaPressed))
                     }
                 }
                 // nothing reaches the window while keys are recorded

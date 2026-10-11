@@ -56,7 +56,7 @@ class ShortcutEditorTest {
     @After
     fun reset() {
         ShortcutRegistry.overrides = emptyMap()
-        ShortcutRegistry.recording = false
+        ShortcutRegistry.resume()
     }
 
     private fun editor() {

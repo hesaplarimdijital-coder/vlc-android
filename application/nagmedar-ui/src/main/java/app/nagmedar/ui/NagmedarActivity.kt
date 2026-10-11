@@ -2,11 +2,13 @@ package app.nagmedar.ui
 
 import android.content.Intent
 import android.graphics.Rect
+import android.hardware.input.InputManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.DragEvent
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.Menu
@@ -23,6 +25,7 @@ import androidx.compose.runtime.setValue
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.MenuBarKey
 import app.nagmedar.ui.input.NAGMEDAR_DRAG
+import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
@@ -127,8 +130,24 @@ class NagmedarActivity : ComponentActivity() {
         runCatching { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
     }
 
+    /** A keyboard that comes, goes or changes its layout changes the keys' places and keycaps (S-410). */
+    private val keyboards = object : InputManager.InputDeviceListener {
+        override fun onInputDeviceAdded(deviceId: Int) = PhysicalKeys.forget()
+
+        override fun onInputDeviceRemoved(deviceId: Int) = PhysicalKeys.forget()
+
+        override fun onInputDeviceChanged(deviceId: Int) = PhysicalKeys.forget()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        PhysicalKeys.forget()
+        getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
+    }
+
     override fun onStop() {
         super.onStop()
+        getSystemService(InputManager::class.java)?.unregisterInputDeviceListener(keyboards)
         saveWindowBounds()
     }
 
@@ -216,6 +235,8 @@ class NagmedarActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onProvideKeyboardShortcuts(data: MutableList<KeyboardShortcutGroup>, menu: Menu?, deviceId: Int) {
         super.onProvideKeyboardShortcuts(data, menu, deviceId)
-        data.addAll(ShortcutRegistry.keyboardShortcutGroups(resources))
+        // the keys as the keyboard that asked has them (S-410); the hardware keyboard's when the screen asked
+        val keyboard = deviceId.takeIf { id -> runCatching { InputDevice.getDevice(id)?.isVirtual == false }.getOrDefault(false) }
+        data.addAll(ShortcutRegistry.keyboardShortcutGroups(resources, keyboard))
     }
 }
