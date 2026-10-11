@@ -16,26 +16,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuBarMenus
-import app.nagmedar.ui.components.MenuEntry
-import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
-import app.nagmedar.ui.screens.PageHeader
-import app.nagmedar.ui.screens.PlaceholderScreen
+import app.nagmedar.ui.input.menuBarSpecs
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.PlayerBarInfo
 import app.nagmedar.ui.playback.TransportBar
+import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
@@ -63,6 +65,7 @@ fun TestShell(
     widthClass: WidthClass,
     startDestination: Destination = Destination.Home,
     sidebarCollapsed: Boolean = false,
+    menuBar: MenuBarState? = null,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -76,11 +79,10 @@ fun TestShell(
         badges = mapOf(Destination.Movies to "128", Destination.Music to "4 812", Destination.Podcasts to "4 yeni"),
         onSearch = {},
         menus = {
-            MenuBarMenus(
-                listOf("Medya", "Oynatma", "Ses", "Video", "Altyazı", "Araçlar", "Görünüm", "Yardım").map { title ->
-                    MenuSpec(title) { listOf(MenuEntry.Item("$title…", {})) }
-                },
-            )
+            // the app's menus, from the shortcut table (S-302)
+            val res = LocalContext.current.resources
+            val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
+            if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
         player = { kind -> SamplePlayerBar(kind) },
         navController = navController,

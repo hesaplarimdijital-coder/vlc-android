@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.input.MenuBarKey
 import app.nagmedar.ui.input.ShortcutRegistry
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.vlc.media.MediaUtils
@@ -31,6 +32,9 @@ import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 class NagmedarActivity : ComponentActivity() {
 
     private var actions: AppActions? = null
+
+    /** Alt alone or F10 takes the keyboard to the menu bar (S-302). */
+    private val menuBarKey = MenuBarKey()
 
     /** Screen asked for by a launcher shortcut (S-309), until the shell has shown it. */
     private var destination by mutableStateOf<String?>(null)
@@ -60,6 +64,10 @@ class NagmedarActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (menuBarKey.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN) && actions != null) {
+            actions?.toggleMenuBar()
+            return true
+        }
         if (event.action == KeyEvent.ACTION_DOWN && (event.isCtrlPressed || event.isAltPressed || event.isMetaPressed)) {
             val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
             if (shortcut != null && actions?.perform(shortcut.id) == true) return true

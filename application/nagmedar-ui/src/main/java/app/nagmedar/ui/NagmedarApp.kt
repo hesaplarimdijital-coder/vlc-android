@@ -26,15 +26,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.MenuBarMenus
+import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
+import app.nagmedar.ui.input.menuBarSpecs
 import app.nagmedar.ui.input.rememberInputModeState
 import app.nagmedar.ui.input.trackInputMode
 import app.nagmedar.ui.library.HomeScreen
@@ -121,8 +124,9 @@ private fun NagmedarMain(
     val settingsList = rememberLazyListState()
     val undo = rememberUndoBarState()
     var shortcutListRequests by remember { mutableIntStateOf(0) }
+    val menuBar = rememberMenuBarState()
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, onOpenFile) { shortcutListRequests++ }
+        AppActions(context, prefs, navigator, undo, menuBar, onOpenFile) { shortcutListRequests++ }
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
@@ -155,7 +159,7 @@ private fun NagmedarMain(
                 onSidebarCollapsedChange = prefs::updateSidebarCollapsed,
                 badges = counts,
                 onSearch = { actions.perform(ShortcutId.CommandPalette) },
-                menus = { MenuBarMenus(menuSpecs(context, actions)) },
+                menus = { MenuBarMenus(menuSpecs(context, actions), menuBar) },
                 player = { navKind -> PlayerBar(navKind, nowPlaying) },
                 navController = navController,
                 overlay = {
@@ -207,25 +211,15 @@ fun openClassic(context: Context, fragment: String?) {
     context.startActivity(intent)
 }
 
-/** Menu bar contents, built from the shortcut table so labels and keys match everywhere. */
-private fun menuSpecs(context: Context, actions: AppActions): List<MenuSpec> {
-    val res = context.resources
-    return ShortcutGroup.entries.map { group ->
-        MenuSpec(res.getString(group.title)) {
-            ShortcutRegistry.defaults.filter { it.group == group }.map { shortcut ->
-                MenuEntry.Item(
-                    label = res.getString(shortcut.label),
-                    onClick = { actions.perform(shortcut.id) },
-                    shortcut = shortcut.chord.label(res),
-                    enabled = actions.isAvailable(shortcut.id),
-                )
-            } + if (group == ShortcutGroup.Tools) listOf(
-                MenuEntry.Separator,
-                MenuEntry.Item(res.getString(R.string.nag_classic_interface), { openClassic(context, null) }),
-            ) else emptyList()
+/** Menu bar contents, built from the shortcut table so labels and keys match everywhere (S-302). */
+private fun menuSpecs(context: Context, actions: AppActions): List<MenuSpec> =
+    menuBarSpecs(context.resources, { actions.perform(it) }, actions::isAvailable) { group ->
+        if (group == ShortcutGroup.Tools) {
+            listOf(MenuEntry.Separator, MenuEntry.Item(context.getString(R.string.nag_classic_interface), { openClassic(context, null) }))
+        } else {
+            emptyList()
         }
     }
-}
 
 /** What each shortcut does in the shell; player-only shortcuts are handled by the player. */
 class AppActions(
@@ -233,10 +227,14 @@ class AppActions(
     private val prefs: NagmedarPreferences,
     private val navigator: ShellNavigator,
     private val undo: UndoBarState,
+    private val menuBar: MenuBarState,
     private val openFile: () -> Unit,
     private val showShortcutList: () -> Unit,
 ) {
     private var volumeBeforeMute = 100
+
+    /** Alt or F10 (S-302): the keyboard goes to the menu bar, or back from it. */
+    fun toggleMenuBar() = menuBar.onAlt()
 
     fun isAvailable(id: ShortcutId): Boolean = ShortcutRegistry[id].scope == ShortcutScope.Global && id !in comingLater
 

@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
 /** Navigation chrome around the current screen; screens show their own title only in [NavKind.Sidebar]. */
@@ -69,6 +70,7 @@ fun NagmedarShell(
     val current = Destination.fromRoute(entry?.destination?.route)
     val navKind = NavKind.forWidth(widthClass)
     val motion = NagTheme.motion
+    val pointer = NagTheme.inputMode == InputMode.Pointer
     val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
     // The graph builder below must not capture changing values, or NavHost would rebuild the graph.
     val currentScreen by rememberUpdatedState(screen)
@@ -78,8 +80,9 @@ fun NagmedarShell(
         modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
         topBar = {
             if (navKind == NavKind.Sidebar) {
+                // the menus are a pointer's and a keyboard's (S-302); by touch the bar keeps the search
                 MenuBarChrome(
-                    menus = menus,
+                    menus = if (pointer) menus else ({}),
                     search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
                 )
             } else {
