@@ -63,8 +63,24 @@ object EpisodeParser {
 
     /** "The.Expanse" → "The Expanse"; a trailing year and separators go. */
     private fun clean(text: String): String {
-        val words = text.replace('.', ' ').replace('_', ' ').trim(' ', '-', '[', '(', ']', ')')
+        val words = text.replace('.', ' ').replace('_', ' ').trim(' ', '-').trimLoneBrackets()
         return words.replace(Regex("""\s*[(\[]?(19|20)\d{2}[)\]]?$"""), "").replace(Regex("""\s+"""), " ").trim(' ', '-')
+    }
+
+    /** A bracket the code cut in two goes ("Show [", "] Title"); a whole one stays: "Fener (NAS)". */
+    private fun String.trimLoneBrackets(): String {
+        var text = this
+        while (text.isNotEmpty()) {
+            val c = text.first()
+            if (c !in "])" && (c !in "[(" || text.any { it in "])" })) break
+            text = text.drop(1).trim(' ', '-')
+        }
+        while (text.isNotEmpty()) {
+            val c = text.last()
+            if (c !in "[(" && (c !in "])" || text.any { it in "[(" })) break
+            text = text.dropLast(1).trim(' ', '-')
+        }
+        return text
     }
 
     private fun title(after: String): String {

@@ -24,6 +24,9 @@ class VideoLibraryTest {
         assertEquals(EpisodeInfo("Leyla ile Mecnun", 1, 12, 12, ""), parse("/T7/Leyla ile Mecnun 1. Sezon 12. Bölüm.mp4"))
         assertEquals(EpisodeInfo("Kuzey Rüzgârı", 2, 5, 5, ""), parse("/T7/Diziler/Kuzey Rüzgârı/Sezon 2/S02E05.mkv"))
         assertEquals(EpisodeInfo("Kuzey Rüzgârı", 1, 1, 1, ""), parse("/T7/Diziler/Kuzey Rüzgârı/S01E01.mkv"))
+        // a bracket cut by the code goes, a whole one stays
+        assertEquals(EpisodeInfo("Kuzey Rüzgârı", 2, 2, 2, "Fener (NAS)"), parse("/Diziler/Kuzey Rüzgârı/Sezon 2/S02E02 Fener (NAS).mkv"))
+        assertEquals(EpisodeInfo("Dark", 1, 2, 2, "Ghosts"), parse("/T7/Dark [S01E02] Ghosts.mkv"))
         assertEquals("Doctor Who", parse("/T7/Doctor.Who.(2005).S01E01.Rose.mkv")!!.show)
         // films stay films
         assertNull(parse("/T7/Filmler/Kuzey Işığı (2024) 2160p DV.mkv"))
