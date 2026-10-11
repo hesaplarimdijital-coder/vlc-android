@@ -356,6 +356,32 @@
     <string name="nag_kb_legend_bound">Kısayol</string>
     <string name="nag_kb_legend_conflict">Çakışma</string>
     <string name="nag_kb_legend_reserved">Sistemin ya da pencerenin</string>
+    <!-- Sıradaki ve dokunmatik etkileşimler (S-310) -->
+    <string name="nag_queue_title">Sıradaki</string>
+    <string name="nag_queue_clear">Temizle</string>
+    <string name="nag_queue_close">Sıradakini kapat</string>
+    <string name="nag_queue_remove">Sıradan kaldır</string>
+    <string name="nag_queue_remove_short">Kaldır</string>
+    <string name="nag_queue_move_up">Yukarı taşı</string>
+    <string name="nag_queue_move_down">Aşağı taşı</string>
+    <string name="nag_queue_handle">%s: sürükleyerek taşı</string>
+    <string name="nag_queue_empty_title">Sırada başka bir şey yok</string>
+    <string name="nag_queue_empty_desc">Bir filmin ya da parçanın menüsünden “Sıraya ekle”yi seçin.</string>
+    <string name="nag_queue_hint_touch">Sola kaydırma: kaldır · Tutamaçla sürükleme: sırala · Uzun basma: menü</string>
+    <string name="nag_queue_removed">“%s” sıradan kaldırıldı</string>
+    <plurals name="nag_queue_cleared">
+        <item quantity="one">%d öğe sıradan kaldırıldı</item>
+        <item quantity="other">%d öğe sıradan kaldırıldı</item>
+    </plurals>
+    <plurals name="nag_queue_tracks">
+        <item quantity="one">%d parça</item>
+        <item quantity="other">%d parça</item>
+    </plurals>
+    <plurals name="nag_queue_items">
+        <item quantity="one">%d öğe</item>
+        <item quantity="other">%d öğe</item>
+    </plurals>
+    <string name="nag_select">Seç</string>
     <string name="nag_more_actions">Diğer işlemler</string>
     <string name="nag_play_next">Sonra çal</string>
     <string name="nag_add_to_queue">Oynatma sırasına ekle</string>

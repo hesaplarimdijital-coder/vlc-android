@@ -103,7 +103,8 @@ fun NagButton(
     val content = if (primary) primaryContent else colors.text
     Row(
         modifier = modifier
-            .defaultMinSize(minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
+            // by touch a 48 dp target either way (S-310)
+            .defaultMinSize(minWidth = dimens.minTarget, minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
             .focusRing(state, shape)
             .background(background, shape)
             .then(if (primary) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))

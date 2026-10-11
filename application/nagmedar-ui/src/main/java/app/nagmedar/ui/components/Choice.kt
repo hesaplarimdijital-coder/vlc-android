@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
@@ -56,7 +57,9 @@ fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (
             val shape = RoundedCornerShape(dimens.radiusControl)
             Box(
                 modifier = Modifier
+                    // by touch a 48 dp target either way (S-310)
                     .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
+                    .widthIn(min = dimens.minTarget)
                     .focusRing(state, shape)
                     .background(stateBackground(state, isSelected), shape)
                     .pointerHoverIcon(PointerIcon.Hand)

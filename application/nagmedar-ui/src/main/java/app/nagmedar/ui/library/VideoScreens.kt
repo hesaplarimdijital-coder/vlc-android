@@ -106,6 +106,8 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     var detailsRequested by rememberSaveable { mutableStateOf(false) }
     val play: (VideoItem) -> Unit = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } }
     BackHandler(enabled = folder != null) { folder = null }
+    // selecting by touch (S-310): Back lets go first
+    BackHandler(enabled = selection.selecting) { selection.clear() }
     // the details stand beside the header and the list, the full height of the screen (S-303)
     VideoDetailsPanes(
         selected = library?.movies?.firstOrNull { it.key == selected },
@@ -146,7 +148,11 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                         detailsRequested = true
                     },
                     onPlay = play,
-                    menu = { item, playItem, info -> item.media?.let { mediaMenu(context, it, playItem, info) }.orEmpty() },
+                    menu = { item, playItem, info ->
+                        // by touch the menu starts selecting (S-310)
+                        val select = if (pointer) null else ({ selection.startSelecting(item.key) })
+                        item.media?.let { mediaMenu(context, it, playItem, info, select) }.orEmpty()
+                    },
                     selection = selection,
                     onPlayAll = { films -> PlaybackActions.playList(context, films.mapNotNull { it.media }, 0) },
                     onQueueAll = { films -> PlaybackActions.appendList(context, films.mapNotNull { it.media }) },
@@ -259,7 +265,7 @@ fun MoviesLibrary(
         if (selection != null) {
             // a filter or a scan takes away what is no longer listed
             LaunchedEffect(shown) { selection.retain(shown.map { it.key }) }
-            if (selection.count > 1) {
+            if (selection.count > 1 || selection.selecting) {
                 val chosen = shown.filter { it.key in selection }
                 SelectionBar(
                     text = pluralStringResource(R.plurals.nag_selected_films, chosen.size, chosen.size),

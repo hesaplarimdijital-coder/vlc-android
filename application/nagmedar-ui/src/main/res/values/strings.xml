@@ -356,6 +356,32 @@
     <string name="nag_kb_legend_bound">Shortcut</string>
     <string name="nag_kb_legend_conflict">Conflict</string>
     <string name="nag_kb_legend_reserved">The system\'s or the window\'s</string>
+    <!-- Up next and touch interactions (S-310) -->
+    <string name="nag_queue_title">Up next</string>
+    <string name="nag_queue_clear">Clear</string>
+    <string name="nag_queue_close">Close up next</string>
+    <string name="nag_queue_remove">Remove from the queue</string>
+    <string name="nag_queue_remove_short">Remove</string>
+    <string name="nag_queue_move_up">Move up</string>
+    <string name="nag_queue_move_down">Move down</string>
+    <string name="nag_queue_handle">%s: drag to move</string>
+    <string name="nag_queue_empty_title">Nothing else is queued</string>
+    <string name="nag_queue_empty_desc">Choose “Add to queue” in a film\'s or a track\'s menu.</string>
+    <string name="nag_queue_hint_touch">Swipe left: remove · Drag the handle: reorder · Long press: menu</string>
+    <string name="nag_queue_removed">“%s” removed from the queue</string>
+    <plurals name="nag_queue_cleared">
+        <item quantity="one">%d item removed from the queue</item>
+        <item quantity="other">%d items removed from the queue</item>
+    </plurals>
+    <plurals name="nag_queue_tracks">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+    <plurals name="nag_queue_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="nag_select">Select</string>
     <string name="nag_more_actions">More actions</string>
     <string name="nag_play_next">Play next</string>
     <string name="nag_add_to_queue">Add to play queue</string>

@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -156,11 +157,16 @@ interface PlayerBarActions {
     fun cycleRepeat()
 
     fun setVolume(volume: Int)
+
+    /** "Sıradaki" opens or closes (S-310). */
+    fun openQueue() = Unit
 }
 
 /** [PlayerBarActions] on the existing playback service (ADR-05: one service, one session). */
-class ServicePlayerBarActions(private val context: Context) : PlayerBarActions {
+class ServicePlayerBarActions(private val context: Context, private val onQueue: () -> Unit = {}) : PlayerBarActions {
     override fun openPlayer() = PlaybackActions.openPlayer(context)
+
+    override fun openQueue() = onQueue()
 
     override fun togglePlayPause() = PlaybackActions.togglePlayPause()
 
@@ -194,17 +200,25 @@ class ServicePlayerBarActions(private val context: Context) : PlayerBarActions {
 
 /** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
 @Composable
-fun PlayerBar(navKind: NavKind, nowPlaying: NowPlaying, modifier: Modifier = Modifier) {
+fun PlayerBar(
+    navKind: NavKind,
+    nowPlaying: NowPlaying,
+    modifier: Modifier = Modifier,
+    /** Whether "Sıradaki" is open, and its button (S-310). */
+    queueOpen: Boolean = false,
+    onQueue: () -> Unit = {},
+) {
     val media = nowPlaying.media ?: return
     val info = rememberPlayerBarInfo(media, nowPlaying.playing)
     val progress by rememberPlaybackProgress(nowPlaying)
     val context = LocalContext.current
-    val actions = remember(context) { ServicePlayerBarActions(context) }
+    val currentOnQueue by rememberUpdatedState(onQueue)
+    val actions = remember(context) { ServicePlayerBarActions(context) { currentOnQueue() } }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
     if (navKind == NavKind.Sidebar) {
-        TransportBar(info, { progress }, actions, artwork, modifier)
+        TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
     } else {
-        MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar)
+        MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
     }
 }
 
@@ -242,6 +256,7 @@ fun MiniPlayer(
     artwork: @Composable (Dp) -> Unit,
     modifier: Modifier = Modifier,
     floating: Boolean = false,
+    queueOpen: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -325,6 +340,7 @@ fun MiniPlayer(
                     shortcut = ShortcutId.PlayPause,
                 )
                 NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
+                NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
             if (floating) ProgressLine(progress)
@@ -389,6 +405,7 @@ fun TransportBar(
     actions: PlayerBarActions,
     artwork: @Composable (Dp) -> Unit,
     modifier: Modifier = Modifier,
+    queueOpen: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -433,6 +450,7 @@ fun TransportBar(
                 info.format?.let { FormatChip(it) }
                 Spacer(Modifier.width(dimens.gapS))
                 VolumeControl(info.volume, actions::setVolume)
+                NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 NagIconButton(NagIcons.OpenWindow, openLabel, actions::openPlayer)
             }
         }

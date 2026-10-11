@@ -404,6 +404,7 @@ fun SuggestionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modi
     Box(
         modifier = modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
+            .widthIn(min = dimens.minTarget)
             .focusRing(state, shape)
             .background(stateBackground(state, rest = rest), shape)
             .border(1.dp, border, shape)

@@ -1,6 +1,7 @@
 package app.nagmedar.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -48,10 +53,15 @@ import kotlin.math.min
  * A desktop selection over a list (S-405): a click takes one item, Ctrl+click adds or removes one,
  * Shift+click takes the range from the last item clicked (Ctrl+Shift adds it), Ctrl+A takes all
  * and a rubber band in a grid takes what it touches. Keys are the list's own (a uri, an id).
+ * By touch (S-310) the item's menu starts [selecting]; taps then take items in and out.
  */
 @Stable
 class MultiSelection {
     var keys: Set<Any> by mutableStateOf(emptySet())
+        private set
+
+    /** Selecting by touch: a tap takes an item in or out rather than playing it, until none is left. */
+    var selecting: Boolean by mutableStateOf(false)
         private set
 
     /** Where a Shift+click range starts: the last item clicked without Shift. */
@@ -82,6 +92,20 @@ class MultiSelection {
         }
     }
 
+    /** The menu's "Seç" on [key]: selecting starts with it. */
+    fun startSelecting(key: Any) {
+        selecting = true
+        keys = keys + key
+        anchor = key
+    }
+
+    /** A tap while selecting: [key] goes in or out; with none left, selecting ends. */
+    fun toggle(key: Any) {
+        keys = if (key in keys) keys - key else keys + key
+        anchor = key
+        if (keys.isEmpty()) selecting = false
+    }
+
     fun selectAll(order: List<Any>) {
         keys = order.toSet()
         if (anchor !in keys) anchor = order.firstOrNull()
@@ -95,6 +119,7 @@ class MultiSelection {
     fun clear() {
         keys = emptySet()
         anchor = null
+        selecting = false
     }
 
     /** Keeps what is still listed, after a filter or a scan took items away. */
@@ -102,6 +127,22 @@ class MultiSelection {
         if (keys.all { it in order }) return
         keys = keys.filterTo(LinkedHashSet()) { it in order }
         if (anchor !in keys) anchor = null
+        if (keys.isEmpty()) selecting = false
+    }
+}
+
+/** An item's mark while selecting by touch (S-310): a ring, filled and ticked when the item is in. */
+@Composable
+fun SelectionMark(selected: Boolean, modifier: Modifier = Modifier) {
+    val colors = NagTheme.colors
+    Box(
+        modifier
+            .size(26.dp)
+            .background(if (selected) colors.accent else colors.scrim, CircleShape)
+            .border(2.dp, if (selected) colors.accent else Color.White, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (selected) Icon(NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(16.dp))
     }
 }
 

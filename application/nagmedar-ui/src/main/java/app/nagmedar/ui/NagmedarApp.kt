@@ -61,7 +61,11 @@ import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.PlayerBar
+import app.nagmedar.ui.playback.QueuePanelState
+import app.nagmedar.ui.playback.QueueSheet
 import app.nagmedar.ui.playback.rememberNowPlaying
+import app.nagmedar.ui.playback.rememberPlayQueue
+import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
@@ -161,8 +165,9 @@ private fun NagmedarMain(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val screenCommands = remember { ScreenCommands() }
     val dropTargets = remember { DropTargets() }
+    val queuePanel = rememberQueuePanelState()
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, onOpenFile, openPalette = { paletteOpen = true }) {
+        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile, openPalette = { paletteOpen = true }) {
             shortcutListRequests++
         }
     }
@@ -215,10 +220,25 @@ private fun NagmedarMain(
                         Modifier.dropTarget("player-bar", ::mayBePlayable, RoundedCornerShape(NagTheme.dimens.radiusCard)) { files ->
                             actions.queueFiles(files)
                         },
+                        queueOpen = queuePanel.open,
+                        onQueue = queuePanel::toggle,
                     )
                 },
                 navController = navController,
                 overlay = {
+                    // "Sıradaki" beside the screen, over it on a phone (S-310)
+                    if (queuePanel.open) {
+                        val queue = rememberPlayQueue()
+                        QueueSheet(
+                            queue.entries,
+                            queue.current,
+                            queue,
+                            compact = NavKind.forWidth(widthClass) == NavKind.BottomBar,
+                            onClose = { queuePanel.close() },
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            undo = undo,
+                        )
+                    }
                     UndoBarHost(undo, Modifier.align(Alignment.BottomCenter).padding(16.dp))
                     if (dropTargets.incoming && dropTargets.hovered == null) DropOverlay()
                 },
@@ -318,6 +338,7 @@ class AppActions(
     private val screenCommands: ScreenCommands,
     /** Where a drag over the window is, and what takes the files (S-406). */
     val dropTargets: DropTargets,
+    private val queuePanel: QueuePanelState,
     private val openFile: () -> Unit,
     private val openPalette: () -> Unit,
     private val showShortcutList: () -> Unit,
@@ -375,8 +396,8 @@ class AppActions(
     /** The mouse's forward button (S-408). */
     fun forward(): Boolean = navigator.forward()
 
-    /** An Esc nothing else used: the screen lets go of its selection (S-405). */
-    fun escape(): Boolean = screenCommands.escape()
+    /** An Esc nothing else used: "Sıradaki" closes (S-310), else the screen lets go of its selection (S-405). */
+    fun escape(): Boolean = queuePanel.close() || screenCommands.escape()
 
     fun leaveMenuBar() {
         if (menuBar.hasKeyboard) menuBar.leave()
@@ -432,7 +453,7 @@ class AppActions(
             }
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
-            ShortcutId.PlayQueue -> PlaybackActions.openPlayer(context)
+            ShortcutId.PlayQueue -> queuePanel.toggle()
             ShortcutId.ShortcutList -> {
                 navigator.navigate(Destination.Settings)
                 showShortcutList()

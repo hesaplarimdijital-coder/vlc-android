@@ -1,5 +1,6 @@
 package app.nagmedar.ui.library
 
+import androidx.activity.compose.BackHandler
 import android.net.Uri
 import android.widget.Toast
 import android.content.Context
@@ -63,6 +64,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SelectionBar
 import app.nagmedar.ui.components.SelectionCommands
+import app.nagmedar.ui.components.SelectionMark
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
@@ -103,13 +105,15 @@ import org.videolan.vlc.repository.SlaveRepository
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
  * [info] shows the details in this interface (videos, S-802); without it the classic media info opens.
+ * [select] starts selecting by touch (S-310): the menu's "Seç".
  */
-fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (() -> Unit)? = null): List<MenuEntry> {
+fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (() -> Unit)? = null, select: (() -> Unit)? = null): List<MenuEntry> {
     val res = context.resources
-    return listOf(
+    return listOfNotNull(
         MenuEntry.Item(res.getString(R.string.nag_play), play, shortcut = "Enter", icon = NagIcons.Play),
         MenuEntry.Item(res.getString(R.string.nag_play_next), { MediaUtils.insertNext(context, media) }, icon = NagIcons.Next),
         MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { MediaUtils.appendMedia(context, media) }, icon = NagIcons.PlaylistAdd),
+        select?.let { MenuEntry.Item(res.getString(R.string.nag_select), it, icon = NagIcons.Check) },
         MenuEntry.Separator,
         MenuEntry.Item(
             res.getString(R.string.nag_sc_media_info),
@@ -283,16 +287,20 @@ fun MoviesContent(
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val modifiers = LocalClickModifiers.current
+    // selecting by touch (S-310): a tap takes the film in or out
+    val selecting = selection?.selecting == true
     val click: (VideoItem, List<VideoItem>) -> Unit = { item, shown ->
-        if (pointer) {
-            val (ctrl, shift) = modifiers.take()
-            selection?.click(item.key, shown.map { it.key }, ctrl, shift)
-            onSelect(item)
-        } else {
-            onPlay(item)
+        when {
+            selecting -> selection?.toggle(item.key)
+            pointer -> {
+                val (ctrl, shift) = modifiers.take()
+                selection?.click(item.key, shown.map { it.key }, ctrl, shift)
+                onSelect(item)
+            }
+            else -> onPlay(item)
         }
     }
-    val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
+    val doubleClick: ((VideoItem) -> Unit)? = if (pointer && !selecting) onPlay else null
     val isSelected: (VideoItem) -> Boolean = { item -> selection?.contains(item.key) ?: (item.key == selected) }
     if (grid) {
         VideoGrid(items, tech, isSelected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader, selection)
@@ -343,6 +351,7 @@ private fun VideoGrid(
                     selected = isSelected(item),
                     onClick = { onClick(item, items) },
                     onDoubleClick = onDoubleClick?.let { open -> { open(item) } },
+                    selecting = selection?.selecting == true,
                 )
             }
         }
@@ -471,6 +480,8 @@ fun VideoCard(
     selected: Boolean = false,
     onClick: () -> Unit,
     onDoubleClick: (() -> Unit)? = null,
+    /** Selecting by touch (S-310): the card shows whether it is in. */
+    selecting: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -496,6 +507,7 @@ fun VideoCard(
                 }
             }
             if (badge != null) TechBadge(badge, Modifier.align(Alignment.TopStart).padding(6.dp))
+            if (selecting) SelectionMark(selected, Modifier.align(Alignment.TopEnd).padding(6.dp))
         }
         Spacer(Modifier.height(8.dp))
         Text(item.title, style = NagTheme.type.bodyStrong, color = if (selected) colors.onSelection else colors.text, maxLines = 1,
@@ -574,8 +586,10 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
             val modifiers = LocalClickModifiers.current
             LaunchedEffect(sorted) { selection.retain(sorted.map { it.id }) }
             SelectionCommands(selection, sorted.map { it.id })
+            // selecting by touch (S-310): Back lets go
+            BackHandler(enabled = selection.selecting) { selection.clear() }
             Column(Modifier.fillMaxSize()) {
-                if (selection.count > 1) {
+                if (selection.count > 1 || selection.selecting) {
                     val chosen = sorted.filter { it.id in selection }
                     SelectionBar(
                         text = pluralStringResource(R.plurals.nag_selected_tracks, chosen.size, chosen.size),
@@ -595,15 +609,25 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     sort = sort,
                     onSortChange = { sort = it },
                     onRowClick = { media, index ->
-                        if (pointer) {
-                            val (ctrl, shift) = modifiers.take()
-                            selection.click(media.id, sorted.map { it.id }, ctrl, shift)
-                        } else {
-                            PlaybackActions.playList(context, sorted, index)
+                        when {
+                            selection.selecting -> selection.toggle(media.id)
+                            pointer -> {
+                                val (ctrl, shift) = modifiers.take()
+                                selection.click(media.id, sorted.map { it.id }, ctrl, shift)
+                            }
+                            else -> PlaybackActions.playList(context, sorted, index)
                         }
                     },
-                    onRowDoubleClick = if (pointer) ({ _, index -> PlaybackActions.playList(context, sorted, index) }) else null,
-                    rowMenu = { media, index -> mediaMenu(context, media, play = { PlaybackActions.playList(context, sorted, index) }) },
+                    onRowDoubleClick = if (pointer && !selection.selecting) ({ _, index -> PlaybackActions.playList(context, sorted, index) }) else null,
+                    rowMenu = { media, index ->
+                        mediaMenu(
+                            context,
+                            media,
+                            play = { PlaybackActions.playList(context, sorted, index) },
+                            // by touch the menu starts selecting (S-310)
+                            select = if (pointer) null else ({ selection.startSelecting(media.id) }),
+                        )
+                    },
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
                     // a track dragged out with the mouse, with the others selected (S-406)
                     rowModifier = { media ->

@@ -3,6 +3,7 @@ package app.nagmedar.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -66,6 +67,9 @@ fun TestShell(
     startDestination: Destination = Destination.Home,
     sidebarCollapsed: Boolean = false,
     menuBar: MenuBarState? = null,
+    /** "Sıradaki" open (S-310): its button lit, the panel in [overlay]. */
+    queueOpen: Boolean = false,
+    overlay: @Composable BoxScope.() -> Unit = {},
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -84,8 +88,9 @@ fun TestShell(
             val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
             if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
-        player = { kind -> SamplePlayerBar(kind) },
+        player = { kind -> SamplePlayerBar(kind, queueOpen = queueOpen) },
         navController = navController,
+        overlay = overlay,
         screen = screen,
     )
 }
@@ -163,11 +168,11 @@ object NoPlayerActions : PlayerBarActions {
 
 /** The real player bars (S-304) with [samplePlayerInfo], 42 % played. */
 @Composable
-fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions) {
+fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions, queueOpen: Boolean = false) {
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
     if (kind == NavKind.Sidebar) {
-        TransportBar(info, { 0.42f }, actions, artwork)
+        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen)
     } else {
-        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar)
+        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen)
     }
 }

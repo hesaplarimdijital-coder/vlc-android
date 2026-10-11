@@ -340,7 +340,7 @@ private fun ChordButton(
     Box(
         modifier
             .widthIn(min = 84.dp)
-            .heightIn(min = dimens.controlHeight)
+            .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
             .focusRing(state, shape)
             .background(if (recording) colors.selection else stateBackground(state), shape)
             .border(1.dp, if (recording) colors.accent else colors.border, shape)

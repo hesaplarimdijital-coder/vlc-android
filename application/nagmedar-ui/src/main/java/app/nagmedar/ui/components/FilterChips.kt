@@ -50,7 +50,9 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
     val shape = RoundedCornerShape(50)
     Row(
         modifier = modifier
+            // by touch a 48 dp target either way, "4K" too (S-310)
             .heightIn(min = dimens.minTarget.coerceAtLeast(30.dp))
+            .widthIn(min = dimens.minTarget)
             .focusRing(state, shape)
             .background(if (selected) colors.selection else stateBackground(state), shape)
             .border(1.dp, if (selected) colors.accent else colors.borderStrong, shape)
@@ -59,6 +61,7 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
             .toggleable(value = selected, interactionSource = interaction, indication = null, role = Role.Checkbox, onValueChange = onToggle)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
         if (selected) {
             Icon(NagIcons.Check, contentDescription = null, tint = colors.onSelection, modifier = Modifier.size(14.dp))
