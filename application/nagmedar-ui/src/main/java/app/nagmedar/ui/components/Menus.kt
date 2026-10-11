@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
@@ -84,6 +85,7 @@ class MenuSpec(val title: String, val entries: () -> List<MenuEntry>)
  * anchor's top-left corner and moves inside the window when it would overflow (flipping above
  * the anchor point near the bottom edge, like desktop menus).
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MenuPopup(
     visible: Boolean,
@@ -143,7 +145,12 @@ fun MenuPopup(
             }
         }
         if (focusFirst && firstEnabled >= 0) {
-            LaunchedEffect(Unit) { first.requestFocus() }
+            // opened from the keyboard: the popup's own window follows the keyboard too
+            val inputModes = LocalInputModeManager.current
+            LaunchedEffect(Unit) {
+                inputModes.requestInputMode(InputMode.Keyboard)
+                first.requestFocus()
+            }
         }
     }
 }

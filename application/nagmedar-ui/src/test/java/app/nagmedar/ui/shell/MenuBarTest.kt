@@ -8,6 +8,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -78,8 +80,9 @@ class MenuBarTest {
     @Test
     fun aPointerHasTheMenuBar() {
         shell(InputMode.Pointer)
+        // the menu titles; "Araçlar" is a sidebar section too
         listOf("Medya", "Oynatma", "Ses", "Video", "Altyazı", "Araçlar", "Görünüm", "Yardım").forEach {
-            compose.onNodeWithText(it).assertExists()
+            compose.onNode(hasText(it) and hasClickAction()).assertExists()
         }
     }
 
