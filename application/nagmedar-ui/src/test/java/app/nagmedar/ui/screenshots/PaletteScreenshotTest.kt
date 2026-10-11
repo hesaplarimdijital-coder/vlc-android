@@ -34,7 +34,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-305: the command palette over the shell: a query in a DeX window, with the selected hit
- * beside the list; on a phone with no query, the recent items first.
+ * beside the list; on a tablet by touch; on a phone with no query, the recent items first.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -76,6 +76,9 @@ class PaletteScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun dexQuery() = capture("palette-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "aç", emptyList())
+
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun tabletQuery() = capture("palette-tablet-light", WidthClass.Expanded, ThemeMode.Light, InputMode.Touch, "kuzey", emptyList())
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phoneRecent() = capture(
