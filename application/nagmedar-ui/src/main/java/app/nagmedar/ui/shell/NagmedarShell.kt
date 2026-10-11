@@ -91,6 +91,8 @@ fun NagmedarShell(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     overlay: @Composable BoxScope.() -> Unit = {},
+    /** The desktop window's caption bar the top bar goes up into (S-306); null for none. */
+    caption: CaptionBar? = null,
 ) {
     val navigator = remember(navController) { ShellNavigator(navController) }
     val entry by navController.currentBackStackEntryAsState()
@@ -111,9 +113,10 @@ fun NagmedarShell(
                 MenuBarChrome(
                     menus = if (pointer) menus else ({}),
                     search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
+                    caption = caption,
                 )
             } else {
-                PageTopBar(title = stringResource(current.label), onSearch = onSearch.takeIf { current != Destination.Search })
+                PageTopBar(title = stringResource(current.label), onSearch = onSearch.takeIf { current != Destination.Search }, caption = caption)
             }
         },
         navigation = {

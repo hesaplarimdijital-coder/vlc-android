@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -84,6 +86,8 @@ import app.nagmedar.ui.search.commandItems
 import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
+import app.nagmedar.ui.shell.CaptionBar
+import app.nagmedar.ui.shell.rememberCaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.DropOverlay
 import app.nagmedar.ui.shell.LocalPaneWidths
@@ -125,18 +129,20 @@ fun NagmedarApp(
     val inputMode = rememberInputModeState()
     val mode = inputMode.effective(prefs.density)
     NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode) {
-        SystemBarsFollowTheme()
+        // in a desktop window the shell draws the caption bar (S-306); the first run stays below it
+        SystemBarsFollowTheme(drawsCaption = prefs.firstRunDone)
+        val caption = if (prefs.firstRunDone) rememberCaptionBar() else null
         Box(
             Modifier
                 .fillMaxSize()
                 .background(NagTheme.colors.background)
                 .trackInputMode(inputMode)
-                .windowInsetsPadding(WindowInsets.safeDrawing),
+                .windowInsetsPadding(if (caption != null) WindowInsets.safeDrawing.exclude(WindowInsets.captionBar) else WindowInsets.safeDrawing),
         ) {
             if (prefs.firstRunDone) {
                 // Ctrl and Shift held with a click select several items (S-405)
                 TrackClickModifiers {
-                    NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown)
+                    NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown, caption)
                 }
             } else {
                 FirstRunHost(prefs, onDone = {})
@@ -152,6 +158,7 @@ private fun NagmedarMain(
     onActionsReady: (AppActions) -> Unit,
     requestedDestination: String?,
     onDestinationShown: () -> Unit,
+    caption: CaptionBar?,
 ) {
     val context = LocalContext.current
     val repository = remember { MediaRepository(context.applicationContext) }
@@ -225,6 +232,7 @@ private fun NagmedarMain(
                     )
                 },
                 navController = navController,
+                caption = caption,
                 overlay = {
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {

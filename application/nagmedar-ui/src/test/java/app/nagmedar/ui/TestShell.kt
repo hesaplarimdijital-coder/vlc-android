@@ -39,6 +39,7 @@ import app.nagmedar.ui.playback.PlayerBarInfo
 import app.nagmedar.ui.playback.TransportBar
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.screens.PlaceholderScreen
+import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
@@ -70,6 +71,8 @@ fun TestShell(
     /** "Sıradaki" open (S-310): its button lit, the panel in [overlay]. */
     queueOpen: Boolean = false,
     overlay: @Composable BoxScope.() -> Unit = {},
+    /** A desktop window's caption bar (S-306). */
+    caption: CaptionBar? = null,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -91,6 +94,7 @@ fun TestShell(
         player = { kind -> SamplePlayerBar(kind, queueOpen = queueOpen) },
         navController = navController,
         overlay = overlay,
+        caption = caption,
         screen = screen,
     )
 }

@@ -378,43 +378,61 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
 
 // ---------------------------------------------------------------- top bars
 
-/** Compact and medium top bar: page title and search ([onSearch] null: none, on the search page itself). */
+/**
+ * Compact and medium top bar: page title and search ([onSearch] null: none, on the search page
+ * itself). In a desktop window's [caption] bar (S-306) it is the bar: the title moves the window,
+ * the search button takes its clicks, the system's buttons keep their place.
+ */
 @Composable
-fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier, caption: CaptionBar? = null) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(modifier.fillMaxWidth().background(colors.background)) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(dimens.topBarHeight).padding(start = dimens.pagePadding, end = dimens.gapS),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
+                .captionPadding(caption)
+                .padding(start = dimens.pagePadding, end = dimens.gapS),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(title, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f))
-            if (onSearch != null) NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch)
+            if (onSearch != null) NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch, Modifier.captionTarget(caption))
         }
     }
 }
 
-/** Large and extra-large: brand, application menus and the search/command field (Ctrl+K). */
+/**
+ * Large and extra-large: brand, application menus and the search/command field (Ctrl+K). In a
+ * desktop window's [caption] bar (S-306) it is the bar: the brand and the space between move the
+ * window, the menus and the field take their clicks, the system's buttons keep their place.
+ */
 @Composable
 fun MenuBarChrome(
     menus: @Composable RowScope.() -> Unit,
     search: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    caption: CaptionBar? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(modifier.fillMaxWidth().background(colors.chrome)) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(dimens.menuBarHeight).padding(start = 14.dp, end = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(maxOf(dimens.menuBarHeight, caption?.height ?: 0.dp))
+                .captionPadding(caption)
+                .padding(start = 14.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BrandMark(Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.nagmedar_shell_title), style = NagTheme.type.bodyStrong, color = colors.text)
             Spacer(Modifier.width(14.dp))
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, content = menus)
-            search()
+            Row(Modifier.captionTarget(caption), verticalAlignment = Alignment.CenterVertically, content = menus)
+            Spacer(Modifier.weight(1f))
+            Box(Modifier.captionTarget(caption)) { search() }
         }
         HorizontalRule()
     }
