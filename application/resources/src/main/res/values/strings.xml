@@ -332,6 +332,7 @@
     <string name="nagmedar_source_url" translatable="false">https://github.com/hesaplarimdijital-coder/vlc-android</string>
     <string name="nagmedar_new_interface">Nağmedar interface</string>
     <string name="nagmedar_new_interface_short">Nağmedar</string>
+    <string name="nagmedar_player_subtitle_loaded">Subtitle loaded</string>
     <string name="nagmedar_new_interface_summary">The desktop-class interface with sidebar, menus and keyboard shortcuts; the app icon opens it</string>
     <string name="nagmedar_classic_interface">Classic interface</string>
     <string name="nagmedar_classic_interface_short">Classic</string>

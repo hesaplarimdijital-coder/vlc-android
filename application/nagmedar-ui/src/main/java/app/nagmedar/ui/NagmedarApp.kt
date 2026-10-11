@@ -2,6 +2,7 @@ package app.nagmedar.ui
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -64,6 +66,13 @@ import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.screens.SettingsScreen
+import app.nagmedar.ui.input.DropPlan
+import app.nagmedar.ui.input.DropTargets
+import app.nagmedar.ui.input.DroppedFile
+import app.nagmedar.ui.input.LocalDropTargets
+import app.nagmedar.ui.input.dropTarget
+import app.nagmedar.ui.input.mayBePlayable
+import app.nagmedar.ui.input.planDrop
 import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.PaletteItem
 import app.nagmedar.ui.search.SearchScreen
@@ -72,6 +81,7 @@ import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.DropOverlay
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
@@ -80,6 +90,8 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
+import org.videolan.libvlc.interfaces.IMedia
+import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
@@ -88,6 +100,8 @@ import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.LibrariesActivity
 import org.videolan.vlc.gui.SecondaryActivity
 import org.videolan.vlc.gui.preferences.PreferencesActivity
+import org.videolan.vlc.media.MediaUtils
+import org.videolan.vlc.repository.SlaveRepository
 
 /**
  * Root of the new interface: theme from the preferences, density from the last input device,
@@ -146,8 +160,11 @@ private fun NagmedarMain(
     var paletteOpen by remember { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val screenCommands = remember { ScreenCommands() }
+    val dropTargets = remember { DropTargets() }
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, onOpenFile, openPalette = { paletteOpen = true }) { shortcutListRequests++ }
+        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, onOpenFile, openPalette = { paletteOpen = true }) {
+            shortcutListRequests++
+        }
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
@@ -178,6 +195,7 @@ private fun NagmedarMain(
             LocalPaneWidths provides prefs,
             LocalTooltipDelay provides prefs.tooltipDelay.millis,
             LocalScreenCommands provides screenCommands,
+            LocalDropTargets provides dropTargets,
         ) {
             NagmedarShell(
                 widthClass = widthClass,
@@ -189,10 +207,20 @@ private fun NagmedarMain(
                     if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.navigate(Destination.Search)
                 },
                 menus = { MenuBarMenus(menuSpecs(context, actions), menuBar) },
-                player = { navKind -> PlayerBar(navKind, nowPlaying) },
+                // media dropped on the player bar join the queue (S-406)
+                player = { navKind ->
+                    PlayerBar(
+                        navKind,
+                        nowPlaying,
+                        Modifier.dropTarget("player-bar", ::mayBePlayable, RoundedCornerShape(NagTheme.dimens.radiusCard)) { files ->
+                            actions.queueFiles(files)
+                        },
+                    )
+                },
                 navController = navController,
                 overlay = {
                     UndoBarHost(undo, Modifier.align(Alignment.BottomCenter).padding(16.dp))
+                    if (dropTargets.incoming && dropTargets.hovered == null) DropOverlay()
                 },
                 screen = { destination, shellNavigator ->
                     when (destination) {
@@ -288,6 +316,8 @@ class AppActions(
     private val undo: UndoBarState,
     private val menuBar: MenuBarState,
     private val screenCommands: ScreenCommands,
+    /** Where a drag over the window is, and what takes the files (S-406). */
+    val dropTargets: DropTargets,
     private val openFile: () -> Unit,
     private val openPalette: () -> Unit,
     private val showShortcutList: () -> Unit,
@@ -299,6 +329,42 @@ class AppActions(
 
     /** The window's keys while the menu bar has the keyboard. */
     fun menuBarKey(keyCode: Int, down: Boolean, rtl: Boolean): Boolean = menuBar.onKey(keyCode, down, rtl)
+
+    /**
+     * Files dropped on the window and on no target (S-406): media play in the order dropped,
+     * subtitles join the video playing (and are kept with it), else a word on what to do.
+     */
+    fun dropFiles(files: List<DroppedFile>): Boolean {
+        val service = PlaybackService.instance
+        val video = service?.currentMediaWrapper?.takeIf { service.isVideoPlaying }
+        val res = context.resources
+        val message = when (val plan = planDrop(files, video != null)) {
+            is DropPlan.Play -> {
+                MediaUtils.openList(context, plan.uris.map { MLServiceLocator.getAbstractMediaWrapper(Uri.parse(it)) }, 0)
+                res.getQuantityString(R.plurals.nag_drop_playing, plan.uris.size, plan.uris.size)
+            }
+            is DropPlan.LoadSubtitles -> {
+                plan.uris.forEach { uri ->
+                    service?.addSubtitleTrack(Uri.parse(uri), true)
+                    if (video != null) SlaveRepository.getInstance(context).saveSlave(video.location, IMedia.Slave.Type.Subtitle, 2, uri)
+                }
+                res.getQuantityString(R.plurals.nag_drop_subtitles_loaded, plan.uris.size, plan.uris.size)
+            }
+            DropPlan.SubtitlesNeedAVideo -> res.getString(R.string.nag_drop_subtitle_needs_video)
+            DropPlan.Nothing -> res.getString(R.string.nag_drop_nothing)
+        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        return true
+    }
+
+    /** Media dropped on the player bar (S-406): after what plays; false when none would play. */
+    fun queueFiles(files: List<DroppedFile>): Boolean {
+        val media = files.filter { it.playable }
+        if (media.isEmpty()) return false
+        MediaUtils.appendMedia(context, media.map { MLServiceLocator.getAbstractMediaWrapper(Uri.parse(it.uri)) })
+        Toast.makeText(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, media.size, media.size), Toast.LENGTH_SHORT).show()
+        return true
+    }
 
     /** An Esc nothing else used: the screen lets go of its selection (S-405). */
     fun escape(): Boolean = screenCommands.escape()

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.view.DragEvent
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.Menu
@@ -17,7 +19,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.MenuBarKey
+import app.nagmedar.ui.input.NAGMEDAR_DRAG
+import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.vlc.media.MediaUtils
@@ -57,6 +62,66 @@ class NagmedarActivity : ComponentActivity() {
                 onDestinationShown = { destination = null },
             )
         }
+        // files dragged in from another app or window (S-406)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) window.decorView.setOnDragListener { _, event -> onWindowDrag(event) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun onWindowDrag(event: DragEvent): Boolean {
+        val actions = actions ?: return false
+        val targets = actions.dropTargets
+        val description = event.clipDescription
+        val types = description?.let { d -> (0 until d.mimeTypeCount).map { d.getMimeType(it) } }.orEmpty()
+        // a film dragged from one of our lists counts only over a target
+        val own = event.localState == NAGMEDAR_DRAG
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> own || types.any(::isMediaOrSubtitleType)
+            DragEvent.ACTION_DRAG_ENTERED, DragEvent.ACTION_DRAG_LOCATION -> {
+                targets.moved(event.x, event.y, types, outside = !own)
+                true
+            }
+            DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> {
+                targets.ended()
+                true
+            }
+            DragEvent.ACTION_DROP -> {
+                targets.ended()
+                val clip = event.clipData ?: return false
+                // the files stay readable while the window lives; a SAF document's access is kept for good
+                requestDragAndDropPermissions(event)
+                val files = (0 until clip.itemCount).mapNotNull { index ->
+                    val item = clip.getItemAt(index)
+                    item.uri ?: item.text?.toString()?.trim()?.takeIf { it.contains("://") }?.let(Uri::parse)
+                }.map { uri ->
+                    keepAccess(uri)
+                    DroppedFile(uri.toString(), displayName(uri), contentResolver.getType(uri))
+                }
+                if (files.isEmpty()) return false
+                val target = targets.at(event.x, event.y, types)
+                when {
+                    target != null && target.second.onDrop(files) -> true
+                    own -> false
+                    else -> actions.dropFiles(files)
+                }
+            }
+            else -> false
+        }
+    }
+
+    private fun displayName(uri: Uri): String? {
+        if (uri.scheme == "content") {
+            runCatching {
+                contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) return cursor.getString(0)
+                }
+            }
+        }
+        return uri.lastPathSegment
+    }
+
+    private fun keepAccess(uri: Uri) {
+        if (uri.scheme != "content") return
+        runCatching { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
     }
 
     override fun onNewIntent(intent: Intent) {

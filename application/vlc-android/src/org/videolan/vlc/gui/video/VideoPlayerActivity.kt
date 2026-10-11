@@ -547,6 +547,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
 
         rootView = findViewById(R.id.player_root)
+        // Nağmedar (S-406): subtitles and media dropped on the window
+        PlayerDropListener.attach(this)
 
 
         overlayDelegate.playlist = findViewById(R.id.video_playlist)

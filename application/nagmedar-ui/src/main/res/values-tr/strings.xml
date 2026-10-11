@@ -225,6 +225,32 @@
     <string name="nag_selection_play">Oynat</string>
     <string name="nag_selection_queue">Sıraya ekle</string>
     <string name="nag_selection_clear">Seçimi kaldır</string>
+    <!-- Sürükle-bırak (S-406) -->
+    <string name="nag_drop_here">Oynatmak için bırakın</string>
+    <string name="nag_drop_hint">Videolar ve müzik oynatılır; altyazılar oynayan videoya eklenir. Bir filmin üzerine bırakılan altyazı onunla kalır, oynatıcı çubuğuna bırakılanlar sıraya girer.</string>
+    <plurals name="nag_drop_playing">
+        <item quantity="one">%d dosya oynatılıyor</item>
+        <item quantity="other">%d dosya oynatılıyor</item>
+    </plurals>
+    <plurals name="nag_drop_subtitles_loaded">
+        <item quantity="one">%d altyazı yüklendi</item>
+        <item quantity="other">%d altyazı yüklendi</item>
+    </plurals>
+    <plurals name="nag_drop_queued">
+        <item quantity="one">%d dosya sıraya eklendi</item>
+        <item quantity="other">%d dosya sıraya eklendi</item>
+    </plurals>
+    <string name="nag_drop_subtitle_needs_video">Altyazıyı oynayan bir videoya ya da bir filmin üzerine bırakın</string>
+    <string name="nag_drop_nothing">Bırakılanlarda oynatılacak bir şey yok</string>
+    <string name="nag_drop_subtitle_for">Altyazı “%s” ile eşlendi</string>
+    <plurals name="nag_drag_films">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d film</item>
+    </plurals>
+    <plurals name="nag_drag_tracks">
+        <item quantity="one">%d parça</item>
+        <item quantity="other">%d parça</item>
+    </plurals>
     <string name="nag_sc_play_pause">Oynat / duraklat</string>
     <string name="nag_sc_stop">Durdur</string>
     <string name="nag_sc_previous">Önceki</string>

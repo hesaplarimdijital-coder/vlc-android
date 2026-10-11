@@ -80,6 +80,8 @@ fun <T> DenseTable(
     contentPadding: PaddingValues = PaddingValues(bottom = 8.dp),
     /** With a double-click action, a click only selects (a pointer's way: select, then open). */
     onRowDoubleClick: ((T, Int) -> Unit)? = null,
+    /** More for a row: a drag source, a drop target (S-406). */
+    rowModifier: (T) -> Modifier = { Modifier },
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -105,7 +107,7 @@ fun <T> DenseTable(
                         selected = selectedKeys?.contains(key(item)) ?: (selectedKey != null && key(item) == selectedKey),
                         onClick = { onRowClick(item, index) },
                         onDoubleClick = onRowDoubleClick?.let { open -> { open(item, index) } },
-                        modifier = Modifier,
+                        modifier = rowModifier(item),
                     )
                 }
                 if (rowMenu != null) {

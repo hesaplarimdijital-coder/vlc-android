@@ -1,5 +1,7 @@
 package app.nagmedar.ui.library
 
+import android.net.Uri
+import android.widget.Toast
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -38,6 +40,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -72,6 +76,10 @@ import app.nagmedar.ui.components.rubberBandOverlay
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.input.DropKind
+import app.nagmedar.ui.input.dropTarget
+import app.nagmedar.ui.input.fileDragSource
+import app.nagmedar.ui.input.mayBeSubtitle
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.playback.Artwork
@@ -83,11 +91,13 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
+import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.TAG_ITEM
 import org.videolan.vlc.gui.InfoActivity
 import org.videolan.vlc.media.MediaUtils
 import kotlinx.coroutines.delay
+import org.videolan.vlc.repository.SlaveRepository
 
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
@@ -325,7 +335,10 @@ private fun VideoGrid(
                 VideoCard(
                     item,
                     tech[item.key],
-                    Modifier.fillMaxWidth().then(band.item(item.key)),
+                    Modifier
+                        .fillMaxWidth()
+                        .then(band.item(item.key))
+                        .filmDrags(item, items, selection, RoundedCornerShape(NagTheme.dimens.radiusCard)),
                     selected = isSelected(item),
                     onClick = { onClick(item, items) },
                     onDoubleClick = onDoubleClick?.let { open -> { open(item) } },
@@ -363,8 +376,38 @@ private fun VideoTable(
         onRowDoubleClick = onDoubleClick?.let { open -> { item, _ -> open(item) } },
         rowMenu = { item, _ -> menu(item, { onPlay(item) }, { onShowDetails(item) }) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
+        rowModifier = { item -> Modifier.filmDrags(item, sorted, selection, RoundedCornerShape(NagTheme.dimens.radiusControl)) },
     )
 }
+
+/**
+ * A film dragged out with the mouse (S-406), with the others selected when it is one of them, and a
+ * subtitle dropped on it kept with it: the player loads it next time the film plays.
+ */
+private fun Modifier.filmDrags(item: VideoItem, shown: List<VideoItem>, selection: MultiSelection?, shape: Shape): Modifier = composed {
+    val context = LocalContext.current
+    val res = context.resources
+    this
+        .fileDragSource(
+            label = {
+                val many = dragged(item, shown, selection)
+                if (many.size > 1) res.getQuantityString(R.plurals.nag_drag_films, many.size, many.size) else item.title
+            },
+            files = { dragged(item, shown, selection).map { Uri.parse(it.key) } },
+        )
+        .dropTarget("film-${item.key}", ::mayBeSubtitle, shape) { files ->
+            val subtitles = files.filter { it.kind == DropKind.Subtitle }
+            subtitles.forEach { file ->
+                SlaveRepository.getInstance(context).saveSlave(item.media?.location ?: item.key, IMedia.Slave.Type.Subtitle, 2, file.uri)
+            }
+            if (subtitles.isNotEmpty()) Toast.makeText(context, res.getString(R.string.nag_drop_subtitle_for, item.title), Toast.LENGTH_SHORT).show()
+            subtitles.isNotEmpty()
+        }
+}
+
+/** What a drag from [item] carries: the selection when the item is in it, else the item. */
+private fun dragged(item: VideoItem, shown: List<VideoItem>, selection: MultiSelection?): List<VideoItem> =
+    if (selection != null && item.key in selection && selection.count > 1) shown.filter { it.key in selection } else listOf(item)
 
 @Composable
 private fun videoColumns(tech: Map<String, MediaTech>): List<TableColumn<VideoItem>> {
@@ -553,6 +596,19 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     onRowDoubleClick = if (pointer) ({ _, index -> PlaybackActions.playList(context, sorted, index) }) else null,
                     rowMenu = { media, index -> mediaMenu(context, media, play = { PlaybackActions.playList(context, sorted, index) }) },
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
+                    // a track dragged out with the mouse, with the others selected (S-406)
+                    rowModifier = { media ->
+                        Modifier.fileDragSource(
+                            label = {
+                                val many = if (media.id in selection && selection.count > 1) sorted.filter { it.id in selection } else listOf(media)
+                                if (many.size > 1) context.resources.getQuantityString(R.plurals.nag_drag_tracks, many.size, many.size) else media.title.orEmpty()
+                            },
+                            files = {
+                                val many = if (media.id in selection && selection.count > 1) sorted.filter { it.id in selection } else listOf(media)
+                                many.mapNotNull { it.uri }
+                            },
+                        )
+                    },
                 )
             }
         }

@@ -225,6 +225,32 @@
     <string name="nag_selection_play">Play</string>
     <string name="nag_selection_queue">Add to queue</string>
     <string name="nag_selection_clear">Clear the selection</string>
+    <!-- Drag and drop (S-406) -->
+    <string name="nag_drop_here">Drop to play</string>
+    <string name="nag_drop_hint">Videos and music play; subtitles join the video playing. A subtitle dropped on a film stays with it, what is dropped on the player bar joins the queue.</string>
+    <plurals name="nag_drop_playing">
+        <item quantity="one">Playing %d file</item>
+        <item quantity="other">Playing %d files</item>
+    </plurals>
+    <plurals name="nag_drop_subtitles_loaded">
+        <item quantity="one">%d subtitle loaded</item>
+        <item quantity="other">%d subtitles loaded</item>
+    </plurals>
+    <plurals name="nag_drop_queued">
+        <item quantity="one">%d file added to the queue</item>
+        <item quantity="other">%d files added to the queue</item>
+    </plurals>
+    <string name="nag_drop_subtitle_needs_video">Drop subtitles on a playing video or on a film</string>
+    <string name="nag_drop_nothing">Nothing to play in what was dropped</string>
+    <string name="nag_drop_subtitle_for">Subtitle kept with “%s”</string>
+    <plurals name="nag_drag_films">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d films</item>
+    </plurals>
+    <plurals name="nag_drag_tracks">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
     <string name="nag_sc_play_pause">Play / pause</string>
     <string name="nag_sc_stop">Stop</string>
     <string name="nag_sc_previous">Previous</string>
