@@ -45,7 +45,8 @@ class ShellNavigator(private val navController: NavHostController) {
 
 /**
  * The adaptive shell (S-301): bottom bar on compact windows, a rail on medium and expanded
- * windows, a menu bar with a collapsible sidebar on large and extra-large windows. The
+ * windows, a menu bar with a collapsible sidebar on large and extra-large windows; the sidebar's
+ * width is dragged and remembered (S-303). The
  * navigation graph lives in the content slot of [ShellLayout] and survives width changes;
  * [overlay] is drawn over the current screen (undo bars).
  */
@@ -68,6 +69,7 @@ fun NagmedarShell(
     val current = Destination.fromRoute(entry?.destination?.route)
     val navKind = NavKind.forWidth(widthClass)
     val motion = NagTheme.motion
+    val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
     // The graph builder below must not capture changing values, or NavHost would rebuild the graph.
     val currentScreen by rememberUpdatedState(screen)
 
@@ -94,13 +96,14 @@ fun NagmedarShell(
                     collapsed = sidebarCollapsed,
                     onToggleCollapsed = { onSidebarCollapsedChange(!sidebarCollapsed) },
                     badges = badges,
+                    width = sidebarWidth,
                 )
             }
         },
         player = { player(navKind) },
         content = {
             Box(Modifier.fillMaxSize()) {
-                CompositionLocalProvider(LocalNavKind provides navKind) {
+                CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass) {
                     NavHost(
                         navController = navController,
                         startDestination = Destination.Home.route,

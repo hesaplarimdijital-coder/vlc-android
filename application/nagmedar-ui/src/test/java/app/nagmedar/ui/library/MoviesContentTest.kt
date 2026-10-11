@@ -43,27 +43,33 @@ class MoviesContentTest {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 var selected by remember { mutableStateOf<String?>(null) }
                 var requested by remember { mutableStateOf(false) }
-                MoviesContent(
-                    items = MovieSamples.items,
+                VideoDetailsPanes(
+                    selected = MovieSamples.items.firstOrNull { it.key == selected },
+                    detailsRequested = requested,
                     tech = MovieSamples.tech,
                     techState = MovieSamples::state,
-                    grid = grid,
-                    sort = null,
-                    onSortChange = {},
-                    selected = selected,
-                    onSelect = { selected = it.key },
-                    detailsRequested = requested,
-                    onShowDetails = {
-                        selected = it.key
-                        requested = true
-                    },
+                    onPlay = { played += it.title },
                     onCloseDetails = {
                         selected = null
                         requested = false
                     },
-                    onPlay = { played += it.title },
-                    menu = { _, _, _ -> emptyList() },
-                )
+                ) {
+                    MoviesContent(
+                        items = MovieSamples.items,
+                        tech = MovieSamples.tech,
+                        grid = grid,
+                        sort = null,
+                        onSortChange = {},
+                        selected = selected,
+                        onSelect = { selected = it.key },
+                        onShowDetails = {
+                            selected = it.key
+                            requested = true
+                        },
+                        onPlay = { played += it.title },
+                        menu = { _, _, _ -> emptyList() },
+                    )
+                }
             }
         }
         compose.waitForIdle()

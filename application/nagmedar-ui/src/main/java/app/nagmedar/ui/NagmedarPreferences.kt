@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
@@ -21,7 +22,7 @@ import org.videolan.tools.Settings
  * preferences next to the classic settings and observable from Compose.
  */
 @Stable
-class NagmedarPreferences(private val prefs: SharedPreferences) {
+class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 
     var themeMode by mutableStateOf(prefs.enumValue(KEY_THEME, ThemeMode.System))
         private set
@@ -84,11 +85,19 @@ class NagmedarPreferences(private val prefs: SharedPreferences) {
         prefs.edit().putStringSet(NAGMEDAR_SAF_FOLDERS, HashSet(safFolders)).apply()
     }
 
+    /** S-303: widths the panes were dragged to, in dp. */
+    override fun paneWidth(key: String): Float? = prefs.getFloat(KEY_PANE_PREFIX + key, 0f).takeIf { it > 0f }
+
+    override fun savePaneWidth(key: String, widthDp: Float) {
+        prefs.edit().putFloat(KEY_PANE_PREFIX + key, widthDp).apply()
+    }
+
     companion object {
         const val KEY_THEME = "nagmedar_theme"
         const val KEY_ACCENT = "nagmedar_accent"
         const val KEY_DENSITY = "nagmedar_density"
         const val KEY_SIDEBAR_COLLAPSED = "nagmedar_sidebar_collapsed"
+        const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
     }
 }
 

@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -97,42 +98,50 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
     var detailsRequested by rememberSaveable { mutableStateOf(false) }
+    val play: (VideoItem) -> Unit = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } }
     BackHandler(enabled = folder != null) { folder = null }
-    Column(Modifier.fillMaxSize()) {
-        MoviesHeader(library, view, { view = it }, order, { order = it }, onAddFolder)
-        LibraryContent(
-            loading = library == null,
-            empty = library?.movies?.isEmpty() == true,
-            scan = scan,
-            emptyTitle = stringResource(R.string.nag_state_no_videos_title),
-            emptyDescription = stringResource(R.string.nag_state_no_videos_desc),
-            onAddFolder = onAddFolder,
-        ) {
-            MoviesLibrary(
-                library = library ?: VideoLibrary.Empty,
-                tech = tech,
-                view = view,
-                filters = filters,
-                onFiltersChange = { filters = it },
-                order = order,
-                folder = folder,
-                onOpenFolder = { folder = it },
-                sort = sort,
-                onSortChange = { sort = it },
-                selected = selected,
-                onSelect = { selected = it.key },
-                detailsRequested = detailsRequested,
-                onShowDetails = {
-                    selected = it.key
-                    detailsRequested = true
-                },
-                onCloseDetails = {
-                    selected = null
-                    detailsRequested = false
-                },
-                onPlay = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } },
-                menu = { item, play, info -> item.media?.let { mediaMenu(context, it, play, info) }.orEmpty() },
-            )
+    // the details stand beside the header and the list, the full height of the screen (S-303)
+    VideoDetailsPanes(
+        selected = library?.movies?.firstOrNull { it.key == selected },
+        detailsRequested = detailsRequested,
+        tech = tech,
+        onPlay = play,
+        onCloseDetails = {
+            selected = null
+            detailsRequested = false
+        },
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            MoviesHeader(library, view, { view = it }, order, { order = it }, onAddFolder)
+            LibraryContent(
+                loading = library == null,
+                empty = library?.movies?.isEmpty() == true,
+                scan = scan,
+                emptyTitle = stringResource(R.string.nag_state_no_videos_title),
+                emptyDescription = stringResource(R.string.nag_state_no_videos_desc),
+                onAddFolder = onAddFolder,
+            ) {
+                MoviesLibrary(
+                    library = library ?: VideoLibrary.Empty,
+                    tech = tech,
+                    view = view,
+                    filters = filters,
+                    onFiltersChange = { filters = it },
+                    order = order,
+                    folder = folder,
+                    onOpenFolder = { folder = it },
+                    sort = sort,
+                    onSortChange = { sort = it },
+                    selected = selected,
+                    onSelect = { selected = it.key },
+                    onShowDetails = {
+                        selected = it.key
+                        detailsRequested = true
+                    },
+                    onPlay = play,
+                    menu = { item, playItem, info -> item.media?.let { mediaMenu(context, it, playItem, info) }.orEmpty() },
+                )
+            }
         }
     }
 }
@@ -215,9 +224,7 @@ fun MoviesLibrary(
     onSortChange: (TableSort) -> Unit,
     selected: String?,
     onSelect: (VideoItem) -> Unit,
-    detailsRequested: Boolean,
     onShowDetails: (VideoItem) -> Unit,
-    onCloseDetails: () -> Unit,
     onPlay: (VideoItem) -> Unit,
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
 ) {
@@ -248,15 +255,12 @@ fun MoviesLibrary(
             else -> MoviesContent(
                 items = shown,
                 tech = tech,
-                techState = { techStateOf(it, tech) },
                 grid = view != MoviesView.Table,
                 sort = sort,
                 onSortChange = onSortChange,
                 selected = selected,
                 onSelect = onSelect,
-                detailsRequested = detailsRequested,
                 onShowDetails = onShowDetails,
-                onCloseDetails = onCloseDetails,
                 onPlay = onPlay,
                 menu = menu,
                 gridHeader = shelfHeader.takeIf { shelf.isNotEmpty() },
@@ -391,13 +395,16 @@ fun SeriesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                 season = season,
                 onSeasonChange = { season = it },
                 onPlay = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } },
-                menu = { item, play -> item.media?.let { mediaMenu(context, it, play) }.orEmpty() },
+                menu = { item, play, info -> item.media?.let { mediaMenu(context, it, play, info) }.orEmpty() },
             )
         }
     }
 }
 
-/** The shows as cards with what comes next, or one show's seasons and episodes (S-801). */
+/**
+ * The shows as cards with what comes next, or one show's seasons and episodes (S-801) with the
+ * details of the selected episode beside or over them (S-303).
+ */
 @Composable
 fun SeriesContent(
     shows: List<Show>,
@@ -408,7 +415,7 @@ fun SeriesContent(
     season: Int?,
     onSeasonChange: (Int) -> Unit,
     onPlay: (VideoItem) -> Unit,
-    menu: (VideoItem, play: () -> Unit) -> List<MenuEntry>,
+    menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
 ) {
     val show = shows.firstOrNull { it.key == open }
     if (show != null) {
@@ -506,7 +513,60 @@ private fun ShowDetail(
     onSeasonChange: (Int) -> Unit,
     onClose: () -> Unit,
     onPlay: (VideoItem) -> Unit,
-    menu: (VideoItem, play: () -> Unit) -> List<MenuEntry>,
+    menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
+) {
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    var selected by rememberSaveable(show.key) { mutableStateOf<String?>(null) }
+    var requested by rememberSaveable(show.key) { mutableStateOf(false) }
+    VideoDetailsPanes(
+        selected = show.episodes.firstOrNull { it.item.key == selected }?.item,
+        detailsRequested = requested,
+        tech = tech,
+        onPlay = onPlay,
+        onCloseDetails = {
+            selected = null
+            requested = false
+        },
+        list = {
+            ShowEpisodes(
+                show = show,
+                tech = tech,
+                season = season,
+                onSeasonChange = onSeasonChange,
+                onClose = onClose,
+                selected = selected,
+                onClick = { item ->
+                    if (pointer) {
+                        selected = item.key
+                    } else {
+                        onPlay(item)
+                    }
+                },
+                onDoubleClick = if (pointer) onPlay else null,
+                onPlay = onPlay,
+                menu = { item ->
+                    menu(item, { onPlay(item) }) {
+                        selected = item.key
+                        requested = true
+                    }
+                },
+            )
+        },
+    )
+}
+
+@Composable
+private fun ShowEpisodes(
+    show: Show,
+    tech: Map<String, MediaTech>,
+    season: Int,
+    onSeasonChange: (Int) -> Unit,
+    onClose: () -> Unit,
+    selected: String?,
+    onClick: (VideoItem) -> Unit,
+    onDoubleClick: ((VideoItem) -> Unit)?,
+    onPlay: (VideoItem) -> Unit,
+    menu: (VideoItem) -> List<MenuEntry>,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -554,8 +614,15 @@ private fun ShowDetail(
         }
         LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapS)) {
             items(episodes, key = { it.item.key }) { episode ->
-                ContextMenuArea(entries = { menu(episode.item) { onPlay(episode.item) } }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
-                    EpisodeRow(episode, tech[episode.item.key], current = episode == next) { onPlay(episode.item) }
+                ContextMenuArea(entries = { menu(episode.item) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                    EpisodeRow(
+                        episode = episode,
+                        tech = tech[episode.item.key],
+                        next = episode == next,
+                        selected = episode.item.key == selected,
+                        onClick = { onClick(episode.item) },
+                        onDoubleClick = onDoubleClick?.let { play -> { play(episode.item) } },
+                    )
                 }
             }
         }
@@ -563,7 +630,14 @@ private fun ShowDetail(
 }
 
 @Composable
-private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onClick: () -> Unit) {
+private fun EpisodeRow(
+    episode: Episode,
+    tech: MediaTech?,
+    next: Boolean,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onDoubleClick: (() -> Unit)?,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -577,8 +651,9 @@ private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onC
             .fillMaxWidth()
             .heightIn(min = dimens.minTarget)
             .focusRing(state, shape)
-            .background(stateBackground(state, selected = current), shape)
-            .nagClickable(interaction, onClick, onClickLabel = item.title)
+            .background(stateBackground(state, selected = selected), shape)
+            .semantics { this.selected = selected }
+            .nagClickable(interaction, onClick, onClickLabel = item.title, onDoubleClick = onDoubleClick)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -593,15 +668,20 @@ private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onC
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(episode.code, style = NagTheme.type.mono, color = if (current) colors.onSelection else colors.accentText)
+                Text(episode.code, style = NagTheme.type.mono, color = if (selected) colors.onSelection else colors.accentText)
                 Spacer(Modifier.width(8.dp))
                 Text(episode.info.title.ifEmpty { number }, style = NagTheme.type.bodyStrong,
-                    color = if (current) colors.onSelection else colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    color = if (selected) colors.onSelection else colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false))
+                if (next) {
+                    Spacer(Modifier.width(8.dp))
+                    NextTag()
+                }
             }
             Text(
                 listOfNotNull(formatDuration(item.durationMs), tech?.let(::techSummary)?.takeIf { it.isNotEmpty() }).joinToString(" · "),
                 style = NagTheme.type.labelSmall,
-                color = if (current) colors.onSelection else colors.textTertiary,
+                color = if (selected) colors.onSelection else colors.textTertiary,
                 maxLines = 1,
             )
         }
@@ -610,4 +690,19 @@ private fun EpisodeRow(episode: Episode, tech: MediaTech?, current: Boolean, onC
             Icon(NagIcons.Check, contentDescription = stringResource(R.string.nag_watched), tint = colors.success, modifier = Modifier.size(18.dp))
         }
     }
+}
+
+/** "Sıradaki": the episode the show goes on with. */
+@Composable
+private fun NextTag() {
+    val colors = NagTheme.colors
+    Text(
+        stringResource(R.string.nag_next_tag),
+        style = NagTheme.type.caption,
+        color = colors.accentText,
+        maxLines = 1,
+        modifier = Modifier
+            .border(1.dp, colors.accent, RoundedCornerShape(4.dp))
+            .padding(horizontal = 6.dp, vertical = 1.dp),
+    )
 }

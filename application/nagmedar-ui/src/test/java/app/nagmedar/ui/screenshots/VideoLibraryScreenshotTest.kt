@@ -72,9 +72,7 @@ class VideoLibraryScreenshotTest {
             onSortChange = {},
             selected = null,
             onSelect = {},
-            detailsRequested = false,
             onShowDetails = {},
-            onCloseDetails = {},
             onPlay = {},
             menu = { _, _, _ -> emptyList() },
         )
@@ -91,7 +89,7 @@ class VideoLibraryScreenshotTest {
             season = null,
             onSeasonChange = {},
             onPlay = {},
-            menu = { _, _ -> emptyList() },
+            menu = { _, _, _ -> emptyList() },
         )
     }
 

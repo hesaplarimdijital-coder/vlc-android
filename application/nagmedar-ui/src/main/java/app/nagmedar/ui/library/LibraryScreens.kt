@@ -7,10 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,8 +45,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
@@ -72,6 +68,9 @@ import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.ListDetailPanes
+import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -202,72 +201,69 @@ fun techStateOf(item: VideoItem, tech: Map<String, MediaTech>): TechState = when
     else -> TechState.Unavailable
 }
 
-/** Width from which the details panel sits beside the list instead of over it. */
-private val DetailsBesideMinWidth = 900.dp
+/**
+ * A video list with the details of the selected video (S-802): beside the list in expanded
+ * windows and wider, over it in narrower ones (S-303). Where there is room a pointer's selection
+ * shows them at once; otherwise they open when asked for ([detailsRequested], the item's menu).
+ */
+@Composable
+fun VideoDetailsPanes(
+    selected: VideoItem?,
+    detailsRequested: Boolean,
+    tech: Map<String, MediaTech>,
+    onPlay: (VideoItem) -> Unit,
+    onCloseDetails: () -> Unit,
+    modifier: Modifier = Modifier,
+    techState: (VideoItem) -> TechState = { techStateOf(it, tech) },
+    list: @Composable () -> Unit,
+) {
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    val side = currentWidthClass() >= WidthClass.Expanded
+    ListDetailPanes(
+        detail = selected?.takeIf { detailsRequested || (pointer && side) },
+        onCloseDetail = onCloseDetails,
+        list = list,
+        detailPane = { item, fullScreen ->
+            MediaDetailsPanel(
+                item = item,
+                tech = tech[item.key],
+                state = techState(item),
+                onPlay = { onPlay(item) },
+                onClose = onCloseDetails,
+                modifier = Modifier.fillMaxSize(),
+                fullScreen = fullScreen,
+            )
+        },
+        modifier = modifier,
+    )
+}
 
 /**
- * The movies as a grid of cards or a dense table, with the details of the selected one (S-802).
- * With a pointer a click selects and a double click plays; by touch a tap plays and the details
- * open from the item's menu. In a wide window the details sit beside the list; in a narrow one
- * they open over it when asked for.
+ * The movies as a grid of cards or a dense table (S-802). With a pointer a click selects and a
+ * double click plays; by touch a tap plays; the menu's "Medya bilgisi" asks for the details.
  */
 @Composable
 fun MoviesContent(
     items: List<VideoItem>,
     tech: Map<String, MediaTech>,
-    techState: (VideoItem) -> TechState,
     grid: Boolean,
     sort: TableSort?,
     onSortChange: (TableSort) -> Unit,
     selected: String?,
     onSelect: (VideoItem) -> Unit,
-    detailsRequested: Boolean,
     onShowDetails: (VideoItem) -> Unit,
-    onCloseDetails: () -> Unit,
     onPlay: (VideoItem) -> Unit,
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
     /** Scrolls with the grid above the cards (the "Devam et" shelf); the table has none. */
     gridHeader: (@Composable () -> Unit)? = null,
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
-    val selectedItem = items.firstOrNull { it.key == selected }
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val beside = maxWidth >= DetailsBesideMinWidth
-        val panel = selectedItem != null && (beside && (pointer || detailsRequested))
-        Row(Modifier.fillMaxSize()) {
-            Box(Modifier.weight(1f).fillMaxHeight()) {
-                val click: (VideoItem) -> Unit = { item -> if (pointer) onSelect(item) else onPlay(item) }
-                val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
-                if (grid) {
-                    VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader)
-                } else {
-                    VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails)
-                }
-            }
-            if (panel && selectedItem != null) {
-                Box(Modifier.width(1.dp).fillMaxHeight().background(NagTheme.colors.border))
-                MediaDetailsPanel(
-                    item = selectedItem,
-                    tech = tech[selectedItem.key],
-                    state = techState(selectedItem),
-                    onPlay = { onPlay(selectedItem) },
-                    onClose = onCloseDetails,
-                    modifier = Modifier.width(336.dp),
-                )
-            }
-        }
-        if (!beside && detailsRequested && selectedItem != null) {
-            Dialog(onDismissRequest = onCloseDetails, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-                MediaDetailsPanel(
-                    item = selectedItem,
-                    tech = tech[selectedItem.key],
-                    state = techState(selectedItem),
-                    onPlay = { onPlay(selectedItem) },
-                    onClose = onCloseDetails,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
+    val click: (VideoItem) -> Unit = { item -> if (pointer) onSelect(item) else onPlay(item) }
+    val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
+    if (grid) {
+        VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader)
+    } else {
+        VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails)
     }
 }
 

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.library.MovieSamples
 import app.nagmedar.ui.library.MoviesContent
+import app.nagmedar.ui.library.VideoDetailsPanes
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -34,21 +35,27 @@ class MoviesScreenshotTest {
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    MoviesContent(
-                        items = MovieSamples.items,
+                    VideoDetailsPanes(
+                        selected = MovieSamples.items.firstOrNull { it.key == selected },
+                        detailsRequested = false,
                         tech = MovieSamples.tech,
                         techState = MovieSamples::state,
-                        grid = grid,
-                        sort = null,
-                        onSortChange = {},
-                        selected = selected,
-                        onSelect = {},
-                        detailsRequested = false,
-                        onShowDetails = {},
-                        onCloseDetails = {},
                         onPlay = {},
-                        menu = { _, _, _ -> emptyList() },
-                    )
+                        onCloseDetails = {},
+                    ) {
+                        MoviesContent(
+                            items = MovieSamples.items,
+                            tech = MovieSamples.tech,
+                            grid = grid,
+                            sort = null,
+                            onSortChange = {},
+                            selected = selected,
+                            onSelect = {},
+                            onShowDetails = {},
+                            onPlay = {},
+                            menu = { _, _, _ -> emptyList() },
+                        )
+                    }
                 }
             }
         }

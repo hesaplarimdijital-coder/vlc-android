@@ -36,11 +36,13 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.collectState
@@ -203,6 +205,13 @@ private fun RailItem(destination: Destination, selected: Boolean, onClick: () ->
 
 // ---------------------------------------------------------------- large/extra-large: sidebar
 
+/** Widths the sidebar can be dragged to (S-303). */
+val SidebarWidthRange = 200f..360f
+
+/**
+ * The sidebar of large windows. Expanded, its end edge can be dragged between 200 and 360 dp
+ * when [width] is given; collapsed, it shows icons only.
+ */
 @Composable
 fun Sidebar(
     current: Destination,
@@ -211,12 +220,51 @@ fun Sidebar(
     onToggleCollapsed: () -> Unit,
     badges: NavBadges,
     modifier: Modifier = Modifier,
+    width: PaneWidthState? = null,
+) {
+    val dimens = NagTheme.dimens
+    Box(modifier.fillMaxHeight()) {
+        SidebarColumn(
+            current = current,
+            onSelect = onSelect,
+            collapsed = collapsed,
+            onToggleCollapsed = onToggleCollapsed,
+            badges = badges,
+            width = when {
+                collapsed -> dimens.sidebarCollapsedWidth
+                width != null -> width.widthDp.coerceIn(SidebarWidthRange).dp
+                else -> dimens.sidebarWidth
+            },
+        )
+        if (width != null && !collapsed) {
+            // over the sidebar's padding and its edge, so the content does not move
+            PaneDivider(
+                widthDp = width.widthDp.coerceIn(SidebarWidthRange),
+                range = SidebarWidthRange,
+                onResize = { towardsEnd -> width.resize(towardsEnd, SidebarWidthRange) },
+                onSet = { width.widthDp = it.coerceIn(SidebarWidthRange) },
+                onResizeEnd = width::save,
+                label = stringResource(R.string.nag_sidebar_divider),
+                modifier = Modifier.align(Alignment.CenterEnd).width(6.dp),
+                line = Alignment.CenterEnd,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SidebarColumn(
+    current: Destination,
+    onSelect: (Destination) -> Unit,
+    collapsed: Boolean,
+    onToggleCollapsed: () -> Unit,
+    badges: NavBadges,
+    width: Dp,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_sidebar)
-    val width = if (collapsed) dimens.sidebarCollapsedWidth else dimens.sidebarWidth
-    Row(modifier.fillMaxHeight()) {
+    Row(Modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
                 .width(width)

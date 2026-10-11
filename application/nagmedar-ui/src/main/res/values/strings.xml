@@ -285,6 +285,9 @@
     <string name="nag_duration_minutes">%1$d min</string>
     <string name="nag_details_title">Details</string>
     <string name="nag_details_close">Close the details</string>
+    <string name="nag_details_back">Back to the list</string>
+    <string name="nag_pane_divider">Width of the details pane</string>
+    <string name="nag_sidebar_divider">Width of the sidebar</string>
     <string name="nag_details_resume_at">Stopped at</string>
     <string name="nag_details_resume">Resume</string>
     <string name="nag_tech_title">Technical</string>
@@ -322,6 +325,7 @@
     <string name="nag_series_all">All series</string>
     <string name="nag_next_episode">Up next: %1$s</string>
     <string name="nag_episode_number">Episode %1$d</string>
+    <string name="nag_next_tag">Up next</string>
     <string name="nag_all_watched">All watched</string>
     <string name="nag_series_back">Back to the series</string>
     <string name="nag_watched_count">%1$d of %2$d watched</string>

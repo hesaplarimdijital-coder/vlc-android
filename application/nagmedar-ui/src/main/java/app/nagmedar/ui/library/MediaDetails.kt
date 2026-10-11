@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -113,9 +115,10 @@ private fun volumeName(context: Context, key: String): String? = runCatching {
 fun currentLocale(): Locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
 
 /**
- * The details of a video (S-802; S-303 places it among the panes): artwork, title, where it was
- * left, play, and the technical facts from the probe. [state] says what to show while there is
- * no probe yet.
+ * The details of a video (S-802): artwork, title, where it was left, play, and the technical
+ * facts from the probe. [state] says what to show while there is no probe yet. Beside a list it
+ * is a pane with a close button; [fullScreen] (compact and medium windows, S-303) it covers the
+ * content area, goes back to the list and keeps a readable width.
  */
 @Composable
 fun MediaDetailsPanel(
@@ -125,6 +128,7 @@ fun MediaDetailsPanel(
     onPlay: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    fullScreen: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -132,16 +136,24 @@ fun MediaDetailsPanel(
     Column(
         modifier
             .fillMaxHeight()
-            .background(colors.chrome)
+            .background(if (fullScreen) colors.background else colors.chrome)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = if (fullScreen) dimens.pagePadding else 20.dp, vertical = 16.dp)
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .widthIn(max = 560.dp)
             .semantics { paneTitle = title }
             .testTag("details"),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionLabel(title, Modifier.weight(1f))
-            NagIconButton(NagIcons.Close, stringResource(R.string.nag_details_close), onClose)
+            if (fullScreen) {
+                NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_details_back), onClose)
+                Spacer(Modifier.width(4.dp))
+                SectionLabel(title, Modifier.weight(1f))
+            } else {
+                SectionLabel(title, Modifier.weight(1f))
+                NagIconButton(NagIcons.Close, stringResource(R.string.nag_details_close), onClose)
+            }
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {

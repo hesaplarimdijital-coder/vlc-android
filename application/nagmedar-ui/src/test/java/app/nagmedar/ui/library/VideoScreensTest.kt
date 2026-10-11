@@ -50,9 +50,7 @@ class VideoScreensTest {
                     onSortChange = {},
                     selected = null,
                     onSelect = {},
-                    detailsRequested = false,
                     onShowDetails = {},
-                    onCloseDetails = {},
                     onPlay = { played += it.title },
                     menu = { _, _, _ -> emptyList() },
                 )
@@ -148,7 +146,7 @@ class VideoScreensTest {
                     season = season,
                     onSeasonChange = { season = it },
                     onPlay = { played += it.title },
-                    menu = { _, _ -> emptyList() },
+                    menu = { _, _, _ -> emptyList() },
                 )
             }
         }

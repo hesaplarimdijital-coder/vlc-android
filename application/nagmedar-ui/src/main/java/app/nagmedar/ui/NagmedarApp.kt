@@ -56,6 +56,7 @@ import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.screens.SettingsScreen
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
@@ -148,7 +149,7 @@ private fun NagmedarMain(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
         val nowPlaying = rememberNowPlaying()
-        CompositionLocalProvider(LocalLibraryAccess provides libraryAccess) {
+        CompositionLocalProvider(LocalLibraryAccess provides libraryAccess, LocalPaneWidths provides prefs) {
             NagmedarShell(
                 widthClass = widthClass,
                 sidebarCollapsed = prefs.sidebarCollapsed,
