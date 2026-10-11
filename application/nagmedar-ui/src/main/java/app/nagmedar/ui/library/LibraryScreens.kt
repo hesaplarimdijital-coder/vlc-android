@@ -80,6 +80,7 @@ import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.dropTarget
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.mayBeSubtitle
+import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.playback.Artwork
@@ -396,6 +397,13 @@ private fun Modifier.filmDrags(item: VideoItem, shown: List<VideoItem>, selectio
             },
             files = { dragged(item, shown, selection).map { Uri.parse(it.key) } },
         )
+        // the middle button queues the film (S-408)
+        .onMiddleClick {
+            item.media?.let { media ->
+                PlaybackActions.appendList(context, listOf(media))
+                Toast.makeText(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+            }
+        }
         .dropTarget("film-${item.key}", ::mayBeSubtitle, shape) { files ->
             val subtitles = files.filter { it.kind == DropKind.Subtitle }
             subtitles.forEach { file ->
@@ -599,7 +607,10 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
                     // a track dragged out with the mouse, with the others selected (S-406)
                     rowModifier = { media ->
-                        Modifier.fileDragSource(
+                        Modifier.onMiddleClick {
+                            PlaybackActions.appendList(context, listOf(media))
+                            Toast.makeText(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+                        }.fileDragSource(
                             label = {
                                 val many = if (media.id in selection && selection.count > 1) sorted.filter { it.id in selection } else listOf(media)
                                 if (many.size > 1) context.resources.getQuantityString(R.plurals.nag_drag_tracks, many.size, many.size) else media.title.orEmpty()

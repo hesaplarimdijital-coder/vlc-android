@@ -1230,6 +1230,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        // Nağmedar (S-408): the wheel and the middle button
+        if (!isLoading && PlayerMouse.handle(this, event)) return true
         val result = !isLoading && ::touchDelegate.isInitialized && touchDelegate.dispatchGenericMotionEvent(event)
         return if (result) true else super.dispatchGenericMotionEvent(event)
     }
@@ -1511,6 +1513,20 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         optionsDelegate?.show()
         overlayDelegate.hideOverlay(fromUser = false, forceTalkback = true)
     }
+
+    /** Nağmedar (S-408): a notch of the wheel up or down is a step of the volume. */
+    internal fun wheelVolume(notches: Int) {
+        val steps = notches.coerceIn(-5, 5)
+        repeat(if (steps < 0) -steps else steps) { if (steps > 0) volumeUp() else volumeDown() }
+    }
+
+    /** Nağmedar (S-408): Ctrl+wheel seeks [deltaMs]. */
+    internal fun wheelSeek(deltaMs: Int) {
+        if (::touchDelegate.isInitialized) touchDelegate.seekDelta(deltaMs)
+    }
+
+    /** Nağmedar (S-408): the middle button mutes and brings the sound back. */
+    internal fun toggleMuteFromMouse() = updateMute()
 
     private fun volumeUp() {
         if (isMute) {

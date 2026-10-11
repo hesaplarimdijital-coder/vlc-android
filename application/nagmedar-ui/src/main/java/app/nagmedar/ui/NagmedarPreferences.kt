@@ -19,7 +19,10 @@ import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
+import org.videolan.tools.NAGMEDAR_MIDDLE_CLICK
+import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
+import org.videolan.tools.NAGMEDAR_WHEEL_SEEKS
 import org.videolan.tools.Settings
 
 /**
@@ -37,6 +40,24 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         private set
     var sidebarCollapsed by mutableStateOf(prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false))
         private set
+
+    /** S-408: the mouse wheel seeks in the video player, Ctrl+wheel sets the volume (else the other way round). */
+    var wheelSeeks by mutableStateOf(prefs.getBoolean(NAGMEDAR_WHEEL_SEEKS, false))
+        private set
+
+    /** S-408: what the middle button does in the video player. */
+    var middleClick by mutableStateOf(prefs.getString(NAGMEDAR_MIDDLE_CLICK, null) ?: NAGMEDAR_MIDDLE_PLAY_PAUSE)
+        private set
+
+    fun updateWheelSeeks(value: Boolean) {
+        wheelSeeks = value
+        prefs.edit().putBoolean(NAGMEDAR_WHEEL_SEEKS, value).apply()
+    }
+
+    fun updateMiddleClick(value: String) {
+        middleClick = value
+        prefs.edit().putString(NAGMEDAR_MIDDLE_CLICK, value).apply()
+    }
 
     /** S-404: how long the mouse rests before a tooltip shows. */
     var tooltipDelay by mutableStateOf(prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal))

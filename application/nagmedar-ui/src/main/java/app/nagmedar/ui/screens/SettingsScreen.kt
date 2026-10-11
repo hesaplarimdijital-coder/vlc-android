@@ -48,6 +48,9 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.theme.systemAccentSeed
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
+import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
+import org.videolan.tools.NAGMEDAR_MIDDLE_NONE
+import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
@@ -73,34 +76,7 @@ fun SettingsScreen(
     ) {
         item { PageHeader(title = stringResource(R.string.nag_nav_settings)) }
         item { AppearanceSection(prefs) }
-        item {
-            SettingsSection(stringResource(R.string.nag_settings_input)) {
-                SettingRow(stringResource(R.string.nag_settings_density)) {
-                    SegmentedChoice(
-                        options = listOf(
-                            DensityPreference.Auto to stringResource(R.string.nag_theme_system),
-                            DensityPreference.Touch to stringResource(R.string.nag_density_touch),
-                            DensityPreference.Pointer to stringResource(R.string.nag_density_pointer),
-                        ),
-                        selected = prefs.density,
-                        onSelect = prefs::updateDensity,
-                    )
-                }
-                Text(stringResource(R.string.nag_density_auto), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
-                SettingRow(stringResource(R.string.nag_settings_tooltips), subtitle = stringResource(R.string.nag_settings_tooltips_hint)) {
-                    SegmentedChoice(
-                        options = listOf(
-                            TooltipDelay.Off to stringResource(R.string.nag_tooltips_off),
-                            TooltipDelay.Short to stringResource(R.string.nag_tooltips_short),
-                            TooltipDelay.Normal to stringResource(R.string.nag_tooltips_normal),
-                            TooltipDelay.Long to stringResource(R.string.nag_tooltips_long),
-                        ),
-                        selected = prefs.tooltipDelay,
-                        onSelect = prefs::updateTooltipDelay,
-                    )
-                }
-            }
-        }
+        item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
@@ -134,6 +110,56 @@ fun SettingsScreen(
         }
         item {
             LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
+        }
+    }
+}
+
+/** Input (S-201, S-404, S-408): density, the tooltip delay, and what the mouse does in the player. */
+@Composable
+internal fun InputSection(prefs: NagmedarPreferences) {
+    SettingsSection(stringResource(R.string.nag_settings_input)) {
+        SettingRow(stringResource(R.string.nag_settings_density)) {
+            SegmentedChoice(
+                options = listOf(
+                    DensityPreference.Auto to stringResource(R.string.nag_theme_system),
+                    DensityPreference.Touch to stringResource(R.string.nag_density_touch),
+                    DensityPreference.Pointer to stringResource(R.string.nag_density_pointer),
+                ),
+                selected = prefs.density,
+                onSelect = prefs::updateDensity,
+            )
+        }
+        Text(stringResource(R.string.nag_density_auto), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
+        SettingRow(stringResource(R.string.nag_settings_tooltips), subtitle = stringResource(R.string.nag_settings_tooltips_hint)) {
+            SegmentedChoice(
+                options = listOf(
+                    TooltipDelay.Off to stringResource(R.string.nag_tooltips_off),
+                    TooltipDelay.Short to stringResource(R.string.nag_tooltips_short),
+                    TooltipDelay.Normal to stringResource(R.string.nag_tooltips_normal),
+                    TooltipDelay.Long to stringResource(R.string.nag_tooltips_long),
+                ),
+                selected = prefs.tooltipDelay,
+                onSelect = prefs::updateTooltipDelay,
+            )
+        }
+        // S-408: the mouse in the video player
+        SettingRow(stringResource(R.string.nag_settings_wheel), subtitle = stringResource(R.string.nag_settings_wheel_hint)) {
+            SegmentedChoice(
+                options = listOf(false to stringResource(R.string.nag_wheel_volume), true to stringResource(R.string.nag_wheel_seek)),
+                selected = prefs.wheelSeeks,
+                onSelect = prefs::updateWheelSeeks,
+            )
+        }
+        SettingRow(stringResource(R.string.nag_settings_middle_click), subtitle = stringResource(R.string.nag_settings_middle_click_hint)) {
+            SegmentedChoice(
+                options = listOf(
+                    NAGMEDAR_MIDDLE_PLAY_PAUSE to stringResource(R.string.nag_middle_play_pause),
+                    NAGMEDAR_MIDDLE_MUTE to stringResource(R.string.nag_middle_mute),
+                    NAGMEDAR_MIDDLE_NONE to stringResource(R.string.nag_middle_none),
+                ),
+                selected = prefs.middleClick,
+                onSelect = prefs::updateMiddleClick,
+            )
         }
     }
 }

@@ -17,7 +17,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -95,5 +97,21 @@ private class LabelShadow(text: String, private val density: Float, fill: Int, i
         val radius = 8 * density
         canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), radius, radius, back)
         canvas.drawText(shown, padding, height / 2f - (paint.descent() + paint.ascent()) / 2, paint)
+    }
+}
+
+/** The middle button on an item (S-408): in the library it adds the item to the queue. */
+fun Modifier.onMiddleClick(action: () -> Unit): Modifier = composed {
+    val current = rememberUpdatedState(action)
+    pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                if (event.type == PointerEventType.Press && event.buttons.isTertiaryPressed) {
+                    event.changes.forEach { it.consume() }
+                    current.value()
+                }
+            }
+        }
     }
 }

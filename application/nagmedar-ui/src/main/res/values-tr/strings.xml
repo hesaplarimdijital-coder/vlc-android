@@ -197,6 +197,16 @@
     <string name="nag_tooltips_short">Kısa</string>
     <string name="nag_tooltips_normal">Normal</string>
     <string name="nag_tooltips_long">Uzun</string>
+    <!-- Fare (S-408) -->
+    <string name="nag_settings_wheel">Fare tekerleği (oynatıcıda)</string>
+    <string name="nag_settings_wheel_hint">Ctrl ile tekerlek ötekini yapar</string>
+    <string name="nag_wheel_volume">Ses</string>
+    <string name="nag_wheel_seek">Zaman atlama</string>
+    <string name="nag_settings_middle_click">Orta tık (oynatıcıda)</string>
+    <string name="nag_settings_middle_click_hint">Kütüphanede orta tık filmi ya da parçayı sıraya ekler; geri ve ileri tuşları ekranlar arasında gezinir</string>
+    <string name="nag_middle_play_pause">Oynat / duraklat</string>
+    <string name="nag_middle_mute">Sessiz</string>
+    <string name="nag_middle_none">Hiçbiri</string>
     <string name="nag_density_touch">Dokunmatik</string>
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>

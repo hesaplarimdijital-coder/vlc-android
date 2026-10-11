@@ -197,6 +197,16 @@
     <string name="nag_tooltips_short">Short</string>
     <string name="nag_tooltips_normal">Normal</string>
     <string name="nag_tooltips_long">Long</string>
+    <!-- Mouse (S-408) -->
+    <string name="nag_settings_wheel">Mouse wheel (in the player)</string>
+    <string name="nag_settings_wheel_hint">With Ctrl the wheel does the other</string>
+    <string name="nag_wheel_volume">Volume</string>
+    <string name="nag_wheel_seek">Seeking</string>
+    <string name="nag_settings_middle_click">Middle click (in the player)</string>
+    <string name="nag_settings_middle_click_hint">In the library a middle click queues the film or the track; the back and forward buttons move between screens</string>
+    <string name="nag_middle_play_pause">Play / pause</string>
+    <string name="nag_middle_mute">Mute</string>
+    <string name="nag_middle_none">Nothing</string>
     <string name="nag_density_touch">Touch</string>
     <string name="nag_density_pointer">Mouse and keyboard</string>
     <string name="nag_settings_about">About</string>

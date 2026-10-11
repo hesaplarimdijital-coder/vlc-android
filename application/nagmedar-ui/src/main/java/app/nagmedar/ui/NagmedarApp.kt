@@ -366,6 +366,15 @@ class AppActions(
         return true
     }
 
+    /** The route on screen, before a back (S-408). */
+    fun currentRoute(): String? = navigator.currentRoute
+
+    /** A back left [from]: the forward button can return there. */
+    fun wentBack(from: String?) = navigator.wentBack(from)
+
+    /** The mouse's forward button (S-408). */
+    fun forward(): Boolean = navigator.forward()
+
     /** An Esc nothing else used: the screen lets go of its selection (S-405). */
     fun escape(): Boolean = screenCommands.escape()
 

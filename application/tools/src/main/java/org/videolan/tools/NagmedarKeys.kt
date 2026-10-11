@@ -25,3 +25,12 @@ const val NAGMEDAR_EXTRA_DESTINATION = "nagmedar_destination"
 
 /** Intent action of StartActivity that opens the classic interface even when the new one is the default. */
 const val NAGMEDAR_ACTION_CLASSIC = "nagmedar.shortcut.classic"
+
+/** S-408: the mouse wheel seeks in the video player (Ctrl+wheel sets the volume) instead of the other way round. */
+const val NAGMEDAR_WHEEL_SEEKS = "nagmedar_wheel_seeks"
+
+/** S-408: what the middle button does in the video player: [NAGMEDAR_MIDDLE_PLAY_PAUSE], [NAGMEDAR_MIDDLE_MUTE] or [NAGMEDAR_MIDDLE_NONE]. */
+const val NAGMEDAR_MIDDLE_CLICK = "nagmedar_middle_click"
+const val NAGMEDAR_MIDDLE_PLAY_PAUSE = "play_pause"
+const val NAGMEDAR_MIDDLE_MUTE = "mute"
+const val NAGMEDAR_MIDDLE_NONE = "none"

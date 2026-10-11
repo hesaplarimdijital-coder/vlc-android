@@ -145,6 +145,26 @@ class NagmedarActivity : ComponentActivity() {
         return super.dispatchKeyEvent(event)
     }
 
+    /** Back inside the app (never out of it), remembered for the forward button. */
+    private fun goBack(): Boolean {
+        if (!onBackPressedDispatcher.hasEnabledCallbacks()) return false
+        val from = actions?.currentRoute()
+        onBackPressedDispatcher.onBackPressed()
+        actions?.wentBack(from)
+        return true
+    }
+
+    /** The mouse's back and forward buttons move through the screens seen (S-408). */
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_BUTTON_PRESS) {
+            when (event.actionButton) {
+                MotionEvent.BUTTON_BACK -> if (goBack()) return true
+                MotionEvent.BUTTON_FORWARD -> if (actions?.forward() == true) return true
+            }
+        }
+        return super.dispatchGenericMotionEvent(event)
+    }
+
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         // a click elsewhere takes the keyboard from the menu bar
         if (event.actionMasked == MotionEvent.ACTION_DOWN) actions?.leaveMenuBar()
@@ -160,12 +180,10 @@ class NagmedarActivity : ComponentActivity() {
         if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
             // an Esc nothing else used lets go of the screen's selection (S-405), else goes back (S-407):
             // closes the details, leaves a folder, returns to the screen before; never leaves the app
-            if (actions?.escape() == true) return true
-            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
-                onBackPressedDispatcher.onBackPressed()
-                return true
-            }
+            if (actions?.escape() == true || goBack()) return true
         }
+        // the forward key of some keyboards, as the mouse's forward button (S-408)
+        if (keyCode == KeyEvent.KEYCODE_FORWARD && actions?.forward() == true) return true
         return super.onKeyDown(keyCode, event)
     }
 

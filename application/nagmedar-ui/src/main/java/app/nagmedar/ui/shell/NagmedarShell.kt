@@ -31,9 +31,19 @@ val LocalNavKind = compositionLocalOf { NavKind.Sidebar }
 /** Navigation entry point handed to screens. */
 @Stable
 class ShellNavigator(private val navController: NavHostController) {
+    /** Where back went from, latest last: the mouse's forward button returns there (S-408). */
+    private val forwardRoutes = ArrayDeque<String>()
+
+    /** The route on screen. */
+    val currentRoute: String? get() = navController.currentDestination?.route
 
     /** Switches top-level destination, keeping each destination's own back stack and state. */
     fun navigate(destination: Destination) {
+        forwardRoutes.clear()
+        go(destination)
+    }
+
+    private fun go(destination: Destination) {
         navController.navigate(destination.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true
@@ -41,7 +51,24 @@ class ShellNavigator(private val navController: NavHostController) {
         }
     }
 
-    fun back(): Boolean = navController.popBackStack()
+    fun back(): Boolean {
+        val from = currentRoute
+        val popped = navController.popBackStack()
+        if (popped) wentBack(from)
+        return popped
+    }
+
+    /** A back that happened elsewhere (the system's) left [from]: forward can return to it. */
+    fun wentBack(from: String?) {
+        if (from != null && from != currentRoute) forwardRoutes.addLast(from)
+    }
+
+    /** The mouse's forward button: to where back last went from; false when there is nowhere. */
+    fun forward(): Boolean {
+        val route = forwardRoutes.removeLastOrNull() ?: return false
+        go(Destination.fromRoute(route))
+        return true
+    }
 }
 
 /**
