@@ -30,10 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -85,7 +85,6 @@ class MenuSpec(val title: String, val entries: () -> List<MenuEntry>)
  * anchor's top-left corner and moves inside the window when it would overflow (flipping above
  * the anchor point near the bottom edge, like desktop menus).
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MenuPopup(
     visible: Boolean,
@@ -145,12 +144,7 @@ fun MenuPopup(
             }
         }
         if (focusFirst && firstEnabled >= 0) {
-            // opened from the keyboard: the popup's own window follows the keyboard too
-            val inputModes = LocalInputModeManager.current
-            LaunchedEffect(Unit) {
-                inputModes.requestInputMode(InputMode.Keyboard)
-                first.requestFocus()
-            }
+            LaunchedEffect(Unit) { first.requestFocus() }
         }
     }
 }
@@ -173,6 +167,9 @@ internal fun MenuItemRow(item: MenuEntry.Item, modifier: Modifier = Modifier, on
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
             .focusRing(state, shape)
             .background(if (item.enabled) stateBackground(state) else colors.surfaceRaised, shape)
+            // a menu is a popup window of its own, whose input mode may still be touch's when the
+            // keyboard opened it: its items take the focus in any mode
+            .focusProperties { canFocus = item.enabled }
             .nagClickable(interaction, onClick, enabled = item.enabled, role = if (item.checked != null) Role.Checkbox else Role.Button)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
