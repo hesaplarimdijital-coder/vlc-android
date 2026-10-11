@@ -2,6 +2,7 @@ package app.nagmedar.ui
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -97,6 +98,35 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var safFolders by mutableStateOf(prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty())
         private set
 
+    /** A preference changed in another window (S-307): this one follows. Held here: preferences keep listeners weakly. */
+    private val changes = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> reload(key) }
+
+    fun follow() = prefs.registerOnSharedPreferenceChangeListener(changes)
+
+    fun stopFollowing() = prefs.unregisterOnSharedPreferenceChangeListener(changes)
+
+    /** Reads [key] again; null (the preferences were cleared) reads them all. */
+    internal fun reload(key: String?) {
+        if (key == null || key == KEY_THEME) themeMode = prefs.enumValue(KEY_THEME, ThemeMode.System)
+        if (key == null || key == KEY_ACCENT) accent = prefs.enumValue(KEY_ACCENT, Accent.Blue)
+        if (key == null || key == KEY_DENSITY) density = prefs.enumValue(KEY_DENSITY, DensityPreference.Auto)
+        if (key == null || key == KEY_SIDEBAR_COLLAPSED) sidebarCollapsed = prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false)
+        if (key == null || key == NAGMEDAR_WHEEL_SEEKS) wheelSeeks = prefs.getBoolean(NAGMEDAR_WHEEL_SEEKS, false)
+        if (key == null || key == NAGMEDAR_MIDDLE_CLICK) middleClick = prefs.getString(NAGMEDAR_MIDDLE_CLICK, null) ?: NAGMEDAR_MIDDLE_PLAY_PAUSE
+        if (key == null || key == NAGMEDAR_PLAYER_FULLSCREEN) playerFullscreen = prefs.getBoolean(NAGMEDAR_PLAYER_FULLSCREEN, true)
+        if (key == null || key == KEY_TOOLTIP_DELAY) tooltipDelay = prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal)
+        if (key == null || key == NAGMEDAR_FIRST_RUN_DONE) firstRunDone = prefs.getBoolean(NAGMEDAR_FIRST_RUN_DONE, false)
+        if (key == null || key == NAGMEDAR_LAUNCH_NEW_UI) launchNewUi = prefs.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true)
+        if (key == null || key == KEY_PALETTE_RECENT) {
+            recentCommands = prefs.getString(KEY_PALETTE_RECENT, null)?.split('\n')?.filter { it.isNotEmpty() }.orEmpty()
+        }
+        if (key == null || key == KEY_SHORTCUTS) {
+            shortcutOverrides = ShortcutOverrides.parse(prefs.getString(KEY_SHORTCUTS, null))
+            ShortcutRegistry.overrides = shortcutOverrides
+        }
+        if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
+    }
+
     fun updateThemeMode(value: ThemeMode) {
         themeMode = value
         prefs.edit().putString(KEY_THEME, value.name).apply()
@@ -176,7 +206,13 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 @Composable
 fun rememberNagmedarPreferences(): NagmedarPreferences {
     val context = LocalContext.current
-    return remember { NagmedarPreferences(Settings.getInstance(context.applicationContext)) }
+    val prefs = remember { NagmedarPreferences(Settings.getInstance(context.applicationContext)) }
+    // what another window changes, this one follows (S-307)
+    DisposableEffect(prefs) {
+        prefs.follow()
+        onDispose { prefs.stopFollowing() }
+    }
+    return prefs
 }
 
 private inline fun <reified E : Enum<E>> SharedPreferences.enumValue(key: String, default: E): E {

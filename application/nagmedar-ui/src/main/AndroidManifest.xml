@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application>
         <!-- New Compose interface (preview in MVP0). Handles window resizes itself so the
@@ -19,6 +20,17 @@
                 android:gravity="center"
                 android:minWidth="480dp"
                 android:minHeight="360dp" />
+            <!-- S-307: windows of the library open side by side; the system offers "New window" too (Android 15) -->
+            <property
+                android:name="android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI"
+                android:value="true" />
         </activity>
+
+        <!-- S-307: the video player is a window of its own, beside the library's: a task of its own.
+             Started again from any window it is the same player (singleTask), so one session plays. -->
+        <activity
+            android:name="org.videolan.vlc.gui.video.VideoPlayerActivity"
+            android:taskAffinity="${applicationId}.player"
+            tools:node="merge" />
     </application>
 </manifest>

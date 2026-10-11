@@ -1,5 +1,6 @@
 package app.nagmedar.ui
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
 import android.hardware.input.InputManager
@@ -240,3 +241,16 @@ class NagmedarActivity : ComponentActivity() {
         data.addAll(ShortcutRegistry.keyboardShortcutGroups(resources, keyboard))
     }
 }
+
+/**
+ * S-307: a new window of the library opening on [route], beside this one when the window is split
+ * ([adjacent]). Each window is a task of its own, so the system and the launcher see them apart;
+ * all of them show and drive the one playback session.
+ */
+fun newWindowIntent(context: Context, route: String?, adjacent: Boolean): Intent =
+    Intent(context, NagmedarActivity::class.java)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+        .apply {
+            if (adjacent) addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+            if (route != null) putExtra(NAGMEDAR_EXTRA_DESTINATION, route)
+        }

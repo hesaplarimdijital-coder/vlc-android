@@ -1,5 +1,6 @@
 package app.nagmedar.ui
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -426,6 +427,11 @@ class AppActions(
             ShortcutId.OpenFile -> openFile()
             ShortcutId.CommandPalette -> openPalette()
             ShortcutId.OpenNetwork -> openClassic(context, SecondaryActivity.STREAMS)
+            // S-307: another window of the library, on this screen
+            ShortcutId.OpenInNewWindow -> {
+                val split = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && (context as? Activity)?.isInMultiWindowMode == true
+                context.startActivity(newWindowIntent(context, navigator.currentRoute, adjacent = split))
+            }
             ShortcutId.Undo -> return undo.undoLatest()
             ShortcutId.SelectAll -> return screenCommands.selectAll()
             ShortcutId.PlayPause -> PlaybackActions.togglePlayPause()
@@ -478,6 +484,6 @@ class AppActions(
 
     private companion object {
         /** Global shortcuts whose features arrive in later MVPs; they show a notice instead. */
-        val comingLater = setOf(ShortcutId.OpenInNewWindow, ShortcutId.MediaInfo, ShortcutId.Effects)
+        val comingLater = setOf(ShortcutId.MediaInfo, ShortcutId.Effects)
     }
 }
