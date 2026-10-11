@@ -1,5 +1,6 @@
 package app.nagmedar.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -14,6 +15,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 
 val LocalNagColors = staticCompositionLocalOf { NagPalette.dark(Accent.Blue) }
 val LocalNagType = staticCompositionLocalOf { NagType.Pointer }
@@ -36,9 +40,9 @@ object NagTheme {
 }
 
 /**
- * Nağmedar theme: light, dark and OLED black palettes, four accents, two densities and the motion
- * tokens. Material 3 components read a matching colour scheme, so they blend with the custom ones.
- * [reduceMotion] null follows the system's "Remove animations" setting.
+ * Nağmedar theme: light, dark and OLED black palettes, four accents and the wallpaper's (S-204),
+ * two densities and the motion tokens. Material 3 components read a matching colour scheme, so
+ * they blend with the custom ones. [reduceMotion] null follows the system's "Remove animations".
  */
 @Composable
 fun NagmedarTheme(
@@ -49,7 +53,8 @@ fun NagmedarTheme(
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
-    val colors = remember(themeMode, systemDark, accent) { NagPalette.colors(themeMode, systemDark, accent) }
+    val seed = if (accent == Accent.System) systemAccentSeed() else null
+    val colors = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
     val type = NagType.forMode(inputMode)
     val dimens = NagDimens.forMode(inputMode)
     val scheme = remember(colors) { colors.toMaterialScheme() }
@@ -131,3 +136,15 @@ private fun NagType.toMaterialTypography() = Typography(
     labelMedium = labelSmall,
     labelSmall = caption,
 )
+
+/**
+ * S-204: the wallpaper's accent colour (Android 12+), the seed of [Accent.System]; null on older
+ * systems. Read again when the configuration changes, as it does when the wallpaper colours do.
+ */
+@Composable
+fun systemAccentSeed(): Color? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    return remember(context, configuration) { Color(context.getColor(android.R.color.system_accent1_500)) }
+}

@@ -61,6 +61,7 @@ import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
+import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
@@ -87,6 +88,7 @@ fun NagmedarApp(
     val inputMode = rememberInputModeState()
     val mode = inputMode.effective(prefs.density)
     NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode) {
+        SystemBarsFollowTheme()
         Box(
             Modifier
                 .fillMaxSize()

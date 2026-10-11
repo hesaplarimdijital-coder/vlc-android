@@ -45,9 +45,11 @@ import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.Accent
+import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.theme.systemAccentSeed
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
@@ -71,34 +73,7 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.Start,
     ) {
         item { PageHeader(title = stringResource(R.string.nag_nav_settings)) }
-        item {
-            SettingsSection(stringResource(R.string.nag_settings_appearance)) {
-                SettingRow(stringResource(R.string.nag_settings_theme)) {
-                    SegmentedChoice(
-                        options = listOf(
-                            ThemeMode.System to stringResource(R.string.nag_theme_system),
-                            ThemeMode.Light to stringResource(R.string.nag_theme_light),
-                            ThemeMode.Dark to stringResource(R.string.nag_theme_dark),
-                            ThemeMode.Oled to stringResource(R.string.nag_theme_oled),
-                        ),
-                        selected = prefs.themeMode,
-                        onSelect = prefs::updateThemeMode,
-                    )
-                }
-                SettingRow(stringResource(R.string.nag_settings_accent)) {
-                    SwatchChoice(
-                        options = listOf(
-                            Triple(Accent.Blue, Accent.Blue.base, stringResource(R.string.nag_accent_blue)),
-                            Triple(Accent.Amber, Accent.Amber.base, stringResource(R.string.nag_accent_amber)),
-                            Triple(Accent.Green, Accent.Green.base, stringResource(R.string.nag_accent_green)),
-                            Triple(Accent.Coral, Accent.Coral.base, stringResource(R.string.nag_accent_coral)),
-                        ),
-                        selected = prefs.accent,
-                        onSelect = prefs::updateAccent,
-                    )
-                }
-            }
-        }
+        item { AppearanceSection(prefs) }
         item {
             SettingsSection(stringResource(R.string.nag_settings_input)) {
                 SettingRow(stringResource(R.string.nag_settings_density)) {
@@ -148,6 +123,47 @@ fun SettingsScreen(
         }
         item {
             LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
+        }
+    }
+}
+
+/**
+ * Theme and accent (S-204). A choice applies at once, system bars included; the wallpaper's
+ * colour is offered first on Android 12 and later.
+ */
+@Composable
+internal fun AppearanceSection(prefs: NagmedarPreferences) {
+    SettingsSection(stringResource(R.string.nag_settings_appearance)) {
+        SettingRow(stringResource(R.string.nag_settings_theme)) {
+            SegmentedChoice(
+                options = listOf(
+                    ThemeMode.System to stringResource(R.string.nag_theme_system),
+                    ThemeMode.Light to stringResource(R.string.nag_theme_light),
+                    ThemeMode.Dark to stringResource(R.string.nag_theme_dark),
+                    ThemeMode.Oled to stringResource(R.string.nag_theme_oled),
+                ),
+                selected = prefs.themeMode,
+                onSelect = prefs::updateThemeMode,
+            )
+        }
+        val seed = systemAccentSeed()
+        val wallpaper = remember(seed) { seed?.let { AccentTones.fromSeed(it).base } }
+        SettingRow(
+            stringResource(R.string.nag_settings_accent),
+            subtitle = if (wallpaper != null) stringResource(R.string.nag_accent_system_hint) else null,
+        ) {
+            SwatchChoice(
+                options = buildList {
+                    if (wallpaper != null) add(Triple(Accent.System, wallpaper, stringResource(R.string.nag_accent_system)))
+                    add(Triple(Accent.Blue, Accent.Blue.base, stringResource(R.string.nag_accent_blue)))
+                    add(Triple(Accent.Amber, Accent.Amber.base, stringResource(R.string.nag_accent_amber)))
+                    add(Triple(Accent.Green, Accent.Green.base, stringResource(R.string.nag_accent_green)))
+                    add(Triple(Accent.Coral, Accent.Coral.base, stringResource(R.string.nag_accent_coral)))
+                },
+                // without a wallpaper colour the system accent is blue
+                selected = if (wallpaper == null && prefs.accent == Accent.System) Accent.Blue else prefs.accent,
+                onSelect = prefs::updateAccent,
+            )
         }
     }
 }

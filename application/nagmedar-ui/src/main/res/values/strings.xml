@@ -181,6 +181,8 @@
     <string name="nag_accent_amber">Amber</string>
     <string name="nag_accent_green">Green</string>
     <string name="nag_accent_coral">Coral</string>
+    <string name="nag_accent_system">Wallpaper colour</string>
+    <string name="nag_accent_system_hint">Taken from your wallpaper; made lighter or darker where needed so text stays readable.</string>
     <string name="nag_settings_input">Input</string>
     <string name="nag_settings_density">Interface density</string>
     <string name="nag_density_auto">Automatic (follows mouse or touch)</string>

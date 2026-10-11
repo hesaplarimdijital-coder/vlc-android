@@ -181,6 +181,8 @@
     <string name="nag_accent_amber">Kehribar</string>
     <string name="nag_accent_green">Yeşil</string>
     <string name="nag_accent_coral">Mercan</string>
+    <string name="nag_accent_system">Duvar kâğıdı rengi</string>
+    <string name="nag_accent_system_hint">Duvar kâğıdınızdan alınır; yazılar okunaklı kalsın diye gerektiğinde açılır ya da koyulaşır.</string>
     <string name="nag_settings_input">Giriş</string>
     <string name="nag_settings_density">Arayüz yoğunluğu</string>
     <string name="nag_density_auto">Otomatik (fare ya da dokunmaya göre)</string>

@@ -6,6 +6,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
@@ -26,9 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
 
@@ -104,23 +107,50 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
     }
 }
 
-/** Label and control on one settings line. */
+/**
+ * Label and control on one settings line. When the control leaves the label less than
+ * [MinLabelWidth] (a phone), the control goes under its label instead of squeezing it.
+ */
 @Composable
 fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? = null, control: @Composable () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    Row(
+    Layout(
         modifier = modifier.padding(vertical = dimens.gapS),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
-            Text(title, style = NagTheme.type.bodyStrong, color = colors.text)
-            if (subtitle != null) Text(subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary)
+        content = {
+            Column {
+                Text(title, style = NagTheme.type.bodyStrong, color = colors.text)
+                if (subtitle != null) Text(subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary)
+            }
+            Box { control() }
+        },
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val control = measurables[1].measure(loose)
+        val gap = dimens.gapL.roundToPx()
+        val room = if (constraints.hasBoundedWidth) constraints.maxWidth - control.width - gap else Constraints.Infinity
+        if (room >= MinLabelWidth.roundToPx()) {
+            val label = measurables[0].measure(loose.copy(maxWidth = room))
+            val width = if (constraints.hasBoundedWidth) constraints.maxWidth else label.width + gap + control.width
+            val height = maxOf(label.height, control.height).coerceAtLeast(constraints.minHeight)
+            layout(width, height) {
+                label.placeRelative(0, (height - label.height) / 2)
+                control.placeRelative(width - control.width, (height - control.height) / 2)
+            }
+        } else {
+            val label = measurables[0].measure(loose)
+            val between = dimens.gapS.roundToPx()
+            val width = maxOf(label.width, control.width).coerceIn(constraints.minWidth, constraints.maxWidth)
+            layout(width, label.height + between + control.height) {
+                label.placeRelative(0, 0)
+                control.placeRelative(0, label.height + between)
+            }
         }
-        Spacer(Modifier.width(dimens.gapL))
-        control()
     }
 }
+
+/** The narrowest a setting's label may get beside its control. */
+private val MinLabelWidth = 160.dp
 
 /** On/off switch with its label; the whole row toggles it (the states' "Resume automatically"). */
 @Composable

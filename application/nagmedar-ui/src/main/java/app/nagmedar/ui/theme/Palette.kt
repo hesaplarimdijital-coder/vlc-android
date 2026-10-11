@@ -12,6 +12,12 @@ enum class Accent(val base: Color) {
     Amber(Color(0xFFF2B84B)),
     Green(Color(0xFF59D49A)),
     Coral(Color(0xFFFF7A6E)),
+
+    /**
+     * S-204: the wallpaper's colour (Android 12+), turned into tones that keep every contrast
+     * ([AccentTones.fromSeed]); blue where the system has no such colour. [base] is that blue.
+     */
+    System(Color(0xFF8AB0FF)),
 }
 
 /**
@@ -61,14 +67,24 @@ data class NagColors(
 
 object NagPalette {
 
-    fun colors(mode: ThemeMode, systemDark: Boolean, accent: Accent): NagColors = when (mode) {
-        ThemeMode.Light -> light(accent)
-        ThemeMode.Dark -> dark(accent)
-        ThemeMode.Oled -> oled(accent)
-        ThemeMode.System -> if (systemDark) dark(accent) else light(accent)
+    /** [systemSeed]: the wallpaper colour behind [Accent.System]. */
+    fun colors(mode: ThemeMode, systemDark: Boolean, accent: Accent, systemSeed: Color? = null): NagColors {
+        val tones = AccentTones.of(accent, systemSeed)
+        return when (mode) {
+            ThemeMode.Light -> light(tones)
+            ThemeMode.Dark -> dark(tones)
+            ThemeMode.Oled -> oled(tones)
+            ThemeMode.System -> if (systemDark) dark(tones) else light(tones)
+        }
     }
 
-    fun dark(accent: Accent) = NagColors(
+    fun dark(accent: Accent) = dark(AccentTones.of(accent))
+
+    fun oled(accent: Accent) = oled(AccentTones.of(accent))
+
+    fun light(accent: Accent) = light(AccentTones.of(accent))
+
+    fun dark(tones: AccentTones) = NagColors(
         isDark = true,
         background = Color(0xFF111418),
         chrome = Color(0xFF0C0F12),
@@ -81,12 +97,12 @@ object NagPalette {
         text = Color(0xFFE6E9ED),
         textSecondary = Color(0xFFC3CAD3),
         textTertiary = Color(0xFF959FAB),
-        accent = accent.base,
+        accent = tones.base,
         onAccent = Color(0xFF0E1420),
-        accentText = accent.base,
-        selection = darkSelection(accent),
-        onSelection = onDarkSelection(accent),
-        focusRing = accent.base,
+        accentText = tones.base,
+        selection = tones.darkSelection,
+        onSelection = tones.onDarkSelection,
+        focusRing = tones.base,
         success = Color(0xFF59D49A),
         warning = Color(0xFFF2B84B),
         danger = Color(0xFFFF7A6E),
@@ -95,10 +111,10 @@ object NagPalette {
         scrim = Color(0x99000000),
         inverseSurface = Color(0xFFE6E9ED),
         onInverseSurface = Color(0xFF14181C),
-        inverseAccent = mixSrgb(accent.base, Color.Black, 0.5f),
+        inverseAccent = tones.darkInverse,
     )
 
-    fun oled(accent: Accent) = dark(accent).copy(
+    fun oled(tones: AccentTones) = dark(tones).copy(
         background = Color(0xFF000000),
         chrome = Color(0xFF000000),
         surface = Color(0xFF0A0C0F),
@@ -107,63 +123,39 @@ object NagPalette {
         pressed = Color(0xFF242A31),
         border = Color(0xFF1A1F25),
         borderStrong = Color(0xFF262C34),
-        selection = oledSelection(accent),
+        selection = tones.oledSelection,
         scrim = Color(0xB3000000),
     )
 
-    fun light(accent: Accent): NagColors {
-        val deep = mixSrgb(accent.base, Color.Black, 0.55f)
-        return NagColors(
-            isDark = false,
-            background = Color(0xFFFAFBFC),
-            chrome = Color(0xFFFFFFFF),
-            surface = Color(0xFFFFFFFF),
-            surfaceRaised = Color(0xFFFFFFFF),
-            hover = Color(0xFFEDF0F4),
-            pressed = Color(0xFFE2E5EA),
-            border = Color(0xFFE2E5EA),
-            borderStrong = Color(0xFFD6DAE0),
-            text = Color(0xFF12161B),
-            textSecondary = Color(0xFF4A5360),
-            textTertiary = Color(0xFF58626D),
-            accent = deep,
-            onAccent = Color(0xFFFFFFFF),
-            accentText = deep,
-            selection = mixSrgb(accent.base, Color.White, 0.22f),
-            onSelection = Color(0xFF0E1420),
-            focusRing = deep,
-            success = Color(0xFF187A4F),
-            warning = Color(0xFF8A5A12),
-            danger = Color(0xFFB4382B),
-            brandBlue = Color(0xFF4E78D8),
-            brandCoral = Color(0xFFE0574B),
-            scrim = Color(0x6612161B),
-            inverseSurface = Color(0xFF1F252C),
-            onInverseSurface = Color(0xFFE6E9ED),
-            inverseAccent = accent.base,
-        )
-    }
-
-    private fun darkSelection(accent: Accent) = when (accent) {
-        Accent.Blue -> Color(0xFF1C2A49)
-        Accent.Amber -> Color(0xFF33290F)
-        Accent.Green -> Color(0xFF12301F)
-        Accent.Coral -> Color(0xFF3A1E1B)
-    }
-
-    private fun oledSelection(accent: Accent) = when (accent) {
-        Accent.Blue -> Color(0xFF142039)
-        Accent.Amber -> Color(0xFF2C230F)
-        Accent.Green -> Color(0xFF102B1F)
-        Accent.Coral -> Color(0xFF2E1816)
-    }
-
-    private fun onDarkSelection(accent: Accent) = when (accent) {
-        Accent.Blue -> Color(0xFFDCE6FF)
-        Accent.Amber -> Color(0xFFF8E3BD)
-        Accent.Green -> Color(0xFFCFF3E2)
-        Accent.Coral -> Color(0xFFFFD9D4)
-    }
+    fun light(tones: AccentTones) = NagColors(
+        isDark = false,
+        background = Color(0xFFFAFBFC),
+        chrome = Color(0xFFFFFFFF),
+        surface = Color(0xFFFFFFFF),
+        surfaceRaised = Color(0xFFFFFFFF),
+        hover = Color(0xFFEDF0F4),
+        pressed = Color(0xFFE2E5EA),
+        border = Color(0xFFE2E5EA),
+        borderStrong = Color(0xFFD6DAE0),
+        text = Color(0xFF12161B),
+        textSecondary = Color(0xFF4A5360),
+        textTertiary = Color(0xFF58626D),
+        accent = tones.deep,
+        onAccent = Color(0xFFFFFFFF),
+        accentText = tones.deep,
+        selection = tones.lightSelection,
+        onSelection = Color(0xFF0E1420),
+        focusRing = tones.deep,
+        success = Color(0xFF187A4F),
+        warning = Color(0xFF8A5A12),
+        danger = Color(0xFFB4382B),
+        brandBlue = Color(0xFF4E78D8),
+        brandCoral = Color(0xFFE0574B),
+        scrim = Color(0x6612161B),
+        inverseSurface = Color(0xFF1F252C),
+        onInverseSurface = Color(0xFFE6E9ED),
+        inverseAccent = tones.base,
+    )
 }
 
 /** CSS `color-mix(in srgb, a fraction, b)`: mixes in gamma-encoded sRGB like the mockups. */
