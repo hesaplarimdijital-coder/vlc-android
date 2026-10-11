@@ -363,6 +363,7 @@ private fun VideoTable(
     selection: MultiSelection?,
 ) {
     val sorted = remember(items, sort, tech) { sortVideos(items, sort, tech) }
+    val rowShape = RoundedCornerShape(NagTheme.dimens.radiusControl)
     if (selection != null) SelectionCommands(selection, sorted.map { it.key })
     DenseTable(
         columns = videoColumns(tech),
@@ -376,7 +377,7 @@ private fun VideoTable(
         onRowDoubleClick = onDoubleClick?.let { open -> { item, _ -> open(item) } },
         rowMenu = { item, _ -> menu(item, { onPlay(item) }, { onShowDetails(item) }) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
-        rowModifier = { item -> Modifier.filmDrags(item, sorted, selection, RoundedCornerShape(NagTheme.dimens.radiusControl)) },
+        rowModifier = { item -> Modifier.filmDrags(item, sorted, selection, rowShape) },
     )
 }
 
