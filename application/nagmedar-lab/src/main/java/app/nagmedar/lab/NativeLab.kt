@@ -2,8 +2,9 @@ package app.nagmedar.lab
 
 /**
  * libnagmedar_lab.so: FFmpeg, libdovi, whisper.cpp and libusb, linked privately so they never
- * meet libvlc's own copies. Every call is blocking and runs on a background thread; [cancel]
- * stops the running one. Results are JSON objects (see native/lab).
+ * meet libvlc's own copies: the Lab tools and the library's media probe (S-802). Every call is
+ * blocking and runs on a background thread; [cancel] stops the running Lab tool. Results are
+ * JSON objects (see native/lab).
  */
 object NativeLab {
 
@@ -31,4 +32,7 @@ object NativeLab {
 
     /** SP-02: a -6 dBFS sine straight to the USB DAC behind [fd]. */
     @JvmStatic external fun usbTone(fd: Int, rate: Int, bits: Int, seconds: Double, frequency: Double, listener: Progress?): String
+
+    /** S-802: streams, HDR and Dolby Vision of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
+    @JvmStatic external fun probe(input: String): String
 }

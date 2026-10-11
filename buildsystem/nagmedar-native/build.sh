@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper).
 #
-#   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert command
-#                              (host tests in CI: test-host.sh)
+#   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert and
+#                              mediaprobe commands (host tests in CI: test-host.sh)
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb for arm64-v8a and
 #                              libnagmedar_lab.so into application/nagmedar-lab (needs ANDROID_NDK)
 #
@@ -119,6 +119,11 @@ host() {
         "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
         > "$WORK/dvconvert.log" 2>&1 || fail_log "dvconvert (host)" "$WORK/dvconvert.log"
+    log "mediaprobe (host)"
+    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/mediaprobe" -I"$PREFIX/include" \
+        "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
+        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
+        > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
 }
 
 android() {

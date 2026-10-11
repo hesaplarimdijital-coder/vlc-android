@@ -76,6 +76,8 @@ fun <T> DenseTable(
     rowMenu: ((T, Int) -> List<MenuEntry>)? = null,
     rowMenuLabel: String? = null,
     contentPadding: PaddingValues = PaddingValues(bottom = 8.dp),
+    /** With a double-click action, a click only selects (a pointer's way: select, then open). */
+    onRowDoubleClick: ((T, Int) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -100,6 +102,7 @@ fun <T> DenseTable(
                         item = item,
                         selected = selectedKey != null && key(item) == selectedKey,
                         onClick = { onRowClick(item, index) },
+                        onDoubleClick = onRowDoubleClick?.let { open -> { open(item, index) } },
                         modifier = Modifier,
                     )
                 }
@@ -146,7 +149,14 @@ private fun <T> RowScope.HeaderCell(column: TableColumn<T>, index: Int, sort: Ta
 }
 
 @Composable
-private fun <T> TableRow(columns: List<TableColumn<T>>, item: T, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
+private fun <T> TableRow(
+    columns: List<TableColumn<T>>,
+    item: T,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onDoubleClick: (() -> Unit)?,
+    modifier: Modifier,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -160,7 +170,7 @@ private fun <T> TableRow(columns: List<TableColumn<T>>, item: T, selected: Boole
             .focusRing(state, shape)
             .background(stateBackground(state, selected), shape)
             .semantics { this.selected = selected }
-            .nagClickable(interaction, onClick)
+            .nagClickable(interaction, onClick, onDoubleClick = onDoubleClick)
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

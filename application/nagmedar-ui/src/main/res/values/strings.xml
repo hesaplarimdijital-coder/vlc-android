@@ -278,4 +278,27 @@
     <string name="nag_lab_copy">Copy</string>
     <string name="nag_lab_share">Share</string>
     <string name="nag_lab_close">Close</string>
+
+    <!-- S-802: technical details -->
+    <string name="nag_column_video">Video</string>
+    <string name="nag_column_audio">Audio</string>
+    <string name="nag_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="nag_duration_minutes">%1$d min</string>
+    <string name="nag_details_title">Details</string>
+    <string name="nag_details_close">Close the details</string>
+    <string name="nag_details_resume_at">Stopped at</string>
+    <string name="nag_details_resume">Resume</string>
+    <string name="nag_tech_title">Technical</string>
+    <string name="nag_tech_video">Video</string>
+    <string name="nag_tech_frame_rate">Frames</string>
+    <string name="nag_tech_range">HDR</string>
+    <string name="nag_tech_audio">Audio %1$d</string>
+    <string name="nag_tech_subtitles">Subtitles</string>
+    <string name="nag_tech_bitrate">Bit rate</string>
+    <string name="nag_tech_average">avg. %1$s</string>
+    <string name="nag_tech_file">File</string>
+    <string name="nag_tech_location">Location</string>
+    <string name="nag_tech_commentary">Commentary</string>
+    <string name="nag_tech_probing">Reading the file… the details appear in a moment.</string>
+    <string name="nag_tech_unavailable">This build cannot read the technical details (the media probe library is missing).</string>
 </resources>

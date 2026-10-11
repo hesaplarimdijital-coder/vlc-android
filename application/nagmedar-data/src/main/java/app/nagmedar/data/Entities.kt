@@ -114,3 +114,17 @@ data class MediaSettings(
     @ColumnInfo(name = "equalizer_preset") val equalizerPreset: String? = null,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
 )
+
+/**
+ * S-802: the media probe's JSON for one file, kept until the file changes (size or modification
+ * time) or the probe's format does ([probeVersion]).
+ */
+@Entity(tableName = "media_tech")
+data class MediaTechEntry(
+    @PrimaryKey @ColumnInfo(name = "media_uri") val mediaUri: String,
+    @ColumnInfo(name = "file_size") val fileSize: Long,
+    @ColumnInfo(name = "modified_at") val modifiedAt: Long,
+    @ColumnInfo(name = "probe_version") val probeVersion: Int,
+    val json: String,
+    @ColumnInfo(name = "probed_at") val probedAt: Long = 0,
+)

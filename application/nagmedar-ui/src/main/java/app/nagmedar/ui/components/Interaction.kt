@@ -1,7 +1,9 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -52,17 +54,43 @@ fun Modifier.nagClickable(
     enabled: Boolean = true,
     role: Role? = Role.Button,
     onClickLabel: String? = null,
+    /** A second action on double click (play a selected item); a single click then waits for it. */
+    onDoubleClick: (() -> Unit)? = null,
 ): Modifier = this
     .pointerHoverIcon(PointerIcon.Hand)
     .hoverable(interactionSource, enabled)
-    .clickable(
-        interactionSource = interactionSource,
-        indication = null,
-        enabled = enabled,
-        onClickLabel = onClickLabel,
-        role = role,
-        onClick = onClick,
+    .then(
+        if (onDoubleClick == null) {
+            Modifier.clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClickLabel = onClickLabel,
+                role = role,
+                onClick = onClick,
+            )
+        } else {
+            Modifier.doubleClickable(interactionSource, enabled, onClickLabel, role, onClick, onDoubleClick)
+        },
     )
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.doubleClickable(
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean,
+    onClickLabel: String?,
+    role: Role?,
+    onClick: () -> Unit,
+    onDoubleClick: () -> Unit,
+): Modifier = combinedClickable(
+    interactionSource = interactionSource,
+    indication = null,
+    enabled = enabled,
+    onClickLabel = onClickLabel,
+    role = role,
+    onDoubleClick = onDoubleClick,
+    onClick = onClick,
+)
 
 /** 2 dp focus ring in the accent colour, drawn only while the element has keyboard focus. */
 @Composable

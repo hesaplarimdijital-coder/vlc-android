@@ -117,3 +117,18 @@ interface MediaSettingsDao {
     @Query("DELETE FROM media_settings WHERE media_uri = :uri")
     fun forget(uri: String)
 }
+
+@Dao
+interface MediaTechDao {
+    @Query("SELECT * FROM media_tech")
+    fun all(): Flow<List<MediaTechEntry>>
+
+    @Query("SELECT * FROM media_tech WHERE media_uri = :uri")
+    fun get(uri: String): MediaTechEntry?
+
+    @Upsert
+    fun save(entry: MediaTechEntry)
+
+    @Query("DELETE FROM media_tech WHERE media_uri = :uri")
+    fun forget(uri: String)
+}

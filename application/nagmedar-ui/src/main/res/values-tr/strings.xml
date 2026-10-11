@@ -278,4 +278,27 @@
     <string name="nag_lab_copy">Kopyala</string>
     <string name="nag_lab_share">Paylaş</string>
     <string name="nag_lab_close">Kapat</string>
+
+    <!-- S-802: technical details -->
+    <string name="nag_column_video">Video</string>
+    <string name="nag_column_audio">Ses</string>
+    <string name="nag_duration_hours_minutes">%1$d sa %2$d dk</string>
+    <string name="nag_duration_minutes">%1$d dk</string>
+    <string name="nag_details_title">Ayrıntılar</string>
+    <string name="nag_details_close">Ayrıntılar panelini kapat</string>
+    <string name="nag_details_resume_at">Kaldığı yer</string>
+    <string name="nag_details_resume">Devam et</string>
+    <string name="nag_tech_title">Teknik</string>
+    <string name="nag_tech_video">Video</string>
+    <string name="nag_tech_frame_rate">Kare</string>
+    <string name="nag_tech_range">HDR</string>
+    <string name="nag_tech_audio">Ses %1$d</string>
+    <string name="nag_tech_subtitles">Altyazı</string>
+    <string name="nag_tech_bitrate">Bit hızı</string>
+    <string name="nag_tech_average">ort. %1$s</string>
+    <string name="nag_tech_file">Dosya</string>
+    <string name="nag_tech_location">Konum</string>
+    <string name="nag_tech_commentary">Yorum</string>
+    <string name="nag_tech_probing">Dosya okunuyor… ayrıntılar birazdan görünür.</string>
+    <string name="nag_tech_unavailable">Bu sürüm teknik ayrıntıları okuyamıyor (medya inceleme kitaplığı yok).</string>
 </resources>

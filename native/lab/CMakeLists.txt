@@ -1,4 +1,5 @@
-# libnagmedar_lab.so: the native part of Settings > Lab (SP-02, SP-03, SP-05).
+# libnagmedar_lab.so: the native part of Settings > Lab (SP-02, SP-03, SP-05) and the media
+# probe behind the library's technical badges (S-802).
 # Built by buildsystem/nagmedar-native/build.sh android, which provides the static
 # dependencies in DEPS_PREFIX (FFmpeg, libdovi, whisper.cpp) and the libusb sources.
 cmake_minimum_required(VERSION 3.22)
@@ -17,7 +18,7 @@ add_library(usb STATIC
 target_include_directories(usb PUBLIC ${USB} PRIVATE ${LIBUSB_SOURCE}/android ${USB}/os)
 target_compile_options(usb PRIVATE -fvisibility=hidden -pthread -w)
 
-add_library(nagmedar_lab SHARED lab_jni.c dvconvert.c usb_audio.c whisper_lab.cpp)
+add_library(nagmedar_lab SHARED lab_jni.c dvconvert.c mediaprobe.c usb_audio.c whisper_lab.cpp)
 target_include_directories(nagmedar_lab PRIVATE ${DEPS_PREFIX}/include)
 target_compile_options(nagmedar_lab PRIVATE -fvisibility=hidden -O2 -Wall)
 target_link_libraries(nagmedar_lab PRIVATE

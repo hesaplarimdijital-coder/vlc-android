@@ -10,6 +10,7 @@
 #include <libusb.h>
 
 #include "dvconvert.h"
+#include "mediaprobe.h"
 #include "usb_audio.h"
 #include "whisper_lab.h"
 
@@ -160,4 +161,14 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_usbTone(JNIEnv *env, j
     g_cancel = 0;
     Callback cb = callback(env, listener);
     return take(env, usb_audio_tone(fd, (unsigned)rate, bits, seconds, frequency, usb_progress, &cb, &g_cancel));
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_probe(JNIEnv *env, jclass cls, jstring input)
+{
+    (void)cls;
+    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
+    /* the library probes in the background: Lab's cancel button is not for it */
+    jstring result = take(env, media_probe(in, NULL));
+    (*env)->ReleaseStringUTFChars(env, input, in);
+    return result;
 }

@@ -3,11 +3,14 @@ package app.nagmedar.ui.library
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,9 +42,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.lab.MediaTech
+import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
@@ -74,8 +82,11 @@ import kotlinx.coroutines.delay
 
 private enum class ViewMode { Grid, Table }
 
-/** Context menu of a media item; the same entries serve right click, long press and the Menu key. */
-fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit): List<MenuEntry> {
+/**
+ * Context menu of a media item; the same entries serve right click, long press and the Menu key.
+ * [info] shows the details in this interface (videos, S-802); without it the classic media info opens.
+ */
+fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (() -> Unit)? = null): List<MenuEntry> {
     val res = context.resources
     return listOf(
         MenuEntry.Item(res.getString(R.string.nag_play), play, shortcut = "Enter", icon = NagIcons.Play),
@@ -84,7 +95,7 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit): List<Men
         MenuEntry.Separator,
         MenuEntry.Item(
             res.getString(R.string.nag_sc_media_info),
-            { context.startActivity(Intent(context, InfoActivity::class.java).putExtra(TAG_ITEM, media)) },
+            info ?: { context.startActivity(Intent(context, InfoActivity::class.java).putExtra(TAG_ITEM, media)) },
             shortcut = ShortcutRegistry.chordLabel(ShortcutId.MediaInfo, res),
             icon = NagIcons.Info,
         ),
@@ -130,9 +141,10 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
             emptyDescription = stringResource(R.string.nag_state_empty_desc),
             onAddFolder = onAddFolder,
         ) {
-            val videos = loaded?.videos.orEmpty()
+            val videoItems = remember(loaded) { loaded?.videos.orEmpty().map { it.toVideoItem() } }
+            val tech by rememberTech(videoItems)
             val tracks = loaded?.tracks.orEmpty()
-            if (videos.isEmpty() && tracks.isEmpty()) {
+            if (videoItems.isEmpty() && tracks.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     StatePanel(
                         tone = StateTone.Neutral,
@@ -145,12 +157,12 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
                 }
             } else {
                 LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = dimens.gapXl)) {
-                    if (videos.isNotEmpty()) {
+                    if (videoItems.isNotEmpty()) {
                         item { ShelfTitle(stringResource(R.string.nag_home_continue)) }
                         item {
                             LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
-                                itemsIndexed(videos, key = { _, m -> m.id }) { _, media ->
-                                    VideoCard(media, Modifier.width(240.dp)) { PlaybackActions.playVideo(context, media) }
+                                itemsIndexed(videoItems, key = { _, item -> item.key }) { _, item ->
+                                    VideoCard(item, tech[item.key], Modifier.width(240.dp), onClick = { item.media?.let { PlaybackActions.playVideo(context, it) } })
                                 }
                             }
                         }
@@ -187,16 +199,20 @@ private fun ShelfTitle(text: String) {
 
 @Composable
 fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
+    val context = LocalContext.current
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
     val videos by produceState<List<MediaWrapper>?>(null, scan.active, access?.media, access?.folders) {
         loadWhileScanning(scan.active) { repository.videos() }
     }
+    val items = remember(videos) { videos?.map { it.toVideoItem() } }
+    val tech by rememberTech(items)
     val pointer = NagTheme.inputMode == InputMode.Pointer
     var mode by rememberSaveable { mutableStateOf(if (pointer) ViewMode.Table else ViewMode.Grid) }
     var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
-    var selected by rememberSaveable { mutableStateOf<Long?>(null) }
-    val list = videos
+    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    var detailsRequested by rememberSaveable { mutableStateOf(false) }
+    val list = items
     Column(Modifier.fillMaxSize()) {
         PageHeader(
             title = stringResource(R.string.nag_nav_movies),
@@ -215,78 +231,201 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
             emptyDescription = stringResource(R.string.nag_state_no_videos_desc),
             onAddFolder = onAddFolder,
         ) {
-            MoviesContent(list.orEmpty(), mode, sort, { sort = it }, selected, { selected = it })
-        }
-    }
-}
-
-@Composable
-private fun MoviesContent(
-    list: List<MediaWrapper>,
-    mode: ViewMode,
-    sort: TableSort?,
-    onSortChange: (TableSort) -> Unit,
-    selected: Long?,
-    onSelect: (Long) -> Unit,
-) {
-    val context = LocalContext.current
-    val dimens = NagTheme.dimens
-    val pointer = NagTheme.inputMode == InputMode.Pointer
-    when (mode) {
-        ViewMode.Grid -> LazyVerticalGrid(
-            columns = GridCells.Adaptive(if (pointer) 190.dp else 220.dp),
-            contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
-            horizontalArrangement = Arrangement.spacedBy(dimens.gapL),
-            verticalArrangement = Arrangement.spacedBy(dimens.gapL),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            itemsIndexed(list, key = { _, m -> m.id }) { _, media ->
-                val play = { PlaybackActions.playVideo(context, media) }
-                ContextMenuArea(entries = { mediaMenu(context, media, play) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
-                    VideoCard(media, Modifier.fillMaxWidth(), onClick = play)
-                }
-            }
-        }
-        ViewMode.Table -> {
-            val sorted = remember(list, sort) { sortVideos(list, sort) }
-            DenseTable(
-                columns = videoColumns(),
-                rows = sorted,
-                key = { it.id },
-                selectedKey = selected,
+            MoviesContent(
+                items = list.orEmpty(),
+                tech = tech,
+                techState = { item -> techStateOf(item, tech) },
+                grid = mode == ViewMode.Grid,
                 sort = sort,
-                onSortChange = onSortChange,
-                onRowClick = { media, _ ->
-                    onSelect(media.id)
-                    PlaybackActions.playVideo(context, media)
+                onSortChange = { sort = it },
+                selected = selected,
+                onSelect = { selected = it.key },
+                detailsRequested = detailsRequested,
+                onShowDetails = {
+                    selected = it.key
+                    detailsRequested = true
                 },
-                rowMenu = { media, _ -> mediaMenu(context, media) { PlaybackActions.playVideo(context, media) } },
-                rowMenuLabel = stringResource(R.string.nag_more_actions),
+                onCloseDetails = {
+                    selected = null
+                    detailsRequested = false
+                },
+                onPlay = { item -> item.media?.let { PlaybackActions.playVideo(context, it) } },
+                menu = { item, play, info -> item.media?.let { mediaMenu(context, it, play, info) }.orEmpty() },
             )
         }
     }
 }
 
+/** Probed, still probing, or never: the native probe is missing from this build. */
+fun techStateOf(item: VideoItem, tech: Map<String, MediaTech>): TechState = when {
+    tech.containsKey(item.key) -> TechState.Ready
+    NativeLab.available -> TechState.Probing
+    else -> TechState.Unavailable
+}
+
+/** Width from which the details panel sits beside the list instead of over it. */
+private val DetailsBesideMinWidth = 900.dp
+
+/**
+ * The movies as a grid of cards or a dense table, with the details of the selected one (S-802).
+ * With a pointer a click selects and a double click plays; by touch a tap plays and the details
+ * open from the item's menu. In a wide window the details sit beside the list; in a narrow one
+ * they open over it when asked for.
+ */
 @Composable
-private fun videoColumns(): List<TableColumn<MediaWrapper>> {
+fun MoviesContent(
+    items: List<VideoItem>,
+    tech: Map<String, MediaTech>,
+    techState: (VideoItem) -> TechState,
+    grid: Boolean,
+    sort: TableSort?,
+    onSortChange: (TableSort) -> Unit,
+    selected: String?,
+    onSelect: (VideoItem) -> Unit,
+    detailsRequested: Boolean,
+    onShowDetails: (VideoItem) -> Unit,
+    onCloseDetails: () -> Unit,
+    onPlay: (VideoItem) -> Unit,
+    menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
+) {
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    val selectedItem = items.firstOrNull { it.key == selected }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val beside = maxWidth >= DetailsBesideMinWidth
+        val panel = selectedItem != null && (beside && (pointer || detailsRequested))
+        Row(Modifier.fillMaxSize()) {
+            Box(Modifier.weight(1f).fillMaxHeight()) {
+                val click: (VideoItem) -> Unit = { item -> if (pointer) onSelect(item) else onPlay(item) }
+                val doubleClick: ((VideoItem) -> Unit)? = if (pointer) onPlay else null
+                if (grid) {
+                    VideoGrid(items, tech, selected, click, doubleClick, menu, onPlay, onShowDetails)
+                } else {
+                    VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails)
+                }
+            }
+            if (panel && selectedItem != null) {
+                Box(Modifier.width(1.dp).fillMaxHeight().background(NagTheme.colors.border))
+                MediaDetailsPanel(
+                    item = selectedItem,
+                    tech = tech[selectedItem.key],
+                    state = techState(selectedItem),
+                    onPlay = { onPlay(selectedItem) },
+                    onClose = onCloseDetails,
+                    modifier = Modifier.width(336.dp),
+                )
+            }
+        }
+        if (!beside && detailsRequested && selectedItem != null) {
+            Dialog(onDismissRequest = onCloseDetails, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+                MediaDetailsPanel(
+                    item = selectedItem,
+                    tech = tech[selectedItem.key],
+                    state = techState(selectedItem),
+                    onPlay = { onPlay(selectedItem) },
+                    onClose = onCloseDetails,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoGrid(
+    items: List<VideoItem>,
+    tech: Map<String, MediaTech>,
+    selected: String?,
+    onClick: (VideoItem) -> Unit,
+    onDoubleClick: ((VideoItem) -> Unit)?,
+    menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
+    onPlay: (VideoItem) -> Unit,
+    onShowDetails: (VideoItem) -> Unit,
+) {
+    val dimens = NagTheme.dimens
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(if (pointer) 190.dp else 220.dp),
+        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+        horizontalArrangement = Arrangement.spacedBy(dimens.gapL),
+        verticalArrangement = Arrangement.spacedBy(dimens.gapL),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        itemsIndexed(items, key = { _, item -> item.key }) { _, item ->
+            ContextMenuArea(
+                entries = { menu(item, { onPlay(item) }, { onShowDetails(item) }) },
+                accessibilityLabel = stringResource(R.string.nag_more_actions),
+            ) {
+                VideoCard(
+                    item,
+                    tech[item.key],
+                    Modifier.fillMaxWidth(),
+                    selected = item.key == selected,
+                    onClick = { onClick(item) },
+                    onDoubleClick = onDoubleClick?.let { open -> { open(item) } },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoTable(
+    items: List<VideoItem>,
+    tech: Map<String, MediaTech>,
+    sort: TableSort?,
+    onSortChange: (TableSort) -> Unit,
+    selected: String?,
+    onClick: (VideoItem) -> Unit,
+    onDoubleClick: ((VideoItem) -> Unit)?,
+    menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
+    onPlay: (VideoItem) -> Unit,
+    onShowDetails: (VideoItem) -> Unit,
+) {
+    val sorted = remember(items, sort, tech) { sortVideos(items, sort, tech) }
+    DenseTable(
+        columns = videoColumns(tech),
+        rows = sorted,
+        key = { it.key },
+        selectedKey = selected,
+        sort = sort,
+        onSortChange = onSortChange,
+        onRowClick = { item, _ -> onClick(item) },
+        onRowDoubleClick = onDoubleClick?.let { open -> { item, _ -> open(item) } },
+        rowMenu = { item, _ -> menu(item, { onPlay(item) }, { onShowDetails(item) }) },
+        rowMenuLabel = stringResource(R.string.nag_more_actions),
+    )
+}
+
+@Composable
+private fun videoColumns(tech: Map<String, MediaTech>): List<TableColumn<VideoItem>> {
     val title = stringResource(R.string.nag_column_title)
-    val resolution = stringResource(R.string.nag_column_resolution)
+    val video = stringResource(R.string.nag_column_video)
+    val audio = stringResource(R.string.nag_column_audio)
     val duration = stringResource(R.string.nag_column_duration)
-    return remember(title, resolution, duration) {
+    return remember(title, video, audio, duration, tech) {
         listOf(
-            TableColumn<MediaWrapper>(title, ColumnWidth.Weight(1f)) { it.title ?: "" },
-            TableColumn<MediaWrapper>(resolution, ColumnWidth.Fixed(110.dp), mono = true) { it.resolutionLabel() ?: "–" },
-            TableColumn<MediaWrapper>(duration, ColumnWidth.Fixed(100.dp), alignEnd = true, mono = true) { formatDuration(it.length) },
+            TableColumn<VideoItem>(title, ColumnWidth.Weight(1f)) { it.title },
+            TableColumn<VideoItem>(video, ColumnWidth.Fixed(170.dp), mono = true) { item ->
+                tech[item.key]?.video?.let { "${it.resolution.lines} · ${rangeLabel(it)}" }
+                    ?: resolutionOf(item.width, item.height)?.lines ?: "–"
+            },
+            TableColumn<VideoItem>(audio, ColumnWidth.Fixed(150.dp), mono = true) { item ->
+                tech[item.key]?.mainAudio()?.let { "${audioCodecLabel(it)} ${channelLabel(it)}" + if (it.atmos) " Atmos" else "" } ?: "–"
+            },
+            TableColumn<VideoItem>(duration, ColumnWidth.Fixed(100.dp), alignEnd = true, mono = true) { formatDuration(it.durationMs) },
         )
     }
 }
 
-private fun sortVideos(list: List<MediaWrapper>, sort: TableSort?): List<MediaWrapper> {
+private fun sortVideos(list: List<VideoItem>, sort: TableSort?, tech: Map<String, MediaTech>): List<VideoItem> {
     if (sort == null) return list
-    val comparator: Comparator<MediaWrapper> = when (sort.column) {
-        1 -> compareBy { it.height.coerceAtMost(it.width) }
-        2 -> compareBy { it.length }
-        else -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title ?: "" }
+    val comparator: Comparator<VideoItem> = when (sort.column) {
+        // by resolution, then by dynamic range: 4K Dolby Vision last
+        1 -> compareBy<VideoItem> { tech[it.key]?.video?.resolution?.ordinal ?: resolutionOf(it.width, it.height)?.ordinal ?: -1 }
+            .thenBy { tech[it.key]?.video?.dynamicRange?.ordinal ?: -1 }
+        2 -> compareBy(String.CASE_INSENSITIVE_ORDER) { item -> tech[item.key]?.mainAudio()?.let(::audioShortLabel).orEmpty() }
+        3 -> compareBy { it.durationMs }
+        else -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
     }
     return if (sort.ascending) list.sortedWith(comparator) else list.sortedWith(comparator.reversed())
 }
@@ -297,44 +436,55 @@ private val TableSortSaver = Saver<TableSort?, Int>(
     restore = { saved -> if (saved < 0) null else TableSort(saved / 2, saved % 2 == 1) },
 )
 
+/**
+ * A video card (S-802): artwork with the technical badge ("4K DV") and the watched part, the
+ * title, and the technical summary ("2160p · DV P8 · TrueHD") or the duration until the probe
+ * has run.
+ */
 @Composable
-fun VideoCard(media: MediaWrapper, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun VideoCard(
+    item: VideoItem,
+    tech: MediaTech?,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    onClick: () -> Unit,
+    onDoubleClick: (() -> Unit)? = null,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(dimens.radiusCard)
+    val badge = techBadge(tech, item.width, item.height)
+    val summary = tech?.let(::techSummary)?.takeIf { it.isNotEmpty() }
     Column(
         modifier = modifier
             .focusRing(state, shape)
-            .background(if (state.hovered || state.pressed) stateBackground(state) else colors.background, shape)
-            .nagClickable(interaction, onClick, onClickLabel = media.title)
+            .background(if (state.hovered || state.pressed || selected) stateBackground(state, selected) else colors.background, shape)
+            .then(if (selected) Modifier.border(2.dp, colors.accent, shape) else Modifier)
+            .semantics { this.selected = selected }
+            .nagClickable(interaction, onClick, onClickLabel = item.title, onDoubleClick = onDoubleClick)
             .padding(6.dp),
     ) {
         Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {
-            Artwork(media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp)
-            val progress = media.watchProgress()
-            if (progress > 0f) {
+            Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp)
+            if (item.progress > 0f) {
                 Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(colors.scrim)) {
-                    Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(colors.accent))
+                    Box(Modifier.fillMaxWidth(item.progress).fillMaxHeight().background(colors.accent))
                 }
             }
-            media.resolutionLabel()?.let { res ->
-                Text(
-                    res,
-                    style = NagTheme.type.mono,
-                    color = colors.text,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .background(colors.scrim, RoundedCornerShape(4.dp))
-                        .padding(horizontal = 5.dp, vertical = 1.dp),
-                )
-            }
+            if (badge != null) TechBadge(badge, Modifier.align(Alignment.TopStart).padding(6.dp))
         }
         Spacer(Modifier.height(8.dp))
-        Text(media.title ?: "", style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(formatDuration(media.length), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+        Text(item.title, style = NagTheme.type.bodyStrong, color = if (selected) colors.onSelection else colors.text, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
+        Text(
+            summary ?: formatDuration(item.durationMs),
+            style = NagTheme.type.mono,
+            color = if (selected) colors.onSelection else colors.textTertiary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

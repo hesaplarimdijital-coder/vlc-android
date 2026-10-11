@@ -94,6 +94,18 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun mediaProbesAreCachedPerFile() {
+        val tech = db.mediaTech()
+        val uri = "file:///storage/T7/Kuzey Işığı.mkv"
+        tech.save(MediaTechEntry(uri, fileSize = 62_600_000_000, modifiedAt = 1_700_000_000_000, probeVersion = 1, json = "{}", probedAt = 5))
+        tech.save(MediaTechEntry(uri, fileSize = 62_600_000_000, modifiedAt = 1_700_000_000_000, probeVersion = 1, json = "{\"version\":1}", probedAt = 6))
+        assertEquals("{\"version\":1}", tech.get(uri)!!.json)
+        assertEquals(listOf(uri), runBlocking { tech.all().first() }.map { it.mediaUri })
+        tech.forget(uri)
+        assertNull(tech.get(uri))
+    }
+
+    @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
@@ -109,8 +121,7 @@ class NagmedarDatabaseTest {
 
 /**
  * Schema history: the database created from every exported schema opens with the current code
- * after the registered migrations. With a single version this checks that the exported schema
- * and the entities agree; each later version adds its migration here.
+ * after the registered migrations, and keeps its rows.
  */
 @RunWith(AndroidJUnit4::class)
 class NagmedarDatabaseMigrationTest {
@@ -126,8 +137,20 @@ class NagmedarDatabaseMigrationTest {
     @Test
     fun everyVersionMigratesToTheLatest() {
         assumeTrue("schema 1 not exported yet", schemaExported(1))
-        helper.createDatabase(TEST_DB, 1).close()
-        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS)
+        helper.createDatabase(TEST_DB, 1).use { db ->
+            db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, updated_at) VALUES ('file:///film.mkv', -120, 1)")
+        }
+        // 1 -> 2 (S-802): the probe cache appears, the settings stay
+        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT audio_delay_ms FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(-120L, c.getLong(0))
+            }
+            db.execSQL(
+                "INSERT INTO media_tech (media_uri, file_size, modified_at, probe_version, json, probed_at) " +
+                    "VALUES ('file:///film.mkv', 1, 2, 1, '{}', 3)",
+            )
+        }
     }
 
     private companion object {
