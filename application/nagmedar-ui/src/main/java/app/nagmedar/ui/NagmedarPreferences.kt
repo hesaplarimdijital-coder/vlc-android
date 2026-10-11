@@ -41,6 +41,10 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var launchNewUi by mutableStateOf(prefs.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true))
         private set
 
+    /** S-305: what was run from the command palette, the latest first. */
+    var recentCommands by mutableStateOf(prefs.getString(KEY_PALETTE_RECENT, null)?.split('\n')?.filter { it.isNotEmpty() }.orEmpty())
+        private set
+
     /** S-309: tree URIs of the folders chosen with the system picker. */
     var safFolders by mutableStateOf(prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty())
         private set
@@ -85,6 +89,11 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         prefs.edit().putStringSet(NAGMEDAR_SAF_FOLDERS, HashSet(safFolders)).apply()
     }
 
+    fun rememberCommand(id: String) {
+        recentCommands = (listOf(id) + recentCommands.filter { it != id }).take(RECENT_COMMANDS)
+        prefs.edit().putString(KEY_PALETTE_RECENT, recentCommands.joinToString("\n")).apply()
+    }
+
     /** S-303: widths the panes were dragged to, in dp. */
     override fun paneWidth(key: String): Float? = prefs.getFloat(KEY_PANE_PREFIX + key, 0f).takeIf { it > 0f }
 
@@ -98,6 +107,8 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         const val KEY_DENSITY = "nagmedar_density"
         const val KEY_SIDEBAR_COLLAPSED = "nagmedar_sidebar_collapsed"
         const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
+        const val KEY_PALETTE_RECENT = "nagmedar_palette_recent"
+        const val RECENT_COMMANDS = 8
     }
 }
 

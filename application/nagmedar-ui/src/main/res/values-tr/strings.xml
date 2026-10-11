@@ -358,4 +358,24 @@
         <item quantity="one">%d sezon</item>
         <item quantity="other">%d sezon</item>
     </plurals>
+    <!-- Komut paleti (S-305) -->
+    <string name="nag_palette_commands">Komutlar</string>
+    <string name="nag_palette_screens">Ekranlar</string>
+    <string name="nag_palette_settings">Ayarlar</string>
+    <string name="nag_palette_media">Medya</string>
+    <string name="nag_palette_all">Tümü</string>
+    <string name="nag_palette_placeholder">Komut, ekran, ayar ya da medya ara</string>
+    <string name="nag_palette_nothing">Eşleşen bir şey yok</string>
+    <string name="nag_palette_recent">Son kullanılanlar</string>
+    <string name="nag_palette_hint_move">gezin</string>
+    <string name="nag_palette_hint_run">çalıştır</string>
+    <string name="nag_palette_hint_scope">kapsam</string>
+    <string name="nag_palette_shortcut">Kısayol</string>
+    <string name="nag_palette_setting">%1$s: %2$s</string>
+    <string name="nag_palette_film">Video</string>
+    <string name="nag_palette_track">Parça</string>
+    <plurals name="nag_palette_count">
+        <item quantity="one">%d sonuç</item>
+        <item quantity="other">%d sonuç</item>
+    </plurals>
 </resources>

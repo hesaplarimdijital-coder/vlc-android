@@ -358,4 +358,24 @@
         <item quantity="one">%d season</item>
         <item quantity="other">%d seasons</item>
     </plurals>
+    <!-- Command palette (S-305) -->
+    <string name="nag_palette_commands">Commands</string>
+    <string name="nag_palette_screens">Screens</string>
+    <string name="nag_palette_settings">Settings</string>
+    <string name="nag_palette_media">Media</string>
+    <string name="nag_palette_all">All</string>
+    <string name="nag_palette_placeholder">Search commands, screens, settings or media</string>
+    <string name="nag_palette_nothing">Nothing matches</string>
+    <string name="nag_palette_recent">Recently used</string>
+    <string name="nag_palette_hint_move">move</string>
+    <string name="nag_palette_hint_run">run</string>
+    <string name="nag_palette_hint_scope">scope</string>
+    <string name="nag_palette_shortcut">Shortcut</string>
+    <string name="nag_palette_setting">%1$s: %2$s</string>
+    <string name="nag_palette_film">Video</string>
+    <string name="nag_palette_track">Track</string>
+    <plurals name="nag_palette_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
 </resources>

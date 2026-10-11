@@ -2,6 +2,7 @@ package app.nagmedar.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +59,12 @@ import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.screens.SettingsScreen
+import app.nagmedar.ui.search.CommandPalette
+import app.nagmedar.ui.search.PaletteItem
+import app.nagmedar.ui.search.commandItems
+import app.nagmedar.ui.search.mediaItems
+import app.nagmedar.ui.search.screenItems
+import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
@@ -66,6 +74,7 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
+import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
@@ -125,8 +134,9 @@ private fun NagmedarMain(
     val undo = rememberUndoBarState()
     var shortcutListRequests by remember { mutableIntStateOf(0) }
     val menuBar = rememberMenuBarState()
+    var paletteOpen by remember { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, menuBar, onOpenFile) { shortcutListRequests++ }
+        AppActions(context, prefs, navigator, undo, menuBar, onOpenFile, openPalette = { paletteOpen = true }) { shortcutListRequests++ }
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
@@ -196,6 +206,30 @@ private fun NagmedarMain(
             )
         }
     }
+    if (paletteOpen) {
+        // the library's media come when the palette opens; commands, screens and settings at once
+        val media by produceState(emptyList<PaletteItem>()) {
+            value = mediaItems(context.resources, repository.videos() + repository.tracks()) { item ->
+                if (item.type == MediaWrapper.TYPE_VIDEO) PlaybackActions.playVideo(context, item) else PlaybackActions.playList(context, listOf(item), 0)
+            }
+        }
+        val wallpaperAccent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        val items = remember(media, actions) {
+            commandItems(context.resources, actions::isAvailable, { actions.perform(it) }) +
+                screenItems(context.resources, navigator::navigate) +
+                settingItems(context.resources, prefs, wallpaperAccent) +
+                media
+        }
+        CommandPalette(
+            items = items,
+            recent = prefs.recentCommands,
+            onRun = { item ->
+                prefs.rememberCommand(item.id)
+                item.run()
+            },
+            onDismiss = { paletteOpen = false },
+        )
+    }
 }
 
 /**
@@ -229,6 +263,7 @@ class AppActions(
     private val undo: UndoBarState,
     private val menuBar: MenuBarState,
     private val openFile: () -> Unit,
+    private val openPalette: () -> Unit,
     private val showShortcutList: () -> Unit,
 ) {
     private var volumeBeforeMute = 100
@@ -256,6 +291,7 @@ class AppActions(
         val service = PlaybackService.instance
         when (id) {
             ShortcutId.OpenFile -> openFile()
+            ShortcutId.CommandPalette -> openPalette()
             ShortcutId.OpenNetwork -> openClassic(context, SecondaryActivity.STREAMS)
             ShortcutId.Undo -> return undo.undoLatest()
             ShortcutId.PlayPause -> PlaybackActions.togglePlayPause()
@@ -308,6 +344,6 @@ class AppActions(
 
     private companion object {
         /** Global shortcuts whose features arrive in later MVPs; they show a notice instead. */
-        val comingLater = setOf(ShortcutId.CommandPalette, ShortcutId.OpenInNewWindow, ShortcutId.MediaInfo, ShortcutId.Effects)
+        val comingLater = setOf(ShortcutId.OpenInNewWindow, ShortcutId.MediaInfo, ShortcutId.Effects)
     }
 }
