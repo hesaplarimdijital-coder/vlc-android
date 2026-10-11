@@ -84,6 +84,10 @@ ICONS = {
     'Lock': '<rect x="3.5" y="7" width="9" height="6.5" rx="1.2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>',
 }
 
+# Icons that point along the reading direction: drawn mirrored in right-to-left layouts.
+# Media transport icons (Play, Next, Resume, …) keep their direction in every language.
+MIRRORED = {'ChevronLeft', 'ChevronRight'}
+
 
 def num(v):
     s = ('%.3f' % v).rstrip('0').rstrip('.')
@@ -141,8 +145,15 @@ private fun stroke(d: String) = IconPart(d, filled = false)
 
 private fun fill(d: String) = IconPart(d, filled = true)
 
-private fun icon(name: String, vararg parts: IconPart): ImageVector =
-    ImageVector.Builder(name = name, defaultWidth = 16.dp, defaultHeight = 16.dp, viewportWidth = 16f, viewportHeight = 16f)
+private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false): ImageVector =
+    ImageVector.Builder(
+        name = name,
+        defaultWidth = 16.dp,
+        defaultHeight = 16.dp,
+        viewportWidth = 16f,
+        viewportHeight = 16f,
+        autoMirror = mirrored,
+    )
         .apply {
             parts.forEach { part ->
                 if (part.filled) {
@@ -167,7 +178,16 @@ def main(out):
     lines = [HEADER]
     for name, svg in ICONS.items():
         args = ', '.join('%s("%s")' % ('fill' if filled else 'stroke', d) for d, filled in parts(svg))
+        if name in MIRRORED:
+            args += ', mirrored = true'
         lines.append('    val %s: ImageVector by lazy { icon("%s", %s) }' % (name, name, args))
+    lines.append('')
+    lines.append('    /** Every icon in the generator\'s order: the icon board and its tests. */')
+    lines.append('    val all: List<ImageVector> get() = listOf(')
+    names = list(ICONS)
+    for i in range(0, len(names), 8):
+        lines.append('        %s,' % ', '.join(names[i:i + 8]))
+    lines.append('    )')
     with open(out, 'w', encoding='utf-8') as fh:
         fh.write('\n'.join(lines) + '\n' + FOOTER)
     print('wrote %d icons to %s' % (len(ICONS), out))

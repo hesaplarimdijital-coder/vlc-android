@@ -1,8 +1,5 @@
 package app.nagmedar.ui.shell
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -70,6 +67,7 @@ fun NagmedarShell(
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
     val navKind = NavKind.forWidth(widthClass)
+    val motion = NagTheme.motion
     // The graph builder below must not capture changing values, or NavHost would rebuild the graph.
     val currentScreen by rememberUpdatedState(screen)
 
@@ -107,10 +105,10 @@ fun NagmedarShell(
                         navController = navController,
                         startDestination = Destination.Home.route,
                         modifier = Modifier.fillMaxSize(),
-                        enterTransition = { fadeIn(animationSpec = tween(120)) },
-                        exitTransition = { fadeOut(animationSpec = tween(90)) },
-                        popEnterTransition = { fadeIn(animationSpec = tween(120)) },
-                        popExitTransition = { fadeOut(animationSpec = tween(90)) },
+                        enterTransition = { motion.screenEnter() },
+                        exitTransition = { motion.screenExit() },
+                        popEnterTransition = { motion.screenEnter() },
+                        popExitTransition = { motion.screenExit() },
                     ) {
                         Destination.entries.forEach { destination ->
                             composable(destination.route) { currentScreen(destination, navigator) }

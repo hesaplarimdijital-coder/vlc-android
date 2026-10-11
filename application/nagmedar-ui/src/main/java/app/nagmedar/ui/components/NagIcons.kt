@@ -30,8 +30,8 @@ object NagIcons {
     val ListView: ImageVector by lazy { icon("ListView", stroke("M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.5M2.5 8h.5M2.5 12h.5")) }
     val ChevronDown: ImageVector by lazy { icon("ChevronDown", stroke("m4 6 4 4 4-4")) }
     val ChevronUp: ImageVector by lazy { icon("ChevronUp", stroke("m4 10 4-4 4 4")) }
-    val ChevronLeft: ImageVector by lazy { icon("ChevronLeft", stroke("m10 4-4 4 4 4")) }
-    val ChevronRight: ImageVector by lazy { icon("ChevronRight", stroke("m6 4 4 4-4 4")) }
+    val ChevronLeft: ImageVector by lazy { icon("ChevronLeft", stroke("m10 4-4 4 4 4"), mirrored = true) }
+    val ChevronRight: ImageVector by lazy { icon("ChevronRight", stroke("m6 4 4 4-4 4"), mirrored = true) }
     val Check: ImageVector by lazy { icon("Check", stroke("m3.5 8.5 3 3 6-7")) }
     val Play: ImageVector by lazy { icon("Play", fill("M5 3.2v9.6L13 8z")) }
     val Resume: ImageVector by lazy { icon("Resume", stroke("M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8")) }
@@ -81,6 +81,19 @@ object NagIcons {
     val NetworkOff: ImageVector by lazy { icon("NetworkOff", stroke("M2 6.5a9 9 0 0 1 12 0M4.2 9a5.8 5.8 0 0 1 7.6 0M8 12.5h.01M3 3l10 10")) }
     val SearchOff: ImageVector by lazy { icon("SearchOff", stroke("M2.5,7a4.5,4.5 0 1 0 9,0a4.5,4.5 0 1 0 -9,0Z"), stroke("m10.5 10.5 3 3M5.5 7h3")) }
     val Lock: ImageVector by lazy { icon("Lock", stroke("M4.7,7H11.3A1.2,1.2 0 0 1 12.5,8.2V12.3A1.2,1.2 0 0 1 11.3,13.5H4.7A1.2,1.2 0 0 1 3.5,12.3V8.2A1.2,1.2 0 0 1 4.7,7Z"), stroke("M5.5 7V5a2.5 2.5 0 0 1 5 0v2")) }
+
+    /** Every icon in the generator's order: the icon board and its tests. */
+    val all: List<ImageVector> get() = listOf(
+        Home, Movies, Series, Music, Podcasts, Radio, Device, ExternalDrive,
+        Network, Streams, TvLab, Convert, Downloads, Settings, Plus, Grid,
+        ListView, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Check, Play, Resume,
+        Forward, OpenWindow, Subtitle, Info, PlaylistAdd, Folder, Delete, Close,
+        MoreHorizontal, MoreVertical, Shuffle, Previous, Next, Pause, Repeat, Queue,
+        Artists, Albums, History, Equalizer, SmartList, FramePrevious, FrameNext, AudioTrack,
+        Screenshot, Effects, PictureInPicture, Fullscreen, Search, Sort, Lyrics, Volume,
+        Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle, SuccessCircle,
+        Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock,
+    )
 }
 
 private class IconPart(val d: String, val filled: Boolean)
@@ -89,8 +102,15 @@ private fun stroke(d: String) = IconPart(d, filled = false)
 
 private fun fill(d: String) = IconPart(d, filled = true)
 
-private fun icon(name: String, vararg parts: IconPart): ImageVector =
-    ImageVector.Builder(name = name, defaultWidth = 16.dp, defaultHeight = 16.dp, viewportWidth = 16f, viewportHeight = 16f)
+private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false): ImageVector =
+    ImageVector.Builder(
+        name = name,
+        defaultWidth = 16.dp,
+        defaultHeight = 16.dp,
+        viewportWidth = 16f,
+        viewportHeight = 16f,
+        autoMirror = mirrored,
+    )
         .apply {
             parts.forEach { part ->
                 if (part.filled) {

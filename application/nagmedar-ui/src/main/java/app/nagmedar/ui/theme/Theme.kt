@@ -19,6 +19,7 @@ val LocalNagColors = staticCompositionLocalOf { NagPalette.dark(Accent.Blue) }
 val LocalNagType = staticCompositionLocalOf { NagType.Pointer }
 val LocalNagDimens = staticCompositionLocalOf { NagDimens.Pointer }
 val LocalInputMode = staticCompositionLocalOf { InputMode.Pointer }
+val LocalNagMotion = staticCompositionLocalOf { NagMotion.Full }
 
 /** Token access for composables: `NagTheme.colors.text`, `NagTheme.dimens.rowHeight`, … */
 object NagTheme {
@@ -30,17 +31,21 @@ object NagTheme {
         @Composable @ReadOnlyComposable get() = LocalNagDimens.current
     val inputMode: InputMode
         @Composable @ReadOnlyComposable get() = LocalInputMode.current
+    val motion: NagMotion
+        @Composable @ReadOnlyComposable get() = LocalNagMotion.current
 }
 
 /**
- * Nağmedar theme: light, dark and OLED black palettes, four accents and two densities.
- * Material 3 components read a matching colour scheme, so they blend with the custom ones.
+ * Nağmedar theme: light, dark and OLED black palettes, four accents, two densities and the motion
+ * tokens. Material 3 components read a matching colour scheme, so they blend with the custom ones.
+ * [reduceMotion] null follows the system's "Remove animations" setting.
  */
 @Composable
 fun NagmedarTheme(
     themeMode: ThemeMode = ThemeMode.System,
     accent: Accent = Accent.Blue,
     inputMode: InputMode = InputMode.Pointer,
+    reduceMotion: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
@@ -49,11 +54,13 @@ fun NagmedarTheme(
     val dimens = NagDimens.forMode(inputMode)
     val scheme = remember(colors) { colors.toMaterialScheme() }
     val selection = remember(colors) { TextSelectionColors(handleColor = colors.accent, backgroundColor = colors.accent.copy(alpha = 0.35f)) }
+    val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
     CompositionLocalProvider(
         LocalNagColors provides colors,
         LocalNagType provides type,
         LocalNagDimens provides dimens,
         LocalInputMode provides inputMode,
+        LocalNagMotion provides motion,
     ) {
         MaterialTheme(colorScheme = scheme, typography = type.toMaterialTypography()) {
             CompositionLocalProvider(

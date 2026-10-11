@@ -1,11 +1,8 @@
 package app.nagmedar.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -23,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -53,6 +51,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -73,6 +74,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import app.nagmedar.ui.theme.NagColors
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.mixSrgb
 import kotlinx.coroutines.delay
@@ -271,20 +273,34 @@ fun NagProgressBar(progress: Float?, label: String, modifier: Modifier = Modifie
         if (progress != null) {
             Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().background(color, shape))
         } else {
-            val transition = rememberInfiniteTransition(label = "progress")
-            val position by transition.animateFloat(
-                initialValue = -0.3f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(tween(1200, easing = LinearEasing), RepeatMode.Restart),
-                label = "sweep",
-            )
-            Box(
-                Modifier
-                    .offset(x = maxWidth * position)
-                    .width(maxWidth * 0.3f)
-                    .fillMaxHeight()
-                    .background(color, shape),
-            )
+            val loop = NagTheme.motion.loop(NagMotion.SWEEP)
+            if (loop == null) {
+                // motion reduced: a still dashed line says "working" without moving
+                Canvas(Modifier.fillMaxSize()) {
+                    val dash = 8.dp.toPx()
+                    val step = dash + 6.dp.toPx()
+                    var x = 0f
+                    while (x < size.width) {
+                        drawRoundRect(
+                            color = color,
+                            topLeft = Offset(x, 0f),
+                            size = Size(minOf(dash, size.width - x), size.height),
+                            cornerRadius = CornerRadius(size.height / 2),
+                        )
+                        x += step
+                    }
+                }
+            } else {
+                val transition = rememberInfiniteTransition(label = "progress")
+                val position by transition.animateFloat(initialValue = -0.3f, targetValue = 1f, animationSpec = loop, label = "sweep")
+                Box(
+                    Modifier
+                        .offset(x = maxWidth * position)
+                        .width(maxWidth * 0.3f)
+                        .fillMaxHeight()
+                        .background(color, shape),
+                )
+            }
         }
     }
 }
@@ -338,24 +354,23 @@ fun LoadingState(
     }
 }
 
-/** Grey placeholder block; [shimmer] sweeps a lighter band across it while loading. */
+/**
+ * Grey placeholder block; [shimmer] sweeps a lighter band across it while loading, unless motion
+ * is reduced (S-203).
+ */
 @Composable
 fun SkeletonBlock(modifier: Modifier = Modifier, shimmer: Boolean = false) {
     val colors = NagTheme.colors
     val base = mixSrgb(colors.hover, colors.surface, 0.6f)
     val shape = RoundedCornerShape(7.dp)
-    if (!shimmer) {
+    val loop = if (shimmer) NagTheme.motion.loop(NagMotion.SHIMMER) else null
+    if (loop == null) {
         Box(modifier.background(base, shape))
         return
     }
     val highlight = colors.hover
     val transition = rememberInfiniteTransition(label = "skeleton")
-    val shift by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing), RepeatMode.Restart),
-        label = "shimmer",
-    )
+    val shift by transition.animateFloat(initialValue = 0f, targetValue = 1f, animationSpec = loop, label = "shimmer")
     BoxWithConstraints(modifier.clip(shape).background(base)) {
         val width = constraints.maxWidth.toFloat().coerceAtLeast(1f)
         val start = -width + shift * width * 2

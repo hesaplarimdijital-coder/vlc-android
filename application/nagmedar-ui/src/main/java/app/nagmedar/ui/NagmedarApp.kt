@@ -127,8 +127,10 @@ private fun NagmedarMain(
     // without media access a folder is picked with the system picker; with it, the medialibrary's folders open
     val addFolder = { if (access.mediaAccess) openClassic(context, SecondaryActivity.STORAGE_BROWSER) else access.pickFolder() }
     LaunchedEffect(actions) { onActionsReady(actions) }
+    val motion = NagTheme.motion
     LaunchedEffect(shortcutListRequests) {
-        if (shortcutListRequests > 0) settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
+        if (shortcutListRequests == 0) return@LaunchedEffect
+        if (motion.reduced) settingsList.scrollToItem(SETTINGS_SHORTCUTS_ITEM) else settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
     }
     LaunchedEffect(requestedDestination) {
         val destination = Destination.entries.firstOrNull { it.route == requestedDestination } ?: return@LaunchedEffect

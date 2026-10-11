@@ -1,6 +1,8 @@
 package app.nagmedar.ui.onboarding
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -65,6 +68,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.shell.BrandMark
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.mixSrgb
 
@@ -170,16 +174,26 @@ fun FirstRunFlow(
                 .padding(top = if (wide) 32.dp else 0.dp, bottom = if (wide) 32.dp else 0.dp),
         ) {
             FlowTopBar(state, onSkip = advance)
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                StepHeader(state.step)
-                when (state.step) {
-                    FirstRunStep.Access -> AccessStep(state, folders, actions)
-                    FirstRunStep.Sources -> SourcesStep(state, drives, folders)
-                    FirstRunStep.Audio -> AudioStep(state, actions)
-                    FirstRunStep.Notifications -> NotificationStep(state, actions)
+            val motion = NagTheme.motion
+            val slide = with(LocalDensity.current) { NagMotion.STEP_SLIDE_DP.dp.roundToPx() }
+            // S-203: the next step comes in from the end, the previous one from the start
+            AnimatedContent(
+                targetState = state.step,
+                modifier = Modifier.weight(1f),
+                transitionSpec = { motion.step(forward = targetState.ordinal > initialState.ordinal, slidePx = slide) },
+                label = "step",
+            ) { step ->
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    StepHeader(step)
+                    when (step) {
+                        FirstRunStep.Access -> AccessStep(state, folders, actions)
+                        FirstRunStep.Sources -> SourcesStep(state, drives, folders)
+                        FirstRunStep.Audio -> AudioStep(state, actions)
+                        FirstRunStep.Notifications -> NotificationStep(state, actions)
+                    }
+                    if (step == FirstRunStep.Access || step == FirstRunStep.Sources) PrivacyNote()
+                    Spacer(Modifier.height(16.dp))
                 }
-                if (state.step == FirstRunStep.Access || state.step == FirstRunStep.Sources) PrivacyNote()
-                Spacer(Modifier.height(16.dp))
             }
             FlowFooter(
                 label = when (state.step) {
@@ -229,11 +243,16 @@ private fun FlowTopBar(state: FirstRunState, onSkip: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             repeat(total) { index ->
+                val fill by animateColorAsState(
+                    if (index < current) colors.accent else colors.borderStrong,
+                    animationSpec = NagTheme.motion.standard(),
+                    label = "segment",
+                )
                 Box(
                     Modifier
                         .weight(1f)
                         .height(4.dp)
-                        .background(if (index < current) colors.accent else colors.borderStrong, RoundedCornerShape(2.dp)),
+                        .background(fill, RoundedCornerShape(2.dp)),
                 )
             }
         }
