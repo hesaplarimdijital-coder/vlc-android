@@ -110,7 +110,6 @@ fun PaletteSurface(
     val chosen = hits.getOrNull(selected.coerceIn(0, (hits.size - 1).coerceAtLeast(0)))
     val field = remember { FocusRequester() }
     val list = rememberLazyListState()
-    LaunchedEffect(Unit) { field.requestFocus() }
     LaunchedEffect(query, scope) { selected = 0 }
     // the selected row stays in view; rows count the group headers too
     LaunchedEffect(selected, results) {
@@ -265,6 +264,8 @@ fun PaletteSurface(
                 Hint("Tab", stringResource(R.string.nag_palette_hint_scope))
             }
         }
+        // here, not beside the state: the field is composed when the box is measured
+        LaunchedEffect(Unit) { field.requestFocus() }
     }
 }
 
