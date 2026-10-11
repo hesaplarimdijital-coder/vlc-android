@@ -34,7 +34,8 @@ class WidthClassTest {
         )
         for ((kind, shown) in chromes) {
             val reachable = shown.toSet() + if (Destination.More in shown) Destination.overflow(shown).toSet() else emptySet()
-            val missing = Destination.entries.filter { it != Destination.More && it !in reachable }
+            // the search page opens from the search button and the palette
+            val missing = Destination.entries.filter { it != Destination.More && it != Destination.Search && it !in reachable }
             assertEquals("$kind misses $missing", emptyList<Destination>(), missing)
         }
     }

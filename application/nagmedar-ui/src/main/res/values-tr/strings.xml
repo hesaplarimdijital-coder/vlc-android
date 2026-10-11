@@ -25,6 +25,7 @@
     <string name="nag_nav_playlists">Çalma listeleri</string>
     <string name="nag_nav_settings">Ayarlar</string>
     <string name="nag_nav_more">Daha fazla</string>
+    <string name="nag_nav_search">Ara</string>
     <string name="nag_main_navigation">Ana gezinme</string>
     <string name="nag_sidebar">Kenar çubuğu</string>
     <string name="nag_sidebar_collapse">Kenar çubuğunu daralt</string>
@@ -370,6 +371,7 @@
     <string name="nag_palette_hint_move">gezin</string>
     <string name="nag_palette_hint_run">çalıştır</string>
     <string name="nag_palette_hint_scope">kapsam</string>
+    <string name="nag_palette_hint_all">tüm sonuçlar</string>
     <string name="nag_palette_shortcut">Kısayol</string>
     <string name="nag_palette_setting">%1$s: %2$s</string>
     <string name="nag_palette_film">Video</string>
@@ -378,4 +380,31 @@
         <item quantity="one">%d sonuç</item>
         <item quantity="other">%d sonuç</item>
     </plurals>
+    <!-- Arama sayfası (S-311) -->
+    <string name="nag_search_placeholder">Film, dizi, şarkı ya da replik ara</string>
+    <string name="nag_search_clear">Aramayı temizle</string>
+    <plurals name="nag_search_count">
+        <item quantity="one">“%1$s” için %2$d sonuç</item>
+        <item quantity="other">“%1$s” için %2$d sonuç</item>
+    </plurals>
+    <string name="nag_search_where">kütüphane ve altyazılar</string>
+    <string name="nag_search_where_library">kütüphane</string>
+    <string name="nag_search_millis">%d ms</string>
+    <string name="nag_search_network">Ağdakiler de</string>
+    <string name="nag_search_show_network">Ağdakileri de göster</string>
+    <plurals name="nag_search_on_network">
+        <item quantity="one">Ağda %d dosya daha</item>
+        <item quantity="other">Ağda %d dosya daha</item>
+    </plurals>
+    <string name="nag_search_nothing">“%s” için sonuç yok</string>
+    <string name="nag_search_films">Filmler</string>
+    <string name="nag_search_episodes">Diziler</string>
+    <string name="nag_search_music">Müzik</string>
+    <string name="nag_search_said">Söylenenlerde</string>
+    <string name="nag_search_subtitles">Altyazılar</string>
+    <string name="nag_search_syntax">Arama sözdizimi</string>
+    <string name="nag_search_syntax_kind">tek tür (film, dizi, müzik, altyazı)</string>
+    <string name="nag_search_syntax_phrase">tam ifade</string>
+    <string name="nag_search_syntax_exclude">hariç tut</string>
+    <string name="nag_search_syntax_letters">Türkçe harfler eşlenir: “ışık” = “isik”</string>
 </resources>

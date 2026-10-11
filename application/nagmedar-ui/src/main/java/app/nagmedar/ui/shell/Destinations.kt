@@ -37,7 +37,10 @@ enum class Destination(
     Convert("convert", R.string.nag_nav_convert, NavSection.Tools, R.string.nag_coming_convert, "MVP3"),
     Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads, "MVP4"),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),
-    More("more", R.string.nag_nav_more, NavSection.Footer);
+    More("more", R.string.nag_nav_more, NavSection.Footer),
+
+    /** S-311: the search page, opened from the search button and the palette, never listed in the navigation. */
+    Search("search", R.string.nag_nav_search, NavSection.Footer);
 
     val icon: ImageVector
         get() = when (this) {
@@ -56,6 +59,7 @@ enum class Destination(
             Downloads -> NagIcons.Downloads
             Settings -> NagIcons.Settings
             More -> NagIcons.Menu
+            Search -> NagIcons.Search
         }
 
     /** Shorter label for the compact bottom bar. */
@@ -71,10 +75,10 @@ enum class Destination(
         val bottomBar = listOf(Home, Movies, Music, Podcasts, More)
         val rail = listOf(Home, Movies, Series, Music, Podcasts, Radio, TvLab)
         val railFooter = listOf(More, Settings)
-        val sidebar = entries.filter { it != More }
+        val sidebar = entries.filter { it != More && it != Search }
 
         /** Destinations reachable through "More" when [shown] are already in the navigation chrome. */
-        fun overflow(shown: Collection<Destination>) = entries.filter { it != More && it !in shown }
+        fun overflow(shown: Collection<Destination>) = entries.filter { it != More && it != Search && it !in shown }
 
         fun fromRoute(route: String?): Destination = entries.firstOrNull { it.route == route } ?: Home
     }

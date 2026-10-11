@@ -452,8 +452,12 @@ fun KeyCap(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-private fun isSelected(destination: Destination, current: Destination, shown: List<Destination>): Boolean =
-    if (destination == Destination.More) current !in shown || current == Destination.More else destination == current
+private fun isSelected(destination: Destination, current: Destination, shown: List<Destination>): Boolean = when {
+    // the search page belongs to no tab
+    current == Destination.Search -> false
+    destination == Destination.More -> current !in shown || current == Destination.More
+    else -> destination == current
+}
 
 @Composable
 internal fun ChromeFill(modifier: Modifier = Modifier) {

@@ -85,9 +85,10 @@ fun CommandPalette(
     recent: List<String>,
     onRun: (PaletteItem) -> Unit,
     onDismiss: () -> Unit,
+    onSearchAll: ((String) -> Unit)? = null,
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        PaletteSurface(items, recent, onRun, onDismiss)
+        PaletteSurface(items, recent, onRun, onDismiss, onSearchAll = onSearchAll)
     }
 }
 
@@ -99,6 +100,8 @@ fun PaletteSurface(
     onRun: (PaletteItem) -> Unit,
     onDismiss: () -> Unit,
     initialQuery: String = "",
+    /** Shift+Enter (S-311): the search page with the query, for everything the library holds. */
+    onSearchAll: ((String) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -189,7 +192,13 @@ fun PaletteSurface(
                                         true
                                     }
                                     Key.Enter, Key.NumPadEnter -> {
-                                        chosen?.let(run)
+                                        val all = onSearchAll
+                                        if (event.isShiftPressed && all != null) {
+                                            onDismiss()
+                                            all(parsePaletteQuery(query, null).first)
+                                        } else {
+                                            chosen?.let(run)
+                                        }
                                         true
                                     }
                                     Key.Tab -> {
@@ -262,6 +271,7 @@ fun PaletteSurface(
                 Hint("↑↓", stringResource(R.string.nag_palette_hint_move))
                 Hint("Enter", stringResource(R.string.nag_palette_hint_run))
                 Hint("Tab", stringResource(R.string.nag_palette_hint_scope))
+                if (onSearchAll != null) Hint("Shift+Enter", stringResource(R.string.nag_palette_hint_all))
             }
         }
         // here, not beside the state: the field is composed when the box is measured

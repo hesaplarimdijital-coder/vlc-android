@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.screens.SettingsScreen
 import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.PaletteItem
+import app.nagmedar.ui.search.SearchScreen
 import app.nagmedar.ui.search.commandItems
 import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
@@ -135,6 +137,7 @@ private fun NagmedarMain(
     var shortcutListRequests by remember { mutableIntStateOf(0) }
     val menuBar = rememberMenuBarState()
     var paletteOpen by remember { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val actions = remember(context, prefs, navigator) {
         AppActions(context, prefs, navigator, undo, menuBar, onOpenFile, openPalette = { paletteOpen = true }) { shortcutListRequests++ }
     }
@@ -168,7 +171,10 @@ private fun NagmedarMain(
                 sidebarCollapsed = prefs.sidebarCollapsed,
                 onSidebarCollapsedChange = prefs::updateSidebarCollapsed,
                 badges = counts,
-                onSearch = { actions.perform(ShortcutId.CommandPalette) },
+                // the menu bar's field is the palette's; phones and tablets go to the search page (S-311)
+                onSearch = {
+                    if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.navigate(Destination.Search)
+                },
                 menus = { MenuBarMenus(menuSpecs(context, actions), menuBar) },
                 player = { navKind -> PlayerBar(navKind, nowPlaying) },
                 navController = navController,
@@ -181,6 +187,7 @@ private fun NagmedarMain(
                         Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
                         Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
+                        Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -228,6 +235,10 @@ private fun NagmedarMain(
                 item.run()
             },
             onDismiss = { paletteOpen = false },
+            onSearchAll = { query ->
+                searchQuery = query
+                navigator.navigate(Destination.Search)
+            },
         )
     }
 }

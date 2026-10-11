@@ -1,5 +1,6 @@
 package app.nagmedar.ui.playback
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -10,9 +11,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.produceState
 import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.resources.PLAY_EXTRA_START_TIME
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.StartActivity
+import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
 
@@ -48,6 +51,13 @@ fun rememberPlaybackProgress(nowPlaying: NowPlaying): State<Float> = produceStat
 object PlaybackActions {
 
     fun playVideo(context: Context, media: MediaWrapper) = MediaUtils.openMedia(context, media)
+
+    /** Plays a video from [startMs] (S-311: a line found in its subtitles). */
+    fun playVideoAt(context: Context, media: MediaWrapper, startMs: Long) {
+        val intent = VideoPlayerActivity.getIntent(context, media.uri, media.title, false, -1).putExtra(PLAY_EXTRA_START_TIME, startMs)
+        if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
 
     fun playList(context: Context, list: List<MediaWrapper>, position: Int) = MediaUtils.openList(context, list, position)
 

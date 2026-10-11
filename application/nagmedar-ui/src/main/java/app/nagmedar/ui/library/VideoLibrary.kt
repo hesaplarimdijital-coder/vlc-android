@@ -187,14 +187,26 @@ object Sidecars {
      */
     fun languages(video: String, files: Collection<String>): Set<String> {
         val base = video.substringBeforeLast('.', video).lowercase(Locale.ROOT)
-        return files.mapNotNull { file ->
+        return files(video, files).map { file ->
             val lower = file.lowercase(Locale.ROOT)
-            val ext = lower.substringAfterLast('.', "")
-            if (ext !in extensions || !lower.startsWith(base)) return@mapNotNull null
-            val middle = lower.substring(base.length, lower.length - ext.length - 1)
-            // "Film2.srt" and "Film 2.srt" belong to other films
-            if (middle.isNotEmpty() && middle[0] !in ".-_") return@mapNotNull null
+            val middle = lower.substring(base.length, lower.length - lower.substringAfterLast('.').length - 1)
             middle.split('.', '-', '_', ' ').firstNotNullOfOrNull { words[it] } ?: "und"
         }.toSet()
     }
+
+    /** The subtitle files among [files] that belong to [video] (S-311 reads the text ones). */
+    fun files(video: String, files: Collection<String>): List<String> {
+        val base = video.substringBeforeLast('.', video).lowercase(Locale.ROOT)
+        return files.filter { file ->
+            val lower = file.lowercase(Locale.ROOT)
+            val ext = lower.substringAfterLast('.', "")
+            if (ext !in extensions || !lower.startsWith(base)) return@filter false
+            val middle = lower.substring(base.length, lower.length - ext.length - 1)
+            // "Film2.srt" and "Film 2.srt" belong to other films
+            middle.isEmpty() || middle[0] in ".-_"
+        }
+    }
+
+    /** Subtitle formats written as text, which the search page can read. */
+    val textExtensions = setOf("srt", "ass", "ssa", "vtt")
 }
