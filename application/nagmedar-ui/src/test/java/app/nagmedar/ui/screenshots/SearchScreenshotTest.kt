@@ -28,7 +28,8 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-311: the search page in the shell: "kuzey" in a DeX window finds a film, the episodes of a
- * show, a track and a line of a subtitle; on a phone the same, the chips scrolling sideways.
+ * show, a track and a line of a subtitle; on a tablet and a phone the same, the chips scrolling
+ * sideways on the phone.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -70,6 +71,9 @@ class SearchScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun dex() = capture("search-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "kuzey")
+
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun tablet() = capture("search-tablet-dark", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "kuzey")
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("search-phone-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, "kuzey")
