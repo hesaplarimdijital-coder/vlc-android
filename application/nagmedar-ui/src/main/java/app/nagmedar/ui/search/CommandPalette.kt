@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -71,6 +73,7 @@ import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.VerticalRule
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -167,7 +170,9 @@ fun PaletteSurface(
                 Spacer(Modifier.width(12.dp))
                 val placeholder = stringResource(R.string.nag_palette_placeholder)
                 Box(Modifier.weight(1f)) {
-                    if (query.isEmpty()) Text(placeholder, style = NagTheme.type.title, color = colors.textTertiary, maxLines = 1)
+                    if (query.isEmpty()) {
+                        Text(placeholder, style = NagTheme.type.title, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     BasicTextField(
                         value = query,
                         onValueChange = { query = it },
@@ -227,7 +232,8 @@ fun PaletteSurface(
             HorizontalRule()
             // what is searched
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // a phone scrolls the chips sideways
+                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterChip(stringResource(R.string.nag_palette_all), results.scope == null, { scope = null })
                     PaletteKind.entries.forEach { kind ->
                         FilterChip(stringResource(kind.title), results.scope == kind, { on -> scope = if (on) kind else null })
@@ -265,13 +271,16 @@ fun PaletteSurface(
                     Preview(chosen, Modifier.width(300.dp))
                 }
             }
-            HorizontalRule()
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Hint("↑↓", stringResource(R.string.nag_palette_hint_move))
-                Hint("Enter", stringResource(R.string.nag_palette_hint_run))
-                Hint("Tab", stringResource(R.string.nag_palette_hint_scope))
-                if (onSearchAll != null) Hint("Shift+Enter", stringResource(R.string.nag_palette_hint_all))
+            // keys to press: a pointer comes with a keyboard, a touch screen seldom does
+            if (NagTheme.inputMode != InputMode.Touch) {
+                HorizontalRule()
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Hint("↑↓", stringResource(R.string.nag_palette_hint_move))
+                    Hint("Enter", stringResource(R.string.nag_palette_hint_run))
+                    Hint("Tab", stringResource(R.string.nag_palette_hint_scope))
+                    if (onSearchAll != null) Hint("Shift+Enter", stringResource(R.string.nag_palette_hint_all))
+                }
             }
         }
         // here, not beside the state: the field is composed when the box is measured
