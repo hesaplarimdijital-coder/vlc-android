@@ -145,7 +145,7 @@ fun MediaDetailsPanel(
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {
-                Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp)
+                Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
             }
             Spacer(Modifier.height(4.dp))
             Text(item.title, style = NagTheme.type.headline, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis,

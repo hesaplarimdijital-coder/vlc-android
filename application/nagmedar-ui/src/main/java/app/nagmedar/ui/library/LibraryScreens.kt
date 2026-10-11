@@ -467,7 +467,7 @@ fun VideoCard(
             .padding(6.dp),
     ) {
         Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {
-            Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp)
+            Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
             if (item.progress > 0f) {
                 Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(colors.scrim)) {
                     Box(Modifier.fillMaxWidth(item.progress).fillMaxHeight().background(colors.accent))

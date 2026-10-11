@@ -55,9 +55,18 @@ import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.util.ThumbnailsProvider
 
-/** Cover or video thumbnail of [media], loaded through the classic thumbnail cache. */
+/**
+ * Cover or video thumbnail of [media], loaded through the classic thumbnail cache. Without one, a
+ * film or a note stands in, by [video].
+ */
 @Composable
-fun Artwork(media: MediaWrapper?, size: Dp, modifier: Modifier = Modifier, corner: Dp = 6.dp) {
+fun Artwork(
+    media: MediaWrapper?,
+    size: Dp,
+    modifier: Modifier = Modifier,
+    corner: Dp = 6.dp,
+    video: Boolean = media?.type == MediaWrapper.TYPE_VIDEO,
+) {
     val colors = NagTheme.colors
     val px = with(LocalDensity.current) { size.roundToPx() }
     val bitmap by produceState<ImageBitmap?>(null, media?.id, media?.artworkMrl, px) {
@@ -79,7 +88,7 @@ fun Artwork(media: MediaWrapper?, size: Dp, modifier: Modifier = Modifier, corne
             Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
             Icon(
-                if (media?.type == MediaWrapper.TYPE_VIDEO) NagIcons.Movies else NagIcons.Music,
+                if (video) NagIcons.Movies else NagIcons.Music,
                 contentDescription = null,
                 tint = colors.textTertiary,
                 modifier = Modifier.size(size / 2.5f),
