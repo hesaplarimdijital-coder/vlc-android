@@ -25,10 +25,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import kotlin.random.Random
 
 /** S-910 and S-912: the signal path as the panel tells it, and the A/B test as the listener runs it. */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w420dp-h2400dp-mdpi")
 class EqualizerSideTest {
 

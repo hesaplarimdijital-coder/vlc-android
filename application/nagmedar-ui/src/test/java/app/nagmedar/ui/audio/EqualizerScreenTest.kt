@@ -28,11 +28,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import org.videolan.tools.NAGMEDAR_DSP
 import org.videolan.tools.NAGMEDAR_DSP_PROFILES
 
 /** S-906: what the equaliser's controls write for the engine. */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h1700dp-mdpi")
 class EqualizerScreenTest {
 
