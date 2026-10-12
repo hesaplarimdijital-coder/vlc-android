@@ -154,7 +154,7 @@ class EffectsModelTest {
         assertEquals(listOf("aspect:2.39:1"), target.calls)
         assertEquals(0, store.saved)
         // "Save for this file": written now and at every change after
-        controller.setRemembered(true)
+        controller.remember(true)
         assertEquals(AspectChoice.Scope, store.files["file:///kuzey.mkv"]?.aspect)
         controller.update { it.copy(gainPercent = 150) }
         assertEquals(150, store.files["file:///kuzey.mkv"]?.gainPercent)
@@ -169,7 +169,7 @@ class EffectsModelTest {
         assertTrue(controller.remembered)
         assertEquals(150, controller.effects.gainPercent)
         // cleared: forgotten, the effects stay for now
-        controller.setRemembered(false)
+        controller.remember(false)
         assertNull(store.files["file:///kuzey.mkv"])
         assertEquals(150, controller.effects.gainPercent)
     }

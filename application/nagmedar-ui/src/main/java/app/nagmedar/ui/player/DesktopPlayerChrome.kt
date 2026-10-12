@@ -232,7 +232,7 @@ private fun PanelContent(activity: VideoPlayerActivity, visibility: ChromeVisibi
                         supported = effects.supported,
                         remembered = effects.remembered,
                         onChange = effects::update,
-                        onRemember = effects::setRemembered,
+                        onRemember = effects::remember,
                         onMakeDefault = effects::makeDefault,
                         onEqualizerWindow = activity::showEqualizer,
                         columns = layout.columns,

@@ -118,7 +118,7 @@ class EffectsController(
     }
 
     /** "Save for this file": ticked, the film remembers its effects from now on; cleared, it forgets them. */
-    fun setRemembered(on: Boolean) {
+    fun remember(on: Boolean) {
         val uri = media ?: return
         if (on == remembered) return
         remembered = on
