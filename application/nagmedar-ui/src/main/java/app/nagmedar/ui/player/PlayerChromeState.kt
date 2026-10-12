@@ -108,6 +108,9 @@ interface PlayerChromeActions {
     /** S-609: the film goes on in a small window over the others. */
     fun pictureInPicture()
 
+    /** S-701: the system's file picker, for subtitle files to add to the film. */
+    fun addSubtitleFile()
+
     /** Leaves the player. */
     fun close()
 

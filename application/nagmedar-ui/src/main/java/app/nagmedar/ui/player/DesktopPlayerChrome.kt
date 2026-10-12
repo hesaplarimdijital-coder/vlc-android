@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
+import android.view.DragEvent
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.PointerIcon
@@ -16,7 +17,9 @@ import android.widget.FrameLayout
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.hasPrecisePointer
+import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.sizeLabel
@@ -85,6 +89,9 @@ import app.nagmedar.ui.player.snapshot.SnapshotFlash
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
+import app.nagmedar.ui.player.subtitles.PlayerSubtitles
+import app.nagmedar.ui.player.subtitles.SubtitleChooser
+import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
 import app.nagmedar.ui.player.sync.RoomSyncStore
@@ -131,6 +138,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var snapshots: SnapshotController? = null
     private var navigation: PlayerNavigation? = null
     private var refresh: FrameRateMatcher? = null
+    private var subtitles: PlayerSubtitles? = null
 
     override val active: Boolean get() = controls.active
 
@@ -150,6 +158,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.JumpToTime -> navigation?.jumping = true
                 ShortcutId.AddBookmark -> navigation?.addBookmark()
                 ShortcutId.Bookmarks -> panel.toggle(PanelTab.Bookmarks)
+                // S-701: the system's picker rather than the classic one
+                ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
                 ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
                     val done = classic.perform(id)
@@ -186,10 +196,14 @@ class DesktopPlayerChrome : PlayerChrome {
         // the screen's refresh rate (S-612)
         val refresh = FrameRateMatcher(activity).also { it.attach() }
         this.refresh = refresh
+        // subtitle files: picked, dropped on the video, found beside it (S-701)
+        val subtitles = PlayerSubtitles(activity, MainScope())
+        this.subtitles = subtitles
         val frame = MouseOnlyFrame(activity, controls)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation) }
+            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -245,6 +259,40 @@ class DesktopPlayerChrome : PlayerChrome {
         navigation?.onMediaStarted()
         // the screen follows its frame rate (S-612)
         activity?.let { refresh?.apply(RefreshMatch.read(Settings.getInstance(it))) }
+        // its subtitles beside it (S-701)
+        subtitles?.onMediaStarted()
+    }
+
+    /**
+     * S-701: files carried over the video from another app or window: while they are, what a drop
+     * does shows; dropped, subtitles join the film and a video plays instead.
+     */
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun onDrag(activity: VideoPlayerActivity, subtitles: PlayerSubtitles, event: DragEvent): Boolean {
+        val description = event.clipDescription
+        val types = description?.let { d -> (0 until d.mimeTypeCount).map { d.getMimeType(it) } }.orEmpty()
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> types.any(::isMediaOrSubtitleType)
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                subtitles.dragging = true
+                true
+            }
+            DragEvent.ACTION_DRAG_LOCATION -> true
+            DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> {
+                subtitles.dragging = false
+                true
+            }
+            DragEvent.ACTION_DROP -> {
+                subtitles.dragging = false
+                val clip = event.clipData ?: return false
+                // readable while the player's window lives; a document's access is kept for good where it can be
+                activity.requestDragAndDropPermissions(event)
+                val uris = (0 until clip.itemCount).mapNotNull { clip.getItemAt(it).uri }
+                subtitles.dropped(uris)
+                uris.isNotEmpty()
+            }
+            else -> false
+        }
     }
 
     /**
@@ -276,8 +324,10 @@ class DesktopPlayerChrome : PlayerChrome {
         navigation = null
         refresh?.release()
         refresh = null
+        subtitles = null
         panelHost?.detach()
         panelHost = null
+        frame?.setOnDragListener(null)
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
         frame = null
         activity = null
@@ -337,14 +387,27 @@ private fun PlayerChromeContent(
     live: LiveStats,
     snapshots: SnapshotController,
     navigation: PlayerNavigation,
+    subtitles: PlayerSubtitles,
 ) {
     val prefs = rememberNagmedarPreferences()
-    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, prefs) }
+    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, prefs) }
     // the screenshots' folder, chosen with the system's picker: written in, kept across restarts
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) keepSnapshotFolder(activity, prefs, uri)
     }
-    SideEffect { source.pickFolder = { runCatching { folderPicker.launch(null) } } }
+    // subtitle files (S-701): any file, as senders call .srt files many things; what is not one is said
+    val subtitlePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris -> subtitles.picked(uris) }
+    SideEffect {
+        // a picker over the player is not leaving it: no small window
+        source.pickFolder = {
+            activity.isShowingDialog = true
+            runCatching { folderPicker.launch(null) }
+        }
+        subtitles.pick = {
+            activity.isShowingDialog = true
+            runCatching { subtitlePicker.launch(arrayOf("*/*")) }
+        }
+    }
     var state by remember { mutableStateOf(PlayerChromeState()) }
     var uri by remember { mutableStateOf<Uri?>(null) }
     LaunchedEffect(source, visibility.visible) {
@@ -383,16 +446,22 @@ private fun PlayerChromeContent(
                     previews,
                 )
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
-                // above the control bar while it shows
-                SnapshotCard(
-                    outcome = snapshots.state.outcome,
-                    saving = snapshots.state.saving,
-                    onOpen = snapshots::open,
-                    onShare = snapshots::share,
-                    onChooseFolder = source::chooseSnapshotFolder,
-                    onDismiss = snapshots.state::dismiss,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
-                )
+                // above the control bar while it shows: the subtitles found beside the film (S-701), a screenshot's card
+                Column(
+                    Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SubtitleChooser(subtitles.found, onChoose = subtitles::choose, onDismiss = subtitles::dismiss)
+                    SnapshotCard(
+                        outcome = snapshots.state.outcome,
+                        saving = snapshots.state.saving,
+                        onOpen = snapshots::open,
+                        onShare = snapshots::share,
+                        onChooseFolder = source::chooseSnapshotFolder,
+                        onDismiss = snapshots.state::dismiss,
+                    )
+                }
+                if (subtitles.dragging) SubtitleDropOverlay()
             }
             // Ctrl+T (S-608): the time and the chapters as they are when it opens
             if (navigation.jumping) {
@@ -581,6 +650,7 @@ internal class ActivityPlayerSource(
     private val activity: VideoPlayerActivity,
     private val panel: PanelState,
     private val snapshots: SnapshotController,
+    private val subtitles: PlayerSubtitles,
     private val prefs: NagmedarPreferences,
 ) : PlayerChromeActions {
 
@@ -684,6 +754,8 @@ internal class ActivityPlayerSource(
     override fun pictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) activity.switchToPopup()
     }
+
+    override fun addSubtitleFile() = subtitles.pick()
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

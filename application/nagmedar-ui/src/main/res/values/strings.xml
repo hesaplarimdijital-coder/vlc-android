@@ -723,6 +723,22 @@
     <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
     <string name="nag_sync_remember">Remember for this file</string>
     <string name="nag_sync_reset_all">Reset all delays</string>
+    <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
+    <string name="nag_sub_added">Subtitles added: %1$s</string>
+    <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>
+    <string name="nag_sub_not_subtitle">Not a subtitle file: %1$s</string>
+    <string name="nag_sub_failed">The subtitles did not open: %1$s</string>
+    <plurals name="nag_sub_found">
+        <item quantity="one">%d subtitle file in the folder</item>
+        <item quantity="other">%d subtitle files in the folder</item>
+    </plurals>
+    <string name="nag_sub_found_hint">Which one shows?</string>
+    <string name="nag_sub_dismiss">Close</string>
+    <string name="nag_sub_forced">forced</string>
+    <string name="nag_sub_sdh">for the hard of hearing</string>
+    <string name="nag_sub_language_unknown">Language not given</string>
+    <string name="nag_sub_drop_here">Drop the subtitles</string>
+    <string name="nag_sub_drop_hint">They load at once and stay with this film; a video dropped here plays instead.</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
     <string name="nag_refresh_title">Refresh rate matching</string>
     <string name="nag_refresh_exact">whole multiple</string>

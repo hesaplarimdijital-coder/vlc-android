@@ -118,6 +118,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "pip"
     }
 
+    override fun addSubtitleFile() {
+        calls += "add subtitles"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -357,6 +361,13 @@ class DesktopControlsTest {
         state = state.copy(subtitleTrack = null)
         compose.waitForIdle()
         compose.onNodeWithText("Kapalı").assertExists()
+        // S-701: a file of subtitles, from the system's picker
+        compose.onNodeWithTag("player-subtitles").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Ctrl+Shift+A").assertExists()
+        compose.onNode(hasText("Altyazı dosyası ekle…") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        assertEquals(listOf("audio:2", "subtitles:-1", "add subtitles"), actions.calls)
     }
 
     @Test

@@ -704,6 +704,22 @@
     <string name="nag_sync_rate_pal_to_film_hint">PAL (25 fps) altyazı giderek erkene kayıyorsa kullanın; süre çarpanı %1$s.</string>
     <string name="nag_sync_remember">Bu dosya için hatırla</string>
     <string name="nag_sync_reset_all">Tüm gecikmeleri sıfırla</string>
+    <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
+    <string name="nag_sub_added">Altyazı eklendi: %1$s</string>
+    <string name="nag_sub_added_from_folder">Klasördeki altyazı eklendi: %1$s</string>
+    <string name="nag_sub_not_subtitle">Altyazı dosyası değil: %1$s</string>
+    <string name="nag_sub_failed">Altyazı açılamadı: %1$s</string>
+    <plurals name="nag_sub_found">
+        <item quantity="one">Klasörde %d altyazı dosyası var</item>
+        <item quantity="other">Klasörde %d altyazı dosyası var</item>
+    </plurals>
+    <string name="nag_sub_found_hint">Hangisi gösterilsin?</string>
+    <string name="nag_sub_dismiss">Kapat</string>
+    <string name="nag_sub_forced">zorunlu</string>
+    <string name="nag_sub_sdh">işitme engelliler için</string>
+    <string name="nag_sub_language_unknown">Dil belirtilmemiş</string>
+    <string name="nag_sub_drop_here">Altyazıyı bırakın</string>
+    <string name="nag_sub_drop_hint">Hemen yüklenir ve bu filmle kalır; buraya bırakılan bir video ise oynatılır.</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
     <string name="nag_refresh_title">Yenileme hızı eşleme</string>
     <string name="nag_refresh_exact">tam katı</string>

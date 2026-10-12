@@ -364,13 +364,17 @@ private fun AudioMenu(state: PlayerChromeState, actions: PlayerChromeActions, vi
 private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, labelled: Boolean) {
     val off = stringResource(R.string.nag_player_subtitles_off)
     val current = state.subtitleTracks.firstOrNull { it.id == state.subtitleTrack }?.name
+    // S-701: a file of subtitles, from the system's picker
+    val addFile = stringResource(R.string.nag_sc_add_subtitle)
+    val addKeys = ShortcutRegistry.chordLabel(ShortcutId.AddSubtitleFile, LocalContext.current.resources)
     MenuChip(
         label = stringResource(R.string.nag_player_subtitles),
         text = if (labelled) current ?: off else null,
         icon = NagIcons.Subtitle,
         entries = {
             listOf(MenuEntry.Item(off, { actions.setSubtitleTrack(PlayerChromeActions.SUBTITLES_OFF) }, checked = current == null)) +
-                state.subtitleTracks.map { track -> MenuEntry.Item(track.name, { actions.setSubtitleTrack(track.id) }, checked = track.id == state.subtitleTrack) }
+                state.subtitleTracks.map { track -> MenuEntry.Item(track.name, { actions.setSubtitleTrack(track.id) }, checked = track.id == state.subtitleTrack) } +
+                listOf(MenuEntry.Separator, MenuEntry.Item(addFile, actions::addSubtitleFile, shortcut = addKeys))
         },
         visibility = visibility,
         shortcut = ShortcutId.NextSubtitle,
