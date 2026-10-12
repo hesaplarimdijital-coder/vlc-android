@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -342,12 +342,13 @@ private fun MeterView(meter: DspMeter?) {
 
 // --------------------------------------------------------------- the cards
 
-/** The chain's response, 20 Hz to 20 kHz, ±15 dB, at 48 kHz. */
+/** The chain's response, 20 Hz to 20 kHz at 48 kHz: ±12 dB, and as far as the curve goes past it. */
 @Composable
 private fun ResponseCard(dsp: DspSettings, modifier: Modifier) {
     val colors = NagTheme.colors
     val frequencies = remember { DspResponse.logFrequencies(240) }
     val curve = remember(dsp) { DspResponse.curve(dsp, frequencies) }
+    val scale = remember(curve) { ResponseScale.of(curve) }
     val measurer = rememberTextMeasurer()
     val labelStyle = NagTheme.type.caption.copy(color = colors.textTertiary)
     val context = LocalContext.current
@@ -361,13 +362,15 @@ private fun ResponseCard(dsp: DspSettings, modifier: Modifier) {
                 .semantics { contentDescription = description },
         ) {
             val left = 34.dp.toPx()
+            // room for the top line's label above it, and the frequencies below
+            val top = 8.dp.toPx()
             val bottom = 18.dp.toPx()
             val w = size.width - left
-            val h = size.height - bottom
+            val h = size.height - top - bottom
             fun x(hz: Double) = left + (log10(hz / 20.0) / 3.0).toFloat() * w
-            fun y(db: Double) = (h / 2f) - (db.coerceIn(-RESPONSE_DB, RESPONSE_DB) / RESPONSE_DB).toFloat() * (h / 2f)
+            fun y(db: Double) = top + ((scale.top - db.coerceIn(scale.bottom, scale.top)) / (scale.top - scale.bottom)).toFloat() * h
             // the grid: decibels across, frequencies up
-            for (db in listOf(-12.0, -6.0, 0.0, 6.0, 12.0)) {
+            for (db in scale.lines) {
                 val yy = y(db)
                 drawLine(
                     if (db == 0.0) colors.textTertiary else colors.border, Offset(left, yy), Offset(size.width, yy), strokeWidth = 1f,
@@ -377,8 +380,8 @@ private fun ResponseCard(dsp: DspSettings, modifier: Modifier) {
             }
             for ((hz, text) in listOf(50.0 to "50", 100.0 to "100", 200.0 to "200", 500.0 to "500", 1_000.0 to "1k", 2_000.0 to "2k", 5_000.0 to "5k", 10_000.0 to "10k")) {
                 val xx = x(hz)
-                drawLine(colors.border, Offset(xx, 0f), Offset(xx, h), strokeWidth = 1f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f)))
-                drawText(measurer, text, Offset(xx - 8.dp.toPx(), h + 2.dp.toPx()), labelStyle)
+                drawLine(colors.border, Offset(xx, top), Offset(xx, top + h), strokeWidth = 1f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f)))
+                drawText(measurer, text, Offset(xx - 8.dp.toPx(), top + h + 2.dp.toPx()), labelStyle)
             }
             // the curve
             val path = Path()
@@ -391,8 +394,25 @@ private fun ResponseCard(dsp: DspSettings, modifier: Modifier) {
     }
 }
 
-/** The response's height each way, dB. */
-private const val RESPONSE_DB = 15.0
+/**
+ * The response graph's decibels: ±12, widened in steps of 6 to hold the curve (an automatic
+ * preamp takes it far down), at most −48 to +24; its lines every 6 dB, every 12 past 36 dB.
+ */
+internal class ResponseScale(val bottom: Double, val top: Double) {
+    val lines: List<Double>
+        get() {
+            val step = if (top - bottom > 36) 12.0 else 6.0
+            return generateSequence(Math.ceil(bottom / step) * step) { it + step }.takeWhile { it <= top }.toList()
+        }
+
+    companion object {
+        fun of(curve: List<Double>): ResponseScale {
+            val low = (curve.minOrNull() ?: 0.0).coerceAtLeast(-48.0)
+            val high = (curve.maxOrNull() ?: 0.0).coerceAtMost(24.0)
+            return ResponseScale(minOf(-12.0, Math.floor(low / 6) * 6), maxOf(12.0, Math.ceil(high / 6) * 6))
+        }
+    }
+}
 
 @Composable
 private fun PreampCard(state: EqualizerState, modifier: Modifier) {
@@ -427,16 +447,19 @@ private fun GraphicCard(state: EqualizerState, modifier: Modifier) {
         onEnabledChange = { on -> state.update { it.copy(graphicEnabled = on) } },
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            // spread over a wide card, scrolled on a narrow one
-            val fits = maxWidth >= BAND_WIDTH * NativeAudio.GRAPHIC_BANDS
+            // twenty equal columns across a wide card, each at least as wide as its slider and labels;
+            // scrolled on a narrow card
+            val least = maxOf(NagTheme.dimens.minTarget, BAND_WIDTH)
+            val share = maxWidth / NativeAudio.GRAPHIC_BANDS
+            val fits = share >= least
             Row(
                 if (fits) Modifier.fillMaxWidth() else Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = if (fits) Arrangement.SpaceBetween else Arrangement.spacedBy(2.dp),
+                horizontalArrangement = if (fits) Arrangement.Start else Arrangement.spacedBy(2.dp),
             ) {
                 DspSettings.graphicFrequencies.forEachIndexed { i, hz ->
                     val db = dsp.graphicDb.getOrElse(i) { 0.0 }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(min = 30.dp)) {
-                        Text(gainText(db, separator), style = NagTheme.type.caption, color = if (db == 0.0) colors.textTertiary else colors.text, maxLines = 1)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(if (fits) share else least)) {
+                        Text(gainText(db, separator), style = NagTheme.type.caption, color = if (db == 0.0) colors.textTertiary else colors.text, maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
                         GainSlider(
                             value = db,
                             onValueChange = { state.setGraphicBand(i, it) },
@@ -445,7 +468,7 @@ private fun GraphicCard(state: EqualizerState, modifier: Modifier) {
                             enabled = dsp.graphicEnabled,
                             modifier = Modifier.height(170.dp),
                         )
-                        Text(frequencyText(hz, locale, compact = true), style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1)
+                        Text(frequencyText(hz, locale, compact = true), style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
                     }
                 }
             }
@@ -453,8 +476,8 @@ private fun GraphicCard(state: EqualizerState, modifier: Modifier) {
     }
 }
 
-/** A graphic band's column: its slider and labels. */
-private val BAND_WIDTH = 34.dp
+/** A graphic band's column at the least: its labels ("12,5k", "+7,5"). */
+private val BAND_WIDTH = 30.dp
 
 @Composable
 private fun ParametricCard(state: EqualizerState, modifier: Modifier) {
