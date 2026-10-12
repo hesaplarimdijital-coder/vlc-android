@@ -55,7 +55,6 @@
     <string name="nag_coming_tv_lab">Analyse files for your TV and remux them without quality loss.</string>
     <string name="nag_coming_convert">Lossless remux and conversion jobs.</string>
     <string name="nag_coming_downloads">Podcast episodes, subtitles and other downloads.</string>
-    <string name="nag_coming_playlists">Playlists and smart playlists.</string>
     <string name="nag_open_classic">Open the classic interface</string>
 
     <!-- Library -->
@@ -1496,4 +1495,45 @@
     <string name="nag_music_nothing_playing">Nothing plays. Choose a track: it shows here with its waveform.</string>
     <string name="nag_music_waveform">Waveform</string>
     <string name="nag_music_position">%1$s of %2$s</string>
+    <!-- S-804: playlists -->
+    <plurals name="nag_pl_count">
+        <item quantity="one">%d playlist</item>
+        <item quantity="other">%d playlists</item>
+    </plurals>
+    <string name="nag_pl_new">New playlist</string>
+    <string name="nag_pl_create">Create</string>
+    <string name="nag_pl_name">Playlist name</string>
+    <string name="nag_pl_rename">Rename…</string>
+    <string name="nag_pl_rename_title">Rename playlist</string>
+    <string name="nag_pl_export_as">Export as %s…</string>
+    <string name="nag_pl_delete">Delete playlist</string>
+    <string name="nag_pl_deleted">“%s” deleted</string>
+    <string name="nag_pl_remove">Remove from playlist</string>
+    <plurals name="nag_pl_removed">
+        <item quantity="one">%1$d track removed from “%2$s”</item>
+        <item quantity="other">%1$d tracks removed from “%2$s”</item>
+    </plurals>
+    <string name="nag_pl_empty_title">No playlists yet</string>
+    <string name="nag_pl_empty_desc">Make one here, or import an M3U, M3U8, PLS or XSPF file.</string>
+    <string name="nag_pl_list_empty_title">This playlist is empty</string>
+    <string name="nag_pl_list_empty_desc">In Music, select tracks and press “Add to playlist…”.</string>
+    <string name="nag_pl_browse_music">Go to Music</string>
+    <plurals name="nag_pl_imported">
+        <item quantity="one">“%2$s” imported: %1$d track</item>
+        <item quantity="other">“%2$s” imported: %1$d tracks</item>
+    </plurals>
+    <plurals name="nag_pl_import_missing">
+        <item quantity="one">%d not found</item>
+        <item quantity="other">%d not found</item>
+    </plurals>
+    <string name="nag_pl_import_failed">This file could not be read as a playlist.</string>
+    <string name="nag_pl_exported">“%1$s” saved as %2$s</string>
+    <string name="nag_pl_export_failed">The playlist could not be saved.</string>
+    <string name="nag_pl_add">Add to playlist…</string>
+    <string name="nag_pl_add_title">Add to playlist</string>
+    <string name="nag_pl_add_none">These tracks are not in the media library, so they cannot go in a playlist.</string>
+    <plurals name="nag_pl_added">
+        <item quantity="one">%1$d track added to “%2$s”</item>
+        <item quantity="other">%1$d tracks added to “%2$s”</item>
+    </plurals>
 </resources>

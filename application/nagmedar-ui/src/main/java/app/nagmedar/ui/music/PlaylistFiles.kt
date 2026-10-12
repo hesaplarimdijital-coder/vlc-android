@@ -51,6 +51,19 @@ object PlaylistFiles {
         }
     }
 
+    /** The format by the file's first bytes when its name says none: XML, "[playlist]", "#EXTM3U"; null for other files. */
+    fun sniff(bytes: ByteArray): PlaylistFormat? {
+        val head = String(bytes, 0, minOf(bytes.size, 512), StandardCharsets.ISO_8859_1)
+            .removePrefix("\u00EF\u00BB\u00BF")
+            .trimStart()
+        return when {
+            head.startsWith("<?xml") || head.startsWith("<playlist") -> PlaylistFormat.XSPF
+            head.startsWith("[playlist]", ignoreCase = true) -> PlaylistFormat.PLS
+            head.startsWith("#EXTM3U", ignoreCase = true) -> PlaylistFormat.M3U
+            else -> null
+        }
+    }
+
     fun parse(text: String, format: PlaylistFormat, baseDir: String): List<PlaylistEntry> = when (format) {
         PlaylistFormat.M3U, PlaylistFormat.M3U8 -> parseM3u(text, baseDir)
         PlaylistFormat.PLS -> parsePls(text, baseDir)

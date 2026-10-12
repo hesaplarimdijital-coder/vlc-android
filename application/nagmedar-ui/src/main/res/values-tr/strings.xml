@@ -55,7 +55,6 @@
     <string name="nag_coming_tv_lab">Dosyaları TV\'niz için analiz edin, kalite kaybı olmadan remux edin.</string>
     <string name="nag_coming_convert">Kayıpsız remux ve dönüştürme işleri.</string>
     <string name="nag_coming_downloads">Podcast bölümleri, altyazılar ve diğer indirmeler.</string>
-    <string name="nag_coming_playlists">Çalma listeleri ve akıllı listeler.</string>
     <string name="nag_open_classic">Klasik arayüzü aç</string>
 
     <!-- Kütüphane -->
@@ -1468,4 +1467,45 @@
     <string name="nag_music_nothing_playing">Çalan bir şey yok. Bir parça seçin: dalga biçimiyle burada görünür.</string>
     <string name="nag_music_waveform">Dalga biçimi</string>
     <string name="nag_music_position">%1$s / %2$s</string>
+    <!-- S-804: çalma listeleri -->
+    <plurals name="nag_pl_count">
+        <item quantity="one">%d liste</item>
+        <item quantity="other">%d liste</item>
+    </plurals>
+    <string name="nag_pl_new">Yeni liste</string>
+    <string name="nag_pl_create">Oluştur</string>
+    <string name="nag_pl_name">Listenin adı</string>
+    <string name="nag_pl_rename">Yeniden adlandır…</string>
+    <string name="nag_pl_rename_title">Listeyi yeniden adlandır</string>
+    <string name="nag_pl_export_as">%s olarak dışa aktar…</string>
+    <string name="nag_pl_delete">Listeyi sil</string>
+    <string name="nag_pl_deleted">“%s” silindi</string>
+    <string name="nag_pl_remove">Listeden kaldır</string>
+    <plurals name="nag_pl_removed">
+        <item quantity="one">%1$d parça “%2$s” listesinden kaldırıldı</item>
+        <item quantity="other">%1$d parça “%2$s” listesinden kaldırıldı</item>
+    </plurals>
+    <string name="nag_pl_empty_title">Henüz çalma listesi yok</string>
+    <string name="nag_pl_empty_desc">Buradan bir liste oluşturun; M3U, M3U8, PLS ya da XSPF dosyası da içe aktarabilirsiniz.</string>
+    <string name="nag_pl_list_empty_title">Bu liste boş</string>
+    <string name="nag_pl_list_empty_desc">Müzik\'te parçaları seçin ve “Listeye ekle…” düğmesine basın.</string>
+    <string name="nag_pl_browse_music">Müzik\'e git</string>
+    <plurals name="nag_pl_imported">
+        <item quantity="one">“%2$s” içe aktarıldı: %1$d parça</item>
+        <item quantity="other">“%2$s” içe aktarıldı: %1$d parça</item>
+    </plurals>
+    <plurals name="nag_pl_import_missing">
+        <item quantity="one">%d tanesi bulunamadı</item>
+        <item quantity="other">%d tanesi bulunamadı</item>
+    </plurals>
+    <string name="nag_pl_import_failed">Bu dosya çalma listesi olarak okunamadı.</string>
+    <string name="nag_pl_exported">“%1$s”, %2$s olarak kaydedildi</string>
+    <string name="nag_pl_export_failed">Liste kaydedilemedi.</string>
+    <string name="nag_pl_add">Listeye ekle…</string>
+    <string name="nag_pl_add_title">Listeye ekle</string>
+    <string name="nag_pl_add_none">Bu parçalar medya kütüphanesinde değil; çalma listesine eklenemezler.</string>
+    <plurals name="nag_pl_added">
+        <item quantity="one">%1$d parça “%2$s” listesine eklendi</item>
+        <item quantity="other">%1$d parça “%2$s” listesine eklendi</item>
+    </plurals>
 </resources>

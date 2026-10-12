@@ -23,6 +23,7 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - Masaüstü müzik görünümü: büyük pencerede üç bölme (gruplar, parça tablosu, şimdi çalıyor). Tablonun sütunları seçilir (başlığın sağ tık menüsü ya da "Sütunlar": besteci, biçim, derinlik, örnekleme, bit hızı, çalınma, eklenme…), her sütuna göre sıralanır, klavyeyle gezilir. Şimdi çalıyor bölmesinde kapak, biçim ve çıkış, dalga biçimi zaman çizelgesi (tıklanınca atlar, oklarla 5 sn) ve sıradakiler.
 - Telefonun müzik oynatıcısı: mini oynatıcıdan tam ekran; büyük kapak, dalga biçimi, başparmağın ulaştığı yerde denetimler. Kapağı sola kaydırmak sonraki, sağa kaydırmak önceki parçayı çalar; aşağı kaydırmak ya da Geri kapatır.
 - Sıradaki: kütüphanede seçilen parçalar “Hemen sonra oynat” ile çalanın ardına, “Sıraya ekle” ile sonuna girer, çalan liste değişmez; panelde tutamaçla sürüklenir, Alt+↑/↓ ile taşınır, Delete ile çıkarılır.
+- Çalma listeleri: her liste bir sekme; satırlar tutamaçla sürüklenir, Alt+↑/↓ ile taşınır, Delete ile kaldırılır (Geri al geri getirir). M3U, M3U8, PLS ve XSPF içe ve dışa aktarılır: listenin klasör ağacındaki dosyalar göreli yazılır, başka bir bilgisayarda yapılmış listelerin dosyaları kütüphanede adlarından bulunur, eski Türkçe M3U'lar Windows-1254 olarak okunur. Müzik'te seçilen parçalar “Listeye ekle…” ile bir listeye girer.
 
 ## 0.1.0 — MVP1
 

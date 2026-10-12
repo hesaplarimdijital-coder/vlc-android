@@ -166,6 +166,14 @@ class PlaylistFilesTest {
     }
 
     @Test
+    fun aFileWithoutItsExtensionIsKnownByItsStart() {
+        assertEquals(PlaylistFormat.XSPF, PlaylistFiles.sniff("""<?xml version="1.0"?><playlist>""".toByteArray()))
+        assertEquals(PlaylistFormat.PLS, PlaylistFiles.sniff("\n[playlist]\nFile1=a.mp3".toByteArray()))
+        assertEquals(PlaylistFormat.M3U, PlaylistFiles.sniff(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + "#EXTM3U\n".toByteArray()))
+        assertNull(PlaylistFiles.sniff("ID3".toByteArray()))
+    }
+
+    @Test
     fun formatsByTheirNames() {
         assertEquals(PlaylistFormat.M3U8, PlaylistFormat.of("Akşam.M3U8"))
         assertEquals(PlaylistFormat.XSPF, PlaylistFormat.of("a.b.xspf"))

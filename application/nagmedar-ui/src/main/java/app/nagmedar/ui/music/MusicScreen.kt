@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -190,6 +191,9 @@ interface MusicActions {
 
     /** A track dragged out with the mouse, with [others] when it is among those selected (S-406). */
     fun rowModifier(track: Track, others: () -> List<Track>): Modifier = Modifier
+
+    /** S-804: [tracks] to a playlist, chosen or made in a window; null where there is none. */
+    val addToPlaylist: ((List<Track>) -> Unit)? get() = null
 }
 
 // ------------------------------------------------------------------- the screen
@@ -213,7 +217,10 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
         media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) }, locale) }
     }
     val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
-    val actions = remember(context, byUri) { ServiceMusicActions(context, byUri) }
+    // S-804: the tracks being put in a playlist, while its window is open
+    var adding by remember { mutableStateOf<List<Track>?>(null) }
+    val scope = rememberCoroutineScope()
+    val actions = remember(context, byUri) { ServiceMusicActions(context, byUri) { tracks -> adding = tracks } }
     val state = rememberMusicBrowserState()
     Column(Modifier.fillMaxSize()) {
         PageHeader(
@@ -231,6 +238,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
             if (library != null) MusicBrowser(library, state, actions, probing = probing, nowPlaying = nowPlaying)
         }
     }
+    adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
 }
 
 /** The medialibrary's item as the library shows it. */
@@ -256,8 +264,17 @@ fun MediaWrapper.toTrack(tech: TrackTech?): Track {
     )
 }
 
-/** [MusicActions] on the playback service, through the medialibrary's items. */
-private class ServiceMusicActions(private val context: Context, private val byUri: Map<String, MediaWrapper>) : MusicActions {
+/**
+ * [MusicActions] on the playback service, through the medialibrary's items; with [onAddToPlaylist]
+ * the tracks' menu has "Listeye ekle…".
+ */
+internal class ServiceMusicActions(
+    private val context: Context,
+    private val byUri: Map<String, MediaWrapper>,
+    private val onAddToPlaylist: ((List<Track>) -> Unit)? = null,
+) : MusicActions {
+
+    override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
 
     private fun media(tracks: List<Track>) = tracks.mapNotNull { byUri[it.uri] }
 
@@ -270,8 +287,15 @@ private class ServiceMusicActions(private val context: Context, private val byUr
 
     override fun playNext(tracks: List<Track>) = MediaUtils.insertNext(context, media(tracks).toTypedArray())
 
-    override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> =
-        byUri[track.uri]?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
+    override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> {
+        val entries = byUri[track.uri]?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
+        val toPlaylist = onAddToPlaylist ?: return entries
+        // after "Sıraya ekle"
+        val queueLabel = context.getString(R.string.nag_add_to_queue)
+        val at = entries.indexOfFirst { it is MenuEntry.Item && it.label == queueLabel } + 1
+        val item = MenuEntry.Item(context.getString(R.string.nag_pl_add), { toPlaylist(listOf(track)) }, icon = NagIcons.PlaylistAdd)
+        return if (at > 0) entries.subList(0, at) + item + entries.subList(at, entries.size) else entries + item
+    }
 
     override fun rowModifier(track: Track, others: () -> List<Track>): Modifier =
         Modifier.onMiddleClick {
@@ -323,22 +347,22 @@ fun MusicBrowser(
             }
             width >= WidthClass.Large -> Row(Modifier.fillMaxSize()) {
                 if (grouped) {
-                    GroupList(groups, state, Modifier.width(280.dp).fillMaxHeight())
+                    GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false) }
                 if (nowPlaying != null) {
                     VerticalRule()
-                    Box(Modifier.width(320.dp).fillMaxHeight()) { nowPlaying() }
+                    Box(Modifier.width(300.dp).fillMaxHeight()) { nowPlaying() }
                 }
             }
             wide && grouped -> Row(Modifier.fillMaxSize()) {
-                GroupList(groups, state, Modifier.width(260.dp).fillMaxHeight())
+                GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false) }
             }
             !grouped || open != null -> if (open != null) TrackPane(open, state, actions, showBack = grouped)
-            else -> GroupList(groups, state, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
+            else -> GroupList(groups, state, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
         }
     }
 }
@@ -433,11 +457,12 @@ private fun groupLine(group: MusicGroup, view: MusicView): String {
 }
 
 @Composable
-private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, modifier: Modifier) {
+private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, openKey: String?, modifier: Modifier) {
     val listState = rememberLazyListState()
     LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp)) {
         items(groups, key = { it.key }) { group ->
-            GroupRow(group, state.view, selected = group.key == state.group) { state.group = group.key }
+            // the group shown beside, the first one on a wide window until another is opened
+            GroupRow(group, state.view, selected = group.key == openKey) { state.group = group.key }
         }
     }
 }
@@ -534,6 +559,7 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
                 NagButton(stringResource(R.string.nag_selection_play), { actions.play(chosen, 0) }, primary = true)
                 NagButton(stringResource(R.string.nag_play_next), { actions.playNext(chosen) })
                 NagButton(stringResource(R.string.nag_add_to_queue), { actions.queue(chosen) })
+                actions.addToPlaylist?.let { add -> NagButton(stringResource(R.string.nag_pl_add), { add(chosen) }) }
             }
         }
         HorizontalRule()

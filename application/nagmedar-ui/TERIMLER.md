@@ -28,7 +28,8 @@ Sözlüğü testler denetler:
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
 | sanatçı | artist | | | |
 | albüm | album | | | |
-| çalma listesi | playlist | oynatma listesi, oynatma listeleri | | |
+| çalma listesi | playlist | oynatma listesi, oynatma listeleri | | Kısa yerlerde “liste”: “Yeni liste”, “Listeye ekle…”, “Listeden kaldır” |
+| içe aktarmak, dışa aktarmak | import, export | | | Dosyadan okumak, dosyaya yazmak: çalma listeleri (M3U, M3U8, PLS, XSPF), kısayollar, cihaz profilleri |
 | Sıradaki | Up next | kuyruk, oynatma sırası | play queue | Sıradaki parçaların paneli ve onu açan kısayol (Ctrl+L) |
 | sıra | queue | | | “Sıraya ekle”, “Sıradan kaldır”; “Add to queue”, “Remove from the queue” |
 | Hemen sonra oynat | Play next | sonra çal | | Seçileni çalanın hemen arkasına koyar; “Sıraya ekle” en sona |

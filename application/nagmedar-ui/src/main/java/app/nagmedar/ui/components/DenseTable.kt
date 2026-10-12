@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -60,7 +61,8 @@ data class TableSort(val column: Int, val ascending: Boolean)
 /**
  * Dense, desktop-style table (S-202): sticky header with sortable columns, 32 dp rows in
  * pointer mode (taller in touch mode), hover and selection states, keyboard focus per row.
- * [rowMenu] gives every row a context menu (right click, long press, Menu key).
+ * [rowMenu] gives every row a context menu (right click, long press, Menu key). With [reorder]
+ * (made on the same [state]) each row starts with a handle that drags it to another place (S-804).
  */
 @Composable
 fun <T> DenseTable(
@@ -85,6 +87,10 @@ fun <T> DenseTable(
     /** The header's context menu: the columns to show (S-1001). */
     headerMenu: (() -> List<MenuEntry>)? = null,
     headerMenuLabel: String? = null,
+    /** Rows moved by their handles; its list must be [state]. */
+    reorder: ReorderState? = null,
+    /** What a row's handle says to a screen reader ("Neva Kâr: sürükleyerek taşı"). */
+    handleLabel: (T) -> String = { "" },
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -97,6 +103,7 @@ fun <T> DenseTable(
                     .padding(horizontal = dimens.pagePadding - 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (reorder != null) Spacer(Modifier.width(handleWidth()))
                 columns.forEachIndexed { index, column ->
                     HeaderCell(column, index, sort, onSortChange)
                 }
@@ -108,22 +115,30 @@ fun <T> DenseTable(
             header()
         }
         HorizontalRule()
-        LazyColumn(state = state, modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+        LazyColumn(
+            state = state,
+            modifier = Modifier.fillMaxSize().then(if (reorder != null) Modifier.reorderList(reorder) else Modifier),
+            contentPadding = contentPadding,
+        ) {
             itemsIndexed(rows, key = { _, item -> key(item) }) { index, item ->
-                val row = @Composable {
+                // the dragged row rises over the others: its outermost layout carries it
+                val place = if (reorder != null) Modifier.reorderItem(reorder, key(item), index) else Modifier
+                val row = @Composable { outer: Modifier ->
                     TableRow(
                         columns = columns,
                         item = item,
                         selected = selectedKeys?.contains(key(item)) ?: (selectedKey != null && key(item) == selectedKey),
                         onClick = { onRowClick(item, index) },
                         onDoubleClick = onRowDoubleClick?.let { open -> { open(item, index) } },
-                        modifier = rowModifier(item),
+                        modifier = outer.then(rowModifier(item)),
+                        handle = reorder?.let { Modifier.reorderHandle(it, key(item)) },
+                        handleLabel = if (reorder != null) handleLabel(item) else "",
                     )
                 }
                 if (rowMenu != null) {
-                    ContextMenuArea(entries = { rowMenu(item, index) }, accessibilityLabel = rowMenuLabel) { row() }
+                    ContextMenuArea(entries = { rowMenu(item, index) }, modifier = place, accessibilityLabel = rowMenuLabel) { row(Modifier) }
                 } else {
-                    row()
+                    row(place)
                 }
             }
         }
@@ -170,6 +185,8 @@ private fun <T> TableRow(
     onClick: () -> Unit,
     onDoubleClick: (() -> Unit)?,
     modifier: Modifier,
+    handle: Modifier? = null,
+    handleLabel: String = "",
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -188,6 +205,18 @@ private fun <T> TableRow(
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (handle != null) {
+            Box(
+                Modifier
+                    .width(handleWidth())
+                    .heightIn(min = dimens.minTarget)
+                    .then(handle)
+                    .semantics { contentDescription = handleLabel },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(NagIcons.Menu, contentDescription = null, tint = if (selected) colors.onSelection else colors.textTertiary, modifier = Modifier.size(dimens.icon))
+            }
+        }
         columns.forEachIndexed { index, column ->
             Box(Modifier.cell(this, column.width).padding(horizontal = 8.dp), contentAlignment = if (column.alignEnd) Alignment.CenterEnd else Alignment.CenterStart) {
                 Text(
@@ -206,6 +235,10 @@ private fun <T> TableRow(
         }
     }
 }
+
+/** The reorder handle's column: a finger's width by touch. */
+@Composable
+private fun handleWidth(): Dp = NagTheme.dimens.minTarget.coerceAtLeast(28.dp)
 
 /** Column width inside a table row: weight needs the RowScope receiver. */
 private fun Modifier.cell(scope: RowScope, width: ColumnWidth): Modifier = with(scope) {
