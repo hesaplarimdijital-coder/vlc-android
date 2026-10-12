@@ -407,6 +407,46 @@
       }
     },
     {
+      "id": "sync-beeps",
+      "kind": "generated",
+      "step": "sync",
+      "files": [
+        "video/sync_1080p24_beeps.mkv",
+        "video/sync_1080p24_beeps.tr.srt"
+      ],
+      "tests": "A 1 kHz beep every five seconds (5, 10, 15, 20, 25 s) and a sidecar SRT whose lines come 500 ms after each beep: the sync assistant (Shift+H at a beep, Shift+J at its line, Shift+K) should find −500 ms within ±100 ms and bring the lines onto the beeps.",
+      "stories": [
+        "S-704",
+        "S-604"
+      ],
+      "expect": {
+        "duration": [
+          29.9,
+          30.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264"
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "aac"
+          }
+        ],
+        "text": [
+          {
+            "file": "video/sync_1080p24_beeps.tr.srt",
+            "encoding": "utf-8",
+            "contains": [
+              "00:00:05,500 --> 00:00:07,000",
+              "yarım saniye geç"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "id": "flac-hires",
       "kind": "generated",
       "step": "flac",

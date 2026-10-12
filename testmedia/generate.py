@@ -71,6 +71,13 @@ def has_encoder(name):
     return any(line.split()[1:2] == [name] for line in out.splitlines() if len(line.split()) > 1)
 
 
+def srt_text(lines):
+    """SubRip text of (start ms, end ms, text) lines."""
+    def ts(ms):
+        return '%02d:%02d:%02d,%03d' % (ms // 3600000, ms // 60000 % 60, ms // 1000 % 60, ms % 1000)
+    return '\n'.join(f'{i}\n{ts(a)} --> {ts(b)}\n{text}\n' for i, (a, b, text) in enumerate(lines, 1))
+
+
 def ffmpeg_text(text):
     """Escapes text for the drawtext filter."""
     return text.replace('\\', '\\\\').replace(':', '\\:').replace("'", "\\'").replace('%', '\\%')
@@ -358,10 +365,7 @@ class Builder:
                     (24000, 29000, 'Last caption.')]
         signs = [(5000, 8500, '[SIGN: Kuzey Işığı Oteli]'), (19000, 23000, '[TEXT ON SCREEN: 19 s]')]
 
-        def srt(lines):
-            def ts(ms):
-                return '%02d:%02d:%02d,%03d' % (ms // 3600000, ms // 60000 % 60, ms // 1000 % 60, ms % 1000)
-            return '\n'.join(f'{i}\n{ts(a)} --> {ts(b)}\n{text}\n' for i, (a, b, text) in enumerate(lines, 1))
+        srt = srt_text
 
         tr_srt = self.tmp('tr.srt')
         with open(tr_srt, 'w', encoding='utf-8') as fh:
@@ -431,6 +435,17 @@ class Builder:
                    '-metadata:s:s:0', 'language=tur', '-metadata:s:s:1', 'language=tur',
                    '-metadata:s:s:2', 'language=eng', '-metadata:s:s:3', 'language=eng',
                    '-disposition:s:0', 'default', '-disposition:s:3', 'forced', base)
+
+    def sync(self):
+        # S-704: a beep every five seconds, its subtitle half a second late: the sync assistant should find −500 ms
+        out = self.path('video/sync_1080p24_beeps.mkv')
+        ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=24',
+               '-f', 'lavfi', '-i', "aevalsrc='0.5*sin(2*PI*1000*t)*lt(mod(t,5),0.1)*gte(t,4)':s=48000",
+               '-t', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', out)
+        late = 500
+        lines = [(s * 1000 + late, s * 1000 + late + 1500, f'Bip · {s}. saniye (yarım saniye geç)') for s in range(5, 30, 5)]
+        with open(self.path('video/sync_1080p24_beeps.tr.srt'), 'w', encoding='utf-8') as fh:
+            fh.write(srt_text(lines))
 
     # ---------------------------------------------------------------- audio
 
@@ -637,7 +652,7 @@ STEPS = {
     'hdr10': Builder.hdr10, 'hdr10plus': Builder.hdr10plus, 'dv-p81': Builder.dolby_vision_p81,
     'dv-p5': Builder.dolby_vision_p5, 'dv-p7': Builder.dolby_vision_p7,
     'hlg': Builder.hlg, 'stress': Builder.stress, 'interlaced': Builder.interlaced, 'av1': Builder.av1,
-    'subtitles': Builder.subtitles, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
+    'subtitles': Builder.subtitles, 'sync': Builder.sync, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
     'surround': Builder.surround_codecs, 'dsd': Builder.dsd, 'lyrics': Builder.lyrics, 'gapless': Builder.gapless,
     'cue': Builder.cue, 'podcast': Builder.podcast, 'radio': Builder.radio,
 }

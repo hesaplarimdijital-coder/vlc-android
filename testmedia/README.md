@@ -12,7 +12,7 @@ Zip'i tablete (ya da TV testleri için harici diske) açın; klasör yapısı ko
 
 | Klasör | İçerik |
 | --- | --- |
-| `video/` | 4K HEVC Main 10: HDR10, HDR10+ (üç sahne), Dolby Vision 8.1 (mkvmerge yapılandırma kaydıyla), Dolby Vision 5 (yalnız işaretleme: taban katman gerçek IPT değil, renkler bilerek yanlış), 100 Mbit/s yük testi; Dolby Vision 7 MEL (dovi_tool'un MIT lisanslı test dosyalarından, 256×144, E-AC-3 + SRT + bölümlerle: SP-03 dönüştürme girdisi); HLG 1080p50; 1080i25 interlaced H.264; AV1 10 bit; dört altyazı izli MKV (SRT, ASS + gömülü yazı tipi, PGS, zorunlu izler, bölümler) ve yanındaki Windows-1254 SRT, UTF-8 SRT, ASS |
+| `video/` | 4K HEVC Main 10: HDR10, HDR10+ (üç sahne), Dolby Vision 8.1 (mkvmerge yapılandırma kaydıyla), Dolby Vision 5 (yalnız işaretleme: taban katman gerçek IPT değil, renkler bilerek yanlış), 100 Mbit/s yük testi; Dolby Vision 7 MEL (dovi_tool'un MIT lisanslı test dosyalarından, 256×144, E-AC-3 + SRT + bölümlerle: SP-03 dönüştürme girdisi); HLG 1080p50; 1080i25 interlaced H.264; AV1 10 bit; dört altyazı izli MKV (SRT, ASS + gömülü yazı tipi, PGS, zorunlu izler, bölümler) ve yanındaki Windows-1254 SRT, UTF-8 SRT, ASS; senkron örneği (beş saniyede bir bip, yanındaki SRT yarım saniye geç: senkron asistanı −500 ms bulmalı) |
 | `audio/` | FLAC 16/44,1 · 24/96 · 24/192 (24 bitte -110 dBFS ton: bit-perfect yol için null test), FLAC 5.1 kanal tanıma, ALAC 24, AAC, Opus, MP3 (USLT + SYLT sözler), AC-3, E-AC-3, TrueHD 24 bit, DTS çekirdek, DSD64 (DSF) |
 | `audio/gapless/` | Tek bir kesintisiz glissando, örnek hassasiyetinde üç parçaya bölünmüş; FLAC, MP3, AAC, Opus ve M3U8. Parça geçişlerinde tık ya da boşluk duyulmamalı |
 | `audio/cue/` | Tek dosya albüm ve CUE (UTF-8 BOM ve Windows-1254) |
