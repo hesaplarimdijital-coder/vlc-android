@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SampleScreen
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.library.MovieSamples
+import app.nagmedar.ui.search.SearchClock
 import app.nagmedar.ui.search.SearchContent
 import app.nagmedar.ui.search.SearchSamples
 import app.nagmedar.ui.shell.Destination
@@ -20,6 +21,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +40,18 @@ class SearchScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
+    @After
+    fun realClock() {
+        SearchClock.nanoTime = System::nanoTime
+    }
+
     private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, query: String) {
+        // a search takes 2 ms in every picture
+        var now = 0L
+        SearchClock.nanoTime = {
+            now += SEARCH_STEP_NS
+            now
+        }
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
@@ -88,3 +101,5 @@ class SearchScreenshotTest {
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun syntaxEnglish() = capture("search-empty-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
 }
+
+private const val SEARCH_STEP_NS = 2_000_000L

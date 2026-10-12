@@ -147,9 +147,14 @@ class SearchResults(
 /** A key on a network share (smb://, upnp://, nfs://, ftp…): searched only when asked for. */
 fun isOnNetwork(key: String): Boolean = Uri.parse(key).scheme?.lowercase() !in setOf(null, "file", "content")
 
+/** The clock a search is timed by; the screenshots' goes on in even steps, for the same picture each time. */
+internal object SearchClock {
+    var nanoTime: () -> Long = System::nanoTime
+}
+
 /** Searches [data] (S-311); files on network shares count only with [includeNetwork]. */
 fun searchLibrary(data: SearchData, raw: String, includeNetwork: Boolean): SearchResults {
-    val start = System.nanoTime()
+    val start = SearchClock.nanoTime()
     val query = SearchQuery.parse(raw)
     val videos = data.videoIndex.search(query)
     val tracks = data.trackIndex.search(query)
@@ -172,7 +177,7 @@ fun searchLibrary(data: SearchData, raw: String, includeNetwork: Boolean): Searc
         tracks = shownTracks.map { it.value },
         cues = cues,
         hiddenOnNetwork = hidden,
-        millis = (System.nanoTime() - start) / 1_000_000,
+        millis = (SearchClock.nanoTime() - start) / 1_000_000,
     )
 }
 
