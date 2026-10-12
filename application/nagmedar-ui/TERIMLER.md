@@ -79,6 +79,8 @@ Sözlüğü testler denetler:
 | bant giderme | debanding | | | |
 | senkron | sync | eşzamanlama | synchronization | Oynatıcı panelinin sekmesi “Senkron”: ses ve altyazı gecikmesi, altyazı hızı |
 | gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms |
+| kontur | outline | | | Altyazı harflerinin çevresindeki çizgi: yok, 2, 4 ya da 6 px |
+| tırnaklı, tırnaksız | serif, sans serif | | | Altyazı yazı tipleri; “Eş aralıklı” (monospace), “Dar” (condensed) |
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |

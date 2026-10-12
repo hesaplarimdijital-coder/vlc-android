@@ -59,6 +59,7 @@ import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY
 import org.videolan.tools.KEY_SUBTITLES_BOLD
 import org.videolan.tools.KEY_SUBTITLES_COLOR
 import org.videolan.tools.KEY_SUBTITLES_COLOR_OPACITY
+import org.videolan.tools.KEY_SUBTITLES_FONT
 import org.videolan.tools.KEY_SUBTITLES_OUTLINE
 import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR
 import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR_OPACITY
@@ -176,6 +177,8 @@ object VLCOptions {
 
             if (isVLC4()) options.add("--sub-text-scale=" + (1600 / freetypeRelFontsize!!.toFloat()).toString()) else options.add("--freetype-rel-fontsize=" + freetypeRelFontsize!!)
             if (freetypeBold) options.add("--freetype-bold")
+            // Nağmedar (S-705): a system font family other than the default one
+            pref.getString(KEY_SUBTITLES_FONT, null)?.takeIf { it.isNotBlank() }?.let { options.add("--freetype-font=$it") }
             options.add("--freetype-color=$freetypeColor")
             options.add("--freetype-opacity=$freetypeColorOpacity")
             if (freetypeBackgroundEnabled) {

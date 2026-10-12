@@ -46,7 +46,12 @@ class SubtitlesPanelTest {
 
     private val calls = mutableListOf<String>()
 
-    private fun panel(state: DualSubtitles = sampleDual, columns: Int = 1, sync: (@Composable () -> Unit)? = null) {
+    private fun panel(
+        state: DualSubtitles = sampleDual,
+        columns: Int = 1,
+        sync: (@Composable () -> Unit)? = null,
+        appearance: (@Composable () -> Unit)? = null,
+    ) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 SubtitlesPanel(
@@ -60,6 +65,7 @@ class SubtitlesPanelTest {
                     onPosition = { calls += "position:$it" },
                     columns = columns,
                     sync = sync,
+                    appearance = appearance,
                 )
             }
         }
@@ -100,25 +106,29 @@ class SubtitlesPanelTest {
         compose.onNodeWithText("Yok").assertExists()
     }
 
-    private val slot = @Composable { Box(Modifier.fillMaxWidth().height(40.dp).testTag("slot")) }
+    private val delaySlot = @Composable { Box(Modifier.fillMaxWidth().height(40.dp).testTag("delay")) }
+    private val lookSlot = @Composable { Box(Modifier.fillMaxWidth().height(40.dp).testTag("look")) }
 
-    /** S-704: the delay and the sync assistant after the tracks, before the secondary's place. */
+    /** S-704, S-705: the delay and the sync assistant after the tracks, then the look, then the secondary's place. */
     @Test
-    fun theDelayComesAfterTheTracks() {
-        panel(sync = slot)
+    fun theDelayAndTheLookComeAfterTheTracks() {
+        panel(sync = delaySlot, appearance = lookSlot)
         val tracks = compose.onNodeWithText("İZLER").getBoundsInRoot()
-        val delay = compose.onNodeWithTag("slot").getBoundsInRoot()
+        val delay = compose.onNodeWithTag("delay").getBoundsInRoot()
+        val look = compose.onNodeWithTag("look").getBoundsInRoot()
         val secondary = compose.onNodeWithText("İKİNCİL ALTYAZI").getBoundsInRoot()
-        assertTrue(tracks.top < delay.top && delay.bottom <= secondary.top)
+        assertTrue(tracks.top < delay.top && delay.bottom <= look.top && look.bottom <= secondary.top)
     }
 
-    /** Under the video: the tracks and the secondary on the left, the delay on the right. */
+    /** Under the video: the tracks and their look on the left, the delay and the secondary's place on the right. */
     @Test
     fun underTheVideoTheDelayIsBesideTheTracks() {
-        panel(columns = 2, sync = slot)
-        val delay = compose.onNodeWithTag("slot").getBoundsInRoot()
+        panel(columns = 2, sync = delaySlot, appearance = lookSlot)
         val tracks = compose.onNodeWithText("İZLER").getBoundsInRoot()
+        val look = compose.onNodeWithTag("look").getBoundsInRoot()
+        val delay = compose.onNodeWithTag("delay").getBoundsInRoot()
         val secondary = compose.onNodeWithText("İKİNCİL ALTYAZI").getBoundsInRoot()
-        assertTrue(delay.left > tracks.right && secondary.left < delay.left && secondary.top > tracks.top)
+        assertTrue(look.left < delay.left && look.top > tracks.top)
+        assertTrue(delay.left > tracks.right && secondary.left >= delay.left && secondary.top >= delay.bottom)
     }
 }

@@ -94,13 +94,18 @@ import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
 import app.nagmedar.ui.player.subtitles.ActivitySubtitleTracks
 import app.nagmedar.ui.player.subtitles.DualSubtitlesController
 import app.nagmedar.ui.player.subtitles.EncodingDialog
+import app.nagmedar.ui.player.subtitles.LibVlcRestart
+import app.nagmedar.ui.player.subtitles.PendingNativeSubtitleStyle
 import app.nagmedar.ui.player.subtitles.PendingSecondaryLayout
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
+import app.nagmedar.ui.player.subtitles.PrefsSubtitleStyleStore
 import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
 import app.nagmedar.ui.player.subtitles.SecondaryPosition
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.subtitles.SubtitleEncodings
+import app.nagmedar.ui.player.subtitles.SubtitleStyleController
+import app.nagmedar.ui.player.subtitles.SubtitleStyleSection
 import app.nagmedar.ui.player.subtitles.SubtitlesPanel
 import app.nagmedar.ui.player.sync.ActivitySyncAssist
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
@@ -158,6 +163,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var subtitles: PlayerSubtitles? = null
     private var dual: DualSubtitlesController? = null
     private var assistant: SyncAssistant? = null
+    private var appearance: SubtitleStyleController? = null
 
     override val active: Boolean get() = controls.active
 
@@ -229,6 +235,9 @@ class DesktopPlayerChrome : PlayerChrome {
         // two subtitle tracks at once (S-703)
         val dual = DualSubtitlesController(ActivitySubtitleTracks(activity), RoomSecondaryStore(activity.applicationContext), MainScope())
         this.dual = dual
+        // the subtitles' look (S-705), for every film
+        val appearance = SubtitleStyleController(PrefsSubtitleStyleStore(activity.applicationContext), PendingNativeSubtitleStyle, MainScope())
+        this.appearance = appearance
         val frame = MouseOnlyFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
@@ -241,7 +250,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant), layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance), layout)
         }.also { it.attach() }
     }
 
@@ -359,6 +368,10 @@ class DesktopPlayerChrome : PlayerChrome {
         refresh = null
         subtitles = null
         dual = null
+        // a look changed meanwhile reaches the next film: libVLC starts again once nothing plays
+        appearance?.release()
+        appearance = null
+        LibVlcRestart.whenIdle()
         panelHost?.detach()
         panelHost = null
         frame?.setOnDragListener(null)
@@ -372,8 +385,13 @@ class DesktopPlayerChrome : PlayerChrome {
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
 
-/** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704). */
-private class PanelSubtitles(val files: PlayerSubtitles, val dual: DualSubtitlesController, val assistant: SyncAssistant)
+/** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704), the look (S-705). */
+private class PanelSubtitles(
+    val files: PlayerSubtitles,
+    val dual: DualSubtitlesController,
+    val assistant: SyncAssistant,
+    val appearance: SubtitleStyleController,
+)
 
 /** Alt+V, the menu's item, the tab's switch (S-703): the secondary subtitles on or off, said over the video. */
 private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesController) {
@@ -705,6 +723,17 @@ private fun PanelContent(
                                     onMarkSubtitle = { assist(activity, assistant, ShortcutId.SyncMarkSubtitle) },
                                     onApply = { assist(activity, assistant, ShortcutId.SyncApply) },
                                     onUndo = { assist(activity, assistant, ShortcutId.SyncUndo) },
+                                )
+                            },
+                            appearance = {
+                                val look = subtitles.appearance
+                                SubtitleStyleSection(
+                                    style = look.style,
+                                    preset = look.preset,
+                                    waiting = look.waiting,
+                                    layoutSupported = look.supportsLayout,
+                                    onStyle = look::update,
+                                    onPreset = look::choose,
                                 )
                             },
                         )

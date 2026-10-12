@@ -77,8 +77,9 @@ object PendingSecondaryLayout : SecondaryLayoutTarget {
 /**
  * The subtitles' tab of the player's panel (S-703), after the mockups' player: its tracks, the
  * primary and the secondary one shown with it (a switch turns it on and off, as Alt+V does), the
- * file the subtitles came from; their delay and the sync assistant ([sync], S-704); the
- * secondary's place, and the forced subtitles, which wait for the player's native side.
+ * file the subtitles came from; their delay and the sync assistant ([sync], S-704); their look
+ * ([appearance], S-705); the secondary's place, and the forced subtitles, which wait for the
+ * player's native side.
  */
 @Composable
 fun SubtitlesPanel(
@@ -96,20 +97,29 @@ fun SubtitlesPanel(
     columns: Int = 1,
     /** The subtitles' delay and the sync assistant (S-704), after the tracks. */
     sync: (@Composable () -> Unit)? = null,
+    /** The subtitles' look (S-705), after the delay. */
+    appearance: (@Composable () -> Unit)? = null,
 ) {
     Box(modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtitles-panel")) {
         val tracks = @Composable { TracksSection(state, note, onPrimary, onSecondary, onSecondaryOn) }
         val secondary = @Composable { SecondarySection(layoutSupported, position, onPosition) }
         if (columns >= 2) {
+            // the tracks and their look on the left, the delay and the secondary's place on the right
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                     tracks()
-                    if (sync != null) {
+                    if (appearance != null) {
                         PanelRule()
-                        secondary()
+                        appearance()
                     }
                 }
-                Column(Modifier.weight(1f)) { if (sync != null) sync() else secondary() }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                    if (sync != null) {
+                        sync()
+                        PanelRule()
+                    }
+                    secondary()
+                }
             }
         } else {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
@@ -117,6 +127,10 @@ fun SubtitlesPanel(
                 PanelRule()
                 if (sync != null) {
                     sync()
+                    PanelRule()
+                }
+                if (appearance != null) {
+                    appearance()
                     PanelRule()
                 }
                 secondary()

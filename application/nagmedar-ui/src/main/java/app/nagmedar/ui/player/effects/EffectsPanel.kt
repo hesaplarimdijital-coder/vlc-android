@@ -335,7 +335,7 @@ private fun Footer(remembered: Boolean, onRemember: (Boolean) -> Unit, onMakeDef
  * lit from there to the knob; the others from their start. The value is grey while it is the film's own.
  */
 @Composable
-private fun LevelRow(
+internal fun LevelRow(
     label: String,
     value: Int,
     min: Int,

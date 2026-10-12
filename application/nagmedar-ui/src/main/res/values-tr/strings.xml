@@ -746,6 +746,36 @@
     <string name="nag_assist_osd_cleared">Senkron işaretleri silindi</string>
     <string name="nag_assist_osd_nothing">Geri alınacak senkron yok</string>
     <string name="nag_assist_osd_no_subtitles">Altyazı gösterilmiyor</string>
+    <!-- S-705: altyazı görünümü -->
+    <string name="nag_style_title">Görünüm</string>
+    <string name="nag_style_preview">Altyazı görünümünün önizlemesi</string>
+    <string name="nag_style_sample">Işıklar söndüğünde, yolu yıldızlar gösterir.</string>
+    <string name="nag_style_preset">Ön ayar</string>
+    <string name="nag_style_preset_thin">İnce</string>
+    <string name="nag_style_preset_yellow">Sarı</string>
+    <string name="nag_style_preset_boxed">Kutulu</string>
+    <string name="nag_style_font">Yazı tipi</string>
+    <string name="nag_style_font_sans">Tırnaksız</string>
+    <string name="nag_style_font_serif">Tırnaklı</string>
+    <string name="nag_style_font_mono">Eş aralıklı</string>
+    <string name="nag_style_font_condensed">Dar</string>
+    <string name="nag_style_weight_regular">Normal</string>
+    <string name="nag_style_weight_bold">Kalın</string>
+    <string name="nag_style_size">Boyut</string>
+    <string name="nag_style_outline">Kontur</string>
+    <string name="nag_style_shadow">Gölge</string>
+    <string name="nag_style_background">Arka plan</string>
+    <string name="nag_style_colour">Renk</string>
+    <string name="nag_style_white">Beyaz</string>
+    <string name="nag_style_yellow">Sarı</string>
+    <string name="nag_style_cyan">Camgöbeği</string>
+    <string name="nag_style_grey">Gri</string>
+    <string name="nag_style_raise">Yükseklik</string>
+    <string name="nag_style_black_bars">Siyah bantta göster</string>
+    <string name="nag_style_ass">ASS stili</string>
+    <string name="nag_style_ass_file">Dosyanınki</string>
+    <string name="nag_style_ass_ours">Bu görünüm</string>
+    <string name="nag_style_waiting">Yeni görünüm, oynatıcı yeniden açılınca altyazılara uygulanır.</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Altyazı eklendi: %1$s</string>
     <string name="nag_sub_added_from_folder">Klasördeki altyazı eklendi: %1$s</string>

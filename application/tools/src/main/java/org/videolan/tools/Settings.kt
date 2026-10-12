@@ -394,6 +394,8 @@ const val KEY_SUBTITLES_SHADOW = "subtitles_shadow"
 const val KEY_SUBTITLES_SHADOW_COLOR = "subtitles_shadow_color"
 const val KEY_SUBTITLES_SHADOW_COLOR_OPACITY = "subtitles_shadow_color_opacity"
 const val KEY_SUBTITLES_AUTOLOAD = "subtitles_autoload"
+// Nağmedar (S-705): the subtitles' font family, one of the system's ("serif", "monospace"); none is VLC's own
+const val KEY_SUBTITLES_FONT = "nagmedar_subtitles_font"
 const val KEY_OPENGL = "opengl"
 
 //Control settings

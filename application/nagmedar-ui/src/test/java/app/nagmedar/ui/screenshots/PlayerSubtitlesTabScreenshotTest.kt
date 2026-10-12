@@ -18,8 +18,11 @@ import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.subtitles.SecondaryPosition
+import app.nagmedar.ui.player.subtitles.SubtitlePreset
+import app.nagmedar.ui.player.subtitles.SubtitleStyleSection
 import app.nagmedar.ui.player.subtitles.SubtitlesPanel
 import app.nagmedar.ui.player.subtitles.sampleDual
+import app.nagmedar.ui.player.subtitles.sampleLook
 import app.nagmedar.ui.player.sync.AppliedSync
 import app.nagmedar.ui.player.sync.HEARD_MS
 import app.nagmedar.ui.player.sync.SubtitleSyncSection
@@ -38,7 +41,8 @@ import org.robolectric.annotation.GraphicsMode
  * English above, as VLC draws them over the film (drawn here by hand); "TR + EN" on the bar; in
  * English; under the video in half a DeX window; on a phone. S-704: the subtitles' delay, which
  * the film remembers, and the sync assistant: the sound marked, the subtitle next; on the phone,
- * the difference applied, to be taken back.
+ * the difference applied, to be taken back. S-705: the subtitles' look, the mockups' thin one, a
+ * change waiting for the player to open again; the whole tab in a tall DeX window.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -77,6 +81,16 @@ class PlayerSubtitlesTabScreenshotTest {
                                 onUndo = {},
                             )
                         },
+                        appearance = {
+                            SubtitleStyleSection(
+                                style = sampleLook,
+                                preset = SubtitlePreset.Thin,
+                                waiting = true,
+                                layoutSupported = false,
+                                onStyle = {},
+                                onPreset = {},
+                            )
+                        },
                     )
                 }
             }
@@ -101,6 +115,9 @@ class PlayerSubtitlesTabScreenshotTest {
 
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun dexEnglish() = capture("player-subtitles-tab-dex-en")
+
+    @Test @Config(qualifiers = "tr-w1280dp-h1600dp-mdpi")
+    fun dexTall() = capture("player-subtitles-tab-dex-tall")
 
     @Test @Config(qualifiers = "tr-w728dp-h880dp-mdpi")
     fun halfWindow() = capture("player-subtitles-tab-half")

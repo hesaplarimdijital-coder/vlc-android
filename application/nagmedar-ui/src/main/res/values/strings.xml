@@ -765,6 +765,38 @@
     <string name="nag_assist_osd_cleared">Sync marks cleared</string>
     <string name="nag_assist_osd_nothing">No sync to undo</string>
     <string name="nag_assist_osd_no_subtitles">No subtitles are showing</string>
+    <!-- S-705: the subtitles' look -->
+    <string name="nag_style_title">Appearance</string>
+    <string name="nag_style_preview">Preview of the subtitles\' look</string>
+    <string name="nag_style_sample">When the lights go out, the stars show the way.</string>
+    <string name="nag_style_preset">Preset</string>
+    <string name="nag_style_preset_vlc" translatable="false">VLC</string>
+    <string name="nag_style_preset_thin">Thin</string>
+    <string name="nag_style_preset_yellow">Yellow</string>
+    <string name="nag_style_preset_boxed">Boxed</string>
+    <string name="nag_style_font">Font</string>
+    <string name="nag_style_font_sans">Sans serif</string>
+    <string name="nag_style_font_serif">Serif</string>
+    <string name="nag_style_font_mono">Monospace</string>
+    <string name="nag_style_font_condensed">Condensed</string>
+    <string name="nag_style_weight_regular">Regular</string>
+    <string name="nag_style_weight_bold">Bold</string>
+    <string name="nag_style_size">Size</string>
+    <string name="nag_style_outline">Outline</string>
+    <string name="nag_style_px" translatable="false">%1$s px</string>
+    <string name="nag_style_shadow">Shadow</string>
+    <string name="nag_style_background">Background</string>
+    <string name="nag_style_colour">Colour</string>
+    <string name="nag_style_white">White</string>
+    <string name="nag_style_yellow">Yellow</string>
+    <string name="nag_style_cyan">Cyan</string>
+    <string name="nag_style_grey">Grey</string>
+    <string name="nag_style_raise">Height</string>
+    <string name="nag_style_black_bars">Show in the black bar</string>
+    <string name="nag_style_ass">ASS styles</string>
+    <string name="nag_style_ass_file">The file\'s</string>
+    <string name="nag_style_ass_ours">This look</string>
+    <string name="nag_style_waiting">The new look reaches the subtitles when the player opens again.</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Subtitles added: %1$s</string>
     <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>
