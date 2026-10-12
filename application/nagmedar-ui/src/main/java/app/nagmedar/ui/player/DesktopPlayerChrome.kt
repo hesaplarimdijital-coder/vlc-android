@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.PointerIcon
 import android.view.View
@@ -21,13 +22,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.components.LocalTooltipDelay
+import app.nagmedar.ui.input.ShortcutOverrides
+import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.hasPrecisePointer
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
+import org.videolan.tools.Settings
 import org.videolan.vlc.gui.video.PlayerChrome
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
@@ -40,12 +45,16 @@ import org.videolan.vlc.gui.video.VideoPlayerActivity
 class DesktopPlayerChrome : PlayerChrome {
     private val controls = ChromeVisibility()
     private var activity: VideoPlayerActivity? = null
+    private var keys: PlayerKeyTarget? = null
     private var frame: View? = null
 
     override val active: Boolean get() = controls.active
 
     override fun attach(activity: VideoPlayerActivity, root: FrameLayout) {
         this.activity = activity
+        keys = ActivityKeyTarget(activity)
+        // the user's keys (S-402), before the first key arrives
+        ShortcutRegistry.overrides = ShortcutOverrides.parse(Settings.getInstance(activity).getString(NagmedarPreferences.KEY_SHORTCUTS, null))
         // a desktop with a mouse starts with these controls; a finger later hands the video back
         if (hasPrecisePointer(activity)) controls.activate()
         val frame = MouseOnlyFrame(activity, controls)
@@ -78,12 +87,15 @@ class DesktopPlayerChrome : PlayerChrome {
         }
     }
 
+    override fun onKey(event: KeyEvent): Boolean = keys?.let { PlayerKeys.handle(event, it) } ?: false
+
     override fun onPictureInPicture(inPictureInPicture: Boolean) = controls.onPictureInPicture(inPictureInPicture)
 
     override fun detach() {
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
         frame = null
         activity = null
+        keys = null
     }
 }
 

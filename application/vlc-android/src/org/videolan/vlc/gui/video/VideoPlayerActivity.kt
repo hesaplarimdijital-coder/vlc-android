@@ -193,6 +193,7 @@ import org.videolan.vlc.gui.browser.EXTRA_MRL
 import org.videolan.vlc.gui.dialogs.CONFIRM_BOOKMARK_RENAME_DIALOG_RESULT
 import org.videolan.vlc.gui.dialogs.CtxActionReceiver
 import org.videolan.vlc.gui.dialogs.EqualizerFragmentDialog
+import org.videolan.vlc.gui.dialogs.JumpToTimeDialog
 import org.videolan.vlc.gui.dialogs.PlaybackSpeedDialog
 import org.videolan.vlc.gui.dialogs.RENAME_DIALOG_MEDIA
 import org.videolan.vlc.gui.dialogs.RENAME_DIALOG_NEW_NAME
@@ -244,6 +245,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 
 open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, PlaylistAdapter.IPlayer, OnClickListener, OnLongClickListener, StoragePermissionsDelegate.CustomActionController, TextWatcher, IDialogManager, KeycodeListener {
@@ -1263,6 +1265,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             }
             return false
         }
+        // Nağmedar (S-602): the shortcut table's keys first, the user's or VLC's
+        if (chrome?.onKey(event) == true) return true
         if (isShowing || fov == 0f && keyCode == KeyEvent.KEYCODE_DPAD_DOWN && !overlayDelegate.playlistContainer.isVisible())
             overlayDelegate.showOverlayTimeout(Settings.videoHudDelay * 1000)
         when (keyCode) {
@@ -1569,6 +1573,43 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     /** Nağmedar (S-601): the desktop controls' ±10 s, as the keys seek. */
     fun seekBy(deltaMs: Int) {
         if (::touchDelegate.isInitialized) touchDelegate.seekDelta(deltaMs)
+    }
+
+    /** Nağmedar (S-602): Ctrl+↑ and Ctrl+↓, or the user's keys for them. */
+    fun volumeStep(up: Boolean) = if (up) volumeUp() else volumeDown()
+
+    /** Nağmedar (S-602): J and K, or the user's keys: the audio [deltaUs] later or earlier. */
+    fun delayAudio(deltaUs: Long) = delayBy(deltaUs, IPlaybackSettingsController.DelayState.AUDIO)
+
+    /** Nağmedar (S-602): G and H, or the user's keys: the subtitles [deltaUs] later or earlier. */
+    fun delaySubtitles(deltaUs: Long) = delayBy(deltaUs, IPlaybackSettingsController.DelayState.SUBS)
+
+    private fun delayBy(deltaUs: Long, state: IPlaybackSettingsController.DelayState) {
+        delayDelegate.showDelayControls()
+        delayDelegate.delayAudioOrSpu(delta = deltaUs, delayState = state)
+        handler.removeMessages(HIDE_SETTINGS)
+        handler.sendEmptyMessageDelayed(HIDE_SETTINGS, 4000L)
+    }
+
+    /** Nağmedar (S-602): Ctrl+T, VLC's "jump to time". */
+    fun showJumpToTime() {
+        if (supportFragmentManager.isStateSaved) return
+        JumpToTimeDialog.newInstance().show(supportFragmentManager, "time")
+    }
+
+    /**
+     * Nağmedar (S-602): E and Shift+E, a frame forward or back, paused: a precise seek by the
+     * frame's length, until the native frame steps of S-504.
+     */
+    fun stepFrame(forward: Boolean) {
+        val service = service ?: return
+        if (service.isPlaying) service.pause()
+        val track = service.currentVideoTrack
+        val num = track?.getFrameRateNum() ?: 0
+        val den = track?.getFrameRateDen() ?: 0
+        val frameMs = if (num > 0 && den > 0) 1000.0 * den / num else 1000.0 / 25
+        val target = service.getTime() + if (forward) frameMs.roundToLong() else -frameMs.roundToLong()
+        service.seek(target.coerceAtLeast(0L), fast = false)
     }
 
     private fun volumeUp() {

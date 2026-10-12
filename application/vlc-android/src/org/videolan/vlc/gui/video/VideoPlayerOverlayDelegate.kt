@@ -1107,7 +1107,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         player.lockBackButton = false
     }
 
-    private fun pickSubtitles() {
+    /** The file picker for a subtitle; Nağmedar (S-602): also Ctrl+Shift+A. */
+    fun pickSubtitles() {
         val uri = player.videoUri ?: return
         val media = if (uri.scheme.isSchemeFile() || uri.scheme.isSchemeNetwork()) MediaWrapperImpl(FileUtils.getParent(uri.toString())!!.toUri()) else null
         player.isShowingDialog = true

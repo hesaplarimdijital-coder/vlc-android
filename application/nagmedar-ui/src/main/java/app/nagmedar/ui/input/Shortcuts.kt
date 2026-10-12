@@ -146,8 +146,9 @@ enum class ShortcutId {
     OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
+    ShowTime, JumpToTime,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack,
-    Fullscreen, Snapshot, Effects,
+    Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile,
     Settings, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
@@ -199,6 +200,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.NormalSpeed, ShortcutGroup.Playback, R.string.nag_sc_normal_speed, KeyChord(Key.Equals)),
         Shortcut(ShortcutId.Repeat, ShortcutGroup.Playback, R.string.nag_repeat, KeyChord(Key.L)),
         Shortcut(ShortcutId.Shuffle, ShortcutGroup.Playback, R.string.nag_shuffle, KeyChord(Key.R)),
+        // S-602: the rest of VLC's player keys
+        Shortcut(ShortcutId.ShowTime, ShortcutGroup.Playback, R.string.nag_sc_show_time, KeyChord(Key.T), ShortcutScope.Player),
+        Shortcut(ShortcutId.JumpToTime, ShortcutGroup.Playback, R.string.nag_sc_jump_to_time, KeyChord(Key.T, ctrl = true), ShortcutScope.Player),
         // Audio
         Shortcut(ShortcutId.VolumeUp, ShortcutGroup.Audio, R.string.nag_sc_volume_up, KeyChord(Key.DirectionUp, ctrl = true)),
         Shortcut(ShortcutId.VolumeDown, ShortcutGroup.Audio, R.string.nag_sc_volume_down, KeyChord(Key.DirectionDown, ctrl = true)),
@@ -210,6 +214,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Effects, ShortcutGroup.Video, R.string.nag_sc_effects, KeyChord(Key.E, ctrl = true)),
+        Shortcut(ShortcutId.AspectRatio, ShortcutGroup.Video, R.string.nag_sc_aspect_ratio, KeyChord(Key.A), ShortcutScope.Player),
+        Shortcut(ShortcutId.Crop, ShortcutGroup.Video, R.string.nag_sc_crop, KeyChord(Key.C), ShortcutScope.Player),
+        Shortcut(ShortcutId.Zoom, ShortcutGroup.Video, R.string.nag_sc_zoom, KeyChord(Key.Z), ShortcutScope.Player),
         // Subtitle
         Shortcut(ShortcutId.NextSubtitle, ShortcutGroup.Subtitle, R.string.nag_sc_next_subtitle, KeyChord(Key.V), ShortcutScope.Player),
         Shortcut(ShortcutId.SubtitleDelayDown, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_delay_down, KeyChord(Key.G), ShortcutScope.Player),

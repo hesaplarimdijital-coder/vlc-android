@@ -294,6 +294,11 @@
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
     <string name="nag_sc_add_subtitle">Add subtitle file…</string>
     <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
+    <string name="nag_sc_show_time">Show the time</string>
+    <string name="nag_sc_jump_to_time">Jump to time…</string>
+    <string name="nag_sc_aspect_ratio">Aspect ratio</string>
+    <string name="nag_sc_crop">Crop to fill</string>
+    <string name="nag_sc_zoom">Zoom</string>
     <string name="nag_sc_play_queue">Up next</string>
     <string name="nag_sc_shortcut_list">Keyboard shortcuts</string>
     <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
@@ -602,4 +607,9 @@
     <string name="nag_player_ab_set_a">A-B loop: set point A</string>
     <string name="nag_player_ab_set_b">A-B loop: set point B</string>
     <string name="nag_player_ab_off">Turn the A-B loop off</string>
+    <string name="nag_player_repeat_none">Repeat off</string>
+    <string name="nag_player_repeat_all">Repeat all</string>
+    <string name="nag_player_repeat_one">Repeat this one</string>
+    <string name="nag_player_audio_track_now">Audio track: %1$s</string>
+    <string name="nag_player_subtitles_now">Subtitles: %1$s</string>
 </resources>

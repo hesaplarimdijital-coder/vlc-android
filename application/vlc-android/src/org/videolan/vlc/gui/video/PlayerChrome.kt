@@ -5,6 +5,7 @@ package org.videolan.vlc.gui.video
 
 import android.util.Log
 import android.view.InputDevice
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.FrameLayout
 
@@ -29,6 +30,12 @@ interface PlayerChrome {
      * makes the controls stand for the overlay, a finger's hands the overlay back to the player.
      */
     fun onMotion(event: MotionEvent)
+
+    /**
+     * S-602: a key reached the player: the new interface's shortcut table (VLC's keys, or the
+     * user's) answers it first. False leaves it to the classic keys.
+     */
+    fun onKey(event: KeyEvent): Boolean
 
     /** The player went into or out of picture in picture, where there are no controls. */
     fun onPictureInPicture(inPictureInPicture: Boolean)

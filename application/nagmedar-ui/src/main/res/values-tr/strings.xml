@@ -294,6 +294,11 @@
     <string name="nag_sc_subtitle_delay_up">Altyazı gecikmesi +50 ms</string>
     <string name="nag_sc_add_subtitle">Altyazı dosyası ekle…</string>
     <string name="nag_sc_toggle_sidebar">Kenar çubuğunu göster ya da gizle</string>
+    <string name="nag_sc_show_time">Zamanı göster</string>
+    <string name="nag_sc_jump_to_time">Zamana atla…</string>
+    <string name="nag_sc_aspect_ratio">En-boy oranı</string>
+    <string name="nag_sc_crop">Kırparak doldur</string>
+    <string name="nag_sc_zoom">Yakınlaştır</string>
     <string name="nag_sc_play_queue">Sıradaki</string>
     <string name="nag_sc_shortcut_list">Klavye kısayolları</string>
     <string name="nag_settings_shortcuts">Klavye kısayolları</string>
@@ -602,4 +607,9 @@
     <string name="nag_player_ab_set_a">A-B tekrarı: A noktasını koy</string>
     <string name="nag_player_ab_set_b">A-B tekrarı: B noktasını koy</string>
     <string name="nag_player_ab_off">A-B tekrarını kapat</string>
+    <string name="nag_player_repeat_none">Tekrar kapalı</string>
+    <string name="nag_player_repeat_all">Tümünü tekrarla</string>
+    <string name="nag_player_repeat_one">Bunu tekrarla</string>
+    <string name="nag_player_audio_track_now">Ses izi: %1$s</string>
+    <string name="nag_player_subtitles_now">Altyazı: %1$s</string>
 </resources>
