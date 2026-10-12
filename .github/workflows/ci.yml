@@ -11,9 +11,11 @@
 #            screenshots), compares the screenshots with src/test/screenshots and, on
 #            master, pushes them to the ci/screenshots branch for review. Compiler errors
 #            and test failures become check-run annotations.
-# release  : manual or v* tags. Signed release APKs when the keystore secrets exist
-#            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
-#            otherwise it is skipped with a notice.
+# release  : manual (İmzalı release APK üret) or v* tags. Signed release APKs, with the lab's
+#            libraries, into a DRAFT GitHub release with CHANGELOG.md's notes (S-1503): only those
+#            who can push see it; never published, never an artifact. Needs the keystore secrets
+#            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS); without
+#            them it is skipped with a notice. buildsystem/release/README.md has the steps.
 # native   : manual only. Rebuilds libVLC from source for one ABI inside the
 #            VideoLAN Docker image (slow; uses prebuilt contribs when available), then the
 #            app's dev APK with it: Nağmedar's own libVLC (libvlcjni/nagmedar, S-503 …
@@ -256,22 +258,41 @@ jobs:
             buildsystem/benchmark/
           if-no-files-found: error
 
+  # S-1503: the signed APKs go only into a draft GitHub release, which those who can push to the
+  # repository alone see; never published from here, never an artifact (the repository is public)
   release:
-    name: İmzalı release APK
-    if: github.event_name == 'workflow_dispatch' && inputs.release || startsWith(github.ref, 'refs/tags/v')
+    name: İmzalı sürüm (taslak)
+    needs: lab-native
+    if: ${{ !cancelled() && needs.lab-native.result == 'success' && (github.event_name == 'workflow_dispatch' && inputs.release || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    permissions:
+      contents: write
     env:
       HAS_KEYSTORE: ${{ secrets.NAGMEDAR_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v5
+
+      # the lab's native libraries (arm64): the TV Lab and the Lab's tools
+      - name: Laboratuvar kitaplıkları
+        uses: actions/download-artifact@v4
+        with:
+          name: lab-jnilibs
+          path: application/nagmedar-lab/src/main/jniLibs
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
       - name: Anahtar deposu yoksa atla
         if: env.HAS_KEYSTORE != 'true'
-        run: echo "::notice title=Release::NAGMEDAR_KEYSTORE_BASE64 tanımlı değil; imzalı release atlandı."
+        run: echo "::notice title=Sürüm::NAGMEDAR_KEYSTORE_BASE64 tanımlı değil; imzalı sürüm atlandı (buildsystem/release/README.md)."
+      - name: Sürüm notları
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          VERSION=$(python3 buildsystem/release/notes.py --version)
+          python3 buildsystem/release/notes.py "$VERSION" > "$RUNNER_TEMP/notes.md"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
       - name: Hazırlık
         if: env.HAS_KEYSTORE == 'true'
         run: |
@@ -291,13 +312,26 @@ jobs:
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
-      - name: APK
+      - name: Taslak sürüm
         if: env.HAS_KEYSTORE == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: nagmedar-release-apk
-          path: application/app/build/outputs/apk/**/*.apk
-          if-no-files-found: error
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$VERSION"
+          apks=application/app/build/outputs/apk/signedRelease
+          (cd "$apks" && sha256sum *.apk > SHA256SUMS && cat SHA256SUMS)
+          if gh release view "$tag" --json isDraft --jq .isDraft > "$RUNNER_TEMP/draft" 2>/dev/null; then
+            # a published release is the owner's: CI never changes it
+            if [ "$(cat "$RUNNER_TEMP/draft")" != true ]; then
+              echo "::error title=Sürüm::$tag yayımlanmış; CI ona dokunmaz. Yeni bir sürüm için versionName'i artırın."
+              exit 1
+            fi
+            gh release edit "$tag" --draft --title "Nağmedar $VERSION" --notes-file "$RUNNER_TEMP/notes.md" --target "$GITHUB_SHA"
+          else
+            gh release create "$tag" --draft --title "Nağmedar $VERSION" --notes-file "$RUNNER_TEMP/notes.md" --target "$GITHUB_SHA"
+          fi
+          gh release upload "$tag" "$apks"/*.apk "$apks/SHA256SUMS" --clobber
+          echo "::notice title=Taslak sürüm::Nağmedar $VERSION ($tag): Releases'ta taslak olarak duruyor; yalnızca depoya yazabilenler görür."
 
   native:
     name: Native libVLC (${{ inputs.native_abi }})
