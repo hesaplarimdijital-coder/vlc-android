@@ -147,7 +147,7 @@ enum class ShortcutId {
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
     ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks,
-    VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer,
+    VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer, AbSwitch,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
     SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
@@ -219,6 +219,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.NextAudioTrack, ShortcutGroup.Audio, R.string.nag_sc_next_audio_track, KeyChord(Key.B), ShortcutScope.Player),
         // S-603: the equaliser: libVLC's window in the video player, the music engine's page in the library (S-906)
         Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true)),
+        // S-912: the A/B listening test's side (A, B; X in the blind test), wherever the music is chosen
+        Shortcut(ShortcutId.AbSwitch, ShortcutGroup.Audio, R.string.nag_sc_ab_switch, KeyChord(Key.B, alt = true)),
         // Video
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),

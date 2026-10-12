@@ -76,7 +76,11 @@ import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
+import app.nagmedar.ui.audio.AbChoice
+import app.nagmedar.ui.audio.AbTest
 import app.nagmedar.ui.audio.EqualizerScreen
+import app.nagmedar.ui.audio.EqualizerSide
+import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.screens.AboutScreen
 import app.nagmedar.ui.tvlab.Step
 import app.nagmedar.ui.tvlab.TvLabScreen
@@ -285,7 +289,8 @@ private fun NagmedarMain(
                             undo = undo,
                             onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
                         )
-                        Destination.Equalizer -> EqualizerScreen()
+                        // S-906, with S-910's signal path and S-912's A/B test beside the chain
+                        Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
                         Destination.More -> MoreScreen(
                             destinations = Destination.overflow(
                                 when (NavKind.forWidth(widthClass)) {
@@ -493,6 +498,21 @@ class AppActions(
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
             // S-906: in the library the music engine's equaliser; the video player keeps libVLC's
             ShortcutId.Equalizer -> navigator.navigate(Destination.Equalizer)
+            // S-912: from anywhere, while the engine plays through a chain that changes the sound
+            ShortcutId.AbSwitch -> {
+                val path = MusicEngineAccess.signalPath
+                val message = if (path == null || !path.dspActive) {
+                    R.string.nag_ab_unavailable
+                } else {
+                    AbTest.state.next()
+                    when (AbTest.state.choice) {
+                        AbChoice.A -> R.string.nag_ab_now_a
+                        AbChoice.B -> R.string.nag_ab_now_b
+                        AbChoice.X -> R.string.nag_ab_now_x
+                    }
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
             ShortcutId.TvLab -> navigator.navigate(Destination.TvLab)
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()

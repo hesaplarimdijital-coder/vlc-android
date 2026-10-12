@@ -63,6 +63,7 @@ import app.nagmedar.audio.EqType
 import app.nagmedar.audio.GraphicPresets
 import app.nagmedar.audio.HeadphoneProfile
 import app.nagmedar.audio.NativeAudio
+import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.withProfile
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.GainSlider
@@ -188,6 +189,20 @@ fun EqualizerScreen(
     }
 }
 
+/**
+ * S-910 and S-912, the page's [EqualizerScreen] side: the signal path, and the A/B listening
+ * test. While a blind test runs the path keeps quiet about the side that plays.
+ */
+@Composable
+fun EqualizerSide(
+    path: SignalPath? = rememberSignalPath(),
+    outputDevice: String? = MusicEngineAccess.controller?.outputDevice,
+    ab: AbTestState = AbTest.state,
+) {
+    SignalPathCard(path, outputDevice, blind = ab.phase == AbTestState.Phase.Blind)
+    AbTestCard(ab, path)
+}
+
 @Composable
 private fun ColumnScope.ChainCards(state: EqualizerState) {
     val bypassed = state.dsp.bypass
@@ -200,14 +215,15 @@ private fun ColumnScope.ChainCards(state: EqualizerState) {
     LimiterCard(state, dim)
 }
 
-/** A card of the chain: its switch as its title, a hint, its controls. */
+/** A card of the chain: its switch as its title, a hint, its controls; [trailing] at the title's end (a badge). */
 @Composable
-private fun EqCard(
+internal fun EqCard(
     title: String,
     modifier: Modifier = Modifier,
     hint: String? = null,
     enabled: Boolean? = null,
     onEnabledChange: ((Boolean) -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = NagTheme.colors
@@ -223,6 +239,12 @@ private fun EqCard(
     ) {
         if (enabled != null && onEnabledChange != null) {
             NagSwitch(checked = enabled, onCheckedChange = onEnabledChange, label = title)
+        } else if (trailing != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.weight(1f))
+                Spacer(Modifier.width(dimens.gapS))
+                trailing()
+            }
         } else {
             Text(title, style = NagTheme.type.title, color = colors.text)
         }

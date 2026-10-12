@@ -70,6 +70,16 @@ internal fun outputLabel(name: String): String = when (name) {
     else -> stringResource(R.string.nag_output_auto)
 }
 
+/** The engine's sink by the output's name: the pull sink's only owner in the app is the bit-perfect AudioTrack output. */
+@Composable
+internal fun sinkLabel(sink: String): String = outputLabel(
+    when (sink) {
+        "usb" -> NAGMEDAR_OUTPUT_USB
+        "pull" -> NAGMEDAR_OUTPUT_BIT_PERFECT
+        else -> NAGMEDAR_OUTPUT_AAUDIO
+    },
+)
+
 /** Why the samples do not reach the output as they are, in a few words. */
 @Composable
 internal fun reasonLabel(reason: SignalPath.Reason): String = stringResource(

@@ -186,12 +186,7 @@ private fun OutputNow(path: SignalPath, device: String?) {
     val output = path.output ?: return
     val locale = context.resources.locale()
     val parts = buildList {
-        // the pull sink's only owner in the app is the bit-perfect AudioTrack output
-        add(outputLabel(when (output.sink) {
-            "usb" -> NAGMEDAR_OUTPUT_USB
-            "pull" -> NAGMEDAR_OUTPUT_BIT_PERFECT
-            else -> NAGMEDAR_OUTPUT_AAUDIO
-        }))
+        add(sinkLabel(output.sink))
         device?.let(::add)
         add(kiloHertz(output.rate, locale))
         add("${output.bits} bit")

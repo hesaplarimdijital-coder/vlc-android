@@ -97,6 +97,10 @@ Sözlüğü testler denetler:
 | denge | balance | balans | | Sol ve sağ arasında; bir yan kısılır, öteki olduğu gibi kalır |
 | tek kanal | mono | mono | | Tüm kanalların ortalaması her kanala; “Tek kanal” ayarı |
 | DSD | DSD | | | Olduğu gibi; “DSD64”, “DSD128” hız adları; “DoP” (DSD over PCM) da olduğu gibi |
+| sinyal yolu | signal path | | | Dosyadan çıkışa her aşama, biçimiyle; bit-perfect değilse ilk nedeni: “Neden: DSP zinciri” |
+| çözücü | decoder | kod çözücü | | Müzik motorunda FFmpeg; örnekleri 64 bit kayan noktaya açar, DoP sözcüklerine dokunmaz |
+| A/B testi | A/B test | | | Zincirle (A) zincirsizin (B), zincirin düzeyinde karşılaştırılması; A-B tekrarı başka şeydir. Kısayolu Alt+B |
+| kör test | blind test | | | A/B testinde her turda X rastgele A ya da B olur; cevaplar testin sonunda açılır |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |

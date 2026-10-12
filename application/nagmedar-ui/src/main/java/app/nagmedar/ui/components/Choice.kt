@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -38,15 +39,23 @@ import app.nagmedar.ui.theme.NagTheme
 
 /**
  * Row of mutually exclusive options (theme, density, view mode); [fill], the options share the
- * row's width equally (the player panel's).
+ * row's width equally (the player panel's). Not [enabled], it shows its choice faded and takes none.
  */
 @Composable
-fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier, fill: Boolean = false) {
+fun <T> SegmentedChoice(
+    options: List<Pair<T, String>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    fill: Boolean = false,
+    enabled: Boolean = true,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val outer = RoundedCornerShape(dimens.radiusControl + 2.dp)
     Row(
         modifier = modifier
+            .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .background(colors.surface, outer)
             .border(1.dp, colors.border, outer)
             .padding(2.dp)
@@ -66,7 +75,7 @@ fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (
                     .focusRing(state, shape)
                     .background(stateBackground(state, isSelected), shape)
                     .pointerHoverIcon(PointerIcon.Hand)
-                    .selectable(selected = isSelected, interactionSource = interaction, indication = null, role = Role.RadioButton) {
+                    .selectable(selected = isSelected, interactionSource = interaction, indication = null, enabled = enabled, role = Role.RadioButton) {
                         onSelect(value)
                     }
                     .padding(horizontal = dimens.gapM),
