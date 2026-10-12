@@ -89,11 +89,17 @@ import app.nagmedar.ui.player.snapshot.SnapshotFlash
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
+import app.nagmedar.ui.player.subtitles.ActivitySubtitleTracks
+import app.nagmedar.ui.player.subtitles.DualSubtitlesController
 import app.nagmedar.ui.player.subtitles.EncodingDialog
+import app.nagmedar.ui.player.subtitles.PendingSecondaryLayout
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
+import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
+import app.nagmedar.ui.player.subtitles.SecondaryPosition
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.subtitles.SubtitleEncodings
+import app.nagmedar.ui.player.subtitles.SubtitlesPanel
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
 import app.nagmedar.ui.player.sync.RoomSyncStore
@@ -107,6 +113,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.resources.ACTION_REMOTE_PLAYPAUSE
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
@@ -142,6 +149,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var navigation: PlayerNavigation? = null
     private var refresh: FrameRateMatcher? = null
     private var subtitles: PlayerSubtitles? = null
+    private var dual: DualSubtitlesController? = null
 
     override val active: Boolean get() = controls.active
 
@@ -163,6 +171,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Bookmarks -> panel.toggle(PanelTab.Bookmarks)
                 // S-701: the system's picker rather than the classic one
                 ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
+                // S-703: the secondary subtitles, on or off
+                ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
                 ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
                     val done = classic.perform(id)
@@ -203,11 +213,14 @@ class DesktopPlayerChrome : PlayerChrome {
         val subtitles = PlayerSubtitles(activity, MainScope())
         this.subtitles = subtitles
         SubtitleEncodingHook.finder = SubtitleEncodings
+        // two subtitle tracks at once (S-703)
+        val dual = DualSubtitlesController(ActivitySubtitleTracks(activity), RoomSecondaryStore(activity.applicationContext), MainScope())
+        this.dual = dual
         val frame = MouseOnlyFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles) }
+            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -215,7 +228,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual), layout)
         }.also { it.attach() }
     }
 
@@ -263,8 +276,9 @@ class DesktopPlayerChrome : PlayerChrome {
         navigation?.onMediaStarted()
         // the screen follows its frame rate (S-612)
         activity?.let { refresh?.apply(RefreshMatch.read(Settings.getInstance(it))) }
-        // its subtitles beside it (S-701)
+        // its subtitles beside it (S-701), its secondary track (S-703)
         subtitles?.onMediaStarted()
+        dual?.onMediaStarted(uri)
     }
 
     /**
@@ -329,6 +343,7 @@ class DesktopPlayerChrome : PlayerChrome {
         refresh?.release()
         refresh = null
         subtitles = null
+        dual = null
         panelHost?.detach()
         panelHost = null
         frame?.setOnDragListener(null)
@@ -341,6 +356,23 @@ class DesktopPlayerChrome : PlayerChrome {
 
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
+
+/** What the subtitles' tab reads and drives (S-703): the film's subtitle files and its two tracks. */
+private class PanelSubtitles(val files: PlayerSubtitles, val dual: DualSubtitlesController)
+
+/** Alt+V, the menu's item, the tab's switch (S-703): the secondary subtitles on or off, said over the video. */
+private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesController) {
+    val on = dual.toggleSecondary()
+    val state = dual.state
+    val text = when {
+        on -> activity.getString(R.string.nag_subs_secondary_on, state.secondaryTrack?.name.orEmpty())
+        state.primary == null || state.tracks.size < 2 -> activity.getString(R.string.nag_subs_secondary_missing)
+        else -> activity.getString(R.string.nag_subs_secondary_off)
+    }
+    activity.overlayDelegate.showInfo(text, SAID_MS)
+}
+
+private const val SAID_MS = 1_500
 
 /**
  * Over the video: a mouse reaches the controls, a finger or a pen passes through to the classic
@@ -392,9 +424,10 @@ private fun PlayerChromeContent(
     snapshots: SnapshotController,
     navigation: PlayerNavigation,
     subtitles: PlayerSubtitles,
+    dual: DualSubtitlesController,
 ) {
     val prefs = rememberNagmedarPreferences()
-    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, prefs) }
+    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, dual, prefs) }
     // the screenshots' folder, chosen with the system's picker: written in, kept across restarts
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) keepSnapshotFolder(activity, prefs, uri)
@@ -577,13 +610,39 @@ private fun PanelContent(
     info: PanelInfo,
     navigation: PlayerNavigation,
     refresh: FrameRateMatcher,
+    subtitles: PanelSubtitles,
     layout: PanelLayout,
 ) {
     val prefs = rememberNagmedarPreferences()
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.active) InputMode.Pointer else InputMode.Touch) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
-            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), layout.dock, Modifier.fillMaxSize()) { tab ->
+            PlayerPanel(panel, listOf(PanelTab.Subtitles, PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), layout.dock, Modifier.fillMaxSize()) { tab ->
                 when (tab) {
+                    PanelTab.Subtitles -> {
+                        val dual = subtitles.dual
+                        // the player's keys (V) and its own menus change the tracks too
+                        LaunchedEffect(dual, panel.shown) {
+                            while (panel.shown) {
+                                dual.refresh()
+                                delay(1_000)
+                            }
+                        }
+                        var position by remember { mutableStateOf(SecondaryPosition.Top) }
+                        SubtitlesPanel(
+                            state = dual.state,
+                            note = subtitles.files.note,
+                            layoutSupported = PendingSecondaryLayout.supported,
+                            position = position,
+                            onPrimary = dual::setPrimary,
+                            onSecondary = dual::setSecondary,
+                            onSecondaryOn = { on -> if (on != dual.state.secondaryOn) toggleSecondary(activity, dual) },
+                            onPosition = { chosen ->
+                                position = chosen
+                                PendingSecondaryLayout.setPosition(chosen)
+                            },
+                            columns = layout.columns,
+                        )
+                    }
                     PanelTab.Sync -> {
                         // the delays are the player's: VLC's own controls and the keys move them too
                         LaunchedEffect(sync, panel.shown) {
@@ -657,6 +716,7 @@ internal class ActivityPlayerSource(
     private val panel: PanelState,
     private val snapshots: SnapshotController,
     private val subtitles: PlayerSubtitles,
+    private val dual: DualSubtitlesController,
     private val prefs: NagmedarPreferences,
 ) : PlayerChromeActions {
 
@@ -667,6 +727,10 @@ internal class ActivityPlayerSource(
         val service = activity.service ?: return PlayerChromeState()
         val manager = service.playlistManager
         val ab = manager.abRepeat.value?.takeIf { manager.abRepeatOn.value == true }
+        // S-703: the subtitle tracks' languages, and the second one showing
+        val text = runCatching { service.mediaplayer.getTracks(IMedia.Track.Type.Text) }.getOrNull().orEmpty().associateBy { it.id }
+        val shown = runCatching { service.mediaplayer.getSelectedTracks(IMedia.Track.Type.Text) }.getOrNull().orEmpty().map { it.id }
+        val primary = service.spuTrack.takeIf { it != NO_TRACK }
         return PlayerChromeState(
             title = service.title.orEmpty(),
             playing = service.isPlaying,
@@ -678,8 +742,9 @@ internal class ActivityPlayerSource(
             rate = service.rate,
             audioTracks = service.audioTracks.orEmpty().filter { it.getId() != NO_TRACK }.map { TrackChoice(it.getId(), it.getName()) },
             audioTrack = service.audioTrack.takeIf { it != NO_TRACK },
-            subtitleTracks = service.spuTracks.orEmpty().filter { it.getId() != NO_TRACK }.map { TrackChoice(it.getId(), it.getName()) },
-            subtitleTrack = service.spuTrack.takeIf { it != NO_TRACK },
+            subtitleTracks = service.spuTracks.orEmpty().filter { it.getId() != NO_TRACK }.map { TrackChoice(it.getId(), it.getName(), text[it.getId()]?.language.orEmpty()) },
+            subtitleTrack = primary,
+            secondarySubtitleTrack = shown.firstOrNull { it != primary }?.takeIf { primary != null },
             volume = activity.volumePercent,
             maxVolume = activity.maxVolumePercent,
             muted = activity.muted,
@@ -764,6 +829,8 @@ internal class ActivityPlayerSource(
     override fun addSubtitleFile() = subtitles.pick()
 
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
+
+    override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

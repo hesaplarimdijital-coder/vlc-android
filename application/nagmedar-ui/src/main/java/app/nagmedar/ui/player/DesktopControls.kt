@@ -70,6 +70,7 @@ import app.nagmedar.ui.player.snapshot.SnapshotFormat
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.player.subtitles.shortLanguage
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -363,20 +364,33 @@ private fun AudioMenu(state: PlayerChromeState, actions: PlayerChromeActions, vi
 @Composable
 private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, labelled: Boolean) {
     val off = stringResource(R.string.nag_player_subtitles_off)
-    val current = state.subtitleTracks.firstOrNull { it.id == state.subtitleTrack }?.name
+    val primary = state.subtitleTracks.firstOrNull { it.id == state.subtitleTrack }
+    val secondary = state.subtitleTracks.firstOrNull { it.id == state.secondarySubtitleTrack }?.takeIf { primary != null }
+    // S-703: two tracks at once, by their languages: "TR + EN"
+    val current = if (primary != null && secondary != null) shortLanguage(primary.language, primary.name) + " + " + shortLanguage(secondary.language, secondary.name) else primary?.name
     // S-701: a file of subtitles, from the system's picker; S-702: the character set they are read in
+    val resources = LocalContext.current.resources
     val addFile = stringResource(R.string.nag_sc_add_subtitle)
-    val addKeys = ShortcutRegistry.chordLabel(ShortcutId.AddSubtitleFile, LocalContext.current.resources)
+    val addKeys = ShortcutRegistry.chordLabel(ShortcutId.AddSubtitleFile, resources)
     val encoding = stringResource(R.string.nag_enc_menu)
+    val secondaryLabel = stringResource(R.string.nag_sc_secondary_subtitles)
+    val secondaryKeys = ShortcutRegistry.chordLabel(ShortcutId.SecondarySubtitles, resources)
     MenuChip(
         label = stringResource(R.string.nag_player_subtitles),
         text = if (labelled) current ?: off else null,
         icon = NagIcons.Subtitle,
         entries = {
-            listOf(MenuEntry.Item(off, { actions.setSubtitleTrack(PlayerChromeActions.SUBTITLES_OFF) }, checked = current == null)) +
+            listOf(MenuEntry.Item(off, { actions.setSubtitleTrack(PlayerChromeActions.SUBTITLES_OFF) }, checked = primary == null)) +
                 state.subtitleTracks.map { track -> MenuEntry.Item(track.name, { actions.setSubtitleTrack(track.id) }, checked = track.id == state.subtitleTrack) } +
                 listOf(
                     MenuEntry.Separator,
+                    MenuEntry.Item(
+                        secondaryLabel,
+                        actions::toggleSecondarySubtitles,
+                        shortcut = secondaryKeys,
+                        enabled = primary != null && state.subtitleTracks.size > 1,
+                        checked = secondary != null,
+                    ),
                     MenuEntry.Item(addFile, actions::addSubtitleFile, shortcut = addKeys),
                     MenuEntry.Item(encoding, actions::chooseSubtitleEncoding),
                 )
@@ -384,7 +398,7 @@ private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions,
         visibility = visibility,
         shortcut = ShortcutId.NextSubtitle,
         testTag = "player-subtitles",
-        selected = current != null && !labelled,
+        selected = current != null && (!labelled || secondary != null),
     )
 }
 

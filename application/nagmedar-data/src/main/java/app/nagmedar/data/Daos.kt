@@ -149,6 +149,17 @@ abstract class MediaSettingsDao {
         updateSync(uri, audioDelayMs, subtitleDelayMs, subtitleRate, updatedAt)
     }
 
+    /** S-703: the secondary subtitle track [uri] shows with its primary one (null: none); its other columns stay. */
+    @Query("UPDATE media_settings SET secondary_subtitle_track = :track, updated_at = :updatedAt WHERE media_uri = :uri")
+    abstract fun updateSecondarySubtitle(uri: String, track: String?, updatedAt: Long)
+
+    /** S-703: remembers the secondary subtitle track for [uri], making its row when it has none. */
+    @Transaction
+    open fun saveSecondarySubtitle(uri: String, track: String?, updatedAt: Long) {
+        create(MediaSettings(uri, updatedAt = updatedAt))
+        updateSecondarySubtitle(uri, track, updatedAt)
+    }
+
     /** S-702: the character set [uri]'s subtitles are read in (null: detected); its other columns stay. */
     @Query("UPDATE media_settings SET subtitle_encoding = :encoding, updated_at = :updatedAt WHERE media_uri = :uri")
     abstract fun updateSubtitleEncoding(uri: String, encoding: String?, updatedAt: Long)

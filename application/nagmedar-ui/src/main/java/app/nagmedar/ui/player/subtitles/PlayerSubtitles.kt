@@ -51,6 +51,10 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
     /** Opens the system's file picker: the composition's launcher. */
     var pick: () -> Unit = {}
 
+    /** Where the film's last subtitles came from, for the subtitles' tab (S-703): "Film.tr.srt · matched from the folder". */
+    var note by mutableStateOf<String?>(null)
+        private set
+
     /** "Subtitle encoding…" is open on the film's first subtitle file (S-702). */
     var encoding by mutableStateOf<EncodingSample?>(null)
         private set
@@ -66,6 +70,7 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         if (key == lookedAt) return
         lookedAt = key
         found = emptyList()
+        note = null
         // VLC's own "Auto load subtitles" says no
         if (!Settings.getInstance(activity).getBoolean(KEY_SUBTITLES_AUTOLOAD, true)) return
         if (!service.isVideoPlaying) return
@@ -79,7 +84,10 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
             if (lookedAt != key || candidates.isEmpty() || hasSubtitleFiles()) return@launch
             if (candidates.size == 1) {
                 val only = candidates.single()
-                if (load(Uri.parse(only.uri), only.name, select = true)) say(activity.getString(R.string.nag_sub_added_from_folder, only.name))
+                if (load(Uri.parse(only.uri), only.name, select = true)) {
+                    say(activity.getString(R.string.nag_sub_added_from_folder, only.name))
+                    note = activity.getString(R.string.nag_subs_found_note, only.name)
+                }
             } else {
                 found = candidates
             }
@@ -90,7 +98,10 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
     fun choose(candidate: SubtitleCandidate) {
         found = emptyList()
         scope.launch {
-            if (load(Uri.parse(candidate.uri), candidate.name, select = true)) say(activity.getString(R.string.nag_sub_added, candidate.name))
+            if (load(Uri.parse(candidate.uri), candidate.name, select = true)) {
+                say(activity.getString(R.string.nag_sub_added, candidate.name))
+                note = activity.getString(R.string.nag_subs_found_note, candidate.name)
+            }
         }
     }
 
@@ -108,6 +119,7 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         found = emptyList()
         scope.launch {
             val added = subtitles.filterIndexed { index, (uri, name) -> load(uri, name ?: uri.lastPathSegment.orEmpty(), select = index == 0) }
+            added.firstOrNull()?.let { (uri, name) -> note = activity.getString(R.string.nag_subs_added_note, name ?: uri.lastPathSegment.orEmpty()) }
             when {
                 added.isEmpty() -> say(activity.getString(R.string.nag_sub_failed, subtitles.first().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))
                 added.size == 1 -> say(activity.getString(R.string.nag_sub_added, added.single().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))

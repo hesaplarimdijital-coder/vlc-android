@@ -295,6 +295,7 @@
     <string name="nag_sc_subtitle_delay_down">Subtitle delay −50 ms</string>
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
     <string name="nag_sc_add_subtitle">Add subtitle file…</string>
+    <string name="nag_sc_secondary_subtitles">Secondary subtitles on or off</string>
     <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
     <string name="nag_sc_show_time">Show the time</string>
     <string name="nag_sc_jump_to_time">Jump to time…</string>
@@ -723,6 +724,23 @@
     <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
     <string name="nag_sync_remember">Remember for this file</string>
     <string name="nag_sync_reset_all">Reset all delays</string>
+    <!-- S-703: the subtitles' tab: primary and secondary tracks -->
+    <string name="nag_subs_tracks">Tracks</string>
+    <string name="nag_subs_primary">Primary</string>
+    <string name="nag_subs_secondary">Secondary</string>
+    <string name="nag_subs_none">None</string>
+    <string name="nag_subs_secondary_switch">Secondary subtitles</string>
+    <string name="nag_subs_forced">Always show forced subtitles</string>
+    <string name="nag_subs_found_note">%1$s · matched from the folder</string>
+    <string name="nag_subs_added_note">%1$s · added</string>
+    <string name="nag_subs_secondary_title">Secondary subtitles</string>
+    <string name="nag_subs_position">Position</string>
+    <string name="nag_subs_top">At the top</string>
+    <string name="nag_subs_above">Above the primary</string>
+    <string name="nag_subs_keys">turns the secondary subtitles on or off</string>
+    <string name="nag_subs_secondary_on">Secondary subtitles: %1$s</string>
+    <string name="nag_subs_secondary_off">Secondary subtitles off</string>
+    <string name="nag_subs_secondary_missing">No other track for secondary subtitles</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Subtitles added: %1$s</string>
     <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>

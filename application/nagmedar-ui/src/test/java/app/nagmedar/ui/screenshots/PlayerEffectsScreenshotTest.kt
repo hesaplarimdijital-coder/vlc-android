@@ -111,6 +111,8 @@ internal fun PlayerWithPanel(
     overVideo: @Composable BoxScope.() -> Unit = {},
     /** S-608: the bookmarks the timeline marks. */
     bookmarks: List<Long> = emptyList(),
+    /** S-703: the secondary subtitle track shown with the primary one. */
+    secondarySubtitles: String? = null,
     content: @Composable (columns: Int) -> Unit,
 ) {
     val panel = remember { PanelState(tab, open = true) }
@@ -129,13 +131,18 @@ internal fun PlayerWithPanel(
                             overBars = true
                         }
                     }
-                    DesktopControls(samplePlayerState.copy(effectsOpen = tab == PanelTab.Effects, bookmarks = bookmarks), FakePlayerActions(), visibility, previews = null)
+                    DesktopControls(
+                        samplePlayerState.copy(effectsOpen = tab == PanelTab.Effects, bookmarks = bookmarks, secondarySubtitleTrack = secondarySubtitles),
+                        FakePlayerActions(),
+                        visibility,
+                        previews = null,
+                    )
                 }
                 overVideo()
             }
         }
         val tools: @Composable (Modifier, Int) -> Unit = { modifier, columns ->
-            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), dock, modifier) { content(columns) }
+            PlayerPanel(panel, listOf(PanelTab.Subtitles, PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), dock, modifier) { content(columns) }
         }
         if (dock == PanelDock.Side) {
             Row(Modifier.fillMaxSize()) {

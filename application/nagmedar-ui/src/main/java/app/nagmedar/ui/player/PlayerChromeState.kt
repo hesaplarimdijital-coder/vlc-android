@@ -11,7 +11,12 @@ data class ChapterMark(val startMs: Long, val name: String)
 
 /** A track the menus offer: its id for the player and its name. */
 @Immutable
-data class TrackChoice(val id: String, val name: String)
+data class TrackChoice(
+    val id: String,
+    val name: String,
+    /** S-703: as the file tells it ("tur"); the bar writes two subtitle tracks by it ("TR + EN"). */
+    val language: String = "",
+)
 
 /**
  * What the desktop controls over the video show (S-601): the player's state, read twice a second
@@ -33,6 +38,8 @@ data class PlayerChromeState(
     val subtitleTracks: List<TrackChoice> = emptyList(),
     /** The subtitle shown, null when none is. */
     val subtitleTrack: String? = null,
+    /** S-703: the secondary subtitle track shown with [subtitleTrack]; null while it is off. */
+    val secondarySubtitleTrack: String? = null,
     /** The volume in percent, above 100 with audio boost, up to [maxVolume]. */
     val volume: Int = 100,
     val maxVolume: Int = 100,
@@ -113,6 +120,9 @@ interface PlayerChromeActions {
 
     /** S-702: the character set the film's subtitle files are read in, chosen for the film. */
     fun chooseSubtitleEncoding()
+
+    /** S-703: the secondary subtitles on or off (Alt+V). */
+    fun toggleSecondarySubtitles()
 
     /** Leaves the player. */
     fun close()

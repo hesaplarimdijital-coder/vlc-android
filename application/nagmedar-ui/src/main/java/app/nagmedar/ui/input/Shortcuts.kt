@@ -149,7 +149,7 @@ enum class ShortcutId {
     ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
-    NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile,
+    NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
     Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
 }
@@ -231,6 +231,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.SubtitleDelayDown, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_delay_down, KeyChord(Key.G), ShortcutScope.Player),
         Shortcut(ShortcutId.SubtitleDelayUp, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_delay_up, KeyChord(Key.H), ShortcutScope.Player),
         Shortcut(ShortcutId.AddSubtitleFile, ShortcutGroup.Subtitle, R.string.nag_sc_add_subtitle, KeyChord(Key.A, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-703: the secondary track on and off, as VLC 4's own key for it
+        Shortcut(ShortcutId.SecondarySubtitles, ShortcutGroup.Subtitle, R.string.nag_sc_secondary_subtitles, KeyChord(Key.V, alt = true), ShortcutScope.Player),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
         // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization

@@ -126,6 +126,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "encoding"
     }
 
+    override fun toggleSecondarySubtitles() {
+        calls += "secondary"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -148,7 +152,7 @@ internal val samplePlayerState = PlayerChromeState(
     rate = 1f,
     audioTracks = listOf(TrackChoice("1", "English · TrueHD 7.1 Atmos"), TrackChoice("2", "Türkçe · DTS-HD MA 5.1")),
     audioTrack = "1",
-    subtitleTracks = listOf(TrackChoice("3", "Türkçe · SRT"), TrackChoice("4", "English · PGS")),
+    subtitleTracks = listOf(TrackChoice("3", "Türkçe · SRT", "tur"), TrackChoice("4", "English · PGS", "eng")),
     subtitleTrack = "3",
     volume = 70,
     maxVolume = 200,
