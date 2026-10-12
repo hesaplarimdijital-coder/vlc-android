@@ -2,6 +2,7 @@ package app.nagmedar.ui.player
 
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
+import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -36,10 +37,11 @@ object PlayerKeys {
     /** Whether the key [event] pressed is the table's in the player; [target] does what it says. */
     fun handle(event: KeyEvent, target: PlayerKeyTarget): Boolean {
         if (event.action != KeyEvent.ACTION_DOWN || ShortcutRegistry.recording) return false
-        val shortcut = ShortcutRegistry.match(event, scopes)
+        val key = ComposeKeyEvent(event)
+        val shortcut = ShortcutRegistry.match(key, scopes)
         if (shortcut == null) {
             // VLC's key, given away by the user: not the classic player's any more
-            return ShortcutRegistry.defaults.any { it.scope in scopes && it.chord?.matches(event) == true }
+            return ShortcutRegistry.defaults.any { it.scope in scopes && it.chord?.matches(key) == true }
         }
         if (event.repeatCount > 0 && shortcut.id !in repeating) return true
         target.perform(shortcut.id)
