@@ -50,6 +50,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -152,7 +153,7 @@ private fun Analysis(view: TvLabView, report: CheckReport?, actions: TvLabAction
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Findings(view, report, actions)
-                view.tech?.let { Streams(it, locale) }
+                view.tech?.let { Streams(it, locale, labelWidth = 110.dp) }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ChartCard(view, actions, narrow = false, locale = locale)
@@ -163,7 +164,7 @@ private fun Analysis(view: TvLabView, report: CheckReport?, actions: TvLabAction
         Findings(view, report, actions)
         ChartCard(view, actions, narrow = narrow, locale = locale)
         DiskCard(view, actions, locale)
-        view.tech?.let { Streams(it, locale) }
+        view.tech?.let { Streams(it, locale, labelWidth = if (narrow) 88.dp else 110.dp) }
     }
 }
 
@@ -517,7 +518,7 @@ private fun FindingCard(text: FindingText, level: FindingLevel) {
 
 /** What the film holds (S-1201): its container, video, dynamic range and Dolby Vision, every track. */
 @Composable
-private fun Streams(tech: MediaTech, locale: Locale) {
+private fun Streams(tech: MediaTech, locale: Locale, labelWidth: Dp) {
     val res = resources()
     val commentary = stringResource(R.string.nag_tech_commentary)
     val rows = remember(tech, res, locale) { streamRows(res, tech, locale, commentary) }
@@ -525,7 +526,7 @@ private fun Streams(tech: MediaTech, locale: Locale) {
         CardTitle(stringResource(R.string.nag_tvlab_streams))
         rows.forEach { (label, value) ->
             Row(Modifier.fillMaxWidth().heightIn(min = 26.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
-                Text(label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, modifier = Modifier.width(110.dp))
+                Text(label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, modifier = Modifier.width(labelWidth))
                 Text(value, style = NagTheme.type.mono.copy(fontSize = 12.sp), color = NagTheme.colors.text, modifier = Modifier.weight(1f))
             }
         }
@@ -585,7 +586,7 @@ private fun ChartCard(view: TvLabView, actions: TvLabActions, narrow: Boolean, l
     val analysis = view.bitrate?.takeIf { it.complete }
     Card(Modifier.fillMaxWidth().testTag("tvlab-chart-card")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            CardTitle(stringResource(R.string.nag_tvlab_bitrate), Modifier.weight(1f, fill = false))
+            CardTitle(stringResource(R.string.nag_tvlab_bitrate))
             Spacer(Modifier.weight(1f))
             if (analysis != null) {
                 MenuButton(
