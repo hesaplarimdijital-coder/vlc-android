@@ -82,6 +82,9 @@ ICONS = {
     'NetworkOff': '<path d="M2 6.5a9 9 0 0 1 12 0M4.2 9a5.8 5.8 0 0 1 7.6 0M8 12.5h.01M3 3l10 10"/>',
     'SearchOff': '<circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3M5.5 7h3"/>',
     'Lock': '<rect x="3.5" y="7" width="9" height="6.5" rx="1.2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>',
+    # S-603 effects panel (rotating by 90° draws Resume and Forward)
+    'FlipHorizontal': '<path d="M8 2v12M6 4.5 2.5 8 6 11.5zM10 4.5 13.5 8 10 11.5z"/>',
+    'FlipVertical': '<path d="M2 8h12M4.5 6 8 2.5 11.5 6zM4.5 10 8 13.5 11.5 10z"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

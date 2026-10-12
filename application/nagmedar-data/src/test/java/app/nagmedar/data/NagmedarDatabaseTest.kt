@@ -114,8 +114,22 @@ class NagmedarDatabaseTest {
         val saved = settings.get(uri)!!
         assertEquals(-80L, saved.audioDelayMs)
         assertEquals("Windows-1254", saved.subtitleEncoding)
+        // S-603: the effects panel's values ride along, the delays stay
+        settings.saveEffects(uri, "2.39:1", "auto", "rock", "{\"gain\":150}", updatedAt = 7)
+        settings.get(uri)!!.let {
+            assertEquals("{\"gain\":150}", it.effects)
+            assertEquals("2.39:1", it.aspectRatio)
+            assertEquals("rock", it.equalizerPreset)
+            assertEquals(-80L, it.audioDelayMs)
+        }
+        settings.updateEffects(uri, null, null, null, null, updatedAt = 8)
+        assertNull(settings.get(uri)!!.effects)
+        assertEquals(-80L, settings.get(uri)!!.audioDelayMs)
         settings.forget(uri)
         assertNull(settings.get(uri))
+        // a file without a row gets one
+        settings.saveEffects("file:///yeni.mkv", "auto", "auto", null, "{}", updatedAt = 9)
+        assertEquals("{}", settings.get("file:///yeni.mkv")!!.effects)
     }
 }
 
@@ -137,19 +151,23 @@ class NagmedarDatabaseMigrationTest {
     @Test
     fun everyVersionMigratesToTheLatest() {
         assumeTrue("schema 1 not exported yet", schemaExported(1))
+        // the latest schema is exported by the build that introduces it, then committed
+        assumeTrue("schema ${NagmedarDatabase.VERSION} not exported yet", schemaExported(NagmedarDatabase.VERSION))
         helper.createDatabase(TEST_DB, 1).use { db ->
             db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, updated_at) VALUES ('file:///film.mkv', -120, 1)")
         }
-        // 1 -> 2 (S-802): the probe cache appears, the settings stay
+        // 1 -> 2 (S-802): the probe cache appears; 2 -> 3 (S-603): the effects column; the settings stay
         helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
-            db.query("SELECT audio_delay_ms FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
+            db.query("SELECT audio_delay_ms, effects FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals(-120L, c.getLong(0))
+                assertTrue("no effects remembered yet", c.isNull(1))
             }
             db.execSQL(
                 "INSERT INTO media_tech (media_uri, file_size, modified_at, probe_version, json, probed_at) " +
                     "VALUES ('file:///film.mkv', 1, 2, 1, '{}', 3)",
             )
+            db.execSQL("UPDATE media_settings SET effects = '{\"gain\":150}' WHERE media_uri = 'file:///film.mkv'")
         }
     }
 

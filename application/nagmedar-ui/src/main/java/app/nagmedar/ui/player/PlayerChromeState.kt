@@ -41,6 +41,8 @@ data class PlayerChromeState(
     val canFullscreen: Boolean = false,
     val hasPrevious: Boolean = false,
     val hasNext: Boolean = false,
+    /** S-603: the panel shows its effects. */
+    val effectsOpen: Boolean = false,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -83,6 +85,9 @@ interface PlayerChromeActions {
     fun toggleMute()
 
     fun toggleFullscreen()
+
+    /** S-603: opens the panel on its effects, or closes it. */
+    fun toggleEffects()
 
     /** Leaves the player. */
     fun close()

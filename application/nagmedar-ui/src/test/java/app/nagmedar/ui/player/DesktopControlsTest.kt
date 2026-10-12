@@ -87,6 +87,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "fullscreen"
     }
 
+    override fun toggleEffects() {
+        calls += "effects"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -238,9 +242,10 @@ class DesktopControlsTest {
         compose.onNodeWithTag("player-ab").performClick()
         compose.onNodeWithContentDescription("Sesi kapat").performClick()
         compose.onNodeWithContentDescription("Tam ekran").performClick()
+        compose.onNodeWithContentDescription("Efektler ve filtreler").performClick()
         compose.onNodeWithContentDescription("Oynatıcıyı kapat").performClick()
         assertEquals(
-            listOf("playPause", "previous", "next", "seekBy:-10000", "seekBy:10000", "ab", "mute", "fullscreen", "close"),
+            listOf("playPause", "previous", "next", "seekBy:-10000", "seekBy:10000", "ab", "mute", "fullscreen", "effects", "close"),
             actions.calls,
         )
         // what they show

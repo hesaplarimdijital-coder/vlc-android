@@ -1822,6 +1822,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     private fun onPlaying() {
         val mw = service?.currentMediaWrapper ?: return
+        chrome?.onPlaying()
         isPlaying = true
         overlayDelegate.hasPlaylist = service?.hasPlaylist() == true
         setPlaybackParameters()

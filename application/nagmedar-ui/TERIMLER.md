@@ -69,6 +69,12 @@ Sözlüğü testler denetler:
 | kare hızı | frame rate | | | |
 | vurgu rengi | accent colour | | | |
 | ön ayar | preset | | | “VLC”, “mpv” |
+| efekt | effect | | | “Efektler ve filtreler” (Ctrl+E); oynatıcı panelinin sekmesi “Efektler” |
+| ekolayzer | equaliser | eşitleyici | equalizer | VLC'nin ön ayarları kendi adlarıyla: “Düz”, “Güçlü bas”, “Büyük salon” |
+| en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
+| ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
+| geçmeli tarama | deinterlacing | | | |
+| bant giderme | debanding | | | |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 

@@ -98,7 +98,11 @@ object LyricsKey {
         listOf(artist, title, album).joinToString("|") { it?.trim()?.lowercase().orEmpty() } + "|" + (lengthMs / 1000)
 }
 
-/** Settings remembered per file: delays, tracks, aspect ratio, speed, deinterlacing, equaliser. */
+/**
+ * Settings remembered per file: delays, tracks, aspect ratio, speed, deinterlacing, equaliser and
+ * (S-603) the rest of the effects panel's values, as the panel's JSON in [effects]. A null column
+ * is not remembered: the player's own setting applies.
+ */
 @Entity(tableName = "media_settings")
 data class MediaSettings(
     @PrimaryKey @ColumnInfo(name = "media_uri") val mediaUri: String,
@@ -113,6 +117,8 @@ data class MediaSettings(
     val deinterlace: String? = null,
     @ColumnInfo(name = "equalizer_preset") val equalizerPreset: String? = null,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+    /** S-603: colour, crop, rotation, HDR, scaler, debanding and the audio effects, as JSON. */
+    val effects: String? = null,
 )
 
 /**

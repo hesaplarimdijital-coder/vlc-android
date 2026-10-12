@@ -104,18 +104,36 @@ interface LyricsDao {
 }
 
 @Dao
-interface MediaSettingsDao {
+abstract class MediaSettingsDao {
     @Query("SELECT * FROM media_settings WHERE media_uri = :uri")
-    fun get(uri: String): MediaSettings?
+    abstract fun get(uri: String): MediaSettings?
 
     @Query("SELECT * FROM media_settings WHERE media_uri = :uri")
-    fun observe(uri: String): Flow<MediaSettings?>
+    abstract fun observe(uri: String): Flow<MediaSettings?>
 
     @Upsert
-    fun save(settings: MediaSettings)
+    abstract fun save(settings: MediaSettings)
 
     @Query("DELETE FROM media_settings WHERE media_uri = :uri")
-    fun forget(uri: String)
+    abstract fun forget(uri: String)
+
+    /** A row for [settings]' file, unless it has one: its values stay then. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun create(settings: MediaSettings)
+
+    /** S-603: the effects panel's columns of [uri]'s row (null: not remembered); its delays and tracks stay. */
+    @Query(
+        "UPDATE media_settings SET aspect_ratio = :aspectRatio, deinterlace = :deinterlace, equalizer_preset = :equalizerPreset, " +
+            "effects = :effects, updated_at = :updatedAt WHERE media_uri = :uri",
+    )
+    abstract fun updateEffects(uri: String, aspectRatio: String?, deinterlace: String?, equalizerPreset: String?, effects: String?, updatedAt: Long)
+
+    /** S-603: remembers the effects panel's values for [uri], making its row when it has none. */
+    @Transaction
+    open fun saveEffects(uri: String, aspectRatio: String?, deinterlace: String?, equalizerPreset: String?, effects: String?, updatedAt: Long) {
+        create(MediaSettings(uri, updatedAt = updatedAt))
+        updateEffects(uri, aspectRatio, deinterlace, equalizerPreset, effects, updatedAt)
+    }
 }
 
 @Dao

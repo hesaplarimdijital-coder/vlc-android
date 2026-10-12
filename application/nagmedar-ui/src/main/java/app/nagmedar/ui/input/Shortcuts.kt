@@ -147,7 +147,7 @@ enum class ShortcutId {
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
     ShowTime, JumpToTime,
-    VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack,
+    VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile,
     Settings, CommandPalette, ToggleSidebar, PlayQueue,
@@ -210,10 +210,13 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.AudioDelayDown, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_down, KeyChord(Key.J), ShortcutScope.Player),
         Shortcut(ShortcutId.AudioDelayUp, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_up, KeyChord(Key.K), ShortcutScope.Player),
         Shortcut(ShortcutId.NextAudioTrack, ShortcutGroup.Audio, R.string.nag_sc_next_audio_track, KeyChord(Key.B), ShortcutScope.Player),
+        // S-603: the equaliser's window, from the effects panel
+        Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true), ShortcutScope.Player),
         // Video
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.Effects, ShortcutGroup.Video, R.string.nag_sc_effects, KeyChord(Key.E, ctrl = true)),
+        // S-603: the video player's effects panel
+        Shortcut(ShortcutId.Effects, ShortcutGroup.Video, R.string.nag_sc_effects, KeyChord(Key.E, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.AspectRatio, ShortcutGroup.Video, R.string.nag_sc_aspect_ratio, KeyChord(Key.A), ShortcutScope.Player),
         Shortcut(ShortcutId.Crop, ShortcutGroup.Video, R.string.nag_sc_crop, KeyChord(Key.C), ShortcutScope.Player),
         Shortcut(ShortcutId.Zoom, ShortcutGroup.Video, R.string.nag_sc_zoom, KeyChord(Key.Z), ShortcutScope.Player),

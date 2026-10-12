@@ -200,3 +200,44 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
         Text(label, style = NagTheme.type.body, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
     }
 }
+
+/** A box to tick with its label; the whole row ticks it (S-603: "Save for this file"). */
+@Composable
+fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val shape = RoundedCornerShape(dimens.radiusControl)
+    val box = RoundedCornerShape(3.dp)
+    Row(
+        modifier = modifier
+            .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
+            .focusRing(state, shape)
+            .background(stateBackground(state), shape)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interaction, enabled)
+            .toggleable(
+                value = checked,
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange,
+            )
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(16.dp)
+                .background(if (checked) colors.accent else Color.Transparent, box)
+                .border(1.5.dp, if (checked) colors.accent else colors.textTertiary, box),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (checked) Icon(NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(12.dp))
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(label, style = NagTheme.type.label, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
+    }
+}

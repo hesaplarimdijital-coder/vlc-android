@@ -192,6 +192,7 @@ private fun ControlBar(
                 AudioMenu(state, actions, visibility, labelled = wide)
                 SubtitleMenu(state, actions, visibility, labelled = wide)
                 if (!narrow) AbButton(state, actions)
+                BarButton(NagIcons.Effects, stringResource(R.string.nag_sc_effects), actions::toggleEffects, ShortcutId.Effects, selected = state.effectsOpen)
                 Volume(state, actions, slider = !narrow)
                 if (state.canFullscreen) {
                     BarButton(

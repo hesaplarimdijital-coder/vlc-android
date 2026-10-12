@@ -289,6 +289,7 @@
     <string name="nag_sc_fullscreen">Fullscreen</string>
     <string name="nag_sc_snapshot">Take snapshot</string>
     <string name="nag_sc_effects">Effects and filters</string>
+    <string name="nag_sc_equalizer">Equaliser…</string>
     <string name="nag_sc_next_subtitle">Next subtitle track</string>
     <string name="nag_sc_subtitle_delay_down">Subtitle delay −50 ms</string>
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
@@ -612,4 +613,93 @@
     <string name="nag_player_repeat_one">Repeat this one</string>
     <string name="nag_player_audio_track_now">Audio track: %1$s</string>
     <string name="nag_player_subtitles_now">Subtitles: %1$s</string>
+
+    <!-- S-603: the player's panel and its effects -->
+    <string name="nag_panel_subtitles">Subtitles</string>
+    <string name="nag_panel_sync">Sync</string>
+    <string name="nag_panel_effects">Effects</string>
+    <string name="nag_panel_info">Info</string>
+    <string name="nag_panel_close">Close the panel</string>
+    <string name="nag_fx_picture">Picture</string>
+    <string name="nag_fx_reset">Reset</string>
+    <string name="nag_fx_brightness">Brightness</string>
+    <string name="nag_fx_contrast">Contrast</string>
+    <string name="nag_fx_saturation">Saturation</string>
+    <string name="nag_fx_hue">Hue</string>
+    <string name="nag_fx_gamma">Gamma</string>
+    <string name="nag_fx_value_degrees">%1$s°</string>
+    <string name="nag_fx_value_db">%1$s dB</string>
+    <string name="nag_fx_shape">Aspect ratio and crop</string>
+    <string name="nag_fx_auto">Auto</string>
+    <string name="nag_fx_off">Off</string>
+    <string name="nag_fx_aspect_16_9" translatable="false">16:9</string>
+    <string name="nag_fx_aspect_239">2.39:1</string>
+    <string name="nag_fx_aspect_4_3" translatable="false">4:3</string>
+    <string name="nag_fx_aspect_fill">Fill</string>
+    <string name="nag_fx_auto_crop">Detect black bars</string>
+    <string name="nag_fx_auto_crop_hint">Crops the black bars above and below the picture</string>
+    <string name="nag_fx_rotate_left">Rotate 90° left</string>
+    <string name="nag_fx_rotate_right">Rotate 90° right</string>
+    <string name="nag_fx_flip_horizontal">Flip horizontally</string>
+    <string name="nag_fx_flip_vertical">Flip vertically</string>
+    <string name="nag_fx_rotated">Rotated by %1$d°</string>
+    <string name="nag_fx_hdr_section">HDR and scaling</string>
+    <string name="nag_fx_gpu_load">GPU load: %1$s</string>
+    <string name="nag_fx_gpu_low">low</string>
+    <string name="nag_fx_gpu_medium">medium</string>
+    <string name="nag_fx_gpu_high">high</string>
+    <string name="nag_fx_hdr_output">HDR output</string>
+    <string name="nag_fx_hdr_passthrough">Pass to the screen</string>
+    <string name="nag_fx_hdr_tonemap">Tone-map to SDR</string>
+    <string name="nag_fx_tone_mapping">Tone mapping</string>
+    <string name="nag_fx_tone_unused">Not used when passed through</string>
+    <string name="nag_fx_tone_bt2390" translatable="false">BT.2390</string>
+    <string name="nag_fx_tone_hable" translatable="false">Hable</string>
+    <string name="nag_fx_tone_reinhard" translatable="false">Reinhard</string>
+    <string name="nag_fx_tone_mobius" translatable="false">Möbius</string>
+    <string name="nag_fx_scaler">Scaler</string>
+    <string name="nag_fx_scaler_bilinear">Bilinear</string>
+    <string name="nag_fx_scaler_spline36" translatable="false">Spline36</string>
+    <string name="nag_fx_scaler_ewa_lanczos" translatable="false">EWA Lanczos</string>
+    <string name="nag_fx_deinterlace">Deinterlacing</string>
+    <string name="nag_fx_deinterlace_blend">Blend</string>
+    <string name="nag_fx_deinterlace_bob" translatable="false">Bob</string>
+    <string name="nag_fx_deinterlace_yadif" translatable="false">Yadif</string>
+    <string name="nag_fx_deinterlace_yadif2x" translatable="false">Yadif (2×)</string>
+    <string name="nag_fx_debanding">Debanding</string>
+    <string name="nag_fx_audio">Audio</string>
+    <string name="nag_fx_night_mode">Night mode</string>
+    <string name="nag_fx_night_mode_hint">Softens explosions, keeps the dialogue</string>
+    <string name="nag_fx_dialogue">Dialogue</string>
+    <string name="nag_fx_gain">Boost</string>
+    <string name="nag_fx_channels">Channel layout</string>
+    <string name="nag_fx_channels_stereo">Stereo</string>
+    <string name="nag_fx_channels_binaural">Headphones (binaural)</string>
+    <string name="nag_fx_channels_51" translatable="false">5.1</string>
+    <string name="nag_fx_channels_71" translatable="false">7.1</string>
+    <string name="nag_fx_equalizer">Equaliser</string>
+    <string name="nag_fx_equalizer_players">The player\'s setting</string>
+    <string name="nag_fx_remember">Save for this file</string>
+    <string name="nag_fx_make_default">Make default</string>
+    <string name="nag_fx_made_default">Made default</string>
+    <string name="nag_fx_pending">The faded settings come with the next version of the playback engine.</string>
+    <!-- VLC's equaliser presets, by VLC's names -->
+    <string name="nag_eq_flat">Flat</string>
+    <string name="nag_eq_classical">Classical</string>
+    <string name="nag_eq_club">Club</string>
+    <string name="nag_eq_dance">Dance</string>
+    <string name="nag_eq_full_bass">Full bass</string>
+    <string name="nag_eq_full_bass_treble">Full bass and treble</string>
+    <string name="nag_eq_full_treble">Full treble</string>
+    <string name="nag_eq_headphones">Headphones</string>
+    <string name="nag_eq_large_hall">Large hall</string>
+    <string name="nag_eq_live">Live</string>
+    <string name="nag_eq_party">Party</string>
+    <string name="nag_eq_pop" translatable="false">Pop</string>
+    <string name="nag_eq_reggae" translatable="false">Reggae</string>
+    <string name="nag_eq_rock" translatable="false">Rock</string>
+    <string name="nag_eq_ska" translatable="false">Ska</string>
+    <string name="nag_eq_soft">Soft</string>
+    <string name="nag_eq_soft_rock">Soft rock</string>
+    <string name="nag_eq_techno">Techno</string>
 </resources>

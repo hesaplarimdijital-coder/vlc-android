@@ -97,7 +97,7 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.NextAudioTrack -> nextTrack(audio = true)
             ShortcutId.Fullscreen -> PlayerWindow.toggleFullscreen(activity)
             ShortcutId.Snapshot -> activity.takeScreenshot()
-            ShortcutId.Effects -> activity.showEqualizer()
+            ShortcutId.Equalizer -> activity.showEqualizer()
             ShortcutId.AspectRatio -> nextScale(aspectRatios)
             ShortcutId.Crop -> nextScale(crops)
             ShortcutId.Zoom -> nextScale(zooms)

@@ -95,7 +95,7 @@ class PlayerChromeScreenshotTest {
 
 /** A night sky with an aurora, for the controls to lie over. */
 @Composable
-private fun SampleVideo(modifier: Modifier = Modifier) {
+internal fun SampleVideo(modifier: Modifier = Modifier) {
     DrawCanvas(modifier) {
         drawRect(Brush.verticalGradient(listOf(Color(0xFF07111C), Color(0xFF0E2A3E), Color(0xFF132F2A))))
         val wave = Path().apply {

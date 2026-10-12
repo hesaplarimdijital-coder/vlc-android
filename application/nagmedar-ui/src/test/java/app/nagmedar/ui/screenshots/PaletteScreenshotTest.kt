@@ -43,7 +43,7 @@ class PaletteScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private val later = setOf(ShortcutId.MediaInfo, ShortcutId.Effects)
+    private val later = setOf(ShortcutId.MediaInfo)
 
     @Composable
     private fun items(): List<PaletteItem> {

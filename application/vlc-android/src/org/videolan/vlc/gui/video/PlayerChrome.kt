@@ -1,5 +1,5 @@
 /*
- * Nağmedar (S-601): the desktop control bar over the video player.
+ * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603).
  */
 package org.videolan.vlc.gui.video
 
@@ -39,6 +39,12 @@ interface PlayerChrome {
 
     /** The player went into or out of picture in picture, where there are no controls. */
     fun onPictureInPicture(inPictureInPicture: Boolean)
+
+    /**
+     * S-603: a media started or went on playing: a new film brings the effects it remembers
+     * (or the defaults) to the player.
+     */
+    fun onPlaying()
 
     fun detach()
 
