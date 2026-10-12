@@ -1,5 +1,6 @@
 package app.nagmedar.ui.tvlab
 
+import android.net.Uri
 import app.nagmedar.lab.AudioTech
 import app.nagmedar.lab.BitrateAnalysis
 import app.nagmedar.lab.DiskSpeed
@@ -10,6 +11,7 @@ import app.nagmedar.lab.VideoTech
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.CompletableDeferred
 
 /*
  * The TV Lab's sample film, as the mockup has it: a UHD Blu-ray remux with Dolby Vision profile 7
@@ -148,3 +150,63 @@ fun sampleTvLabView(profile: DeviceProfile = BuiltInProfiles.lgB4Usb) = TvLabVie
 
 /** The sample film read, its drive measured, its packets being counted. */
 fun sampleRunningView() = sampleTvLabView().copy(bitrate = null, bitrateStep = Step.Running(0.42f), elapsedMs = null)
+
+/** The native lab's stand-in: the sample film read at once, its bitrate held at [bitrateGate] when set. */
+class FakeTvLabEngine(
+    override val available: Boolean = true,
+    var tech: MediaTech? = sampleTech(),
+) : TvLabEngine {
+    val calls = mutableListOf<String>()
+    var bitrateGate: CompletableDeferred<Unit>? = null
+    var lastProgress: ((Float) -> Unit)? = null
+
+    override fun describe(uri: Uri) = sampleFile
+
+    override suspend fun probe(uri: Uri): MediaTech? {
+        calls += "probe"
+        return tech
+    }
+
+    override suspend fun bitrate(uri: Uri, progress: (Float) -> Unit): Result<BitrateAnalysis> {
+        calls += "bitrate"
+        lastProgress = progress
+        progress(0.5f)
+        bitrateGate?.await()
+        return Result.success(sampleBitrate(60))
+    }
+
+    override fun drive(uri: Uri): DriveInfo {
+        calls += "drive"
+        return sampleDrive
+    }
+
+    override suspend fun diskSpeed(uri: Uri, sizeBytes: Long, progress: (Float, Double) -> Unit): Result<DiskSpeed> {
+        calls += "disk:$sizeBytes"
+        progress(0.5f, 380.0)
+        return Result.success(sampleDisk)
+    }
+
+    override fun cancel() {
+        calls += "cancel"
+    }
+}
+
+/** Profiles kept in memory. */
+class MemoryProfileStore : ProfileStore {
+    val saved = linkedMapOf<String, DeviceProfile>()
+
+    override fun all() = BuiltInProfiles.all.map { saved[it.id]?.copy(builtIn = true) ?: it } + saved.values.filter { BuiltInProfiles.of(it.id) == null }
+
+    override fun save(profile: DeviceProfile) {
+        saved[profile.id] = profile
+    }
+
+    override fun remove(id: String) {
+        saved.remove(id)
+        if (selected == id && BuiltInProfiles.of(id) == null) selected = null
+    }
+
+    override fun saved(id: String) = id in saved
+
+    override var selected: String? = null
+}

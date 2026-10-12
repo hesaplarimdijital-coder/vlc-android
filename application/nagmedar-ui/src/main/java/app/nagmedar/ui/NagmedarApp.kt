@@ -344,7 +344,7 @@ fun openClassic(context: Context, fragment: String?) {
 }
 
 /** Menu bar contents, built from the shortcut table so labels and keys match everywhere (S-302). */
-private fun menuSpecs(context: Context, actions: AppActions): List<MenuSpec> =
+internal fun menuSpecs(context: Context, actions: AppActions): List<MenuSpec> =
     menuBarSpecs(context.resources, { actions.perform(it) }, actions::isAvailable) { group ->
         if (group == ShortcutGroup.Tools) {
             listOf(MenuEntry.Separator, MenuEntry.Item(context.getString(R.string.nag_classic_interface), { openClassic(context, null) }))

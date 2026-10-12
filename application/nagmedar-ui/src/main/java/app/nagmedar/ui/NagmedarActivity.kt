@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.nagmedar.ui.input.DroppedFile
-import app.nagmedar.ui.input.MenuBarKey
 import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.isMediaOrSubtitleType
@@ -33,7 +32,6 @@ import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
-import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 
 /**
  * Entry point of the new Nağmedar interface (S-006). Playback still runs in the existing
@@ -47,8 +45,8 @@ class NagmedarActivity : ComponentActivity() {
 
     private var actions: AppActions? = null
 
-    /** Alt alone or F10 takes the keyboard to the menu bar and back (S-302). */
-    private val menuBarKey = MenuBarKey()
+    /** What the window does with a key, before the views and after them (S-401, S-302, S-407). */
+    private val keys = WindowKeys({ actions }, this::goBack)
 
     /** Screen asked for by a launcher shortcut (S-309), until the shell has shown it. */
     private var destination by mutableStateOf<String?>(null)
@@ -173,20 +171,8 @@ class NagmedarActivity : ComponentActivity() {
         intent.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)?.let { destination = it }
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // the shortcut editor is recording keys (S-402)
-        if (ShortcutRegistry.recording) return super.dispatchKeyEvent(event)
-        val down = event.action == KeyEvent.ACTION_DOWN
-        if (menuBarKey.onKey(event.keyCode, down) && actions?.toggleMenuBar() == true) return true
-        val rtl = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
-        if (actions?.menuBarKey(event.keyCode, down, rtl) == true) return true
-        if (event.action == KeyEvent.ACTION_DOWN && (event.isCtrlPressed || event.isAltPressed || event.isMetaPressed)) {
-            val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
-            // Ctrl+A and Ctrl+Z go to a focused text field first (onKeyDown)
-            if (shortcut != null && !shortcut.textFirst && actions?.perform(shortcut.id) == true) return true
-        }
-        return super.dispatchKeyEvent(event)
-    }
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean =
+        keys.beforeViews(event, rtl = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL) || super.dispatchKeyEvent(event)
 
     /** Back inside the app (never out of it), remembered for the forward button. */
     private fun goBack(): Boolean {
@@ -214,24 +200,7 @@ class NagmedarActivity : ComponentActivity() {
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        // the plain arrows move the focus in the shell; bound to a shortcut (mpv's seek) they act in the player
-        if (!ShortcutRegistry.recording && !(isArrow(keyCode) && event.hasNoModifiers())) {
-            val shortcut = ShortcutRegistry.match(ComposeKeyEvent(event))
-            if (shortcut != null && (shortcut.chord?.hasModifier != true || shortcut.textFirst) && actions?.perform(shortcut.id) == true) return true
-        }
-        if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
-            // an Esc nothing else used lets go of the screen's selection (S-405), else goes back (S-407):
-            // closes the details, leaves a folder, returns to the screen before; never leaves the app
-            if (actions?.escape() == true || goBack()) return true
-        }
-        // the forward key of some keyboards, as the mouse's forward button (S-408)
-        if (keyCode == KeyEvent.KEYCODE_FORWARD && actions?.forward() == true) return true
-        return super.onKeyDown(keyCode, event)
-    }
-
-    private fun isArrow(keyCode: Int) = keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
-        keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean = keys.afterViews(event) || super.onKeyDown(keyCode, event)
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onProvideKeyboardShortcuts(data: MutableList<KeyboardShortcutGroup>, menu: Menu?, deviceId: Int) {

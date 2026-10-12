@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,10 +33,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
+import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /**
  * A filter that is on or off (S-801): "4K", "Dolby Vision", "İzlenmedi". On, it is filled and
@@ -91,6 +94,9 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
     val state = interaction.collectState()
     val menu = rememberMenuState()
     var height by remember { mutableIntStateOf(0) }
+    val inputModes = LocalInputModeManager.current
+    // opened from the keyboard, the menu's first item takes the focus (S-1403)
+    var byKeys by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(dimens.radiusControl)
     Box(modifier) {
         Row(
@@ -101,7 +107,14 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
                 .focusRing(state, shape)
                 .background(stateBackground(state, menu.isOpen), shape)
                 .border(1.dp, colors.borderStrong, shape)
-                .nagClickable(interaction, { menu.open(IntOffset(0, height + 4)) }, role = Role.DropdownList)
+                .nagClickable(
+                    interaction,
+                    {
+                        byKeys = inputModes.inputMode == ComposeInputMode.Keyboard
+                        menu.open(IntOffset(0, height + 4))
+                    },
+                    role = Role.DropdownList,
+                )
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -114,7 +127,7 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
             Icon(NagIcons.ChevronDown, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(14.dp))
         }
         MenuPopup(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) entries() else emptyList(), offset = menu.offset ?: IntOffset.Zero,
-            minWidth = 180.dp)
+            minWidth = 180.dp, focusFirst = byKeys)
     }
 }
 
@@ -123,15 +136,20 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
 fun IconMenuButton(icon: ImageVector, contentDescription: String, entries: () -> List<MenuEntry>, modifier: Modifier = Modifier) {
     val menu = rememberMenuState()
     var height by remember { mutableIntStateOf(0) }
+    val inputModes = LocalInputModeManager.current
+    var byKeys by remember { mutableStateOf(false) }
     Box(modifier) {
         NagIconButton(
             icon,
             contentDescription,
-            { menu.open(IntOffset(0, height + 4)) },
+            {
+                byKeys = inputModes.inputMode == ComposeInputMode.Keyboard
+                menu.open(IntOffset(0, height + 4))
+            },
             modifier = Modifier.onGloballyPositioned { height = it.size.height },
             selected = menu.isOpen,
         )
         MenuPopup(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) entries() else emptyList(), offset = menu.offset ?: IntOffset.Zero,
-            minWidth = 180.dp)
+            minWidth = 180.dp, focusFirst = byKeys)
     }
 }
