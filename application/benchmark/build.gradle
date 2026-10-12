@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.test'
+    id 'kotlin-android'
+}
+
+/*
+ * S-1404: Nağmedar's macrobenchmarks: the cold and warm start-up, the Settings and Films lists
+ * scrolled (frame times), and the test set's 4K HDR10 samples played (dropped frames, from the
+ * app's NagmedarPerf log line). They run on a device against the app's benchmark build
+ * (buildsystem/benchmark/run.sh checks them against thresholds.json); CI builds them.
+ */
+android {
+    namespace = 'app.nagmedar.macrobenchmark'
+    targetProjectPath = ':application:app'
+    // the tests drive the app from a process of their own
+    experimentalProperties['android.experimental.self-instrumenting'] = true
+
+    defaultConfig {
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    buildTypes {
+        // against the app's benchmark build: release code, profileable, beside the installed app
+        benchmark {
+            debuggable = true
+            signingConfig = signingConfigs.debug
+            matchingFallbacks = ['release']
+        }
+    }
+}
+
+androidComponents {
+    beforeVariants(selector().all()) { variant ->
+        variant.enable = variant.buildType == 'benchmark'
+    }
+}
+
+dependencies {
+    implementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+    implementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiautomatorVersion"
+    implementation "androidx.benchmark:benchmark-macro-junit4:$rootProject.ext.macrobenchmarkVersion"
+}

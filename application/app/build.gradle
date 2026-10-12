@@ -107,6 +107,16 @@ android {
             initWith release
             matchingFallbacks = ['release']
         }
+        // S-1404: what the macrobenchmarks (application/benchmark) measure: the release build,
+        // profileable, signed with the shared debug key and installed beside the app
+        benchmark {
+            initWith release
+            signingConfig = signingConfigs.debug
+            matchingFallbacks = ['release']
+            applicationIdSuffix ".benchmark"
+            debuggable = false
+            profileable = true
+        }
         debug {
             applicationIdSuffix ".debug"
             jniDebuggable true
@@ -121,6 +131,9 @@ android {
         manifest.srcFile 'flavors/release/AndroidManifest.xml'
     }
     sourceSets.signedRelease {
+        manifest.srcFile 'flavors/release/AndroidManifest.xml'
+    }
+    sourceSets.benchmark {
         manifest.srcFile 'flavors/release/AndroidManifest.xml'
     }
 
@@ -170,6 +183,7 @@ android {
             def outputName = "Nagmedar-"
             outputName += variant.versionName.replace(" ", "-")
             if (variant.buildType.name == "debug") outputName += "-debug"
+            if (variant.buildType.name == "benchmark") outputName += "-benchmark"
             outputName += "-" + abiName + ".apk"
             output.outputFileName = outputName
         }

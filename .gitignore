@@ -86,3 +86,6 @@ __pycache__/
 # native lab libraries built by CI (buildsystem/nagmedar-native)
 /application/nagmedar-lab/src/main/jniLibs/
 /native/.work/
+
+# S-1404: buildsystem/benchmark/run.sh results
+/benchmark-results/

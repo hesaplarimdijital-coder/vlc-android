@@ -35,6 +35,12 @@ android {
             initWith release
             matchingFallbacks = ['release']
         }
+        // S-1404: the macrobenchmarks' build, app.nagmedar.benchmark
+        benchmark {
+            initWith release
+            matchingFallbacks = ['release']
+            buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.benchmark\""
+        }
 
     }
 

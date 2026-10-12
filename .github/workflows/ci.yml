@@ -3,8 +3,9 @@
 # lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05) for
 #            arm64, with host tests of the Dolby Vision converter and the whisper pipeline.
 #            Cached until native/lab or buildsystem/nagmedar-native changes.
-# app      : every push / PR. Builds the arm64 debug APK (uploaded) and an unsigned release
-#            (compile check) against the published libVLC 4 AAR, without native
+# app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
+#            (compile check) and the macrobenchmarks with the benchmark build they measure
+#            (uploaded, S-1404) against the published libVLC 4 AAR, without native
 #            compilation, on the hosted runner's Android SDK. The debug leg also runs the
 #            Nağmedar UI tests (tokens, shortcuts, layout state, accessibility gate,
 #            screenshots), compares the screenshots with src/test/screenshots and, on
@@ -182,6 +183,9 @@ jobs:
         run: |
           if [ "${{ matrix.variant }}" = release ]; then
             ./gradlew :application:app:assembleRelease --console=plain 2>&1 | tee build.log
+            # S-1404: the macrobenchmarks and the app's benchmark build they measure, arm64
+            ./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark \
+              -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee -a build.log
           else
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
@@ -238,6 +242,18 @@ jobs:
         with:
           name: nagmedar-debug-apk
           path: application/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+      # S-1404: run on a device with buildsystem/benchmark/run.sh --apks <this, unzipped>
+      - name: Macrobenchmark APK'ları
+        if: matrix.variant == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nagmedar-benchmark
+          path: |
+            application/app/build/outputs/apk/benchmark/*.apk
+            application/benchmark/build/outputs/apk/benchmark/*.apk
+            buildsystem/benchmark/
           if-no-files-found: error
 
   release:

@@ -1184,4 +1184,28 @@
     <string name="nag_tvlab_profile_imported">%1$s içe aktarıldı.</string>
     <string name="nag_tvlab_profile_exported">Profil kaydedildi.</string>
     <string name="nag_tvlab_analyse">TV Lab\'de analiz et</string>
+    <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
+    <string name="nag_perf_title">Performans</string>
+    <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>
+    <string name="nag_perf_startup">Açılış</string>
+    <string name="nag_perf_startup_last">Son soğuk açılış · hedef ≤ %1$s</string>
+    <string name="nag_perf_startup_median">Son %1$d soğuk açılışın ortancası · hedef ≤ %2$s</string>
+    <string name="nag_perf_startup_none">Henüz ölçülmedi: Nağmedar\'ı kapatıp başlatıcıdan yeniden açın.</string>
+    <string name="nag_perf_seconds">%1$s sn</string>
+    <string name="nag_perf_on_target">Hedefte</string>
+    <string name="nag_perf_slow">Yavaş</string>
+    <string name="nag_perf_playbacks">Oynatmalar</string>
+    <string name="nag_perf_playbacks_target">Hedef: kayıp kare ≤ %1$s</string>
+    <string name="nag_perf_playbacks_none">Henüz oynatma yok: bir film oynatıp kapatın, özeti buraya gelir.</string>
+    <string name="nag_perf_dropped">%1$s kayıp</string>
+    <string name="nag_perf_none_dropped">Kayıp yok</string>
+    <string name="nag_perf_battery">pil saatte %1$s</string>
+    <string name="nag_perf_battery_none">pil ölçülmedi</string>
+    <string name="nag_perf_frames">%1$s kare, %2$s kayıp</string>
+    <string name="nag_perf_report">Rapor</string>
+    <string name="nag_perf_clear">Ölçümleri sil</string>
+    <string name="nag_perf_report_title">Nağmedar performans raporu</string>
+    <string name="nag_perf_report_device">Cihaz: %1$s · Android %2$s</string>
+    <string name="nag_perf_report_startups">Soğuk açılışlar, ilk kareye kadar (hedef ≤ %1$s):</string>
+    <string name="nag_perf_report_playbacks">Oynatmalar (hedef: kayıp kare ≤ %1$s):</string>
 </resources>

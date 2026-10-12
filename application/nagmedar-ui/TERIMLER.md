@@ -72,6 +72,8 @@ Sözlüğü testler denetler:
 | cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
 | bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
 | kare hızı | frame rate | | | |
+| kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
+| açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |
 | yenileme hızı | refresh rate | tazeleme hızı | | Ekranın hızı, Hz ile: “120 Hz”; “Yenileme hızı eşleme” ekranı filmin kare hızına geçirir: her zaman, kesintisizse ya da hiç |
 | vurgu rengi | accent colour | | | |
 | ön ayar | preset | | | “VLC”, “mpv” |

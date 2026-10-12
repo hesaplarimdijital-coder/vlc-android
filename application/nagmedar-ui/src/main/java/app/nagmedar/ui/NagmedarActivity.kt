@@ -28,6 +28,7 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.perf.StartupPerf
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
@@ -69,6 +70,8 @@ class NagmedarActivity : ComponentActivity() {
         }
         // files dragged in from another app or window (S-406)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) window.decorView.setOnDragListener { _, event -> onWindowDrag(event) }
+        // S-1404: a cold start-up's time to its first frame
+        StartupPerf.watch(this, restored = savedInstanceState != null)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)

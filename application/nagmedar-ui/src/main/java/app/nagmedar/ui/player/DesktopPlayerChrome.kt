@@ -48,10 +48,16 @@ import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.hasPrecisePointer
 import app.nagmedar.ui.input.isMediaOrSubtitleType
+import app.nagmedar.ui.library.TechRepository
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.library.rangeLabel
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.library.storageName
+import app.nagmedar.ui.perf.PlaybackPerf
+import app.nagmedar.ui.perf.PrefsPerfStore
+import app.nagmedar.ui.perf.SystemBattery
+import app.nagmedar.ui.perf.keep
 import app.nagmedar.ui.player.effects.ActivityEffectsTarget
 import app.nagmedar.ui.player.effects.EffectsController
 import app.nagmedar.ui.player.effects.EffectsEngine
@@ -135,8 +141,10 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.resources.ACTION_REMOTE_PLAYPAUSE
@@ -183,6 +191,9 @@ class DesktopPlayerChrome : PlayerChrome {
     private var assistant: SyncAssistant? = null
     private var appearance: SubtitleStyleController? = null
     private var online: OnlineSubtitlesController? = null
+    private var infoSource: ActivityInfoSource? = null
+    private var perf: PlaybackPerf? = null
+    private var perfJob: Job? = null
 
     override val active: Boolean get() = controls.active
 
@@ -244,6 +255,21 @@ class DesktopPlayerChrome : PlayerChrome {
         this.assistant = assistant
         // the film's facts and statistics (S-605)
         val infoSource = ActivityInfoSource(activity)
+        this.infoSource = infoSource
+        // S-1404: each playback's shown and dropped frames and the battery it uses, kept and written to the log
+        val perf = PlaybackPerf(SystemBattery(activity))
+        this.perf = perf
+        perfJob = MainScope().launch {
+            while (true) {
+                delay(1_000)
+                val stats = infoSource.stats()
+                perf.sample(stats)
+                PlaybackPerf.trace(stats)
+                // the picture as libVLC plays it, for a film the library has not probed
+                val key = perf.playing
+                if (key != null && perf.needsPicture) infoSource.tracks().video?.let { perf.describe(key, it.width, it.height, "") }
+            }
+        }
         // the screenshots (S-606)
         val snapshots = SnapshotController(activity)
         this.snapshots = snapshots
@@ -337,8 +363,11 @@ class DesktopPlayerChrome : PlayerChrome {
         output?.onMediaStarted()
         sync?.onMediaStarted(uri)
         assistant?.onMediaStarted(uri)
-        // another film: its own minute of statistics
-        if (uri != playingUri) live.clear()
+        // another film: its own minute of statistics, and its own record (S-1404)
+        if (uri != playingUri) {
+            live.clear()
+            if (uri != null) startRecord(uri)
+        }
         playingUri = uri
         // its bookmarks
         navigation?.onMediaStarted()
@@ -349,6 +378,21 @@ class DesktopPlayerChrome : PlayerChrome {
         dual?.onMediaStarted(uri)
         // S-503: the look's size, which a new player would not have
         appearance?.onMediaStarted()
+    }
+
+    /**
+     * S-1404: the film [uri] begins its playback's record, which ends the one before (kept); its
+     * picture comes from the library's probe when it has one.
+     */
+    private fun startRecord(uri: String) {
+        val activity = activity ?: return
+        val perf = perf ?: return
+        val name = infoSource?.fileName() ?: Uri.parse(uri).lastPathSegment.orEmpty()
+        perf.start(uri, name)?.let { PrefsPerfStore.get(activity).keep(it) }
+        MainScope().launch {
+            val video = runCatching { TechRepository.get(activity).cached(uri) }.getOrNull()?.video ?: return@launch
+            perf.describe(uri, video.width, video.height, rangeLabel(video))
+        }
     }
 
     /**
@@ -403,6 +447,12 @@ class DesktopPlayerChrome : PlayerChrome {
     }
 
     override fun detach() {
+        // the playback ends with the player: its record is kept (S-1404)
+        perfJob?.cancel()
+        perfJob = null
+        activity?.let { activity -> perf?.finish()?.let { PrefsPerfStore.get(activity).keep(it) } }
+        perf = null
+        infoSource = null
         effects?.release()
         effects = null
         autoCrop?.setAutoCrop(false)

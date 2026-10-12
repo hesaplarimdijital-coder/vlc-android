@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -44,6 +45,7 @@ import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.lab.LabSection
+import app.nagmedar.ui.perf.PerformanceSection
 import app.nagmedar.ui.player.snapshot.HdrSnapshot
 import app.nagmedar.ui.player.snapshot.SnapshotFormat
 import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
@@ -80,7 +82,8 @@ fun SettingsScreen(
     val dimens = NagTheme.dimens
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        // the macrobenchmarks scroll it by this tag (S-1404)
+        modifier = Modifier.fillMaxSize().testTag("settings"),
         contentPadding = PaddingValues(bottom = dimens.gapXl),
         horizontalAlignment = Alignment.Start,
     ) {
@@ -122,6 +125,8 @@ fun SettingsScreen(
         item {
             LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
         }
+        // S-1404: the start-ups and playbacks this device measured
+        item { PerformanceSection(section = { title, content -> SettingsSection(title, content) }) }
     }
 }
 

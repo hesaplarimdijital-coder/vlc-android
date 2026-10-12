@@ -29,8 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.MenuBarMenus
@@ -125,6 +128,7 @@ import org.videolan.vlc.repository.SlaveRepository
  * actions to the activity, which routes key events to them. [requestedDestination] is a route
  * asked for by a launcher shortcut; [onDestinationShown] clears it.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NagmedarApp(
     onOpenFile: () -> Unit,
@@ -143,6 +147,8 @@ fun NagmedarApp(
             Modifier
                 .fillMaxSize()
                 .background(NagTheme.colors.background)
+                // the test tags as resource ids, for UI Automator and the macrobenchmarks (S-1404)
+                .semantics { testTagsAsResourceId = true }
                 .trackInputMode(inputMode)
                 .windowInsetsPadding(if (caption != null) WindowInsets.safeDrawing.exclude(WindowInsets.captionBar) else WindowInsets.safeDrawing),
         ) {

@@ -26,5 +26,7 @@ include ':application:nagmedar-ui'
 include ':application:nagmedar-data'
 include ':application:nagmedar-session'
 include ':application:nagmedar-lab'
+// S-1404: the macrobenchmarks, against the app's benchmark build
+include ':application:benchmark'
 include ':application:moviepedia'
 include ':application:remote-access-client'

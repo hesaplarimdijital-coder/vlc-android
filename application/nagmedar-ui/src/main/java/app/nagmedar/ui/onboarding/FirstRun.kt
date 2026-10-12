@@ -42,6 +42,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -256,7 +257,8 @@ private fun FlowTopBar(state: FirstRunState, onSkip: () -> Unit) {
                 )
             }
         }
-        TextButton(stringResource(R.string.nag_fr_skip), onSkip)
+        // the macrobenchmarks skip the flow by this tag (S-1404)
+        TextButton(stringResource(R.string.nag_fr_skip), onSkip, Modifier.testTag("first-run-skip"))
     }
 }
 
@@ -508,13 +510,13 @@ private fun FlowFooter(label: String, hint: String?, onClick: () -> Unit) {
 // ---------------------------------------------------------------- building blocks
 
 @Composable
-private fun TextButton(label: String, onClick: () -> Unit) {
+private fun TextButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(22.dp)
     Box(
-        Modifier
+        modifier
             .heightIn(min = NagTheme.dimens.minTarget.coerceAtLeast(44.dp))
             .focusRing(state, shape)
             .background(if (state.hovered || state.pressed) colors.hover else colors.background, shape)

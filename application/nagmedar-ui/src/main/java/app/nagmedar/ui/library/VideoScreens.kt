@@ -119,7 +119,8 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
             detailsRequested = false
         },
     ) {
-        Column(Modifier.fillMaxSize()) {
+        // the macrobenchmarks scroll its list by this tag (S-1404)
+        Column(Modifier.fillMaxSize().testTag("films")) {
             MoviesHeader(library, view, { view = it }, order, { order = it }, onAddFolder)
             LibraryContent(
                 loading = library == null,
