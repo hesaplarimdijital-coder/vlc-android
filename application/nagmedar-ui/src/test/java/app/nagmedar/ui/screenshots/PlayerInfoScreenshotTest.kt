@@ -57,7 +57,10 @@ class PlayerInfoScreenshotTest {
         compose.setContent {
             val live = remember {
                 LiveStats().apply {
-                    for (i in 0 until 60) add(StatsSample((64 + 14 * sin(i / 5.2) + 9 * sin(i / 1.9)).toFloat(), 103_216L + i * 24, 0))
+                    for (i in 0 until 60) {
+                        val mbps = (64 + 14 * sin(i / 5.2) + 9 * sin(i / 1.9)).toFloat()
+                        add(StatsSample(mbps, 103_216L + i * 24, 0, demuxMbps = mbps - 0.4f, audioPlayed = 201_430L + i * 47))
+                    }
                 }
             }
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {

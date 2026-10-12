@@ -125,7 +125,7 @@ class PlayerEffectsScreenshotTest {
     fun thisBuildsPlayer() = capture("player-effects-pending", PlayerEffects(aspect = AspectChoice.Wide, gainPercent = 130), thisBuild)
 
     // Nağmedar's own libVLC: a change waiting for its next start, and the output forced to a bitstream (S-508)
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h1600dp-mdpi")
     fun nativeDex() = capture("player-effects-native-dex", sampleEffects, everything, deferred = native, output = output)
 
     @Test @Config(qualifiers = "tr-w728dp-h880dp-mdpi")
