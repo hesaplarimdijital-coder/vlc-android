@@ -154,9 +154,19 @@ class PopupLayout : ConstraintLayout, ScaleGestureDetector.OnScaleGestureListene
         screenHeight = size.y
     }
 
+    /** Nağmedar (S-609): a mouse's right button on the small window: its menu. */
+    var onSecondaryClick: ((MotionEvent) -> Unit)? = null
+
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         if (windowManager == null)
             return false
+        // Nağmedar (S-609): the right button opens the menu, and is neither a tap nor a drag
+        if (event.actionMasked == MotionEvent.ACTION_DOWN && event.buttonState and MotionEvent.BUTTON_SECONDARY != 0) {
+            onSecondaryClick?.let {
+                it(event)
+                return true
+            }
+        }
         if (scaleGestureDetector != null)
             scaleGestureDetector!!.onTouchEvent(event)
         if (gestureDetector != null && gestureDetector!!.onTouchEvent(event))

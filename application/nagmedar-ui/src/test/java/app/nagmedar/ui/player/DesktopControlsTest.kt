@@ -107,6 +107,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "snapshotFolder"
     }
 
+    override fun pictureInPicture() {
+        calls += "pip"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -136,6 +140,7 @@ internal val samplePlayerState = PlayerChromeState(
     canFullscreen = true,
     hasPrevious = true,
     hasNext = true,
+    canPictureInPicture = true,
 )
 
 /** Frames for the timeline without a file: a plain one, whatever the time. */
@@ -270,6 +275,18 @@ class DesktopControlsTest {
         compose.onNodeWithText("1:11:45 / 2:18:10").assertExists()
         compose.onNodeWithText("Kuzey Işığı").assertExists()
         compose.onNodeWithContentDescription("A-B tekrarını kapat").assertExists()
+    }
+
+    /** S-609: the small window, from the bar of a wide enough window, where the device has one. */
+    @Test
+    fun pictureInPictureFromTheBar() {
+        controls()
+        shownAndHeld()
+        compose.onNodeWithContentDescription("Resim içinde resim").performClick()
+        assertEquals(listOf("pip"), actions.calls)
+        state = state.copy(canPictureInPicture = false)
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("Resim içinde resim").assertDoesNotExist()
     }
 
     /** The right button's click, as the mouse makes it. */

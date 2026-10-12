@@ -45,4 +45,33 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
+    <!-- Nağmedar (S-609): ten seconds back and forward beside play and pause -->
+    <ImageView
+            android:id="@+id/popup_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/nagmedar_popup_back"
+            android:scaleType="center"
+            android:src="@drawable/nagmedar_pip_back"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/video_play_pause"
+            app:layout_constraintEnd_toStartOf="@+id/video_play_pause"
+            app:layout_constraintTop_toTopOf="@+id/video_play_pause"
+            tools:visibility="visible" />
+
+    <ImageView
+            android:id="@+id/popup_forward"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:contentDescription="@string/nagmedar_popup_forward"
+            android:scaleType="center"
+            android:src="@drawable/nagmedar_pip_forward"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/video_play_pause"
+            app:layout_constraintStart_toEndOf="@+id/video_play_pause"
+            app:layout_constraintTop_toTopOf="@+id/video_play_pause"
+            tools:visibility="visible" />
+
 </org.videolan.vlc.gui.view.PopupLayout>

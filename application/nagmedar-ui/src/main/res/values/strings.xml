@@ -840,4 +840,6 @@
     <string name="nag_jump_unreadable">No time can be read: type 1:12:33, 72:33 or +30, for example.</string>
     <string name="nag_jump_hint" formatted="false">1:12:33 · 72:33 · 45 s · +30 · −2 min · 50%</string>
     <string name="nag_jump_go">Go</string>
+    <!-- S-609: picture in picture -->
+    <string name="nag_player_pip">Picture in picture</string>
 </resources>

@@ -1430,4 +1430,11 @@
     <string name="nagmedar_new_interface_summary">Kenar çubuğu, menüler ve klavye kısayollarıyla masaüstü sınıfı arayüz; uygulama simgesi bunu açar</string>
     <string name="nagmedar_classic_interface">Klasik arayüz</string>
     <string name="nagmedar_classic_interface_short">Klasik</string>
+    <!-- Nağmedar (S-609): the small window's buttons and menu -->
+    <string name="nagmedar_popup_back">10 sn geri</string>
+    <string name="nagmedar_popup_forward">10 sn ileri</string>
+    <string name="nagmedar_popup_play">Oynat</string>
+    <string name="nagmedar_popup_pause">Duraklat</string>
+    <string name="nagmedar_popup_fullscreen">Tam oynatıcıya dön</string>
+    <string name="nagmedar_popup_close">Kapat</string>
 </resources>

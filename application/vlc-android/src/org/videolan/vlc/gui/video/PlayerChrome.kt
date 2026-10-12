@@ -1,13 +1,17 @@
 /*
- * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603).
+ * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603); the buttons
+ * of picture in picture (S-609).
  */
 package org.videolan.vlc.gui.video
 
+import android.app.RemoteAction
+import android.os.Build
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.widget.FrameLayout
+import androidx.annotation.RequiresApi
 
 /**
  * The controls a mouse uses over the video: drawn by Nağmedar's new interface, which depends on
@@ -45,6 +49,13 @@ interface PlayerChrome {
      * (or the defaults) to the player.
      */
     fun onPlaying()
+
+    /**
+     * S-609: the buttons of picture in picture's window, for a film [playing] or paused: back,
+     * play or pause, forward. None leaves the window the system's own.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun pictureInPictureActions(playing: Boolean): List<RemoteAction> = emptyList()
 
     fun detach()
 

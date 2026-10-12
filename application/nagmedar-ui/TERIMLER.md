@@ -80,6 +80,7 @@ Sözlüğü testler denetler:
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
+| resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 

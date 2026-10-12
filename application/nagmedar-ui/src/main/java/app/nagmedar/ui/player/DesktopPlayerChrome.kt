@@ -1,7 +1,10 @@
 package app.nagmedar.ui.player
 
 import android.annotation.SuppressLint
+import android.app.RemoteAction
 import android.content.Context
+import android.content.Intent
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.view.KeyEvent
@@ -89,10 +92,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.videolan.resources.ACTION_REMOTE_PLAYPAUSE
+import org.videolan.resources.AndroidDevices
+import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
+import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
+import org.videolan.resources.EXTRA_SEEK_DELAY
 import org.videolan.tools.Settings
+import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.gui.video.PlayerChrome
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
+import org.videolan.vlc.util.getPendingIntent
 
 /**
  * The new interface's controls over the classic video player (S-601), which finds them by name
@@ -222,6 +232,25 @@ class DesktopPlayerChrome : PlayerChrome {
         navigation?.onMediaStarted()
     }
 
+    /**
+     * S-609: picture in picture's window has back and forward ten seconds around play or pause,
+     * as the control bar has them; the playback service does them, the window being the system's.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun pictureInPictureActions(playing: Boolean): List<RemoteAction> {
+        val activity = activity ?: return emptyList()
+        fun action(icon: Int, title: Int, command: String): RemoteAction {
+            val intent = Intent(command).setClass(activity, PlaybackService::class.java).putExtra(EXTRA_SEEK_DELAY, PIP_STEP_S)
+            val label = activity.getString(title)
+            return RemoteAction(Icon.createWithResource(activity, icon), label, label, activity.getPendingIntent(intent))
+        }
+        return listOf(
+            action(R.drawable.nagmedar_pip_back, R.string.nag_sc_back_10s, ACTION_REMOTE_SEEK_BACKWARD),
+            if (playing) action(R.drawable.nagmedar_pip_pause, R.string.nag_pause, ACTION_REMOTE_PLAYPAUSE) else action(R.drawable.nagmedar_pip_play, R.string.nag_play, ACTION_REMOTE_PLAYPAUSE),
+            action(R.drawable.nagmedar_pip_forward, R.string.nag_sc_forward_10s, ACTION_REMOTE_SEEK_FORWARD),
+        )
+    }
+
     override fun detach() {
         effects?.release()
         effects = null
@@ -238,6 +267,9 @@ class DesktopPlayerChrome : PlayerChrome {
         keys = null
     }
 }
+
+/** Picture in picture's step back and forward, in seconds: the control bar's. */
+private const val PIP_STEP_S = 10L
 
 /**
  * Over the video: a mouse reaches the controls, a finger or a pen passes through to the classic
@@ -545,6 +577,7 @@ internal class ActivityPlayerSource(
             canFullscreen = PlayerWindow.canToggleFullscreen(activity),
             hasPrevious = service.hasPrevious(),
             hasNext = service.hasNext(),
+            canPictureInPicture = AndroidDevices.pipAllowed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
         )
     }
 
@@ -612,6 +645,11 @@ internal class ActivityPlayerSource(
     }
 
     override fun chooseSnapshotFolder() = pickFolder()
+
+    // VLC's way in: the system's picture in picture, or its own small window where the device has none
+    override fun pictureInPicture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) activity.switchToPopup()
+    }
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

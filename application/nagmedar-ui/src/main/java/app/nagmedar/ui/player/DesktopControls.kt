@@ -153,8 +153,9 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
 
 /**
  * The control bar: the timeline over a row of controls. Wide, every control with its name; on a
- * tablet's width the tracks' names give way to their icons, and below 720 dp the screenshot button
- * goes; on a phone's, the speed, the A-B loop and the volume's slider make room for the rest.
+ * tablet's width the tracks' names give way to their icons, and below 780 and 720 dp picture in
+ * picture and the screenshot button go; on a phone's, the speed, the A-B loop and the volume's
+ * slider make room for the rest.
  */
 @Composable
 private fun ControlBar(
@@ -176,6 +177,8 @@ private fun ControlBar(
         val narrow = maxWidth < 600.dp
         // the camera needs a little more than a tablet's narrowest window; Shift+S stays
         val roomy = maxWidth >= 720.dp
+        // picture in picture a little more again
+        val roomier = maxWidth >= 780.dp
         Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 8.dp)) {
             PlayerTimeline(state, actions::seekTo, previews, initialHover = timelineHover)
             Row(
@@ -206,6 +209,9 @@ private fun ControlBar(
                 if (!narrow) AbButton(state, actions)
                 if (roomy) SnapshotButton(state, actions, visibility)
                 BarButton(NagIcons.Effects, stringResource(R.string.nag_sc_effects), actions::toggleEffects, ShortcutId.Effects, selected = state.effectsOpen)
+                if (roomier && state.canPictureInPicture) {
+                    BarButton(NagIcons.PictureInPicture, stringResource(R.string.nag_player_pip), actions::pictureInPicture)
+                }
                 Volume(state, actions, slider = !narrow)
                 if (state.canFullscreen) {
                     BarButton(

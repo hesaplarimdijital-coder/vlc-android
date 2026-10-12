@@ -336,6 +336,13 @@
     <string name="nagmedar_new_interface_summary">The desktop-class interface with sidebar, menus and keyboard shortcuts; the app icon opens it</string>
     <string name="nagmedar_classic_interface">Classic interface</string>
     <string name="nagmedar_classic_interface_short">Classic</string>
+    <!-- Nağmedar (S-609): the small window's buttons and menu -->
+    <string name="nagmedar_popup_back">Jump back 10 s</string>
+    <string name="nagmedar_popup_forward">Jump forward 10 s</string>
+    <string name="nagmedar_popup_play">Play</string>
+    <string name="nagmedar_popup_pause">Pause</string>
+    <string name="nagmedar_popup_fullscreen">Back to the full player</string>
+    <string name="nagmedar_popup_close">Close</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and VLC Authors.</string>

@@ -868,7 +868,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
                     val paramBuilder = PictureInPictureParams.Builder()
                     if (width != 0 && height != 0 && (width.toFloat() / height.toFloat()) in 0.418410f..2.39f)
                         paramBuilder.setAspectRatio(Rational(width, height))
-                    paramBuilder.setActions(listOf())
+                    // Nağmedar (S-609): back, play or pause, forward in the small window
+                    paramBuilder.setActions(chrome?.pictureInPictureActions(service?.isPlaying == true) ?: listOf())
                     service?.updateWidgetState()
                     enterPictureInPictureMode(paramBuilder.build())
                 } catch (e: IllegalArgumentException) { // Fallback with default parameters
@@ -1680,7 +1681,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         service?.let { service ->
             when (event.type) {
                 MediaPlayer.Event.Playing -> onPlaying()
-                MediaPlayer.Event.Paused -> overlayDelegate.updateOverlayPausePlay()
+                MediaPlayer.Event.Paused -> {
+                    overlayDelegate.updateOverlayPausePlay()
+                    updatePictureInPictureActions()
+                }
                 MediaPlayer.Event.Opening -> {
                     forcedTime = -1
                     if (!subtitlesExtraPath.isNullOrEmpty()) {
@@ -1823,6 +1827,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     private fun onPlaying() {
         val mw = service?.currentMediaWrapper ?: return
         chrome?.onPlaying()
+        updatePictureInPictureActions()
         isPlaying = true
         overlayDelegate.hasPlaylist = service?.hasPlaylist() == true
         setPlaybackParameters()
@@ -1894,6 +1899,13 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     override fun isInPictureInPictureMode(): Boolean {
         return service?.isInPiPMode?.value == true
+    }
+
+    /** Nağmedar (S-609): picture in picture's buttons follow the player: pause while it plays, play while it waits. */
+    private fun updatePictureInPictureActions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !isInPictureInPictureMode) return
+        val actions = chrome?.pictureInPictureActions(service?.isPlaying == true)?.takeIf { it.isNotEmpty() } ?: return
+        setPictureInPictureParams(PictureInPictureParams.Builder().setActions(actions).build())
     }
 
     override fun setPictureInPictureParams(params: PictureInPictureParams) {

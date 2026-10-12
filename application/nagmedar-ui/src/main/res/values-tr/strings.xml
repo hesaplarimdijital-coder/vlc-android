@@ -818,4 +818,6 @@
     <string name="nag_jump_unreadable">Bir zaman okunamadı: örneğin 1:12:33, 72:33 ya da +30 yazın.</string>
     <string name="nag_jump_hint" formatted="false">1:12:33 · 72:33 · 45 sn · +30 · −2 dk · %50</string>
     <string name="nag_jump_go">Git</string>
+    <!-- S-609: picture in picture -->
+    <string name="nag_player_pip">Resim içinde resim</string>
 </resources>

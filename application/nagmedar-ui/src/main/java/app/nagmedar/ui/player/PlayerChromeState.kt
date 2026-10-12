@@ -48,6 +48,8 @@ data class PlayerChromeState(
     val snapshot: SnapshotSettings = SnapshotSettings(),
     /** S-608: the film's bookmarks, marked on the timeline. */
     val bookmarks: List<Long> = emptyList(),
+    /** S-609: the device has picture in picture, or VLC's own small window. */
+    val canPictureInPicture: Boolean = false,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -102,6 +104,9 @@ interface PlayerChromeActions {
 
     /** S-606: the system's folder picker, for the screenshots' folder. */
     fun chooseSnapshotFolder()
+
+    /** S-609: the film goes on in a small window over the others. */
+    fun pictureInPicture()
 
     /** Leaves the player. */
     fun close()

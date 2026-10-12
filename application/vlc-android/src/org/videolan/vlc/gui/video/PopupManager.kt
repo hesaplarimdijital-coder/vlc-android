@@ -30,12 +30,14 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
 import android.widget.ImageView
+import android.widget.PopupMenu
 import androidx.core.app.NotificationCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.Observer
@@ -69,6 +71,9 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
     private lateinit var expandButton: ImageView
     private lateinit var closeButton: ImageView
     private lateinit var playPauseButton: ImageView
+    // Nağmedar (S-609): ten seconds back and forward
+    private lateinit var backButton: ImageView
+    private lateinit var forwardButton: ImageView
     private val alwaysOn: Boolean = Settings.getInstance(service).getBoolean(POPUP_KEEPSCREEN, false)
     var observer: Observer<Boolean> = Observer {
         if (!it) {
@@ -81,6 +86,8 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
             playPauseButton.visibility = visibility
             closeButton.visibility = visibility
             expandButton.visibility = visibility
+            backButton.visibility = visibility
+            forwardButton.visibility = visibility
         }
     }
 
@@ -112,6 +119,12 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
         playPauseButton.setOnClickListener(this)
         closeButton.setOnClickListener(this)
         expandButton.setOnClickListener(this)
+        backButton = view.findViewById(R.id.popup_back)
+        forwardButton = view.findViewById(R.id.popup_forward)
+        backButton.setOnClickListener(this)
+        forwardButton.setOnClickListener(this)
+        // Nağmedar (S-609): the right button's menu
+        view.onSecondaryClick = { showMenu(view) }
 
         val gestureDetector = GestureDetectorCompat(service, this)
         gestureDetector.setOnDoubleTapListener(this)
@@ -250,7 +263,35 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
             }
             R.id.popup_close -> stopPlayback()
             R.id.popup_expand -> expandToVideoPlayer()
+            R.id.popup_back -> seekBy(-STEP_MS)
+            R.id.popup_forward -> seekBy(STEP_MS)
         }
+    }
+
+    /** Nağmedar (S-609): ten seconds back or forward, as the player's control bar goes. */
+    private fun seekBy(deltaMs: Long) {
+        if (!service.hasMedia()) return
+        service.seek((service.getTime() + deltaMs).coerceIn(0L, service.length.coerceAtLeast(0L)), fromUser = true)
+    }
+
+    /**
+     * Nağmedar (S-609): the small window's menu, from the mouse's right button: play or pause, ten
+     * seconds back or forward, back to the full player, close.
+     */
+    private fun showMenu(anchor: View) {
+        val menu = PopupMenu(ContextThemeWrapper(service, android.R.style.Theme_DeviceDefault), anchor)
+        menu.menu.apply {
+            add(0, R.id.video_play_pause, 0, if (service.isPlaying) R.string.nagmedar_popup_pause else R.string.nagmedar_popup_play)
+            add(0, R.id.popup_back, 1, R.string.nagmedar_popup_back)
+            add(0, R.id.popup_forward, 2, R.string.nagmedar_popup_forward)
+            add(0, R.id.popup_expand, 3, R.string.nagmedar_popup_fullscreen)
+            add(0, R.id.popup_close, 4, R.string.nagmedar_popup_close)
+        }
+        menu.setOnMenuItemClickListener { item ->
+            rootView?.findViewById<View>(item.itemId)?.let { onClick(it) }
+            true
+        }
+        menu.show()
     }
 
     private fun expandToVideoPlayer() {
@@ -323,6 +364,8 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
     }
 
     companion object {
+        /** Nağmedar (S-609): the small window's step back and forward. */
+        private const val STEP_MS = 10_000L
 
         private const val TAG = "VLC/PopupManager"
 
