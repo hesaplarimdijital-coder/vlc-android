@@ -43,6 +43,11 @@ object WidgetCache {
         return widgetCacheEntry
     }
 
+    /** S-1009: an album cover changed: every widget draws its cover again. */
+    fun invalidateCovers() {
+        entries.forEach { it.currentCoverInvalidated = true }
+    }
+
     fun clear(widget: Widget) {
         var entry: WidgetCacheEntry? = null
         entries.forEach { if (it.widget.widgetId == widget.widgetId) entry = it }

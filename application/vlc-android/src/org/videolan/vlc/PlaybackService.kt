@@ -144,6 +144,7 @@ import app.nagmedar.session.Media3SessionHost
 import app.nagmedar.session.SessionAction
 import org.videolan.vlc.media.PlaybackObserver
 import org.videolan.vlc.media.PlaybackSessionSource
+import org.videolan.tools.BitmapCache
 import org.videolan.tools.DrawableCache
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SEEK_BUTTONS
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SPEED_BUTTONS
@@ -179,6 +180,7 @@ import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
 import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.gui.video.PopupManager
 import org.videolan.vlc.gui.video.VideoPlayerActivity
+import org.videolan.vlc.media.CoverHook
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.NO_LENGTH_PROGRESS_MAX
@@ -204,6 +206,7 @@ import org.videolan.vlc.widget.MiniPlayerAppWidgetProvider
 import org.videolan.vlc.widget.VLCAppWidgetProvider
 import org.videolan.vlc.widget.VLCAppWidgetProviderBlack
 import org.videolan.vlc.widget.VLCAppWidgetProviderWhite
+import org.videolan.vlc.widget.utils.WidgetCache
 import videolan.org.commontools.LiveEvent
 import java.util.ArrayDeque
 import java.util.Calendar
@@ -315,9 +318,16 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                     executeUpdate()
                     showNotification()
                 }
-                VLCAppWidgetProvider.ACTION_WIDGET_INIT -> updateWidget()
+                // S-1009: a widget put on the home screen while the service runs is followed from then on
+                VLCAppWidgetProvider.ACTION_WIDGET_INIT -> {
+                    updateHasWidget()
+                    updateWidget()
+                }
                 VLCAppWidgetProvider.ACTION_WIDGET_ENABLED, VLCAppWidgetProvider.ACTION_WIDGET_DISABLED -> updateHasWidget()
-                MiniPlayerAppWidgetProvider.ACTION_WIDGET_INIT -> updateWidget()
+                MiniPlayerAppWidgetProvider.ACTION_WIDGET_INIT -> {
+                    updateHasWidget()
+                    updateWidget()
+                }
                 MiniPlayerAppWidgetProvider.ACTION_WIDGET_ENABLED, MiniPlayerAppWidgetProvider.ACTION_WIDGET_DISABLED -> updateHasWidget()
                 AudioManager.ACTION_AUDIO_BECOMING_NOISY -> if (detectHeadset) {
                     if (BuildConfig.DEBUG) Log.i(TAG, "Becoming noisy")
@@ -874,9 +884,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private fun updateHasWidget() {
         val manager = AppWidgetManager.getInstance(this) ?: return
         widget = when {
+            // S-1009: the mini player first: the old widgets only ask to be replaced, and would take its updates
+            manager.getAppWidgetIds(ComponentName(this, MiniPlayerAppWidgetProvider::class.java)).isNotEmpty() -> 3
             manager.getAppWidgetIds(ComponentName(this, VLCAppWidgetProviderWhite::class.java)).isNotEmpty() -> 1
             manager.getAppWidgetIds(ComponentName(this, VLCAppWidgetProviderBlack::class.java)).isNotEmpty() -> 2
-            manager.getAppWidgetIds(ComponentName(this, MiniPlayerAppWidgetProvider::class.java)).isNotEmpty() -> 3
             else -> 0
         }
     }
@@ -1017,6 +1028,20 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     fun onMediaPlayerEvent(event: MediaPlayer.Event) = mediaPlayerListener.onEvent(event)
 
+    /**
+     * S-1009: an album cover is new (found, chosen, taken away): the notification, the lock screen,
+     * the media session and the widgets show it.
+     */
+    @MainThread
+    fun onCoverChanged() {
+        BitmapCache.clear()
+        ArtworkProvider.clear()
+        WidgetCache.invalidateCovers()
+        if (hasMedia()) updateMediaQueue()
+        executeUpdate()
+        if (notificationShowing) showNotification()
+    }
+
     fun onPlaybackStopped(systemExit: Boolean) {
         if (!systemExit) hideNotification(isForeground)
         removePopup()
@@ -1070,7 +1095,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                     var cover = if (coverOnLockscreen && metaData != null)
                         metaData.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART) else null
                     if (coverOnLockscreen && cover == null)
-                        cover = AudioUtil.readCoverBitmap(Uri.decode(mw.artworkMrl), 256)
+                        cover = AudioUtil.readCoverBitmap(Uri.decode(CoverHook.artwork(mw)), 256)
                     if (cover == null || cover.isRecycled)
                         cover = ctx.getBitmapFromDrawable(R.drawable.ic_no_media)
 
@@ -1250,8 +1275,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 bob.putText(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, MediaUtils.getMediaAlbum(ctx, media))
             }
             if (Permissions.canReadStorage(ctx) && coverOnLockscreen) {
+                // S-1009: Nağmedar's album cover first, else the medialibrary's art
+                val ownCover = CoverHook.file(media)
                 val albumArtUri = when {
-                    isSchemeHttpOrHttps(media.artworkMrl) -> {
+                    ownCover == null && isSchemeHttpOrHttps(media.artworkMrl) -> {
                         //ArtworkProvider will cache remote images
                         ArtworkProvider.buildUri(ctx, Uri.Builder()
                                 .appendPath(ArtworkProvider.REMOTE)
@@ -1267,7 +1294,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 }
                 bob.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, albumArtUri.toString())
                 if (!carMode) {
-                    val cover = AudioUtil.readCoverBitmap(Uri.decode(media.artworkMrl), 512)
+                    val cover = AudioUtil.readCoverBitmap(ownCover?.path ?: Uri.decode(media.artworkMrl), 512)
                     val config = cover?.config
                     if (config != null)
                     //In case of format not supported
@@ -1573,8 +1600,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val artworkToUriCache = HashMap<String, Uri>()
             for (media in playlistManager.getMediaList()) {
                 try {
-                    val artworkMrl = media.artworkMrl
-                    if (!artworkMrl.isNullOrEmpty() && isPathValid(artworkMrl)) {
+                    // S-1009: Nağmedar's album cover, kept in the app's own folder, else the medialibrary's art
+                    val ownCover = CoverHook.file(media)
+                    val artworkMrl = ownCover?.path ?: media.artworkMrl
+                    if (!artworkMrl.isNullOrEmpty() && (ownCover != null || isPathValid(artworkMrl))) {
                         val artworkUri = artworkToUriCache.getOrPut(artworkMrl) { ArtworkProvider.buildMediaUri(ctx, media) }
                         val key = MediaSessionBrowser.generateMediaId(media)
                         it[key] = artworkUri

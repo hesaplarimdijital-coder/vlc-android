@@ -39,13 +39,16 @@ data class Cover(val file: File, val origin: CoverOrigin) {
 data class CoverTrack(val uri: String, val album: String?, val artist: String?) {
     /** An album's tracks share their cover; a track without an album has its own. */
     val key: String
-        get() = if (!album.isNullOrBlank()) "album|${fold(artist)}|${fold(album)}" else "file|$uri"
+        get() = if (!album.isNullOrBlank()) albumKey(artist, album) else "file|$uri"
 
     /** Cover Art Archive needs the album and its artist. */
     val searchable: Boolean get() = !album.isNullOrBlank() && !artist.isNullOrBlank()
 
     companion object {
         private fun fold(text: String?): String = text?.trim()?.lowercase(Locale.ROOT).orEmpty()
+
+        /** The key of the album [title] of [artist], as its tracks' is. */
+        fun albumKey(artist: String?, title: String): String = "album|${fold(artist)}|${fold(title)}"
 
         /** The medialibrary's item: its album under its album artist, else its artist. */
         fun of(media: MediaWrapper): CoverTrack? {
@@ -195,6 +198,9 @@ class CoverFinder(
 
     /** [bytes] as [track]'s album's cover, chosen by hand; null when they are not an image. */
     suspend fun choose(track: CoverTrack, bytes: ByteArray): Cover? = withContext(io) { store.keep(track.key, CoverOrigin.User, bytes) }
+
+    /** The cover kept for [key], at once: no file read but whether it is there, no network. */
+    fun keptNow(key: String): Cover? = store.kept(key)
 
     /** Whether [track]'s album's cover was chosen by hand. */
     suspend fun isChosen(track: CoverTrack): Boolean = withContext(io) { store.kept(track.key)?.origin == CoverOrigin.User }

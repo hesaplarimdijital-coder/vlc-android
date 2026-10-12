@@ -69,6 +69,7 @@ import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.BitmapUtil
 import org.videolan.vlc.gui.helpers.getColoredBitmapFromColor
+import org.videolan.vlc.media.CoverHook
 import org.videolan.vlc.media.Progress
 import org.videolan.vlc.repository.WidgetRepository
 import org.videolan.vlc.util.TextUtils
@@ -321,9 +322,10 @@ class MiniPlayerAppWidgetProvider : AppWidgetProvider() {
         if (forPreview) {
             displayCover(context, views, true, widgetType, widgetCacheEntry)
             views.setImageViewBitmap(R.id.cover, cutBitmapCover(widgetType, previewBitmap!!, widgetCacheEntry))
-        } else if (widgetCacheEntry.currentMedia?.artworkMrl != widgetCacheEntry.currentCover || widgetCacheEntry.currentCoverInvalidated) {
+        } else if (CoverHook.artwork(widgetCacheEntry.currentMedia) != widgetCacheEntry.currentCover || widgetCacheEntry.currentCoverInvalidated) {
             widgetCacheEntry.currentCoverInvalidated = false
-            widgetCacheEntry.currentCover = if (service?.isPlaying == true && !service.isVideoPlaying) widgetCacheEntry.currentMedia?.artworkMrl
+            // S-1009: Nağmedar's album cover, else the medialibrary's art
+            widgetCacheEntry.currentCover = if (service?.isPlaying == true && !service.isVideoPlaying) CoverHook.artwork(widgetCacheEntry.currentMedia)
                     ?: settings.getString(KEY_CURRENT_AUDIO_RESUME_THUMB, null) else settings.getString(KEY_CURRENT_AUDIO_RESUME_THUMB, null)
             if (!widgetCacheEntry.currentCover.isNullOrEmpty()) {
                 log(appWidgetId, WidgetLogType.INFO, "Bugfix Refresh - Update cover: ${widgetCacheEntry.currentMedia?.artworkMrl} for ${widgetCacheEntry.widget.widgetId} -> ${widgetCacheEntry.currentCover}")

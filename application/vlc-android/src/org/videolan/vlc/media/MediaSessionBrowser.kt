@@ -548,7 +548,13 @@ class MediaSessionBrowser {
                 }
 
                 /* Icon */
-                val iconUri = if (libraryItem.itemType != MediaLibraryItem.TYPE_PLAYLIST && !libraryItem.artworkMrl.isNullOrEmpty() && isPathValid(libraryItem.artworkMrl)) {
+                // S-1009: Nağmedar's album covers count as art: a track's album's, an album's own
+                val ownCover = when (libraryItem) {
+                    is MediaWrapper -> CoverHook.file(libraryItem)
+                    is Album -> CoverHook.file(libraryItem)
+                    else -> null
+                }
+                val iconUri = if (libraryItem.itemType != MediaLibraryItem.TYPE_PLAYLIST && (ownCover != null || (!libraryItem.artworkMrl.isNullOrEmpty() && isPathValid(libraryItem.artworkMrl)))) {
                     val iconUri = Uri.Builder()
                     when (libraryItem.itemType) {
                         MediaLibraryItem.TYPE_ARTIST ->{
@@ -561,11 +567,11 @@ class MediaSessionBrowser {
                         }
                         else -> {
                             iconUri.appendPath(ArtworkProvider.MEDIA)
-                            (libraryItem as? MediaWrapper)?.let { iconUri.appendPath("${it.lastModified}") }
+                            (libraryItem as? MediaWrapper)?.let { iconUri.appendPath("${ownCover?.lastModified() ?: it.lastModified}") }
                         }
                     }
                     iconUri.appendPath("${libraryItem.id}")
-                    artworkToUriCache.getOrPut(libraryItem.artworkMrl) { ArtworkProvider.buildUri(context, iconUri.build()) }
+                    artworkToUriCache.getOrPut(ownCover?.path ?: libraryItem.artworkMrl) { ArtworkProvider.buildUri(context, iconUri.build()) }
                 } else if (libraryItem.itemType == MediaLibraryItem.TYPE_MEDIA && (libraryItem as MediaWrapper).type == MediaWrapper.TYPE_STREAM)
                     res.getResourceUri(R.drawable.ic_auto_stream_unknown)
                 else {

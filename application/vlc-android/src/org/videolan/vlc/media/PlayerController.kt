@@ -60,7 +60,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     override val engineId = EngineId.LibVlc
 
-    /** libVLC plays everything: video, streams, radio, podcasts and, until the audio engine lands, music. */
+    /** libVLC plays everything the music engine (S-901) does not take: video, streams, radio, podcasts, music it cannot. */
     override fun canPlay(media: EngineMedia) = true
 
     override fun play() {

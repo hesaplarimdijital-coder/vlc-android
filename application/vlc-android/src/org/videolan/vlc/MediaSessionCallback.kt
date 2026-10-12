@@ -378,7 +378,8 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
     }
 
     private fun checkForSeekFailure(forward: Boolean) {
-        if (playbackService.playlistManager.player.lastPosition == 0.0f && (forward || playbackService.getTime() > 0)) {
+        // S-1009: libVLC's last position stays 0 while the music engine plays: whether it seeks is what counts
+        if (!playbackService.isSeekable && (forward || playbackService.getTime() > 0)) {
             val context = playbackService.applicationContext
             playbackService.displaySubtitleMessage(context.getString(R.string.unseekable_stream))
         }

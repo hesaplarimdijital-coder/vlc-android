@@ -117,3 +117,6 @@
 
 # Nağmedar (S-808): the playback service finds the play statistics' recorder by name
 -keep class app.nagmedar.ui.stats.PlayStatsRecorder { <init>(); }
+
+# Nağmedar (S-1009): the playback service finds the album covers' observer by name
+-keep class app.nagmedar.ui.covers.CoverObserver { <init>(); }

@@ -9,6 +9,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import app.nagmedar.audio.FileTags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -138,10 +139,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     val player by lazy(LazyThreadSafetyMode.NONE) { PlayerController(service.applicationContext) }
 
     /**
-     * Engine selection (S-501, ADR-05). libVLC is the only engine today, so every item stays on
-     * [player]; the Nağmedar audio engine of MVP2 registers here and takes local music.
+     * Engine selection (S-501, ADR-05): Nağmedar Ses Motoru for the local music library (S-901),
+     * libVLC ([player]) for everything else.
      */
-    /** Nağmedar Ses Motoru for the local music library (S-901); libVLC for everything else. */
     val musicEngine by lazy(LazyThreadSafetyMode.NONE) {
         MusicEngineController(service.applicationContext, player.progress, player.speed).also { it.onHandOver = { onEngineHandOver() } }
     }
@@ -478,8 +478,11 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         if (systemExit) {
             player.release()
             musicEngine.release()
+        } else {
+            // S-1009: the music engine stops too; restarting libVLC alone left it playing
+            if (engine === musicEngine) musicEngine.stop()
+            player.restart()
         }
-        else player.restart()
         mediaList.clear()
         showAudioPlayer.value = false
         service.onPlaybackStopped(systemExit)
@@ -922,7 +925,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             settings.putSingle(KEY_CURRENT_AUDIO, media.location)
             settings.putSingle(KEY_CURRENT_AUDIO_RESUME_TITLE, media.title ?: "")
             settings.putSingle(KEY_CURRENT_AUDIO_RESUME_ARTIST, media.artistName ?: "")
-            settings.putSingle(KEY_CURRENT_AUDIO_RESUME_THUMB, media.artworkURL ?: "")
+            // S-1009: the widget shows Nağmedar's album cover when the service is gone too
+            settings.putSingle(KEY_CURRENT_AUDIO_RESUME_THUMB, CoverHook.file(media)?.path ?: media.artworkURL ?: "")
         }
     }
 
@@ -1400,9 +1404,29 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
      * @param mw: The [MediaWrapper] to be updated
      */
     private fun refreshTrackMeta(mw: MediaWrapper) {
+        if (engine !== player) {
+            // S-1009: libVLC's media is another item's while the music engine plays: the file's own tags
+            if (mw.title == mw.fileName) readEngineTrackTags(mw)
+            return
+        }
         mw.updateMeta(player.mediaplayer)
         service.onMediaListChanged()
         service.showNotification()
+    }
+
+    /** S-1009: the title and artist of a music engine's track the medialibrary has no tags of, from the file's own. */
+    private fun readEngineTrackTags(mw: MediaWrapper) {
+        val uri = mw.uri ?: return
+        launch {
+            val (title, artist) = withContext(Dispatchers.IO) {
+                FileTags.tag(ctx, uri, "TITLE")?.trim() to FileTags.tag(ctx, uri, "ARTIST")?.trim()
+            }
+            if (title.isNullOrEmpty() && artist.isNullOrEmpty()) return@launch
+            if (!title.isNullOrEmpty()) mw.title = title
+            if (!artist.isNullOrEmpty()) mw.setArtist(artist)
+            service.onMediaListChanged()
+            service.showNotification()
+        }
     }
 
     private suspend fun savePlaycount(mw: MediaWrapper) {

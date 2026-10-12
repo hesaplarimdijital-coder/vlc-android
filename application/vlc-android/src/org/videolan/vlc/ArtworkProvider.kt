@@ -46,6 +46,7 @@ import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.interfaces.IMediaFactory
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.Medialibrary
+import org.videolan.medialibrary.interfaces.media.Album
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.MediaLibraryItem
 import org.videolan.resources.VLCInstance
@@ -54,6 +55,7 @@ import org.videolan.tools.removeFileScheme
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.BitmapUtil
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
+import org.videolan.vlc.media.CoverHook
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.util.AccessControl
 import org.videolan.vlc.util.ThumbnailsProvider
@@ -185,6 +187,10 @@ class ArtworkProvider : ContentProvider() {
             }
         }
         mw?.let {
+            // S-1009: Nağmedar's album cover first
+            CoverHook.file(mw as? Album)?.takeIf { it.canRead() }?.let { file ->
+                return@getCategoryImage ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            }
             if (!mw.artworkMrl.isNullOrEmpty()) {
                 val filePath = Uri.decode(mw.artworkMrl).removeFileScheme()
                 val file = File(filePath)
@@ -233,22 +239,24 @@ class ArtworkProvider : ContentProvider() {
         val height169 = 540
         val width169 = 960
         val mw: MediaLibraryItem? = runBlocking(Dispatchers.IO) { ctx.getFromMl { getMedia(mediaId) } }
-        mw?.let {
-            if (!mw.artworkMrl.isNullOrEmpty()) {
-                val filePath = Uri.decode(mw.artworkMrl).removeFileScheme()
-                val file = File(filePath)
-                if (file.canRead() && isImageWithinBounds(filePath)) return@getMediaImage ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-            }
+        // S-1009: Nağmedar's album cover first, else the medialibrary's art
+        val ownCover = CoverHook.file(mw as? MediaWrapper)
+        val artworkMrl = ownCover?.path ?: mw?.artworkMrl
+        if (!artworkMrl.isNullOrEmpty()) {
+            val filePath = Uri.decode(artworkMrl).removeFileScheme()
+            val file = File(filePath)
+            if (file.canRead() && isImageWithinBounds(filePath)) return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         }
         // Non-square cover art will have an artworkMrl, which will be padded, re-encoded, and cached.
         // Videos, tracks with no cover art, etc. use mediaId and will be processed per library item.
-        var key = mw?.artworkMrl ?: "$mediaId"
+        var key = artworkMrl ?: "$mediaId"
         val nonTransparent = (Build.VERSION.SDK_INT == 33) && ("com.android.systemui" == callingPackage)
         if (nonTransparent) key += "_nonTransparent"
         if (fallbackIcon != null) key += fallbackIcon.toString()
         val image = getOrPutImage(key) {
             runBlocking(Dispatchers.IO) {
-                var bitmap = if (mw != null) ThumbnailsProvider.obtainBitmap(mw, width) else null
+                var bitmap = ownCover?.let { AudioUtil.fetchCoverBitmap(it.path, width) }
+                    ?: if (mw != null) ThumbnailsProvider.obtainBitmap(mw, width) else null
                 if (bitmap == null) bitmap = readEmbeddedArtwork(mw, width)
                 if (padSquare && bitmap != null) bitmap = padSquare(bitmap)
                 if (bitmap == null) {
@@ -605,10 +613,12 @@ class ArtworkProvider : ContentProvider() {
          * Construct the URI for MediaWrappers
          */
         fun buildMediaUri(ctx: Context, media: MediaWrapper): Uri {
-            val audioNoArtwork = media.type == MediaWrapper.TYPE_AUDIO && media.artworkMrl.isNullOrEmpty()
+            // S-1009: Nağmedar's album cover counts as art, and its version tells a changed cover apart
+            val ownCover = CoverHook.version(media)
+            val audioNoArtwork = media.type == MediaWrapper.TYPE_AUDIO && media.artworkMrl.isNullOrEmpty() && ownCover == 0L
             return buildUri(ctx, Uri.Builder()
                     .appendPath(MEDIA)
-                    .appendPath("${if (audioNoArtwork) 0L else media.lastModified}")
+                    .appendPath("${if (audioNoArtwork) 0L else if (ownCover != 0L) ownCover else media.lastModified}")
                     .appendPath("${if (audioNoArtwork) 0L else media.id}")
                     .build())
         }
