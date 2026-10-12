@@ -67,6 +67,9 @@ class PlayerChromeScreenshotTest {
             }
         }
         compose.waitForIdle()
+        // the mouse rests on the timeline a moment: its frame is read
+        compose.mainClock.advanceTimeBy(500)
+        compose.waitForIdle()
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }

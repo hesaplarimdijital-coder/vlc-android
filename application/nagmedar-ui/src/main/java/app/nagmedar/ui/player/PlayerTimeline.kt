@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -47,11 +47,9 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.coerceAtLeast
-import androidx.compose.ui.unit.coerceAtMost
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.theme.NagTheme
@@ -195,6 +193,7 @@ private val TimelineHeight = 34.dp
 private val TrackFromBottom = 10.dp
 private val PreviewWidth = 192.dp
 private val PreviewHeight = 108.dp
+private val PreviewGap = 6.dp
 
 @Composable
 private fun AbLetter(letter: String, ms: Long, length: Long, widthPx: Float) {
@@ -208,7 +207,10 @@ private fun AbLetter(letter: String, ms: Long, length: Long, widthPx: Float) {
     )
 }
 
-/** Above the mouse: the frame of that moment (when the file gives one), its time and its chapter. */
+/**
+ * Above the mouse: the frame of that moment (when the file gives one), its time and its chapter.
+ * Centred on the mouse and kept inside the timeline; the label may be wider than the frame.
+ */
 @Composable
 private fun HoverPreview(
     state: PlayerChromeState,
@@ -217,7 +219,6 @@ private fun HoverPreview(
     width: Dp,
     previews: FramePreviews?,
 ) {
-    val colors = NagTheme.colors
     var frame by remember { mutableStateOf<ImageBitmap?>(null) }
     val bucket = ms / FramePreviews.STEP_MS
     LaunchedEffect(previews, bucket) {
@@ -235,14 +236,17 @@ private fun HoverPreview(
     }
     val text = listOfNotNull(playerClock(ms), chapter).joinToString(" · ")
     val image = frame
-    val boxWidth = if (image != null) PreviewWidth else PreviewWidth.coerceAtMost(width)
-    val left = (x - boxWidth / 2).coerceIn(0.dp, (width - boxWidth).coerceAtLeast(0.dp))
     val shape = RoundedCornerShape(6.dp)
     Column(
         Modifier
-            .offset(x = left, y = -(if (image != null) PreviewHeight + 34.dp else 34.dp))
-            .width(boxWidth)
-            .testTag("player-preview"),
+            .testTag("player-preview")
+            .layout { measurable, _ ->
+                val room = width.roundToPx()
+                val placeable = measurable.measure(Constraints(maxWidth = room))
+                val left = (x.roundToPx() - placeable.width / 2).coerceIn(0, (room - placeable.width).coerceAtLeast(0))
+                // above the timeline, taking no room in it
+                layout(0, 0) { placeable.place(left, -placeable.height - PreviewGap.roundToPx()) }
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (image != null) {

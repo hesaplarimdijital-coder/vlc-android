@@ -6,6 +6,7 @@ import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -172,16 +173,25 @@ class DesktopControlsTest {
         compose.waitForIdle()
     }
 
+    /**
+     * A change the mouse's handler would make, made from the test's thread: the composition hears
+     * of it at once, as the clock is the test's and does not run by itself.
+     */
+    private fun mouse(change: ChromeVisibility.() -> Unit) {
+        visibility.change()
+        Snapshot.sendApplyNotifications()
+    }
+
     @Test
     fun aMovingMouseShowsThemAndTwoSecondsOfRestHideThem() {
         controls()
         assertFalse("hidden at first", shown())
         compose.mainClock.autoAdvance = false
-        visibility.onMouseMoved()
+        mouse { onMouseMoved() }
         compose.mainClock.advanceTimeBy(300)
         assertTrue("shown when the mouse moves", shown())
         compose.mainClock.advanceTimeBy(1_500)
-        visibility.onMouseMoved()
+        mouse { onMouseMoved() }
         compose.mainClock.advanceTimeBy(1_500)
         assertTrue("a move starts the two seconds again", shown())
         compose.mainClock.advanceTimeBy(1_000)
@@ -194,18 +204,21 @@ class DesktopControlsTest {
     fun theyStayWhileTheMouseRestsOnThemOrAMenuIsOpen() {
         controls()
         compose.mainClock.autoAdvance = false
-        visibility.onMouseMoved()
-        visibility.overBars = true
+        mouse {
+            onMouseMoved()
+            overBars = true
+        }
         compose.mainClock.advanceTimeBy(5_000)
         assertTrue("the mouse on the bar keeps them", shown())
         // a menu opened from the bar keeps them when the mouse goes onto it
         compose.onNodeWithTag("player-speed").performClick()
         compose.mainClock.advanceTimeBy(100)
         assertTrue(visibility.menuOpen)
-        visibility.overBars = false
+        mouse { overBars = false }
         compose.mainClock.advanceTimeBy(5_000)
         assertTrue("an open menu keeps them", shown())
         compose.onNode(hasText("1,5×") and hasClickAction()).performClick()
+        Snapshot.sendApplyNotifications()
         compose.mainClock.advanceTimeBy(100)
         assertEquals(listOf("rate:1.5"), actions.calls)
         assertFalse("the menu closed", visibility.menuOpen)
@@ -266,6 +279,8 @@ class DesktopControlsTest {
         assertEquals(listOf("seekTo:${state.lengthMs / 2}"), actions.calls)
         // the mouse at 0.95: 2:11:15, in the chapter "Şafak", with a frame
         timeline.performMouseInput { moveTo(Offset(width * 0.95f, height / 2f)) }
+        // the mouse rests a moment before a frame is read
+        compose.mainClock.advanceTimeBy(200)
         compose.waitForIdle()
         compose.onNodeWithTag("player-preview").assertExists()
         compose.onNodeWithText("2:11:15 · Bölüm 4 — Şafak").assertExists()
