@@ -67,6 +67,7 @@ Sözlüğü testler denetler:
 | katkıcı | contributor | | | |
 | kapsayıcı | container | | | MKV, MP4 |
 | kare hızı | frame rate | | | |
+| yenileme hızı | refresh rate | tazeleme hızı | | Ekranın hızı, Hz ile: “120 Hz”; “Yenileme hızı eşleme” ekranı filmin kare hızına geçirir: her zaman, kesintisizse ya da hiç |
 | vurgu rengi | accent colour | | | |
 | ön ayar | preset | | | “VLC”, “mpv” |
 | efekt | effect | | | “Efektler ve filtreler” (Ctrl+E); oynatıcı panelinin sekmesi “Efektler” |

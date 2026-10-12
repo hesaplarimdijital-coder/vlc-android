@@ -174,6 +174,15 @@ private fun decimal(locale: Locale, value: Double, digits: Int): String =
 /** "23,976 fps", "25 fps" (Turkish). */
 fun frameRateLabel(fps: Double, locale: Locale): String = decimal(locale, fps, 3) + " fps"
 
+/** A screen's refresh rate: "120 Hz", "59,94 Hz", "23,976 Hz" (Turkish). */
+fun refreshRateLabel(hz: Double, locale: Locale): String = refreshRateNumber(hz, locale) + " Hz"
+
+/** "120", "59,94": a refresh rate without its unit, in a sentence. */
+fun refreshRateNumber(hz: Double, locale: Locale): String = decimal(locale, hz, 3)
+
+/** A screen's rates: "60 / 120 Hz"; a slash, as a comma is the decimal point in Turkish ("59,94 / 60 Hz"). */
+fun refreshRatesLabel(rates: List<Double>, locale: Locale): String = rates.joinToString(" / ") { refreshRateNumber(it, locale) } + " Hz"
+
 /** "56 Mbps", "4,1 Mbps", "320 kbps". */
 fun bitrateLabel(bitsPerSecond: Long, locale: Locale): String = when {
     bitsPerSecond >= 10_000_000 -> decimal(locale, bitsPerSecond / 1e6, 0) + " Mbps"

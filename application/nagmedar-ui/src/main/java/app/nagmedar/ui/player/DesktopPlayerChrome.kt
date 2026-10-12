@@ -73,6 +73,12 @@ import app.nagmedar.ui.player.panel.PanelLayout
 import app.nagmedar.ui.player.panel.PanelState
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.panel.PlayerPanel
+import app.nagmedar.ui.player.refresh.FrameRateMatcher
+import app.nagmedar.ui.player.refresh.RefreshMatch
+import app.nagmedar.ui.player.refresh.RefreshSection
+import app.nagmedar.ui.player.refresh.cadenceLabel
+import app.nagmedar.ui.player.refresh.cadenceText
+import app.nagmedar.ui.player.refresh.screenLabel
 import app.nagmedar.ui.player.snapshot.SnapshotCard
 import app.nagmedar.ui.player.snapshot.SnapshotController
 import app.nagmedar.ui.player.snapshot.SnapshotFlash
@@ -124,8 +130,12 @@ class DesktopPlayerChrome : PlayerChrome {
     private var sync: SyncController? = null
     private var snapshots: SnapshotController? = null
     private var navigation: PlayerNavigation? = null
+    private var refresh: FrameRateMatcher? = null
 
     override val active: Boolean get() = controls.active
+
+    // S-612: the screen's refresh rate follows the film as the sync tab's choice says
+    override val matchesFrameRate: Boolean get() = true
 
     override fun attach(activity: VideoPlayerActivity, root: FrameLayout) {
         this.activity = activity
@@ -173,6 +183,9 @@ class DesktopPlayerChrome : PlayerChrome {
         // "Jump to time", the chapters and the bookmarks (S-608)
         val navigation = PlayerNavigation(activity)
         this.navigation = navigation
+        // the screen's refresh rate (S-612)
+        val refresh = FrameRateMatcher(activity).also { it.attach() }
+        this.refresh = refresh
         val frame = MouseOnlyFrame(activity, controls)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
@@ -184,7 +197,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live), navigation, layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, layout)
         }.also { it.attach() }
     }
 
@@ -230,6 +243,8 @@ class DesktopPlayerChrome : PlayerChrome {
         playingUri = uri
         // its bookmarks
         navigation?.onMediaStarted()
+        // the screen follows its frame rate (S-612)
+        activity?.let { refresh?.apply(RefreshMatch.read(Settings.getInstance(it))) }
     }
 
     /**
@@ -259,6 +274,8 @@ class DesktopPlayerChrome : PlayerChrome {
         snapshots = null
         navigation?.release()
         navigation = null
+        refresh?.release()
+        refresh = null
         panelHost?.detach()
         panelHost = null
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
@@ -388,8 +405,11 @@ private fun PlayerChromeContent(
     }
 }
 
-/** What the Info tab reads and shows: the film's facts, its statistics, whether they show over the video. */
-private class PanelInfo(val source: ActivityInfoSource, val state: InfoState, val live: LiveStats)
+/**
+ * What the Info tab reads and shows: the film's facts, its statistics, whether they show over the
+ * video; the screen's refresh rate and the frames' cadence on it (S-612).
+ */
+private class PanelInfo(val source: ActivityInfoSource, val state: InfoState, val live: LiveStats, val refresh: FrameRateMatcher)
 
 /** The Info tab in the app (S-605): the film's facts, read again every two seconds while it shows. */
 @Composable
@@ -407,6 +427,7 @@ private fun InfoContent(info: PanelInfo, navigation: PlayerNavigation, columns: 
             tracks = source.tracks()
             decoding = source.decoding()
             lengthMs = source.lengthMs()
+            info.refresh.refresh()
             chapters = navigation.chapters()
             nowMs = navigation.timeMs()
             delay(2_000)
@@ -429,11 +450,15 @@ private fun InfoContent(info: PanelInfo, navigation: PlayerNavigation, columns: 
     }
     val streams = streamRows(tech, tracks, decoding)
     // the video output and the audio decoder are the native side's to tell (S-504, S-506)
+    val screen = info.refresh.status
     val rows = listOf(
         InfoRow(stringResource(R.string.nag_info_video_decoder), stringResource(decoding.label)),
         InfoRow(stringResource(R.string.nag_info_video_output), null),
         InfoRow(stringResource(R.string.nag_info_audio_decoder), null),
         InfoRow(stringResource(R.string.nag_info_audio_output), source.audioOutput()),
+        // the screen's rate and how the film's frames fall on it (S-612)
+        InfoRow(stringResource(R.string.nag_refresh_screen), screenLabel(screen)),
+        InfoRow(cadenceLabel(screen.cadence), cadenceText(screen.cadence)),
     )
     val last = info.live.last
     val labels = ReportLabels(
@@ -476,6 +501,7 @@ private fun PanelContent(
     sync: SyncController,
     info: PanelInfo,
     navigation: PlayerNavigation,
+    refresh: FrameRateMatcher,
     layout: PanelLayout,
 ) {
     val prefs = rememberNagmedarPreferences()
@@ -491,6 +517,8 @@ private fun PanelContent(
                                 delay(500)
                             }
                         }
+                        // the screen's rate is read again as the tab opens; its changes come by themselves
+                        LaunchedEffect(refresh) { refresh.refresh() }
                         SyncPanel(
                             values = sync.values,
                             remembered = sync.remembered,
@@ -501,6 +529,12 @@ private fun PanelContent(
                             onResetAll = sync::resetAll,
                             onRemember = sync::remember,
                             columns = layout.columns,
+                            refresh = {
+                                RefreshSection(refresh.status, prefs.refreshMatch) { match ->
+                                    prefs.updateRefreshMatch(match)
+                                    refresh.apply(match)
+                                }
+                            },
                         )
                     }
                     PanelTab.Effects -> EffectsPanel(

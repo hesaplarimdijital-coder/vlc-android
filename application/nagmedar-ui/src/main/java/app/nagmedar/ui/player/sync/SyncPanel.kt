@@ -49,9 +49,10 @@ import app.nagmedar.ui.theme.PlexMono
 
 /**
  * The sync tab of the player's panel (S-604), after the mockups' "Panel · Sync": the audio delay
- * and the subtitles' delay in 10 and 50 ms steps, the subtitles' speed between frame rates, then
- * "Remember for this file" and "Reset all delays". The delays are the player's, read back while
- * the tab shows; a positive delay makes the sound or the subtitles come later.
+ * and the subtitles' delay in 10 and 50 ms steps, the subtitles' speed between frame rates, the
+ * screen's refresh rate matching ([refresh], S-612), then "Remember for this file" and "Reset all
+ * delays". The delays are the player's, read back while the tab shows; a positive delay makes the
+ * sound or the subtitles come later.
  */
 @Composable
 fun SyncPanel(
@@ -66,6 +67,8 @@ fun SyncPanel(
     modifier: Modifier = Modifier,
     /** Under the video in a wide window: two columns of sections. */
     columns: Int = 1,
+    /** The refresh rate's section (S-612), after the subtitles' speed. */
+    refresh: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier.fillMaxSize().testTag("sync-panel")) {
         Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
@@ -101,6 +104,10 @@ fun SyncPanel(
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                         rate()
+                        if (refresh != null) {
+                            PanelRule()
+                            refresh()
+                        }
                     }
                 }
             } else {
@@ -109,6 +116,10 @@ fun SyncPanel(
                     PanelRule()
                     subtitles()
                     rate()
+                    if (refresh != null) {
+                        PanelRule()
+                        refresh()
+                    }
                 }
             }
         }

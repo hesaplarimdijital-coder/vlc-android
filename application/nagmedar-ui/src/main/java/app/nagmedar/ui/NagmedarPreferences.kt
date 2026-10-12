@@ -14,6 +14,7 @@ import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
@@ -26,6 +27,7 @@ import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.NAGMEDAR_PLAYER_FULLSCREEN
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WHEEL_SEEKS
+import org.videolan.tools.KEY_VIDEO_MATCH_FRAME_RATE
 import org.videolan.tools.Settings
 
 /**
@@ -78,6 +80,15 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     fun updateSnapshot(value: SnapshotSettings) {
         snapshot = value
         value.write(prefs.edit()).apply()
+    }
+
+    /** S-612: whether the screen's refresh rate follows the film: always, if seamless, never. */
+    var refreshMatch by mutableStateOf(RefreshMatch.read(prefs))
+        private set
+
+    fun updateRefreshMatch(value: RefreshMatch) {
+        refreshMatch = value
+        prefs.edit().putString(RefreshMatch.KEY, value.key).apply()
     }
 
     /** S-404: how long the mouse rests before a tooltip shows. */
@@ -136,6 +147,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         }
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
         if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
+        if (key == null || key == RefreshMatch.KEY || key == KEY_VIDEO_MATCH_FRAME_RATE) refreshMatch = RefreshMatch.read(prefs)
     }
 
     fun updateThemeMode(value: ThemeMode) {

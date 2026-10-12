@@ -723,6 +723,34 @@
     <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
     <string name="nag_sync_remember">Remember for this file</string>
     <string name="nag_sync_reset_all">Reset all delays</string>
+    <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
+    <string name="nag_refresh_title">Refresh rate matching</string>
+    <string name="nag_refresh_exact">whole multiple</string>
+    <string name="nag_refresh_not_exact">not a whole multiple</string>
+    <string name="nag_refresh_content">Content</string>
+    <string name="nag_refresh_screen">Screen</string>
+    <string name="nag_refresh_repeats">Repeated frames</string>
+    <string name="nag_refresh_drops">Dropped frames</string>
+    <string name="nag_refresh_phone">phone screen</string>
+    <string name="nag_refresh_tablet">tablet panel</string>
+    <string name="nag_refresh_none">none · every frame stays as long</string>
+    <string name="nag_refresh_every_seconds">once every ≈ %1$s s</string>
+    <string name="nag_refresh_every_minutes">once every ≈ %1$s min</string>
+    <string name="nag_refresh_per_second">≈ %1$s a second</string>
+    <string name="nag_refresh_subtle">hard to notice</string>
+    <string name="nag_refresh_visible">noticeable in pans</string>
+    <string name="nag_refresh_stutter">pans stutter</string>
+    <string name="nag_refresh_choppy">motion looks choppy</string>
+    <string name="nag_refresh_always">Always</string>
+    <string name="nag_refresh_seamless">If seamless</string>
+    <string name="nag_refresh_off">Off</string>
+    <string name="nag_refresh_always_hint">With a TV over HDMI the screen switches to %1$s Hz; it may go black for ~1 s as it does.</string>
+    <string name="nag_refresh_always_hint_any">With a TV over HDMI the screen switches to the film\'s rate; it may go black for ~1 s as it does.</string>
+    <string name="nag_refresh_seamless_hint">The screen follows the film only when it can switch without going black; a TV mostly stays as it is.</string>
+    <string name="nag_refresh_off_hint">The screen keeps its own rate.</string>
+    <string name="nag_refresh_no_multiple">None of this screen\'s rates is a whole multiple of the film\'s: %1$s.</string>
+    <string name="nag_refresh_system_never">Android\'s own setting keeps the screen from following content.</string>
+    <string name="nag_refresh_system_seamless">Android\'s own setting allows only seamless switches.</string>
 
     <!-- S-605: the Info tab of the player's panel and the statistics over the video -->
     <string name="nag_info_no_media">Nothing is playing</string>

@@ -36,9 +36,12 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
 
-/** Row of mutually exclusive options (theme, density, view mode). */
+/**
+ * Row of mutually exclusive options (theme, density, view mode); [fill], the options share the
+ * row's width equally (the player panel's).
+ */
 @Composable
-fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier) {
+fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier, fill: Boolean = false) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val outer = RoundedCornerShape(dimens.radiusControl + 2.dp)
@@ -56,7 +59,7 @@ fun <T> SegmentedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (
             val isSelected = value == selected
             val shape = RoundedCornerShape(dimens.radiusControl)
             Box(
-                modifier = Modifier
+                modifier = (if (fill) Modifier.weight(1f) else Modifier)
                     // by touch a 48 dp target either way (S-310)
                     .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
                     .widthIn(min = dimens.minTarget)

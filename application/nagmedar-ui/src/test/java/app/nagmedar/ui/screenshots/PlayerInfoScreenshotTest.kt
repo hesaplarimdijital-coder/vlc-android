@@ -24,6 +24,10 @@ import app.nagmedar.ui.player.info.sampleTracks
 import app.nagmedar.ui.player.info.streamRows
 import app.nagmedar.ui.player.navigate.sampleChapters
 import app.nagmedar.ui.player.panel.PanelTab
+import app.nagmedar.ui.player.refresh.cadenceLabel
+import app.nagmedar.ui.player.refresh.cadenceText
+import app.nagmedar.ui.player.refresh.sampleTablet
+import app.nagmedar.ui.player.refresh.screenLabel
 import app.nagmedar.ui.player.samplePlayerState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -38,8 +42,8 @@ import kotlin.math.sin
 /**
  * S-605: the player with its Info tab, after the mockups' "Panel · Info", and the statistics over
  * the video: Kuzey Işığı's streams from the media probe, its decoding, a minute of its input
- * bitrate, its chapters (S-608); in English; under the video in half a DeX window; on a phone, for
- * a finger.
+ * bitrate, its chapters (S-608), the screen and how often a frame repeats on it (S-612); in
+ * English; under the video in half a DeX window; on a phone, for a finger.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -70,6 +74,9 @@ class PlayerInfoScreenshotTest {
                             InfoRow(stringResource(R.string.nag_info_video_output), null),
                             InfoRow(stringResource(R.string.nag_info_audio_decoder), null),
                             InfoRow(stringResource(R.string.nag_info_audio_output), "AAudio"),
+                            // S-612: the screen, and how the film's frames fall on it
+                            InfoRow(stringResource(R.string.nag_refresh_screen), screenLabel(sampleTablet)),
+                            InfoRow(cadenceLabel(sampleTablet.cadence), cadenceText(sampleTablet.cadence)),
                         ),
                         live = live,
                         overlay = true,

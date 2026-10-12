@@ -704,6 +704,34 @@
     <string name="nag_sync_rate_pal_to_film_hint">PAL (25 fps) altyazı giderek erkene kayıyorsa kullanın; süre çarpanı %1$s.</string>
     <string name="nag_sync_remember">Bu dosya için hatırla</string>
     <string name="nag_sync_reset_all">Tüm gecikmeleri sıfırla</string>
+    <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
+    <string name="nag_refresh_title">Yenileme hızı eşleme</string>
+    <string name="nag_refresh_exact">tam katı</string>
+    <string name="nag_refresh_not_exact">tam katı değil</string>
+    <string name="nag_refresh_content">İçerik</string>
+    <string name="nag_refresh_screen">Ekran</string>
+    <string name="nag_refresh_repeats">Kare tekrarı</string>
+    <string name="nag_refresh_drops">Kare atlama</string>
+    <string name="nag_refresh_phone">telefon ekranı</string>
+    <string name="nag_refresh_tablet">tablet paneli</string>
+    <string name="nag_refresh_none">yok · her kare eşit süre kalır</string>
+    <string name="nag_refresh_every_seconds">≈ %1$s sn\'de bir</string>
+    <string name="nag_refresh_every_minutes">≈ %1$s dk\'da bir</string>
+    <string name="nag_refresh_per_second">saniyede ≈ %1$s</string>
+    <string name="nag_refresh_subtle">göze zor çarpar</string>
+    <string name="nag_refresh_visible">kaydırmalarda fark edilir</string>
+    <string name="nag_refresh_stutter">kaydırmalarda takılır</string>
+    <string name="nag_refresh_choppy">hareket kesik görünür</string>
+    <string name="nag_refresh_always">Her zaman</string>
+    <string name="nag_refresh_seamless">Kesintisizse</string>
+    <string name="nag_refresh_off">Kapalı</string>
+    <string name="nag_refresh_always_hint">HDMI ile TV\'ye bağlıyken ekran %1$s Hz moduna geçirilir; geçişte ~1 sn siyah ekran olabilir.</string>
+    <string name="nag_refresh_always_hint_any">HDMI ile TV\'ye bağlıyken ekran filmin hızına geçirilir; geçişte ~1 sn siyah ekran olabilir.</string>
+    <string name="nag_refresh_seamless_hint">Ekran hızı yalnızca görüntü kesilmeden değişebiliyorsa filme göre ayarlanır; TV çoğu zaman olduğu gibi kalır.</string>
+    <string name="nag_refresh_off_hint">Ekran kendi hızında kalır.</string>
+    <string name="nag_refresh_no_multiple">Bu ekranın hiçbir hızı filmin tam katı değil: %1$s.</string>
+    <string name="nag_refresh_system_never">Android\'in kendi ayarı ekranın içeriğe uymasını kapatmış.</string>
+    <string name="nag_refresh_system_seamless">Android\'in kendi ayarı yalnızca kesintisiz geçişe izin veriyor.</string>
 
     <!-- S-605: the Info tab of the player's panel and the statistics over the video -->
     <string name="nag_info_no_media">Oynayan bir dosya yok</string>

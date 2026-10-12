@@ -1862,7 +1862,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         //if possible, match display with content frame rate
         val preferMatchFrameRate =
             settings.getBoolean(KEY_VIDEO_MATCH_FRAME_RATE, false)
-        if (preferMatchFrameRate) {
+        // Nağmedar (S-612): the new interface's refresh rate matching stands for this switch
+        if (preferMatchFrameRate && chrome?.matchesFrameRate != true) {
             val surfaceView = rootView?.findViewById<View>(R.id.surface_video) as SurfaceView
             FrameRateManager(this, service!!).matchFrameRate(surfaceView, window)
         }

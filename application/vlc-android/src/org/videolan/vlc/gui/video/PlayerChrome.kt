@@ -1,6 +1,6 @@
 /*
  * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603); the buttons
- * of picture in picture (S-609).
+ * of picture in picture (S-609); the refresh rate's matching (S-612).
  */
 package org.videolan.vlc.gui.video
 
@@ -49,6 +49,13 @@ interface PlayerChrome {
      * (or the defaults) to the player.
      */
     fun onPlaying()
+
+    /**
+     * S-612: whether these controls make the screen's refresh rate follow the film, as their own
+     * choice says (always, when seamless, never); the classic "Match display frame rate" then
+     * stands aside.
+     */
+    val matchesFrameRate: Boolean get() = false
 
     /**
      * S-609: the buttons of picture in picture's window, for a film [playing] or paused: back,

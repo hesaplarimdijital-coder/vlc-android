@@ -63,6 +63,7 @@ object NagIcons {
     val Effects: ImageVector by lazy { icon("Effects", stroke("M3 4.5h10M3 8h10M3 11.5h10"), stroke("M4.6,4.5a1.4,1.4 0 1 0 2.8,0a1.4,1.4 0 1 0 -2.8,0Z"), stroke("M9.1,8a1.4,1.4 0 1 0 2.8,0a1.4,1.4 0 1 0 -2.8,0Z"), stroke("M3.6,11.5a1.4,1.4 0 1 0 2.8,0a1.4,1.4 0 1 0 -2.8,0Z")) }
     val PictureInPicture: ImageVector by lazy { icon("PictureInPicture", stroke("M3.5,3H12.5A1.5,1.5 0 0 1 14,4.5V11.5A1.5,1.5 0 0 1 12.5,13H3.5A1.5,1.5 0 0 1 2,11.5V4.5A1.5,1.5 0 0 1 3.5,3Z"), fill("M8.6,8H11.9A0.6,0.6 0 0 1 12.5,8.6V10.9A0.6,0.6 0 0 1 11.9,11.5H8.6A0.6,0.6 0 0 1 8,10.9V8.6A0.6,0.6 0 0 1 8.6,8Z")) }
     val Fullscreen: ImageVector by lazy { icon("Fullscreen", stroke("M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10")) }
+    val Display: ImageVector by lazy { icon("Display", stroke("M2.5,3H13.5A1,1 0 0 1 14.5,4V10A1,1 0 0 1 13.5,11H2.5A1,1 0 0 1 1.5,10V4A1,1 0 0 1 2.5,3Z"), stroke("M5.5 13.5h5M8 11v2.5")) }
     val Search: ImageVector by lazy { icon("Search", stroke("M2.5,7a4.5,4.5 0 1 0 9,0a4.5,4.5 0 1 0 -9,0Z"), stroke("m10.5 10.5 3 3")) }
     val Sort: ImageVector by lazy { icon("Sort", stroke("M4.5 3v10M2.5 11l2 2 2-2M11.5 13V3M9.5 5l2-2 2 2")) }
     val Lyrics: ImageVector by lazy { icon("Lyrics", stroke("M2.5 4h7M2.5 7.5h11M2.5 11h8")) }
@@ -95,6 +96,7 @@ object NagIcons {
         Screenshot, Effects, PictureInPicture, Fullscreen, Search, Sort, Lyrics, Volume,
         Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle, SuccessCircle,
         Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal, FlipVertical,
+        Display,
     )
 }
 
