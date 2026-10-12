@@ -1,5 +1,5 @@
 {
-  "description": "S-1404: what Nağmedar's macrobenchmarks are held to. 'test' is ClassName.method of application/benchmark; 'stat' is median (start-up) or a percentile (frames); a benchmark not 'required' may be skipped (the Films need films on the device).",
+  "description": "S-1404: what Nağmedar's macrobenchmarks are held to. 'test' is ClassName.method of application/benchmark; 'stat' is median (start-up) or a percentile (frames); a benchmark not 'required' may be skipped (the Films need films on the device, the Music music).",
   "benchmarks": [
     {
       "test": "StartupBenchmark.cold",
@@ -43,6 +43,22 @@
     },
     {
       "test": "ScrollBenchmark.films",
+      "metric": "frameDurationCpuMs",
+      "stat": "P95",
+      "max": 16,
+      "required": false,
+      "why": "Bir kareye CPU'da en çok 16 ms (60 Hz'in payı)"
+    },
+    {
+      "test": "ScrollBenchmark.music",
+      "metric": "frameOverrunMs",
+      "stat": "P90",
+      "max": 0,
+      "required": false,
+      "why": "S-803: büyük müzik kütüphanesinin parça tablosu kaydırılırken on kareden dokuzu zamanında"
+    },
+    {
+      "test": "ScrollBenchmark.music",
       "metric": "frameDurationCpuMs",
       "stat": "P95",
       "max": 16,

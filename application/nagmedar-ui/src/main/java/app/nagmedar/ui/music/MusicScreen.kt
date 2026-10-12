@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -335,7 +336,8 @@ fun MusicBrowser(
     // a wide window always shows a group; a narrow one shows the list until one is opened
     val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide }
     if (!wide && grouped && state.group != null) BackHandler { state.group = null }
-    Column(modifier.fillMaxSize()) {
+    // "music": what the scroll benchmark (S-803) looks for
+    Column(modifier.fillMaxSize().testTag("music")) {
         ViewChips(state)
         FilterRow(state, probing)
         when {
