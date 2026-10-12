@@ -173,7 +173,7 @@ private fun ToneBadge(text: String, tone: Color) {
     )
 }
 
-/** What the choice does, on a raised ground with a screen's icon, as the mockup has it. */
+/** What the choice does, on a raised ground with a screen's icon (the series' TV), as the mockup has it. */
 @Composable
 private fun HintCard(lines: List<String>) {
     val colors = NagTheme.colors
@@ -186,7 +186,7 @@ private fun HintCard(lines: List<String>) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(NagIcons.Display, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.padding(top = 1.dp).size(14.dp))
+        Icon(NagIcons.Series, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.padding(top = 1.dp).size(14.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             lines.forEach { Text(it, style = NagTheme.type.labelSmall, color = colors.textSecondary) }
         }
