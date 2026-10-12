@@ -302,7 +302,7 @@ private fun NagmedarMain(
                         // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying() })
                         // S-804: the medialibrary's playlists, a tab each
-                        Destination.Playlists -> PlaylistsScreen(undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
+                        Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)

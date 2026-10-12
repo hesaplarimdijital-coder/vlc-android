@@ -50,7 +50,7 @@ fun RatingDialog(tracks: List<Track>, stats: Map<String, TrackStats>, onRate: (I
 fun RatingSurface(tracks: List<Track>, stats: Map<String, TrackStats>, onRate: (Int) -> Unit, onDismiss: () -> Unit) {
     val colors = NagTheme.colors
     // the tracks' rating when they share one; none when they differ
-    val ratings = remember(tracks) { tracks.map { stats[it.uri]?.rating ?: 0 }.distinct() }
+    val ratings = remember(tracks) { tracks.map { stats[it.statsKey]?.rating ?: 0 }.distinct() }
     var stars by remember { mutableIntStateOf(ratings.singleOrNull() ?: 0) }
     val set = { value: Int ->
         stars = value

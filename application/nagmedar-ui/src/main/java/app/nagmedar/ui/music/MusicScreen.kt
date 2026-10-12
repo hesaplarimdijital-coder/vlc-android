@@ -212,15 +212,9 @@ interface MusicActions {
 fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying: (@Composable () -> Unit)? = null) {
     val context = LocalContext.current
     val scan = rememberScanState()
-    val access = LocalLibraryAccess.current
-    val media by produceState<List<MediaWrapper>?>(null, scan.active, access?.media, access?.folders) {
-        loadWhileScanning(scan.active) { repository.tracks() }
-    }
+    val media = rememberMusicMedia(repository, scan.active)
     val tech by TrackTechIndex.tech.collectAsState()
     val probing by TrackTechIndex.remaining.collectAsState()
-    LaunchedEffect(media) {
-        media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString() }) } }
-    }
     val locale = context.resources.locale()
     val library = remember(media, tech, locale) {
         media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) }, locale) }
@@ -259,6 +253,23 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
     }
 }
 
+/**
+ * The medialibrary's music (or the picked folders'), read again while a scan finds more, the
+ * engine's probe started on what is new: the music screen's, and the smart lists' (S-805).
+ */
+@Composable
+fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<MediaWrapper>? {
+    val context = LocalContext.current
+    val access = LocalLibraryAccess.current
+    val media by produceState<List<MediaWrapper>?>(null, scanning, access?.media, access?.folders) {
+        loadWhileScanning(scanning) { repository.tracks() }
+    }
+    LaunchedEffect(media) {
+        media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString() }) } }
+    }
+    return media
+}
+
 /** The medialibrary's item as the library shows it. */
 fun MediaWrapper.toTrack(tech: TrackTech?): Track {
     val location = uri?.toString().orEmpty()
@@ -287,18 +298,26 @@ fun MediaWrapper.toTrack(tech: TrackTech?): Track {
  */
 internal class ServiceMusicActions(
     private val context: Context,
-    private val byUri: Map<String, MediaWrapper>,
+    /** The medialibrary's item of a track's uri. */
+    private val lookup: (String) -> MediaWrapper?,
     private val onAddToPlaylist: ((List<Track>) -> Unit)? = null,
     private val onAskRating: ((List<Track>) -> Unit)? = null,
 ) : MusicActions {
+
+    constructor(
+        context: Context,
+        byUri: Map<String, MediaWrapper>,
+        onAddToPlaylist: ((List<Track>) -> Unit)? = null,
+        onAskRating: ((List<Track>) -> Unit)? = null,
+    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating)
 
     override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
 
     override val askRating: ((List<Track>) -> Unit)? get() = onAskRating
 
-    override fun rate(tracks: List<Track>, rating: Int) = tracks.forEach { TrackStatsIndex.rate(context, it.uri, rating) }
+    override fun rate(tracks: List<Track>, rating: Int) = tracks.forEach { TrackStatsIndex.rate(context, it.statsKey, rating) }
 
-    private fun media(tracks: List<Track>) = tracks.mapNotNull { byUri[it.uri] }
+    private fun media(tracks: List<Track>) = tracks.mapNotNull { lookup(it.uri) }
 
     override fun play(tracks: List<Track>, index: Int) {
         val list = media(tracks)
@@ -310,7 +329,7 @@ internal class ServiceMusicActions(
     override fun playNext(tracks: List<Track>) = MediaUtils.insertNext(context, media(tracks).toTypedArray())
 
     override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> {
-        val entries = byUri[track.uri]?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
+        val entries = lookup(track.uri)?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
         // after "Sıraya ekle": "Listeye ekle…", "Puan ver…"
         val added = listOfNotNull(
             onAddToPlaylist?.let { add -> MenuEntry.Item(context.getString(R.string.nag_pl_add), { add(listOf(track)) }, icon = NagIcons.PlaylistAdd) },
@@ -436,7 +455,7 @@ private fun FilterRow(state: MusicBrowserState, probing: Int) {
 }
 
 @Composable
-private fun depthLabel(depth: Depth): String = when (depth) {
+internal fun depthLabel(depth: Depth): String = when (depth) {
     Depth.Bits16 -> stringResource(R.string.nag_sp_bits, 16)
     Depth.Bits24 -> stringResource(R.string.nag_sp_bits, 24)
     Depth.Bits32 -> stringResource(R.string.nag_sp_bits, 32)

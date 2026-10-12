@@ -46,6 +46,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -235,13 +236,13 @@ internal fun DialogFrame(onDismiss: () -> Unit, content: @Composable () -> Unit)
     ) { content() }
 }
 
-/** The card of the player's small dialogs: a title with Esc, then what it asks. */
+/** The card of the player's small dialogs: a title with Esc, then what it asks; [cardWidth] wide where the window has room. */
 @Composable
-internal fun DialogCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun DialogCard(title: String, modifier: Modifier = Modifier, cardWidth: Dp = 380.dp, content: @Composable ColumnScope.() -> Unit) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(12.dp)
     BoxWithConstraints(contentAlignment = Alignment.Center) {
-        val width = if (maxWidth < 420.dp) maxWidth - 32.dp else 380.dp
+        val width = if (maxWidth < cardWidth + 40.dp) maxWidth - 32.dp else cardWidth
         Column(
             modifier
                 .width(width)

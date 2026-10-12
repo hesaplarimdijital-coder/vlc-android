@@ -66,6 +66,9 @@ data class Track(
     val filedArtist: String? get() = albumArtist?.takeIf { it.isNotBlank() } ?: artist?.takeIf { it.isNotBlank() }
 
     val composer: String? get() = tech?.composer?.takeIf { it.isNotBlank() }
+
+    /** S-808: what its rating and plays are kept by. */
+    val statsKey: String get() = uri
 }
 
 /** The ways through the library (S-803). */

@@ -145,6 +145,19 @@ class MediaLibraryPlaylists(private val context: Context) : PlaylistStore {
             val location = item.uri?.let { if (it.scheme == "file") it.path else it.toString() }.orEmpty()
             PlaylistEntry(location, item.title, item.artistName, item.albumName, item.length)
         }
+        return write(entries, name, uri, format)
+    }
+
+    /** S-805: [tracks] (a smart list's, as it is now) written to [uri] as [format]. */
+    suspend fun exportTracks(tracks: List<Track>, name: String, uri: Uri, format: PlaylistFormat): Boolean {
+        val entries = tracks.map { track ->
+            val location = Uri.parse(track.uri).let { if (it.scheme == "file") it.path else track.uri }.orEmpty()
+            PlaylistEntry(location, track.title, track.artist, track.album, track.durationMs)
+        }
+        return write(entries, name, uri, format)
+    }
+
+    private suspend fun write(entries: List<PlaylistEntry>, name: String, uri: Uri, format: PlaylistFormat): Boolean {
         val text = PlaylistFiles.write(entries, format, localFolder(uri), name)
         return withContext(Dispatchers.IO) {
             runCatching {

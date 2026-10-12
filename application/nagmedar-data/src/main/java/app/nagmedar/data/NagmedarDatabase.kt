@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
-        AudioTechEntry::class, TrackStatsEntry::class,
+        AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -29,10 +29,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun mediaTech(): MediaTechDao
     abstract fun audioTech(): AudioTechDao
     abstract fun trackStats(): TrackStatsDao
+    abstract fun smartPlaylists(): SmartPlaylistDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 6
+        const val VERSION = 7
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -83,8 +84,19 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 6 → 7 (S-805): the smart lists. */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `smart_playlist` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`rules` TEXT NOT NULL, `match_all` INTEGER NOT NULL, `sort` TEXT, `limit_count` INTEGER, " +
+                        "`created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
-        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 
         @Volatile
         private var instance: NagmedarDatabase? = null

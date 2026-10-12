@@ -17,10 +17,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.music.AddToPlaylistSurface
 import app.nagmedar.ui.music.FakePlaylistStore
+import app.nagmedar.ui.music.FakeSmartListStore
 import app.nagmedar.ui.music.MusicActions
+import app.nagmedar.ui.music.MusicSamples
 import app.nagmedar.ui.music.PlaylistSummary
 import app.nagmedar.ui.music.PlaylistsBrowser
 import app.nagmedar.ui.music.PlaylistsState
+import app.nagmedar.ui.music.SmartField
+import app.nagmedar.ui.music.SmartListSurface
+import app.nagmedar.ui.music.SmartListsState
+import app.nagmedar.ui.music.SmartOp
+import app.nagmedar.ui.music.SmartRule
+import app.nagmedar.ui.music.SmartTemplate
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
@@ -66,12 +74,24 @@ class PlaylistsScreenshotTest {
     }
 
     @Composable
-    private fun Playlists(store: FakePlaylistStore) {
+    private fun Playlists(store: FakePlaylistStore, smartStore: FakeSmartListStore? = null) {
         val scope = rememberCoroutineScope()
         val state = remember { PlaylistsState(store, scope) }
         LaunchedEffect(Unit) { state.reload() }
-        PlaylistsBrowser(state, NoMusicActions)
+        val smart = smartStore?.let { remember { SmartListsState(it, scope) } }
+        if (smart != null) LaunchedEffect(Unit) { smart.follow() }
+        PlaylistsBrowser(
+            state, NoMusicActions, smart = smart,
+            library = MusicSamples.tracks, stats = MusicSamples.stats, now = { 1_760_000_000_000L },
+        )
     }
+
+    /** S-805: the templates' lists, the most played first. */
+    private fun smartLists() = FakeSmartListStore(
+        SmartTemplate.MostPlayed.build("En çok çalınanlar"),
+        SmartTemplate.Favourites.build("En sevilenler"),
+        SmartTemplate.HiRes.build("Yüksek çözünürlük"),
+    )
 
     private fun lists() = FakePlaylistStore(
         "Akşam" to listOf(1, 4, 8, 0, 9),
@@ -100,6 +120,35 @@ class PlaylistsScreenshotTest {
         val store = FakePlaylistStore()
         capture("playlists-tablet-light-empty", ThemeMode.Light, InputMode.Touch) {
             TestShell(WidthClass.Expanded, startDestination = Destination.Playlists) { _, _ -> Playlists(store) }
+        }
+    }
+
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    fun smartDex() {
+        val smart = smartLists()
+        capture("playlists-smart-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
+            TestShell(WidthClass.Large, startDestination = Destination.Playlists) { _, _ -> Playlists(FakePlaylistStore(), smart) }
+        }
+    }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun smartEditor() {
+        val forgotten = SmartTemplate.Forgotten.build("Unutulan sevilenler").let {
+            it.copy(rules = it.rules + SmartRule(SmartField.Genre, SmartOp.Contains, "klasik"), limit = 25)
+        }
+        capture("playlists-smart-editor-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                SmartListSurface(forgotten, MusicSamples.tracks, MusicSamples.stats, 1_760_000_000_000L, onSave = {}, onDismiss = {})
+            }
+        }
+    }
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
+    fun smartNewPhoneEnglish() {
+        capture("playlists-smart-new-phone-light-en", ThemeMode.Light, InputMode.Touch) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                SmartListSurface(null, MusicSamples.tracks, MusicSamples.stats, 1_760_000_000_000L, onSave = {}, onDismiss = {})
+            }
         }
     }
 

@@ -247,3 +247,22 @@ abstract class TrackStatsDao {
         updateRating(key, rating.coerceIn(0, 5), at)
     }
 }
+
+@Dao
+interface SmartPlaylistDao {
+    /** In the order they were made. */
+    @Query("SELECT * FROM smart_playlist ORDER BY created_at, id")
+    fun observe(): Flow<List<SmartPlaylistEntry>>
+
+    @Query("SELECT * FROM smart_playlist WHERE id = :id")
+    fun get(id: Long): SmartPlaylistEntry?
+
+    @Insert
+    fun insert(entry: SmartPlaylistEntry): Long
+
+    @Update
+    fun update(entry: SmartPlaylistEntry)
+
+    @Query("DELETE FROM smart_playlist WHERE id = :id")
+    fun delete(id: Long)
+}

@@ -178,3 +178,20 @@ data class TrackStatsEntry(
     @ColumnInfo(name = "last_played_at") val lastPlayedAt: Long = 0,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
 )
+
+/**
+ * S-805: a smart list: its name, its rules as text (a line each, "field|op|value"), whether all
+ * of them or any must hold, its order ("column:true", null for the library's) and how many
+ * tracks it takes at most (null: all).
+ */
+@Entity(tableName = "smart_playlist")
+data class SmartPlaylistEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val rules: String,
+    @ColumnInfo(name = "match_all") val matchAll: Boolean = true,
+    val sort: String? = null,
+    @ColumnInfo(name = "limit_count") val limitCount: Int? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+)

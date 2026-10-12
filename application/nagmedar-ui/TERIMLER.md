@@ -120,6 +120,8 @@ Sözlüğü testler denetler:
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
+| akıllı liste | smart list | otomatik liste, dinamik liste | auto playlist | Kurallarla kendiliğinden dolan çalma listesi; “Kuralları düzenle…”, “Parçalar uysun: tüm kurallara / herhangi bir kurala” |
+| kural | rule | ölçüt | criterion | Akıllı listenin bir satırı: alan, işleç, değer (“Puan en az 4”, “Eklenme en çok 30 gün önce”) |
 | puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi” |
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
 | uyku zamanlayıcısı | sleep timer | uyku modu, kapanma zamanlayıcısı | sleep mode | Süre bitince ya da çalan parça bitince oynatmayı durdurur (Alt+S); “Parça sonu”, “+15 dk”, “Zamanlayıcıyı kapat” |

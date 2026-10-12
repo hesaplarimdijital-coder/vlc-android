@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -45,6 +48,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -56,6 +60,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
+import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.IconMenuButton
@@ -80,10 +85,14 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.library.rememberScanState
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.stats.TrackStats
+import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
@@ -98,7 +107,7 @@ private val EXPORT_FORMATS = listOf(PlaylistFormat.M3U8, PlaylistFormat.XSPF, Pl
  * written to one through the system's picker.
  */
 @Composable
-fun PlaylistsScreen(undo: UndoBarState?, onBrowseMusic: () -> Unit) {
+fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMusic: () -> Unit) {
     val context = LocalContext.current
     val res = context.resources
     val store = remember(context) { MediaLibraryPlaylists(context.applicationContext) }
@@ -110,7 +119,22 @@ fun PlaylistsScreen(undo: UndoBarState?, onBrowseMusic: () -> Unit) {
     val state = remember(store, scope) { PlaylistsState(store, scope) }
     val changes by store.changes.collectAsState()
     LaunchedEffect(changes) { state.reload() }
-    val actions = remember(context, store) { ServiceMusicActions(context, store.media) }
+    // S-805: the smart lists, and the library, the ratings and the plays they read
+    val smartStore = remember(context) { DatabaseSmartLists(context.applicationContext) }
+    val smart = remember(smartStore, scope) { SmartListsState(smartStore, scope) }
+    LaunchedEffect(smart) { smart.follow() }
+    val scan = rememberScanState()
+    val media = rememberMusicMedia(repository, scan.active)
+    val tech by TrackTechIndex.tech.collectAsState()
+    val library = remember(media, tech) { media?.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) } }
+    val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
+    val stats by TrackStatsIndex.stats.collectAsState()
+    LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
+    // S-808: "Puan ver…" from a line's menu
+    var rating by remember { mutableStateOf<List<Track>?>(null) }
+    val actions = remember(context, store, byUri) {
+        ServiceMusicActions(context, lookup = { uri -> store.media[uri] ?: byUri[uri] }, onAskRating = { tracks -> rating = tracks })
+    }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
@@ -129,16 +153,27 @@ fun PlaylistsScreen(undo: UndoBarState?, onBrowseMusic: () -> Unit) {
                 ?: Toast.makeText(context, text, Toast.LENGTH_LONG).show()
         }
     }
-    // which playlist the file being made is for, kept through the picker
+    // which playlist (or, S-805, which smart list) the file being made is for, kept through the picker
     var exportingId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var exportingSmart by rememberSaveable { mutableStateOf(false) }
     val exporters = EXPORT_FORMATS.associateWith { format ->
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(format.mimeType)) { uri ->
-            val playlist = state.playlists?.firstOrNull { it.id == exportingId }
+            val id = exportingId
+            val ofSmart = exportingSmart
             exportingId = null
-            if (uri == null || playlist == null) return@rememberLauncherForActivityResult
+            exportingSmart = false
+            if (uri == null || id == null) return@rememberLauncherForActivityResult
             scope.launch {
-                val saved = store.export(playlist.id, playlist.name, uri, format)
-                val text = if (saved) res.getString(R.string.nag_pl_exported, playlist.name, format.name) else res.getString(R.string.nag_pl_export_failed)
+                val (name, saved) = if (ofSmart) {
+                    // the smart list as it is now
+                    val list = smart.lists?.firstOrNull { it.id == id } ?: return@launch
+                    val tracks = library?.let { list.select(it, stats, System.currentTimeMillis(), res.locale()) }.orEmpty()
+                    list.name to store.exportTracks(tracks, list.name, uri, format)
+                } else {
+                    val playlist = state.playlists?.firstOrNull { it.id == id } ?: return@launch
+                    playlist.name to store.export(playlist.id, playlist.name, uri, format)
+                }
+                val text = if (saved) res.getString(R.string.nag_pl_exported, name, format.name) else res.getString(R.string.nag_pl_export_failed)
                 Toast.makeText(context, text, Toast.LENGTH_LONG).show()
             }
         }
@@ -150,10 +185,20 @@ fun PlaylistsScreen(undo: UndoBarState?, onBrowseMusic: () -> Unit) {
         onImport = { importer.launch(arrayOf("*/*")) },
         onExport = { playlist, format ->
             exportingId = playlist.id
+            exportingSmart = false
             exporters.getValue(format).launch("${playlist.name}.${format.extension}")
         },
         onBrowseMusic = onBrowseMusic,
+        smart = smart,
+        library = library,
+        stats = stats,
+        onExportSmart = { list, format ->
+            exportingId = list.id
+            exportingSmart = true
+            exporters.getValue(format).launch("${list.name}.${format.extension}")
+        },
     )
+    rating?.let { tracks -> RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null }) }
 }
 
 /** A playlist's name being asked for: a new one, or one renamed. */
@@ -161,6 +206,13 @@ private sealed interface Naming {
     data object New : Naming
 
     data class Rename(val playlist: PlaylistSummary) : Naming
+}
+
+/** S-805: a smart list being made, or changed. */
+private sealed interface SmartEditing {
+    data object New : SmartEditing
+
+    data class Edit(val list: SmartList) : SmartEditing
 }
 
 /** The playlists below their header; [state] in the app is the medialibrary's, in tests a list's. */
@@ -173,10 +225,36 @@ fun PlaylistsBrowser(
     onImport: () -> Unit = {},
     onExport: (PlaylistSummary, PlaylistFormat) -> Unit = { _, _ -> },
     onBrowseMusic: () -> Unit = {},
+    /** S-805: the smart lists; null where there are none. */
+    smart: SmartListsState? = null,
+    /** S-805: the music library the smart lists take their tracks from; null while it is read. */
+    library: List<Track>? = null,
+    stats: Map<String, TrackStats> = emptyMap(),
+    /** The smart lists' clock ("in the last 30 days"). */
+    now: () -> Long = System::currentTimeMillis,
+    onExportSmart: (SmartList, PlaylistFormat) -> Unit = { _, _ -> },
 ) {
     val res = LocalContext.current.resources
+    val locale = res.locale()
     var naming by remember { mutableStateOf<Naming?>(null) }
+    var editing by remember { mutableStateOf<SmartEditing?>(null) }
+    var openSmart by rememberSaveable { mutableStateOf<Long?>(null) }
     val playlists = state.playlists
+    val smartLists = smart?.lists.orEmpty()
+    // read again as the library, the ratings and the plays change
+    val clock = remember(library, stats) { now() }
+    val smartTracks = remember(smartLists, library, stats, clock, locale) {
+        smartLists.associate { list -> list.id to library?.let { list.select(it, stats, clock, locale) } }
+    }
+    // a smart list open, or the first one when no playlist is
+    val shownSmart = smartLists.firstOrNull { it.id == openSmart } ?: smartLists.firstOrNull().takeIf { state.open == null }
+    val deleteSmart = { list: SmartList ->
+        openSmart = null
+        smart?.delete(list) { restore ->
+            undo?.show(res.getString(R.string.nag_pl_deleted, list.name), res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res), restore)
+        }
+    }
+    val smartMenu = { list: SmartList -> smartListMenu(res, list, onEdit = { editing = SmartEditing.Edit(list) }, onExport = onExportSmart, onDelete = { deleteSmart(it) }) }
     val delete = { playlist: PlaylistSummary ->
         state.delete(playlist.id) { restore ->
             undo?.show(res.getString(R.string.nag_pl_deleted, playlist.name), res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res), restore)
@@ -189,12 +267,16 @@ fun PlaylistsBrowser(
             subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
         ) {
             NagButton(stringResource(R.string.nag_sc_import), onImport, icon = NagIcons.Folder)
+            if (smart != null) {
+                Spacer(Modifier.width(NagTheme.dimens.gapS))
+                NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
+            }
             Spacer(Modifier.width(NagTheme.dimens.gapS))
             NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
         }
         when {
             playlists == null -> Unit
-            playlists.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            playlists.isEmpty() && smartLists.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 StatePanel(
                     tone = StateTone.Neutral,
                     icon = NagIcons.PlaylistAdd,
@@ -205,12 +287,33 @@ fun PlaylistsBrowser(
                 )
             }
             else -> {
-                PlaylistTabs(playlists, state.openId, state::openList, menu)
+                PlaylistTabs(
+                    playlists = playlists,
+                    openId = state.openId.takeIf { shownSmart == null },
+                    onOpen = { id ->
+                        openSmart = null
+                        state.openList(id)
+                    },
+                    menu = menu,
+                    smartLists = smartLists,
+                    smartCounts = smartTracks.mapValues { it.value?.size },
+                    openSmart = shownSmart?.id,
+                    onOpenSmart = { id -> openSmart = id },
+                    smartMenu = smartMenu,
+                )
                 HorizontalRule()
                 val open = state.open
-                if (open != null) PlaylistPane(open, state, actions, undo, { menu(open) }, onBrowseMusic)
+                when {
+                    shownSmart != null -> SmartPane(shownSmart, smartTracks[shownSmart.id], stats, actions, onEdit = { editing = SmartEditing.Edit(shownSmart) }, menu = { smartMenu(shownSmart) })
+                    open != null -> PlaylistPane(open, state, actions, undo, { menu(open) }, onBrowseMusic)
+                }
             }
         }
+    }
+    when (val asking = editing) {
+        null -> Unit
+        SmartEditing.New -> SmartListDialog(null, library, stats, clock, onSave = { list -> smart?.save(list) { id -> openSmart = id } }, onDismiss = { editing = null })
+        is SmartEditing.Edit -> SmartListDialog(asking.list, library, stats, clock, onSave = { list -> smart?.save(list) }, onDismiss = { editing = null })
     }
     when (val asking = naming) {
         null -> Unit
@@ -231,6 +334,21 @@ fun PlaylistsBrowser(
     }
 }
 
+/** S-805: a smart list's menu: its tab's and its pane's. */
+private fun smartListMenu(
+    res: Resources,
+    list: SmartList,
+    onEdit: () -> Unit,
+    onExport: (SmartList, PlaylistFormat) -> Unit,
+    onDelete: (SmartList) -> Unit,
+): List<MenuEntry> = buildList {
+    add(MenuEntry.Item(res.getString(R.string.nag_smart_edit), onEdit, icon = NagIcons.SmartList))
+    add(MenuEntry.Separator)
+    EXPORT_FORMATS.forEach { format -> add(MenuEntry.Item(res.getString(R.string.nag_pl_export_as, format.name), { onExport(list, format) })) }
+    add(MenuEntry.Separator)
+    add(MenuEntry.Item(res.getString(R.string.nag_smart_delete), { onDelete(list) }, icon = NagIcons.Delete, destructive = true))
+}
+
 /** A playlist's menu: its tab's and its pane's. */
 private fun playlistMenu(
     res: Resources,
@@ -246,9 +364,19 @@ private fun playlistMenu(
     add(MenuEntry.Item(res.getString(R.string.nag_pl_delete), { onDelete(playlist) }, icon = NagIcons.Delete, destructive = true))
 }
 
-/** The playlists' tabs, scrolled sideways when they do not fit; each has the playlist's menu. */
+/** The playlists' tabs, then the smart lists' (S-805), scrolled sideways when they do not fit; each has its list's menu. */
 @Composable
-private fun PlaylistTabs(playlists: List<PlaylistSummary>, openId: Long?, onOpen: (Long) -> Unit, menu: (PlaylistSummary) -> List<MenuEntry>) {
+private fun PlaylistTabs(
+    playlists: List<PlaylistSummary>,
+    openId: Long?,
+    onOpen: (Long) -> Unit,
+    menu: (PlaylistSummary) -> List<MenuEntry>,
+    smartLists: List<SmartList> = emptyList(),
+    smartCounts: Map<Long, Int?> = emptyMap(),
+    openSmart: Long? = null,
+    onOpenSmart: (Long) -> Unit = {},
+    smartMenu: (SmartList) -> List<MenuEntry> = { emptyList() },
+) {
     val dimens = NagTheme.dimens
     val moreActions = stringResource(R.string.nag_more_actions)
     Row(
@@ -261,14 +389,19 @@ private fun PlaylistTabs(playlists: List<PlaylistSummary>, openId: Long?, onOpen
     ) {
         playlists.forEach { playlist ->
             ContextMenuArea(entries = { menu(playlist) }, accessibilityLabel = moreActions) {
-                PlaylistTab(playlist, selected = playlist.id == openId) { onOpen(playlist.id) }
+                PlaylistTab(playlist.name, playlist.count, selected = playlist.id == openId) { onOpen(playlist.id) }
+            }
+        }
+        smartLists.forEach { list ->
+            ContextMenuArea(entries = { smartMenu(list) }, accessibilityLabel = moreActions) {
+                PlaylistTab(list.name, smartCounts[list.id], selected = list.id == openSmart, icon = NagIcons.SmartList) { onOpenSmart(list.id) }
             }
         }
     }
 }
 
 @Composable
-private fun PlaylistTab(playlist: PlaylistSummary, selected: Boolean, onClick: () -> Unit) {
+private fun PlaylistTab(name: String, count: Int?, selected: Boolean, icon: ImageVector? = null, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -288,16 +421,22 @@ private fun PlaylistTab(playlist: PlaylistSummary, selected: Boolean, onClick: (
         verticalArrangement = Arrangement.Bottom,
     ) {
         Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = if (selected) colors.accent else colors.textTertiary, modifier = Modifier.size(NagTheme.dimens.icon))
+                Spacer(Modifier.width(6.dp))
+            }
             Text(
-                playlist.name,
+                name,
                 style = if (selected) NagTheme.type.bodyStrong else NagTheme.type.body,
                 color = if (selected) colors.text else colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
-            Spacer(Modifier.width(6.dp))
-            Text("${playlist.count}", style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+            if (count != null) {
+                Spacer(Modifier.width(6.dp))
+                Text("$count", style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+            }
         }
         Box(Modifier.fillMaxWidth().height(2.dp).background(if (selected) colors.accent else Color.Transparent))
     }

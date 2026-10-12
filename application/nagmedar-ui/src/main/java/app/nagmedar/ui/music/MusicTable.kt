@@ -102,7 +102,7 @@ fun rememberMusicColumns(
         columns.mapIndexed { i, column ->
             val stars: (@Composable (Track, Boolean) -> Unit)? = if (column != MusicColumn.Rating) null else { track, selected ->
                 RatingStars(
-                    rating = stats[track.uri]?.rating ?: 0,
+                    rating = stats[track.statsKey]?.rating ?: 0,
                     onRate = if (rates) ({ stars -> latestRate?.invoke(track, stars) }) else null,
                     emptyTint = if (selected) NagTheme.colors.onSelection.copy(alpha = 0.45f) else NagTheme.colors.textTertiary.copy(alpha = 0.6f),
                     filledTint = if (selected) NagTheme.colors.onSelection else NagTheme.colors.accent,
@@ -133,10 +133,10 @@ fun rememberMusicColumns(
                     }.orEmpty()
                     MusicColumn.Rate -> track.tech?.let { kiloHertz(if (it.dsdRate > 0) it.dsdRate else it.rate, locale) }.orEmpty()
                     MusicColumn.Bitrate -> track.tech?.bitrate?.takeIf { it > 0 }?.let { resources.getString(R.string.nag_sp_kbps, (it / 1000).toInt()) }.orEmpty()
-                    MusicColumn.Rating -> stats[track.uri]?.rating?.takeIf { it > 0 }?.let { "★".repeat(it) }.orEmpty()
-                    MusicColumn.Plays -> stats[track.uri]?.plays?.takeIf { it > 0 }?.toString().orEmpty()
-                    MusicColumn.Skips -> stats[track.uri]?.skips?.takeIf { it > 0 }?.toString().orEmpty()
-                    MusicColumn.LastPlayed -> stats[track.uri]?.lastPlayedAt?.takeIf { it > 0 }?.let { dates.format(Date(it)) }.orEmpty()
+                    MusicColumn.Rating -> stats[track.statsKey]?.rating?.takeIf { it > 0 }?.let { "★".repeat(it) }.orEmpty()
+                    MusicColumn.Plays -> stats[track.statsKey]?.plays?.takeIf { it > 0 }?.toString().orEmpty()
+                    MusicColumn.Skips -> stats[track.statsKey]?.skips?.takeIf { it > 0 }?.toString().orEmpty()
+                    MusicColumn.LastPlayed -> stats[track.statsKey]?.lastPlayedAt?.takeIf { it > 0 }?.let { dates.format(Date(it)) }.orEmpty()
                     MusicColumn.Added -> if (track.addedAt > 0) dates.format(Date(epochMillis(track.addedAt))) else ""
                 }
             }
@@ -145,7 +145,7 @@ fun rememberMusicColumns(
 }
 
 /** The medialibrary keeps seconds; picked folders, milliseconds. */
-private fun epochMillis(time: Long): Long = if (time < 100_000_000_000L) time * 1000 else time
+internal fun epochMillis(time: Long): Long = if (time < 100_000_000_000L) time * 1000 else time
 
 /** [tracks] in the order [sort] asks, [stats] giving the ratings and counts; ties stay in album order. */
 fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale, stats: Map<String, TrackStats> = emptyMap()): List<Track> {
@@ -169,10 +169,10 @@ fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale, stats: Map
         MusicColumn.Rate -> { t -> t.tech?.let { (if (it.dsdRate > 0) it.dsdRate else it.rate).toDouble() } }
         MusicColumn.Bitrate -> { t -> t.tech?.bitrate?.toDouble() }
         // unrated, never played: last either way
-        MusicColumn.Rating -> { t -> stats[t.uri]?.rating?.takeIf { it > 0 }?.toDouble() }
-        MusicColumn.Plays -> { t -> (stats[t.uri]?.plays ?: 0).toDouble() }
-        MusicColumn.Skips -> { t -> (stats[t.uri]?.skips ?: 0).toDouble() }
-        MusicColumn.LastPlayed -> { t -> stats[t.uri]?.lastPlayedAt?.takeIf { it > 0 }?.toDouble() }
+        MusicColumn.Rating -> { t -> stats[t.statsKey]?.rating?.takeIf { it > 0 }?.toDouble() }
+        MusicColumn.Plays -> { t -> (stats[t.statsKey]?.plays ?: 0).toDouble() }
+        MusicColumn.Skips -> { t -> (stats[t.statsKey]?.skips ?: 0).toDouble() }
+        MusicColumn.LastPlayed -> { t -> stats[t.statsKey]?.lastPlayedAt?.takeIf { it > 0 }?.toDouble() }
         MusicColumn.Added -> { t -> epochMillis(t.addedAt).toDouble() }
         else -> { _ -> null }
     }

@@ -149,6 +149,19 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun smartListsAreKeptInTheOrderTheyWereMade() {
+        val smart = db.smartPlaylists()
+        val first = smart.insert(SmartPlaylistEntry(name = "En sevilenler", rules = "rating|at_least|4", sort = "rating:false", createdAt = 1, updatedAt = 1))
+        val second = smart.insert(SmartPlaylistEntry(name = "Hiç çalınmayanlar", rules = "last_played|never|", matchAll = false, limitCount = 50, createdAt = 2, updatedAt = 2))
+        assertEquals(listOf("En sevilenler", "Hiç çalınmayanlar"), runBlocking { smart.observe().first() }.map { it.name })
+        smart.update(smart.get(first)!!.copy(name = "Beşlikler", updatedAt = 3))
+        assertEquals("Beşlikler", smart.get(first)!!.name)
+        assertEquals(50, smart.get(second)!!.limitCount)
+        smart.delete(first)
+        assertEquals(listOf(second), runBlocking { smart.observe().first() }.map { it.id })
+    }
+
+    @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
@@ -228,6 +241,11 @@ class NagmedarDatabaseMigrationTest {
             db.execSQL(
                 "INSERT INTO track_stats (track_key, rating, play_count, skip_count, first_played_at, last_played_at, updated_at) " +
                     "VALUES ('file:///neva.flac', 4, 2, 0, 1, 2, 2)",
+            )
+            // 6 -> 7 (S-805): the smart lists
+            db.execSQL(
+                "INSERT INTO smart_playlist (name, rules, match_all, sort, limit_count, created_at, updated_at) " +
+                    "VALUES ('En sevilenler', 'rating|at_least|4', 1, 'rating:false', NULL, 1, 1)",
             )
         }
     }
