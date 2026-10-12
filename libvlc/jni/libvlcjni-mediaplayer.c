@@ -1264,3 +1264,130 @@ Java_org_videolan_libvlc_MediaPlayer_nativeGetTeletextTransparency(JNIEnv *env,
 
     return !!libvlc_video_get_teletext_transparency (p_obj->u.p_mp);
 }
+
+/*
+ * Nağmedar (S-503 … S-508): libVLC 4's own controls, reached from Java.
+ */
+
+jfloat
+Java_org_videolan_libvlc_MediaPlayer_nativeGetSpuTextScale(JNIEnv *env,
+                                                           jobject thiz)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return 1.f;
+
+#if defined(LIBVLC_VERSION_MAJOR) && LIBVLC_VERSION_MAJOR >= 4
+    return libvlc_video_get_spu_text_scale(p_obj->u.p_mp);
+#else
+    return 1.f;
+#endif
+}
+
+void
+Java_org_videolan_libvlc_MediaPlayer_nativeSetSpuTextScale(JNIEnv *env,
+                                                           jobject thiz,
+                                                           jfloat scale)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return;
+
+#if defined(LIBVLC_VERSION_MAJOR) && LIBVLC_VERSION_MAJOR >= 4
+    if (scale < 0.1f)
+        scale = 0.1f;
+    else if (scale > 5.f)
+        scale = 5.f;
+    libvlc_video_set_spu_text_scale(p_obj->u.p_mp, scale);
+#endif
+}
+
+void
+Java_org_videolan_libvlc_MediaPlayer_nativeNextFrame(JNIEnv *env, jobject thiz)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return;
+
+    libvlc_media_player_next_frame(p_obj->u.p_mp);
+}
+
+void
+Java_org_videolan_libvlc_MediaPlayer_nativeSetVideoAdjust(JNIEnv *env,
+                                                          jobject thiz,
+                                                          jboolean enabled,
+                                                          jfloat contrast,
+                                                          jfloat brightness,
+                                                          jfloat hue,
+                                                          jfloat saturation,
+                                                          jfloat gamma)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return;
+
+    libvlc_media_player_t *mp = p_obj->u.p_mp;
+    /* the values first: the filter starts with them */
+    libvlc_video_set_adjust_float(mp, libvlc_adjust_Contrast, contrast);
+    libvlc_video_set_adjust_float(mp, libvlc_adjust_Brightness, brightness);
+    libvlc_video_set_adjust_float(mp, libvlc_adjust_Hue, hue);
+    libvlc_video_set_adjust_float(mp, libvlc_adjust_Saturation, saturation);
+    libvlc_video_set_adjust_float(mp, libvlc_adjust_Gamma, gamma);
+    libvlc_video_set_adjust_int(mp, libvlc_adjust_Enable, enabled ? 1 : 0);
+}
+
+jboolean
+Java_org_videolan_libvlc_MediaPlayer_nativeSetDeinterlace(JNIEnv *env,
+                                                          jobject thiz,
+                                                          jint state,
+                                                          jstring jmode)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return false;
+
+#if defined(LIBVLC_VERSION_MAJOR) && LIBVLC_VERSION_MAJOR >= 4
+    const char *psz_mode = jmode ? (*env)->GetStringUTFChars(env, jmode, 0) : NULL;
+    int ret = libvlc_video_set_deinterlace(p_obj->u.p_mp, state, psz_mode);
+    if (psz_mode)
+        (*env)->ReleaseStringUTFChars(env, jmode, psz_mode);
+    return ret == 0;
+#else
+    return false;
+#endif
+}
+
+jobjectArray
+Java_org_videolan_libvlc_MediaPlayer_nativeGetAudioOutputDevices(JNIEnv *env,
+                                                                 jobject thiz)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return NULL;
+
+    libvlc_audio_output_device_t *list = libvlc_audio_output_device_enum(p_obj->u.p_mp);
+    int count = 0;
+    for (libvlc_audio_output_device_t *it = list; it != NULL; it = it->p_next)
+        count++;
+
+    jclass string_class = (*env)->FindClass(env, "java/lang/String");
+    jobjectArray array = string_class ? (*env)->NewObjectArray(env, count * 2, string_class, NULL) : NULL;
+    if (array)
+    {
+        int i = 0;
+        for (libvlc_audio_output_device_t *it = list; it != NULL; it = it->p_next)
+        {
+            jstring id = (*env)->NewStringUTF(env, it->psz_device ? it->psz_device : "");
+            jstring description = (*env)->NewStringUTF(env, it->psz_description ? it->psz_description : "");
+            (*env)->SetObjectArrayElement(env, array, i++, id);
+            (*env)->SetObjectArrayElement(env, array, i++, description);
+            (*env)->DeleteLocalRef(env, id);
+            (*env)->DeleteLocalRef(env, description);
+        }
+    }
+    if (string_class)
+        (*env)->DeleteLocalRef(env, string_class);
+    if (list)
+        libvlc_audio_output_device_list_release(list);
+    return array;
+}

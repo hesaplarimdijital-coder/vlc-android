@@ -1392,6 +1392,56 @@ public class MediaPlayer extends VLCObject<MediaPlayer.Event> {
         nativeSetTeletextTransparency(transparent);
     };
 
+    /* Nağmedar (S-503 … S-508): libVLC 4's own controls, reached from Java */
+
+    /**
+     * The subtitles' text scale, 1.0 being libVLC's normal size (S-503, S-705).
+     */
+    public float getSpuTextScale() {
+        return nativeGetSpuTextScale();
+    }
+
+    /**
+     * Sets the subtitles' text scale, from 0.1 to 5.0: the playing film's subtitles change at once.
+     */
+    public void setSpuTextScale(float scale) {
+        nativeSetSpuTextScale(scale);
+    }
+
+    /**
+     * Shows the next frame, the film paused (S-504).
+     */
+    public void nextFrame() {
+        nativeNextFrame();
+    }
+
+    /**
+     * The picture's colours (S-505): libVLC's adjust filter, on or off, with its contrast and
+     * saturation (0 to 2, 1 neutral), brightness (0 to 2, 1 neutral), hue (-180 to 180 degrees)
+     * and gamma (0.01 to 10, 1 neutral).
+     */
+    public void setVideoAdjust(boolean enabled, float contrast, float brightness, float hue, float saturation, float gamma) {
+        nativeSetVideoAdjust(enabled, contrast, brightness, hue, saturation, gamma);
+    }
+
+    /**
+     * Deinterlacing (S-505): state -1 automatic, 0 off, 1 on; the filter's mode ("yadif", "bob",
+     * "blend" …), or null for the current one.
+     *
+     * @return false when the mode is not one libVLC knows
+     */
+    public boolean setDeinterlace(int state, String mode) {
+        return nativeSetDeinterlace(state, mode);
+    }
+
+    /**
+     * The audio output's devices as libVLC lists them (S-508): id, description, id, description …
+     */
+    public String[] getAudioOutputDevices() {
+        final String[] devices = nativeGetAudioOutputDevices();
+        return devices != null ? devices : new String[0];
+    }
+
     /**
      * Gets current movie's length in ms.
      * @return the movie length (in ms), or -1 if there is no media.
@@ -1516,4 +1566,10 @@ public class MediaPlayer extends VLCObject<MediaPlayer.Event> {
     private native void nativeSetTeletext(int page);
     private native boolean nativeGetTeletextTransparency();
     private native void nativeSetTeletextTransparency(boolean transparent);
+    private native float nativeGetSpuTextScale();
+    private native void nativeSetSpuTextScale(float scale);
+    private native void nativeNextFrame();
+    private native void nativeSetVideoAdjust(boolean enabled, float contrast, float brightness, float hue, float saturation, float gamma);
+    private native boolean nativeSetDeinterlace(int state, String mode);
+    private native String[] nativeGetAudioOutputDevices();
 }
