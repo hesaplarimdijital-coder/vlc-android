@@ -150,9 +150,17 @@ internal fun PanelChip(text: String, selected: Boolean, enabled: Boolean, onSele
     }
 }
 
-/** Choices side by side, one chosen, each as wide as the others: the subtitles' speeds. */
+/** Choices side by side, one chosen, each as wide as the others: the subtitles' speeds, the secondary subtitles' place. */
 @Composable
-internal fun <T> ChoiceRow(options: List<Pair<T, String>>, selected: T, enabled: Boolean, onSelect: (T) -> Unit, modifier: Modifier = Modifier) {
+internal fun <T> ChoiceRow(
+    options: List<Pair<T, String>>,
+    selected: T,
+    enabled: Boolean,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    /** Figures ("1,000×", "25→23,976") in the monospaced type; words in the text's, on two lines where they must. */
+    mono: Boolean = true,
+) {
     val colors = NagTheme.colors
     Row(
         modifier
@@ -180,7 +188,14 @@ internal fun <T> ChoiceRow(options: List<Pair<T, String>>, selected: T, enabled:
                     .padding(horizontal = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label, style = NagTheme.type.mono, color = if (chosen) colors.text else colors.textSecondary, maxLines = 1, textAlign = TextAlign.Center)
+                Text(
+                    label,
+                    style = if (mono) NagTheme.type.mono else NagTheme.type.labelSmall,
+                    color = if (chosen) colors.text else colors.textSecondary,
+                    maxLines = if (mono) 1 else 2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = if (mono) 0.dp else 3.dp),
+                )
             }
         }
     }

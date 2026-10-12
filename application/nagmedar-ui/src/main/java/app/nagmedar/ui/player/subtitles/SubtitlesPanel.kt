@@ -184,6 +184,7 @@ private fun SecondarySection(supported: Boolean, position: SecondaryPosition, on
                 selected = position,
                 enabled = supported,
                 onSelect = onPosition,
+                mono = false,
             )
         }
         ShortcutRegistry.chordLabel(ShortcutId.SecondarySubtitles, resources)?.let { keys ->
