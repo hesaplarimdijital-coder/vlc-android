@@ -161,7 +161,7 @@ private fun DelaySection(
             for (step in listOf(-SyncController.STEP_MS, -SyncController.SMALL_STEP_MS)) {
                 StepButton(signed(step, locale), stringResource(R.string.nag_sync_step, title, signed(step, locale)), tag) { onSet(valueMs + step) }
             }
-            StepButton(stringResource(R.string.nag_fx_reset), stringResource(R.string.nag_sync_reset, title), tag, enabled = valueMs != 0L) { onSet(0) }
+            StepButton(stringResource(R.string.nag_fx_reset), stringResource(R.string.nag_sync_reset, title), tag, enabled = valueMs != 0L, numeric = false) { onSet(0) }
             for (step in listOf(SyncController.SMALL_STEP_MS, SyncController.STEP_MS)) {
                 StepButton(signed(step, locale), stringResource(R.string.nag_sync_step, title, signed(step, locale)), tag) { onSet(valueMs + step) }
             }
@@ -179,9 +179,9 @@ private fun DelaySection(
     }
 }
 
-/** A step of a delay: one of five buttons as wide as each other. */
+/** A step of a delay: one of five buttons as wide as each other; the steps in figures, "Reset" in words. */
 @Composable
-private fun RowScope.StepButton(text: String, label: String, tag: String, enabled: Boolean = true, onClick: () -> Unit) {
+private fun RowScope.StepButton(text: String, label: String, tag: String, enabled: Boolean = true, numeric: Boolean = true, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
@@ -197,7 +197,7 @@ private fun RowScope.StepButton(text: String, label: String, tag: String, enable
             .testTag("$tag-step"),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = NagTheme.type.mono, color = if (enabled) colors.text else colors.textTertiary, maxLines = 1)
+        Text(text, style = if (numeric) NagTheme.type.mono else NagTheme.type.labelSmall, color = if (enabled) colors.text else colors.textTertiary, maxLines = 1)
     }
 }
 
