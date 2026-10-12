@@ -149,6 +149,24 @@ class CoverFinderTest {
         assertEquals(CoverOrigin.User, find(CoverTrack("file:///c/d/z.flac", "Tek", "Çağla Akın"))!!.origin)
     }
 
+    /** S-1502: the covers chosen by hand go into a backup, and come back on another device. */
+    @Test
+    fun theChosenCoversGoIntoABackupAndComeBack() {
+        runBlocking { finder.choose(track, png) }
+        // one found: it is found again, not backed up
+        inTags = jpeg
+        find(CoverTrack("file:///a/b/x.flac", "Konuk", "Deniz Su"))
+        val chosen = runBlocking { finder.chosenFiles() }
+        assertEquals(1, chosen.size)
+        val there = CoverFinder(CoverStore(folder.newFolder("there")), sources, archive, online = { false }, clock = { now }, io = Dispatchers.Unconfined)
+        assertTrue(runBlocking { there.restoreChosen(chosen[0].name, chosen[0].readBytes()) })
+        inTags = null
+        assertEquals(CoverOrigin.User, runBlocking { there.find(track) }!!.origin)
+        // not a chosen cover's name, not an image: not taken
+        assertFalse(runBlocking { there.restoreChosen("../evil.user", png) })
+        assertFalse(runBlocking { there.restoreChosen(chosen[0].name, text) })
+    }
+
     @Test
     fun theKeys() {
         // an album's tracks share it, whatever the case or the spaces

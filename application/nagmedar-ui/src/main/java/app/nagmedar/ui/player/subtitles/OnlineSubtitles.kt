@@ -82,7 +82,8 @@ class PrefsOnlineQuotaStore(private val prefs: SharedPreferences) : OnlineQuotaS
         prefs.edit().putString(KEY, listOfNotNull(quota.remaining, quota.allowed, quota.resetAtMs).joinToString(",")).apply()
     }
 
-    private companion object {
+    companion object {
+        /** The quota's key; a backup leaves it out (S-1502). */
         const val KEY = "nagmedar_opensubtitles_quota"
     }
 }

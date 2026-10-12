@@ -105,12 +105,30 @@ interface LyricsDao {
     /** S-1003: how many tracks' downloaded lyrics are kept: found ones (an instrumental's word too), not the misses. */
     @Query("SELECT COUNT(*) FROM lyrics_cache WHERE source = 'lrclib' AND (text != '' OR language IS NOT NULL)")
     fun countDownloaded(): Int
+
+    /** S-1502: what a backup keeps of the lyrics: the user's own, and those given a delay. */
+    @Query("SELECT * FROM lyrics_cache WHERE source = 'user' OR offset_ms != 0 ORDER BY track_key, source")
+    fun kept(): List<LyricsEntry>
+
+    /** S-1502: a backup's lyrics, over what is here for the same track and source. */
+    @Upsert
+    fun saveAll(entries: List<LyricsEntry>)
 }
 
 @Dao
 abstract class MediaSettingsDao {
     @Query("SELECT * FROM media_settings WHERE media_uri = :uri")
     abstract fun get(uri: String): MediaSettings?
+
+    /** S-1502: every file's, for a backup. */
+    @Query("SELECT * FROM media_settings ORDER BY media_uri")
+    abstract fun all(): List<MediaSettings>
+
+    /** S-1502: a backup's rows, each over this one's when it is as new ([RestoreMerge.mediaSettings]). */
+    @Transaction
+    open fun restore(rows: List<MediaSettings>) {
+        rows.forEach { row -> RestoreMerge.mediaSettings(get(row.mediaUri), row)?.let { save(it) } }
+    }
 
     @Query("SELECT * FROM media_settings WHERE media_uri = :uri")
     abstract fun observe(uri: String): Flow<MediaSettings?>
@@ -214,6 +232,20 @@ abstract class TrackStatsDao {
     @Query("SELECT * FROM track_stats WHERE track_key = :key")
     abstract fun get(key: String): TrackStatsEntry?
 
+    /** S-1502: every track's, for a backup. */
+    @Query("SELECT * FROM track_stats ORDER BY track_key")
+    abstract fun all(): List<TrackStatsEntry>
+
+    /** [entry] as it is. */
+    @Upsert
+    abstract fun save(entry: TrackStatsEntry)
+
+    /** S-1502: a backup's statistics, merged with this one's ([RestoreMerge.stats]). */
+    @Transaction
+    open fun restore(rows: List<TrackStatsEntry>) {
+        rows.forEach { row -> save(RestoreMerge.stats(get(row.trackKey), row)) }
+    }
+
     /** A row for [key], unless it has one. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun create(entry: TrackStatsEntry)
@@ -260,6 +292,10 @@ interface SmartPlaylistDao {
 
     @Query("SELECT * FROM smart_playlist WHERE id = :id")
     fun get(id: Long): SmartPlaylistEntry?
+
+    /** S-1502: every list, in the order they were made, for a backup. */
+    @Query("SELECT * FROM smart_playlist ORDER BY created_at, id")
+    fun all(): List<SmartPlaylistEntry>
 
     @Insert
     fun insert(entry: SmartPlaylistEntry): Long

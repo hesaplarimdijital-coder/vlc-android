@@ -113,40 +113,46 @@ class MediaLibraryPlaylists(private val context: Context) : PlaylistStore {
         } ?: return null
         val format = PlaylistFormat.of(fileName) ?: PlaylistFiles.sniff(bytes) ?: return null
         val entries = PlaylistFiles.parse(PlaylistFiles.decode(bytes, format), format, localFolder(uri).orEmpty())
-        val ids = context.getFromMl {
-            val library = getAudio(Medialibrary.SORT_DEFAULT, false, true, false).orEmpty().toList() +
-                getVideos(Medialibrary.SORT_DEFAULT, false, true, false).orEmpty().toList()
-            val matcher = PlaylistMatcher(library.map { it.uri?.takeIf { u -> u.scheme == "file" }?.path.orEmpty() })
-            entries.map { entry ->
-                val location = entry.location
-                val found = matcher.match(location)?.let { library[it] }
-                when {
-                    found != null -> found.id
-                    location.startsWith("/") && File(location).isFile -> {
-                        val mrl = Uri.fromFile(File(location))
-                        (getMedia(mrl) ?: addMedia(mrl.toString(), entry.durationMs.takeIf { it > 0 } ?: -1L))?.id
-                    }
-                    Regex("""^[a-zA-Z][a-zA-Z0-9+.-]*://""").containsMatchIn(location) && !location.startsWith("file:", ignoreCase = true) ->
-                        (getMedia(location) ?: addStream(location, entry.title ?: location))?.id
-                    else -> null
-                }?.takeIf { it > 0 }
-            }
-        }
+        val ids = resolve(entries)
         val name = PlaylistsState.uniqueName(fileName.substringBeforeLast('.').ifBlank { fileName }, taken)
         val found = ids.filterNotNull()
         val id = create(name, found) ?: return null
         return Imported(id, name, found.size, ids.size - found.size)
     }
 
-    /** The playlist of [id] written to [uri] as [format]; relative paths where [uri] is a folder's file. */
-    suspend fun export(id: Long, name: String, uri: Uri, format: PlaylistFormat): Boolean {
-        val items = playlist(id) { getTracks(true, false)?.toList() }.orEmpty()
-        val entries = items.map { item ->
-            val location = item.uri?.let { if (it.scheme == "file") it.path else it.toString() }.orEmpty()
-            PlaylistEntry(location, item.title, item.artistName, item.albumName, item.length)
+    /**
+     * The medialibrary's ids of a playlist's [entries], a null for each found nowhere: in the
+     * library ([PlaylistMatcher]), else a file outside it or a stream, added to the medialibrary
+     * as the classic interface does. S-804's import and S-1502's restore read lists with it.
+     */
+    suspend fun resolve(entries: List<PlaylistEntry>): List<Long?> = context.getFromMl {
+        val library = getAudio(Medialibrary.SORT_DEFAULT, false, true, false).orEmpty().toList() +
+            getVideos(Medialibrary.SORT_DEFAULT, false, true, false).orEmpty().toList()
+        val matcher = PlaylistMatcher(library.map { it.uri?.takeIf { u -> u.scheme == "file" }?.path.orEmpty() })
+        entries.map { entry ->
+            val location = entry.location
+            val found = matcher.match(location)?.let { library[it] }
+            when {
+                found != null -> found.id
+                location.startsWith("/") && File(location).isFile -> {
+                    val mrl = Uri.fromFile(File(location))
+                    (getMedia(mrl) ?: addMedia(mrl.toString(), entry.durationMs.takeIf { it > 0 } ?: -1L))?.id
+                }
+                Regex("""^[a-zA-Z][a-zA-Z0-9+.-]*://""").containsMatchIn(location) && !location.startsWith("file:", ignoreCase = true) ->
+                    (getMedia(location) ?: addStream(location, entry.title ?: location))?.id
+                else -> null
+            }?.takeIf { it > 0 }
         }
-        return write(entries, name, uri, format)
     }
+
+    /** The lines of the playlist of [id], as a playlist file has them: a file's path, else its address. */
+    suspend fun entries(id: Long): List<PlaylistEntry> = playlist(id) { getTracks(true, false)?.toList() }.orEmpty().map { item ->
+        val location = item.uri?.let { if (it.scheme == "file") it.path else it.toString() }.orEmpty()
+        PlaylistEntry(location, item.title, item.artistName, item.albumName, item.length)
+    }
+
+    /** The playlist of [id] written to [uri] as [format]; relative paths where [uri] is a folder's file. */
+    suspend fun export(id: Long, name: String, uri: Uri, format: PlaylistFormat): Boolean = write(entries(id), name, uri, format)
 
     /** S-805: [tracks] (a smart list's, as it is now) written to [uri] as [format]. */
     suspend fun exportTracks(tracks: List<Track>, name: String, uri: Uri, format: PlaylistFormat): Boolean {

@@ -1670,4 +1670,60 @@
     <string name="nag_cover_again">Kapağı yeniden ara</string>
     <string name="nag_cover_unchoose">Seçilen kapağı kaldır</string>
     <string name="nag_cover_not_image">Bu dosya bir resim değil</string>
+    <!-- S-1502: yedekleme ve geri yükleme -->
+    <string name="nag_backup_settings">Yedekleme</string>
+    <string name="nag_backup_make">Yedek dosyası</string>
+    <string name="nag_backup_make_hint">Ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz, dosya ayarları ve seçtiğiniz kapaklar tek bir dosyaya yazılır. Hesap girişleri ve bu cihazın klasör izinleri yazılmaz.</string>
+    <string name="nag_backup_make_button">Yedekle…</string>
+    <string name="nag_backup_working">Yedekleniyor…</string>
+    <string name="nag_backup_last">Son yedek: %1$s</string>
+    <string name="nag_backup_never">Henüz yedek alınmadı</string>
+    <string name="nag_backup_file_name">nagmedar-yedek-%1$s.zip</string>
+    <string name="nag_backup_done">Yedek kaydedildi</string>
+    <string name="nag_backup_failed">Yedek yazılamadı</string>
+    <string name="nag_backup_restore">Geri yükleme</string>
+    <string name="nag_backup_restore_hint">Bir yedek dosyasından seçtiklerinizi geri getirir. Buradakiler silinmez: aynı adlı ayar, liste ve profiller yedektekiyle değişir, puanlar ve çalınmalar birleştirilir.</string>
+    <string name="nag_backup_restore_button">Geri yükle…</string>
+    <string name="nag_backup_restore_go">Geri yükle</string>
+    <string name="nag_backup_restoring">Geri yükleniyor…</string>
+    <string name="nag_backup_made">%1$s tarihli yedek · Nağmedar %2$s</string>
+    <string name="nag_backup_part_settings">Ayarlar</string>
+    <string name="nag_backup_part_shortcuts">Kısayollar</string>
+    <string name="nag_backup_part_profiles">TV Lab cihaz profilleri</string>
+    <string name="nag_backup_part_playlists">Çalma listeleri</string>
+    <string name="nag_backup_part_smart_lists">Akıllı listeler</string>
+    <string name="nag_backup_part_stats">Puanlar ve çalınmalar</string>
+    <string name="nag_backup_part_lyrics">Sözleriniz ve gecikmeler</string>
+    <string name="nag_backup_part_file_settings">Dosya ayarları</string>
+    <string name="nag_backup_part_covers">Seçtiğiniz kapaklar</string>
+    <plurals name="nag_backup_settings_count">
+        <item quantity="one">%d ayar</item>
+        <item quantity="other">%d ayar</item>
+    </plurals>
+    <plurals name="nag_backup_changes_count">
+        <item quantity="one">%d değişiklik</item>
+        <item quantity="other">%d değişiklik</item>
+    </plurals>
+    <plurals name="nag_backup_profiles_count">
+        <item quantity="one">%d profil</item>
+        <item quantity="other">%d profil</item>
+    </plurals>
+    <plurals name="nag_backup_lists_count">
+        <item quantity="one">%d liste</item>
+        <item quantity="other">%d liste</item>
+    </plurals>
+    <plurals name="nag_backup_files_count">
+        <item quantity="one">%d dosya</item>
+        <item quantity="other">%d dosya</item>
+    </plurals>
+    <string name="nag_backup_done_title">Geri yüklendi</string>
+    <plurals name="nag_backup_missing">
+        <item quantity="one">Listelerdeki %d parça bu kütüphanede yok. Kütüphane tarandıktan sonra eklemek için yedeği yeniden geri yükleyin.</item>
+        <item quantity="other">Listelerdeki %d parça bu kütüphanede yok. Kütüphane tarandıktan sonra eklemek için yedeği yeniden geri yükleyin.</item>
+    </plurals>
+    <string name="nag_backup_failed_parts">Geri yüklenemedi: %1$s</string>
+    <string name="nag_backup_not_backup">Bu dosya bir Nağmedar yedeği değil</string>
+    <string name="nag_backup_newer">Bu yedek Nağmedar\'ın daha yeni bir sürümüyle alınmış; önce uygulamayı güncelleyin</string>
+    <string name="nag_backup_damaged">Yedek dosyası bozuk ya da yarım</string>
+    <string name="nag_backup_unreadable">Dosya okunamadı</string>
 </resources>

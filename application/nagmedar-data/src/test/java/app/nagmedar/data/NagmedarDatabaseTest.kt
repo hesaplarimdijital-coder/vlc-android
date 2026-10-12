@@ -203,6 +203,47 @@ class NagmedarDatabaseTest {
         assertNull(settings.get("file:///yeni.mkv")!!.audioDelayMs)
         assertEquals("auto", settings.get("file:///yeni.mkv")!!.aspectRatio)
     }
+
+    /** S-1502: what a backup reads, and its rows restored over these without losing either's. */
+    @Test
+    fun aBackupsRowsAreReadAndRestored() {
+        val stats = db.trackStats()
+        stats.played("a", 100)
+        stats.played("a", 200)
+        stats.rate("b", 3, 50)
+        stats.restore(
+            listOf(
+                TrackStatsEntry("a", rating = 4, playCount = 5, firstPlayedAt = 50, lastPlayedAt = 150, updatedAt = 150),
+                TrackStatsEntry("c", playCount = 1, lastPlayedAt = 10, updatedAt = 10),
+            ),
+        )
+        assertEquals(TrackStatsEntry("a", 4, 5, 0, 50, 200, 200), stats.get("a"))
+        assertEquals(3, stats.get("b")!!.rating)
+        assertEquals(1, stats.get("c")!!.playCount)
+        assertEquals(listOf("a", "b", "c"), stats.all().map { it.trackKey })
+
+        // the lyrics a backup keeps: the user's and those given a delay
+        val lyrics = db.lyrics()
+        lyrics.save(LyricsEntry("t1", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]bir", fetchedAt = 1))
+        lyrics.save(LyricsEntry("t2", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]iki", offsetMs = 300, fetchedAt = 1))
+        lyrics.save(LyricsEntry("t3", LyricsSource.USER, synced = false, text = "üç"))
+        assertEquals(listOf("t2", "t3"), lyrics.kept().map { it.trackKey })
+        lyrics.saveAll(listOf(LyricsEntry("t1", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]bir", offsetMs = -200, fetchedAt = 1)))
+        assertEquals(-200L, lyrics.forTrack("t1").single().offsetMs)
+
+        // a file's settings: the newer row
+        val files = db.mediaSettings()
+        files.save(MediaSettings("u1", audioDelayMs = 50, updatedAt = 10))
+        files.restore(listOf(MediaSettings("u1", audioDelayMs = -120, updatedAt = 5), MediaSettings("u2", subtitleDelayMs = 400, updatedAt = 1)))
+        assertEquals(50L, files.get("u1")!!.audioDelayMs)
+        assertEquals(400L, files.get("u2")!!.subtitleDelayMs)
+        assertEquals(listOf("u1", "u2"), files.all().map { it.mediaUri })
+
+        val smart = db.smartPlaylists()
+        smart.insert(SmartPlaylistEntry(name = "İkinci", rules = "", createdAt = 2))
+        smart.insert(SmartPlaylistEntry(name = "Birinci", rules = "", createdAt = 1))
+        assertEquals(listOf("Birinci", "İkinci"), smart.all().map { it.name })
+    }
 }
 
 /**

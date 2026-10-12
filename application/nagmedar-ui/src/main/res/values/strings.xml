@@ -1698,4 +1698,60 @@
     <string name="nag_cover_again">Look for the cover again</string>
     <string name="nag_cover_unchoose">Remove the chosen cover</string>
     <string name="nag_cover_not_image">This file is not an image</string>
+    <!-- S-1502: backup and restore -->
+    <string name="nag_backup_settings">Backup</string>
+    <string name="nag_backup_make">Backup file</string>
+    <string name="nag_backup_make_hint">Settings, shortcuts, TV Lab device profiles, playlists, smart lists, ratings and play counts, your own lyrics, per-file settings and the covers you chose go into one file. Account sign-ins and this device\'s folder permissions are left out.</string>
+    <string name="nag_backup_make_button">Back up…</string>
+    <string name="nag_backup_working">Backing up…</string>
+    <string name="nag_backup_last">Last backup: %1$s</string>
+    <string name="nag_backup_never">No backup yet</string>
+    <string name="nag_backup_file_name">nagmedar-backup-%1$s.zip</string>
+    <string name="nag_backup_done">The backup is saved</string>
+    <string name="nag_backup_failed">The backup could not be written</string>
+    <string name="nag_backup_restore">Restore</string>
+    <string name="nag_backup_restore_hint">Brings back what you choose from a backup file. Nothing here is deleted: settings, lists and profiles of the same name are replaced by the backup\'s, ratings and play counts are merged.</string>
+    <string name="nag_backup_restore_button">Restore…</string>
+    <string name="nag_backup_restore_go">Restore</string>
+    <string name="nag_backup_restoring">Restoring…</string>
+    <string name="nag_backup_made">Backup of %1$s · Nağmedar %2$s</string>
+    <string name="nag_backup_part_settings">Settings</string>
+    <string name="nag_backup_part_shortcuts">Shortcuts</string>
+    <string name="nag_backup_part_profiles">TV Lab device profiles</string>
+    <string name="nag_backup_part_playlists">Playlists</string>
+    <string name="nag_backup_part_smart_lists">Smart lists</string>
+    <string name="nag_backup_part_stats">Ratings and play counts</string>
+    <string name="nag_backup_part_lyrics">Your lyrics and delays</string>
+    <string name="nag_backup_part_file_settings">Per-file settings</string>
+    <string name="nag_backup_part_covers">Covers you chose</string>
+    <plurals name="nag_backup_settings_count">
+        <item quantity="one">%d setting</item>
+        <item quantity="other">%d settings</item>
+    </plurals>
+    <plurals name="nag_backup_changes_count">
+        <item quantity="one">%d change</item>
+        <item quantity="other">%d changes</item>
+    </plurals>
+    <plurals name="nag_backup_profiles_count">
+        <item quantity="one">%d profile</item>
+        <item quantity="other">%d profiles</item>
+    </plurals>
+    <plurals name="nag_backup_lists_count">
+        <item quantity="one">%d list</item>
+        <item quantity="other">%d lists</item>
+    </plurals>
+    <plurals name="nag_backup_files_count">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
+    <string name="nag_backup_done_title">Restored</string>
+    <plurals name="nag_backup_missing">
+        <item quantity="one">%d track of the playlists is not in this library. Once the library is scanned, restore the backup again to add it.</item>
+        <item quantity="other">%d tracks of the playlists are not in this library. Once the library is scanned, restore the backup again to add them.</item>
+    </plurals>
+    <string name="nag_backup_failed_parts">Could not be restored: %1$s</string>
+    <string name="nag_backup_not_backup">This file is not a Nağmedar backup</string>
+    <string name="nag_backup_newer">This backup was made by a newer Nağmedar; update the app first</string>
+    <string name="nag_backup_damaged">The backup file is damaged or incomplete</string>
+    <string name="nag_backup_unreadable">The file could not be read</string>
 </resources>

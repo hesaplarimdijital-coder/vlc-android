@@ -128,6 +128,8 @@ Sözlüğü testler denetler:
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
 | uyku zamanlayıcısı | sleep timer | uyku modu, kapanma zamanlayıcısı | sleep mode | Süre bitince ya da çalan parça bitince oynatmayı durdurur (Alt+S); “Parça sonu”, “+15 dk”, “Zamanlayıcıyı kapat” |
 | alarm | alarm | çalar saat | alarm clock | Ayarlar › Alarm; müzikle ya da internet radyosuyla çalar, ses düzeyi sessizlikten yükselir. Android'in “alarm saati” (alarm clock) olarak kurulur |
+| yedek, yedeklemek | backup, back up | | | Ayarlar › Yedekleme: ayarlar, kısayollar, cihaz profilleri, çalma ve akıllı listeler, puanlar ve çalınmalar, sözler, dosya ayarları ve elle seçilen kapaklar tek bir ZIP dosyasında; hesap girişleri ve bu cihazın klasör izinleri yazılmaz |
+| geri yüklemek | restore | | | Bir yedekten seçilen bölümleri geri koymak: aynı adlı olanlar yedektekiyle değişir, puanlar ve çalınmalar birleştirilir, hiçbir şey silinmez |
 
 ## Özel adlar
 

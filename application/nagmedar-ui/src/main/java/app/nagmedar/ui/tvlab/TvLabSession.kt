@@ -246,6 +246,12 @@ class TvLabController(
         profiles.selected = profile.id
     }
 
+    /** The profiles read again, as a restore left them (S-1502): the chosen one kept's, else the one shown. */
+    fun reloadProfiles() {
+        profileList = profiles.all()
+        profile = profileList.firstOrNull { it.id == profiles.selected } ?: profileList.firstOrNull { it.id == profile.id } ?: profileList.first()
+    }
+
     /** An id for a new profile named [name]. */
     fun newId(name: String): String = FileProfileStore.newId(name, profileList.map { it.id })
 
@@ -294,8 +300,15 @@ object TvLabSession {
     fun get(context: Context): TvLabController = controller ?: synchronized(this) {
         controller ?: TvLabController(
             NativeTvLabEngine(context.applicationContext),
-            FileProfileStore(File(context.applicationContext.filesDir, "tvlab/profiles"), Settings.getInstance(context.applicationContext)),
+            profileStore(context),
             CoroutineScope(SupervisorJob() + Dispatchers.Main),
         ).also { controller = it }
     }
+
+    /** The TV Lab when it was opened; null before. */
+    fun opened(): TvLabController? = controller
+
+    /** Where the profiles are kept: a JSON file each in the app's folder, the chosen one in the preferences. */
+    fun profileStore(context: Context): FileProfileStore =
+        FileProfileStore(File(context.applicationContext.filesDir, "tvlab/profiles"), Settings.getInstance(context.applicationContext))
 }

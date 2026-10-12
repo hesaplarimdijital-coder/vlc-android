@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.MusicSection
+import app.nagmedar.ui.backup.BackupSection
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
@@ -106,6 +107,8 @@ fun SettingsScreen(
         item { LyricsSection() }
         // S-1006: where album covers come from
         item { CoversSection() }
+        // S-1502: the app's settings, lists and statistics in one file, and back
+        item { BackupSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {

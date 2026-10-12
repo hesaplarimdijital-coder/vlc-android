@@ -92,19 +92,28 @@ class CoverStore(private val dir: File) {
     /** [bytes] kept as [key]'s cover from [origin]; null when they are not an image or cannot be written. */
     fun keep(key: String, origin: CoverOrigin, bytes: ByteArray): Cover? {
         if (!looksLikeImage(bytes)) return null
-        return try {
-            dir.mkdirs()
-            val target = file(key, origin)
-            val part = File(dir, "${target.name}.part")
-            part.writeBytes(bytes)
-            if (!part.renameTo(target)) {
-                part.delete()
-                return null
-            }
-            Cover(target, origin)
-        } catch (e: IOException) {
-            null
-        }
+        val target = file(key, origin)
+        return if (write(target, bytes)) Cover(target, origin) else null
+    }
+
+    /** S-1502: the covers chosen by hand, for a backup: their files, whose names their albums' keys give. */
+    fun chosen(): List<File> = dir.listFiles()
+        ?.filter { it.isFile && CHOSEN_NAME.matches(it.name) && it.length() > 0 }
+        ?.sortedBy { it.name }
+        .orEmpty()
+
+    /** S-1502: a cover chosen by hand, back from a backup under its file's [name]; false when it is not one. */
+    fun restoreChosen(name: String, bytes: ByteArray): Boolean =
+        CHOSEN_NAME.matches(name) && looksLikeImage(bytes) && write(File(dir, name), bytes)
+
+    /** [bytes] as [target], whole or not at all. */
+    private fun write(target: File, bytes: ByteArray): Boolean = try {
+        dir.mkdirs()
+        val part = File(dir, "${target.name}.part")
+        part.writeBytes(bytes)
+        part.renameTo(target).also { moved -> if (!moved) part.delete() }
+    } catch (e: IOException) {
+        false
     }
 
     /** The user's cover of [key] taken away. */
@@ -143,9 +152,12 @@ class CoverStore(private val dir: File) {
         return gone
     }
 
-    private companion object {
-        val ORDER = listOf(CoverOrigin.User, CoverOrigin.Tags, CoverOrigin.Folder, CoverOrigin.Online)
-        val FOUND = ORDER - CoverOrigin.User
+    companion object {
+        private val ORDER = listOf(CoverOrigin.User, CoverOrigin.Tags, CoverOrigin.Folder, CoverOrigin.Online)
+        private val FOUND = ORDER - CoverOrigin.User
+
+        /** A chosen cover's file: its album key's SHA-1, ".user". */
+        val CHOSEN_NAME = Regex("[0-9a-f]{40}\\.user")
     }
 }
 
@@ -201,6 +213,12 @@ class CoverFinder(
 
     /** The cover kept for [key], at once: no file read but whether it is there, no network. */
     fun keptNow(key: String): Cover? = store.kept(key)
+
+    /** S-1502: the covers chosen by hand, for a backup. */
+    suspend fun chosenFiles(): List<File> = withContext(io) { store.chosen() }
+
+    /** S-1502: a cover chosen by hand, back from a backup; false when it is not one. */
+    suspend fun restoreChosen(name: String, bytes: ByteArray): Boolean = withContext(io) { store.restoreChosen(name, bytes) }
 
     /** Whether [track]'s album's cover was chosen by hand. */
     suspend fun isChosen(track: CoverTrack): Boolean = withContext(io) { store.kept(track.key)?.origin == CoverOrigin.User }
