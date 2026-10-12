@@ -133,6 +133,21 @@ class EffectsModelTest {
     }
 
     @Test
+    fun aNewFilmGetsTheEffectsEqualiserBackOverThePlayersOwn() {
+        val engine = EffectsEngine(target)
+        engine.apply(PlayerEffects(gainPercent = 150))
+        target.calls.clear()
+        // the same effects, a new film: the player set VLC's equaliser again as it started
+        engine.apply(PlayerEffects(gainPercent = 150), newFilm = true)
+        assertEquals(listOf("equalizer:null:3.5"), target.calls)
+        // the film's own sound: nothing to put back
+        engine.apply(PlayerEffects())
+        target.calls.clear()
+        engine.apply(PlayerEffects(), newFilm = true)
+        assertEquals(emptyList<String>(), target.calls)
+    }
+
+    @Test
     fun whatTheNativeSideLacksWaits() {
         val engine = EffectsEngine(target, PendingNativeEffects)
         assertEquals(setOf(Effect.Aspect, Effect.Equalizer, Effect.Gain), engine.supported)

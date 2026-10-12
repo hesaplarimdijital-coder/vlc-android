@@ -98,7 +98,7 @@ class EffectsController(
             // another film may have started meanwhile
             if (media != uri) return@launch
             remembered = own != null
-            show(own ?: store.defaults() ?: PlayerEffects())
+            show(own ?: store.defaults() ?: PlayerEffects(), newFilm = true)
         }
     }
 
@@ -137,9 +137,9 @@ class EffectsController(
         engine.apply(PlayerEffects())
     }
 
-    private fun show(next: PlayerEffects) {
+    private fun show(next: PlayerEffects, newFilm: Boolean = false) {
         effects = next
-        engine.apply(next)
+        engine.apply(next, newFilm)
     }
 
     /** A save still waiting is done now. */

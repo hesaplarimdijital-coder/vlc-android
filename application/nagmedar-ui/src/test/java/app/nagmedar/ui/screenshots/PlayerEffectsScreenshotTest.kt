@@ -105,7 +105,10 @@ class PlayerEffectsScreenshotTest {
 private fun PlayerWithPanel(effects: PlayerEffects, supported: Set<Effect>, controls: Boolean) {
     val panel = remember { PanelState(PanelTab.Effects, open = true) }
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
-        val dock = PanelDock.of(maxWidth, maxHeight)
+        // the window's size, read here: the rows and columns below have their own scopes
+        val width = maxWidth
+        val height = maxHeight
+        val dock = PanelDock.of(width, height)
         val video: @Composable (Modifier) -> Unit = { modifier ->
             Box(modifier, contentAlignment = Alignment.Center) {
                 SampleVideo(Modifier.fillMaxWidth().aspectRatio(16 / 9f))
@@ -133,7 +136,7 @@ private fun PlayerWithPanel(effects: PlayerEffects, supported: Set<Effect>, cont
         } else {
             Column(Modifier.fillMaxSize()) {
                 video(Modifier.weight(1f).fillMaxWidth())
-                tools(Modifier.height(PanelDock.bottomHeight(maxHeight)).fillMaxWidth(), PanelDock.bottomColumns(maxWidth))
+                tools(Modifier.height(PanelDock.bottomHeight(height)).fillMaxWidth(), PanelDock.bottomColumns(width))
             }
         }
     }

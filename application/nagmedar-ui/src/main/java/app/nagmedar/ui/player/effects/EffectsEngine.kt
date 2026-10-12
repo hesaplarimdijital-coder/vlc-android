@@ -76,11 +76,18 @@ class EffectsEngine(private val target: PlayerEffectsTarget, private val native:
 
     private var applied = PlayerEffects()
 
-    fun apply(effects: PlayerEffects) {
+    /**
+     * [newFilm]: a film just started, for which the player set its own equaliser again (VLC's,
+     * when it is on): the effects' equaliser goes back over it.
+     */
+    fun apply(effects: PlayerEffects, newFilm: Boolean = false) {
         val last = applied
         applied = effects
         if (effects.aspect != last.aspect) target.setAspect(effects.aspect)
-        if (effects.equalizer != last.equalizer || effects.gainPercent != last.gainPercent) target.setEqualizer(effects.equalizer, effects.gainDb)
+        val ownEqualizer = effects.equalizer != null || effects.gainPercent != 100
+        if (effects.equalizer != last.equalizer || effects.gainPercent != last.gainPercent || (newFilm && ownEqualizer)) {
+            target.setEqualizer(effects.equalizer, effects.gainDb)
+        }
         val can = native.supported
         if (Effect.ColorAdjust in can && effects.color != last.color) native.setColorAdjust(effects.color)
         if (Effect.AutoCrop in can && effects.autoCrop != last.autoCrop) native.setAutoCrop(effects.autoCrop)
