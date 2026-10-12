@@ -75,6 +75,8 @@ Sözlüğü testler denetler:
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |
 | bant giderme | debanding | | | |
+| senkron | sync | eşzamanlama | synchronization | Oynatıcı panelinin sekmesi “Senkron”: ses ve altyazı gecikmesi, altyazı hızı |
+| gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 

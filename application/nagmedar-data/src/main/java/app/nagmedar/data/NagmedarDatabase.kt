@@ -27,7 +27,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 3
+        const val VERSION = 4
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -47,8 +47,15 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 3 → 4 (S-604): the subtitles' speed per file. */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `media_settings` ADD COLUMN `subtitle_rate` TEXT")
+            }
+        }
+
         /** Schema migrations, oldest first. */
-        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 
         @Volatile
         private var instance: NagmedarDatabase? = null

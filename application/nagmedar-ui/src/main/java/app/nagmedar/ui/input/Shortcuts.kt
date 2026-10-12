@@ -150,7 +150,7 @@ enum class ShortcutId {
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile,
-    Settings, CommandPalette, ToggleSidebar, PlayQueue,
+    Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
 }
 
@@ -227,6 +227,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.AddSubtitleFile, ShortcutGroup.Subtitle, R.string.nag_sc_add_subtitle, KeyChord(Key.A, ctrl = true, shift = true), ShortcutScope.Player),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
+        // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization
+        Shortcut(ShortcutId.Synchronization, ShortcutGroup.Tools, R.string.nag_sc_sync, KeyChord(Key.S, ctrl = true, shift = true), ShortcutScope.Player),
         // View
         Shortcut(ShortcutId.CommandPalette, ShortcutGroup.View, R.string.nag_search, KeyChord(Key.K, ctrl = true)),
         Shortcut(ShortcutId.ToggleSidebar, ShortcutGroup.View, R.string.nag_sc_toggle_sidebar, KeyChord(Key.B, ctrl = true)),

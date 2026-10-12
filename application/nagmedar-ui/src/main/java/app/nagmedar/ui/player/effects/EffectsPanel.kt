@@ -3,12 +3,10 @@ package app.nagmedar.ui.player.effects
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -21,9 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -52,7 +48,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.progressBarRangeInfo
@@ -64,7 +59,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HoverTooltip
 import app.nagmedar.ui.components.MenuEntry
@@ -78,12 +72,24 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.panel.DropButton
+import app.nagmedar.ui.player.panel.LabelledRow
+import app.nagmedar.ui.player.panel.PanelBadge
+import app.nagmedar.ui.player.panel.PanelCaption
+import app.nagmedar.ui.player.panel.PanelChip
+import app.nagmedar.ui.player.panel.PanelDisabledAlpha
+import app.nagmedar.ui.player.panel.PanelRule
+import app.nagmedar.ui.player.panel.PanelSection
+import app.nagmedar.ui.player.panel.PendingNote
+import app.nagmedar.ui.player.panel.SectionTitle
+import app.nagmedar.ui.player.panel.SwitchRow
+import app.nagmedar.ui.player.panel.TextAction
+import app.nagmedar.ui.player.panel.decimal
+import app.nagmedar.ui.player.panel.signed
 import app.nagmedar.ui.theme.NagTheme
-import kotlinx.coroutines.delay
 import java.text.NumberFormat
-import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 /**
  * The effects tab of the player's panel (S-603), after the mockups' "Panel · Effects": the
@@ -114,7 +120,7 @@ fun EffectsPanel(
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                         HdrSection(effects, supported, onChange)
-                        Rule()
+                        PanelRule()
                         AudioSection(effects, supported, onChange, onEqualizerWindow)
                     }
                 }
@@ -122,9 +128,9 @@ fun EffectsPanel(
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                     PictureSection(effects, supported, onChange)
                     ShapeSection(effects, supported, onChange)
-                    Rule()
+                    PanelRule()
                     HdrSection(effects, supported, onChange)
-                    Rule()
+                    PanelRule()
                     AudioSection(effects, supported, onChange, onEqualizerWindow)
                 }
             }
@@ -138,7 +144,7 @@ private fun PictureSection(effects: PlayerEffects, supported: Set<Effect>, onCha
     val enabled = Effect.ColorAdjust in supported
     val color = effects.color
     val locale = currentLocale()
-    Section {
+    PanelSection {
         SectionTitle(stringResource(R.string.nag_fx_picture)) {
             TextAction(stringResource(R.string.nag_fx_reset), enabled = enabled && !color.isNeutral) { onChange { it.copy(color = ColorAdjust()) } }
         }
@@ -165,10 +171,10 @@ private fun PictureSection(effects: PlayerEffects, supported: Set<Effect>, onCha
             (color.gamma * 100).roundToInt(),
             (ColorAdjust.GAMMA_MIN * 100).roundToInt(),
             (ColorAdjust.GAMMA_MAX * 100).roundToInt(),
-            decimal(color.gamma, locale),
+            decimal(color.gamma.toDouble(), 2, locale),
             enabled,
         ) { v -> onChange { it.copy(color = it.color.copy(gamma = v / 100f)) } }
-        if (!enabled) PendingNote()
+        if (!enabled) PendingNote("effects-pending")
     }
 }
 
@@ -177,7 +183,7 @@ private fun PictureSection(effects: PlayerEffects, supported: Set<Effect>, onCha
 private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
     val transform = effects.transform
     val canTransform = Effect.Transform in supported
-    Section(spacing = 8.dp) {
+    PanelSection(spacing = 8.dp) {
         SectionTitle(stringResource(R.string.nag_fx_shape))
         FlowRow(
             Modifier.selectableGroup(),
@@ -185,7 +191,7 @@ private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChang
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             AspectChoice.entries.forEach { aspect ->
-                Chip(stringResource(aspect.label), selected = effects.aspect == aspect, enabled = Effect.Aspect in supported) {
+                PanelChip(stringResource(aspect.label), selected = effects.aspect == aspect, enabled = Effect.Aspect in supported) {
                     onChange { it.copy(aspect = aspect) }
                 }
             }
@@ -211,8 +217,8 @@ private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChang
                 onChange { it.copy(transform = it.transform.flippedVertically()) }
             }
         }
-        if (transform.rotation != 0) Caption(stringResource(R.string.nag_fx_rotated, transform.rotation))
-        if (Effect.AutoCrop !in supported || !canTransform) PendingNote()
+        if (transform.rotation != 0) PanelCaption(stringResource(R.string.nag_fx_rotated, transform.rotation))
+        if (Effect.AutoCrop !in supported || !canTransform) PendingNote("effects-pending")
     }
 }
 
@@ -220,9 +226,9 @@ private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChang
 private fun HdrSection(effects: PlayerEffects, supported: Set<Effect>, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
     val video = setOf(Effect.HdrOutput, Effect.ToneMapping, Effect.Scaler, Effect.Debanding)
     val passthrough = effects.hdrOutput == HdrOutput.Passthrough
-    Section(spacing = 6.dp) {
+    PanelSection(spacing = 6.dp) {
         SectionTitle(stringResource(R.string.nag_fx_hdr_section)) {
-            if (supported.any { it in video }) Badge(stringResource(R.string.nag_fx_gpu_load, stringResource(gpuLoad(effects))))
+            if (supported.any { it in video }) PanelBadge(stringResource(R.string.nag_fx_gpu_load, stringResource(gpuLoad(effects))))
         }
         SelectRow(stringResource(R.string.nag_fx_hdr_output), effects.hdrOutput, HdrOutput.entries, Effect.HdrOutput in supported) { option ->
             onChange { it.copy(hdrOutput = option) }
@@ -243,7 +249,7 @@ private fun HdrSection(effects: PlayerEffects, supported: Set<Effect>, onChange:
         SwitchRow(stringResource(R.string.nag_fx_debanding), null, effects.debanding, enabled = Effect.Debanding in supported) { on ->
             onChange { it.copy(debanding = on) }
         }
-        if (!supported.containsAll(video + Effect.Deinterlace)) PendingNote()
+        if (!supported.containsAll(video + Effect.Deinterlace)) PendingNote("effects-pending")
     }
 }
 
@@ -255,7 +261,7 @@ private fun AudioSection(
     onEqualizerWindow: () -> Unit,
 ) {
     val locale = currentLocale()
-    Section(spacing = 6.dp) {
+    PanelSection(spacing = 6.dp) {
         SectionTitle(stringResource(R.string.nag_fx_audio))
         SwitchRow(
             stringResource(R.string.nag_fx_night_mode),
@@ -290,7 +296,7 @@ private fun AudioSection(
         }
         EqualizerRow(effects.equalizer, Effect.Equalizer in supported) { choice -> onChange { it.copy(equalizer = choice) } }
         WindowButton(NagIcons.Equalizer, stringResource(R.string.nag_sc_equalizer), ShortcutId.Equalizer, onEqualizerWindow)
-        if (!supported.containsAll(setOf(Effect.NightMode, Effect.Dialogue, Effect.ChannelLayout))) PendingNote()
+        if (!supported.containsAll(setOf(Effect.NightMode, Effect.Dialogue, Effect.ChannelLayout))) PendingNote("effects-pending")
     }
 }
 
@@ -324,78 +330,6 @@ private fun Footer(remembered: Boolean, onRemember: (Boolean) -> Unit, onMakeDef
     }
 }
 
-@Composable
-private fun Section(spacing: Dp = 2.dp, content: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(spacing), content = content)
-}
-
-/** A section's name in capitals, with what acts on the whole section at its end. */
-@Composable
-private fun SectionTitle(text: String, trailing: @Composable () -> Unit = {}) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text.uppercase(currentLocale()),
-            style = NagTheme.type.caption.copy(letterSpacing = 0.08.em),
-            color = NagTheme.colors.textTertiary,
-            maxLines = 1,
-            modifier = Modifier.weight(1f),
-        )
-        trailing()
-    }
-}
-
-@Composable
-private fun Rule() {
-    Box(Modifier.fillMaxWidth().height(1.dp).background(NagTheme.colors.border))
-}
-
-@Composable
-private fun Caption(text: String) {
-    Text(text, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
-}
-
-/** Under faded controls: they wait for the native side of the player. */
-@Composable
-private fun PendingNote() {
-    Text(
-        stringResource(R.string.nag_fx_pending),
-        style = NagTheme.type.labelSmall,
-        color = NagTheme.colors.textTertiary,
-        modifier = Modifier.padding(top = 2.dp).testTag("effects-pending"),
-    )
-}
-
-/** A text button in the accent colour: "Reset". */
-@Composable
-private fun TextAction(text: String, enabled: Boolean, onClick: () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    val state = interaction.collectState()
-    val colors = NagTheme.colors
-    Box(
-        Modifier
-            .heightIn(min = 24.dp)
-            .background(stateBackground(state), RoundedCornerShape(5.dp))
-            .nagClickable(interaction, onClick, enabled = enabled)
-            .padding(horizontal = 6.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = NagTheme.type.label, color = if (enabled) colors.accentText else colors.textTertiary)
-    }
-}
-
-@Composable
-private fun Badge(text: String) {
-    Text(
-        text,
-        style = NagTheme.type.labelSmall,
-        color = NagTheme.colors.textSecondary,
-        maxLines = 1,
-        modifier = Modifier
-            .background(NagTheme.colors.surfaceRaised, RoundedCornerShape(9.dp))
-            .padding(horizontal = 8.dp, vertical = 1.dp),
-    )
-}
-
 /**
  * A level: its name, a slider and its value. [centred] sliders start from their middle (0 or 1,00),
  * lit from there to the knob; the others from their start. The value is grey while it is the film's own.
@@ -421,7 +355,7 @@ private fun LevelRow(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 28.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA),
+            .alpha(if (enabled) 1f else PanelDisabledAlpha),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -534,65 +468,6 @@ private fun LevelSlider(
     }
 }
 
-/** A chip of a group where one is chosen: the aspect ratios. */
-@Composable
-private fun Chip(text: String, selected: Boolean, enabled: Boolean, onSelect: () -> Unit) {
-    val colors = NagTheme.colors
-    val interaction = remember { MutableInteractionSource() }
-    val state = interaction.collectState()
-    val shape = RoundedCornerShape(14.dp)
-    Box(
-        Modifier
-            .heightIn(min = 28.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .border(1.dp, if (selected) colors.accent.copy(alpha = 0.6f) else colors.borderStrong, shape)
-            .background(if (selected) colors.accent.copy(alpha = 0.15f) else stateBackground(state), shape)
-            .pointerHoverIcon(PointerIcon.Hand)
-            .hoverable(interaction, enabled)
-            .selectable(selected = selected, interactionSource = interaction, indication = null, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
-            .padding(horizontal = 10.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = NagTheme.type.labelSmall, color = if (selected) colors.text else colors.textSecondary, maxLines = 1)
-    }
-}
-
-/** An on/off setting: its name (and what it does) with the switch at the end; the whole row toggles it. */
-@Composable
-private fun SwitchRow(title: String, hint: String?, checked: Boolean, enabled: Boolean, onToggle: (Boolean) -> Unit) {
-    val colors = NagTheme.colors
-    val interaction = remember { MutableInteractionSource() }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 32.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .pointerHoverIcon(PointerIcon.Hand)
-            .hoverable(interaction, enabled)
-            .toggleable(checked, interaction, indication = null, enabled = enabled, role = Role.Switch, onValueChange = onToggle),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, style = NagTheme.type.label, color = colors.text)
-            if (hint != null) Text(hint, style = NagTheme.type.labelSmall, color = colors.textTertiary)
-        }
-        Box(
-            Modifier
-                .size(width = 38.dp, height = 24.dp)
-                .background(if (checked) colors.accent else colors.borderStrong, RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            Box(
-                Modifier
-                    .padding(start = if (checked) 18.dp else 4.dp)
-                    .size(16.dp)
-                    .background(if (checked) colors.onAccent else colors.textSecondary, RoundedCornerShape(8.dp)),
-            )
-        }
-    }
-}
-
 /** A rotation or a mirroring, by its icon; a mirroring stays lit while it applies. */
 @Composable
 private fun RowScope.TransformButton(
@@ -610,7 +485,7 @@ private fun RowScope.TransformButton(
         Modifier
             .weight(1f)
             .height(30.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .alpha(if (enabled) 1f else PanelDisabledAlpha)
             .border(1.dp, if (selected) colors.accent.copy(alpha = 0.6f) else colors.borderStrong, shape)
             .background(stateBackground(state, selected, rest = colors.surfaceRaised.copy(alpha = 0.5f)), shape)
             .nagClickable(interaction, onClick, enabled = enabled, onClickLabel = label)
@@ -666,41 +541,6 @@ private fun EqualizerRow(choice: String?, enabled: Boolean, onSelect: (String?) 
     }
 }
 
-@Composable
-private fun LabelledRow(label: String, control: @Composable () -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary, maxLines = 2, modifier = Modifier.width(96.dp))
-        Box(Modifier.weight(1f)) { control() }
-    }
-}
-
-@Composable
-private fun DropButton(text: String, enabled: Boolean, label: String, onClick: () -> Unit) {
-    val colors = NagTheme.colors
-    val interaction = remember { MutableInteractionSource() }
-    val state = interaction.collectState()
-    val shape = RoundedCornerShape(7.dp)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 28.dp)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .border(1.dp, colors.borderStrong, shape)
-            .background(stateBackground(state, rest = colors.background), shape)
-            .nagClickable(interaction, onClick, enabled = enabled, onClickLabel = label)
-            .semantics {
-                contentDescription = label
-                stateDescription = text
-            }
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(text, style = NagTheme.type.labelSmall, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        Icon(NagIcons.ChevronDown, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(12.dp))
-    }
-}
-
 /** A button that opens a window, its keys at its end: "Equaliser… Ctrl+Shift+E". */
 @Composable
 private fun WindowButton(icon: ImageVector, text: String, shortcut: ShortcutId, onClick: () -> Unit) {
@@ -746,22 +586,4 @@ private fun gpuLoad(effects: PlayerEffects): Int {
     }
 }
 
-/** "+6", "0", "−20": the plus and the minus sign of the typography rules. */
-private fun signed(value: Int, locale: Locale): String {
-    val number = NumberFormat.getIntegerInstance(locale).format(abs(value))
-    return when {
-        value > 0 -> "+$number"
-        value < 0 -> "−$number"
-        else -> number
-    }
-}
-
-/** "1,06" in Turkish, "1.06" in English. */
-private fun decimal(value: Float, locale: Locale): String =
-    NumberFormat.getNumberInstance(locale).apply {
-        minimumFractionDigits = 2
-        maximumFractionDigits = 2
-    }.format(value.toDouble())
-
-private const val DISABLED_ALPHA = 0.45f
 private const val WHEEL_STEP = 0.02f

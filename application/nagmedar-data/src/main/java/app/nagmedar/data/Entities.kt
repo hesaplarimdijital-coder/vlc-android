@@ -99,9 +99,9 @@ object LyricsKey {
 }
 
 /**
- * Settings remembered per file: delays, tracks, aspect ratio, speed, deinterlacing, equaliser and
- * (S-603) the rest of the effects panel's values, as the panel's JSON in [effects]. A null column
- * is not remembered: the player's own setting applies.
+ * Settings remembered per file: delays, tracks, aspect ratio, speed, deinterlacing, equaliser,
+ * (S-603) the rest of the effects panel's values, as the panel's JSON in [effects], and (S-604)
+ * the subtitles' speed. A null column is not remembered: the player's own setting applies.
  */
 @Entity(tableName = "media_settings")
 data class MediaSettings(
@@ -119,6 +119,8 @@ data class MediaSettings(
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
     /** S-603: colour, crop, rotation, HDR, scaler, debanding and the audio effects, as JSON. */
     val effects: String? = null,
+    /** S-604: the subtitles' speed, as the frame rates they were timed for and play at ("25>23.976"). */
+    @ColumnInfo(name = "subtitle_rate") val subtitleRate: String? = null,
 )
 
 /**

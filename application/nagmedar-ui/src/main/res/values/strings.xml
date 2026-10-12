@@ -290,6 +290,7 @@
     <string name="nag_sc_snapshot">Take snapshot</string>
     <string name="nag_sc_effects">Effects and filters</string>
     <string name="nag_sc_equalizer">Equaliser…</string>
+    <string name="nag_sc_sync">Audio and subtitle sync</string>
     <string name="nag_sc_next_subtitle">Next subtitle track</string>
     <string name="nag_sc_subtitle_delay_down">Subtitle delay −50 ms</string>
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
@@ -682,7 +683,7 @@
     <string name="nag_fx_remember">Save for this file</string>
     <string name="nag_fx_make_default">Make default</string>
     <string name="nag_fx_made_default">Made default</string>
-    <string name="nag_fx_pending">The faded settings come with the next version of the playback engine.</string>
+    <string name="nag_panel_pending">The faded settings come with the next version of the playback engine.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Flat</string>
     <string name="nag_eq_classical">Classical</string>
@@ -702,4 +703,24 @@
     <string name="nag_eq_soft">Soft</string>
     <string name="nag_eq_soft_rock">Soft rock</string>
     <string name="nag_eq_techno">Techno</string>
+
+    <!-- S-604: the sync tab of the player's panel -->
+    <string name="nag_sync_audio_delay">Audio delay</string>
+    <string name="nag_sync_subtitle_delay">Subtitle delay</string>
+    <string name="nag_sync_this_file">this file</string>
+    <string name="nag_sync_ms" translatable="false">%1$s ms</string>
+    <string name="nag_sync_audio_hint">Positive: the sound comes later</string>
+    <string name="nag_sync_subtitle_hint">Positive: the subtitles come later</string>
+    <string name="nag_sync_keys_step" translatable="false">±50 ms</string>
+    <string name="nag_sync_step">%1$s: %2$s ms</string>
+    <string name="nag_sync_reset">%1$s: reset</string>
+    <string name="nag_sync_rate">Subtitle speed</string>
+    <string name="nag_sync_rate_same">1.000×</string>
+    <string name="nag_sync_rate_film_to_pal">23.976→25</string>
+    <string name="nag_sync_rate_pal_to_film">25→23.976</string>
+    <string name="nag_sync_rate_same_hint">The subtitles keep their own timing.</string>
+    <string name="nag_sync_rate_film_to_pal_hint">Use it when cinema (23.976 fps) subtitles fall further behind a PAL (25 fps) video; duration factor %1$s.</string>
+    <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
+    <string name="nag_sync_remember">Remember for this file</string>
+    <string name="nag_sync_reset_all">Reset all delays</string>
 </resources>

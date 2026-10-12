@@ -130,6 +130,17 @@ class NagmedarDatabaseTest {
         // a file without a row gets one
         settings.saveEffects("file:///yeni.mkv", "auto", "auto", null, "{}", updatedAt = 9)
         assertEquals("{}", settings.get("file:///yeni.mkv")!!.effects)
+        // S-604: the delays and the subtitles' speed, the effects staying
+        settings.saveSync("file:///yeni.mkv", 120, -350, "25>23.976", updatedAt = 10)
+        settings.get("file:///yeni.mkv")!!.let {
+            assertEquals(120L, it.audioDelayMs)
+            assertEquals(-350L, it.subtitleDelayMs)
+            assertEquals("25>23.976", it.subtitleRate)
+            assertEquals("{}", it.effects)
+        }
+        settings.updateSync("file:///yeni.mkv", null, null, null, updatedAt = 11)
+        assertNull(settings.get("file:///yeni.mkv")!!.audioDelayMs)
+        assertEquals("auto", settings.get("file:///yeni.mkv")!!.aspectRatio)
     }
 }
 
@@ -156,12 +167,14 @@ class NagmedarDatabaseMigrationTest {
         helper.createDatabase(TEST_DB, 1).use { db ->
             db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, updated_at) VALUES ('file:///film.mkv', -120, 1)")
         }
-        // 1 -> 2 (S-802): the probe cache appears; 2 -> 3 (S-603): the effects column; the settings stay
+        // 1 -> 2 (S-802): the probe cache appears; 2 -> 3 (S-603): the effects column; 3 -> 4 (S-604):
+        // the subtitles' speed; the settings stay
         helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
-            db.query("SELECT audio_delay_ms, effects FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
+            db.query("SELECT audio_delay_ms, effects, subtitle_rate FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals(-120L, c.getLong(0))
                 assertTrue("no effects remembered yet", c.isNull(1))
+                assertTrue("no subtitle speed remembered yet", c.isNull(2))
             }
             db.execSQL(
                 "INSERT INTO media_tech (media_uri, file_size, modified_at, probe_version, json, probed_at) " +

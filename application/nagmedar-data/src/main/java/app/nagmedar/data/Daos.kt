@@ -134,6 +134,20 @@ abstract class MediaSettingsDao {
         create(MediaSettings(uri, updatedAt = updatedAt))
         updateEffects(uri, aspectRatio, deinterlace, equalizerPreset, effects, updatedAt)
     }
+
+    /** S-604: the sync panel's columns of [uri]'s row (null: not remembered); its effects and tracks stay. */
+    @Query(
+        "UPDATE media_settings SET audio_delay_ms = :audioDelayMs, subtitle_delay_ms = :subtitleDelayMs, " +
+            "subtitle_rate = :subtitleRate, updated_at = :updatedAt WHERE media_uri = :uri",
+    )
+    abstract fun updateSync(uri: String, audioDelayMs: Long?, subtitleDelayMs: Long?, subtitleRate: String?, updatedAt: Long)
+
+    /** S-604: remembers the sync panel's values for [uri], making its row when it has none. */
+    @Transaction
+    open fun saveSync(uri: String, audioDelayMs: Long?, subtitleDelayMs: Long?, subtitleRate: String?, updatedAt: Long) {
+        create(MediaSettings(uri, updatedAt = updatedAt))
+        updateSync(uri, audioDelayMs, subtitleDelayMs, subtitleRate, updatedAt)
+    }
 }
 
 @Dao

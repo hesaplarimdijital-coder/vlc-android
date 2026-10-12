@@ -290,6 +290,7 @@
     <string name="nag_sc_snapshot">Ekran görüntüsü al</string>
     <string name="nag_sc_effects">Efektler ve filtreler</string>
     <string name="nag_sc_equalizer">Ekolayzer…</string>
+    <string name="nag_sc_sync">Ses ve altyazı senkronu</string>
     <string name="nag_sc_next_subtitle">Sonraki altyazı</string>
     <string name="nag_sc_subtitle_delay_down">Altyazı gecikmesi −50 ms</string>
     <string name="nag_sc_subtitle_delay_up">Altyazı gecikmesi +50 ms</string>
@@ -669,7 +670,7 @@
     <string name="nag_fx_remember">Bu dosya için kaydet</string>
     <string name="nag_fx_make_default">Varsayılan yap</string>
     <string name="nag_fx_made_default">Varsayılan yapıldı</string>
-    <string name="nag_fx_pending">Soluk ayarlar oynatıcı motorunun yeni sürümüyle gelecek.</string>
+    <string name="nag_panel_pending">Soluk ayarlar oynatıcı motorunun yeni sürümüyle gelecek.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Düz</string>
     <string name="nag_eq_classical">Klasik</string>
@@ -685,4 +686,22 @@
     <string name="nag_eq_soft">Yumuşak</string>
     <string name="nag_eq_soft_rock">Yumuşak rock</string>
     <string name="nag_eq_techno">Tekno</string>
+
+    <!-- S-604: the sync tab of the player's panel -->
+    <string name="nag_sync_audio_delay">Ses gecikmesi</string>
+    <string name="nag_sync_subtitle_delay">Altyazı gecikmesi</string>
+    <string name="nag_sync_this_file">bu dosya</string>
+    <string name="nag_sync_audio_hint">Pozitif: ses daha geç gelir</string>
+    <string name="nag_sync_subtitle_hint">Pozitif: altyazı daha geç gelir</string>
+    <string name="nag_sync_step">%1$s: %2$s ms</string>
+    <string name="nag_sync_reset">%1$s: sıfırla</string>
+    <string name="nag_sync_rate">Altyazı hızı</string>
+    <string name="nag_sync_rate_same">1,000×</string>
+    <string name="nag_sync_rate_film_to_pal">23,976→25</string>
+    <string name="nag_sync_rate_pal_to_film">25→23,976</string>
+    <string name="nag_sync_rate_same_hint">Altyazı kendi zamanlamasıyla gösterilir.</string>
+    <string name="nag_sync_rate_film_to_pal_hint">Sinema (23,976 fps) altyazısı PAL (25 fps) videoda giderek geç kalıyorsa kullanın; süre çarpanı %1$s.</string>
+    <string name="nag_sync_rate_pal_to_film_hint">PAL (25 fps) altyazı giderek erkene kayıyorsa kullanın; süre çarpanı %1$s.</string>
+    <string name="nag_sync_remember">Bu dosya için hatırla</string>
+    <string name="nag_sync_reset_all">Tüm gecikmeleri sıfırla</string>
 </resources>

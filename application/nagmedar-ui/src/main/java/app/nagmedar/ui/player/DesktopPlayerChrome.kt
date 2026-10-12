@@ -41,6 +41,11 @@ import app.nagmedar.ui.player.panel.PanelLayout
 import app.nagmedar.ui.player.panel.PanelState
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.panel.PlayerPanel
+import app.nagmedar.ui.player.sync.ActivitySyncTarget
+import app.nagmedar.ui.player.sync.PendingNativeSubtitles
+import app.nagmedar.ui.player.sync.RoomSyncStore
+import app.nagmedar.ui.player.sync.SyncController
+import app.nagmedar.ui.player.sync.SyncPanel
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -66,6 +71,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var frame: View? = null
     private var panelHost: PanelHost? = null
     private var effects: EffectsController? = null
+    private var sync: SyncController? = null
 
     override val active: Boolean get() = controls.active
 
@@ -75,6 +81,13 @@ class DesktopPlayerChrome : PlayerChrome {
         keys = PlayerKeyTarget { id ->
             when (id) {
                 ShortcutId.Effects -> panel.toggle(PanelTab.Effects)
+                ShortcutId.Synchronization -> panel.toggle(PanelTab.Sync)
+                // the delays' keys: the sync tab shows (and remembers) where they took the delays
+                ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
+                    val done = classic.perform(id)
+                    sync?.refresh()
+                    return@PlayerKeyTarget done
+                }
                 else -> return@PlayerKeyTarget classic.perform(id)
             }
             true
@@ -91,6 +104,9 @@ class DesktopPlayerChrome : PlayerChrome {
             MainScope(),
         )
         this.effects = effects
+        // the delays and the subtitles' speed (S-604)
+        val sync = SyncController(ActivitySyncTarget(activity), PendingNativeSubtitles, RoomSyncStore(activity.applicationContext), MainScope())
+        this.sync = sync
         val frame = MouseOnlyFrame(activity, controls)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
@@ -101,7 +117,7 @@ class DesktopPlayerChrome : PlayerChrome {
         val video = activity.videoLayout?.let { root.indexOfChild(it) } ?: -1
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
-        panelHost = PanelHost(activity, root, panel) { layout -> PanelContent(activity, controls, panel, effects, layout) }.also { it.attach() }
+        panelHost = PanelHost(activity, root, panel) { layout -> PanelContent(activity, controls, panel, effects, sync, layout) }.also { it.attach() }
     }
 
     override fun show() = controls.show()
@@ -138,12 +154,16 @@ class DesktopPlayerChrome : PlayerChrome {
     }
 
     override fun onPlaying() {
-        effects?.onMediaStarted(activity?.service?.currentMediaWrapper?.uri?.toString())
+        val uri = activity?.service?.currentMediaWrapper?.uri?.toString()
+        effects?.onMediaStarted(uri)
+        sync?.onMediaStarted(uri)
     }
 
     override fun detach() {
         effects?.release()
         effects = null
+        sync?.release()
+        sync = null
         panelHost?.detach()
         panelHost = null
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
@@ -217,17 +237,44 @@ private fun PlayerChromeContent(activity: VideoPlayerActivity, visibility: Chrom
 }
 
 /**
- * The panel in the app (S-603): its effects tab drives the playing film. Dense for a mouse, roomier
- * when a finger last touched the video.
+ * The panel in the app: its sync tab (S-604) and its effects tab (S-603) drive the playing film.
+ * Dense for a mouse, roomier when a finger last touched the video.
  */
 @Composable
-private fun PanelContent(activity: VideoPlayerActivity, visibility: ChromeVisibility, panel: PanelState, effects: EffectsController, layout: PanelLayout) {
+private fun PanelContent(
+    activity: VideoPlayerActivity,
+    visibility: ChromeVisibility,
+    panel: PanelState,
+    effects: EffectsController,
+    sync: SyncController,
+    layout: PanelLayout,
+) {
     val prefs = rememberNagmedarPreferences()
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.active) InputMode.Pointer else InputMode.Touch) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
-            PlayerPanel(panel, listOf(PanelTab.Effects), layout.dock, Modifier.fillMaxSize()) { tab ->
-                if (tab == PanelTab.Effects) {
-                    EffectsPanel(
+            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects), layout.dock, Modifier.fillMaxSize()) { tab ->
+                when (tab) {
+                    PanelTab.Sync -> {
+                        // the delays are the player's: VLC's own controls and the keys move them too
+                        LaunchedEffect(sync, panel.shown) {
+                            while (panel.shown) {
+                                sync.refresh()
+                                delay(500)
+                            }
+                        }
+                        SyncPanel(
+                            values = sync.values,
+                            remembered = sync.remembered,
+                            supportsRate = sync.supportsRate,
+                            onAudioDelay = sync::setAudioDelay,
+                            onSubtitleDelay = sync::setSubtitleDelay,
+                            onRate = sync::setRate,
+                            onResetAll = sync::resetAll,
+                            onRemember = sync::remember,
+                            columns = layout.columns,
+                        )
+                    }
+                    PanelTab.Effects -> EffectsPanel(
                         effects = effects.effects,
                         supported = effects.supported,
                         remembered = effects.remembered,
@@ -237,6 +284,7 @@ private fun PanelContent(activity: VideoPlayerActivity, visibility: ChromeVisibi
                         onEqualizerWindow = activity::showEqualizer,
                         columns = layout.columns,
                     )
+                    else -> Unit
                 }
             }
         }
