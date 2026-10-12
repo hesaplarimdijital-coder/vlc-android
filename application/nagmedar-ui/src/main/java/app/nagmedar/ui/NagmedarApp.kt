@@ -62,6 +62,11 @@ import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.SeriesScreen
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.lyrics.LyricsSession
+import app.nagmedar.ui.lyrics.LyricsTrack
+import app.nagmedar.ui.lyrics.PlayingLyricsFullScreen
+import app.nagmedar.ui.lyrics.delayNumber
+import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.music.MusicNowPlaying
 import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
@@ -199,12 +204,20 @@ private fun NagmedarMain(
     var phonePlayer by rememberSaveable { mutableStateOf(false) }
     // S-1007: the sleep timer's window, from the menu bar and the palette
     var sleepTimerOpen by rememberSaveable { mutableStateOf(false) }
+    // S-1004: the lyrics over the whole window (Ctrl+Shift+L, the panes' full-screen button)
+    var lyricsOpen by rememberSaveable { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
         AppActions(
             context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile,
             openPalette = { paletteOpen = true },
             showShortcutList = { shortcutListRequests++ },
             openSleepTimer = { sleepTimerOpen = true },
+            toggleLyrics = { lyricsOpen = !lyricsOpen },
+            closeLyrics = {
+                val open = lyricsOpen
+                lyricsOpen = false
+                open
+            },
         )
     }
     // media access asked for from the library starts the scan of this device's storage
@@ -276,8 +289,9 @@ private fun NagmedarMain(
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
-                        PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle)
+                        PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle, onFullScreenLyrics = { lyricsOpen = true })
                     }
+                    if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {
                         val queue = rememberPlayQueue()
@@ -300,7 +314,7 @@ private fun NagmedarMain(
                         Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
                         Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
                         // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
-                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying() })
+                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }) })
                         // S-804: the medialibrary's playlists, a tab each
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
@@ -409,6 +423,9 @@ class AppActions(
     private val showShortcutList: () -> Unit,
     /** S-1007: the sleep timer's window. */
     private val openSleepTimer: () -> Unit = {},
+    /** S-1004: the lyrics over the whole window, opened or closed; closed, and whether they were open. */
+    private val toggleLyrics: () -> Unit = {},
+    private val closeLyrics: () -> Boolean = { false },
 ) {
     private var volumeBeforeMute = 100
 
@@ -464,7 +481,7 @@ class AppActions(
     fun forward(): Boolean = navigator.forward()
 
     /** An Esc nothing else used: "Sıradaki" closes (S-310), else the screen lets go of its selection (S-405). */
-    fun escape(): Boolean = queuePanel.close() || screenCommands.escape()
+    fun escape(): Boolean = closeLyrics() || queuePanel.close() || screenCommands.escape()
 
     fun leaveMenuBar() {
         if (menuBar.hasKeyboard) menuBar.leave()
@@ -524,6 +541,9 @@ class AppActions(
                 }
             }
             ShortcutId.SleepTimer -> openSleepTimer()
+            ShortcutId.Lyrics -> toggleLyrics()
+            ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
+            ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
             // S-906: in the library the music engine's equaliser; the video player keeps libVLC's
             ShortcutId.Equalizer -> navigator.navigate(Destination.Equalizer)
@@ -552,6 +572,21 @@ class AppActions(
             else -> return false
         }
         return true
+    }
+
+    /** S-1004: the playing track's lyrics [byMs] later (earlier when negative), said in a toast. */
+    private fun shiftLyrics(byMs: Long) {
+        val media = PlaybackService.instance?.currentMediaWrapper?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
+        val track = media?.let(LyricsTrack::of)
+        val session = LyricsSession.get(context)
+        // only the lyrics of what plays, as a view of them has them
+        val delay = if (track != null && session.load.track == track) session.shift(byMs) else null
+        val message = if (delay == null) {
+            context.getString(R.string.nag_lyrics_delay_none)
+        } else {
+            context.getString(R.string.nag_lyrics_delay_now, context.getString(R.string.nag_lyrics_delay_value, delayNumber(delay, context.resources.locale())))
+        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun seekBy(deltaMs: Long) {

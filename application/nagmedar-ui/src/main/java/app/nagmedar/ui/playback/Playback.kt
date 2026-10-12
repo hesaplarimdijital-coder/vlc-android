@@ -5,10 +5,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.PLAY_EXTRA_START_TIME
@@ -45,6 +50,35 @@ fun rememberPlaybackProgress(nowPlaying: NowPlaying): State<Float> = produceStat
 }
 
 /**
+ * S-1004: where the current media is, in milliseconds, for the lyrics: read ten times a second
+ * while it plays (once when paused); a seek of [seekTo] shows at once, paused or not.
+ */
+@Stable
+class PlaybackTime internal constructor() {
+    var ms by mutableLongStateOf(0L)
+        internal set
+
+    fun seekTo(ms: Long) {
+        val target = ms.coerceAtLeast(0L)
+        PlaybackActions.seekToMs(target)
+        this.ms = target
+    }
+}
+
+@Composable
+fun rememberPlaybackTime(nowPlaying: NowPlaying): PlaybackTime {
+    val time = remember { PlaybackTime() }
+    LaunchedEffect(nowPlaying.media, nowPlaying.playing) {
+        while (true) {
+            time.ms = PlaybackService.instance?.getTime() ?: 0L
+            if (!nowPlaying.playing) break
+            delay(100)
+        }
+    }
+    return time
+}
+
+/**
  * Commands to the existing playback service (ADR-05 keeps one service and one session; the
  * PlaybackEngine interface of S-501 sits behind these calls later).
  */
@@ -75,6 +109,13 @@ object PlaybackActions {
 
     fun previous() {
         PlaybackService.instance?.previous(false)
+    }
+
+    /** S-1004: to [ms] of the current media (a line of its lyrics). */
+    fun seekToMs(ms: Long) {
+        val service = PlaybackService.instance ?: return
+        val length = service.length
+        service.seek(if (length > 0) ms.coerceIn(0L, length) else ms.coerceAtLeast(0L), fromUser = true)
     }
 
     fun seekTo(fraction: Float) {

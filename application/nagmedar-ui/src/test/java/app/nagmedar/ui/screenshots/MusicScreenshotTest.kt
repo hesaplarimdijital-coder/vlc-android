@@ -18,6 +18,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.NoPlayerActions
 import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
+import app.nagmedar.ui.lyrics.LyricsLoad
+import app.nagmedar.ui.lyrics.LyricsPane
+import app.nagmedar.ui.lyrics.LyricsSamples
 import app.nagmedar.ui.music.Depth
 import app.nagmedar.ui.music.MusicActions
 import app.nagmedar.ui.music.MusicBrowser
@@ -130,6 +133,41 @@ class MusicScreenshotTest {
                         onPlayUpNext = {},
                         artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
                         onRate = {},
+                    )
+                }
+            }
+        }
+    }
+
+    /** S-1004: the now playing pane with the lyrics, the line sung lit, a delay set. */
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    fun lyricsDex() {
+        val library = library("tr")
+        val album = library.groups(MusicView.Albums).first { it.title == "Gece Yolcusu" }.key
+        capture("music-lyrics-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
+            TestShell(WidthClass.Large, startDestination = Destination.Music) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = album)) {
+                    NowPlayingPanel(
+                        info = playing.copy(title = "Sabaha Kadar", artist = "Ada Karan", album = "Gece Mavisi", lengthMs = 241_600, format = "FLAC 24/48 · AAudio · 48 kHz"),
+                        progress = { 0.12f },
+                        waveform = MusicSamples.waveform,
+                        upNext = upNext,
+                        onSeek = {},
+                        onPlayUpNext = {},
+                        artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
+                        onRate = {},
+                        lyrics = { modifier ->
+                            LyricsPane(
+                                load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.synced.copy(offsetMs = 300)),
+                                timeMs = { 23_500L },
+                                onSeek = {},
+                                onDelay = {},
+                                modifier = modifier,
+                                onFullScreen = {},
+                            )
+                        },
+                        lyricsShown = true,
+                        onLyricsShown = {},
                     )
                 }
             }

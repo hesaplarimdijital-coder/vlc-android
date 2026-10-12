@@ -110,7 +110,7 @@ Sözlüğü testler denetler:
 | geçmeli tarama | deinterlacing | | | |
 | bant giderme | debanding | | | |
 | senkron | sync | eşzamanlama | synchronization | Oynatıcı panelinin sekmesi “Senkron”: ses ve altyazı gecikmesi, altyazı hızı |
-| gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms |
+| gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms. Sözlerde 0,1 sn adımla (Alt+G, Alt+H), parça başına saklanır |
 | kontur | outline | | | Altyazı harflerinin çevresindeki çizgi: yok, 2, 4 ya da 6 px |
 | tırnaklı, tırnaksız | serif, sans serif | | | Altyazı yazı tipleri; “Eş aralıklı” (monospace), “Dar” (condensed) |
 | parmak izi | fingerprint | | hash | Dosyanın OpenSubtitles'taki kimliği: boyutu ve ilk ve son 64 KB'si; “bu dosyaya uygun” altyazılar onunla bulunur |

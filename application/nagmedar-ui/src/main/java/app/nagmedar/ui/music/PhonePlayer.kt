@@ -1,5 +1,6 @@
 package app.nagmedar.ui.music
 
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -23,14 +24,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -49,6 +55,7 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.ServicePlayerBarActions
@@ -61,9 +68,6 @@ import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.media.PlaylistManager
-import android.support.v4.media.session.PlaybackStateCompat
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -86,6 +90,10 @@ fun PhonePlayer(
     artwork: @Composable (Dp) -> Unit = {},
     /** S-808: sets [NowPlayingInfo.rating]. */
     onRate: ((Int) -> Unit)? = null,
+    /** S-1004: the track's lyrics, in place of the artwork while [lyricsShown]; the top row's button turns them on and off. */
+    lyrics: (@Composable (Modifier) -> Unit)? = null,
+    lyricsShown: Boolean = false,
+    onLyricsShown: ((Boolean) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -118,63 +126,78 @@ fun PhonePlayer(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
+            // S-1004
+            if (lyrics != null && onLyricsShown != null) {
+                NagIconButton(
+                    NagIcons.Lyrics,
+                    stringResource(R.string.nag_lyrics_title),
+                    { onLyricsShown(!lyricsShown) },
+                    selected = lyricsShown,
+                    modifier = Modifier.testTag("phone-lyrics"),
+                )
+            }
             // S-1007
             SleepTimerButton()
             NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, shortcut = ShortcutId.PlayQueue)
         }
-        // the artwork: swiped sideways it changes the track, down it closes the player
-        BoxWithConstraints(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .semantics {
-                    customActions = listOf(
-                        CustomAccessibilityAction(next) { latestActions.next(); true },
-                        CustomAccessibilityAction(previous) { latestActions.previous(); true },
-                        CustomAccessibilityAction(close) { latestClose(); true },
-                    )
-                }
-                .pointerInput(Unit) {
-                    val sideways = with(density) { SWIPE.toPx() }
-                    val down = with(density) { CLOSE.toPx() }
-                    var dx = 0f
-                    var dy = 0f
-                    detectDragGestures(
-                        onDragStart = {
-                            dx = 0f
-                            dy = 0f
-                        },
-                        onDragEnd = {
-                            val horizontal = abs(dx) > abs(dy)
-                            scope.launch {
-                                when {
-                                    horizontal && dx <= -sideways -> latestActions.next()
-                                    horizontal && dx >= sideways -> latestActions.previous()
-                                    !horizontal && dy >= down -> latestClose()
-                                }
-                                swipe.animateTo(0f)
-                                drop.animateTo(0f)
-                            }
-                        },
-                        onDragCancel = {
-                            scope.launch {
-                                swipe.animateTo(0f)
-                                drop.animateTo(0f)
-                            }
-                        },
-                    ) { change, amount ->
-                        change.consume()
-                        dx += amount.x
-                        dy += amount.y
-                        scope.launch {
-                            if (abs(dx) > abs(dy)) swipe.snapTo(dx) else drop.snapTo(dy.coerceAtLeast(0f))
-                        }
+        if (lyrics != null && lyricsShown) {
+            // S-1004: the lyrics scroll: no swipes over them
+            lyrics(Modifier.fillMaxWidth().weight(1f))
+        } else {
+            // the artwork: swiped sideways it changes the track, down it closes the player
+            BoxWithConstraints(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .semantics {
+                        customActions = listOf(
+                            CustomAccessibilityAction(next) { latestActions.next(); true },
+                            CustomAccessibilityAction(previous) { latestActions.previous(); true },
+                            CustomAccessibilityAction(close) { latestClose(); true },
+                        )
                     }
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            val side = minOf(maxWidth, maxHeight, 420.dp)
-            Box(Modifier.offset { IntOffset(swipe.value.roundToInt(), 0) }) { artwork(side) }
+                    .pointerInput(Unit) {
+                        val sideways = with(density) { SWIPE.toPx() }
+                        val down = with(density) { CLOSE.toPx() }
+                        var dx = 0f
+                        var dy = 0f
+                        detectDragGestures(
+                            onDragStart = {
+                                dx = 0f
+                                dy = 0f
+                            },
+                            onDragEnd = {
+                                val horizontal = abs(dx) > abs(dy)
+                                scope.launch {
+                                    when {
+                                        horizontal && dx <= -sideways -> latestActions.next()
+                                        horizontal && dx >= sideways -> latestActions.previous()
+                                        !horizontal && dy >= down -> latestClose()
+                                    }
+                                    swipe.animateTo(0f)
+                                    drop.animateTo(0f)
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    swipe.animateTo(0f)
+                                    drop.animateTo(0f)
+                                }
+                            },
+                        ) { change, amount ->
+                            change.consume()
+                            dx += amount.x
+                            dy += amount.y
+                            scope.launch {
+                                if (abs(dx) > abs(dy)) swipe.snapTo(dx) else drop.snapTo(dy.coerceAtLeast(0f))
+                            }
+                        }
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                val side = minOf(maxWidth, maxHeight, 420.dp)
+                Box(Modifier.offset { IntOffset(swipe.value.roundToInt(), 0) }) { artwork(side) }
+            }
         }
         Spacer(Modifier.height(dimens.gapM))
         Column(Modifier.fillMaxWidth().widthIn(max = 560.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -219,9 +242,12 @@ private val SWIPE = 80.dp
 /** A swipe down this long closes the player. */
 private val CLOSE = 140.dp
 
-/** The phone player on the playback service; [onQueue] opens "Sıradaki" over it. Nothing without music. */
+/**
+ * The phone player on the playback service; [onQueue] opens "Sıradaki" over it, [onFullScreenLyrics]
+ * the lyrics over the whole window (S-1004). Nothing without music.
+ */
 @Composable
-fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier = Modifier) {
+fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier = Modifier, onFullScreenLyrics: (() -> Unit)? = null) {
     val context = LocalContext.current
     val nowPlaying = rememberNowPlaying()
     val media = nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
@@ -240,6 +266,8 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
     LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
     val key = statsKey(media)
     val latestQueue by rememberUpdatedState(onQueue)
+    // S-1004: the lyrics in place of the artwork, until turned off
+    var lyricsShown by rememberSaveable { mutableStateOf(false) }
     val actions = remember(context) { ServicePlayerBarActions(context, { latestQueue() }) }
     PhonePlayer(
         info = NowPlayingInfo(
@@ -260,5 +288,8 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
         artwork = { size -> Artwork(media, size, corner = 12.dp, video = false) },
         onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
+        lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
+        lyricsShown = lyricsShown,
+        onLyricsShown = { lyricsShown = it },
     )
 }

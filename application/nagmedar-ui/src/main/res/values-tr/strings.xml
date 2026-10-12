@@ -1626,4 +1626,30 @@
         <item quantity="other">%d parçanın sözleri</item>
     </plurals>
     <string name="nag_lyrics_clear">Temizle</string>
+    <!-- S-1004: synced lyrics -->
+    <string name="nag_lyrics_title">Sözler</string>
+    <string name="nag_lyrics_looking">Sözler aranıyor…</string>
+    <string name="nag_lyrics_missing">Söz bulunamadı</string>
+    <string name="nag_lyrics_missing_desc">Parçanın yanına aynı adlı bir .lrc dosyası koyabilirsiniz.</string>
+    <string name="nag_lyrics_missing_offline">Parçanın yanına aynı adlı bir .lrc dosyası koyabilir ya da Ayarlar › Sözler\'den LRCLIB\'i açabilirsiniz.</string>
+    <string name="nag_lyrics_look_again">Yeniden ara</string>
+    <string name="nag_lyrics_instrumental">Enstrümantal</string>
+    <string name="nag_lyrics_instrumental_desc">LRCLIB\'e göre bu parçada söz yok.</string>
+    <string name="nag_lyrics_plain">Düz söz: satırlar zamanlanmamış</string>
+    <string name="nag_lyrics_from_user">Elle yazılmış</string>
+    <string name="nag_lyrics_from_tags">Dosyanın etiketlerinden</string>
+    <string name="nag_lyrics_from_lrc">.lrc dosyasından</string>
+    <string name="nag_lyrics_from_lrclib">LRCLIB\'den</string>
+    <string name="nag_lyrics_delay">Gecikme</string>
+    <string name="nag_lyrics_delay_value">%1$s sn</string>
+    <string name="nag_lyrics_delay_reset">Gecikmeyi sıfırla</string>
+    <string name="nag_lyrics_earlier">Sözleri %1$s erken göster</string>
+    <string name="nag_lyrics_later">Sözleri %1$s geç göster</string>
+    <string name="nag_lyrics_delay_now">Söz gecikmesi: %1$s</string>
+    <string name="nag_lyrics_delay_none">Önce çalan parçanın zamanlı sözlerini açın</string>
+    <string name="nag_lyrics_seek">Bu satıra atla</string>
+    <string name="nag_lyrics_close">Sözleri kapat</string>
+    <string name="nag_sc_lyrics">Tam ekran sözler</string>
+    <string name="nag_sc_lyrics_earlier">Sözler daha erken</string>
+    <string name="nag_sc_lyrics_later">Sözler daha geç</string>
 </resources>

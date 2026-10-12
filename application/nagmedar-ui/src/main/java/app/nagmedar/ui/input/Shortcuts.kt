@@ -153,6 +153,7 @@ enum class ShortcutId {
     SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
     Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
+    Lyrics, LyricsEarlier, LyricsLater,
 }
 
 @Immutable
@@ -223,6 +224,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true)),
         // S-912: the A/B listening test's side (A, B; X in the blind test), wherever the music is chosen
         Shortcut(ShortcutId.AbSwitch, ShortcutGroup.Audio, R.string.nag_sc_ab_switch, KeyChord(Key.B, alt = true)),
+        // S-1004: the lyrics' delay in tenths of a second, as G and H move the subtitles' in the player
+        Shortcut(ShortcutId.LyricsEarlier, ShortcutGroup.Audio, R.string.nag_sc_lyrics_earlier, KeyChord(Key.G, alt = true)),
+        Shortcut(ShortcutId.LyricsLater, ShortcutGroup.Audio, R.string.nag_sc_lyrics_later, KeyChord(Key.H, alt = true)),
         // Video
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),
@@ -253,6 +257,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.CommandPalette, ShortcutGroup.View, R.string.nag_search, KeyChord(Key.K, ctrl = true)),
         Shortcut(ShortcutId.ToggleSidebar, ShortcutGroup.View, R.string.nag_sc_toggle_sidebar, KeyChord(Key.B, ctrl = true)),
         Shortcut(ShortcutId.PlayQueue, ShortcutGroup.View, R.string.nag_sc_play_queue, KeyChord(Key.L, ctrl = true)),
+        // S-1004: the playing track's lyrics over the whole window
+        Shortcut(ShortcutId.Lyrics, ShortcutGroup.View, R.string.nag_sc_lyrics, KeyChord(Key.L, ctrl = true, shift = true)),
         // Help
         Shortcut(ShortcutId.ShortcutList, ShortcutGroup.Help, R.string.nag_sc_shortcut_list, KeyChord(Key.Slash, ctrl = true)),
     )

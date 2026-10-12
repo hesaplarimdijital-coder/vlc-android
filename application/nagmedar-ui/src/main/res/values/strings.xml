@@ -1654,4 +1654,30 @@
         <item quantity="other">The lyrics of %d tracks</item>
     </plurals>
     <string name="nag_lyrics_clear">Clear</string>
+    <!-- S-1004: synced lyrics -->
+    <string name="nag_lyrics_title">Lyrics</string>
+    <string name="nag_lyrics_looking">Looking for lyrics…</string>
+    <string name="nag_lyrics_missing">No lyrics found</string>
+    <string name="nag_lyrics_missing_desc">You can put an .lrc file of the same name beside the track.</string>
+    <string name="nag_lyrics_missing_offline">You can put an .lrc file of the same name beside the track, or turn on LRCLIB in Settings › Lyrics.</string>
+    <string name="nag_lyrics_look_again">Look again</string>
+    <string name="nag_lyrics_instrumental">Instrumental</string>
+    <string name="nag_lyrics_instrumental_desc">LRCLIB says this track has no words.</string>
+    <string name="nag_lyrics_plain">Plain lyrics: the lines are not timed</string>
+    <string name="nag_lyrics_from_user">Written by hand</string>
+    <string name="nag_lyrics_from_tags">From the file\'s tags</string>
+    <string name="nag_lyrics_from_lrc">From the .lrc file</string>
+    <string name="nag_lyrics_from_lrclib">From LRCLIB</string>
+    <string name="nag_lyrics_delay">Delay</string>
+    <string name="nag_lyrics_delay_value">%1$s s</string>
+    <string name="nag_lyrics_delay_reset">Reset the delay</string>
+    <string name="nag_lyrics_earlier">Show the lyrics %1$s earlier</string>
+    <string name="nag_lyrics_later">Show the lyrics %1$s later</string>
+    <string name="nag_lyrics_delay_now">Lyrics delay: %1$s</string>
+    <string name="nag_lyrics_delay_none">Open the playing track\'s synced lyrics first</string>
+    <string name="nag_lyrics_seek">Jump to this line</string>
+    <string name="nag_lyrics_close">Close the lyrics</string>
+    <string name="nag_sc_lyrics">Full-screen lyrics</string>
+    <string name="nag_sc_lyrics_earlier">Lyrics earlier</string>
+    <string name="nag_sc_lyrics_later">Lyrics later</string>
 </resources>

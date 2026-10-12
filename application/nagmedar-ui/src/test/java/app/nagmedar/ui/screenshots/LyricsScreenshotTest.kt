@@ -12,7 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.NoPlayerActions
+import app.nagmedar.ui.lyrics.LyricsFullScreen
+import app.nagmedar.ui.lyrics.LyricsLoad
+import app.nagmedar.ui.lyrics.LyricsPane
+import app.nagmedar.ui.lyrics.LyricsSamples
 import app.nagmedar.ui.lyrics.LyricsSection
+import app.nagmedar.ui.music.MusicSamples
+import app.nagmedar.ui.music.NowPlayingInfo
+import app.nagmedar.ui.music.PhonePlayer
+import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -23,7 +32,11 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** S-1003, for approval: Settings › Lyrics, LRCLIB on with lyrics kept, in DeX; off and nothing kept, on a phone in English. */
+/**
+ * For approval: S-1003's Settings › Lyrics, LRCLIB on with lyrics kept, in DeX; off and nothing
+ * kept, on a phone in English. S-1004's lyrics over the whole window in DeX, a line half sung word
+ * by word; in the phone's player in English, with a delay; plain lyrics on a phone.
+ */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class LyricsScreenshotTest {
@@ -53,5 +66,78 @@ class LyricsScreenshotTest {
     @Test @Config(qualifiers = "en-w390dp-h844dp-hdpi")
     fun settingsPhoneEnglish() = capture("settings-lyrics-phone-light-en", ThemeMode.Light, InputMode.Touch) {
         Box(Modifier.padding(top = 16.dp)) { LyricsSection(online = false, kept = 0, onOnlineChange = {}, onClear = {}) }
+    }
+
+    private val playing = NowPlayingInfo(
+        title = "Sabaha Kadar",
+        artist = "Ada Karan",
+        album = "Gece Mavisi",
+        format = "FLAC 24/48 · AAudio · 48 kHz",
+        lengthMs = 241_600,
+        playing = true,
+        rating = 4,
+    )
+
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun fullScreenDex() = capture("lyrics-full-screen-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
+        LyricsFullScreen(
+            title = "Sabaha Kadar",
+            subtitle = "Ada Karan · Gece Mavisi",
+            load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.synced),
+            timeMs = { LyricsSamples.WORD_TIME_MS },
+            onSeek = {},
+            onDelay = {},
+            onClose = {},
+        )
+    }
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
+    fun phoneEnglish() = capture("lyrics-phone-light-en", ThemeMode.Light, InputMode.Touch) {
+        PhonePlayer(
+            info = playing,
+            progress = { 0.09f },
+            waveform = MusicSamples.waveform,
+            actions = NoPlayerActions,
+            onClose = {},
+            artwork = { size -> Artwork(null, size, corner = 12.dp, video = false) },
+            onRate = {},
+            lyrics = { modifier ->
+                LyricsPane(
+                    load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.synced.copy(offsetMs = 300)),
+                    timeMs = { 18_500L },
+                    onSeek = {},
+                    onDelay = {},
+                    modifier = modifier,
+                    onFullScreen = {},
+                )
+            },
+            lyricsShown = true,
+            onLyricsShown = {},
+        )
+    }
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun plainPhone() = capture("lyrics-plain-phone-dark", ThemeMode.Dark, InputMode.Touch) {
+        PhonePlayer(
+            info = playing,
+            progress = { 0.3f },
+            waveform = MusicSamples.waveform,
+            actions = NoPlayerActions,
+            onClose = {},
+            artwork = { size -> Artwork(null, size, corner = 12.dp, video = false) },
+            onRate = {},
+            lyrics = { modifier ->
+                LyricsPane(
+                    load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.plain),
+                    timeMs = { 70_000L },
+                    onSeek = {},
+                    onDelay = {},
+                    modifier = modifier,
+                    onFullScreen = {},
+                )
+            },
+            lyricsShown = true,
+            onLyricsShown = {},
+        )
     }
 }

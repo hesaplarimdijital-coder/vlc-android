@@ -27,8 +27,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,12 +66,15 @@ import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.audio.sinkLabel
+import app.nagmedar.ui.components.NagIconButton
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.QueueEntry
@@ -114,21 +119,52 @@ fun NowPlayingPanel(
     artwork: @Composable (Dp) -> Unit = {},
     /** S-808: sets [NowPlayingInfo.rating]. */
     onRate: ((Int) -> Unit)? = null,
+    /** S-1004: the track's lyrics, in place of the artwork and the queue while [lyricsShown]; the header's button turns them on and off. */
+    lyrics: (@Composable (Modifier) -> Unit)? = null,
+    lyricsShown: Boolean = false,
+    onLyricsShown: ((Boolean) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    Column(
-        modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(dimens.gapL),
-        verticalArrangement = Arrangement.spacedBy(dimens.gapS),
-    ) {
-        Text(stringResource(R.string.nag_now_playing), style = NagTheme.type.labelSmall, color = colors.textTertiary)
-        if (info == null) {
-            Text(stringResource(R.string.nag_music_nothing_playing), style = NagTheme.type.body, color = colors.textSecondary)
-        } else {
-            Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate)
+    Column(modifier.fillMaxSize().padding(dimens.gapL), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.nag_now_playing), style = NagTheme.type.labelSmall, color = colors.textTertiary, modifier = Modifier.weight(1f))
+            if (info != null && lyrics != null && onLyricsShown != null) {
+                NagIconButton(
+                    NagIcons.Lyrics,
+                    stringResource(R.string.nag_lyrics_title),
+                    { onLyricsShown(!lyricsShown) },
+                    selected = lyricsShown,
+                    size = 24.dp,
+                    iconSize = 16.dp,
+                    modifier = Modifier.testTag("now-playing-lyrics"),
+                )
+            }
+        }
+        when {
+            info == null -> Text(stringResource(R.string.nag_music_nothing_playing), style = NagTheme.type.body, color = colors.textSecondary)
+            lyrics != null && lyricsShown -> {
+                PlayingLine(info, artwork)
+                lyrics(Modifier.weight(1f).fillMaxWidth())
+                WaveformTimeline(waveform, progress, info.lengthMs, onSeek, height = 40.dp)
+            }
+            else -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate)
+            }
+        }
+    }
+}
+
+/** S-1004: what plays, in a line above its lyrics: a small artwork, the title, the artist and album. */
+@Composable
+private fun PlayingLine(info: NowPlayingInfo, artwork: @Composable (Dp) -> Unit) {
+    val colors = NagTheme.colors
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
+        artwork(48.dp)
+        Column(Modifier.weight(1f)) {
+            Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            val line = listOfNotNull(info.artist?.takeIf { it.isNotBlank() }, info.album?.takeIf { it.isNotBlank() }).joinToString(" · ")
+            if (line.isNotEmpty()) Text(line, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -329,9 +365,9 @@ private fun bucket(waveform: Waveform, index: Int, count: Int): Pair<Float, Floa
 
 // --------------------------------------------------------------- the app's panel
 
-/** The panel on the playback service: what plays, its waveform, the queue after it. */
+/** The panel on the playback service: what plays, its waveform, the queue after it; or its lyrics (S-1004), which [onFullScreenLyrics] opens over the window. */
 @Composable
-fun MusicNowPlaying() {
+fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
     val context = LocalContext.current
     val nowPlaying = rememberNowPlaying()
     val media = nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
@@ -344,6 +380,8 @@ fun MusicNowPlaying() {
     val queue = rememberPlayQueue()
     val path = rememberSignalPath()
     val upNext = if (queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
+    // S-1004: the lyrics in place of the artwork and the queue, until turned off
+    var lyricsShown by rememberSaveable { mutableStateOf(false) }
     val info = media?.let {
         NowPlayingInfo(
             title = it.nowPlaying ?: it.title ?: "",
@@ -364,6 +402,9 @@ fun MusicNowPlaying() {
         onPlayUpNext = { i -> queue.play(queue.current + 1 + i) },
         artwork = { size -> Artwork(media, size, corner = 8.dp, video = false) },
         onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
+        lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
+        lyricsShown = lyricsShown,
+        onLyricsShown = { lyricsShown = it },
     )
 }
 
