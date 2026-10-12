@@ -210,7 +210,87 @@ double nag_audio_volume(NagAudio *engine);
  */
 int nag_audio_render(NagAudio *engine, void *out, int frames);
 
-/** The engine's source and output as JSON (S-910's signal path reads it). */
+/* ---------------------------------------------------------------- DSP chain */
+
+/*
+ * S-906: the chain between the voices and the output, in 64-bit floats:
+ *   preamp → 20-band graphic EQ → parametric EQ → headphone profile → limiter → clip meter.
+ * One bypass turns the whole chain off; with it off, or with nothing in it changing the
+ * samples, the engine stays bit-perfect.
+ */
+
+#define NAG_GRAPHIC_BANDS 20
+#define NAG_EQ_BANDS 10
+#define NAG_DSP_LOOKAHEAD_MAX_MS 10.0
+#define NAG_DSP_RATE_MAX 768000
+
+/** The graphic EQ's centre frequencies: ISO half-octave bands, 25 Hz to 18 kHz. */
+extern const double nag_graphic_frequencies[NAG_GRAPHIC_BANDS];
+
+typedef enum NagEqType {
+    NAG_EQ_PEAK = 0,
+    NAG_EQ_LOW_SHELF,
+    NAG_EQ_HIGH_SHELF,
+    NAG_EQ_LOW_PASS,
+    NAG_EQ_HIGH_PASS,
+} NagEqType;
+
+typedef struct NagEqBand {
+    int enabled;
+    NagEqType type;
+    double freq;    /* Hz */
+    double gain_db; /* peaks and shelves; ignored by the passes */
+    double q;
+} NagEqBand;
+
+typedef struct NagDspParams {
+    int bypass; /* the one key: the chain off, whatever is in it */
+    double preamp_db;
+    /** With auto_preamp the chain's largest gain is taken back, so an EQ boost cannot clip. */
+    int auto_preamp;
+    int graphic_enabled;
+    double graphic_db[NAG_GRAPHIC_BANDS];
+    int parametric_enabled;
+    NagEqBand parametric[NAG_EQ_BANDS];
+    /** A headphone correction: its own bands and preamp (AutoEq's ParametricEQ, say). */
+    int profile_enabled;
+    char profile_name[64];
+    double profile_preamp_db;
+    NagEqBand profile[NAG_EQ_BANDS];
+    int limiter_enabled;
+    double limiter_threshold_db; /* dBFS, at most 0 */
+    double limiter_release_ms;
+    double limiter_lookahead_ms; /* at most NAG_DSP_LOOKAHEAD_MAX_MS; the chain's latency */
+} NagDspParams;
+
+/** Nothing in the chain: no bypass, 0 dB everywhere, the limiter off (its defaults -1 dBFS, 100 ms, 5 ms). */
+void nag_dsp_params_defaults(NagDspParams *params);
+/** Whether [params] leave the samples as they are: bypassed, or nothing in the chain active. */
+int nag_dsp_params_identity(const NagDspParams *params);
+
+/**
+ * The chain's parameters, copied; the render takes them over at its next block, the filters
+ * keep their memory so a change does not click. Realtime safe on the render's side.
+ */
+int nag_audio_set_dsp(NagAudio *engine, const NagDspParams *params);
+/** The parameters last set (the defaults before any). */
+void nag_audio_get_dsp(NagAudio *engine, NagDspParams *params);
+/** Whether the chain changes the samples right now. */
+int nag_audio_dsp_active(NagAudio *engine);
+/** The limiter's lookahead at the output's rate, in frames (0 without it). */
+int64_t nag_audio_dsp_latency_frames(NagAudio *engine);
+
+typedef struct NagDspMeter {
+    int64_t frames;      /* frames through the chain since the last reset */
+    int64_t clipped;     /* samples beyond full scale at the chain's end */
+    double peak;         /* the largest |sample| before the limiter, 1.0 = full scale */
+    double reduction_db; /* the limiter's largest gain reduction, >= 0 */
+} NagDspMeter;
+
+/** The clip meter (S-906); with [reset], the counts start over after the read. */
+void nag_audio_dsp_meter(NagAudio *engine, NagDspMeter *meter, int reset);
+
+/** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 
 const char *nag_audio_version(void);

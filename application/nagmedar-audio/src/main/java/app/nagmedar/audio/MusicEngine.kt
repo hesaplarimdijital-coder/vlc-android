@@ -195,6 +195,26 @@ class MusicEngine(
     /** The signal path (S-910) as the engine tells it, JSON. */
     fun signalPath(): String = if (available) NativeAudio.signalPath(handle) else "{}"
 
+    /** S-906: the DSP chain's settings; the render takes them at its next block, without a click. */
+    var dsp: DspSettings = DspSettings()
+        set(value) {
+            field = value
+            if (available) NativeAudio.setDsp(handle, value.flags, value.values, value.profileName)
+        }
+
+    /** Whether the chain changes the samples (the bit-perfect badge goes off). */
+    val dspActive: Boolean get() = available && NativeAudio.dspActive(handle)
+
+    /** The limiter's lookahead at the output's rate, in frames. */
+    val dspLatencyFrames: Long get() = if (available) NativeAudio.dspLatencyFrames(handle) else 0L
+
+    /** The clip meter; with [reset] the counts start over after this read. */
+    fun dspMeter(reset: Boolean = false): DspMeter {
+        if (!available) return DspMeter(0, 0, 0.0, 0.0)
+        val m = NativeAudio.dspMeter(handle, reset)
+        return DspMeter(m[0].toLong(), m[1].toLong(), m[2], m[3])
+    }
+
     val sourceInfo: SourceInfo? get() = if (available) SourceInfo.parse(NativeAudio.sourceInfo(handle)) else null
 
     override fun close() {

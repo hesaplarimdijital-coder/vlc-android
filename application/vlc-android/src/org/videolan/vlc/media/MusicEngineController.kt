@@ -1,11 +1,14 @@
 package org.videolan.vlc.media
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import app.nagmedar.audio.CrossfadeCurve
+import app.nagmedar.audio.DspMeter
+import app.nagmedar.audio.DspSettings
 import app.nagmedar.audio.EngineState
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.MusicFormats
@@ -28,6 +31,7 @@ import org.videolan.tools.NAGMEDAR_CROSSFADE_EQUAL_POWER
 import org.videolan.tools.NAGMEDAR_CROSSFADE_LINEAR
 import org.videolan.tools.NAGMEDAR_CROSSFADE_MS
 import org.videolan.tools.NAGMEDAR_CROSSFADE_SKIP_ALBUM
+import org.videolan.tools.NAGMEDAR_DSP
 import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
@@ -173,7 +177,32 @@ class MusicEngineController(
         created.volume = volume / 100.0
         engine = created
         applyCrossfadeSettings()
+        applyDspSettings()
+        Settings.getInstance(context).registerOnSharedPreferenceChangeListener(settingsListener)
         return created
+    }
+
+    /** S-906: the chain follows its setting; the EQ screen writes NAGMEDAR_DSP and the engine takes it at its next block. */
+    private val settingsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            NAGMEDAR_DSP -> applyDspSettings()
+            NAGMEDAR_CROSSFADE_MS, NAGMEDAR_CROSSFADE_CURVE -> applyCrossfadeSettings()
+        }
+    }
+
+    /** The DSP chain as set (S-906); the defaults, nothing in the chain, until the user touches it. */
+    val dsp: DspSettings get() = engine?.dsp ?: DspSettings.fromJson(Settings.getInstance(context).getString(NAGMEDAR_DSP, null))
+
+    /** Whether the chain changes the samples right now. */
+    val dspActive: Boolean get() = engine?.dspActive ?: false
+
+    /** The clip meter (S-906); with [reset] the counts start over. */
+    fun dspMeter(reset: Boolean = false): DspMeter = engine?.dspMeter(reset) ?: DspMeter(0, 0, 0.0, 0.0)
+
+    /** Reads NAGMEDAR_DSP into the engine. */
+    fun applyDspSettings() {
+        val engine = engine ?: return
+        engine.dsp = DspSettings.fromJson(Settings.getInstance(context).getString(NAGMEDAR_DSP, null))
     }
 
     /**
@@ -304,6 +333,7 @@ class MusicEngineController(
 
     override fun release() {
         stopTicker()
+        if (engine != null) Settings.getInstance(context).unregisterOnSharedPreferenceChangeListener(settingsListener)
         engine?.close()
         engine = null
         listener = null

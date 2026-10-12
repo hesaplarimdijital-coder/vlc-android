@@ -5,11 +5,18 @@
 //   nagaudio decode FILE [FILE2 ...] [-o OUT] [-f s16|s24|s32|f32|f64] [--seek MS]
 //                                           [--seek-after FRAMES] [--volume V] [--no-dither] [--md5]
 //                                           [--crossfade MS [--linear]]
+//                                           [--preamp DB] [--auto-preamp] [--graphic DB,DB,...]
+//                                           [--peq TYPE:HZ:DB:Q;...] [--profile TYPE:HZ:DB:Q;...]
+//                                           [--profile-preamp DB] [--limiter DB] [--limiter-release MS]
+//                                           [--limiter-lookahead MS] [--bypass]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
 //           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary
 //           with the events seen and, with --md5, the MD5 of the samples (what ffmpeg -f md5
 //           prints for the same raw format). --seek MS starts at MS; with --seek-after N the
-//           start is 0 and the seek comes while playing, after N frames rendered.
+//           start is 0 and the seek comes while playing, after N frames rendered. The DSP
+//           options (S-906) set the chain: --graphic takes the 20 bands' dB in order, a band
+//           of --peq/--profile is pk, ls, hs, lp or hp with its Hz, dB and Q. The summary
+//           carries the clip meter, the chain's latency and the signal path.
 #include "nagaudio.h"
 #include "source.h"
 
@@ -100,6 +107,35 @@ static NagSampleFormat parse_format(const char *name)
     return NAG_FMT_NONE;
 }
 
+/* "TYPE:HZ:DB:Q;TYPE:HZ:DB:Q" into [bands]; the count, or -1 for a bad band. */
+static int parse_bands(const char *text, NagEqBand *bands, int max)
+{
+    int n = 0;
+    const char *p = text;
+    while (*p && n < max) {
+        char type[8] = {0};
+        double hz = 0, db = 0, q = 1;
+        int used = 0;
+        if (sscanf(p, "%7[a-z]:%lf:%lf:%lf%n", type, &hz, &db, &q, &used) < 3)
+            return -1;
+        NagEqBand *b = &bands[n++];
+        b->enabled = 1;
+        b->freq = hz;
+        b->gain_db = db;
+        b->q = q;
+        if (strcmp(type, "pk") == 0) b->type = NAG_EQ_PEAK;
+        else if (strcmp(type, "ls") == 0) b->type = NAG_EQ_LOW_SHELF;
+        else if (strcmp(type, "hs") == 0) b->type = NAG_EQ_HIGH_SHELF;
+        else if (strcmp(type, "lp") == 0) b->type = NAG_EQ_LOW_PASS;
+        else if (strcmp(type, "hp") == 0) b->type = NAG_EQ_HIGH_PASS;
+        else return -1;
+        p += used;
+        if (*p == ';')
+            p++;
+    }
+    return n;
+}
+
 static int decode(int argc, char **argv)
 {
     const char *files[64];
@@ -108,7 +144,9 @@ static int decode(int argc, char **argv)
     NagSampleFormat format = NAG_FMT_NONE;
     int64_t seek_ms = -1, seek_after = -1;
     double volume = 1.0;
-    int dither = 1, md5 = 0, crossfade_ms = 0, linear = 0;
+    int dither = 1, md5 = 0, crossfade_ms = 0, linear = 0, dsp_set = 0;
+    NagDspParams dsp;
+    nag_dsp_params_defaults(&dsp);
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) out_path = argv[++i];
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
@@ -124,6 +162,37 @@ static int decode(int argc, char **argv)
         else if (strcmp(argv[i], "--crossfade") == 0 && i + 1 < argc) crossfade_ms = atoi(argv[++i]);
         else if (strcmp(argv[i], "--linear") == 0) linear = 1;
         else if (strcmp(argv[i], "--md5") == 0) md5 = 1;
+        else if (strcmp(argv[i], "--preamp") == 0 && i + 1 < argc) { dsp.preamp_db = atof(argv[++i]); dsp_set = 1; }
+        else if (strcmp(argv[i], "--auto-preamp") == 0) { dsp.auto_preamp = 1; dsp_set = 1; }
+        else if (strcmp(argv[i], "--graphic") == 0 && i + 1 < argc) {
+            dsp.graphic_enabled = 1;
+            dsp_set = 1;
+            const char *p = argv[++i];
+            for (int b = 0; b < NAG_GRAPHIC_BANDS && *p; b++) {
+                dsp.graphic_db[b] = strtod(p, (char **)&p);
+                if (*p == ',')
+                    p++;
+            }
+        } else if (strcmp(argv[i], "--peq") == 0 && i + 1 < argc) {
+            dsp.parametric_enabled = 1;
+            dsp_set = 1;
+            if (parse_bands(argv[++i], dsp.parametric, NAG_EQ_BANDS) < 0) {
+                fprintf(stderr, "nagaudio: bad band in %s\n", argv[i]);
+                return 2;
+            }
+        } else if (strcmp(argv[i], "--profile") == 0 && i + 1 < argc) {
+            dsp.profile_enabled = 1;
+            dsp_set = 1;
+            snprintf(dsp.profile_name, sizeof(dsp.profile_name), "cli");
+            if (parse_bands(argv[++i], dsp.profile, NAG_EQ_BANDS) < 0) {
+                fprintf(stderr, "nagaudio: bad band in %s\n", argv[i]);
+                return 2;
+            }
+        } else if (strcmp(argv[i], "--profile-preamp") == 0 && i + 1 < argc) { dsp.profile_enabled = 1; dsp.profile_preamp_db = atof(argv[++i]); dsp_set = 1; }
+        else if (strcmp(argv[i], "--limiter") == 0 && i + 1 < argc) { dsp.limiter_enabled = 1; dsp.limiter_threshold_db = atof(argv[++i]); dsp_set = 1; }
+        else if (strcmp(argv[i], "--limiter-release") == 0 && i + 1 < argc) { dsp.limiter_release_ms = atof(argv[++i]); dsp_set = 1; }
+        else if (strcmp(argv[i], "--limiter-lookahead") == 0 && i + 1 < argc) { dsp.limiter_lookahead_ms = atof(argv[++i]); dsp_set = 1; }
+        else if (strcmp(argv[i], "--bypass") == 0) { dsp.bypass = 1; dsp_set = 1; }
         else if (argv[i][0] == '-' && argv[i][1]) {
             fprintf(stderr, "nagaudio: unknown option %s\n", argv[i]);
             return 2;
@@ -145,6 +214,8 @@ static int decode(int argc, char **argv)
     nag_audio_set_sink(e, nag_sink_pull_new());
     nag_audio_set_volume(e, volume);
     nag_audio_set_crossfade(e, crossfade_ms, linear ? NAG_CROSSFADE_LINEAR : NAG_CROSSFADE_EQUAL_POWER);
+    if (dsp_set)
+        nag_audio_set_dsp(e, &dsp);
     if (nag_audio_open(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
         nag_audio_free(e);
         return 1;
@@ -170,6 +241,7 @@ static int decode(int argc, char **argv)
     int64_t last_track = -1;
     int idle_rounds = 0;
     NagFormat fmt = {0};
+    char *signal_path = NULL;
     while (nag_audio_state(e) != NAG_STATE_ENDED && nag_audio_state(e) != NAG_STATE_STOPPED) {
         NagFormat now = nag_audio_output_format(e);
         if (now.sample_format == NAG_FMT_NONE) {
@@ -199,6 +271,8 @@ static int decode(int argc, char **argv)
         }
         if (n > 0) {
             size_t bytes = (size_t)n * fmt.channels * nag_format_bytes_per_sample(fmt.sample_format);
+            if (!signal_path)
+                signal_path = nag_audio_signal_path_json(e); /* as the first frames play */
             if (out)
                 fwrite(buf, 1, bytes, out);
             if (hash)
@@ -218,6 +292,9 @@ static int decode(int argc, char **argv)
             }
         }
     }
+    NagDspMeter meter;
+    nag_audio_dsp_meter(e, &meter, 0);
+    int64_t dsp_latency = nag_audio_dsp_latency_frames(e);
     nag_audio_stop(e);
     nag_audio_free(e);
     if (out && out != stdout)
@@ -235,7 +312,11 @@ static int decode(int argc, char **argv)
         printf("\"");
         av_free(hash);
     }
+    printf(",\"meter\":{\"frames\":%lld,\"clipped\":%lld,\"peak\":%.9f,\"reduction_db\":%.4f},\"dsp_latency\":%lld",
+           (long long)meter.frames, (long long)meter.clipped, meter.peak, meter.reduction_db, (long long)dsp_latency);
+    printf(",\"signal_path\":%s", signal_path ? signal_path : "null");
     printf(",\"events\":\"%s\"}\n", seen.log);
+    free(signal_path);
     free(buf);
     return seen.errors ? 1 : 0;
 }

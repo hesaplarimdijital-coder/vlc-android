@@ -8,6 +8,8 @@
 #   - a mono file on both channels, a 5.1 file mixed down within one LSB of ffmpeg's
 #   - the output formats: s16, s24, s32 and f32 of a 16-bit and a 24-bit file
 #   - the test set's gapless album (S-904): the three cuts equal the whole glissando
+#   - the DSP chain (S-906): identity and bypass bit-exact, the EQs equal to dsp_model.py's,
+#     the limiter never past its threshold, the auto preamp level, the clip meter
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -127,6 +129,66 @@ ok = worst < 1e-12 and worst_l < 1e-12
 print("%s crossfade equal-power and linear, worst error %.1e / %.1e" % ("ok  " if ok else "FAIL", worst, worst_l))
 sys.exit(0 if ok else 1)
 PY
+
+echo "== S-906: DSP chain"
+MODEL="$HERE/dsp_model.py"
+json() { python3 -c 'import json,sys; d=json.load(sys.stdin); print(eval(sys.argv[1], {"d": d}))' "$1"; }
+# a chain with nothing in it, and a bypassed one with everything in it, leave the samples alone
+check "dsp identity bit-exact" "$(engine_md5 s16 flac16.flac)" "$(engine_md5 s16 flac16.flac --preamp 0 --graphic 0,0,0,0,0 --peq "pk:1000:0:1" --limiter-release 50)"
+check "dsp bypass bit-exact" "$(engine_md5 s16 flac16.flac)" "$(engine_md5 s16 flac16.flac --preamp -3 --graphic 2,2,2 --limiter -1 --bypass)"
+"$NAGAUDIO" decode flac16.flac -f f64 -o plain.raw > /dev/null
+# the EQs: the engine's doubles against the Python model, to rounding
+EQ=(--preamp -2.5 --graphic 3,-2,0,4,0,0,-6,0,0,2,0,0,5,0,0,-3,0,0,1,2 --peq "pk:1000:6:1.2;ls:120:-3:0.7;hs:8000:2.5:0.7;hp:30:0:0.7" --profile "pk:3300:-4:2;lp:16000:0:0.7" --profile-preamp -1.5)
+"$NAGAUDIO" decode flac16.flac -f f64 -o eq.raw "${EQ[@]}" > eq.json
+python3 "$MODEL" plain.raw model.raw 44100 2 "${EQ[@]}"
+python3 - <<'PY' || failures=$((failures + 1))
+import struct, sys
+a = open("eq.raw", "rb").read()
+b = open("model.raw", "rb").read()
+n = len(a) // 8
+x, y = struct.unpack("<%dd" % n, a), struct.unpack("<%dd" % n, b)
+worst = max(abs(x[i] - y[i]) for i in range(n)) if n and len(a) == len(b) else float("inf")
+print("%s dsp: 15 EQ bands and two preamps against the model, worst error %.1e" % ("ok  " if worst < 1e-12 else "FAIL", worst))
+sys.exit(0 if worst < 1e-12 else 1)
+PY
+check "dsp stages in the signal path" "graphic_eq:9 parametric_eq:4 profile:2" "$(json '" ".join("%s:%d" % (s["stage"], s["bands"]) for s in d["signal_path"]["dsp"] if "bands" in s)' < eq.json)"
+check "dsp is why not bit-perfect" "dsp" "$(json 'd["signal_path"]["not_bit_perfect_because"]' < eq.json)"
+# the limiter: a full-scale 1 kHz sine, 6 dB up, never passes -1 dBFS; without it the meter counts the clipping
+ffmpeg -v error -y -f lavfi -i "sine=f=1000:r=48000:d=2,aformat=channel_layouts=stereo" -af "volume=11.3,aformat=sample_fmts=s32" -c:a flac hot.flac
+"$NAGAUDIO" decode hot.flac -f f64 -o hot_lim.raw --preamp 6 --limiter -1 > lim.json
+"$NAGAUDIO" decode hot.flac -f f64 -o hot_clip.raw --preamp 6 > clip.json
+check "limiter latency 5 ms at 48 kHz" "239" "$(json 'd["dsp_latency"]' < lim.json)"
+check "clip meter counts without the limiter" "120000" "$(json 'd["meter"]["clipped"]' < clip.json)"
+check "clip meter clean with the limiter" "0" "$(json 'd["meter"]["clipped"]' < lim.json)"
+python3 - <<'PY' || failures=$((failures + 1))
+import json, math, struct, sys
+data = open("hot_lim.raw", "rb").read()
+x = struct.unpack("<%dd" % (len(data) // 8), data)
+threshold = 10 ** (-1 / 20)
+peak = max(abs(v) for v in x)
+reduction = json.load(open("lim.json"))["meter"]["reduction_db"]
+ok = peak <= threshold and threshold / peak < 1.001 and 6.9 < reduction < 7.1
+print("%s limiter: peak %.12f against %.12f, reduction %.2f dB" % ("ok  " if ok else "FAIL", peak, threshold, reduction))
+sys.exit(0 if ok else 1)
+PY
+# the auto preamp takes a +6 dB peak at 1 kHz back: the sine comes out at its own level
+"$NAGAUDIO" decode hot.flac -f f64 -o hot_auto.raw --peq "pk:1000:6:1" --auto-preamp > auto.json
+check "auto preamp -6 dB" "-6.0" "$(json '"%.1f" % [s for s in d["signal_path"]["dsp"] if s["stage"] == "auto_preamp"][0]["db"]' < auto.json)"
+"$NAGAUDIO" decode hot.flac -f f64 -o hot_plain.raw > /dev/null
+python3 - <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+def tail_peak(path):
+    data = open(path, "rb").read()
+    x = struct.unpack("<%dd" % (len(data) // 8), data)
+    return max(abs(v) for v in x[len(x) // 2:])
+diff = 20 * math.log10(tail_peak("hot_auto.raw") / tail_peak("hot_plain.raw"))
+print("%s auto preamp: the sine's level changed by %.4f dB" % ("ok  " if abs(diff) < 0.01 else "FAIL", diff))
+sys.exit(0 if abs(diff) < 0.01 else 1)
+PY
+# a seek forgets the chain's memory: what follows it equals a start from that time
+"$NAGAUDIO" decode flac16.flac -f f64 -o seek_start.raw --seek 1000 --limiter -1 --preamp 3 > /dev/null
+"$NAGAUDIO" decode flac16.flac -f f64 -o seek_mid.raw --seek 1000 --seek-after 5000 --limiter -1 --preamp 3 > /dev/null
+check "dsp reset at a seek" "$(md5_of < seek_start.raw)" "$(tail -c $(stat -c %s seek_start.raw) seek_mid.raw | md5_of)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

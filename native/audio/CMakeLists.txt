@@ -10,7 +10,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg (empty: the system's pkg-config)")
 
-set(CORE ring.c source.c engine.c)
+set(CORE ring.c source.c dsp.c engine.c)
 
 if(DEPS_PREFIX)
     set(FFMPEG_INCLUDE ${DEPS_PREFIX}/include)

@@ -50,3 +50,6 @@ const val NAGMEDAR_CROSSFADE_CURVE = "nagmedar_crossfade_curve"
 const val NAGMEDAR_CROSSFADE_SKIP_ALBUM = "nagmedar_crossfade_skip_album"
 const val NAGMEDAR_CROSSFADE_LINEAR = "linear"
 const val NAGMEDAR_CROSSFADE_EQUAL_POWER = "equal_power"
+
+/** S-906: the DSP chain's settings as JSON (app.nagmedar.audio.DspSettings); absent: nothing in the chain. */
+const val NAGMEDAR_DSP = "nagmedar_dsp"

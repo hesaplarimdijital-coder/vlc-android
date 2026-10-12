@@ -1,4 +1,5 @@
 #include "nagaudio.h"
+#include "dsp.h"
 #include "ring.h"
 #include "source.h"
 
@@ -113,6 +114,18 @@ struct NagAudio {
     uint32_t noise;       /* dither */
     _Atomic int64_t total_frames; /* frames handed to the sink */
 
+    /* S-906: the DSP chain */
+    NagDsp dsp;                          /* the render's own */
+    const NagDspParams *dsp_active;      /* what the render compiled; freed through dsp_retired */
+    _Atomic(NagDspParams *) dsp_pending; /* the control plane's next set: one slot, the newest wins */
+    NagDspParams *dsp_params;            /* the control plane's copy of the last set (under the lock) */
+    atomic_int dsp_identity;             /* the set leaves the samples alone (voice_format reads it) */
+    _Atomic(NagDspParams *) dsp_retired[RETIRED_QUEUE];
+    _Atomic unsigned dsp_retired_read, dsp_retired_write;
+    atomic_int dsp_reset_wanted;         /* a new track or a seek: the filters forget */
+    _Atomic int64_t meter_frames, meter_clipped;
+    _Atomic double meter_peak, meter_reduction;
+
     /* the event plane */
     NagEvent events[EVENT_QUEUE];
     _Atomic unsigned event_read, event_write;
@@ -211,6 +224,8 @@ static void *decoder_main(void *arg)
             atomic_store(&v->played, 0);
             atomic_store(&v->base_ms, ms);
             atomic_store(&v->eof, 0);
+            if (atomic_load(&e->current) == v)
+                atomic_store(&e->dsp_reset_wanted, 1); /* no tail of the audio before the seek */
             release_render(e);
             /* a later seek wins: only this one is done with */
             int one = 1;
@@ -290,6 +305,7 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
     return v;
 }
 
+/* The format the sink is asked for [v]: the track's own depth, or the widest with the DSP chain in the way. */
 static NagFormat voice_format(const NagAudio *e, const Voice *v)
 {
     NagFormat f = {v->info.rate, e->cfg.channels, NAG_FMT_S32};
@@ -299,7 +315,7 @@ static NagFormat voice_format(const NagAudio *e, const Voice *v)
     }
     if (v->info.is_float)
         f.sample_format = NAG_FMT_F32;
-    else if (v->info.bits > 0 && v->info.bits <= 16)
+    else if (v->info.bits > 0 && v->info.bits <= 16 && atomic_load(&e->dsp_identity))
         f.sample_format = NAG_FMT_S16;
     if (nag_format_bits(f.sample_format) > nag_format_bits(e->cfg.max_format) && e->cfg.max_format != NAG_FMT_NONE)
         f.sample_format = e->cfg.max_format;
@@ -369,10 +385,19 @@ static void free_retired(NagAudio *e)
         unsigned r = atomic_load_explicit(&e->retired_read, memory_order_relaxed);
         unsigned w = atomic_load_explicit(&e->retired_write, memory_order_acquire);
         if (r == w)
-            return;
+            break;
         Voice *v = atomic_load(&e->retired[r % RETIRED_QUEUE]);
         atomic_store_explicit(&e->retired_read, r + 1, memory_order_release);
         voice_free(v);
+    }
+    for (;;) {
+        unsigned r = atomic_load_explicit(&e->dsp_retired_read, memory_order_relaxed);
+        unsigned w = atomic_load_explicit(&e->dsp_retired_write, memory_order_acquire);
+        if (r == w)
+            break;
+        NagDspParams *p = atomic_load(&e->dsp_retired[r % RETIRED_QUEUE]);
+        atomic_store_explicit(&e->dsp_retired_read, r + 1, memory_order_release);
+        free(p);
     }
 }
 
@@ -450,7 +475,12 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     sem_init(&e->event_sem, 0, 0);
     e->mix = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
     e->mix2 = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
-    if (!e->mix || !e->mix2 || pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
+    e->dsp_params = malloc(sizeof(*e->dsp_params));
+    int dsp_ok = e->cfg.channels <= NAG_DSP_CHANNELS_MAX && nag_dsp_init(&e->dsp, e->cfg.channels) == 0;
+    if (!e->mix || !e->mix2 || !e->dsp_params || !dsp_ok || pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
+        if (dsp_ok)
+            nag_dsp_free(&e->dsp);
+        free(e->dsp_params);
         free(e->mix);
         free(e->mix2);
         sem_destroy(&e->event_sem);
@@ -458,6 +488,8 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
         free(e);
         return NULL;
     }
+    nag_dsp_params_defaults(e->dsp_params);
+    atomic_store(&e->dsp_identity, 1);
     e->event_thread_started = 1;
     return e;
 }
@@ -500,6 +532,10 @@ void nag_audio_free(NagAudio *e)
         e->sink->destroy(e->sink);
     sem_destroy(&e->event_sem);
     pthread_mutex_destroy(&e->lock);
+    free(atomic_exchange(&e->dsp_pending, NULL));
+    free((NagDspParams *)e->dsp_active);
+    free(e->dsp_params);
+    nag_dsp_free(&e->dsp);
     free(e->mix);
     free(e->mix2);
     free(e);
@@ -554,6 +590,7 @@ int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
         ret = open_sink_for(e, &want);
     }
     atomic_store(&e->current, v);
+    atomic_store(&e->dsp_reset_wanted, 1);
     post(e, NAG_EVENT_TRACK, id, NULL);
     if (atomic_load(&e->state) == NAG_STATE_ENDED)
         set_state(e, NAG_STATE_PLAYING);
@@ -620,6 +657,7 @@ int nag_audio_stop(NagAudio *e)
     Voice *current, *next, *fade_out;
     take_voices(e, &current, &next, &fade_out);
     set_state(e, NAG_STATE_STOPPED);
+    atomic_store(&e->dsp_reset_wanted, 1);
     if (e->sink && e->sink->pause)
         e->sink->pause(e->sink);
     pthread_mutex_unlock(&e->lock);
@@ -713,6 +751,109 @@ void nag_audio_set_volume(NagAudio *e, double volume)
 double nag_audio_volume(NagAudio *e)
 {
     return atomic_load(&e->volume);
+}
+
+/* ---------------------------------------------------------------- DSP chain */
+
+int nag_audio_set_dsp(NagAudio *e, const NagDspParams *params)
+{
+    NagDspParams *copy = malloc(sizeof(*copy));
+    if (!copy)
+        return -1;
+    *copy = *params;
+    pthread_mutex_lock(&e->lock);
+    *e->dsp_params = *params;
+    atomic_store(&e->dsp_identity, nag_dsp_params_identity(params));
+    /* the render takes the slot's set at its next block; one it never took is dropped here */
+    NagDspParams *dropped = atomic_exchange(&e->dsp_pending, copy);
+    pthread_mutex_unlock(&e->lock);
+    free(dropped);
+    return 0;
+}
+
+void nag_audio_get_dsp(NagAudio *e, NagDspParams *params)
+{
+    pthread_mutex_lock(&e->lock);
+    *params = *e->dsp_params;
+    pthread_mutex_unlock(&e->lock);
+}
+
+int nag_audio_dsp_active(NagAudio *e)
+{
+    return !atomic_load(&e->dsp_identity);
+}
+
+int64_t nag_audio_dsp_latency_frames(NagAudio *e)
+{
+    pthread_mutex_lock(&e->lock);
+    int64_t frames = 0;
+    if (!e->dsp_params->bypass && e->dsp_params->limiter_enabled && atomic_load(&e->out_valid)) {
+        double ms = e->dsp_params->limiter_lookahead_ms;
+        if (ms > NAG_DSP_LOOKAHEAD_MAX_MS)
+            ms = NAG_DSP_LOOKAHEAD_MAX_MS;
+        frames = ms > 0 ? (int64_t)lrint(ms * e->out.rate / 1000.0) - 1 : 0;
+        if (frames < 0)
+            frames = 0;
+    }
+    pthread_mutex_unlock(&e->lock);
+    return frames;
+}
+
+void nag_audio_dsp_meter(NagAudio *e, NagDspMeter *meter, int reset)
+{
+    meter->frames = atomic_load(&e->meter_frames);
+    meter->clipped = atomic_load(&e->meter_clipped);
+    meter->peak = atomic_load(&e->meter_peak);
+    meter->reduction_db = atomic_load(&e->meter_reduction);
+    if (reset) {
+        atomic_store(&e->meter_frames, 0);
+        atomic_store(&e->meter_clipped, 0);
+        atomic_store(&e->meter_peak, 0.0);
+        atomic_store(&e->meter_reduction, 0.0);
+    }
+}
+
+/* The render's side: the newest parameters, a reset asked for, the rate; whether the chain is in the way. */
+static int dsp_prepare(NagAudio *e)
+{
+    if (atomic_load(&e->dsp_pending)) {
+        unsigned w = atomic_load_explicit(&e->dsp_retired_write, memory_order_relaxed);
+        unsigned r = atomic_load_explicit(&e->dsp_retired_read, memory_order_acquire);
+        if (w - r < RETIRED_QUEUE) { /* room to retire the set in use; otherwise next block */
+            NagDspParams *p = atomic_exchange(&e->dsp_pending, NULL);
+            if (p) {
+                if (e->dsp_active) {
+                    atomic_store(&e->dsp_retired[w % RETIRED_QUEUE], (NagDspParams *)e->dsp_active);
+                    atomic_store_explicit(&e->dsp_retired_write, w + 1, memory_order_release);
+                    sem_post(&e->event_sem);
+                }
+                e->dsp_active = p;
+                nag_dsp_compile(&e->dsp, p, e->out.rate);
+            }
+        }
+    }
+    if (e->dsp_active && e->dsp.rate != e->out.rate)
+        nag_dsp_compile(&e->dsp, e->dsp_active, e->out.rate);
+    if (atomic_exchange(&e->dsp_reset_wanted, 0))
+        nag_dsp_reset(&e->dsp);
+    return e->dsp.active;
+}
+
+static inline void atomic_max_double(_Atomic double *target, double value)
+{
+    double seen = atomic_load(target);
+    while (value > seen && !atomic_compare_exchange_weak(target, &seen, value))
+        ;
+}
+
+static void meter_add(NagAudio *e, const NagDspBlockMeter *m, int frames)
+{
+    atomic_fetch_add(&e->meter_frames, frames);
+    if (m->clipped)
+        atomic_fetch_add(&e->meter_clipped, m->clipped);
+    atomic_max_double(&e->meter_peak, m->peak);
+    if (m->min_gain < 1.0)
+        atomic_max_double(&e->meter_reduction, -20.0 * log10(m->min_gain > 1e-12 ? m->min_gain : 1e-12));
 }
 
 /* ------------------------------------------------------------------- render */
@@ -817,6 +958,17 @@ static inline void silence(NagAudio *e, void *out, int frames)
     memset(out, 0, (size_t)frames * e->out.channels * nag_format_bytes_per_sample(e->out.sample_format));
 }
 
+/* The mix buffer's [n_frames] through the DSP chain when it is in the way, then into [out]. */
+static void finish_block(NagAudio *e, void *out, int n_frames, double volume, int dither, int dsp_on)
+{
+    if (dsp_on) {
+        NagDspBlockMeter m;
+        nag_dsp_process(&e->dsp, e->mix, n_frames, &m);
+        meter_add(e, &m, n_frames);
+    }
+    convert(e, e->mix, out, n_frames, volume, dither);
+}
+
 /* Whether converting [v] into the output narrows it: 24 bits into 16, floats into integers. */
 static int needs_dither(const NagAudio *e, const Voice *v)
 {
@@ -875,6 +1027,9 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
     const int bytes = nag_format_bytes_per_sample(e->out.sample_format) * channels;
     const double volume = atomic_load(&e->volume);
     const int curve = atomic_load(&e->crossfade_curve);
+    const int dsp_on = dsp_prepare(e);
+    /* a chain in the way makes every output a conversion from doubles: dithered to integers */
+    const int dsp_dither = dsp_on && e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64;
     int produced = 0;
     int pos = 0;
     while (pos < frames) {
@@ -941,7 +1096,7 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
             atomic_fetch_add(&v->played, n_frames);
             if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
                 sem_post(&v->wake);
-            convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, needs_dither(e, v));
+            finish_block(e, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, needs_dither(e, v) || dsp_dither, dsp_on);
             pos += n_frames;
             produced += n_frames;
             continue;
@@ -983,7 +1138,8 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
                 a[c] = a[c] * out_gain + b[c] * in_gain;
         }
         e->fade_done += n_frames;
-        convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64);
+        finish_block(e, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume,
+                     e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64, dsp_on);
         pos += n_frames;
         produced += n_frames;
     }
@@ -1054,6 +1210,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
         why = "lossy";
     else if (volume < 1.0)
         why = "volume";
+    else if (!atomic_load(&e->dsp_identity))
+        why = "dsp";
     else if (out.sample_format != NAG_FMT_F32 && out.sample_format != NAG_FMT_F64 && nag_format_bits(out.sample_format) < v->info.bits)
         why = "depth";
     else if (!sink_exclusive)
@@ -1085,8 +1243,30 @@ char *nag_audio_signal_path_json(NagAudio *e)
     } else {
         str_add(&j, "null");
     }
-    str_add(&j, ",\"volume\":%.4f,\"crossfade_ms\":%d,\"dsp\":[],\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}", volume,
-            atomic_load(&e->crossfade_ms), bit_perfect ? "true" : "false", why);
+    str_add(&j, ",\"volume\":%.4f,\"crossfade_ms\":%d,\"dsp\":[", volume, atomic_load(&e->crossfade_ms));
+    {
+        /* S-906: the stages as the parameters compile at the output's rate (a dry compile) */
+        NagDsp probe;
+        nag_dsp_probe(&probe, e->cfg.channels);
+        nag_dsp_compile(&probe, e->dsp_params, out.rate > 0 ? out.rate : 48000);
+        for (int i = 0; i < probe.n_stages; i++) {
+            const NagDspStage *s = &probe.stages[i];
+            str_add(&j, "%s{\"stage\":\"%s\"", i ? "," : "", s->name);
+            if (s->count)
+                str_add(&j, ",\"bands\":%d", s->count);
+            if (s->db != 0 || strcmp(s->name, "preamp") == 0 || strcmp(s->name, "limiter") == 0)
+                str_add(&j, ",\"db\":%.2f", s->db);
+            if (strcmp(s->name, "profile") == 0) {
+                str_add(&j, ",\"name\":");
+                str_add_quoted(&j, e->dsp_params->profile_name);
+            }
+            if (strcmp(s->name, "limiter") == 0)
+                str_add(&j, ",\"lookahead_ms\":%.1f,\"release_ms\":%.0f", probe.limiter.frames * 1000.0 / probe.rate, e->dsp_params->limiter_release_ms);
+            str_add(&j, "}");
+        }
+    }
+    str_add(&j, "],\"dsp_active\":%s,\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}", atomic_load(&e->dsp_identity) ? "false" : "true",
+            bit_perfect ? "true" : "false", why);
     pthread_mutex_unlock(&e->lock);
     return j.s;
 }

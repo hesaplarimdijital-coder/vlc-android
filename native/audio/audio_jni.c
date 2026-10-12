@@ -282,3 +282,100 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_sourceInfo(JNIEnv 
              (long long)info.bitrate);
     return utf8(env, json);
 }
+
+/* ---------------------------------------------------------------- S-906 DSP */
+
+/*
+ * The chain's parameters come flat (NativeAudio.setDsp):
+ *   flags: bypass, auto_preamp, graphic_enabled, parametric_enabled, profile_enabled,
+ *          limiter_enabled, then (enabled, type) of the 10 parametric and the 10 profile bands
+ *   values: preamp_db, profile_preamp_db, limiter_threshold_db, limiter_release_ms,
+ *           limiter_lookahead_ms, the 20 graphic bands' dB, then (freq, gain_db, q) of the
+ *           10 parametric and the 10 profile bands
+ */
+#define DSP_FLAGS (6 + 2 * 2 * NAG_EQ_BANDS)
+#define DSP_VALUES (5 + NAG_GRAPHIC_BANDS + 2 * 3 * NAG_EQ_BANDS)
+
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setDsp(JNIEnv *env, jclass cls, jlong handle, jintArray flags_array, jdoubleArray values_array,
+                                                                  jstring profile_name)
+{
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (!e || !flags_array || !values_array)
+        return -1;
+    if ((*env)->GetArrayLength(env, flags_array) < DSP_FLAGS || (*env)->GetArrayLength(env, values_array) < DSP_VALUES)
+        return -1;
+    jint flags[DSP_FLAGS];
+    jdouble values[DSP_VALUES];
+    (*env)->GetIntArrayRegion(env, flags_array, 0, DSP_FLAGS, flags);
+    (*env)->GetDoubleArrayRegion(env, values_array, 0, DSP_VALUES, values);
+    NagDspParams p;
+    nag_dsp_params_defaults(&p);
+    p.bypass = flags[0];
+    p.auto_preamp = flags[1];
+    p.graphic_enabled = flags[2];
+    p.parametric_enabled = flags[3];
+    p.profile_enabled = flags[4];
+    p.limiter_enabled = flags[5];
+    p.preamp_db = values[0];
+    p.profile_preamp_db = values[1];
+    p.limiter_threshold_db = values[2];
+    p.limiter_release_ms = values[3];
+    p.limiter_lookahead_ms = values[4];
+    for (int i = 0; i < NAG_GRAPHIC_BANDS; i++)
+        p.graphic_db[i] = values[5 + i];
+    NagEqBand *sets[2] = {p.parametric, p.profile};
+    for (int s = 0; s < 2; s++) {
+        for (int i = 0; i < NAG_EQ_BANDS; i++) {
+            const jint *f = flags + 6 + (s * NAG_EQ_BANDS + i) * 2;
+            const jdouble *v = values + 5 + NAG_GRAPHIC_BANDS + (s * NAG_EQ_BANDS + i) * 3;
+            sets[s][i].enabled = f[0];
+            sets[s][i].type = (NagEqType)f[1];
+            sets[s][i].freq = v[0];
+            sets[s][i].gain_db = v[1];
+            sets[s][i].q = v[2];
+        }
+    }
+    if (profile_name) {
+        const char *name = (*env)->GetStringUTFChars(env, profile_name, NULL);
+        if (name) {
+            snprintf(p.profile_name, sizeof(p.profile_name), "%s", name);
+            (*env)->ReleaseStringUTFChars(env, profile_name, name);
+        }
+    }
+    return nag_audio_set_dsp(e, &p);
+}
+
+JNIEXPORT jboolean JNICALL Java_app_nagmedar_audio_NativeAudio_dspActive(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) && nag_audio_dsp_active(engine_of(handle)) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jlong JNICALL Java_app_nagmedar_audio_NativeAudio_dspLatencyFrames(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? (jlong)nag_audio_dsp_latency_frames(engine_of(handle)) : 0;
+}
+
+/* frames, clipped, peak, reduction_db */
+JNIEXPORT jdoubleArray JNICALL Java_app_nagmedar_audio_NativeAudio_dspMeter(JNIEnv *env, jclass cls, jlong handle, jboolean reset)
+{
+    (void)cls;
+    jdoubleArray result = (*env)->NewDoubleArray(env, 4);
+    if (!result)
+        return NULL;
+    jdouble values[4] = {0, 0, 0, 0};
+    if (engine_of(handle)) {
+        NagDspMeter m;
+        nag_audio_dsp_meter(engine_of(handle), &m, reset == JNI_TRUE);
+        values[0] = (jdouble)m.frames;
+        values[1] = (jdouble)m.clipped;
+        values[2] = m.peak;
+        values[3] = m.reduction_db;
+    }
+    (*env)->SetDoubleArrayRegion(env, result, 0, 4, values);
+    return result;
+}

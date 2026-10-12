@@ -2,6 +2,14 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 0.2.0 — MVP2 (hazırlanıyor)
+
+### Müzik motoru
+- Nağmedar Ses Motoru: yerel müzik dosyaları için FFmpeg çözücülü, 64-bit kayan noktalı kendi motor; çıkış kaynağın derinliğinde ve hızında, 16 ve 24 bit FLAC ffmpeg'le bit-exact. Ayarlar › Müzik'ten libVLC'ye dönülebilir.
+- Boşluksuz oynatma: sıradaki parça önceden çözülür, örnek doğruluğunda devralınır; MP3 ve AAC'nin kodlayıcı gecikmesi ve dolgusu kırpılır.
+- Çapraz geçiş: süre (2, 4, 8 sn), eşit güç ya da doğrusal eğri; albümün ardışık parçalarında kendiliğinden kapalı.
+- DSP zinciri: ön kazanç (otomatik ön kazançla), 20 bantlı grafik ekolayzer, 10 bantlı parametrik ekolayzer, AutoEq biçiminde kulaklık profili, önden bakışlı sınırlayıcı ve kırpılma göstergesi; tek tuşla atlanır ve atlanınca çıkış bit-perfect kalır. (Ekolayzer ekranı sonraki adımda.)
+
 ## 0.1.0 — MVP1
 
 Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine kurulu çatalı, DeX ve klavye-fare için yeni bir arayüzle. Uygulama kimliği `app.nagmedar`; klasik VLC arayüzü Ayarlar › Başlangıç'tan seçilebilir.

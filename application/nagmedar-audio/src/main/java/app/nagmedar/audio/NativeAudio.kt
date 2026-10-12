@@ -46,6 +46,20 @@ object NativeAudio {
     const val CROSSFADE_LINEAR = 1
     const val CROSSFADE_MAX_MS = 12_000
 
+    // S-906: the DSP chain
+    const val GRAPHIC_BANDS = 20
+    const val EQ_BANDS = 10
+    const val EQ_PEAK = 0
+    const val EQ_LOW_SHELF = 1
+    const val EQ_HIGH_SHELF = 2
+    const val EQ_LOW_PASS = 3
+    const val EQ_HIGH_PASS = 4
+    const val DSP_LOOKAHEAD_MAX_MS = 10.0
+    /** setDsp's flags: 6 switches, then (enabled, type) of 10 parametric and 10 profile bands. */
+    const val DSP_FLAGS = 6 + 2 * 2 * EQ_BANDS
+    /** setDsp's values: 5 gains and times, the 20 graphic bands' dB, then (freq, dB, Q) of 10 + 10 bands. */
+    const val DSP_VALUES = 5 + GRAPHIC_BANDS + 2 * 3 * EQ_BANDS
+
     @JvmStatic external fun version(): String
 
     /** An engine; 0 on failure. [maxFormat] caps the output's depth, [fixedFormat] (or FORMAT_NONE) fixes it. */
@@ -90,4 +104,15 @@ object NativeAudio {
     @JvmStatic external fun signalPath(handle: Long): String
 
     @JvmStatic external fun sourceInfo(handle: Long): String
+
+    /** S-906: the chain's parameters, flat (DspSettings.flags and values); the render takes them at its next block. */
+    @JvmStatic external fun setDsp(handle: Long, flags: IntArray, values: DoubleArray, profileName: String): Int
+
+    @JvmStatic external fun dspActive(handle: Long): Boolean
+
+    /** The limiter's lookahead at the output's rate, in frames. */
+    @JvmStatic external fun dspLatencyFrames(handle: Long): Long
+
+    /** frames, clipped samples, peak before the limiter, the limiter's largest reduction in dB. */
+    @JvmStatic external fun dspMeter(handle: Long, reset: Boolean): DoubleArray
 }

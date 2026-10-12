@@ -82,6 +82,13 @@ Sözlüğü testler denetler:
 | müzik motoru | music engine | ses motoru | audio engine | Nağmedar Ses Motoru'nun ayarlardaki adı; yerel müzik dosyalarını çalar, libVLC'ye dönülebilir |
 | boşluksuz | gapless | | | Bir albümün parçaları arada boşluk ya da tık olmadan birbirini izler; “kesintisiz” ekranın yenileme hızı geçişi için kalır |
 | çapraz geçiş | crossfade | | cross-fade | Sonraki parça çalanın sonunun üstüne girer; süresi saniyeyle, eğrisi “Eşit güç” ya da “Doğrusal” |
+| DSP zinciri | DSP chain | efekt zinciri | effects chain | Ön kazanç → grafik ekolayzer → parametrik ekolayzer → kulaklık profili → sınırlayıcı; tek tuşla atlanır |
+| atla | bypass | baypas | | DSP zincirinin tek tuşla devre dışı kalması: “Zinciri atla”; atlanınca çıkış bit-perfect kalır |
+| ön kazanç | preamp | preamp, ön yükseltici | pre-amp | Zincirin başındaki dB kazancı; “Otomatik ön kazanç” en yüksek yükseltmeyi geri alır |
+| sınırlayıcı | limiter | limiter, kısıtlayıcı | | Zincirin sonunda tepeleri eşiğin (dBFS) altında tutar; önden bakış süresi gecikmedir |
+| kulaklık profili | headphone profile | | | AutoEq'nun ParametricEQ.txt biçiminde içe alınan düzeltme: kendi bantları ve ön kazancı |
+| kırpılma | clipping | klip | | Tam ölçeği aşan örnekler; “Kırpılma göstergesi” sayar ve tepeyi dBFS olarak yazar |
+| bant | band | | | Ekolayzerin bir bandı: merkez frekansı, kazancı (dB) ve Q'su; “tepe”, “alçak raf”, “yüksek raf”, “alçak geçiren”, “yüksek geçiren” |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |
