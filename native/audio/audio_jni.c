@@ -643,3 +643,34 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_usbError(JNIEnv *e
     NagAudio *e = engine_of(handle);
     return utf8(env, e ? nag_sink_usb_error(nag_audio_sink(e)) : "");
 }
+
+/* ----------------------------------------------------------- S-912 A/B test */
+
+JNIEXPORT jdouble JNICALL Java_app_nagmedar_audio_NativeAudio_dspLevelDb(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? nag_audio_dsp_level_db(engine_of(handle)) : 0.0;
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setAbSide(JNIEnv *env, jclass cls, jlong handle, jint side)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_ab_side(engine_of(handle), side);
+}
+
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_abSide(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? nag_audio_ab_side(engine_of(handle)) : 0;
+}
+
+JNIEXPORT jdouble JNICALL Java_app_nagmedar_audio_NativeAudio_abGainDb(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? nag_audio_ab_gain_db(engine_of(handle)) : 0.0;
+}

@@ -143,6 +143,11 @@ struct NagAudio {
     atomic_int max_format, min_format;
     _Atomic int64_t meter_frames, meter_clipped;
     _Atomic double meter_peak, meter_reduction;
+    /* S-912: the chain's level change, from the energy in and out over the last stretch */
+    _Atomic double ab_energy_in, ab_energy_out;
+    int64_t ab_frames;    /* frames in the window; halved with the energies every AB_WINDOW frames */
+    atomic_int ab_side;
+    _Atomic double ab_gain; /* side B's gain, linear, frozen when B was chosen */
 
     /* the event plane */
     NagEvent events[EVENT_QUEUE];
@@ -555,6 +560,7 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     atomic_store(&e->dsp_identity, 1);
     atomic_store(&e->max_format, e->cfg.max_format);
     atomic_store(&e->min_format, NAG_FMT_NONE);
+    atomic_store(&e->ab_gain, 1.0);
     e->event_thread_started = 1;
     return e;
 }
@@ -1027,6 +1033,38 @@ static int balance_mono(NagAudio *e, double *frames, int n)
     return 1;
 }
 
+/* ---------------------------------------------------------------- A/B test */
+
+double nag_audio_dsp_level_db(NagAudio *e)
+{
+    double in = atomic_load(&e->ab_energy_in), out = atomic_load(&e->ab_energy_out);
+    if (in <= 0 || out <= 0)
+        return 0;
+    return 10.0 * log10(out / in);
+}
+
+void nag_audio_set_ab_side(NagAudio *e, int side)
+{
+    if (side) {
+        double db = nag_audio_dsp_level_db(e);
+        atomic_store(&e->ab_gain, pow(10.0, db / 20.0));
+        atomic_store(&e->ab_side, 1);
+    } else {
+        atomic_store(&e->ab_side, 0);
+    }
+}
+
+int nag_audio_ab_side(NagAudio *e)
+{
+    return atomic_load(&e->ab_side);
+}
+
+double nag_audio_ab_gain_db(NagAudio *e)
+{
+    double g = atomic_load(&e->ab_gain);
+    return g > 0 ? 20.0 * log10(g) : 0;
+}
+
 /* The render's side: the newest parameters, a reset asked for, the rate; whether the chain is in the way. */
 static int dsp_prepare(NagAudio *e)
 {
@@ -1170,15 +1208,44 @@ static inline void silence(NagAudio *e, void *out, int frames)
     memset(out, 0, (size_t)frames * e->out.channels * nag_format_bytes_per_sample(e->out.sample_format));
 }
 
+#define AB_WINDOW_SECONDS 10
+
+static double block_energy(const double *frames, int samples)
+{
+    double sum = 0;
+    for (int i = 0; i < samples; i++)
+        sum += frames[i] * frames[i];
+    return sum;
+}
+
 /* The mix buffer's [n_frames] through balance and mono, the DSP chain when it is in the way, then into [out]. */
 static void finish_block(NagAudio *e, void *out, int n_frames, double volume, int dither, int dsp_on)
 {
+    const int samples = n_frames * e->out.channels;
     if (balance_mono(e, e->mix, n_frames) && e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64)
         dither = 1;
-    if (dsp_on) {
+    if (dsp_on && atomic_load(&e->ab_side) == 1) {
+        /* S-912: side B, the chain bypassed at the chain's level */
+        const double gain = atomic_load(&e->ab_gain);
+        if (gain != 1.0)
+            for (int i = 0; i < samples; i++)
+                e->mix[i] *= gain;
+    } else if (dsp_on) {
+        double in = block_energy(e->mix, samples);
         NagDspBlockMeter m;
         nag_dsp_process(&e->dsp, e->mix, n_frames, &m);
         meter_add(e, &m, n_frames);
+        double out_energy = block_energy(e->mix, samples);
+        /* the window: everything halves every AB_WINDOW seconds, so the last stretch weighs most */
+        double ein = atomic_load(&e->ab_energy_in) + in, eout = atomic_load(&e->ab_energy_out) + out_energy;
+        e->ab_frames += n_frames;
+        if (e->ab_frames >= (int64_t)AB_WINDOW_SECONDS * e->out.rate) {
+            ein *= 0.5;
+            eout *= 0.5;
+            e->ab_frames /= 2;
+        }
+        atomic_store(&e->ab_energy_in, ein);
+        atomic_store(&e->ab_energy_out, eout);
     }
     convert(e, e->mix, out, n_frames, volume, dither);
 }
@@ -1574,7 +1641,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
             str_add(&j, "}");
         }
     }
-    str_add(&j, "],\"dsp_active\":%s,\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}", atomic_load(&e->dsp_identity) ? "false" : "true",
+    str_add(&j, "],\"dsp_active\":%s,\"dsp_level_db\":%.2f,\"ab_side\":\"%s\",\"ab_gain_db\":%.2f,\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}",
+            atomic_load(&e->dsp_identity) ? "false" : "true", nag_audio_dsp_level_db(e), atomic_load(&e->ab_side) ? "B" : "A", nag_audio_ab_gain_db(e),
             bit_perfect ? "true" : "false", why);
     pthread_mutex_unlock(&e->lock);
     return j.s;

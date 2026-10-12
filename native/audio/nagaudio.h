@@ -308,6 +308,20 @@ typedef struct NagDspMeter {
 /** The clip meter (S-906); with [reset], the counts start over after the read. */
 void nag_audio_dsp_meter(NagAudio *engine, NagDspMeter *meter, int reset);
 
+/*
+ * S-912: the A/B listening test. The engine keeps the energy of what goes into the chain and
+ * what comes out, over the last stretch of playing (a window of about ten seconds), so the
+ * chain's level change is known: nag_audio_dsp_level_db. Side B plays the chain bypassed
+ * with that change applied as a gain instead, so both sides are as loud (within 0.1 dB once
+ * the window holds a few seconds); the blind part (which side is which) is the owner's.
+ */
+double nag_audio_dsp_level_db(NagAudio *engine);
+/** 0: side A (the chain as set); 1: side B (bypassed, level matched). */
+void nag_audio_set_ab_side(NagAudio *engine, int side);
+int nag_audio_ab_side(NagAudio *engine);
+/** The gain side B applies, in dB (frozen when B was chosen). */
+double nag_audio_ab_gain_db(NagAudio *engine);
+
 /* --------------------------------------------------------------- ReplayGain */
 
 /* S-907: the gain the tags ask for, applied per track before the DSP chain. */

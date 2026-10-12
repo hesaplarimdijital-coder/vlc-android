@@ -19,6 +19,10 @@
 #     0x05/0xFA markers, the same from both
 #   - the formats (S-911): WavPack, TTA, ALAC, WMA, Vorbis, AIFF, WAV float, CAF and Matroska
 #     audio, each what ffmpeg decodes (the engine's own FFmpeg build must carry them)
+#   - the A/B test (S-912): the chain's level change measured within 0.1 dB of the model's
+#     response, side B bypassed at that level, exactly
+#   - the null test (S-1405): null_test.py finds a capture's lead-in and reports no difference
+#     for a true capture, the one differing sample for a broken one
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -377,6 +381,53 @@ check "16-bit file widened to s32" "s32 $(ffmpeg -v error -i flac16.flac -f s32l
 check "16-bit file as s24" "s24 $(ffmpeg -v error -i flac16.flac -f s24le - | md5_of)" "$(chosen_md5 flac16.flac --min-format s24 --max-format s24)"
 check "24-bit file capped at s24" "s24 $(ffmpeg -v error -i flac24.flac -f s24le - | md5_of)" "$(chosen_md5 flac24.flac --max-format s24)"
 check "24-bit file capped at s16, dithered" "s16" "$(chosen_md5 flac24.flac --max-format s16 | cut -d" " -f1)"
+
+echo "== S-912: A/B level match"
+# a preamp of 6 dB: the level change is 6.00 dB and side B is the file at 6 dB, the first half the chain's
+"$NAGAUDIO" decode flac16.flac -f f64 -o ab_b.raw --preamp 6 --ab-after 88200 > ab.json
+"$NAGAUDIO" decode flac16.flac -f f64 -o ab_a.raw --preamp 6 > /dev/null
+check "chain level +6.00 dB" "6.0000 6.0000" "$(json '"%.4f %.4f" % (d["dsp_level_db"], d["ab_gain_db"])' < ab.json)"
+python3 - <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+def load(path):
+    data = open(path, "rb").read()
+    return struct.unpack("<%dd" % (len(data) // 8), data)
+a, b, plain = load("ab_a.raw"), load("ab_b.raw"), load("plain.raw")
+half = 88200 * 2
+gain = 10 ** (6.0 / 20)
+first = a[:half] == b[:half]
+worst = max(abs(b[i] - plain[i] * gain) for i in range(half, len(plain)))
+ok = first and worst < 1e-12
+print("%s side A the chain, side B the file at the chain's level, worst error %.1e" % ("ok  " if ok else "FAIL", worst))
+sys.exit(0 if ok else 1)
+PY
+# a 1 kHz boost on the 997 Hz sine: the level change equals the model's response there
+"$NAGAUDIO" decode sine23.flac -f f64 -o ab_eq.raw --peq "pk:1000:6:1" > ab_eq.json
+python3 - "$(json 'd["dsp_level_db"]' < ab_eq.json)" "$(python3 "$MODEL" --response 48000 997 --peq "pk:1000:6:1")" <<'PY' || failures=$((failures + 1))
+import sys
+measured, expected = float(sys.argv[1]), float(sys.argv[2])
+ok = abs(measured - expected) < 0.1
+print("%s chain level on the sine %.2f dB, the model's response %.2f dB" % ("ok  " if ok else "FAIL", measured, expected))
+sys.exit(0 if ok else 1)
+PY
+
+echo "== S-1405: null test"
+"$NAGAUDIO" decode flac24.flac -f s24 -o ref24.raw > /dev/null
+python3 - <<'PY'
+import random
+ref = open("ref24.raw", "rb").read()
+random.seed(1)
+lead = bytearray()
+for i in range(1234 * 2):
+    v = random.randint(-3, 3) & 0xFFFFFF
+    lead += bytes((v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF))
+open("cap_ok.raw", "wb").write(bytes(lead) + ref + bytes(6 * 500))
+bad = bytearray(bytes(lead) + ref)
+bad[len(lead) + 6 * 100000] ^= 1
+open("cap_bad.raw", "wb").write(bytes(bad))
+PY
+check "null test on a true capture" "1234 0 True" "$(python3 "$HERE/null_test.py" ref24.raw cap_ok.raw --format s24 --rate 96000 | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["offset_frames"], d["samples_differing"], d["bit_perfect"])')"
+check "null test on a broken capture" "1 1 100000" "$(python3 "$HERE/null_test.py" ref24.raw cap_bad.raw --format s24 --rate 96000 | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["samples_differing"], d["largest_difference_lsb"], d["first_difference_frame"])' || true)"
 
 echo "== S-911: formats"
 for spec in "wv:-c:a wavpack" "tta:-c:a tta" "m4a:-c:a alac" "aiff:-c:a pcm_s24be" "wav:-c:a pcm_f32le" "caf:-c:a pcm_s24le" "mka:-c:a flac" "oga:-c:a libvorbis -q:a 5"; do

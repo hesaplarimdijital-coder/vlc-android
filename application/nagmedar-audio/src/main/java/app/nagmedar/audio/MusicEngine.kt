@@ -77,6 +77,9 @@ data class SourceInfo(
     }
 }
 
+/** S-912: the A/B test's sides. */
+enum class AbSide { A, B }
+
 /** S-908: how a DSD file plays, as NagDsdMode: decoded to PCM, or as DoP words for a DAC that takes them on a bit-perfect output. */
 enum class DsdMode { Pcm, Dop }
 
@@ -273,6 +276,22 @@ class MusicEngine(
         val m = NativeAudio.dspMeter(handle, reset)
         return DspMeter(m[0].toLong(), m[1].toLong(), m[2], m[3])
     }
+
+    /** S-912: the chain's level change over the last stretch of playing, dB. */
+    val dspLevelDb: Double get() = if (available) NativeAudio.dspLevelDb(handle) else 0.0
+
+    /** S-912: the A/B test's side: A the chain as set, B bypassed at the chain's level. */
+    var abSide: AbSide
+        get() = if (available && NativeAudio.abSide(handle) == 1) AbSide.B else AbSide.A
+        set(value) {
+            if (available) NativeAudio.setAbSide(handle, value.ordinal)
+        }
+
+    /** S-912: side B's gain in dB, frozen when B was chosen. */
+    val abGainDb: Double get() = if (available) NativeAudio.abGainDb(handle) else 0.0
+
+    /** S-910: the signal path as a model. */
+    val signalPathModel: SignalPath? get() = SignalPath.parse(signalPath())
 
     /** S-907: ReplayGain, applied per track from its tags; the tracks loaded take it at once. */
     var replayGain: ReplayGainSettings = ReplayGainSettings()

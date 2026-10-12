@@ -191,4 +191,15 @@ object NativeAudio {
 
     /** Why the USB sink's last open failed. */
     @JvmStatic external fun usbError(handle: Long): String
+
+    /** S-912: the chain's level change over the last stretch, dB. */
+    @JvmStatic external fun dspLevelDb(handle: Long): Double
+
+    /** S-912: 0 side A (the chain), 1 side B (bypassed at the chain's level). */
+    @JvmStatic external fun setAbSide(handle: Long, side: Int)
+
+    @JvmStatic external fun abSide(handle: Long): Int
+
+    /** S-912: side B's gain, dB, as frozen when B was chosen. */
+    @JvmStatic external fun abGainDb(handle: Long): Double
 }
