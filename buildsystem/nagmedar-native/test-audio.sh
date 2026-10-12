@@ -17,6 +17,8 @@
 #   - DSD (S-908): a modulated sine as DSF and DFF (dsd_gen.py) decodes to PCM as ffmpeg does,
 #     the same from both containers, at its level; as DoP the words carry the file's bits under
 #     the 0x05/0xFA markers, the same from both
+#   - the formats (S-911): WavPack, TTA, ALAC, WMA, Vorbis, AIFF, WAV float, CAF and Matroska
+#     audio, each what ffmpeg decodes (the engine's own FFmpeg build must carry them)
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -367,6 +369,17 @@ ok = markers_ok and same
 print("%s dop: %d frames, markers alternate %s, the file's bits %s" % ("ok  " if ok else "FAIL", len(words) // 2, markers_ok, same))
 sys.exit(0 if ok else 1)
 PY
+
+echo "== S-911: formats"
+for spec in "wv:-c:a wavpack" "tta:-c:a tta" "m4a:-c:a alac" "aiff:-c:a pcm_s24be" "wav:-c:a pcm_f32le" "caf:-c:a pcm_s24le" "mka:-c:a flac" "oga:-c:a libvorbis -q:a 5"; do
+    ext=${spec%%:*}
+    codec=${spec#*:}
+    # shellcheck disable=SC2086
+    ffmpeg -v error -y -i flac24.flac $codec "fmt.$ext"
+    check "$ext decodes as ffmpeg" "$(ffmpeg -v error -i "fmt.$ext" -f f32le - | md5_of)" "$(engine_md5 f32 "fmt.$ext")"
+done
+ffmpeg -v error -y -i flac16.flac -c:a wmav2 -b:a 128k fmt.wma
+check "wma decodes as ffmpeg" "$(ffmpeg -v error -i fmt.wma -f f32le - | md5_of)" "$(engine_md5 f32 fmt.wma)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

@@ -52,8 +52,8 @@ FFMPEG_COMPONENTS=(
     --enable-avformat --enable-avcodec --enable-swresample
     --enable-protocol=file,pipe,fd
     --enable-demuxer=matroska,mov,hevc,mpegts,mp3,flac,ogg,wav,aac,ac3,eac3,dts,dtshd,truehd,w64,aiff,ape,wv
-    # the music engine's formats (S-901, S-908, S-911): Musepack, TTA, DSD, WMA
-    --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf
+    # the music engine's formats (S-901, S-908, S-911): Musepack, TTA, DSD, WMA, CAF
+    --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf,caf
     --enable-muxer=matroska,mp4,mov,null
     --enable-parser=hevc,h264,aac,ac3,mpegaudio,flac,opus,vorbis,dca,mlp
     --enable-bsf=hevc_mp4toannexb,extract_extradata
