@@ -192,6 +192,41 @@ if problems:
 print('ok: media probe (Dolby Vision 7 MEL / 8.1, HDR10, HLG, HDR10+, audio, subtitles, errors)')
 PY
 
+echo "== S-1202: bitrate analysis"
+# the 2-second SDR file: every byte of its packets lands in one of its seconds; the first second alone when asked
+"$PREFIX/bin/bitrate" "$T/sdr.mkv" > "$T/bitrate-sdr.json" 2> /dev/null
+"$PREFIX/bin/bitrate" "$T/sdr.mkv" 1 > "$T/bitrate-sdr-1s.json" 2> /dev/null
+"$PREFIX/bin/bitrate" "$T/missing.mkv" > "$T/bitrate-missing.json" 2> /dev/null
+python3 - "$T" <<'PY'
+import json, os, sys
+t = sys.argv[1]
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+b = json.load(open(f'{t}/bitrate-sdr.json'))
+check(not b['error'] and b['complete'] and b['version'] == 1, f'sdr {b.get("error")} {b.get("complete")}')
+n = b['seconds']
+check(2 <= n <= 3 and len(b['total']) == n and len(b['video']) == n, f'seconds {n} {len(b["total"])} {len(b["video"])}')
+packets = sum(s['bytes'] for s in b['streams'])
+# a second's kilobits are rounded: within 63 bytes a second of the packets' bytes
+check(abs(sum(b['total']) * 125 - packets) <= 63 * n, f'total {sum(b["total"]) * 125} vs packets {packets}')
+check(0 < packets <= os.path.getsize(f'{t}/sdr.mkv'), f'packets {packets} size {os.path.getsize(f"{t}/sdr.mkv")}')
+check(b['peak_1s_kbps'] == max(b['total']) and abs(b['peak_5s_kbps'] - sum(b['total']) / n) <= 1, f'peaks {b["peak_1s_kbps"]} {b["peak_5s_kbps"]} {b["total"]}')
+check(b['video_peak_1s_kbps'] == max(b['video']) and 0 < b['video_average_kbps'] <= b['average_kbps'], f'video {b["video"]} {b["video_average_kbps"]} {b["average_kbps"]}')
+types = [s['type'] for s in b['streams']]
+check(types[:5] == ['video', 'audio', 'audio', 'audio', 'audio'] and types.count('subtitle') == 2, f'streams {types}')
+check(b['streams'][0]['codec'] == 'h264' and abs(b['streams'][0]['bytes'] - sum(b['video']) * 125) <= 63 * n, f'video stream {b["streams"][0]}')
+one = json.load(open(f'{t}/bitrate-sdr-1s.json'))
+check(one['seconds'] == 1 and one['total'] == b['total'][:1] and one['video'] == b['video'][:1], f'one second {one["total"]} {one["video"]} vs {b["total"]} {b["video"]}')
+missing = json.load(open(f'{t}/bitrate-missing.json'))
+check(missing['error'].startswith('open:'), f'missing {missing}')
+if problems:
+    print('::error title=S-1202 bitrate::' + '; '.join(problems))
+    sys.exit(1)
+print('ok: bitrate analysis (seconds, peaks, streams, the first second alone, errors)')
+PY
+
 echo "== SP-05: whisper pipeline smoke test"
 ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 -c:a libmp3lame "$T/tone.mp3" 2> /dev/null || ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 "$T/tone.wav"
 input=$(ls "$T"/tone.* | head -1)

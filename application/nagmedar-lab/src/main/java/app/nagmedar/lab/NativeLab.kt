@@ -35,4 +35,11 @@ object NativeLab {
 
     /** S-802: streams, HDR and Dolby Vision of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
     @JvmStatic external fun probe(input: String): String
+
+    /**
+     * S-1202: the bitrate of [input] second by second, from its packets, the first [maxSeconds]
+     * of it (0 for all); see [BitrateAnalysis]. Reads the whole file: slow on a big one, with
+     * [listener] told how far it is; [cancel] stops it.
+     */
+    @JvmStatic external fun bitrate(input: String, maxSeconds: Double, listener: Progress?): String
 }

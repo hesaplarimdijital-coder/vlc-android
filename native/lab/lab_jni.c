@@ -9,6 +9,7 @@
 #include <libavutil/ffversion.h>
 #include <libusb.h>
 
+#include "bitrate.h"
 #include "dvconvert.h"
 #include "mediaprobe.h"
 #include "usb_audio.h"
@@ -91,6 +92,14 @@ static void whisper_progress(void *opaque, double fraction, const char *stage)
     report(opaque, fraction, stage);
 }
 
+static int bitrate_progress_cb(void *opaque, double fraction)
+{
+    char msg[64];
+    snprintf(msg, sizeof(msg), "%.0f %%", fraction * 100);
+    report(opaque, fraction, msg);
+    return g_cancel;
+}
+
 static void usb_progress(void *opaque, double fraction, int64_t frames, int64_t errors)
 {
     char msg[96];
@@ -169,6 +178,18 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_probe(JNIEnv *env, jcl
     const char *in = (*env)->GetStringUTFChars(env, input, NULL);
     /* the library probes in the background: Lab's cancel button is not for it */
     jstring result = take(env, media_probe(in, NULL));
+    (*env)->ReleaseStringUTFChars(env, input, in);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_bitrate(JNIEnv *env, jclass cls, jstring input, jdouble max_seconds,
+                                                                  jobject listener)
+{
+    (void)cls;
+    g_cancel = 0;
+    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
+    Callback cb = callback(env, listener);
+    jstring result = take(env, media_bitrate(in, max_seconds, listener ? bitrate_progress_cb : NULL, &cb, &g_cancel));
     (*env)->ReleaseStringUTFChars(env, input, in);
     return result;
 }

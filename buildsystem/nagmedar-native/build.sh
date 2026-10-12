@@ -124,6 +124,11 @@ host() {
         "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
         > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
+    log "bitrate (host)"
+    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/bitrate" -I"$PREFIX/include" \
+        "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" \
+        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
+        > "$WORK/bitrate.log" 2>&1 || fail_log "bitrate (host)" "$WORK/bitrate.log"
 }
 
 android() {
