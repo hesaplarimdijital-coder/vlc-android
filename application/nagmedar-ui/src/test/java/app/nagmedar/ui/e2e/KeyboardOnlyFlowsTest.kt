@@ -40,6 +40,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.robolectric.shadows.ShadowDialog
 
 /**
  * S-1403: the main flows of a DeX window with the keyboard alone, through the window's own keys:
@@ -73,8 +74,21 @@ class KeyboardOnlyFlowsTest {
 
     /** Keys to the window on top: a menu or a dialog when one is open. */
     private fun keys(block: KeyInjectionScope.() -> Unit) {
+        compose.runOnIdle { dialogsOutOfTouchMode() }
         compose.onAllNodes(isRoot()).onLast().performKeyInput(block)
         compose.waitForIdle()
+    }
+
+    /**
+     * A hardware key takes the whole screen out of touch mode, so a dialog opened after it has
+     * the keyboard from the start (its buttons and chips take the focus); the injected keys do
+     * not, so the dialogs leave touch mode here, as the main window did in [show].
+     */
+    private fun dialogsOutOfTouchMode() {
+        ShadowDialog.getShownDialogs().filter { it.isShowing }.forEach { dialog ->
+            val view = dialog.currentFocus ?: dialog.window?.decorView ?: return@forEach
+            if (view.isInTouchMode) view.requestFocusFromTouch()
+        }
     }
 
     private fun texts(node: SemanticsNode): List<String> =
