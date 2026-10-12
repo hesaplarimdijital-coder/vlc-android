@@ -26,6 +26,7 @@
 #     B delayed as the chain delays, the switch crossfaded
 #   - the null test (S-1405): null_test.py finds a capture's lead-in and reports no difference
 #     for a true capture, the one differing sample for a broken one
+#   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -509,6 +510,28 @@ ok = w["filled"] == points and worst < 1e-6
 print("%s waveform of %d buckets, worst error %.1e" % ("ok  " if ok else "FAIL", points, worst))
 sys.exit(0 if ok else 1)
 PY
+
+echo "== S-1003: embedded lyrics"
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a flac -metadata LYRICS='[00:01.00]Birinci satır
+[00:01.50]İkinci "satır"' lyrics.flac
+check "flac LYRICS, escaped" '{"plain":"[00:01.00]Birinci satır\n[00:01.50]İkinci \"satır\""}' "$("$NAGAUDIO" lyrics lyrics.flac)"
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a libmp3lame lyrics.mp3
+python3 - <<'PY'
+from mutagen.id3 import ID3, SYLT, USLT, Encoding
+tags = ID3()
+tags.add(USLT(encoding=Encoding.UTF8, lang="tur", desc="", text="Düz söz\nikinci"))
+tags.add(SYLT(encoding=Encoding.UTF8, lang="tur", format=2, type=1, text=[("Gece", 0), ("Yolcusu", 1200), ("şarkı", 1800)]))
+tags.save("lyrics.mp3")
+PY
+check "mp3 USLT and SYLT" '{"plain":"Düz söz\nikinci","synced":[[0,"Gece"],[1200,"Yolcusu"],[1800,"şarkı"]]}' "$("$NAGAUDIO" lyrics lyrics.mp3)"
+# ffmpeg writes "lyrics" to ID3v2 as a TXXX called USLT
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a libmp3lame -metadata lyrics="ffmpeg'in sözü" lyrics_txxx.mp3
+check "mp3 TXXX:USLT" '{"plain":"ffmpeg'"'"'in sözü"}' "$("$NAGAUDIO" lyrics lyrics_txxx.mp3)"
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a aac -metadata lyrics="MP4 sözü" lyrics.m4a
+check "m4a ©lyr" '{"plain":"MP4 sözü"}' "$("$NAGAUDIO" lyrics lyrics.m4a)"
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=48000:d=1" -c:a libopus -metadata LYRICS="Opus sözü" lyrics.opus
+check "opus LYRICS" '{"plain":"Opus sözü"}' "$("$NAGAUDIO" lyrics lyrics.opus)"
+check "no lyrics" '{}' "$("$NAGAUDIO" lyrics flac16.flac)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

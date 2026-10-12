@@ -26,6 +26,7 @@ Sözlüğü testler denetler:
 | sezon | season | | | |
 | parça | track | şarkı | song | Müzikte tek öğe; arama kutusunda da “parça” |
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
+| zamanlı söz, düz söz | synced lyrics, plain lyrics | senkron söz | | Satırları LRC ya da SYLT ile zamanlanmış söz çalarken izlenir; düz söz zamansızdır. Sırayla dosyanın etiketlerinden, yanındaki .lrc dosyasından, LRCLIB'den (Ayarlar › Sözler) |
 | sanatçı | artist | | | |
 | albüm | album | | | |
 | çalma listesi | playlist | oynatma listesi, oynatma listeleri | | Kısa yerlerde “liste”: “Yeni liste”, “Listeye ekle…”, “Listeden kaldır” |

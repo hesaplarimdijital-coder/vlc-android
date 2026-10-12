@@ -1613,4 +1613,17 @@
     <string name="nag_smart_t_recently_added">Son eklenenler</string>
     <string name="nag_smart_t_hi_res">Yüksek çözünürlük</string>
     <string name="nag_smart_t_forgotten">Unutulan sevilenler</string>
+    <!-- S-1003: where lyrics come from -->
+    <string name="nag_lyrics_settings">Sözler</string>
+    <string name="nag_lyrics_online">Çevrimiçi sözler (LRCLIB)</string>
+    <string name="nag_lyrics_online_hint">Dosyada da yanındaki .lrc dosyasında da zamanlı söz yoksa parçanın adı, sanatçısı, albümü ve süresi lrclib.net\'e gönderilir. Bulunanlar çevrimdışı kullanım için saklanır.</string>
+    <string name="nag_lyrics_online_on">Açık</string>
+    <string name="nag_lyrics_online_off">Kapalı</string>
+    <string name="nag_lyrics_kept">Çevrimdışı için saklananlar</string>
+    <string name="nag_lyrics_kept_none">Henüz yok</string>
+    <plurals name="nag_lyrics_kept_count">
+        <item quantity="one">%d parçanın sözleri</item>
+        <item quantity="other">%d parçanın sözleri</item>
+    </plurals>
+    <string name="nag_lyrics_clear">Temizle</string>
 </resources>

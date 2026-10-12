@@ -89,8 +89,13 @@ class NagmedarDatabaseTest {
         val entries = lyrics.forTrack(key)
         assertEquals(LyricsSource.LRCLIB, entries.first().source)
         assertEquals(350L, entries.first().offsetMs)
-        assertEquals(1, lyrics.pruneDownloaded(before = 15))
+        // S-1003: what was found counts, a miss does not; an instrumental's word does
+        lyrics.save(LyricsEntry("x|miss||200", LyricsSource.LRCLIB, synced = false, text = "", fetchedAt = 12))
+        lyrics.save(LyricsEntry("x|instrumental||200", LyricsSource.LRCLIB, synced = false, text = "", language = "zxx", fetchedAt = 30))
+        assertEquals(2, lyrics.countDownloaded())
+        assertEquals(2, lyrics.pruneDownloaded(before = 15))
         assertEquals(listOf(LyricsSource.FILE), lyrics.forTrack(key).map { it.source })
+        assertEquals(1, lyrics.countDownloaded())
     }
 
     @Test

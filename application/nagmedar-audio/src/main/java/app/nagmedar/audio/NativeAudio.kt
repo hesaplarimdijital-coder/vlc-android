@@ -157,6 +157,13 @@ object NativeAudio {
     /** Writes the ReplayGain tags into the file behind [fd] (read-write; [name] helps the type detection); NaN leaves a tag alone. 0, or negative. */
     @JvmStatic external fun writeReplayGain(fd: Int, name: String, trackGain: Double, trackPeak: Double, albumGain: Double, albumPeak: Double, trackLufs: Double, albumLufs: Double): Int
 
+    /**
+     * S-1003: the lyrics in the tags of the file behind [fd] (read; [name] helps the type
+     * detection), JSON: {"plain": "...", "synced": [[ms, "line"], ...]} (TagLyrics.parse); null
+     * when it has none or cannot be read.
+     */
+    @JvmStatic external fun readLyrics(fd: Int, name: String): String?
+
     /** The file as the engine reads it, with its ReplayGain tags, JSON (SourceInfo.parse); "{}" when it cannot be opened. */
     @JvmStatic external fun probe(path: String): String
 

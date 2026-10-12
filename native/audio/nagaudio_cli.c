@@ -468,6 +468,21 @@ static int decode(int argc, char **argv)
     return seen.errors ? 1 : 0;
 }
 
+/* S-1003: the file's lyrics as JSON; "{}" when it has none */
+static int lyrics(const char *file)
+{
+    FILE *f = fopen(file, "rb");
+    if (!f) {
+        perror(file);
+        return 1;
+    }
+    char *json = nag_tags_read_lyrics(fileno(f), file);
+    fclose(f);
+    printf("%s\n", json ? json : "{}");
+    free(json);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 3 && strcmp(argv[1], "info") == 0)
@@ -480,10 +495,12 @@ int main(int argc, char **argv)
         return tag(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "wave") == 0)
         return wave(argc - 2, argv + 2);
+    if (argc >= 3 && strcmp(argv[1], "lyrics") == 0)
+        return lyrics(argv[2]);
     if (argc >= 2 && strcmp(argv[1], "version") == 0) {
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | version\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | version\n");
     return 2;
 }

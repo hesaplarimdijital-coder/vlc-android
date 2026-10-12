@@ -435,6 +435,13 @@ typedef struct NagReplayGainTags {
  */
 int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags *tags, char *error, size_t error_size);
 
+/**
+ * S-1003: the lyrics of the file behind [fd] (read; [name] with its extension helps the type
+ * detection) as JSON, {"plain": "...", "synced": [[ms, "line"], ...]}, either part missing; NULL
+ * when it has none. The descriptor stays the caller's; the caller frees the text.
+ */
+char *nag_tags_read_lyrics(int fd, const char *name);
+
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 

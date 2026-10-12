@@ -503,6 +503,21 @@ JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_writeReplayGain(JNIEn
     return ret;
 }
 
+/* S-1003: the file's lyrics as JSON; null when it has none. The descriptor stays the caller's. */
+JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_readLyrics(JNIEnv *env, jclass cls, jint fd, jstring name)
+{
+    (void)cls;
+    const char *utf = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    char *json = nag_tags_read_lyrics(fd, utf);
+    if (utf)
+        (*env)->ReleaseStringUTFChars(env, name, utf);
+    if (!json)
+        return NULL;
+    jstring result = utf8(env, json);
+    free(json);
+    return result;
+}
+
 /* The file as the source reads it, with its ReplayGain tags, JSON; "{}" when it cannot be opened. */
 JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env, jclass cls, jstring path)
 {

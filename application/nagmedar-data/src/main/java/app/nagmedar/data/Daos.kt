@@ -101,6 +101,10 @@ interface LyricsDao {
     /** Drops downloaded lyrics older than [before]; user edits and local files stay. */
     @Query("DELETE FROM lyrics_cache WHERE fetched_at < :before AND source = 'lrclib'")
     fun pruneDownloaded(before: Long): Int
+
+    /** S-1003: how many tracks' downloaded lyrics are kept: found ones (an instrumental's word too), not the misses. */
+    @Query("SELECT COUNT(*) FROM lyrics_cache WHERE source = 'lrclib' AND (text != '' OR language IS NOT NULL)")
+    fun countDownloaded(): Int
 }
 
 @Dao

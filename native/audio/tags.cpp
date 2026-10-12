@@ -10,14 +10,20 @@
  */
 #include "nagaudio.h"
 
+#include <taglib/aifffile.h>
 #include <taglib/fileref.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/mpegfile.h>
+#include <taglib/synchronizedlyricsframe.h>
 #include <taglib/tiostream.h>
 #include <taglib/tpropertymap.h>
 #include <taglib/tstring.h>
+#include <taglib/wavfile.h>
 
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <unistd.h>
 
 namespace {
@@ -176,7 +182,109 @@ TagLib::String r128(double lufs)
     return TagLib::String(text);
 }
 
+/* JSON's string: quotes, backslashes and control characters escaped, UTF-8 as it is */
+std::string quoted(const std::string &text)
+{
+    std::string out = "\"";
+    for (unsigned char c : text) {
+        switch (c) {
+        case '"': out += "\\\""; break;
+        case '\\': out += "\\\\"; break;
+        case '\n': out += "\\n"; break;
+        case '\r': out += "\\r"; break;
+        case '\t': out += "\\t"; break;
+        default:
+            if (c < 0x20) {
+                char escape[8];
+                snprintf(escape, sizeof escape, "\\u%04x", c);
+                out += escape;
+            } else {
+                out += static_cast<char>(c);
+            }
+        }
+    }
+    out += '"';
+    return out;
+}
+
+/* the ID3v2 tag of the formats that keep one: MP3, AIFF, WAV */
+TagLib::ID3v2::Tag *id3v2(TagLib::File *file)
+{
+    if (auto *mpeg = dynamic_cast<TagLib::MPEG::File *>(file))
+        return mpeg->hasID3v2Tag() ? mpeg->ID3v2Tag() : nullptr;
+    if (auto *aiff = dynamic_cast<TagLib::RIFF::AIFF::File *>(file))
+        return aiff->hasID3v2Tag() ? aiff->tag() : nullptr;
+    if (auto *wav = dynamic_cast<TagLib::RIFF::WAV::File *>(file))
+        return wav->hasID3v2Tag() ? wav->ID3v2Tag() : nullptr;
+    return nullptr;
+}
+
 } // namespace
+
+/*
+ * S-1003: the lyrics a file carries, as JSON: {"plain": "...", "synced": [[ms, "line"], ...]},
+ * either missing when the file has none. Plain: ID3v2's USLT, the Vorbis comments' LYRICS (or
+ * UNSYNCEDLYRICS), MP4's ©lyr, APE's Lyrics, all through TagLib's property map; their text may
+ * itself be LRC, which the app reads. Synced: ID3v2's SYLT in milliseconds. Null when the file
+ * cannot be read or has no lyrics; the caller frees the text.
+ */
+extern "C" char *nag_tags_read_lyrics(int fd, const char *name)
+{
+    if (fd < 0)
+        return nullptr;
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull())
+        return nullptr;
+    std::string plain;
+    const TagLib::PropertyMap properties = file.properties();
+    /* "USLT": a TXXX by that name, as ffmpeg writes "lyrics" to ID3v2 */
+    for (const char *key : {"LYRICS", "UNSYNCEDLYRICS", "UNSYNCED LYRICS", "USLT"}) {
+        auto found = properties.find(key);
+        if (found != properties.end() && !found->second.isEmpty()) {
+            plain = found->second.front().to8Bit(true);
+            break;
+        }
+    }
+    if (plain.empty()) {
+        /* a USLT with a description: "LYRICS:<description>" */
+        for (const auto &entry : properties) {
+            if (entry.first.startsWith("LYRICS") && !entry.second.isEmpty()) {
+                plain = entry.second.front().to8Bit(true);
+                break;
+            }
+        }
+    }
+    std::string synced;
+    if (TagLib::ID3v2::Tag *tag = id3v2(file.file())) {
+        for (TagLib::ID3v2::Frame *frame : tag->frameList("SYLT")) {
+            auto *sylt = dynamic_cast<TagLib::ID3v2::SynchronizedLyricsFrame *>(frame);
+            if (!sylt || sylt->timestampFormat() != TagLib::ID3v2::SynchronizedLyricsFrame::AbsoluteMilliseconds)
+                continue;
+            const auto lines = sylt->synchedText();
+            if (lines.isEmpty())
+                continue;
+            for (const auto &line : lines) {
+                if (!synced.empty())
+                    synced += ',';
+                synced += '[' + std::to_string(line.time) + ',' + quoted(line.text.to8Bit(true)) + ']';
+            }
+            break;
+        }
+    }
+    if (plain.empty() && synced.empty())
+        return nullptr;
+    std::string out = "{";
+    if (!plain.empty())
+        out += "\"plain\":" + quoted(plain);
+    if (!synced.empty()) {
+        if (!plain.empty())
+            out += ',';
+        out += "\"synced\":[" + synced + ']';
+    }
+    out += '}';
+    return strdup(out.c_str());
+}
 
 extern "C" int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags *tags, char *error, size_t error_size)
 {

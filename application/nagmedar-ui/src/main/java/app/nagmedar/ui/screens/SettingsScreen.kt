@@ -46,6 +46,7 @@ import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.lab.LabSection
+import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
 import app.nagmedar.ui.player.snapshot.HdrSnapshot
 import app.nagmedar.ui.player.snapshot.SnapshotFormat
@@ -100,6 +101,8 @@ fun SettingsScreen(
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
         // S-1007: waking to music
         item { AlarmSection() }
+        // S-1003: where lyrics come from
+        item { LyricsSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {

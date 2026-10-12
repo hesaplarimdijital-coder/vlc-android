@@ -1641,4 +1641,17 @@
     <string name="nag_smart_t_recently_added">Recently added</string>
     <string name="nag_smart_t_hi_res">Hi-res</string>
     <string name="nag_smart_t_forgotten">Forgotten favourites</string>
+    <!-- S-1003: where lyrics come from -->
+    <string name="nag_lyrics_settings">Lyrics</string>
+    <string name="nag_lyrics_online">Online lyrics (LRCLIB)</string>
+    <string name="nag_lyrics_online_hint">When neither the file nor an .lrc file beside it has synced lyrics, the track\'s title, artist, album and length are sent to lrclib.net. What is found is kept for offline use.</string>
+    <string name="nag_lyrics_online_on">On</string>
+    <string name="nag_lyrics_online_off">Off</string>
+    <string name="nag_lyrics_kept">Kept for offline use</string>
+    <string name="nag_lyrics_kept_none">None yet</string>
+    <plurals name="nag_lyrics_kept_count">
+        <item quantity="one">The lyrics of %d track</item>
+        <item quantity="other">The lyrics of %d tracks</item>
+    </plurals>
+    <string name="nag_lyrics_clear">Clear</string>
 </resources>
