@@ -12,5 +12,6 @@ fun MediaWrapper.toEngineMedia(): EngineMedia {
         uri = uri?.toString() ?: location ?: "",
         isAudio = type == MediaWrapper.TYPE_AUDIO,
         isLocal = uri?.scheme in LOCAL_SCHEMES || location?.startsWith("/") == true,
+        mimeType = null,
     )
 }

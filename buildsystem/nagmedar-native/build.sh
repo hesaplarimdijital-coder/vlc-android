@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper).
+# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper)
+# and the music engine (S-901, native/audio).
 #
-#   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert and
-#                              mediaprobe commands (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb for arm64-v8a and
-#                              libnagmedar_lab.so into application/nagmedar-lab (needs ANDROID_NDK)
+#   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert,
+#                              mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb for arm64-v8a;
+#                              libnagmedar_lab.so into application/nagmedar-lab and
+#                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
 #
 # Sources are cloned at the versions in versions.env into $NAGMEDAR_NATIVE_WORK
 # (default native/.work). Nothing here is needed for a build without the lab tools:
-# the app loads the library on demand and says so when it is missing.
+# the app loads the libraries on demand and says so when they are missing.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -50,11 +52,15 @@ FFMPEG_COMPONENTS=(
     --enable-avformat --enable-avcodec --enable-swresample
     --enable-protocol=file,pipe,fd
     --enable-demuxer=matroska,mov,hevc,mpegts,mp3,flac,ogg,wav,aac,ac3,eac3,dts,dtshd,truehd,w64,aiff,ape,wv
+    # the music engine's formats (S-901, S-908, S-911): Musepack, TTA, DSD, WMA
+    --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf
     --enable-muxer=matroska,mp4,mov,null
     --enable-parser=hevc,h264,aac,ac3,mpegaudio,flac,opus,vorbis,dca,mlp
     --enable-bsf=hevc_mp4toannexb,extract_extradata
     --enable-decoder=aac,aac_latm,ac3,eac3,mp3,mp3float,mp2,flac,opus,vorbis,dca,truehd,mlp,alac,ape,wavpack
     --enable-decoder=pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be,pcm_s32le,pcm_f32le,pcm_bluray,pcm_dvd
+    --enable-decoder=mpc7,mpc8,tta,wmav1,wmav2,wmapro,wmalossless,pcm_u8,pcm_s8,pcm_f64le,pcm_s24le_planar,pcm_s32le_planar
+    --enable-decoder=dsd_lsbf,dsd_msbf,dsd_lsbf_planar,dsd_msbf_planar
 )
 
 build_ffmpeg() { # extra configure args...
@@ -108,11 +114,22 @@ build_lab() { # extra cmake args...
     grep -E "warning:" "$dir.build.log" | grep -v "/src/libusb/" | head -20 || true
 }
 
+build_audio() { # extra cmake args...
+    log "libnagmedar_audio ($TARGET)"
+    local dir="$WORK/build-$TARGET/audio"
+    cmake -S "$ROOT/native/audio" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DDEPS_PREFIX="$PREFIX" \
+        "$@" > "$dir.configure.log" 2>&1 || fail_log "audio configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libnagmedar_audio ($TARGET)" "$dir.build.log"
+    grep -E "warning:" "$dir.build.log" | head -20 || true
+}
+
 host() {
     build_ffmpeg --cc="${CC:-cc}"
     build_dovi ""
     build_whisper
     build_lab
+    build_audio
+    cp "$WORK/build-host/audio/nagaudio" "$PREFIX/bin/"
     cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
     log "dvconvert (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/dvconvert" -I"$PREFIX/include" \
@@ -155,6 +172,12 @@ android() {
     cp "$WORK/build-android/lab/libnagmedar_lab.so" "$out/"
     "$tc/bin/llvm-strip" --strip-unneeded "$out/libnagmedar_lab.so"
     ls -la "$out"
+    build_audio "${ndk_cmake[@]}"
+    local audio_out="$ROOT/application/nagmedar-audio/src/main/jniLibs/arm64-v8a"
+    mkdir -p "$audio_out"
+    cp "$WORK/build-android/audio/libnagmedar_audio.so" "$audio_out/"
+    "$tc/bin/llvm-strip" --strip-unneeded "$audio_out/libnagmedar_audio.so"
+    ls -la "$audio_out"
 }
 
 case "$TARGET" in

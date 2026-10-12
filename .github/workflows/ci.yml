@@ -1,8 +1,9 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05) for
-#            arm64, with host tests of the Dolby Vision converter and the whisper pipeline.
-#            Cached until native/lab or buildsystem/nagmedar-native changes.
+# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05) and
+#            the music engine (S-901, native/audio) for arm64, with host tests of the Dolby
+#            Vision converter, the whisper pipeline and the engine's bit-exact decoding.
+#            Cached until native/lab, native/audio or buildsystem/nagmedar-native changes.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
 #            (compile check) and the macrobenchmarks with the benchmark build they measure
 #            (uploaded, S-1404) against the published libVLC 4 AAR, without native
@@ -72,8 +73,10 @@ jobs:
         id: cache
         uses: actions/cache@v4
         with:
-          path: application/nagmedar-lab/src/main/jniLibs
-          key: lab-native-${{ hashFiles('native/lab/**', 'buildsystem/nagmedar-native/**') }}
+          path: |
+            application/nagmedar-lab/src/main/jniLibs
+            application/nagmedar-audio/src/main/jniLibs
+          key: lab-native-${{ hashFiles('native/lab/**', 'native/audio/**', 'buildsystem/nagmedar-native/**') }}
 
       - uses: actions/setup-java@v5
         if: steps.cache.outputs.cache-hit != 'true'
@@ -130,7 +133,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: lab-jnilibs
-          path: application/nagmedar-lab/src/main/jniLibs
+          path: |
+            application/nagmedar-lab/src/main/jniLibs
+            application/nagmedar-audio/src/main/jniLibs
           if-no-files-found: error
 
   app:
@@ -154,7 +159,7 @@ jobs:
         continue-on-error: true
         with:
           name: lab-jnilibs
-          path: application/nagmedar-lab/src/main/jniLibs
+          path: application
 
       - uses: actions/setup-java@v5
         with:
@@ -193,6 +198,7 @@ jobs:
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
               :application:tools:testDebugUnitTest :application:nagmedar-data:testDebugUnitTest \
               :application:nagmedar-session:testDebugUnitTest :application:nagmedar-lab:testDebugUnitTest \
+              :application:nagmedar-audio:testDebugUnitTest \
               -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           fi
 
@@ -278,7 +284,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lab-jnilibs
-          path: application/nagmedar-lab/src/main/jniLibs
+          path: application
 
       - uses: actions/setup-java@v5
         with:
@@ -351,7 +357,7 @@ jobs:
         continue-on-error: true
         with:
           name: lab-jnilibs
-          path: application/nagmedar-lab/src/main/jniLibs
+          path: application
 
       - name: libVLC derlemesi
         run: |

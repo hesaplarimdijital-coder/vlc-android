@@ -426,19 +426,19 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     val isPlaying: Boolean
         @MainThread
-        get() = playlistManager.player.isPlaying()
+        get() = playlistManager.engine.isPlaying()
 
     val isSeekable: Boolean
         @MainThread
-        get() = playlistManager.player.seekable
+        get() = playlistManager.engine.seekable
 
     val isPausable: Boolean
         @MainThread
-        get() = playlistManager.player.pausable
+        get() = playlistManager.engine.pausable
 
     val isPaused: Boolean
         @MainThread
-        get() = playlistManager.player.isPaused()
+        get() = playlistManager.engine.isPaused()
 
     val isShuffling: Boolean
         @MainThread
@@ -609,7 +609,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     val length: Long
         @MainThread
-        get() = playlistManager.player.getLength()
+        get() = playlistManager.engine.getLength()
 
     val lastStats: IMedia.Stats?
         get() = playlistManager.player.previousMediaStats
@@ -649,7 +649,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     val rate: Float
         @MainThread
-        get() = playlistManager.player.getRate()
+        get() = playlistManager.engine.getRate()
 
     val titles: Array<out MediaPlayer.Title>?
         @MainThread
@@ -674,7 +674,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     val volume: Int
         @MainThread
-        get() = playlistManager.player.getVolume()
+        get() = playlistManager.engine.getVolume()
 
     val audioTracksCount: Int
         @MainThread
@@ -1002,11 +1002,11 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     fun setTime(time: Long, fast: Boolean = false) {
         val shouldFast = fast || (!playlistManager.isBenchmark && settings.getBoolean(KEY_ALWAYS_FAST_SEEK, false))
-        playlistManager.player.setTime(time, shouldFast)
+        playlistManager.engine.setTime(time, shouldFast)
         publishState(time)
     }
 
-    fun getTime() = playlistManager.player.getCurrentTime()
+    fun getTime() = playlistManager.engine.getCurrentTime()
 
     fun onMediaPlayerEvent(event: MediaPlayer.Event) = mediaPlayerListener.onEvent(event)
 
@@ -1300,7 +1300,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 }
             }
         }
-        pscb.setState(state, time, if (isPaused) 0f else playlistManager.player.getRate())
+        pscb.setState(state, time, if (isPaused) 0f else playlistManager.engine.getRate())
         pscb.setActiveQueueItemId(playlistManager.currentIndex.toLong())
         val repeatType = PlaylistManager.repeating.value
         val podcastMode = isPodcastMode
@@ -1818,7 +1818,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     @MainThread
     fun setRate(rate: Float, save: Boolean) {
-        playlistManager.player.setRate(rate, save)
+        playlistManager.engine.setRate(rate, save)
         lifecycleScope.launch(Dispatchers.Main) {
             executeUpdate(true)
         }
@@ -1846,7 +1846,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     fun getChapters(title: Int) = playlistManager.player.getChapters(title)
 
     @MainThread
-    fun setVolume(volume: Int) = playlistManager.player.setVolume(volume)
+    fun setVolume(volume: Int) = playlistManager.engine.setVolume(volume)
 
     @MainThread
     @JvmOverloads

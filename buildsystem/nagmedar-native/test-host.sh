@@ -266,3 +266,10 @@ if problems:
     sys.exit(1)
 print(f"ok: whisper decoded {r['audio_seconds']} s, inference {r['inference_seconds']:.2f} s, {r['system']}")
 PY
+
+echo "== S-901: music engine"
+# the test files go with the lab's, for the ci/debug-native branch when something fails
+NAGMEDAR_TEST_DIR="${NAGMEDAR_TEST_DIR:-$T}" "$HERE/test-audio.sh" "$PREFIX" 2>&1 | tee "$T/audio-tests.log" || {
+    echo "::error title=S-901 ses motoru::$(grep -E "FAIL|failed" "$T/audio-tests.log" | annotate)"
+    exit 1
+}

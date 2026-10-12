@@ -376,8 +376,9 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 //        }
 //    }
     companion object {
+        /** The state of the engine playing: libVLC's, or the music engine's (S-901), which sets it too. */
         @Volatile var playbackState = PlaybackStateCompat.STATE_NONE
-            private set
+            internal set
     }
 }
 

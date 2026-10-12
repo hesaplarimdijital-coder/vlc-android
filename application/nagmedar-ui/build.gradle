@@ -50,6 +50,8 @@ dependencies {
     implementation project(':application:vlc-android')
     implementation project(':application:nagmedar-data')
     implementation project(':application:nagmedar-lab')
+    // S-901: whether this build carries the music engine (Settings › Music)
+    implementation project(':application:nagmedar-audio')
 
     implementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     implementation 'androidx.compose.ui:ui'

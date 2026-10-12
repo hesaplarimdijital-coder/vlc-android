@@ -177,6 +177,8 @@ dependencies {
     api project(':application:mediadb')
     api project(':application:live-plot-graph')
     implementation project(':application:nagmedar-session')
+    // S-901: Nağmedar Ses Motoru behind the playback service
+    implementation project(':application:nagmedar-audio')
 
 
     // AppCompat

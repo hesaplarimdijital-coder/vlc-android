@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.nagmedar.audio.MusicEngine
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
@@ -62,6 +63,7 @@ import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
 import org.videolan.tools.NAGMEDAR_MIDDLE_NONE
 import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
+import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
@@ -92,6 +94,8 @@ fun SettingsScreen(
         item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
         item { SnapshotSection(prefs) }
+        // S-901: the engine behind the local music library
+        item { MusicSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {
@@ -284,6 +288,33 @@ internal fun SnapshotSection(prefs: NagmedarPreferences) {
                 if (settings.folder != null) NagButton(stringResource(R.string.nag_snap_default_folder), { forgetSnapshotFolder(context, prefs) })
                 NagButton(stringResource(R.string.nag_snap_change_folder), { runCatching { picker.launch(null) } })
             }
+        }
+    }
+}
+
+/**
+ * S-901: Settings › Music: whether the local music library plays through Nağmedar Ses Motoru
+ * (the default) or libVLC. A build without the engine says so and keeps libVLC.
+ */
+@Composable
+internal fun MusicSection(engineAvailable: Boolean = MusicEngine.available) {
+    val context = LocalContext.current
+    val vlcSettings = remember(context) { Settings.getInstance(context) }
+    var nagmedarEngine by remember { mutableStateOf(vlcSettings.getBoolean(NAGMEDAR_MUSIC_ENGINE, true)) }
+    SettingsSection(stringResource(R.string.nag_settings_music)) {
+        SettingRow(stringResource(R.string.nag_settings_music_engine), subtitle = stringResource(R.string.nag_settings_music_engine_hint)) {
+            SegmentedChoice(
+                options = listOf(true to stringResource(R.string.nag_music_engine_nagmedar), false to stringResource(R.string.nag_music_engine_libvlc)),
+                selected = nagmedarEngine && engineAvailable,
+                onSelect = { enabled ->
+                    if (enabled && !engineAvailable) return@SegmentedChoice
+                    nagmedarEngine = enabled
+                    vlcSettings.edit().putBoolean(NAGMEDAR_MUSIC_ENGINE, enabled).apply()
+                },
+            )
+        }
+        if (!engineAvailable) {
+            Text(stringResource(R.string.nag_settings_music_engine_missing), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning)
         }
     }
 }

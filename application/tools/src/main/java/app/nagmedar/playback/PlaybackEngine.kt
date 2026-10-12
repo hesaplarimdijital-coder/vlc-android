@@ -26,6 +26,10 @@ interface PlaybackEngine {
     /** Whether this engine plays [media]. */
     fun canPlay(media: EngineMedia): Boolean
 
+    /** Whether the playing item can be seeked, and paused. */
+    val seekable: Boolean
+    val pausable: Boolean
+
     fun play()
 
     /** Pauses; false when the media cannot be paused. */
@@ -54,14 +58,15 @@ interface PlaybackEngine {
     fun release()
 }
 
-/** Chooses the engine for an item: the first engine that accepts it, libVLC otherwise. */
-class EngineRouter(private val engines: List<PlaybackEngine>) {
+/**
+ * Chooses the engine for an item: the first engine that accepts it, [default] (the last one,
+ * libVLC, which accepts everything) otherwise.
+ */
+class EngineRouter(private val engines: List<PlaybackEngine>, val default: PlaybackEngine = engines.last()) {
 
     init {
         require(engines.isNotEmpty()) { "at least one engine" }
     }
-
-    val default: PlaybackEngine get() = engines.first()
 
     fun engineFor(media: EngineMedia): PlaybackEngine = engines.firstOrNull { it.canPlay(media) } ?: default
 }

@@ -1208,4 +1208,11 @@
     <string name="nag_perf_report_device">Cihaz: %1$s · Android %2$s</string>
     <string name="nag_perf_report_startups">Soğuk açılışlar, ilk kareye kadar (hedef ≤ %1$s):</string>
     <string name="nag_perf_report_playbacks">Oynatmalar (hedef: kayıp kare ≤ %1$s):</string>
+    <!-- S-901: Settings › Music, the engine behind the local music library -->
+    <string name="nag_settings_music">Müzik</string>
+    <string name="nag_settings_music_engine">Müzik motoru</string>
+    <string name="nag_settings_music_engine_hint">Yerel müzik dosyaları Nağmedar\'ın kendi motoruyla çalar: bir albümün parçaları arada boşluk olmadan birbirini izler, çıkış bit-perfect olabilir, ekolayzer kendisinindir. Akışlar ve diğer her şey her durumda libVLC ile oynar. Bir sonraki parçadan itibaren geçerlidir.</string>
+    <string name="nag_music_engine_nagmedar">Nağmedar motoru</string>
+    <string name="nag_music_engine_libvlc">libVLC</string>
+    <string name="nag_settings_music_engine_missing">Bu derleme motor olmadan yapılmış: müzik libVLC ile çalar. CI\'dan alınan APK\'yı kullanın.</string>
 </resources>

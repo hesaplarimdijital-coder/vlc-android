@@ -40,3 +40,6 @@ const val NAGMEDAR_WINDOW_BOUNDS = "nagmedar_window_bounds"
 
 /** S-409: the video player opened from a desktop window asks to fill the screen (Android 14 and later). */
 const val NAGMEDAR_PLAYER_FULLSCREEN = "nagmedar_player_fullscreen"
+
+/** S-901: the local music library plays through Nağmedar Ses Motoru (default) rather than libVLC. */
+const val NAGMEDAR_MUSIC_ENGINE = "nagmedar_music_engine"

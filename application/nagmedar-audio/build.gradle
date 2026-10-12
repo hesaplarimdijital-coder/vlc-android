@@ -1,0 +1,43 @@
+// Nağmedar Ses Motoru (S-901, ADR-06): the music engine's Kotlin side over libnagmedar_audio.so,
+// which buildsystem/nagmedar-native builds and CI drops into src/main/jniLibs. Without the
+// library the engine says it is unavailable and the playback service keeps libVLC for music.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.audio'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
+    testImplementation "androidx.test:core:$rootProject.ext.testCore"
+    testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+}

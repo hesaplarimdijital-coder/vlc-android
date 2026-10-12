@@ -102,7 +102,9 @@ import org.videolan.vlc.util.updateNextProgramAfterThumbnailGeneration
 import org.videolan.vlc.util.updateWithMLMeta
 import org.videolan.vlc.util.validateLocation
 import app.nagmedar.playback.EngineHost
+import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.EngineRouter
+import app.nagmedar.playback.PlaybackEngine
 import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Stack
@@ -139,7 +141,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
      * Engine selection (S-501, ADR-05). libVLC is the only engine today, so every item stays on
      * [player]; the Nağmedar audio engine of MVP2 registers here and takes local music.
      */
-    val engines by lazy(LazyThreadSafetyMode.NONE) { EngineHost(EngineRouter(listOf(player))) }
+    /** Nağmedar Ses Motoru for the local music library (S-901); libVLC for everything else. */
+    val musicEngine by lazy(LazyThreadSafetyMode.NONE) { MusicEngineController(service.applicationContext, player.progress, player.speed) }
+    val engines by lazy(LazyThreadSafetyMode.NONE) { EngineHost(EngineRouter(listOf(musicEngine, player))) }
+
+    /** The engine playing the current item: the transport goes through it. */
+    val engine: PlaybackEngine get() = engines.current
     private val settings by lazy(LazyThreadSafetyMode.NONE) { Settings.getInstance(service) }
     private val ctx by lazy(LazyThreadSafetyMode.NONE) { service.applicationContext }
     var currentIndex = -1
@@ -283,7 +290,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         stopAfter = instance.getInt(AUDIO_STOP_AFTER, -1)
         if (stopAfter < position) stopAfter = -1
         clearABRepeat()
-        player.setRate(1.0f, false)
+        engine.setRate(1.0f, false)
         playIndex(currentIndex)
         service.onPlaylistLoaded()
         if (mlUpdate) {
@@ -352,19 +359,19 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             load(playList, position, mlUpdate = true, avoidErasingStop = true)
             loadingLastPlaylist = false
             if (!audio) {
-                val rate = settings.getFloat(VIDEO_SPEED, player.getRate())
-                if (rate != 1.0f) player.setRate(rate, false)
+                val rate = settings.getFloat(VIDEO_SPEED, engine.getRate())
+                if (rate != 1.0f) engine.setRate(rate, false)
             }
         }
         return true
     }
 
     fun play() {
-        if (hasMedia()) player.play()
+        if (hasMedia()) engine.play()
     }
 
     fun pause() {
-        if (player.pause()) {
+        if (engine.pause()) {
             savePosition()
             launch {
                 //needed to save the current media in audio mode when it's a video played as audio
@@ -395,7 +402,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     fun restart() {
-        val isPlaying = player.isPlaying() && isAudioList()
+        val isPlaying = engine.isPlaying() && isAudioList()
         stop()
         if (isPlaying) PlaybackService.loadLastAudio(service)
     }
@@ -419,7 +426,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         mediaList.removeEventListener(this)
         previous.clear()
         currentIndex = -1
-        if (systemExit) player.release()
+        if (systemExit) {
+            player.release()
+            musicEngine.release()
+        }
         else player.restart()
         mediaList.clear()
         showAudioPlayer.value = false
@@ -438,19 +448,19 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     fun previous(force: Boolean) {
         mediaList.getMedia(currentIndex)?.let { if (it.type == MediaWrapper.TYPE_VIDEO) saveMediaMeta() }
         if (hasPrevious() &&
-                ((force || !player.seekable || (player.getCurrentTime() < PREVIOUS_LIMIT_DELAY) || (lastPrevious != -1L && System.currentTimeMillis() - lastPrevious < PREVIOUS_LIMIT_DELAY)))) {
+                ((force || !engine.seekable || (engine.getCurrentTime() < PREVIOUS_LIMIT_DELAY) || (lastPrevious != -1L && System.currentTimeMillis() - lastPrevious < PREVIOUS_LIMIT_DELAY)))) {
             val size = mediaList.size()
             currentIndex = prevIndex
             if (previous.size > 0) previous.pop()
             if (size == 0 || prevIndex < 0 || currentIndex >= size) {
                 Log.w(TAG, "Warning: invalid previous index, aborted !")
-                player.stop()
+                engine.stop()
                 return
             }
             launch { playIndex(currentIndex) }
             lastPrevious = -1L
         } else {
-            player.setPosition(0F)
+            if (engine === player) player.setPosition(0F) else engine.setTime(0L)
             lastPrevious = System.currentTimeMillis()
         }
     }
@@ -563,6 +573,16 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                     return
                 }
             }
+            // Nağmedar (S-901): the local music library plays through its own engine when it takes the item
+            if (engines.prepareFor(mw.toEngineMedia()) === musicEngine && musicEngine.startPlayback(mw, mediaplayerEventListener, start)) {
+                if (browserAudioActive) musicEngine.setVolume(0)
+                newMedia = true
+                determinePrevAndNextIndices()
+                service.onNewPlayback()
+                return
+            }
+            // the engine could not take it: libVLC does, as for everything else
+            engines.prepareFor(EngineMedia(uri.toString(), isAudio = false, isLocal = false))
             //todo restore position as well when we move to VLC 4.0
             val media = mediaFactory.getFromUri(VLCInstance.getInstance(service), uri)
             //fixme workaround to prevent the issue described in https://code.videolan.org/videolan/vlc-android/-/issues/2106
@@ -599,7 +619,6 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
             }
             media.setEventListener(this@PlaylistManager)
-            engines.prepareFor(mw.toEngineMedia())
             player.startPlayback(media, mediaplayerEventListener, start)
             player.setSlaves(media, mw)
             if (browserAudioActive) player.setVolume(0)
@@ -607,7 +626,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             determinePrevAndNextIndices()
             service.onNewPlayback()
         } else { //Start VideoPlayer for first video, it will trigger playIndex when ready.
-            if (player.isPlaying()) player.stop()
+            if (engine.isPlaying()) engine.stop()
             VideoPlayerActivity.startOpened(ctx, mw.uri, currentIndex)
         }
     }
@@ -619,16 +638,17 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
 
     fun onServiceDestroyed() {
         player.release()
+        musicEngine.release()
     }
 
     fun setBrowserAudio(enable: Boolean) {
         if (browserAudioActive == enable) return
         browserAudioActive = enable
         if (enable) {
-            preBrowserVolume = player.getVolume()
-            player.setVolume(0)
+            preBrowserVolume = engine.getVolume()
+            engine.setVolume(0)
         } else {
-            player.setVolume(if (preBrowserVolume >= 0) preBrowserVolume else 100)
+            engine.setVolume(if (preBrowserVolume >= 0) preBrowserVolume else 100)
             preBrowserVolume = -1
         }
     }
@@ -710,8 +730,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         if (currentMedia.uri.scheme.isSchemeFD()) return@outerLaunch
         if (Settings.getInstance(AppContextProvider.appContext).getBoolean(KEY_INCOGNITO, false)) return@outerLaunch
         //Save progress
-        val time = player.mediaplayer.time
-        val length = player.getLength()
+        val time = if (engine === player) player.mediaplayer.time else engine.getCurrentTime()
+        val length = engine.getLength()
         val canSwitchToVideo = player.canSwitchToVideo()
         launch(Dispatchers.IO) innerLaunch@ {
             val media = if (entryUrl != null) medialibrary.getMedia(entryUrl) else medialibrary.findMedia(currentMedia) ?: return@innerLaunch
@@ -719,7 +739,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             if (media.id == 0L) return@innerLaunch
             if (titleIdx > 0) media.setLongMeta(MediaWrapper.META_TITLE, titleIdx.toLong())
             //checks if the [MediaPlayer] has not been reset in the meantime to prevent saving 0
-            if (time != 0L || player.isPlaying())
+            if (time != 0L || engine.isPlaying())
                 if (media.type == MediaWrapper.TYPE_VIDEO || canSwitchToVideo || media.isPodcast) {
                     if (length == 0L) {
                         media.time = -1L
@@ -817,7 +837,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 1F
             }
         }
-        player.setRate(playbackRate, false)
+        engine.setRate(playbackRate, false)
     }
 
     @Synchronized
@@ -1062,9 +1082,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             val audio = !video && isAudioList()
             putBoolean(if (audio) AUDIO_SHUFFLING else MEDIA_SHUFFLING, shuffling)
             putInt(if (audio) POSITION_IN_AUDIO_LIST else POSITION_IN_MEDIA_LIST, if (reset) 0 else currentIndex)
-            putLong(if (audio) POSITION_IN_SONG else POSITION_IN_MEDIA, if (reset) 0L else player.getCurrentTime())
+            putLong(if (audio) POSITION_IN_SONG else POSITION_IN_MEDIA, if (reset) 0L else engine.getCurrentTime())
             if (!audio) {
-                putFloat(VIDEO_SPEED, player.getRate())
+                putFloat(VIDEO_SPEED, engine.getRate())
             }
             //we reached the end. The next proposed media should be the first of the list
             if (reset) {
@@ -1234,7 +1254,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                     } ?: return
                     if (newMedia) {
                         loadMediaMeta(mw)
-                        mw.length = player.getLength()
+                        mw.length = engine.getLength()
                         saveMediaList()
                         savePosition()
                         saveCurrentMedia()
@@ -1291,12 +1311,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 MediaPlayer.Event.TimeChanged -> {
                     abRepeat.value?.let {
                         val fastSeek = settings.getBoolean(KEY_ALWAYS_FAST_SEEK, false)
-                        if (it.stop != -1L && player.getCurrentTime() > it.stop) service.setTime(it.start, false)
-                        if ((fastSeek && player.getCurrentTime() < it.start - 30000L)
-                            || (!fastSeek && player.getCurrentTime() < it.start))
+                        if (it.stop != -1L && engine.getCurrentTime() > it.stop) service.setTime(it.start, false)
+                        if ((fastSeek && engine.getCurrentTime() < it.start - 30000L)
+                            || (!fastSeek && engine.getCurrentTime() < it.start))
                             service.setTime(it.start, false)
                     }
-                    if (player.getCurrentTime() % 10 == 0L) savePosition()
+                    if (engine.getCurrentTime() % 10 == 0L) savePosition()
                     val now = System.currentTimeMillis()
                     if (now - lastTimeMetaSaved > 5000L){
                         lastTimeMetaSaved = now
@@ -1311,7 +1331,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
                 MediaPlayer.Event.ESSelected -> {
                     getCurrentMedia()?.let { media ->
-                        if (player.isPlaying()) {
+                        if (engine.isPlaying()) {
                             if (media.type == MediaWrapper.TYPE_STREAM && (media.title != player.mediaplayer.media?.getMeta(IMedia.Meta.Title, true) || media.artistName != player.mediaplayer.media?.getMeta(IMedia.Meta.Artist, true))) {
                                 refreshTrackMeta(media)
                             }

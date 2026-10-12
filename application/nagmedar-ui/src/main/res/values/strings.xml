@@ -1236,4 +1236,11 @@
     <string name="nag_perf_report_device">Device: %1$s · Android %2$s</string>
     <string name="nag_perf_report_startups">Cold start-ups, to the first frame (target ≤ %1$s):</string>
     <string name="nag_perf_report_playbacks">Playbacks (target: dropped frames ≤ %1$s):</string>
+    <!-- S-901: Settings › Music, the engine behind the local music library -->
+    <string name="nag_settings_music">Music</string>
+    <string name="nag_settings_music_engine">Music engine</string>
+    <string name="nag_settings_music_engine_hint">Local music files play through Nağmedar\'s own engine: the tracks of an album follow one another without a gap, the output can be bit-perfect, and the equaliser is its own. libVLC plays streams and everything else either way. Applies to the next track.</string>
+    <string name="nag_music_engine_nagmedar">Nağmedar engine</string>
+    <string name="nag_music_engine_libvlc">libVLC</string>
+    <string name="nag_settings_music_engine_missing">This build was made without the engine: music plays through libVLC. Use the APK from CI.</string>
 </resources>

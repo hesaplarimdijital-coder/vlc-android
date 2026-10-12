@@ -15,6 +15,8 @@ class EngineHostTest {
         var stops = 0
 
         override fun canPlay(media: EngineMedia) = accepts(media)
+        override val seekable = true
+        override val pausable = true
         override fun play() {
             playing = true
         }
@@ -70,7 +72,8 @@ class EngineHostTest {
     fun aStubEngineLeavesEverythingToLibVlc() {
         val vlc = libVlc()
         val stub = FakeEngine(EngineId.NagmedarAudio) { false }
-        val host = EngineHost(EngineRouter(listOf(vlc, stub)))
+        val host = EngineHost(EngineRouter(listOf(stub, vlc)))
+        assertSame(vlc, host.current)
         for (media in listOf(localFlac, stream, movie)) assertSame(vlc, host.prepareFor(media))
         assertEquals(0, vlc.stops)
     }
@@ -81,7 +84,10 @@ class EngineHostTest {
         val audio = audioEngine()
         val changes = mutableListOf<Pair<EngineId, EngineId>>()
         val host = EngineHost(EngineRouter(listOf(audio, vlc))) { from, to -> changes += from to to }
-        assertSame(audio, host.current)
+        // libVLC until an item asks for the other
+        assertSame(vlc, host.current)
+        assertSame(audio, host.prepareFor(localFlac))
+        changes.clear()
 
         audio.level = 64
         audio.speed = 1.25f
