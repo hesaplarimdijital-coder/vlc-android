@@ -1443,6 +1443,46 @@ public class MediaPlayer extends VLCObject<MediaPlayer.Event> {
     }
 
     /**
+     * The audio mix mode (S-505, S-508): 0 as the film has it, 1 stereo, 2 binaural, 3 4.0,
+     * 4 5.1, 5 7.1; the playing audio output changes at once when it can.
+     *
+     * @return false when there is no audio output, or it refuses the mode
+     */
+    public boolean setAudioMixMode(int mode) {
+        return nativeSetAudioMixMode(mode);
+    }
+
+    /**
+     * The audio filters beside the equalizer (S-505): a colon-separated chain such as
+     * "compressor:nagdialogue", or null for none. The equalizer stays as it is.
+     */
+    public boolean setAudioFilters(String chain) {
+        return nativeSetAudioFilters(chain);
+    }
+
+    /**
+     * An audio filter's option, changed on the fly: "compressor-threshold", "nagdialogue-gain" …
+     */
+    public boolean setAudioFilterOption(String name, float value) {
+        return nativeSetAudioFilterFloat(name, value);
+    }
+
+    /**
+     * Crops the picture by this many pixels on each side (S-505); all zero removes the crop.
+     */
+    public void setCropBorder(int left, int right, int top, int bottom) {
+        nativeSetCropBorder(left, right, top, bottom);
+    }
+
+    /**
+     * Crops the picture to this ratio (S-505), "16:9" as 16 and 9; a zero denominator removes
+     * the crop.
+     */
+    public void setCropRatio(int num, int den) {
+        nativeSetCropRatio(num, den);
+    }
+
+    /**
      * Gets current movie's length in ms.
      * @return the movie length (in ms), or -1 if there is no media.
      */
@@ -1572,4 +1612,9 @@ public class MediaPlayer extends VLCObject<MediaPlayer.Event> {
     private native void nativeSetVideoAdjust(boolean enabled, float contrast, float brightness, float hue, float saturation, float gamma);
     private native boolean nativeSetDeinterlace(int state, String mode);
     private native String[] nativeGetAudioOutputDevices();
+    private native boolean nativeSetAudioMixMode(int mode);
+    private native boolean nativeSetAudioFilters(String chain);
+    private native boolean nativeSetAudioFilterFloat(String name, float value);
+    private native void nativeSetCropBorder(int left, int right, int top, int bottom);
+    private native void nativeSetCropRatio(int num, int den);
 }

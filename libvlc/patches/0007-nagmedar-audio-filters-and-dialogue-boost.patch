@@ -1,0 +1,493 @@
+From daca4634a263e2ef989efcc01e2dc7a193aff2b3 Mon Sep 17 00:00:00 2001
+Message-Id: <daca4634a263e2ef989efcc01e2dc7a193aff2b3.1791784655.git.noreply@anthropic.com>
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Oct 2026 08:57:35 +0300
+Subject: [PATCH] =?UTF-8?q?Na=C4=9Fmedar:=20audio=20filters=20beside=20the?=
+ =?UTF-8?q?=20equalizer,=20and=20a=20dialogue=20boost?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+libvlc_audio_set_filters() adds audio filters ("compressor:nagdialogue")
+that stay in the chain when the equalizer is set, and
+libvlc_audio_set_filter_float() changes a filter's option on the fly.
+The nagdialogue filter raises the dialogue: the centre channel of a
+multichannel mix, or the voice band of what both stereo channels share.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Lvh4tsdhXUadwhZpYnRA5K
+---
+ include/vlc/libvlc_media_player.h  |  32 ++++
+ lib/libvlc.sym                     |   2 +
+ lib/media_player.c                 |  97 ++++++++++--
+ modules/audio_filter/Makefile.am   |   3 +
+ modules/audio_filter/meson.build   |   7 +
+ modules/audio_filter/nagdialogue.c | 235 +++++++++++++++++++++++++++++
+ 6 files changed, 367 insertions(+), 9 deletions(-)
+ create mode 100644 modules/audio_filter/nagdialogue.c
+
+diff --git a/include/vlc/libvlc_media_player.h b/include/vlc/libvlc_media_player.h
+index a9631f9a3d..dcccd3f4d0 100644
+--- a/include/vlc/libvlc_media_player.h
++++ b/include/vlc/libvlc_media_player.h
+@@ -2840,6 +2840,38 @@ LIBVLC_API libvlc_audio_output_mixmode_t libvlc_audio_get_mixmode( libvlc_media_
+ LIBVLC_API int libvlc_audio_set_mixmode( libvlc_media_player_t *p_mi,
+                                          libvlc_audio_output_mixmode_t mode );
+ 
++/**
++ * Set the audio filters an application adds beside the equalizer (Nağmedar).
++ *
++ * The chain is a list of audio filter modules separated by colons
++ * ("compressor:nagdialogue"); an empty chain removes them. The equalizer,
++ * when it is on (\see libvlc_media_player_set_equalizer), stays in front of
++ * them, and setting it does not remove them. The playing audio output takes
++ * the new chain at once.
++ *
++ * \param p_mi media player
++ * \param psz_chain the filters, or NULL for none
++ * \return 0 on success, -1 on error
++ * \version Nağmedar's LibVLC 4.0.0
++ */
++LIBVLC_API int libvlc_audio_set_filters( libvlc_media_player_t *p_mi,
++                                         const char *psz_chain );
++
++/**
++ * Set a floating point option of an audio filter (Nağmedar), such as
++ * "compressor-threshold" or "nagdialogue-gain": the playing audio output's
++ * filter takes it at once, and the audio outputs to come inherit it.
++ *
++ * \param p_mi media player
++ * \param psz_name the option's name
++ * \param f_value its value
++ * \return 0 on success, -1 on error
++ * \version Nağmedar's LibVLC 4.0.0
++ */
++LIBVLC_API int libvlc_audio_set_filter_float( libvlc_media_player_t *p_mi,
++                                              const char *psz_name,
++                                              float f_value );
++
+ 
+ /**
+  * Get current audio delay.
+diff --git a/lib/libvlc.sym b/lib/libvlc.sym
+index f92df6b013..b9b5f3788d 100644
+--- a/lib/libvlc.sym
++++ b/lib/libvlc.sym
+@@ -25,6 +25,8 @@ libvlc_audio_get_mute
+ libvlc_audio_get_volume
+ libvlc_audio_set_mixmode
+ libvlc_audio_set_stereomode
++libvlc_audio_set_filter_float
++libvlc_audio_set_filters
+ libvlc_audio_set_delay
+ libvlc_audio_set_mute
+ libvlc_audio_set_volume
+diff --git a/lib/media_player.c b/lib/media_player.c
+index a8563478cb..e9e2e39dc6 100644
+--- a/lib/media_player.c
++++ b/lib/media_player.c
+@@ -755,6 +755,8 @@ libvlc_media_player_new( libvlc_instance_t *instance )
+     var_Create (mp, "volume", VLC_VAR_FLOAT);
+     var_Create (mp, "corks", VLC_VAR_INTEGER);
+     var_Create (mp, "audio-filter", VLC_VAR_STRING);
++    /* Nağmedar: the audio filters an application adds beside the equalizer */
++    var_Create (mp, "nagmedar-audio-filters", VLC_VAR_STRING);
+     var_Create (mp, "role", VLC_VAR_STRING | VLC_VAR_DOINHERIT);
+     var_Create (mp, "amem-data", VLC_VAR_ADDRESS);
+     var_Create (mp, "amem-setup", VLC_VAR_ADDRESS);
+@@ -2166,6 +2168,9 @@ int libvlc_media_player_add_slave( libvlc_media_player_t *p_mi,
+  */
+ #define EQZ_BAND_VALUE_SIZE 12
+ 
++static void audio_filters_update( libvlc_media_player_t *, audio_output_t *,
++                                  bool, const char * );
++
+ int libvlc_media_player_set_equalizer( libvlc_media_player_t *p_mi, libvlc_equalizer_t *p_equalizer )
+ {
+     char bands[EQZ_BANDS_MAX * EQZ_BAND_VALUE_SIZE + 1];
+@@ -2183,21 +2188,95 @@ int libvlc_media_player_set_equalizer( libvlc_media_player_t *p_mi, libvlc_equal
+         var_SetFloat( p_mi, "equalizer-preamp", p_equalizer->f_preamp );
+         var_SetString( p_mi, "equalizer-bands", bands );
+     }
+-    var_SetString( p_mi, "audio-filter", p_equalizer ? "equalizer" : "" );
+-
+     audio_output_t *p_aout = vlc_player_aout_Hold( p_mi->player );
+-    if( p_aout != NULL )
++    if( p_aout != NULL && p_equalizer != NULL )
+     {
+-        if( p_equalizer != NULL )
+-        {
+-            var_SetFloat( p_aout, "equalizer-preamp", p_equalizer->f_preamp );
+-            var_SetString( p_aout, "equalizer-bands", bands );
+-        }
++        var_SetFloat( p_aout, "equalizer-preamp", p_equalizer->f_preamp );
++        var_SetString( p_aout, "equalizer-bands", bands );
++    }
+ 
+-        var_SetString( p_aout, "audio-filter", p_equalizer ? "equalizer" : "" );
++    /* Nağmedar: the equalizer joins the application's filters instead of replacing them */
++    audio_filters_update( p_mi, p_aout, p_equalizer != NULL, NULL );
++
++    if( p_aout != NULL )
+         aout_Release(p_aout);
++
++    return 0;
++}
++
++/*
++ * Nağmedar: the audio filter chain is the equalizer, when it is on, followed by
++ * the filters the application asked for ("nagmedar-audio-filters"); either
++ * part changes without touching the other.
++ */
++static void audio_filters_update( libvlc_media_player_t *p_mi,
++                                  audio_output_t *p_aout, bool b_equalizer,
++                                  const char *psz_extra )
++{
++    char *psz_current = var_GetNonEmptyString( p_mi, "nagmedar-audio-filters" );
++    if( psz_extra != NULL )
++    {
++        var_SetString( p_mi, "nagmedar-audio-filters", psz_extra );
++        free( psz_current );
++        psz_current = *psz_extra ? strdup( psz_extra ) : NULL;
++    }
++
++    char *psz_chain;
++    if( b_equalizer && psz_current != NULL )
++    {
++        if( asprintf( &psz_chain, "equalizer:%s", psz_current ) == -1 )
++            psz_chain = NULL;
+     }
++    else if( b_equalizer )
++        psz_chain = strdup( "equalizer" );
++    else
++        psz_chain = strdup( psz_current != NULL ? psz_current : "" );
++    free( psz_current );
++    if( psz_chain == NULL )
++        return;
++
++    var_SetString( p_mi, "audio-filter", psz_chain );
++    if( p_aout != NULL )
++        var_SetString( p_aout, "audio-filter", psz_chain );
++    free( psz_chain );
++}
++
++static bool audio_equalizer_on( libvlc_media_player_t *p_mi )
++{
++    char *psz_chain = var_GetNonEmptyString( p_mi, "audio-filter" );
++    bool b_on = psz_chain != NULL && strstr( psz_chain, "equalizer" ) != NULL;
++    free( psz_chain );
++    return b_on;
++}
+ 
++int libvlc_audio_set_filters( libvlc_media_player_t *p_mi, const char *psz_chain )
++{
++    audio_output_t *p_aout = vlc_player_aout_Hold( p_mi->player );
++    audio_filters_update( p_mi, p_aout, audio_equalizer_on( p_mi ),
++                          psz_chain != NULL ? psz_chain : "" );
++    if( p_aout != NULL )
++        aout_Release(p_aout);
++    return 0;
++}
++
++int libvlc_audio_set_filter_float( libvlc_media_player_t *p_mi,
++                                   const char *psz_name, float f_value )
++{
++    if( psz_name == NULL || !*psz_name )
++        return -1;
++
++    /* The media player keeps the value for the audio outputs to come… */
++    var_Create( p_mi, psz_name, VLC_VAR_FLOAT );
++    var_SetFloat( p_mi, psz_name, f_value );
++
++    /* …and the playing one takes it at once, through the filter's callback */
++    audio_output_t *p_aout = vlc_player_aout_Hold( p_mi->player );
++    if( p_aout != NULL )
++    {
++        var_Create( p_aout, psz_name, VLC_VAR_FLOAT | VLC_VAR_DOINHERIT );
++        var_SetFloat( p_aout, psz_name, f_value );
++        aout_Release(p_aout);
++    }
+     return 0;
+ }
+ 
+diff --git a/modules/audio_filter/Makefile.am b/modules/audio_filter/Makefile.am
+index d9eb4bba7b..25831f995f 100644
+--- a/modules/audio_filter/Makefile.am
++++ b/modules/audio_filter/Makefile.am
+@@ -62,11 +62,14 @@ libcenter_plugin_la_SOURCES = audio_filter/center.c
+ libcenter_plugin_la_LIBADD  = $(LIBM)
+ libstereopan_plugin_la_SOURCES = audio_filter/stereo_pan.c
+ libstereopan_plugin_la_LIBADD = $(LIBM)
++libnagdialogue_plugin_la_SOURCES = audio_filter/nagdialogue.c
++libnagdialogue_plugin_la_LIBADD = $(LIBM)
+ 
+ audio_filter_PLUGINS += \
+ 	libaudiobargraph_a_plugin.la \
+ 	libchorus_flanger_plugin.la \
+ 	libcompressor_plugin.la \
++	libnagdialogue_plugin.la \
+ 	libexpander_plugin.la \
+ 	liblimiter_plugin.la \
+ 	libequalizer_plugin.la \
+diff --git a/modules/audio_filter/meson.build b/modules/audio_filter/meson.build
+index f10219d5ac..dc2b5a7f4a 100644
+--- a/modules/audio_filter/meson.build
++++ b/modules/audio_filter/meson.build
+@@ -35,6 +35,13 @@ vlc_modules += {
+     'link_with' : [libdynamics],
+ }
+ 
++# Dialogue boost module (Nağmedar)
++vlc_modules += {
++    'name' : 'nagdialogue',
++    'sources' : files('nagdialogue.c'),
++    'dependencies' : [m_lib],
++}
++
+ # Expander module
+ vlc_modules += {
+     'name' : 'expander',
+diff --git a/modules/audio_filter/nagdialogue.c b/modules/audio_filter/nagdialogue.c
+new file mode 100644
+index 0000000000..47277f19fb
+--- /dev/null
++++ b/modules/audio_filter/nagdialogue.c
+@@ -0,0 +1,235 @@
++/*****************************************************************************
++ * nagdialogue.c : dialogue boost audio filter (Nağmedar)
++ *****************************************************************************
++ * Copyright (C) 2026 Nağmedar authors
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU Lesser General Public License as published by
++ * the Free Software Foundation; either version 2.1 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this program; if not, write to the Free Software Foundation,
++ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
++ *****************************************************************************/
++
++/*
++ * The dialogue raised by a few decibels, the rest of the mix left alone:
++ *
++ *  - with a centre channel (5.1, 7.1 …), the centre channel, where the
++ *    dialogue of a film mix lives, is multiplied by the gain;
++ *  - in stereo, the part common to both channels (the "mid") is passed
++ *    through a band-pass filter around the voice (300 Hz – 4 kHz) and the
++ *    boosted band is added back to both channels, so that music and effects
++ *    panned to the sides keep their level.
++ *
++ * The gain changes on the fly ("nagdialogue-gain", in dB) and ramps over a
++ * few milliseconds so that it does not click. A soft clipper keeps a loud
++ * boost from wrapping.
++ */
++
++#ifdef HAVE_CONFIG_H
++# include "config.h"
++#endif
++
++#include <math.h>
++#include <stdatomic.h>
++
++#include <vlc_common.h>
++#include <vlc_aout.h>
++#include <vlc_filter.h>
++#include <vlc_plugin.h>
++
++#define CFG_PREFIX "nagdialogue-"
++
++#define GAIN_TEXT N_("Dialogue gain (dB)")
++#define GAIN_LONGTEXT N_("How much louder the dialogue is: the centre channel, " \
++    "or in stereo the voice band of what both channels share.")
++
++/* The band the voice lives in: a constant-peak band-pass around 1 kHz, wide
++ * enough (Q 0.6) to reach from about 300 Hz to 4 kHz. */
++#define VOICE_CENTRE_HZ 1000.f
++#define VOICE_Q 0.6f
++
++/* The gain ramps over this long, so that a change does not click. */
++#define RAMP_MS 20.f
++
++typedef struct
++{
++    /* The gain asked for, in dB, set from any thread */
++    _Atomic float gain_db;
++
++    /* Where the ramp is: the linear gain applied to the last sample */
++    float gain_now;
++    /* How much the linear gain moves per sample towards its target */
++    float gain_step;
++
++    /* The channel the dialogue is in, or -1 for stereo's mid */
++    int centre;
++    unsigned channels;
++
++    /* The voice band-pass (direct form I), for the stereo mid */
++    float b0, b1, b2, a1, a2;
++    float x1, x2, y1, y2;
++} filter_sys_t;
++
++static int GainCallback( vlc_object_t *obj, char const *var,
++                         vlc_value_t oldval, vlc_value_t newval, void *data )
++{
++    filter_sys_t *sys = data;
++    atomic_store( &sys->gain_db, newval.f_float );
++    (void) obj; (void) var; (void) oldval;
++    return VLC_SUCCESS;
++}
++
++static inline float SoftClip( float v )
++{
++    /* Linear up to 0.9, then a gentle knee that never passes 1 */
++    const float knee = 0.9f;
++    float a = fabsf( v );
++    if( a <= knee )
++        return v;
++    float over = ( a - knee ) / ( 1.f - knee );
++    float shaped = knee + ( 1.f - knee ) * ( over / ( 1.f + over ) );
++    return copysignf( shaped, v );
++}
++
++static block_t *Process( filter_t *filter, block_t *block )
++{
++    filter_sys_t *sys = filter->p_sys;
++    float *samples = (float *) block->p_buffer;
++    const unsigned channels = sys->channels;
++    const float target = powf( 10.f, atomic_load( &sys->gain_db ) / 20.f );
++
++    for( unsigned i = 0; i < block->i_nb_samples; i++, samples += channels )
++    {
++        /* The ramp towards the gain asked for */
++        if( sys->gain_now < target )
++            sys->gain_now = fminf( sys->gain_now + sys->gain_step, target );
++        else if( sys->gain_now > target )
++            sys->gain_now = fmaxf( sys->gain_now - sys->gain_step, target );
++        const float gain = sys->gain_now;
++
++        if( sys->centre >= 0 )
++        {
++            samples[sys->centre] = SoftClip( samples[sys->centre] * gain );
++            continue;
++        }
++
++        /* Stereo: the voice band of the mid, boosted and added back */
++        const float mid = 0.5f * ( samples[0] + samples[1] );
++        const float band = sys->b0 * mid + sys->b1 * sys->x1 + sys->b2 * sys->x2
++                         - sys->a1 * sys->y1 - sys->a2 * sys->y2;
++        sys->x2 = sys->x1;
++        sys->x1 = mid;
++        sys->y2 = sys->y1;
++        sys->y1 = band;
++
++        const float extra = band * ( gain - 1.f );
++        samples[0] = SoftClip( samples[0] + extra );
++        samples[1] = SoftClip( samples[1] + extra );
++    }
++    return block;
++}
++
++static void Flush( filter_t *filter )
++{
++    filter_sys_t *sys = filter->p_sys;
++    sys->x1 = sys->x2 = sys->y1 = sys->y2 = 0.f;
++}
++
++static void Close( filter_t *filter )
++{
++    filter_sys_t *sys = filter->p_sys;
++    vlc_object_t *aout = vlc_object_parent( filter );
++
++    var_DelCallback( aout, CFG_PREFIX "gain", GainCallback, sys );
++    var_Destroy( aout, CFG_PREFIX "gain" );
++    free( sys );
++}
++
++/* The index of the centre channel in VLC's channel order, or -1 without one */
++static int CentreIndex( const audio_sample_format_t *fmt )
++{
++    const uint32_t physical = fmt->i_physical_channels;
++    if( !( physical & AOUT_CHAN_CENTER ) )
++        return -1;
++    /* The channels that come before the centre in the WG4 order */
++    const uint32_t before = AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT
++                          | AOUT_CHAN_MIDDLELEFT | AOUT_CHAN_MIDDLERIGHT
++                          | AOUT_CHAN_REARLEFT | AOUT_CHAN_REARRIGHT
++                          | AOUT_CHAN_REARCENTER;
++    return (int) vlc_popcount( physical & before );
++}
++
++static int Open( vlc_object_t *obj )
++{
++    filter_t *filter = (filter_t *) obj;
++    vlc_object_t *aout = vlc_object_parent( filter );
++    const audio_sample_format_t *fmt = &filter->fmt_in.audio;
++
++    if( fmt->i_format != VLC_CODEC_FL32
++     || !AOUT_FMTS_IDENTICAL( fmt, &filter->fmt_out.audio ) )
++        return VLC_EGENERIC;
++
++    const unsigned channels = aout_FormatNbChannels( fmt );
++    const int centre = CentreIndex( fmt );
++    if( centre < 0 && channels != 2 )
++    {
++        msg_Dbg( filter, "no dialogue channel in %u channels", channels );
++        return VLC_EGENERIC;
++    }
++    if( centre >= (int) channels )
++        return VLC_EGENERIC;
++
++    filter_sys_t *sys = malloc( sizeof( *sys ) );
++    if( unlikely( sys == NULL ) )
++        return VLC_ENOMEM;
++    filter->p_sys = sys;
++
++    sys->channels = channels;
++    sys->centre = centre;
++    sys->gain_now = 1.f;
++    sys->gain_step = ( powf( 10.f, 12.f / 20.f ) - 1.f )
++                   / ( RAMP_MS * fmt->i_rate / 1000.f );
++    sys->x1 = sys->x2 = sys->y1 = sys->y2 = 0.f;
++
++    /* RBJ constant-peak band-pass */
++    const float w0 = 2.f * (float) M_PI * VOICE_CENTRE_HZ / (float) fmt->i_rate;
++    const float alpha = sinf( w0 ) / ( 2.f * VOICE_Q );
++    const float a0 = 1.f + alpha;
++    sys->b0 = alpha / a0;
++    sys->b1 = 0.f;
++    sys->b2 = -alpha / a0;
++    sys->a1 = -2.f * cosf( w0 ) / a0;
++    sys->a2 = ( 1.f - alpha ) / a0;
++
++    atomic_init( &sys->gain_db, var_CreateGetFloat( aout, CFG_PREFIX "gain" ) );
++    var_AddCallback( aout, CFG_PREFIX "gain", GainCallback, sys );
++
++    msg_Dbg( filter, "dialogue boost on %s, %.1f dB",
++             centre >= 0 ? "the centre channel" : "the stereo mid",
++             atomic_load( &sys->gain_db ) );
++
++    static const struct vlc_filter_operations filter_ops =
++    {
++        .filter_audio = Process, .flush = Flush, .close = Close,
++    };
++    filter->ops = &filter_ops;
++    return VLC_SUCCESS;
++}
++
++vlc_module_begin()
++    set_shortname( N_("Dialogue") )
++    set_description( N_("Dialogue boost") )
++    set_subcategory( SUBCAT_AUDIO_AFILTER )
++    set_capability( "audio filter", 0 )
++    add_float_with_range( CFG_PREFIX "gain", 0.f, 0.f, 12.f, GAIN_TEXT, GAIN_LONGTEXT )
++    add_shortcut( "nagdialogue" )
++    set_callback( Open )
++vlc_module_end()
+-- 
+2.43.0
+

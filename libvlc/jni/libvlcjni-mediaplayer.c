@@ -1391,3 +1391,83 @@ Java_org_videolan_libvlc_MediaPlayer_nativeGetAudioOutputDevices(JNIEnv *env,
         libvlc_audio_output_device_list_release(list);
     return array;
 }
+
+jboolean
+Java_org_videolan_libvlc_MediaPlayer_nativeSetAudioMixMode(JNIEnv *env,
+                                                           jobject thiz,
+                                                           jint mode)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return false;
+
+    if (mode < libvlc_AudioMixMode_Unset || mode > libvlc_AudioMixMode_7_1)
+        return false;
+    return libvlc_audio_set_mixmode(p_obj->u.p_mp,
+                                    (libvlc_audio_output_mixmode_t) mode) == 0;
+}
+
+jboolean
+Java_org_videolan_libvlc_MediaPlayer_nativeSetAudioFilters(JNIEnv *env,
+                                                           jobject thiz,
+                                                           jstring jchain)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return false;
+
+    const char *psz_chain = jchain ? (*env)->GetStringUTFChars(env, jchain, 0) : NULL;
+    int ret = libvlc_audio_set_filters(p_obj->u.p_mp, psz_chain);
+    if (psz_chain)
+        (*env)->ReleaseStringUTFChars(env, jchain, psz_chain);
+    return ret == 0;
+}
+
+jboolean
+Java_org_videolan_libvlc_MediaPlayer_nativeSetAudioFilterFloat(JNIEnv *env,
+                                                               jobject thiz,
+                                                               jstring jname,
+                                                               jfloat value)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj || !jname)
+        return false;
+
+    const char *psz_name = (*env)->GetStringUTFChars(env, jname, 0);
+    if (!psz_name)
+        return false;
+    int ret = libvlc_audio_set_filter_float(p_obj->u.p_mp, psz_name, value);
+    (*env)->ReleaseStringUTFChars(env, jname, psz_name);
+    return ret == 0;
+}
+
+void
+Java_org_videolan_libvlc_MediaPlayer_nativeSetCropBorder(JNIEnv *env,
+                                                         jobject thiz,
+                                                         jint left, jint right,
+                                                         jint top, jint bottom)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return;
+
+    if (left < 0) left = 0;
+    if (right < 0) right = 0;
+    if (top < 0) top = 0;
+    if (bottom < 0) bottom = 0;
+    libvlc_video_set_crop_border(p_obj->u.p_mp, left, right, top, bottom);
+}
+
+void
+Java_org_videolan_libvlc_MediaPlayer_nativeSetCropRatio(JNIEnv *env,
+                                                        jobject thiz,
+                                                        jint num, jint den)
+{
+    vlcjni_object *p_obj = VLCJniObject_getInstance(env, thiz);
+    if (!p_obj)
+        return;
+
+    if (num < 0 || den < 0)
+        return;
+    libvlc_video_set_crop_ratio(p_obj->u.p_mp, num, den);
+}
