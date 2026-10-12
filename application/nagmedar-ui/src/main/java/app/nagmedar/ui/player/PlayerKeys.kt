@@ -67,7 +67,8 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.JumpForward -> activity.seekBy(10_000)
             ShortcutId.JumpBackLong -> activity.seekBy(-60_000)
             ShortcutId.JumpForwardLong -> activity.seekBy(60_000)
-            ShortcutId.NextFrame -> activity.stepFrame(forward = true)
+            // S-504: libVLC's own next frame when this build has it, else a frame's worth of seeking
+            ShortcutId.NextFrame -> if (!LibVlcExtensions.nextFrame(service.mediaplayer)) activity.stepFrame(forward = true)
             ShortcutId.PreviousFrame -> activity.stepFrame(forward = false)
             ShortcutId.Slower -> activity.decreaseRate()
             ShortcutId.Faster -> activity.increaseRate()

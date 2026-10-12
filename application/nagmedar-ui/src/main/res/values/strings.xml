@@ -683,6 +683,24 @@
     <string name="nag_fx_channels_binaural">Headphones (binaural)</string>
     <string name="nag_fx_channels_51" translatable="false">5.1</string>
     <string name="nag_fx_channels_71" translatable="false">7.1</string>
+    <!-- S-505, S-506: what libVLC takes as it starts again -->
+    <string name="nag_fx_deferred">The HDR output, tone mapping, scaler and rotation are taken when the player opens again.</string>
+    <string name="nag_fx_waiting">The change here waits for the player to open again.</string>
+    <!-- S-508: the audio output -->
+    <string name="nag_out_title">Output</string>
+    <string name="nag_out_stereo">Stereo PCM</string>
+    <string name="nag_out_multichannel">Multichannel PCM</string>
+    <string name="nag_out_passthrough">Bitstream (passthrough)</string>
+    <string name="nag_out_forced">Bitstream, forced codecs</string>
+    <string name="nag_out_refused">The player\'s output cannot send a bitstream: choose AudioTrack in the classic audio settings.</string>
+    <string name="nag_out_no_bitstream">Nothing plugged in says it takes a bitstream; the sound goes as PCM.</string>
+    <string name="nag_out_pcm_only">PCM</string>
+    <string name="nag_out_sink_hdmi" translatable="false">HDMI</string>
+    <string name="nag_out_sink_usb" translatable="false">USB</string>
+    <string name="nag_out_sink_bluetooth" translatable="false">Bluetooth</string>
+    <string name="nag_out_sink_headphones">Headphones</string>
+    <string name="nag_out_sink_speaker">Speaker</string>
+    <string name="nag_out_sink_other">Other output</string>
     <string name="nag_fx_equalizer">Equaliser</string>
     <string name="nag_fx_equalizer_players">The player\'s setting</string>
     <string name="nag_fx_remember">Save for this file</string>
@@ -742,6 +760,7 @@
     <string name="nag_subs_top">At the top</string>
     <string name="nag_subs_above">Above the primary</string>
     <string name="nag_subs_keys">turns the secondary subtitles on or off</string>
+    <string name="nag_subs_position_waiting">The place reaches the subtitles when the player opens again.</string>
     <string name="nag_subs_secondary_on">Secondary subtitles: %1$s</string>
     <string name="nag_subs_secondary_off">Secondary subtitles off</string>
     <string name="nag_subs_secondary_missing">No other track for secondary subtitles</string>
@@ -928,7 +947,12 @@
     <string name="nag_info_frames">Frames</string>
     <string name="nag_info_frames_lost">%1$s dropped</string>
     <string name="nag_info_frames_shown">%1$s shown</string>
-    <string name="nag_info_buffer">Buffer</string>
+    <string name="nag_info_buffer">Audio buffers</string>
+    <string name="nag_info_buffers_played">%1$s played</string>
+    <string name="nag_info_demux">Demux: %1$s · %2$s corrupted · %3$s gaps</string>
+    <string name="nag_info_output_auto">VLC\'s choice: Android\'s own, HDR passed to the screen</string>
+    <string name="nag_info_output_android">Android (ASurfaceControl), HDR passed to the screen</string>
+    <string name="nag_info_output_opengl">OpenGL ES with libplacebo: tone mapping, scaling</string>
     <string name="nag_info_pending">The faded lines fill in with the next version of the playback engine.</string>
     <string name="nag_info_overlay">Show over the video</string>
     <string name="nag_info_overlay_bitrate">Bitrate</string>
@@ -937,6 +961,7 @@
     <string name="nag_info_copied">Copied</string>
     <string name="nag_info_report_bitrate">Input bitrate: %1$s</string>
     <string name="nag_info_report_frames">Frames: %1$s dropped of %2$s shown</string>
+    <string name="nag_info_report_audio">Audio buffers: %1$s lost of %2$s played</string>
     <!-- S-606: screenshots -->
     <string name="nag_snap_options">Screenshot options</string>
     <string name="nag_snap_saved">Screenshot saved</string>

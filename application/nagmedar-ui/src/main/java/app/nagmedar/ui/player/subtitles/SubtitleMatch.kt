@@ -71,6 +71,9 @@ fun matchSubtitles(video: String, files: List<Pair<String, String>>, prefer: Str
 
 private val forcedWords = setOf("forced", "zorunlu", "foreign")
 
+/** Whether a track's or a file's [name] says it is the forced subtitles: "Forced", "Zorunlu", "Foreign parts only". */
+fun isForcedName(name: String): Boolean = name.lowercase(Locale.ROOT).split(tokenSplit).any { it in forcedWords }
+
 /** "hi" is the hard of hearing in a file's name, not Hindi. */
 private val sdhWords = setOf("sdh", "hi", "cc", "hoh")
 

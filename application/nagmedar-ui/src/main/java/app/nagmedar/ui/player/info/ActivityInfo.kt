@@ -3,11 +3,16 @@ package app.nagmedar.ui.player.info
 import android.provider.OpenableColumns
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.resources.NagmedarVlcOptions
 import org.videolan.tools.KEY_AOUT
 import org.videolan.tools.KEY_HARDWARE_ACCELERATION
+import org.videolan.tools.KEY_OPENGL
 import org.videolan.tools.Settings
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import java.io.File
+
+/** The video output the settings choose (S-506). */
+enum class VideoOutputChoice { Auto, Android, OpenGl }
 
 /**
  * What the classic player tells of the playing film (S-605): its file, its tracks as libVLC sees
@@ -69,6 +74,13 @@ internal class ActivityInfoSource(private val activity: VideoPlayerActivity) {
         }
     }
 
+    /** The video output the settings choose (S-506): VLC's own choice, Android's, or OpenGL. */
+    fun videoOutput(): VideoOutputChoice = when (Settings.getInstance(activity).getString(KEY_OPENGL, "-1")?.toIntOrNull()) {
+        NagmedarVlcOptions.VOUT_ANDROID -> VideoOutputChoice.Android
+        NagmedarVlcOptions.VOUT_OPENGL -> VideoOutputChoice.OpenGl
+        else -> if (NagmedarVlcOptions.needsOpenGl(Settings.getInstance(activity))) VideoOutputChoice.OpenGl else VideoOutputChoice.Auto
+    }
+
     /** The audio output the settings choose: AAudio unless they ask for AudioTrack or OpenSL ES. */
     fun audioOutput(): String = when (Settings.getInstance(activity).getString(KEY_AOUT, "-1")?.toIntOrNull()) {
         1 -> AOUT_AUDIOTRACK
@@ -81,7 +93,18 @@ internal class ActivityInfoSource(private val activity: VideoPlayerActivity) {
         val player = activity.service?.mediaplayer ?: return null
         val playing = player.media ?: return null
         return try {
-            playing.stats?.let { StatsSample(inputMbps = it.inputBitrate * BITS_PER_BYTE, displayed = it.displayedPictures, lost = it.lostPictures) }
+            playing.stats?.let {
+                StatsSample(
+                    inputMbps = it.inputBitrate * BITS_PER_BYTE,
+                    displayed = it.displayedPictures,
+                    lost = it.lostPictures,
+                    demuxMbps = it.demuxBitrate * BITS_PER_BYTE,
+                    corrupted = it.demuxCorrupted,
+                    discontinuities = it.demuxDiscontinuity,
+                    audioPlayed = it.playedAbuffers,
+                    audioLost = it.lostAbuffers,
+                )
+            }
         } finally {
             playing.release()
         }

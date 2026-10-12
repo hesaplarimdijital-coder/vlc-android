@@ -396,6 +396,28 @@ const val KEY_SUBTITLES_SHADOW_COLOR_OPACITY = "subtitles_shadow_color_opacity"
 const val KEY_SUBTITLES_AUTOLOAD = "subtitles_autoload"
 // Nağmedar (S-705): the subtitles' font family, one of the system's ("serif", "monospace"); none is VLC's own
 const val KEY_SUBTITLES_FONT = "nagmedar_subtitles_font"
+
+// Nağmedar (S-503 … S-508): what libVLC starts with, read by VLCOptions as the subtitles' font is
+/** The subtitles' height above the picture's bottom edge, in pixels. */
+const val KEY_NAG_SUBTITLE_MARGIN = "nagmedar_subtitle_margin"
+/** Whether the subtitles may stand in the black bars under a wide film. */
+const val KEY_NAG_SUBTITLE_BLACK_BARS = "nagmedar_subtitle_black_bars"
+/** Whether ASS files are shown with the app's look rather than their own styles. */
+const val KEY_NAG_ASS_OURS = "nagmedar_subtitle_ass_ours"
+/** Whether the secondary subtitles stand at the top of the picture. */
+const val KEY_NAG_SECONDARY_SUB_TOP = "nagmedar_secondary_sub_top"
+/** libplacebo's tone-mapping curve for the OpenGL video output: "auto", "bt2390", "hable", "reinhard", "mobius". */
+const val KEY_NAG_TONE_MAPPING = "nagmedar_tone_mapping"
+/** The OpenGL video output's scaler: "auto", "bilinear", "spline36", "ewa_lanczos". */
+const val KEY_NAG_SCALER = "nagmedar_scaler"
+/** The picture turned or mirrored, as VLC's transform filter names it: "", "90", "180", "270", "hflip", "vflip", "transpose", "antitranspose". */
+const val KEY_NAG_TRANSFORM = "nagmedar_transform"
+/** How the sound leaves: "auto", "stereo", "pcm", "passthrough" (as the device reports), "forced" (the codecs below). */
+const val KEY_NAG_AUDIO_OUTPUT = "nagmedar_audio_output"
+/** The codecs sent as a bitstream when forced: "ac3,eac3,dts,dtshd,truehd". */
+const val KEY_NAG_PASSTHROUGH_CODECS = "nagmedar_passthrough_codecs"
+/** Whether a film's forced subtitles show on their own when no subtitles are chosen. */
+const val KEY_NAG_FORCED_SUBTITLES = "nagmedar_forced_subtitles"
 const val KEY_OPENGL = "opengl"
 
 //Control settings

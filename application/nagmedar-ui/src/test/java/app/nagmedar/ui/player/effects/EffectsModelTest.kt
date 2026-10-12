@@ -37,7 +37,7 @@ internal class FakeEffectsTarget : PlayerEffectsTarget {
     }
 }
 
-internal class FakeNativeEffects(override val supported: Set<Effect>) : NativeEffects {
+internal class FakeNativeEffects(override val supported: Set<Effect>, override val deferred: Set<Effect> = emptySet()) : NativeEffects {
     val calls = mutableListOf<String>()
 
     override fun setColorAdjust(adjust: ColorAdjust) {
@@ -130,6 +130,24 @@ class EffectsModelTest {
         engine.apply(sampleEffects)
         assertTrue(native.calls.containsAll(listOf("crop:true", "hdr:passthrough:ewa_lanczos", "debanding:true", "night:true", "dialogue:3", "channels:stereo")))
         assertTrue("rock, at the film's level", "equalizer:rock:0.0" in target.calls)
+    }
+
+    @Test
+    fun whatLibVlcTakesAsItStartsIsLeftWhenThePlayerGoes() {
+        val native = FakeNativeEffects(Effect.entries.toSet(), deferred = setOf(Effect.HdrOutput, Effect.ToneMapping, Effect.Scaler, Effect.Transform))
+        val engine = EffectsEngine(target, native)
+        engine.apply(PlayerEffects(hdrOutput = HdrOutput.ToneMap, transform = VideoTransform(rotation = 90), nightMode = true))
+        assertEquals(listOf("transform:90", "hdr:tonemap:auto", "night:true"), native.calls)
+        native.calls.clear()
+        // the player goes: the sound's effects are undone, VLC's settings for its next start are not
+        engine.apply(PlayerEffects(), release = true)
+        assertEquals(listOf("night:false"), native.calls)
+        val controller = EffectsController(EffectsEngine(target, native), FakeEffectsStore(), CoroutineScope(Dispatchers.Unconfined), saveAfterMs = 0)
+        assertFalse(controller.waiting)
+        controller.update { it.copy(nightMode = true) }
+        assertFalse(controller.waiting)
+        controller.update { it.copy(scaler = Scaler.Spline36) }
+        assertTrue(controller.waiting)
     }
 
     @Test

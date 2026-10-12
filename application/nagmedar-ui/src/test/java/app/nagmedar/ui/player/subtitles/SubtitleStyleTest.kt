@@ -55,8 +55,8 @@ internal class FakeStyleStore(var kept: SubtitleStyle = SubtitleStyle()) : Subti
     }
 }
 
-internal class FakeNativeStyle(override val live: Boolean) : NativeSubtitleStyle {
-    override val supportsLayout: Boolean = live
+internal class FakeNativeStyle(override val liveSize: Boolean) : NativeSubtitleStyle {
+    override val supportsLayout: Boolean = liveSize
     val applied = mutableListOf<SubtitleStyle>()
 
     override fun apply(style: SubtitleStyle) {
@@ -173,13 +173,23 @@ class SubtitleStyleTest {
         assertEquals(1, store.saves)
 
         LibVlcRestart.pending = false
-        val native = FakeNativeStyle(live = true)
+        val native = FakeNativeStyle(liveSize = true)
         val live = SubtitleStyleController(FakeStyleStore(), native, CoroutineScope(Dispatchers.Unconfined), saveAfterMs = 0)
+        // the size alone changes the playing film's subtitles at once (S-503)
         live.update(live.style.copy(sizePx = 52))
         assertEquals(listOf(SubtitleStyle(sizePx = 52)), native.applied)
         assertFalse(live.waiting)
         assertFalse(LibVlcRestart.pending)
         assertTrue(live.supportsLayout)
+        // a new film's player takes the size again
+        live.onMediaStarted()
+        assertEquals(2, native.applied.size)
+        // the rest still waits for libVLC's options, the size going at once with it
+        live.update(live.style.copy(sizePx = 56, shadow = false))
+        assertEquals(SubtitleStyle(sizePx = 56, shadow = false), native.applied.last())
+        assertTrue(live.waiting)
+        assertTrue(LibVlcRestart.pending)
+        LibVlcRestart.pending = false
     }
 
     private val changes = mutableListOf<SubtitleStyle>()

@@ -10,6 +10,13 @@ package app.nagmedar.ui.player.effects
 interface NativeEffects {
     val supported: Set<Effect>
 
+    /**
+     * Of [supported], the effects libVLC takes as it starts rather than while a film plays (the
+     * video output, its tone mapping and scaler, the picture turned): they are kept for its next
+     * start, and the panel says so.
+     */
+    val deferred: Set<Effect> get() = emptySet()
+
     fun setColorAdjust(adjust: ColorAdjust)
 
     fun setAutoCrop(enabled: Boolean)
@@ -76,11 +83,15 @@ class EffectsEngine(private val target: PlayerEffectsTarget, private val native:
 
     private var applied = PlayerEffects()
 
+    /** What libVLC takes as it starts rather than at once. */
+    val deferred: Set<Effect> get() = native.deferred
+
     /**
      * [newFilm]: a film just started, for which the player set its own equaliser again (VLC's,
-     * when it is on): the effects' equaliser goes back over it.
+     * when it is on): the effects' equaliser goes back over it. [release]: the player goes, and
+     * what libVLC keeps for its next start ([deferred]) is left as it is.
      */
-    fun apply(effects: PlayerEffects, newFilm: Boolean = false) {
+    fun apply(effects: PlayerEffects, newFilm: Boolean = false, release: Boolean = false) {
         val last = applied
         applied = effects
         if (effects.aspect != last.aspect) target.setAspect(effects.aspect)
@@ -88,7 +99,7 @@ class EffectsEngine(private val target: PlayerEffectsTarget, private val native:
         if (effects.equalizer != last.equalizer || effects.gainPercent != last.gainPercent || (newFilm && ownEqualizer)) {
             target.setEqualizer(effects.equalizer, effects.gainDb)
         }
-        val can = native.supported
+        val can = if (release) native.supported - native.deferred else native.supported
         if (Effect.ColorAdjust in can && effects.color != last.color) native.setColorAdjust(effects.color)
         if (Effect.AutoCrop in can && effects.autoCrop != last.autoCrop) native.setAutoCrop(effects.autoCrop)
         if (Effect.Transform in can && effects.transform != last.transform) native.setTransform(effects.transform)

@@ -56,9 +56,15 @@ import app.nagmedar.ui.player.effects.ActivityEffectsTarget
 import app.nagmedar.ui.player.effects.EffectsController
 import app.nagmedar.ui.player.effects.EffectsEngine
 import app.nagmedar.ui.player.effects.EffectsPanel
-import app.nagmedar.ui.player.effects.PendingNativeEffects
+import app.nagmedar.ui.player.audio.ActivityAudioOutput
+import app.nagmedar.ui.player.audio.AudioOutputController
+import app.nagmedar.ui.player.audio.PrefsAudioOutputStore
+import app.nagmedar.ui.player.effects.ActivityAutoCrop
+import app.nagmedar.ui.player.effects.AudioOutputView
+import app.nagmedar.ui.player.effects.LibVlcEffects
 import app.nagmedar.ui.player.effects.RoomEffectsStore
 import app.nagmedar.ui.player.info.ActivityInfoSource
+import app.nagmedar.ui.player.info.VideoOutputChoice
 import app.nagmedar.ui.player.info.FileFacts
 import app.nagmedar.ui.player.info.InfoPanel
 import app.nagmedar.ui.player.info.InfoRow
@@ -100,13 +106,13 @@ import app.nagmedar.ui.player.subtitles.OkHttpOpenSubtitles
 import app.nagmedar.ui.player.subtitles.OnlineSection
 import app.nagmedar.ui.player.subtitles.OnlineSubtitlesController
 import app.nagmedar.ui.player.subtitles.OnlineSubtitlesDialog
-import app.nagmedar.ui.player.subtitles.PendingNativeSubtitleStyle
-import app.nagmedar.ui.player.subtitles.PendingSecondaryLayout
+import app.nagmedar.ui.player.subtitles.LibVlcSubtitleStyle
+import app.nagmedar.ui.player.subtitles.PrefsForcedSubtitlesStore
+import app.nagmedar.ui.player.subtitles.PrefsSecondaryLayout
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.PrefsSubtitleStyleStore
 import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
-import app.nagmedar.ui.player.subtitles.SecondaryPosition
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.subtitles.SubtitleEncodings
@@ -138,6 +144,7 @@ import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
 import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.EXTRA_SEEK_DELAY
 import org.videolan.resources.SubtitleEncodingHook
+import org.videolan.tools.KEY_SUBTITLE_PREFERRED_LANGUAGE
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.gui.video.PlayerChrome
@@ -163,6 +170,8 @@ class DesktopPlayerChrome : PlayerChrome {
     private var frame: View? = null
     private var panelHost: PanelHost? = null
     private var effects: EffectsController? = null
+    private var autoCrop: ActivityAutoCrop? = null
+    private var output: AudioOutputController? = null
     private var sync: SyncController? = null
     private var snapshots: SnapshotController? = null
     private var navigation: PlayerNavigation? = null
@@ -211,14 +220,20 @@ class DesktopPlayerChrome : PlayerChrome {
         ShortcutRegistry.overrides = ShortcutOverrides.parse(Settings.getInstance(activity).getString(NagmedarPreferences.KEY_SHORTCUTS, null))
         // a desktop with a mouse starts with these controls; a finger later hands the video back
         if (hasPrecisePointer(activity)) controls.activate()
-        // the effects (S-603): the classic player's own today, the native ones once libVLC has them
+        // the effects (S-603): the classic player's own, and libVLC's through Nağmedar's additions (S-505, S-506)
+        val settings = Settings.getInstance(activity)
+        val autoCrop = ActivityAutoCrop(activity, MainScope())
+        this.autoCrop = autoCrop
         val effects = EffectsController(
-            EffectsEngine(ActivityEffectsTarget(activity), PendingNativeEffects),
+            EffectsEngine(ActivityEffectsTarget(activity), LibVlcEffects({ activity.service?.mediaplayer?.takeIf { !it.isReleased } }, settings, autoCrop)),
             RoomEffectsStore(activity.applicationContext),
             // saves outlive the player's window: the last change is kept when it closes
             MainScope(),
         )
         this.effects = effects
+        // the audio output (S-508): PCM or a bitstream, as the device says or as forced
+        val output = AudioOutputController(ActivityAudioOutput(activity), PrefsAudioOutputStore(settings))
+        this.output = output
         // the delays and the subtitles' speed (S-604)
         val sync = SyncController(ActivitySyncTarget(activity), PendingNativeSubtitles, RoomSyncStore(activity.applicationContext), MainScope())
         this.sync = sync
@@ -240,11 +255,23 @@ class DesktopPlayerChrome : PlayerChrome {
         val subtitles = PlayerSubtitles(activity, MainScope())
         this.subtitles = subtitles
         SubtitleEncodingHook.finder = SubtitleEncodings
-        // two subtitle tracks at once (S-703)
-        val dual = DualSubtitlesController(ActivitySubtitleTracks(activity), RoomSecondaryStore(activity.applicationContext), MainScope())
+        // two subtitle tracks at once (S-703); the forced ones on their own when wanted (S-503)
+        val dual = DualSubtitlesController(
+            ActivitySubtitleTracks(activity),
+            RoomSecondaryStore(activity.applicationContext),
+            MainScope(),
+            forcedStore = PrefsForcedSubtitlesStore(settings),
+            forcedLanguages = { forcedLanguages(activity) },
+        )
         this.dual = dual
-        // the subtitles' look (S-705), for every film
-        val appearance = SubtitleStyleController(PrefsSubtitleStyleStore(activity.applicationContext), PendingNativeSubtitleStyle, MainScope())
+        // the secondary subtitles' place (S-503), as libVLC's options take it
+        val secondaryLayout = PrefsSecondaryLayout(settings)
+        // the subtitles' look (S-705), for every film; its size at once with Nağmedar's libVLC (S-503)
+        val appearance = SubtitleStyleController(
+            PrefsSubtitleStyleStore(activity.applicationContext),
+            LibVlcSubtitleStyle { activity.service?.mediaplayer?.takeIf { !it.isReleased } },
+            MainScope(),
+        )
         this.appearance = appearance
         // subtitles from OpenSubtitles.com, with Nağmedar's own key (S-706)
         val online = OnlineSubtitlesController(OkHttpOpenSubtitles(BuildConfig.OPENSUBTITLES_API_KEY), PrefsOnlineQuotaStore(Settings.getInstance(activity)), MainScope())
@@ -261,7 +288,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online), layout)
+            PanelContent(activity, controls, panel, effects, output, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online, secondaryLayout), layout)
         }.also { it.attach() }
     }
 
@@ -301,6 +328,9 @@ class DesktopPlayerChrome : PlayerChrome {
     override fun onPlaying() {
         val uri = activity?.service?.currentMediaWrapper?.uri?.toString()
         effects?.onMediaStarted(uri)
+        // S-505: the black bars of the new film; S-508: the output chosen, which a new player would not have
+        autoCrop?.onMediaStarted()
+        output?.onMediaStarted()
         sync?.onMediaStarted(uri)
         assistant?.onMediaStarted(uri)
         // another film: its own minute of statistics
@@ -313,6 +343,8 @@ class DesktopPlayerChrome : PlayerChrome {
         // its subtitles beside it (S-701), its secondary track (S-703)
         subtitles?.onMediaStarted()
         dual?.onMediaStarted(uri)
+        // S-503: the look's size, which a new player would not have
+        appearance?.onMediaStarted()
     }
 
     /**
@@ -369,6 +401,9 @@ class DesktopPlayerChrome : PlayerChrome {
     override fun detach() {
         effects?.release()
         effects = null
+        autoCrop?.setAutoCrop(false)
+        autoCrop = null
+        output = null
         sync?.release()
         sync = null
         assistant = null
@@ -405,7 +440,20 @@ private class PanelSubtitles(
     val assistant: SyncAssistant,
     val appearance: SubtitleStyleController,
     val online: OnlineSubtitlesController,
+    val secondaryLayout: PrefsSecondaryLayout,
 )
+
+/**
+ * S-503: the languages a film's forced subtitles are wanted in, most wanted first: the audio
+ * track's, the subtitles' preferred language from the classic settings, the interface's.
+ */
+private fun forcedLanguages(activity: VideoPlayerActivity): List<String> {
+    val audio = activity.service?.mediaplayer?.takeIf { !it.isReleased }?.let { player ->
+        runCatching { player.getSelectedTrack(IMedia.Track.Type.Audio)?.language }.getOrNull()
+    }
+    val preferred = Settings.getInstance(activity).getString(KEY_SUBTITLE_PREFERRED_LANGUAGE, null)
+    return listOfNotNull(audio, preferred, Locale.getDefault().language).filter { it.isNotBlank() }.distinct()
+}
 
 /** Alt+V, the menu's item, the tab's switch (S-703): the secondary subtitles on or off, said over the video. */
 private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesController) {
@@ -657,7 +705,16 @@ private fun InfoContent(info: PanelInfo, navigation: PlayerNavigation, columns: 
     val screen = info.refresh.status
     val rows = listOf(
         InfoRow(stringResource(R.string.nag_info_video_decoder), stringResource(decoding.label)),
-        InfoRow(stringResource(R.string.nag_info_video_output), null),
+        InfoRow(
+            stringResource(R.string.nag_info_video_output),
+            stringResource(
+                when (source.videoOutput()) {
+                    VideoOutputChoice.Auto -> R.string.nag_info_output_auto
+                    VideoOutputChoice.Android -> R.string.nag_info_output_android
+                    VideoOutputChoice.OpenGl -> R.string.nag_info_output_opengl
+                },
+            ),
+        ),
         InfoRow(stringResource(R.string.nag_info_audio_decoder), null),
         InfoRow(stringResource(R.string.nag_info_audio_output), source.audioOutput()),
         // the screen's rate and how the film's frames fall on it (S-612)
@@ -671,6 +728,7 @@ private fun InfoContent(info: PanelInfo, navigation: PlayerNavigation, columns: 
         live = stringResource(R.string.nag_info_live),
         bitrate = stringResource(R.string.nag_info_report_bitrate, last?.let { mbpsLabel(it.inputMbps, locale) }.orEmpty()),
         frames = stringResource(R.string.nag_info_report_frames, countLabel(last?.lost ?: 0, locale), countLabel(last?.displayed ?: 0, locale)),
+        audio = stringResource(R.string.nag_info_report_audio, countLabel(last?.audioLost ?: 0, locale), countLabel(last?.audioPlayed ?: 0, locale)),
     )
     InfoPanel(
         file = file,
@@ -702,6 +760,7 @@ private fun PanelContent(
     visibility: ChromeVisibility,
     panel: PanelState,
     effects: EffectsController,
+    output: AudioOutputController,
     sync: SyncController,
     info: PanelInfo,
     navigation: PlayerNavigation,
@@ -725,20 +784,20 @@ private fun PanelContent(
                                 delay(500)
                             }
                         }
-                        var position by remember { mutableStateOf(SecondaryPosition.Top) }
+                        val secondaryLayout = subtitles.secondaryLayout
                         SubtitlesPanel(
                             state = dual.state,
                             note = subtitles.files.note,
-                            layoutSupported = PendingSecondaryLayout.supported,
-                            position = position,
+                            layoutSupported = secondaryLayout.supported,
+                            position = secondaryLayout.current,
                             onPrimary = dual::setPrimary,
                             onSecondary = dual::setSecondary,
                             onSecondaryOn = { on -> if (on != dual.state.secondaryOn) toggleSecondary(activity, dual) },
-                            onPosition = { chosen ->
-                                position = chosen
-                                PendingSecondaryLayout.setPosition(chosen)
-                            },
+                            onPosition = secondaryLayout::setPosition,
                             columns = layout.columns,
+                            forced = dual.forced,
+                            onForced = dual::wantForced,
+                            positionWaiting = secondaryLayout.waiting,
                             sync = {
                                 SubtitleSyncSection(
                                     delayMs = sync.values.subtitleDelayMs,
@@ -802,16 +861,25 @@ private fun PanelContent(
                             },
                         )
                     }
-                    PanelTab.Effects -> EffectsPanel(
-                        effects = effects.effects,
-                        supported = effects.supported,
-                        remembered = effects.remembered,
-                        onChange = effects::update,
-                        onRemember = effects::remember,
-                        onMakeDefault = effects::makeDefault,
-                        onEqualizerWindow = activity::showEqualizer,
-                        columns = layout.columns,
-                    )
+                    PanelTab.Effects -> {
+                        // S-508: what is plugged in, read again as the tab opens
+                        LaunchedEffect(output) { output.refresh() }
+                        EffectsPanel(
+                            effects = effects.effects,
+                            supported = effects.supported,
+                            remembered = effects.remembered,
+                            onChange = effects::update,
+                            onRemember = effects::remember,
+                            onMakeDefault = effects::makeDefault,
+                            onEqualizerWindow = activity::showEqualizer,
+                            columns = layout.columns,
+                            deferred = effects.deferred,
+                            waiting = effects.waiting,
+                            output = AudioOutputView(output.mode, output.codecs, output.sinks, output.canPassthrough, output.refused),
+                            onOutputMode = output::choose,
+                            onOutputCodec = output::toggle,
+                        )
+                    }
                     PanelTab.Info -> InfoContent(info, navigation, layout.columns)
                     PanelTab.Bookmarks -> {
                         val uri = remember { mutableStateOf(info.source.uri()) }

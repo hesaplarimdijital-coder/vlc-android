@@ -11,6 +11,25 @@ import kotlin.math.log10
 enum class Effect {
     ColorAdjust, Aspect, AutoCrop, Transform, HdrOutput, ToneMapping, Scaler, Deinterlace, Debanding,
     NightMode, Dialogue, Gain, ChannelLayout, Equalizer,
+    ;
+
+    /** Whether this effect is set differently in [a] and [b]. */
+    fun differs(a: PlayerEffects, b: PlayerEffects): Boolean = when (this) {
+        ColorAdjust -> a.color != b.color
+        Aspect -> a.aspect != b.aspect
+        AutoCrop -> a.autoCrop != b.autoCrop
+        Transform -> a.transform != b.transform
+        HdrOutput -> a.hdrOutput != b.hdrOutput
+        ToneMapping -> a.toneMapping != b.toneMapping
+        Scaler -> a.scaler != b.scaler
+        Deinterlace -> a.deinterlace != b.deinterlace
+        Debanding -> a.debanding != b.debanding
+        NightMode -> a.nightMode != b.nightMode
+        Dialogue -> a.dialogueDb != b.dialogueDb
+        Gain -> a.gainPercent != b.gainPercent
+        ChannelLayout -> a.channelLayout != b.channelLayout
+        Equalizer -> a.equalizer != b.equalizer
+    }
 }
 
 /**

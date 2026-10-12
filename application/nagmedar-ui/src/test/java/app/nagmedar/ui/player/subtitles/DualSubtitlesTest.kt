@@ -19,6 +19,14 @@ internal class FakeSubtitleTracks(var tracks: List<SubtitleTrackChoice>, var sel
     }
 }
 
+internal class FakeForcedStore(var on: Boolean = false) : ForcedSubtitlesStore {
+    override fun load(): Boolean = on
+
+    override fun save(on: Boolean) {
+        this.on = on
+    }
+}
+
 internal class FakeSecondaryStore : SecondaryStore {
     val kept = HashMap<String, String?>()
 
@@ -118,6 +126,42 @@ class DualSubtitlesTest {
         val dual = dual(target, store)
         assertEquals(listOf("spu/2", "spu/4"), target.selected)
         assertTrue(dual.state.secondaryOn)
+    }
+
+    @Test
+    fun theForcedSubtitlesShowOnTheirOwnWhenWanted() {
+        // the track named so, in the audio's language first
+        assertEquals("spu/3", forcedTrack(sampleSubtitleTracks, listOf("tur", "en"))?.id)
+        val english = sampleSubtitleTracks + SubtitleTrackChoice("spu/5", "English (Forced)", "eng")
+        assertEquals("spu/5", forcedTrack(english, listOf("en"))?.id)
+        assertEquals("spu/5", forcedTrack(english, listOf("fr", "eng"))?.id)
+        // none in the languages wanted: any forced one
+        assertEquals("spu/3", forcedTrack(english, listOf("fr"))?.id)
+        assertEquals("spu/3", forcedTrack(english, emptyList())?.id)
+        assertNull(forcedTrack(sampleSubtitleTracks.take(1), listOf("tur")))
+
+        // a film with no subtitles chosen: the forced ones show, once the setting is on
+        val target = FakeSubtitleTracks(sampleSubtitleTracks)
+        val store = FakeForcedStore()
+        val dual = DualSubtitlesController(target, FakeSecondaryStore(), CoroutineScope(Dispatchers.Unconfined), waitStepMs = 0, forcedStore = store, forcedLanguages = { listOf("tur") })
+        dual.onMediaStarted(film)
+        assertNull(dual.state.primary)
+        dual.wantForced(true)
+        assertTrue(store.on)
+        assertEquals(listOf("spu/3"), target.selected)
+        assertEquals("spu/3", dual.state.primary)
+        // the next film too, as it starts; subtitles chosen by the player stay
+        target.selected = listOf("spu/4")
+        dual.onMediaStarted("file:///films/other.mkv")
+        assertEquals("spu/4", dual.state.primary)
+        target.selected = emptyList()
+        dual.onMediaStarted("file:///films/third.mkv")
+        assertEquals("spu/3", dual.state.primary)
+        // off, nothing is chosen for the user
+        dual.wantForced(false)
+        target.selected = emptyList()
+        dual.onMediaStarted("file:///films/fourth.mkv")
+        assertNull(dual.state.primary)
     }
 
     @Test

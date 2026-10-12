@@ -8,11 +8,16 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.player.LibVlcExtensions
 import app.nagmedar.ui.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.videolan.libvlc.MediaPlayer
+import org.videolan.tools.KEY_NAG_ASS_OURS
+import org.videolan.tools.KEY_NAG_SUBTITLE_BLACK_BARS
+import org.videolan.tools.KEY_NAG_SUBTITLE_MARGIN
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY
@@ -210,6 +215,10 @@ class PrefsSubtitleStyleStore(private val prefs: SharedPreferences) : SubtitleSt
         editor.putInt(KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, (style.backgroundPercent * OPAQUE + 50) / 100)
         // the system's own family needs no option
         if (style.font == SubtitleFont.Sans) editor.remove(KEY_SUBTITLES_FONT) else editor.putString(KEY_SUBTITLES_FONT, style.font.family)
+        // S-503: where the subtitles stand, as libVLC's options take it (NagmedarVlcOptions)
+        editor.putInt(KEY_NAG_SUBTITLE_MARGIN, style.raisePx)
+        editor.putBoolean(KEY_NAG_SUBTITLE_BLACK_BARS, style.inBlackBars)
+        editor.putBoolean(KEY_NAG_ASS_OURS, style.ass == AssStyles.Ours)
         editor.apply()
     }
 
@@ -256,24 +265,41 @@ fun snapSize(px: Int): Int =
     ((px.toFloat() / SubtitleStyle.SIZE_STEP_PX).roundToInt() * SubtitleStyle.SIZE_STEP_PX).coerceIn(SubtitleStyle.MIN_SIZE_PX, SubtitleStyle.MAX_SIZE_PX)
 
 /**
- * The native side of the look (S-503): libVLC's text renderer taking a look while a film plays,
- * and the settings only it has: where the subtitles stand, the black bars, the ASS styles. This
- * build's libVLC has none of it ([PendingNativeSubtitleStyle]): the look reaches the subtitles as
- * libVLC starts again ([LibVlcRestart]).
+ * The native side of the look (S-503): libVLC taking the text's size while a film plays
+ * ([liveSize], Nağmedar's own libVLC), and the settings only it has: where the subtitles stand,
+ * the black bars, the ASS styles ([supportsLayout], VLC's options as libVLC starts again). The
+ * published libVLC has none of it ([PendingNativeSubtitleStyle]): the look reaches the subtitles
+ * as libVLC starts again ([LibVlcRestart]).
  */
 interface NativeSubtitleStyle {
-    val live: Boolean
+    /** Whether the text's size changes the playing film's subtitles at once. */
+    val liveSize: Boolean
 
     val supportsLayout: Boolean
 
+    /** The playing film's subtitles take what [style] changes at once: their size. */
     fun apply(style: SubtitleStyle)
 }
 
 object PendingNativeSubtitleStyle : NativeSubtitleStyle {
-    override val live: Boolean = false
+    override val liveSize: Boolean = false
     override val supportsLayout: Boolean = false
 
     override fun apply(style: SubtitleStyle) = Unit
+}
+
+/**
+ * libVLC with Nağmedar's additions ([LibVlcExtensions]): the text's size at once, through its
+ * text scale; the rest, and the subtitles' place, through its options as it starts again.
+ */
+class LibVlcSubtitleStyle(private val player: () -> MediaPlayer?) : NativeSubtitleStyle {
+    override val liveSize: Boolean get() = LibVlcExtensions.hasTextScale
+    override val supportsLayout: Boolean = true
+
+    override fun apply(style: SubtitleStyle) {
+        val player = player() ?: return
+        LibVlcExtensions.setSpuTextScale(player, style.textScale / 100f)
+    }
 }
 
 /**
@@ -305,10 +331,11 @@ class SubtitleStyleController(
 
     fun update(next: SubtitleStyle) {
         if (next == style) return
+        val before = style
         style = next
-        if (native.live) {
-            native.apply(next)
-        } else {
+        val sizeOnly = next == before.copy(sizePx = next.sizePx)
+        if (native.liveSize) native.apply(next)
+        if (!(sizeOnly && native.liveSize)) {
             waiting = true
             LibVlcRestart.pending = true
         }
@@ -321,6 +348,11 @@ class SubtitleStyleController(
     }
 
     fun choose(preset: SubtitlePreset) = update(preset.over(style))
+
+    /** A film started: the playing player takes the look's size, when it can (a player outlives libVLC's options). */
+    fun onMediaStarted() {
+        if (native.liveSize) native.apply(style)
+    }
 
     /** The player goes: what is left to save is saved. */
     fun release() {

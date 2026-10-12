@@ -72,6 +72,8 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.audio.AudioOutputMode
+import app.nagmedar.ui.player.audio.PassthroughCodec
 import app.nagmedar.ui.player.panel.DropButton
 import app.nagmedar.ui.player.panel.LabelledRow
 import app.nagmedar.ui.player.panel.PanelBadge
@@ -109,29 +111,42 @@ fun EffectsPanel(
     modifier: Modifier = Modifier,
     /** Under the video in a wide window: two columns of sections. */
     columns: Int = 1,
+    /** Of [supported], what libVLC takes as it starts again rather than at once (S-505, S-506). */
+    deferred: Set<Effect> = emptySet(),
+    /** Whether such a change waits for the player to open again. */
+    waiting: Boolean = false,
+    /** The audio output (S-508), under the channel layout; none hides it. */
+    output: AudioOutputView? = null,
+    onOutputMode: (AudioOutputMode) -> Unit = {},
+    onOutputCodec: (PassthroughCodec) -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().testTag("effects-panel")) {
         Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            val audio = @Composable {
+                AudioSection(effects, supported, onChange, onEqualizerWindow) {
+                    if (output != null) AudioOutputRows(output, onOutputMode, onOutputCodec)
+                }
+            }
             if (columns >= 2) {
                 Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                         PictureSection(effects, supported, onChange)
-                        ShapeSection(effects, supported, onChange)
+                        ShapeSection(effects, supported, deferred, waiting, onChange)
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                        HdrSection(effects, supported, onChange)
+                        HdrSection(effects, supported, deferred, waiting, onChange)
                         PanelRule()
-                        AudioSection(effects, supported, onChange, onEqualizerWindow)
+                        audio()
                     }
                 }
             } else {
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                     PictureSection(effects, supported, onChange)
-                    ShapeSection(effects, supported, onChange)
+                    ShapeSection(effects, supported, deferred, waiting, onChange)
                     PanelRule()
-                    HdrSection(effects, supported, onChange)
+                    HdrSection(effects, supported, deferred, waiting, onChange)
                     PanelRule()
-                    AudioSection(effects, supported, onChange, onEqualizerWindow)
+                    audio()
                 }
             }
         }
@@ -180,7 +195,7 @@ private fun PictureSection(effects: PlayerEffects, supported: Set<Effect>, onCha
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
+private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, deferred: Set<Effect>, waiting: Boolean, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
     val transform = effects.transform
     val canTransform = Effect.Transform in supported
     PanelSection(spacing = 8.dp) {
@@ -218,12 +233,20 @@ private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, onChang
             }
         }
         if (transform.rotation != 0) PanelCaption(stringResource(R.string.nag_fx_rotated, transform.rotation))
+        // S-505: the turn is drawn by the OpenGL output, which libVLC takes as it starts again
+        if (canTransform && Effect.Transform in deferred) DeferredNote(waiting && !transform.isNeutral, "shape-deferred")
         if (Effect.AutoCrop !in supported || !canTransform) PendingNote("effects-pending")
     }
 }
 
+/** What libVLC takes as it starts again: said once, and that it waits when a change was made. */
 @Composable
-private fun HdrSection(effects: PlayerEffects, supported: Set<Effect>, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
+private fun DeferredNote(waiting: Boolean, tag: String) {
+    PanelCaption(stringResource(if (waiting) R.string.nag_fx_waiting else R.string.nag_fx_deferred), Modifier.testTag(tag))
+}
+
+@Composable
+private fun HdrSection(effects: PlayerEffects, supported: Set<Effect>, deferred: Set<Effect>, waiting: Boolean, onChange: ((PlayerEffects) -> PlayerEffects) -> Unit) {
     val video = setOf(Effect.HdrOutput, Effect.ToneMapping, Effect.Scaler, Effect.Debanding)
     val passthrough = effects.hdrOutput == HdrOutput.Passthrough
     PanelSection(spacing = 6.dp) {
@@ -249,6 +272,8 @@ private fun HdrSection(effects: PlayerEffects, supported: Set<Effect>, onChange:
         SwitchRow(stringResource(R.string.nag_fx_debanding), null, effects.debanding, enabled = Effect.Debanding in supported) { on ->
             onChange { it.copy(debanding = on) }
         }
+        // S-506: the output, its tone mapping and its scaler are libVLC's settings, taken as it starts again
+        if (supported.any { it in deferred }) DeferredNote(waiting, "hdr-deferred")
         if (!supported.containsAll(video + Effect.Deinterlace)) PendingNote("effects-pending")
     }
 }
@@ -259,6 +284,8 @@ private fun AudioSection(
     supported: Set<Effect>,
     onChange: ((PlayerEffects) -> PlayerEffects) -> Unit,
     onEqualizerWindow: () -> Unit,
+    /** The audio output's rows (S-508), after the channel layout. */
+    output: @Composable () -> Unit = {},
 ) {
     val locale = currentLocale()
     PanelSection(spacing = 6.dp) {
@@ -294,6 +321,7 @@ private fun AudioSection(
         SelectRow(stringResource(R.string.nag_fx_channels), effects.channelLayout, ChannelLayout.entries, Effect.ChannelLayout in supported) { option ->
             onChange { it.copy(channelLayout = option) }
         }
+        output()
         EqualizerRow(effects.equalizer, Effect.Equalizer in supported) { choice -> onChange { it.copy(equalizer = choice) } }
         WindowButton(NagIcons.Equalizer, stringResource(R.string.nag_sc_equalizer), ShortcutId.Equalizer, onEqualizerWindow)
         if (!supported.containsAll(setOf(Effect.NightMode, Effect.Dialogue, Effect.ChannelLayout))) PendingNote("effects-pending")

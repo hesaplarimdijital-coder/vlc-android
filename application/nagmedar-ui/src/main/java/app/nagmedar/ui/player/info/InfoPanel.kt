@@ -103,14 +103,14 @@ fun InfoPanel(
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) { about() }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                        LiveSection(live, pending)
+                        LiveSection(live)
                         ChaptersSection(chapters, nowMs, previews, onChapter)
                     }
                 }
             } else {
                 about()
                 PanelRule()
-                LiveSection(live, pending)
+                LiveSection(live)
                 ChaptersSection(chapters, nowMs, previews, onChapter)
             }
             // once, under everything: which lines wait for the native side
@@ -206,9 +206,9 @@ private fun DecodingSection(rows: List<InfoRow>) {
     }
 }
 
-/** A sample a second: the input bitrate and its last minute; the buffer and the pictures shown and lost side by side. */
+/** A sample a second: the input bitrate and its last minute; the sound's buffers and the pictures shown and lost side by side. */
 @Composable
-private fun LiveSection(live: LiveStats, pending: Boolean) {
+private fun LiveSection(live: LiveStats) {
     val colors = NagTheme.colors
     val locale = currentLocale()
     val last = live.last
@@ -232,14 +232,30 @@ private fun LiveSection(live: LiveStats, pending: Boolean) {
                 PanelCaption(stringResource(R.string.nag_info_graph_start), Modifier.weight(1f))
                 PanelCaption(stringResource(R.string.nag_info_graph_now))
             }
+            // S-504: what the demuxer reads, and what it found broken
+            PanelCaption(
+                stringResource(
+                    R.string.nag_info_demux,
+                    last?.let { mbpsLabel(it.demuxMbps, locale) } ?: "—",
+                    countLabel(last?.corrupted ?: 0, locale),
+                    countLabel(last?.discontinuities ?: 0, locale),
+                ),
+                Modifier.testTag("info-demux"),
+            )
         }
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // the buffer: the native side's (S-504), faded until then
-            if (pending) {
-                Card(Modifier.weight(1f).fillMaxHeight().alpha(PanelDisabledAlpha)) {
-                    Text(stringResource(R.string.nag_info_buffer), style = NagTheme.type.labelSmall, color = colors.textSecondary)
-                    Text("—", style = NagTheme.type.title.copy(fontFamily = PlexMono), color = colors.textTertiary)
-                }
+            // S-504: the sound's buffers, lost when the output could not keep up
+            Card(Modifier.weight(1f).fillMaxHeight()) {
+                Text(stringResource(R.string.nag_info_buffer), style = NagTheme.type.labelSmall, color = colors.textSecondary)
+                val audioLost = last?.audioLost ?: 0
+                Text(
+                    stringResource(R.string.nag_info_frames_lost, countLabel(audioLost, locale)),
+                    style = NagTheme.type.title.copy(fontFamily = PlexMono),
+                    color = if (last == null) colors.textTertiary else if (audioLost == 0L) colors.success else colors.warning,
+                    maxLines = 1,
+                    modifier = Modifier.testTag("info-audio-lost"),
+                )
+                PanelCaption(stringResource(R.string.nag_info_buffers_played, countLabel(last?.audioPlayed ?: 0, locale)))
             }
             Card(Modifier.weight(1f).fillMaxHeight()) {
                 Text(stringResource(R.string.nag_info_frames), style = NagTheme.type.labelSmall, color = colors.textSecondary)

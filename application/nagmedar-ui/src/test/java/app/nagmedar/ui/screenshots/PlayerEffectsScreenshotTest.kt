@@ -25,9 +25,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.player.ChromeVisibility
 import app.nagmedar.ui.player.DesktopControls
 import app.nagmedar.ui.player.FakePlayerActions
+import app.nagmedar.ui.player.audio.AudioOutputMode
+import app.nagmedar.ui.player.audio.AudioSink
+import app.nagmedar.ui.player.audio.AudioSinkKind
+import app.nagmedar.ui.player.audio.PassthroughCodec
 import app.nagmedar.ui.player.effects.AspectChoice
+import app.nagmedar.ui.player.effects.AudioOutputView
 import app.nagmedar.ui.player.effects.Effect
 import app.nagmedar.ui.player.effects.EffectsPanel
+import app.nagmedar.ui.player.effects.LibVlcEffects
 import app.nagmedar.ui.player.effects.PlayerEffects
 import app.nagmedar.ui.player.effects.sampleEffects
 import app.nagmedar.ui.player.panel.PanelDock
@@ -62,18 +68,37 @@ class PlayerEffectsScreenshotTest {
     /** This build: the classic player's aspect ratios and equaliser. */
     private val thisBuild = setOf(Effect.Aspect, Effect.Equalizer, Effect.Gain)
 
+    /** Nağmedar's own libVLC (S-505, S-506, S-508): what it takes as it starts, and the audio output's rows. */
+    private val native = LibVlcEffects.DEFERRED
+
+    private val output = AudioOutputView(
+        mode = AudioOutputMode.Forced,
+        codecs = setOf(PassthroughCodec.Ac3, PassthroughCodec.Eac3, PassthroughCodec.Dts),
+        sinks = listOf(
+            AudioSink("LG TV", AudioSinkKind.Hdmi, setOf(PassthroughCodec.Ac3, PassthroughCodec.Eac3, PassthroughCodec.Dts)),
+            AudioSink("Hoparlör", AudioSinkKind.Speaker, emptySet()),
+        ),
+        canPassthrough = true,
+        refused = false,
+    )
+
     private fun capture(
         name: String,
         effects: PlayerEffects,
         supported: Set<Effect>,
         input: InputMode = InputMode.Pointer,
         controls: Boolean = true,
+        deferred: Set<Effect> = emptySet(),
+        output: AudioOutputView? = null,
     ) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 PlayerWithPanel(PanelTab.Effects, controls) { columns ->
-                    EffectsPanel(effects, supported, remembered = true, onChange = {}, onRemember = {}, onMakeDefault = {}, onEqualizerWindow = {}, columns = columns)
+                    EffectsPanel(
+                        effects, supported, remembered = true, onChange = {}, onRemember = {}, onMakeDefault = {}, onEqualizerWindow = {}, columns = columns,
+                        deferred = deferred, waiting = deferred.isNotEmpty(), output = output,
+                    )
                 }
             }
         }
@@ -98,6 +123,16 @@ class PlayerEffectsScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun thisBuildsPlayer() = capture("player-effects-pending", PlayerEffects(aspect = AspectChoice.Wide, gainPercent = 130), thisBuild)
+
+    // Nağmedar's own libVLC: a change waiting for its next start, and the output forced to a bitstream (S-508)
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun nativeDex() = capture("player-effects-native-dex", sampleEffects, everything, deferred = native, output = output)
+
+    @Test @Config(qualifiers = "tr-w728dp-h880dp-mdpi")
+    fun nativeTablet() = capture("player-effects-native-tablet", sampleEffects, everything, deferred = native, output = output)
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun nativePhone() = capture("player-effects-native-phone", sampleEffects, everything, input = InputMode.Touch, controls = false, deferred = native, output = output)
 }
 
 /**

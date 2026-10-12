@@ -72,9 +72,22 @@ enum class VideoDecoding(val label: Int, val tag: Int?) {
     SoftwareFallback(R.string.nag_info_decoder_fallback, R.string.nag_info_tag_software),
 }
 
-/** One second of the player's statistics: the input bitrate and the pictures shown and lost. */
+/**
+ * One second of the player's statistics: the input bitrate and the pictures shown and lost; and
+ * (S-504) the demuxer's bitrate, the packets it found corrupted and the gaps it met, the sound's
+ * buffers played and lost.
+ */
 @Immutable
-data class StatsSample(val inputMbps: Float, val displayed: Long, val lost: Long)
+data class StatsSample(
+    val inputMbps: Float,
+    val displayed: Long,
+    val lost: Long,
+    val demuxMbps: Float = 0f,
+    val corrupted: Long = 0,
+    val discontinuities: Long = 0,
+    val audioPlayed: Long = 0,
+    val audioLost: Long = 0,
+)
 
 /**
  * The last minute of statistics, a sample a second (S-605): what the Info tab's graph and the
@@ -240,11 +253,12 @@ fun infoReport(file: FileFacts?, streams: List<StreamRow>, decoding: List<InfoRo
         appendLine(labels.live)
         appendLine(labels.bitrate)
         appendLine(labels.frames)
+        labels.audio?.let(::appendLine)
     }
 }.trimEnd()
 
 /** The report's headings and the last second's lines, in the interface's language. */
-class ReportLabels(val streams: String, val decoding: String, val live: String, val bitrate: String, val frames: String)
+class ReportLabels(val streams: String, val decoding: String, val live: String, val bitrate: String, val frames: String, val audio: String? = null)
 
 /** "61,8 Mbps": the input bitrate as the player reads it. */
 fun mbpsLabel(mbps: Float, locale: Locale): String = decimal(mbps.toDouble(), 1, locale) + " Mbps"

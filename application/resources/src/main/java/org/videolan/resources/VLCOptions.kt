@@ -198,8 +198,9 @@ object VLCOptions {
             } else options.add("--freetype-outline-opacity=0")
 
 
-            if (opengl == 1) options.add("--vout=gles2,none")
-            else if (opengl == 0) options.add("--vout=android_display,none")
+            // Nağmedar (S-503 … S-506): the video output, and what it and the subtitles start with
+            NagmedarVlcOptions.vout(opengl, pref)?.let { options.add(it) }
+            options.addAll(NagmedarVlcOptions.options(pref))
             options.add("--keystore")
             options.add(if (AndroidUtil.isMarshMallowOrLater) "file_crypt,none" else "file_plaintext,none")
             options.add("--keystore-file")

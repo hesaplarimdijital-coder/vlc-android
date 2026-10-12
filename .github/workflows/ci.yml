@@ -14,7 +14,9 @@
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS);
 #            otherwise it is skipped with a notice.
 # native   : manual only. Rebuilds libVLC from source for one ABI inside the
-#            VideoLAN Docker image (slow; uses prebuilt contribs when available).
+#            VideoLAN Docker image (slow; uses prebuilt contribs when available), then the
+#            app's dev APK with it: Nağmedar's own libVLC (libvlcjni/nagmedar, S-503 …
+#            S-508), its additions found at run time by the new interface.
 
 name: CI
 
@@ -283,7 +285,8 @@ jobs:
 
   native:
     name: Native libVLC (${{ inputs.native_abi }})
-    if: github.event_name == 'workflow_dispatch' && inputs.native_abi != 'yok'
+    needs: lab-native
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.native_abi != 'yok' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     container:
@@ -291,18 +294,43 @@ jobs:
       options: --user root
     steps:
       - uses: actions/checkout@v5
+
+      # the APK below carries the lab's libraries too
+      - name: Laboratuvar kitaplıkları
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: lab-jnilibs
+          path: application/nagmedar-lab/src/main/jniLibs
+
       - name: libVLC derlemesi
         run: |
           git config --global --add safe.directory '*'
           ./buildsystem/compile.sh -l -t -a ${{ inputs.native_abi }} 2>&1 | tee native.log
+
+      # Nağmedar's own libVLC (libvlcjni/nagmedar: S-503 … S-508) in the app: the dev build
+      # type takes libvlcjni and the medialibrary from source, as VLC's own dev builds do
+      - name: Uygulama (dev, kendi libVLC'mizle)
+        run: ./buildsystem/compile.sh -t -a ${{ inputs.native_abi }} 2>&1 | tee app.log
+
       - name: Hataları işaretle
         if: failure()
-        run: python3 buildsystem/ci/annotate_gradle_errors.py native.log
+        run: |
+          python3 buildsystem/ci/annotate_gradle_errors.py native.log || true
+          [ -f app.log ] && python3 buildsystem/ci/annotate_gradle_errors.py app.log || true
       - name: AAR ve .so
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: libvlc-${{ inputs.native_abi }}
           path: |
             libvlcjni/libvlc/build/outputs/aar/*.aar
             .dbg/**/*.so
+          if-no-files-found: warn
+      - name: APK (kendi libVLC'mizle)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nagmedar-native-${{ inputs.native_abi }}-apk
+          path: application/app/build/outputs/apk/dev/*.apk
           if-no-files-found: warn

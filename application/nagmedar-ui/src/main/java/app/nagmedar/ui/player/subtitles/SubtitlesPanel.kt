@@ -1,5 +1,6 @@
 package app.nagmedar.ui.player.subtitles
 
+import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +52,7 @@ import app.nagmedar.ui.player.panel.PendingNote
 import app.nagmedar.ui.player.panel.SectionTitle
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.NagTheme
+import org.videolan.tools.KEY_NAG_SECONDARY_SUB_TOP
 
 /** Where the secondary subtitles show (S-703): at the top of the picture, or right above the primary ones. */
 enum class SecondaryPosition(val key: String, @StringRes val label: Int) {
@@ -75,6 +78,31 @@ object PendingSecondaryLayout : SecondaryLayoutTarget {
 }
 
 /**
+ * The secondary subtitles' place as VLC's options take it (S-503, NagmedarVlcOptions): kept in
+ * the settings for every film, reaching the subtitles as libVLC starts again ([LibVlcRestart]).
+ */
+@Stable
+class PrefsSecondaryLayout(private val prefs: SharedPreferences) : SecondaryLayoutTarget {
+    override val supported: Boolean = true
+
+    /** Where the secondary subtitles stand. */
+    var current by mutableStateOf(if (prefs.getBoolean(KEY_NAG_SECONDARY_SUB_TOP, true)) SecondaryPosition.Top else SecondaryPosition.AbovePrimary)
+        private set
+
+    /** Whether a change waits for the player to open again. */
+    var waiting by mutableStateOf(false)
+        private set
+
+    override fun setPosition(position: SecondaryPosition) {
+        if (position == current) return
+        current = position
+        prefs.edit().putBoolean(KEY_NAG_SECONDARY_SUB_TOP, position == SecondaryPosition.Top).apply()
+        waiting = true
+        LibVlcRestart.pending = true
+    }
+}
+
+/**
  * The subtitles' tab of the player's panel (S-703), after the mockups' player: its tracks, the
  * primary and the secondary one shown with it (a switch turns it on and off, as Alt+V does), the
  * file the subtitles came from; their delay and the sync assistant ([sync], S-704); their look
@@ -95,6 +123,11 @@ fun SubtitlesPanel(
     modifier: Modifier = Modifier,
     /** Under the video in a wide window: two columns of sections. */
     columns: Int = 1,
+    /** S-503: whether the forced subtitles show on their own; null while the native side cannot. */
+    forced: Boolean? = null,
+    onForced: (Boolean) -> Unit = {},
+    /** Whether the secondary's place waits for the player to open again. */
+    positionWaiting: Boolean = false,
     /** The subtitles' delay and the sync assistant (S-704), after the tracks. */
     sync: (@Composable () -> Unit)? = null,
     /** The subtitles' look (S-705), after the delay. */
@@ -103,8 +136,8 @@ fun SubtitlesPanel(
     online: (@Composable () -> Unit)? = null,
 ) {
     Box(modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtitles-panel")) {
-        val tracks = @Composable { TracksSection(state, note, onPrimary, onSecondary, onSecondaryOn) }
-        val secondary = @Composable { SecondarySection(layoutSupported, position, onPosition) }
+        val tracks = @Composable { TracksSection(state, note, onPrimary, onSecondary, onSecondaryOn, forced, onForced) }
+        val secondary = @Composable { SecondarySection(layoutSupported, position, positionWaiting, onPosition) }
         if (columns >= 2) {
             // the tracks and their look on the left, the delay and the secondary's place on the right
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
@@ -156,6 +189,8 @@ private fun TracksSection(
     onPrimary: (String?) -> Unit,
     onSecondary: (String?) -> Unit,
     onSecondaryOn: (Boolean) -> Unit,
+    forced: Boolean?,
+    onForced: (Boolean) -> Unit,
 ) {
     val off = stringResource(R.string.nag_player_subtitles_off)
     val none = stringResource(R.string.nag_subs_none)
@@ -191,8 +226,12 @@ private fun TracksSection(
             )
         }
         if (note != null) PanelCaption(note, Modifier.testTag("subtitles-note"))
-        // S-503: the forced subtitles of the language chosen, the native side's to show
-        NagCheckbox(false, {}, stringResource(R.string.nag_subs_forced), Modifier.alpha(PanelDisabledAlpha), enabled = false)
+        // S-503: the forced subtitles (the foreign lines) on their own, when none are chosen
+        if (forced != null) {
+            NagCheckbox(forced, onForced, stringResource(R.string.nag_subs_forced), Modifier.testTag("subtitles-forced"))
+        } else {
+            NagCheckbox(false, {}, stringResource(R.string.nag_subs_forced), Modifier.alpha(PanelDisabledAlpha), enabled = false)
+        }
     }
 }
 
@@ -210,7 +249,7 @@ private fun TrackRow(label: String, shown: String, entries: List<MenuEntry>, ena
 
 /** The secondary subtitles: where they show, and the key that turns them on and off. */
 @Composable
-private fun SecondarySection(supported: Boolean, position: SecondaryPosition, onPosition: (SecondaryPosition) -> Unit) {
+private fun SecondarySection(supported: Boolean, position: SecondaryPosition, waiting: Boolean, onPosition: (SecondaryPosition) -> Unit) {
     val resources = LocalContext.current.resources
     PanelSection(spacing = 8.dp) {
         SectionTitle(stringResource(R.string.nag_subs_secondary_title))
@@ -229,6 +268,7 @@ private fun SecondarySection(supported: Boolean, position: SecondaryPosition, on
                 PanelCaption(stringResource(R.string.nag_subs_keys))
             }
         }
+        if (waiting) PanelCaption(stringResource(R.string.nag_subs_position_waiting), Modifier.testTag("subtitles-position-waiting"))
         if (!supported) PendingNote("subtitles-pending")
     }
 }

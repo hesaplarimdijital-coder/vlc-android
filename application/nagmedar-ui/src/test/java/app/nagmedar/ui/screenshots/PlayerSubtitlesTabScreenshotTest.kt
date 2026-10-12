@@ -54,7 +54,7 @@ class PlayerSubtitlesTabScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun capture(name: String, input: InputMode = InputMode.Pointer, controls: Boolean = true, applied: Boolean = false) {
+    private fun capture(name: String, input: InputMode = InputMode.Pointer, controls: Boolean = true, applied: Boolean = false, native: Boolean = false) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
@@ -62,13 +62,16 @@ class PlayerSubtitlesTabScreenshotTest {
                     SubtitlesPanel(
                         state = sampleDual,
                         note = "Kuzey Işığı.tr.srt · klasörden eşlendi",
-                        layoutSupported = false,
+                        layoutSupported = native,
                         position = SecondaryPosition.Top,
                         onPrimary = {},
                         onSecondary = {},
                         onSecondaryOn = {},
                         onPosition = {},
                         columns = columns,
+                        // S-503, with Nağmedar's own libVLC: the forced subtitles wanted, the secondary's place waiting
+                        forced = true.takeIf { native },
+                        positionWaiting = native,
                         sync = {
                             SubtitleSyncSection(
                                 delayMs = -350,
@@ -89,7 +92,7 @@ class PlayerSubtitlesTabScreenshotTest {
                                 style = sampleLook,
                                 preset = SubtitlePreset.Thin,
                                 waiting = true,
-                                layoutSupported = false,
+                                layoutSupported = native,
                                 onStyle = {},
                                 onPreset = {},
                             )
@@ -128,4 +131,14 @@ class PlayerSubtitlesTabScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("player-subtitles-tab-phone", input = InputMode.Touch, controls = false, applied = true)
+
+    // S-503, Nağmedar's own libVLC: the forced subtitles, the secondary's place and the look's layout all taken
+    @Test @Config(qualifiers = "tr-w1280dp-h1600dp-mdpi")
+    fun nativeDex() = capture("player-subtitles-native-dex", native = true)
+
+    @Test @Config(qualifiers = "tr-w728dp-h880dp-mdpi")
+    fun nativeTablet() = capture("player-subtitles-native-tablet", native = true)
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun nativePhone() = capture("player-subtitles-native-phone", input = InputMode.Touch, controls = false, native = true)
 }

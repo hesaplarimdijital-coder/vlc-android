@@ -670,6 +670,21 @@
     <string name="nag_fx_channels">Kanal düzeni</string>
     <string name="nag_fx_channels_stereo">Stereo</string>
     <string name="nag_fx_channels_binaural">Kulaklık (binaural)</string>
+    <!-- S-505, S-506: libVLC'nin yeniden başlarken aldıkları -->
+    <string name="nag_fx_deferred">HDR çıkışı, ton eşleme, ölçekleyici ve döndürme oynatıcı yeniden açılınca uygulanır.</string>
+    <string name="nag_fx_waiting">Buradaki değişiklik oynatıcının yeniden açılmasını bekliyor.</string>
+    <!-- S-508: ses çıkışı -->
+    <string name="nag_out_title">Çıkış</string>
+    <string name="nag_out_stereo">Stereo PCM</string>
+    <string name="nag_out_multichannel">Çok kanallı PCM</string>
+    <string name="nag_out_passthrough">Bitstream (passthrough)</string>
+    <string name="nag_out_forced">Bitstream, zorlanan codec\'ler</string>
+    <string name="nag_out_refused">Oynatıcının ses çıkışı bitstream gönderemiyor: klasik ses ayarlarında AudioTrack\'i seçin.</string>
+    <string name="nag_out_no_bitstream">Takılı hiçbir cihaz bitstream aldığını söylemiyor; ses PCM olarak gidiyor.</string>
+    <string name="nag_out_pcm_only">PCM</string>
+    <string name="nag_out_sink_headphones">Kulaklık</string>
+    <string name="nag_out_sink_speaker">Hoparlör</string>
+    <string name="nag_out_sink_other">Başka çıkış</string>
     <string name="nag_fx_equalizer">Ekolayzer</string>
     <string name="nag_fx_equalizer_players">Oynatıcının ayarı</string>
     <string name="nag_fx_remember">Bu dosya için kaydet</string>
@@ -723,6 +738,7 @@
     <string name="nag_subs_top">Üstte</string>
     <string name="nag_subs_above">Birincilin üstünde</string>
     <string name="nag_subs_keys">ikincil altyazıyı açar ya da kapatır</string>
+    <string name="nag_subs_position_waiting">Yer, oynatıcı yeniden açılınca altyazılara uygulanır.</string>
     <string name="nag_subs_secondary_on">İkincil altyazı: %1$s</string>
     <string name="nag_subs_secondary_off">İkincil altyazı kapalı</string>
     <string name="nag_subs_secondary_missing">İkincil altyazı için başka iz yok</string>
@@ -903,7 +919,12 @@
     <string name="nag_info_frames">Kare</string>
     <string name="nag_info_frames_lost">%1$s kayıp</string>
     <string name="nag_info_frames_shown">%1$s gösterildi</string>
-    <string name="nag_info_buffer">Tampon</string>
+    <string name="nag_info_buffer">Ses tamponları</string>
+    <string name="nag_info_buffers_played">%1$s çalındı</string>
+    <string name="nag_info_demux">Demux: %1$s · %2$s bozuk · %3$s kopukluk</string>
+    <string name="nag_info_output_auto">VLC\'nin seçimi: Android\'in kendi çıkışı, HDR ekrana aktarılır</string>
+    <string name="nag_info_output_android">Android (ASurfaceControl), HDR ekrana aktarılır</string>
+    <string name="nag_info_output_opengl">libplacebo ile OpenGL ES: ton eşleme, ölçekleme</string>
     <string name="nag_info_pending">Soluk satırlar oynatıcı motorunun yeni sürümüyle dolacak.</string>
     <string name="nag_info_overlay">Videonun üzerinde göster</string>
     <string name="nag_info_overlay_bitrate">Bit hızı</string>
@@ -912,6 +933,7 @@
     <string name="nag_info_copied">Kopyalandı</string>
     <string name="nag_info_report_bitrate">Giriş bit hızı: %1$s</string>
     <string name="nag_info_report_frames">Kare: %2$s gösterildi, %1$s kayıp</string>
+    <string name="nag_info_report_audio">Ses tamponları: %2$s çalındı, %1$s kayıp</string>
     <!-- S-606: screenshots -->
     <string name="nag_snap_options">Ekran görüntüsü seçenekleri</string>
     <string name="nag_snap_saved">Ekran görüntüsü kaydedildi</string>

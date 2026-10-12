@@ -293,7 +293,7 @@ fi
 # the "libvlcjni aynası" workflow); VLC comes from the user's fork. Each link can be
 # pointed elsewhere through the environment.
 if [ "$FORCE_VLC_4" = 1 ]; then
-    LIBVLCJNI_TESTED_HASH=a8d53a9151d7e4a9a5dfd0a5eb1cd92669afdc21
+    LIBVLCJNI_TESTED_HASH=3cf6461bf659cf0118e69a37e95cd1f2fd09f71b
     LIBVLCJNI_BRANCH="libvlcjni/nagmedar"
     : ${VLC_REPOSITORY:=https://github.com/hesaplarimdijital-coder/vlc.git}
 else

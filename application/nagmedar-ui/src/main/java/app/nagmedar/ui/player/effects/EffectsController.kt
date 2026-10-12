@@ -85,6 +85,13 @@ class EffectsController(
 
     val supported: Set<Effect> get() = engine.supported
 
+    /** Of [supported], what libVLC takes as it starts again. */
+    val deferred: Set<Effect> get() = engine.deferred
+
+    /** Whether a change waits for libVLC to start again (the video output, its scaler, the picture turned). */
+    var waiting by mutableStateOf(false)
+        private set
+
     private var pending: Pair<String, PlayerEffects>? = null
     private var saving: Job? = null
 
@@ -105,6 +112,7 @@ class EffectsController(
     fun update(change: (PlayerEffects) -> PlayerEffects) {
         val next = change(effects)
         if (next == effects) return
+        if (engine.deferred.any { it.differs(effects, next) }) waiting = true
         show(next)
         val uri = media
         if (remembered && uri != null) {
@@ -134,7 +142,7 @@ class EffectsController(
     /** The player goes: what is left to save is saved, and the player's next film starts without these effects. */
     fun release() {
         flush()
-        engine.apply(PlayerEffects())
+        engine.apply(PlayerEffects(), release = true)
     }
 
     private fun show(next: PlayerEffects, newFilm: Boolean = false) {

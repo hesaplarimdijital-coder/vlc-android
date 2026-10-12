@@ -1,6 +1,7 @@
 package app.nagmedar.ui.player.subtitles
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -13,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.libvlc.interfaces.IMedia
+import org.videolan.tools.KEY_NAG_FORCED_SUBTITLES
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import java.util.Locale
 
@@ -46,6 +48,35 @@ interface SubtitleTrackTarget {
     fun select(ids: List<String>)
 }
 
+/** Whether the forced subtitles show on their own (S-503): a setting for every film. */
+interface ForcedSubtitlesStore {
+    fun load(): Boolean
+
+    fun save(on: Boolean)
+}
+
+class PrefsForcedSubtitlesStore(private val prefs: SharedPreferences) : ForcedSubtitlesStore {
+    override fun load(): Boolean = prefs.getBoolean(KEY_NAG_FORCED_SUBTITLES, false)
+
+    override fun save(on: Boolean) {
+        prefs.edit().putBoolean(KEY_NAG_FORCED_SUBTITLES, on).apply()
+    }
+}
+
+/**
+ * The forced track among [tracks] (S-503): one named so ("Forced", "Zorunlu", "Foreign parts"),
+ * in the first of [languages] that has one, else in any language; null without one.
+ */
+fun forcedTrack(tracks: List<SubtitleTrackChoice>, languages: List<String>): SubtitleTrackChoice? {
+    val forced = tracks.filter { isForcedName(it.name) }
+    if (forced.isEmpty()) return null
+    for (language in languages) {
+        val wanted = languageOf(language) ?: language.lowercase(Locale.ROOT).ifEmpty { continue }
+        forced.firstOrNull { track -> languageOf(track.language) == wanted || track.language.equals(language, ignoreCase = true) }?.let { return it }
+    }
+    return forced.first()
+}
+
 /** Where a film's secondary track is kept: the per-file settings (S-809). */
 interface SecondaryStore {
     suspend fun load(uri: String): String?
@@ -76,11 +107,37 @@ class DualSubtitlesController(
     /** The tracks come a moment after a film starts: they are waited for this long, a step at a time. */
     private val waitStepMs: Long = 250,
     private val waitSteps: Int = 12,
+    /** S-503: whether a film's forced subtitles show on their own when none are chosen, kept in the settings. */
+    private val forcedStore: ForcedSubtitlesStore? = null,
+    /** The languages the forced subtitles are wanted in, most wanted first: the audio's, the preferred one. */
+    private val forcedLanguages: () -> List<String> = { emptyList() },
 ) {
     var state by mutableStateOf(DualSubtitles())
         private set
 
+    /** Whether a film's forced subtitles (the foreign lines only) show when no subtitles are chosen (S-503). */
+    var forced by mutableStateOf(forcedStore?.load() ?: false)
+        private set
+
     private var media: String? = null
+
+    fun wantForced(on: Boolean) {
+        if (on == forced) return
+        forced = on
+        forcedStore?.save(on)
+        if (on) showForced()
+    }
+
+    /** With nothing chosen, the forced track for the languages wanted shows. */
+    private fun showForced(): Boolean {
+        refresh()
+        val current = state
+        if (current.primary != null) return false
+        val track = forcedTrack(current.tracks, forcedLanguages()) ?: return false
+        target.select(listOf(track.id))
+        state = current.copy(primary = track.id, secondaryOn = false)
+        return true
+    }
 
     /** The player's tracks and which show, after its keys or a new film changed them. */
     fun refresh() {
@@ -158,16 +215,21 @@ class DualSubtitlesController(
         state = DualSubtitles()
         if (uri == null) return
         scope.launch {
-            val kept = store.load(uri) ?: return@launch refresh()
+            val kept = store.load(uri)
             repeat(waitSteps) {
                 if (media != uri) return@launch
                 refresh()
                 val current = state
-                if (current.tracks.any { it.id == kept } && current.primary != null) {
+                if (kept != null && current.tracks.any { it.id == kept } && current.primary != null) {
                     if (current.primary != kept && !(current.secondaryOn && current.secondary == kept)) {
                         target.select(listOf(current.primary, kept))
                         state = current.copy(secondary = kept, secondaryOn = true)
                     }
+                    return@launch
+                }
+                // S-503: the tracks are there and the player chose none: the forced ones, when wanted
+                if (kept == null && current.tracks.isNotEmpty()) {
+                    if (forced) showForced()
                     return@launch
                 }
                 delay(waitStepMs)
