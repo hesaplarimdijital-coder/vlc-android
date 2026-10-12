@@ -142,11 +142,48 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
      * [player]; the Nağmedar audio engine of MVP2 registers here and takes local music.
      */
     /** Nağmedar Ses Motoru for the local music library (S-901); libVLC for everything else. */
-    val musicEngine by lazy(LazyThreadSafetyMode.NONE) { MusicEngineController(service.applicationContext, player.progress, player.speed) }
+    val musicEngine by lazy(LazyThreadSafetyMode.NONE) {
+        MusicEngineController(service.applicationContext, player.progress, player.speed).also { it.onHandOver = { onEngineHandOver() } }
+    }
     val engines by lazy(LazyThreadSafetyMode.NONE) { EngineHost(EngineRouter(listOf(musicEngine, player))) }
 
     /** The engine playing the current item: the transport goes through it. */
     val engine: PlaybackEngine get() = engines.current
+
+    /**
+     * S-904: the engine handed over to the next item without a gap, so the indices follow as
+     * next() and playIndex() would have moved them; the Playing event that follows loads the
+     * new item's meta. Repeat one plays the same item again.
+     */
+    private fun onEngineHandOver() {
+        clearABRepeat()
+        getCurrentMedia()?.addFlags(MediaWrapper.MEDIA_FROM_START)
+        if (repeating.value != PlaybackStateCompat.REPEAT_MODE_ONE && isValidPosition(nextIndex)) {
+            previous.push(currentIndex)
+            currentIndex = nextIndex
+        }
+        newMedia = true
+        launch {
+            determinePrevAndNextIndices()
+            service.onNewPlayback()
+        }
+    }
+
+    /**
+     * S-904: what the music engine decodes ahead: the next item when it plays in the engine too
+     * (the same item again on repeat one), nothing when the list ends, the next is libVLC's or
+     * playback stops after this item.
+     */
+    private fun syncEngineNext() {
+        if (engine !== musicEngine) return
+        val next = when {
+            stopAfter == currentIndex -> null
+            repeating.value == PlaybackStateCompat.REPEAT_MODE_ONE -> getCurrentMedia()
+            isValidPosition(nextIndex) -> mediaList.getMedia(nextIndex)
+            else -> null
+        }
+        musicEngine.setNext(next?.takeIf { musicEngine.canPlay(it.toEngineMedia()) }, getCurrentMedia())
+    }
     private val settings by lazy(LazyThreadSafetyMode.NONE) { Settings.getInstance(service) }
     private val ctx by lazy(LazyThreadSafetyMode.NONE) { service.applicationContext }
     var currentIndex = -1
@@ -952,6 +989,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 if (previous.size + 1 == size) {
                     if (repeating.value == PlaybackStateCompat.REPEAT_MODE_NONE) {
                         nextIndex = -1
+                        syncEngineNext()
                         return
                     } else {
                         previous.clear()
@@ -971,6 +1009,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
             }
         }
+        syncEngineNext()
     }
 
     fun previousTotalTime(): Long {

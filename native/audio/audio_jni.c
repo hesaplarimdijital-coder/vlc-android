@@ -146,18 +146,26 @@ JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_open(JNIEnv *env, jcl
     return ret;
 }
 
-JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setNext(JNIEnv *env, jclass cls, jlong handle, jlong id, jstring url)
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setNext(JNIEnv *env, jclass cls, jlong handle, jlong id, jstring url, jboolean crossfade)
 {
     (void)cls;
     NagAudio *e = engine_of(handle);
     if (!e)
         return -1;
     if (!url)
-        return nag_audio_set_next(e, id, NULL);
+        return nag_audio_set_next(e, id, NULL, 0);
     const char *path = (*env)->GetStringUTFChars(env, url, NULL);
-    int ret = nag_audio_set_next(e, id, path);
+    int ret = nag_audio_set_next(e, id, path, crossfade ? 1 : 0);
     (*env)->ReleaseStringUTFChars(env, url, path);
     return ret;
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setCrossfade(JNIEnv *env, jclass cls, jlong handle, jint ms, jint curve)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_crossfade(engine_of(handle), ms, (NagCrossfadeCurve)curve);
 }
 
 JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_play(JNIEnv *env, jclass cls, jlong handle)

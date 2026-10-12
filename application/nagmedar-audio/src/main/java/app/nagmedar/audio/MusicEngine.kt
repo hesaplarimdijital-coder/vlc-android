@@ -12,6 +12,9 @@ import java.io.Closeable
 /** The engine's state, as NagState. */
 enum class EngineState { Stopped, Playing, Paused, Ended }
 
+/** S-905: the crossfade's gains over its length, in the engine's order. */
+enum class CrossfadeCurve { EqualPower, Linear }
+
 /** What the output is open for: the sink's rate, channels and sample format. */
 data class OutputFormat(val rate: Int, val channels: Int, val sampleFormat: Int) {
     val bits: Int
@@ -125,11 +128,20 @@ class MusicEngine(
      */
     fun open(id: Long, uri: Uri, startMs: Long): Boolean = withPath(uri) { path -> NativeAudio.open(handle, id, path, startMs) == 0 }
 
-    /** The track to follow the one playing, decoded ahead (S-904); null clears it. */
-    fun setNext(id: Long, uri: Uri?): Boolean {
+    /**
+     * The track to follow the one playing, decoded ahead (S-904); null clears it. With
+     * [crossfade] the two overlap for the crossfade's length (S-905), without it the next
+     * starts on the sample after the last.
+     */
+    fun setNext(id: Long, uri: Uri?, crossfade: Boolean = false): Boolean {
         if (!available) return false
-        if (uri == null) return NativeAudio.setNext(handle, id, null) == 0
-        return withPath(uri) { path -> NativeAudio.setNext(handle, id, path) == 0 }
+        if (uri == null) return NativeAudio.setNext(handle, id, null, false) == 0
+        return withPath(uri) { path -> NativeAudio.setNext(handle, id, path, crossfade) == 0 }
+    }
+
+    /** S-905: how long a crossfade lasts (0 turns it off) and its curve. A track opened from then on keeps enough audio ahead for it. */
+    fun setCrossfade(ms: Int, curve: CrossfadeCurve) {
+        if (available) NativeAudio.setCrossfade(handle, ms.coerceIn(0, NativeAudio.CROSSFADE_MAX_MS), curve.ordinal)
     }
 
     private inline fun withPath(uri: Uri, block: (String) -> Boolean): Boolean {

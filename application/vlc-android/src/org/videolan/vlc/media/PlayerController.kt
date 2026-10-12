@@ -45,8 +45,8 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
     var mediaplayer = newMediaPlayer()
         private set
     var switchToVideo = false
-    var seekable = false
-    var pausable = false
+    override var seekable = false
+    override var pausable = false
     var previousMediaStats: IMedia.Stats? = null
         private set
     @Volatile var hasRenderer = false

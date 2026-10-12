@@ -41,6 +41,11 @@ object NativeAudio {
     const val SINK_PULL = 0
     const val SINK_AAUDIO = 1
 
+    // crossfade curves
+    const val CROSSFADE_EQUAL_POWER = 0
+    const val CROSSFADE_LINEAR = 1
+    const val CROSSFADE_MAX_MS = 12_000
+
     @JvmStatic external fun version(): String
 
     /** An engine; 0 on failure. [maxFormat] caps the output's depth, [fixedFormat] (or FORMAT_NONE) fixes it. */
@@ -52,7 +57,11 @@ object NativeAudio {
 
     @JvmStatic external fun open(handle: Long, id: Long, url: String, startMs: Long): Int
 
-    @JvmStatic external fun setNext(handle: Long, id: Long, url: String?): Int
+    /** The next track; with [crossfade] it comes in over the end of the one playing (S-905). */
+    @JvmStatic external fun setNext(handle: Long, id: Long, url: String?, crossfade: Boolean): Int
+
+    /** S-905: the crossfade's length (0: off, at most 12 000) and curve: 0 equal power, 1 linear. */
+    @JvmStatic external fun setCrossfade(handle: Long, ms: Int, curve: Int)
 
     @JvmStatic external fun play(handle: Long): Int
 

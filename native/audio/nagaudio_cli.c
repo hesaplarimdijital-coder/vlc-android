@@ -4,6 +4,7 @@
 //   nagaudio info FILE                      the source as the engine reads it, JSON
 //   nagaudio decode FILE [FILE2 ...] [-o OUT] [-f s16|s24|s32|f32|f64] [--seek MS]
 //                                           [--seek-after FRAMES] [--volume V] [--no-dither] [--md5]
+//                                           [--crossfade MS [--linear]]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
 //           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary
 //           with the events seen and, with --md5, the MD5 of the samples (what ffmpeg -f md5
@@ -107,7 +108,7 @@ static int decode(int argc, char **argv)
     NagSampleFormat format = NAG_FMT_NONE;
     int64_t seek_ms = -1, seek_after = -1;
     double volume = 1.0;
-    int dither = 1, md5 = 0;
+    int dither = 1, md5 = 0, crossfade_ms = 0, linear = 0;
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) out_path = argv[++i];
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
@@ -120,6 +121,8 @@ static int decode(int argc, char **argv)
         else if (strcmp(argv[i], "--seek-after") == 0 && i + 1 < argc) seek_after = atoll(argv[++i]);
         else if (strcmp(argv[i], "--volume") == 0 && i + 1 < argc) volume = atof(argv[++i]);
         else if (strcmp(argv[i], "--no-dither") == 0) dither = 0;
+        else if (strcmp(argv[i], "--crossfade") == 0 && i + 1 < argc) crossfade_ms = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--linear") == 0) linear = 1;
         else if (strcmp(argv[i], "--md5") == 0) md5 = 1;
         else if (argv[i][0] == '-' && argv[i][1]) {
             fprintf(stderr, "nagaudio: unknown option %s\n", argv[i]);
@@ -141,6 +144,7 @@ static int decode(int argc, char **argv)
         return 1;
     nag_audio_set_sink(e, nag_sink_pull_new());
     nag_audio_set_volume(e, volume);
+    nag_audio_set_crossfade(e, crossfade_ms, linear ? NAG_CROSSFADE_LINEAR : NAG_CROSSFADE_EQUAL_POWER);
     if (nag_audio_open(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
         nag_audio_free(e);
         return 1;
@@ -150,7 +154,7 @@ static int decode(int argc, char **argv)
     int64_t queued = -1;
     if (next_file < n_files) {
         queued = next_file + 1;
-        nag_audio_set_next(e, queued, files[next_file++]);
+        nag_audio_set_next(e, queued, files[next_file++], crossfade_ms > 0);
     }
     nag_audio_play(e);
     FILE *out = NULL;
@@ -190,7 +194,7 @@ static int decode(int argc, char **argv)
             last_track = track;
             if (track == queued && next_file < n_files) {
                 queued = next_file + 1;
-                nag_audio_set_next(e, queued, files[next_file++]);
+                nag_audio_set_next(e, queued, files[next_file++], crossfade_ms > 0);
             }
         }
         if (n > 0) {

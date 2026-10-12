@@ -96,6 +96,38 @@ check "gapless flac parts" "$(ffmpeg -v error -i whole.flac -f s16le - | md5_of)
 for part in 1 2 3; do ffmpeg -v error -y -i part$part.flac -c:a libmp3lame -b:a 320k part$part.mp3; done
 check "gapless mp3 parts" "$( (ffmpeg -v error -i part1.mp3 -f f32le -; ffmpeg -v error -i part2.mp3 -f f32le -; ffmpeg -v error -i part3.mp3 -f f32le -) | md5_of)" "$(engine_md5 f32 part1.mp3 part2.mp3 part3.mp3)"
 
+echo "== S-905: crossfade"
+# a one-second crossfade over the end of part 1: cos/sin gains over its last 44100 frames, exactly
+"$NAGAUDIO" decode part1.flac -f f64 -o a.raw > /dev/null
+"$NAGAUDIO" decode part2.flac -f f64 -o b.raw > /dev/null
+"$NAGAUDIO" decode part1.flac part2.flac -f f64 --crossfade 1000 -o xf.raw > /dev/null
+"$NAGAUDIO" decode part1.flac part2.flac -f f64 --crossfade 1000 --linear -o xl.raw > /dev/null
+python3 - <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+def frames(path):
+    data = open(path, "rb").read()
+    return [struct.unpack_from("<2d", data, i) for i in range(0, len(data), 16)]
+a, b, x, l = frames("a.raw"), frames("b.raw"), frames("xf.raw"), frames("xl.raw")
+fade = 44100
+if len(x) != len(a) + len(b) - fade or len(l) != len(x):
+    print("FAIL crossfade length %d, expected %d" % (len(x), len(a) + len(b) - fade))
+    sys.exit(1)
+worst = worst_l = 0.0
+for i in range(fade):
+    t = (i + 1) / fade
+    ea = a[len(a) - fade + i]
+    eb = b[i]
+    for c in range(2):
+        worst = max(worst, abs(ea[c] * math.cos(t * math.pi / 2) + eb[c] * math.sin(t * math.pi / 2) - x[len(a) - fade + i][c]))
+        worst_l = max(worst_l, abs(ea[c] * (1 - t) + eb[c] * t - l[len(a) - fade + i][c]))
+if x[:len(a) - fade] != a[:len(a) - fade] or x[len(a):] != b[fade:]:
+    print("FAIL crossfade: the parts outside the fade changed")
+    sys.exit(1)
+ok = worst < 1e-12 and worst_l < 1e-12
+print("%s crossfade equal-power and linear, worst error %.1e / %.1e" % ("ok  " if ok else "FAIL", worst, worst_l))
+sys.exit(0 if ok else 1)
+PY
+
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"
     exit 1

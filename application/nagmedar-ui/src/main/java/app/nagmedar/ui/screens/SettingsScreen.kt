@@ -1,5 +1,6 @@
 package app.nagmedar.ui.screens
 
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -59,6 +60,11 @@ import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.theme.systemAccentSeed
+import org.videolan.tools.NAGMEDAR_CROSSFADE_CURVE
+import org.videolan.tools.NAGMEDAR_CROSSFADE_EQUAL_POWER
+import org.videolan.tools.NAGMEDAR_CROSSFADE_LINEAR
+import org.videolan.tools.NAGMEDAR_CROSSFADE_MS
+import org.videolan.tools.NAGMEDAR_CROSSFADE_SKIP_ALBUM
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
 import org.videolan.tools.NAGMEDAR_MIDDLE_NONE
@@ -297,9 +303,9 @@ internal fun SnapshotSection(prefs: NagmedarPreferences) {
  * (the default) or libVLC. A build without the engine says so and keeps libVLC.
  */
 @Composable
-internal fun MusicSection(engineAvailable: Boolean = MusicEngine.available) {
+internal fun MusicSection(engineAvailable: Boolean = MusicEngine.available, settings: SharedPreferences? = null) {
     val context = LocalContext.current
-    val vlcSettings = remember(context) { Settings.getInstance(context) }
+    val vlcSettings = settings ?: remember(context) { Settings.getInstance(context) }
     var nagmedarEngine by remember { mutableStateOf(vlcSettings.getBoolean(NAGMEDAR_MUSIC_ENGINE, true)) }
     SettingsSection(stringResource(R.string.nag_settings_music)) {
         SettingRow(stringResource(R.string.nag_settings_music_engine), subtitle = stringResource(R.string.nag_settings_music_engine_hint)) {
@@ -316,8 +322,50 @@ internal fun MusicSection(engineAvailable: Boolean = MusicEngine.available) {
         if (!engineAvailable) {
             Text(stringResource(R.string.nag_settings_music_engine_missing), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning)
         }
+        // S-905: the crossfade, its curve and the album's joins
+        var crossfadeMs by remember { mutableStateOf(vlcSettings.getInt(NAGMEDAR_CROSSFADE_MS, 0)) }
+        var curve by remember { mutableStateOf(vlcSettings.getString(NAGMEDAR_CROSSFADE_CURVE, NAGMEDAR_CROSSFADE_EQUAL_POWER) ?: NAGMEDAR_CROSSFADE_EQUAL_POWER) }
+        var skipAlbum by remember { mutableStateOf(vlcSettings.getBoolean(NAGMEDAR_CROSSFADE_SKIP_ALBUM, true)) }
+        SettingRow(stringResource(R.string.nag_settings_crossfade), subtitle = stringResource(R.string.nag_settings_crossfade_hint)) {
+            SegmentedChoice(
+                options = listOf(0 to stringResource(R.string.nag_crossfade_off)) + CROSSFADE_STEPS_MS.map { it to stringResource(R.string.nag_crossfade_seconds, it / 1000) },
+                selected = CROSSFADE_STEPS_MS.firstOrNull { it == crossfadeMs } ?: 0,
+                onSelect = { ms ->
+                    crossfadeMs = ms
+                    vlcSettings.edit().putInt(NAGMEDAR_CROSSFADE_MS, ms).apply()
+                },
+            )
+        }
+        if (crossfadeMs > 0) {
+            SettingRow(stringResource(R.string.nag_settings_crossfade_curve)) {
+                SegmentedChoice(
+                    options = listOf(
+                        NAGMEDAR_CROSSFADE_EQUAL_POWER to stringResource(R.string.nag_crossfade_equal_power),
+                        NAGMEDAR_CROSSFADE_LINEAR to stringResource(R.string.nag_crossfade_linear),
+                    ),
+                    selected = curve,
+                    onSelect = { chosen ->
+                        curve = chosen
+                        vlcSettings.edit().putString(NAGMEDAR_CROSSFADE_CURVE, chosen).apply()
+                    },
+                )
+            }
+            SettingRow(stringResource(R.string.nag_settings_crossfade_album), subtitle = stringResource(R.string.nag_settings_crossfade_album_hint)) {
+                SegmentedChoice(
+                    options = listOf(true to stringResource(R.string.nag_crossfade_album_gapless), false to stringResource(R.string.nag_crossfade_album_fade)),
+                    selected = skipAlbum,
+                    onSelect = { skip ->
+                        skipAlbum = skip
+                        vlcSettings.edit().putBoolean(NAGMEDAR_CROSSFADE_SKIP_ALBUM, skip).apply()
+                    },
+                )
+            }
+        }
     }
 }
+
+/** S-905: the crossfade lengths offered, in milliseconds. */
+private val CROSSFADE_STEPS_MS = listOf(2_000, 4_000, 8_000)
 
 /** S-502: which media session the playback service publishes (Settings > Lab). */
 @Composable

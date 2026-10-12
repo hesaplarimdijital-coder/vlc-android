@@ -43,3 +43,10 @@ const val NAGMEDAR_PLAYER_FULLSCREEN = "nagmedar_player_fullscreen"
 
 /** S-901: the local music library plays through Nağmedar Ses Motoru (default) rather than libVLC. */
 const val NAGMEDAR_MUSIC_ENGINE = "nagmedar_music_engine"
+
+/** S-905: the crossfade between tracks in milliseconds (0: off), its curve ("equal_power", "linear"), and whether an album's tracks keep their gapless joins instead. */
+const val NAGMEDAR_CROSSFADE_MS = "nagmedar_crossfade_ms"
+const val NAGMEDAR_CROSSFADE_CURVE = "nagmedar_crossfade_curve"
+const val NAGMEDAR_CROSSFADE_SKIP_ALBUM = "nagmedar_crossfade_skip_album"
+const val NAGMEDAR_CROSSFADE_LINEAR = "linear"
+const val NAGMEDAR_CROSSFADE_EQUAL_POWER = "equal_power"

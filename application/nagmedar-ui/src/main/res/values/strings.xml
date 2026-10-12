@@ -1243,4 +1243,16 @@
     <string name="nag_music_engine_nagmedar">Nağmedar engine</string>
     <string name="nag_music_engine_libvlc">libVLC</string>
     <string name="nag_settings_music_engine_missing">This build was made without the engine: music plays through libVLC. Use the APK from CI.</string>
+    <!-- S-905: Settings › Music, the crossfade -->
+    <string name="nag_settings_crossfade">Crossfade</string>
+    <string name="nag_settings_crossfade_hint">The next track comes in over the end of the one playing. Off on a bit-perfect output, which takes the samples as they are.</string>
+    <string name="nag_crossfade_off">Off</string>
+    <string name="nag_crossfade_seconds">%1$d s</string>
+    <string name="nag_settings_crossfade_curve">Curve</string>
+    <string name="nag_crossfade_equal_power">Equal power</string>
+    <string name="nag_crossfade_linear">Linear</string>
+    <string name="nag_settings_crossfade_album">Within an album</string>
+    <string name="nag_settings_crossfade_album_hint">Consecutive tracks of one album are meant to follow without a gap; a crossfade would cut their joins.</string>
+    <string name="nag_crossfade_album_gapless">No gap, no crossfade</string>
+    <string name="nag_crossfade_album_fade">Crossfade too</string>
 </resources>

@@ -79,6 +79,7 @@ typedef struct Voice {
     atomic_int failed;
     atomic_int seek_pending; /* seek_ms is read by the decoder once this is set */
     _Atomic int64_t seek_ms;
+    int crossfade;           /* this voice, as the next, comes in over the end of the one before */
     _Atomic int64_t played;  /* frames the render took since the start or the last seek */
     _Atomic int64_t base_ms; /* the time of frame 0 of [played] */
     sem_t wake;
@@ -101,9 +102,14 @@ struct NagAudio {
     /* the render plane */
     _Atomic(Voice *) current;
     _Atomic(Voice *) next;
+    _Atomic(Voice *) fade_out; /* the voice ending under the current one during a crossfade */
     atomic_int hold;      /* the control plane asks the render to keep its hands off the voices */
     atomic_int rendering; /* the render is inside the voices */
+    atomic_int crossfade_ms;
+    atomic_int crossfade_curve;
+    int64_t fade_total, fade_done; /* frames of the crossfade under way; the render's own */
     double *mix;
+    double *mix2;
     uint32_t noise;       /* dither */
     _Atomic int64_t total_frames; /* frames handed to the sink */
 
@@ -242,6 +248,11 @@ static void *decoder_main(void *arg)
 
 static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_ms, char *error, size_t error_size)
 {
+    double ring_seconds = e->cfg.ring_seconds;
+    /* a crossfade needs the whole tail of the track decoded before it starts */
+    int crossfade_ms = atomic_load(&e->crossfade_ms);
+    if (crossfade_ms > 0 && ring_seconds < crossfade_ms / 1000.0 + 0.5)
+        ring_seconds = crossfade_ms / 1000.0 + 0.5;
     Voice *v = calloc(1, sizeof(*v));
     if (!v) {
         snprintf(error, error_size, "out of memory");
@@ -256,7 +267,7 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
         return NULL;
     }
     v->info = *nag_source_info(v->src);
-    size_t capacity = (size_t)(e->cfg.ring_seconds * v->info.rate);
+    size_t capacity = (size_t)(ring_seconds * v->info.rate);
     if (capacity < DECODE_FRAMES * 2)
         capacity = DECODE_FRAMES * 2;
     if (nag_ring_init(&v->ring, capacity, e->cfg.channels) < 0 || !(v->scratch = malloc(sizeof(double) * DECODE_FRAMES * e->cfg.channels))) {
@@ -438,8 +449,10 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     pthread_mutex_init(&e->lock, NULL);
     sem_init(&e->event_sem, 0, 0);
     e->mix = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
-    if (!e->mix || pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
+    e->mix2 = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
+    if (!e->mix || !e->mix2 || pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
         free(e->mix);
+        free(e->mix2);
         sem_destroy(&e->event_sem);
         pthread_mutex_destroy(&e->lock);
         free(e);
@@ -450,11 +463,13 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
 }
 
 /* Takes the voices from the render; the caller frees them. Under the lock. */
-static void take_voices(NagAudio *e, Voice **current, Voice **next)
+static void take_voices(NagAudio *e, Voice **current, Voice **next, Voice **fade_out)
 {
     hold_render(e);
     *current = atomic_exchange(&e->current, NULL);
     *next = atomic_exchange(&e->next, NULL);
+    *fade_out = atomic_exchange(&e->fade_out, NULL);
+    e->fade_total = 0;
     release_render(e);
 }
 
@@ -463,8 +478,8 @@ void nag_audio_free(NagAudio *e)
     if (!e)
         return;
     pthread_mutex_lock(&e->lock);
-    Voice *current, *next;
-    take_voices(e, &current, &next);
+    Voice *current, *next, *fade_out;
+    take_voices(e, &current, &next, &fade_out);
     atomic_store(&e->state, NAG_STATE_STOPPED);
     if (e->sink) {
         if (e->sink->pause)
@@ -474,6 +489,7 @@ void nag_audio_free(NagAudio *e)
     pthread_mutex_unlock(&e->lock);
     voice_free(current);
     voice_free(next);
+    voice_free(fade_out);
     if (e->event_thread_started) {
         atomic_store(&e->event_quit, 1);
         sem_post(&e->event_sem);
@@ -485,6 +501,7 @@ void nag_audio_free(NagAudio *e)
     sem_destroy(&e->event_sem);
     pthread_mutex_destroy(&e->lock);
     free(e->mix);
+    free(e->mix2);
     free(e);
 }
 
@@ -529,8 +546,8 @@ int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
         return -1;
     }
     pthread_mutex_lock(&e->lock);
-    Voice *old_current, *old_next;
-    take_voices(e, &old_current, &old_next);
+    Voice *old_current, *old_next, *old_fade;
+    take_voices(e, &old_current, &old_next, &old_fade);
     int ret = 0;
     if (!sink_fits(e, v)) {
         NagFormat want = voice_format(e, v);
@@ -545,10 +562,11 @@ int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
     pthread_mutex_unlock(&e->lock);
     voice_free(old_current);
     voice_free(old_next);
+    voice_free(old_fade);
     return ret;
 }
 
-int nag_audio_set_next(NagAudio *e, int64_t id, const char *url)
+int nag_audio_set_next(NagAudio *e, int64_t id, const char *url, int crossfade)
 {
     Voice *v = NULL;
     if (url) {
@@ -558,6 +576,7 @@ int nag_audio_set_next(NagAudio *e, int64_t id, const char *url)
             post(e, NAG_EVENT_ERROR, id, error);
             return -1;
         }
+        v->crossfade = crossfade ? 1 : 0;
     }
     pthread_mutex_lock(&e->lock);
     hold_render(e);
@@ -598,15 +617,31 @@ int nag_audio_pause(NagAudio *e)
 int nag_audio_stop(NagAudio *e)
 {
     pthread_mutex_lock(&e->lock);
-    Voice *current, *next;
-    take_voices(e, &current, &next);
+    Voice *current, *next, *fade_out;
+    take_voices(e, &current, &next, &fade_out);
     set_state(e, NAG_STATE_STOPPED);
     if (e->sink && e->sink->pause)
         e->sink->pause(e->sink);
     pthread_mutex_unlock(&e->lock);
     voice_free(current);
     voice_free(next);
+    voice_free(fade_out);
     return 0;
+}
+
+void nag_audio_set_crossfade(NagAudio *e, int ms, NagCrossfadeCurve curve)
+{
+    if (ms < 0)
+        ms = 0;
+    if (ms > NAG_CROSSFADE_MAX_MS)
+        ms = NAG_CROSSFADE_MAX_MS;
+    atomic_store(&e->crossfade_ms, ms);
+    atomic_store(&e->crossfade_curve, (int)curve);
+}
+
+int nag_audio_crossfade_ms(NagAudio *e)
+{
+    return atomic_load(&e->crossfade_ms);
 }
 
 int nag_audio_seek(NagAudio *e, int64_t ms)
@@ -795,6 +830,37 @@ static int needs_dither(const NagAudio *e, const Voice *v)
     return v->info.bits > out_bits;
 }
 
+/* The crossfade's gains at [x] of the way (0..1): the track going and the one coming. */
+static inline void fade_gains(int curve, double x, double *out_gain, double *in_gain)
+{
+    if (curve == NAG_CROSSFADE_LINEAR) {
+        *out_gain = 1.0 - x;
+        *in_gain = x;
+    } else {
+        *out_gain = cos(x * M_PI_2);
+        *in_gain = sin(x * M_PI_2);
+    }
+}
+
+/*
+ * Ends [v], the voice playing: the next goes on in the same buffer, or the queue is empty.
+ * Returns the voice now current, NULL when none.
+ */
+static Voice *hand_over(NagAudio *e, Voice *v)
+{
+    Voice *n = atomic_exchange(&e->next, NULL);
+    atomic_store(&e->current, n);
+    retire(e, v);
+    post(e, NAG_EVENT_TRACK_ENDED, v->id, NULL);
+    if (n) {
+        post(e, NAG_EVENT_TRACK, n->id, NULL);
+    } else {
+        post(e, NAG_EVENT_QUEUE_EMPTY, 0, NULL);
+        set_state(e, NAG_STATE_ENDED);
+    }
+    return n;
+}
+
 int nag_audio_render(NagAudio *e, void *out, int frames)
 {
     if (frames <= 0)
@@ -808,6 +874,7 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
     const int channels = e->out.channels;
     const int bytes = nag_format_bytes_per_sample(e->out.sample_format) * channels;
     const double volume = atomic_load(&e->volume);
+    const int curve = atomic_load(&e->crossfade_curve);
     int produced = 0;
     int pos = 0;
     while (pos < frames) {
@@ -820,37 +887,105 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
                 sem_post(&e->event_sem);
             break;
         }
+        Voice *f = atomic_load(&e->fade_out);
         size_t available = nag_ring_available(&v->ring);
-        if (available == 0) {
-            if (atomic_load(&v->eof) && !atomic_load(&v->seek_pending)) {
-                /* this voice is done: the next one goes on in the same buffer */
-                Voice *n = atomic_exchange(&e->next, NULL);
-                atomic_store(&e->current, n);
-                retire(e, v);
-                post(e, NAG_EVENT_TRACK_ENDED, v->id, NULL);
-                if (n) {
+        if (!f) {
+            int n_frames = frames - pos;
+            if (n_frames > MIX_FRAMES)
+                n_frames = MIX_FRAMES;
+            /* S-905: the end of this voice in sight, the next one comes in over it */
+            Voice *n = atomic_load(&e->next);
+            int fade_ms = atomic_load(&e->crossfade_ms);
+            if (n && n->crossfade && fade_ms > 0 && n->info.rate == v->info.rate && !atomic_load(&v->seek_pending)) {
+                int64_t fade_frames = (int64_t)fade_ms * v->info.rate / 1000;
+                int64_t total = v->info.duration_ms > 0 ? v->info.duration_ms * v->info.rate / 1000 : 0;
+                int64_t position = atomic_load(&v->base_ms) * v->info.rate / 1000 + atomic_load(&v->played);
+                int64_t start_at = total > 0 ? total - fade_frames : -1;
+                if (total > 0 && position >= start_at) {
+                    /* the track's length says where the fade starts: over its last fade_frames */
+                    atomic_store(&e->next, NULL);
+                    atomic_store(&e->fade_out, v);
+                    atomic_store(&e->current, n);
+                    e->fade_total = total - position > 0 ? total - position : 1;
+                    e->fade_done = 0;
                     post(e, NAG_EVENT_TRACK, n->id, NULL);
-                } else {
-                    post(e, NAG_EVENT_QUEUE_EMPTY, 0, NULL);
-                    set_state(e, NAG_STATE_ENDED);
-                    break;
+                    continue;
                 }
-                continue;
+                if (total > 0 && start_at - position < n_frames) {
+                    n_frames = (int)(start_at - position); /* up to the fade's first sample, exactly */
+                } else if (total <= 0 && atomic_load(&v->eof) && available > 0 && (int64_t)available <= fade_frames) {
+                    /* a length unknown: what is left once decoded, if it fits the fade */
+                    atomic_store(&e->next, NULL);
+                    atomic_store(&e->fade_out, v);
+                    atomic_store(&e->current, n);
+                    e->fade_total = (int64_t)available;
+                    e->fade_done = 0;
+                    post(e, NAG_EVENT_TRACK, n->id, NULL);
+                    continue;
+                }
             }
-            break; /* the decoder is behind: silence */
+            if (available == 0) {
+                if (atomic_load(&v->eof) && !atomic_load(&v->seek_pending)) {
+                    /* this voice is done: the next one goes on in the same buffer */
+                    if (!hand_over(e, v))
+                        break;
+                    continue;
+                }
+                break; /* the decoder is behind: silence */
+            }
+            if (n_frames <= 0)
+                n_frames = 1;
+            if ((size_t)n_frames > available)
+                n_frames = (int)available;
+            nag_ring_read(&v->ring, e->mix, (size_t)n_frames);
+            atomic_fetch_add(&v->played, n_frames);
+            if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
+                sem_post(&v->wake);
+            convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, needs_dither(e, v));
+            pos += n_frames;
+            produced += n_frames;
+            continue;
         }
-        int n = frames - pos;
-        if (n > MIX_FRAMES)
-            n = MIX_FRAMES;
-        if ((size_t)n > available)
-            n = (int)available;
-        nag_ring_read(&v->ring, e->mix, (size_t)n);
-        atomic_fetch_add(&v->played, n);
+        /* a crossfade: [f] fades out under [v], which fades in */
+        size_t left = nag_ring_available(&f->ring);
+        if (left == 0) {
+            if (!atomic_load(&f->eof))
+                break; /* the outgoing voice's decoder is behind: silence rather than a jump */
+            atomic_store(&e->fade_out, NULL);
+            retire(e, f);
+            post(e, NAG_EVENT_TRACK_ENDED, f->id, NULL);
+            e->fade_total = 0;
+            continue;
+        }
+        if (available == 0)
+            break; /* the incoming voice's decoder is behind: silence rather than a jump */
+        int n_frames = frames - pos;
+        if (n_frames > MIX_FRAMES)
+            n_frames = MIX_FRAMES;
+        if ((size_t)n_frames > available)
+            n_frames = (int)available;
+        if ((size_t)n_frames > left)
+            n_frames = (int)left;
+        nag_ring_read(&f->ring, e->mix, (size_t)n_frames);
+        nag_ring_read(&v->ring, e->mix2, (size_t)n_frames);
+        atomic_fetch_add(&f->played, n_frames);
+        atomic_fetch_add(&v->played, n_frames);
         if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
             sem_post(&v->wake);
-        convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, n, volume, needs_dither(e, v));
-        pos += n;
-        produced += n;
+        const double total = (double)(e->fade_total > 0 ? e->fade_total : 1);
+        for (int i = 0; i < n_frames; i++) {
+            double out_gain, in_gain;
+            double x = (e->fade_done + i + 1) / total;
+            fade_gains(curve, x > 1.0 ? 1.0 : x, &out_gain, &in_gain);
+            double *a = e->mix + (size_t)i * channels;
+            const double *b = e->mix2 + (size_t)i * channels;
+            for (int c = 0; c < channels; c++)
+                a[c] = a[c] * out_gain + b[c] * in_gain;
+        }
+        e->fade_done += n_frames;
+        convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64);
+        pos += n_frames;
+        produced += n_frames;
     }
     if (pos < frames)
         memset((uint8_t *)out + (size_t)pos * bytes, 0, (size_t)(frames - pos) * bytes);
@@ -923,6 +1058,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
         why = "depth";
     else if (!sink_exclusive)
         why = "output";
+    else if (atomic_load(&e->crossfade_ms) > 0)
+        why = "crossfade";
     else {
         why = "";
         bit_perfect = 1;
@@ -948,7 +1085,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
     } else {
         str_add(&j, "null");
     }
-    str_add(&j, ",\"volume\":%.4f,\"dsp\":[],\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}", volume, bit_perfect ? "true" : "false", why);
+    str_add(&j, ",\"volume\":%.4f,\"crossfade_ms\":%d,\"dsp\":[],\"bit_perfect\":%s,\"not_bit_perfect_because\":\"%s\"}", volume,
+            atomic_load(&e->crossfade_ms), bit_perfect ? "true" : "false", why);
     pthread_mutex_unlock(&e->lock);
     return j.s;
 }

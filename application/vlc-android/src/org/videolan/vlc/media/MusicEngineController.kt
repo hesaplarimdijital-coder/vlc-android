@@ -5,6 +5,7 @@ import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import app.nagmedar.audio.CrossfadeCurve
 import app.nagmedar.audio.EngineState
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.MusicFormats
@@ -22,6 +23,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.NAGMEDAR_CROSSFADE_CURVE
+import org.videolan.tools.NAGMEDAR_CROSSFADE_EQUAL_POWER
+import org.videolan.tools.NAGMEDAR_CROSSFADE_LINEAR
+import org.videolan.tools.NAGMEDAR_CROSSFADE_MS
+import org.videolan.tools.NAGMEDAR_CROSSFADE_SKIP_ALBUM
 import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
@@ -46,8 +52,16 @@ class MusicEngineController(
     private var engine: MusicEngine? = null
     private var listener: MediaPlayerEventListener? = null
     private var ticker: Job? = null
-    private var trackId = 0L
+    private var ids = 0L
+    private var trackId = -1L
+    private var nextId = -1L
     private var playingUri: Uri? = null
+
+    /**
+     * S-904: the engine went on to the track given to [setNext] by itself, without a gap; the
+     * playlist manager moves its indices along before the Playing event that follows.
+     */
+    var onHandOver: (() -> Unit)? = null
     private var volume = 100
     private var rate = 1f
     private var lastTime = 0L
@@ -108,15 +122,28 @@ class MusicEngineController(
         }
 
         override fun onTrackStarted(id: Long) {
-            val length = engine?.lengthMs ?: 0L
-            updateProgress(engine?.timeMs ?: 0L, length)
-            send(MediaPlayer.Event.LengthChanged, length)
+            val engine = engine ?: return
+            val length = engine.lengthMs
+            lastTime = engine.timeMs
+            updateProgress(lastTime, length)
+            if (id == nextId && id != trackId) {
+                // a gapless hand-over (S-904): the manager's indices move on, then the service hears a new Playing
+                trackId = id
+                nextId = -1L
+                onHandOver?.invoke()
+                send(MediaPlayer.Event.LengthChanged, length)
+                send(MediaPlayer.Event.Playing)
+            } else {
+                send(MediaPlayer.Event.LengthChanged, length)
+                // a track opened while another played: the state stays, the service still hears a Playing for it
+                if (engine.state == EngineState.Playing) send(MediaPlayer.Event.Playing)
+            }
         }
 
         override fun onTrackEnded(id: Long) = Unit
 
         override fun onQueueEmpty() {
-            /* the playlist manager's own next(): a gapless hand-over comes with S-904 */
+            /* no next was set (the list's end, a stream next, stop after this): the manager's own next() */
             send(MediaPlayer.Event.EndReached)
         }
 
@@ -145,6 +172,7 @@ class MusicEngineController(
         created.useAAudio()
         created.volume = volume / 100.0
         engine = created
+        applyCrossfadeSettings()
         return created
     }
 
@@ -152,11 +180,12 @@ class MusicEngineController(
      * Plays [mw] from [time] with events to [listener]; false when the engine cannot open it,
      * in which case the manager plays it with libVLC.
      */
-    fun startPlayback(mw: MediaWrapper, listener: MediaPlayerEventListener, time: Long): Boolean {
+    internal fun startPlayback(mw: MediaWrapper, listener: MediaPlayerEventListener, time: Long): Boolean {
         val engine = engine() ?: return false
         val uri = mw.uri ?: return false
         this.listener = listener
-        trackId++
+        trackId = ++ids
+        nextId = -1L
         playingUri = uri
         seekable = true
         pausable = true
@@ -172,6 +201,51 @@ class MusicEngineController(
         send(MediaPlayer.Event.PausableChanged, 1L)
         engine.play()
         return true
+    }
+
+    /**
+     * S-904: the track to follow the one playing, decoded ahead and started in the same output
+     * buffer; null when nothing follows in the engine (the manager then hears EndReached).
+     * S-905: with a crossfade set, the two overlap, unless [current] and [mw] are an album's
+     * consecutive tracks and the setting keeps those joins gapless.
+     */
+    fun setNext(mw: MediaWrapper?, current: MediaWrapper? = null): Boolean {
+        val engine = engine ?: return false
+        val uri = mw?.uri
+        if (uri == null) {
+            if (nextId != -1L) {
+                nextId = -1L
+                engine.setNext(-1L, null)
+            }
+            return true
+        }
+        val crossfade = applyCrossfadeSettings() > 0 && !(crossfadeSkipsAlbum && consecutiveInAlbum(current, mw))
+        val id = ++ids
+        if (!engine.setNext(id, uri, crossfade)) {
+            nextId = -1L
+            return false
+        }
+        nextId = id
+        return true
+    }
+
+    private val crossfadeSkipsAlbum: Boolean get() = Settings.getInstance(context).getBoolean(NAGMEDAR_CROSSFADE_SKIP_ALBUM, true)
+
+    /** Reads the crossfade settings into the engine; returns its length in milliseconds (0 when off or bit-perfect). */
+    fun applyCrossfadeSettings(): Int {
+        val engine = engine ?: return 0
+        val settings = Settings.getInstance(context)
+        val ms = settings.getInt(NAGMEDAR_CROSSFADE_MS, 0).coerceIn(0, 12_000)
+        val curve = if (settings.getString(NAGMEDAR_CROSSFADE_CURVE, NAGMEDAR_CROSSFADE_EQUAL_POWER) == NAGMEDAR_CROSSFADE_LINEAR) CrossfadeCurve.Linear else CrossfadeCurve.EqualPower
+        engine.setCrossfade(ms, curve)
+        return ms
+    }
+
+    /** Whether [next] follows [current] on the same album and disc: a join that is meant to be gapless. */
+    private fun consecutiveInAlbum(current: MediaWrapper?, next: MediaWrapper): Boolean {
+        if (current == null || current.albumId <= 0L || current.albumId != next.albumId) return false
+        if (current.discNumber != next.discNumber) return false
+        return next.trackNumber == current.trackNumber + 1
     }
 
     override fun play() {

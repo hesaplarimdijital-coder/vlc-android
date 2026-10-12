@@ -165,8 +165,25 @@ NagSink *nag_audio_sink(NagAudio *engine);
  */
 int nag_audio_open(NagAudio *engine, int64_t id, const char *url, int64_t start_ms);
 
-/** The track to follow the one playing, decoded ahead (S-904); NULL clears it. */
-int nag_audio_set_next(NagAudio *engine, int64_t id, const char *url);
+/**
+ * The track to follow the one playing, decoded ahead (S-904); NULL clears it. With [crossfade]
+ * the two overlap for the crossfade's duration (S-905), without it the next starts on the
+ * sample after the last.
+ */
+int nag_audio_set_next(NagAudio *engine, int64_t id, const char *url, int crossfade);
+
+typedef enum NagCrossfadeCurve {
+    NAG_CROSSFADE_EQUAL_POWER = 0, /* cosine and sine: the loudness stays level */
+    NAG_CROSSFADE_LINEAR = 1,
+} NagCrossfadeCurve;
+
+/**
+ * S-905: how long a crossfade lasts (0 turns it off; at most NAG_CROSSFADE_MAX_MS) and its
+ * curve. A track opened from then on keeps enough decoded audio ahead for it.
+ */
+void nag_audio_set_crossfade(NagAudio *engine, int ms, NagCrossfadeCurve curve);
+int nag_audio_crossfade_ms(NagAudio *engine);
+#define NAG_CROSSFADE_MAX_MS 12000
 
 int nag_audio_play(NagAudio *engine);
 int nag_audio_pause(NagAudio *engine);
