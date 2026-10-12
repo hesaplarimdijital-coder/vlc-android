@@ -78,6 +78,8 @@ Sözlüğü testler denetler:
 | senkron | sync | eşzamanlama | synchronization | Oynatıcı panelinin sekmesi “Senkron”: ses ve altyazı gecikmesi, altyazı hızı |
 | gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms |
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
+| yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
+| zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 

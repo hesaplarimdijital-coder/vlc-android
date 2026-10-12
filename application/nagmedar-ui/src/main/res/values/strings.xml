@@ -808,4 +808,36 @@
     <string name="nag_snap_menu_folder">Folder: %1$s</string>
     <string name="nag_snap_menu_change_folder">Change the folder…</string>
     <string name="nag_snap_menu_default_folder">Back to the default folder</string>
+    <!-- S-608: jump to time, chapters, bookmarks -->
+    <string name="nag_sc_next_chapter">Next chapter</string>
+    <string name="nag_sc_previous_chapter">Previous chapter</string>
+    <string name="nag_sc_add_bookmark">Add a bookmark</string>
+    <string name="nag_sc_bookmarks">Bookmarks</string>
+    <string name="nag_panel_bookmarks">Bookmarks</string>
+    <string name="nag_bm_title">Bookmarks · %1$d</string>
+    <string name="nag_bm_empty">No bookmarks yet.</string>
+    <string name="nag_bm_empty_keys">No bookmarks yet. %1$s marks the moment playing.</string>
+    <string name="nag_bm_refused">This film can\'t keep bookmarks: the media library isn\'t ready.</string>
+    <string name="nag_bm_kept">Bookmarks are kept in the media library; VLC\'s classic player shows them too.</string>
+    <string name="nag_bm_add">Add a bookmark</string>
+    <string name="nag_bm_rename">Rename…</string>
+    <string name="nag_bm_remove">Remove</string>
+    <string name="nag_bm_go">Go to %1$s</string>
+    <string name="nag_bm_more">More for %1$s</string>
+    <string name="nag_bm_default_name">Bookmark %1$d</string>
+    <string name="nag_bm_added">Bookmark added: %1$s · %2$s</string>
+    <string name="nag_bm_rename_title">Name the bookmark</string>
+    <string name="nag_bm_name">Bookmark name</string>
+    <string name="nag_bm_save">Save</string>
+    <string name="nag_chapters_title">Chapters · %1$d</string>
+    <string name="nag_chapters_keys">skip</string>
+    <string name="nag_chapters_row">%1$d · %2$s</string>
+    <string name="nag_jump_title">Jump to time</string>
+    <string name="nag_jump_field">Time</string>
+    <string name="nag_jump_length">/ %1$s</string>
+    <string name="nag_jump_to">→ %1$s</string>
+    <string name="nag_jump_past_end">The film lasts %1$s.</string>
+    <string name="nag_jump_unreadable">No time can be read: type 1:12:33, 72:33 or +30, for example.</string>
+    <string name="nag_jump_hint" formatted="false">1:12:33 · 72:33 · 45 s · +30 · −2 min · 50%</string>
+    <string name="nag_jump_go">Go</string>
 </resources>

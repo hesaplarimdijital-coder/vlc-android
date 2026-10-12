@@ -22,7 +22,9 @@ import app.nagmedar.ui.player.info.VideoDecoding
 import app.nagmedar.ui.player.info.sampleFile
 import app.nagmedar.ui.player.info.sampleTracks
 import app.nagmedar.ui.player.info.streamRows
+import app.nagmedar.ui.player.navigate.sampleChapters
 import app.nagmedar.ui.player.panel.PanelTab
+import app.nagmedar.ui.player.samplePlayerState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -36,7 +38,8 @@ import kotlin.math.sin
 /**
  * S-605: the player with its Info tab, after the mockups' "Panel · Info", and the statistics over
  * the video: Kuzey Işığı's streams from the media probe, its decoding, a minute of its input
- * bitrate; in English; under the video in half a DeX window; on a phone, for a finger.
+ * bitrate, its chapters (S-608); in English; under the video in half a DeX window; on a phone, for
+ * a finger.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -73,6 +76,9 @@ class PlayerInfoScreenshotTest {
                         onOverlay = {},
                         report = { "" },
                         columns = columns,
+                        chapters = sampleChapters,
+                        nowMs = samplePlayerState.timeMs,
+                        previews = TintedPreviews,
                     )
                 }
             }

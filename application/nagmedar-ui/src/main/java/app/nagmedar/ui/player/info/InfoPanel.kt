@@ -46,6 +46,9 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.ChapterMark
+import app.nagmedar.ui.player.FramePreviews
+import app.nagmedar.ui.player.navigate.ChaptersSection
 import app.nagmedar.ui.player.panel.PanelCaption
 import app.nagmedar.ui.player.panel.PanelDisabledAlpha
 import app.nagmedar.ui.player.panel.PanelRule
@@ -58,9 +61,9 @@ import kotlinx.coroutines.delay
 
 /**
  * The Info tab of the player's panel (S-605), after the mockups' "Panel · Info": the file, its
- * streams with their codecs, profiles and HDR metadata, how it is decoded and output, and the
- * last minute live (the input bitrate's graph, the pictures shown and lost), with "Show over the
- * video" and "Copy the report" at its foot.
+ * streams with their codecs, profiles and HDR metadata, how it is decoded and output, the last
+ * minute live (the input bitrate's graph, the pictures shown and lost) and the chapters (S-608),
+ * with "Show over the video" and "Copy the report" at its foot.
  */
 @Composable
 fun InfoPanel(
@@ -76,6 +79,11 @@ fun InfoPanel(
     columns: Int = 1,
     /** What the native side cannot tell yet (the video output, the audio decoder, the buffer) shows faded, with a note. */
     pending: Boolean = true,
+    /** S-608: the film's chapters, the one playing at [nowMs] lit; a click goes to one ([onChapter]). */
+    chapters: List<ChapterMark> = emptyList(),
+    nowMs: Long = 0L,
+    previews: FramePreviews? = null,
+    onChapter: (Long) -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().testTag("info-panel")) {
         Column(
@@ -94,12 +102,16 @@ fun InfoPanel(
             if (columns >= 2) {
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) { about() }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) { LiveSection(live, pending) }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                        LiveSection(live, pending)
+                        ChaptersSection(chapters, nowMs, previews, onChapter)
+                    }
                 }
             } else {
                 about()
                 PanelRule()
                 LiveSection(live, pending)
+                ChaptersSection(chapters, nowMs, previews, onChapter)
             }
             // once, under everything: which lines wait for the native side
             if (pending) PendingNote("info-pending", stringResource(R.string.nag_info_pending))

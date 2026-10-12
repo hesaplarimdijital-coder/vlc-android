@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +61,10 @@ import app.nagmedar.ui.player.info.countLabel
 import app.nagmedar.ui.player.info.infoReport
 import app.nagmedar.ui.player.info.mbpsLabel
 import app.nagmedar.ui.player.info.streamRows
+import app.nagmedar.ui.player.navigate.BookmarksPanel
+import app.nagmedar.ui.player.navigate.JumpDialog
+import app.nagmedar.ui.player.navigate.PlayerNavigation
+import app.nagmedar.ui.player.navigate.RenameBookmarkDialog
 import app.nagmedar.ui.player.panel.PanelHost
 import app.nagmedar.ui.player.panel.PanelLayout
 import app.nagmedar.ui.player.panel.PanelState
@@ -110,6 +113,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var effects: EffectsController? = null
     private var sync: SyncController? = null
     private var snapshots: SnapshotController? = null
+    private var navigation: PlayerNavigation? = null
 
     override val active: Boolean get() = controls.active
 
@@ -122,6 +126,10 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Synchronization -> panel.toggle(PanelTab.Sync)
                 ShortcutId.MediaInfo -> panel.toggle(PanelTab.Info)
                 ShortcutId.Snapshot -> snapshots?.take()
+                // S-608: the new interface's "Jump to time", bookmarks and their tab
+                ShortcutId.JumpToTime -> navigation?.jumping = true
+                ShortcutId.AddBookmark -> navigation?.addBookmark()
+                ShortcutId.Bookmarks -> panel.toggle(PanelTab.Bookmarks)
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
                 ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
                     val done = classic.perform(id)
@@ -152,10 +160,13 @@ class DesktopPlayerChrome : PlayerChrome {
         // the screenshots (S-606)
         val snapshots = SnapshotController(activity)
         this.snapshots = snapshots
+        // "Jump to time", the chapters and the bookmarks (S-608)
+        val navigation = PlayerNavigation(activity)
+        this.navigation = navigation
         val frame = MouseOnlyFrame(activity, controls)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots) }
+            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -163,7 +174,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live), layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live), navigation, layout)
         }.also { it.attach() }
     }
 
@@ -207,6 +218,8 @@ class DesktopPlayerChrome : PlayerChrome {
         // another film: its own minute of statistics
         if (uri != playingUri) live.clear()
         playingUri = uri
+        // its bookmarks
+        navigation?.onMediaStarted()
     }
 
     override fun detach() {
@@ -215,6 +228,8 @@ class DesktopPlayerChrome : PlayerChrome {
         sync?.release()
         sync = null
         snapshots = null
+        navigation?.release()
+        navigation = null
         panelHost?.detach()
         panelHost = null
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
@@ -272,6 +287,7 @@ private fun PlayerChromeContent(
     info: InfoState,
     live: LiveStats,
     snapshots: SnapshotController,
+    navigation: PlayerNavigation,
 ) {
     val prefs = rememberNagmedarPreferences()
     val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, prefs) }
@@ -294,10 +310,8 @@ private fun PlayerChromeContent(
     LaunchedEffect(visibility) {
         snapshotFlow { visibility.cursorHidden }.collect { frame.cursorChanged() }
     }
-    val previews = remember(uri) { uri?.let { RetrieverFramePreviews(activity.applicationContext, it) } }
-    DisposableEffect(previews) {
-        onDispose { previews?.close() }
-    }
+    // shared with the chapters and the bookmarks; read again for another film
+    val previews = remember(uri) { navigation.previewsFor(uri) }
     val sampling = info.overlay || (panel.shown && panel.tab == PanelTab.Info)
     LaunchedEffect(sampling) {
         while (sampling) {
@@ -309,7 +323,16 @@ private fun PlayerChromeContent(
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             Box(Modifier.fillMaxSize()) {
                 SnapshotFlash(snapshots.state.flashes)
-                DesktopControls(state.copy(effectsOpen = panel.open && panel.tab == PanelTab.Effects, snapshot = prefs.snapshot), source, visibility, previews)
+                DesktopControls(
+                    state.copy(
+                        effectsOpen = panel.open && panel.tab == PanelTab.Effects,
+                        snapshot = prefs.snapshot,
+                        bookmarks = navigation.bookmarks.marks.map { it.timeMs },
+                    ),
+                    source,
+                    visibility,
+                    previews,
+                )
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
                 // above the control bar while it shows
                 SnapshotCard(
@@ -322,6 +345,13 @@ private fun PlayerChromeContent(
                     modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
                 )
             }
+            // Ctrl+T (S-608): the time and the chapters as they are when it opens
+            if (navigation.jumping) {
+                val now = remember { navigation.timeMs() }
+                val length = remember { navigation.lengthMs() }
+                val chapters = remember { navigation.chapters() }
+                JumpDialog(now, length, chapters, onJump = navigation::seek, onDismiss = { navigation.jumping = false })
+            }
         }
     }
 }
@@ -331,18 +361,22 @@ private class PanelInfo(val source: ActivityInfoSource, val state: InfoState, va
 
 /** The Info tab in the app (S-605): the film's facts, read again every two seconds while it shows. */
 @Composable
-private fun InfoContent(info: PanelInfo, columns: Int) {
+private fun InfoContent(info: PanelInfo, navigation: PlayerNavigation, columns: Int) {
     val source = info.source
     var uri by remember { mutableStateOf(source.uri()) }
     var tracks by remember { mutableStateOf(source.tracks()) }
     var decoding by remember { mutableStateOf(source.decoding()) }
     var lengthMs by remember { mutableStateOf(source.lengthMs()) }
+    var chapters by remember { mutableStateOf(navigation.chapters()) }
+    var nowMs by remember { mutableStateOf(navigation.timeMs()) }
     LaunchedEffect(source) {
         while (true) {
             uri = source.uri()
             tracks = source.tracks()
             decoding = source.decoding()
             lengthMs = source.lengthMs()
+            chapters = navigation.chapters()
+            nowMs = navigation.timeMs()
             delay(2_000)
         }
     }
@@ -386,6 +420,13 @@ private fun InfoContent(info: PanelInfo, columns: Int) {
         onOverlay = { info.state.overlay = it },
         report = { infoReport(file, streams, rows, info.live.last, labels) },
         columns = columns,
+        chapters = chapters,
+        nowMs = nowMs,
+        previews = remember(uri) { navigation.previewsFor(uri?.let(Uri::parse)) },
+        onChapter = { ms ->
+            navigation.seek(ms)
+            nowMs = ms
+        },
     )
 }
 
@@ -402,12 +443,13 @@ private fun PanelContent(
     effects: EffectsController,
     sync: SyncController,
     info: PanelInfo,
+    navigation: PlayerNavigation,
     layout: PanelLayout,
 ) {
     val prefs = rememberNagmedarPreferences()
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.active) InputMode.Pointer else InputMode.Touch) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
-            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects, PanelTab.Info), layout.dock, Modifier.fillMaxSize()) { tab ->
+            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), layout.dock, Modifier.fillMaxSize()) { tab ->
                 when (tab) {
                     PanelTab.Sync -> {
                         // the delays are the player's: VLC's own controls and the keys move them too
@@ -439,9 +481,30 @@ private fun PanelContent(
                         onEqualizerWindow = activity::showEqualizer,
                         columns = layout.columns,
                     )
-                    PanelTab.Info -> InfoContent(info, layout.columns)
+                    PanelTab.Info -> InfoContent(info, navigation, layout.columns)
+                    PanelTab.Bookmarks -> {
+                        val uri = remember { mutableStateOf(info.source.uri()) }
+                        LaunchedEffect(navigation) {
+                            while (true) {
+                                uri.value = info.source.uri()
+                                delay(2_000)
+                            }
+                        }
+                        BookmarksPanel(
+                            marks = navigation.bookmarks.marks,
+                            refused = navigation.bookmarks.refused,
+                            previews = remember(uri.value) { navigation.previewsFor(uri.value?.let(Uri::parse)) },
+                            onAdd = navigation::addBookmark,
+                            onSeek = navigation::seek,
+                            onRename = { navigation.renaming = it },
+                            onRemove = navigation.bookmarks::remove,
+                        )
+                    }
                     else -> Unit
                 }
+            }
+            navigation.renaming?.let { mark ->
+                RenameBookmarkDialog(mark, onRename = { name -> navigation.bookmarks.rename(mark, name) }, onDismiss = { navigation.renaming = null })
             }
         }
     }

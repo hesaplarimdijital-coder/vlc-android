@@ -31,6 +31,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -60,9 +62,9 @@ import kotlin.math.roundToInt
 private const val SEEK_EVERY_MS = 120L
 
 /**
- * The player's timeline (S-601): what has played, the chapters' starts as ticks, the A-B loop's
- * marks with its stretch lit; under the mouse a frame of that moment with its time and chapter.
- * A click seeks there; a drag seeks as it goes.
+ * The player's timeline (S-601): what has played, the chapters' starts as ticks, the bookmarks as
+ * diamonds (S-608), the A-B loop's marks with its stretch lit; under the mouse a frame of that
+ * moment with its time and chapter. A click seeks there; a drag seeks as it goes.
  */
 @Composable
 fun PlayerTimeline(
@@ -167,6 +169,21 @@ fun PlayerTimeline(
                 if (chapter.startMs <= 0) continue
                 val at = x(chapter.startMs)
                 drawRect(tick, Offset(at - 1.dp.toPx(), y - 6.dp.toPx()), Size(2.dp.toPx(), 4.dp.toPx()))
+            }
+            // the bookmarks (S-608): small diamonds above the track
+            val half = 3.dp.toPx()
+            for (bookmark in state.bookmarks) {
+                val at = x(bookmark)
+                val top = y - thickness / 2 - 4.dp.toPx() - 2 * half
+                val diamond = Path().apply {
+                    moveTo(at, top)
+                    lineTo(at + half, top + half)
+                    lineTo(at, top + 2 * half)
+                    lineTo(at - half, top + half)
+                    close()
+                }
+                drawPath(diamond, colors.accent)
+                drawPath(diamond, Color.Black.copy(alpha = 0.45f), style = Stroke(width = 1.dp.toPx()))
             }
             val thumb = (if (emphasised) 7.dp else 6.dp).toPx()
             drawCircle(Color.Black.copy(alpha = 0.35f), thumb + 1.dp.toPx(), Offset(size.width * played, y + 1.dp.toPx()))

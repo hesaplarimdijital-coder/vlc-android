@@ -2,6 +2,7 @@ package app.nagmedar.ui.player.panel
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,6 +49,9 @@ enum class PanelTab(@StringRes val label: Int) {
     Sync(R.string.nag_panel_sync),
     Effects(R.string.nag_panel_effects),
     Info(R.string.nag_panel_info),
+
+    /** S-608: the film's bookmarks. */
+    Bookmarks(R.string.nag_panel_bookmarks),
 }
 
 /**
@@ -136,7 +141,8 @@ fun PlayerPanel(
                 .padding(start = 12.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(Modifier.weight(1f).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            // more tabs than fit scroll sideways
+            Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 tabs.forEach { tab -> PanelTabButton(stringResource(tab.label), selected = tab == state.tab) { state.show(tab) } }
             }
             NagIconButton(NagIcons.Close, stringResource(R.string.nag_panel_close), state::close, size = 32.dp, iconSize = 14.dp)

@@ -7,6 +7,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
+import app.nagmedar.ui.player.navigate.chapterStep
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
@@ -89,6 +90,8 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.Shuffle -> service.shuffle()
             ShortcutId.ShowTime -> activity.overlayDelegate.showOverlay()
             ShortcutId.JumpToTime -> activity.showJumpToTime()
+            ShortcutId.NextChapter -> stepChapter(forward = true)
+            ShortcutId.PreviousChapter -> stepChapter(forward = false)
             ShortcutId.VolumeUp -> activity.volumeStep(up = true)
             ShortcutId.VolumeDown -> activity.volumeStep(up = false)
             ShortcutId.Mute -> activity.toggleMute()
@@ -121,6 +124,22 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
         val name = if (next.getId() == NO_TRACK) activity.getString(R.string.nag_player_subtitles_off) else next.getName()
         activity.overlayDelegate.showInfo(
             activity.getString(if (audio) R.string.nag_player_audio_track_now else R.string.nag_player_subtitles_now, name),
+            1000,
+        )
+    }
+
+    /**
+     * Shift+N and Shift+P (S-608): the next chapter, or back to the start of this one, then the one
+     * before; its number and name show.
+     */
+    private fun stepChapter(forward: Boolean) {
+        val service = activity.service ?: return
+        val chapters = service.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty()
+        val index = chapterStep(chapters, service.getTime(), forward) ?: return
+        service.chapterIdx = index
+        val name = chapters[index].name
+        activity.overlayDelegate.showInfo(
+            if (name.isBlank()) activity.getString(R.string.nag_player_chapter, index + 1) else activity.getString(R.string.nag_player_chapter_named, index + 1, name),
             1000,
         )
     }

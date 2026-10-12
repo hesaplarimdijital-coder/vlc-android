@@ -146,7 +146,7 @@ enum class ShortcutId {
     OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
-    ShowTime, JumpToTime,
+    ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile,
@@ -204,6 +204,11 @@ object ShortcutRegistry {
         // S-602: the rest of VLC's player keys
         Shortcut(ShortcutId.ShowTime, ShortcutGroup.Playback, R.string.nag_sc_show_time, KeyChord(Key.T), ShortcutScope.Player),
         Shortcut(ShortcutId.JumpToTime, ShortcutGroup.Playback, R.string.nag_sc_jump_to_time, KeyChord(Key.T, ctrl = true), ShortcutScope.Player),
+        // S-608: chapters as VLC desktop steps through them, and bookmarks
+        Shortcut(ShortcutId.NextChapter, ShortcutGroup.Playback, R.string.nag_sc_next_chapter, KeyChord(Key.N, shift = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.PreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_previous_chapter, KeyChord(Key.P, shift = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.AddBookmark, ShortcutGroup.Playback, R.string.nag_sc_add_bookmark, KeyChord(Key.D, ctrl = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.Bookmarks, ShortcutGroup.Playback, R.string.nag_sc_bookmarks, KeyChord(Key.B, ctrl = true, shift = true), ShortcutScope.Player),
         // Audio
         Shortcut(ShortcutId.VolumeUp, ShortcutGroup.Audio, R.string.nag_sc_volume_up, KeyChord(Key.DirectionUp, ctrl = true)),
         Shortcut(ShortcutId.VolumeDown, ShortcutGroup.Audio, R.string.nag_sc_volume_down, KeyChord(Key.DirectionDown, ctrl = true)),

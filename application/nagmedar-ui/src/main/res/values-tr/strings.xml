@@ -786,4 +786,36 @@
     <string name="nag_snap_menu_folder">Klasör: %1$s</string>
     <string name="nag_snap_menu_change_folder">Klasörü değiştir…</string>
     <string name="nag_snap_menu_default_folder">Varsayılan klasöre dön</string>
+    <!-- S-608: jump to time, chapters, bookmarks -->
+    <string name="nag_sc_next_chapter">Sonraki bölüm</string>
+    <string name="nag_sc_previous_chapter">Önceki bölüm</string>
+    <string name="nag_sc_add_bookmark">Yer imi ekle</string>
+    <string name="nag_sc_bookmarks">Yer imleri</string>
+    <string name="nag_panel_bookmarks">Yer imleri</string>
+    <string name="nag_bm_title">Yer imleri · %1$d</string>
+    <string name="nag_bm_empty">Henüz yer imi yok.</string>
+    <string name="nag_bm_empty_keys">Henüz yer imi yok. %1$s çalan anı işaretler.</string>
+    <string name="nag_bm_refused">Bu film yer imi tutamıyor: medya kütüphanesi hazır değil.</string>
+    <string name="nag_bm_kept">Yer imleri medya kütüphanesinde saklanır; VLC\'nin klasik oynatıcısı da gösterir.</string>
+    <string name="nag_bm_add">Yer imi ekle</string>
+    <string name="nag_bm_rename">Yeniden adlandır…</string>
+    <string name="nag_bm_remove">Sil</string>
+    <string name="nag_bm_go">%1$s yer imine git</string>
+    <string name="nag_bm_more">%1$s için daha fazla</string>
+    <string name="nag_bm_default_name">Yer imi %1$d</string>
+    <string name="nag_bm_added">Yer imi eklendi: %1$s · %2$s</string>
+    <string name="nag_bm_rename_title">Yer imini adlandırın</string>
+    <string name="nag_bm_name">Yer iminin adı</string>
+    <string name="nag_bm_save">Kaydet</string>
+    <string name="nag_chapters_title">Bölümler · %1$d</string>
+    <string name="nag_chapters_keys">atla</string>
+    <string name="nag_chapters_row">%1$d · %2$s</string>
+    <string name="nag_jump_title">Zamana atla</string>
+    <string name="nag_jump_field">Zaman</string>
+    <string name="nag_jump_length">/ %1$s</string>
+    <string name="nag_jump_to">→ %1$s</string>
+    <string name="nag_jump_past_end">Film %1$s sürüyor.</string>
+    <string name="nag_jump_unreadable">Bir zaman okunamadı: örneğin 1:12:33, 72:33 ya da +30 yazın.</string>
+    <string name="nag_jump_hint" formatted="false">1:12:33 · 72:33 · 45 sn · +30 · −2 dk · %50</string>
+    <string name="nag_jump_go">Git</string>
 </resources>

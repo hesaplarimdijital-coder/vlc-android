@@ -46,6 +46,8 @@ data class PlayerChromeState(
     val effectsOpen: Boolean = false,
     /** S-606: the screenshots' choices, for the screenshot button's menu. */
     val snapshot: SnapshotSettings = SnapshotSettings(),
+    /** S-608: the film's bookmarks, marked on the timeline. */
+    val bookmarks: List<Long> = emptyList(),
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }

@@ -160,6 +160,9 @@ private val mpvKeys: Map<ShortcutId, KeyChord?> = mapOf(
     ShortcutId.SubtitleDelayUp to KeyChord(Key.Z, shift = true),
     // mpv shows the time with O and has no zoom of its own on a key: Z is the subtitles' there
     ShortcutId.ShowTime to KeyChord(Key.O),
+    // mpv's chapters are PgUp and PgDn
+    ShortcutId.NextChapter to KeyChord(Key.PageUp),
+    ShortcutId.PreviousChapter to KeyChord(Key.PageDown),
     ShortcutId.Zoom to null,
 )
 
