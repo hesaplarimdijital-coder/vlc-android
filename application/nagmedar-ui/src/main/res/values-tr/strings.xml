@@ -776,6 +776,34 @@
     <string name="nag_style_ass_file">Dosyanınki</string>
     <string name="nag_style_ass_ours">Bu görünüm</string>
     <string name="nag_style_waiting">Yeni görünüm, oynatıcı yeniden açılınca altyazılara uygulanır.</string>
+    <!-- S-706: OpenSubtitles.com'dan altyazı -->
+    <string name="nag_online_search">OpenSubtitles\'ta ara</string>
+    <string name="nag_online_title">OpenSubtitles\'ta ara</string>
+    <string name="nag_online_search_short">Ara</string>
+    <string name="nag_online_name">Film adı</string>
+    <string name="nag_online_by_hash">Önce dosyanın parmak iziyle</string>
+    <string name="nag_online_searching">Aranıyor…</string>
+    <string name="nag_online_none">Altyazı bulunamadı; adı değiştirip yeniden arayın.</string>
+    <string name="nag_online_hash_match">bu dosyaya uygun</string>
+    <plurals name="nag_online_downloads">
+        <item quantity="one">%1$s indirme</item>
+        <item quantity="other">%1$s indirme</item>
+    </plurals>
+    <string name="nag_online_hearing_impaired">işitme engelliler için</string>
+    <string name="nag_online_machine">makine çevirisi</string>
+    <string name="nag_online_download">İndir</string>
+    <string name="nag_online_downloading">İndiriliyor…</string>
+    <string name="nag_online_quota">OpenSubtitles kotası: %1$d/%2$d</string>
+    <string name="nag_online_close">Kapat</string>
+    <string name="nag_online_no_key">Bu derlemede OpenSubtitles anahtarı yok</string>
+    <string name="nag_online_offline">OpenSubtitles\'a ulaşılamadı; bağlantıyı denetleyin.</string>
+    <string name="nag_online_quota_over">Bugünkü indirme hakkı doldu.</string>
+    <string name="nag_online_quota_over_at">Bugünkü indirme hakkı doldu; yenilenme saati: %1$s.</string>
+    <string name="nag_online_server">OpenSubtitles şu an yanıt vermiyor; biraz sonra yeniden deneyin.</string>
+    <string name="nag_online_unsaved">Altyazı kaydedilemedi.</string>
+    <string name="nag_online_note">%1$s · OpenSubtitles\'tan</string>
+    <string name="nag_online_saved_beside">%1$s indirildi, filmin yanına kaydedildi</string>
+    <string name="nag_online_saved_app">%1$s indirildi, uygulamanın klasörüne kaydedildi</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Altyazı eklendi: %1$s</string>
     <string name="nag_sub_added_from_folder">Klasördeki altyazı eklendi: %1$s</string>

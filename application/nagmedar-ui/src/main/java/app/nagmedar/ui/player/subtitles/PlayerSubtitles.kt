@@ -171,6 +171,33 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         return done
     }
 
+    /**
+     * The online search's film (S-706): the playing one, its file's fingerprint, its folder for a
+     * download (else the app's), which then shows; null without a film.
+     */
+    fun onlineFilm(): OnlineFilm? {
+        val service = activity.service ?: return null
+        val media = service.currentMediaWrapper ?: return null
+        val video = media.uri ?: return null
+        val context = activity.applicationContext
+        val filmName = displayName(context.contentResolver, video) ?: media.title ?: return null
+        return object : OnlineFilm {
+            override val name: String = filmName
+
+            override suspend fun hash(): String? = movieHash(context.contentResolver, video)
+
+            override suspend fun save(fileName: String, bytes: ByteArray): SavedSubtitle? =
+                withContext(Dispatchers.IO) { saveSubtitle(context, video, fileName, bytes) }
+
+            override suspend fun load(saved: SavedSubtitle): Boolean {
+                if (!this@PlayerSubtitles.load(Uri.parse(saved.uri), saved.name, select = true)) return false
+                note = activity.getString(R.string.nag_online_note, saved.name)
+                say(activity.getString(if (saved.beside) R.string.nag_online_saved_beside else R.string.nag_online_saved_app, saved.name))
+                return true
+            }
+        }
+    }
+
     /** "Subtitle encoding…": the film's first subtitle file, its head read; a word when it has none. */
     fun openEncoding() {
         val service = activity.service ?: return
@@ -302,6 +329,65 @@ private fun treeSiblings(context: Context, video: Uri): List<Pair<String, String
         }
     }
 }
+
+/**
+ * A downloaded subtitle file (S-706) beside [video]: in a local file's folder, or in the folder
+ * chosen with the system's picker, through its document tree; where the app may not write, in
+ * its own folder. Null when neither takes it.
+ */
+internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes: ByteArray): SavedSubtitle? {
+    saveBeside(context, video, fileName, bytes)?.let { uri ->
+        return SavedSubtitle(uri.toString(), displayName(context.contentResolver, uri) ?: fileName, beside = true)
+    }
+    val folder = File(context.getExternalFilesDir(null) ?: context.filesDir, APP_SUBTITLES)
+    return runCatching {
+        folder.mkdirs()
+        val file = uniqueFile(folder, fileName)
+        file.writeBytes(bytes)
+        SavedSubtitle(Uri.fromFile(file).toString(), file.name, beside = false)
+    }.getOrNull()
+}
+
+private fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? = when (video.scheme) {
+    null, ContentResolver.SCHEME_FILE -> runCatching {
+        val folder = File(requireNotNull(video.path)).parentFile ?: error("no folder")
+        val file = uniqueFile(folder, fileName)
+        file.writeBytes(bytes)
+        Uri.fromFile(file)
+    }.getOrNull()
+    ContentResolver.SCHEME_CONTENT -> treeSave(context, video, fileName, bytes)
+    else -> null
+}
+
+private fun treeSave(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? {
+    val segments = video.pathSegments
+    if (segments.size < 4 || segments[0] != "tree" || segments[2] != "document") return null
+    val resolver = context.contentResolver
+    val documentId = runCatching { DocumentsContract.getDocumentId(video) }.getOrNull() ?: return null
+    val parentId = parentDocument(resolver, video, documentId) ?: return null
+    val folder = DocumentsContract.buildDocumentUriUsingTree(video, parentId)
+    // the provider keeps the name as it is given, and numbers it when it is taken
+    val created = runCatching { DocumentsContract.createDocument(resolver, folder, ANY_FILE, fileName) }.getOrNull() ?: return null
+    val written = runCatching { resolver.openOutputStream(created)?.use { it.write(bytes) } != null }.getOrDefault(false)
+    if (!written) {
+        runCatching { DocumentsContract.deleteDocument(resolver, created) }
+        return null
+    }
+    return created
+}
+
+/** [name] in [folder], or "Name (2).srt" when it is taken. */
+private fun uniqueFile(folder: File, name: String): File {
+    val first = File(folder, name)
+    if (!first.exists()) return first
+    val base = name.substringBeforeLast('.')
+    val extension = name.substringAfterLast('.', "").let { if (it.isEmpty()) "" else ".$it" }
+    return (2..MAX_COPIES).asSequence().map { File(folder, "$base ($it)$extension") }.firstOrNull { !it.exists() } ?: first
+}
+
+private const val APP_SUBTITLES = "Subtitles"
+private const val ANY_FILE = "application/octet-stream"
+private const val MAX_COPIES = 99
 
 /** The folder a tree's document is in: the provider says so from Android 8; the external storage's ids are paths before. */
 private fun parentDocument(resolver: ContentResolver, video: Uri, documentId: String): String? {

@@ -797,6 +797,35 @@
     <string name="nag_style_ass_file">The file\'s</string>
     <string name="nag_style_ass_ours">This look</string>
     <string name="nag_style_waiting">The new look reaches the subtitles when the player opens again.</string>
+    <!-- S-706: subtitles from OpenSubtitles.com -->
+    <string name="nag_online_search">Search OpenSubtitles</string>
+    <string name="nag_online_title">Search OpenSubtitles</string>
+    <string name="nag_online_search_short">Search</string>
+    <string name="nag_online_name">Film name</string>
+    <string name="nag_online_by_hash">The file\'s fingerprint first</string>
+    <string name="nag_online_searching">Searching…</string>
+    <string name="nag_online_none">No subtitles found; change the name and search again.</string>
+    <string name="nag_online_hash_match">fits this file</string>
+    <plurals name="nag_online_downloads">
+        <item quantity="one">%1$s download</item>
+        <item quantity="other">%1$s downloads</item>
+    </plurals>
+    <string name="nag_online_fps" translatable="false">%1$s fps</string>
+    <string name="nag_online_hearing_impaired">for the hard of hearing</string>
+    <string name="nag_online_machine">machine translated</string>
+    <string name="nag_online_download">Download</string>
+    <string name="nag_online_downloading">Downloading…</string>
+    <string name="nag_online_quota">OpenSubtitles quota: %1$d/%2$d</string>
+    <string name="nag_online_close">Close</string>
+    <string name="nag_online_no_key">This build has no OpenSubtitles key</string>
+    <string name="nag_online_offline">OpenSubtitles could not be reached; check the connection.</string>
+    <string name="nag_online_quota_over">Today\'s downloads are used up.</string>
+    <string name="nag_online_quota_over_at">Today\'s downloads are used up; they come back at %1$s.</string>
+    <string name="nag_online_server">OpenSubtitles is not answering now; try again a little later.</string>
+    <string name="nag_online_unsaved">The subtitles could not be saved.</string>
+    <string name="nag_online_note">%1$s · from OpenSubtitles</string>
+    <string name="nag_online_saved_beside">%1$s downloaded and saved beside the film</string>
+    <string name="nag_online_saved_app">%1$s downloaded and saved in the app\'s folder</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Subtitles added: %1$s</string>
     <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>

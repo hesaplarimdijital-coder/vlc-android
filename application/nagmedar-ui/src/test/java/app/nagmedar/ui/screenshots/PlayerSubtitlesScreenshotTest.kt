@@ -24,11 +24,16 @@ import app.nagmedar.ui.player.FakePreviews
 import app.nagmedar.ui.player.samplePlayerState
 import app.nagmedar.ui.player.subtitles.EncodingSample
 import app.nagmedar.ui.player.subtitles.EncodingSurface
+import app.nagmedar.ui.player.subtitles.OnlineProblem
+import app.nagmedar.ui.player.subtitles.OnlineQuota
+import app.nagmedar.ui.player.subtitles.OnlineSearchState
+import app.nagmedar.ui.player.subtitles.OnlineSubtitlesSurface
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.subtitles.SubtitleEncoding
 import app.nagmedar.ui.player.subtitles.sampleEncoding
 import app.nagmedar.ui.player.subtitles.sampleFound
+import app.nagmedar.ui.player.subtitles.sampleOnline
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -42,7 +47,8 @@ import org.robolectric.annotation.GraphicsMode
  * S-701: the subtitles found in the film's folder, offered over the video above the control bar
  * (DeX, in English, on a phone); and files carried over the video, to be dropped. S-702: "Subtitle
  * encoding…" on a Turkish SRT in Windows-1254, detected; in English with Windows-1252 chosen, its
- * letters broken in the preview; on a phone.
+ * letters broken in the preview; on a phone. S-706: "Search OpenSubtitles", the subtitle timed for
+ * the file first, the day's quota; in English; on a phone; and a build without the key.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -107,4 +113,34 @@ class PlayerSubtitlesScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun encodingPhone() = capture("player-encoding-phone", InputMode.Touch) { Encoding() }
+
+    @Composable
+    private fun Online(state: OnlineSearchState = sampleSearch) {
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+        OnlineSubtitlesSurface(
+            state = state,
+            quota = OnlineQuota(14, 20, null),
+            nowMs = 0,
+            onName = {},
+            onLanguage = {},
+            onByHash = {},
+            onSearch = {},
+            onDownload = {},
+            onDismiss = {},
+        )
+    }
+
+    private val sampleSearch = OnlineSearchState("Kuzey Işığı 2024", listOf("tr", "en"), listOf("tr", "en"), results = sampleOnline)
+
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun online() = capture("player-online-dex") { Online() }
+
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun onlineEnglish() = capture("player-online-dex-en") { Online(sampleSearch.copy(languages = listOf("en", "tr"), offered = listOf("en", "tr"))) }
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun onlinePhone() = capture("player-online-phone", InputMode.Touch) { Online(sampleSearch.copy(downloading = sampleOnline[0].fileId)) }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun onlineWithoutKey() = capture("player-online-nokey-dex") { Online(sampleSearch.copy(results = null, problem = OnlineProblem.NoKey)) }
 }

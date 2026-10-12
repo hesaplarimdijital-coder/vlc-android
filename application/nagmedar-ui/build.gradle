@@ -12,6 +12,9 @@ android {
 
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // S-706: Nağmedar's own OpenSubtitles.com API key, from the build's environment (a CI secret)
+        // or a Gradle property; without one the subtitles' search says so
+        buildConfigField 'String', 'OPENSUBTITLES_API_KEY', "\"${openSubtitlesKey(project)}\""
     }
 
     buildTypes {
@@ -69,4 +72,10 @@ dependencies {
     testImplementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     testImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+}
+
+static def openSubtitlesKey(project) {
+    def key = System.getenv('NAGMEDAR_OPENSUBTITLES_API_KEY') ?: project.findProperty('nagmedar_opensubtitles_api_key') ?: ''
+    // only a key's characters: nothing that would break the generated Java string
+    return key.toString().replaceAll('[^A-Za-z0-9_-]', '')
 }

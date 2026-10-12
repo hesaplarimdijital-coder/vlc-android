@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
+import app.nagmedar.ui.BuildConfig
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.LocalTooltipDelay
@@ -95,9 +96,14 @@ import app.nagmedar.ui.player.subtitles.ActivitySubtitleTracks
 import app.nagmedar.ui.player.subtitles.DualSubtitlesController
 import app.nagmedar.ui.player.subtitles.EncodingDialog
 import app.nagmedar.ui.player.subtitles.LibVlcRestart
+import app.nagmedar.ui.player.subtitles.OkHttpOpenSubtitles
+import app.nagmedar.ui.player.subtitles.OnlineSection
+import app.nagmedar.ui.player.subtitles.OnlineSubtitlesController
+import app.nagmedar.ui.player.subtitles.OnlineSubtitlesDialog
 import app.nagmedar.ui.player.subtitles.PendingNativeSubtitleStyle
 import app.nagmedar.ui.player.subtitles.PendingSecondaryLayout
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
+import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.PrefsSubtitleStyleStore
 import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
 import app.nagmedar.ui.player.subtitles.SecondaryPosition
@@ -107,6 +113,7 @@ import app.nagmedar.ui.player.subtitles.SubtitleEncodings
 import app.nagmedar.ui.player.subtitles.SubtitleStyleController
 import app.nagmedar.ui.player.subtitles.SubtitleStyleSection
 import app.nagmedar.ui.player.subtitles.SubtitlesPanel
+import app.nagmedar.ui.player.subtitles.onlineLanguages
 import app.nagmedar.ui.player.sync.ActivitySyncAssist
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
@@ -164,6 +171,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var dual: DualSubtitlesController? = null
     private var assistant: SyncAssistant? = null
     private var appearance: SubtitleStyleController? = null
+    private var online: OnlineSubtitlesController? = null
 
     override val active: Boolean get() = controls.active
 
@@ -238,11 +246,14 @@ class DesktopPlayerChrome : PlayerChrome {
         // the subtitles' look (S-705), for every film
         val appearance = SubtitleStyleController(PrefsSubtitleStyleStore(activity.applicationContext), PendingNativeSubtitleStyle, MainScope())
         this.appearance = appearance
+        // subtitles from OpenSubtitles.com, with Nağmedar's own key (S-706)
+        val online = OnlineSubtitlesController(OkHttpOpenSubtitles(BuildConfig.OPENSUBTITLES_API_KEY), PrefsOnlineQuotaStore(Settings.getInstance(activity)), MainScope())
+        this.online = online
         val frame = MouseOnlyFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual) }
+            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -250,7 +261,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance), layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online), layout)
         }.also { it.attach() }
     }
 
@@ -371,6 +382,8 @@ class DesktopPlayerChrome : PlayerChrome {
         // a look changed meanwhile reaches the next film: libVLC starts again once nothing plays
         appearance?.release()
         appearance = null
+        online?.close()
+        online = null
         LibVlcRestart.whenIdle()
         panelHost?.detach()
         panelHost = null
@@ -385,12 +398,13 @@ class DesktopPlayerChrome : PlayerChrome {
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
 
-/** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704), the look (S-705). */
+/** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704), the look (S-705), OpenSubtitles (S-706). */
 private class PanelSubtitles(
     val files: PlayerSubtitles,
     val dual: DualSubtitlesController,
     val assistant: SyncAssistant,
     val appearance: SubtitleStyleController,
+    val online: OnlineSubtitlesController,
 )
 
 /** Alt+V, the menu's item, the tab's switch (S-703): the secondary subtitles on or off, said over the video. */
@@ -492,6 +506,7 @@ private fun PlayerChromeContent(
     navigation: PlayerNavigation,
     subtitles: PlayerSubtitles,
     dual: DualSubtitlesController,
+    online: OnlineSubtitlesController,
 ) {
     val prefs = rememberNagmedarPreferences()
     val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, dual, prefs) }
@@ -569,6 +584,20 @@ private fun PlayerChromeContent(
             }
             // S-702: the character set of the film's subtitle files
             subtitles.encoding?.let { sample -> EncodingDialog(sample, onApply = subtitles::applyEncoding, onDismiss = subtitles::closeEncoding) }
+            // S-706: subtitles from OpenSubtitles
+            online.state?.let { search ->
+                OnlineSubtitlesDialog(
+                    state = search,
+                    quota = online.quota,
+                    nowMs = System.currentTimeMillis(),
+                    onName = online::setName,
+                    onLanguage = online::toggle,
+                    onByHash = online::setByHash,
+                    onSearch = online::search,
+                    onDownload = online::download,
+                    onDismiss = online::close,
+                )
+            }
             // Ctrl+T (S-608): the time and the chapters as they are when it opens
             if (navigation.jumping) {
                 val now = remember { navigation.timeMs() }
@@ -735,6 +764,13 @@ private fun PanelContent(
                                     onStyle = look::update,
                                     onPreset = look::choose,
                                 )
+                            },
+                            online = {
+                                val search = subtitles.online
+                                val locale = currentLocale()
+                                OnlineSection(search.available, search.quota, System.currentTimeMillis()) {
+                                    subtitles.files.onlineFilm()?.let { film -> search.open(film, onlineLanguages(locale)) }
+                                }
                             },
                         )
                     }

@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.player.panel.PanelTab
+import app.nagmedar.ui.player.subtitles.OnlineQuota
+import app.nagmedar.ui.player.subtitles.OnlineSection
 import app.nagmedar.ui.player.subtitles.SecondaryPosition
 import app.nagmedar.ui.player.subtitles.SubtitlePreset
 import app.nagmedar.ui.player.subtitles.SubtitleStyleSection
@@ -42,7 +44,8 @@ import org.robolectric.annotation.GraphicsMode
  * English; under the video in half a DeX window; on a phone. S-704: the subtitles' delay, which
  * the film remembers, and the sync assistant: the sound marked, the subtitle next; on the phone,
  * the difference applied, to be taken back. S-705: the subtitles' look, the mockups' thin one, a
- * change waiting for the player to open again; the whole tab in a tall DeX window.
+ * change waiting for the player to open again; the whole tab in a tall DeX window. S-706:
+ * "Search OpenSubtitles" last, with the day's quota.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -91,6 +94,7 @@ class PlayerSubtitlesTabScreenshotTest {
                                 onPreset = {},
                             )
                         },
+                        online = { OnlineSection(available = true, quota = OnlineQuota(14, 20, null), nowMs = 0) {} },
                     )
                 }
             }

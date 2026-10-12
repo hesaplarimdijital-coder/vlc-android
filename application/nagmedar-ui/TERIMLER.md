@@ -81,6 +81,8 @@ Sözlüğü testler denetler:
 | gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms |
 | kontur | outline | | | Altyazı harflerinin çevresindeki çizgi: yok, 2, 4 ya da 6 px |
 | tırnaklı, tırnaksız | serif, sans serif | | | Altyazı yazı tipleri; “Eş aralıklı” (monospace), “Dar” (condensed) |
+| parmak izi | fingerprint | | hash | Dosyanın OpenSubtitles'taki kimliği: boyutu ve ilk ve son 64 KB'si; “bu dosyaya uygun” altyazılar onunla bulunur |
+| kota | quota | | | OpenSubtitles'ın günlük indirme hakkı: “OpenSubtitles kotası: 4/5” |
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
