@@ -35,6 +35,7 @@ import org.videolan.resources.EXIT_PLAYER
 import org.videolan.resources.PLAYLIST_TYPE_AUDIO
 import org.videolan.resources.PLAYLIST_TYPE_VIDEO
 import org.videolan.resources.PLAY_FROM_SERVICE
+import org.videolan.resources.DecodingHook
 import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.VLCOptions
@@ -584,7 +585,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 val kept = runCatching { SlaveRepository.getInstance(ctx).getSlaves(mw.location).map { it.uri } }.getOrDefault(emptyList())
                 runCatching { finder.find(ctx, mw.uri, uri, kept) }.getOrNull()
             }?.let { media.addOption(":subsdec-encoding=$it") }
-            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags, PlaybackService.hasRenderer())
+            // Nağmedar (S-507): a film the hardware decoder would colour wrong (Dolby Vision profile 5) is decoded in software
+            val software = DecodingHook.adviser?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }
+                ?.let { adviser -> runCatching { adviser.needsSoftwareDecoding(ctx, mw.uri) }.getOrDefault(false) } ?: false
+            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer())
             /* keeping only video during benchmark */
             if (isBenchmark) {
                 media.addOption(":no-audio")

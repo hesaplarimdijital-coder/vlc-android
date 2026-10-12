@@ -61,6 +61,7 @@ import app.nagmedar.ui.player.audio.AudioOutputController
 import app.nagmedar.ui.player.audio.PrefsAudioOutputStore
 import app.nagmedar.ui.player.effects.ActivityAutoCrop
 import app.nagmedar.ui.player.effects.AudioOutputView
+import app.nagmedar.ui.player.effects.DolbyVisionDecoding
 import app.nagmedar.ui.player.effects.LibVlcEffects
 import app.nagmedar.ui.player.effects.RoomEffectsStore
 import app.nagmedar.ui.player.info.ActivityInfoSource
@@ -143,6 +144,7 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
 import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.EXTRA_SEEK_DELAY
+import org.videolan.resources.DecodingHook
 import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.tools.KEY_SUBTITLE_PREFERRED_LANGUAGE
 import org.videolan.tools.Settings
@@ -255,6 +257,8 @@ class DesktopPlayerChrome : PlayerChrome {
         val subtitles = PlayerSubtitles(activity, MainScope())
         this.subtitles = subtitles
         SubtitleEncodingHook.finder = SubtitleEncodings
+        // Dolby Vision profile 5 films are decoded in software, for libplacebo to colour them right (S-507)
+        DecodingHook.adviser = DolbyVisionDecoding
         // two subtitle tracks at once (S-703); the forced ones on their own when wanted (S-503)
         val dual = DualSubtitlesController(
             ActivitySubtitleTracks(activity),

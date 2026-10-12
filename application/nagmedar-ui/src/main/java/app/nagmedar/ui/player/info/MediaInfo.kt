@@ -70,6 +70,8 @@ enum class VideoDecoding(val label: Int, val tag: Int?) {
     Software(R.string.nag_info_decoder_software, R.string.nag_info_tag_software),
     /** Hardware decoding failed on this file: VLC went on in software. */
     SoftwareFallback(R.string.nag_info_decoder_fallback, R.string.nag_info_tag_software),
+    /** S-507: a Dolby Vision profile 5 film, decoded in software for libplacebo to colour it right. */
+    SoftwareDolbyVision(R.string.nag_info_decoder_dolby_vision, R.string.nag_info_tag_software),
 }
 
 /**

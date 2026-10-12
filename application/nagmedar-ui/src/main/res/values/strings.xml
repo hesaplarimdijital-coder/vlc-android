@@ -939,6 +939,7 @@
     <string name="nag_info_decoder_hardware_direct">MediaCodec · hardware · direct rendering</string>
     <string name="nag_info_decoder_software">FFmpeg · software</string>
     <string name="nag_info_decoder_fallback">FFmpeg · software (hardware failed on this file)</string>
+    <string name="nag_info_decoder_dolby_vision">FFmpeg · software (Dolby Vision profile 5, coloured by libplacebo)</string>
     <string name="nag_info_live">Live</string>
     <string name="nag_info_every_second">every second</string>
     <string name="nag_info_input_bitrate">Input bitrate</string>

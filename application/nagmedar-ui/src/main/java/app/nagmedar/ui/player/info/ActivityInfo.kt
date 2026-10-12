@@ -1,6 +1,7 @@
 package app.nagmedar.ui.player.info
 
 import android.provider.OpenableColumns
+import app.nagmedar.ui.player.effects.DolbyVisionDecoding
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.NagmedarVlcOptions
@@ -65,6 +66,7 @@ internal class ActivityInfoSource(private val activity: VideoPlayerActivity) {
 
     /** How the settings ask for the video to be decoded, and whether hardware decoding failed on this file. */
     fun decoding(): VideoDecoding {
+        if (DolbyVisionDecoding.decidedFor(uri())) return VideoDecoding.SoftwareDolbyVision
         if (media?.hasFlag(MediaWrapper.MEDIA_NO_HWACCEL) == true) return VideoDecoding.SoftwareFallback
         return when (Settings.getInstance(activity).getString(KEY_HARDWARE_ACCELERATION, "-1")?.toIntOrNull()) {
             0 -> VideoDecoding.Software

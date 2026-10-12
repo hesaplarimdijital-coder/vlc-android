@@ -911,6 +911,7 @@
     <string name="nag_info_decoder_hardware_direct">MediaCodec · donanım · doğrudan çıkış</string>
     <string name="nag_info_decoder_software">FFmpeg · yazılım</string>
     <string name="nag_info_decoder_fallback">FFmpeg · yazılım (donanım bu dosyada çalışmadı)</string>
+    <string name="nag_info_decoder_dolby_vision">FFmpeg · yazılım (Dolby Vision profil 5, renkleri libplacebo veriyor)</string>
     <string name="nag_info_live">Canlı</string>
     <string name="nag_info_every_second">her saniye</string>
     <string name="nag_info_input_bitrate">Giriş bit hızı</string>

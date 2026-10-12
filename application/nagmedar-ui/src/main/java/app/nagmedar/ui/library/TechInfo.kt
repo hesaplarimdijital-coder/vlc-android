@@ -120,6 +120,14 @@ class TechRepository private constructor(private val context: Context) {
         }
     }
 
+    /** The current probe of one file, made now when there is none (S-507: before a film starts); null when it cannot be. */
+    suspend fun probeNow(key: String): MediaTech? = withContext(Dispatchers.IO) {
+        cached(key) ?: run {
+            if (NativeLab.available) probeIfStale(key)
+            cached(key)
+        }
+    }
+
     private fun probeIfStale(key: String) {
         val uri = Uri.parse(key)
         val (size, modified) = stamp(uri) ?: return
