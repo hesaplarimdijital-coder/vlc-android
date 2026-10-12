@@ -35,11 +35,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -207,7 +206,7 @@ private fun SyncedLines(lyrics: Lyrics, timeMs: () -> Long, onSeek: ((Long) -> U
         LazyColumn(
             state = list,
             contentPadding = PaddingValues(top = maxHeight * 0.3f, bottom = maxHeight * 0.6f),
-            modifier = Modifier.fillMaxSize().fadingEdges(FADE).testTag("lyrics-lines"),
+            modifier = Modifier.fillMaxSize().fadingEdges(FADE, NagTheme.colors.background).testTag("lyrics-lines"),
         ) {
             itemsIndexed(lyrics.lines) { index, line ->
                 LyricRow(
@@ -271,7 +270,7 @@ private fun LyricRow(
 private fun PlainLines(lyrics: Lyrics, large: Boolean) {
     val colors = NagTheme.colors
     val style = if (large) lineStyle(true).copy(fontWeight = FontWeight.Normal) else NagTheme.type.body
-    LazyColumn(Modifier.fillMaxSize().fadingEdges(FADE).testTag("lyrics-lines"), contentPadding = PaddingValues(vertical = NagTheme.dimens.gapS)) {
+    LazyColumn(Modifier.fillMaxSize().fadingEdges(FADE, colors.background).testTag("lyrics-lines"), contentPadding = PaddingValues(vertical = NagTheme.dimens.gapS)) {
         item {
             Text(
                 stringResource(R.string.nag_lyrics_plain),
@@ -467,19 +466,22 @@ private fun rememberPlayingLyrics(): PlayingLyricsState {
     )
 }
 
-/** The lists' ends fade out over [edge]: the lines come and go rather than being cut. */
-private fun Modifier.fadingEdges(edge: Dp): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-    .drawWithContent {
-        drawContent()
-        val part = edge.toPx() / size.height
-        if (part < 0.5f) {
-            drawRect(
-                Brush.verticalGradient(0f to Color.Transparent, part to Color.Black, 1f - part to Color.Black, 1f to Color.Transparent),
-                blendMode = BlendMode.DstIn,
-            )
-        }
+/**
+ * The lists' ends fade into [color] over [edge]: the lines come and go rather than being cut. A
+ * veil of the background over the lines, which every renderer draws alike.
+ */
+private fun Modifier.fadingEdges(edge: Dp, color: Color): Modifier = drawWithContent {
+    drawContent()
+    val height = edge.toPx()
+    if (height * 2 < size.height) {
+        drawRect(Brush.verticalGradient(0f to color, 1f to color.copy(alpha = 0f), startY = 0f, endY = height), size = Size(size.width, height))
+        drawRect(
+            Brush.verticalGradient(0f to color.copy(alpha = 0f), 1f to color, startY = size.height - height, endY = size.height),
+            topLeft = Offset(0f, size.height - height),
+            size = Size(size.width, height),
+        )
     }
+}
 
 /** How far the lists' ends fade. */
 private val FADE = 24.dp
