@@ -290,6 +290,68 @@ typedef struct NagDspMeter {
 /** The clip meter (S-906); with [reset], the counts start over after the read. */
 void nag_audio_dsp_meter(NagAudio *engine, NagDspMeter *meter, int reset);
 
+/* --------------------------------------------------------------- ReplayGain */
+
+/* S-907: the gain the tags ask for, applied per track before the DSP chain. */
+
+typedef enum NagReplayGainMode {
+    NAG_REPLAYGAIN_OFF = 0,
+    NAG_REPLAYGAIN_TRACK,
+    NAG_REPLAYGAIN_ALBUM, /* the album's gain, the track's when the album has none */
+} NagReplayGainMode;
+
+typedef struct NagReplayGain {
+    NagReplayGainMode mode;
+    double preamp_db;       /* on top of the tags' gain */
+    double untagged_db;     /* for a track without tags (0: as it is) */
+    int prevent_clipping;   /* the gain is held back where the tags' peak would pass full scale */
+} NagReplayGain;
+
+void nag_audio_set_replaygain(NagAudio *engine, const NagReplayGain *settings);
+void nag_audio_get_replaygain(NagAudio *engine, NagReplayGain *settings);
+/** The gain in dB the playing track gets from this (0 when off or untagged and no untagged_db). */
+double nag_audio_replaygain_db(NagAudio *engine);
+
+/* S-907: the EBU R128 scanner (ITU-R BS.1770-4) and ReplayGain 2.0's gains (-18 LUFS). */
+
+typedef struct NagLoudnessResult {
+    double loudness_lufs; /* integrated; -HUGE_VAL for silence */
+    double true_peak;     /* 4x oversampled, 1.0 = full scale */
+    double sample_peak;
+    double gain_db;       /* ReplayGain 2.0: -18 - loudness */
+    int64_t frames;
+    int rate;
+} NagLoudnessResult;
+
+typedef struct NagLoudnessScan NagLoudnessScan;
+
+/** An album's accumulator: every file scanned into it adds its blocks to the album's gating. */
+NagLoudnessScan *nag_loudness_scan_new(void);
+void nag_loudness_scan_free(NagLoudnessScan *scan);
+/**
+ * Scans [url] whole, into [result]; with [album] its blocks count for the album too. [cancel]
+ * (may be NULL) set non-zero from another thread stops it with -2. Negative on failure, with
+ * [error].
+ */
+int nag_loudness_scan_file(NagLoudnessScan *album, const char *url, NagLoudnessResult *result, const int *cancel, char *error,
+                           size_t error_size);
+/** The album's result over everything scanned into it; -1 when nothing was. */
+int nag_loudness_scan_result(const NagLoudnessScan *album, NagLoudnessResult *result);
+
+/* S-907: the tags, written in place with TagLib (ID3v2, Vorbis comments, APE, MP4, Opus R128). */
+
+typedef struct NagReplayGainTags {
+    double track_gain_db, track_peak; /* NAN leaves a tag alone */
+    double album_gain_db, album_peak;
+    double track_lufs, album_lufs;    /* REPLAYGAIN_*_RANGE is not written; these go to R128 for Opus */
+} NagReplayGainTags;
+
+/**
+ * Writes the tags into the file behind [fd] (read-write; [name] with its extension helps the
+ * type detection); the descriptor stays the caller's. 0, or negative with [error].
+ */
+int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags *tags, char *error, size_t error_size);
+
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 

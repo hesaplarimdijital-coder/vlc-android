@@ -89,6 +89,9 @@ Sözlüğü testler denetler:
 | kulaklık profili | headphone profile | | | AutoEq'nun ParametricEQ.txt biçiminde içe alınan düzeltme: kendi bantları ve ön kazancı |
 | kırpılma | clipping | klip | | Tam ölçeği aşan örnekler; “Kırpılma göstergesi” sayar ve tepeyi dBFS olarak yazar |
 | bant | band | | | Ekolayzerin bir bandı: merkez frekansı, kazancı (dB) ve Q'su; “tepe”, “alçak raf”, “yüksek raf”, “alçak geçiren”, “yüksek geçiren” |
+| ses düzeyi | loudness | gürlük | | EBU R128'in ölçtüğü, LUFS ile: “Ses düzeyi taraması” albümleri ölçüp ReplayGain etiketlerini yazar |
+| gerçek tepe | true peak | | inter-sample peak | Dört kat örneklenmiş tepe, dBTP; ReplayGain'in kırpılma önlemesi buna bakar |
+| parça kazancı, albüm kazancı | track gain, album gain | | | ReplayGain'in iki kipi; “Albüm” albümü olmayan parçada parça kazancına düşer |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |
@@ -110,7 +113,10 @@ Sözlüğü testler denetler:
 
 Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 
+- AutoEq
+- EBU R128
 - GNU General Public License
+- ReplayGain
 - SIL Open Font License
 - VLC for Android
 

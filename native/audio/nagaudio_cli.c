@@ -2,6 +2,11 @@
 // at a file.
 //
 //   nagaudio info FILE                      the source as the engine reads it, JSON
+//   nagaudio scan FILE... [--album]         EBU R128 loudness, true peak and ReplayGain 2.0 gain
+//                                           of each file (and of the album with --album), JSON
+//   nagaudio tag FILE [--track-gain DB] [--track-peak P] [--album-gain DB] [--album-peak P]
+//                     [--track-lufs L] [--album-lufs L]
+//                                           writes the ReplayGain tags into FILE (S-907)
 //   nagaudio decode FILE [FILE2 ...] [-o OUT] [-f s16|s24|s32|f32|f64] [--seek MS]
 //                                           [--seek-after FRAMES] [--volume V] [--no-dither] [--md5]
 //                                           [--crossfade MS [--linear]]
@@ -9,6 +14,8 @@
 //                                           [--peq TYPE:HZ:DB:Q;...] [--profile TYPE:HZ:DB:Q;...]
 //                                           [--profile-preamp DB] [--limiter DB] [--limiter-release MS]
 //                                           [--limiter-lookahead MS] [--bypass]
+//                                           [--replaygain off|track|album] [--rg-preamp DB]
+//                                           [--rg-untagged DB] [--rg-no-clip]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
 //           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary
 //           with the events seen and, with --md5, the MD5 of the samples (what ffmpeg -f md5
@@ -92,6 +99,91 @@ static int info(const char *path)
     return 0;
 }
 
+static void print_loudness(const NagLoudnessResult *r)
+{
+    if (r->loudness_lufs > -HUGE_VAL)
+        printf("{\"loudness_lufs\":%.3f,", r->loudness_lufs);
+    else
+        printf("{\"loudness_lufs\":null,");
+    printf("\"true_peak\":%.9f,\"sample_peak\":%.9f,\"gain_db\":%.3f,\"frames\":%lld,\"rate\":%d}", r->true_peak, r->sample_peak, r->gain_db,
+           (long long)r->frames, r->rate);
+}
+
+static int scan(int argc, char **argv)
+{
+    int album = 0;
+    const char *files[64];
+    int n_files = 0;
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--album") == 0) album = 1;
+        else if (n_files < 64) files[n_files++] = argv[i];
+    }
+    if (!n_files) {
+        fprintf(stderr, "nagaudio scan: a file is needed\n");
+        return 2;
+    }
+    NagLoudnessScan *acc = album ? nag_loudness_scan_new() : NULL;
+    printf("{\"tracks\":[");
+    int failed = 0;
+    for (int i = 0; i < n_files; i++) {
+        NagLoudnessResult r;
+        char error[256] = {0};
+        if (nag_loudness_scan_file(acc, files[i], &r, NULL, error, sizeof(error)) < 0) {
+            fprintf(stderr, "nagaudio: %s: %s\n", files[i], error);
+            failed++;
+            printf("%snull", i ? "," : "");
+            continue;
+        }
+        printf("%s", i ? "," : "");
+        print_loudness(&r);
+    }
+    printf("]");
+    if (acc) {
+        NagLoudnessResult r;
+        printf(",\"album\":");
+        if (nag_loudness_scan_result(acc, &r) == 0)
+            print_loudness(&r);
+        else
+            printf("null");
+        nag_loudness_scan_free(acc);
+    }
+    printf("}\n");
+    return failed ? 1 : 0;
+}
+
+static int tag(int argc, char **argv)
+{
+    const char *file = NULL;
+    NagReplayGainTags t = {NAN, NAN, NAN, NAN, NAN, NAN};
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--track-gain") == 0 && i + 1 < argc) t.track_gain_db = atof(argv[++i]);
+        else if (strcmp(argv[i], "--track-peak") == 0 && i + 1 < argc) t.track_peak = atof(argv[++i]);
+        else if (strcmp(argv[i], "--album-gain") == 0 && i + 1 < argc) t.album_gain_db = atof(argv[++i]);
+        else if (strcmp(argv[i], "--album-peak") == 0 && i + 1 < argc) t.album_peak = atof(argv[++i]);
+        else if (strcmp(argv[i], "--track-lufs") == 0 && i + 1 < argc) t.track_lufs = atof(argv[++i]);
+        else if (strcmp(argv[i], "--album-lufs") == 0 && i + 1 < argc) t.album_lufs = atof(argv[++i]);
+        else file = argv[i];
+    }
+    if (!file) {
+        fprintf(stderr, "nagaudio tag: a file is needed\n");
+        return 2;
+    }
+    FILE *f = fopen(file, "r+b");
+    if (!f) {
+        perror(file);
+        return 1;
+    }
+    char error[256] = {0};
+    int ret = nag_tags_write_replaygain(fileno(f), file, &t, error, sizeof(error));
+    fclose(f);
+    if (ret < 0) {
+        fprintf(stderr, "nagaudio: %s: %s\n", file, error);
+        return 1;
+    }
+    printf("{\"written\":true}\n");
+    return 0;
+}
+
 static int format_same(const NagFormat *a, const NagFormat *b)
 {
     return a->rate == b->rate && a->channels == b->channels && a->sample_format == b->sample_format;
@@ -144,9 +236,10 @@ static int decode(int argc, char **argv)
     NagSampleFormat format = NAG_FMT_NONE;
     int64_t seek_ms = -1, seek_after = -1;
     double volume = 1.0;
-    int dither = 1, md5 = 0, crossfade_ms = 0, linear = 0, dsp_set = 0;
+    int dither = 1, md5 = 0, crossfade_ms = 0, linear = 0, dsp_set = 0, rg_set = 0;
     NagDspParams dsp;
     nag_dsp_params_defaults(&dsp);
+    NagReplayGain rg = {NAG_REPLAYGAIN_OFF, 0, 0, 1};
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) out_path = argv[++i];
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
@@ -193,6 +286,13 @@ static int decode(int argc, char **argv)
         else if (strcmp(argv[i], "--limiter-release") == 0 && i + 1 < argc) { dsp.limiter_release_ms = atof(argv[++i]); dsp_set = 1; }
         else if (strcmp(argv[i], "--limiter-lookahead") == 0 && i + 1 < argc) { dsp.limiter_lookahead_ms = atof(argv[++i]); dsp_set = 1; }
         else if (strcmp(argv[i], "--bypass") == 0) { dsp.bypass = 1; dsp_set = 1; }
+        else if (strcmp(argv[i], "--replaygain") == 0 && i + 1 < argc) {
+            const char *mode = argv[++i];
+            rg.mode = strcmp(mode, "track") == 0 ? NAG_REPLAYGAIN_TRACK : strcmp(mode, "album") == 0 ? NAG_REPLAYGAIN_ALBUM : NAG_REPLAYGAIN_OFF;
+            rg_set = 1;
+        } else if (strcmp(argv[i], "--rg-preamp") == 0 && i + 1 < argc) { rg.preamp_db = atof(argv[++i]); rg_set = 1; }
+        else if (strcmp(argv[i], "--rg-untagged") == 0 && i + 1 < argc) { rg.untagged_db = atof(argv[++i]); rg_set = 1; }
+        else if (strcmp(argv[i], "--rg-no-clip") == 0) { rg.prevent_clipping = 0; rg_set = 1; }
         else if (argv[i][0] == '-' && argv[i][1]) {
             fprintf(stderr, "nagaudio: unknown option %s\n", argv[i]);
             return 2;
@@ -216,6 +316,8 @@ static int decode(int argc, char **argv)
     nag_audio_set_crossfade(e, crossfade_ms, linear ? NAG_CROSSFADE_LINEAR : NAG_CROSSFADE_EQUAL_POWER);
     if (dsp_set)
         nag_audio_set_dsp(e, &dsp);
+    if (rg_set)
+        nag_audio_set_replaygain(e, &rg);
     if (nag_audio_open(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
         nag_audio_free(e);
         return 1;
@@ -327,10 +429,14 @@ int main(int argc, char **argv)
         return info(argv[2]);
     if (argc >= 3 && strcmp(argv[1], "decode") == 0)
         return decode(argc - 2, argv + 2);
+    if (argc >= 3 && strcmp(argv[1], "scan") == 0)
+        return scan(argc - 2, argv + 2);
+    if (argc >= 3 && strcmp(argv[1], "tag") == 0)
+        return tag(argc - 2, argv + 2);
     if (argc >= 2 && strcmp(argv[1], "version") == 0) {
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | nagaudio decode FILE... [-o OUT] [-f FORMAT] [--seek MS] [--volume V] [--no-dither] [--md5]\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | version\n");
     return 2;
 }

@@ -13,6 +13,8 @@ import app.nagmedar.audio.EngineState
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.MusicFormats
 import app.nagmedar.audio.OutputFormat
+import app.nagmedar.audio.ReplayGainMode
+import app.nagmedar.audio.ReplayGainSettings
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.PlaybackEngine
@@ -33,6 +35,13 @@ import org.videolan.tools.NAGMEDAR_CROSSFADE_MS
 import org.videolan.tools.NAGMEDAR_CROSSFADE_SKIP_ALBUM
 import org.videolan.tools.NAGMEDAR_DSP
 import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_ALBUM
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_CLIP
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_MODE
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_OFF
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_PREAMP
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_TRACK
+import org.videolan.tools.NAGMEDAR_REPLAYGAIN_UNTAGGED
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
 
@@ -178,16 +187,44 @@ class MusicEngineController(
         engine = created
         applyCrossfadeSettings()
         applyDspSettings()
+        applyReplayGainSettings()
         Settings.getInstance(context).registerOnSharedPreferenceChangeListener(settingsListener)
         return created
     }
 
-    /** S-906: the chain follows its setting; the EQ screen writes NAGMEDAR_DSP and the engine takes it at its next block. */
+    /** S-906, S-907: the chain and ReplayGain follow their settings; a screen writes them and the engine takes them at its next block. */
     private val settingsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             NAGMEDAR_DSP -> applyDspSettings()
             NAGMEDAR_CROSSFADE_MS, NAGMEDAR_CROSSFADE_CURVE -> applyCrossfadeSettings()
+            NAGMEDAR_REPLAYGAIN_MODE, NAGMEDAR_REPLAYGAIN_PREAMP, NAGMEDAR_REPLAYGAIN_UNTAGGED, NAGMEDAR_REPLAYGAIN_CLIP -> applyReplayGainSettings()
         }
+    }
+
+    /** S-907: ReplayGain as set; the tracks loaded take a change at once. */
+    val replayGain: ReplayGainSettings get() = engine?.replayGain ?: replayGainSettings()
+
+    /** The gain in dB the playing track gets from ReplayGain. */
+    val replayGainDb: Double get() = engine?.replayGainDb ?: 0.0
+
+    fun applyReplayGainSettings() {
+        val engine = engine ?: return
+        engine.replayGain = replayGainSettings()
+    }
+
+    private fun replayGainSettings(): ReplayGainSettings {
+        val settings = Settings.getInstance(context)
+        val mode = when (settings.getString(NAGMEDAR_REPLAYGAIN_MODE, NAGMEDAR_REPLAYGAIN_OFF)) {
+            NAGMEDAR_REPLAYGAIN_TRACK -> ReplayGainMode.Track
+            NAGMEDAR_REPLAYGAIN_ALBUM -> ReplayGainMode.Album
+            else -> ReplayGainMode.Off
+        }
+        return ReplayGainSettings(
+            mode = mode,
+            preampDb = settings.getFloat(NAGMEDAR_REPLAYGAIN_PREAMP, 0f).toDouble().coerceIn(-15.0, 15.0),
+            untaggedDb = settings.getFloat(NAGMEDAR_REPLAYGAIN_UNTAGGED, 0f).toDouble().coerceIn(-15.0, 15.0),
+            preventClipping = settings.getBoolean(NAGMEDAR_REPLAYGAIN_CLIP, true),
+        )
     }
 
     /** The DSP chain as set (S-906); the defaults, nothing in the chain, until the user touches it. */

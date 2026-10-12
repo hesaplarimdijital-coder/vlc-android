@@ -60,6 +60,11 @@ object NativeAudio {
     /** setDsp's values: 5 gains and times, the 20 graphic bands' dB, then (freq, dB, Q) of 10 + 10 bands. */
     const val DSP_VALUES = 5 + GRAPHIC_BANDS + 2 * 3 * EQ_BANDS
 
+    // S-907: NagReplayGainMode
+    const val REPLAYGAIN_OFF = 0
+    const val REPLAYGAIN_TRACK = 1
+    const val REPLAYGAIN_ALBUM = 2
+
     @JvmStatic external fun version(): String
 
     /** An engine; 0 on failure. [maxFormat] caps the output's depth, [fixedFormat] (or FORMAT_NONE) fixes it. */
@@ -115,4 +120,34 @@ object NativeAudio {
 
     /** frames, clipped samples, peak before the limiter, the limiter's largest reduction in dB. */
     @JvmStatic external fun dspMeter(handle: Long, reset: Boolean): DoubleArray
+
+    /** S-907: the ReplayGain applied per track; takes effect on the tracks loaded too. */
+    @JvmStatic external fun setReplayGain(handle: Long, mode: Int, preampDb: Double, untaggedDb: Double, preventClipping: Boolean)
+
+    /** The gain in dB the playing track gets from ReplayGain. */
+    @JvmStatic external fun replayGainDb(handle: Long): Double
+
+    /** S-907: a scan: an album's accumulator and the cancel flag of its file scans; 0 on failure. */
+    @JvmStatic external fun loudnessNew(): Long
+
+    /**
+     * Scans [path] whole (EBU R128); with [forAlbum] its blocks count for the album too. Returns
+     * loudness LUFS (-inf for silence), true peak, sample peak, ReplayGain dB, frames, rate; or
+     * null when the file cannot be read or the scan was cancelled. Slow: a worker thread's.
+     */
+    @JvmStatic external fun loudnessScan(handle: Long, path: String, forAlbum: Boolean): DoubleArray?
+
+    /** The album's result over the files scanned for it, as [loudnessScan] returns one; null when none. */
+    @JvmStatic external fun loudnessAlbum(handle: Long): DoubleArray?
+
+    /** Stops the scan under way on [handle]; it returns null. */
+    @JvmStatic external fun loudnessCancel(handle: Long)
+
+    @JvmStatic external fun loudnessFree(handle: Long)
+
+    /** Writes the ReplayGain tags into the file behind [fd] (read-write; [name] helps the type detection); NaN leaves a tag alone. 0, or negative. */
+    @JvmStatic external fun writeReplayGain(fd: Int, name: String, trackGain: Double, trackPeak: Double, albumGain: Double, albumPeak: Double, trackLufs: Double, albumLufs: Double): Int
+
+    /** The file as the engine reads it, with its ReplayGain tags, JSON (SourceInfo.parse); "{}" when it cannot be opened. */
+    @JvmStatic external fun probe(path: String): String
 }

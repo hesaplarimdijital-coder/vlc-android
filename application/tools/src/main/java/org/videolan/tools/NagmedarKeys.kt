@@ -53,3 +53,12 @@ const val NAGMEDAR_CROSSFADE_EQUAL_POWER = "equal_power"
 
 /** S-906: the DSP chain's settings as JSON (app.nagmedar.audio.DspSettings); absent: nothing in the chain. */
 const val NAGMEDAR_DSP = "nagmedar_dsp"
+
+/** S-907: ReplayGain: "off", "track" or "album"; the preamp and the untagged tracks' gain in dB (floats); clipping prevention. */
+const val NAGMEDAR_REPLAYGAIN_MODE = "nagmedar_replaygain_mode"
+const val NAGMEDAR_REPLAYGAIN_PREAMP = "nagmedar_replaygain_preamp"
+const val NAGMEDAR_REPLAYGAIN_UNTAGGED = "nagmedar_replaygain_untagged"
+const val NAGMEDAR_REPLAYGAIN_CLIP = "nagmedar_replaygain_clip"
+const val NAGMEDAR_REPLAYGAIN_OFF = "off"
+const val NAGMEDAR_REPLAYGAIN_TRACK = "track"
+const val NAGMEDAR_REPLAYGAIN_ALBUM = "album"

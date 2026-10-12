@@ -2,9 +2,9 @@
 # Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper)
 # and the music engine (S-901, native/audio).
 #
-#   build.sh host    <prefix>  FFmpeg + libdovi for this machine and the dvconvert,
+#   build.sh host    <prefix>  FFmpeg, libdovi and TagLib for this machine and the dvconvert,
 #                              mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb for arm64-v8a;
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
 #
@@ -114,6 +114,20 @@ build_lab() { # extra cmake args...
     grep -E "warning:" "$dir.build.log" | grep -v "/src/libusb/" | head -20 || true
 }
 
+build_taglib() { # extra cmake args...
+    fetch taglib "$TAGLIB_URL" "$TAGLIB_REF"
+    fetch utfcpp "$UTFCPP_URL" "$UTFCPP_REF"
+    if [ -f "$PREFIX/lib/libtag.a" ]; then return; fi
+    log "TagLib $TAGLIB_REF ($TARGET)"
+    local dir="$WORK/build-$TARGET/taglib"
+    cmake -S "$WORK/src/taglib" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+        -DBUILD_SHARED_LIBS=OFF -DBUILD_BINDINGS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DWITH_ZLIB=OFF \
+        -DVISIBILITY_HIDDEN=ON -Dutf8cpp_INCLUDE_DIR="$WORK/src/utfcpp/source" \
+        "$@" > "$dir.configure.log" 2>&1 || fail_log "TagLib configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "TagLib build ($TARGET)" "$dir.build.log"
+    cmake --install "$dir" > /dev/null
+}
+
 build_audio() { # extra cmake args...
     log "libnagmedar_audio ($TARGET)"
     local dir="$WORK/build-$TARGET/audio"
@@ -128,6 +142,7 @@ host() {
     build_dovi ""
     build_whisper
     build_lab
+    build_taglib
     build_audio
     cp "$WORK/build-host/audio/nagaudio" "$PREFIX/bin/"
     cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
@@ -172,6 +187,7 @@ android() {
     cp "$WORK/build-android/lab/libnagmedar_lab.so" "$out/"
     "$tc/bin/llvm-strip" --strip-unneeded "$out/libnagmedar_lab.so"
     ls -la "$out"
+    build_taglib "${ndk_cmake[@]}"
     build_audio "${ndk_cmake[@]}"
     local audio_out="$ROOT/application/nagmedar-audio/src/main/jniLibs/arm64-v8a"
     mkdir -p "$audio_out"

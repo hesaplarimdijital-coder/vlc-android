@@ -20,6 +20,11 @@ void nag_source_close(NagSource *source);
 const NagSourceInfo *nag_source_info(const NagSource *source);
 /** The channels of the frames read (the mix). */
 int nag_source_channels(const NagSource *source);
+/**
+ * ITU-R BS.1770 weights of the channels read, for the loudness scanner: 1 for most, 1.41 for the
+ * surrounds (Ls, Rs, Lb, Rb), 0 for the LFE. Fills up to [max]; returns the channels.
+ */
+int nag_source_channel_weights(const NagSource *source, double *weights, int max);
 
 /**
  * Up to [max_frames] frames into [dst]: how many, 0 at the end of the file, a negative

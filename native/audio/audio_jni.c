@@ -2,9 +2,13 @@
 // handle (its pointer as a long); its events reach the Java listener on the engine's event
 // thread, attached to the VM for as long as the engine lives.
 #include "nagaudio.h"
+#include "source.h"
 
+#include <android/log.h>
 #include <jni.h>
 
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -378,4 +382,158 @@ JNIEXPORT jdoubleArray JNICALL Java_app_nagmedar_audio_NativeAudio_dspMeter(JNIE
     }
     (*env)->SetDoubleArrayRegion(env, result, 0, 4, values);
     return result;
+}
+
+/* ---------------------------------------------------------- S-907 ReplayGain */
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setReplayGain(JNIEnv *env, jclass cls, jlong handle, jint mode, jdouble preampDb, jdouble untaggedDb,
+                                                                        jboolean preventClipping)
+{
+    (void)env;
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (!e)
+        return;
+    NagReplayGain rg = {(NagReplayGainMode)mode, preampDb, untaggedDb, preventClipping == JNI_TRUE};
+    nag_audio_set_replaygain(e, &rg);
+}
+
+JNIEXPORT jdouble JNICALL Java_app_nagmedar_audio_NativeAudio_replayGainDb(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? nag_audio_replaygain_db(engine_of(handle)) : 0.0;
+}
+
+/* A scan: an album's accumulator and its cancel flag. */
+typedef struct Scan {
+    NagLoudnessScan *album;
+    int cancel;
+} Scan;
+
+JNIEXPORT jlong JNICALL Java_app_nagmedar_audio_NativeAudio_loudnessNew(JNIEnv *env, jclass cls)
+{
+    (void)env;
+    (void)cls;
+    Scan *s = calloc(1, sizeof(*s));
+    if (!s)
+        return 0;
+    s->album = nag_loudness_scan_new();
+    if (!s->album) {
+        free(s);
+        return 0;
+    }
+    return (jlong)(intptr_t)s;
+}
+
+static jdoubleArray loudness_array(JNIEnv *env, const NagLoudnessResult *r)
+{
+    jdoubleArray result = (*env)->NewDoubleArray(env, 6);
+    if (!result)
+        return NULL;
+    jdouble values[6] = {r->loudness_lufs, r->true_peak, r->sample_peak, r->gain_db, (jdouble)r->frames, (jdouble)r->rate};
+    (*env)->SetDoubleArrayRegion(env, result, 0, 6, values);
+    return result;
+}
+
+/* loudness LUFS (-inf for silence), true peak, sample peak, gain dB, frames, rate; null on failure or cancel */
+JNIEXPORT jdoubleArray JNICALL Java_app_nagmedar_audio_NativeAudio_loudnessScan(JNIEnv *env, jclass cls, jlong handle, jstring path, jboolean forAlbum)
+{
+    (void)cls;
+    Scan *s = (Scan *)(intptr_t)handle;
+    if (!s || !path)
+        return NULL;
+    const char *url = (*env)->GetStringUTFChars(env, path, NULL);
+    if (!url)
+        return NULL;
+    NagLoudnessResult r;
+    char error[256] = {0};
+    int ret = nag_loudness_scan_file(forAlbum == JNI_TRUE ? s->album : NULL, url, &r, &s->cancel, error, sizeof(error));
+    (*env)->ReleaseStringUTFChars(env, path, url);
+    if (ret < 0) {
+        __android_log_print(ANDROID_LOG_WARN, "NagmedarAudio", "loudness scan: %s", error);
+        return NULL;
+    }
+    return loudness_array(env, &r);
+}
+
+JNIEXPORT jdoubleArray JNICALL Java_app_nagmedar_audio_NativeAudio_loudnessAlbum(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)cls;
+    Scan *s = (Scan *)(intptr_t)handle;
+    NagLoudnessResult r;
+    if (!s || nag_loudness_scan_result(s->album, &r) < 0)
+        return NULL;
+    return loudness_array(env, &r);
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_loudnessCancel(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    Scan *s = (Scan *)(intptr_t)handle;
+    if (s)
+        __atomic_store_n(&s->cancel, 1, __ATOMIC_RELAXED);
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_loudnessFree(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    Scan *s = (Scan *)(intptr_t)handle;
+    if (!s)
+        return;
+    nag_loudness_scan_free(s->album);
+    free(s);
+}
+
+/* NaN leaves a tag alone; the descriptor stays the caller's. 0, or negative. */
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_writeReplayGain(JNIEnv *env, jclass cls, jint fd, jstring name, jdouble trackGain, jdouble trackPeak,
+                                                                          jdouble albumGain, jdouble albumPeak, jdouble trackLufs, jdouble albumLufs)
+{
+    (void)cls;
+    NagReplayGainTags tags = {trackGain, trackPeak, albumGain, albumPeak, trackLufs, albumLufs};
+    const char *utf = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    char error[256] = {0};
+    int ret = nag_tags_write_replaygain(fd, utf, &tags, error, sizeof(error));
+    if (utf)
+        (*env)->ReleaseStringUTFChars(env, name, utf);
+    if (ret < 0)
+        __android_log_print(ANDROID_LOG_WARN, "NagmedarAudio", "tags: %s", error);
+    return ret;
+}
+
+/* The file as the source reads it, with its ReplayGain tags, JSON; "{}" when it cannot be opened. */
+JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env, jclass cls, jstring path)
+{
+    (void)cls;
+    if (!path)
+        return utf8(env, "{}");
+    const char *url = (*env)->GetStringUTFChars(env, path, NULL);
+    if (!url)
+        return utf8(env, "{}");
+    NagSource *src = NULL;
+    char error[256] = {0};
+    int ret = nag_source_open(&src, url, 0, error, sizeof(error));
+    (*env)->ReleaseStringUTFChars(env, path, url);
+    if (ret < 0)
+        return utf8(env, "{}");
+    const NagSourceInfo *i = nag_source_info(src);
+    char json[768];
+    int n = snprintf(json, sizeof(json),
+                     "{\"codec\":\"%s\",\"container\":\"%s\",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld",
+                     i->codec, i->container, i->rate, i->channels, i->bits, i->is_float ? "true" : "false", (long long)i->duration_ms,
+                     (long long)i->bitrate);
+    if (!isnan(i->track_gain_db) && n < (int)sizeof(json))
+        n += snprintf(json + n, sizeof(json) - n, ",\"track_gain_db\":%.2f", i->track_gain_db);
+    if (!isnan(i->track_peak) && n < (int)sizeof(json))
+        n += snprintf(json + n, sizeof(json) - n, ",\"track_peak\":%.6f", i->track_peak);
+    if (!isnan(i->album_gain_db) && n < (int)sizeof(json))
+        n += snprintf(json + n, sizeof(json) - n, ",\"album_gain_db\":%.2f", i->album_gain_db);
+    if (!isnan(i->album_peak) && n < (int)sizeof(json))
+        n += snprintf(json + n, sizeof(json) - n, ",\"album_peak\":%.6f", i->album_peak);
+    if (n < (int)sizeof(json))
+        snprintf(json + n, sizeof(json) - n, "}");
+    nag_source_close(src);
+    return utf8(env, json);
 }

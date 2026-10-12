@@ -10,6 +10,8 @@
 #   - the test set's gapless album (S-904): the three cuts equal the whole glissando
 #   - the DSP chain (S-906): identity and bypass bit-exact, the EQs equal to dsp_model.py's,
 #     the limiter never past its threshold, the auto preamp level, the clip meter
+#   - ReplayGain (S-907): the scanner against ffmpeg's ebur128 and the standard's sine, the
+#     tags written and read back in four formats with the audio untouched, the playback gains
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -189,6 +191,72 @@ PY
 "$NAGAUDIO" decode flac16.flac -f f64 -o seek_start.raw --seek 1000 --limiter -1 --preamp 3 > /dev/null
 "$NAGAUDIO" decode flac16.flac -f f64 -o seek_mid.raw --seek 1000 --seek-after 5000 --limiter -1 --preamp 3 > /dev/null
 check "dsp reset at a seek" "$(md5_of < seek_start.raw)" "$(tail -c $(stat -c %s seek_start.raw) seek_mid.raw | md5_of)"
+
+echo "== S-907: EBU R128 scanner"
+# ITU-R BS.1770: a 997 Hz sine at -23 dBFS in both channels reads -23.0 LUFS
+ffmpeg -v error -y -f lavfi -i "sine=f=997:r=48000:d=5,aformat=channel_layouts=stereo" -af "volume=$(python3 -c 'print(10**(-23/20)/0.0888)'),aformat=sample_fmts=s32" -c:a flac sine23.flac
+# a 12 kHz sine at 48 kHz, 45 degrees off the samples: its true peak is 0.5, its sample peak 0.354
+ffmpeg -v error -y -f lavfi -i "aevalsrc=0.5*sin(2*PI*12000*t+PI/4)|0.5*sin(2*PI*12000*t+PI/4):s=48000:d=2" -c:a flac -sample_fmt s32 isp.flac
+"$NAGAUDIO" scan sine23.flac isp.flac flac16.flac mp3.mp3 six.flac --album > scan.json
+ffmpeg_lufs() { ffmpeg -nostats -i "$1" -af ebur128 -f null - 2>&1 | grep -A3 "Integrated loudness" | sed -n 's/.*I: *\(-*[0-9.]*\) LUFS.*/\1/p'; }
+python3 - "$(ffmpeg_lufs flac16.flac)" "$(ffmpeg_lufs mp3.mp3)" "$(ffmpeg_lufs six.flac)" <<'PY' || failures=$((failures + 1))
+import json, math, sys
+r = json.load(open("scan.json"))
+sine, isp, flac, mp3, six = r["tracks"]
+problems = []
+if abs(sine["loudness_lufs"] + 23.0) > 0.1:
+    problems.append("the -23 dBFS sine reads %.2f LUFS" % sine["loudness_lufs"])
+if abs(20 * math.log10(isp["true_peak"] / 0.5)) > 0.1 or abs(isp["sample_peak"] - 0.353553) > 1e-4:
+    problems.append("true peak %.4f, sample peak %.4f of the 12 kHz sine" % (isp["true_peak"], isp["sample_peak"]))
+for name, ours, theirs in (("flac16", flac, sys.argv[1]), ("mp3", mp3, sys.argv[2]), ("5.1", six, sys.argv[3])):
+    if abs(ours["loudness_lufs"] - float(theirs)) > 0.15:
+        problems.append("%s: %.2f LUFS here, %s in ffmpeg" % (name, ours["loudness_lufs"], theirs))
+if abs(sine["gain_db"] - (-18 - sine["loudness_lufs"])) > 1e-6:
+    problems.append("gain %.3f dB for %.3f LUFS" % (sine["gain_db"], sine["loudness_lufs"]))
+album = r["album"]
+if not (-30 < album["loudness_lufs"] < 0) or album["true_peak"] < max(t["true_peak"] for t in r["tracks"]):
+    problems.append("album %s" % album)
+if problems:
+    print("FAIL scanner: " + "; ".join(problems))
+    sys.exit(1)
+print("ok   scanner: sine %.2f LUFS, 12 kHz true peak %.4f, flac16/mp3/5.1 within 0.15 LU of ffmpeg, album %.2f LUFS" % (sine["loudness_lufs"], isp["true_peak"], album["loudness_lufs"]))
+PY
+
+echo "== S-907: ReplayGain tags"
+for f in flac16.flac mp3.mp3 aac.m4a opus.opus; do
+    cp "$f" "tagged_$f"
+    "$NAGAUDIO" tag "tagged_$f" --track-gain -3.25 --track-peak 0.987654 --album-gain -4.5 --album-peak 0.999 --track-lufs -14.75 --album-lufs -13.5 > /dev/null
+    check "tags read back from $f" "-3.25 0.987654 -4.5 0.999" "$("$NAGAUDIO" info "tagged_$f" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["track_gain_db"], "%.6f" % d["track_peak"], d["album_gain_db"], d["album_peak"])')"
+    fmt=f32le; case "$f" in flac16.flac) fmt=s16le ;; esac
+    check "audio of $f untouched by the tags" "$(ffmpeg -v error -i "$f" -f $fmt - | md5_of)" "$(ffmpeg -v error -i "tagged_$f" -f $fmt - | md5_of)"
+done
+check "opus R128 gains" "-2432 -2112" "$(ffprobe -v error -show_entries stream_tags=R128_ALBUM_GAIN,R128_TRACK_GAIN -of default=nw=1:nk=1 tagged_opus.opus | tr '\n' ' ' | sed 's/ $//')"
+
+echo "== S-907: ReplayGain playback"
+"$NAGAUDIO" decode tagged_flac16.flac -f f64 -o rg_track.raw --replaygain track > rg_track.json
+"$NAGAUDIO" decode tagged_flac16.flac -f f64 -o rg_album.raw --replaygain album --rg-preamp 2 > /dev/null
+"$NAGAUDIO" decode flac16.flac -f f64 -o rg_untagged.raw --replaygain track --rg-untagged -6 > /dev/null
+"$NAGAUDIO" decode tagged_flac16.flac -f f64 -o rg_clip.raw --replaygain track --rg-preamp 12 > rg_clip.json
+check "replaygain off bit-exact" "$(engine_md5 s16 flac16.flac)" "$(engine_md5 s16 tagged_flac16.flac --replaygain off)"
+check "replaygain is why not bit-perfect" "replaygain" "$(json 'd["signal_path"]["not_bit_perfect_because"]' < rg_track.json)"
+check "clipping prevented" "True 0.11" "$(json 'str(d["signal_path"]["replaygain"]["clipping_prevented"]) + " %.2f" % d["signal_path"]["replaygain"]["gain_db"]' < rg_clip.json)"
+python3 - <<'PY' || failures=$((failures + 1))
+import struct, sys
+def load(path):
+    data = open(path, "rb").read()
+    return struct.unpack("<%dd" % (len(data) // 8), data)
+plain = load("plain.raw")
+worst = 0.0
+for name, db in (("rg_track", -3.25), ("rg_album", -4.5 + 2), ("rg_untagged", -6.0)):
+    x = load(name + ".raw")
+    gain = 10 ** (db / 20)
+    worst = max(worst, max(abs(x[i] - plain[i] * gain) for i in range(len(plain))))
+clip = load("rg_clip.raw")
+held = 1 / 0.987654
+worst = max(worst, max(abs(clip[i] - plain[i] * held) for i in range(len(plain))))
+print("%s replaygain track, album with preamp, untagged and clip-prevented gains, worst error %.1e" % ("ok  " if worst == 0 else "FAIL", worst))
+sys.exit(0 if worst == 0 else 1)
+PY
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

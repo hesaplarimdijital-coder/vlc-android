@@ -121,6 +121,7 @@ internal fun licenseLabel(license: License): String = when (license.id) {
     "gsm" -> stringResource(R.string.nag_license_gsm)
     "harfbuzz" -> stringResource(R.string.nag_license_old_mit)
     "publicdomain" -> stringResource(R.string.nag_license_public_domain)
+    "boost" -> "Boost 1.0"
     else -> compactLicenseName(license.name)
 }
 

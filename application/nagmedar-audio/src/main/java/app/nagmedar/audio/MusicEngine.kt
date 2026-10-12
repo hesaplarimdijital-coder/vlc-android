@@ -35,7 +35,7 @@ data class OutputFormat(val rate: Int, val channels: Int, val sampleFormat: Int)
     }
 }
 
-/** The playing track's file as the engine's source read it (nag_audio_source_info). */
+/** The playing track's file as the engine's source read it (nag_audio_source_info), with its ReplayGain tags when it has them. */
 data class SourceInfo(
     val codec: String,
     val container: String,
@@ -45,18 +45,40 @@ data class SourceInfo(
     val isFloat: Boolean,
     val durationMs: Long,
     val bitrate: Long,
+    val trackGainDb: Double? = null,
+    val trackPeak: Double? = null,
+    val albumGainDb: Double? = null,
+    val albumPeak: Double? = null,
 ) {
+    /** Whether the file carries a ReplayGain (or Opus R128) gain. */
+    val hasReplayGain: Boolean get() = trackGainDb != null || albumGainDb != null
+
     companion object {
         fun parse(json: String): SourceInfo? = runCatching {
             val o = JSONObject(json)
             if (!o.has("rate")) return null
+            fun number(key: String): Double? = if (o.has(key)) o.optDouble(key).takeUnless { it.isNaN() } else null
             SourceInfo(
                 o.optString("codec"), o.optString("container"), o.getInt("rate"), o.optInt("channels"), o.optInt("bits"),
                 o.optBoolean("float"), o.optLong("duration_ms"), o.optLong("bitrate"),
+                number("track_gain_db"), number("track_peak"), number("album_gain_db"), number("album_peak"),
             )
         }.getOrNull()
     }
 }
+
+/** S-907: how the tags' gains are applied, as NagReplayGain. */
+enum class ReplayGainMode { Off, Track, Album }
+
+data class ReplayGainSettings(
+    val mode: ReplayGainMode = ReplayGainMode.Off,
+    /** On top of the tags' gain, dB. */
+    val preampDb: Double = 0.0,
+    /** For a track without tags, dB (0: as it is). */
+    val untaggedDb: Double = 0.0,
+    /** The gain is held back where the tags' peak would pass full scale. */
+    val preventClipping: Boolean = true,
+)
 
 /**
  * Nağmedar Ses Motoru (S-901): one engine, its output and its events, for the playback service.
@@ -214,6 +236,16 @@ class MusicEngine(
         val m = NativeAudio.dspMeter(handle, reset)
         return DspMeter(m[0].toLong(), m[1].toLong(), m[2], m[3])
     }
+
+    /** S-907: ReplayGain, applied per track from its tags; the tracks loaded take it at once. */
+    var replayGain: ReplayGainSettings = ReplayGainSettings()
+        set(value) {
+            field = value
+            if (available) NativeAudio.setReplayGain(handle, value.mode.ordinal, value.preampDb, value.untaggedDb, value.preventClipping)
+        }
+
+    /** The gain in dB the playing track gets from ReplayGain (0 when off or untagged). */
+    val replayGainDb: Double get() = if (available) NativeAudio.replayGainDb(handle) else 0.0
 
     val sourceInfo: SourceInfo? get() = if (available) SourceInfo.parse(NativeAudio.sourceInfo(handle)) else null
 

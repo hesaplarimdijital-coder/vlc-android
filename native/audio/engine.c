@@ -81,6 +81,8 @@ typedef struct Voice {
     atomic_int seek_pending; /* seek_ms is read by the decoder once this is set */
     _Atomic int64_t seek_ms;
     int crossfade;           /* this voice, as the next, comes in over the end of the one before */
+    _Atomic double rg_gain;  /* S-907: the ReplayGain of this track, linear (1: none) */
+    int rg_prevented;        /* the gain was held back by the peak */
     _Atomic int64_t played;  /* frames the render took since the start or the last seek */
     _Atomic int64_t base_ms; /* the time of frame 0 of [played] */
     sem_t wake;
@@ -123,6 +125,9 @@ struct NagAudio {
     _Atomic(NagDspParams *) dsp_retired[RETIRED_QUEUE];
     _Atomic unsigned dsp_retired_read, dsp_retired_write;
     atomic_int dsp_reset_wanted;         /* a new track or a seek: the filters forget */
+
+    /* S-907: ReplayGain, under the lock; the voices carry their gains */
+    NagReplayGain rg;
     _Atomic int64_t meter_frames, meter_clipped;
     _Atomic double meter_peak, meter_reduction;
 
@@ -261,6 +266,35 @@ static void *decoder_main(void *arg)
     return NULL;
 }
 
+/* S-907: the gain the tags of [v] ask for under the settings; sets v->rg_gain. Under the lock. */
+static void voice_replaygain(NagAudio *e, Voice *v)
+{
+    const NagReplayGain *rg = &e->rg;
+    double gain = 1.0;
+    v->rg_prevented = 0;
+    if (rg->mode != NAG_REPLAYGAIN_OFF) {
+        double gain_db = NAN, peak = NAN;
+        if (rg->mode == NAG_REPLAYGAIN_ALBUM && !isnan(v->info.album_gain_db)) {
+            gain_db = v->info.album_gain_db;
+            peak = v->info.album_peak;
+        } else if (!isnan(v->info.track_gain_db)) {
+            gain_db = v->info.track_gain_db;
+            peak = v->info.track_peak;
+        }
+        if (isnan(gain_db)) {
+            if (rg->untagged_db != 0)
+                gain = pow(10.0, rg->untagged_db / 20.0);
+        } else {
+            gain = pow(10.0, (gain_db + rg->preamp_db) / 20.0);
+            if (rg->prevent_clipping && !isnan(peak) && peak > 0 && gain * peak > 1.0) {
+                gain = 1.0 / peak;
+                v->rg_prevented = 1;
+            }
+        }
+    }
+    atomic_store(&v->rg_gain, gain);
+}
+
 static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_ms, char *error, size_t error_size)
 {
     double ring_seconds = e->cfg.ring_seconds;
@@ -276,6 +310,7 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
     v->engine = e;
     v->id = id;
     v->url = strdup(url);
+    atomic_store(&v->rg_gain, 1.0);
     sem_init(&v->wake, 0, 0);
     if (nag_source_open(&v->src, url, e->cfg.channels, error, error_size) < 0) {
         voice_free(v);
@@ -582,6 +617,7 @@ int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
         return -1;
     }
     pthread_mutex_lock(&e->lock);
+    voice_replaygain(e, v);
     Voice *old_current, *old_next, *old_fade;
     take_voices(e, &old_current, &old_next, &old_fade);
     int ret = 0;
@@ -616,6 +652,8 @@ int nag_audio_set_next(NagAudio *e, int64_t id, const char *url, int crossfade)
         v->crossfade = crossfade ? 1 : 0;
     }
     pthread_mutex_lock(&e->lock);
+    if (v)
+        voice_replaygain(e, v);
     hold_render(e);
     Voice *old = atomic_exchange(&e->next, v);
     release_render(e);
@@ -811,6 +849,38 @@ void nag_audio_dsp_meter(NagAudio *e, NagDspMeter *meter, int reset)
         atomic_store(&e->meter_peak, 0.0);
         atomic_store(&e->meter_reduction, 0.0);
     }
+}
+
+/* --------------------------------------------------------------- ReplayGain */
+
+void nag_audio_set_replaygain(NagAudio *e, const NagReplayGain *settings)
+{
+    pthread_mutex_lock(&e->lock);
+    e->rg = *settings;
+    /* the voices there are get the new gains; held so none is retired meanwhile */
+    hold_render(e);
+    Voice *voices[3] = {atomic_load(&e->current), atomic_load(&e->next), atomic_load(&e->fade_out)};
+    for (int i = 0; i < 3; i++)
+        if (voices[i])
+            voice_replaygain(e, voices[i]);
+    release_render(e);
+    pthread_mutex_unlock(&e->lock);
+}
+
+void nag_audio_get_replaygain(NagAudio *e, NagReplayGain *settings)
+{
+    pthread_mutex_lock(&e->lock);
+    *settings = e->rg;
+    pthread_mutex_unlock(&e->lock);
+}
+
+double nag_audio_replaygain_db(NagAudio *e)
+{
+    Voice *v = atomic_load(&e->current);
+    if (!v)
+        return 0;
+    double gain = atomic_load(&v->rg_gain);
+    return gain > 0 ? 20.0 * log10(gain) : -144.0;
 }
 
 /* The render's side: the newest parameters, a reset asked for, the rate; whether the chain is in the way. */
@@ -1096,7 +1166,11 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
             atomic_fetch_add(&v->played, n_frames);
             if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
                 sem_post(&v->wake);
-            finish_block(e, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, needs_dither(e, v) || dsp_dither, dsp_on);
+            const double rg = atomic_load(&v->rg_gain);
+            if (rg != 1.0)
+                for (int i = 0; i < n_frames * channels; i++)
+                    e->mix[i] *= rg;
+            finish_block(e, (uint8_t *)out + (size_t)pos * bytes, n_frames, volume, needs_dither(e, v) || dsp_dither || rg != 1.0, dsp_on);
             pos += n_frames;
             produced += n_frames;
             continue;
@@ -1128,10 +1202,13 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
         if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
             sem_post(&v->wake);
         const double total = (double)(e->fade_total > 0 ? e->fade_total : 1);
+        const double rg_out = atomic_load(&f->rg_gain), rg_in = atomic_load(&v->rg_gain);
         for (int i = 0; i < n_frames; i++) {
             double out_gain, in_gain;
             double x = (e->fade_done + i + 1) / total;
             fade_gains(curve, x > 1.0 ? 1.0 : x, &out_gain, &in_gain);
+            out_gain *= rg_out;
+            in_gain *= rg_in;
             double *a = e->mix + (size_t)i * channels;
             const double *b = e->mix2 + (size_t)i * channels;
             for (int c = 0; c < channels; c++)
@@ -1210,6 +1287,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
         why = "lossy";
     else if (volume < 1.0)
         why = "volume";
+    else if (atomic_load(&v->rg_gain) != 1.0)
+        why = "replaygain";
     else if (!atomic_load(&e->dsp_identity))
         why = "dsp";
     else if (out.sample_format != NAG_FMT_F32 && out.sample_format != NAG_FMT_F64 && nag_format_bits(out.sample_format) < v->info.bits)
@@ -1243,7 +1322,16 @@ char *nag_audio_signal_path_json(NagAudio *e)
     } else {
         str_add(&j, "null");
     }
-    str_add(&j, ",\"volume\":%.4f,\"crossfade_ms\":%d,\"dsp\":[", volume, atomic_load(&e->crossfade_ms));
+    str_add(&j, ",\"volume\":%.4f,\"crossfade_ms\":%d", volume, atomic_load(&e->crossfade_ms));
+    {
+        /* S-907 */
+        static const char *const modes[] = {"off", "track", "album"};
+        double gain = v ? atomic_load(&v->rg_gain) : 1.0;
+        str_add(&j, ",\"replaygain\":{\"mode\":\"%s\",\"preamp_db\":%.2f,\"gain_db\":%.2f,\"tagged\":%s,\"clipping_prevented\":%s}",
+                modes[e->rg.mode >= 0 && e->rg.mode <= 2 ? e->rg.mode : 0], e->rg.preamp_db, gain > 0 ? 20.0 * log10(gain) : -144.0,
+                v && (!isnan(v->info.track_gain_db) || !isnan(v->info.album_gain_db)) ? "true" : "false", v && v->rg_prevented ? "true" : "false");
+    }
+    str_add(&j, ",\"dsp\":[");
     {
         /* S-906: the stages as the parameters compile at the output's rate (a dry compile) */
         NagDsp probe;

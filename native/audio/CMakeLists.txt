@@ -1,33 +1,42 @@
 # libnagmedar_audio.so: Nağmedar Ses Motoru (S-901, ADR-06), the music engine behind the
 # playback service: FFmpeg decoding, the voices and their rings, the render with the DSP
-# chain, and the sinks (AAudio, the pull sink of the bit-perfect AudioTrack path, the USB DAC).
-# Built by buildsystem/nagmedar-native/build.sh, which provides the static FFmpeg in
-# DEPS_PREFIX; the host build also makes the nagaudio command for the tests.
+# chain, and the sinks (AAudio, the pull sink of the bit-perfect AudioTrack path, the USB DAC);
+# the EBU R128 scanner and TagLib for the ReplayGain tags (S-907).
+# Built by buildsystem/nagmedar-native/build.sh, which provides the static FFmpeg and TagLib
+# in DEPS_PREFIX; the host build also makes the nagaudio command for the tests.
 cmake_minimum_required(VERSION 3.22)
-project(nagmedar_audio C)
+project(nagmedar_audio C CXX)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg (empty: the system's pkg-config)")
+set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and TagLib (empty: the system's pkg-config)")
 
-set(CORE ring.c source.c dsp.c engine.c)
+set(CORE ring.c source.c dsp.c loudness.c engine.c tags.cpp)
 
 if(DEPS_PREFIX)
     set(FFMPEG_INCLUDE ${DEPS_PREFIX}/include)
     set(FFMPEG_LIBS ${DEPS_PREFIX}/lib/libavformat.a ${DEPS_PREFIX}/lib/libavcodec.a ${DEPS_PREFIX}/lib/libswresample.a ${DEPS_PREFIX}/lib/libavutil.a)
+    set(TAGLIB_INCLUDE ${DEPS_PREFIX}/include)
+    set(TAGLIB_LIBS ${DEPS_PREFIX}/lib/libtag.a)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET libavformat libavcodec libswresample libavutil)
+    pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
     set(FFMPEG_INCLUDE ${FFMPEG_INCLUDE_DIRS})
     set(FFMPEG_LIBS PkgConfig::FFMPEG)
+    set(TAGLIB_INCLUDE ${TAGLIB_INCLUDE_DIRS})
+    set(TAGLIB_LIBS PkgConfig::TAGLIB)
 endif()
 
 find_package(Threads REQUIRED)
 
 add_library(nagaudio_core STATIC ${CORE})
-target_include_directories(nagaudio_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${FFMPEG_INCLUDE})
+target_include_directories(nagaudio_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${FFMPEG_INCLUDE} ${TAGLIB_INCLUDE})
 target_compile_options(nagaudio_core PRIVATE -fvisibility=hidden -O2 -Wall -Wextra -Wno-unused-parameter)
-target_link_libraries(nagaudio_core PUBLIC ${FFMPEG_LIBS} Threads::Threads m)
+# TagLib is static too: its symbols stay inside the library (TAGLIB_STATIC keeps its export macro empty)
+target_compile_definitions(nagaudio_core PRIVATE TAGLIB_STATIC)
+target_link_libraries(nagaudio_core PUBLIC ${FFMPEG_LIBS} ${TAGLIB_LIBS} Threads::Threads m)
 
 if(ANDROID)
     add_library(nagmedar_audio SHARED audio_jni.c sink_aaudio.c)

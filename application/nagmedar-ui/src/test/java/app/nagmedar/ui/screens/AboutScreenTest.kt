@@ -57,12 +57,14 @@ class AboutScreenTest {
 
     @Test
     fun theListIsS005s() {
-        assertEquals(59, libraries.size)
+        assertEquals(61, libraries.size)
         val byTitle = libraries.associateBy { it.title }
-        // the lab's native additions are there, with their licences
+        // the lab's and the music engine's native additions are there, with their licences
         assertEquals("mit", byTitle.getValue("dovi_tool").license?.id)
         assertEquals("lgpl2.1", byTitle.getValue("libusb").license?.id)
         assertEquals("mit", byTitle.getValue("whisper.cpp").license?.id)
+        assertEquals("lgpl2.1", byTitle.getValue("TagLib").license?.id)
+        assertEquals("boost", byTitle.getValue("utfcpp").license?.id)
         assertEquals("LGPL v2.1 or later", byTitle.getValue("FFmpeg").license?.name)
         assertTrue(libraries.all { it.license != null })
     }
