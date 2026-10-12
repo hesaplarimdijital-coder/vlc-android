@@ -67,7 +67,7 @@ internal class ActivityAudioOutput(private val activity: VideoPlayerActivity) : 
                 AudioSink(
                     name = info.productName?.toString()?.takeIf { it.isNotBlank() } ?: activity.getString(kindOf(info.type).label),
                     kind = kindOf(info.type),
-                    codecs = info.encodings.mapNotNull { PassthroughCodec.of(it) }.toSet(),
+                    codecs = info.encodings.map { PassthroughCodec.of(it) }.filterNotNull().toSet(),
                 )
             }
             .distinct()

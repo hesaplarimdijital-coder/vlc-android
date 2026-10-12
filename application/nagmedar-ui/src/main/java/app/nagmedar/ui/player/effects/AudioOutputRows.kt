@@ -3,6 +3,7 @@ package app.nagmedar.ui.player.effects
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +48,7 @@ data class AudioOutputView(
  * The audio output (S-508), under the channel layout: how the sound leaves, the codecs forced as
  * a bitstream, and what is plugged in with the codecs each takes.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AudioOutputRows(output: AudioOutputView, onMode: (AudioOutputMode) -> Unit, onToggle: (PassthroughCodec) -> Unit) {
     val colors = NagTheme.colors
