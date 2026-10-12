@@ -63,9 +63,16 @@ class LoudnessScanner(context: Context) : Closeable {
     companion object {
         private const val TAG = "NagmedarAudio"
 
-        /** The file as the engine reads it, with its ReplayGain tags; null when it cannot be opened. */
+        /** The file as the engine reads it, with its ReplayGain tags and composer; null when it cannot be opened. */
         fun probe(context: Context, uri: Uri): SourceInfo? =
             if (!NativeAudio.available) null else withReadPath(context.applicationContext, uri) { path -> SourceInfo.parse(NativeAudio.probe(path)) }
+
+        /**
+         * S-1001: the waveform of [uri] in [points] buckets, decoding the whole file (seconds for a
+         * long one: off the main thread); null when the engine is missing or the file does not decode.
+         */
+        fun waveform(context: Context, uri: Uri, points: Int): Waveform? =
+            if (!NativeAudio.available) null else withReadPath(context.applicationContext, uri) { path -> NativeAudio.waveform(path, points)?.let(::Waveform) }
 
         /**
          * Writes [track] (and [album], when given) as ReplayGain tags into [uri], which must be

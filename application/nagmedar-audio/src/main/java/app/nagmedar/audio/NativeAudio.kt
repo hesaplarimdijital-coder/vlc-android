@@ -160,6 +160,9 @@ object NativeAudio {
     /** The file as the engine reads it, with its ReplayGain tags, JSON (SourceInfo.parse); "{}" when it cannot be opened. */
     @JvmStatic external fun probe(path: String): String
 
+    /** S-1001: [points] buckets' peak and RMS, two floats each, 0..1; null when the file does not decode. */
+    @JvmStatic external fun waveform(path: String, points: Int): FloatArray?
+
     /** S-909: the pace without a pitch change, 0.25..4 (1: out of the way). */
     @JvmStatic external fun setTempo(handle: Long, tempo: Double)
 

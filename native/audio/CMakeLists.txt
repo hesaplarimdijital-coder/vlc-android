@@ -13,7 +13,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and TagLib (empty: the system's pkg-config)")
 set(LIBUSB_SOURCE "" CACHE PATH "libusb source tree, for the USB DAC sink (S-903); empty: no USB sink")
 
-set(CORE ring.c source.c dsp.c stretch.c loudness.c engine.c tags.cpp)
+set(CORE ring.c source.c dsp.c stretch.c loudness.c probe.c engine.c tags.cpp)
 
 if(DEPS_PREFIX)
     set(FFMPEG_INCLUDE ${DEPS_PREFIX}/include)

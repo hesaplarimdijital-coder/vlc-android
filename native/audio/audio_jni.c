@@ -512,32 +512,36 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env,
     const char *url = (*env)->GetStringUTFChars(env, path, NULL);
     if (!url)
         return utf8(env, "{}");
-    NagSource *src = NULL;
-    char error[256] = {0};
-    int ret = nag_source_open(&src, url, 0, error, sizeof(error));
+    char *json = nag_probe_json(url);
     (*env)->ReleaseStringUTFChars(env, path, url);
-    if (ret < 0)
-        return utf8(env, "{}");
-    const NagSourceInfo *i = nag_source_info(src);
-    char json[768];
-    int n = snprintf(json, sizeof(json),
-                     "{\"codec\":\"%s\",\"container\":\"%s\",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld",
-                     i->codec, i->container, i->rate, i->channels, i->bits, i->is_float ? "true" : "false", (long long)i->duration_ms,
-                     (long long)i->bitrate);
-    if (!isnan(i->track_gain_db) && n < (int)sizeof(json))
-        n += snprintf(json + n, sizeof(json) - n, ",\"track_gain_db\":%.2f", i->track_gain_db);
-    if (!isnan(i->track_peak) && n < (int)sizeof(json))
-        n += snprintf(json + n, sizeof(json) - n, ",\"track_peak\":%.6f", i->track_peak);
-    if (!isnan(i->album_gain_db) && n < (int)sizeof(json))
-        n += snprintf(json + n, sizeof(json) - n, ",\"album_gain_db\":%.2f", i->album_gain_db);
-    if (!isnan(i->album_peak) && n < (int)sizeof(json))
-        n += snprintf(json + n, sizeof(json) - n, ",\"album_peak\":%.6f", i->album_peak);
-    if (i->dsd_rate && n < (int)sizeof(json))
-        n += snprintf(json + n, sizeof(json) - n, ",\"dsd_rate\":%d", i->dsd_rate);
-    if (n < (int)sizeof(json))
-        snprintf(json + n, sizeof(json) - n, "}");
-    nag_source_close(src);
-    return utf8(env, json);
+    jstring result = utf8(env, json ? json : "{}");
+    free(json);
+    return result;
+}
+
+/* S-1001: the waveform's peaks and RMS, two floats a bucket; null when the file does not decode */
+JNIEXPORT jfloatArray JNICALL Java_app_nagmedar_audio_NativeAudio_waveform(JNIEnv *env, jclass cls, jstring path, jint points)
+{
+    (void)cls;
+    if (!path || points <= 0 || points > 100000)
+        return NULL;
+    const char *url = (*env)->GetStringUTFChars(env, path, NULL);
+    if (!url)
+        return NULL;
+    float *buckets = malloc(sizeof(float) * 2 * (size_t)points);
+    char error[256] = {0};
+    int filled = buckets ? nag_waveform(url, points, buckets, NULL, error, sizeof(error)) : -1;
+    (*env)->ReleaseStringUTFChars(env, path, url);
+    jfloatArray result = NULL;
+    if (filled > 0) {
+        result = (*env)->NewFloatArray(env, 2 * points);
+        if (result)
+            (*env)->SetFloatArrayRegion(env, result, 0, 2 * points, buckets);
+    } else {
+        __android_log_print(ANDROID_LOG_WARN, "NagmedarAudio", "waveform: %s", error);
+    }
+    free(buckets);
+    return result;
 }
 
 /* ------------------------------------------------- S-909 tempo, pitch, balance */

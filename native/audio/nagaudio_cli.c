@@ -1,7 +1,9 @@
 // nagaudio: the engine from the command line, for the host tests (S-901, S-1405) and for a look
 // at a file.
 //
-//   nagaudio info FILE                      the source as the engine reads it, JSON
+//   nagaudio info FILE                      the source as the engine reads it, JSON (the library's
+//                                           probe, S-803: with the composer)
+//   nagaudio wave FILE [--points N]         the waveform: each of N buckets' peak and RMS (S-1001)
 //   nagaudio scan FILE... [--album]         EBU R128 loudness, true peak and ReplayGain 2.0 gain
 //                                           of each file (and of the album with --album), JSON
 //   nagaudio tag FILE [--track-gain DB] [--track-peak P] [--album-gain DB] [--album-peak P]
@@ -73,34 +75,47 @@ static void on_event(void *opaque, const NagEvent *ev)
     pthread_mutex_unlock(&s->lock);
 }
 
-static void print_info(const NagSourceInfo *i)
-{
-    printf("{\"codec\":\"%s\",\"container\":\"%s\",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld",
-           i->codec, i->container, i->rate, i->channels, i->bits, i->is_float ? "true" : "false", (long long)i->duration_ms,
-           (long long)i->bitrate);
-    if (!isnan(i->track_gain_db))
-        printf(",\"track_gain_db\":%.2f", i->track_gain_db);
-    if (!isnan(i->track_peak))
-        printf(",\"track_peak\":%.6f", i->track_peak);
-    if (!isnan(i->album_gain_db))
-        printf(",\"album_gain_db\":%.2f", i->album_gain_db);
-    if (!isnan(i->album_peak))
-        printf(",\"album_peak\":%.6f", i->album_peak);
-    if (i->dsd_rate)
-        printf(",\"dsd_rate\":%d", i->dsd_rate);
-    printf("}\n");
-}
-
 static int info(const char *path)
 {
-    NagSource *src = NULL;
-    char error[256] = {0};
-    if (nag_source_open(&src, path, 0, error, sizeof(error)) < 0) {
-        fprintf(stderr, "nagaudio: %s: %s\n", path, error);
+    char *json = nag_probe_json(path);
+    if (!json) {
+        fprintf(stderr, "nagaudio: %s: does not open\n", path);
         return 1;
     }
-    print_info(nag_source_info(src));
-    nag_source_close(src);
+    printf("%s\n", json);
+    free(json);
+    return 0;
+}
+
+/* S-1001: the waveform's buckets, peaks and RMS */
+static int wave(int argc, char **argv)
+{
+    const char *path = NULL;
+    int points = 1000;
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--points") == 0 && i + 1 < argc) points = atoi(argv[++i]);
+        else path = argv[i];
+    }
+    if (!path || points <= 0) {
+        fprintf(stderr, "nagaudio wave: a file and a positive --points are needed\n");
+        return 2;
+    }
+    float *buckets = malloc(sizeof(float) * 2 * (size_t)points);
+    char error[256] = {0};
+    int filled = buckets ? nag_waveform(path, points, buckets, NULL, error, sizeof(error)) : -1;
+    if (filled < 0) {
+        fprintf(stderr, "nagaudio: %s: %s\n", path, error);
+        free(buckets);
+        return 1;
+    }
+    printf("{\"points\":%d,\"filled\":%d,\"peak\":[", points, filled);
+    for (int b = 0; b < points; b++)
+        printf("%s%.7f", b ? "," : "", buckets[2 * b]);
+    printf("],\"rms\":[");
+    for (int b = 0; b < points; b++)
+        printf("%s%.7f", b ? "," : "", buckets[2 * b + 1]);
+    printf("]}\n");
+    free(buckets);
     return 0;
 }
 
@@ -463,10 +478,12 @@ int main(int argc, char **argv)
         return scan(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "tag") == 0)
         return tag(argc - 2, argv + 2);
+    if (argc >= 3 && strcmp(argv[1], "wave") == 0)
+        return wave(argc - 2, argv + 2);
     if (argc >= 2 && strcmp(argv[1], "version") == 0) {
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | version\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | version\n");
     return 2;
 }

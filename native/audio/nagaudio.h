@@ -50,6 +50,7 @@ const char *nag_format_name(NagSampleFormat f);
 /* -------------------------------------------------------------- source info */
 
 #define NAG_NAME_MAX 64
+#define NAG_TAG_MAX 256
 
 typedef struct NagSourceInfo {
     int rate;
@@ -65,6 +66,8 @@ typedef struct NagSourceInfo {
     /* S-908: a DSD file's bit rate (2822400 for DSD64), 0 for PCM; dop when it comes as DSD over PCM */
     int dsd_rate;
     int dop;
+    /* S-803: the composer tag (ID3 TCOM, Vorbis COMPOSER, MP4 ©wrt), "" when absent */
+    char composer[NAG_TAG_MAX];
 } NagSourceInfo;
 
 /* ------------------------------------------------------------------- events */
@@ -434,6 +437,23 @@ int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags 
 
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
+
+/* ------------------------------------------------------- probe and waveform */
+
+/**
+ * S-803: what the library keeps of a file, as the engine reads it: codec, container, rate,
+ * channels, bits, float, duration, bitrate, the ReplayGain tags, a DSD rate and the composer, as
+ * JSON (malloc'd, the caller frees it); NULL when the file does not open.
+ */
+char *nag_probe_json(const char *url);
+
+/**
+ * S-1001: the waveform of [url] in [points] buckets of equal length: out[2i] the peak and
+ * out[2i + 1] the RMS of the bucket's samples, all channels, 0..1. Decodes the whole file;
+ * [cancel] set non-zero from another thread stops it (-2). Returns the buckets filled, or a
+ * negative error with [error] saying why.
+ */
+int nag_waveform(const char *url, int points, float *out, const int *cancel, char *error, size_t error_size);
 
 const char *nag_audio_version(void);
 

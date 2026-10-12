@@ -19,6 +19,8 @@
 #     0x05/0xFA markers, the same from both
 #   - the formats (S-911): WavPack, TTA, ALAC, WMA, Vorbis, AIFF, WAV float, CAF and Matroska
 #     audio, each what ffmpeg decodes (the engine's own FFmpeg build must carry them)
+#   - the library's probe (S-803): the composer from FLAC, MP3, M4A and Opus; the waveform
+#     (S-1001): each bucket's peak and RMS as the decoded samples give them
 #   - the A/B test (S-912): the chain's level change measured within 0.1 dB of the model's
 #     response, side B bypassed at that level, exactly; the chain running on through side B,
 #     B delayed as the chain delays, the switch crossfaded
@@ -473,6 +475,40 @@ for spec in "wv:-c:a wavpack" "tta:-c:a tta" "m4a:-c:a alac" "aiff:-c:a pcm_s24b
 done
 ffmpeg -v error -y -i flac16.flac -c:a wmav2 -b:a 128k fmt.wma
 check "wma decodes as ffmpeg" "$(ffmpeg -v error -i fmt.wma -f f32le - | md5_of)" "$(engine_md5 f32 fmt.wma)"
+
+echo "== S-803, S-1001: the library's probe and the waveform"
+# the composer, as each format keeps it (ID3 TCOM, Vorbis COMPOSER, MP4 ©wrt), in Turkish and quoted
+for spec in "flac:-c:a flac" "mp3:-c:a libmp3lame" "m4a:-c:a aac" "opus:-c:a libopus"; do
+    ext=${spec%%:*}
+    codec=${spec#*:}
+    # shellcheck disable=SC2086
+    ffmpeg -v error -y -f lavfi -i "sine=f=440:r=48000:d=1" -metadata composer='Hammâmîzâde İsmâil Dede Efendi "Dede"' $codec "composer.$ext"
+    check "$ext composer" 'Hammâmîzâde İsmâil Dede Efendi "Dede"' "$("$NAGAUDIO" info "composer.$ext" | json 'd.get("composer")')"
+done
+check "no composer" "None" "$("$NAGAUDIO" info flac16.flac | json 'd.get("composer")')"
+# the waveform: each bucket's peak and RMS over both channels, as the decode's samples give them
+"$NAGAUDIO" wave flac16.flac --points 50 > wave.json
+python3 - <<'PY' || failures=$((failures + 1))
+import json, math, struct, sys
+w = json.load(open("wave.json"))
+data = open("plain.raw", "rb").read()
+x = struct.unpack("<%dd" % (len(data) // 8), data)
+C, points = 2, w["points"]
+total = len(x) // C  # 4 s at 44.1 kHz: the length the file says
+peak, squares, count = [0.0] * points, [0.0] * points, [0] * points
+for f in range(total):
+    b = min(f * points // total, points - 1)
+    for c in range(C):
+        v = x[f * C + c]
+        peak[b] = max(peak[b], min(abs(v), 1.0))
+        squares[b] += v * v
+        count[b] += 1
+rms = [math.sqrt(squares[b] / count[b]) for b in range(points)]
+worst = max(max(abs(w["peak"][b] - peak[b]), abs(w["rms"][b] - rms[b])) for b in range(points))
+ok = w["filled"] == points and worst < 1e-6
+print("%s waveform of %d buckets, worst error %.1e" % ("ok  " if ok else "FAIL", points, worst))
+sys.exit(0 if ok else 1)
+PY
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

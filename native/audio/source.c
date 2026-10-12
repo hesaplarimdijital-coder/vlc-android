@@ -71,6 +71,15 @@ static double first_tag(const AVFormatContext *ic, const AVStream *st, const cha
     return isnan(v) ? tag_number(ic->metadata, key) : v;
 }
 
+/* A text tag of the stream, else of the file; NULL when neither has it */
+static const char *first_text(const AVFormatContext *ic, const AVStream *st, const char *key)
+{
+    const AVDictionaryEntry *e = av_dict_get(st->metadata, key, NULL, 0);
+    if (!e || !e->value || !e->value[0])
+        e = av_dict_get(ic->metadata, key, NULL, 0);
+    return e && e->value && e->value[0] ? e->value : NULL;
+}
+
 static void read_info(NagSource *s)
 {
     const AVStream *st = s->ic->streams[s->stream];
@@ -103,6 +112,22 @@ static void read_info(NagSource *s)
     info->bitrate = par->bit_rate > 0 ? par->bit_rate : s->ic->bit_rate;
     snprintf(info->codec, sizeof(info->codec), "%s", avcodec_get_name(par->codec_id));
     snprintf(info->container, sizeof(info->container), "%s", s->ic->iformat ? s->ic->iformat->name : "");
+    const char *composer = first_text(s->ic, st, "composer");
+    if (composer) {
+        snprintf(info->composer, sizeof(info->composer), "%s", composer);
+        if (strlen(composer) >= sizeof(info->composer)) {
+            /* cut short: not in the middle of a character */
+            size_t n = strlen(info->composer), i = n;
+            while (i > 0 && ((unsigned char)info->composer[i - 1] & 0xC0) == 0x80)
+                i--;
+            if (i > 0) {
+                unsigned char lead = (unsigned char)info->composer[i - 1];
+                size_t need = lead >= 0xF0 ? 4 : lead >= 0xE0 ? 3 : lead >= 0xC0 ? 2 : 1;
+                if (n - (i - 1) < need)
+                    info->composer[i - 1] = 0;
+            }
+        }
+    }
     info->track_gain_db = first_tag(s->ic, st, "REPLAYGAIN_TRACK_GAIN");
     info->track_peak = first_tag(s->ic, st, "REPLAYGAIN_TRACK_PEAK");
     info->album_gain_db = first_tag(s->ic, st, "REPLAYGAIN_ALBUM_GAIN");

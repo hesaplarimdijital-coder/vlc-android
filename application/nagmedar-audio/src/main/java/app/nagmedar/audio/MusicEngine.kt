@@ -53,7 +53,12 @@ data class SourceInfo(
     val dsdRate: Int = 0,
     /** S-908: the file goes out as DSD over PCM. */
     val dop: Boolean = false,
+    /** S-803: the composer tag; null when the file has none. */
+    val composer: String? = null,
 ) {
+    /** Lossless: integer PCM, or DSD; a float or lossy codec is not. */
+    val lossless: Boolean get() = isDsd || (!isFloat && bits > 0)
+
     /** Whether the file carries a ReplayGain (or Opus R128) gain. */
     val hasReplayGain: Boolean get() = trackGainDb != null || albumGainDb != null
 
@@ -72,6 +77,7 @@ data class SourceInfo(
                 o.optBoolean("float"), o.optLong("duration_ms"), o.optLong("bitrate"),
                 number("track_gain_db"), number("track_peak"), number("album_gain_db"), number("album_peak"),
                 o.optInt("dsd_rate", 0), o.optBoolean("dop", false),
+                o.optString("composer").takeIf { o.has("composer") && it.isNotBlank() },
             )
         }.getOrNull()
     }
