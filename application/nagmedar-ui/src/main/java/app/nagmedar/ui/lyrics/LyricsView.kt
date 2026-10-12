@@ -34,6 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -49,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
@@ -200,7 +207,7 @@ private fun SyncedLines(lyrics: Lyrics, timeMs: () -> Long, onSeek: ((Long) -> U
         LazyColumn(
             state = list,
             contentPadding = PaddingValues(top = maxHeight * 0.3f, bottom = maxHeight * 0.6f),
-            modifier = Modifier.fillMaxSize().testTag("lyrics-lines"),
+            modifier = Modifier.fillMaxSize().fadingEdges(FADE).testTag("lyrics-lines"),
         ) {
             itemsIndexed(lyrics.lines) { index, line ->
                 LyricRow(
@@ -264,7 +271,7 @@ private fun LyricRow(
 private fun PlainLines(lyrics: Lyrics, large: Boolean) {
     val colors = NagTheme.colors
     val style = if (large) lineStyle(true).copy(fontWeight = FontWeight.Normal) else NagTheme.type.body
-    LazyColumn(Modifier.fillMaxSize().testTag("lyrics-lines"), contentPadding = PaddingValues(vertical = NagTheme.dimens.gapS)) {
+    LazyColumn(Modifier.fillMaxSize().fadingEdges(FADE).testTag("lyrics-lines"), contentPadding = PaddingValues(vertical = NagTheme.dimens.gapS)) {
         item {
             Text(
                 stringResource(R.string.nag_lyrics_plain),
@@ -367,7 +374,7 @@ fun LyricsFullScreen(
             .testTag("lyrics-full-screen"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(Modifier.fillMaxWidth().widthIn(max = MAX_WIDTH), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.widthIn(max = MAX_WIDTH).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 if (title != null) Text(title, style = NagTheme.type.title, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (!subtitle.isNullOrBlank()) Text(subtitle, style = NagTheme.type.body, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -379,7 +386,7 @@ fun LyricsFullScreen(
             timeMs = timeMs,
             onSeek = onSeek,
             onDelay = onDelay,
-            modifier = Modifier.weight(1f).fillMaxWidth().widthIn(max = MAX_WIDTH),
+            modifier = Modifier.weight(1f).widthIn(max = MAX_WIDTH).fillMaxWidth(),
             large = true,
             onlineAllowed = onlineAllowed,
             onLookAgain = onLookAgain,
@@ -459,6 +466,23 @@ private fun rememberPlayingLyrics(): PlayingLyricsState {
         onLookAgain = session::again,
     )
 }
+
+/** The lists' ends fade out over [edge]: the lines come and go rather than being cut. */
+private fun Modifier.fadingEdges(edge: Dp): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        val part = edge.toPx() / size.height
+        if (part < 0.5f) {
+            drawRect(
+                Brush.verticalGradient(0f to Color.Transparent, part to Color.Black, 1f - part to Color.Black, 1f to Color.Transparent),
+                blendMode = BlendMode.DstIn,
+            )
+        }
+    }
+
+/** How far the lists' ends fade. */
+private val FADE = 24.dp
 
 /** A synced line without words: a pause in the singing. */
 private const val INTERLUDE = "♪"
