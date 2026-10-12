@@ -96,6 +96,7 @@ Sözlüğü testler denetler:
 | perde | pitch | pitch, ton | | Yarım ton olarak (−24…+24); hız korunarak değiştirilir |
 | denge | balance | balans | | Sol ve sağ arasında; bir yan kısılır, öteki olduğu gibi kalır |
 | tek kanal | mono | mono | | Tüm kanalların ortalaması her kanala; “Tek kanal” ayarı |
+| DSD | DSD | | | Olduğu gibi; “DSD64”, “DSD128” hız adları; “DoP” (DSD over PCM) da olduğu gibi |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |

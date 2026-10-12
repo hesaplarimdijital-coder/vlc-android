@@ -49,9 +49,18 @@ data class SourceInfo(
     val trackPeak: Double? = null,
     val albumGainDb: Double? = null,
     val albumPeak: Double? = null,
+    /** S-908: a DSD file's bit rate (2 822 400 for DSD64), 0 for PCM. */
+    val dsdRate: Int = 0,
+    /** S-908: the file goes out as DSD over PCM. */
+    val dop: Boolean = false,
 ) {
     /** Whether the file carries a ReplayGain (or Opus R128) gain. */
     val hasReplayGain: Boolean get() = trackGainDb != null || albumGainDb != null
+
+    val isDsd: Boolean get() = dsdRate > 0
+
+    /** "DSD64", "DSD128", … for a DSD file; null otherwise. */
+    val dsdName: String? get() = if (dsdRate > 0) "DSD${Math.round(dsdRate / 44100.0)}" else null
 
     companion object {
         fun parse(json: String): SourceInfo? = runCatching {
@@ -62,10 +71,14 @@ data class SourceInfo(
                 o.optString("codec"), o.optString("container"), o.getInt("rate"), o.optInt("channels"), o.optInt("bits"),
                 o.optBoolean("float"), o.optLong("duration_ms"), o.optLong("bitrate"),
                 number("track_gain_db"), number("track_peak"), number("album_gain_db"), number("album_peak"),
+                o.optInt("dsd_rate", 0), o.optBoolean("dop", false),
             )
         }.getOrNull()
     }
 }
+
+/** S-908: how a DSD file plays, as NagDsdMode: decoded to PCM, or as DoP words for a DAC that takes them on a bit-perfect output. */
+enum class DsdMode { Pcm, Dop }
 
 /** S-907: how the tags' gains are applied, as NagReplayGain. */
 enum class ReplayGainMode { Off, Track, Album }
@@ -273,6 +286,13 @@ class MusicEngine(
         set(value) {
             field = value
             if (available) NativeAudio.setMono(handle, value)
+        }
+
+    /** S-908: DSD as PCM or as DoP, from the next track on. */
+    var dsdMode: DsdMode = DsdMode.Pcm
+        set(value) {
+            field = value
+            if (available) NativeAudio.setDsdMode(handle, value.ordinal)
         }
 
     val sourceInfo: SourceInfo? get() = if (available) SourceInfo.parse(NativeAudio.sourceInfo(handle)) else null

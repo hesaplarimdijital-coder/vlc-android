@@ -14,6 +14,9 @@
 #     tags written and read back in four formats with the audio untouched, the playback gains
 #   - tempo, pitch, balance and mono (S-909): a sine keeps its frequency through a tempo change
 #     and its length through a pitch change, at the levels asked; balance and mono exact
+#   - DSD (S-908): a modulated sine as DSF and DFF (dsd_gen.py) decodes to PCM as ffmpeg does,
+#     the same from both containers, at its level; as DoP the words carry the file's bits under
+#     the 0x05/0xFA markers, the same from both
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -308,6 +311,61 @@ worst = max(max(abs(balance[2 * i] - plain[2 * i] * 0.5), abs(balance[2 * i + 1]
 worst = max(worst, max(abs(mono[2 * i] - (plain[2 * i] + plain[2 * i + 1]) / 2) + abs(mono[2 * i + 1] - mono[2 * i]) for i in range(n)))
 print("%s balance 0.5 (left at half) and mono (both sides the average), worst error %.1e" % ("ok  " if worst == 0 else "FAIL", worst))
 sys.exit(0 if worst == 0 else 1)
+PY
+
+echo "== S-908: DSD"
+python3 "$HERE/dsd_gen.py" sine.dsf sine.dff
+check "dsd info" "2822400 352800" "$("$NAGAUDIO" info sine.dsf 2> /dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["dsd_rate"], d["rate"])')"
+check "dsf to pcm as ffmpeg" "$(ffmpeg -v error -i sine.dsf -f f32le - | md5_of)" "$(engine_md5 f32 sine.dsf 2> /dev/null)"
+"$NAGAUDIO" decode sine.dsf -f f64 -o dsf_pcm.raw 2> /dev/null > dsf_pcm.json
+"$NAGAUDIO" decode sine.dff -f f64 -o dff_pcm.raw 2> /dev/null > /dev/null
+check "dsd to pcm is why not bit-perfect" "dsd_pcm" "$(json 'd["signal_path"]["not_bit_perfect_because"]' < dsf_pcm.json)"
+# the decoders' first frames differ in their filter's start; from frame 64 on the two containers agree
+check "dsf and dff decode alike" "$(tail -c +$((64 * 16 + 1)) dsf_pcm.raw | md5_of)" "$(tail -c +$((64 * 16 + 1)) dff_pcm.raw | md5_of)"
+python3 - <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+data = open("dsf_pcm.raw", "rb").read()
+x = struct.unpack("<%dd" % (len(data) // 8), data)[0::2]
+rate = 352800
+# the sine's amplitude at 1 kHz, by correlation over the middle of the file
+a, b = len(x) // 4, len(x) * 3 // 4
+w = 2 * math.pi * 1000 / rate
+re = sum(x[i] * math.cos(w * i) for i in range(a, b))
+im = sum(x[i] * math.sin(w * i) for i in range(a, b))
+amplitude = 2 * math.hypot(re, im) / (b - a)
+ok = abs(amplitude - 0.5) < 0.03
+print("%s dsd decoded: the 1 kHz sine at %.3f (modulated at 0.5)" % ("ok  " if ok else "FAIL", amplitude))
+sys.exit(0 if ok else 1)
+PY
+"$NAGAUDIO" decode sine.dsf -f s32 -o dop.raw --dop 2> /dev/null > dop.json
+"$NAGAUDIO" decode sine.dff -f s32 -o dop_dff.raw --dop 2> /dev/null > /dev/null
+check "dop source" "176400 24 True" "$(json 'str(d["signal_path"]["source"]["rate"]) + " " + str(d["signal_path"]["source"]["bits"]) + " " + str(d["signal_path"]["source"]["dop"])' < dop.json)"
+check "dop from dff is dop from dsf" "$(md5_of < dop.raw)" "$(md5_of < dop_dff.raw)"
+python3 - <<'PY' || failures=$((failures + 1))
+import struct, sys
+raw = open("dop.raw", "rb").read()
+words = struct.unpack("<%di" % (len(raw) // 4), raw)
+bits = [bytearray(), bytearray()]
+markers_ok = True
+for i in range(0, len(words), 2):
+    expect = 0x05 if (i // 2) % 2 == 0 else 0xFA
+    for c in range(2):
+        word = (words[i + c] >> 8) & 0xFFFFFF
+        markers_ok = markers_ok and (word >> 16) == expect
+        bits[c] += bytes(((word >> 8) & 0xFF, word & 0xFF))
+# the DSF's bytes: blocks of 4096 per channel, bits oldest first in the LSB, reversed for DoP
+dsf = open("sine.dsf", "rb").read()
+block = struct.unpack_from("<I", dsf, 28 + 4 + 8 + 4 * 6 + 8)[0]
+payload = dsf[28 + 52 + 12:]
+reverse = [int("{:08b}".format(b)[::-1], 2) for b in range(256)]
+expected = [bytearray(), bytearray()]
+for off in range(0, len(payload), 2 * block):
+    expected[0] += bytes(reverse[b] for b in payload[off:off + block])
+    expected[1] += bytes(reverse[b] for b in payload[off + block:off + 2 * block])
+same = all(bytes(bits[c]) == bytes(expected[c][:len(bits[c])]) and len(bits[c]) == len(expected[c]) for c in range(2))
+ok = markers_ok and same
+print("%s dop: %d frames, markers alternate %s, the file's bits %s" % ("ok  " if ok else "FAIL", len(words) // 2, markers_ok, same))
+sys.exit(0 if ok else 1)
 PY
 
 if [ "$failures" -gt 0 ]; then

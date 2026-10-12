@@ -15,6 +15,16 @@ typedef struct NagSource NagSource;
  * negative AVERROR and says why in [error].
  */
 int nag_source_open(NagSource **out, const char *url, int channels, char *error, size_t error_size);
+
+/** nag_source_open_ex flags */
+#define NAG_SOURCE_DOP 1 /* a stereo DSD file as DoP frames (S-908): 24-bit words at the DSD rate / 16 */
+
+/**
+ * As nag_source_open; with NAG_SOURCE_DOP a stereo DSD file is not decoded but packed as DSD
+ * over PCM: 16 DSD bits per channel per frame under the 0x05/0xFA markers, in 24-bit words
+ * (NagSourceInfo.dop set, rate the DoP rate). Anything else opens as usual.
+ */
+int nag_source_open_ex(NagSource **out, const char *url, int channels, int flags, char *error, size_t error_size);
 void nag_source_close(NagSource *source);
 
 const NagSourceInfo *nag_source_info(const NagSource *source);

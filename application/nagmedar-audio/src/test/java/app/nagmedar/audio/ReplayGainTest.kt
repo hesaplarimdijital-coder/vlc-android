@@ -29,6 +29,20 @@ class ReplayGainTest {
     }
 
     @Test
+    fun sourceInfoKnowsDsd() {
+        val dsd = SourceInfo.parse("""{"codec":"dsd_lsbf_planar","container":"dsf","rate":352800,"channels":2,"bits":0,"float":true,"duration_ms":499,"bitrate":5644800,"dsd_rate":2822400}""")!!
+        assertTrue(dsd.isDsd)
+        assertEquals("DSD64", dsd.dsdName)
+        assertFalse(dsd.dop)
+        val dop = SourceInfo.parse("""{"codec":"dsd_msbf","container":"iff","rate":352800,"channels":2,"bits":24,"float":false,"duration_ms":499,"bitrate":5644800,"dsd_rate":11289600,"dop":true}""")!!
+        assertTrue(dop.dop)
+        assertEquals("DSD256", dop.dsdName)
+        val pcm = SourceInfo.parse("""{"codec":"flac","container":"flac","rate":44100,"channels":2,"bits":16,"float":false,"duration_ms":4000,"bitrate":539530}""")!!
+        assertFalse(pcm.isDsd)
+        assertNull(pcm.dsdName)
+    }
+
+    @Test
     fun loudnessOfTheEnginesArray() {
         val l = Loudness.of(doubleArrayOf(-23.04, 0.0705, 0.0704, 5.04, 240000.0, 48000.0))!!
         assertEquals(-23.04, l.lufs, 0.0)

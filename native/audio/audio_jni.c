@@ -281,9 +281,9 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_sourceInfo(JNIEnv 
         return utf8(env, "{}");
     char json[512];
     snprintf(json, sizeof(json),
-             "{\"codec\":\"%s\",\"container\":\"%s\",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld}",
+             "{\"codec\":\"%s\",\"container\":\"%s\",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld,\"dsd_rate\":%d,\"dop\":%s}",
              info.codec, info.container, info.rate, info.channels, info.bits, info.is_float ? "true" : "false", (long long)info.duration_ms,
-             (long long)info.bitrate);
+             (long long)info.bitrate, info.dsd_rate, info.dop ? "true" : "false");
     return utf8(env, json);
 }
 
@@ -532,6 +532,8 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env,
         n += snprintf(json + n, sizeof(json) - n, ",\"album_gain_db\":%.2f", i->album_gain_db);
     if (!isnan(i->album_peak) && n < (int)sizeof(json))
         n += snprintf(json + n, sizeof(json) - n, ",\"album_peak\":%.6f", i->album_peak);
+    if (i->dsd_rate && n < (int)sizeof(json))
+        n += snprintf(json + n, sizeof(json) - n, ",\"dsd_rate\":%d", i->dsd_rate);
     if (n < (int)sizeof(json))
         snprintf(json + n, sizeof(json) - n, "}");
     nag_source_close(src);
@@ -570,4 +572,14 @@ JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setMono(JNIEnv *env, 
     (void)cls;
     if (engine_of(handle))
         nag_audio_set_mono(engine_of(handle), mono == JNI_TRUE);
+}
+
+/* ------------------------------------------------------------------ S-908 DSD */
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setDsdMode(JNIEnv *env, jclass cls, jlong handle, jint mode)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_dsd_mode(engine_of(handle), (NagDsdMode)mode);
 }

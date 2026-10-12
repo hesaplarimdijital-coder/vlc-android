@@ -135,6 +135,9 @@ struct NagAudio {
     NagStretch stretch;
     _Atomic double balance;
     atomic_int mono;
+
+    /* S-908 */
+    atomic_int dsd_mode;
     _Atomic int64_t meter_frames, meter_clipped;
     _Atomic double meter_peak, meter_reduction;
 
@@ -319,7 +322,11 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
     v->url = strdup(url);
     atomic_store(&v->rg_gain, 1.0);
     sem_init(&v->wake, 0, 0);
-    if (nag_source_open(&v->src, url, e->cfg.channels, error, error_size) < 0) {
+    /* S-908: DoP only where the output can carry 24-bit words as they are */
+    int dop = atomic_load(&e->dsd_mode) == NAG_DSD_DOP && e->cfg.channels == 2 &&
+              (e->cfg.max_format == NAG_FMT_NONE || e->cfg.max_format == NAG_FMT_S32 || e->cfg.max_format == NAG_FMT_S24_3) &&
+              (e->cfg.fixed_format == NAG_FMT_NONE || e->cfg.fixed_format == NAG_FMT_S32 || e->cfg.fixed_format == NAG_FMT_S24_3);
+    if (nag_source_open_ex(&v->src, url, e->cfg.channels, dop ? NAG_SOURCE_DOP : 0, error, error_size) < 0) {
         voice_free(v);
         return NULL;
     }
@@ -355,6 +362,8 @@ static NagFormat voice_format(const NagAudio *e, const Voice *v)
         f.sample_format = e->cfg.fixed_format;
         return f;
     }
+    if (v->info.dop)
+        return f; /* DoP words want the 24 bits of an S32 */
     if (v->info.is_float)
         f.sample_format = NAG_FMT_F32;
     else if (v->info.bits > 0 && v->info.bits <= 16 && atomic_load(&e->dsp_identity))
@@ -896,6 +905,18 @@ double nag_audio_replaygain_db(NagAudio *e)
     return gain > 0 ? 20.0 * log10(gain) : -144.0;
 }
 
+/* ---------------------------------------------------------------------- DSD */
+
+void nag_audio_set_dsd_mode(NagAudio *e, NagDsdMode mode)
+{
+    atomic_store(&e->dsd_mode, mode == NAG_DSD_DOP ? NAG_DSD_DOP : NAG_DSD_PCM);
+}
+
+NagDsdMode nag_audio_dsd_mode(NagAudio *e)
+{
+    return (NagDsdMode)atomic_load(&e->dsd_mode);
+}
+
 /* ------------------------------------------------------------ tempo, pitch */
 
 void nag_audio_set_tempo(NagAudio *e, double tempo)
@@ -1186,11 +1207,12 @@ static Voice *hand_over(NagAudio *e, Voice *v)
  * sink that no longer fits are handled here. Returns the frames (0: none now, the decoder
  * behind or nothing playing); *dither says whether what came needs dithering into integers.
  */
-static int pull_mixed(NagAudio *e, double *dst, int n_max, int *dither)
+static int pull_mixed(NagAudio *e, double *dst, int n_max, int *dither, int *raw)
 {
     const int channels = e->out.channels;
     const int curve = atomic_load(&e->crossfade_curve);
     *dither = 0;
+    *raw = 0;
     for (;;) {
         Voice *v = atomic_load(&e->current);
         if (!v)
@@ -1210,7 +1232,7 @@ static int pull_mixed(NagAudio *e, double *dst, int n_max, int *dither)
             /* S-905: the end of this voice in sight, the next one comes in over it */
             Voice *n = atomic_load(&e->next);
             int fade_ms = atomic_load(&e->crossfade_ms);
-            if (n && n->crossfade && fade_ms > 0 && n->info.rate == v->info.rate && !atomic_load(&v->seek_pending)) {
+            if (n && n->crossfade && fade_ms > 0 && n->info.rate == v->info.rate && !atomic_load(&v->seek_pending) && !v->info.dop && !n->info.dop) {
                 int64_t fade_frames = (int64_t)fade_ms * v->info.rate / 1000;
                 int64_t total = v->info.duration_ms > 0 ? v->info.duration_ms * v->info.rate / 1000 : 0;
                 int64_t position = atomic_load(&v->base_ms) * v->info.rate / 1000 + atomic_load(&v->played);
@@ -1255,6 +1277,11 @@ static int pull_mixed(NagAudio *e, double *dst, int n_max, int *dither)
             atomic_fetch_add(&v->played, n_frames);
             if (nag_ring_available(&v->ring) < v->ring.capacity / 2)
                 sem_post(&v->wake);
+            if (v->info.dop) {
+                /* S-908: DoP words pass as they are */
+                *raw = 1;
+                return n_frames;
+            }
             const double rg = atomic_load(&v->rg_gain);
             if (rg != 1.0)
                 for (int i = 0; i < n_frames * channels; i++)
@@ -1311,8 +1338,8 @@ static int pull_mixed(NagAudio *e, double *dst, int n_max, int *dither)
 static int stretch_source(void *opaque, double *dst, int frames)
 {
     NagAudio *e = opaque;
-    int dither;
-    int got = pull_mixed(e, dst, frames, &dither);
+    int dither, raw;
+    int got = pull_mixed(e, dst, frames, &dither, &raw);
     if (got == 0 && atomic_load(&e->state) == NAG_STATE_ENDED)
         return -1;
     return got;
@@ -1321,6 +1348,9 @@ static int stretch_source(void *opaque, double *dst, int frames)
 /* S-909: the stretcher follows its settings and the output's rate; whether it is in the way. */
 static int stretch_prepare(NagAudio *e)
 {
+    Voice *v = atomic_load(&e->current);
+    if (v && v->info.dop)
+        return 0; /* S-908: DoP words are not audio to stretch */
     double tempo = atomic_load(&e->tempo), pitch = atomic_load(&e->pitch);
     if (e->stretch.rate != e->out.rate || e->stretch.tempo != tempo || e->stretch.pitch != pitch)
         nag_stretch_configure(&e->stretch, e->out.rate, tempo, pitch);
@@ -1355,14 +1385,17 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
         int n = frames - pos;
         if (n > MIX_FRAMES)
             n = MIX_FRAMES;
-        int dither = 0;
-        int got = stretch_on ? nag_stretch_pull(&e->stretch, e->mix, n, stretch_source, e) : pull_mixed(e, e->mix, n, &dither);
+        int dither = 0, raw = 0;
+        int got = stretch_on ? nag_stretch_pull(&e->stretch, e->mix, n, stretch_source, e) : pull_mixed(e, e->mix, n, &dither, &raw);
         if (got <= 0)
             break;
         if (stretch_on)
             dither = e->cfg.dither; /* the voices' own needs are not known past the stretcher */
         (void)channels;
-        finish_block(e, (uint8_t *)out + (size_t)pos * bytes, got, volume, (dither && integer_out) || processed_dither, dsp_on);
+        if (raw)
+            convert(e, e->mix, (uint8_t *)out + (size_t)pos * bytes, got, 1.0, 0); /* DoP: untouched, the volume included */
+        else
+            finish_block(e, (uint8_t *)out + (size_t)pos * bytes, got, volume, (dither && integer_out) || processed_dither, dsp_on);
         pos += got;
         produced += got;
     }
@@ -1429,6 +1462,12 @@ char *nag_audio_signal_path_json(NagAudio *e)
     const char *why;
     if (!v || out.sample_format == NAG_FMT_NONE)
         why = "idle";
+    else if (v->info.dsd_rate && !v->info.dop)
+        why = "dsd_pcm";
+    else if (v->info.dop && (volume < 1.0 || !sink_exclusive))
+        why = volume < 1.0 ? "volume" : "output";
+    else if (v->info.dop)
+        why = ""; /* DoP: the words go out as they are, whatever else is set */
     else if (v->info.is_float || v->info.bits == 0)
         why = "lossy";
     else if (volume < 1.0)
@@ -1449,8 +1488,9 @@ char *nag_audio_signal_path_json(NagAudio *e)
         why = "crossfade";
     else {
         why = "";
-        bit_perfect = 1;
     }
+    if (why[0] == 0)
+        bit_perfect = 1;
     str_add(&j, "{\"version\":\"%s\",\"state\":%d,\"source\":", NAGAUDIO_VERSION, atomic_load(&e->state));
     if (v) {
         str_add(&j, "{\"id\":%lld,\"url\":", (long long)v->id);
@@ -1459,8 +1499,11 @@ char *nag_audio_signal_path_json(NagAudio *e)
         str_add_quoted(&j, v->info.codec);
         str_add(&j, ",\"container\":");
         str_add_quoted(&j, v->info.container);
-        str_add(&j, ",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld}", v->info.rate,
+        str_add(&j, ",\"rate\":%d,\"channels\":%d,\"bits\":%d,\"float\":%s,\"duration_ms\":%lld,\"bitrate\":%lld", v->info.rate,
                 v->info.channels, v->info.bits, v->info.is_float ? "true" : "false", (long long)v->info.duration_ms, (long long)v->info.bitrate);
+        if (v->info.dsd_rate)
+            str_add(&j, ",\"dsd_rate\":%d,\"dop\":%s", v->info.dsd_rate, v->info.dop ? "true" : "false");
+        str_add(&j, "}");
     } else {
         str_add(&j, "null");
     }

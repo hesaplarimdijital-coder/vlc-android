@@ -67,3 +67,8 @@ const val NAGMEDAR_REPLAYGAIN_ALBUM = "album"
 const val NAGMEDAR_AUDIO_PITCH = "nagmedar_audio_pitch"
 const val NAGMEDAR_AUDIO_BALANCE = "nagmedar_audio_balance"
 const val NAGMEDAR_AUDIO_MONO = "nagmedar_audio_mono"
+
+/** S-908: DSD files decoded to PCM ("pcm") or passed as DoP words ("dop", for a DAC that takes them on a bit-perfect output). */
+const val NAGMEDAR_DSD_MODE = "nagmedar_dsd_mode"
+const val NAGMEDAR_DSD_PCM = "pcm"
+const val NAGMEDAR_DSD_DOP = "dop"

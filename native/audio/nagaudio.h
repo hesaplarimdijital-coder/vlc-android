@@ -62,6 +62,9 @@ typedef struct NagSourceInfo {
     char container[NAG_NAME_MAX];
     /* ReplayGain / R128 tags (S-907), as in the file; NAN when absent */
     double track_gain_db, track_peak, album_gain_db, album_peak;
+    /* S-908: a DSD file's bit rate (2822400 for DSD64), 0 for PCM; dop when it comes as DSD over PCM */
+    int dsd_rate;
+    int dop;
 } NagSourceInfo;
 
 /* ------------------------------------------------------------------- events */
@@ -311,6 +314,23 @@ void nag_audio_set_replaygain(NagAudio *engine, const NagReplayGain *settings);
 void nag_audio_get_replaygain(NagAudio *engine, NagReplayGain *settings);
 /** The gain in dB the playing track gets from this (0 when off or untagged and no untagged_db). */
 double nag_audio_replaygain_db(NagAudio *engine);
+
+/* ---------------------------------------------------------------------- DSD */
+
+/*
+ * S-908: how a DSD file (DSF, DFF) plays. As PCM it is decoded (FFmpeg's filter, 8 bits to a
+ * sample: DSD64 to 352.8 kHz float). As DoP a stereo file's bits go out as they are, under the
+ * DoP markers in 24-bit words at the DSD rate / 16 (DSD64: 176.4 kHz), which only a DAC that
+ * takes DoP on a bit-perfect output turns back into DSD; the engine then leaves the samples
+ * alone (no gain, no chain, no crossfade). A track opened from then on follows the mode.
+ */
+typedef enum NagDsdMode {
+    NAG_DSD_PCM = 0,
+    NAG_DSD_DOP = 1,
+} NagDsdMode;
+
+void nag_audio_set_dsd_mode(NagAudio *engine, NagDsdMode mode);
+NagDsdMode nag_audio_dsd_mode(NagAudio *engine);
 
 /* ------------------------------------------------------------ tempo, pitch */
 

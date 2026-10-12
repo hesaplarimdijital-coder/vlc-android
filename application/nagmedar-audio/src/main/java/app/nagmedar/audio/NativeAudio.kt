@@ -65,6 +65,10 @@ object NativeAudio {
     const val TEMPO_MAX = 4.0
     const val PITCH_MAX_SEMITONES = 24.0
 
+    // S-908: NagDsdMode
+    const val DSD_PCM = 0
+    const val DSD_DOP = 1
+
     // S-907: NagReplayGainMode
     const val REPLAYGAIN_OFF = 0
     const val REPLAYGAIN_TRACK = 1
@@ -167,4 +171,7 @@ object NativeAudio {
 
     /** S-909: the channels mixed to one on all of them. */
     @JvmStatic external fun setMono(handle: Long, mono: Boolean)
+
+    /** S-908: DSD files decoded to PCM (0) or passed as DoP words (1) from the next track on. */
+    @JvmStatic external fun setDsdMode(handle: Long, mode: Int)
 }

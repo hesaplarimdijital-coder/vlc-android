@@ -7,6 +7,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import app.nagmedar.audio.CrossfadeCurve
+import app.nagmedar.audio.DsdMode
 import app.nagmedar.audio.DspMeter
 import app.nagmedar.audio.DspSettings
 import app.nagmedar.audio.EngineState
@@ -37,6 +38,8 @@ import org.videolan.tools.NAGMEDAR_CROSSFADE_EQUAL_POWER
 import org.videolan.tools.NAGMEDAR_CROSSFADE_LINEAR
 import org.videolan.tools.NAGMEDAR_CROSSFADE_MS
 import org.videolan.tools.NAGMEDAR_CROSSFADE_SKIP_ALBUM
+import org.videolan.tools.NAGMEDAR_DSD_DOP
+import org.videolan.tools.NAGMEDAR_DSD_MODE
 import org.videolan.tools.NAGMEDAR_DSP
 import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
 import org.videolan.tools.NAGMEDAR_REPLAYGAIN_ALBUM
@@ -204,17 +207,18 @@ class MusicEngineController(
             NAGMEDAR_DSP -> applyDspSettings()
             NAGMEDAR_CROSSFADE_MS, NAGMEDAR_CROSSFADE_CURVE -> applyCrossfadeSettings()
             NAGMEDAR_REPLAYGAIN_MODE, NAGMEDAR_REPLAYGAIN_PREAMP, NAGMEDAR_REPLAYGAIN_UNTAGGED, NAGMEDAR_REPLAYGAIN_CLIP -> applyReplayGainSettings()
-            NAGMEDAR_AUDIO_PITCH, NAGMEDAR_AUDIO_BALANCE, NAGMEDAR_AUDIO_MONO -> applyAudioSettings()
+            NAGMEDAR_AUDIO_PITCH, NAGMEDAR_AUDIO_BALANCE, NAGMEDAR_AUDIO_MONO, NAGMEDAR_DSD_MODE -> applyAudioSettings()
         }
     }
 
-    /** S-909: the pitch, balance and mono as set. */
+    /** S-909, S-908: the pitch, balance, mono and the DSD mode as set. */
     fun applyAudioSettings() {
         val engine = engine ?: return
         val settings = Settings.getInstance(context)
         engine.pitch = settings.getFloat(NAGMEDAR_AUDIO_PITCH, 0f).toDouble()
         engine.balance = settings.getFloat(NAGMEDAR_AUDIO_BALANCE, 0f).toDouble()
         engine.mono = settings.getBoolean(NAGMEDAR_AUDIO_MONO, false)
+        engine.dsdMode = if (settings.getString(NAGMEDAR_DSD_MODE, null) == NAGMEDAR_DSD_DOP) DsdMode.Dop else DsdMode.Pcm
     }
 
     /** S-907: ReplayGain as set; the tracks loaded take a change at once. */
