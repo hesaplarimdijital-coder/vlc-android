@@ -4,12 +4,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -95,7 +97,8 @@ class SmartPlaylistsTest {
         // no playlist chosen: the smart list's tab is open after the playlist's
         compose.onNodeWithText("En çok çalınanlar").performClick()
         compose.onNodeWithTag("smart-pane").assertExists()
-        compose.onNodeWithText("Gece Yolcusu").assertExists()
+        // the track, and two more of its album
+        compose.onAllNodesWithText("Gece Yolcusu").assertCountEquals(3)
         compose.onNode(hasText("Kuralları düzenle…") and hasClickAction()).performClick()
         // at least 20 plays
         compose.onAllNodesWithTag("smart-value")[0].performTextReplacement("20")
