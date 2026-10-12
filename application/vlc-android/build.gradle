@@ -169,6 +169,9 @@ dependencies {
     releaseApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     signedReleaseApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     signedReleaseApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    // S-1404: the macrobenchmarks' build
+    benchmarkApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
+    benchmarkApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     api project(':application:tools')
     api project(':application:resources')
     api project(':application:mediadb')

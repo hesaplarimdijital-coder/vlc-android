@@ -85,6 +85,7 @@ fun PerformanceCard(view: PerfView, onReport: () -> Unit, onClear: () -> Unit) {
     val locale = currentLocale()
     Column(Modifier.fillMaxWidth().testTag("performance")) {
         Text(stringResource(R.string.nag_perf_intro), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+        Spacer(Modifier.height(dimens.gapS))
         val median = view.medianStartupMs
         SettingRow(
             stringResource(R.string.nag_perf_startup),

@@ -80,6 +80,9 @@ dependencies {
     debugApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     releaseApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     releaseApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    // S-1404: the macrobenchmarks' build
+    benchmarkApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
+    benchmarkApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     vlcBundleApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     vlcBundleApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
 
