@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -51,6 +52,7 @@ import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.player.panel.PanelCaption
 import app.nagmedar.ui.player.panel.PanelChip
+import app.nagmedar.ui.player.panel.PanelDisabledAlpha
 import app.nagmedar.ui.player.panel.decimal
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
@@ -123,6 +125,7 @@ fun OnlineSubtitlesSurface(
                 keyboardActions = KeyboardActions(onSearch = { onSearch() }),
                 modifier = Modifier
                     .weight(1f)
+                    .alpha(if (usable) 1f else PanelDisabledAlpha)
                     .border(1.dp, colors.borderStrong, RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 10.dp)
                     .semantics { contentDescription = label }
@@ -143,7 +146,13 @@ fun OnlineSubtitlesSurface(
                 PanelChip(languageName(code, locale), selected = code in state.languages, enabled = usable) { onLanguage(code) }
             }
         }
-        NagCheckbox(state.byHash, onByHash, stringResource(R.string.nag_online_by_hash), Modifier.testTag("online-by-hash"), enabled = usable)
+        NagCheckbox(
+            state.byHash,
+            onByHash,
+            stringResource(R.string.nag_online_by_hash),
+            Modifier.alpha(if (usable) 1f else PanelDisabledAlpha).testTag("online-by-hash"),
+            enabled = usable,
+        )
         Column(
             Modifier
                 .fillMaxWidth()
