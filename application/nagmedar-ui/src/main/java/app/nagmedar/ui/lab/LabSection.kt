@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** ACTION_CREATE_DOCUMENT with the MIME type and file name decided at launch time. */
-private class CreateFile : ActivityResultContract<Pair<String, String>, Uri?>() {
+internal class CreateFile : ActivityResultContract<Pair<String, String>, Uri?>() {
     override fun createIntent(context: Context, input: Pair<String, String>) =
         Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType(input.first).putExtra(Intent.EXTRA_TITLE, input.second)
 

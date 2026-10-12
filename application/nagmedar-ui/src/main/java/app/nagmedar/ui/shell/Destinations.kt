@@ -33,7 +33,7 @@ enum class Destination(
     Device("device", R.string.nag_nav_device, NavSection.Sources, R.string.nag_coming_device, "MVP1"),
     Network("network", R.string.nag_nav_network, NavSection.Sources, R.string.nag_coming_network, "MVP1"),
     Streams("streams", R.string.nag_nav_streams, NavSection.Sources, R.string.nag_coming_streams, "MVP1"),
-    TvLab("tvlab", R.string.nag_nav_tv_lab, NavSection.Tools, R.string.nag_coming_tv_lab, "MVP1"),
+    TvLab("tvlab", R.string.nag_nav_tv_lab, NavSection.Tools, R.string.nag_coming_tv_lab),
     Convert("convert", R.string.nag_nav_convert, NavSection.Tools, R.string.nag_coming_convert, "MVP3"),
     Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads, "MVP4"),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),

@@ -151,7 +151,7 @@ enum class ShortcutId {
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
     SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
-    Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
+    Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
 }
 
@@ -243,6 +243,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
         // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization
         Shortcut(ShortcutId.Synchronization, ShortcutGroup.Tools, R.string.nag_sc_sync, KeyChord(Key.S, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-1201: the TV Lab, from anywhere
+        Shortcut(ShortcutId.TvLab, ShortcutGroup.Tools, R.string.nag_nav_tv_lab, KeyChord(Key.T, ctrl = true, shift = true)),
         // View
         Shortcut(ShortcutId.CommandPalette, ShortcutGroup.View, R.string.nag_search, KeyChord(Key.K, ctrl = true)),
         Shortcut(ShortcutId.ToggleSidebar, ShortcutGroup.View, R.string.nag_sc_toggle_sidebar, KeyChord(Key.B, ctrl = true)),

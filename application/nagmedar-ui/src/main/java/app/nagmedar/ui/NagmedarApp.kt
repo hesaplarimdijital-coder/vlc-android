@@ -59,6 +59,7 @@ import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.MusicScreen
 import app.nagmedar.ui.library.SeriesScreen
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
@@ -73,6 +74,10 @@ import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.screens.AboutScreen
+import app.nagmedar.ui.tvlab.Step
+import app.nagmedar.ui.tvlab.TvLabScreen
+import app.nagmedar.ui.tvlab.TvLabSession
+import app.nagmedar.ui.tvlab.percentLabel
 import app.nagmedar.ui.screens.SettingsScreen
 import app.nagmedar.ui.screens.rememberThirdParties
 import app.nagmedar.ui.input.DropPlan
@@ -200,6 +205,9 @@ private fun NagmedarMain(
         val c = repository.counts()
         value = mapOf(Destination.Movies to c.videos.toString(), Destination.Music to c.tracks.toString())
     }
+    // S-1202: a long analysis goes on while other screens show; the sidebar says how far it is
+    val tvLab = remember(context) { TvLabSession.get(context) }
+    val tvLabProgress = (tvLab.bitrateStep as? Step.Running)?.let { percentLabel(it.fraction ?: 0f, currentLocale()) }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
@@ -215,7 +223,7 @@ private fun NagmedarMain(
                 widthClass = widthClass,
                 sidebarCollapsed = prefs.sidebarCollapsed,
                 onSidebarCollapsedChange = prefs::updateSidebarCollapsed,
-                badges = counts,
+                badges = if (tvLabProgress != null) counts + (Destination.TvLab to tvLabProgress) else counts,
                 // the menu bar's field is the palette's; phones and tablets go to the search page (S-311)
                 onSearch = {
                     if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.navigate(Destination.Search)
@@ -260,6 +268,7 @@ private fun NagmedarMain(
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
+                        Destination.TvLab -> TvLabScreen(tvLab)
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -473,6 +482,7 @@ class AppActions(
                 }
             }
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
+            ShortcutId.TvLab -> navigator.navigate(Destination.TvLab)
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
             ShortcutId.ShortcutList -> {

@@ -190,8 +190,9 @@ fun bitrateLabel(bitsPerSecond: Long, locale: Locale): String = when {
     else -> decimal(locale, bitsPerSecond / 1e3, 0) + " kbps"
 }
 
-/** "58,4 GB", "734 MB". */
+/** "1,8 TB", "58,4 GB", "734 MB". */
 fun sizeLabel(bytes: Long, locale: Locale): String = when {
+    bytes >= 1_000_000_000_000 -> decimal(locale, bytes / 1e12, 1) + " TB"
     bytes >= 1_000_000_000 -> decimal(locale, bytes / 1e9, 1) + " GB"
     bytes >= 1_000_000 -> decimal(locale, bytes / 1e6, 0) + " MB"
     else -> decimal(locale, bytes / 1e3, 0) + " kB"
