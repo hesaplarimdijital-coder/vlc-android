@@ -82,10 +82,11 @@ class MenuBarScreenshotTest {
         val specs = remember(res) {
             menuBarSpecs(res, {}, { ShortcutRegistry[it].scope == ShortcutScope.Global && it !in later })
         }
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            specs.chunked(4).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
-                    row.forEach { OpenMenu(it) }
+        // four columns, each menu under the one four before it: the long ones (Playback, Subtitle) fit
+        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+            for (column in 0 until COLUMNS) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    specs.filterIndexed { index, _ -> index % COLUMNS == column }.forEach { OpenMenu(it) }
                 }
             }
         }
@@ -113,6 +114,10 @@ class MenuBarScreenshotTest {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val COLUMNS = 4
     }
 
     @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
