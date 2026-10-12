@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- S-1007: the alarm rings at its minute; Android 13 and later grant this to an alarm clock -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
     <application>
         <!-- New Compose interface (preview in MVP0). Handles window resizes itself so the
              shell keeps its state when a DeX window is resized or moved between displays. -->
@@ -25,6 +29,23 @@
                 android:name="android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI"
                 android:value="true" />
         </activity>
+
+        <!-- S-1007: the alarm; and setting it again after a restart or a change of the clock (the
+             system's broadcasts reach a receiver that is not exported) -->
+        <receiver
+            android:name="app.nagmedar.ui.sleep.AlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="app.nagmedar.ui.sleep.AlarmRescheduler"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <!-- S-307: the video player is a window of its own, beside the library's: a task of its own.
              Started again from any window it is the same player (singleTask), so one session plays. -->

@@ -53,6 +53,7 @@ import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
@@ -97,6 +98,8 @@ fun SettingsScreen(
         item { SnapshotSection(prefs) }
         // S-901: the engine behind the local music library
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
+        // S-1007: waking to music
+        item { AlarmSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {

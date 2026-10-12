@@ -199,7 +199,7 @@ class PlaylistModel : ViewModel(), PlaybackService.Callback by EmptyPBSCallback 
     }
 
     fun stopAfter(position: Int) {
-        service?.playlistManager?.stopAfter = position
+        service?.playlistManager?.setStopAfterPosition(position)
     }
 
     fun play(position: Int) = service?.playIndex(position)

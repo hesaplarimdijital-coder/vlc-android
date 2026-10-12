@@ -146,7 +146,7 @@ enum class ShortcutId {
     OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
     JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
-    ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks,
+    ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks, SleepTimer,
     VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer, AbSwitch,
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
@@ -210,6 +210,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.PreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_previous_chapter, KeyChord(Key.P, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.AddBookmark, ShortcutGroup.Playback, R.string.nag_sc_add_bookmark, KeyChord(Key.D, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Bookmarks, ShortcutGroup.Playback, R.string.nag_sc_bookmarks, KeyChord(Key.B, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-1007: the sleep timer's window (S for sleep; VLC has none)
+        Shortcut(ShortcutId.SleepTimer, ShortcutGroup.Playback, R.string.nag_sc_sleep_timer, KeyChord(Key.S, alt = true)),
         // Audio
         Shortcut(ShortcutId.VolumeUp, ShortcutGroup.Audio, R.string.nag_sc_volume_up, KeyChord(Key.DirectionUp, ctrl = true)),
         Shortcut(ShortcutId.VolumeDown, ShortcutGroup.Audio, R.string.nag_sc_volume_down, KeyChord(Key.DirectionDown, ctrl = true)),

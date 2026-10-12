@@ -24,6 +24,8 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - Telefonun müzik oynatıcısı: mini oynatıcıdan tam ekran; büyük kapak, dalga biçimi, başparmağın ulaştığı yerde denetimler. Kapağı sola kaydırmak sonraki, sağa kaydırmak önceki parçayı çalar; aşağı kaydırmak ya da Geri kapatır.
 - Sıradaki: kütüphanede seçilen parçalar “Hemen sonra oynat” ile çalanın ardına, “Sıraya ekle” ile sonuna girer, çalan liste değişmez; panelde tutamaçla sürüklenir, Alt+↑/↓ ile taşınır, Delete ile çıkarılır.
 - Çalma listeleri: her liste bir sekme; satırlar tutamaçla sürüklenir, Alt+↑/↓ ile taşınır, Delete ile kaldırılır (Geri al geri getirir). M3U, M3U8, PLS ve XSPF içe ve dışa aktarılır: listenin klasör ağacındaki dosyalar göreli yazılır, başka bir bilgisayarda yapılmış listelerin dosyaları kütüphanede adlarından bulunur, eski Türkçe M3U'lar Windows-1254 olarak okunur. Müzik'te seçilen parçalar “Listeye ekle…” ile bir listeye girer.
+- Uyku zamanlayıcısı: 15 dk'dan 2 saate ya da çalan parçanın sonuna; süre bitince istenirse parça sonuna kadar çalar, ses son 30 saniyede yavaşça kısılır ve sonraki oynatmada eski düzeyine döner. Telefonun oynatıcısında ay düğmesi, masaüstünde Oynatma menüsü, komut paleti ve Alt+S; çalışırken kalan süre çubukta görünür, “+15 dk” uzatır.
+- Alarm (Ayarlar › Alarm): saat, günler (seçilmezse bir kez), son çalınan müzik, bir çalma listesi ya da internet radyosu akışı; ses sıfırdan seçilen sürede (30 sn–5 dk) yükselir, cihazın medya ses düzeyi gerekirse ayarlanan düzeye çıkarılır. Android'in alarm saati olarak kurulur (durum çubuğunda ve kilit ekranında görünür), yeniden başlatmadan ve saat değişikliğinden sonra yeniden kurulur; akış yanıt vermezse son çalınan müzik çalar.
 
 ## 0.1.0 — MVP1
 

@@ -195,6 +195,18 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private var prevIndex = -1
     private var previous = Stack<Int>()
     var stopAfter = -1
+
+    /**
+     * Playback stops after the item at [position] (-1: it goes on). The music engine decodes the
+     * next track ahead (S-904): when the item playing is the one, it is told at once that nothing
+     * follows; Nağmedar's sleep timer (S-1007) and the classic "stop after" both come here.
+     */
+    fun setStopAfterPosition(position: Int) {
+        val was = stopAfter
+        stopAfter = position
+        if (position == currentIndex || was == currentIndex) syncEngineNext()
+    }
+
     var shuffling: Boolean = false
         set(value) {
             field = value

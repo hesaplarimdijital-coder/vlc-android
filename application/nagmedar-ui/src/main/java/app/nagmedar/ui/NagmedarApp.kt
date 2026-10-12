@@ -114,6 +114,7 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
@@ -196,10 +197,15 @@ private fun NagmedarMain(
     val queuePanel = rememberQueuePanelState()
     // S-1002: the phone's music player, over the shell
     var phonePlayer by rememberSaveable { mutableStateOf(false) }
+    // S-1007: the sleep timer's window, from the menu bar and the palette
+    var sleepTimerOpen by rememberSaveable { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
-        AppActions(context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile, openPalette = { paletteOpen = true }) {
-            shortcutListRequests++
-        }
+        AppActions(
+            context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile,
+            openPalette = { paletteOpen = true },
+            showShortcutList = { shortcutListRequests++ },
+            openSleepTimer = { sleepTimerOpen = true },
+        )
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
@@ -268,6 +274,7 @@ private fun NagmedarMain(
                 navController = navController,
                 caption = caption,
                 overlay = {
+                    if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
                         PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle)
                     }
@@ -400,6 +407,8 @@ class AppActions(
     private val openFile: () -> Unit,
     private val openPalette: () -> Unit,
     private val showShortcutList: () -> Unit,
+    /** S-1007: the sleep timer's window. */
+    private val openSleepTimer: () -> Unit = {},
 ) {
     private var volumeBeforeMute = 100
 
@@ -514,6 +523,7 @@ class AppActions(
                     it.setVolume(volumeBeforeMute)
                 }
             }
+            ShortcutId.SleepTimer -> openSleepTimer()
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
             // S-906: in the library the music engine's equaliser; the video player keeps libVLC's
             ShortcutId.Equalizer -> navigator.navigate(Destination.Equalizer)

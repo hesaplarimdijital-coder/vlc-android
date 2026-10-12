@@ -120,6 +120,8 @@ Sözlüğü testler denetler:
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
+| uyku zamanlayıcısı | sleep timer | uyku modu, kapanma zamanlayıcısı | sleep mode | Süre bitince ya da çalan parça bitince oynatmayı durdurur (Alt+S); “Parça sonu”, “+15 dk”, “Zamanlayıcıyı kapat” |
+| alarm | alarm | çalar saat | alarm clock | Ayarlar › Alarm; müzikle ya da internet radyosuyla çalar, ses düzeyi sessizlikten yükselir. Android'in “alarm saati” (alarm clock) olarak kurulur |
 
 ## Özel adlar
 

@@ -52,6 +52,7 @@ import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.ServicePlayerBarActions
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlaybackProgress
+import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -111,6 +112,8 @@ fun PhonePlayer(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
+            // S-1007
+            SleepTimerButton()
             NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, shortcut = ShortcutId.PlayQueue)
         }
         // the artwork: swiped sideways it changes the track, down it closes the player

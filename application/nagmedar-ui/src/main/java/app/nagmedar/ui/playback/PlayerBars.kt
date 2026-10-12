@@ -72,6 +72,7 @@ import app.nagmedar.ui.library.techBadge
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -466,6 +467,8 @@ fun TransportBar(
                 info.format?.let { FormatChip(it) }
                 Spacer(Modifier.width(dimens.gapS))
                 VolumeControl(info.volume, actions::setVolume)
+                // S-1007: while the sleep timer runs, what is left
+                SleepTimerButton(onlyWhileRunning = true)
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 NagIconButton(NagIcons.OpenWindow, openLabel, actions::openPlayer)
             }
