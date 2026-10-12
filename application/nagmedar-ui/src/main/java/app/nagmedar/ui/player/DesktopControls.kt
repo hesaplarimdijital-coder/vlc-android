@@ -171,7 +171,8 @@ private fun ControlBar(
             .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f))))
             .testTag("player-controls"),
     ) {
-        val wide = maxWidth >= 840.dp
+        // the tracks' names need a window of their own: beside the panel they give way to icons
+        val wide = maxWidth >= 1100.dp
         val narrow = maxWidth < 600.dp
         // the camera needs a little more than a tablet's narrowest window; Shift+S stays
         val roomy = maxWidth >= 720.dp

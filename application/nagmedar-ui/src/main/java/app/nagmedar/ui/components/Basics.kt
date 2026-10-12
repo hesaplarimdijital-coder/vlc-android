@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -108,6 +109,8 @@ fun NagButton(
             .focusRing(state, shape)
             .background(background, shape)
             .then(if (primary) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))
+            // a button that cannot be pressed now looks so
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .nagClickable(interaction, onClick, enabled = enabled, role = Role.Button)
             .padding(horizontal = dimens.gapM),
         verticalAlignment = Alignment.CenterVertically,
@@ -120,6 +123,9 @@ fun NagButton(
         Text(text, style = NagTheme.type.label, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
+
+/** How faded a control is that cannot be used now. */
+private const val DISABLED_ALPHA = 0.45f
 
 /** Small uppercase-free section caption used in the sidebar and settings. */
 @Composable
