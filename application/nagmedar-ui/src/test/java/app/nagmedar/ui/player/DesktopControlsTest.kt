@@ -1,12 +1,16 @@
 package app.nagmedar.ui.player
 
+import android.content.Context
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -15,6 +19,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.doubleClick
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,8 +29,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.R
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -385,6 +392,30 @@ class DesktopControlsTest {
         video.performMouseInput { doubleClick(Offset(width / 2f, height / 3f)) }
         compose.mainClock.advanceTimeBy(400)
         assertEquals(listOf("fullscreen"), actions.calls)
+    }
+
+    private var barWidth by mutableStateOf(1280.dp)
+
+    /** From a tablet's narrowest window to a desktop's, beside the panel or not: nothing is squeezed out of the bar. */
+    @Test
+    fun atEveryWidthTheFullScreenButtonStaysInTheBar() {
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                Box(Modifier.width(barWidth)) { DesktopControls(state, actions, visibility, previews) }
+            }
+        }
+        shownAndHeld()
+        val fullscreen = ApplicationProvider.getApplicationContext<Context>().getString(R.string.nag_sc_fullscreen)
+        for (width in 600..1280 step 4) {
+            compose.runOnIdle { barWidth = width.dp }
+            compose.waitForIdle()
+            val bar = compose.onNodeWithTag("player-controls").getUnclippedBoundsInRoot()
+            val button = compose.onNodeWithContentDescription(fullscreen).getUnclippedBoundsInRoot()
+            assertTrue("at $width dp the full-screen button is ${button.width} wide", button.width >= 24.dp)
+            assertTrue("at $width dp the full-screen button ends at ${button.right} of ${bar.right}", button.right <= bar.right - 15.dp)
+            val volume = runCatching { compose.onNodeWithTag("player-volume").getUnclippedBoundsInRoot() }.getOrNull()
+            if (volume != null) assertTrue("at $width dp the volume's slider is ${volume.width} wide", volume.width >= 95.dp)
+        }
     }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")

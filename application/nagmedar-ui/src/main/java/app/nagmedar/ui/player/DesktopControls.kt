@@ -153,9 +153,9 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
 
 /**
  * The control bar: the timeline over a row of controls. Wide, every control with its name; on a
- * tablet's width the tracks' names give way to their icons, and below 780 and 720 dp picture in
- * picture and the screenshot button go; on a phone's, the speed, the A-B loop and the volume's
- * slider make room for the rest.
+ * tablet's width the tracks' names give way to their icons, and below 780, 720 and 700 dp picture
+ * in picture, the screenshot button and the volume's slider go; on a phone's, the speed and the
+ * A-B loop make room for the rest. The full-screen button stays at every width.
  */
 @Composable
 private fun ControlBar(
@@ -175,7 +175,10 @@ private fun ControlBar(
         // the tracks' names need a window of their own: beside the panel they give way to icons
         val wide = maxWidth >= 1100.dp
         val narrow = maxWidth < 600.dp
-        // the camera needs a little more than a tablet's narrowest window; Shift+S stays
+        // the volume's slider needs a little more than a tablet's narrowest window, beside the panel
+        // too: the full-screen button stays, the volume's icon and the wheel set it
+        val sliderRoom = maxWidth >= 700.dp
+        // the camera a little more again; Shift+S stays
         val roomy = maxWidth >= 720.dp
         // picture in picture a little more again
         val roomier = maxWidth >= 780.dp
@@ -212,7 +215,7 @@ private fun ControlBar(
                 if (roomier && state.canPictureInPicture) {
                     BarButton(NagIcons.PictureInPicture, stringResource(R.string.nag_player_pip), actions::pictureInPicture)
                 }
-                Volume(state, actions, slider = !narrow)
+                Volume(state, actions, slider = sliderRoom)
                 if (state.canFullscreen) {
                     BarButton(
                         NagIcons.Fullscreen,
