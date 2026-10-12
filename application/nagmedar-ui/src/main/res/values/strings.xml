@@ -736,7 +736,7 @@
     <string name="nag_sub_dismiss">Close</string>
     <string name="nag_sub_forced">forced</string>
     <string name="nag_sub_sdh">for the hard of hearing</string>
-    <string name="nag_sub_language_unknown">Language not given</string>
+    <string name="nag_sub_language_unknown">Unknown language</string>
     <string name="nag_sub_drop_here">Drop the subtitles</string>
     <string name="nag_sub_drop_hint">They load at once and stay with this film; a video dropped here plays instead.</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->

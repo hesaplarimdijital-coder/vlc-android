@@ -94,7 +94,7 @@ private fun CandidateRow(candidate: SubtitleCandidate, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(language, style = NagTheme.type.label, color = colors.text, maxLines = 1, modifier = Modifier.width(92.dp))
+        Text(language, style = NagTheme.type.label, color = colors.text, maxLines = 2, modifier = Modifier.width(96.dp))
         Column(Modifier.weight(1f)) {
             val tags = listOfNotNull(
                 stringResource(R.string.nag_sub_forced).takeIf { candidate.forced },
@@ -106,7 +106,7 @@ private fun CandidateRow(candidate: SubtitleCandidate, onClick: () -> Unit) {
     }
 }
 
-/** "Türkçe" in a Turkish interface, "Turkish" in an English one; "Language not given" without one. */
+/** "Türkçe" in a Turkish interface, "Turkish" in an English one; "Unknown language" without one. */
 @Composable
 fun languageName(code: String?): String {
     val locale = currentLocale()

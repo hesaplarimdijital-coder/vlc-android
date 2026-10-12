@@ -717,7 +717,7 @@
     <string name="nag_sub_dismiss">Kapat</string>
     <string name="nag_sub_forced">zorunlu</string>
     <string name="nag_sub_sdh">işitme engelliler için</string>
-    <string name="nag_sub_language_unknown">Dil belirtilmemiş</string>
+    <string name="nag_sub_language_unknown">Dil belirsiz</string>
     <string name="nag_sub_drop_here">Altyazıyı bırakın</string>
     <string name="nag_sub_drop_hint">Hemen yüklenir ve bu filmle kalır; buraya bırakılan bir video ise oynatılır.</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->

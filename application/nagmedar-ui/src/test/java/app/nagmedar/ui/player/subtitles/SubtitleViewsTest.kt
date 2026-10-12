@@ -46,7 +46,7 @@ class SubtitleViewsTest {
         assertEquals(4, compose.onAllNodesWithTag("subtitle-candidate").fetchSemanticsNodes().size)
         compose.onAllNodesWithText("Türkçe").assertCountEquals(2)
         compose.onNodeWithText("İngilizce").assertExists()
-        compose.onNodeWithText("Dil belirtilmemiş").assertExists()
+        compose.onNodeWithText("Dil belirsiz").assertExists()
         compose.onNodeWithText("zorunlu").assertExists()
         compose.onNodeWithText("işitme engelliler için").assertExists()
         compose.onNodeWithText("Kuzey Işığı.en.SDH.srt").performClick()
