@@ -5,7 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -31,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /** S-804: the playlists' tabs, their lines moved and taken out by keys, a playlist made. */
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
@@ -55,6 +58,7 @@ class PlaylistsBrowserTest {
     }
 
     private val undo = UndoBarState()
+    private lateinit var inputModes: InputModeManager
 
     private fun show(store: FakePlaylistStore, input: InputMode = InputMode.Pointer): PlaylistsState {
         lateinit var state: PlaylistsState
@@ -63,12 +67,15 @@ class PlaylistsBrowserTest {
             state = remember { PlaylistsState(store, scope) }
             LaunchedEffect(Unit) { state.reload() }
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
+                inputModes = LocalInputModeManager.current
                 CompositionLocalProvider(LocalWidthClass provides WidthClass.Large) {
                     PlaylistsBrowser(state, actions, undo = undo)
                 }
             }
         }
         compose.waitForIdle()
+        // a hardware key takes the window out of touch mode; injected keys do not
+        if (input == InputMode.Pointer) compose.runOnIdle { inputModes.requestInputMode(ComposeInputMode.Keyboard) }
         return state
     }
 
