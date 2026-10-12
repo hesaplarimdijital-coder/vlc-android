@@ -6,7 +6,7 @@ import java.util.Locale
  * Fuzzy search for the command palette (S-305) and the search page (S-311). Text is compared
  * folded the Turkish way: "ışık" is found by "isik", "Şarkı" by "sarki", "İzlenmedi" by
  * "izlenmedi"; a query matches when its characters come in order, and matches at word starts and
- * in runs score higher.
+ * in runs score higher, a whole word ("aç" in "Dosya aç…") the most.
  */
 
 private val turkish = Locale.forLanguageTag("tr")
@@ -46,6 +46,7 @@ object FuzzyMatcher {
     private const val TEXT_START = 8
     private const val RUN = 20
     private const val GAP = 1
+    private const val WORD = 16
     private const val NONE = Int.MIN_VALUE / 2
 
     /**
@@ -107,14 +108,40 @@ object FuzzyMatcher {
             end = j
         }
         if (end < 0) return null
-        val positions = IntArray(m)
-        var j = end
-        for (i in m - 1 downTo 0) {
-            positions[i] = j
-            j = from[i][j]
+        val word = wholeWord(q, t)
+        val positions = if (word != null && word.first >= best) {
+            best = word.first
+            IntArray(m) { word.second + it }
+        } else {
+            IntArray(m).also { positions ->
+                var j = end
+                for (i in m - 1 downTo 0) {
+                    positions[i] = j
+                    j = from[i][j]
+                }
+            }
         }
         // a shorter text with the same match ranks first
         return FuzzyMatch(best - (n - m) / 4, positions)
+    }
+
+    /**
+     * The query as a whole word of the text, scored as the run it is and [WORD] more, with where
+     * it starts; null for none. Initials alone ("A/B testi: çalanı" for "aç") rank after it.
+     */
+    private fun wholeWord(q: String, t: String): Pair<Int, Int>? {
+        var found: Pair<Int, Int>? = null
+        var start = t.indexOf(q)
+        while (start >= 0) {
+            val end = start + q.length
+            if ((start == 0 || isWordStart(t, start)) && (end == t.length || !t[end].isLetterOrDigit())) {
+                var score = MATCH + WORD_START + (if (start == 0) TEXT_START else 0) - start.coerceAtMost(10) + WORD
+                for (k in start + 1 until end) score += MATCH + RUN + (if (isWordStart(t, k)) WORD_START else 0)
+                if (found == null || score > found.first) found = score to start
+            }
+            start = t.indexOf(q, start + 1)
+        }
+        return found
     }
 
     private fun isWordStart(t: String, j: Int): Boolean {

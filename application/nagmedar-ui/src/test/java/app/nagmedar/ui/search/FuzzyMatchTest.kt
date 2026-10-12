@@ -46,6 +46,9 @@ class FuzzyMatchTest {
         assertTrue(score("dosya", "Dosya aç…") > score("dosya", "Altyazı dosyası ekle"))
         // a shorter text with the same match first
         assertTrue(score("tam", "Tam ekran") > score("tam", "Tam ekran ve kenarlıksız pencere"))
+        // a whole word beats initials, however early
+        assertTrue(score("aç", "Dosya aç…") > score("aç", "A/B testi: çalanı değiştir"))
+        assertArrayEquals(intArrayOf(6, 7), FuzzyMatcher.match("aç", "Dosya aç…")!!.positions)
     }
 
     @Test
