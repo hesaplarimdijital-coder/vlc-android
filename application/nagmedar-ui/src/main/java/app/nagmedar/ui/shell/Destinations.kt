@@ -43,7 +43,10 @@ enum class Destination(
     Search("search", R.string.nag_nav_search, NavSection.Footer),
 
     /** S-209: about and licences, opened from Settings, never listed in the navigation. */
-    About("about", R.string.nag_settings_about, NavSection.Footer);
+    About("about", R.string.nag_settings_about, NavSection.Footer),
+
+    /** S-906: the music engine's equaliser, opened from Settings › Music and Audio › Equaliser…, never listed. */
+    Equalizer("equalizer", R.string.nag_eq_title, NavSection.Footer);
 
     val icon: ImageVector
         get() = when (this) {
@@ -64,6 +67,7 @@ enum class Destination(
             More -> NagIcons.Menu
             Search -> NagIcons.Search
             About -> NagIcons.Info
+            Equalizer -> NagIcons.Equalizer
         }
 
     /**
@@ -82,7 +86,7 @@ enum class Destination(
         val rail = listOf(Home, Movies, Series, Music, Podcasts, Radio, TvLab)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
-        val unlisted = setOf(Search, About)
+        val unlisted = setOf(Search, About, Equalizer)
 
         val sidebar = entries.filter { it != More && it !in unlisted }
 

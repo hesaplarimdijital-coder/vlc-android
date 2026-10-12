@@ -206,3 +206,51 @@ data class DspMeter(val frames: Long, val clipped: Long, val peak: Double, val r
     val peakDb: Double get() = if (peak > 0) 20 * kotlin.math.log10(peak) else Double.NEGATIVE_INFINITY
     val clipping: Boolean get() = clipped > 0
 }
+
+/**
+ * S-906: a headphone correction kept for later: its name, preamp and bands (AutoEq's
+ * ParametricEQ.txt, imported). The chain uses one at a time (DspSettings.profile).
+ */
+data class HeadphoneProfile(val name: String, val preampDb: Double, val bands: List<EqBand>) {
+
+    fun toJson(): JSONObject = JSONObject().put("name", name).put("preamp", preampDb).put("bands", JSONArray(bands.map { it.toJson() }))
+
+    companion object {
+        fun fromJson(o: JSONObject): HeadphoneProfile? {
+            val name = o.optString("name").takeIf { it.isNotBlank() } ?: return null
+            val bands = o.optJSONArray("bands")?.let { a -> List(minOf(a.length(), NativeAudio.EQ_BANDS)) { i -> EqBand.fromJson(a.getJSONObject(i)) } }.orEmpty()
+            return HeadphoneProfile(name, o.optDouble("preamp", 0.0), bands)
+        }
+
+        /** The profiles saved as a JSON array (NAGMEDAR_DSP_PROFILES); none for anything broken. */
+        fun listFromJson(json: String?): List<HeadphoneProfile> {
+            if (json.isNullOrBlank()) return emptyList()
+            return runCatching {
+                val a = JSONArray(json)
+                (0 until a.length()).mapNotNull { i -> a.optJSONObject(i)?.let(::fromJson) }
+            }.getOrDefault(emptyList())
+        }
+
+        fun listToJson(profiles: List<HeadphoneProfile>): String = JSONArray(profiles.map { it.toJson() }).toString()
+
+        /**
+         * The profile in [text] (AutoEq's ParametricEQ.txt) named after [fileName] when it has one
+         * ("Sennheiser HD 600 ParametricEQ.txt" → "Sennheiser HD 600"), else [fallbackName].
+         */
+        fun parse(text: String, fileName: String?, fallbackName: String): HeadphoneProfile? {
+            val (preamp, bands) = DspSettings.parseAutoEq(text) ?: return null
+            val name = fileName
+                ?.substringAfterLast('/')
+                ?.substringBeforeLast('.')
+                ?.replace(Regex("""[\s_-]*ParametricEQ$""", RegexOption.IGNORE_CASE), "")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+                ?: fallbackName
+            return HeadphoneProfile(name, preamp, bands)
+        }
+    }
+}
+
+/** The chain with [profile] as its headphone correction, on. */
+fun DspSettings.withProfile(profile: HeadphoneProfile): DspSettings =
+    copy(profileEnabled = true, profileName = profile.name, profilePreampDb = profile.preampDb, profile = profile.bands.take(NativeAudio.EQ_BANDS))

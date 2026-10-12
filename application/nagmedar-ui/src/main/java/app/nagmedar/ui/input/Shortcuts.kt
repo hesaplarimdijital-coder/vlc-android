@@ -217,8 +217,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.AudioDelayDown, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_down, KeyChord(Key.J), ShortcutScope.Player),
         Shortcut(ShortcutId.AudioDelayUp, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_up, KeyChord(Key.K), ShortcutScope.Player),
         Shortcut(ShortcutId.NextAudioTrack, ShortcutGroup.Audio, R.string.nag_sc_next_audio_track, KeyChord(Key.B), ShortcutScope.Player),
-        // S-603: the equaliser's window, from the effects panel
-        Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-603: the equaliser: libVLC's window in the video player, the music engine's page in the library (S-906)
+        Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true)),
         // Video
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),

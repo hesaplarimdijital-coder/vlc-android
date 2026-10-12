@@ -76,6 +76,7 @@ import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
+import app.nagmedar.ui.audio.EqualizerScreen
 import app.nagmedar.ui.screens.AboutScreen
 import app.nagmedar.ui.tvlab.Step
 import app.nagmedar.ui.tvlab.TvLabScreen
@@ -282,7 +283,9 @@ private fun NagmedarMain(
                             onShowFirstRun = { prefs.updateFirstRunDone(false) },
                             listState = settingsList,
                             undo = undo,
+                            onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
                         )
+                        Destination.Equalizer -> EqualizerScreen()
                         Destination.More -> MoreScreen(
                             destinations = Destination.overflow(
                                 when (NavKind.forWidth(widthClass)) {
@@ -488,6 +491,8 @@ class AppActions(
                 }
             }
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
+            // S-906: in the library the music engine's equaliser; the video player keeps libVLC's
+            ShortcutId.Equalizer -> navigator.navigate(Destination.Equalizer)
             ShortcutId.TvLab -> navigator.navigate(Destination.TvLab)
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()

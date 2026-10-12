@@ -79,3 +79,6 @@ const val NAGMEDAR_OUTPUT_AUTO = "auto"
 const val NAGMEDAR_OUTPUT_AAUDIO = "aaudio"
 const val NAGMEDAR_OUTPUT_BIT_PERFECT = "bitperfect"
 const val NAGMEDAR_OUTPUT_USB = "usb"
+
+/** S-906: the headphone profiles imported, as JSON (app.nagmedar.audio.HeadphoneProfile.listToJson). */
+const val NAGMEDAR_DSP_PROFILES = "nagmedar_dsp_profiles"

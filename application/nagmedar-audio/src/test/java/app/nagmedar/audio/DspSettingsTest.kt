@@ -106,6 +106,26 @@ class DspSettingsTest {
     }
 
     @Test
+    fun headphoneProfiles() {
+        val text = "Preamp: -6.4 dB\nFilter 1: ON PK Fc 105 Hz Gain -3.2 dB Q 0.70\nFilter 2: ON HSC Fc 10000 Hz Gain 2.0 dB Q 0.70\n"
+        val named = HeadphoneProfile.parse(text, "Sennheiser HD 600 ParametricEQ.txt", "Pasted")!!
+        assertEquals("Sennheiser HD 600", named.name)
+        assertEquals(-6.4, named.preampDb, 0.0)
+        assertEquals(2, named.bands.size)
+        assertEquals("Pasted", HeadphoneProfile.parse(text, null, "Pasted")!!.name)
+        assertEquals("AirPods Pro", HeadphoneProfile.parse(text, "content/AirPods Pro_ParametricEQ.txt", "Pasted")!!.name)
+        assertNull(HeadphoneProfile.parse("nothing", "x.txt", "Pasted"))
+        val list = listOf(named, named.copy(name = "Other"))
+        assertEquals(list, HeadphoneProfile.listFromJson(HeadphoneProfile.listToJson(list)))
+        assertTrue(HeadphoneProfile.listFromJson("broken").isEmpty())
+        val chain = DspSettings().withProfile(named)
+        assertTrue(chain.profileEnabled)
+        assertEquals("Sennheiser HD 600", chain.profileName)
+        assertEquals(-6.4, chain.profilePreampDb, 0.0)
+        assertFalse(chain.identity)
+    }
+
+    @Test
     fun theMeter() {
         val m = DspMeter(frames = 48_000, clipped = 12, peak = 0.5, reductionDb = 2.0)
         assertTrue(m.clipping)

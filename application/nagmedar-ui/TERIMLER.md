@@ -39,7 +39,7 @@ Sözlüğü testler denetler:
 | altyazı | subtitle | alt yazı | caption | Tek sözcük |
 | kodlama | encoding | karakter seti, kod sayfası | charset | “Altyazı kodlaması”: Otomatik, UTF-8, Türkçe · Windows-1254; film başına hatırlanır |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
-| ses düzeyi | volume | ses seviyesi, ses yüksekliği | loudness | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz” |
+| ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |
 | cihaz | device | aygıt | | |
 | harici disk | external drive | harici sürücü | external disk | |
@@ -89,7 +89,7 @@ Sözlüğü testler denetler:
 | kulaklık profili | headphone profile | | | AutoEq'nun ParametricEQ.txt biçiminde içe alınan düzeltme: kendi bantları ve ön kazancı |
 | kırpılma | clipping | klip | | Tam ölçeği aşan örnekler; “Kırpılma göstergesi” sayar ve tepeyi dBFS olarak yazar |
 | bant | band | | | Ekolayzerin bir bandı: merkez frekansı, kazancı (dB) ve Q'su; “tepe”, “alçak raf”, “yüksek raf”, “alçak geçiren”, “yüksek geçiren” |
-| ses düzeyi | loudness | gürlük | | EBU R128'in ölçtüğü, LUFS ile: “Ses düzeyi taraması” albümleri ölçüp ReplayGain etiketlerini yazar |
+| gürlük | loudness | | | Kulağın algıladığı ses, EBU R128'in ölçtüğü, LUFS ile; ses düzeyi (volume) değildir: “Gürlük taraması” albümleri ölçüp ReplayGain etiketlerini yazar |
 | gerçek tepe | true peak | | inter-sample peak | Dört kat örneklenmiş tepe, dBTP; ReplayGain'in kırpılma önlemesi buna bakar |
 | parça kazancı, albüm kazancı | track gain, album gain | | | ReplayGain'in iki kipi; “Albüm” albümü olmayan parçada parça kazancına düşer |
 | hız | speed | tempo | tempo | Perde korunarak çalma hızı: 0,5–3×; motorun tempo aşaması, sesli kitap ve podcast için |

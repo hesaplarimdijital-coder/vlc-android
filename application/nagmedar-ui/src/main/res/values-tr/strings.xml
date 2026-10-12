@@ -1229,7 +1229,7 @@
     <string name="nag_crossfade_album_fade">Çapraz geçişle</string>
     <!-- S-902, S-903: Settings › Music, the output -->
     <string name="nag_settings_output">Çıkış</string>
-    <string name="nag_settings_output_hint">Otomatik: aygıt alıyorsa (Android 14 ve sonrası, USB DAC ya da HDMI) bit-perfect, almıyorsa AAudio. USB DAC: DAC doğrudan sürülür; Android\'in kendi USB sesi bu sırada susar.</string>
+    <string name="nag_settings_output_hint">Otomatik: cihaz alıyorsa (Android 14 ve sonrası, USB DAC ya da HDMI) bit-perfect, almıyorsa AAudio. USB DAC: DAC doğrudan sürülür; Android\'in kendi USB sesi bu sırada susar.</string>
     <string name="nag_output_auto">Otomatik</string>
     <string name="nag_output_aaudio">AAudio</string>
     <string name="nag_output_bit_perfect">Bit-perfect</string>
@@ -1256,14 +1256,14 @@
     <string name="nag_sp_reason_crossfade">çapraz geçiş</string>
     <!-- S-907: Settings › Music, ReplayGain and the loudness scan -->
     <string name="nag_settings_replaygain">ReplayGain</string>
-    <string name="nag_settings_replaygain_hint">Etiketlerdeki kazanç parçaları aynı ses düzeyine getirir; albüme göre seçilince albüm içindeki farklar korunur. Etiketsiz parçalar olduğu gibi çalar.</string>
+    <string name="nag_settings_replaygain_hint">Etiketlerdeki kazanç parçaları aynı gürlüğe getirir; albüme göre seçilince albüm içindeki farklar korunur. Etiketsiz parçalar olduğu gibi çalar.</string>
     <string name="nag_replaygain_off">Kapalı</string>
     <string name="nag_replaygain_track">Parçaya göre</string>
     <string name="nag_replaygain_album">Albüme göre</string>
     <string name="nag_settings_replaygain_preamp">Ön kazanç</string>
     <string name="nag_settings_replaygain_clip">Kırpılmayı önle</string>
     <string name="nag_settings_replaygain_clip_hint">Parçanın tepesi tam ölçeği aşacaksa kazanç geri çekilir.</string>
-    <string name="nag_rg_scan">Ses düzeyi taraması</string>
+    <string name="nag_rg_scan">Gürlük taraması</string>
     <string name="nag_rg_scan_hint">Her albümü ölçer (EBU R128) ve ReplayGain etiketlerini arka planda dosyalara yazar. Zaten etiketli parçalara dokunmaz.</string>
     <string name="nag_rg_scan_start">Kütüphaneyi tara</string>
     <string name="nag_rg_scan_stop">Durdur</string>
@@ -1292,4 +1292,61 @@
     <string name="nag_settings_sound_reset">Perdeyi ve dengeyi sıfırla</string>
     <!-- S-906: the equaliser -->
     <string name="nag_eq_open">Ekolayzeri aç</string>
+    <string name="nag_eq_title">Ekolayzer</string>
+    <string name="nag_eq_subtitle">Müzik motorunun DSP zinciri</string>
+    <string name="nag_eq_bypass">Zinciri atla</string>
+    <string name="nag_eq_bypass_on">Zincir atlandı: ayarları saklanıyor, müzik olduğu gibi çalıyor.</string>
+    <string name="nag_eq_preset">Ön ayar</string>
+    <string name="nag_eq_preset_custom">Özel</string>
+    <string name="nag_eq_reset_chain">Zinciri sıfırla</string>
+    <string name="nag_eq_response">Frekans yanıtı</string>
+    <string name="nag_eq_response_hint">Tüm zincir 48 kHz\'de, ön kazançlar dahil; sınırlayıcı frekansa değil düzeye etki eder.</string>
+    <string name="nag_eq_preamp">Ön kazanç</string>
+    <string name="nag_eq_auto_preamp">Otomatik ön kazanç</string>
+    <string name="nag_eq_auto_preamp_hint">Zincirin en büyük yükseltmesini geri alır, yükseltme kırpılmaz: şu an %1$s.</string>
+    <string name="nag_eq_graphic">Grafik ekolayzer</string>
+    <string name="nag_eq_graphic_hint">Yirmi yarım oktav bant, ±12 dB. Bir bandı 0 dB\'ye döndürmek için iki kez tıklayın ya da dokunun.</string>
+    <string name="nag_eq_band">%1$s bandı</string>
+    <string name="nag_eq_parametric">Parametrik ekolayzer</string>
+    <string name="nag_eq_parametric_hint">Kendi bantlarınız, en çok on tane: tepeler, raflar ve geçirenler.</string>
+    <string name="nag_eq_parametric_empty">Henüz bant yok.</string>
+    <string name="nag_eq_add_band">Bant ekle</string>
+    <string name="nag_eq_remove_band">Bandı kaldır</string>
+    <string name="nag_eq_band_number">Bant %1$d</string>
+    <string name="nag_eq_type">Filtre</string>
+    <string name="nag_eq_type_peak">Tepe</string>
+    <string name="nag_eq_type_low_shelf">Alçak raf</string>
+    <string name="nag_eq_type_high_shelf">Yüksek raf</string>
+    <string name="nag_eq_type_low_pass">Alçak geçiren</string>
+    <string name="nag_eq_type_high_pass">Yüksek geçiren</string>
+    <string name="nag_eq_frequency">Frekans</string>
+    <string name="nag_eq_gain">Kazanç</string>
+    <string name="nag_eq_q">Q</string>
+    <string name="nag_eq_profile">Kulaklık profili</string>
+    <string name="nag_eq_profile_hint">Kulaklığınız için AutoEq\'nun ParametricEQ.txt biçiminde bir düzeltme; kendi bantları ve ön kazancıyla.</string>
+    <string name="nag_eq_profile_open">Dosya aç…</string>
+    <string name="nag_eq_profile_paste">Yapıştır</string>
+    <string name="nag_eq_profile_none">Henüz profil yok: bir AutoEq ParametricEQ.txt dosyası açın ya da metnini kopyalayıp yapıştırın.</string>
+    <string name="nag_eq_profile_bad">İçinde AutoEq filtresi yok.</string>
+    <string name="nag_eq_profile_remove">Profili kaldır</string>
+    <string name="nag_eq_profile_pasted">Yapıştırılan profil</string>
+    <plurals name="nag_eq_profile_summary">
+        <item quantity="one">%1$d bant, ön kazanç %2$s</item>
+        <item quantity="other">%1$d bant, ön kazanç %2$s</item>
+    </plurals>
+    <string name="nag_eq_limiter">Sınırlayıcı</string>
+    <string name="nag_eq_limiter_hint">Tepeleri eşiğin altında tutar. Önden bakış süresi zincirin gecikmesidir.</string>
+    <string name="nag_eq_threshold">Eşik</string>
+    <string name="nag_eq_release">Bırakma</string>
+    <string name="nag_eq_lookahead">Önden bakış</string>
+    <string name="nag_eq_meter">Kırpılma göstergesi</string>
+    <string name="nag_eq_meter_idle">Motor müzik çalarken dolar.</string>
+    <string name="nag_eq_meter_peak">Tepe %1$s</string>
+    <plurals name="nag_eq_meter_clipped">
+        <item quantity="one">%1$d örnek kırpıldı</item>
+        <item quantity="other">%1$d örnek kırpıldı</item>
+    </plurals>
+    <string name="nag_eq_meter_clean">Kırpılma yok</string>
+    <string name="nag_eq_meter_limiter">Sınırlayıcı %1$s</string>
+    <string name="nag_eq_meter_reset">Göstergeyi sıfırla</string>
 </resources>

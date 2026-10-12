@@ -477,9 +477,10 @@ fun KeyCap(text: String, modifier: Modifier = Modifier) {
 }
 
 private fun isSelected(destination: Destination, current: Destination, shown: List<Destination>): Boolean = when {
-    // the search page belongs to no tab; about is Settings'
+    // the search page belongs to no tab; about is Settings'; the music engine's equaliser is Music's
     current == Destination.Search -> false
     current == Destination.About -> destination == Destination.Settings
+    current == Destination.Equalizer -> destination == Destination.Music
     destination == Destination.More -> current !in shown || current == Destination.More
     else -> destination == current
 }
