@@ -1455,4 +1455,45 @@
     <string name="nag_ab_now_b">B: without the chain, at its level</string>
     <string name="nag_ab_now_x">X</string>
     <string name="nag_ab_unavailable">The A/B test works while the music engine plays through the DSP chain.</string>
+    <!-- S-803: the music library -->
+    <string name="nag_music_view_tracks">Tracks</string>
+    <string name="nag_music_view_artists">Artists</string>
+    <string name="nag_music_view_albums">Albums</string>
+    <string name="nag_music_view_genres">Genres</string>
+    <string name="nag_music_view_composers">Composers</string>
+    <string name="nag_music_view_years">Years</string>
+    <string name="nag_music_view_folders">Folders</string>
+    <string name="nag_music_unknown_album">Unknown album</string>
+    <string name="nag_music_unknown_genre">No genre</string>
+    <string name="nag_music_unknown_composer">No composer</string>
+    <string name="nag_music_unknown_year">No year</string>
+    <string name="nag_music_unknown_folder">Unknown folder</string>
+    <plurals name="nag_music_albums">
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+    <string name="nag_music_lossy">Lossy</string>
+    <string name="nag_music_rate_and_up">%1$s and up</string>
+    <plurals name="nag_music_probing">
+        <item quantity="one">Reading the depth and sample rate of %d file</item>
+        <item quantity="other">Reading the depth and sample rate of %d files</item>
+    </plurals>
+    <string name="nag_music_no_match">No track fits the filters</string>
+    <string name="nag_music_columns">Columns</string>
+    <string name="nag_music_back">Back to the list</string>
+    <string name="nag_column_album_artist">Album artist</string>
+    <string name="nag_column_genre">Genre</string>
+    <string name="nag_column_composer">Composer</string>
+    <string name="nag_column_year">Year</string>
+    <string name="nag_column_track_number">No.</string>
+    <string name="nag_column_format">Format</string>
+    <string name="nag_column_depth">Depth</string>
+    <string name="nag_column_rate">Sample rate</string>
+    <string name="nag_column_bitrate">Bitrate</string>
+    <string name="nag_column_plays">Plays</string>
+    <string name="nag_column_added">Added</string>
+    <!-- S-1001: the desktop music view -->
+    <string name="nag_music_nothing_playing">Nothing plays. Choose a track: it shows here with its waveform.</string>
+    <string name="nag_music_waveform">Waveform</string>
+    <string name="nag_music_position">%1$s of %2$s</string>
 </resources>

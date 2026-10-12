@@ -82,20 +82,30 @@ fun <T> DenseTable(
     onRowDoubleClick: ((T, Int) -> Unit)? = null,
     /** More for a row: a drag source, a drop target (S-406). */
     rowModifier: (T) -> Modifier = { Modifier },
+    /** The header's context menu: the columns to show (S-1001). */
+    headerMenu: (() -> List<MenuEntry>)? = null,
+    headerMenuLabel: String? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
-                .padding(horizontal = dimens.pagePadding - 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            columns.forEachIndexed { index, column ->
-                HeaderCell(column, index, sort, onSortChange)
+        val header = @Composable {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
+                    .padding(horizontal = dimens.pagePadding - 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                columns.forEachIndexed { index, column ->
+                    HeaderCell(column, index, sort, onSortChange)
+                }
             }
+        }
+        if (headerMenu != null) {
+            ContextMenuArea(entries = headerMenu, accessibilityLabel = headerMenuLabel) { header() }
+        } else {
+            header()
         }
         HorizontalRule()
         LazyColumn(state = state, modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {

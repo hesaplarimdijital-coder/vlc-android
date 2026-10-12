@@ -186,3 +186,18 @@ interface MediaTechDao {
     @Query("DELETE FROM media_tech WHERE media_uri = :uri")
     fun forget(uri: String)
 }
+
+@Dao
+interface AudioTechDao {
+    @Query("SELECT * FROM audio_tech")
+    fun all(): List<AudioTechEntry>
+
+    @Query("SELECT * FROM audio_tech WHERE media_uri = :uri")
+    fun get(uri: String): AudioTechEntry?
+
+    @Upsert
+    fun save(entries: List<AudioTechEntry>)
+
+    @Query("DELETE FROM audio_tech WHERE media_uri = :uri")
+    fun forget(uri: String)
+}

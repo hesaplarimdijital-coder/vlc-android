@@ -82,3 +82,9 @@ const val NAGMEDAR_OUTPUT_USB = "usb"
 
 /** S-906: the headphone profiles imported, as JSON (app.nagmedar.audio.HeadphoneProfile.listToJson). */
 const val NAGMEDAR_DSP_PROFILES = "nagmedar_dsp_profiles"
+
+/** S-803: the music library's way in ("tracks", "artists", "albums", "genres", "composers", "years", "folders"). */
+const val NAGMEDAR_MUSIC_VIEW = "nagmedar_music_view"
+
+/** S-1001: the music table's columns, in order, comma-separated (app.nagmedar.ui.music.MusicColumn's keys). */
+const val NAGMEDAR_MUSIC_COLUMNS = "nagmedar_music_columns"

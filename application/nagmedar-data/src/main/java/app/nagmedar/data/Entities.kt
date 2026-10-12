@@ -136,3 +136,28 @@ data class MediaTechEntry(
     val json: String,
     @ColumnInfo(name = "probed_at") val probedAt: Long = 0,
 )
+
+/**
+ * S-803: a music file as the engine's probe read it (codec, rate, depth, channels, DSD, bitrate,
+ * the composer), kept until the file changes (size or modification time) or the probe's format
+ * does ([probeVersion]). The library's filters and smart lists read it; the medialibrary keeps
+ * the rest of the tags.
+ */
+@Entity(tableName = "audio_tech")
+data class AudioTechEntry(
+    @PrimaryKey @ColumnInfo(name = "media_uri") val mediaUri: String,
+    @ColumnInfo(name = "file_size") val fileSize: Long,
+    @ColumnInfo(name = "modified_at") val modifiedAt: Long,
+    @ColumnInfo(name = "probe_version") val probeVersion: Int,
+    val codec: String,
+    val container: String,
+    val rate: Int,
+    val channels: Int,
+    val bits: Int,
+    @ColumnInfo(name = "is_float") val isFloat: Boolean,
+    @ColumnInfo(name = "dsd_rate") val dsdRate: Int,
+    val bitrate: Long,
+    @ColumnInfo(name = "duration_ms") val durationMs: Long,
+    val composer: String?,
+    @ColumnInfo(name = "probed_at") val probedAt: Long = 0,
+)

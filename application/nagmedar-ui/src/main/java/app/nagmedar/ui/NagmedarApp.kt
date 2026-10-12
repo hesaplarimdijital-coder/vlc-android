@@ -60,9 +60,11 @@ import app.nagmedar.ui.library.LibraryAccess
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
-import app.nagmedar.ui.library.MusicScreen
 import app.nagmedar.ui.library.SeriesScreen
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.music.MusicNowPlaying
+import app.nagmedar.ui.music.MusicScreen
+import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
@@ -191,6 +193,8 @@ private fun NagmedarMain(
     val screenCommands = remember { ScreenCommands() }
     val dropTargets = remember { DropTargets() }
     val queuePanel = rememberQueuePanelState()
+    // S-1002: the phone's music player, over the shell
+    var phonePlayer by rememberSaveable { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
         AppActions(context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile, openPalette = { paletteOpen = true }) {
             shortcutListRequests++
@@ -250,11 +254,22 @@ private fun NagmedarMain(
                         },
                         queueOpen = queuePanel.open,
                         onQueue = queuePanel::toggle,
+                        // music opens here: on a desktop window the music view with its now playing pane
+                        onOpenAudio = {
+                            if (navKind == NavKind.Sidebar) {
+                                navigator.navigate(Destination.Music)
+                            } else {
+                                phonePlayer = true
+                            }
+                        },
                     )
                 },
                 navController = navController,
                 caption = caption,
                 overlay = {
+                    if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
+                        PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle)
+                    }
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {
                         val queue = rememberPlayQueue()
@@ -276,7 +291,8 @@ private fun NagmedarMain(
                         Destination.Home -> HomeScreen(repository, onAddFolder = addFolder, onBrowse = shellNavigator::navigate)
                         Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
                         Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
-                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder)
+                        // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
+                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying() })
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)

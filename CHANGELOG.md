@@ -18,6 +18,12 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - Hız, perde, denge ve tek kanal: perdeyi koruyan hız (0,25–4×, WSOLA), hızı koruyan perde (±24 yarım ton), denge ve tek kanal; her biri kapalıyken çıkış bit-perfect kalır.
 - ReplayGain: parça ya da albüm kazancı, ön kazanç, etiketsiz parçalar için kazanç, tepeye göre kırpılma önleme; Opus'un R128 etiketleri de okunur. EBU R128 tarayıcı (ITU-R BS.1770-4, gerçek tepe) kütüphanenin albümlerini arka planda ölçer ve ReplayGain etiketlerini TagLib ile dosyalara yazar (FLAC, MP3, M4A, Opus, WavPack, APE, DSF…).
 
+### Müzik kütüphanesi
+- Kütüphane: parçalar, sanatçılar (albüm sanatçısına göre), albümler, türler, besteciler, yıllar ve klasörler; Türkçe sıralama. Bit derinliği (16, 24, 32 bit, DSD, kayıplı) ve örnekleme hızı (44,1 kHz'den 192 kHz ve üstüne) filtreleri; derinlik, hız ve besteci motorun kendi incelemesinden okunur ve dosya değişene dek Nağmedar'ın veritabanında kalır.
+- Masaüstü müzik görünümü: büyük pencerede üç bölme (gruplar, parça tablosu, şimdi çalıyor). Tablonun sütunları seçilir (başlığın sağ tık menüsü ya da "Sütunlar": besteci, biçim, derinlik, örnekleme, bit hızı, çalınma, eklenme…), her sütuna göre sıralanır, klavyeyle gezilir. Şimdi çalıyor bölmesinde kapak, biçim ve çıkış, dalga biçimi zaman çizelgesi (tıklanınca atlar, oklarla 5 sn) ve sıradakiler.
+- Telefonun müzik oynatıcısı: mini oynatıcıdan tam ekran; büyük kapak, dalga biçimi, başparmağın ulaştığı yerde denetimler. Kapağı sola kaydırmak sonraki, sağa kaydırmak önceki parçayı çalar; aşağı kaydırmak ya da Geri kapatır.
+- Sıradaki: kütüphanede seçilen parçalar “Hemen sonra oynat” ile çalanın ardına, “Sıraya ekle” ile sonuna girer, çalan liste değişmez; panelde tutamaçla sürüklenir, Alt+↑/↓ ile taşınır, Delete ile çıkarılır.
+
 ## 0.1.0 — MVP1
 
 Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine kurulu çatalı, DeX ve klavye-fare için yeni bir arayüzle. Uygulama kimliği `app.nagmedar`; klasik VLC arayüzü Ayarlar › Başlangıç'tan seçilebilir.

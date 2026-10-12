@@ -162,9 +162,20 @@ interface PlayerBarActions {
     fun openQueue() = Unit
 }
 
-/** [PlayerBarActions] on the existing playback service (ADR-05: one service, one session). */
-class ServicePlayerBarActions(private val context: Context, private val onQueue: () -> Unit = {}) : PlayerBarActions {
-    override fun openPlayer() = PlaybackActions.openPlayer(context)
+/**
+ * [PlayerBarActions] on the existing playback service (ADR-05: one service, one session). With
+ * [onOpenAudio], music opens in the new interface (S-1002: the phone player, the music view).
+ */
+class ServicePlayerBarActions(
+    private val context: Context,
+    private val onQueue: () -> Unit = {},
+    private val onOpenAudio: (() -> Unit)? = null,
+) : PlayerBarActions {
+    override fun openPlayer() {
+        val audio = PlaybackService.instance?.currentMediaWrapper?.type == MediaWrapper.TYPE_AUDIO
+        val open = onOpenAudio
+        if (audio && open != null) open() else PlaybackActions.openPlayer(context)
+    }
 
     override fun openQueue() = onQueue()
 
@@ -207,13 +218,18 @@ fun PlayerBar(
     /** Whether "Sıradaki" is open, and its button (S-310). */
     queueOpen: Boolean = false,
     onQueue: () -> Unit = {},
+    /** Music opened from the bar (S-1002); null: the classic audio player. */
+    onOpenAudio: (() -> Unit)? = null,
 ) {
     val media = nowPlaying.media ?: return
     val info = rememberPlayerBarInfo(media, nowPlaying.playing)
     val progress by rememberPlaybackProgress(nowPlaying)
     val context = LocalContext.current
     val currentOnQueue by rememberUpdatedState(onQueue)
-    val actions = remember(context) { ServicePlayerBarActions(context) { currentOnQueue() } }
+    val currentOnOpenAudio by rememberUpdatedState(onOpenAudio)
+    val actions = remember(context) {
+        ServicePlayerBarActions(context, { currentOnQueue() }, { currentOnOpenAudio?.invoke() ?: PlaybackActions.openPlayer(context) })
+    }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
     if (navKind == NavKind.Sidebar) {
         TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)

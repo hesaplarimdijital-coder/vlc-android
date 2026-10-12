@@ -101,6 +101,8 @@ Sözlüğü testler denetler:
 | çözücü | decoder | kod çözücü | | Müzik motorunda FFmpeg; örnekleri 64 bit kayan noktaya açar, DoP sözcüklerine dokunmaz |
 | A/B testi | A/B test | | | Zincirle (A) zincirsizin (B), zincirin düzeyinde karşılaştırılması; A-B tekrarı başka şeydir. Kısayolu Alt+B |
 | kör test | blind test | | | A/B testinde her turda X rastgele A ya da B olur; cevaplar testin sonunda açılır |
+| dalga biçimi | waveform | dalga formu | | Müzik görünümünün zaman çizelgesi: her çubuk parçanın bir kesiti, tepesi soluk, gürlüğü koyu; tıklanınca oraya atlar |
+| bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |

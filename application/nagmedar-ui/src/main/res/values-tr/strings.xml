@@ -1427,4 +1427,45 @@
     <string name="nag_ab_now_b">B: zincirsiz, aynı düzeyde</string>
     <string name="nag_ab_now_x">X</string>
     <string name="nag_ab_unavailable">A/B testi, müzik motoru DSP zinciriyle çalarken çalışır.</string>
+    <!-- S-803: müzik kütüphanesi -->
+    <string name="nag_music_view_tracks">Parçalar</string>
+    <string name="nag_music_view_artists">Sanatçılar</string>
+    <string name="nag_music_view_albums">Albümler</string>
+    <string name="nag_music_view_genres">Türler</string>
+    <string name="nag_music_view_composers">Besteciler</string>
+    <string name="nag_music_view_years">Yıllar</string>
+    <string name="nag_music_view_folders">Klasörler</string>
+    <string name="nag_music_unknown_album">Bilinmeyen albüm</string>
+    <string name="nag_music_unknown_genre">Türü yok</string>
+    <string name="nag_music_unknown_composer">Bestecisi yok</string>
+    <string name="nag_music_unknown_year">Yılı yok</string>
+    <string name="nag_music_unknown_folder">Bilinmeyen klasör</string>
+    <plurals name="nag_music_albums">
+        <item quantity="one">%d albüm</item>
+        <item quantity="other">%d albüm</item>
+    </plurals>
+    <string name="nag_music_lossy">Kayıplı</string>
+    <string name="nag_music_rate_and_up">%1$s ve üstü</string>
+    <plurals name="nag_music_probing">
+        <item quantity="one">%d dosyanın derinliği ve örnekleme hızı okunuyor</item>
+        <item quantity="other">%d dosyanın derinliği ve örnekleme hızı okunuyor</item>
+    </plurals>
+    <string name="nag_music_no_match">Filtrelere uyan parça yok</string>
+    <string name="nag_music_columns">Sütunlar</string>
+    <string name="nag_music_back">Listeye dön</string>
+    <string name="nag_column_album_artist">Albüm sanatçısı</string>
+    <string name="nag_column_genre">Tür</string>
+    <string name="nag_column_composer">Besteci</string>
+    <string name="nag_column_year">Yıl</string>
+    <string name="nag_column_track_number">No</string>
+    <string name="nag_column_format">Biçim</string>
+    <string name="nag_column_depth">Derinlik</string>
+    <string name="nag_column_rate">Örnekleme</string>
+    <string name="nag_column_bitrate">Bit hızı</string>
+    <string name="nag_column_plays">Çalınma</string>
+    <string name="nag_column_added">Eklenme</string>
+    <!-- S-1001: masaüstü müzik görünümü -->
+    <string name="nag_music_nothing_playing">Çalan bir şey yok. Bir parça seçin: dalga biçimiyle burada görünür.</string>
+    <string name="nag_music_waveform">Dalga biçimi</string>
+    <string name="nag_music_position">%1$s / %2$s</string>
 </resources>

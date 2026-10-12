@@ -106,6 +106,24 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun musicProbesAreCachedPerFile() {
+        val tech = db.audioTech()
+        val uri = "file:///storage/emulated/0/Music/Itrî/Neva Kâr.flac"
+        fun entry(bits: Int, composer: String?) = AudioTechEntry(
+            uri, fileSize = 31_200_000, modifiedAt = 1_700_000_000_000, probeVersion = 1, codec = "flac", container = "flac",
+            rate = 96_000, channels = 2, bits = bits, isFloat = false, dsdRate = 0, bitrate = 2_600_000, durationMs = 412_000,
+            composer = composer, probedAt = 5,
+        )
+        tech.save(listOf(entry(16, null)))
+        tech.save(listOf(entry(24, "Buhûrîzâde Mustafa Itrî")))
+        assertEquals(24, tech.get(uri)!!.bits)
+        assertEquals("Buhûrîzâde Mustafa Itrî", tech.get(uri)!!.composer)
+        assertEquals(listOf(uri), tech.all().map { it.mediaUri })
+        tech.forget(uri)
+        assertNull(tech.get(uri))
+    }
+
+    @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
