@@ -54,6 +54,9 @@ import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
+import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.covers.rememberCoverMenu
+import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
@@ -268,6 +271,8 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
     val latestQueue by rememberUpdatedState(onQueue)
     // S-1004: the lyrics in place of the artwork, until turned off
     var lyricsShown by rememberSaveable { mutableStateOf(false) }
+    val coverMenu = rememberCoverMenu(remember(media) { CoverTrack.of(media) })
+    val coverLabel = stringResource(R.string.nag_cover_menu)
     val actions = remember(context) { ServicePlayerBarActions(context, { latestQueue() }) }
     PhonePlayer(
         info = NowPlayingInfo(
@@ -286,7 +291,10 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
         modifier = modifier,
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
-        artwork = { size -> Artwork(media, size, corner = 12.dp, video = false) },
+        // S-1006: the album's cover changed from its menu (a long press)
+        artwork = { size ->
+            ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = 12.dp, video = false) }
+        },
         onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
         lyricsShown = lyricsShown,

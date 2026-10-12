@@ -28,6 +28,7 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.perf.StartupPerf
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -60,6 +61,8 @@ class NagmedarActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
+        // S-1006: the album covers are looked for in the app; its Robolectric tests run it too, offline
+        CoverCenter.active = Build.FINGERPRINT != "robolectric"
         setContent {
             NagmedarApp(
                 onOpenFile = { openDocument.launch(arrayOf("video/*", "audio/*", "application/x-mpegurl", "application/octet-stream")) },

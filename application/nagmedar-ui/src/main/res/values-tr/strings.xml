@@ -1652,4 +1652,22 @@
     <string name="nag_sc_lyrics">Tam ekran sözler</string>
     <string name="nag_sc_lyrics_earlier">Sözler daha erken</string>
     <string name="nag_sc_lyrics_later">Sözler daha geç</string>
+    <!-- S-1006: album covers -->
+    <string name="nag_covers_settings">Kapaklar</string>
+    <string name="nag_covers_online">Çevrimiçi kapaklar (Cover Art Archive)</string>
+    <string name="nag_covers_online_hint">Dosyada da klasöründe de kapak yoksa albümün adı ve sanatçısı MusicBrainz\'e gönderilir, kapağı Cover Art Archive\'dan alınır. Bulunan kapaklar saklanır.</string>
+    <string name="nag_covers_online_on">Açık</string>
+    <string name="nag_covers_online_off">Kapalı</string>
+    <string name="nag_covers_kept">Saklanan kapaklar</string>
+    <string name="nag_covers_kept_none">Henüz yok</string>
+    <plurals name="nag_covers_kept_count">
+        <item quantity="one">%d albümün kapağı</item>
+        <item quantity="other">%d albümün kapağı</item>
+    </plurals>
+    <string name="nag_covers_clear">Temizle</string>
+    <string name="nag_cover_menu">Kapak</string>
+    <string name="nag_cover_change">Kapağı değiştir…</string>
+    <string name="nag_cover_again">Kapağı yeniden ara</string>
+    <string name="nag_cover_unchoose">Seçilen kapağı kaldır</string>
+    <string name="nag_cover_not_image">Bu dosya bir resim değil</string>
 </resources>

@@ -64,15 +64,17 @@ import app.nagmedar.ui.components.NagSlider
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.covers.CoverCenter
+import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.library.audioFormatLabel
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.techBadge
 import app.nagmedar.ui.shell.NavKind
-import app.nagmedar.ui.theme.InputMode
-import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.sleep.SleepTimerButton
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -93,9 +95,16 @@ fun Artwork(
     video: Boolean = media?.type == MediaWrapper.TYPE_VIDEO,
 ) {
     val colors = NagTheme.colors
+    val context = LocalContext.current
     val px = with(LocalDensity.current) { size.roundToPx() }
-    val bitmap by produceState<ImageBitmap?>(null, media?.id, media?.artworkMrl, px) {
-        value = media?.let { ThumbnailsProvider.obtainBitmap(it, px)?.asImageBitmap() }
+    // S-1006: a track's album cover (its tags', its folder's, Cover Art Archive's, or one chosen); else the medialibrary's
+    val changes by CoverCenter.changes.collectAsState()
+    val bitmap by produceState<ImageBitmap?>(null, media?.id, media?.artworkMrl, px, changes) {
+        value = media?.let { item ->
+            val track = if (item.type == MediaWrapper.TYPE_AUDIO) CoverTrack.of(item) else null
+            track?.let { runCatching { CoverCenter.image(context, it, px) }.getOrNull() }
+                ?: ThumbnailsProvider.obtainBitmap(item, px)?.asImageBitmap()
+        }
     }
     val shape = RoundedCornerShape(corner)
     val placeholder = bitmap == null

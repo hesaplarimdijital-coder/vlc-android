@@ -94,3 +94,6 @@ const val NAGMEDAR_ALARM = "nagmedar_alarm"
 
 /** S-1003: lyrics are looked up on LRCLIB when the device has no synced ones (default on); what is found is kept for offline use. */
 const val NAGMEDAR_LYRICS_ONLINE = "nagmedar_lyrics_online"
+
+/** S-1006: album covers are looked up on Cover Art Archive (through MusicBrainz) when the file and its folder have none (default on). */
+const val NAGMEDAR_COVERS_ONLINE = "nagmedar_covers_online"

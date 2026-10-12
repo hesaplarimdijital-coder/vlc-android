@@ -483,6 +483,49 @@ static int lyrics(const char *file)
     return 0;
 }
 
+/* S-1006: the front cover in the file's tags written to OUT; "none" when there is none */
+static int cover(const char *file, const char *out)
+{
+    FILE *f = fopen(file, "rb");
+    if (!f) {
+        perror(file);
+        return 1;
+    }
+    size_t size = 0;
+    unsigned char *bytes = nag_tags_read_cover(fileno(f), file, &size);
+    fclose(f);
+    if (!bytes) {
+        printf("none\n");
+        return 0;
+    }
+    FILE *o = fopen(out, "wb");
+    if (!o) {
+        perror(out);
+        free(bytes);
+        return 1;
+    }
+    fwrite(bytes, 1, size, o);
+    fclose(o);
+    free(bytes);
+    printf("%zu\n", size);
+    return 0;
+}
+
+/* S-1006: the first value of the file's tag KEY; nothing when it has none */
+static int property(const char *file, const char *key)
+{
+    FILE *f = fopen(file, "rb");
+    if (!f) {
+        perror(file);
+        return 1;
+    }
+    char *value = nag_tags_read_property(fileno(f), file, key);
+    fclose(f);
+    printf("%s\n", value ? value : "");
+    free(value);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 3 && strcmp(argv[1], "info") == 0)
@@ -497,10 +540,14 @@ int main(int argc, char **argv)
         return wave(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "lyrics") == 0)
         return lyrics(argv[2]);
+    if (argc >= 4 && strcmp(argv[1], "cover") == 0)
+        return cover(argv[2], argv[3]);
+    if (argc >= 4 && strcmp(argv[1], "prop") == 0)
+        return property(argv[2], argv[3]);
     if (argc >= 2 && strcmp(argv[1], "version") == 0) {
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | version\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | cover FILE OUT | prop FILE KEY | version\n");
     return 2;
 }

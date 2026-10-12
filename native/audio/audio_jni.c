@@ -518,6 +518,43 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_readLyrics(JNIEnv 
     return result;
 }
 
+/* S-1006: the front cover in the file's tags, its bytes; null when it has none. The descriptor stays the caller's. */
+JNIEXPORT jbyteArray JNICALL Java_app_nagmedar_audio_NativeAudio_readCover(JNIEnv *env, jclass cls, jint fd, jstring name)
+{
+    (void)cls;
+    const char *utf = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    size_t size = 0;
+    unsigned char *bytes = nag_tags_read_cover(fd, utf, &size);
+    if (utf)
+        (*env)->ReleaseStringUTFChars(env, name, utf);
+    if (!bytes)
+        return NULL;
+    jbyteArray result = size <= 0x7fffffff ? (*env)->NewByteArray(env, (jsize)size) : NULL;
+    if (result)
+        (*env)->SetByteArrayRegion(env, result, 0, (jsize)size, (const jbyte *)bytes);
+    free(bytes);
+    return result;
+}
+
+/* S-1006: the first value of the file's tag [key]; null when it has none. */
+JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_readTag(JNIEnv *env, jclass cls, jint fd, jstring name, jstring key)
+{
+    (void)cls;
+    if (!key)
+        return NULL;
+    const char *utf = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    const char *k = (*env)->GetStringUTFChars(env, key, NULL);
+    char *value = nag_tags_read_property(fd, utf, k);
+    (*env)->ReleaseStringUTFChars(env, key, k);
+    if (utf)
+        (*env)->ReleaseStringUTFChars(env, name, utf);
+    if (!value)
+        return NULL;
+    jstring result = utf8(env, value);
+    free(value);
+    return result;
+}
+
 /* The file as the source reads it, with its ReplayGain tags, JSON; "{}" when it cannot be opened. */
 JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env, jclass cls, jstring path)
 {

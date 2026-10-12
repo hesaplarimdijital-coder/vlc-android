@@ -26,6 +26,7 @@ Sözlüğü testler denetler:
 | sezon | season | | | |
 | parça | track | şarkı | song | Müzikte tek öğe; arama kutusunda da “parça” |
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
+| kapak | cover | kapak resmi | artwork | Albümün kapağı: dosyanın etiketlerinden, klasöründen, Cover Art Archive'dan ya da elle seçilen; “Kapağı değiştir…”, “Kapağı yeniden ara” |
 | zamanlı söz, düz söz | synced lyrics, plain lyrics | senkron söz | | Satırları LRC ya da SYLT ile zamanlanmış söz çalarken izlenir; düz söz zamansızdır. Sırayla dosyanın etiketlerinden, yanındaki .lrc dosyasından, LRCLIB'den (Ayarlar › Sözler) |
 | sanatçı | artist | | | |
 | albüm | album | | | |

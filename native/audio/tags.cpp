@@ -18,6 +18,7 @@
 #include <taglib/tiostream.h>
 #include <taglib/tpropertymap.h>
 #include <taglib/tstring.h>
+#include <taglib/tvariant.h>
 #include <taglib/wavfile.h>
 
 #include <cmath>
@@ -284,6 +285,65 @@ extern "C" char *nag_tags_read_lyrics(int fd, const char *name)
     }
     out += '}';
     return strdup(out.c_str());
+}
+
+/*
+ * S-1006: the front cover the file's tags carry (ID3v2's APIC, FLAC's and the Vorbis comments'
+ * PICTURE, MP4's covr, APE's and ASF's pictures, through TagLib's PICTURE property): the front
+ * cover's bytes, else the first picture's; NULL when there is none. *size is set; the caller
+ * frees the bytes.
+ */
+extern "C" unsigned char *nag_tags_read_cover(int fd, const char *name, size_t *size)
+{
+    if (!size)
+        return nullptr;
+    *size = 0;
+    if (fd < 0)
+        return nullptr;
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull())
+        return nullptr;
+    TagLib::ByteVector chosen;
+    for (const auto &picture : file.complexProperties("PICTURE")) {
+        const TagLib::ByteVector data = picture.value("data").value<TagLib::ByteVector>();
+        if (data.isEmpty())
+            continue;
+        const bool front = picture.value("pictureType").value<TagLib::String>() == "Front Cover";
+        if (chosen.isEmpty() || front)
+            chosen = data;
+        if (front)
+            break;
+    }
+    if (chosen.isEmpty())
+        return nullptr;
+    auto *out = static_cast<unsigned char *>(malloc(chosen.size()));
+    if (!out)
+        return nullptr;
+    memcpy(out, chosen.data(), chosen.size());
+    *size = chosen.size();
+    return out;
+}
+
+/*
+ * S-1006: the first value of the file's tag [key], by TagLib's property name
+ * ("MUSICBRAINZ_ALBUMID", "MUSICBRAINZ_RELEASEGROUPID"), UTF-8; NULL when it has none. The caller
+ * frees the text.
+ */
+extern "C" char *nag_tags_read_property(int fd, const char *name, const char *key)
+{
+    if (fd < 0 || !key)
+        return nullptr;
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull())
+        return nullptr;
+    const TagLib::PropertyMap properties = file.properties();
+    auto found = properties.find(TagLib::String(key, TagLib::String::UTF8).upper());
+    if (found == properties.end() || found->second.isEmpty())
+        return nullptr;
+    const std::string value = found->second.front().to8Bit(true);
+    return value.empty() ? nullptr : strdup(value.c_str());
 }
 
 extern "C" int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags *tags, char *error, size_t error_size)

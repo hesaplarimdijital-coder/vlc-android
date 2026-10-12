@@ -27,6 +27,7 @@
 #   - the null test (S-1405): null_test.py finds a capture's lead-in and reports no difference
 #     for a true capture, the one differing sample for a broken one
 #   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus
+#   - the covers (S-1006): the front cover of FLAC, M4A, MP3 (of two pictures) and Opus; a tag by name
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -532,6 +533,44 @@ check "m4a ©lyr" '{"plain":"MP4 sözü"}' "$("$NAGAUDIO" lyrics lyrics.m4a)"
 ffmpeg -v error -y -f lavfi -i "sine=f=440:r=48000:d=1" -c:a libopus -metadata LYRICS="Opus sözü" lyrics.opus
 check "opus LYRICS" '{"plain":"Opus sözü"}' "$("$NAGAUDIO" lyrics lyrics.opus)"
 check "no lyrics" '{}' "$("$NAGAUDIO" lyrics flac16.flac)"
+
+echo "== S-1006: embedded covers"
+ffmpeg -v error -y -f lavfi -i "color=c=0x3366cc:s=64x64:d=1" -frames:v 1 front.png
+ffmpeg -v error -y -f lavfi -i "color=c=0xcc3333:s=32x32:d=1" -frames:v 1 back.png
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -i front.png -map 0 -map 1 -c:a flac -c:v png \
+    -disposition:v attached_pic -metadata MUSICBRAINZ_ALBUMID=0f3ad0d6-1111-4b5e-9c7c-2a4cd1c6c0de cover.flac
+"$NAGAUDIO" cover cover.flac cover_flac.out >/dev/null
+check "flac PICTURE" "same" "$(cmp -s cover_flac.out front.png && echo same || echo different)"
+check "flac MusicBrainz release" "0f3ad0d6-1111-4b5e-9c7c-2a4cd1c6c0de" "$("$NAGAUDIO" prop cover.flac musicbrainz_albumid)"
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -i front.png -map 0 -map 1 -c:a aac -c:v copy -disposition:v attached_pic cover.m4a
+"$NAGAUDIO" cover cover.m4a cover_m4a.out >/dev/null
+check "m4a covr" "same" "$(cmp -s cover_m4a.out front.png && echo same || echo different)"
+# the back cover first, the front cover second: the front is the cover
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a libmp3lame cover.mp3
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=48000:d=1" -c:a libopus cover.opus
+python3 - <<'PY'
+import base64
+from mutagen.id3 import ID3, APIC
+from mutagen.oggopus import OggOpus
+from mutagen.flac import Picture
+front = open("front.png", "rb").read()
+back = open("back.png", "rb").read()
+tags = ID3()
+tags.add(APIC(mime="image/png", type=4, desc="arka", data=back))
+tags.add(APIC(mime="image/png", type=3, desc="ön", data=front))
+tags.save("cover.mp3")
+opus = OggOpus("cover.opus")
+picture = Picture()
+picture.type, picture.mime, picture.data = 3, "image/png", front
+opus["METADATA_BLOCK_PICTURE"] = [base64.b64encode(picture.write()).decode("ascii")]
+opus.save()
+PY
+"$NAGAUDIO" cover cover.mp3 cover_mp3.out >/dev/null
+check "mp3 APIC, the front of two" "same" "$(cmp -s cover_mp3.out front.png && echo same || echo different)"
+"$NAGAUDIO" cover cover.opus cover_opus.out >/dev/null
+check "opus METADATA_BLOCK_PICTURE" "same" "$(cmp -s cover_opus.out front.png && echo same || echo different)"
+check "no cover" "none" "$("$NAGAUDIO" cover flac16.flac none.out)"
+check "no such tag" "" "$("$NAGAUDIO" prop flac16.flac MUSICBRAINZ_ALBUMID)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

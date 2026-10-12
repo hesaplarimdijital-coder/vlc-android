@@ -45,6 +45,7 @@ import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.covers.CoversSection
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
@@ -103,6 +104,8 @@ fun SettingsScreen(
         item { AlarmSection() }
         // S-1003: where lyrics come from
         item { LyricsSection() }
+        // S-1006: where album covers come from
+        item { CoversSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {

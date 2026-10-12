@@ -1680,4 +1680,22 @@
     <string name="nag_sc_lyrics">Full-screen lyrics</string>
     <string name="nag_sc_lyrics_earlier">Lyrics earlier</string>
     <string name="nag_sc_lyrics_later">Lyrics later</string>
+    <!-- S-1006: album covers -->
+    <string name="nag_covers_settings">Covers</string>
+    <string name="nag_covers_online">Online covers (Cover Art Archive)</string>
+    <string name="nag_covers_online_hint">When neither the file nor its folder has a cover, the album\'s title and artist are sent to MusicBrainz and its cover is taken from Cover Art Archive. The covers found are kept.</string>
+    <string name="nag_covers_online_on">On</string>
+    <string name="nag_covers_online_off">Off</string>
+    <string name="nag_covers_kept">Covers kept</string>
+    <string name="nag_covers_kept_none">None yet</string>
+    <plurals name="nag_covers_kept_count">
+        <item quantity="one">The cover of %d album</item>
+        <item quantity="other">The covers of %d albums</item>
+    </plurals>
+    <string name="nag_covers_clear">Clear</string>
+    <string name="nag_cover_menu">Cover</string>
+    <string name="nag_cover_change">Change the cover…</string>
+    <string name="nag_cover_again">Look for the cover again</string>
+    <string name="nag_cover_unchoose">Remove the chosen cover</string>
+    <string name="nag_cover_not_image">This file is not an image</string>
 </resources>

@@ -442,6 +442,15 @@ int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags 
  */
 char *nag_tags_read_lyrics(int fd, const char *name);
 
+/**
+ * S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes
+ * and their *size; NULL when there is none. The descriptor stays the caller's; the caller frees.
+ */
+unsigned char *nag_tags_read_cover(int fd, const char *name, size_t *size);
+
+/** S-1006: the first value of tag [key] (TagLib's property name), UTF-8; NULL for none. The caller frees. */
+char *nag_tags_read_property(int fd, const char *name, const char *key);
+
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 

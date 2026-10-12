@@ -73,6 +73,9 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.covers.rememberCoverMenu
+import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
@@ -382,6 +385,8 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
     val upNext = if (queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
     // S-1004: the lyrics in place of the artwork and the queue, until turned off
     var lyricsShown by rememberSaveable { mutableStateOf(false) }
+    val coverMenu = rememberCoverMenu(remember(media) { media?.let(CoverTrack::of) })
+    val coverLabel = stringResource(R.string.nag_cover_menu)
     val info = media?.let {
         NowPlayingInfo(
             title = it.nowPlaying ?: it.title ?: "",
@@ -400,7 +405,10 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
         upNext = upNext,
         onSeek = PlaybackActions::seekTo,
         onPlayUpNext = { i -> queue.play(queue.current + 1 + i) },
-        artwork = { size -> Artwork(media, size, corner = 8.dp, video = false) },
+        // S-1006: the album's cover changed from its menu (a right click, a long press)
+        artwork = { size ->
+            ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = 8.dp, video = false) }
+        },
         onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
         lyricsShown = lyricsShown,

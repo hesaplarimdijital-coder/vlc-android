@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -51,6 +53,7 @@ import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
@@ -67,30 +70,32 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.stateBackground
-import app.nagmedar.ui.components.LocalClickModifiers
+import app.nagmedar.ui.covers.CoverMenuButton
+import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.covers.rememberCover
+import app.nagmedar.ui.covers.rememberCoverMenu
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.library.LibraryContent
+import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.rememberScanState
-import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
-import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
-import org.videolan.vlc.media.MediaUtils
 import org.videolan.tools.NAGMEDAR_MUSIC_COLUMNS
 import org.videolan.tools.NAGMEDAR_MUSIC_VIEW
 import org.videolan.tools.Settings
+import org.videolan.vlc.media.MediaUtils
 
 /**
  * S-803: where the music library is: the way in (tracks, artists, albums, genres, composers,
@@ -268,6 +273,15 @@ fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<Med
         media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString() }) } }
     }
     return media
+}
+
+/** S-1006: an album's cover in its header; a click (a right click, a long press) opens its menu. */
+@Composable
+private fun AlbumCover(group: MusicGroup, modifier: Modifier = Modifier) {
+    val track = remember(group.key) { group.tracks.firstOrNull()?.let(CoverTrack::of) }
+    val side = 48.dp
+    val px = with(LocalDensity.current) { side.roundToPx() }
+    CoverMenuButton(rememberCover(track, px), side, stringResource(R.string.nag_cover_menu), rememberCoverMenu(track), modifier)
 }
 
 /** The medialibrary's item as the library shows it. */
@@ -581,6 +595,8 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (showBack) NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), { state.group = null })
+            // S-1006: an album's cover, its menu to change it
+            if (state.view == MusicView.Albums) AlbumCover(group, Modifier.padding(start = 4.dp, end = 4.dp))
             if (state.view != MusicView.Tracks) {
                 Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
                     Text(groupTitle(group, state.view), style = NagTheme.type.title, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)

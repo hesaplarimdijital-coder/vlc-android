@@ -164,6 +164,12 @@ object NativeAudio {
      */
     @JvmStatic external fun readLyrics(fd: Int, name: String): String?
 
+    /** S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes; null when there is none. */
+    @JvmStatic external fun readCover(fd: Int, name: String): ByteArray?
+
+    /** S-1006: the first value of the file's tag [key], by TagLib's property name ("MUSICBRAINZ_ALBUMID"); null for none. */
+    @JvmStatic external fun readTag(fd: Int, name: String, key: String): String?
+
     /** The file as the engine reads it, with its ReplayGain tags, JSON (SourceInfo.parse); "{}" when it cannot be opened. */
     @JvmStatic external fun probe(path: String): String
 
