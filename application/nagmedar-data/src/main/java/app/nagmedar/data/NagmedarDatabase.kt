@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
-        AudioTechEntry::class,
+        AudioTechEntry::class, TrackStatsEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -28,10 +28,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun mediaSettings(): MediaSettingsDao
     abstract fun mediaTech(): MediaTechDao
     abstract fun audioTech(): AudioTechDao
+    abstract fun trackStats(): TrackStatsDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 5
+        const val VERSION = 6
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -71,8 +72,19 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 5 → 6 (S-808): ratings and play counts. */
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `track_stats` (`track_key` TEXT NOT NULL, `rating` INTEGER NOT NULL, " +
+                        "`play_count` INTEGER NOT NULL, `skip_count` INTEGER NOT NULL, `first_played_at` INTEGER NOT NULL, " +
+                        "`last_played_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`track_key`))",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
-        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 
         @Volatile
         private var instance: NagmedarDatabase? = null

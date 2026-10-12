@@ -2,7 +2,9 @@ package app.nagmedar.ui.music
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -11,8 +13,11 @@ import app.nagmedar.ui.audio.formatName
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.ColumnWidth
+import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.stats.TrackStats
+import app.nagmedar.ui.theme.NagTheme
 import java.text.Collator
 import java.text.DateFormat
 import java.util.Date
@@ -32,16 +37,21 @@ enum class MusicColumn(val key: String, @StringRes val label: Int, val width: Co
     Year("year", R.string.nag_column_year, ColumnWidth.Fixed(64.dp), alignEnd = true, mono = true),
     Number("number", R.string.nag_column_track_number, ColumnWidth.Fixed(48.dp), alignEnd = true, mono = true),
     Duration("duration", R.string.nag_column_duration, ColumnWidth.Fixed(68.dp), alignEnd = true, mono = true),
+    /** S-808: the stars, set with a click. */
+    Rating("rating", R.string.nag_column_rating, ColumnWidth.Fixed(108.dp)),
     Format("format", R.string.nag_column_format, ColumnWidth.Fixed(108.dp), mono = true),
     Depth("depth", R.string.nag_column_depth, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
     Rate("rate", R.string.nag_column_rate, ColumnWidth.Fixed(88.dp), alignEnd = true, mono = true),
     Bitrate("bitrate", R.string.nag_column_bitrate, ColumnWidth.Fixed(96.dp), alignEnd = true, mono = true),
+    /** S-808: Nağmedar's own counts: a play once half the track (or four minutes) is heard. */
     Plays("plays", R.string.nag_column_plays, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
+    Skips("skips", R.string.nag_column_skips, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
+    LastPlayed("last_played", R.string.nag_column_last_played, ColumnWidth.Fixed(112.dp), alignEnd = true, mono = true),
     Added("added", R.string.nag_column_added, ColumnWidth.Fixed(104.dp), alignEnd = true, mono = true);
 
     companion object {
         /** What a new table shows. */
-        val DEFAULT = listOf(Title, Artist, Album, Year, Format, Duration)
+        val DEFAULT = listOf(Title, Artist, Album, Year, Format, Duration, Rating)
 
         /** The columns kept in the settings, Title first; the default for nothing kept. */
         fun parse(text: String?): List<MusicColumn> {
@@ -70,17 +80,35 @@ fun formatLabel(tech: TrackTech): String {
 /** 44100 → "44.1", 96000 → "96". */
 private fun shortKiloHertz(rate: Int): String = if (rate % 1000 == 0) "${rate / 1000}" else "%.1f".format(Locale.ROOT, rate / 1000.0)
 
-/** The [columns] as the table shows them, with their texts in the interface's language. */
+/**
+ * The [columns] as the table shows them, with their texts in the interface's language; [stats]
+ * gives the ratings and counts (S-808), and [onRate] sets a rating from the stars (null: they
+ * only show).
+ */
 @Composable
-fun rememberMusicColumns(columns: List<MusicColumn>): List<TableColumn<Track>> {
+fun rememberMusicColumns(
+    columns: List<MusicColumn>,
+    stats: Map<String, TrackStats> = emptyMap(),
+    onRate: ((Track, Int) -> Unit)? = null,
+): List<TableColumn<Track>> {
     val resources = LocalContext.current.resources
     val locale = resources.locale()
     val unknownArtist = stringResource(R.string.nag_unknown_artist)
     val titles = columns.map { stringResource(it.label) }
-    return remember(columns, locale, unknownArtist, titles) {
+    val latestRate by rememberUpdatedState(onRate)
+    val rates = onRate != null
+    return remember(columns, locale, unknownArtist, titles, stats, rates) {
         val dates = DateFormat.getDateInstance(DateFormat.SHORT, locale)
         columns.mapIndexed { i, column ->
-            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd, mono = column.mono) { track ->
+            val stars: (@Composable (Track, Boolean) -> Unit)? = if (column != MusicColumn.Rating) null else { track, selected ->
+                RatingStars(
+                    rating = stats[track.uri]?.rating ?: 0,
+                    onRate = if (rates) ({ stars -> latestRate?.invoke(track, stars) }) else null,
+                    emptyTint = if (selected) NagTheme.colors.onSelection.copy(alpha = 0.45f) else NagTheme.colors.textTertiary.copy(alpha = 0.6f),
+                    filledTint = if (selected) NagTheme.colors.onSelection else NagTheme.colors.accent,
+                )
+            }
+            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd, mono = column.mono, content = stars) { track ->
                 when (column) {
                     MusicColumn.Title -> track.title
                     MusicColumn.Artist -> track.artist?.takeIf { it.isNotBlank() } ?: unknownArtist
@@ -105,7 +133,10 @@ fun rememberMusicColumns(columns: List<MusicColumn>): List<TableColumn<Track>> {
                     }.orEmpty()
                     MusicColumn.Rate -> track.tech?.let { kiloHertz(if (it.dsdRate > 0) it.dsdRate else it.rate, locale) }.orEmpty()
                     MusicColumn.Bitrate -> track.tech?.bitrate?.takeIf { it > 0 }?.let { resources.getString(R.string.nag_sp_kbps, (it / 1000).toInt()) }.orEmpty()
-                    MusicColumn.Plays -> if (track.playCount > 0) "${track.playCount}" else ""
+                    MusicColumn.Rating -> stats[track.uri]?.rating?.takeIf { it > 0 }?.let { "★".repeat(it) }.orEmpty()
+                    MusicColumn.Plays -> stats[track.uri]?.plays?.takeIf { it > 0 }?.toString().orEmpty()
+                    MusicColumn.Skips -> stats[track.uri]?.skips?.takeIf { it > 0 }?.toString().orEmpty()
+                    MusicColumn.LastPlayed -> stats[track.uri]?.lastPlayedAt?.takeIf { it > 0 }?.let { dates.format(Date(it)) }.orEmpty()
                     MusicColumn.Added -> if (track.addedAt > 0) dates.format(Date(epochMillis(track.addedAt))) else ""
                 }
             }
@@ -116,8 +147,8 @@ fun rememberMusicColumns(columns: List<MusicColumn>): List<TableColumn<Track>> {
 /** The medialibrary keeps seconds; picked folders, milliseconds. */
 private fun epochMillis(time: Long): Long = if (time < 100_000_000_000L) time * 1000 else time
 
-/** [tracks] in the order [sort] asks; ties stay in album order. */
-fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale): List<Track> {
+/** [tracks] in the order [sort] asks, [stats] giving the ratings and counts; ties stay in album order. */
+fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale, stats: Map<String, TrackStats> = emptyMap()): List<Track> {
     if (sort == null) return tracks
     val collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
     val text: (Track) -> String? = when (sort.column) {
@@ -137,7 +168,11 @@ fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale): List<Trac
         MusicColumn.Depth -> { t -> t.tech?.let { if (it.dsdRate > 0) 1.0 else it.bits.toDouble() } }
         MusicColumn.Rate -> { t -> t.tech?.let { (if (it.dsdRate > 0) it.dsdRate else it.rate).toDouble() } }
         MusicColumn.Bitrate -> { t -> t.tech?.bitrate?.toDouble() }
-        MusicColumn.Plays -> { t -> t.playCount.toDouble() }
+        // unrated, never played: last either way
+        MusicColumn.Rating -> { t -> stats[t.uri]?.rating?.takeIf { it > 0 }?.toDouble() }
+        MusicColumn.Plays -> { t -> (stats[t.uri]?.plays ?: 0).toDouble() }
+        MusicColumn.Skips -> { t -> (stats[t.uri]?.skips ?: 0).toDouble() }
+        MusicColumn.LastPlayed -> { t -> stats[t.uri]?.lastPlayedAt?.takeIf { it > 0 }?.toDouble() }
         MusicColumn.Added -> { t -> epochMillis(t.addedAt).toDouble() }
         else -> { _ -> null }
     }

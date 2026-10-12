@@ -88,6 +88,8 @@ ICONS = {
     # S-1007 the sleep timer and the alarm
     'Sleep': '<path d="M13.5 8.8A5.6 5.6 0 1 1 7.2 2.5a4.4 4.4 0 0 0 6.3 6.3z"/>',
     'Alarm': '<circle cx="8" cy="8.8" r="4.7"/><path d="M8 6.4v2.6l1.7 1.1M2.6 4.3 4.5 2.6M13.4 4.3 11.5 2.6"/>',
+    'Star': '<path d="M8 2.5 9.44 6.42l4.17.16-3.28 2.58 1.14 4.01L8 10.85l-3.47 2.32 1.14-4.01-3.28-2.58 4.17-.16z"/>',
+    'StarFilled': '<path d="M8 2.5 9.44 6.42l4.17.16-3.28 2.58 1.14 4.01L8 10.85l-3.47 2.32 1.14-4.01-3.28-2.58 4.17-.16z" style="fill:currentColor"/><path d="M8 2.5 9.44 6.42l4.17.16-3.28 2.58 1.14 4.01L8 10.85l-3.47 2.32 1.14-4.01-3.28-2.58 4.17-.16z"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

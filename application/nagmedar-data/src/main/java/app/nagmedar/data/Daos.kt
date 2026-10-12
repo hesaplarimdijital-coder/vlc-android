@@ -201,3 +201,49 @@ interface AudioTechDao {
     @Query("DELETE FROM audio_tech WHERE media_uri = :uri")
     fun forget(uri: String)
 }
+
+@Dao
+abstract class TrackStatsDao {
+    @Query("SELECT * FROM track_stats")
+    abstract fun observe(): Flow<List<TrackStatsEntry>>
+
+    @Query("SELECT * FROM track_stats WHERE track_key = :key")
+    abstract fun get(key: String): TrackStatsEntry?
+
+    /** A row for [key], unless it has one. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun create(entry: TrackStatsEntry)
+
+    @Query(
+        "UPDATE track_stats SET play_count = play_count + 1, last_played_at = :at, updated_at = :at, " +
+            "first_played_at = CASE WHEN first_played_at = 0 THEN :at ELSE first_played_at END WHERE track_key = :key",
+    )
+    abstract fun addPlay(key: String, at: Long)
+
+    @Query("UPDATE track_stats SET skip_count = skip_count + 1, updated_at = :at WHERE track_key = :key")
+    abstract fun addSkip(key: String, at: Long)
+
+    @Query("UPDATE track_stats SET rating = :rating, updated_at = :at WHERE track_key = :key")
+    abstract fun updateRating(key: String, rating: Int, at: Long)
+
+    /** A play of [key] counted at [at]. */
+    @Transaction
+    open fun played(key: String, at: Long) {
+        create(TrackStatsEntry(key, updatedAt = at))
+        addPlay(key, at)
+    }
+
+    /** [key] left for another track before it counted as played. */
+    @Transaction
+    open fun skipped(key: String, at: Long) {
+        create(TrackStatsEntry(key, updatedAt = at))
+        addSkip(key, at)
+    }
+
+    /** [key]'s rating: 0 (none) to 5. */
+    @Transaction
+    open fun rate(key: String, rating: Int, at: Long) {
+        create(TrackStatsEntry(key, updatedAt = at))
+        updateRating(key, rating.coerceIn(0, 5), at)
+    }
+}

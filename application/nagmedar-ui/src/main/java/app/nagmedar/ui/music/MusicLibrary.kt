@@ -59,7 +59,6 @@ data class Track(
     val durationMs: Long,
     /** The folder the file is in: its path, or the document tree's. */
     val folder: String,
-    val playCount: Long = 0,
     val addedAt: Long = 0,
     val tech: TrackTech? = null,
 ) {

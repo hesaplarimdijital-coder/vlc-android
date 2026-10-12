@@ -52,6 +52,8 @@ class TableColumn<T>(
     /** Monospace for durations, formats and sizes. */
     val mono: Boolean = false,
     val sortable: Boolean = true,
+    /** What the cell shows instead of [value]'s text (S-808: the rating's stars); [value] is still its text. */
+    val content: (@Composable (item: T, selected: Boolean) -> Unit)? = null,
     val value: (T) -> String,
 )
 
@@ -219,18 +221,23 @@ private fun <T> TableRow(
         }
         columns.forEachIndexed { index, column ->
             Box(Modifier.cell(this, column.width).padding(horizontal = 8.dp), contentAlignment = if (column.alignEnd) Alignment.CenterEnd else Alignment.CenterStart) {
-                Text(
-                    text = column.value(item),
-                    style = if (column.mono) NagTheme.type.mono else if (index == 0) NagTheme.type.bodyStrong else NagTheme.type.body,
-                    color = when {
-                        selected -> colors.onSelection
-                        index == 0 -> colors.text
-                        else -> colors.textSecondary
-                    },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = if (column.alignEnd) TextAlign.End else TextAlign.Start,
-                )
+                val content = column.content
+                if (content != null) {
+                    content(item, selected)
+                } else {
+                    Text(
+                        text = column.value(item),
+                        style = if (column.mono) NagTheme.type.mono else if (index == 0) NagTheme.type.bodyStrong else NagTheme.type.body,
+                        color = when {
+                            selected -> colors.onSelection
+                            index == 0 -> colors.text
+                            else -> colors.textSecondary
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = if (column.alignEnd) TextAlign.End else TextAlign.Start,
+                    )
+                }
             }
         }
     }

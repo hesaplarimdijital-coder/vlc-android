@@ -475,6 +475,7 @@
     <!-- S-802: technical details -->
     <string name="nag_column_video">Video</string>
     <string name="nag_column_audio">Ses</string>
+    <string name="nag_duration_hours">%1$d sa</string>
     <string name="nag_duration_hours_minutes">%1$d sa %2$d dk</string>
     <string name="nag_duration_minutes">%1$d dk</string>
     <string name="nag_duration_seconds">%1$d sn</string>
@@ -1555,4 +1556,14 @@
     <string name="nag_alarm_exact_off">Android, Nağmedar\'ın tam dakikasında çalmasına izin vermiyor: alarm birkaç dakika gecikebilir.</string>
     <string name="nag_alarm_exact_allow">İzin ver</string>
     <string name="nag_alarm_try">Şimdi dene</string>
+    <!-- S-808: ratings and play counts -->
+    <string name="nag_column_rating">Puan</string>
+    <string name="nag_column_skips">Atlama</string>
+    <string name="nag_column_last_played">Son çalınma</string>
+    <string name="nag_rating_none">Puan verilmedi</string>
+    <string name="nag_rating_value">Puan: 5 üzerinden %1$d</string>
+    <string name="nag_rate">Puan ver…</string>
+    <string name="nag_rate_title">Puan ver</string>
+    <string name="nag_rate_clear">Puanı kaldır</string>
+    <string name="nag_rate_mixed">Puanları farklı; bir yıldız hepsine aynı puanı verir.</string>
 </resources>

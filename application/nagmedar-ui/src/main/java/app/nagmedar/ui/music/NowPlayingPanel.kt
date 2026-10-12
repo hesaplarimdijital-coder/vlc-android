@@ -23,6 +23,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
@@ -61,6 +64,7 @@ import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.audio.sinkLabel
+import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -72,6 +76,8 @@ import app.nagmedar.ui.playback.QueueEntry
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
+import app.nagmedar.ui.stats.TrackStatsIndex
+import app.nagmedar.ui.stats.statsKey
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import kotlin.math.max
@@ -87,6 +93,8 @@ data class NowPlayingInfo(
     val format: String?,
     val lengthMs: Long,
     val playing: Boolean,
+    /** S-808: its stars (0 none); null for what is not rated (a stream). */
+    val rating: Int? = null,
 )
 
 /**
@@ -104,6 +112,8 @@ fun NowPlayingPanel(
     onPlayUpNext: (Int) -> Unit,
     modifier: Modifier = Modifier,
     artwork: @Composable (Dp) -> Unit = {},
+    /** S-808: sets [NowPlayingInfo.rating]. */
+    onRate: ((Int) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -118,7 +128,7 @@ fun NowPlayingPanel(
         if (info == null) {
             Text(stringResource(R.string.nag_music_nothing_playing), style = NagTheme.type.body, color = colors.textSecondary)
         } else {
-            Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork)
+            Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate)
         }
     }
 }
@@ -132,6 +142,7 @@ private fun Playing(
     onSeek: (Float) -> Unit,
     onPlayUpNext: (Int) -> Unit,
     artwork: @Composable (Dp) -> Unit,
+    onRate: ((Int) -> Unit)?,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -145,6 +156,7 @@ private fun Playing(
         val line = listOfNotNull(info.artist?.takeIf { it.isNotBlank() }, info.album?.takeIf { it.isNotBlank() }).joinToString(" · ")
         if (line.isNotEmpty()) Text(line, style = NagTheme.type.body, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
         if (info.format != null) Text(info.format, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 2)
+        info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 16.dp, target = 22.dp, focusable = onRate != null, modifier = Modifier.testTag("now-playing-rating")) }
         Spacer(Modifier.height(dimens.gapXs))
         WaveformTimeline(waveform, progress, info.lengthMs, onSeek)
         if (upNext.isNotEmpty()) {
@@ -320,8 +332,13 @@ private fun bucket(waveform: Waveform, index: Int, count: Int): Pair<Float, Floa
 /** The panel on the playback service: what plays, its waveform, the queue after it. */
 @Composable
 fun MusicNowPlaying() {
+    val context = LocalContext.current
     val nowPlaying = rememberNowPlaying()
     val media = nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
+    // S-808: its stars
+    val stats by TrackStatsIndex.stats.collectAsState()
+    LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
+    val key = media?.let(::statsKey)
     val progress by rememberPlaybackProgress(nowPlaying)
     val waveform = rememberWaveform(media?.uri?.toString())
     val queue = rememberPlayQueue()
@@ -335,6 +352,7 @@ fun MusicNowPlaying() {
             format = path?.let { p -> formatLine(p) },
             lengthMs = it.length,
             playing = nowPlaying.playing,
+            rating = key?.let { k -> stats[k]?.rating ?: 0 },
         )
     }
     NowPlayingPanel(
@@ -345,6 +363,7 @@ fun MusicNowPlaying() {
         onSeek = PlaybackActions::seekTo,
         onPlayUpNext = { i -> queue.play(queue.current + 1 + i) },
         artwork = { size -> Artwork(media, size, corner = 8.dp, video = false) },
+        onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
     )
 }
 

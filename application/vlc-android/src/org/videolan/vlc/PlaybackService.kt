@@ -142,6 +142,7 @@ import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import app.nagmedar.session.Media3SessionHost
 import app.nagmedar.session.SessionAction
+import org.videolan.vlc.media.PlaybackObserver
 import org.videolan.vlc.media.PlaybackSessionSource
 import org.videolan.tools.DrawableCache
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SEEK_BUTTONS
@@ -216,6 +217,9 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private var position: Long = -1L
     private val dispatcher = ServiceLifecycleDispatcher(this)
+
+    /** S-808: what follows the service while it lives (Nağmedar's play statistics). */
+    private val observers by lazy(LazyThreadSafetyMode.NONE) { PlaybackObserver.create() }
 
     internal var enabledActions = PlaybackAction.createBaseActions()
     lateinit var playlistManager: PlaylistManager
@@ -808,6 +812,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         headSetDetection.observe(this, Observer { detectHeadset(it) })
         equalizer.observe(this, Observer { setEqualizer(it) })
         serviceFlow.value = this
+        // S-808: Nağmedar's play statistics follow the service, whoever started it
+        observers.forEach { it.attach(this) }
         mediaBrowserCompat = MediaBrowserInstance.getInstance(this)
         PlaylistManager.playingState.value = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -923,6 +929,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     override fun onDestroy() {
         serviceFlow.value = null
+        observers.forEach { it.detach() }
         dispatcher.onServicePreSuperOnDestroy()
         PlaylistManager.playingState.value = false
         super.onDestroy()

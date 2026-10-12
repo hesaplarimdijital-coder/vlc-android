@@ -1,6 +1,7 @@
 package app.nagmedar.ui.music
 
 import app.nagmedar.audio.Waveform
+import app.nagmedar.ui.stats.TrackStats
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
@@ -27,25 +28,36 @@ object MusicSamples {
         tech: TrackTech?,
         genre: String,
         albumArtist: String? = null,
-        plays: Long = 0,
+        plays: Int = 0,
+        rating: Int = 0,
     ) = Track(
         ++ids, "file:///storage/emulated/0/Music/$artist/$album/$number.flac", title, artist, albumArtist, album, genre, year,
-        number, 1, durationMs, "/storage/emulated/0/Music/$artist/$album", plays, 1_760_000_000L - ids * 86_400, tech,
-    )
+        number, 1, durationMs, "/storage/emulated/0/Music/$artist/$album", 1_760_000_000L - ids * 86_400, tech,
+    ).also { track ->
+        // S-808: the counts and stars kept beside the library
+        if (plays > 0 || rating > 0) {
+            sampleStats[track.uri] = TrackStats(rating, plays, skips = plays / 5, firstPlayedAt = 1_750_000_000_000L, lastPlayedAt = 1_760_000_000_000L - ids * 3_600_000)
+        }
+    }
+
+    private val sampleStats = mutableMapOf<String, TrackStats>()
 
     val tracks: List<Track> = listOf(
-        track("Segâh Tekbîr", "Kadri Erdem", "Itrî'nin İzinde", 1999, 1, 312_000, flac2496, "Klasik", plays = 14),
-        track("Neva Kâr", "Kadri Erdem", "Itrî'nin İzinde", 1999, 2, 498_000, flac2496, "Klasik", plays = 9),
+        track("Segâh Tekbîr", "Kadri Erdem", "Itrî'nin İzinde", 1999, 1, 312_000, flac2496, "Klasik", plays = 14, rating = 5),
+        track("Neva Kâr", "Kadri Erdem", "Itrî'nin İzinde", 1999, 2, 498_000, flac2496, "Klasik", plays = 9, rating = 4),
         track("Nihâvend Saz Semâîsi", "Kadri Erdem", "Itrî'nin İzinde", 1999, 3, 401_000, flac2496, "Klasik", plays = 3),
-        track("Gece Yolcusu", "Cemre Kaya", "Gece Yolcusu", 2016, 1, 254_000, flac1644, "Rock", plays = 31),
-        track("Yağmur", "Cemre Kaya", "Gece Yolcusu", 2016, 2, 231_000, flac1644, "Rock", plays = 22),
+        track("Gece Yolcusu", "Cemre Kaya", "Gece Yolcusu", 2016, 1, 254_000, flac1644, "Rock", plays = 31, rating = 5),
+        track("Yağmur", "Cemre Kaya", "Gece Yolcusu", 2016, 2, 231_000, flac1644, "Rock", plays = 22, rating = 3),
         track("Son Vapur", "Cemre Kaya", "Gece Yolcusu", 2016, 3, 287_000, mp3, "Rock", plays = 12),
-        track("Uzak", "Çağla Akın", "Tek", 2021, 1, 198_000, alac24192, "Pop", plays = 7),
+        track("Uzak", "Çağla Akın", "Tek", 2021, 1, 198_000, alac24192, "Pop", plays = 7, rating = 2),
         track("Kuzey Işığı", "Çağla Akın", "Tek", 2021, 2, 216_000, alac24192, "Pop"),
         track("Ada", "Deniz Su", "Konuk", 2004, 4, 243_000, dsd64, "Caz", albumArtist = "Çeşitli Sanatçılar", plays = 2),
         track("Liman", "Ece Duru", "Konuk", 2004, 5, 205_000, opus, "Caz", albumArtist = "Çeşitli Sanatçılar"),
         track("İsimsiz", "Ece Duru", "Demo", 2023, 1, 97_000, null, "Caz"),
     )
+
+    /** S-808: the samples' ratings and counts, by uri. */
+    val stats: Map<String, TrackStats> get() = sampleStats
 
     /** A waveform that looks like music: verses, a louder chorus, a fade at the end. */
     val waveform: Waveform = Waveform(

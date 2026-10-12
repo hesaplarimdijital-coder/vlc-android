@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -46,6 +47,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlayerBarActions
@@ -53,6 +55,8 @@ import app.nagmedar.ui.playback.ServicePlayerBarActions
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.sleep.SleepTimerButton
+import app.nagmedar.ui.stats.TrackStatsIndex
+import app.nagmedar.ui.stats.statsKey
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -80,6 +84,8 @@ fun PhonePlayer(
     shuffling: Boolean = false,
     repeating: Boolean = false,
     artwork: @Composable (Dp) -> Unit = {},
+    /** S-808: sets [NowPlayingInfo.rating]. */
+    onRate: ((Int) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -176,6 +182,8 @@ fun PhonePlayer(
             val line = listOfNotNull(info.artist?.takeIf { it.isNotBlank() }, info.album?.takeIf { it.isNotBlank() }).joinToString(" · ")
             if (line.isNotEmpty()) Text(line, style = NagTheme.type.body, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (info.format != null) Text(info.format, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            // S-808: a finger's stars
+            info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 24.dp, target = 44.dp, modifier = Modifier.offset(x = (-10).dp).testTag("phone-rating")) }
             Spacer(Modifier.height(dimens.gapS))
             WaveformTimeline(waveform, progress, info.lengthMs, actions::seekTo, height = 56.dp)
         }
@@ -227,6 +235,10 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
     val path = rememberSignalPath()
     val shuffling by PlaylistManager.shuffling.collectAsState()
     val repeating by PlaylistManager.repeating.collectAsState()
+    // S-808: its stars
+    val stats by TrackStatsIndex.stats.collectAsState()
+    LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
+    val key = statsKey(media)
     val latestQueue by rememberUpdatedState(onQueue)
     val actions = remember(context) { ServicePlayerBarActions(context, { latestQueue() }) }
     PhonePlayer(
@@ -237,6 +249,7 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
             format = path?.let { formatLine(it) },
             lengthMs = media.length,
             playing = nowPlaying.playing,
+            rating = key?.let { stats[it]?.rating ?: 0 },
         ),
         progress = { progress },
         waveform = waveform,
@@ -246,5 +259,6 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
         artwork = { size -> Artwork(media, size, corner = 12.dp, video = false) },
+        onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
     )
 }

@@ -198,7 +198,11 @@ private fun nextRing(at: Long, now: Long, locale: Locale): String {
     val time = String.format(Locale.ROOT, "%02d:%02d", ring.get(Calendar.HOUR_OF_DAY), ring.get(Calendar.MINUTE))
     val minutes = ((at - now + 59_999) / 60_000).toInt()
     if (minutes >= 24 * 60) return stringResource(R.string.nag_alarm_next, day, time)
-    val within = if (minutes >= 60) stringResource(R.string.nag_duration_hours_minutes, minutes / 60, minutes % 60) else stringResource(R.string.nag_duration_minutes, minutes)
+    val within = when {
+        minutes < 60 -> stringResource(R.string.nag_duration_minutes, minutes)
+        minutes % 60 == 0 -> stringResource(R.string.nag_duration_hours, minutes / 60)
+        else -> stringResource(R.string.nag_duration_hours_minutes, minutes / 60, minutes % 60)
+    }
     return stringResource(R.string.nag_alarm_next_in, day, time, within)
 }
 

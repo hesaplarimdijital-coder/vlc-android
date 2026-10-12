@@ -124,6 +124,31 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun playsSkipsAndRatingsAddUpPerTrack() {
+        val stats = db.trackStats()
+        val key = "file:///storage/emulated/0/Music/Itrî/Neva Kâr.flac"
+        stats.played(key, at = 100)
+        stats.played(key, at = 200)
+        stats.skipped(key, at = 300)
+        stats.rate(key, rating = 4, at = 400)
+        stats.get(key)!!.let {
+            assertEquals(2, it.playCount)
+            assertEquals(1, it.skipCount)
+            assertEquals(4, it.rating)
+            assertEquals("the first play stays", 100L, it.firstPlayedAt)
+            assertEquals("a skip is not a play", 200L, it.lastPlayedAt)
+            assertEquals(400L, it.updatedAt)
+        }
+        // a rating of a track never played; out of range, the nearest star
+        stats.rate("$key#3", rating = 9, at = 500)
+        assertEquals(5, stats.get("$key#3")!!.rating)
+        assertEquals(0, stats.get("$key#3")!!.playCount)
+        stats.rate(key, rating = 0, at = 600)
+        assertEquals("taken back", 0, stats.get(key)!!.rating)
+        assertEquals(2, runBlocking { stats.observe().first() }.size)
+    }
+
+    @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
@@ -199,6 +224,11 @@ class NagmedarDatabaseMigrationTest {
                     "VALUES ('file:///film.mkv', 1, 2, 1, '{}', 3)",
             )
             db.execSQL("UPDATE media_settings SET effects = '{\"gain\":150}' WHERE media_uri = 'file:///film.mkv'")
+            // 5 -> 6 (S-808): the ratings and play counts
+            db.execSQL(
+                "INSERT INTO track_stats (track_key, rating, play_count, skip_count, first_played_at, last_played_at, updated_at) " +
+                    "VALUES ('file:///neva.flac', 4, 2, 0, 1, 2, 2)",
+            )
         }
     }
 

@@ -475,6 +475,7 @@
     <!-- S-802: technical details -->
     <string name="nag_column_video">Video</string>
     <string name="nag_column_audio">Audio</string>
+    <string name="nag_duration_hours">%1$d h</string>
     <string name="nag_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="nag_duration_minutes">%1$d min</string>
     <string name="nag_duration_seconds">%1$d s</string>
@@ -1583,4 +1584,14 @@
     <string name="nag_alarm_exact_off">Android does not let Nağmedar ring at the exact minute: the alarm may come a few minutes late.</string>
     <string name="nag_alarm_exact_allow">Allow</string>
     <string name="nag_alarm_try">Try it now</string>
+    <!-- S-808: ratings and play counts -->
+    <string name="nag_column_rating">Rating</string>
+    <string name="nag_column_skips">Skips</string>
+    <string name="nag_column_last_played">Last played</string>
+    <string name="nag_rating_none">Not rated</string>
+    <string name="nag_rating_value">Rating: %1$d of 5</string>
+    <string name="nag_rate">Rate…</string>
+    <string name="nag_rate_title">Rate</string>
+    <string name="nag_rate_clear">Remove the rating</string>
+    <string name="nag_rate_mixed">Their ratings differ; a star gives all of them the same.</string>
 </resources>

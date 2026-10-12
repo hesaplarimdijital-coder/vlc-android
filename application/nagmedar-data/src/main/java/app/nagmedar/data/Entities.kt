@@ -161,3 +161,20 @@ data class AudioTechEntry(
     val composer: String?,
     @ColumnInfo(name = "probed_at") val probedAt: Long = 0,
 )
+
+/**
+ * S-808: what was done with a track: the rating given (0 none, 1–5 stars), the plays counted (half
+ * of it heard, or four minutes), the skips (left for another track before that) and when it was
+ * first and last played. Keyed by the track's uri (a CUE sheet's track: the image's uri and its
+ * number, "…/album.flac#3"), so that a rescan of the medialibrary keeps them.
+ */
+@Entity(tableName = "track_stats")
+data class TrackStatsEntry(
+    @PrimaryKey @ColumnInfo(name = "track_key") val trackKey: String,
+    val rating: Int = 0,
+    @ColumnInfo(name = "play_count") val playCount: Int = 0,
+    @ColumnInfo(name = "skip_count") val skipCount: Int = 0,
+    @ColumnInfo(name = "first_played_at") val firstPlayedAt: Long = 0,
+    @ColumnInfo(name = "last_played_at") val lastPlayedAt: Long = 0,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+)

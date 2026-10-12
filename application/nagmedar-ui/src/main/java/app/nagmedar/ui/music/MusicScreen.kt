@@ -80,6 +80,8 @@ import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.stats.TrackStats
+import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -195,6 +197,12 @@ interface MusicActions {
 
     /** S-804: [tracks] to a playlist, chosen or made in a window; null where there is none. */
     val addToPlaylist: ((List<Track>) -> Unit)? get() = null
+
+    /** S-808: [tracks]' rating, 0 (none) to 5 stars. */
+    fun rate(tracks: List<Track>, rating: Int) = Unit
+
+    /** S-808: the rating window for [tracks]; null where ratings are not kept. */
+    val askRating: ((List<Track>) -> Unit)? get() = null
 }
 
 // ------------------------------------------------------------------- the screen
@@ -218,10 +226,16 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
         media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) }, locale) }
     }
     val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
-    // S-804: the tracks being put in a playlist, while its window is open
+    // S-808: the ratings and counts
+    val stats by TrackStatsIndex.stats.collectAsState()
+    LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
+    // S-804: the tracks being put in a playlist, while its window is open; S-808: being rated
     var adding by remember { mutableStateOf<List<Track>?>(null) }
+    var rating by remember { mutableStateOf<List<Track>?>(null) }
     val scope = rememberCoroutineScope()
-    val actions = remember(context, byUri) { ServiceMusicActions(context, byUri) { tracks -> adding = tracks } }
+    val actions = remember(context, byUri) {
+        ServiceMusicActions(context, byUri, onAddToPlaylist = { tracks -> adding = tracks }, onAskRating = { tracks -> rating = tracks })
+    }
     val state = rememberMusicBrowserState()
     Column(Modifier.fillMaxSize()) {
         PageHeader(
@@ -236,10 +250,13 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
             emptyDescription = stringResource(R.string.nag_state_no_music_desc),
             onAddFolder = onAddFolder,
         ) {
-            if (library != null) MusicBrowser(library, state, actions, probing = probing, nowPlaying = nowPlaying)
+            if (library != null) MusicBrowser(library, state, actions, probing = probing, nowPlaying = nowPlaying, stats = stats)
         }
     }
     adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
+    rating?.let { tracks ->
+        RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+    }
 }
 
 /** The medialibrary's item as the library shows it. */
@@ -259,7 +276,6 @@ fun MediaWrapper.toTrack(tech: TrackTech?): Track {
         discNumber = discNumber,
         durationMs = length,
         folder = path.substringBeforeLast('/', ""),
-        playCount = playCount,
         addedAt = insertionDate,
         tech = tech,
     )
@@ -267,15 +283,20 @@ fun MediaWrapper.toTrack(tech: TrackTech?): Track {
 
 /**
  * [MusicActions] on the playback service, through the medialibrary's items; with [onAddToPlaylist]
- * the tracks' menu has "Listeye ekle…".
+ * the tracks' menu has "Listeye ekle…", with [onAskRating] "Puan ver…" (S-808).
  */
 internal class ServiceMusicActions(
     private val context: Context,
     private val byUri: Map<String, MediaWrapper>,
     private val onAddToPlaylist: ((List<Track>) -> Unit)? = null,
+    private val onAskRating: ((List<Track>) -> Unit)? = null,
 ) : MusicActions {
 
     override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
+
+    override val askRating: ((List<Track>) -> Unit)? get() = onAskRating
+
+    override fun rate(tracks: List<Track>, rating: Int) = tracks.forEach { TrackStatsIndex.rate(context, it.uri, rating) }
 
     private fun media(tracks: List<Track>) = tracks.mapNotNull { byUri[it.uri] }
 
@@ -290,12 +311,15 @@ internal class ServiceMusicActions(
 
     override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> {
         val entries = byUri[track.uri]?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
-        val toPlaylist = onAddToPlaylist ?: return entries
-        // after "Sıraya ekle"
+        // after "Sıraya ekle": "Listeye ekle…", "Puan ver…"
+        val added = listOfNotNull(
+            onAddToPlaylist?.let { add -> MenuEntry.Item(context.getString(R.string.nag_pl_add), { add(listOf(track)) }, icon = NagIcons.PlaylistAdd) },
+            onAskRating?.let { ask -> MenuEntry.Item(context.getString(R.string.nag_rate), { ask(listOf(track)) }, icon = NagIcons.Star) },
+        )
+        if (added.isEmpty()) return entries
         val queueLabel = context.getString(R.string.nag_add_to_queue)
         val at = entries.indexOfFirst { it is MenuEntry.Item && it.label == queueLabel } + 1
-        val item = MenuEntry.Item(context.getString(R.string.nag_pl_add), { toPlaylist(listOf(track)) }, icon = NagIcons.PlaylistAdd)
-        return if (at > 0) entries.subList(0, at) + item + entries.subList(at, entries.size) else entries + item
+        return if (at > 0) entries.subList(0, at) + added + entries.subList(at, entries.size) else entries + added
     }
 
     override fun rowModifier(track: Track, others: () -> List<Track>): Modifier =
@@ -327,6 +351,8 @@ fun MusicBrowser(
     modifier: Modifier = Modifier,
     probing: Int = 0,
     nowPlaying: (@Composable () -> Unit)? = null,
+    /** S-808: the ratings and counts, by track uri. */
+    stats: Map<String, TrackStats> = emptyMap(),
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
@@ -352,7 +378,7 @@ fun MusicBrowser(
                     GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false, stats) }
                 if (nowPlaying != null) {
                     VerticalRule()
                     Box(Modifier.width(300.dp).fillMaxHeight()) { nowPlaying() }
@@ -361,9 +387,9 @@ fun MusicBrowser(
             wide && grouped -> Row(Modifier.fillMaxSize()) {
                 GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false, stats) }
             }
-            !grouped || open != null -> if (open != null) TrackPane(open, state, actions, showBack = grouped)
+            !grouped || open != null -> if (open != null) TrackPane(open, state, actions, showBack = grouped, stats)
             else -> GroupList(groups, state, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
         }
     }
@@ -509,16 +535,18 @@ private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOp
 
 /** A group's tracks: its name, play and shuffle, the columns, the table. */
 @Composable
-private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: MusicActions, showBack: Boolean) {
+private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: MusicActions, showBack: Boolean, stats: Map<String, TrackStats>) {
     val dimens = NagTheme.dimens
     val locale = LocalContext.current.resources.locale()
     val compact = currentWidthClass() == WidthClass.Compact
     val pointer = NagTheme.inputMode == InputMode.Pointer
     // the whole library sorts by artist when nothing else is asked; a group plays in album order
     val sort = state.sort ?: if (state.view == MusicView.Tracks) MusicSort(MusicColumn.Artist, true) else null
-    val shown = remember(group, sort, locale) { sortTracks(group.tracks, sort, locale) }
+    // sorted by a rating or a count, the order follows them; else a play counted does not resort
+    val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
+    val shown = remember(group, sort, locale, sortStats) { sortTracks(group.tracks, sort, locale, sortStats) }
     val columns = if (compact) listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Duration) else state.columns
-    val tableColumns = rememberMusicColumns(columns)
+    val tableColumns = rememberMusicColumns(columns, stats, onRate = if (actions.askRating != null) ({ track, stars -> actions.rate(listOf(track), stars) }) else null)
     val labels = MusicColumn.entries.associateWith { stringResource(it.label) }
     val selection = rememberMultiSelection()
     val modifiers = LocalClickModifiers.current
@@ -562,6 +590,7 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
                 NagButton(stringResource(R.string.nag_play_next), { actions.playNext(chosen) })
                 NagButton(stringResource(R.string.nag_add_to_queue), { actions.queue(chosen) })
                 actions.addToPlaylist?.let { add -> NagButton(stringResource(R.string.nag_pl_add), { add(chosen) }) }
+                actions.askRating?.let { ask -> NagButton(stringResource(R.string.nag_rate), { ask(chosen) }) }
             }
         }
         HorizontalRule()
@@ -598,6 +627,9 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
         )
     }
 }
+
+/** S-808: the columns whose order the statistics decide. */
+private val STATS_COLUMNS = setOf(MusicColumn.Rating, MusicColumn.Plays, MusicColumn.Skips, MusicColumn.LastPlayed)
 
 /** The columns to show, each with its check; the title always. */
 private fun columnMenu(state: MusicBrowserState, labels: Map<MusicColumn, String>): List<MenuEntry> =
