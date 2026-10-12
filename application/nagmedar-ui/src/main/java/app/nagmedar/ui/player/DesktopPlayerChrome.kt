@@ -38,20 +38,20 @@ import org.videolan.vlc.gui.video.VideoPlayerActivity
  * the classic overlay's gestures.
  */
 class DesktopPlayerChrome : PlayerChrome {
-    private val visibility = ChromeVisibility()
+    private val controls = ChromeVisibility()
     private var activity: VideoPlayerActivity? = null
     private var frame: View? = null
 
-    override val active: Boolean get() = visibility.active
+    override val active: Boolean get() = controls.active
 
     override fun attach(activity: VideoPlayerActivity, root: FrameLayout) {
         this.activity = activity
         // a desktop with a mouse starts with these controls; a finger later hands the video back
-        if (hasPrecisePointer(activity)) visibility.activate()
-        val frame = MouseOnlyFrame(activity, visibility)
+        if (hasPrecisePointer(activity)) controls.activate()
+        val frame = MouseOnlyFrame(activity, controls)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, visibility, frame) }
+            setContent { PlayerChromeContent(activity, controls, frame) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -60,7 +60,7 @@ class DesktopPlayerChrome : PlayerChrome {
         this.frame = frame
     }
 
-    override fun show() = visibility.show()
+    override fun show() = controls.show()
 
     override fun onMotion(event: MotionEvent) {
         if (PlayerChrome.isMouse(event)) {
@@ -69,16 +69,16 @@ class DesktopPlayerChrome : PlayerChrome {
                 MotionEvent.ACTION_MOVE, MotionEvent.ACTION_SCROLL,
                 -> {
                     // the mouse takes over from the classic overlay
-                    if (!visibility.active) activity?.takeIf { it.isShowing }?.overlayDelegate?.hideOverlay(true)
-                    visibility.onMouseMoved()
+                    if (!controls.active) activity?.takeIf { it.isShowing }?.overlayDelegate?.hideOverlay(true)
+                    controls.onMouseMoved()
                 }
             }
         } else if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            visibility.onFinger()
+            controls.onFinger()
         }
     }
 
-    override fun onPictureInPicture(inPictureInPicture: Boolean) = visibility.onPictureInPicture(inPictureInPicture)
+    override fun onPictureInPicture(inPictureInPicture: Boolean) = controls.onPictureInPicture(inPictureInPicture)
 
     override fun detach() {
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
@@ -93,7 +93,7 @@ class DesktopPlayerChrome : PlayerChrome {
  * here takes the focus. The cursor hides with the controls when the video fills the screen.
  */
 @SuppressLint("ViewConstructor")
-internal class MouseOnlyFrame(context: Context, private val visibility: ChromeVisibility) : FrameLayout(context) {
+internal class MouseOnlyFrame(context: Context, private val controls: ChromeVisibility) : FrameLayout(context) {
 
     /** Whether the cursor hides with the controls: the video fills the screen. */
     var hidesCursor = false
@@ -104,15 +104,15 @@ internal class MouseOnlyFrame(context: Context, private val visibility: ChromeVi
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean =
-        visibility.active && !visibility.pictureInPicture && PlayerChrome.isMouse(event) && super.dispatchTouchEvent(event)
+        controls.active && !controls.pictureInPicture && PlayerChrome.isMouse(event) && super.dispatchTouchEvent(event)
 
-    override fun dispatchHoverEvent(event: MotionEvent): Boolean = visibility.active && super.dispatchHoverEvent(event)
+    override fun dispatchHoverEvent(event: MotionEvent): Boolean = controls.active && super.dispatchHoverEvent(event)
 
-    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean = visibility.active && super.dispatchGenericMotionEvent(event)
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean = controls.active && super.dispatchGenericMotionEvent(event)
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onResolvePointerIcon(event: MotionEvent, pointerIndex: Int): PointerIcon? =
-        if (hidesCursor && visibility.cursorHidden) PointerIcon.getSystemIcon(context, PointerIcon.TYPE_NULL) else super.onResolvePointerIcon(event, pointerIndex)
+        if (hidesCursor && controls.cursorHidden) PointerIcon.getSystemIcon(context, PointerIcon.TYPE_NULL) else super.onResolvePointerIcon(event, pointerIndex)
 
     /** The cursor's look changed without a move: the system asks again. */
     fun cursorChanged() {
