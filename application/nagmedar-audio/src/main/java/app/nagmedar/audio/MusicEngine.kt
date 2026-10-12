@@ -158,6 +158,30 @@ class MusicEngine(
     fun usePullSink(): Boolean = available && NativeAudio.setSink(handle, NativeAudio.SINK_PULL) == 0
 
     /**
+     * S-903: the USB DAC behind [connection] as the output, driven directly; the connection stays
+     * the caller's to close after the engine moves to another sink. False when the engine could
+     * not take it (the device lost, no 2-channel format): [usbError] says why.
+     */
+    fun useUsbSink(connection: android.hardware.usb.UsbDeviceConnection): Boolean = available && NativeAudio.setUsbSink(handle, connection.fileDescriptor) == 0
+
+    /** S-903: the DAC's own volume, 0..1; false without a volume control. */
+    fun setUsbVolume(volume: Double): Boolean = available && NativeAudio.usbSetVolume(handle, volume) == 0
+
+    val usbHasVolume: Boolean get() = available && NativeAudio.usbHasVolume(handle)
+
+    val usbError: String get() = if (available) NativeAudio.usbError(handle) else ""
+
+    /** S-902: the depths the sink is asked for, NativeAudio.FORMAT_* (FORMAT_NONE: no bound). */
+    fun setFormatRange(minFormat: Int, maxFormat: Int) {
+        if (available) NativeAudio.setFormatRange(handle, minFormat, maxFormat)
+    }
+
+    /** S-902: the pull sink's owner reports whether its output is bit-perfect, for the signal path. */
+    fun setPullBitPerfect(bitPerfect: Boolean, latencyFrames: Long) {
+        if (available) NativeAudio.setPullBitPerfect(handle, bitPerfect, latencyFrames)
+    }
+
+    /**
      * Starts [uri] as track [id] at [startMs]; false when the engine cannot open it (the caller
      * falls back to libVLC). The decoder has it open before this returns.
      */

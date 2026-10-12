@@ -9,6 +9,8 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - Boşluksuz oynatma: sıradaki parça önceden çözülür, örnek doğruluğunda devralınır; MP3 ve AAC'nin kodlayıcı gecikmesi ve dolgusu kırpılır.
 - Çapraz geçiş: süre (2, 4, 8 sn), eşit güç ya da doğrusal eğri; albümün ardışık parçalarında kendiliğinden kapalı.
 - DSP zinciri: ön kazanç (otomatik ön kazançla), 20 bantlı grafik ekolayzer, 10 bantlı parametrik ekolayzer, AutoEq biçiminde kulaklık profili, önden bakışlı sınırlayıcı ve kırpılma göstergesi; tek tuşla atlanır ve atlanınca çıkış bit-perfect kalır. (Ekolayzer ekranı sonraki adımda.)
+- Bit-perfect çıkış (Android 14+): aygıtın bit-perfect mikser özniteliklerine uyan bir AudioTrack; örnekler karıştırılmadan, yeniden örneklenmeden, dokunulmadan gider; parçanın hızı değişince akış yeniden açılır; desteklenmezse olağan akışa ya da AAudio'ya düşer. Ayarlar › Müzik › Çıkış: otomatik, AAudio, bit-perfect, USB.
+- USB doğrudan çıkış: USB DAC libusb ile doğrudan sürülür (UAC1 ve UAC2, asenkron geri bildirim, 44,1–384 kHz, 16/24/32 bit); DAC'ın kendi ses denetimi uygulamanın sesidir; kablo çekilince başka çıkışa düşer.
 - Formatlar: FLAC, ALAC, WavPack, APE, TTA, Musepack, MP3, AAC, Opus, Vorbis, WMA, AIFF, WAV, W64, CAF, Matroska ses; motorun kendi FFmpeg derlemesiyle, her biri ffmpeg'in çözdüğüyle bire bir. (Tracker formatları, libopenmpt, sonraya kaldı.)
 - DSD (DSF, DFF): PCM'e çözülerek (DSD64 → 352,8 kHz) ya da bit-perfect çıkışta DoP olarak (bitler 0x05/0xFA işaretleri altında 24 bitlik sözcüklerde, olduğu gibi); sinyal yolu DSD hızını söyler.
 - Hız, perde, denge ve tek kanal: perdeyi koruyan hız (0,25–4×, WSOLA), hızı koruyan perde (±24 yarım ton), denge ve tek kanal; her biri kapalıyken çıkış bit-perfect kalır.

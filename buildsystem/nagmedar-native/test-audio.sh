@@ -370,6 +370,14 @@ print("%s dop: %d frames, markers alternate %s, the file's bits %s" % ("ok  " if
 sys.exit(0 if ok else 1)
 PY
 
+echo "== S-902: the output's depth as the owner asks"
+# the format is the engine's own choice here (no -f): the range decides it
+chosen_md5() { "$NAGAUDIO" decode "$@" --md5 | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["format"], d["md5"])'; }
+check "16-bit file widened to s32" "s32 $(ffmpeg -v error -i flac16.flac -f s32le - | md5_of)" "$(chosen_md5 flac16.flac --min-format s32)"
+check "16-bit file as s24" "s24 $(ffmpeg -v error -i flac16.flac -f s24le - | md5_of)" "$(chosen_md5 flac16.flac --min-format s24 --max-format s24)"
+check "24-bit file capped at s24" "s24 $(ffmpeg -v error -i flac24.flac -f s24le - | md5_of)" "$(chosen_md5 flac24.flac --max-format s24)"
+check "24-bit file capped at s16, dithered" "s16" "$(chosen_md5 flac24.flac --max-format s16 | cut -d" " -f1)"
+
 echo "== S-911: formats"
 for spec in "wv:-c:a wavpack" "tta:-c:a tta" "m4a:-c:a alac" "aiff:-c:a pcm_s24be" "wav:-c:a pcm_f32le" "caf:-c:a pcm_s24le" "mka:-c:a flac" "oga:-c:a libvorbis -q:a 5"; do
     ext=${spec%%:*}

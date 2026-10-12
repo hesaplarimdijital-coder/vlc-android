@@ -17,7 +17,7 @@
 //                                           [--replaygain off|track|album] [--rg-preamp DB]
 //                                           [--rg-untagged DB] [--rg-no-clip]
 //                                           [--tempo T] [--pitch SEMITONES] [--balance B] [--mono]
-//                                           [--dop]
+//                                           [--dop] [--min-format FORMAT] [--max-format FORMAT]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
 //           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary
 //           with the events seen and, with --md5, the MD5 of the samples (what ffmpeg -f md5
@@ -246,6 +246,7 @@ static int decode(int argc, char **argv)
     NagReplayGain rg = {NAG_REPLAYGAIN_OFF, 0, 0, 1};
     double tempo = 1.0, pitch = 0.0, balance = 0.0;
     int mono = 0, dop = 0;
+    NagSampleFormat min_format = NAG_FMT_NONE, max_format = NAG_FMT_S32;
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) out_path = argv[++i];
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
@@ -304,6 +305,8 @@ static int decode(int argc, char **argv)
         else if (strcmp(argv[i], "--balance") == 0 && i + 1 < argc) balance = atof(argv[++i]);
         else if (strcmp(argv[i], "--mono") == 0) mono = 1;
         else if (strcmp(argv[i], "--dop") == 0) dop = 1;
+        else if (strcmp(argv[i], "--min-format") == 0 && i + 1 < argc) min_format = parse_format(argv[++i]);
+        else if (strcmp(argv[i], "--max-format") == 0 && i + 1 < argc) max_format = parse_format(argv[++i]);
         else if (argv[i][0] == '-' && argv[i][1]) {
             fprintf(stderr, "nagaudio: unknown option %s\n", argv[i]);
             return 2;
@@ -334,6 +337,8 @@ static int decode(int argc, char **argv)
     nag_audio_set_balance(e, balance);
     nag_audio_set_mono(e, mono);
     nag_audio_set_dsd_mode(e, dop ? NAG_DSD_DOP : NAG_DSD_PCM);
+    if (min_format != NAG_FMT_NONE || max_format != NAG_FMT_S32)
+        nag_audio_set_format_range(e, min_format, max_format);
     if (nag_audio_open(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
         nag_audio_free(e);
         return 1;

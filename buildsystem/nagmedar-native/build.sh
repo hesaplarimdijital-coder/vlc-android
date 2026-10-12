@@ -129,10 +129,11 @@ build_taglib() { # extra cmake args...
 }
 
 build_audio() { # extra cmake args...
+    fetch libusb "$LIBUSB_URL" "$LIBUSB_REF"
     log "libnagmedar_audio ($TARGET)"
     local dir="$WORK/build-$TARGET/audio"
     cmake -S "$ROOT/native/audio" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DDEPS_PREFIX="$PREFIX" \
-        "$@" > "$dir.configure.log" 2>&1 || fail_log "audio configure ($TARGET)" "$dir.configure.log"
+        -DLIBUSB_SOURCE="$WORK/src/libusb" "$@" > "$dir.configure.log" 2>&1 || fail_log "audio configure ($TARGET)" "$dir.configure.log"
     cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libnagmedar_audio ($TARGET)" "$dir.build.log"
     grep -E "warning:" "$dir.build.log" | head -20 || true
 }

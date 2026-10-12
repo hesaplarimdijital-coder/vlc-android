@@ -11,6 +11,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and TagLib (empty: the system's pkg-config)")
+set(LIBUSB_SOURCE "" CACHE PATH "libusb source tree, for the USB DAC sink (S-903); empty: no USB sink")
 
 set(CORE ring.c source.c dsp.c stretch.c loudness.c engine.c tags.cpp)
 
@@ -31,12 +32,26 @@ endif()
 
 find_package(Threads REQUIRED)
 
+if(LIBUSB_SOURCE)
+    # libusb from source, private to this library, as the lab builds it
+    set(USB ${LIBUSB_SOURCE}/libusb)
+    add_library(nagaudio_usb STATIC
+        ${USB}/core.c ${USB}/descriptor.c ${USB}/hotplug.c ${USB}/io.c ${USB}/sync.c ${USB}/strerror.c
+        ${USB}/os/linux_usbfs.c ${USB}/os/events_posix.c ${USB}/os/threads_posix.c ${USB}/os/linux_netlink.c)
+    target_include_directories(nagaudio_usb PUBLIC ${USB} PRIVATE ${LIBUSB_SOURCE}/android ${USB}/os)
+    target_compile_options(nagaudio_usb PRIVATE -fvisibility=hidden -pthread -w)
+    list(APPEND CORE sink_usb.c)
+endif()
+
 add_library(nagaudio_core STATIC ${CORE})
 target_include_directories(nagaudio_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${FFMPEG_INCLUDE} ${TAGLIB_INCLUDE})
 target_compile_options(nagaudio_core PRIVATE -fvisibility=hidden -O2 -Wall -Wextra -Wno-unused-parameter)
 # TagLib is static too: its symbols stay inside the library (TAGLIB_STATIC keeps its export macro empty)
 target_compile_definitions(nagaudio_core PRIVATE TAGLIB_STATIC)
 target_link_libraries(nagaudio_core PUBLIC ${FFMPEG_LIBS} ${TAGLIB_LIBS} Threads::Threads m)
+if(LIBUSB_SOURCE)
+    target_link_libraries(nagaudio_core PUBLIC nagaudio_usb)
+endif()
 
 if(ANDROID)
     add_library(nagmedar_audio SHARED audio_jni.c sink_aaudio.c)

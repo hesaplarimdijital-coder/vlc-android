@@ -6,6 +6,10 @@ import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import app.nagmedar.audio.BitPerfectOutput
 import app.nagmedar.audio.CrossfadeCurve
 import app.nagmedar.audio.DsdMode
 import app.nagmedar.audio.DspMeter
@@ -17,6 +21,7 @@ import app.nagmedar.audio.NativeAudio
 import app.nagmedar.audio.OutputFormat
 import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.ReplayGainSettings
+import app.nagmedar.audio.UsbOutput
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.PlaybackEngine
@@ -42,6 +47,11 @@ import org.videolan.tools.NAGMEDAR_DSD_DOP
 import org.videolan.tools.NAGMEDAR_DSD_MODE
 import org.videolan.tools.NAGMEDAR_DSP
 import org.videolan.tools.NAGMEDAR_MUSIC_ENGINE
+import org.videolan.tools.NAGMEDAR_MUSIC_OUTPUT
+import org.videolan.tools.NAGMEDAR_OUTPUT_AAUDIO
+import org.videolan.tools.NAGMEDAR_OUTPUT_AUTO
+import org.videolan.tools.NAGMEDAR_OUTPUT_BIT_PERFECT
+import org.videolan.tools.NAGMEDAR_OUTPUT_USB
 import org.videolan.tools.NAGMEDAR_REPLAYGAIN_ALBUM
 import org.videolan.tools.NAGMEDAR_REPLAYGAIN_CLIP
 import org.videolan.tools.NAGMEDAR_REPLAYGAIN_MODE
@@ -70,6 +80,27 @@ class MusicEngineController(
     override val engineId = EngineId.NagmedarAudio
 
     private var engine: MusicEngine? = null
+
+    /** S-902: the bit-perfect AudioTrack output, when chosen and a device takes it. */
+    private var bitPerfectOutput: BitPerfectOutput? = null
+
+    /** S-903: the USB DAC driven directly, when chosen and permitted. */
+    private var usbOutput: UsbOutput? = null
+    private val audioManager: AudioManager? get() = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+    private val deviceCallback = object : AudioDeviceCallback() {
+        override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>) = selectOutput()
+        override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) = selectOutput()
+    }
+
+    /** Whether the output takes the samples as they are right now (the bit-perfect badge; crossfade off). */
+    val outputBitPerfect: Boolean get() = bitPerfectOutput?.bitPerfect == true || usbOutput?.active == true
+
+    /** S-903: the USB output, for the settings screen to list devices and ask the user's permission. */
+    val usb: UsbOutput? get() = usbOutput ?: engine?.let { UsbOutput(context, it).also { u -> usbOutput = u } }
+
+    /** "bitperfect", "aaudio" or "usb": the output in use. */
+    var outputName: String = NAGMEDAR_OUTPUT_AAUDIO
+        private set
     private var listener: MediaPlayerEventListener? = null
     private var ticker: Job? = null
     private var ids = 0L
@@ -177,7 +208,8 @@ class MusicEngineController(
         }
 
         override fun onDeviceLost() {
-            Log.i(TAG, "the output's device is gone; the engine reopens it")
+            Log.i(TAG, "the output's device is gone; the output is chosen again")
+            selectOutput()
         }
     }
 
@@ -189,10 +221,11 @@ class MusicEngineController(
             created.close()
             return null
         }
-        created.useAAudio()
         created.volume = volume / 100.0
         created.tempo = rate.toDouble()
         engine = created
+        selectOutput()
+        audioManager?.registerAudioDeviceCallback(deviceCallback, null)
         applyCrossfadeSettings()
         applyDspSettings()
         applyReplayGainSettings()
@@ -208,7 +241,50 @@ class MusicEngineController(
             NAGMEDAR_CROSSFADE_MS, NAGMEDAR_CROSSFADE_CURVE -> applyCrossfadeSettings()
             NAGMEDAR_REPLAYGAIN_MODE, NAGMEDAR_REPLAYGAIN_PREAMP, NAGMEDAR_REPLAYGAIN_UNTAGGED, NAGMEDAR_REPLAYGAIN_CLIP -> applyReplayGainSettings()
             NAGMEDAR_AUDIO_PITCH, NAGMEDAR_AUDIO_BALANCE, NAGMEDAR_AUDIO_MONO, NAGMEDAR_DSD_MODE -> applyAudioSettings()
+            NAGMEDAR_MUSIC_OUTPUT -> selectOutput()
         }
+    }
+
+    /**
+     * S-902: the output as set: bit-perfect through Android 14's mixer attributes where a device
+     * takes it ("auto" and "bitperfect"), AAudio otherwise; chosen again when devices come and go.
+     */
+    fun selectOutput() {
+        val engine = engine ?: return
+        val wanted = Settings.getInstance(context).getString(NAGMEDAR_MUSIC_OUTPUT, NAGMEDAR_OUTPUT_AUTO) ?: NAGMEDAR_OUTPUT_AUTO
+        if (wanted == NAGMEDAR_OUTPUT_USB) {
+            /* S-903: the DAC itself, when the user has let the app open it (the settings screen asks) */
+            val output = usb
+            if (output != null && ((output.active && output.stillValid()) || (output.permitted() && output.start()))) {
+                bitPerfectOutput?.close()
+                bitPerfectOutput = null
+                engine.setFormatRange(NativeAudio.FORMAT_NONE, NativeAudio.FORMAT_S32)
+                outputName = NAGMEDAR_OUTPUT_USB
+                setVolume(volume)
+                return
+            }
+        }
+        if (wanted == NAGMEDAR_OUTPUT_AUTO || wanted == NAGMEDAR_OUTPUT_BIT_PERFECT) {
+            val output = bitPerfectOutput ?: BitPerfectOutput(context, engine).also { bitPerfectOutput = it }
+            if (output.stillValid() || output.start()) {
+                leaveUsb()
+                outputName = NAGMEDAR_OUTPUT_BIT_PERFECT
+                setVolume(volume)
+                return
+            }
+        }
+        bitPerfectOutput?.close()
+        bitPerfectOutput = null
+        engine.setFormatRange(NativeAudio.FORMAT_NONE, NativeAudio.FORMAT_S32)
+        engine.useAAudio()
+        leaveUsb()
+        setVolume(volume)
+        outputName = NAGMEDAR_OUTPUT_AAUDIO
+    }
+
+    /** The engine already has another sink: the USB connection can go. */
+    private fun leaveUsb() {
+        if (usbOutput?.active == true) usbOutput?.stop()
     }
 
     /** S-909, S-908: the pitch, balance, mono and the DSD mode as set. */
@@ -305,7 +381,8 @@ class MusicEngineController(
             }
             return true
         }
-        val crossfade = applyCrossfadeSettings() > 0 && !(crossfadeSkipsAlbum && consecutiveInAlbum(current, mw))
+        /* S-905: off on a bit-perfect output, which takes the samples as they are */
+        val crossfade = applyCrossfadeSettings() > 0 && !outputBitPerfect && !(crossfadeSkipsAlbum && consecutiveInAlbum(current, mw))
         val id = ++ids
         if (!engine.setNext(id, uri, crossfade)) {
             nextId = -1L
@@ -382,17 +459,29 @@ class MusicEngineController(
 
     override fun getVolume() = volume
 
-    /** VLC's percent, 100 = the samples as they are; linear, as the Android output applies it. */
+    /** VLC's percent, 100 = the samples as they are; linear, as the Android output applies it. On the USB output the DAC's own control, where it has one. */
     override fun setVolume(volume: Int): Int {
         this.volume = volume.coerceIn(0, 200)
-        engine?.volume = this.volume / 100.0
+        val output = usbOutput
+        if (output != null && output.active && output.setVolume(this.volume / 100.0)) {
+            engine?.volume = 1.0
+        } else {
+            engine?.volume = this.volume / 100.0
+        }
         return 0
     }
 
     override fun release() {
         stopTicker()
-        if (engine != null) Settings.getInstance(context).unregisterOnSharedPreferenceChangeListener(settingsListener)
+        if (engine != null) {
+            Settings.getInstance(context).unregisterOnSharedPreferenceChangeListener(settingsListener)
+            audioManager?.unregisterAudioDeviceCallback(deviceCallback)
+        }
+        bitPerfectOutput?.close()
+        bitPerfectOutput = null
         engine?.close()
+        usbOutput?.close()
+        usbOutput = null
         engine = null
         listener = null
     }

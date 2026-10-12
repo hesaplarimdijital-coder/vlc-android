@@ -72,3 +72,10 @@ const val NAGMEDAR_AUDIO_MONO = "nagmedar_audio_mono"
 const val NAGMEDAR_DSD_MODE = "nagmedar_dsd_mode"
 const val NAGMEDAR_DSD_PCM = "pcm"
 const val NAGMEDAR_DSD_DOP = "dop"
+
+/** S-902, S-903: the music engine's output: "auto" (bit-perfect where the device takes it, else AAudio), "aaudio", "bitperfect", "usb". */
+const val NAGMEDAR_MUSIC_OUTPUT = "nagmedar_music_output"
+const val NAGMEDAR_OUTPUT_AUTO = "auto"
+const val NAGMEDAR_OUTPUT_AAUDIO = "aaudio"
+const val NAGMEDAR_OUTPUT_BIT_PERFECT = "bitperfect"
+const val NAGMEDAR_OUTPUT_USB = "usb"

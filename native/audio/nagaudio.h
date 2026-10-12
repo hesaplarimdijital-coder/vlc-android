@@ -122,10 +122,25 @@ struct NagSink {
 
 /* The pull sink: the owner (Java's AudioTrack thread, a test) calls nag_audio_render itself. */
 NagSink *nag_sink_pull_new(void);
+/** S-902: the owner tells whether its output takes the samples as they are, and its latency. */
+void nag_sink_pull_set_bit_perfect(NagSink *sink, int bit_perfect, int64_t latency_frames);
 #ifdef __ANDROID__
 /* AAudio, exclusive and low latency when the device allows, shared otherwise. */
 NagSink *nag_sink_aaudio_new(void);
 #endif
+
+/*
+ * S-903: a USB Audio Class DAC driven directly with libusb, behind the file descriptor of a
+ * UsbDeviceConnection (Android) or a usbfs device (tests). Bit-perfect: the samples go to the
+ * device's endpoint as they are, at the track's rate; the feature unit's volume control is the
+ * volume. A cable pulled ends in nag_audio_sink_lost, after which open fails.
+ */
+NagSink *nag_sink_usb_new(int fd);
+/** The hardware volume, 0..1 as attenuation under the device's loudest; -1 without a volume control. */
+int nag_sink_usb_set_volume(NagSink *sink, double volume);
+int nag_sink_usb_has_volume(NagSink *sink);
+/** Why the last open failed. */
+const char *nag_sink_usb_error(NagSink *sink);
 
 /**
  * For sinks: the device went away or the stream broke (AAudio's disconnect, a USB cable
@@ -314,6 +329,16 @@ void nag_audio_set_replaygain(NagAudio *engine, const NagReplayGain *settings);
 void nag_audio_get_replaygain(NagAudio *engine, NagReplayGain *settings);
 /** The gain in dB the playing track gets from this (0 when off or untagged and no untagged_db). */
 double nag_audio_replaygain_db(NagAudio *engine);
+
+/* ------------------------------------------------------------ output depth */
+
+/**
+ * S-902: the sample formats the sink is asked for, from here on: at least [min_format] (NONE:
+ * the track's own depth) and at most [max_format] (NONE: no cap) for integer tracks; floats
+ * stay F32. An output that takes only 24-bit words asks for S24_3 both ways. The sink is
+ * reopened for the track playing when its depth changes.
+ */
+void nag_audio_set_format_range(NagAudio *engine, NagSampleFormat min_format, NagSampleFormat max_format);
 
 /* ---------------------------------------------------------------------- DSD */
 

@@ -583,3 +583,63 @@ JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setDsdMode(JNIEnv *en
     if (engine_of(handle))
         nag_audio_set_dsd_mode(engine_of(handle), (NagDsdMode)mode);
 }
+
+/* ------------------------------------------------------- S-902 bit-perfect */
+
+/** The depths the sink is asked for: NagSampleFormat values, FORMAT_NONE for no bound. */
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setFormatRange(JNIEnv *env, jclass cls, jlong handle, jint minFormat, jint maxFormat)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_format_range(engine_of(handle), (NagSampleFormat)minFormat, (NagSampleFormat)maxFormat);
+}
+
+/** The pull sink's owner says whether its output is bit-perfect, and its latency in frames. */
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setPullBitPerfect(JNIEnv *env, jclass cls, jlong handle, jboolean bitPerfect, jlong latencyFrames)
+{
+    (void)env;
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (e)
+        nag_sink_pull_set_bit_perfect(nag_audio_sink(e), bitPerfect == JNI_TRUE, latencyFrames);
+}
+
+/* ---------------------------------------------------------------- S-903 USB */
+
+/** The USB DAC behind [fd] (a UsbDeviceConnection's) as the sink; the engine owns the sink. */
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setUsbSink(JNIEnv *env, jclass cls, jlong handle, jint fd)
+{
+    (void)env;
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (!e)
+        return -1;
+    NagSink *sink = nag_sink_usb_new(fd);
+    if (!sink)
+        return -1;
+    return nag_audio_set_sink(e, sink);
+}
+
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_usbSetVolume(JNIEnv *env, jclass cls, jlong handle, jdouble volume)
+{
+    (void)env;
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    return e ? nag_sink_usb_set_volume(nag_audio_sink(e), volume) : -1;
+}
+
+JNIEXPORT jboolean JNICALL Java_app_nagmedar_audio_NativeAudio_usbHasVolume(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)env;
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    return e && nag_sink_usb_has_volume(nag_audio_sink(e)) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_usbError(JNIEnv *env, jclass cls, jlong handle)
+{
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    return utf8(env, e ? nag_sink_usb_error(nag_audio_sink(e)) : "");
+}

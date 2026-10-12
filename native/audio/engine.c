@@ -138,6 +138,9 @@ struct NagAudio {
 
     /* S-908 */
     atomic_int dsd_mode;
+
+    /* S-902: the depths the sink is asked for, as the owner's output takes them (cfg's at first) */
+    atomic_int max_format, min_format;
     _Atomic int64_t meter_frames, meter_clipped;
     _Atomic double meter_peak, meter_reduction;
 
@@ -323,8 +326,9 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
     atomic_store(&v->rg_gain, 1.0);
     sem_init(&v->wake, 0, 0);
     /* S-908: DoP only where the output can carry 24-bit words as they are */
+    NagSampleFormat max = (NagSampleFormat)atomic_load(&e->max_format);
     int dop = atomic_load(&e->dsd_mode) == NAG_DSD_DOP && e->cfg.channels == 2 &&
-              (e->cfg.max_format == NAG_FMT_NONE || e->cfg.max_format == NAG_FMT_S32 || e->cfg.max_format == NAG_FMT_S24_3) &&
+              (max == NAG_FMT_NONE || max == NAG_FMT_S32 || max == NAG_FMT_S24_3) &&
               (e->cfg.fixed_format == NAG_FMT_NONE || e->cfg.fixed_format == NAG_FMT_S32 || e->cfg.fixed_format == NAG_FMT_S24_3);
     if (nag_source_open_ex(&v->src, url, e->cfg.channels, dop ? NAG_SOURCE_DOP : 0, error, error_size) < 0) {
         voice_free(v);
@@ -368,8 +372,11 @@ static NagFormat voice_format(const NagAudio *e, const Voice *v)
         f.sample_format = NAG_FMT_F32;
     else if (v->info.bits > 0 && v->info.bits <= 16 && atomic_load(&e->dsp_identity))
         f.sample_format = NAG_FMT_S16;
-    if (nag_format_bits(f.sample_format) > nag_format_bits(e->cfg.max_format) && e->cfg.max_format != NAG_FMT_NONE)
-        f.sample_format = e->cfg.max_format;
+    NagSampleFormat max = (NagSampleFormat)atomic_load(&e->max_format), min = (NagSampleFormat)atomic_load(&e->min_format);
+    if (max != NAG_FMT_NONE && nag_format_bits(f.sample_format) > nag_format_bits(max))
+        f.sample_format = max;
+    if (min != NAG_FMT_NONE && f.sample_format != NAG_FMT_F32 && f.sample_format != NAG_FMT_F64 && nag_format_bits(f.sample_format) < nag_format_bits(min))
+        f.sample_format = min;
     return f;
 }
 
@@ -546,6 +553,8 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     }
     nag_dsp_params_defaults(e->dsp_params);
     atomic_store(&e->dsp_identity, 1);
+    atomic_store(&e->max_format, e->cfg.max_format);
+    atomic_store(&e->min_format, NAG_FMT_NONE);
     e->event_thread_started = 1;
     return e;
 }
@@ -903,6 +912,23 @@ double nag_audio_replaygain_db(NagAudio *e)
         return 0;
     double gain = atomic_load(&v->rg_gain);
     return gain > 0 ? 20.0 * log10(gain) : -144.0;
+}
+
+/* ------------------------------------------------------------ output depth */
+
+void nag_audio_set_format_range(NagAudio *e, NagSampleFormat min_format, NagSampleFormat max_format)
+{
+    pthread_mutex_lock(&e->lock);
+    atomic_store(&e->min_format, min_format);
+    atomic_store(&e->max_format, max_format);
+    /* the voice playing may want the sink in another depth now: the event thread reopens it */
+    Voice *v = atomic_load(&e->current);
+    if (v && !sink_fits(e, v)) {
+        atomic_store(&e->out_valid, 0);
+        if (!atomic_exchange(&e->reopen_wanted, 1))
+            sem_post(&e->event_sem);
+    }
+    pthread_mutex_unlock(&e->lock);
 }
 
 /* ---------------------------------------------------------------------- DSD */
@@ -1564,6 +1590,8 @@ const char *nag_audio_version(void)
 typedef struct PullSink {
     NagFormat format;
     int open;
+    atomic_int bit_perfect; /* the owner says its output takes the samples as they are (S-902) */
+    _Atomic int64_t latency;
 } PullSink;
 
 static int pull_open(NagSink *sink, NagAudio *engine, const NagFormat *want, NagFormat *got)
@@ -1589,14 +1617,20 @@ static void pull_close(NagSink *sink)
 
 static int64_t pull_latency(NagSink *sink)
 {
-    (void)sink;
-    return 0;
+    return atomic_load(&((PullSink *)sink->priv)->latency);
 }
 
 static int pull_bit_perfect(NagSink *sink)
 {
-    (void)sink;
-    return 0;
+    return atomic_load(&((PullSink *)sink->priv)->bit_perfect);
+}
+
+void nag_sink_pull_set_bit_perfect(NagSink *sink, int bit_perfect, int64_t latency_frames)
+{
+    if (!sink || sink->bit_perfect != pull_bit_perfect)
+        return;
+    atomic_store(&((PullSink *)sink->priv)->bit_perfect, bit_perfect ? 1 : 0);
+    atomic_store(&((PullSink *)sink->priv)->latency, latency_frames);
 }
 
 static void pull_destroy(NagSink *sink)

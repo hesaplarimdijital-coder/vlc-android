@@ -37,7 +37,7 @@ object NativeAudio {
     const val STATE_PAUSED = 2
     const val STATE_ENDED = 3
 
-    // sinks of setSink
+    // sinks of setSink (the USB sink has setUsbSink)
     const val SINK_PULL = 0
     const val SINK_AAUDIO = 1
 
@@ -174,4 +174,21 @@ object NativeAudio {
 
     /** S-908: DSD files decoded to PCM (0) or passed as DoP words (1) from the next track on. */
     @JvmStatic external fun setDsdMode(handle: Long, mode: Int)
+
+    /** S-902: the depths the sink is asked for, FORMAT_* (FORMAT_NONE: no bound); the sink reopens when the track's changes. */
+    @JvmStatic external fun setFormatRange(handle: Long, minFormat: Int, maxFormat: Int)
+
+    /** S-902: the pull sink's owner says whether its output takes the samples as they are, and its latency in frames. */
+    @JvmStatic external fun setPullBitPerfect(handle: Long, bitPerfect: Boolean, latencyFrames: Long)
+
+    /** S-903: the USB DAC behind [fd] (a UsbDeviceConnection's) as the sink; 0 when set. */
+    @JvmStatic external fun setUsbSink(handle: Long, fd: Int): Int
+
+    /** S-903: the DAC's own volume, 0..1; negative without a volume control. */
+    @JvmStatic external fun usbSetVolume(handle: Long, volume: Double): Int
+
+    @JvmStatic external fun usbHasVolume(handle: Long): Boolean
+
+    /** Why the USB sink's last open failed. */
+    @JvmStatic external fun usbError(handle: Long): String
 }
