@@ -15,6 +15,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.search.PaletteItem
 import app.nagmedar.ui.search.PaletteKind
 import app.nagmedar.ui.search.PaletteSurface
@@ -43,12 +45,13 @@ class PaletteScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
+    /** As in the app: the player's commands and those of later MVPs are not offered in the shell. */
     private val later = emptySet<ShortcutId>()
 
     @Composable
     private fun items(): List<PaletteItem> {
         val res = LocalContext.current.resources
-        return commandItems(res, { it !in later }, {}) + screenItems(res) {} + listOf(
+        return commandItems(res, { ShortcutRegistry[it].scope == ShortcutScope.Global && it !in later }, {}) + screenItems(res) {} + listOf(
             PaletteItem("media:kuzey", PaletteKind.Media, "Kuzey Işığı", "Video · 2:18:10", icon = NagIcons.Movies) {},
             PaletteItem("media:sabaha", PaletteKind.Media, "Sabaha Kadar", "Parça · Ada Karan", icon = NagIcons.Music) {},
             PaletteItem("media:acik", PaletteKind.Media, "Açık Deniz", "Video · 1:44:00", icon = NagIcons.Movies) {},

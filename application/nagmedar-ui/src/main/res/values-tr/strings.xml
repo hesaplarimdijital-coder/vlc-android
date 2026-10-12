@@ -724,6 +724,8 @@
     <string name="nag_info_decoding">Çözme ve çıkış</string>
     <string name="nag_info_video_decoder">Video çözücü</string>
     <string name="nag_info_audio_output">Ses çıkışı</string>
+    <string name="nag_info_video_output">Video çıkışı</string>
+    <string name="nag_info_audio_decoder">Ses çözücü</string>
     <string name="nag_info_decoder_auto">Otomatik · önce MediaCodec (donanım)</string>
     <string name="nag_info_decoder_hardware">MediaCodec · donanım</string>
     <string name="nag_info_decoder_hardware_direct">MediaCodec · donanım · doğrudan çıkış</string>
@@ -737,6 +739,8 @@
     <string name="nag_info_frames">Kare</string>
     <string name="nag_info_frames_lost">%1$s kayıp</string>
     <string name="nag_info_frames_shown">%1$s gösterildi</string>
+    <string name="nag_info_buffer">Tampon</string>
+    <string name="nag_info_pending">Soluk satırlar oynatıcı motorunun yeni sürümüyle dolacak.</string>
     <string name="nag_info_overlay">Videonun üzerinde göster</string>
     <string name="nag_info_overlay_bitrate">Bit hızı</string>
     <string name="nag_info_overlay_lost">Kayıp kare</string>

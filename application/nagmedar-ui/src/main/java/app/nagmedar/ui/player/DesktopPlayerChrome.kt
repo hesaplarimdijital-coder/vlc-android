@@ -330,8 +330,11 @@ private fun InfoContent(info: PanelInfo, columns: Int) {
         )
     }
     val streams = streamRows(tech, tracks, decoding)
+    // the video output and the audio decoder are the native side's to tell (S-504, S-506)
     val rows = listOf(
         InfoRow(stringResource(R.string.nag_info_video_decoder), stringResource(decoding.label)),
+        InfoRow(stringResource(R.string.nag_info_video_output), null),
+        InfoRow(stringResource(R.string.nag_info_audio_decoder), null),
         InfoRow(stringResource(R.string.nag_info_audio_output), source.audioOutput()),
     )
     val last = info.live.last

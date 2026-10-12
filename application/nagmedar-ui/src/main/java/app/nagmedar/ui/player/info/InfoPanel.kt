@@ -6,7 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -44,6 +47,7 @@ import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.player.panel.PanelCaption
+import app.nagmedar.ui.player.panel.PanelDisabledAlpha
 import app.nagmedar.ui.player.panel.PanelRule
 import app.nagmedar.ui.player.panel.PanelSection
 import app.nagmedar.ui.player.panel.PendingNote
@@ -70,28 +74,35 @@ fun InfoPanel(
     modifier: Modifier = Modifier,
     /** Under the video in a wide window: two columns of sections. */
     columns: Int = 1,
-    /** What the native side cannot tell yet (the video output, the buffer) is noted. */
+    /** What the native side cannot tell yet (the video output, the audio decoder, the buffer) shows faded, with a note. */
     pending: Boolean = true,
 ) {
     Column(modifier.fillMaxSize().testTag("info-panel")) {
-        Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(13.dp),
+        ) {
             val about = @Composable {
                 if (file != null) FileHeader(file) else PanelCaption(stringResource(R.string.nag_info_no_media))
                 if (streams.isNotEmpty()) StreamsSection(streams)
-                DecodingSection(decoding, pending)
+                DecodingSection(decoding)
             }
             if (columns >= 2) {
-                Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) { about() }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) { LiveSection(live, pending) }
                 }
             } else {
-                Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                    about()
-                    PanelRule()
-                    LiveSection(live, pending)
-                }
+                about()
+                PanelRule()
+                LiveSection(live, pending)
             }
+            // once, under everything: which lines wait for the native side
+            if (pending) PendingNote("info-pending", stringResource(R.string.nag_info_pending))
         }
         Footer(overlay, onOverlay, report)
     }
@@ -163,21 +174,27 @@ private fun StreamLine(row: StreamRow) {
     }
 }
 
+/** The decoders and outputs, as the mockup lists them; what the native side cannot tell yet is faded. */
 @Composable
-private fun DecodingSection(rows: List<InfoRow>, pending: Boolean) {
+private fun DecodingSection(rows: List<InfoRow>) {
     PanelSection(spacing = 4.dp) {
         SectionTitle(stringResource(R.string.nag_info_decoding))
         rows.forEach { row ->
-            Row(Modifier.fillMaxWidth().heightIn(min = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 20.dp)
+                    .alpha(if (row.value != null) 1f else PanelDisabledAlpha),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 Text(row.label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1, modifier = Modifier.width(96.dp))
-                Text(row.value, style = NagTheme.type.labelSmall, color = NagTheme.colors.text, modifier = Modifier.weight(1f))
+                Text(row.value ?: "—", style = NagTheme.type.labelSmall, color = NagTheme.colors.text, modifier = Modifier.weight(1f))
             }
         }
-        if (pending) PendingNote("info-pending")
     }
 }
 
-/** A sample a second: the input bitrate and its last minute, the pictures shown and lost. */
+/** A sample a second: the input bitrate and its last minute; the buffer and the pictures shown and lost side by side. */
 @Composable
 private fun LiveSection(live: LiveStats, pending: Boolean) {
     val colors = NagTheme.colors
@@ -204,26 +221,34 @@ private fun LiveSection(live: LiveStats, pending: Boolean) {
                 PanelCaption(stringResource(R.string.nag_info_graph_now))
             }
         }
-        Card {
-            Text(stringResource(R.string.nag_info_frames), style = NagTheme.type.labelSmall, color = colors.textSecondary)
-            val lost = last?.lost ?: 0
-            Text(
-                stringResource(R.string.nag_info_frames_lost, countLabel(lost, locale)),
-                style = NagTheme.type.title.copy(fontFamily = PlexMono),
-                color = if (last == null) colors.textTertiary else if (lost == 0L) colors.success else colors.warning,
-                modifier = Modifier.testTag("info-lost"),
-            )
-            PanelCaption(stringResource(R.string.nag_info_frames_shown, countLabel(last?.displayed ?: 0, locale)))
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // the buffer: the native side's (S-504), faded until then
+            if (pending) {
+                Card(Modifier.weight(1f).fillMaxHeight().alpha(PanelDisabledAlpha)) {
+                    Text(stringResource(R.string.nag_info_buffer), style = NagTheme.type.labelSmall, color = colors.textSecondary)
+                    Text("—", style = NagTheme.type.title.copy(fontFamily = PlexMono), color = colors.textTertiary)
+                }
+            }
+            Card(Modifier.weight(1f).fillMaxHeight()) {
+                Text(stringResource(R.string.nag_info_frames), style = NagTheme.type.labelSmall, color = colors.textSecondary)
+                val lost = last?.lost ?: 0
+                Text(
+                    stringResource(R.string.nag_info_frames_lost, countLabel(lost, locale)),
+                    style = NagTheme.type.title.copy(fontFamily = PlexMono),
+                    color = if (last == null) colors.textTertiary else if (lost == 0L) colors.success else colors.warning,
+                    maxLines = 1,
+                    modifier = Modifier.testTag("info-lost"),
+                )
+                PanelCaption(stringResource(R.string.nag_info_frames_shown, countLabel(last?.displayed ?: 0, locale)))
+            }
         }
-        if (pending) PendingNote("info-live-pending")
     }
 }
 
 @Composable
-private fun Card(content: @Composable () -> Unit) {
+private fun Card(modifier: Modifier = Modifier.fillMaxWidth(), content: @Composable () -> Unit) {
     Column(
-        Modifier
-            .fillMaxWidth()
+        modifier
             .border(1.dp, NagTheme.colors.border, RoundedCornerShape(8.dp))
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -290,35 +315,46 @@ private fun Footer(overlay: Boolean, onOverlay: (Boolean) -> Unit, report: () ->
 }
 
 /**
- * The statistics over the video (S-605's overlay), at its top left under the title: the input
- * bitrate and the pictures lost of those shown, every second.
+ * The statistics over the video (S-605's overlay), at its top left under the title, as the mockup
+ * draws it: a small dark card with the input bitrate and the pictures lost of those shown, every
+ * second; none lost in green, some in amber.
  */
 @Composable
 fun StatsOverlay(stats: StatsSample?, modifier: Modifier = Modifier) {
     val locale = currentLocale()
+    val colors = NagTheme.colors
+    val shape = RoundedCornerShape(8.dp)
     Column(
         modifier
-            .background(Color.Black.copy(alpha = 0.62f), RoundedCornerShape(8.dp))
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .width(236.dp)
+            .background(OverlayBackground, shape)
+            .border(1.dp, Color.White.copy(alpha = 0.08f), shape)
+            .padding(horizontal = 12.dp, vertical = 9.dp)
             .testTag("stats-overlay"),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
-        OverlayLine(stringResource(R.string.nag_info_overlay_bitrate), stats?.let { mbpsLabel(it.inputMbps, locale) } ?: "—")
+        OverlayLine(stringResource(R.string.nag_info_overlay_bitrate), stats?.let { mbpsLabel(it.inputMbps, locale) } ?: "—", colors.text)
         OverlayLine(
             stringResource(R.string.nag_info_overlay_lost),
             stats?.let { countLabel(it.lost, locale) + " / " + countLabel(it.displayed, locale) } ?: "—",
-            highlight = stats?.lost?.let { it > 0 } ?: false,
+            when {
+                stats == null -> colors.text
+                stats.lost > 0 -> colors.warning
+                else -> colors.success
+            },
         )
     }
 }
 
 @Composable
-private fun OverlayLine(label: String, value: String, highlight: Boolean = false) {
-    Row(Modifier.widthIn(min = 220.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = NagTheme.type.mono, color = Color.White.copy(alpha = 0.7f), modifier = Modifier.weight(1f))
-        Text(value, style = NagTheme.type.mono, color = if (highlight) NagTheme.colors.warning else Color.White)
+private fun OverlayLine(label: String, value: String, color: Color) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(label, style = NagTheme.type.mono, color = NagTheme.colors.textTertiary, maxLines = 1, modifier = Modifier.weight(1f))
+        Text(value, style = NagTheme.type.mono, color = color, maxLines = 1)
     }
 }
+
+/** The mockup's card over the video: almost black, a little see-through. */
+private val OverlayBackground = Color(0xC70C0F12)
 
 private const val CAPACITY = 60

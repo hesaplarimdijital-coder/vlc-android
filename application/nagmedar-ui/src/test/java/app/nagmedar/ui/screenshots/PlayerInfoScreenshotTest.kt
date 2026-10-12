@@ -64,6 +64,8 @@ class PlayerInfoScreenshotTest {
                         streams = streamRows(TechSamples.kuzeyIsigi, sampleTracks, VideoDecoding.Hardware),
                         decoding = listOf(
                             InfoRow(stringResource(R.string.nag_info_video_decoder), stringResource(VideoDecoding.Hardware.label)),
+                            InfoRow(stringResource(R.string.nag_info_video_output), null),
+                            InfoRow(stringResource(R.string.nag_info_audio_decoder), null),
                             InfoRow(stringResource(R.string.nag_info_audio_output), "AAudio"),
                         ),
                         live = live,

@@ -746,6 +746,8 @@
     <string name="nag_info_decoding">Decoding and output</string>
     <string name="nag_info_video_decoder">Video decoder</string>
     <string name="nag_info_audio_output">Audio output</string>
+    <string name="nag_info_video_output">Video output</string>
+    <string name="nag_info_audio_decoder">Audio decoder</string>
     <string name="nag_info_decoder_auto">Automatic · MediaCodec (hardware) first</string>
     <string name="nag_info_decoder_hardware">MediaCodec · hardware</string>
     <string name="nag_info_decoder_hardware_direct">MediaCodec · hardware · direct rendering</string>
@@ -759,6 +761,8 @@
     <string name="nag_info_frames">Frames</string>
     <string name="nag_info_frames_lost">%1$s dropped</string>
     <string name="nag_info_frames_shown">%1$s shown</string>
+    <string name="nag_info_buffer">Buffer</string>
+    <string name="nag_info_pending">The faded lines fill in with the next version of the playback engine.</string>
     <string name="nag_info_overlay">Show over the video</string>
     <string name="nag_info_overlay_bitrate">Bitrate</string>
     <string name="nag_info_overlay_lost">Dropped frames</string>

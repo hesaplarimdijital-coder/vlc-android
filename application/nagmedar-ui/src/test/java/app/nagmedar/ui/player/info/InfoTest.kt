@@ -119,7 +119,8 @@ class InfoTest {
         val report = infoReport(
             sampleFile,
             streams,
-            listOf(InfoRow("Video çözücü", "MediaCodec · donanım")),
+            // what the native side cannot tell yet is left out
+            listOf(InfoRow("Video çözücü", "MediaCodec · donanım"), InfoRow("Video çıkışı", null)),
             StatsSample(61.8f, 103_216, 0),
             ReportLabels("Akışlar", "Çözme ve çıkış", "Canlı", "Giriş bit hızı: 61,8 Mbps", "Kare: 103 216 gösterildi, 0 kayıp"),
         )

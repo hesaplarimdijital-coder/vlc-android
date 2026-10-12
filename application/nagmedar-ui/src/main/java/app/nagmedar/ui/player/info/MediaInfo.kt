@@ -36,9 +36,12 @@ data class StreamRow(
     val current: Boolean = false,
 )
 
-/** A label and its value: "Video decoder", "MediaCodec · hardware". */
+/**
+ * A label and its value: "Video decoder", "MediaCodec · hardware". A null value is one the native
+ * side of the player cannot tell yet (the video output, the audio decoder): the row is faded.
+ */
 @Immutable
-data class InfoRow(val label: String, val value: String)
+data class InfoRow(val label: String, val value: String?)
 
 /** The file itself: its name and "58,4 GB · Matroska · 2:18:10 · SAMSUNG T7". */
 @Immutable
@@ -227,9 +230,10 @@ fun infoReport(file: FileFacts?, streams: List<StreamRow>, decoding: List<InfoRo
         }
         appendLine()
     }
-    if (decoding.isNotEmpty()) {
+    val known = decoding.filter { it.value != null }
+    if (known.isNotEmpty()) {
         appendLine(labels.decoding)
-        decoding.forEach { appendLine("${it.label}: ${it.value}") }
+        known.forEach { appendLine("${it.label}: ${it.value}") }
         appendLine()
     }
     stats?.let {

@@ -91,8 +91,8 @@ internal fun PanelCaption(text: String, modifier: Modifier = Modifier) {
 
 /** Under faded controls: they wait for the native side of the player. */
 @Composable
-internal fun PendingNote(tag: String) {
-    PanelCaption(stringResource(R.string.nag_panel_pending), Modifier.padding(top = 2.dp).testTag(tag))
+internal fun PendingNote(tag: String, text: String = stringResource(R.string.nag_panel_pending)) {
+    PanelCaption(text, Modifier.padding(top = 2.dp).testTag(tag))
 }
 
 /** A text button in the accent colour: "Reset". */
