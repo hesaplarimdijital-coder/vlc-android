@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -41,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
-import app.nagmedar.ui.player.panel.PanelBadge
 import app.nagmedar.ui.player.panel.TextAction
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
@@ -151,16 +151,32 @@ private fun Saved(saved: SnapshotOutcome.Saved, onOpen: (SnapshotOutcome.Saved) 
         )
         if (badges.isNotEmpty()) {
             Row(Modifier.padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                badges.forEach { PanelBadge(it) }
+                badges.forEach { Badge(it) }
             }
         }
         if (saved.uri != null) {
-            Row(Modifier.padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            // the buttons' words in line with the lines above
+            Row(Modifier.padding(top = 2.dp).offset(x = (-6).dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 TextAction(stringResource(R.string.nag_snap_open), enabled = true) { onOpen(saved) }
                 TextAction(stringResource(R.string.nag_snap_share), enabled = true) { onShare(saved) }
             }
         }
     }
+}
+
+/** "HDR → SDR", "with subtitles": a small label on the card's own darker ground. */
+@Composable
+private fun Badge(text: String) {
+    Text(
+        text,
+        style = NagTheme.type.labelSmall,
+        color = NagTheme.colors.textSecondary,
+        maxLines = 1,
+        modifier = Modifier
+            .background(NagTheme.colors.surface, RoundedCornerShape(9.dp))
+            .border(1.dp, NagTheme.colors.border, RoundedCornerShape(9.dp))
+            .padding(horizontal = 8.dp, vertical = 1.dp),
+    )
 }
 
 @Composable

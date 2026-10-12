@@ -19,12 +19,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-606: the card says where the screenshot went and what became of its HDR and subtitles; it
  * opens and shares it; a folder gone is chosen again; the card goes after six seconds.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class SnapshotCardTest {
 
