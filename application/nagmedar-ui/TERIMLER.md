@@ -93,7 +93,7 @@ Sözlüğü testler denetler:
 | gerçek tepe | true peak | | inter-sample peak | Dört kat örneklenmiş tepe, dBTP; ReplayGain'in kırpılma önlemesi buna bakar |
 | parça kazancı, albüm kazancı | track gain, album gain | | | ReplayGain'in iki kipi; “Albüm” albümü olmayan parçada parça kazancına düşer |
 | hız | speed | tempo | tempo | Perde korunarak çalma hızı: 0,5–3×; motorun tempo aşaması, sesli kitap ve podcast için |
-| perde | pitch | pitch, ton | | Yarım ton olarak (−24…+24); hız korunarak değiştirilir |
+| perde | pitch | pitch | | Yarım ton olarak (−24…+24); hız korunarak değiştirilir |
 | denge | balance | balans | | Sol ve sağ arasında; bir yan kısılır, öteki olduğu gibi kalır |
 | tek kanal | mono | mono | | Tüm kanalların ortalaması her kanala; “Tek kanal” ayarı |
 | DSD | DSD | | | Olduğu gibi; “DSD64”, “DSD128” hız adları; “DoP” (DSD over PCM) da olduğu gibi |
