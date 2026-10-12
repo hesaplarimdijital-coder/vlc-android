@@ -279,12 +279,11 @@ class DesktopControlsTest {
         assertEquals(listOf("seekTo:${state.lengthMs / 2}"), actions.calls)
         // the mouse at 0.95: 2:11:15, in the chapter "Şafak", with a frame
         timeline.performMouseInput { moveTo(Offset(width * 0.95f, height / 2f)) }
-        // the mouse rests a moment before a frame is read
-        compose.mainClock.advanceTimeBy(200)
         compose.waitForIdle()
         compose.onNodeWithTag("player-preview").assertExists()
         compose.onNodeWithText("2:11:15 · Bölüm 4 — Şafak").assertExists()
-        assertTrue(previews.asked.isNotEmpty())
+        // the mouse rests a moment before a frame is read
+        compose.waitUntil(5_000) { previews.asked.isNotEmpty() }
         timeline.performMouseInput { moveTo(Offset(-50f, -400f)) }
         compose.waitForIdle()
         compose.onNodeWithTag("player-preview").assertDoesNotExist()
