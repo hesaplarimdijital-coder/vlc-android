@@ -20,7 +20,8 @@
 #   - the formats (S-911): WavPack, TTA, ALAC, WMA, Vorbis, AIFF, WAV float, CAF and Matroska
 #     audio, each what ffmpeg decodes (the engine's own FFmpeg build must carry them)
 #   - the A/B test (S-912): the chain's level change measured within 0.1 dB of the model's
-#     response, side B bypassed at that level, exactly
+#     response, side B bypassed at that level, exactly; the chain running on through side B,
+#     B delayed as the chain delays, the switch crossfaded
 #   - the null test (S-1405): null_test.py finds a capture's lead-in and reports no difference
 #     for a true capture, the one differing sample for a broken one
 set -euo pipefail
@@ -408,6 +409,39 @@ import sys
 measured, expected = float(sys.argv[1]), float(sys.argv[2])
 ok = abs(measured - expected) < 0.1
 print("%s chain level on the sine %.2f dB, the model's response %.2f dB" % ("ok  " if ok else "FAIL", measured, expected))
+sys.exit(0 if ok else 1)
+PY
+# nothing but the sound tells the sides apart: with a peak and the limiter (whose lookahead
+# delays the chain), side B from about 1.5 s on. The chain runs on B too (the meter counts every
+# frame); the switch crossfades over 10 ms (441 frames), each frame the two sides weighed; then B
+# is the file delayed by the chain's latency, at B's gain
+"$NAGAUDIO" decode flac16.flac -f f64 -o abl_b.raw --peq "pk:1000:6:1" --limiter -1 --ab-after 66150 > abl.json
+"$NAGAUDIO" decode flac16.flac -f f64 -o abl_a.raw --peq "pk:1000:6:1" --limiter -1 > /dev/null
+python3 - "$(json '"%d %d %.4f" % (d["meter"]["frames"], d["dsp_latency"], d["ab_gain_db"])' < abl.json)" <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+frames, latency, gain_db = sys.argv[1].split()
+frames, latency = int(frames), int(latency)
+def load(path):
+    data = open(path, "rb").read()
+    return struct.unpack("<%dd" % (len(data) // 8), data)
+a, b, plain = load("abl_a.raw"), load("abl_b.raw"), load("plain.raw")
+C, F = 2, 441
+total = len(plain) // C
+first = next(i for i in range(len(b)) if b[i] != a[i]) // C
+start = first - 1  # the crossfade's first frame weighs B at 0: still A's
+# B's gain as the output holds it (the summary rounds it): at the loudest sample after the crossfade
+loudest = max(range((start + F) * C, total * C), key=lambda i: abs(plain[i - latency * C]))
+gain = b[loudest] / plain[loudest - latency * C]
+assert abs(20 * math.log10(gain) - float(gain_db)) < 1e-4
+def side_b(f, c):
+    return plain[(f - latency) * C + c] * gain
+worst_fade = max(abs(b[(start + k) * C + c] - (a[(start + k) * C + c] * (1 - k / F) + side_b(start + k, c) * (k / F)))
+                 for k in range(F) for c in range(C))
+worst_b = max(abs(b[f * C + c] - side_b(f, c)) for f in range(start + F, total) for c in range(C))
+ok = frames == total and latency > 0 and 66150 <= start < 66150 + 1024 and worst_fade < 1e-12 and worst_b < 1e-12
+print("%s chain on both sides (%d of %d frames metered), the switch at frame %d crossfaded (worst %.1e), "
+      "side B the file %d frames late at %+.2f dB (worst %.1e)"
+      % ("ok  " if ok else "FAIL", frames, total, start, worst_fade, latency, float(gain_db), worst_b))
 sys.exit(0 if ok else 1)
 PY
 

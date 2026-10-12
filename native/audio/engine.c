@@ -148,6 +148,14 @@ struct NagAudio {
     int64_t ab_frames;    /* frames in the window; halved with the energies every AB_WINDOW frames */
     atomic_int ab_side;
     _Atomic double ab_gain; /* side B's gain, linear, frozen when B was chosen */
+    /* Side B is the dry signal delayed as the chain delays it, and the chain runs on either side
+     * (its filters stay warm, the meter and the level keep counting), so a switch is seamless:
+     * nothing but the sound tells the sides apart, which the blind test needs. The render's own. */
+    double *ab_dry;   /* MIX_FRAMES frames: the block, delayed */
+    double *ab_line;  /* the delay line, the chain's capacity in frames */
+    int ab_line_pos;
+    int ab_shown;     /* the side the output is on, or crossfading to */
+    int ab_fade;      /* frames left of that crossfade */
 
     /* the event plane */
     NagEvent events[EVENT_QUEUE];
@@ -541,9 +549,12 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     e->dsp_params = malloc(sizeof(*e->dsp_params));
     int dsp_ok = e->cfg.channels <= NAG_DSP_CHANNELS_MAX && nag_dsp_init(&e->dsp, e->cfg.channels) == 0;
     int stretch_ok = e->cfg.channels <= NAG_STRETCH_CHANNELS_MAX && nag_stretch_init(&e->stretch, e->cfg.channels) == 0;
+    e->ab_dry = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
+    e->ab_line = dsp_ok ? calloc((size_t)e->dsp.capacity_frames * e->cfg.channels, sizeof(double)) : NULL;
     atomic_store(&e->tempo, 1.0);
     atomic_store(&e->pitch, 0.0);
-    if (!e->mix || !e->mix2 || !e->dsp_params || !dsp_ok || !stretch_ok || pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
+    if (!e->mix || !e->mix2 || !e->dsp_params || !dsp_ok || !stretch_ok || !e->ab_dry || !e->ab_line ||
+        pthread_create(&e->event_thread, NULL, event_main, e) != 0) {
         if (dsp_ok)
             nag_dsp_free(&e->dsp);
         if (stretch_ok)
@@ -551,6 +562,8 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
         free(e->dsp_params);
         free(e->mix);
         free(e->mix2);
+        free(e->ab_dry);
+        free(e->ab_line);
         sem_destroy(&e->event_sem);
         pthread_mutex_destroy(&e->lock);
         free(e);
@@ -610,6 +623,8 @@ void nag_audio_free(NagAudio *e)
     nag_stretch_free(&e->stretch);
     free(e->mix);
     free(e->mix2);
+    free(e->ab_dry);
+    free(e->ab_line);
     free(e);
 }
 
@@ -1209,6 +1224,8 @@ static inline void silence(NagAudio *e, void *out, int frames)
 }
 
 #define AB_WINDOW_SECONDS 10
+/* a switch between the sides crossfades over this long: no click to tell one from the other */
+#define AB_FADE_MS 10
 
 static double block_energy(const double *frames, int samples)
 {
@@ -1218,19 +1235,76 @@ static double block_energy(const double *frames, int samples)
     return sum;
 }
 
+/* S-912: [n] frames of [x] into the line that delays as the chain does (its limiter's lookahead);
+ * [dry], when given, gets them as delayed. Fed on every block, so side B can start at any time. */
+static void ab_delay(NagAudio *e, const double *x, double *dry, int n)
+{
+    const int C = e->dsp.channels;
+    const int cap = e->dsp.capacity_frames;
+    const int latency = e->dsp.limiter_on ? e->dsp.limiter.frames - 1 : 0;
+    int pos = e->ab_line_pos;
+    for (int i = 0; i < n; i++) {
+        memcpy(e->ab_line + (size_t)pos * C, x + (size_t)i * C, sizeof(double) * C);
+        if (dry) {
+            int r = pos - latency;
+            if (r < 0)
+                r += cap;
+            memcpy(dry + (size_t)i * C, e->ab_line + (size_t)r * C, sizeof(double) * C);
+        }
+        if (++pos == cap)
+            pos = 0;
+    }
+    e->ab_line_pos = pos;
+}
+
+/* S-912: the block's output in e->mix, which holds the chain's: side A the chain's, side B the dry
+ * signal at B's gain; a switch crossfades from the side shown to the other over AB_FADE_MS. */
+static void ab_output(NagAudio *e, int side, int n)
+{
+    const int C = e->dsp.channels;
+    int fade_frames = e->out.rate * AB_FADE_MS / 1000;
+    if (fade_frames < 1)
+        fade_frames = 1;
+    if (side != e->ab_shown) {
+        /* a switch back in the middle of one goes back from where it got to */
+        e->ab_fade = e->ab_fade > 0 ? fade_frames - e->ab_fade : fade_frames;
+        e->ab_shown = side;
+    }
+    const double gain = atomic_load(&e->ab_gain);
+    double *wet = e->mix;
+    const double *dry = e->ab_dry;
+    if (e->ab_fade <= 0) {
+        if (side == 1)
+            for (int i = 0; i < n * C; i++)
+                wet[i] = dry[i] * gain;
+        return;
+    }
+    for (int i = 0; i < n; i++) {
+        double to = 1.0; /* the weight of the side shown */
+        if (e->ab_fade > 0) {
+            to = 1.0 - (double)e->ab_fade / fade_frames;
+            e->ab_fade--;
+        }
+        const double chain = side == 1 ? 1.0 - to : to;
+        for (int c = 0; c < C; c++) {
+            const size_t k = (size_t)i * C + c;
+            wet[k] = wet[k] * chain + dry[k] * gain * (1.0 - chain);
+        }
+    }
+}
+
 /* The mix buffer's [n_frames] through balance and mono, the DSP chain when it is in the way, then into [out]. */
 static void finish_block(NagAudio *e, void *out, int n_frames, double volume, int dither, int dsp_on)
 {
     const int samples = n_frames * e->out.channels;
     if (balance_mono(e, e->mix, n_frames) && e->cfg.dither && e->out.sample_format != NAG_FMT_F32 && e->out.sample_format != NAG_FMT_F64)
         dither = 1;
-    if (dsp_on && atomic_load(&e->ab_side) == 1) {
-        /* S-912: side B, the chain bypassed at the chain's level */
-        const double gain = atomic_load(&e->ab_gain);
-        if (gain != 1.0)
-            for (int i = 0; i < samples; i++)
-                e->mix[i] *= gain;
-    } else if (dsp_on) {
+    const int ab = e->out.channels == e->dsp.channels; /* the line's frames are the chain's */
+    if (dsp_on) {
+        /* S-912: the chain runs on side B too; the side picks the output */
+        const int side = atomic_load(&e->ab_side);
+        if (ab)
+            ab_delay(e, e->mix, e->ab_dry, n_frames);
         double in = block_energy(e->mix, samples);
         NagDspBlockMeter m;
         nag_dsp_process(&e->dsp, e->mix, n_frames, &m);
@@ -1246,6 +1320,14 @@ static void finish_block(NagAudio *e, void *out, int n_frames, double volume, in
         }
         atomic_store(&e->ab_energy_in, ein);
         atomic_store(&e->ab_energy_out, eout);
+        if (ab)
+            ab_output(e, side, n_frames);
+    } else {
+        /* no chain: the samples as they are; the line keeps up for when one comes */
+        if (ab)
+            ab_delay(e, e->mix, NULL, n_frames);
+        e->ab_shown = atomic_load(&e->ab_side);
+        e->ab_fade = 0;
     }
     convert(e, e->mix, out, n_frames, volume, dither);
 }
@@ -1467,6 +1549,8 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
     if (atomic_exchange(&e->dsp_reset_wanted, 0)) {
         nag_dsp_reset(&e->dsp);
         nag_stretch_reset(&e->stretch);
+        /* side B's line forgets with the chain's */
+        memset(e->ab_line, 0, sizeof(double) * (size_t)e->dsp.capacity_frames * e->dsp.channels);
     }
     const int dsp_on = dsp_prepare(e);
     const int stretch_on = stretch_prepare(e);

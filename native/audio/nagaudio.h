@@ -314,6 +314,9 @@ void nag_audio_dsp_meter(NagAudio *engine, NagDspMeter *meter, int reset);
  * chain's level change is known: nag_audio_dsp_level_db. Side B plays the chain bypassed
  * with that change applied as a gain instead, so both sides are as loud (within 0.1 dB once
  * the window holds a few seconds); the blind part (which side is which) is the owner's.
+ * Nothing but the sound tells the sides apart: the chain runs on side B too (its filters,
+ * the meter and the level keep going), B's samples are delayed as the chain delays A's, and
+ * a switch crossfades over 10 ms.
  */
 double nag_audio_dsp_level_db(NagAudio *engine);
 /** 0: side A (the chain as set); 1: side B (bypassed, level matched). */
