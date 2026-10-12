@@ -411,10 +411,14 @@ class DesktopControlsTest {
             compose.waitForIdle()
             val bar = compose.onNodeWithTag("player-controls").getUnclippedBoundsInRoot()
             val button = compose.onNodeWithContentDescription(fullscreen).getUnclippedBoundsInRoot()
-            assertTrue("at $width dp the full-screen button is ${button.width} wide", button.width >= 24.dp)
+            val buttonWidth = button.right - button.left
+            assertTrue("at $width dp the full-screen button is $buttonWidth wide", buttonWidth >= 24.dp)
             assertTrue("at $width dp the full-screen button ends at ${button.right} of ${bar.right}", button.right <= bar.right - 15.dp)
             val volume = runCatching { compose.onNodeWithTag("player-volume").getUnclippedBoundsInRoot() }.getOrNull()
-            if (volume != null) assertTrue("at $width dp the volume's slider is ${volume.width} wide", volume.width >= 95.dp)
+            if (volume != null) {
+                val sliderWidth = volume.right - volume.left
+                assertTrue("at $width dp the volume's slider is $sliderWidth wide", sliderWidth >= 95.dp)
+            }
         }
     }
 
