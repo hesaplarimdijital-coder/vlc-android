@@ -144,9 +144,13 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             MediaPlayer.ScaleType.SURFACE_235_1, MediaPlayer.ScaleType.SURFACE_239_1, MediaPlayer.ScaleType.SURFACE_5_4,
         )
 
-        /** Until S-505's crop, the picture cropped to fill the screen, and back. */
-        val crops = listOf(MediaPlayer.ScaleType.SURFACE_BEST_FIT, MediaPlayer.ScaleType.SURFACE_FILL)
+        /**
+         * Until S-505's crop, the picture cropped to fill the screen (libVLC's "fit screen"; its
+         * "fill" stretches the picture instead), and back.
+         */
+        val crops = listOf(MediaPlayer.ScaleType.SURFACE_BEST_FIT, MediaPlayer.ScaleType.SURFACE_FIT_SCREEN)
 
+        /** Fitted, cropped to fill, then pixel for pixel. */
         val zooms = listOf(MediaPlayer.ScaleType.SURFACE_BEST_FIT, MediaPlayer.ScaleType.SURFACE_FIT_SCREEN, MediaPlayer.ScaleType.SURFACE_ORIGINAL)
     }
 }
