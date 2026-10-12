@@ -720,6 +720,26 @@
     <string name="nag_sub_language_unknown">Dil belirsiz</string>
     <string name="nag_sub_drop_here">Altyazıyı bırakın</string>
     <string name="nag_sub_drop_hint">Hemen yüklenir ve bu filmle kalır; buraya bırakılan bir video ise oynatılır.</string>
+    <!-- S-702: the subtitles' character set, detected or chosen for the film -->
+    <string name="nag_enc_title">Altyazı kodlaması</string>
+    <string name="nag_enc_menu">Altyazı kodlaması…</string>
+    <string name="nag_enc_automatic">Otomatik (%1$s algılandı)</string>
+    <string name="nag_enc_preview">Önizleme</string>
+    <string name="nag_enc_no_lines">Bu dosyada okunacak satır yok.</string>
+    <string name="nag_enc_kept">Bu film için hatırlanır.</string>
+    <string name="nag_enc_apply">Uygula</string>
+    <string name="nag_enc_none">Bu filmin altyazı dosyası yok</string>
+    <string name="nag_enc_applied">Altyazı %1$s olarak okundu</string>
+    <string name="nag_enc_applied_auto">Altyazı kendi kodlamasıyla okundu</string>
+    <string name="nag_enc_utf8">UTF-8 (Unicode)</string>
+    <string name="nag_enc_tr_windows">Türkçe · Windows-1254</string>
+    <string name="nag_enc_tr_iso">Türkçe · ISO-8859-9</string>
+    <string name="nag_enc_western">Batı Avrupa · Windows-1252</string>
+    <string name="nag_enc_central">Orta Avrupa · Windows-1250</string>
+    <string name="nag_enc_cyrillic">Kiril · Windows-1251</string>
+    <string name="nag_enc_greek">Yunanca · Windows-1253</string>
+    <string name="nag_enc_arabic">Arapça · Windows-1256</string>
+    <string name="nag_enc_utf16">UTF-16 (Unicode)</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
     <string name="nag_refresh_title">Yenileme hızı eşleme</string>
     <string name="nag_refresh_exact">tam katı</string>

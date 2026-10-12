@@ -222,7 +222,7 @@ fun RenameSurface(mark: BookmarkMark, onRename: (String) -> Unit, onDismiss: () 
 
 /** A dialog's window: the card in the middle, a tap beside it closes it. */
 @Composable
-private fun DialogFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+internal fun DialogFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) {
     Box(
         Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { onDismiss() } },
         contentAlignment = Alignment.Center,
@@ -231,7 +231,7 @@ private fun DialogFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) 
 
 /** The card of the player's small dialogs: a title with Esc, then what it asks. */
 @Composable
-private fun DialogCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun DialogCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(12.dp)
     BoxWithConstraints(contentAlignment = Alignment.Center) {

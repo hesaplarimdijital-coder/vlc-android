@@ -111,6 +111,9 @@ interface PlayerChromeActions {
     /** S-701: the system's file picker, for subtitle files to add to the film. */
     fun addSubtitleFile()
 
+    /** S-702: the character set the film's subtitle files are read in, chosen for the film. */
+    fun chooseSubtitleEncoding()
+
     /** Leaves the player. */
     fun close()
 

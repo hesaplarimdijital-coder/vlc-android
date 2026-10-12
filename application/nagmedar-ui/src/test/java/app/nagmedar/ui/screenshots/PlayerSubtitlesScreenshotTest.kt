@@ -22,8 +22,12 @@ import app.nagmedar.ui.player.DesktopControls
 import app.nagmedar.ui.player.FakePlayerActions
 import app.nagmedar.ui.player.FakePreviews
 import app.nagmedar.ui.player.samplePlayerState
+import app.nagmedar.ui.player.subtitles.EncodingSample
+import app.nagmedar.ui.player.subtitles.EncodingSurface
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
+import app.nagmedar.ui.player.subtitles.SubtitleEncoding
+import app.nagmedar.ui.player.subtitles.sampleEncoding
 import app.nagmedar.ui.player.subtitles.sampleFound
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -36,7 +40,9 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-701: the subtitles found in the film's folder, offered over the video above the control bar
- * (DeX, in English, on a phone); and files carried over the video, to be dropped.
+ * (DeX, in English, on a phone); and files carried over the video, to be dropped. S-702: "Subtitle
+ * encoding…" on a Turkish SRT in Windows-1254, detected; in English with Windows-1252 chosen, its
+ * letters broken in the preview; on a phone.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -83,4 +89,22 @@ class PlayerSubtitlesScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun drop() = capture("player-subtitles-drop-dex") { SubtitleDropOverlay() }
+
+    @Composable
+    private fun Encoding(sample: EncodingSample = sampleEncoding) {
+        // the dialog's dim, drawn here: the window holds only the activity
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+        EncodingSurface(sample, onApply = {}, onDismiss = {})
+    }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    fun encoding() = capture("player-encoding-dex") { Encoding() }
+
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    fun encodingEnglish() = capture("player-encoding-dex-en") {
+        Encoding(EncodingSample(sampleEncoding.name, sampleEncoding.head, sampleEncoding.detected, chosen = SubtitleEncoding.Windows1252))
+    }
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun encodingPhone() = capture("player-encoding-phone", InputMode.Touch) { Encoding() }
 }

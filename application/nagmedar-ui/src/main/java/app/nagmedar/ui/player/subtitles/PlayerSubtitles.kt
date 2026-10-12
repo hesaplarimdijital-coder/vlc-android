@@ -35,6 +35,8 @@ import java.util.Locale
  * the subtitles' menu), dropped on the video, or found in its folder as it starts. One found is
  * loaded; more than one are offered ([found]), the user's language first. What is added stays
  * with the film, as the classic player's picker keeps it, and its document's access with the app.
+ * Each is read in its own character set (S-702): VLC is told the film's as it starts, a file in
+ * another one is read into UTF-8 first; "Subtitle encoding…" chooses one for the film ([encoding]).
  */
 @Stable
 internal class PlayerSubtitles(private val activity: VideoPlayerActivity, private val scope: CoroutineScope) {
@@ -48,6 +50,10 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
 
     /** Opens the system's file picker: the composition's launcher. */
     var pick: () -> Unit = {}
+
+    /** "Subtitle encoding…" is open on the film's first subtitle file (S-702). */
+    var encoding by mutableStateOf<EncodingSample?>(null)
+        private set
 
     /** The film whose folder was read: once a film. */
     private var lookedAt: String? = null
@@ -73,7 +79,7 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
             if (lookedAt != key || candidates.isEmpty() || hasSubtitleFiles()) return@launch
             if (candidates.size == 1) {
                 val only = candidates.single()
-                if (load(Uri.parse(only.uri), select = true)) say(activity.getString(R.string.nag_sub_added_from_folder, only.name))
+                if (load(Uri.parse(only.uri), only.name, select = true)) say(activity.getString(R.string.nag_sub_added_from_folder, only.name))
             } else {
                 found = candidates
             }
@@ -83,7 +89,9 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
     /** The one chosen from those found: it shows. */
     fun choose(candidate: SubtitleCandidate) {
         found = emptyList()
-        if (load(Uri.parse(candidate.uri), select = true)) say(activity.getString(R.string.nag_sub_added, candidate.name))
+        scope.launch {
+            if (load(Uri.parse(candidate.uri), candidate.name, select = true)) say(activity.getString(R.string.nag_sub_added, candidate.name))
+        }
     }
 
     fun dismiss() {
@@ -98,11 +106,13 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
             return
         }
         found = emptyList()
-        val added = subtitles.filterIndexed { index, (uri, _) -> load(uri, select = index == 0) }
-        when {
-            added.isEmpty() -> say(activity.getString(R.string.nag_sub_failed, subtitles.first().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))
-            added.size == 1 -> say(activity.getString(R.string.nag_sub_added, added.single().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))
-            else -> say(activity.resources.getQuantityString(R.plurals.nag_drop_subtitles_loaded, added.size, added.size))
+        scope.launch {
+            val added = subtitles.filterIndexed { index, (uri, name) -> load(uri, name ?: uri.lastPathSegment.orEmpty(), select = index == 0) }
+            when {
+                added.isEmpty() -> say(activity.getString(R.string.nag_sub_failed, subtitles.first().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))
+                added.size == 1 -> say(activity.getString(R.string.nag_sub_added, added.single().let { (uri, name) -> name ?: uri.lastPathSegment.orEmpty() }))
+                else -> say(activity.resources.getQuantityString(R.plurals.nag_drop_subtitles_loaded, added.size, added.size))
+            }
         }
     }
 
@@ -130,17 +140,83 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         }
     }
 
-    /** Loads [uri] into the playing film, kept with it; [select], it shows. */
-    private fun load(uri: Uri, select: Boolean): Boolean {
+    /**
+     * Loads [uri] (named [name]) into the playing film, read in its own character set; [select],
+     * it shows. The file itself is kept with the film: as the film starts again VLC is told its
+     * character set (S-702).
+     */
+    private suspend fun load(uri: Uri, name: String, select: Boolean): Boolean {
         val service = activity.service ?: return false
         val media = service.currentMediaWrapper ?: return false
         // a document picked or dropped stays readable when the film plays again
         if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
             runCatching { activity.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         }
-        val done = runCatching { service.addSubtitleTrack(uri, select) }.getOrDefault(false)
+        val context = activity.applicationContext
+        val readable = withContext(Dispatchers.IO) { SubtitleEncodings.readable(context, media.uri.toString(), uri, name) }
+        val done = runCatching { service.addSubtitleTrack(readable, select) }.getOrDefault(false)
         if (done) SlaveRepository.getInstance(activity).saveSlave(media.location, IMedia.Slave.Type.Subtitle, KEPT_PRIORITY, uri.toString())
         return done
+    }
+
+    /** "Subtitle encoding…": the film's first subtitle file, its head read; a word when it has none. */
+    fun openEncoding() {
+        val service = activity.service ?: return
+        val media = service.currentMediaWrapper?.uri ?: return
+        val context = activity.applicationContext
+        val files = subtitleFiles()
+        scope.launch {
+            val sample = withContext(Dispatchers.IO) {
+                files.firstNotNullOfOrNull { uri ->
+                    val name = displayName(context.contentResolver, uri) ?: return@firstNotNullOfOrNull null
+                    val head = SubtitleEncodings.head(context, uri) ?: return@firstNotNullOfOrNull null
+                    if (!isTextSubtitle(name, head)) return@firstNotNullOfOrNull null
+                    EncodingSample(name, head, detectEncoding(head), SubtitleEncodings.chosen(context, media))
+                }
+            }
+            if (sample == null) say(activity.getString(R.string.nag_enc_none)) else encoding = sample
+        }
+    }
+
+    fun closeEncoding() {
+        encoding = null
+    }
+
+    /**
+     * The character set chosen for the film (null: detected), kept for it: its subtitle files are
+     * read in it at once, the first one shows; as the film starts again VLC is told it.
+     */
+    fun applyEncoding(chosen: SubtitleEncoding?) {
+        val service = activity.service ?: return
+        val media = service.currentMediaWrapper?.uri ?: return
+        val context = activity.applicationContext
+        val files = subtitleFiles()
+        scope.launch {
+            SubtitleEncodings.choose(context, media, chosen)
+            val readable = withContext(Dispatchers.IO) {
+                files.mapNotNull { uri ->
+                    val name = displayName(context.contentResolver, uri) ?: return@mapNotNull null
+                    val head = SubtitleEncodings.head(context, uri) ?: return@mapNotNull null
+                    if (!isTextSubtitle(name, head)) return@mapNotNull null
+                    SubtitleEncodings.readable(context, media.toString(), uri, name, chosen ?: detectEncoding(head))
+                }
+            }
+            readable.forEachIndexed { index, uri -> runCatching { service.addSubtitleTrack(uri, index == 0) } }
+            if (readable.isNotEmpty()) {
+                say(if (chosen == null) activity.getString(R.string.nag_enc_applied_auto) else activity.getString(R.string.nag_enc_applied, activity.getString(chosen.label)))
+            }
+        }
+    }
+
+    /** The film's subtitle files as VLC loaded them, not the copies read into UTF-8. */
+    private fun subtitleFiles(): List<Uri> {
+        val media = activity.service?.mediaplayer?.media ?: return emptyList()
+        val slaves = try {
+            media.slaves?.filter { it.type == IMedia.Slave.Type.Subtitle }?.map { it.uri }.orEmpty()
+        } finally {
+            media.release()
+        }
+        return slaves.filterNot { SubtitleEncodings.isCopy(activity, it) }.distinct().map(Uri::parse)
     }
 
     /** Whether the playing film has subtitle files already: found by VLC beside a local file, or kept with it. */

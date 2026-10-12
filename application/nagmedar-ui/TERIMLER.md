@@ -37,6 +37,7 @@ Sözlüğü testler denetler:
 | A-B tekrarı | A-B loop | | A-B repeat | A noktası, B noktası; düğmesi sırayla A’yı, B’yi koyar, sonra kapatır |
 | tam ekran | fullscreen | | | “Tam ekrandan çık” / “Exit fullscreen” |
 | altyazı | subtitle | alt yazı | caption | Tek sözcük |
+| kodlama | encoding | karakter seti, kod sayfası | charset | “Altyazı kodlaması”: Otomatik, UTF-8, Türkçe · Windows-1254; film başına hatırlanır |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | loudness | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz” |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |

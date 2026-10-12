@@ -739,6 +739,26 @@
     <string name="nag_sub_language_unknown">Unknown language</string>
     <string name="nag_sub_drop_here">Drop the subtitles</string>
     <string name="nag_sub_drop_hint">They load at once and stay with this film; a video dropped here plays instead.</string>
+    <!-- S-702: the subtitles' character set, detected or chosen for the film -->
+    <string name="nag_enc_title">Subtitle encoding</string>
+    <string name="nag_enc_menu">Subtitle encoding…</string>
+    <string name="nag_enc_automatic">Automatic (%1$s detected)</string>
+    <string name="nag_enc_preview">Preview</string>
+    <string name="nag_enc_no_lines">No lines to read in this file.</string>
+    <string name="nag_enc_kept">Remembered for this film.</string>
+    <string name="nag_enc_apply">Apply</string>
+    <string name="nag_enc_none">This film has no subtitle files</string>
+    <string name="nag_enc_applied">Subtitles read as %1$s</string>
+    <string name="nag_enc_applied_auto">Subtitles read in their own encoding</string>
+    <string name="nag_enc_utf8">UTF-8 (Unicode)</string>
+    <string name="nag_enc_tr_windows">Turkish · Windows-1254</string>
+    <string name="nag_enc_tr_iso">Turkish · ISO-8859-9</string>
+    <string name="nag_enc_western">Western European · Windows-1252</string>
+    <string name="nag_enc_central">Central European · Windows-1250</string>
+    <string name="nag_enc_cyrillic">Cyrillic · Windows-1251</string>
+    <string name="nag_enc_greek">Greek · Windows-1253</string>
+    <string name="nag_enc_arabic">Arabic · Windows-1256</string>
+    <string name="nag_enc_utf16">UTF-16 (Unicode)</string>
     <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
     <string name="nag_refresh_title">Refresh rate matching</string>
     <string name="nag_refresh_exact">whole multiple</string>

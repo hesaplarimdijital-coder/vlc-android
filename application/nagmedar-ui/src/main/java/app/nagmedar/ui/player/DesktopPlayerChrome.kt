@@ -89,9 +89,11 @@ import app.nagmedar.ui.player.snapshot.SnapshotFlash
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
+import app.nagmedar.ui.player.subtitles.EncodingDialog
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
+import app.nagmedar.ui.player.subtitles.SubtitleEncodings
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
 import app.nagmedar.ui.player.sync.RoomSyncStore
@@ -110,6 +112,7 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
 import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.EXTRA_SEEK_DELAY
+import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.gui.video.PlayerChrome
@@ -196,9 +199,10 @@ class DesktopPlayerChrome : PlayerChrome {
         // the screen's refresh rate (S-612)
         val refresh = FrameRateMatcher(activity).also { it.attach() }
         this.refresh = refresh
-        // subtitle files: picked, dropped on the video, found beside it (S-701)
+        // subtitle files: picked, dropped on the video, found beside it (S-701), read in their character set (S-702)
         val subtitles = PlayerSubtitles(activity, MainScope())
         this.subtitles = subtitles
+        SubtitleEncodingHook.finder = SubtitleEncodings
         val frame = MouseOnlyFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
@@ -463,6 +467,8 @@ private fun PlayerChromeContent(
                 }
                 if (subtitles.dragging) SubtitleDropOverlay()
             }
+            // S-702: the character set of the film's subtitle files
+            subtitles.encoding?.let { sample -> EncodingDialog(sample, onApply = subtitles::applyEncoding, onDismiss = subtitles::closeEncoding) }
             // Ctrl+T (S-608): the time and the chapters as they are when it opens
             if (navigation.jumping) {
                 val now = remember { navigation.timeMs() }
@@ -756,6 +762,8 @@ internal class ActivityPlayerSource(
     }
 
     override fun addSubtitleFile() = subtitles.pick()
+
+    override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

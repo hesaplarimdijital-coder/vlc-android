@@ -148,6 +148,17 @@ abstract class MediaSettingsDao {
         create(MediaSettings(uri, updatedAt = updatedAt))
         updateSync(uri, audioDelayMs, subtitleDelayMs, subtitleRate, updatedAt)
     }
+
+    /** S-702: the character set [uri]'s subtitles are read in (null: detected); its other columns stay. */
+    @Query("UPDATE media_settings SET subtitle_encoding = :encoding, updated_at = :updatedAt WHERE media_uri = :uri")
+    abstract fun updateSubtitleEncoding(uri: String, encoding: String?, updatedAt: Long)
+
+    /** S-702: remembers the subtitles' character set for [uri], making its row when it has none. */
+    @Transaction
+    open fun saveSubtitleEncoding(uri: String, encoding: String?, updatedAt: Long) {
+        create(MediaSettings(uri, updatedAt = updatedAt))
+        updateSubtitleEncoding(uri, encoding, updatedAt)
+    }
 }
 
 @Dao

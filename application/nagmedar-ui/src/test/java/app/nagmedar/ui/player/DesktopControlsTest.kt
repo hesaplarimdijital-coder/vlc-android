@@ -122,6 +122,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "add subtitles"
     }
 
+    override fun chooseSubtitleEncoding() {
+        calls += "encoding"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -367,7 +371,12 @@ class DesktopControlsTest {
         compose.onNodeWithText("Ctrl+Shift+A").assertExists()
         compose.onNode(hasText("Altyazı dosyası ekle…") and hasClickAction()).performClick()
         compose.waitForIdle()
-        assertEquals(listOf("audio:2", "subtitles:-1", "add subtitles"), actions.calls)
+        // S-702: the character set they are read in
+        compose.onNodeWithTag("player-subtitles").performClick()
+        compose.waitForIdle()
+        compose.onNode(hasText("Altyazı kodlaması…") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        assertEquals(listOf("audio:2", "subtitles:-1", "add subtitles", "encoding"), actions.calls)
     }
 
     @Test

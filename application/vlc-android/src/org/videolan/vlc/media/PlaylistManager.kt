@@ -35,6 +35,7 @@ import org.videolan.resources.EXIT_PLAYER
 import org.videolan.resources.PLAYLIST_TYPE_AUDIO
 import org.videolan.resources.PLAYLIST_TYPE_VIDEO
 import org.videolan.resources.PLAY_FROM_SERVICE
+import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.VLCOptions
 import org.videolan.resources.util.VLCCrashHandler
@@ -88,6 +89,7 @@ import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
 import org.videolan.vlc.gui.browser.BaseBrowserFragment
 import org.videolan.vlc.gui.video.VideoPlayerActivity
+import org.videolan.vlc.repository.SlaveRepository
 import org.videolan.vlc.util.FileUtils
 import org.videolan.vlc.util.FontCache
 import org.videolan.vlc.util.awaitMedialibraryStarted
@@ -577,6 +579,11 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             //todo in VLC 4.0, this should be done by using libvlc_media_player_set_time instead of start-time
             media.addOption(":start-time=${start/1000L}")
             media.addOption(":no-sout-chromecast-video")
+            // Nağmedar (S-702): the subtitles' character set, read from the film's subtitle files or chosen for it
+            SubtitleEncodingHook.finder?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }?.let { finder ->
+                val kept = runCatching { SlaveRepository.getInstance(ctx).getSlaves(mw.location).map { it.uri } }.getOrDefault(emptyList())
+                runCatching { finder.find(ctx, mw.uri, uri, kept) }.getOrNull()
+            }?.let { media.addOption(":subsdec-encoding=$it") }
             VLCOptions.setMediaOptions(media, ctx, flags or mw.flags, PlaybackService.hasRenderer())
             /* keeping only video during benchmark */
             if (isBenchmark) {
