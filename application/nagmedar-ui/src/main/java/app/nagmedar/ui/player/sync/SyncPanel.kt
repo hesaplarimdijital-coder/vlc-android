@@ -145,7 +145,7 @@ fun SyncPanel(
  * move it by 50 ms.
  */
 @Composable
-private fun DelaySection(
+internal fun DelaySection(
     title: String,
     valueMs: Long,
     remembered: Boolean,

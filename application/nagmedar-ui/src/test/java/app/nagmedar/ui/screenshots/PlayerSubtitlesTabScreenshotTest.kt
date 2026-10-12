@@ -20,6 +20,9 @@ import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.subtitles.SecondaryPosition
 import app.nagmedar.ui.player.subtitles.SubtitlesPanel
 import app.nagmedar.ui.player.subtitles.sampleDual
+import app.nagmedar.ui.player.sync.AppliedSync
+import app.nagmedar.ui.player.sync.HEARD_MS
+import app.nagmedar.ui.player.sync.SubtitleSyncSection
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -33,7 +36,9 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * S-703: the player with its subtitles' tab, after the mockups' player: Turkish at the bottom,
  * English above, as VLC draws them over the film (drawn here by hand); "TR + EN" on the bar; in
- * English; under the video in half a DeX window; on a phone.
+ * English; under the video in half a DeX window; on a phone. S-704: the subtitles' delay, which
+ * the film remembers, and the sync assistant: the sound marked, the subtitle next; on the phone,
+ * the difference applied, to be taken back.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -42,7 +47,7 @@ class PlayerSubtitlesTabScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun capture(name: String, input: InputMode = InputMode.Pointer, controls: Boolean = true) {
+    private fun capture(name: String, input: InputMode = InputMode.Pointer, controls: Boolean = true, applied: Boolean = false) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
@@ -57,6 +62,21 @@ class PlayerSubtitlesTabScreenshotTest {
                         onSecondaryOn = {},
                         onPosition = {},
                         columns = columns,
+                        sync = {
+                            SubtitleSyncSection(
+                                delayMs = -350,
+                                remembered = true,
+                                audioMarkMs = HEARD_MS.takeUnless { applied },
+                                subtitleMarkMs = null,
+                                applied = AppliedSync(0, -350, rememberedBefore = false).takeIf { applied },
+                                onDelay = {},
+                                onRemember = {},
+                                onMarkAudio = {},
+                                onMarkSubtitle = {},
+                                onApply = {},
+                                onUndo = {},
+                            )
+                        },
                     )
                 }
             }
@@ -86,5 +106,5 @@ class PlayerSubtitlesTabScreenshotTest {
     fun halfWindow() = capture("player-subtitles-tab-half")
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun phone() = capture("player-subtitles-tab-phone", input = InputMode.Touch, controls = false)
+    fun phone() = capture("player-subtitles-tab-phone", input = InputMode.Touch, controls = false, applied = true)
 }

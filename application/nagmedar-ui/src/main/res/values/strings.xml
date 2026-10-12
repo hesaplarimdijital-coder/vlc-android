@@ -296,6 +296,10 @@
     <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
     <string name="nag_sc_add_subtitle">Add subtitle file…</string>
     <string name="nag_sc_secondary_subtitles">Secondary subtitles on or off</string>
+    <string name="nag_sc_sync_mark_audio">Sync: mark the sound</string>
+    <string name="nag_sc_sync_mark_subtitle">Sync: mark the subtitle</string>
+    <string name="nag_sc_sync_apply">Sync: apply the difference</string>
+    <string name="nag_sc_sync_undo">Sync: undo</string>
     <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
     <string name="nag_sc_show_time">Show the time</string>
     <string name="nag_sc_jump_to_time">Jump to time…</string>
@@ -741,6 +745,26 @@
     <string name="nag_subs_secondary_on">Secondary subtitles: %1$s</string>
     <string name="nag_subs_secondary_off">Secondary subtitles off</string>
     <string name="nag_subs_secondary_missing">No other track for secondary subtitles</string>
+    <string name="nag_subs_delay">Delay</string>
+    <!-- S-704: the sync assistant -->
+    <string name="nag_assist_title">Sync assistant</string>
+    <string name="nag_assist_hint">Mark the sound when you hear a line and the subtitle when you see it on screen, then apply the difference.</string>
+    <string name="nag_assist_mark_audio">Mark the sound</string>
+    <string name="nag_assist_audio_marked">Sound marked · %1$s</string>
+    <string name="nag_assist_mark_subtitle">Mark the subtitle</string>
+    <string name="nag_assist_subtitle_marked">Subtitle marked · %1$s</string>
+    <string name="nag_assist_apply">Apply the difference</string>
+    <string name="nag_assist_apply_difference">Apply the difference · %1$s</string>
+    <string name="nag_assist_applied">Difference applied · %1$s</string>
+    <string name="nag_assist_undo">Undo</string>
+    <string name="nag_assist_osd_audio_difference">Sound marked · difference %1$s</string>
+    <string name="nag_assist_osd_subtitle_difference">Subtitle marked · difference %1$s</string>
+    <string name="nag_assist_osd_applied">Subtitle delay %1$s · remembered for this file</string>
+    <string name="nag_assist_osd_need_marks">Mark the sound and the subtitle first</string>
+    <string name="nag_assist_osd_undone">Sync undone · subtitle delay %1$s</string>
+    <string name="nag_assist_osd_cleared">Sync marks cleared</string>
+    <string name="nag_assist_osd_nothing">No sync to undo</string>
+    <string name="nag_assist_osd_no_subtitles">No subtitles are showing</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Subtitles added: %1$s</string>
     <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>

@@ -296,6 +296,10 @@
     <string name="nag_sc_subtitle_delay_up">Altyazı gecikmesi +50 ms</string>
     <string name="nag_sc_add_subtitle">Altyazı dosyası ekle…</string>
     <string name="nag_sc_secondary_subtitles">İkincil altyazıyı aç ya da kapat</string>
+    <string name="nag_sc_sync_mark_audio">Senkron: sesi işaretle</string>
+    <string name="nag_sc_sync_mark_subtitle">Senkron: altyazıyı işaretle</string>
+    <string name="nag_sc_sync_apply">Senkron: farkı uygula</string>
+    <string name="nag_sc_sync_undo">Senkron: geri al</string>
     <string name="nag_sc_toggle_sidebar">Kenar çubuğunu göster ya da gizle</string>
     <string name="nag_sc_show_time">Zamanı göster</string>
     <string name="nag_sc_jump_to_time">Zamana atla…</string>
@@ -722,6 +726,26 @@
     <string name="nag_subs_secondary_on">İkincil altyazı: %1$s</string>
     <string name="nag_subs_secondary_off">İkincil altyazı kapalı</string>
     <string name="nag_subs_secondary_missing">İkincil altyazı için başka iz yok</string>
+    <string name="nag_subs_delay">Gecikme</string>
+    <!-- S-704: senkron asistanı -->
+    <string name="nag_assist_title">Senkron asistanı</string>
+    <string name="nag_assist_hint">Repliği duyunca sesi, ekranda görünce altyazıyı işaretleyin; sonra farkı uygulayın.</string>
+    <string name="nag_assist_mark_audio">Sesi işaretle</string>
+    <string name="nag_assist_audio_marked">Ses işaretlendi · %1$s</string>
+    <string name="nag_assist_mark_subtitle">Altyazıyı işaretle</string>
+    <string name="nag_assist_subtitle_marked">Altyazı işaretlendi · %1$s</string>
+    <string name="nag_assist_apply">Farkı uygula</string>
+    <string name="nag_assist_apply_difference">Farkı uygula · %1$s</string>
+    <string name="nag_assist_applied">Fark uygulandı · %1$s</string>
+    <string name="nag_assist_undo">Geri al</string>
+    <string name="nag_assist_osd_audio_difference">Ses işaretlendi · fark %1$s</string>
+    <string name="nag_assist_osd_subtitle_difference">Altyazı işaretlendi · fark %1$s</string>
+    <string name="nag_assist_osd_applied">Altyazı gecikmesi %1$s · bu dosya için hatırlanır</string>
+    <string name="nag_assist_osd_need_marks">Önce sesi ve altyazıyı işaretleyin</string>
+    <string name="nag_assist_osd_undone">Senkron geri alındı · altyazı gecikmesi %1$s</string>
+    <string name="nag_assist_osd_cleared">Senkron işaretleri silindi</string>
+    <string name="nag_assist_osd_nothing">Geri alınacak senkron yok</string>
+    <string name="nag_assist_osd_no_subtitles">Altyazı gösterilmiyor</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
     <string name="nag_sub_added">Altyazı eklendi: %1$s</string>
     <string name="nag_sub_added_from_folder">Klasördeki altyazı eklendi: %1$s</string>

@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.os.ConfigurationCompat
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.LocalTooltipDelay
@@ -77,6 +78,7 @@ import app.nagmedar.ui.player.panel.PanelLayout
 import app.nagmedar.ui.player.panel.PanelState
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.panel.PlayerPanel
+import app.nagmedar.ui.player.panel.signed
 import app.nagmedar.ui.player.refresh.FrameRateMatcher
 import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.refresh.RefreshSection
@@ -100,11 +102,15 @@ import app.nagmedar.ui.player.subtitles.SubtitleChooser
 import app.nagmedar.ui.player.subtitles.SubtitleDropOverlay
 import app.nagmedar.ui.player.subtitles.SubtitleEncodings
 import app.nagmedar.ui.player.subtitles.SubtitlesPanel
+import app.nagmedar.ui.player.sync.ActivitySyncAssist
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
 import app.nagmedar.ui.player.sync.RoomSyncStore
+import app.nagmedar.ui.player.sync.SubtitleSyncSection
+import app.nagmedar.ui.player.sync.SyncAssistant
 import app.nagmedar.ui.player.sync.SyncController
 import app.nagmedar.ui.player.sync.SyncPanel
+import app.nagmedar.ui.player.sync.preciseClock
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -126,6 +132,7 @@ import org.videolan.vlc.gui.video.PlayerChrome
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.util.getPendingIntent
+import java.util.Locale
 
 /**
  * The new interface's controls over the classic video player (S-601), which finds them by name
@@ -150,6 +157,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var refresh: FrameRateMatcher? = null
     private var subtitles: PlayerSubtitles? = null
     private var dual: DualSubtitlesController? = null
+    private var assistant: SyncAssistant? = null
 
     override val active: Boolean get() = controls.active
 
@@ -173,6 +181,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
                 // S-703: the secondary subtitles, on or off
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
+                // S-704: the sync assistant's steps, said over the video
+                ShortcutId.SyncMarkAudio, ShortcutId.SyncMarkSubtitle, ShortcutId.SyncApply, ShortcutId.SyncUndo -> assistant?.let { assist(activity, it, id) }
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
                 ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
                     val done = classic.perform(id)
@@ -198,6 +208,9 @@ class DesktopPlayerChrome : PlayerChrome {
         // the delays and the subtitles' speed (S-604)
         val sync = SyncController(ActivitySyncTarget(activity), PendingNativeSubtitles, RoomSyncStore(activity.applicationContext), MainScope())
         this.sync = sync
+        // the sync assistant (S-704): the sound and the subtitle marked, their difference onto the subtitles' delay
+        val assistant = SyncAssistant(ActivitySyncAssist(activity, sync))
+        this.assistant = assistant
         // the film's facts and statistics (S-605)
         val infoSource = ActivityInfoSource(activity)
         // the screenshots (S-606)
@@ -228,7 +241,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual), layout)
+            PanelContent(activity, controls, panel, effects, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant), layout)
         }.also { it.attach() }
     }
 
@@ -269,6 +282,7 @@ class DesktopPlayerChrome : PlayerChrome {
         val uri = activity?.service?.currentMediaWrapper?.uri?.toString()
         effects?.onMediaStarted(uri)
         sync?.onMediaStarted(uri)
+        assistant?.onMediaStarted(uri)
         // another film: its own minute of statistics
         if (uri != playingUri) live.clear()
         playingUri = uri
@@ -337,6 +351,7 @@ class DesktopPlayerChrome : PlayerChrome {
         effects = null
         sync?.release()
         sync = null
+        assistant = null
         snapshots = null
         navigation?.release()
         navigation = null
@@ -357,8 +372,8 @@ class DesktopPlayerChrome : PlayerChrome {
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
 
-/** What the subtitles' tab reads and drives (S-703): the film's subtitle files and its two tracks. */
-private class PanelSubtitles(val files: PlayerSubtitles, val dual: DualSubtitlesController)
+/** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704). */
+private class PanelSubtitles(val files: PlayerSubtitles, val dual: DualSubtitlesController, val assistant: SyncAssistant)
 
 /** Alt+V, the menu's item, the tab's switch (S-703): the secondary subtitles on or off, said over the video. */
 private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesController) {
@@ -373,6 +388,40 @@ private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesCo
 }
 
 private const val SAID_MS = 1_500
+
+/**
+ * The sync assistant's steps (S-704), from their keys or the subtitles' tab, each said over the
+ * video as VLC desktop says them: the moment marked, or the difference once both are; the delay
+ * it made, remembered for the film; what was taken back.
+ */
+private fun assist(activity: VideoPlayerActivity, assistant: SyncAssistant, step: ShortcutId) {
+    val locale = ConfigurationCompat.getLocales(activity.resources.configuration)[0] ?: Locale.getDefault()
+    fun ms(value: Long) = activity.getString(R.string.nag_sync_ms, signed(value, locale))
+    val text = when (step) {
+        ShortcutId.SyncMarkAudio -> {
+            val mark = assistant.markAudio() ?: return
+            assistant.differenceMs?.let { activity.getString(R.string.nag_assist_osd_audio_difference, ms(it)) }
+                ?: activity.getString(R.string.nag_assist_audio_marked, preciseClock(mark.filmMs, locale))
+        }
+        // VLC desktop's too: no subtitle to mark while none shows
+        ShortcutId.SyncMarkSubtitle -> if (activity.service?.spuTrack.let { it == null || it == NO_SUBTITLES }) {
+            activity.getString(R.string.nag_assist_osd_no_subtitles)
+        } else {
+            val mark = assistant.markSubtitle() ?: return
+            assistant.differenceMs?.let { activity.getString(R.string.nag_assist_osd_subtitle_difference, ms(it)) }
+                ?: activity.getString(R.string.nag_assist_subtitle_marked, preciseClock(mark.filmMs, locale))
+        }
+        ShortcutId.SyncApply -> assistant.apply()?.let { activity.getString(R.string.nag_assist_osd_applied, ms(it.toMs)) }
+            ?: activity.getString(R.string.nag_assist_osd_need_marks)
+        ShortcutId.SyncUndo -> assistant.undo()?.let { activity.getString(R.string.nag_assist_osd_undone, ms(it.fromMs)) }
+            ?: activity.getString(if (assistant.clearMarks()) R.string.nag_assist_osd_cleared else R.string.nag_assist_osd_nothing)
+        else -> return
+    }
+    activity.overlayDelegate.showInfo(text, SAID_MS)
+}
+
+/** The player's id of "no subtitles". */
+private const val NO_SUBTITLES = "-1"
 
 /**
  * Over the video: a mouse reaches the controls, a finger or a pen passes through to the classic
@@ -620,11 +669,13 @@ private fun PanelContent(
                 when (tab) {
                     PanelTab.Subtitles -> {
                         val dual = subtitles.dual
-                        // the player's keys (V) and its own menus change the tracks too
-                        LaunchedEffect(dual, panel.shown) {
+                        val assistant = subtitles.assistant
+                        // the player's keys (V, G/H) and its own menus change the tracks and the delay too
+                        LaunchedEffect(dual, sync, panel.shown) {
                             while (panel.shown) {
                                 dual.refresh()
-                                delay(1_000)
+                                sync.refresh()
+                                delay(500)
                             }
                         }
                         var position by remember { mutableStateOf(SecondaryPosition.Top) }
@@ -641,6 +692,21 @@ private fun PanelContent(
                                 PendingSecondaryLayout.setPosition(chosen)
                             },
                             columns = layout.columns,
+                            sync = {
+                                SubtitleSyncSection(
+                                    delayMs = sync.values.subtitleDelayMs,
+                                    remembered = sync.remembered,
+                                    audioMarkMs = assistant.audioMark?.filmMs,
+                                    subtitleMarkMs = assistant.subtitleMark?.filmMs,
+                                    applied = assistant.applied,
+                                    onDelay = sync::setSubtitleDelay,
+                                    onRemember = sync::remember,
+                                    onMarkAudio = { assist(activity, assistant, ShortcutId.SyncMarkAudio) },
+                                    onMarkSubtitle = { assist(activity, assistant, ShortcutId.SyncMarkSubtitle) },
+                                    onApply = { assist(activity, assistant, ShortcutId.SyncApply) },
+                                    onUndo = { assist(activity, assistant, ShortcutId.SyncUndo) },
+                                )
+                            },
                         )
                     }
                     PanelTab.Sync -> {

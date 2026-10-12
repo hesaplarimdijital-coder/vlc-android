@@ -77,8 +77,8 @@ object PendingSecondaryLayout : SecondaryLayoutTarget {
 /**
  * The subtitles' tab of the player's panel (S-703), after the mockups' player: its tracks, the
  * primary and the secondary one shown with it (a switch turns it on and off, as Alt+V does), the
- * file the subtitles came from; the secondary's place, and the forced subtitles, which wait for
- * the player's native side.
+ * file the subtitles came from; their delay and the sync assistant ([sync], S-704); the
+ * secondary's place, and the forced subtitles, which wait for the player's native side.
  */
 @Composable
 fun SubtitlesPanel(
@@ -94,19 +94,31 @@ fun SubtitlesPanel(
     modifier: Modifier = Modifier,
     /** Under the video in a wide window: two columns of sections. */
     columns: Int = 1,
+    /** The subtitles' delay and the sync assistant (S-704), after the tracks. */
+    sync: (@Composable () -> Unit)? = null,
 ) {
     Box(modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtitles-panel")) {
         val tracks = @Composable { TracksSection(state, note, onPrimary, onSecondary, onSecondaryOn) }
         val secondary = @Composable { SecondarySection(layoutSupported, position, onPosition) }
         if (columns >= 2) {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                Column(Modifier.weight(1f)) { tracks() }
-                Column(Modifier.weight(1f)) { secondary() }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                    tracks()
+                    if (sync != null) {
+                        PanelRule()
+                        secondary()
+                    }
+                }
+                Column(Modifier.weight(1f)) { if (sync != null) sync() else secondary() }
             }
         } else {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 tracks()
                 PanelRule()
+                if (sync != null) {
+                    sync()
+                    PanelRule()
+                }
                 secondary()
             }
         }

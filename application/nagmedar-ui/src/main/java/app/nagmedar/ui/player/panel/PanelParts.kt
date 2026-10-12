@@ -97,12 +97,12 @@ internal fun PendingNote(tag: String, text: String = stringResource(R.string.nag
 
 /** A text button in the accent colour: "Reset". */
 @Composable
-internal fun TextAction(text: String, enabled: Boolean, onClick: () -> Unit) {
+internal fun TextAction(text: String, enabled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     Box(
-        Modifier
+        modifier
             .heightIn(min = 24.dp)
             .background(stateBackground(state), RoundedCornerShape(5.dp))
             .nagClickable(interaction, onClick, enabled = enabled)
