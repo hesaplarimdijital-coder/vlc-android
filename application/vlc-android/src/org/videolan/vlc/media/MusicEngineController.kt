@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import app.nagmedar.audio.AbSide
 import app.nagmedar.audio.BitPerfectOutput
 import app.nagmedar.audio.CrossfadeCurve
 import app.nagmedar.audio.DsdMode
@@ -21,6 +22,7 @@ import app.nagmedar.audio.NativeAudio
 import app.nagmedar.audio.OutputFormat
 import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.ReplayGainSettings
+import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.UsbOutput
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
@@ -126,6 +128,27 @@ class MusicEngineController(
     val outputFormat: OutputFormat? get() = engine?.outputFormat
 
     val signalPath: String get() = engine?.signalPath() ?: "{}"
+
+    /** S-910: the signal path as a model; null while the engine has not been made. */
+    val signalPathModel: SignalPath? get() = engine?.signalPathModel
+
+    /** The output device's name: the USB DAC, or the device the bit-perfect track goes to; null on AAudio. */
+    val outputDevice: String?
+        get() = when {
+            usbOutput?.active == true -> usbOutput?.device?.let(UsbOutput::name)
+            bitPerfectOutput?.active == true -> bitPerfectOutput?.deviceName
+            else -> null
+        }
+
+    /** S-912: the A/B test's side: A the DSP chain as set, B bypassed at the chain's level. */
+    var abSide: AbSide
+        get() = engine?.abSide ?: AbSide.A
+        set(value) {
+            engine?.abSide = value
+        }
+
+    /** S-912: the chain's level change over the last stretch of playing, dB. */
+    val dspLevelDb: Double get() = engine?.dspLevelDb ?: 0.0
 
     /** The setting: the engine takes the local music library unless turned off (Settings › Music). */
     private val enabled: Boolean get() = Settings.getInstance(context).getBoolean(NAGMEDAR_MUSIC_ENGINE, true)

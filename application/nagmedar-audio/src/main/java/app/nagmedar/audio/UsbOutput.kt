@@ -34,34 +34,10 @@ class UsbOutput(context: Context, private val engine: MusicEngine) : Closeable {
     val active: Boolean get() = connection != null
 
     /** The USB audio devices attached. */
-    fun devices(): List<UsbDevice> = manager.deviceList.values.filter { device ->
-        (0 until device.interfaceCount).any { device.getInterface(it).interfaceClass == UsbConstants.USB_CLASS_AUDIO }
-    }
+    fun devices(): List<UsbDevice> = devices(context)
 
     /** Whether [device] (the first found when null) is there and the app may open it. */
     fun permitted(device: UsbDevice? = null): Boolean = (device ?: devices().firstOrNull())?.let { manager.hasPermission(it) } == true
-
-    /**
-     * Asks the user for [device]; [onResult] comes on the main thread with the answer. The
-     * owner then calls [start].
-     */
-    fun requestPermission(device: UsbDevice, onResult: (Boolean) -> Unit) {
-        if (manager.hasPermission(device)) {
-            onResult(true)
-            return
-        }
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(c: Context, intent: Intent) {
-                if (intent.action != ACTION_PERMISSION) return
-                runCatching { context.unregisterReceiver(this) }
-                onResult(intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
-            }
-        }
-        ContextCompat.registerReceiver(context, receiver, IntentFilter(ACTION_PERMISSION), ContextCompat.RECEIVER_NOT_EXPORTED)
-        val intent = Intent(ACTION_PERMISSION).setPackage(context.packageName)
-        val pending = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        manager.requestPermission(device, pending)
-    }
 
     /** Opens [device] (the first permitted one when null) and makes it the engine's sink. */
     fun start(device: UsbDevice? = null): Boolean {
@@ -102,5 +78,44 @@ class UsbOutput(context: Context, private val engine: MusicEngine) : Closeable {
     companion object {
         private const val TAG = "NagmedarAudio"
         private const val ACTION_PERMISSION = "app.nagmedar.audio.USB_PERMISSION"
+
+        /** The USB audio devices attached (USB DACs, headsets with a DAC). */
+        fun devices(context: Context): List<UsbDevice> {
+            val manager = context.getSystemService(Context.USB_SERVICE) as? UsbManager ?: return emptyList()
+            return manager.deviceList.values.filter { device ->
+                (0 until device.interfaceCount).any { device.getInterface(it).interfaceClass == UsbConstants.USB_CLASS_AUDIO }
+            }
+        }
+
+        fun hasPermission(context: Context, device: UsbDevice): Boolean =
+            (context.getSystemService(Context.USB_SERVICE) as? UsbManager)?.hasPermission(device) == true
+
+        /** The device's name as its maker gives it ("Topping D90"), or its USB ids. */
+        fun name(device: UsbDevice): String =
+            listOfNotNull(device.manufacturerName, device.productName).joinToString(" ").trim().ifEmpty { "%04x:%04x".format(device.vendorId, device.productId) }
+
+        /**
+         * Asks the user to let the app open [device]; [onResult] comes on the main thread with
+         * the answer (at once when it was given before).
+         */
+        fun requestPermission(context: Context, device: UsbDevice, onResult: (Boolean) -> Unit) {
+            val app = context.applicationContext
+            val manager = app.getSystemService(Context.USB_SERVICE) as UsbManager
+            if (manager.hasPermission(device)) {
+                onResult(true)
+                return
+            }
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(c: Context, intent: Intent) {
+                    if (intent.action != ACTION_PERMISSION) return
+                    runCatching { app.unregisterReceiver(this) }
+                    onResult(intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
+                }
+            }
+            ContextCompat.registerReceiver(app, receiver, IntentFilter(ACTION_PERMISSION), ContextCompat.RECEIVER_NOT_EXPORTED)
+            val intent = Intent(ACTION_PERMISSION).setPackage(app.packageName)
+            val pending = PendingIntent.getBroadcast(app, 1, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            manager.requestPermission(device, pending)
+        }
     }
 }

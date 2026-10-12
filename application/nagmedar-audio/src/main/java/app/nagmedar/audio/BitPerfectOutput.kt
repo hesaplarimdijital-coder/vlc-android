@@ -55,6 +55,9 @@ class BitPerfectOutput(context: Context, private val engine: MusicEngine) : Clos
     /** Whether the feeder runs. */
     val active: Boolean get() = running
 
+    /** The device the track goes to ("Topping D90", "HDMI"); null before [start]. */
+    val deviceName: String? get() = candidate?.name
+
     /** Whether the device in use is still there, so a restart would change nothing. */
     fun stillValid(): Boolean = running && candidate?.let { c -> candidates().any { it.device.id == c.device.id } } == true
 

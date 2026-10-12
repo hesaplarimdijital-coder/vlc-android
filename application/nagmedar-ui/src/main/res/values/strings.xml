@@ -1255,4 +1255,69 @@
     <string name="nag_settings_crossfade_album_hint">Consecutive tracks of one album are meant to follow without a gap; a crossfade would cut their joins.</string>
     <string name="nag_crossfade_album_gapless">No gap, no crossfade</string>
     <string name="nag_crossfade_album_fade">Crossfade too</string>
+    <!-- S-902, S-903: Settings › Music, the output -->
+    <string name="nag_settings_output">Output</string>
+    <string name="nag_settings_output_hint">Automatic plays bit-perfect where the device takes it (Android 14 and later, a USB DAC or HDMI) and through AAudio otherwise. USB DAC drives the DAC itself: Android\'s own USB sound is silent meanwhile.</string>
+    <string name="nag_output_auto">Automatic</string>
+    <string name="nag_output_aaudio">AAudio</string>
+    <string name="nag_output_bit_perfect">Bit-perfect</string>
+    <string name="nag_output_usb">USB DAC</string>
+    <string name="nag_output_usb_none">No USB DAC is attached; the music plays bit-perfect or through AAudio meanwhile.</string>
+    <string name="nag_output_usb_ask">%1$s: the app needs your permission to drive it.</string>
+    <string name="nag_output_usb_allow">Allow</string>
+    <string name="nag_output_usb_ready">%1$s is ready.</string>
+    <string name="nag_output_usb_denied">Without your permission the music plays bit-perfect or through AAudio.</string>
+    <string name="nag_output_now">Now: %1$s</string>
+    <!-- S-910: why the samples do not reach the output as they are -->
+    <string name="nag_sp_bit_perfect">Bit-perfect</string>
+    <string name="nag_sp_not_bit_perfect">Not bit-perfect: %1$s</string>
+    <string name="nag_sp_reason_idle">nothing plays</string>
+    <string name="nag_sp_reason_dsd_pcm">DSD converted to PCM</string>
+    <string name="nag_sp_reason_lossy">a lossy source</string>
+    <string name="nag_sp_reason_volume">the volume is not at full</string>
+    <string name="nag_sp_reason_replaygain">ReplayGain</string>
+    <string name="nag_sp_reason_tempo">speed or pitch</string>
+    <string name="nag_sp_reason_balance">balance or mono</string>
+    <string name="nag_sp_reason_dsp">the DSP chain</string>
+    <string name="nag_sp_reason_depth">the output is narrower than the source</string>
+    <string name="nag_sp_reason_output">the output mixes or resamples</string>
+    <string name="nag_sp_reason_crossfade">crossfade</string>
+    <!-- S-907: Settings › Music, ReplayGain and the loudness scan -->
+    <string name="nag_settings_replaygain">ReplayGain</string>
+    <string name="nag_settings_replaygain_hint">The tags\' gain brings the tracks to one loudness; by album, the differences within an album stay. Untagged tracks play as they are.</string>
+    <string name="nag_replaygain_off">Off</string>
+    <string name="nag_replaygain_track">By track</string>
+    <string name="nag_replaygain_album">By album</string>
+    <string name="nag_settings_replaygain_preamp">Preamp</string>
+    <string name="nag_settings_replaygain_clip">Prevent clipping</string>
+    <string name="nag_settings_replaygain_clip_hint">The gain is held back where a track\'s peak would pass full scale.</string>
+    <string name="nag_rg_scan">Loudness scan</string>
+    <string name="nag_rg_scan_hint">Measures every album (EBU R128) and writes its ReplayGain tags into the files, in the background. Tracks tagged already are left alone.</string>
+    <string name="nag_rg_scan_start">Scan the library</string>
+    <string name="nag_rg_scan_stop">Stop</string>
+    <string name="nag_rg_scan_redo">Measure tagged tracks again</string>
+    <string name="nag_rg_scan_progress">Album %1$d of %2$d: %3$s</string>
+    <string name="nag_rg_scan_result">%1$d tagged, %2$d tagged already, %3$d could not be written.</string>
+    <string name="nag_rg_scan_stopped">Stopped. %1$s</string>
+    <!-- S-908: Settings › Music, DSD -->
+    <string name="nag_settings_dsd">DSD</string>
+    <string name="nag_settings_dsd_hint">DSF and DFF files. As PCM they are converted (DSD64 to 352.8 kHz) and play on every output; DoP passes the DSD bits as they are, for a DAC that takes DoP on a bit-perfect output.</string>
+    <string name="nag_dsd_pcm">Convert to PCM</string>
+    <string name="nag_dsd_dop">DoP</string>
+    <!-- S-909: Settings › Music, pitch, balance and mono -->
+    <string name="nag_settings_pitch">Pitch</string>
+    <string name="nag_settings_pitch_hint">Without a change of pace. Like the balance and mono, it changes the samples: the output is not bit-perfect while it is set.</string>
+    <plurals name="nag_pitch_semitones">
+        <item quantity="one">%1$s semitone</item>
+        <item quantity="other">%1$s semitones</item>
+    </plurals>
+    <string name="nag_settings_balance">Balance</string>
+    <string name="nag_balance_centre">Centre</string>
+    <string name="nag_balance_left">Left %1$d</string>
+    <string name="nag_balance_right">Right %1$d</string>
+    <string name="nag_settings_mono">Mono</string>
+    <string name="nag_settings_mono_switch">Mix the channels to one</string>
+    <string name="nag_settings_sound_reset">Reset pitch and balance</string>
+    <!-- S-906: the equaliser -->
+    <string name="nag_eq_open">Open the equaliser</string>
 </resources>

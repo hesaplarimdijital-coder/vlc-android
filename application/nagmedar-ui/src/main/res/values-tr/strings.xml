@@ -1227,4 +1227,69 @@
     <string name="nag_settings_crossfade_album_hint">Bir albümün ardışık parçaları boşluk olmadan birbirini izlemek için yapılmıştır; çapraz geçiş bu birleşimleri keser.</string>
     <string name="nag_crossfade_album_gapless">Boşluksuz, geçişsiz</string>
     <string name="nag_crossfade_album_fade">Çapraz geçişle</string>
+    <!-- S-902, S-903: Settings › Music, the output -->
+    <string name="nag_settings_output">Çıkış</string>
+    <string name="nag_settings_output_hint">Otomatik: aygıt alıyorsa (Android 14 ve sonrası, USB DAC ya da HDMI) bit-perfect, almıyorsa AAudio. USB DAC: DAC doğrudan sürülür; Android\'in kendi USB sesi bu sırada susar.</string>
+    <string name="nag_output_auto">Otomatik</string>
+    <string name="nag_output_aaudio">AAudio</string>
+    <string name="nag_output_bit_perfect">Bit-perfect</string>
+    <string name="nag_output_usb">USB DAC</string>
+    <string name="nag_output_usb_none">Takılı USB DAC yok; bu sırada müzik bit-perfect ya da AAudio ile çalar.</string>
+    <string name="nag_output_usb_ask">%1$s: uygulamanın DAC\'ı sürmesi için izniniz gerekiyor.</string>
+    <string name="nag_output_usb_allow">İzin ver</string>
+    <string name="nag_output_usb_ready">%1$s hazır.</string>
+    <string name="nag_output_usb_denied">İzin verilmezse müzik bit-perfect ya da AAudio ile çalar.</string>
+    <string name="nag_output_now">Şu an: %1$s</string>
+    <!-- S-910: why the samples do not reach the output as they are -->
+    <string name="nag_sp_bit_perfect">Bit-perfect</string>
+    <string name="nag_sp_not_bit_perfect">Bit-perfect değil: %1$s</string>
+    <string name="nag_sp_reason_idle">çalan yok</string>
+    <string name="nag_sp_reason_dsd_pcm">DSD, PCM\'e dönüştürülüyor</string>
+    <string name="nag_sp_reason_lossy">kaynak kayıplı</string>
+    <string name="nag_sp_reason_volume">ses tam açık değil</string>
+    <string name="nag_sp_reason_replaygain">ReplayGain</string>
+    <string name="nag_sp_reason_tempo">hız ya da perde</string>
+    <string name="nag_sp_reason_balance">denge ya da tek kanal</string>
+    <string name="nag_sp_reason_dsp">DSP zinciri</string>
+    <string name="nag_sp_reason_depth">çıkış kaynaktan dar</string>
+    <string name="nag_sp_reason_output">çıkış karıştırıyor ya da yeniden örnekliyor</string>
+    <string name="nag_sp_reason_crossfade">çapraz geçiş</string>
+    <!-- S-907: Settings › Music, ReplayGain and the loudness scan -->
+    <string name="nag_settings_replaygain">ReplayGain</string>
+    <string name="nag_settings_replaygain_hint">Etiketlerdeki kazanç parçaları aynı ses düzeyine getirir; albüme göre seçilince albüm içindeki farklar korunur. Etiketsiz parçalar olduğu gibi çalar.</string>
+    <string name="nag_replaygain_off">Kapalı</string>
+    <string name="nag_replaygain_track">Parçaya göre</string>
+    <string name="nag_replaygain_album">Albüme göre</string>
+    <string name="nag_settings_replaygain_preamp">Ön kazanç</string>
+    <string name="nag_settings_replaygain_clip">Kırpılmayı önle</string>
+    <string name="nag_settings_replaygain_clip_hint">Parçanın tepesi tam ölçeği aşacaksa kazanç geri çekilir.</string>
+    <string name="nag_rg_scan">Ses düzeyi taraması</string>
+    <string name="nag_rg_scan_hint">Her albümü ölçer (EBU R128) ve ReplayGain etiketlerini arka planda dosyalara yazar. Zaten etiketli parçalara dokunmaz.</string>
+    <string name="nag_rg_scan_start">Kütüphaneyi tara</string>
+    <string name="nag_rg_scan_stop">Durdur</string>
+    <string name="nag_rg_scan_redo">Etiketli parçaları da yeniden ölç</string>
+    <string name="nag_rg_scan_progress">Albüm %1$d/%2$d: %3$s</string>
+    <string name="nag_rg_scan_result">%1$d parça etiketlendi, %2$d zaten etiketliydi, %3$d yazılamadı.</string>
+    <string name="nag_rg_scan_stopped">Durduruldu. %1$s</string>
+    <!-- S-908: Settings › Music, DSD -->
+    <string name="nag_settings_dsd">DSD</string>
+    <string name="nag_settings_dsd_hint">DSF ve DFF dosyaları. PCM\'de dönüştürülür (DSD64 → 352,8 kHz) ve her çıkışta çalar; DoP, DSD bitlerini olduğu gibi gönderir: DoP alan bir DAC\'ta bit-perfect çıkışla kullanın.</string>
+    <string name="nag_dsd_pcm">PCM\'e dönüştür</string>
+    <string name="nag_dsd_dop">DoP</string>
+    <!-- S-909: Settings › Music, pitch, balance and mono -->
+    <string name="nag_settings_pitch">Perde</string>
+    <string name="nag_settings_pitch_hint">Hız değişmeden. Denge ve tek kanal gibi örnekleri değiştirir: ayarlıyken çıkış bit-perfect olmaz.</string>
+    <plurals name="nag_pitch_semitones">
+        <item quantity="one">%1$s yarım ton</item>
+        <item quantity="other">%1$s yarım ton</item>
+    </plurals>
+    <string name="nag_settings_balance">Denge</string>
+    <string name="nag_balance_centre">Orta</string>
+    <string name="nag_balance_left">Sol %1$d</string>
+    <string name="nag_balance_right">Sağ %1$d</string>
+    <string name="nag_settings_mono">Tek kanal</string>
+    <string name="nag_settings_mono_switch">Kanalları teke indir</string>
+    <string name="nag_settings_sound_reset">Perdeyi ve dengeyi sıfırla</string>
+    <!-- S-906: the equaliser -->
+    <string name="nag_eq_open">Ekolayzeri aç</string>
 </resources>
