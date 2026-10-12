@@ -86,11 +86,14 @@ class KeyboardOnlyFlowsTest {
 
     /** Tab until the focus is on what says [text], as a keyboard user goes through a window. */
     private fun tabTo(text: String) {
+        val seen = mutableListOf<List<String>>()
         repeat(120) {
-            if (focused().any { it == text }) return
+            val now = focused()
+            if (now.any { it == text }) return
+            if (seen.lastOrNull() != now) seen += now
             keys { pressKey(Key.Tab) }
         }
-        fail("Tab never reached “$text”; the focus is on ${focused()}")
+        fail("Tab never reached “$text”; the focus went through $seen")
     }
 
     private fun waitFor(what: String, condition: () -> Boolean) {

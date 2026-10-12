@@ -15,11 +15,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
@@ -141,3 +144,13 @@ private fun Modifier.doubleClickable(
 @Composable
 fun Modifier.focusRing(state: InteractionState, shape: Shape): Modifier =
     if (state.focused) this.border(2.dp, NagTheme.colors.focusRing, shape) else this
+
+/**
+ * Tab and Shift+Tab take the keyboard from a one-line text field on to the next or the previous
+ * control, as they do from any other one (S-1403): typed in, Compose's text field keeps them.
+ */
+fun Modifier.tabMovesFocus(focusManager: FocusManager): Modifier = onPreviewKeyEvent { event ->
+    if (event.key != Key.Tab || event.isCtrlPressed || event.isAltPressed || event.isMetaPressed) return@onPreviewKeyEvent false
+    if (event.type == KeyEventType.KeyDown) focusManager.moveFocus(if (event.isShiftPressed) FocusDirection.Previous else FocusDirection.Next)
+    true
+}

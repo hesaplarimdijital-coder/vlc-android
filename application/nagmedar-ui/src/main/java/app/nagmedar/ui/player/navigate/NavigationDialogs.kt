@@ -37,6 +37,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -51,6 +52,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.player.ChapterMark
 import app.nagmedar.ui.player.playerClock
 import app.nagmedar.ui.shell.KeyCap
@@ -80,6 +82,7 @@ fun JumpSurface(
     initial: String? = null,
 ) {
     val colors = NagTheme.colors
+    val focusManager = LocalFocusManager.current
     val start = initial ?: playerClock(nowMs)
     var value by remember { mutableStateOf(TextFieldValue(start, TextRange(0, start.length))) }
     val target = parseJumpTime(value.text, nowMs, lengthMs)
@@ -114,6 +117,7 @@ fun JumpSurface(
                     .focusRequester(focus)
                     .semantics { contentDescription = label }
                     .testTag("jump-field")
+                    .tabMovesFocus(focusManager)
                     .onPreviewKeyEvent { event ->
                         if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                         when (event.key) {
@@ -171,6 +175,7 @@ fun RenameBookmarkDialog(mark: BookmarkMark, onRename: (String) -> Unit, onDismi
 @Composable
 fun RenameSurface(mark: BookmarkMark, onRename: (String) -> Unit, onDismiss: () -> Unit) {
     val colors = NagTheme.colors
+    val focusManager = LocalFocusManager.current
     var value by remember { mutableStateOf(TextFieldValue(mark.name, TextRange(0, mark.name.length))) }
     val save = {
         if (value.text.isNotBlank()) {
@@ -198,6 +203,7 @@ fun RenameSurface(mark: BookmarkMark, onRename: (String) -> Unit, onDismiss: () 
                 .focusRequester(focus)
                 .semantics { contentDescription = label }
                 .testTag("rename-field")
+                .tabMovesFocus(focusManager)
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     when (event.key) {

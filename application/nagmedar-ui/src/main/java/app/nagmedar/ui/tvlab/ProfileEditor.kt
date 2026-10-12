@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -43,6 +44,7 @@ import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.SegmentedChoice
+import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.theme.NagTheme
 import java.util.Locale
 
@@ -317,6 +319,7 @@ private fun Field(title: String, value: String, onValue: (String) -> Unit, hint:
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    val focusManager = LocalFocusManager.current
     Group(title) {
         Box(
             Modifier
@@ -335,7 +338,7 @@ private fun Field(title: String, value: String, onValue: (String) -> Unit, hint:
                 textStyle = NagTheme.type.body.copy(color = colors.text),
                 cursorBrush = SolidColor(colors.accent),
                 keyboardOptions = if (number) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = title },
+                modifier = Modifier.fillMaxWidth().tabMovesFocus(focusManager).semantics { contentDescription = title },
             )
         }
     }

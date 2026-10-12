@@ -30,6 +30,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -47,6 +48,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
@@ -98,6 +100,7 @@ fun OnlineSubtitlesSurface(
 ) {
     val colors = NagTheme.colors
     val locale = currentLocale()
+    val focusManager = LocalFocusManager.current
     val usable = state.problem != OnlineProblem.NoKey
     DialogCard(
         stringResource(R.string.nag_online_title),
@@ -130,6 +133,7 @@ fun OnlineSubtitlesSurface(
                     .padding(horizontal = 12.dp, vertical = 10.dp)
                     .semantics { contentDescription = label }
                     .testTag("online-name")
+                    .tabMovesFocus(focusManager)
                     .onPreviewKeyEvent { event ->
                         if (event.type == KeyEventType.KeyDown && (event.key == Key.Enter || event.key == Key.NumPadEnter)) {
                             onSearch()

@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +62,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.search.foldForSearch
 import app.nagmedar.ui.shell.BrandMark
@@ -328,6 +330,7 @@ private fun Person(name: String, what: String) {
 
 @Composable
 private fun FilterField(query: String, onQuery: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
@@ -351,7 +354,7 @@ private fun FilterField(query: String, onQuery: (String) -> Unit) {
                 singleLine = true,
                 textStyle = NagTheme.type.body.copy(color = colors.text),
                 cursorBrush = SolidColor(colors.accent),
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = placeholder },
+                modifier = Modifier.fillMaxWidth().tabMovesFocus(focusManager).semantics { contentDescription = placeholder },
             )
         }
         if (query.isNotEmpty()) NagIconButton(NagIcons.Close, stringResource(R.string.nag_search_clear), { onQuery("") })
