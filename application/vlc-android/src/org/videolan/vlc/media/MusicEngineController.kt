@@ -12,6 +12,7 @@ import app.nagmedar.audio.DspSettings
 import app.nagmedar.audio.EngineState
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.MusicFormats
+import app.nagmedar.audio.NativeAudio
 import app.nagmedar.audio.OutputFormat
 import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.ReplayGainSettings
@@ -28,6 +29,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.NAGMEDAR_AUDIO_BALANCE
+import org.videolan.tools.NAGMEDAR_AUDIO_MONO
+import org.videolan.tools.NAGMEDAR_AUDIO_PITCH
 import org.videolan.tools.NAGMEDAR_CROSSFADE_CURVE
 import org.videolan.tools.NAGMEDAR_CROSSFADE_EQUAL_POWER
 import org.videolan.tools.NAGMEDAR_CROSSFADE_LINEAR
@@ -184,10 +188,12 @@ class MusicEngineController(
         }
         created.useAAudio()
         created.volume = volume / 100.0
+        created.tempo = rate.toDouble()
         engine = created
         applyCrossfadeSettings()
         applyDspSettings()
         applyReplayGainSettings()
+        applyAudioSettings()
         Settings.getInstance(context).registerOnSharedPreferenceChangeListener(settingsListener)
         return created
     }
@@ -198,7 +204,17 @@ class MusicEngineController(
             NAGMEDAR_DSP -> applyDspSettings()
             NAGMEDAR_CROSSFADE_MS, NAGMEDAR_CROSSFADE_CURVE -> applyCrossfadeSettings()
             NAGMEDAR_REPLAYGAIN_MODE, NAGMEDAR_REPLAYGAIN_PREAMP, NAGMEDAR_REPLAYGAIN_UNTAGGED, NAGMEDAR_REPLAYGAIN_CLIP -> applyReplayGainSettings()
+            NAGMEDAR_AUDIO_PITCH, NAGMEDAR_AUDIO_BALANCE, NAGMEDAR_AUDIO_MONO -> applyAudioSettings()
         }
+    }
+
+    /** S-909: the pitch, balance and mono as set. */
+    fun applyAudioSettings() {
+        val engine = engine ?: return
+        val settings = Settings.getInstance(context)
+        engine.pitch = settings.getFloat(NAGMEDAR_AUDIO_PITCH, 0f).toDouble()
+        engine.balance = settings.getFloat(NAGMEDAR_AUDIO_BALANCE, 0f).toDouble()
+        engine.mono = settings.getBoolean(NAGMEDAR_AUDIO_MONO, false)
     }
 
     /** S-907: ReplayGain as set; the tracks loaded take a change at once. */
@@ -353,10 +369,11 @@ class MusicEngineController(
 
     override fun getRate() = rate
 
-    /** The speed; S-909 brings the tempo change to the engine, until then the value is kept. */
+    /** The speed: the engine's tempo (S-909), the pitch kept, as libVLC's rate is. */
     override fun setRate(rate: Float, save: Boolean) {
-        this.rate = rate
-        speed.postValue(rate)
+        this.rate = rate.coerceIn(NativeAudio.TEMPO_MIN.toFloat(), NativeAudio.TEMPO_MAX.toFloat())
+        engine?.tempo = this.rate.toDouble()
+        speed.postValue(this.rate)
     }
 
     override fun getVolume() = volume

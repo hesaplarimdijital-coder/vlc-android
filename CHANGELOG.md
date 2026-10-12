@@ -9,6 +9,7 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - Boşluksuz oynatma: sıradaki parça önceden çözülür, örnek doğruluğunda devralınır; MP3 ve AAC'nin kodlayıcı gecikmesi ve dolgusu kırpılır.
 - Çapraz geçiş: süre (2, 4, 8 sn), eşit güç ya da doğrusal eğri; albümün ardışık parçalarında kendiliğinden kapalı.
 - DSP zinciri: ön kazanç (otomatik ön kazançla), 20 bantlı grafik ekolayzer, 10 bantlı parametrik ekolayzer, AutoEq biçiminde kulaklık profili, önden bakışlı sınırlayıcı ve kırpılma göstergesi; tek tuşla atlanır ve atlanınca çıkış bit-perfect kalır. (Ekolayzer ekranı sonraki adımda.)
+- Hız, perde, denge ve tek kanal: perdeyi koruyan hız (0,25–4×, WSOLA), hızı koruyan perde (±24 yarım ton), denge ve tek kanal; her biri kapalıyken çıkış bit-perfect kalır.
 - ReplayGain: parça ya da albüm kazancı, ön kazanç, etiketsiz parçalar için kazanç, tepeye göre kırpılma önleme; Opus'un R128 etiketleri de okunur. EBU R128 tarayıcı (ITU-R BS.1770-4, gerçek tepe) kütüphanenin albümlerini arka planda ölçer ve ReplayGain etiketlerini TagLib ile dosyalara yazar (FLAC, MP3, M4A, Opus, WavPack, APE, DSF…). (Tarama ve ReplayGain ayar satırları sonraki adımda.)
 
 ## 0.1.0 — MVP1

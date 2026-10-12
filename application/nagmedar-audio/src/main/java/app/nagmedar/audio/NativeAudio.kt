@@ -60,6 +60,11 @@ object NativeAudio {
     /** setDsp's values: 5 gains and times, the 20 graphic bands' dB, then (freq, dB, Q) of 10 + 10 bands. */
     const val DSP_VALUES = 5 + GRAPHIC_BANDS + 2 * 3 * EQ_BANDS
 
+    // S-909
+    const val TEMPO_MIN = 0.25
+    const val TEMPO_MAX = 4.0
+    const val PITCH_MAX_SEMITONES = 24.0
+
     // S-907: NagReplayGainMode
     const val REPLAYGAIN_OFF = 0
     const val REPLAYGAIN_TRACK = 1
@@ -150,4 +155,16 @@ object NativeAudio {
 
     /** The file as the engine reads it, with its ReplayGain tags, JSON (SourceInfo.parse); "{}" when it cannot be opened. */
     @JvmStatic external fun probe(path: String): String
+
+    /** S-909: the pace without a pitch change, 0.25..4 (1: out of the way). */
+    @JvmStatic external fun setTempo(handle: Long, tempo: Double)
+
+    /** S-909: the pitch in semitones without a pace change, -24..24 (0: out of the way). */
+    @JvmStatic external fun setPitch(handle: Long, semitones: Double)
+
+    /** S-909: -1 (left only) .. 1 (right only). */
+    @JvmStatic external fun setBalance(handle: Long, balance: Double)
+
+    /** S-909: the channels mixed to one on all of them. */
+    @JvmStatic external fun setMono(handle: Long, mono: Boolean)
 }

@@ -247,6 +247,34 @@ class MusicEngine(
     /** The gain in dB the playing track gets from ReplayGain (0 when off or untagged). */
     val replayGainDb: Double get() = if (available) NativeAudio.replayGainDb(handle) else 0.0
 
+    /** S-909: the pace, the pitch kept (audiobooks and podcasts: 0.5..3); 1 leaves the samples alone. */
+    var tempo: Double = 1.0
+        set(value) {
+            field = value.coerceIn(NativeAudio.TEMPO_MIN, NativeAudio.TEMPO_MAX)
+            if (available) NativeAudio.setTempo(handle, field)
+        }
+
+    /** S-909: the pitch in semitones, the pace kept; 0 leaves the samples alone. */
+    var pitch: Double = 0.0
+        set(value) {
+            field = value.coerceIn(-NativeAudio.PITCH_MAX_SEMITONES, NativeAudio.PITCH_MAX_SEMITONES)
+            if (available) NativeAudio.setPitch(handle, field)
+        }
+
+    /** S-909: -1 (left only) .. 1 (right only); 0 leaves the samples alone. */
+    var balance: Double = 0.0
+        set(value) {
+            field = value.coerceIn(-1.0, 1.0)
+            if (available) NativeAudio.setBalance(handle, field)
+        }
+
+    /** S-909: every channel the average of them all. */
+    var mono: Boolean = false
+        set(value) {
+            field = value
+            if (available) NativeAudio.setMono(handle, value)
+        }
+
     val sourceInfo: SourceInfo? get() = if (available) SourceInfo.parse(NativeAudio.sourceInfo(handle)) else null
 
     override fun close() {

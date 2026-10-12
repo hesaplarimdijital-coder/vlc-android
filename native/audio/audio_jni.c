@@ -537,3 +537,37 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_probe(JNIEnv *env,
     nag_source_close(src);
     return utf8(env, json);
 }
+
+/* ------------------------------------------------- S-909 tempo, pitch, balance */
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setTempo(JNIEnv *env, jclass cls, jlong handle, jdouble tempo)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_tempo(engine_of(handle), tempo);
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setPitch(JNIEnv *env, jclass cls, jlong handle, jdouble semitones)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_pitch(engine_of(handle), semitones);
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setBalance(JNIEnv *env, jclass cls, jlong handle, jdouble balance)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_balance(engine_of(handle), balance);
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setMono(JNIEnv *env, jclass cls, jlong handle, jboolean mono)
+{
+    (void)env;
+    (void)cls;
+    if (engine_of(handle))
+        nag_audio_set_mono(engine_of(handle), mono == JNI_TRUE);
+}

@@ -92,6 +92,10 @@ Sözlüğü testler denetler:
 | ses düzeyi | loudness | gürlük | | EBU R128'in ölçtüğü, LUFS ile: “Ses düzeyi taraması” albümleri ölçüp ReplayGain etiketlerini yazar |
 | gerçek tepe | true peak | | inter-sample peak | Dört kat örneklenmiş tepe, dBTP; ReplayGain'in kırpılma önlemesi buna bakar |
 | parça kazancı, albüm kazancı | track gain, album gain | | | ReplayGain'in iki kipi; “Albüm” albümü olmayan parçada parça kazancına düşer |
+| hız | speed | tempo | tempo | Perde korunarak çalma hızı: 0,5–3×; motorun tempo aşaması, sesli kitap ve podcast için |
+| perde | pitch | pitch, ton | | Yarım ton olarak (−24…+24); hız korunarak değiştirilir |
+| denge | balance | balans | | Sol ve sağ arasında; bir yan kısılır, öteki olduğu gibi kalır |
+| tek kanal | mono | mono | | Tüm kanalların ortalaması her kanala; “Tek kanal” ayarı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |

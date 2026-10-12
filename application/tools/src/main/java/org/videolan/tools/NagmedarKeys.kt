@@ -62,3 +62,8 @@ const val NAGMEDAR_REPLAYGAIN_CLIP = "nagmedar_replaygain_clip"
 const val NAGMEDAR_REPLAYGAIN_OFF = "off"
 const val NAGMEDAR_REPLAYGAIN_TRACK = "track"
 const val NAGMEDAR_REPLAYGAIN_ALBUM = "album"
+
+/** S-909: the music engine's pitch in semitones, balance (-1..1) and mono downmix (floats and a boolean); the pace is the player's rate. */
+const val NAGMEDAR_AUDIO_PITCH = "nagmedar_audio_pitch"
+const val NAGMEDAR_AUDIO_BALANCE = "nagmedar_audio_balance"
+const val NAGMEDAR_AUDIO_MONO = "nagmedar_audio_mono"

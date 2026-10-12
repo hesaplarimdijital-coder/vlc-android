@@ -312,6 +312,24 @@ void nag_audio_get_replaygain(NagAudio *engine, NagReplayGain *settings);
 /** The gain in dB the playing track gets from this (0 when off or untagged and no untagged_db). */
 double nag_audio_replaygain_db(NagAudio *engine);
 
+/* ------------------------------------------------------------ tempo, pitch */
+
+/*
+ * S-909: the pace without a pitch change (WSOLA), 0.25 to 4; the pitch in semitones without
+ * a pace change (stretched, then resampled), -24 to 24. At 1 and 0 the stage is out of the
+ * way; above 192 kHz it stays out. The render takes a change at its next block.
+ */
+void nag_audio_set_tempo(NagAudio *engine, double tempo);
+double nag_audio_tempo(NagAudio *engine);
+void nag_audio_set_pitch(NagAudio *engine, double semitones);
+double nag_audio_pitch(NagAudio *engine);
+/** S-909: the balance, -1 (left only) to 1 (right only); the other side is attenuated linearly. */
+void nag_audio_set_balance(NagAudio *engine, double balance);
+double nag_audio_balance(NagAudio *engine);
+/** S-909: the channels mixed to one, on all of them (a mono recording on one earphone, say). */
+void nag_audio_set_mono(NagAudio *engine, int mono);
+int nag_audio_mono(NagAudio *engine);
+
 /* S-907: the EBU R128 scanner (ITU-R BS.1770-4) and ReplayGain 2.0's gains (-18 LUFS). */
 
 typedef struct NagLoudnessResult {

@@ -12,6 +12,8 @@
 #     the limiter never past its threshold, the auto preamp level, the clip meter
 #   - ReplayGain (S-907): the scanner against ffmpeg's ebur128 and the standard's sine, the
 #     tags written and read back in four formats with the audio untouched, the playback gains
+#   - tempo, pitch, balance and mono (S-909): a sine keeps its frequency through a tempo change
+#     and its length through a pitch change, at the levels asked; balance and mono exact
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -255,6 +257,56 @@ clip = load("rg_clip.raw")
 held = 1 / 0.987654
 worst = max(worst, max(abs(clip[i] - plain[i] * held) for i in range(len(plain))))
 print("%s replaygain track, album with preamp, untagged and clip-prevented gains, worst error %.1e" % ("ok  " if worst == 0 else "FAIL", worst))
+sys.exit(0 if worst == 0 else 1)
+PY
+
+echo "== S-909: tempo, pitch, balance, mono"
+check "tempo 1 and pitch 0 stay out of the way" "$(engine_md5 s16 flac16.flac)" "$(engine_md5 s16 flac16.flac --tempo 1 --pitch 0)"
+"$NAGAUDIO" decode sine23.flac -f f64 -o tempo2.raw --tempo 2 > tempo2.json
+"$NAGAUDIO" decode sine23.flac -f f64 -o tempo05.raw --tempo 0.5 > /dev/null
+"$NAGAUDIO" decode sine23.flac -f f64 -o pitch12.raw --pitch 12 > /dev/null
+"$NAGAUDIO" decode sine23.flac -f f64 -o pitchm7.raw --pitch -7 > /dev/null
+"$NAGAUDIO" decode sine23.flac -f f64 -o both.raw --tempo 1.5 --pitch -5 > /dev/null
+check "tempo is why not bit-perfect" "tempo" "$(json 'd["signal_path"]["not_bit_perfect_because"]' < tempo2.json)"
+python3 - <<'PY' || failures=$((failures + 1))
+import math, struct, sys
+def left(path):
+    data = open(path, "rb").read()
+    return struct.unpack("<%dd" % (len(data) // 8), data)[0::2]
+def measure(path):
+    x = left(path)
+    a, b = len(x) // 10, len(x) * 9 // 10
+    crossings = sum(1 for i in range(a + 1, b) if x[i - 1] < 0 <= x[i])
+    return len(x) / 48000.0, crossings / ((b - a) / 48000.0), max(abs(v) for v in x)
+plain_peak = 0.0705
+problems = []
+for name, seconds, hz in (("tempo2", 2.5, 997), ("tempo05", 10.0, 997), ("pitch12", 5.0, 1994), ("pitchm7", 5.0, 997 * 2 ** (-7 / 12)), ("both", 5.0 / 1.5, 997 * 2 ** (-5 / 12))):
+    s, f, p = measure(name + ".raw")
+    # the end of the queue goes out unstretched: up to 0.3 s short at the slowest tempo
+    if not (seconds - 0.35 <= s <= seconds + 0.05):
+        problems.append("%s: %.2f s, expected %.2f" % (name, s, seconds))
+    if abs(f - hz) > hz * 0.005:
+        problems.append("%s: %.1f Hz, expected %.1f" % (name, f, hz))
+    if p > plain_peak * 1.05:
+        problems.append("%s: peak %.4f over the sine's %.4f" % (name, p, plain_peak))
+if problems:
+    print("FAIL tempo and pitch: " + "; ".join(problems))
+    sys.exit(1)
+print("ok   tempo 2 and 0.5 keep 997 Hz; pitch +12 and -7 and tempo 1.5 with pitch -5 land on their frequencies and lengths")
+PY
+"$NAGAUDIO" decode flac16.flac -f f64 -o balance.raw --balance 0.5 > /dev/null
+"$NAGAUDIO" decode flac16.flac -f f64 -o mono.raw --mono > mono.json
+check "balance is why not bit-perfect" "balance" "$(json 'd["signal_path"]["not_bit_perfect_because"]' < mono.json)"
+python3 - <<'PY' || failures=$((failures + 1))
+import struct, sys
+def load(path):
+    data = open(path, "rb").read()
+    return struct.unpack("<%dd" % (len(data) // 8), data)
+plain, balance, mono = load("plain.raw"), load("balance.raw"), load("mono.raw")
+n = len(plain) // 2
+worst = max(max(abs(balance[2 * i] - plain[2 * i] * 0.5), abs(balance[2 * i + 1] - plain[2 * i + 1])) for i in range(n))
+worst = max(worst, max(abs(mono[2 * i] - (plain[2 * i] + plain[2 * i + 1]) / 2) + abs(mono[2 * i + 1] - mono[2 * i]) for i in range(n)))
+print("%s balance 0.5 (left at half) and mono (both sides the average), worst error %.1e" % ("ok  " if worst == 0 else "FAIL", worst))
 sys.exit(0 if worst == 0 else 1)
 PY
 
