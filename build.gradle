@@ -48,6 +48,16 @@ allprojects {
         targetCompatibility = rootProject.ext.targetJVM.toString()
     }
 
+    // Nağmedar CI: a test that hangs fails its task instead of holding the job for two hours, and
+    // the log names each test as it starts and ends, so the one that hung is the one left open
+    tasks.withType(Test).configureEach {
+        timeout.set(java.time.Duration.ofMinutes(25))
+        if (System.getenv('CI')) {
+            beforeTest { descriptor -> logger.lifecycle("test started: ${descriptor.className} ${descriptor.name}") }
+            afterTest { descriptor, result -> logger.lifecycle("test ended: ${descriptor.className} ${descriptor.name} ${result.resultType}") }
+        }
+    }
+
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
