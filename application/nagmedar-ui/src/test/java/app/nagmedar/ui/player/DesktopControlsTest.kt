@@ -10,6 +10,9 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.MouseButton
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasClickAction
@@ -23,6 +26,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -89,6 +93,18 @@ internal class FakePlayerActions : PlayerChromeActions {
 
     override fun toggleEffects() {
         calls += "effects"
+    }
+
+    override fun takeSnapshot() {
+        calls += "snapshot"
+    }
+
+    override fun setSnapshotSettings(settings: SnapshotSettings) {
+        calls += "snapshotSettings:${settings.format},${settings.subtitles},${settings.hdr},${settings.folder}"
+    }
+
+    override fun chooseSnapshotFolder() {
+        calls += "snapshotFolder"
     }
 
     override fun close() {
@@ -240,12 +256,13 @@ class DesktopControlsTest {
         compose.onNodeWithContentDescription("10 sn geri").performClick()
         compose.onNodeWithContentDescription("10 sn ileri").performClick()
         compose.onNodeWithTag("player-ab").performClick()
+        compose.onNodeWithContentDescription("Ekran görüntüsü al").performClick()
         compose.onNodeWithContentDescription("Sesi kapat").performClick()
         compose.onNodeWithContentDescription("Tam ekran").performClick()
         compose.onNodeWithContentDescription("Efektler ve filtreler").performClick()
         compose.onNodeWithContentDescription("Oynatıcıyı kapat").performClick()
         assertEquals(
-            listOf("playPause", "previous", "next", "seekBy:-10000", "seekBy:10000", "ab", "mute", "fullscreen", "effects", "close"),
+            listOf("playPause", "previous", "next", "seekBy:-10000", "seekBy:10000", "ab", "snapshot", "mute", "fullscreen", "effects", "close"),
             actions.calls,
         )
         // what they show
@@ -253,6 +270,50 @@ class DesktopControlsTest {
         compose.onNodeWithText("1:11:45 / 2:18:10").assertExists()
         compose.onNodeWithText("Kuzey Işığı").assertExists()
         compose.onNodeWithContentDescription("A-B tekrarını kapat").assertExists()
+    }
+
+    /** The right button's click, as the mouse makes it. */
+    private fun rightClick(tag: String) {
+        compose.onNodeWithTag(tag).performMouseInput {
+            moveTo(center)
+            press(MouseButton.Secondary)
+            release(MouseButton.Secondary)
+        }
+        compose.waitForIdle()
+    }
+
+    /** S-606: the camera takes a screenshot; a right click opens its choices, as Settings has them. */
+    @Test
+    fun theScreenshotButtonTakesOneAndItsMenuChooses() {
+        controls()
+        shownAndHeld()
+        compose.onNodeWithContentDescription("Ekran görüntüsü al").performClick()
+        rightClick("player-snapshot")
+        assertTrue("the menu keeps the controls", visibility.menuOpen)
+        compose.onNode(hasText("Ekran görüntüsü al") and hasClickAction()).assertExists()
+        compose.onNodeWithText("Klasör: Pictures/Nağmedar").assertExists()
+        compose.onNode(hasText("Altyazılı") and hasClickAction()).assertIsOn()
+        compose.onNode(hasText("WebP") and hasClickAction()).assertIsOff().performClick()
+        compose.waitForIdle()
+        assertFalse("the menu closed", visibility.menuOpen)
+        rightClick("player-snapshot")
+        compose.onNode(hasText("Klasörü değiştir…") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        // a chosen folder can be left for the default one
+        state = state.copy(snapshot = SnapshotSettings(folder = "content://com.android.externalstorage.documents/tree/primary%3APictures%2FEkran"))
+        rightClick("player-snapshot")
+        compose.onNodeWithText("Klasör: Pictures/Ekran").assertExists()
+        compose.onNode(hasText("Varsayılan klasöre dön") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        assertEquals(
+            listOf(
+                "snapshot",
+                "snapshotSettings:WebP,true,ToneMap,null",
+                "snapshotFolder",
+                "snapshotSettings:Png,true,ToneMap,null",
+            ),
+            actions.calls,
+        )
     }
 
     @Test

@@ -10,6 +10,8 @@ import android.view.PointerIcon
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -64,6 +67,12 @@ import app.nagmedar.ui.player.panel.PanelLayout
 import app.nagmedar.ui.player.panel.PanelState
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.panel.PlayerPanel
+import app.nagmedar.ui.player.snapshot.SnapshotCard
+import app.nagmedar.ui.player.snapshot.SnapshotController
+import app.nagmedar.ui.player.snapshot.SnapshotFlash
+import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
+import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
 import app.nagmedar.ui.player.sync.ActivitySyncTarget
 import app.nagmedar.ui.player.sync.PendingNativeSubtitles
 import app.nagmedar.ui.player.sync.RoomSyncStore
@@ -100,6 +109,7 @@ class DesktopPlayerChrome : PlayerChrome {
     private var panelHost: PanelHost? = null
     private var effects: EffectsController? = null
     private var sync: SyncController? = null
+    private var snapshots: SnapshotController? = null
 
     override val active: Boolean get() = controls.active
 
@@ -111,6 +121,7 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Effects -> panel.toggle(PanelTab.Effects)
                 ShortcutId.Synchronization -> panel.toggle(PanelTab.Sync)
                 ShortcutId.MediaInfo -> panel.toggle(PanelTab.Info)
+                ShortcutId.Snapshot -> snapshots?.take()
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
                 ShortcutId.AudioDelayDown, ShortcutId.AudioDelayUp, ShortcutId.SubtitleDelayDown, ShortcutId.SubtitleDelayUp -> {
                     val done = classic.perform(id)
@@ -138,10 +149,13 @@ class DesktopPlayerChrome : PlayerChrome {
         this.sync = sync
         // the film's facts and statistics (S-605)
         val infoSource = ActivityInfoSource(activity)
+        // the screenshots (S-606)
+        val snapshots = SnapshotController(activity)
+        this.snapshots = snapshots
         val frame = MouseOnlyFrame(activity, controls)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live) }
+            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots) }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
@@ -200,6 +214,7 @@ class DesktopPlayerChrome : PlayerChrome {
         effects = null
         sync?.release()
         sync = null
+        snapshots = null
         panelHost?.detach()
         panelHost = null
         frame?.let { (it.parent as? ViewGroup)?.removeView(it) }
@@ -245,7 +260,7 @@ internal class MouseOnlyFrame(context: Context, private val controls: ChromeVisi
 /**
  * The controls in the app: the player's state twice a second while they show, its commands,
  * frames for the timeline; the statistics over the video when asked (S-605), sampled every second
- * while they or the Info tab show.
+ * while they or the Info tab show; the screenshots' flash and card (S-606).
  */
 @Composable
 private fun PlayerChromeContent(
@@ -256,9 +271,15 @@ private fun PlayerChromeContent(
     infoSource: ActivityInfoSource,
     info: InfoState,
     live: LiveStats,
+    snapshots: SnapshotController,
 ) {
     val prefs = rememberNagmedarPreferences()
-    val source = remember(activity) { ActivityPlayerSource(activity, panel) }
+    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, prefs) }
+    // the screenshots' folder, chosen with the system's picker: written in, kept across restarts
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) keepSnapshotFolder(activity, prefs, uri)
+    }
+    SideEffect { source.pickFolder = { runCatching { folderPicker.launch(null) } } }
     var state by remember { mutableStateOf(PlayerChromeState()) }
     var uri by remember { mutableStateOf<Uri?>(null) }
     LaunchedEffect(source, visibility.visible) {
@@ -287,8 +308,19 @@ private fun PlayerChromeContent(
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = InputMode.Pointer) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             Box(Modifier.fillMaxSize()) {
-                DesktopControls(state.copy(effectsOpen = panel.open && panel.tab == PanelTab.Effects), source, visibility, previews)
+                SnapshotFlash(snapshots.state.flashes)
+                DesktopControls(state.copy(effectsOpen = panel.open && panel.tab == PanelTab.Effects, snapshot = prefs.snapshot), source, visibility, previews)
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
+                // above the control bar while it shows
+                SnapshotCard(
+                    outcome = snapshots.state.outcome,
+                    saving = snapshots.state.saving,
+                    onOpen = snapshots::open,
+                    onShare = snapshots::share,
+                    onChooseFolder = source::chooseSnapshotFolder,
+                    onDismiss = snapshots.state::dismiss,
+                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                )
             }
         }
     }
@@ -416,7 +448,15 @@ private fun PanelContent(
 }
 
 /** The classic player's state, as the controls show it, and its commands. */
-internal class ActivityPlayerSource(private val activity: VideoPlayerActivity, private val panel: PanelState) : PlayerChromeActions {
+internal class ActivityPlayerSource(
+    private val activity: VideoPlayerActivity,
+    private val panel: PanelState,
+    private val snapshots: SnapshotController,
+    private val prefs: NagmedarPreferences,
+) : PlayerChromeActions {
+
+    /** Opens the folder picker: the composition's launcher. */
+    var pickFolder: () -> Unit = {}
 
     fun read(): PlayerChromeState {
         val service = activity.service ?: return PlayerChromeState()
@@ -499,6 +539,16 @@ internal class ActivityPlayerSource(private val activity: VideoPlayerActivity, p
     override fun toggleFullscreen() = PlayerWindow.toggleFullscreen(activity)
 
     override fun toggleEffects() = panel.toggle(PanelTab.Effects)
+
+    override fun takeSnapshot() = snapshots.take()
+
+    override fun setSnapshotSettings(settings: SnapshotSettings) {
+        // back to Pictures/Nağmedar: the chosen folder's permission goes
+        if (settings.folder == null && prefs.snapshot.folder != null) forgetSnapshotFolder(activity, prefs)
+        prefs.updateSnapshot(settings)
+    }
+
+    override fun chooseSnapshotFolder() = pickFolder()
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

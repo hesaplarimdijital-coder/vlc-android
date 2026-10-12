@@ -14,6 +14,7 @@ import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
@@ -68,6 +69,15 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     fun updateMiddleClick(value: String) {
         middleClick = value
         prefs.edit().putString(NAGMEDAR_MIDDLE_CLICK, value).apply()
+    }
+
+    /** S-606: the screenshots' format, subtitles, HDR and folder. */
+    var snapshot by mutableStateOf(SnapshotSettings.read(prefs))
+        private set
+
+    fun updateSnapshot(value: SnapshotSettings) {
+        snapshot = value
+        value.write(prefs.edit()).apply()
     }
 
     /** S-404: how long the mouse rests before a tooltip shows. */
@@ -125,6 +135,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
             ShortcutRegistry.overrides = shortcutOverrides
         }
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
+        if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
     }
 
     fun updateThemeMode(value: ThemeMode) {

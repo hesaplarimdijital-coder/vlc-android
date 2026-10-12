@@ -1,5 +1,8 @@
 package app.nagmedar.ui.screens
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +44,12 @@ import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.lab.LabSection
+import app.nagmedar.ui.player.snapshot.HdrSnapshot
+import app.nagmedar.ui.player.snapshot.SnapshotFormat
+import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
+import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
+import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
+import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
@@ -79,6 +88,7 @@ fun SettingsScreen(
         item { AppearanceSection(prefs) }
         item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
+        item { SnapshotSection(prefs) }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
                 SettingRow(stringResource(R.string.nag_settings_launcher)) {
@@ -213,6 +223,62 @@ internal fun AppearanceSection(prefs: NagmedarPreferences) {
                 selected = if (wallpaper == null && prefs.accent == Accent.System) Accent.Blue else prefs.accent,
                 onSelect = prefs::updateAccent,
             )
+        }
+    }
+}
+
+/**
+ * Screenshots (S-606): their format, whether the subtitles go in, what HDR films' pictures
+ * become, and their folder, Pictures/Nağmedar unless one is chosen. The player's screenshot
+ * button has the same choices in its menu.
+ */
+@Composable
+internal fun SnapshotSection(prefs: NagmedarPreferences) {
+    val context = LocalContext.current
+    val settings = prefs.snapshot
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) keepSnapshotFolder(context, prefs, uri)
+    }
+    SettingsSection(stringResource(R.string.nag_snap_settings)) {
+        // WebP is lossless from Android 10
+        val lossless = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        SettingRow(stringResource(R.string.nag_snap_format), subtitle = stringResource(if (lossless) R.string.nag_snap_format_hint else R.string.nag_snap_format_hint_old)) {
+            SegmentedChoice(
+                options = SnapshotFormat.entries.map { it to it.label },
+                selected = settings.format,
+                onSelect = { prefs.updateSnapshot(settings.copy(format = it)) },
+            )
+        }
+        SettingRow(stringResource(R.string.nag_snap_subtitles), subtitle = stringResource(R.string.nag_snap_subtitles_hint)) {
+            SegmentedChoice(
+                options = listOf(true to stringResource(R.string.nag_snap_with), false to stringResource(R.string.nag_snap_without)),
+                selected = settings.subtitles,
+                onSelect = { prefs.updateSnapshot(settings.copy(subtitles = it)) },
+            )
+        }
+        // HDR is kept from Android 14, which copies a picture with its PQ or HLG coding
+        val keepHdr = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        SettingRow(
+            stringResource(R.string.nag_snap_hdr),
+            subtitle = stringResource(if (keepHdr) R.string.nag_snap_hdr_hint else R.string.nag_snap_hdr_unavailable),
+        ) {
+            if (keepHdr) {
+                SegmentedChoice(
+                    options = listOf(
+                        HdrSnapshot.ToneMap to stringResource(R.string.nag_snap_tone_map),
+                        HdrSnapshot.Keep to stringResource(R.string.nag_snap_keep_hdr),
+                    ),
+                    selected = settings.hdr,
+                    onSelect = { prefs.updateSnapshot(settings.copy(hdr = it)) },
+                )
+            }
+        }
+        val folder = snapshotFolderLabel(settings.folder, defaultSnapshotFolder(stringResource(R.string.nagmedar_shell_title)))
+        SettingRow(stringResource(R.string.nag_snap_folder), subtitle = folder) {
+            Row(horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
+                if (settings.folder != null) NagButton(stringResource(R.string.nag_snap_default_folder), { forgetSnapshotFolder(context, prefs) })
+                NagButton(stringResource(R.string.nag_snap_change_folder), { runCatching { picker.launch(null) } })
+            }
         }
     }
 }

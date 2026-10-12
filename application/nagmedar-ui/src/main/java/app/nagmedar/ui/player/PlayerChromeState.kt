@@ -1,6 +1,7 @@
 package app.nagmedar.ui.player
 
 import androidx.compose.runtime.Immutable
+import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -43,6 +44,8 @@ data class PlayerChromeState(
     val hasNext: Boolean = false,
     /** S-603: the panel shows its effects. */
     val effectsOpen: Boolean = false,
+    /** S-606: the screenshots' choices, for the screenshot button's menu. */
+    val snapshot: SnapshotSettings = SnapshotSettings(),
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -88,6 +91,15 @@ interface PlayerChromeActions {
 
     /** S-603: opens the panel on its effects, or closes it. */
     fun toggleEffects()
+
+    /** S-606: a screenshot of the film, as the settings ask for it. */
+    fun takeSnapshot()
+
+    /** S-606: the screenshots' choices, from the button's menu. */
+    fun setSnapshotSettings(settings: SnapshotSettings)
+
+    /** S-606: the system's folder picker, for the screenshots' folder. */
+    fun chooseSnapshotFolder()
 
     /** Leaves the player. */
     fun close()

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.io.File
 import java.util.Collections
@@ -98,6 +99,11 @@ class TechRepository private constructor(private val context: Context) {
                 .toMap()
         }
         .flowOn(Dispatchers.Default)
+
+    /** The current probe of one file ([key], a media URI) when it has one: the player asks it (S-606). */
+    suspend fun cached(key: String): MediaTech? = withContext(Dispatchers.IO) {
+        dao.get(key)?.takeIf { it.probeVersion == MediaProbe.VERSION }?.let { MediaProbe.parse(it.json) }
+    }
 
     /** Probes the [keys] (media URIs) that have no current result, in the background. */
     fun probeMissing(keys: List<String>) {

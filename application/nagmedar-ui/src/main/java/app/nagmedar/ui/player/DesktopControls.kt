@@ -1,5 +1,6 @@
 package app.nagmedar.ui.player
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -43,8 +44,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -60,7 +63,13 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.input.contextMenuGesture
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.snapshot.HdrSnapshot
+import app.nagmedar.ui.player.snapshot.SnapshotFormat
+import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
+import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -144,8 +153,8 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
 
 /**
  * The control bar: the timeline over a row of controls. Wide, every control with its name; on a
- * tablet's width the tracks' names give way to their icons; on a phone's, the speed, the A-B loop
- * and the volume's slider make room for the rest.
+ * tablet's width the tracks' names give way to their icons, and below 720 dp the screenshot button
+ * goes; on a phone's, the speed, the A-B loop and the volume's slider make room for the rest.
  */
 @Composable
 private fun ControlBar(
@@ -164,6 +173,8 @@ private fun ControlBar(
     ) {
         val wide = maxWidth >= 840.dp
         val narrow = maxWidth < 600.dp
+        // the camera needs a little more than a tablet's narrowest window; Shift+S stays
+        val roomy = maxWidth >= 720.dp
         Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 8.dp)) {
             PlayerTimeline(state, actions::seekTo, previews, initialHover = timelineHover)
             Row(
@@ -192,6 +203,7 @@ private fun ControlBar(
                 AudioMenu(state, actions, visibility, labelled = wide)
                 SubtitleMenu(state, actions, visibility, labelled = wide)
                 if (!narrow) AbButton(state, actions)
+                if (roomy) SnapshotButton(state, actions, visibility)
                 BarButton(NagIcons.Effects, stringResource(R.string.nag_sc_effects), actions::toggleEffects, ShortcutId.Effects, selected = state.effectsOpen)
                 Volume(state, actions, slider = !narrow)
                 if (state.canFullscreen) {
@@ -368,6 +380,77 @@ private fun AbButton(state: PlayerChromeState, actions: PlayerChromeActions) {
         },
     )
     BarChip(label, "A-B", null, actions::abRepeat, null, "player-ab", selected = state.abState != AbState.Off)
+}
+
+/**
+ * The camera takes a screenshot (S-606); a right click, or a long press, opens its choices: the
+ * subtitles, the format, HDR and the folder, as Settings has them.
+ */
+@Composable
+private fun SnapshotButton(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility) {
+    var menuAt by remember { mutableStateOf<IntOffset?>(null) }
+    val entries = snapshotMenu(state.snapshot, actions)
+    val optionsLabel = stringResource(R.string.nag_snap_options)
+    fun open(at: IntOffset) {
+        menuAt = at
+        visibility.menuOpen = true
+    }
+    Box(
+        Modifier
+            .contextMenuGesture { at -> open(IntOffset(at.x.roundToInt(), at.y.roundToInt())) }
+            .semantics { customActions = listOf(CustomAccessibilityAction(optionsLabel) { open(IntOffset.Zero); true }) }
+            .testTag("player-snapshot"),
+    ) {
+        BarButton(NagIcons.Screenshot, stringResource(R.string.nag_sc_snapshot), actions::takeSnapshot, ShortcutId.Snapshot)
+        MenuPopup(
+            visible = menuAt != null,
+            onDismiss = {
+                menuAt = null
+                visibility.menuOpen = false
+            },
+            entries = if (menuAt != null) entries else emptyList(),
+            offset = menuAt ?: IntOffset.Zero,
+            minWidth = 240.dp,
+        )
+    }
+}
+
+/** The screenshot button's menu: take one, then the choices Settings > Screenshots has. */
+@Composable
+internal fun snapshotMenu(settings: SnapshotSettings, actions: PlayerChromeActions): List<MenuEntry> {
+    val keys = ShortcutRegistry.chordLabel(ShortcutId.Snapshot, LocalContext.current.resources)
+    val folder = snapshotFolderLabel(settings.folder, defaultSnapshotFolder(stringResource(R.string.nagmedar_shell_title)))
+    val keepHdr = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+    return listOf(
+        MenuEntry.Item(stringResource(R.string.nag_sc_snapshot), actions::takeSnapshot, shortcut = keys),
+        MenuEntry.Separator,
+        MenuEntry.Item(
+            stringResource(R.string.nag_snap_with),
+            { actions.setSnapshotSettings(settings.copy(subtitles = !settings.subtitles)) },
+            checked = settings.subtitles,
+        ),
+        MenuEntry.Separator,
+    ) + SnapshotFormat.entries.map { format ->
+        MenuEntry.Item(format.label, { actions.setSnapshotSettings(settings.copy(format = format)) }, checked = settings.format == format)
+    } + listOf(
+        MenuEntry.Separator,
+        MenuEntry.Item(
+            stringResource(R.string.nag_snap_menu_tone_map),
+            { actions.setSnapshotSettings(settings.copy(hdr = HdrSnapshot.ToneMap)) },
+            checked = settings.hdr == HdrSnapshot.ToneMap || !keepHdr,
+        ),
+        MenuEntry.Item(
+            stringResource(R.string.nag_snap_menu_keep_hdr),
+            { actions.setSnapshotSettings(settings.copy(hdr = HdrSnapshot.Keep)) },
+            enabled = keepHdr,
+            checked = settings.hdr == HdrSnapshot.Keep && keepHdr,
+        ),
+        MenuEntry.Separator,
+        MenuEntry.Item(stringResource(R.string.nag_snap_menu_folder, folder), {}, enabled = false),
+        MenuEntry.Item(stringResource(R.string.nag_snap_menu_change_folder), actions::chooseSnapshotFolder),
+    ) + listOfNotNull(
+        settings.folder?.let { MenuEntry.Item(stringResource(R.string.nag_snap_menu_default_folder), { actions.setSnapshotSettings(settings.copy(folder = null)) }) },
+    )
 }
 
 /** The speaker mutes and brings the sound back; the slider sets the volume, past 100 % with audio boost. */
