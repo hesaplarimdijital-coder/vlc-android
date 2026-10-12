@@ -10,6 +10,7 @@
 #include <libusb.h>
 
 #include "bitrate.h"
+#include "disktest.h"
 #include "dvconvert.h"
 #include "mediaprobe.h"
 #include "usb_audio.h"
@@ -96,6 +97,14 @@ static int bitrate_progress_cb(void *opaque, double fraction)
 {
     char msg[64];
     snprintf(msg, sizeof(msg), "%.0f %%", fraction * 100);
+    report(opaque, fraction, msg);
+    return g_cancel;
+}
+
+static int disk_progress_cb(void *opaque, double fraction, double mb_per_s)
+{
+    char msg[64];
+    snprintf(msg, sizeof(msg), "%.0f MB/s", mb_per_s);
     report(opaque, fraction, msg);
     return g_cancel;
 }
@@ -192,4 +201,13 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_bitrate(JNIEnv *env, j
     jstring result = take(env, media_bitrate(in, max_seconds, listener ? bitrate_progress_cb : NULL, &cb, &g_cancel));
     (*env)->ReleaseStringUTFChars(env, input, in);
     return result;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_diskSpeed(JNIEnv *env, jclass cls, jint fd, jlong offset, jlong max_bytes,
+                                                                    jdouble max_seconds, jobject listener)
+{
+    (void)cls;
+    g_cancel = 0;
+    Callback cb = callback(env, listener);
+    return take(env, disk_read_speed(fd, offset, max_bytes, max_seconds, listener ? disk_progress_cb : NULL, &cb, &g_cancel));
 }

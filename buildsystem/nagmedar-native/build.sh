@@ -129,6 +129,9 @@ host() {
         "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
         > "$WORK/bitrate.log" 2>&1 || fail_log "bitrate (host)" "$WORK/bitrate.log"
+    log "disktest (host)"
+    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/disktest" "$ROOT/native/lab/disktest.c" "$ROOT/native/lab/disktest_cli.c" \
+        > "$WORK/disktest.log" 2>&1 || fail_log "disktest (host)" "$WORK/disktest.log"
 }
 
 android() {

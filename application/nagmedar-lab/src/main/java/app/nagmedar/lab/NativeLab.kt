@@ -42,4 +42,10 @@ object NativeLab {
      * [listener] told how far it is; [cancel] stops it.
      */
     @JvmStatic external fun bitrate(input: String, maxSeconds: Double, listener: Progress?): String
+
+    /**
+     * S-1204: how fast the drive behind [fd] reads, sequentially from [offset], at most
+     * [maxBytes] or [maxSeconds]; see [DiskSpeed]. [fd] stays open; [cancel] stops it.
+     */
+    @JvmStatic external fun diskSpeed(fd: Int, offset: Long, maxBytes: Long, maxSeconds: Double, listener: Progress?): String
 }

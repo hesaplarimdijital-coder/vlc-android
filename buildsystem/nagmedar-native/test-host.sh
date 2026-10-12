@@ -227,6 +227,26 @@ if problems:
 print('ok: bitrate analysis (seconds, peaks, streams, the first second alone, errors)')
 PY
 
+echo "== S-1204: disk test"
+"$PREFIX/bin/disktest" "$T/sdr.mkv" > "$T/disk.json"
+"$PREFIX/bin/disktest" "$T/sdr.mkv" 1 > "$T/disk-1mb.json"
+python3 - "$T" <<'PY'
+import json, os, sys
+t = sys.argv[1]
+problems = []
+whole = json.load(open(f'{t}/disk.json'))
+part = json.load(open(f'{t}/disk-1mb.json'))
+size = os.path.getsize(f'{t}/sdr.mkv')
+if whole['error'] or whole['bytes'] != size or whole['mb_per_s'] <= 0 or not whole['complete']:
+    problems.append(f'whole {whole} size {size}')
+if part['error'] or part['bytes'] != min(size, 1000000):
+    problems.append(f'1 MB {part}')
+if problems:
+    print('::error title=S-1204 disk test::' + '; '.join(problems))
+    sys.exit(1)
+print(f'ok: disk test ({whole["mb_per_s"]} MB/s here)')
+PY
+
 echo "== SP-05: whisper pipeline smoke test"
 ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 -c:a libmp3lame "$T/tone.mp3" 2> /dev/null || ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 "$T/tone.wav"
 input=$(ls "$T"/tone.* | head -1)
