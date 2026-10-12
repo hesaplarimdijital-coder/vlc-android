@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -169,8 +170,11 @@ class InfoTest {
         compose.onNodeWithText("HEVC Main 10 · 3840×2160 · 23,976").assertExists()
         compose.onNodeWithTag("info-bitrate").assertExists()
         compose.onNodeWithText("61,8 Mbps").assertExists()
-        compose.onNodeWithText("0 kayıp").assertExists()
+        compose.onNodeWithTag("info-lost").assertTextContains("0 kayıp")
         compose.onNodeWithText("103.216 gösterildi").assertExists()
+        // S-504: the sound's buffers and the demuxer's line
+        compose.onNodeWithTag("info-audio-lost").assertTextContains("0 kayıp")
+        compose.onNodeWithTag("info-demux").assertExists()
         compose.onNodeWithTag("info-overlay").assertIsOff().performClick()
         assertTrue(overlay)
         compose.onNodeWithTag("info-overlay").assertIsOn()

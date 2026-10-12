@@ -1,11 +1,14 @@
 package app.nagmedar.ui.player.effects
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.lab.MediaProbe
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 
 /** S-507: only a Dolby Vision profile 5 film, whose base layer is not HDR10, goes to the software decoder. */
+@RunWith(AndroidJUnit4::class)
 class DolbyVisionDecodingTest {
 
     private fun probe(dvProfile: Int, elPresent: Boolean = false) = MediaProbe.parse(
