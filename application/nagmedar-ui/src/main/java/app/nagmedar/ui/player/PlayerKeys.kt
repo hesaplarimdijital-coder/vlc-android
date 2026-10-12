@@ -105,7 +105,6 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.SubtitleDelayDown -> activity.delaySubtitles(-DELAY_STEP_US)
             ShortcutId.SubtitleDelayUp -> activity.delaySubtitles(DELAY_STEP_US)
             ShortcutId.AddSubtitleFile -> activity.overlayDelegate.pickSubtitles()
-            ShortcutId.MediaInfo -> service.playlistManager.toggleStats()
             else -> return false
         }
         return true

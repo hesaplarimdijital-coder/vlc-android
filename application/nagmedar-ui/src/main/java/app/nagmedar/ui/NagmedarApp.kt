@@ -491,6 +491,6 @@ class AppActions(
 
     private companion object {
         /** Global shortcuts whose features arrive in later MVPs; they show a notice instead. */
-        val comingLater = setOf(ShortcutId.MediaInfo)
+        val comingLater = emptySet<ShortcutId>()
     }
 }

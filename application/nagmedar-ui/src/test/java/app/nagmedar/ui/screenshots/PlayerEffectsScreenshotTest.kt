@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -104,7 +105,12 @@ class PlayerEffectsScreenshotTest {
  * the panel in a wide window, above it in a narrow one ([PanelDock]); [content] gets the columns.
  */
 @Composable
-internal fun PlayerWithPanel(tab: PanelTab, controls: Boolean, content: @Composable (columns: Int) -> Unit) {
+internal fun PlayerWithPanel(
+    tab: PanelTab,
+    controls: Boolean,
+    overVideo: @Composable BoxScope.() -> Unit = {},
+    content: @Composable (columns: Int) -> Unit,
+) {
     val panel = remember { PanelState(tab, open = true) }
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
         // the window's size, read here: the rows and columns below have their own scopes
@@ -123,10 +129,11 @@ internal fun PlayerWithPanel(tab: PanelTab, controls: Boolean, content: @Composa
                     }
                     DesktopControls(samplePlayerState.copy(effectsOpen = tab == PanelTab.Effects), FakePlayerActions(), visibility, previews = null)
                 }
+                overVideo()
             }
         }
         val tools: @Composable (Modifier, Int) -> Unit = { modifier, columns ->
-            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects), dock, modifier) { content(columns) }
+            PlayerPanel(panel, listOf(PanelTab.Sync, PanelTab.Effects, PanelTab.Info), dock, modifier) { content(columns) }
         }
         if (dock == PanelDock.Side) {
             Row(Modifier.fillMaxSize()) {

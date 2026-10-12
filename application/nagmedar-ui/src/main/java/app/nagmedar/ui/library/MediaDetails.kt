@@ -98,7 +98,7 @@ fun techRows(tech: MediaTech, key: String): List<TechRow> {
 
 /** The name of the drive a file is on ("SAMSUNG T7", "Internal shared storage"). */
 @Composable
-private fun storageName(key: String): String? {
+internal fun storageName(key: String): String? {
     val context = LocalContext.current
     return remember(key) { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) volumeName(context, key) else null }
 }

@@ -723,4 +723,47 @@
     <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
     <string name="nag_sync_remember">Remember for this file</string>
     <string name="nag_sync_reset_all">Reset all delays</string>
+
+    <!-- S-605: the Info tab of the player's panel and the statistics over the video -->
+    <string name="nag_info_no_media">Nothing is playing</string>
+    <string name="nag_info_streams">Streams</string>
+    <string name="nag_info_mark_video" translatable="false">V</string>
+    <string name="nag_info_mark_audio" translatable="false">A%1$d</string>
+    <string name="nag_info_mark_subtitles" translatable="false">S</string>
+    <string name="nag_info_khz">%1$s kHz</string>
+    <string name="nag_info_bits">%1$d bit</string>
+    <plurals name="nag_info_channels">
+        <item quantity="one">%d channel</item>
+        <item quantity="other">%d channels</item>
+    </plurals>
+    <plurals name="nag_info_subtitle_tracks">
+        <item quantity="one">Subtitles · %d track</item>
+        <item quantity="other">Subtitles · %d tracks</item>
+    </plurals>
+    <string name="nag_info_tag_hardware">hardware</string>
+    <string name="nag_info_tag_software">software</string>
+    <string name="nag_info_tag_playing">playing</string>
+    <string name="nag_info_decoding">Decoding and output</string>
+    <string name="nag_info_video_decoder">Video decoder</string>
+    <string name="nag_info_audio_output">Audio output</string>
+    <string name="nag_info_decoder_auto">Automatic · MediaCodec (hardware) first</string>
+    <string name="nag_info_decoder_hardware">MediaCodec · hardware</string>
+    <string name="nag_info_decoder_hardware_direct">MediaCodec · hardware · direct rendering</string>
+    <string name="nag_info_decoder_software">FFmpeg · software</string>
+    <string name="nag_info_decoder_fallback">FFmpeg · software (hardware failed on this file)</string>
+    <string name="nag_info_live">Live</string>
+    <string name="nag_info_every_second">every second</string>
+    <string name="nag_info_input_bitrate">Input bitrate</string>
+    <string name="nag_info_graph_start">−60 s</string>
+    <string name="nag_info_graph_now">now</string>
+    <string name="nag_info_frames">Frames</string>
+    <string name="nag_info_frames_lost">%1$s dropped</string>
+    <string name="nag_info_frames_shown">%1$s shown</string>
+    <string name="nag_info_overlay">Show over the video</string>
+    <string name="nag_info_overlay_bitrate">Bitrate</string>
+    <string name="nag_info_overlay_lost">Dropped frames</string>
+    <string name="nag_info_copy_report">Copy the report</string>
+    <string name="nag_info_copied">Copied</string>
+    <string name="nag_info_report_bitrate">Input bitrate: %1$s</string>
+    <string name="nag_info_report_frames">Frames: %1$s dropped of %2$s shown</string>
 </resources>

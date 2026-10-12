@@ -704,4 +704,44 @@
     <string name="nag_sync_rate_pal_to_film_hint">PAL (25 fps) altyazı giderek erkene kayıyorsa kullanın; süre çarpanı %1$s.</string>
     <string name="nag_sync_remember">Bu dosya için hatırla</string>
     <string name="nag_sync_reset_all">Tüm gecikmeleri sıfırla</string>
+
+    <!-- S-605: the Info tab of the player's panel and the statistics over the video -->
+    <string name="nag_info_no_media">Oynayan bir dosya yok</string>
+    <string name="nag_info_streams">Akışlar</string>
+    <string name="nag_info_khz">%1$s kHz</string>
+    <string name="nag_info_bits">%1$d bit</string>
+    <plurals name="nag_info_channels">
+        <item quantity="one">%d kanal</item>
+        <item quantity="other">%d kanal</item>
+    </plurals>
+    <plurals name="nag_info_subtitle_tracks">
+        <item quantity="one">Altyazı · %d iz</item>
+        <item quantity="other">Altyazı · %d iz</item>
+    </plurals>
+    <string name="nag_info_tag_hardware">donanım</string>
+    <string name="nag_info_tag_software">yazılım</string>
+    <string name="nag_info_tag_playing">çalıyor</string>
+    <string name="nag_info_decoding">Çözme ve çıkış</string>
+    <string name="nag_info_video_decoder">Video çözücü</string>
+    <string name="nag_info_audio_output">Ses çıkışı</string>
+    <string name="nag_info_decoder_auto">Otomatik · önce MediaCodec (donanım)</string>
+    <string name="nag_info_decoder_hardware">MediaCodec · donanım</string>
+    <string name="nag_info_decoder_hardware_direct">MediaCodec · donanım · doğrudan çıkış</string>
+    <string name="nag_info_decoder_software">FFmpeg · yazılım</string>
+    <string name="nag_info_decoder_fallback">FFmpeg · yazılım (donanım bu dosyada çalışmadı)</string>
+    <string name="nag_info_live">Canlı</string>
+    <string name="nag_info_every_second">her saniye</string>
+    <string name="nag_info_input_bitrate">Giriş bit hızı</string>
+    <string name="nag_info_graph_start">−60 sn</string>
+    <string name="nag_info_graph_now">şimdi</string>
+    <string name="nag_info_frames">Kare</string>
+    <string name="nag_info_frames_lost">%1$s kayıp</string>
+    <string name="nag_info_frames_shown">%1$s gösterildi</string>
+    <string name="nag_info_overlay">Videonun üzerinde göster</string>
+    <string name="nag_info_overlay_bitrate">Bit hızı</string>
+    <string name="nag_info_overlay_lost">Kayıp kare</string>
+    <string name="nag_info_copy_report">Raporu kopyala</string>
+    <string name="nag_info_copied">Kopyalandı</string>
+    <string name="nag_info_report_bitrate">Giriş bit hızı: %1$s</string>
+    <string name="nag_info_report_frames">Kare: %2$s gösterildi, %1$s kayıp</string>
 </resources>

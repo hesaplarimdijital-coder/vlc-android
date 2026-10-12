@@ -74,7 +74,7 @@ class MenuBarScreenshotTest {
     }
 
     /** As in the app: player shortcuts and those of later MVPs are not available in the shell. */
-    private val later = setOf(ShortcutId.MediaInfo)
+    private val later = emptySet<ShortcutId>()
 
     @Composable
     private fun Menus() {
