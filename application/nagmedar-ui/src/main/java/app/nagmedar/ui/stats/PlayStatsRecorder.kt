@@ -1,5 +1,7 @@
 package app.nagmedar.ui.stats
 
+import app.nagmedar.ui.scrobble.ScrobbleTrack
+import app.nagmedar.ui.scrobble.Scrobbling
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -12,7 +14,8 @@ import org.videolan.vlc.media.PlaybackObserver
 /**
  * S-808: the playback service's music, counted into Nağmedar's statistics for as long as the
  * service lives, whatever started it. A look a second while it plays, every few seconds while it
- * does not; videos and streams are not counted.
+ * does not; videos and streams are not counted. The same looks go to the scrobbling (S-1008), which
+ * decides for itself what it sends.
  */
 class PlayStatsRecorder : PlaybackObserver {
 
@@ -20,6 +23,8 @@ class PlayStatsRecorder : PlaybackObserver {
 
     override fun attach(service: PlaybackService) {
         val context = service.applicationContext
+        val scrobbling = Scrobbling.get(context).hub
+        scrobbling.resume()
         val counter = ListenCounter(
             onPlayed = { key -> TrackStatsIndex.record(context, key, played = true) },
             onSkipped = { key -> TrackStatsIndex.record(context, key, played = false) },
@@ -31,12 +36,16 @@ class PlayStatsRecorder : PlaybackObserver {
             while (isActive) {
                 delay(if (playing) SAMPLE_MS else IDLE_MS)
                 playing = runCatching { service.isPlaying }.getOrDefault(false)
-                val key = runCatching { service.currentMediaWrapper }.getOrNull()?.let(::statsKey)
+                val media = runCatching { service.currentMediaWrapper }.getOrNull()
+                val key = media?.let(::statsKey)
+                val time = if (media == null) 0L else service.getTime()
+                val length = if (media == null) 0L else service.length
                 if (key == null) {
                     counter.sample(null, 0, 0, playing = false)
                 } else {
-                    counter.sample(key, service.getTime(), service.length, playing)
+                    counter.sample(key, time, length, playing)
                 }
+                scrobbling.sample({ media?.let { ScrobbleTrack.of(it) } }, time, length, playing && media != null)
             }
         }
     }

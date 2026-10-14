@@ -5,6 +5,7 @@ import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
+import app.nagmedar.ui.scrobble.ScrobbleSettings
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -39,6 +40,8 @@ object BackupSettings {
         KEY_OPEN_SUBTITLES_USER,
         KEY_OPEN_SUBTITLES_LIMIT,
         PrefsOnlineQuotaStore.KEY,
+        // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
+        *ScrobbleSettings.keys.toTypedArray(),
         // the settings' version, which the backup keeps on its own
         KEY_CURRENT_SETTINGS_VERSION,
         KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION,

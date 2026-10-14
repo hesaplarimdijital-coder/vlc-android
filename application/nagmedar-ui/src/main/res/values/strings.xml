@@ -2184,4 +2184,39 @@
         <item quantity="one">%1$d result for “%2$s”</item>
         <item quantity="other">%1$d results for “%2$s”</item>
     </plurals>
+    <!-- S-1008: scrobbling (Settings › Scrobble) -->
+    <string name="nag_scrobble_title">Scrobbling</string>
+    <string name="nag_scrobble_intro">Sends the music you play to Last.fm and ListenBrainz. A track counts once you have heard half of it or four minutes, whichever comes first; tracks under 30 s, videos, podcasts and streams are not sent. While you are offline, scrobbles wait on this device and are sent later.</string>
+    <string name="nag_scrobble_lastfm">Last.fm</string>
+    <string name="nag_scrobble_listenbrainz">ListenBrainz</string>
+    <string name="nag_scrobble_signed_in">Signed in as %1$s</string>
+    <string name="nag_scrobble_signed_out">Not signed in</string>
+    <string name="nag_scrobble_no_key">This build has no %1$s key, so it cannot be used.</string>
+    <string name="nag_scrobble_held">%1$s did not accept this account\'s scrobbles. They wait here and none are lost: sign in again to send them.</string>
+    <string name="nag_scrobble_on">On</string>
+    <string name="nag_scrobble_off">Off</string>
+    <string name="nag_scrobble_none_waiting">Nothing waiting to be sent</string>
+    <plurals name="nag_scrobble_waiting">
+        <item quantity="one">%d scrobble waiting to be sent</item>
+        <item quantity="other">%d scrobbles waiting to be sent</item>
+    </plurals>
+    <string name="nag_scrobble_sign_in">Sign in…</string>
+    <string name="nag_scrobble_sign_in_again">Sign in again…</string>
+    <string name="nag_scrobble_send_now">Send now</string>
+    <string name="nag_scrobble_forget">Forget account</string>
+    <string name="nag_scrobble_user">User name</string>
+    <string name="nag_scrobble_password">Password</string>
+    <string name="nag_scrobble_password_hint">The password goes to Last.fm once and is not kept. Only the session key Last.fm gives back is kept, encrypted on this device.</string>
+    <string name="nag_scrobble_token">User token</string>
+    <string name="nag_scrobble_token_hint">Copy your token from your ListenBrainz settings page and paste it here. It is kept encrypted on this device.</string>
+    <string name="nag_scrobble_open_listenbrainz">Open ListenBrainz settings</string>
+    <string name="nag_scrobble_sign_in_confirm">Sign in</string>
+    <string name="nag_scrobble_check_token">Check token</string>
+    <string name="nag_scrobble_cancel">Cancel</string>
+    <string name="nag_scrobble_signing_in">Signing in…</string>
+    <string name="nag_scrobble_refused_lastfm">Last.fm did not accept this user name and password.</string>
+    <string name="nag_scrobble_refused_listenbrainz">ListenBrainz did not accept this token.</string>
+    <string name="nag_scrobble_offline">There is no connection. Check the network and try again.</string>
+    <string name="nag_scrobble_server">%1$s answered with an error (%2$d). Try again later.</string>
+    <string name="nag_scrobble_not_kept">The sign-in could not be stored securely on this device.</string>
 </resources>

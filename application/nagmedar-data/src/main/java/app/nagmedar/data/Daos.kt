@@ -449,3 +449,37 @@ interface NetworkServerDao {
     @Query("DELETE FROM network_server WHERE id = :id")
     fun delete(id: Long)
 }
+
+@Dao
+interface ScrobbleDao {
+    /** [entry] queued; -1 when the same track at the same time is already waiting for the service. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun add(entry: ScrobbleEntry): Long
+
+    /** The oldest [limit] scrobbles waiting for [service]. */
+    @Query("SELECT * FROM scrobble_queue WHERE service = :service ORDER BY listened_at, id LIMIT :limit")
+    fun pending(service: String, limit: Int): List<ScrobbleEntry>
+
+    /** Sent, or given up on. */
+    @Query("DELETE FROM scrobble_queue WHERE id IN (:ids)")
+    fun remove(ids: List<Long>)
+
+    /** Sending them failed for a reason that may pass. */
+    @Query("UPDATE scrobble_queue SET attempts = attempts + 1 WHERE id IN (:ids)")
+    fun failed(ids: List<Long>)
+
+    @Query("SELECT COUNT(*) FROM scrobble_queue WHERE service = :service")
+    fun count(service: String): Int
+
+    /** How many wait for each service, as they change. */
+    @Query("SELECT service, COUNT(*) AS count FROM scrobble_queue GROUP BY service")
+    fun counts(): Flow<List<ScrobbleCount>>
+
+    /** Forgets what waits for [service]; how many. */
+    @Query("DELETE FROM scrobble_queue WHERE service = :service")
+    fun clear(service: String): Int
+
+    /** Forgets what was heard before [before] (seconds since the epoch) and waits for [service]; how many. */
+    @Query("DELETE FROM scrobble_queue WHERE service = :service AND listened_at < :before")
+    fun dropOlderThan(service: String, before: Long): Int
+}

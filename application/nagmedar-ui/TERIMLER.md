@@ -136,6 +136,8 @@ Sözlüğü testler denetler:
 | tracker modülü | tracker module | mod dosyası, tracker şarkısı | mod file | MOD, XM, S3M, IT, MPTM… libopenmpt'nin çaldığı modül biçimleri; motor çalarken sentezler, kütüphane türünü (XM, IT…) format olarak gösterir |
 | puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi” |
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
+| scrobble | scrobbling, scrobble | | | Çalınan müziğin Last.fm ve ListenBrainz'e gönderilen kaydı (Ayarlar › Scrobble): 30 sn'den uzun bir parçanın yarısı ya da dört dakikası dinlenince sayılır; video, podcast ve akış gönderilmez. Çevrimdışıyken cihazda bekler: “3 scrobble gönderilmeyi bekliyor”. Türkçede olduğu gibi yazılır, ek kesmeyle: “scrobble'lar” |
+| belirteç | token | token, jeton | | ListenBrainz'in kullanıcıya verdiği anahtar: ayarlar sayfasından kopyalanıp yapıştırılır, cihazda şifrelenerek saklanır; “Belirteci denetle”. Last.fm'de saklanan ise “oturum anahtarı”dır, parola saklanmaz |
 | uyku zamanlayıcısı | sleep timer | uyku modu, kapanma zamanlayıcısı | sleep mode | Süre bitince ya da çalan parça bitince oynatmayı durdurur (Alt+S); “Parça sonu”, “+15 dk”, “Zamanlayıcıyı kapat” |
 | alarm | alarm | çalar saat | alarm clock | Ayarlar › Alarm; müzikle ya da internet radyosuyla çalar, ses düzeyi sessizlikten yükselir. Android'in “alarm saati” (alarm clock) olarak kurulur |
 | yedek, yedeklemek | backup, back up | | | Ayarlar › Yedekleme: ayarlar, kısayollar, cihaz profilleri, çalma ve akıllı listeler, puanlar ve çalınmalar, sözler, dosya ayarları ve elle seçilen kapaklar tek bir ZIP dosyasında; hesap girişleri ve bu cihazın klasör izinleri yazılmaz |
@@ -157,6 +159,8 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 - AutoEq
 - EBU R128
 - GNU General Public License
+- Last.fm
+- ListenBrainz
 - ReplayGain
 - SIL Open Font License
 - VLC for Android
