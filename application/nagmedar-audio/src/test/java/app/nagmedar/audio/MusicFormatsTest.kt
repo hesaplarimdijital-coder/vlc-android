@@ -40,11 +40,6 @@ class MusicFormatsTest {
         }
         assertTrue(MusicFormats.canPlay(Uri.parse("content://media/external/audio/media/42"), "audio/x-mod"))
         assertFalse(MusicFormats.isTracker(Uri.parse("file:///a/b.flac")))
-        // a module's kind in the library: the file's extension; a decoded file's codec as the engine gave it
-        assertEquals("xm", MusicFormats.codecOf(MusicFormats.TRACKER, Uri.parse("file:///a/b.XM")))
-        assertEquals("mptm", MusicFormats.codecOf("tracker", Uri.parse("content://com.android.externalstorage.documents/document/primary%3AMusic%2Fx.mptm")))
-        assertEquals("tracker", MusicFormats.codecOf("tracker", Uri.parse("content://media/external/audio/media/42")))
-        assertEquals("flac", MusicFormats.codecOf("flac", Uri.parse("file:///a/b.flac")))
         // a PPM is a picture, whatever libopenmpt makes of the name
         assertFalse(MusicFormats.canPlay(Uri.parse("file:///a/picture.ppm"), null))
     }

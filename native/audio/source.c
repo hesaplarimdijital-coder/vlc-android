@@ -7,6 +7,7 @@
 #include <libavutil/dict.h>
 #include <libavutil/opt.h>
 #include <libswresample/swresample.h>
+#include <libopenmpt/libopenmpt.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -15,6 +16,14 @@
 
 /* decoding errors in a row before a read gives up: a damaged frame is skipped, a damaged file is not */
 #define MAX_DECODE_ERRORS 32
+
+/* S-911: a tracker module is rendered at this rate, this many frames at a time: as ffmpeg's
+ * libopenmpt demuxer renders it, so that the render is the same (libopenmpt's volume ramps go
+ * by the size of the reads) */
+#define MOD_RATE 48000
+#define MOD_CHUNK 256
+/* a module is read whole: a file larger than this is not one */
+#define MOD_MAX_BYTES (64 << 20)
 
 struct NagSource {
     AVFormatContext *ic;
@@ -46,6 +55,10 @@ struct NagSource {
     uint8_t dop_carry[2];
     int dop_carried[2];
     int64_t dop_position; /* frames before the next packet, when its timestamp is unknown */
+    /* S-911: a tracker module, rendered by libopenmpt instead of decoded by FFmpeg */
+    openmpt_module *mod;
+    float *mod_buffer;    /* MOD_CHUNK frames of what it renders, mono or interleaved stereo */
+    int64_t mod_position; /* the frame the next render starts at, in the module's own count */
 };
 
 static int is_dsd(enum AVCodecID id)
@@ -122,12 +135,6 @@ static void read_info(NagSource *s)
     info->bitrate = par->bit_rate > 0 ? par->bit_rate : s->ic->bit_rate;
     snprintf(info->codec, sizeof(info->codec), "%s", avcodec_get_name(par->codec_id));
     snprintf(info->container, sizeof(info->container), "%s", s->ic->iformat ? s->ic->iformat->name : "");
-    /* S-911: a tracker module, rendered by libopenmpt through FFmpeg's demuxer: what plays is the
-     * module, not the float PCM it renders to, and a bit rate means nothing for it */
-    if (!strcmp(info->container, "libopenmpt")) {
-        snprintf(info->codec, sizeof(info->codec), "tracker");
-        info->bitrate = 0;
-    }
     const char *composer = first_text(s->ic, st, "composer");
     if (composer) {
         snprintf(info->composer, sizeof(info->composer), "%s", composer);
@@ -161,26 +168,26 @@ static void read_info(NagSource *s)
     }
 }
 
-static int open_swr(NagSource *s, char *error, size_t error_size)
+/* The converter from frames of [in_layout] in [in_fmt] to the fifo's doubles in s->channels, at the same rate. */
+static int open_swr_from(NagSource *s, const AVChannelLayout *in_layout, enum AVSampleFormat in_fmt, int rate, char *error, size_t error_size)
 {
     AVChannelLayout out_layout;
-    if (s->channels == s->dec->ch_layout.nb_channels) {
-        av_channel_layout_copy(&out_layout, &s->dec->ch_layout);
+    if (s->channels == in_layout->nb_channels) {
+        av_channel_layout_copy(&out_layout, in_layout);
     } else {
         av_channel_layout_default(&out_layout, s->channels);
     }
-    int ret = swr_alloc_set_opts2(&s->swr, &out_layout, AV_SAMPLE_FMT_DBL, s->dec->sample_rate,
-                                  &s->dec->ch_layout, s->dec->sample_fmt, s->dec->sample_rate, 0, NULL);
+    int ret = swr_alloc_set_opts2(&s->swr, &out_layout, AV_SAMPLE_FMT_DBL, rate, in_layout, in_fmt, rate, 0, NULL);
     if (ret < 0) {
         av_channel_layout_uninit(&out_layout);
         fail(error, error_size, "swresample", ret);
         return ret;
     }
     /* a mono file on a stereo output: the same samples on both sides, not 3 dB down */
-    if (s->dec->ch_layout.nb_channels == 1 && s->channels == 2) {
+    if (in_layout->nb_channels == 1 && s->channels == 2) {
         const double matrix[2] = {1.0, 1.0};
         swr_set_matrix(s->swr, matrix, 1);
-    } else if (s->dec->ch_layout.nb_channels > s->channels) {
+    } else if (in_layout->nb_channels > s->channels) {
         /* a downmix that cannot clip: the coefficients of each output sum to one at most */
         av_opt_set_double(s->swr, "rematrix_maxval", 1.0, 0);
     }
@@ -189,6 +196,178 @@ static int open_swr(NagSource *s, char *error, size_t error_size)
         fail(error, error_size, "swresample init", ret);
         return ret;
     }
+    return 0;
+}
+
+static int open_swr(NagSource *s, char *error, size_t error_size)
+{
+    return open_swr_from(s, &s->dec->ch_layout, s->dec->sample_fmt, s->dec->sample_rate, error, error_size);
+}
+
+/*
+ * S-911: a tracker module (MOD, XM, S3M, IT, MPTM, …), told from the file's first bytes and
+ * read whole for libopenmpt, which renders it to float at MOD_RATE: stereo, or mono when the
+ * frames asked for are mono. Returns 1 when [url] is a module and open, 0 when it is not one
+ * (FFmpeg reads it then), negative when it is one that cannot be read.
+ */
+static int mod_open(NagSource *s, const char *url, int channels, char *error, size_t error_size)
+{
+    AVIOContext *pb = NULL;
+    if (avio_open2(&pb, url, AVIO_FLAG_READ, NULL, NULL) < 0)
+        return 0; /* FFmpeg says what is wrong with the file */
+    int64_t size = avio_size(pb);
+    if (size <= 0 || size > MOD_MAX_BYTES) {
+        avio_closep(&pb);
+        return 0;
+    }
+    /* the first bytes tell: with the recommended amount the answer is final */
+    int64_t head = (int64_t)openmpt_probe_file_header_get_recommended_size();
+    if (head > size)
+        head = size;
+    uint8_t *data = malloc((size_t)head);
+    if (!data) {
+        avio_closep(&pb);
+        fail(error, error_size, "out of memory", AVERROR(ENOMEM));
+        return AVERROR(ENOMEM);
+    }
+    int64_t at = 0;
+    while (at < head) {
+        int n = avio_read(pb, data + at, (int)(head - at));
+        if (n <= 0)
+            break;
+        at += n;
+    }
+    int probe = at == head ? openmpt_probe_file_header(OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, data, (size_t)head, (uint64_t)size,
+                                                       NULL, NULL, NULL, NULL, NULL, NULL)
+                           : OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE;
+    if (probe != OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS) {
+        free(data);
+        avio_closep(&pb);
+        return 0;
+    }
+    uint8_t *whole = realloc(data, (size_t)size);
+    if (!whole) {
+        free(data);
+        avio_closep(&pb);
+        fail(error, error_size, "out of memory", AVERROR(ENOMEM));
+        return AVERROR(ENOMEM);
+    }
+    data = whole;
+    while (at < size) {
+        int n = avio_read(pb, data + at, (int)FFMIN(size - at, 1 << 20));
+        if (n <= 0)
+            break;
+        at += n;
+    }
+    avio_closep(&pb);
+    if (at != size) {
+        free(data);
+        fail(error, error_size, "the module could not be read whole", AVERROR(EIO));
+        return AVERROR(EIO);
+    }
+    int err = OPENMPT_ERROR_OK;
+    const char *message = NULL;
+    s->mod = openmpt_module_create_from_memory2(data, (size_t)size, NULL, NULL, NULL, NULL, &err, &message, NULL);
+    free(data);
+    if (!s->mod) {
+        if (error && error_size)
+            snprintf(error, error_size, "module: %s", message && message[0] ? message : "cannot be read");
+        openmpt_free_string(message);
+        return AVERROR_INVALIDDATA;
+    }
+    openmpt_free_string(message);
+    openmpt_module_set_repeat_count(s->mod, 0); /* once through, its loops as written */
+    s->channels = channels > 0 ? channels : 2;
+    int rendered = s->channels == 1 ? 1 : 2;
+    AVChannelLayout layout;
+    av_channel_layout_default(&layout, rendered);
+    int ret = open_swr_from(s, &layout, AV_SAMPLE_FMT_FLT, MOD_RATE, error, error_size);
+    av_channel_layout_uninit(&layout);
+    if (ret < 0)
+        return ret;
+    s->mod_buffer = malloc(sizeof(float) * MOD_CHUNK * (size_t)rendered);
+    s->fifo = av_audio_fifo_alloc(AV_SAMPLE_FMT_DBL, s->channels, 1 << 16);
+    if (!s->mod_buffer || !s->fifo) {
+        fail(error, error_size, "out of memory", AVERROR(ENOMEM));
+        return AVERROR(ENOMEM);
+    }
+    /* what the file is: the module is the "codec", its kind (mod, xm, it, …) the container */
+    NagSourceInfo *info = &s->info;
+    memset(info, 0, sizeof(*info));
+    info->rate = MOD_RATE;
+    info->channels = rendered;
+    info->is_float = 1;
+    info->duration_ms = llround(openmpt_module_get_duration_seconds(s->mod) * 1000.0);
+    s->file_duration_ms = info->duration_ms;
+    snprintf(info->codec, sizeof(info->codec), "tracker");
+    const char *type = openmpt_module_get_metadata(s->mod, "type");
+    snprintf(info->container, sizeof(info->container), "%s", type && type[0] ? type : "mod");
+    openmpt_free_string(type);
+    info->track_gain_db = info->track_peak = info->album_gain_db = info->album_peak = NAN;
+    return 1;
+}
+
+/* Renders the next frames of the module into the fifo, minus what a seek asked to drop. */
+static int mod_render(NagSource *s)
+{
+    int rendered = s->channels == 1 ? 1 : 2;
+    size_t got = rendered == 1 ? openmpt_module_read_float_mono(s->mod, MOD_RATE, MOD_CHUNK, s->mod_buffer)
+                               : openmpt_module_read_interleaved_float_stereo(s->mod, MOD_RATE, MOD_CHUNK, s->mod_buffer);
+    if (got == 0) {
+        s->drained = 1;
+        return 0;
+    }
+    int64_t position = s->mod_position;
+    s->mod_position += (int64_t)got;
+    int offset = 0;
+    if (s->skip_until >= 0) {
+        if (position + (int64_t)got <= s->skip_until) {
+            s->fifo_end = position + (int64_t)got;
+            return 0;
+        }
+        if (position < s->skip_until)
+            offset = (int)(s->skip_until - position);
+        s->skip_until = -1;
+    }
+    s->fifo_end = position + (int64_t)got;
+    int frames = (int)got - offset;
+    uint8_t *out = NULL;
+    int ret = av_samples_alloc(&out, NULL, s->channels, frames, AV_SAMPLE_FMT_DBL, 0);
+    if (ret < 0)
+        return ret;
+    const uint8_t *in[1] = {(const uint8_t *)(s->mod_buffer + (size_t)offset * (size_t)rendered)};
+    ret = swr_convert(s->swr, &out, frames, in, frames);
+    if (ret > 0)
+        ret = av_audio_fifo_write(s->fifo, (void **)&out, ret);
+    av_freep(&out);
+    return ret < 0 ? ret : 0;
+}
+
+/*
+ * To frame [target] of the module: libopenmpt lands on the first row boundary at or after the
+ * time asked, so it is asked for earlier times until it lands at or before the target; the
+ * rest is dropped as it renders, and what follows starts on the frame asked.
+ */
+static int mod_seek(NagSource *s, int64_t target)
+{
+    double ask = (double)target / MOD_RATE;
+    double at = openmpt_module_set_position_seconds(s->mod, ask);
+    double step = 0.01;
+    for (int i = 0; i < 24 && at * MOD_RATE > (double)target + 0.5 && ask > 0.0; i++) {
+        ask -= step;
+        if (ask < 0.0)
+            ask = 0.0;
+        step *= 2.0;
+        at = openmpt_module_set_position_seconds(s->mod, ask);
+    }
+    int64_t landed = llround(at * MOD_RATE);
+    if (landed < 0)
+        landed = 0;
+    av_audio_fifo_reset(s->fifo);
+    s->drained = 0;
+    s->mod_position = landed;
+    s->skip_until = landed < target ? target : -1;
+    s->fifo_end = landed;
     return 0;
 }
 
@@ -209,9 +388,17 @@ int nag_source_open_ex(NagSource **out, const char *url, int channels, int flags
     s->next_pts = 0;
     s->part_start = 0;
     s->part_end = -1;
+    /* S-911: a tracker module is libopenmpt's; anything else FFmpeg's */
+    int ret = mod_open(s, url, channels, error, error_size);
+    if (ret != 0) {
+        if (ret < 0)
+            goto fail;
+        *out = s;
+        return 0;
+    }
     AVDictionary *opts = NULL;
     av_dict_set(&opts, "probesize", "4000000", 0);
-    int ret = avformat_open_input(&s->ic, url, NULL, &opts);
+    ret = avformat_open_input(&s->ic, url, NULL, &opts);
     av_dict_free(&opts);
     if (ret < 0) {
         fail(error, error_size, "open", ret);
@@ -304,6 +491,9 @@ void nag_source_close(NagSource *s)
     swr_free(&s->swr);
     avcodec_free_context(&s->dec);
     avformat_close_input(&s->ic);
+    if (s->mod)
+        openmpt_module_destroy(s->mod);
+    free(s->mod_buffer);
     free(s);
 }
 
@@ -475,6 +665,14 @@ static int part_filled(const NagSource *s)
 static int fill(NagSource *s, int want)
 {
     int errors = 0;
+    if (s->mod) {
+        while (!s->drained && !part_filled(s) && av_audio_fifo_size(s->fifo) < want) {
+            int ret = mod_render(s);
+            if (ret < 0)
+                return ret;
+        }
+        return 0;
+    }
     if (s->dop) {
         while (!s->drained && !part_filled(s) && av_audio_fifo_size(s->fifo) < want) {
             int ret = av_read_frame(s->ic, s->packet);
@@ -572,6 +770,8 @@ static int seek_frames(NagSource *s, int64_t target)
 {
     if (target < 0)
         target = 0;
+    if (s->mod)
+        return mod_seek(s, target);
     AVStream *st = s->ic->streams[s->stream];
     int64_t preroll = av_rescale(SEEK_PREROLL_MS, s->info.rate, 1000);
     int64_t before = target > preroll ? target - preroll : 0;

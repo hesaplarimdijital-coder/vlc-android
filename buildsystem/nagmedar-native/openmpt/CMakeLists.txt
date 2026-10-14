@@ -1,20 +1,19 @@
 # libopenmpt as a static library for the music engine (S-911): the tracker formats (MOD, XM,
-# S3M, IT, MPTM, MED, OKT, …) rendered by OpenMPT's player, which the engine's FFmpeg reads
-# through its libopenmpt demuxer. libopenmpt ships no CMake build of its own (a Makefile, an
-# Android.mk and Visual Studio projects), so this lists what its Makefile lists: the common
-# code, the sound library with its plugins and DSP, and the C/C++ API; miniz stands in for
-# zlib (as the Makefile does without zlib), so the compressed J2B modules load too. Without
-# mpg123 and Vorbis, MO3 modules with MP3 or Vorbis samples do not load; the rest do.
+# S3M, IT, MPTM, MED, OKT, …) rendered by OpenMPT's player (native/audio/source.c). libopenmpt
+# ships no CMake build of its own (a Makefile, an Android.mk and Visual Studio projects), so
+# this lists what its Makefile lists: the common code, the sound library with its plugins and
+# DSP, and the C/C++ API; miniz stands in for zlib (as the Makefile does without zlib), so the
+# compressed J2B modules load too. Without mpg123 and Vorbis, MO3 modules with MP3 or Vorbis
+# samples do not load; the rest do.
 #
 #   cmake -S buildsystem/nagmedar-native/openmpt -B <dir> -DOPENMPT_SOURCE=<checkout> -DCMAKE_INSTALL_PREFIX=<prefix>
 #
-# installs libopenmpt.a, the libopenmpt/ headers and lib/pkgconfig/libopenmpt.pc (what FFmpeg's
-# configure looks for; OPENMPT_PC_LIBS adds the C++ runtime the static library needs).
+# installs libopenmpt.a, the libopenmpt/ headers and lib/pkgconfig/libopenmpt.pc (for a build
+# of the engine against a prefix through pkg-config).
 cmake_minimum_required(VERSION 3.22)
 project(nagmedar_openmpt C CXX)
 
 set(OPENMPT_SOURCE "" CACHE PATH "libopenmpt source tree (a checkout of OpenMPT/openmpt at a libopenmpt-* tag)")
-set(OPENMPT_PC_LIBS "-lstdc++ -lm" CACHE STRING "what libopenmpt.pc lists after -lopenmpt: the C++ runtime and libm")
 if(NOT OPENMPT_SOURCE)
     message(FATAL_ERROR "OPENMPT_SOURCE is not set")
 endif()
@@ -86,8 +85,7 @@ install(FILES
     "${OPENMPT_SOURCE}/libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h"
     DESTINATION include/libopenmpt)
 
-# the pkg-config file FFmpeg's configure asks for (`--enable-libopenmpt`): the static library
-# and what it needs, as pkg-config --libs gives them
+# the pkg-config file, for a build against the prefix (the C++ runtime comes with the C++ linker)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libopenmpt.pc"
 "prefix=${CMAKE_INSTALL_PREFIX}
 exec_prefix=\${prefix}
@@ -98,7 +96,8 @@ Name: libopenmpt
 Description: Tracker module player based on OpenMPT (static, for the Nagmedar music engine)
 URL: https://lib.openmpt.org/
 Version: ${OPENMPT_VERSION}
-Libs: -L\${libdir} -lopenmpt ${OPENMPT_PC_LIBS}
+Libs: -L\${libdir} -lopenmpt
+Libs.private: -lm
 Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libopenmpt.pc" DESTINATION lib/pkgconfig)

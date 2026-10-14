@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.AbSide
+import app.nagmedar.audio.MusicFormats
 import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.SignalPath
 import app.nagmedar.ui.R
@@ -244,10 +245,11 @@ private fun channelsText(channels: Int): String = when (channels) {
 
 private const val SEPARATOR = " · "
 
-/** FFmpeg's names as people know them; PCM and DSD by their file. */
+/** FFmpeg's names as people know them; PCM and DSD by their file; a tracker module (S-911) by its kind (MOD, XM, IT, …). */
 internal fun formatName(codec: String, container: String): String = when {
     codec.startsWith("pcm_") -> CONTAINER_NAMES[container] ?: "PCM"
     codec.startsWith("dsd_") -> CONTAINER_NAMES[container] ?: "DSD"
+    codec == MusicFormats.TRACKER -> container.takeIf { it.isNotBlank() }?.uppercase(Locale.ROOT) ?: "Tracker"
     else -> CODEC_NAMES[codec] ?: codec.uppercase(Locale.ROOT)
 }
 
@@ -257,8 +259,6 @@ private val CODEC_NAMES = mapOf(
     "tta" to "TTA", "tak" to "TAK", "wmav1" to "WMA", "wmav2" to "WMA", "wmapro" to "WMA Pro", "wmalossless" to "WMA Lossless",
     "ac3" to "AC-3", "eac3" to "E-AC-3", "dts" to "DTS", "truehd" to "TrueHD", "mlp" to "MLP", "musepack7" to "Musepack",
     "musepack8" to "Musepack", "speex" to "Speex",
-    // S-911: a tracker module, as the engine names it; the library shows the module's kind (MOD, XM, IT, …) by its file
-    "tracker" to "Tracker",
 )
 
 /** FFmpeg's demuxers by their files' names: "iff" reads DFF. */

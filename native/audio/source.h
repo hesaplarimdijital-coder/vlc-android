@@ -1,6 +1,7 @@
 // A track read through FFmpeg into interleaved double frames at the file's own rate: the demuxer
 // and the decoder, swresample for the sample format and the channel mix, and a sample-accurate
-// seek (what lies before the target in the first decoded frames is dropped).
+// seek (what lies before the target in the first decoded frames is dropped). A tracker module
+// (S-911) is rendered by libopenmpt instead, at 48 kHz, with the same seek.
 #ifndef NAG_SOURCE_H
 #define NAG_SOURCE_H
 

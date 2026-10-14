@@ -10,7 +10,7 @@ import java.util.Locale
  */
 object MusicFormats {
 
-    /** What the engine calls a tracker module's codec: the module plays, it is not decoded. */
+    /** What the engine calls a tracker module's codec: the module plays, it is not decoded; its kind (mod, xm, it, …) is the container. */
     const val TRACKER = "tracker"
 
     /**
@@ -50,14 +50,6 @@ object MusicFormats {
 
     /** S-911: whether [uri] names a tracker module, by its extension. */
     fun isTracker(uri: Uri): Boolean = extensionOf(uri)?.let { it in trackerExtensions } ?: false
-
-    /**
-     * The codec the library shows for what the engine read: a tracker module's kind by its
-     * file's extension ("mod", "xm", "it", …) when the engine says a module plays ([TRACKER]);
-     * [codec] as the engine gave it otherwise.
-     */
-    fun codecOf(codec: String, uri: Uri): String =
-        if (codec == TRACKER) extensionOf(uri)?.takeIf { it in trackerExtensions } ?: codec else codec
 
     /** The extension of the last path segment, or null when it has none. */
     fun extensionOf(uri: Uri): String? {

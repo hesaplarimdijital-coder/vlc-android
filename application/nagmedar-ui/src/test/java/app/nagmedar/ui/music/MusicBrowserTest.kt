@@ -128,6 +128,9 @@ class MusicBrowserTest {
         val tracks = MusicSamples.tracks
         assertEquals(listOf("FLAC 24/96", "FLAC 16/44.1", "MP3 320 kb/s", "ALAC 24/192", "DSD64", "Opus 160 kb/s"),
             listOf(0, 3, 5, 6, 8, 9).map { formatLabel(tracks[it].tech!!) })
+        // S-911: a tracker module by its kind, as the engine names it
+        assertEquals("IT", formatLabel(TrackTech("tracker", "it", 48000, 0, 2, true)))
+        assertEquals("Tracker", formatLabel(TrackTech("tracker", "", 48000, 0, 2, true)))
         val tr = Locale.forLanguageTag("tr")
         // by depth and rate, the unprobed last both ways
         val up = sortTracks(tracks, MusicSort(MusicColumn.Rate, true), tr).map { it.title }
