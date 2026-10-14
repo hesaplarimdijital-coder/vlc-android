@@ -210,19 +210,21 @@ jobs:
 
       # a failed or hung build's log and test results on the ci/debug-app branch, readable with git
       # where the run's own logs are not (the job log names each test as it starts and ends)
+      # (a pull request's on ci/debug-pr-<number>)
       - name: Günlüğü ci/debug-app dalına koy
-        if: failure() && matrix.variant == 'debug' && github.event_name == 'push'
+        if: failure() && matrix.variant == 'debug' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           TOKEN: ${{ github.token }}
+          TARGET: ${{ github.event_name == 'pull_request' && format('ci/debug-pr-{0}', github.event.pull_request.number) || 'ci/debug-app' }}
         run: |
           out="$RUNNER_TEMP/debug-app"
           rm -rf "$out" && mkdir -p "$out"
           for f in init.log build.log; do [ -f "$f" ] && cp "$f" "$out"/; done
           find application -path '*/build/test-results/*' -name '*.xml' -size -4M -print0 2>/dev/null | xargs -0 -r cp --parents -t "$out"
           cd "$out"
-          git init -q && git checkout -q --orphan ci/debug-app
+          git init -q && git checkout -q --orphan "$TARGET"
           git add -A && git commit -q -m "App build log for ${GITHUB_SHA::7}"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/debug-app || true
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$TARGET" || true
 
       - name: Ekran görüntülerini karşılaştır
         if: always() && matrix.variant == 'debug'
@@ -233,10 +235,12 @@ jobs:
             application/nagmedar-ui/src/test/screenshots \
             application/nagmedar-ui/build/outputs/screenshots/diff
 
+      # a pull request's (from this repository) go to ci/shots-pr-<number>, for its review
       - name: Ekran görüntülerini ci/screenshots dalına koy
-        if: always() && matrix.variant == 'debug' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: always() && matrix.variant == 'debug' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           TOKEN: ${{ github.token }}
+          TARGET: ${{ github.event_name == 'pull_request' && format('ci/shots-pr-{0}', github.event.pull_request.number) || 'ci/screenshots' }}
         run: |
           src=application/nagmedar-ui/build/outputs/screenshots
           # exported Room schemas, to be committed under application/nagmedar-data/schemas
@@ -247,9 +251,9 @@ jobs:
           [ -d "$src" ] && cp -r "$src"/. "$out"/
           [ -d "$schemas" ] && cp -r "$schemas" "$out"/schemas
           cd "$out"
-          git init -q && git checkout -q --orphan ci/screenshots
+          git init -q && git checkout -q --orphan "$TARGET"
           git add -A && git commit -q -m "Screenshots for ${GITHUB_SHA::7}"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/screenshots
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$TARGET"
 
       - name: Test raporları
         if: always()
