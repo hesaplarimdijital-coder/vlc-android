@@ -124,7 +124,8 @@ fun keepSnapshotFolder(context: Context, prefs: NagmedarPreferences, uri: Uri) {
     val modes = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
     runCatching { resolver.takePersistableUriPermission(uri, modes) }
     val before = prefs.snapshot.folder
-    if (before != null && before != uri.toString()) {
+    // S-607: the recordings may be written into the same folder
+    if (before != null && before != uri.toString() && before != prefs.recordingFolder) {
         val release = if (before in prefs.safFolders) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else modes
         runCatching { resolver.releasePersistableUriPermission(Uri.parse(before), release) }
     }
@@ -134,6 +135,10 @@ fun keepSnapshotFolder(context: Context, prefs: NagmedarPreferences, uri: Uri) {
 /** Back to Pictures/Nağmedar: the chosen folder lets go of its writing permission. */
 fun forgetSnapshotFolder(context: Context, prefs: NagmedarPreferences) {
     val before = prefs.snapshot.folder ?: return
+    if (before == prefs.recordingFolder) {
+        prefs.updateSnapshot(prefs.snapshot.copy(folder = null))
+        return
+    }
     val release = if (before in prefs.safFolders) {
         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
     } else {

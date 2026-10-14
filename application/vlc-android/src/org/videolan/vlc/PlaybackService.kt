@@ -1566,6 +1566,17 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     fun removeCallback(cb: Callback) = cbActor.trySend(CbRemove(cb))
 
     private fun restartPlaylistManager() = playlistManager.restart()
+
+    /**
+     * Nağmedar (S-607): records what plays into [directory], or stops ([directory] null). False when
+     * libVLC is not what plays: the music engine has no recording.
+     */
+    @MainThread
+    fun record(directory: String?): Boolean = playlistManager.engine === playlistManager.player && playlistManager.player.record(directory)
+
+    /** Nağmedar (S-607): whether what plays can be recorded: libVLC plays it. */
+    val canRecord: Boolean
+        get() = hasMedia() && playlistManager.engine === playlistManager.player
     fun restartMediaPlayer() = playlistManager.player.restart()
 
     fun saveMediaMeta() = playlistManager.saveMediaMeta()

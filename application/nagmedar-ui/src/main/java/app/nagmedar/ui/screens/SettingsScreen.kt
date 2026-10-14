@@ -50,6 +50,7 @@ import app.nagmedar.ui.covers.CoversSection
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
+import app.nagmedar.ui.player.record.RecordingSection
 import app.nagmedar.ui.player.snapshot.HdrSnapshot
 import app.nagmedar.ui.player.snapshot.SnapshotFormat
 import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
@@ -99,6 +100,8 @@ fun SettingsScreen(
         item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
         item { SnapshotSection(prefs) }
+        // S-607: what Shift+R records, and where
+        item { RecordingSection(prefs) }
         // S-901: the engine behind the local music library
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
         // S-1007: waking to music

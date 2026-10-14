@@ -30,6 +30,12 @@
                 android:value="true" />
         </activity>
 
+        <!-- S-607: the app kept in the foreground while a recording is copied into its folder -->
+        <service
+            android:name="app.nagmedar.ui.player.record.RecordingKeeper"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <!-- S-1007: the alarm; and setting it again after a restart or a change of the clock (the
              system's broadcasts reach a receiver that is not exported) -->
         <receiver

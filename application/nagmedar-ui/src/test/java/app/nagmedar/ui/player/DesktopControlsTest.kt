@@ -118,6 +118,10 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "pip"
     }
 
+    override fun toggleRecording() {
+        calls += "record"
+    }
+
     override fun addSubtitleFile() {
         calls += "add subtitles"
     }

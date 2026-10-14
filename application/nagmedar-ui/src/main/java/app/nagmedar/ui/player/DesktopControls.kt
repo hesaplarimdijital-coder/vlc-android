@@ -417,12 +417,12 @@ private fun AbButton(state: PlayerChromeState, actions: PlayerChromeActions) {
 
 /**
  * The camera takes a screenshot (S-606); a right click, or a long press, opens its choices: the
- * subtitles, the format, HDR and the folder, as Settings has them.
+ * subtitles, the format, HDR and the folder, as Settings has them; and recording (S-607).
  */
 @Composable
 private fun SnapshotButton(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility) {
     var menuAt by remember { mutableStateOf<IntOffset?>(null) }
-    val entries = snapshotMenu(state.snapshot, actions)
+    val entries = snapshotMenu(state.snapshot, actions, state.recording)
     val optionsLabel = stringResource(R.string.nag_snap_options)
     fun open(at: IntOffset) {
         menuAt = at
@@ -448,14 +448,23 @@ private fun SnapshotButton(state: PlayerChromeState, actions: PlayerChromeAction
     }
 }
 
-/** The screenshot button's menu: take one, then the choices Settings > Screenshots has. */
+/**
+ * The screenshot button's menu: take one, or record what plays (S-607), then the choices Settings ›
+ * Screenshots has.
+ */
 @Composable
-internal fun snapshotMenu(settings: SnapshotSettings, actions: PlayerChromeActions): List<MenuEntry> {
-    val keys = ShortcutRegistry.chordLabel(ShortcutId.Snapshot, LocalContext.current.resources)
+internal fun snapshotMenu(settings: SnapshotSettings, actions: PlayerChromeActions, recording: Boolean = false): List<MenuEntry> {
+    val resources = LocalContext.current.resources
+    val keys = ShortcutRegistry.chordLabel(ShortcutId.Snapshot, resources)
     val folder = snapshotFolderLabel(settings.folder, defaultSnapshotFolder(stringResource(R.string.nagmedar_shell_title)))
     val keepHdr = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
     return listOf(
         MenuEntry.Item(stringResource(R.string.nag_sc_snapshot), actions::takeSnapshot, shortcut = keys),
+        MenuEntry.Item(
+            stringResource(if (recording) R.string.nag_rec_stop else R.string.nag_rec_start),
+            actions::toggleRecording,
+            shortcut = ShortcutRegistry.chordLabel(ShortcutId.Record, resources),
+        ),
         MenuEntry.Separator,
         MenuEntry.Item(
             stringResource(R.string.nag_snap_with),

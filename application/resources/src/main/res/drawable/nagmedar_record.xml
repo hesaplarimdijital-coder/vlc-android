@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nağmedar (S-607): the player's options sheet's "Record", drawn as the new interface's icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M2.5,8a5.5,5.5 0 1 0 11,0a5.5,5.5 0 1 0 -11,0Z"
+        android:strokeColor="?attr/player_icon_color"
+        tools:strokeColor="#ffffff"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="1.2" />
+    <path
+        android:fillColor="#FFE5483B"
+        android:pathData="M5.2,8a2.8,2.8 0 1 0 5.6,0a2.8,2.8 0 1 0 -5.6,0Z" />
+</vector>

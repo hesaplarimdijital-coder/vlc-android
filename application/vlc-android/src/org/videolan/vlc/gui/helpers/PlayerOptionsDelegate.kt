@@ -48,6 +48,7 @@ import org.videolan.vlc.gui.helpers.hf.PinCodeDelegate
 import org.videolan.vlc.gui.helpers.hf.checkPIN
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.PlayerController
+import org.videolan.vlc.media.RecordingHook
 import org.videolan.vlc.util.TextUtils
 import org.videolan.vlc.util.getScreenHeight
 import org.videolan.vlc.util.isTalkbackIsEnabled
@@ -80,6 +81,7 @@ private const val ID_AUDIO_CONTROL_SETTING = 20L
 private const val ID_SAFE_MODE_LOCK = 21L
 private const val ID_SAFE_MODE_UNLOCK = 22L
 private const val ID_SHARE = 23L
+private const val ID_RECORD = 24L
 @SuppressLint("ShowToast")
 class PlayerOptionsDelegate(val activity: FragmentActivity, val service: PlaybackService, private val showABReapeat:Boolean = true)  {
 
@@ -125,6 +127,10 @@ class PlayerOptionsDelegate(val activity: FragmentActivity, val service: Playbac
         if (::bookmarkClickedListener.isInitialized) options.add(PlayerOption(ID_BOOKMARK, R.drawable.ic_bookmark, res.getString(R.string.bookmarks)))
         if (showABReapeat) options.add(PlayerOption(ID_ABREPEAT, R.drawable.ic_abrepeat, res.getString(R.string.ab_repeat)))
         options.add(PlayerOption(ID_SAVE_PLAYLIST, R.drawable.ic_addtoplaylist, res.getString(R.string.playlist_save)))
+        // Nağmedar (S-607): what plays recorded, while libVLC plays it
+        RecordingHook.recorder?.takeIf { service.canRecord || it.recording }?.let { recorder ->
+            options.add(PlayerOption(ID_RECORD, recorder.icon, recorder.label(activity)))
+        }
         if (service.playlistManager.player.canDoPassthrough() && settings.getString(KEY_AOUT, "0") != "2")
             options.add(PlayerOption(ID_PASSTHROUGH, R.drawable.ic_passthrough, res.getString(R.string.audio_digital_title)))
 
@@ -225,6 +231,10 @@ class PlayerOptionsDelegate(val activity: FragmentActivity, val service: Playbac
                 setShuffle()
             }
             ID_PASSTHROUGH -> togglePassthrough()
+            ID_RECORD -> {
+                hide()
+                RecordingHook.recorder?.toggle(service)
+            }
             ID_ABREPEAT -> {
                 hide()
                 service.playlistManager.toggleABRepeat()

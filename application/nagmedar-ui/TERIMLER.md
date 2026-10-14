@@ -119,6 +119,7 @@ Sözlüğü testler denetler:
 | parmak izi | fingerprint | | hash | Dosyanın OpenSubtitles'taki kimliği: boyutu ve ilk ve son 64 KB'si; “bu dosyaya uygun” altyazılar onunla bulunur |
 | kota | quota | | | OpenSubtitles'ın günlük indirme hakkı: “OpenSubtitles kotası: 4/5” |
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
+| kayıt, kayda almak | recording, record | | | Oynayanın akışı geldiği gibi yazılır (Shift+R, VLC'nin Playback › Record'u); “Kayda al”, “Kaydı durdur”, Ayarlar › Kayıt. “Kaydetmek” yalnızca dosyanın yazılması için: “Kaydediliyor… %45” |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |

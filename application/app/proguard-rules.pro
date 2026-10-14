@@ -120,3 +120,6 @@
 
 # Nağmedar (S-1009): the playback service finds the album covers' observer by name
 -keep class app.nagmedar.ui.covers.CoverObserver { <init>(); }
+
+# Nağmedar (S-607): the playback service finds the recordings' observer by name
+-keep class app.nagmedar.ui.player.record.RecordingObserver { <init>(); }

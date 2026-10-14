@@ -294,6 +294,16 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun navigate(where: Int) = mediaplayer.navigate(where)
 
+    /**
+     * Nağmedar (S-607): libVLC writes what it plays into [directory] as it comes (VLC's record), or
+     * stops when [directory] is null. Whether the request reached libVLC: that it records is told
+     * by the RecordChanged event.
+     */
+    fun record(directory: String?): Boolean {
+        if (mediaplayer.isReleased || !mediaplayer.hasMedia()) return false
+        return mediaplayer.record(directory, directory != null)
+    }
+
     fun getChapters(title: Int): Array<out MediaPlayer.Chapter>? = if (!mediaplayer.isReleased) mediaplayer.getChapters(title) else emptyArray()
 
     fun getTitles(): Array<out MediaPlayer.Title>? = if (!mediaplayer.isReleased) mediaplayer.titles else emptyArray()

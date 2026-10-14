@@ -93,6 +93,10 @@ import app.nagmedar.ui.player.panel.PanelState
 import app.nagmedar.ui.player.panel.PanelTab
 import app.nagmedar.ui.player.panel.PlayerPanel
 import app.nagmedar.ui.player.panel.signed
+import app.nagmedar.ui.player.record.RecordingCard
+import app.nagmedar.ui.player.record.RecordingIndicator
+import app.nagmedar.ui.player.record.Recordings
+import app.nagmedar.ui.player.record.keepRecordingFolder
 import app.nagmedar.ui.player.refresh.FrameRateMatcher
 import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.refresh.RefreshSection
@@ -209,6 +213,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Synchronization -> panel.toggle(PanelTab.Sync)
                 ShortcutId.MediaInfo -> panel.toggle(PanelTab.Info)
                 ShortcutId.Snapshot -> snapshots?.take()
+                // S-607: what plays recorded, or the recording stopped
+                ShortcutId.Record -> Recordings.toggle()
                 // S-608: the new interface's "Jump to time", bookmarks and their tab
                 ShortcutId.JumpToTime -> navigation?.jumping = true
                 ShortcutId.AddBookmark -> navigation?.addBookmark()
@@ -270,6 +276,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 if (key != null && perf.needsPicture) infoSource.tracks().video?.let { perf.describe(key, it.width, it.height, "") }
             }
         }
+        // the recordings' outcomes show on the card over the video (S-607)
+        Recordings.cardShown = true
         // the screenshots (S-606)
         val snapshots = SnapshotController(activity)
         this.snapshots = snapshots
@@ -462,6 +470,7 @@ class DesktopPlayerChrome : PlayerChrome {
         sync = null
         assistant = null
         snapshots = null
+        Recordings.cardShown = false
         navigation?.release()
         navigation = null
         refresh?.release()
@@ -616,6 +625,13 @@ private fun PlayerChromeContent(
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) keepSnapshotFolder(activity, prefs, uri)
     }
+    // S-607: the recordings' folder, chosen from the card when the one chosen before is gone; the recording is kept there then
+    val recordingFolderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { picked ->
+        if (picked != null) {
+            keepRecordingFolder(activity, prefs, picked)
+            Recordings.retry()
+        }
+    }
     // subtitle files (S-701): any file, as senders call .srt files many things; what is not one is said
     val subtitlePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris -> subtitles.picked(uris) }
     SideEffect {
@@ -667,6 +683,15 @@ private fun PlayerChromeContent(
                     previews,
                 )
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
+                // S-607: a recording's mark, under the title while it shows
+                val recorder = Recordings.recorder
+                if (recorder != null) {
+                    RecordingIndicator(
+                        recorder.status,
+                        onStop = Recordings::stop,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(end = 16.dp, top = if (visibility.visible) 64.dp else 16.dp),
+                    )
+                }
                 // above the control bar while it shows: the subtitles found beside the film (S-701), a screenshot's card
                 Column(
                     Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
@@ -681,6 +706,19 @@ private fun PlayerChromeContent(
                         onChooseFolder = source::chooseSnapshotFolder,
                         onDismiss = snapshots.state::dismiss,
                     )
+                    if (recorder != null) {
+                        RecordingCard(
+                            outcome = recorder.outcome,
+                            onPlay = { saved -> Recordings.play(activity, saved) },
+                            onOpenFolder = { saved -> Recordings.openFolder(activity, saved) },
+                            onChooseFolder = {
+                                activity.isShowingDialog = true
+                                runCatching { recordingFolderPicker.launch(null) }
+                            },
+                            onRetry = Recordings::retry,
+                            onDismiss = recorder::dismiss,
+                        )
+                    }
                 }
                 if (subtitles.dragging) SubtitleDropOverlay()
             }
@@ -1006,6 +1044,7 @@ internal class ActivityPlayerSource(
             hasPrevious = service.hasPrevious(),
             hasNext = service.hasNext(),
             canPictureInPicture = AndroidDevices.pipAllowed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
+            recording = Recordings.recorder?.recording == true,
         )
     }
 
@@ -1078,6 +1117,8 @@ internal class ActivityPlayerSource(
     override fun pictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) activity.switchToPopup()
     }
+
+    override fun toggleRecording() = Recordings.toggle()
 
     override fun addSubtitleFile() = subtitles.pick()
 

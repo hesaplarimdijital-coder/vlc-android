@@ -57,6 +57,8 @@ data class PlayerChromeState(
     val bookmarks: List<Long> = emptyList(),
     /** S-609: the device has picture in picture, or VLC's own small window. */
     val canPictureInPicture: Boolean = false,
+    /** S-607: what plays is being recorded. */
+    val recording: Boolean = false,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -114,6 +116,9 @@ interface PlayerChromeActions {
 
     /** S-609: the film goes on in a small window over the others. */
     fun pictureInPicture()
+
+    /** S-607: what plays recorded, or the recording stopped (Shift+R). */
+    fun toggleRecording()
 
     /** S-701: the system's file picker, for subtitle files to add to the film. */
     fun addSubtitleFile()

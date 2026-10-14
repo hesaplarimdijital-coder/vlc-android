@@ -14,6 +14,7 @@ import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.shell.PaneWidths
@@ -82,6 +83,17 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         value.write(prefs.edit()).apply()
     }
 
+    /** S-607: the recordings' folder (a tree the system's picker gave); null for Movies, Music or Download/Nağmedar. */
+    var recordingFolder by mutableStateOf(readRecordingFolder())
+        private set
+
+    fun updateRecordingFolder(value: String?) {
+        recordingFolder = value
+        prefs.edit().putString(KEY_RECORDING_FOLDER, value).apply()
+    }
+
+    private fun readRecordingFolder(): String? = prefs.getString(KEY_RECORDING_FOLDER, null)?.takeIf { it.isNotEmpty() }
+
     /** S-612: whether the screen's refresh rate follows the film: always, if seamless, never. */
     var refreshMatch by mutableStateOf(RefreshMatch.read(prefs))
         private set
@@ -147,6 +159,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         }
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
         if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
+        if (key == null || key == KEY_RECORDING_FOLDER) recordingFolder = readRecordingFolder()
         if (key == null || key == RefreshMatch.KEY || key == KEY_VIDEO_MATCH_FRAME_RATE) refreshMatch = RefreshMatch.read(prefs)
     }
 

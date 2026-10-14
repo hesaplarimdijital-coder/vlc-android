@@ -44,6 +44,8 @@ class PlayerKeysTest {
         Triple("B", KeyChord(Key.B), ShortcutId.NextAudioTrack),
         Triple("Ctrl+T", KeyChord(Key.T, ctrl = true), ShortcutId.JumpToTime),
         Triple("Shift+S", KeyChord(Key.S, shift = true), ShortcutId.Snapshot),
+        // S-607: VLC desktop's Playback › Record
+        Triple("Shift+R", KeyChord(Key.R, shift = true), ShortcutId.Record),
         // S-704: the sync assistant's
         Triple("Shift+H", KeyChord(Key.H, shift = true), ShortcutId.SyncMarkAudio),
         Triple("Shift+J", KeyChord(Key.J, shift = true), ShortcutId.SyncMarkSubtitle),
