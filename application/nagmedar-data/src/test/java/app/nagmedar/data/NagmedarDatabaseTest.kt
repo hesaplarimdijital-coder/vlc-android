@@ -313,6 +313,31 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun scrobblesWaitPerServiceOldestFirstAndOnlyOnce() {
+        val queue = db.scrobbles()
+        fun entry(service: String, track: String, at: Long) = ScrobbleEntry(service = service, artist = "Ada Karan", track = track, album = "Gece Mavisi", durationSec = 241, listenedAt = at, queuedAt = at)
+        assertTrue(queue.add(entry("lastfm", "Sabaha Kadar", 200)) > 0)
+        assertTrue(queue.add(entry("lastfm", "Uzak", 100)) > 0)
+        assertTrue(queue.add(entry("listenbrainz", "Sabaha Kadar", 200)) > 0)
+        // the same track at the same time, for the same service: once
+        assertEquals(-1L, queue.add(entry("lastfm", "Sabaha Kadar", 200)))
+        assertEquals(listOf("Uzak", "Sabaha Kadar"), queue.pending("lastfm", 50).map { it.track })
+        assertEquals(listOf("Uzak"), queue.pending("lastfm", 1).map { it.track })
+        assertEquals(mapOf("lastfm" to 2, "listenbrainz" to 1), runBlocking { queue.counts().first() }.associate { it.service to it.count })
+
+        val first = queue.pending("lastfm", 50)
+        queue.failed(listOf(first[0].id))
+        assertEquals(listOf(1, 0), queue.pending("lastfm", 50).map { it.attempts })
+        queue.remove(listOf(first[0].id))
+        assertEquals(1, queue.count("lastfm"))
+        // what was heard long ago is dropped, one service's queue is cleared on its own
+        assertEquals(1, queue.dropOlderThan("lastfm", 300))
+        assertEquals(0, queue.count("lastfm"))
+        assertEquals(1, queue.clear("listenbrainz"))
+        assertTrue(runBlocking { queue.counts().first() }.isEmpty())
+    }
+
+    @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
         val uri = "file:///storage/T7/Kuzey Işığı.mkv"
@@ -485,6 +510,19 @@ class NagmedarDatabaseMigrationTest {
                 "INSERT INTO network_server (name, url, credentials, created_at, last_used_at) " +
                     "VALUES ('NAS', 'smb://nas.local/Filmler', x'0102', 1, 0)",
             )
+            // 12 -> 13 (S-1008): the scrobbles waiting, each track once per service and time
+            db.execSQL(
+                "INSERT INTO scrobble_queue (service, artist, track, album, album_artist, duration_sec, listened_at, attempts, queued_at) " +
+                    "VALUES ('lastfm', 'Ada Karan', 'Sabaha Kadar', NULL, NULL, 241, 1000, 0, 1000)",
+            )
+            db.execSQL(
+                "INSERT OR IGNORE INTO scrobble_queue (service, artist, track, album, album_artist, duration_sec, listened_at, attempts, queued_at) " +
+                    "VALUES ('lastfm', 'Ada Karan', 'Sabaha Kadar', NULL, NULL, 241, 1000, 0, 1001)",
+            )
+            db.query("SELECT COUNT(*) FROM scrobble_queue").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(1, c.getInt(0))
+            }
         }
     }
 

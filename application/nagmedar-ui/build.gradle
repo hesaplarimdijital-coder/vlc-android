@@ -19,6 +19,10 @@ android {
         // search asks iTunes alone and says so
         buildConfigField 'String', 'PODCASTINDEX_KEY', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_KEY', 'nagmedar_podcastindex_key')}\""
         buildConfigField 'String', 'PODCASTINDEX_SECRET', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_SECRET', 'nagmedar_podcastindex_secret')}\""
+        // S-1008: Nağmedar's own Last.fm API key and shared secret, from the build's environment (CI secrets)
+        // or Gradle properties; without them Last.fm stays off and Settings says so
+        buildConfigField 'String', 'LASTFM_API_KEY', "\"${secretValue('NAGMEDAR_LASTFM_API_KEY', 'nagmedar_lastfm_api_key', project)}\""
+        buildConfigField 'String', 'LASTFM_SECRET', "\"${secretValue('NAGMEDAR_LASTFM_SECRET', 'nagmedar_lastfm_secret', project)}\""
     }
 
     buildTypes {
@@ -70,13 +74,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
-    // S-1010: the converter's foreground jobs
+    // S-1010: the converter's foreground jobs; S-1008: the job that sends the scrobbles waiting
     implementation "androidx.work:work-runtime-ktx:$rootProject.ext.workManagerVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
     testImplementation "androidx.test:core:$rootProject.ext.testCore"
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+    testImplementation "androidx.work:work-testing:$rootProject.ext.workManagerVersion"
     testImplementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     testImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
@@ -93,4 +98,11 @@ static def podcastIndexValue(project, envName, propertyName) {
     // as the text of a Java string: the secret may hold $, ^ and #, so only the backslash and the quote are escaped
     // and control characters (a pasted line break) dropped
     return value.replaceAll('[\\p{Cntrl}]', '').replace('\\', '\\\\').replace('"', '\\"')
+}
+
+/** A build secret: the environment's [env] or the Gradle property [property], only its key characters. */
+static def secretValue(String env, String property, project) {
+    def value = System.getenv(env) ?: project.findProperty(property) ?: ''
+    // only a key's characters: nothing that would break the generated Java string
+    return value.toString().replaceAll('[^A-Za-z0-9_-]', '')
 }

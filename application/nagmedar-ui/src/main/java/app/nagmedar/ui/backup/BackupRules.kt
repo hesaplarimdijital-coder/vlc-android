@@ -9,6 +9,7 @@ import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.player.subtitles.whisper.WhisperPrefs
+import app.nagmedar.ui.scrobble.ScrobbleSettings
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -50,6 +51,8 @@ object BackupSettings {
         // this device's: the subtitles from speech's last job (S-709)
         WhisperPrefs.KEY_SEEN,
         WhisperPrefs.KEY_TIMED_OUT,
+        // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
+        *ScrobbleSettings.keys.toTypedArray(),
         // the settings' version, which the backup keeps on its own
         KEY_CURRENT_SETTINGS_VERSION,
         KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION,
