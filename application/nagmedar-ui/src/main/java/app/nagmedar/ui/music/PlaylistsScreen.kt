@@ -59,6 +59,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.DenseTable
@@ -126,7 +127,7 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
     val scan = rememberScanState()
     val media = rememberMusicMedia(repository, scan.active)
     val tech by TrackTechIndex.tech.collectAsState()
-    val library = remember(media, tech) { media?.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) } }
+    val library = remember(media, tech) { media?.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) } }
     val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
     val stats by TrackStatsIndex.stats.collectAsState()
     LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }

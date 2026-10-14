@@ -15,6 +15,7 @@ import app.nagmedar.audio.CrossfadeCurve
 import app.nagmedar.audio.DsdMode
 import app.nagmedar.audio.DspMeter
 import app.nagmedar.audio.DspSettings
+import app.nagmedar.audio.EnginePart
 import app.nagmedar.audio.EngineState
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.MusicFormats
@@ -24,6 +25,8 @@ import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.ReplayGainSettings
 import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.UsbOutput
+import app.nagmedar.audio.cue.CueSheets
+import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.PlaybackEngine
@@ -377,7 +380,7 @@ class MusicEngineController(
         lastTime = time
         updateProgress(time, mw.length)
         send(MediaPlayer.Event.Opening)
-        if (!engine.open(trackId, uri, time)) {
+        if (!engine.open(trackId, uri, time, partOf(uri))) {
             seekable = false
             pausable = false
             return false
@@ -407,7 +410,7 @@ class MusicEngineController(
         /* S-905: off on a bit-perfect output, which takes the samples as they are */
         val crossfade = applyCrossfadeSettings() > 0 && !outputBitPerfect && !(crossfadeSkipsAlbum && consecutiveInAlbum(current, mw))
         val id = ++ids
-        if (!engine.setNext(id, uri, crossfade)) {
+        if (!engine.setNext(id, uri, crossfade, partOf(uri))) {
             nextId = -1L
             return false
         }
@@ -429,9 +432,28 @@ class MusicEngineController(
 
     /** Whether [next] follows [current] on the same album and disc: a join that is meant to be gapless. */
     private fun consecutiveInAlbum(current: MediaWrapper?, next: MediaWrapper): Boolean {
-        if (current == null || current.albumId <= 0L || current.albumId != next.albumId) return false
+        if (current == null) return false
+        // S-808: a CUE sheet's tracks, one after the other in the same file
+        val cueCurrent = CueUri.trackNumber(current.uri)
+        val cueNext = CueUri.trackNumber(next.uri)
+        if (cueCurrent != null && cueNext != null) return cueNext == cueCurrent + 1 && CueUri.file(current.uri) == CueUri.file(next.uri)
+        if (current.albumId <= 0L || current.albumId != next.albumId) return false
         if (current.discNumber != next.discNumber) return false
         return next.trackNumber == current.trackNumber + 1
+    }
+
+    /**
+     * S-808: the part of its file a CUE sheet's track is ("…#cue=3"), from the sheet beside the
+     * file; null for a whole file, and for a track whose sheet is gone (the whole file plays then).
+     */
+    private fun partOf(uri: Uri): EnginePart? {
+        if (!CueUri.isTrack(uri)) return null
+        val track = CueSheets.track(context, uri)
+        if (track == null) {
+            Log.w(TAG, "no CUE sheet gives $uri: the whole file plays")
+            return null
+        }
+        return EnginePart(track.from, track.to)
     }
 
     override fun play() {

@@ -28,6 +28,11 @@
 #     for a true capture, the one differing sample for a broken one
 #   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus
 #   - the covers (S-1006): the front cover of FLAC, M4A, MP3 (of two pictures) and Opus; a tag by name
+#   - CUE parts (S-808): a file's parts, bounded in CUE frames (1/75 s), played as a queue give
+#     the whole file back, sample for sample in FLAC and MP3, within -60 dBFS in AAC and Opus
+#     (whose decoders settle after a seek, as ffmpeg's own do); a part alone is ffmpeg's trim
+#     of the file; a seek within a part counts from the part's start; and a seek in MP3 lands
+#     on the sample asked (the trimmed encoder delay accounted for)
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -571,6 +576,32 @@ check "mp3 APIC, the front of two" "same" "$(cmp -s cover_mp3.out front.png && e
 check "opus METADATA_BLOCK_PICTURE" "same" "$(cmp -s cover_opus.out front.png && echo same || echo different)"
 check "no cover" "none" "$("$NAGAUDIO" cover flac16.flac none.out)"
 check "no such tag" "" "$("$NAGAUDIO" prop flac16.flac MUSICBRAINZ_ALBUMID)"
+
+echo "== S-808: CUE parts"
+# the gapless album's whole (6 s at 44.1 kHz): parts at 0, 2 s (150 CUE frames) and 4 s 1/3 (325), as a CUE sheet cuts it
+check "flac parts as the whole" "$(ffmpeg -v error -i whole.flac -f s16le - | md5_of)" "$(engine_md5 s16 "whole.flac#cue=0,150" "whole.flac#cue=150,325" "whole.flac#cue=325" --no-dither)"
+# 150 CUE frames = 88 200 samples, 325 = 191 100
+check "flac part alone" "$(ffmpeg -v error -i whole.flac -af 'atrim=start_sample=88200:end_sample=191100' -f s16le - | md5_of)" "$(engine_md5 s16 "whole.flac#cue=150,325" --no-dither)"
+check "seek within a part" "$(ffmpeg -v error -i whole.flac -af 'atrim=start_sample=132300:end_sample=191100' -f s16le - | md5_of)" "$(engine_md5 s16 "whole.flac#cue=150,325" --no-dither --seek 1000)"
+check "part length" "2333" "$("$NAGAUDIO" decode "whole.flac#cue=150,325" -f s16 | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["frames"] * 1000 // d["rate"])')"
+ffmpeg -v error -y -i whole.flac -c:a libmp3lame -b:a 192k whole.mp3
+ffmpeg -v error -y -i whole.flac -c:a aac -b:a 160k whole.m4a
+ffmpeg -v error -y -i whole.flac -c:a libopus -b:a 128k whole.opus
+check "mp3 parts as the whole" "$(engine_md5 f32 whole.mp3)" "$(engine_md5 f32 "whole.mp3#cue=0,150" "whole.mp3#cue=150,325" "whole.mp3#cue=325")"
+# AAC's and Opus's decoders settle after a seek, as ffmpeg's own -ss shows: the parts are the whole within -60 dBFS, at the same length
+for f in whole.m4a whole.opus; do
+    "$NAGAUDIO" decode "$f" -f f32 -o whole_lossy.raw > /dev/null
+    "$NAGAUDIO" decode "$f#cue=0,150" "$f#cue=150,325" "$f#cue=325" -f f32 -o parts_lossy.raw > /dev/null
+    check "$f parts as the whole" "same" "$(python3 - <<'PY'
+import numpy as np
+w = np.fromfile("whole_lossy.raw", dtype="<f4")
+p = np.fromfile("parts_lossy.raw", dtype="<f4")
+print("same" if len(w) == len(p) and len(w) > 0 and float(np.abs(w - p).max()) <= 1e-3 else "length %d vs %d, worst %g" % (len(w), len(p), float(np.abs(w[:min(len(w), len(p))] - p[:min(len(w), len(p))]).max()) if min(len(w), len(p)) else 0))
+PY
+)"
+done
+# MP3's timestamps start after the trimmed encoder delay: a seek lands on the sample asked all the same
+check "mp3 seek exact" "$(ffmpeg -v error -i whole.mp3 -af 'atrim=start_sample=88200' -f f32le - | md5_of)" "$(engine_md5 f32 whole.mp3 --seek 2000)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

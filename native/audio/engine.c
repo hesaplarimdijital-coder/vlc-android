@@ -321,7 +321,13 @@ static void voice_replaygain(NagAudio *e, Voice *v)
     atomic_store(&v->rg_gain, gain);
 }
 
-static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_ms, char *error, size_t error_size)
+/* S-808: a CUE frame (1/75 s) count in the file's frames, to the nearest; the same bound gives the same frame. */
+static int64_t cue_frames(int64_t cue, int rate)
+{
+    return (cue * rate + NAG_CUE_FRAMES_PER_SECOND / 2) / NAG_CUE_FRAMES_PER_SECOND;
+}
+
+static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_ms, int64_t from, int64_t to, char *error, size_t error_size)
 {
     double ring_seconds = e->cfg.ring_seconds;
     /* a crossfade needs the whole tail of the track decoded before it starts */
@@ -348,6 +354,15 @@ static Voice *voice_new(NagAudio *e, int64_t id, const char *url, int64_t start_
         return NULL;
     }
     v->info = *nag_source_info(v->src);
+    if (from > 0 || to >= 0) {
+        /* S-808: only the part, its bounds in the file's own frames */
+        if (nag_source_set_part(v->src, from > 0 ? cue_frames(from, v->info.rate) : 0, to >= 0 ? cue_frames(to, v->info.rate) : -1) < 0) {
+            snprintf(error, error_size, "the part cannot be reached");
+            voice_free(v);
+            return NULL;
+        }
+        v->info = *nag_source_info(v->src);
+    }
     size_t capacity = (size_t)(ring_seconds * v->info.rate);
     if (capacity < DECODE_FRAMES * 2)
         capacity = DECODE_FRAMES * 2;
@@ -662,8 +677,13 @@ NagSink *nag_audio_sink(NagAudio *e)
 
 int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
 {
+    return nag_audio_open_part(e, id, url, start_ms, 0, -1);
+}
+
+int nag_audio_open_part(NagAudio *e, int64_t id, const char *url, int64_t start_ms, int64_t from, int64_t to)
+{
     char error[256] = {0};
-    Voice *v = voice_new(e, id, url, start_ms, error, sizeof(error));
+    Voice *v = voice_new(e, id, url, start_ms, from, to, error, sizeof(error));
     if (!v) {
         post(e, NAG_EVENT_ERROR, id, error);
         return -1;
@@ -693,10 +713,15 @@ int nag_audio_open(NagAudio *e, int64_t id, const char *url, int64_t start_ms)
 
 int nag_audio_set_next(NagAudio *e, int64_t id, const char *url, int crossfade)
 {
+    return nag_audio_set_next_part(e, id, url, crossfade, 0, -1);
+}
+
+int nag_audio_set_next_part(NagAudio *e, int64_t id, const char *url, int crossfade, int64_t from, int64_t to)
+{
     Voice *v = NULL;
     if (url) {
         char error[256] = {0};
-        v = voice_new(e, id, url, 0, error, sizeof(error));
+        v = voice_new(e, id, url, 0, from, to, error, sizeof(error));
         if (!v) {
             post(e, NAG_EVENT_ERROR, id, error);
             return -1;

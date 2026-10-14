@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
+import app.nagmedar.audio.cue.CueUri
 import java.io.Closeable
 import java.io.File
 
@@ -92,8 +93,9 @@ class LoudnessScanner(context: Context) : Closeable {
             }
         }
 
-        /** The file's name with its extension, for the tag writer's type detection. */
-        fun displayName(context: Context, uri: Uri): String {
+        /** The file's name with its extension, for the tag writer's type detection; a CUE track's (S-808) is its file's. */
+        fun displayName(context: Context, track: Uri): String {
+            val uri = CueUri.file(track)
             if (uri.scheme == "content") {
                 runCatching {
                     context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
@@ -112,18 +114,21 @@ class LoudnessScanner(context: Context) : Closeable {
             }
         }.onFailure { Log.w(TAG, "cannot write $uri: $it") }.getOrNull()
 
-        private inline fun <T> withReadPath(context: Context, uri: Uri, block: (String) -> T?): T? = when (uri.scheme) {
-            null, "file" -> uri.path?.let(block)
-            "content" -> {
-                val descriptor = runCatching { context.contentResolver.openFileDescriptor(uri, "r") }.getOrNull()
-                if (descriptor == null) {
-                    Log.w(TAG, "cannot open $uri")
-                    null
-                } else {
-                    descriptor.use { block("/proc/self/fd/${it.fd}") }
+        private inline fun <T> withReadPath(context: Context, track: Uri, block: (String) -> T?): T? {
+            val uri = CueUri.file(track)
+            return when (uri.scheme) {
+                null, "file" -> uri.path?.let(block)
+                "content" -> {
+                    val descriptor = runCatching { context.contentResolver.openFileDescriptor(uri, "r") }.getOrNull()
+                    if (descriptor == null) {
+                        Log.w(TAG, "cannot open $uri")
+                        null
+                    } else {
+                        descriptor.use { block("/proc/self/fd/${it.fd}") }
+                    }
                 }
+                else -> null
             }
-            else -> null
         }
     }
 }

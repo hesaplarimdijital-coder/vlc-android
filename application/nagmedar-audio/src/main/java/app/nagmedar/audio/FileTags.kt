@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import app.nagmedar.audio.cue.CueUri
 import java.io.File
 
 /**
@@ -20,10 +21,11 @@ object FileTags {
     /** The first value of [uri]'s tag [key], by TagLib's property name ("MUSICBRAINZ_ALBUMID"). */
     fun tag(context: Context, uri: Uri, key: String): String? = read(context, uri) { fd, name -> NativeAudio.readTag(fd, name, key) }
 
-    /** [block] on a read-only descriptor of [uri] and its name (the type detection's). */
-    internal fun <T> read(context: Context, uri: Uri, block: (fd: Int, name: String) -> T?): T? {
+    /** [block] on a read-only descriptor of [uri] and its name (the type detection's); a CUE track's file (S-808) is its own. */
+    internal fun <T> read(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {
         if (!NativeAudio.available) return null
         val app = context.applicationContext
+        val uri = CueUri.file(track)
         val descriptor = runCatching {
             when (uri.scheme) {
                 null, "file" -> uri.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_ONLY) }

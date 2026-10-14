@@ -88,6 +88,11 @@ object NativeAudio {
     /** The next track; with [crossfade] it comes in over the end of the one playing (S-905). */
     @JvmStatic external fun setNext(handle: Long, id: Long, url: String?, crossfade: Boolean): Int
 
+    /** S-808: a part of a file as track [id]: from [from] to [to] in CUE frames (1/75 s; [to] -1: the file's end). */
+    @JvmStatic external fun openPart(handle: Long, id: Long, url: String, startMs: Long, from: Long, to: Long): Int
+
+    @JvmStatic external fun setNextPart(handle: Long, id: Long, url: String, crossfade: Boolean, from: Long, to: Long): Int
+
     /** S-905: the crossfade's length (0: off, at most 12 000) and curve: 0 equal power, 1 linear. */
     @JvmStatic external fun setCrossfade(handle: Long, ms: Int, curve: Int)
 

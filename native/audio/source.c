@@ -27,6 +27,14 @@ struct NagSource {
     int channels;      /* of the frames read */
     int64_t skip_until; /* samples (at the file's rate) to drop after a seek; -1 none */
     int64_t next_pts;   /* the sample position of the next decoded frame, when the decoder gives no pts */
+    int64_t fifo_end;   /* the sample position (in the stream's own count) just past the last frame pushed into the fifo */
+    /* The stream's first timestamp in samples: its count runs from there (MP3's trimmed encoder
+     * delay, 1105 samples, say), while the file's frames are counted from 0. */
+    int64_t pts_offset;
+    /* S-808: the part of the file read, in its frames: [part_start, part_end); part_end -1 for the end */
+    int64_t part_start;
+    int64_t part_end;
+    int64_t file_duration_ms; /* the whole file's, as read_info found it */
     int eof_sent;      /* the decoder was told the input ended */
     int drained;       /* nothing more will come */
     NagSourceInfo info;
@@ -109,6 +117,8 @@ static void read_info(NagSource *s)
         info->duration_ms = av_rescale_q(st->duration, st->time_base, (AVRational){1, 1000});
     else if (s->ic->duration > 0)
         info->duration_ms = s->ic->duration / (AV_TIME_BASE / 1000);
+    s->file_duration_ms = info->duration_ms;
+    s->pts_offset = st->start_time != AV_NOPTS_VALUE && st->start_time > 0 ? av_rescale_q(st->start_time, st->time_base, (AVRational){1, info->rate}) : 0;
     info->bitrate = par->bit_rate > 0 ? par->bit_rate : s->ic->bit_rate;
     snprintf(info->codec, sizeof(info->codec), "%s", avcodec_get_name(par->codec_id));
     snprintf(info->container, sizeof(info->container), "%s", s->ic->iformat ? s->ic->iformat->name : "");
@@ -191,6 +201,8 @@ int nag_source_open_ex(NagSource **out, const char *url, int channels, int flags
     }
     s->skip_until = -1;
     s->next_pts = 0;
+    s->part_start = 0;
+    s->part_end = -1;
     AVDictionary *opts = NULL;
     av_dict_set(&opts, "probesize", "4000000", 0);
     int ret = avformat_open_input(&s->ic, url, NULL, &opts);
@@ -347,6 +359,7 @@ static int push_frame(NagSource *s, AVFrame *frame)
     if (s->skip_until >= 0) {
         if (position + samples <= s->skip_until) {
             s->next_pts = position + samples;
+            s->fifo_end = position + samples;
             return 0;
         }
         if (position < s->skip_until)
@@ -354,6 +367,7 @@ static int push_frame(NagSource *s, AVFrame *frame)
         s->skip_until = -1;
     }
     s->next_pts = position + samples;
+    s->fifo_end = position + samples;
     int out_samples = samples - offset;
     if (out_samples <= 0)
         return 0;
@@ -426,6 +440,7 @@ static int push_dop_packet(NagSource *s, const AVPacket *pkt)
     if (s->skip_until >= 0) {
         if (position + frames <= s->skip_until) {
             s->dop_position = position + frames;
+            s->fifo_end = position + frames;
             free(out);
             return 0;
         }
@@ -434,6 +449,7 @@ static int push_dop_packet(NagSource *s, const AVPacket *pkt)
         s->skip_until = -1;
     }
     s->dop_position = position + frames;
+    s->fifo_end = position + frames;
     int ret = 0;
     if (frames - offset > 0) {
         double *planes[1] = {out + (size_t)offset * 2};
@@ -444,11 +460,17 @@ static int push_dop_packet(NagSource *s, const AVPacket *pkt)
 }
 
 /* Fills the fifo with at least [want] samples, or all that is left. */
+/* Whether the fifo already reaches the part's end: nothing more needs decoding. */
+static int part_filled(const NagSource *s)
+{
+    return s->part_end >= 0 && s->fifo_end >= s->part_end + s->pts_offset;
+}
+
 static int fill(NagSource *s, int want)
 {
     int errors = 0;
     if (s->dop) {
-        while (!s->drained && av_audio_fifo_size(s->fifo) < want) {
+        while (!s->drained && !part_filled(s) && av_audio_fifo_size(s->fifo) < want) {
             int ret = av_read_frame(s->ic, s->packet);
             if (ret == AVERROR_EOF) {
                 s->drained = 1;
@@ -464,7 +486,7 @@ static int fill(NagSource *s, int want)
         }
         return 0;
     }
-    while (!s->drained && av_audio_fifo_size(s->fifo) < want) {
+    while (!s->drained && !part_filled(s) && av_audio_fifo_size(s->fifo) < want) {
         int ret = avcodec_receive_frame(s->dec, s->frame);
         if (ret == 0) {
             ret = push_frame(s, s->frame);
@@ -519,17 +541,35 @@ int nag_source_read(NagSource *s, double *dst, int max_frames)
         return 0;
     if (have > max_frames)
         have = max_frames;
+    if (s->part_end >= 0) {
+        /* S-808: the part ends on its last frame exactly */
+        int64_t head = s->fifo_end - av_audio_fifo_size(s->fifo);
+        int64_t left = s->part_end + s->pts_offset - head;
+        if (left <= 0)
+            return 0;
+        if (have > left)
+            have = (int)left;
+    }
     void *planes[1] = {dst};
     ret = av_audio_fifo_read(s->fifo, planes, have);
     return ret < 0 ? ret : have;
 }
 
-int nag_source_seek(NagSource *s, int64_t ms)
+/*
+ * To file frame [target], sample accurate: the demuxer to the key before it, the rest dropped.
+ * The demuxer is asked for a little before the target, so that a decoder which leans on the
+ * frames before (MP3's bit reservoir, a codec's priming) has them when the target comes.
+ */
+#define SEEK_PREROLL_MS 200
+
+static int seek_frames(NagSource *s, int64_t target)
 {
-    if (ms < 0)
-        ms = 0;
+    if (target < 0)
+        target = 0;
     AVStream *st = s->ic->streams[s->stream];
-    int64_t ts = av_rescale_q(ms, (AVRational){1, 1000}, st->time_base);
+    int64_t preroll = av_rescale(SEEK_PREROLL_MS, s->info.rate, 1000);
+    int64_t before = target > preroll ? target - preroll : 0;
+    int64_t ts = av_rescale_q(before + s->pts_offset, (AVRational){1, s->info.rate}, st->time_base);
     int ret = av_seek_frame(s->ic, s->stream, ts, AVSEEK_FLAG_BACKWARD);
     if (ret < 0) {
         /* a stream that cannot seek by time: back to the start */
@@ -542,10 +582,45 @@ int nag_source_seek(NagSource *s, int64_t ms)
     av_audio_fifo_reset(s->fifo);
     s->eof_sent = 0;
     s->drained = 0;
-    s->skip_until = av_rescale(ms, s->info.rate, 1000);
+    s->skip_until = target + s->pts_offset;
     s->next_pts = 0;
+    s->fifo_end = 0;
     s->dop_carried[0] = 0;
     s->dop_marker = 0x05;
     s->dop_position = 0;
     return 0;
+}
+
+int nag_source_seek(NagSource *s, int64_t ms)
+{
+    if (ms < 0)
+        ms = 0;
+    int64_t target = s->part_start + av_rescale(ms, s->info.rate, 1000);
+    if (s->part_end >= 0 && target > s->part_end)
+        target = s->part_end;
+    return seek_frames(s, target);
+}
+
+int nag_source_set_part(NagSource *s, int64_t start, int64_t end)
+{
+    if (start < 0)
+        start = 0;
+    if (end >= 0 && end < start)
+        end = start;
+    s->part_start = start;
+    s->part_end = end;
+    /* the info tells the part's length */
+    if (end >= 0)
+        s->info.duration_ms = av_rescale(end - start, 1000, s->info.rate);
+    else if (s->file_duration_ms > 0)
+        s->info.duration_ms = s->file_duration_ms - av_rescale(start, 1000, s->info.rate);
+    if (s->info.duration_ms < 0)
+        s->info.duration_ms = 0;
+    return start > 0 ? seek_frames(s, start) : 0;
+}
+
+void nag_source_part(const NagSource *s, int64_t *start, int64_t *end)
+{
+    *start = s->part_start;
+    *end = s->part_end;
 }

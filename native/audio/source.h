@@ -42,7 +42,18 @@ int nag_source_channel_weights(const NagSource *source, double *weights, int max
  */
 int nag_source_read(NagSource *source, double *dst, int max_frames);
 
-/** To [ms], sample accurate: the next read starts at that time. */
+/** To [ms] (of the part, when one is set), sample accurate: the next read starts at that time. */
 int nag_source_seek(NagSource *source, int64_t ms);
+
+/**
+ * S-808: only the part of the file from frame [start] to frame [end] (at the file's rate; end
+ * -1: to its end), as a CUE sheet's track. From here on reads stop at [end], seeks and times
+ * count from [start], and the info's duration is the part's. The next read starts at [start].
+ * Negative on a seek failure.
+ */
+int nag_source_set_part(NagSource *source, int64_t start, int64_t end);
+
+/** S-808: frames [start, end) of the part set, or 0 and -1 for the whole file. */
+void nag_source_part(const NagSource *source, int64_t *start, int64_t *end);
 
 #endif

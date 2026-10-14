@@ -22,9 +22,16 @@ class MediaRepository(private val context: Context) {
         getVideos(Medialibrary.SORT_ALPHA, false, Settings.includeMissing, false)?.toList().orEmpty()
     } + picked(MediaWrapper.TYPE_VIDEO)
 
-    suspend fun tracks(): List<MediaWrapper> = context.getFromMl {
-        getAudio(Medialibrary.SORT_ARTIST, false, Settings.includeMissing, false)?.toList().orEmpty()
-    } + picked(MediaWrapper.TYPE_AUDIO)
+    /**
+     * The music: the medialibrary's (or the picked folders'), a file with a CUE sheet beside it
+     * (S-808) replaced by the sheet's tracks. Each folder is listed once for its sheets.
+     */
+    suspend fun tracks(): List<MediaWrapper> {
+        val files = context.getFromMl {
+            getAudio(Medialibrary.SORT_ARTIST, false, Settings.includeMissing, false)?.toList().orEmpty()
+        } + picked(MediaWrapper.TYPE_AUDIO)
+        return withContext(Dispatchers.IO) { CueLibrary.expand(context, files) }
+    }
 
     /**
      * The videos as library items (S-801), with the languages of the subtitle files next to

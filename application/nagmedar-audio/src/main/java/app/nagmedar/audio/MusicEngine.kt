@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import app.nagmedar.audio.cue.CueUri
 import org.json.JSONObject
 import java.io.Closeable
 
@@ -82,6 +83,9 @@ data class SourceInfo(
         }.getOrNull()
     }
 }
+
+/** S-808: a part of a file as the engine plays it: from [from] to [to] in CUE frames (1/75 s; [to] null: the file's end). */
+data class EnginePart(val from: Long, val to: Long?)
 
 /** S-912: the A/B test's sides. */
 enum class AbSide { A, B }
@@ -192,19 +196,24 @@ class MusicEngine(
 
     /**
      * Starts [uri] as track [id] at [startMs]; false when the engine cannot open it (the caller
-     * falls back to libVLC). The decoder has it open before this returns.
+     * falls back to libVLC). The decoder has it open before this returns. With [part] only that
+     * part of the file plays, as a CUE sheet's track (S-808): its times count from the part's start.
      */
-    fun open(id: Long, uri: Uri, startMs: Long): Boolean = withPath(uri) { path -> NativeAudio.open(handle, id, path, startMs) == 0 }
+    fun open(id: Long, uri: Uri, startMs: Long, part: EnginePart? = null): Boolean = withPath(uri) { path ->
+        if (part == null) NativeAudio.open(handle, id, path, startMs) == 0 else NativeAudio.openPart(handle, id, path, startMs, part.from, part.to ?: -1L) == 0
+    }
 
     /**
      * The track to follow the one playing, decoded ahead (S-904); null clears it. With
      * [crossfade] the two overlap for the crossfade's length (S-905), without it the next
-     * starts on the sample after the last.
+     * starts on the sample after the last. With [part] only that part of the file (S-808).
      */
-    fun setNext(id: Long, uri: Uri?, crossfade: Boolean = false): Boolean {
+    fun setNext(id: Long, uri: Uri?, crossfade: Boolean = false, part: EnginePart? = null): Boolean {
         if (!available) return false
         if (uri == null) return NativeAudio.setNext(handle, id, null, false) == 0
-        return withPath(uri) { path -> NativeAudio.setNext(handle, id, path, crossfade) == 0 }
+        return withPath(uri) { path ->
+            if (part == null) NativeAudio.setNext(handle, id, path, crossfade) == 0 else NativeAudio.setNextPart(handle, id, path, crossfade, part.from, part.to ?: -1L) == 0
+        }
     }
 
     /** S-905: how long a crossfade lasts (0 turns it off) and its curve. A track opened from then on keeps enough audio ahead for it. */
@@ -214,10 +223,12 @@ class MusicEngine(
 
     private inline fun withPath(uri: Uri, block: (String) -> Boolean): Boolean {
         if (!available) return false
-        return when (uri.scheme) {
-            null, "file" -> uri.path?.let(block) ?: false
+        // a CUE sheet's track names its file with a fragment (S-808): the file is what opens
+        val file = CueUri.file(uri)
+        return when (file.scheme) {
+            null, "file" -> file.path?.let(block) ?: false
             "content" -> {
-                val descriptor: ParcelFileDescriptor? = runCatching { context.contentResolver.openFileDescriptor(uri, "r") }.getOrNull()
+                val descriptor: ParcelFileDescriptor? = runCatching { context.contentResolver.openFileDescriptor(file, "r") }.getOrNull()
                 if (descriptor == null) {
                     Log.w(TAG, "cannot open $uri")
                     false

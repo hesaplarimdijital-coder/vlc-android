@@ -164,6 +164,31 @@ JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setNext(JNIEnv *env, 
     return ret;
 }
 
+/* S-808: a part of a file, from and to in CUE frames (1/75 s; to -1: the file's end) */
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_openPart(JNIEnv *env, jclass cls, jlong handle, jlong id, jstring url, jlong start_ms, jlong from, jlong to)
+{
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (!e || !url)
+        return -1;
+    const char *path = (*env)->GetStringUTFChars(env, url, NULL);
+    int ret = nag_audio_open_part(e, id, path, start_ms, from, to);
+    (*env)->ReleaseStringUTFChars(env, url, path);
+    return ret;
+}
+
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setNextPart(JNIEnv *env, jclass cls, jlong handle, jlong id, jstring url, jboolean crossfade, jlong from, jlong to)
+{
+    (void)cls;
+    NagAudio *e = engine_of(handle);
+    if (!e || !url)
+        return -1;
+    const char *path = (*env)->GetStringUTFChars(env, url, NULL);
+    int ret = nag_audio_set_next_part(e, id, path, crossfade ? 1 : 0, from, to);
+    (*env)->ReleaseStringUTFChars(env, url, path);
+    return ret;
+}
+
 JNIEXPORT void JNICALL Java_app_nagmedar_audio_NativeAudio_setCrossfade(JNIEnv *env, jclass cls, jlong handle, jint ms, jint curve)
 {
     (void)env;

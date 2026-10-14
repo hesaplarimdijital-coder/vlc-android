@@ -124,6 +124,7 @@ Sözlüğü testler denetler:
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 | akıllı liste | smart list | otomatik liste, dinamik liste | auto playlist | Kurallarla kendiliğinden dolan çalma listesi; “Kuralları düzenle…”, “Parçalar uysun: tüm kurallara / herhangi bir kurala” |
 | kural | rule | ölçüt | criterion | Akıllı listenin bir satırı: alan, işleç, değer (“Puan en az 4”, “Eklenme en çok 30 gün önce”) |
+| CUE sayfası | CUE sheet | cue dosyası | cue file | Tek dosyalık albümün parça listesi (album.cue): parçaları kütüphanede ayrı ayrı görünür, örnek doğruluğunda çalınır; her parça dosyasının adresi ve sayfadaki numarasıyla bilinir (“…/album.flac#cue=3”) |
 | puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi” |
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
 | uyku zamanlayıcısı | sleep timer | uyku modu, kapanma zamanlayıcısı | sleep mode | Süre bitince ya da çalan parça bitince oynatmayı durdurur (Alt+S); “Parça sonu”, “+15 dk”, “Zamanlayıcıyı kapat” |

@@ -193,6 +193,17 @@ int nag_audio_open(NagAudio *engine, int64_t id, const char *url, int64_t start_
  */
 int nag_audio_set_next(NagAudio *engine, int64_t id, const char *url, int crossfade);
 
+/*
+ * S-808: a part of a file as a track of its own (a CUE sheet's): from [from] to [to] in CUE
+ * frames, 1/75 s (a CD sector; [to] -1: the file's end). The part's bounds are sample exact at
+ * the file's rate (44.1 and 48 kHz and their multiples divide by 75), so two parts that meet
+ * play on without a gap or a repeated sample, as a gapless hand-over does. Times, seeks and the
+ * length count from the part's start.
+ */
+#define NAG_CUE_FRAMES_PER_SECOND 75
+int nag_audio_open_part(NagAudio *engine, int64_t id, const char *url, int64_t start_ms, int64_t from, int64_t to);
+int nag_audio_set_next_part(NagAudio *engine, int64_t id, const char *url, int crossfade, int64_t from, int64_t to);
+
 typedef enum NagCrossfadeCurve {
     NAG_CROSSFADE_EQUAL_POWER = 0, /* cosine and sine: the loudness stays level */
     NAG_CROSSFADE_LINEAR = 1,

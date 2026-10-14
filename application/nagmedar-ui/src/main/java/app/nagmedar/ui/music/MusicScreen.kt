@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
@@ -222,7 +223,8 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
     val library = remember(media, tech, locale) {
-        media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[it] }) }, locale) }
+        // S-808: a CUE sheet's track has its file's technical side
+        media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale) }
     }
     val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
     // S-808: the ratings and counts
@@ -270,7 +272,8 @@ fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<Med
         loadWhileScanning(scanning) { repository.tracks() }
     }
     LaunchedEffect(media) {
-        media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString() }) } }
+        // S-808: a CUE sheet's tracks share their file, probed once
+        media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString()?.let(CueUri::file) }.distinct()) } }
     }
     return media
 }
@@ -364,7 +367,8 @@ internal class ServiceMusicActions(
                 val many = others()
                 if (many.size > 1) context.resources.getQuantityString(R.plurals.nag_drag_tracks, many.size, many.size) else track.title
             },
-            files = { others().map { Uri.parse(it.uri) } },
+            // S-808: a CUE sheet's track is dragged as its file
+            files = { others().map { Uri.parse(CueUri.file(it.uri)) } },
         )
 }
 

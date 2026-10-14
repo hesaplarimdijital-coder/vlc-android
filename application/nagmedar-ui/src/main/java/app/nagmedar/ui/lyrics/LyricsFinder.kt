@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.Immutable
 import app.nagmedar.audio.TagLyrics
+import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.LyricsKey
 import app.nagmedar.data.LyricsSource
@@ -184,6 +185,8 @@ class DeviceLyrics(context: Context) : LocalLyrics {
     override fun read(track: LyricsTrack): List<Lyrics> {
         val uri = Uri.parse(track.uri)
         if (uri.scheme != null && uri.scheme != ContentResolver.SCHEME_FILE && uri.scheme != ContentResolver.SCHEME_CONTENT) return emptyList()
+        // S-808: a CUE sheet's track shares its file: the file's lyrics and the .lrc beside it are the album's, not the track's
+        if (CueUri.isTrack(uri)) return emptyList()
         return listOfNotNull(
             runCatching { TagLyrics.read(context, uri)?.let { Lyrics.of(it) } }.getOrNull(),
             runCatching { sidecar(uri)?.let { Lyrics.of(it, LyricsOrigin.File) } }.getOrNull(),

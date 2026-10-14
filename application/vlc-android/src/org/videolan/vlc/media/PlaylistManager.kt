@@ -10,6 +10,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.nagmedar.audio.FileTags
+import app.nagmedar.audio.cue.CueSheet
+import app.nagmedar.audio.cue.CueSheets
+import app.nagmedar.audio.cue.CueUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -108,6 +111,7 @@ import app.nagmedar.playback.EngineRouter
 import app.nagmedar.playback.PlaybackEngine
 import java.security.SecureRandom
 import java.util.Calendar
+import java.util.Locale
 import java.util.Stack
 import kotlin.math.max
 
@@ -392,9 +396,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             return false
         }
         launch {
-            val playList = withContext(Dispatchers.Default) {
+            val playList = withContext(Dispatchers.IO) {
                 locations.asSequence().mapTo(ArrayList(locations.size)) {
-                    MLServiceLocator.getAbstractMediaWrapper(it.toUri())
+                    val uri = it.toUri()
+                    // S-808: a CUE sheet's track comes back with what its sheet says of it
+                    (if (CueUri.isTrack(uri)) CueMedia.restore(ctx, uri, medialibrary.getMedia(CueUri.file(uri))?.length ?: 0L) else null)
+                        ?: MLServiceLocator.getAbstractMediaWrapper(uri)
                 }
             }
             // load playlist
@@ -588,7 +595,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         if (isBenchmark) mw.addFlags(MediaWrapper.MEDIA_BENCHMARK)
         parsed = false
         player.switchToVideo = false
-        if (mw.uri.scheme == "content") withContext(Dispatchers.IO) { MediaUtils.retrieveMediaTitle(mw) }
+        // a CUE sheet's track (S-808) keeps the sheet's title, not its file's name
+        if (mw.uri.scheme == "content" && !CueUri.isTrack(mw.uri)) withContext(Dispatchers.IO) { MediaUtils.retrieveMediaTitle(mw) }
 
         if (mw.type != MediaWrapper.TYPE_VIDEO || isVideoPlaying || player.hasRenderer
                 || mw.hasFlag(MediaWrapper.MEDIA_FORCE_AUDIO)) {
@@ -635,8 +643,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             }
             // the engine could not take it: libVLC does, as for everything else
             engines.prepareFor(EngineMedia(uri.toString(), isAudio = false, isLocal = false))
+            // S-808: a CUE sheet's track is a part of its file: libVLC plays the file between the part's times
+            val cuePart = if (CueUri.isTrack(mw.uri)) withContext(Dispatchers.IO) { CueSheets.track(ctx, mw.uri) } else null
             //todo restore position as well when we move to VLC 4.0
-            val media = mediaFactory.getFromUri(VLCInstance.getInstance(service), uri)
+            val media = mediaFactory.getFromUri(VLCInstance.getInstance(service), if (cuePart != null) CueUri.file(uri) else uri)
             //fixme workaround to prevent the issue described in https://code.videolan.org/videolan/vlc-android/-/issues/2106
             if (shouldDisableCookieForwarding) {
                 shouldDisableCookieForwarding = false
@@ -650,7 +660,13 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 media.addOption(":dav1d-thread-frames=$dav1dThreadNumber")
             }
             //todo in VLC 4.0, this should be done by using libvlc_media_player_set_time instead of start-time
-            media.addOption(":start-time=${start/1000L}")
+            if (cuePart != null) {
+                val from = cuePart.from.toDouble() / CueSheet.FRAMES_PER_SECOND
+                media.addOption(":start-time=${"%.3f".format(Locale.ROOT, from + start / 1000.0)}")
+                cuePart.to?.let { media.addOption(":stop-time=${"%.3f".format(Locale.ROOT, it.toDouble() / CueSheet.FRAMES_PER_SECOND)}") }
+            } else {
+                media.addOption(":start-time=${start/1000L}")
+            }
             media.addOption(":no-sout-chromecast-video")
             // Nağmedar (S-702): the subtitles' character set, read from the film's subtitle files or chosen for it
             SubtitleEncodingHook.finder?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }?.let { finder ->
@@ -1432,7 +1448,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private suspend fun savePlaycount(mw: MediaWrapper) {
         if (Settings.getInstance(AppContextProvider.appContext).getBoolean(KEY_INCOGNITO, false)) return
         var currentMedia = mw
-        if (settings.getBoolean(PLAYBACK_HISTORY, true) && !mw.uri.scheme.isSchemeFD()) withContext(Dispatchers.IO) {
+        // S-808: a CUE sheet's track is not a file of its own: the medialibrary is not given it
+        if (settings.getBoolean(PLAYBACK_HISTORY, true) && !mw.uri.scheme.isSchemeFD() && !CueUri.isTrack(mw.uri)) withContext(Dispatchers.IO) {
             var id = mw.id
             if (id == 0L) {
                 var internalMedia = medialibrary.findMedia(mw)

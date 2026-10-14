@@ -22,7 +22,9 @@
 //                                           [--dop] [--min-format FORMAT] [--max-format FORMAT]
 //                                           [--ab-after FRAMES]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
-//           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary
+//           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary.
+//           A FILE may be a part of a file, a CUE sheet's track (S-808): FILE#cue=FROM,TO with
+//           FROM and TO in CUE frames (1/75 s; TO left out: the file's end).
 //           with the events seen and, with --md5, the MD5 of the samples (what ffmpeg -f md5
 //           prints for the same raw format). --seek MS starts at MS; with --seek-after N the
 //           start is 0 and the seek comes while playing, after N frames rendered. The DSP
@@ -248,6 +250,40 @@ static int parse_bands(const char *text, NagEqBand *bands, int max)
     return n;
 }
 
+/* S-808: "FILE#cue=FROM,TO" apart: the file's name (in [name], cut at the #) and the part's bounds. */
+static void split_part(const char *arg, char *name, size_t name_size, int64_t *from, int64_t *to)
+{
+    *from = 0;
+    *to = -1;
+    const char *hash = strstr(arg, "#cue=");
+    if (!hash) {
+        snprintf(name, name_size, "%s", arg);
+        return;
+    }
+    snprintf(name, name_size, "%.*s", (int)(hash - arg), arg);
+    const char *spec = hash + 5;
+    char *end = NULL;
+    *from = strtoll(spec, &end, 10);
+    if (end && *end == ',')
+        *to = strtoll(end + 1, NULL, 10);
+}
+
+static int open_file(NagAudio *e, int64_t id, const char *arg, int64_t start_ms)
+{
+    char name[4096];
+    int64_t from, to;
+    split_part(arg, name, sizeof(name), &from, &to);
+    return nag_audio_open_part(e, id, name, start_ms, from, to);
+}
+
+static int queue_file(NagAudio *e, int64_t id, const char *arg, int crossfade)
+{
+    char name[4096];
+    int64_t from, to;
+    split_part(arg, name, sizeof(name), &from, &to);
+    return nag_audio_set_next_part(e, id, name, crossfade, from, to);
+}
+
 static int decode(int argc, char **argv)
 {
     const char *files[64];
@@ -357,7 +393,7 @@ static int decode(int argc, char **argv)
     nag_audio_set_dsd_mode(e, dop ? NAG_DSD_DOP : NAG_DSD_PCM);
     if (min_format != NAG_FMT_NONE || max_format != NAG_FMT_S32)
         nag_audio_set_format_range(e, min_format, max_format);
-    if (nag_audio_open(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
+    if (open_file(e, 1, files[0], seek_ms > 0 && seek_after < 0 ? seek_ms : 0) < 0) {
         nag_audio_free(e);
         return 1;
     }
@@ -366,7 +402,7 @@ static int decode(int argc, char **argv)
     int64_t queued = -1;
     if (next_file < n_files) {
         queued = next_file + 1;
-        nag_audio_set_next(e, queued, files[next_file++], crossfade_ms > 0);
+        queue_file(e, queued, files[next_file++], crossfade_ms > 0);
     }
     nag_audio_play(e);
     FILE *out = NULL;
@@ -407,7 +443,7 @@ static int decode(int argc, char **argv)
             last_track = track;
             if (track == queued && next_file < n_files) {
                 queued = next_file + 1;
-                nag_audio_set_next(e, queued, files[next_file++], crossfade_ms > 0);
+                queue_file(e, queued, files[next_file++], crossfade_ms > 0);
             }
         }
         if (n > 0) {

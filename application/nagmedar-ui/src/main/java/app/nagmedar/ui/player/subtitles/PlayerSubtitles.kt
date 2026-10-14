@@ -4,13 +4,13 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.audio.FolderFiles
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.DropPlan
@@ -289,46 +289,9 @@ internal fun displayName(resolver: ContentResolver, uri: Uri): String? {
     return uri.lastPathSegment?.substringAfterLast('/')
 }
 
-private val SIBLINGS = arrayOf(
-    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-    DocumentsContract.Document.COLUMN_MIME_TYPE,
-)
 
-/**
- * The files beside a video, their names and where they are: a local file's folder, read
- * directly, or a folder chosen with the system's picker (S-309), read through its document tree.
- * A document another app shared alone, or a stream, has no folder to read.
- */
-internal fun siblingFiles(context: Context, video: Uri): List<Pair<String, String>> = when (video.scheme) {
-    null, ContentResolver.SCHEME_FILE -> {
-        val folder = video.path?.let { File(it).parentFile }
-        folder?.listFiles()?.filter { it.isFile }?.map { it.name to Uri.fromFile(it).toString() }.orEmpty()
-    }
-    ContentResolver.SCHEME_CONTENT -> treeSiblings(context, video)
-    else -> emptyList()
-}
-
-private fun treeSiblings(context: Context, video: Uri): List<Pair<String, String>> {
-    // content://…/tree/<root>/document/<document>: a folder's tree the app may read
-    val segments = video.pathSegments
-    if (segments.size < 4 || segments[0] != "tree" || segments[2] != "document") return emptyList()
-    val resolver = context.contentResolver
-    val documentId = runCatching { DocumentsContract.getDocumentId(video) }.getOrNull() ?: return emptyList()
-    val parentId = parentDocument(resolver, video, documentId) ?: return emptyList()
-    val children = DocumentsContract.buildChildDocumentsUriUsingTree(video, parentId)
-    val cursor = runCatching { resolver.query(children, SIBLINGS, null, null, null) }.getOrNull() ?: return emptyList()
-    return cursor.use { c ->
-        buildList {
-            while (c.moveToNext()) {
-                val id = c.getString(0) ?: continue
-                val name = c.getString(1) ?: continue
-                if (c.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR) continue
-                add(name to DocumentsContract.buildDocumentUriUsingTree(video, id).toString())
-            }
-        }
-    }
-}
+/** The files beside a video, their names and where they are ([FolderFiles]: a folder, or a picked tree). */
+internal fun siblingFiles(context: Context, video: Uri): List<Pair<String, String>> = FolderFiles.siblings(context, video)
 
 /**
  * A downloaded subtitle file (S-706) beside [video]: in a local file's folder, or in the folder
@@ -364,7 +327,7 @@ private fun treeSave(context: Context, video: Uri, fileName: String, bytes: Byte
     if (segments.size < 4 || segments[0] != "tree" || segments[2] != "document") return null
     val resolver = context.contentResolver
     val documentId = runCatching { DocumentsContract.getDocumentId(video) }.getOrNull() ?: return null
-    val parentId = parentDocument(resolver, video, documentId) ?: return null
+    val parentId = FolderFiles.parentDocument(resolver, video, documentId) ?: return null
     val folder = DocumentsContract.buildDocumentUriUsingTree(video, parentId)
     // the provider keeps the name as it is given, and numbers it when it is taken
     val created = runCatching { DocumentsContract.createDocument(resolver, folder, ANY_FILE, fileName) }.getOrNull() ?: return null
@@ -390,15 +353,3 @@ private const val ANY_FILE = "application/octet-stream"
 private const val MAX_COPIES = 99
 
 /** The folder a tree's document is in: the provider says so from Android 8; the external storage's ids are paths before. */
-private fun parentDocument(resolver: ContentResolver, video: Uri, documentId: String): String? {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val path = runCatching { DocumentsContract.findDocumentPath(resolver, video) }.getOrNull()?.path
-        if (path != null && path.size >= 2) return path[path.size - 2]
-    }
-    // "primary:Movies/Film.mkv" is in "primary:Movies", "primary:Film.mkv" in "primary:"
-    return when {
-        '/' in documentId -> documentId.substringBeforeLast('/')
-        ':' in documentId && !documentId.endsWith(':') -> documentId.substringBefore(':') + ":"
-        else -> null
-    }
-}
