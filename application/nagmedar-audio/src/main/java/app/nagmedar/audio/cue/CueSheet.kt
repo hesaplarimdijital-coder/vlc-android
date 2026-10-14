@@ -47,11 +47,15 @@ data class CueSheet(
     /** The year of REM DATE ("2026", "2026-03-01"); null when it says none. */
     val year: Int? get() = date?.trim()?.take(4)?.toIntOrNull()?.takeIf { it > 0 }
 
-    /** The file whose name is [fileName] (case aside, the folder's part of either ignored), else the only file. */
-    fun fileNamed(fileName: String): CueFile? {
+    /**
+     * The file whose name is [fileName] (case aside, the folder's part of either ignored); with
+     * [orOnly], the only file when none is named so (a sheet whose FILE line names the rip
+     * before it was renamed).
+     */
+    fun fileNamed(fileName: String, orOnly: Boolean = false): CueFile? {
         val wanted = fileName.substringAfterLast('/').substringAfterLast('\\')
         return files.firstOrNull { it.name.substringAfterLast('/').substringAfterLast('\\').equals(wanted, ignoreCase = true) }
-            ?: files.singleOrNull()
+            ?: if (orOnly) files.singleOrNull() else null
     }
 
     companion object {

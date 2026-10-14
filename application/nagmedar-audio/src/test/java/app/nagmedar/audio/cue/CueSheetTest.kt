@@ -65,6 +65,8 @@ class CueSheetTest {
         assertEquals("TRA012600003", file.tracks[2].isrc)
         assertEquals(file, parsed.fileNamed("ALBUM.FLAC"))
         assertEquals(file, parsed.fileNamed("C:\\Müzik\\album.flac"))
+        assertNull(parsed.fileNamed("renamed.flac"))
+        assertEquals(file, parsed.fileNamed("renamed.flac", orOnly = true))
     }
 
     @Test
@@ -159,6 +161,13 @@ class CueSheetTest {
         assertEquals(Uri.fromFile(File(dir, "disc.cue")).toString(), CueSheets.forFile(context, audio)!!.first.uri)
         // a file the sheets do not list, or a sheet with one track: the file is a track of its own
         assertNull(CueSheets.forFile(context, Uri.fromFile(File(dir, "single.flac"))))
+        // the sheet named as a renamed rip lists it, whatever its FILE line says
+        File(dir, "renamed.flac").writeBytes(ByteArray(16))
+        File(dir, "renamed.cue").writeText(sheet)
+        assertEquals(3, CueSheets.forFile(context, Uri.fromFile(File(dir, "renamed.flac")))!!.second.tracks.size)
+        File(dir, "renamed.cue").delete()
+        File(dir, "renamed.flac").delete()
+        CueSheets.clear()
         File(dir, "disc.cue").writeText("FILE \"album.flac\" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n")
         CueSheets.clear()
         assertNull(CueSheets.forFile(context, audio))

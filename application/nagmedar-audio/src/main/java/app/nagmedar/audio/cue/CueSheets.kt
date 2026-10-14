@@ -19,13 +19,17 @@ import java.util.concurrent.ConcurrentHashMap
 object CueUri {
     private const val KEY = "cue="
 
-    /** The uri of track [number] of the sheet beside [file]. */
-    fun of(file: Uri, number: Int): Uri = file.buildUpon().fragment("$KEY$number").build()
+    /** The uri of track [number] of the sheet beside [file]: the fragment as written, "cue=3", not "cue%3D3". */
+    fun of(file: Uri, number: Int): Uri = file.buildUpon().encodedFragment("$KEY$number").build()
 
     /** The track's number when [uri] names a CUE sheet's track; null otherwise. */
-    fun trackNumber(uri: Uri?): Int? = uri?.fragment?.takeIf { it.startsWith(KEY) }?.substring(KEY.length)?.toIntOrNull()
+    fun trackNumber(uri: Uri?): Int? = number(uri?.fragment)
 
-    fun trackNumber(uri: String?): Int? = uri?.substringAfter('#', "")?.takeIf { it.startsWith(KEY) }?.substring(KEY.length)?.toIntOrNull()
+    fun trackNumber(uri: String?): Int? = number(uri?.substringAfter('#', ""))
+
+    /** "cue=3" (or "cue%3D3", as a uri written by other hands may encode it) → 3. */
+    private fun number(fragment: String?): Int? =
+        fragment?.replace("%3D", "=", ignoreCase = true)?.takeIf { it.startsWith(KEY) }?.substring(KEY.length)?.toIntOrNull()
 
     fun isTrack(uri: Uri?): Boolean = trackNumber(uri) != null
 
@@ -84,17 +88,20 @@ object CueSheets {
 
     /**
      * Among a folder's [siblings] (names and uris), the sheet listing [fileName] with the file's
-     * tracks; null when no sheet gives it two tracks or more.
+     * tracks; null when no sheet gives it two tracks or more. The sheet named as the file
+     * ("album.cue" for "album.flac") lists it even when its FILE line says another name (the
+     * sheet of a renamed rip); any other sheet must name the file.
      */
     fun among(context: Context, fileName: String, siblings: List<Pair<String, String>>): Pair<FoundSheet, CueFile>? {
         val sheets = siblings.filter { (name, _) -> name.substringAfterLast('.', "").equals("cue", ignoreCase = true) }
         if (sheets.isEmpty()) return null
         val stem = fileName.substringBeforeLast('.').lowercase(Locale.ROOT)
+        fun sameStem(name: String) = name.substringBeforeLast('.').lowercase(Locale.ROOT) == stem
         // the sheet named as the file first
-        val ordered = sheets.sortedBy { (name, _) -> if (name.substringBeforeLast('.').lowercase(Locale.ROOT) == stem) 0 else 1 }
-        for ((_, uri) in ordered) {
+        val ordered = sheets.sortedBy { (name, _) -> if (sameStem(name)) 0 else 1 }
+        for ((name, uri) in ordered) {
             val sheet = read(context, Uri.parse(uri)) ?: continue
-            val cueFile = sheet.fileNamed(fileName) ?: continue
+            val cueFile = sheet.fileNamed(fileName, orOnly = sameStem(name)) ?: continue
             if (cueFile.tracks.size >= 2) return FoundSheet(uri, sheet) to cueFile
         }
         return null

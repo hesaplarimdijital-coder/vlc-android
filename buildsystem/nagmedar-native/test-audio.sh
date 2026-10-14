@@ -632,10 +632,14 @@ for f in whole.m4a whole.opus; do
     "$NAGAUDIO" decode "$f" -f f32 -o whole_lossy.raw > /dev/null
     "$NAGAUDIO" decode "$f#cue=0,150" "$f#cue=150,325" "$f#cue=325" -f f32 -o parts_lossy.raw > /dev/null
     check "$f parts as the whole" "same" "$(python3 - <<'PY'
-import numpy as np
-w = np.fromfile("whole_lossy.raw", dtype="<f4")
-p = np.fromfile("parts_lossy.raw", dtype="<f4")
-print("same" if len(w) == len(p) and len(w) > 0 and float(np.abs(w - p).max()) <= 1e-3 else "length %d vs %d, worst %g" % (len(w), len(p), float(np.abs(w[:min(len(w), len(p))] - p[:min(len(w), len(p))]).max()) if min(len(w), len(p)) else 0))
+import struct
+def samples(name):
+    data = open(name, "rb").read()
+    return struct.unpack("<%df" % (len(data) // 4), data)
+w, p = samples("whole_lossy.raw"), samples("parts_lossy.raw")
+n = min(len(w), len(p))
+worst = max(abs(a - b) for a, b in zip(w, p)) if n else 0
+print("same" if len(w) == len(p) and n > 0 and worst <= 1e-3 else "length %d vs %d, worst %g" % (len(w), len(p), worst))
 PY
 )"
 done
