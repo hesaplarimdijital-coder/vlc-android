@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.LrcTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-14T19:59:39.708Z" hostname="runnervm8k3b6" time="0.011">
+  <properties/>
+  <testcase name="theLineAtATime" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.003"/>
+  <testcase name="writtenAndReadBack" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.003"/>
+  <testcase name="aLineSungAgain" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.001"/>
+  <testcase name="timedLinesInOrder" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.0"/>
+  <testcase name="theOffsetTagShowsLinesSooner" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.001"/>
+  <testcase name="wordStamps" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.0"/>
+  <testcase name="theTagsLyrics" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.002"/>
+  <testcase name="plainText" classname="app.nagmedar.ui.lyrics.LrcTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

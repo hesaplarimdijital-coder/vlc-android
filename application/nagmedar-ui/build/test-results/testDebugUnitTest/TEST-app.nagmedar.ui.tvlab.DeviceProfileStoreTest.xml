@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-14T20:00:30.954Z" hostname="runnervm8k3b6" time="0.12">
+  <properties/>
+  <testcase name="newIdsAndFileNames" classname="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" time="0.018"/>
+  <testcase name="aHandWrittenProfileIsRead" classname="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" time="0.04"/>
+  <testcase name="aBrokenFileIsLeftOut" classname="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" time="0.019"/>
+  <testcase name="theStoreKeepsTheUsersProfilesAndChanges" classname="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" time="0.025"/>
+  <testcase name="theAppsProfilesComeBackAsTheyWent" classname="app.nagmedar.ui.tvlab.DeviceProfileStoreTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.ShortcutRegistryTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-14T19:59:36.694Z" hostname="runnervm8k3b6" time="0.19">
+  <properties/>
+  <testcase name="everyIdHasExactlyOneShortcut" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.023"/>
+  <testcase name="eventsMatchShortcuts" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.023"/>
+  <testcase name="conflictsAreDetected" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.021"/>
+  <testcase name="systemShortcutListCoversEveryShortcut" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.031"/>
+  <testcase name="labels" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.021"/>
+  <testcase name="everyMenuGroupHasEntries" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.023"/>
+  <testcase name="vlcDefaults" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.024"/>
+  <testcase name="noChordIsBoundTwice" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

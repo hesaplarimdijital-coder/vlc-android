@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseMigrationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-14T19:56:01.305Z" hostname="runnervm8k3b6" time="21.921">
+  <properties/>
+  <testcase name="everyVersionMigratesToTheLatest" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="21.907"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

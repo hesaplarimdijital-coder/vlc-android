@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.sync.SyncTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-14T19:59:56.999Z" hostname="runnervm8k3b6" time="0.557">
+  <properties/>
+  <testcase name="theTabsControls" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.138"/>
+  <testcase name="aFilmRemembersItsDelaysAndGetsThemBackOverVlcs" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.057"/>
+  <testcase name="theSettingsColumnsReadBack" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.055"/>
+  <testcase name="theSpeedIsFadedUntilThePlayerCanDoIt" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.126"/>
+  <testcase name="theSubtitlesSpeedWaitsForTheNativeSide" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.062"/>
+  <testcase name="withoutAPlayerNothingIsRead" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.06"/>
+  <testcase name="theDelaysAreThePlayers" classname="app.nagmedar.ui.player.sync.SyncTest" time="0.059"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
