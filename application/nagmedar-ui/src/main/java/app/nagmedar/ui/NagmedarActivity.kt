@@ -30,6 +30,7 @@ import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.perf.StartupPerf
+import app.nagmedar.ui.radio.RadioCenter
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
@@ -63,6 +64,8 @@ class NagmedarActivity : ComponentActivity() {
         if (savedInstanceState == null) destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
         // S-1006: the album covers are looked for in the app; its Robolectric tests run it too, offline
         CoverCenter.active = Build.FINGERPRINT != "robolectric"
+        // S-1105: the radio directory and the station logos are asked in the app, not in its tests
+        RadioCenter.active = Build.FINGERPRINT != "robolectric"
         setContent {
             NagmedarApp(
                 onOpenFile = { openDocument.launch(arrayOf("video/*", "audio/*", "application/x-mpegurl", "application/octet-stream")) },

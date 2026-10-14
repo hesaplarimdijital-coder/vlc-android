@@ -81,6 +81,7 @@ import app.nagmedar.ui.playback.QueueSheet
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
+import app.nagmedar.ui.radio.RadioScreen
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
@@ -206,6 +207,8 @@ private fun NagmedarMain(
     var sleepTimerOpen by rememberSaveable { mutableStateOf(false) }
     // S-1004: the lyrics over the whole window (Ctrl+Shift+L, the panes' full-screen button)
     var lyricsOpen by rememberSaveable { mutableStateOf(false) }
+    // S-1105: the radio screen's search box asked for by Ctrl+Shift+R
+    var radioSearchRequested by remember { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
         AppActions(
             context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile,
@@ -213,6 +216,7 @@ private fun NagmedarMain(
             showShortcutList = { shortcutListRequests++ },
             openSleepTimer = { sleepTimerOpen = true },
             toggleLyrics = { lyricsOpen = !lyricsOpen },
+            openRadioSearch = { radioSearchRequested = true },
             closeLyrics = {
                 val open = lyricsOpen
                 lyricsOpen = false
@@ -317,6 +321,8 @@ private fun NagmedarMain(
                         Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }) })
                         // S-804: the medialibrary's playlists, a tab each
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
+                        // S-1105: the radio directory's search
+                        Destination.Radio -> RadioScreen(searchRequested = radioSearchRequested, onSearchHandled = { radioSearchRequested = false })
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)
@@ -426,6 +432,8 @@ class AppActions(
     /** S-1004: the lyrics over the whole window, opened or closed; closed, and whether they were open. */
     private val toggleLyrics: () -> Unit = {},
     private val closeLyrics: () -> Boolean = { false },
+    /** S-1105: the radio screen's search box takes the keyboard. */
+    private val openRadioSearch: () -> Unit = {},
 ) {
     private var volumeBeforeMute = 100
 
@@ -563,6 +571,10 @@ class AppActions(
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
             ShortcutId.TvLab -> navigator.navigate(Destination.TvLab)
+            ShortcutId.RadioSearch -> {
+                navigator.navigate(Destination.Radio)
+                openRadioSearch()
+            }
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
             ShortcutId.ShortcutList -> {

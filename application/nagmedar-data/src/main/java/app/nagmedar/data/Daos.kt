@@ -64,27 +64,66 @@ abstract class PodcastDao {
 }
 
 @Dao
-interface RadioDao {
+abstract class RadioDao {
     @Query("SELECT * FROM radio_station WHERE favorite = 1 ORDER BY name COLLATE NOCASE")
-    fun favorites(): Flow<List<RadioStation>>
+    abstract fun favorites(): Flow<List<RadioStation>>
 
     @Query("SELECT * FROM radio_station WHERE last_played_at > 0 ORDER BY last_played_at DESC LIMIT :limit")
-    fun recent(limit: Int): Flow<List<RadioStation>>
+    abstract fun recent(limit: Int): Flow<List<RadioStation>>
+
+    /** The stations imported from playlist files: those without a directory UUID. */
+    @Query("SELECT * FROM radio_station WHERE station_uuid IS NULL ORDER BY name COLLATE NOCASE")
+    abstract fun imported(): Flow<List<RadioStation>>
 
     @Query("SELECT * FROM radio_station WHERE station_uuid = :uuid")
-    fun byUuid(uuid: String): RadioStation?
+    abstract fun byUuid(uuid: String): RadioStation?
+
+    @Query("SELECT * FROM radio_station WHERE id = :id")
+    abstract fun byId(id: Long): RadioStation?
+
+    @Query("SELECT * FROM radio_station WHERE station_uuid IN (:uuids)")
+    abstract fun byUuids(uuids: List<String>): List<RadioStation>
+
+    @Query("SELECT * FROM radio_station WHERE station_uuid IS NULL AND stream_url = :url LIMIT 1")
+    abstract fun importedByUrl(url: String): RadioStation?
 
     @Upsert
-    fun save(station: RadioStation): Long
+    abstract fun save(station: RadioStation): Long
+
+    /**
+     * A station kept: one of the directory (same UUID) or an imported one (same address, no id yet)
+     * already in the table is updated with what is known now and keeps the user's favourite, plays
+     * and vote. Returns the row's id.
+     */
+    @Transaction
+    open fun keep(station: RadioStation): Long {
+        val known = station.stationUuid?.let(::byUuid)
+            ?: station.takeIf { it.stationUuid == null && it.id == 0L }?.let { importedByUrl(it.streamUrl) }
+        val row = if (known == null) station else station.copy(id = known.id, favorite = known.favorite, lastPlayedAt = known.lastPlayedAt, lastVotedAt = known.lastVotedAt)
+        // an upsert that updates answers -1
+        val inserted = save(row)
+        return if (inserted > 0) inserted else row.id
+    }
 
     @Query("UPDATE radio_station SET favorite = :favorite WHERE id = :id")
-    fun setFavorite(id: Long, favorite: Boolean)
+    abstract fun setFavorite(id: Long, favorite: Boolean)
 
     @Query("UPDATE radio_station SET last_played_at = :at WHERE id = :id")
-    fun markPlayed(id: Long, at: Long)
+    abstract fun markPlayed(id: Long, at: Long)
+
+    @Query("UPDATE radio_station SET last_voted_at = :at, votes = :votes WHERE id = :id")
+    abstract fun markVoted(id: Long, at: Long, votes: Int)
+
+    /** Takes the station out of "recent" without touching its other uses. */
+    @Query("UPDATE radio_station SET last_played_at = 0 WHERE id = :id")
+    abstract fun forgetPlayed(id: Long)
+
+    /** Drops rows nothing refers to any more: directory stations that are no favourite, were never played and never voted for. */
+    @Query("DELETE FROM radio_station WHERE station_uuid IS NOT NULL AND favorite = 0 AND last_played_at = 0 AND last_voted_at = 0")
+    abstract fun pruneUnused()
 
     @Delete
-    fun delete(station: RadioStation)
+    abstract fun delete(station: RadioStation)
 }
 
 @Dao

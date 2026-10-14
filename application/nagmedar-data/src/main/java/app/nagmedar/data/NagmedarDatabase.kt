@@ -33,7 +33,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 7
+        const val VERSION = 8
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -95,8 +95,20 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 7 → 8 (S-1105): the radio stations' country, language and votes, and when the user voted. */
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `radio_station` ADD COLUMN `country` TEXT")
+                db.execSQL("ALTER TABLE `radio_station` ADD COLUMN `language` TEXT")
+                db.execSQL("ALTER TABLE `radio_station` ADD COLUMN `votes` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `radio_station` ADD COLUMN `last_voted_at` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         /** Schema migrations, oldest first. */
-        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+        val MIGRATIONS: Array<Migration> = arrayOf(
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8,
+        )
 
         @Volatile
         private var instance: NagmedarDatabase? = null

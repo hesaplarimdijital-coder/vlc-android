@@ -48,6 +48,8 @@ Sözlüğü testler denetler:
 | harici disk | external drive | harici sürücü | external disk | |
 | ağ paylaşımı | network share | | | SMB, DLNA, WebDAV |
 | akış | stream | | | “Ağ akışı aç…” |
+| radyo rehberi | radio directory | radyo dizini | | Radio Browser: ada, ülkeye, dile, etikete, kodeğe göre aranan topluluk listesi; listedeki tek öğe “radyo”, İngilizcede “station” |
+| oy vermek | to vote | | | Rehberde bir radyo için günde bir kez; “Bu radyoya oy ver” |
 | kısayol | shortcut | | hotkey, key binding | |
 | tuş | key | | | |
 | pencere | window | | | “Yeni pencerede aç” |

@@ -53,7 +53,11 @@ data class PodcastEpisode(
     @ColumnInfo(name = "download_state") val downloadState: Int = DownloadState.NONE,
 )
 
-/** An internet radio station: from the Radio Browser directory (with its UUID) or added by hand. */
+/**
+ * An internet radio station: from the Radio Browser directory (with its UUID) or imported from a
+ * playlist file (no UUID). A row exists while the station is a favourite, was played or was
+ * imported (S-1105, S-1106).
+ */
 @Entity(tableName = "radio_station", indices = [Index(value = ["station_uuid"], unique = true)])
 data class RadioStation(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -68,6 +72,14 @@ data class RadioStation(
     val bitrate: Int = 0,
     val favorite: Boolean = false,
     @ColumnInfo(name = "last_played_at") val lastPlayedAt: Long = 0,
+    /** The country's name as the directory gives it. */
+    val country: String? = null,
+    /** The language's name as the directory gives it. */
+    val language: String? = null,
+    /** The directory's vote count when the station was last read. */
+    val votes: Int = 0,
+    /** When the user last voted for the station (0: never): a vote is cast once a day. */
+    @ColumnInfo(name = "last_voted_at") val lastVotedAt: Long = 0,
 )
 
 /**

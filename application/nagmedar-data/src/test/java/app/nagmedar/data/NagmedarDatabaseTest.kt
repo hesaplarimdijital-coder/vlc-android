@@ -79,6 +79,81 @@ class NagmedarDatabaseTest {
     }
 
     @Test
+    fun aDirectoryStationReadAgainKeepsTheUsersMarks() {
+        val radio = db.radio()
+        val id = radio.keep(RadioStation(stationUuid = "uuid-7", name = "Radyo Yedi", streamUrl = "https://radio.example/7", votes = 10))
+        radio.setFavorite(id, true)
+        radio.markPlayed(id, at = 99)
+        radio.markVoted(id, at = 77, votes = 11)
+        // the directory says something else now; the favourite, the play and the vote stay
+        val again = radio.keep(RadioStation(stationUuid = "uuid-7", name = "Radyo Yedi FM", streamUrl = "https://radio.example/7b", votes = 12, country = "Türkiye"))
+        assertEquals(id, again)
+        val kept = radio.byUuid("uuid-7")!!
+        assertEquals("Radyo Yedi FM", kept.name)
+        assertEquals("https://radio.example/7b", kept.streamUrl)
+        assertEquals(12, kept.votes)
+        assertEquals("Türkiye", kept.country)
+        assertTrue(kept.favorite)
+        assertEquals(99L, kept.lastPlayedAt)
+        assertEquals(77L, kept.lastVotedAt)
+    }
+
+    @Test
+    fun importedStationsAreThoseWithoutADirectoryId() {
+        val radio = db.radio()
+        radio.save(RadioStation(name = "Zeytin FM", streamUrl = "https://zeytin.example/canli"))
+        radio.save(RadioStation(name = "Ada Radyo", streamUrl = "https://ada.example/canli"))
+        radio.keep(RadioStation(stationUuid = "uuid-8", name = "Dizinden", streamUrl = "https://dizin.example/8"))
+        assertEquals(listOf("Ada Radyo", "Zeytin FM"), runBlocking { radio.imported().first() }.map { it.name })
+        assertEquals("Zeytin FM", radio.importedByUrl("https://zeytin.example/canli")?.name)
+        assertNull(radio.importedByUrl("https://dizin.example/8"))
+    }
+
+    @Test
+    fun anImportedStationKeptAgainIsTheSameRow() {
+        val radio = db.radio()
+        val first = radio.keep(RadioStation(name = "Zeytin FM", streamUrl = "https://zeytin.example/canli", faviconUrl = "https://zeytin.example/logo.png"))
+        radio.setFavorite(first, true)
+        radio.markPlayed(first, at = 41)
+        val again = radio.keep(RadioStation(name = "Zeytin FM (yeni)", streamUrl = "https://zeytin.example/canli"))
+        assertEquals(first, again)
+        val kept = runBlocking { radio.imported().first() }.single()
+        assertEquals("Zeytin FM (yeni)", kept.name)
+        assertTrue(kept.favorite)
+        assertEquals(41L, kept.lastPlayedAt)
+        // a row that has its id is updated in place
+        assertEquals(first, radio.keep(kept.copy(name = "Zeytin FM 2")))
+        assertEquals("Zeytin FM 2", radio.byId(first)?.name)
+        assertEquals(1, runBlocking { radio.imported().first() }.size)
+    }
+
+    @Test
+    fun aVoteIsRememberedThroughPruning() {
+        val radio = db.radio()
+        val voted = radio.keep(RadioStation(stationUuid = "uuid-11", name = "Oy verilen", streamUrl = "https://a/11"))
+        radio.markVoted(voted, at = 1_000, votes = 5)
+        radio.pruneUnused()
+        assertEquals(1_000L, radio.byUuid("uuid-11")?.lastVotedAt)
+    }
+
+    @Test
+    fun forgettingAPlayedStationAndPruningTheUnused() {
+        val radio = db.radio()
+        val played = radio.keep(RadioStation(stationUuid = "uuid-9", name = "Çalınan", streamUrl = "https://a/9"))
+        val loved = radio.keep(RadioStation(stationUuid = "uuid-10", name = "Sevilen", streamUrl = "https://a/10"))
+        radio.markPlayed(played, at = 5)
+        radio.markPlayed(loved, at = 6)
+        radio.setFavorite(loved, true)
+        radio.forgetPlayed(played)
+        radio.forgetPlayed(loved)
+        assertTrue(runBlocking { radio.recent(10).first() }.isEmpty())
+        radio.pruneUnused()
+        // the favourite stays, the one nothing refers to goes
+        assertNull(radio.byUuid("uuid-9"))
+        assertEquals("Sevilen", radio.byUuid("uuid-10")?.name)
+    }
+
+    @Test
     fun lyricsAreKeyedByTrackAndSource() {
         val lyrics = db.lyrics()
         val key = LyricsKey.of(" Ada Karan ", "Sabaha Kadar", "Gece Mavisi", 241_900)
@@ -293,6 +368,35 @@ class NagmedarDatabaseMigrationTest {
                 "INSERT INTO smart_playlist (name, rules, match_all, sort, limit_count, created_at, updated_at) " +
                     "VALUES ('En sevilenler', 'rating|at_least|4', 1, 'rating:false', NULL, 1, 1)",
             )
+            // 7 -> 8 (S-1105): the radio stations' country, language and votes
+            db.execSQL(
+                "INSERT INTO radio_station (station_uuid, name, stream_url, bitrate, favorite, last_played_at, country, language, votes, last_voted_at) " +
+                    "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 128, 1, 2, 'Türkiye', 'turkish', 40, 3)",
+            )
+        }
+    }
+
+    @Test
+    fun radioStationsKeepTheirRowsFromSeven() {
+        assumeTrue("schema 7 not exported yet", schemaExported(7))
+        assumeTrue("schema 8 not exported yet", schemaExported(8))
+        helper.createDatabase(TEST_DB, 7).use { db ->
+            db.execSQL(
+                "INSERT INTO radio_station (station_uuid, name, stream_url, bitrate, favorite, last_played_at) " +
+                    "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 128, 1, 2)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 8, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT name, favorite, last_played_at, country, language, votes, last_voted_at FROM radio_station").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Radyo", c.getString(0))
+                assertEquals(1, c.getInt(1))
+                assertEquals(2L, c.getLong(2))
+                assertTrue("no country yet", c.isNull(3))
+                assertTrue("no language yet", c.isNull(4))
+                assertEquals(0, c.getInt(5))
+                assertEquals(0L, c.getLong(6))
+            }
         }
     }
 

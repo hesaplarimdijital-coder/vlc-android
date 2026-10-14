@@ -2,6 +2,15 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 0.4.0 — MVP4 (hazırlanıyor)
+
+### Radyo
+- Radyo rehberi (Radio Browser): Radyo sayfasında ada göre arama; ülke, dil, etiket, kodek ve en düşük bit hızı filtreleri; oy, çok dinlenen, ad ve bit hızına göre sıralama. Sonuçta logo, ad, ülke, kodek ve bit hızı, oy sayısı ve etiketler görünür; Enter oynatır, menü (sağ tık, Menü tuşu) oynatır, oy verir, akış adresini kopyalar. Ctrl+Shift+R aramaya götürür.
+- Sunucu seçimi: `all.api.radio-browser.info` DNS'ten çözülür, her adres ters çözülüp ada çevrilir (`de1.api.radio-browser.info` gibi), karıştırılır ve HTTPS ile ada gidilir. Bir sunucu zaman aşımına uğrar ya da 5xx verirse sıradakine geçilir, bozuk olan bir süre aranmaz; DNS bir şey vermezse sunucu listesi `all.api.radio-browser.info/json/servers` adresinden okunur. Her istek `Nagmedar/<sürüm> (+https://github.com/hesaplarimdijital-coder/vlc-android)` kimliğiyle gider.
+- Bir radyo her çalmaya başladığında rehbere “tıklama” bildirilir (rehberin istediği gibi) ve dönen adres çalınır; rehber yanıt vermezse kayıtlı adres çalar. Oy, bir radyo için günde bir kez verilir.
+- Veritabanı 7'den 8'e: radyo tablosuna ülke, dil, oy sayısı ve son oy zamanı eklendi; kayıtlı radyoların favori ve çalınma izleri korunur.
+- Dinlenen radyonun ICY başlığı “Sanatçı - Parça” olarak ayrılır: bildirimde ve kilit ekranında parça adı, sanatçı ve radyonun adı (albüm) görünür.
+
 ## 0.2.0 — MVP2 (hazırlanıyor)
 
 ### Müzik motoru

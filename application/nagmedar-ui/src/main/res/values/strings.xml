@@ -44,11 +44,55 @@
     <string name="nag_search_hint">Artist, album, track or command</string>
     <string name="nag_search">Search or run a command</string>
 
+    <!-- Radio (S-1105) -->
+    <string name="nag_radio_source">Radio Browser · community directory</string>
+    <string name="nag_radio_search_placeholder">Type a station name</string>
+    <string name="nag_radio_any">Any</string>
+    <string name="nag_radio_filter_country">Country</string>
+    <string name="nag_radio_filter_language">Language</string>
+    <string name="nag_radio_filter_tag">Tag</string>
+    <string name="nag_radio_filter_codec">Codec</string>
+    <string name="nag_radio_filter_bitrate">Bitrate</string>
+    <string name="nag_radio_filter_value">%1$s: %2$s</string>
+    <string name="nag_radio_bitrate_at_least">At least %1$d kbps</string>
+    <string name="nag_radio_sort">Sort: %1$s</string>
+    <string name="nag_radio_sort_votes">Most voted</string>
+    <string name="nag_radio_sort_popular">Most listened</string>
+    <string name="nag_radio_sort_name">Name</string>
+    <string name="nag_radio_sort_bitrate">Highest bitrate</string>
+    <string name="nag_radio_options_loading">Loading the list…</string>
+    <string name="nag_radio_options_failed">The list could not be loaded</string>
+    <string name="nag_radio_searching">Searching the radio directory…</string>
+    <string name="nag_radio_none_title">No station found</string>
+    <string name="nag_radio_none_desc">Try other words or fewer filters.</string>
+    <string name="nag_radio_retry">Try again</string>
+    <string name="nag_radio_offline_title">No connection</string>
+    <string name="nag_radio_offline_desc">The radio directory needs the internet. Check the connection and try again.</string>
+    <string name="nag_radio_busy_title">The directory is busy</string>
+    <string name="nag_radio_busy_desc">The radio directory asked for a little patience. Try again in a minute.</string>
+    <string name="nag_radio_error_title">The directory did not answer</string>
+    <string name="nag_radio_error_desc">The server answered with an error (%1$d).</string>
+    <string name="nag_radio_loading_more">Loading more…</string>
+    <string name="nag_radio_more">Show more</string>
+    <plurals name="nag_radio_votes">
+        <item quantity="one">%1$s vote</item>
+        <item quantity="other">%1$s votes</item>
+    </plurals>
+    <string name="nag_radio_vote">Vote for this station</string>
+    <string name="nag_radio_voted_today">Voted in the last day</string>
+    <string name="nag_radio_copy_address">Copy the stream address</string>
+    <string name="nag_radio_copied">Stream address copied</string>
+    <string name="nag_radio_voted">You voted for %1$s</string>
+    <string name="nag_radio_already_voted">You voted for %1$s less than a day ago</string>
+    <string name="nag_radio_vote_refused">The directory did not take the vote</string>
+    <string name="nag_radio_vote_offline">The vote could not be sent. Check the connection.</string>
+    <string name="nag_radio_failed">That did not work. Try again.</string>
+    <string name="nag_sc_radio_search">Search the radio directory</string>
+
     <!-- Placeholders -->
     <string name="nag_coming_title">%1$s arrives in %2$s</string>
     <string name="nag_coming_movies">Films with posters, technical details and TV compatibility.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
-    <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
     <string name="nag_coming_network">SMB, DLNA and WebDAV shares.</string>
     <string name="nag_coming_streams">Network streams and saved addresses.</string>

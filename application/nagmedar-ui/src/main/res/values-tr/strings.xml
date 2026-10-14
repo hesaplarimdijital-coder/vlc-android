@@ -44,11 +44,55 @@
     <string name="nag_search_hint">Sanatçı, albüm, parça ya da komut</string>
     <string name="nag_search">Ara ya da komut çalıştır</string>
 
+    <!-- Radyo (S-1105) -->
+    <string name="nag_radio_source">Radio Browser · topluluk rehberi</string>
+    <string name="nag_radio_search_placeholder">Radyo adı yazın</string>
+    <string name="nag_radio_any">Hepsi</string>
+    <string name="nag_radio_filter_country">Ülke</string>
+    <string name="nag_radio_filter_language">Dil</string>
+    <string name="nag_radio_filter_tag">Etiket</string>
+    <string name="nag_radio_filter_codec">Kodek</string>
+    <string name="nag_radio_filter_bitrate">Bit hızı</string>
+    <string name="nag_radio_filter_value">%1$s: %2$s</string>
+    <string name="nag_radio_bitrate_at_least">En az %1$d kbps</string>
+    <string name="nag_radio_sort">Sıralama: %1$s</string>
+    <string name="nag_radio_sort_votes">En çok oy alan</string>
+    <string name="nag_radio_sort_popular">En çok dinlenen</string>
+    <string name="nag_radio_sort_name">Ad</string>
+    <string name="nag_radio_sort_bitrate">En yüksek bit hızı</string>
+    <string name="nag_radio_options_loading">Liste yükleniyor…</string>
+    <string name="nag_radio_options_failed">Liste yüklenemedi</string>
+    <string name="nag_radio_searching">Radyo rehberinde aranıyor…</string>
+    <string name="nag_radio_none_title">Radyo bulunamadı</string>
+    <string name="nag_radio_none_desc">Başka sözcükler deneyin ya da filtreleri azaltın.</string>
+    <string name="nag_radio_retry">Yeniden dene</string>
+    <string name="nag_radio_offline_title">Bağlantı yok</string>
+    <string name="nag_radio_offline_desc">Radyo rehberi için internet gerekir. Bağlantıyı denetleyin ve yeniden deneyin.</string>
+    <string name="nag_radio_busy_title">Rehber yoğun</string>
+    <string name="nag_radio_busy_desc">Radyo rehberi biraz sabır istedi. Bir dakika sonra yeniden deneyin.</string>
+    <string name="nag_radio_error_title">Rehber yanıt vermedi</string>
+    <string name="nag_radio_error_desc">Sunucu hata verdi (%1$d).</string>
+    <string name="nag_radio_loading_more">Daha fazlası yükleniyor…</string>
+    <string name="nag_radio_more">Daha fazla göster</string>
+    <plurals name="nag_radio_votes">
+        <item quantity="one">%1$s oy</item>
+        <item quantity="other">%1$s oy</item>
+    </plurals>
+    <string name="nag_radio_vote">Bu radyoya oy ver</string>
+    <string name="nag_radio_voted_today">Son bir günde oy verildi</string>
+    <string name="nag_radio_copy_address">Akış adresini kopyala</string>
+    <string name="nag_radio_copied">Akış adresi kopyalandı</string>
+    <string name="nag_radio_voted">%1$s için oy verdiniz</string>
+    <string name="nag_radio_already_voted">%1$s için bir günden kısa süre önce oy verdiniz</string>
+    <string name="nag_radio_vote_refused">Rehber oyu almadı</string>
+    <string name="nag_radio_vote_offline">Oy gönderilemedi. Bağlantıyı denetleyin.</string>
+    <string name="nag_radio_failed">İşlem tamamlanamadı. Yeniden deneyin.</string>
+    <string name="nag_sc_radio_search">Radyo rehberinde ara</string>
+
     <!-- Yer tutucular -->
     <string name="nag_coming_title">%1$s %2$s ile geliyor</string>
     <string name="nag_coming_movies">Afişler, teknik bilgiler ve TV uyumluluğuyla filmler.</string>
     <string name="nag_coming_podcasts">Abonelikler, yeni bölümler ve indirmeler.</string>
-    <string name="nag_coming_radio">İnternet radyosu rehberi, favoriler ve kayıtlar.</string>
     <string name="nag_coming_device">Bu cihazdaki ve harici disklerdeki klasörler.</string>
     <string name="nag_coming_network">SMB, DLNA ve WebDAV paylaşımları.</string>
     <string name="nag_coming_streams">Ağ akışları ve kayıtlı adresler.</string>
