@@ -3,6 +3,7 @@ package app.nagmedar.ui.library
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import app.nagmedar.audio.MusicFormats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.videolan.libvlc.util.Extensions
@@ -42,7 +43,10 @@ object SafLibrary {
         cache.remove(folder)
     }
 
-    /** Media type from the provider's MIME type, or from the extension when the provider does not know it. */
+    /**
+     * Media type from the provider's MIME type, or from the extension when the provider does
+     * not know it: libVLC's, and the engine's own (the tracker modules, S-911).
+     */
     fun typeOf(name: String, mime: String?): Int {
         val m = mime.orEmpty()
         if (m.startsWith("video/")) return MediaWrapper.TYPE_VIDEO
@@ -53,6 +57,7 @@ object SafLibrary {
         return when {
             Extensions.VIDEO.contains(extension) -> MediaWrapper.TYPE_VIDEO
             Extensions.AUDIO.contains(extension) -> MediaWrapper.TYPE_AUDIO
+            extension.substring(1) in MusicFormats.extensions -> MediaWrapper.TYPE_AUDIO
             else -> MediaWrapper.TYPE_ALL
         }
     }

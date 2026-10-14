@@ -2,9 +2,9 @@
 # Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper)
 # and the music engine (S-901, native/audio).
 #
-#   build.sh host    <prefix>  FFmpeg, libdovi and TagLib for this machine and the dvconvert,
-#                              mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib for arm64-v8a;
+#   build.sh host    <prefix>  libopenmpt, FFmpeg, libdovi and TagLib for this machine and the
+#                              dvconvert, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
+#   build.sh android <prefix>  libopenmpt, FFmpeg, libdovi, whisper.cpp, libusb, TagLib for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
 #
@@ -61,7 +61,21 @@ FFMPEG_COMPONENTS=(
     --enable-decoder=pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be,pcm_s32le,pcm_f32le,pcm_bluray,pcm_dvd
     --enable-decoder=mpc7,mpc8,tta,wmav1,wmav2,wmapro,wmalossless,pcm_u8,pcm_s8,pcm_f64le,pcm_s24le_planar,pcm_s32le_planar
     --enable-decoder=dsd_lsbf,dsd_msbf,dsd_lsbf_planar,dsd_msbf_planar
+    # the tracker formats (S-911): libopenmpt renders them, its demuxer hands the engine float PCM
+    --enable-libopenmpt --enable-demuxer=libopenmpt
 )
+
+build_openmpt() { # extra cmake args...
+    fetch openmpt "$OPENMPT_URL" "$OPENMPT_REF"
+    if [ -f "$PREFIX/lib/libopenmpt.a" ]; then return; fi
+    log "libopenmpt $OPENMPT_REF ($TARGET)"
+    local dir="$WORK/build-$TARGET/openmpt"
+    mkdir -p "$WORK/build-$TARGET"
+    cmake -S "$HERE/openmpt" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+        -DOPENMPT_SOURCE="$WORK/src/openmpt" "$@" > "$dir.configure.log" 2>&1 || fail_log "libopenmpt configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libopenmpt build ($TARGET)" "$dir.build.log"
+    cmake --install "$dir" > /dev/null
+}
 
 build_ffmpeg() { # extra configure args...
     fetch ffmpeg "$FFMPEG_URL" "$FFMPEG_REF"
@@ -69,6 +83,8 @@ build_ffmpeg() { # extra configure args...
     log "ffmpeg $FFMPEG_REF ($TARGET)"
     local dir="$WORK/build-$TARGET/ffmpeg"
     rm -rf "$dir" && mkdir -p "$dir" && cd "$dir"
+    # configure finds libopenmpt (S-911) through the pkg-config file build_openmpt installed
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     "$WORK/src/ffmpeg/configure" --prefix="$PREFIX" "${FFMPEG_COMPONENTS[@]}" "$@" > configure.log 2>&1 || {
         cat configure.log >> ffbuild/config.log 2>/dev/null; fail_log "FFmpeg configure ($TARGET)" ffbuild/config.log; }
     make -j"$JOBS" > make.log 2>&1 || fail_log "FFmpeg make ($TARGET)" make.log
@@ -139,6 +155,7 @@ build_audio() { # extra cmake args...
 }
 
 host() {
+    build_openmpt
     build_ffmpeg --cc="${CC:-cc}"
     build_dovi ""
     build_whisper
@@ -173,6 +190,10 @@ android() {
     local cc="$tc/bin/aarch64-linux-android$ANDROID_API-clang"
     local ndk_cmake=(-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake"
         -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-$ANDROID_API -DANDROID_STL=c++_static)
+    # the static libopenmpt needs the NDK's static libc++ when FFmpeg's configure links its test program with clang (C);
+    # configure adds -lstdc++ of its own, which an empty archive stands in for (the NDK has no GNU libstdc++)
+    build_openmpt "${ndk_cmake[@]}" -DOPENMPT_PC_LIBS="-lc++_static -lc++abi -lm"
+    [ -f "$PREFIX/lib/libstdc++.a" ] || "$tc/bin/llvm-ar" rc "$PREFIX/lib/libstdc++.a"
     build_ffmpeg --target-os=android --arch=aarch64 --cpu=armv8-a --enable-cross-compile \
         --cc="$cc" --cxx="$cc++" --ld="$cc" --ar="$tc/bin/llvm-ar" --nm="$tc/bin/llvm-nm" \
         --ranlib="$tc/bin/llvm-ranlib" --strip="$tc/bin/llvm-strip" --sysroot="$tc/sysroot" \

@@ -1670,6 +1670,8 @@ char *nag_audio_signal_path_json(NagAudio *e)
         why = volume < 1.0 ? "volume" : "output";
     else if (v->info.dop)
         why = ""; /* DoP: the words go out as they are, whatever else is set */
+    else if (!strcmp(v->info.codec, "tracker"))
+        why = "rendered"; /* S-911: a module is played, not read: there are no bits to keep */
     else if (v->info.is_float || v->info.bits == 0)
         why = "lossy";
     else if (volume < 1.0)

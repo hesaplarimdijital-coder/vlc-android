@@ -16,6 +16,7 @@ Zip'i tablete (ya da TV testleri için harici diske) açın; klasör yapısı ko
 | `audio/` | FLAC 16/44,1 · 24/96 · 24/192 (24 bitte -110 dBFS ton: bit-perfect yol için null test), FLAC 5.1 kanal tanıma, ALAC 24, AAC, Opus, MP3 (USLT + SYLT sözler), AC-3, E-AC-3, TrueHD 24 bit, DTS çekirdek, DSD64 (DSF) |
 | `audio/gapless/` | Tek bir kesintisiz glissando, örnek hassasiyetinde üç parçaya bölünmüş; FLAC, MP3, AAC, Opus ve M3U8. Parça geçişlerinde tık ya da boşluk duyulmamalı |
 | `audio/cue/` | Tek dosya albüm ve CUE (UTF-8 BOM ve Windows-1254) |
+| `audio/tracker/` | Aynı parça MOD, XM, S3M ve IT olarak (`tools/tracker.py` yazar): motor libopenmpt ile çalar, kütüphane türünü gösterir |
 | `audio/lyrics/` | LYRICS etiketli FLAC ve kelime zamanlamalı `.lrc` |
 | `podcast/` | RSS (iTunes + Podcasting 2.0), ID3 bölümlü bölüm, JSON bölümler |
 | `radio/` | M3U8 ve PLS istasyon listeleri |

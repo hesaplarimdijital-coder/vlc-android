@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
+import app.nagmedar.audio.MusicFormats
 import app.nagmedar.ui.theme.NagTheme
 
 /*
@@ -50,7 +51,7 @@ fun dropKind(name: String?, mime: String?): DropKind {
         extension in subtitleExtensions || type in subtitleTypes -> DropKind.Subtitle
         extension in playlistExtensions || type in playlistTypes -> DropKind.Playlist
         extension in videoExtensions || type.startsWith("video/") -> DropKind.Video
-        extension in audioExtensions || type.startsWith("audio/") -> DropKind.Audio
+        extension in audioExtensions || extension in MusicFormats.extensions || type.startsWith("audio/") -> DropKind.Audio
         else -> DropKind.Other
     }
 }

@@ -84,9 +84,9 @@ object ReplayGainScan {
         }
     }
 
-    /** One album: the tracks the engine can read, measured together; the tags of each written. */
+    /** One album: the tracks the engine can read and tag (a tracker module takes no tags, S-911), measured together; the tags of each written. */
     internal fun scanAlbum(context: Context, album: Album, redo: Boolean) {
-        val tracks = album.tracks.filter { track -> MusicFormats.canPlay(track.uri, null) }
+        val tracks = album.tracks.filter { track -> MusicFormats.canPlay(track.uri, null) && !MusicFormats.isTracker(track.uri) }
         if (tracks.isEmpty()) return
         val todo = if (redo) tracks else tracks.filter { track -> LoudnessScanner.probe(context, track.uri)?.hasReplayGain != true }
         if (todo.isEmpty()) {

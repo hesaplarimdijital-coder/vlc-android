@@ -31,6 +31,24 @@ class MusicFormatsTest {
         assertFalse(MusicFormats.canPlay(Uri.parse("content://media/external/audio/media/42"), "video/mp4"))
     }
 
+    /** S-911: the tracker modules are the engine's, told by their kind in the library. */
+    @Test
+    fun trackerModulesAreTheEngines() {
+        for (extension in listOf("mod", "xm", "s3m", "it", "mptm", "669", "med", "okt", "mo3", "umx")) {
+            assertTrue(extension, MusicFormats.canPlay(Uri.parse("file:///a/Tracker/song.$extension"), null))
+            assertTrue(extension, MusicFormats.isTracker(Uri.parse("file:///a/Tracker/song.$extension")))
+        }
+        assertTrue(MusicFormats.canPlay(Uri.parse("content://media/external/audio/media/42"), "audio/x-mod"))
+        assertFalse(MusicFormats.isTracker(Uri.parse("file:///a/b.flac")))
+        // a module's kind in the library: the file's extension; a decoded file's codec as the engine gave it
+        assertEquals("xm", MusicFormats.codecOf(MusicFormats.TRACKER, Uri.parse("file:///a/b.XM")))
+        assertEquals("mptm", MusicFormats.codecOf("tracker", Uri.parse("content://com.android.externalstorage.documents/document/primary%3AMusic%2Fx.mptm")))
+        assertEquals("tracker", MusicFormats.codecOf("tracker", Uri.parse("content://media/external/audio/media/42")))
+        assertEquals("flac", MusicFormats.codecOf("flac", Uri.parse("file:///a/b.flac")))
+        // a PPM is a picture, whatever libopenmpt makes of the name
+        assertFalse(MusicFormats.canPlay(Uri.parse("file:///a/picture.ppm"), null))
+    }
+
     @Test
     fun theExtension() {
         assertEquals("flac", MusicFormats.extensionOf(Uri.parse("file:///a/B.FLAC")))

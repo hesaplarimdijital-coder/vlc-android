@@ -171,6 +171,8 @@ class FirstRunTest {
         assertEquals(MediaWrapper.TYPE_VIDEO, SafLibrary.typeOf("Kuzey Işığı.mkv", "video/x-matroska"))
         assertEquals(MediaWrapper.TYPE_AUDIO, SafLibrary.typeOf("Sabaha Kadar.flac", "application/octet-stream"))
         assertEquals(MediaWrapper.TYPE_VIDEO, SafLibrary.typeOf("film.m2ts", null))
+        // S-911: a tracker module the provider does not know is a track
+        assertEquals(MediaWrapper.TYPE_AUDIO, SafLibrary.typeOf("modül.mptm", "application/octet-stream"))
         assertEquals(MediaWrapper.TYPE_ALL, SafLibrary.typeOf("notlar.txt", "text/plain"))
     }
 

@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import app.nagmedar.audio.LoudnessScanner
 import app.nagmedar.audio.MusicEngine
+import app.nagmedar.audio.MusicFormats
 import app.nagmedar.data.AudioTechEntry
 import app.nagmedar.data.NagmedarDatabase
 import kotlinx.coroutines.Dispatchers
@@ -79,9 +80,13 @@ object TrackTechIndex {
         }
     }
 
-    /** A file the probe cannot read is kept too, empty, so it is not read again until it changes. */
+    /**
+     * A file the probe cannot read is kept too, empty, so it is not read again until it changes.
+     * A tracker module (S-911) is kept by its kind ("mod", "xm", "it", …), which its file says.
+     */
     private fun probe(context: Context, uri: String, stamp: Pair<Long, Long>): AudioTechEntry {
-        val info = runCatching { LoudnessScanner.probe(context, Uri.parse(uri)) }
+        val parsed = Uri.parse(uri)
+        val info = runCatching { LoudnessScanner.probe(context, parsed) }
             .onFailure { Log.w(TAG, "probe of $uri failed: $it") }
             .getOrNull()
         return AudioTechEntry(
@@ -89,7 +94,7 @@ object TrackTechIndex {
             fileSize = stamp.first,
             modifiedAt = stamp.second,
             probeVersion = PROBE_VERSION,
-            codec = info?.codec.orEmpty(),
+            codec = info?.codec?.let { MusicFormats.codecOf(it, parsed) }.orEmpty(),
             container = info?.container.orEmpty(),
             rate = info?.rate ?: 0,
             channels = info?.channels ?: 0,

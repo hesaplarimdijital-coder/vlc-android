@@ -87,6 +87,7 @@ internal fun reasonLabel(reason: SignalPath.Reason): String = stringResource(
         SignalPath.Reason.None -> R.string.nag_sp_bit_perfect
         SignalPath.Reason.Idle -> R.string.nag_sp_reason_idle
         SignalPath.Reason.DsdToPcm -> R.string.nag_sp_reason_dsd_pcm
+        SignalPath.Reason.Rendered -> R.string.nag_sp_reason_rendered
         SignalPath.Reason.Lossy -> R.string.nag_sp_reason_lossy
         SignalPath.Reason.Volume -> R.string.nag_sp_reason_volume
         SignalPath.Reason.ReplayGain -> R.string.nag_sp_reason_replaygain

@@ -257,6 +257,8 @@ private val CODEC_NAMES = mapOf(
     "tta" to "TTA", "tak" to "TAK", "wmav1" to "WMA", "wmav2" to "WMA", "wmapro" to "WMA Pro", "wmalossless" to "WMA Lossless",
     "ac3" to "AC-3", "eac3" to "E-AC-3", "dts" to "DTS", "truehd" to "TrueHD", "mlp" to "MLP", "musepack7" to "Musepack",
     "musepack8" to "Musepack", "speex" to "Speex",
+    // S-911: a tracker module, as the engine names it; the library shows the module's kind (MOD, XM, IT, …) by its file
+    "tracker" to "Tracker",
 )
 
 /** FFmpeg's demuxers by their files' names: "iff" reads DFF. */

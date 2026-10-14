@@ -122,6 +122,12 @@ static void read_info(NagSource *s)
     info->bitrate = par->bit_rate > 0 ? par->bit_rate : s->ic->bit_rate;
     snprintf(info->codec, sizeof(info->codec), "%s", avcodec_get_name(par->codec_id));
     snprintf(info->container, sizeof(info->container), "%s", s->ic->iformat ? s->ic->iformat->name : "");
+    /* S-911: a tracker module, rendered by libopenmpt through FFmpeg's demuxer: what plays is the
+     * module, not the float PCM it renders to, and a bit rate means nothing for it */
+    if (!strcmp(info->container, "libopenmpt")) {
+        snprintf(info->codec, sizeof(info->codec), "tracker");
+        info->bitrate = 0;
+    }
     const char *composer = first_text(s->ic, st, "composer");
     if (composer) {
         snprintf(info->composer, sizeof(info->composer), "%s", composer);

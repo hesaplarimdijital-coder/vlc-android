@@ -1246,6 +1246,7 @@
     <string name="nag_sp_not_bit_perfect">Bit-perfect değil: %1$s</string>
     <string name="nag_sp_reason_idle">çalan yok</string>
     <string name="nag_sp_reason_dsd_pcm">DSD, PCM\'e dönüştürülüyor</string>
+    <string name="nag_sp_reason_rendered">tracker modülü çalarken sentezleniyor</string>
     <string name="nag_sp_reason_lossy">kaynak kayıplı</string>
     <string name="nag_sp_reason_volume">ses tam açık değil</string>
     <string name="nag_sp_reason_replaygain">ReplayGain</string>

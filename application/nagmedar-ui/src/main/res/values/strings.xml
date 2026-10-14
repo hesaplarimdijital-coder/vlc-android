@@ -1274,6 +1274,7 @@
     <string name="nag_sp_not_bit_perfect">Not bit-perfect: %1$s</string>
     <string name="nag_sp_reason_idle">nothing plays</string>
     <string name="nag_sp_reason_dsd_pcm">DSD converted to PCM</string>
+    <string name="nag_sp_reason_rendered">a tracker module, rendered as it plays</string>
     <string name="nag_sp_reason_lossy">a lossy source</string>
     <string name="nag_sp_reason_volume">the volume is not at full</string>
     <string name="nag_sp_reason_replaygain">ReplayGain</string>

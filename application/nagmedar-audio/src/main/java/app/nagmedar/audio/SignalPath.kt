@@ -58,6 +58,8 @@ data class SignalPath(
         None(""),
         Idle("idle"),
         DsdToPcm("dsd_pcm"),
+        /** S-911: a tracker module, rendered by the engine: there is no original to keep bit for bit. */
+        Rendered("rendered"),
         Lossy("lossy"),
         Volume("volume"),
         ReplayGain("replaygain"),

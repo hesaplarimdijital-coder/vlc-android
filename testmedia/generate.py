@@ -30,6 +30,7 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 import dsf  # noqa: E402
 import pgs  # noqa: E402
+import tracker  # noqa: E402
 
 REPO = os.path.dirname(HERE)
 FONT_DIR = os.path.join(REPO, 'application', 'nagmedar-ui', 'src', 'main', 'res', 'font')
@@ -594,6 +595,11 @@ class Builder:
         with open(self.path('audio/cue/album.cp1254.cue'), 'w', encoding='cp1254') as fh:
             fh.write(cue)
 
+    def tracker_modules(self):
+        # S-911: the same piece as MOD, XM, S3M and IT, written by tools/tracker.py
+        for extension in ('mod', 'xm', 's3m', 'it'):
+            tracker.write(self.path(f'audio/tracker/nagmedar.{extension}'))
+
     # ---------------------------------------------------------------- podcast and radio fixtures
 
     def podcast(self):
@@ -654,7 +660,7 @@ STEPS = {
     'hlg': Builder.hlg, 'stress': Builder.stress, 'interlaced': Builder.interlaced, 'av1': Builder.av1,
     'subtitles': Builder.subtitles, 'sync': Builder.sync, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
     'surround': Builder.surround_codecs, 'dsd': Builder.dsd, 'lyrics': Builder.lyrics, 'gapless': Builder.gapless,
-    'cue': Builder.cue, 'podcast': Builder.podcast, 'radio': Builder.radio,
+    'cue': Builder.cue, 'tracker': Builder.tracker_modules, 'podcast': Builder.podcast, 'radio': Builder.radio,
 }
 HEAVY = {'stress'}
 

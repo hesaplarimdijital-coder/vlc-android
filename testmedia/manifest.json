@@ -728,6 +728,44 @@
       }
     },
     {
+      "id": "tracker-modules",
+      "kind": "generated",
+      "step": "tracker",
+      "files": [
+        "audio/tracker/nagmedar.mod",
+        "audio/tracker/nagmedar.xm",
+        "audio/tracker/nagmedar.s3m",
+        "audio/tracker/nagmedar.it"
+      ],
+      "tests": "The same piece as ProTracker MOD, FastTracker II XM, Scream Tracker 3 S3M and Impulse Tracker IT (one looping sine sample, four channels, 15.36 s): the engine renders them with libopenmpt, each at its own kind in the library.",
+      "stories": [
+        "E10",
+        "S-911"
+      ],
+      "expect": {
+        "duration": [15.3, 15.5],
+        "streams": [
+          {
+            "codec_type": "audio",
+            "codec_name": "pcm_f32le",
+            "channels": 2
+          }
+        ],
+        "per_file": {
+          "audio/tracker/nagmedar.mod": {
+            "tags.title": "Nagmedar tracker",
+            "tags.encoder": "Generic ProTracker or compatible"
+          },
+          "audio/tracker/nagmedar.xm": {
+            "tags.encoder": "FastTracker v2.00"
+          },
+          "audio/tracker/nagmedar.it": {
+            "tags.encoder": "Impulse Tracker 2.14"
+          }
+        }
+      }
+    },
+    {
       "id": "podcast-feed",
       "kind": "generated",
       "step": "podcast",

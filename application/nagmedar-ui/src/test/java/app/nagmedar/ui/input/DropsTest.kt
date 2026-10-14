@@ -22,6 +22,8 @@ class DropsTest {
         assertEquals(DropKind.Video, dropKind("Film.MKV", null))
         assertEquals(DropKind.Video, dropKind("content://x/document/13", "video/x-matroska"))
         assertEquals(DropKind.Audio, dropKind("Sabaha Kadar.flac", "audio/flac"))
+        // a tracker module (S-911) is a track, whatever its sender says of its type
+        assertEquals(DropKind.Audio, dropKind("Modül.xm", "application/octet-stream"))
         // a playlist comes as audio/x-mpegurl: it is a list, not a track
         assertEquals(DropKind.Playlist, dropKind("liste.m3u8", "audio/x-mpegurl"))
         assertEquals(DropKind.Other, dropKind("notlar.pdf", "application/pdf"))
