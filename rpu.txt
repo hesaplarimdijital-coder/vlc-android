@@ -1,0 +1,14 @@
+Parsing RPU file...
+
+Summary:
+  Frames: 259
+  Profile: 8
+  DM version: 2 (CM v4.0)
+  Scene/shot count: 3
+  RPU mastering display: 0.0001/1000 nits
+  RPU content light level (L1): MaxCLL: 632.88 nits, MaxFALL: 10.05 nits
+  L6 metadata: Mastering display: 0.0001/1000 nits. MaxCLL: 3948 nits, MaxFALL: 120 nits
+  L5 offsets: top=0, bottom=0, left=0, right=0
+  L2 trims: 100 nits, 600 nits, 1000 nits
+  L8 trims: 100 nits, 1000 nits
+  L9 MDP: DCI-P3 D65

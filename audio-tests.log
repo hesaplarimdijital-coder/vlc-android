@@ -1,0 +1,128 @@
+== S-901: test signals
+ok   info 24/96
+== S-901: bit-exact decoding
+ok   flac 16/44.1 s16
+ok   flac 24/96 s32
+ok   flac 24/96 s24
+ok   flac 24/96 f32
+ok   flac 16 as s32
+ok   seek at open
+ok   seek while playing
+ok   mp3 f32 (gapless trim)
+ok   aac f32
+ok   opus f32
+ok   queue flac+mp3 s16
+ok   mono on both channels
+== S-901: 5.1 downmix within one LSB
+ok   5.1 downmix, worst difference 1 LSB
+== S-904: gapless album
+ok   gapless flac parts
+ok   gapless mp3 parts
+== S-905: crossfade
+ok   crossfade equal-power and linear, worst error 0.0e+00 / 0.0e+00
+== S-906: DSP chain
+ok   dsp identity bit-exact
+ok   dsp bypass bit-exact
+ok   dsp: 15 EQ bands and two preamps against the model, worst error 0.0e+00
+ok   dsp stages in the signal path
+ok   dsp is why not bit-perfect
+ok   limiter latency 5 ms at 48 kHz
+ok   clip meter counts without the limiter
+ok   clip meter clean with the limiter
+ok   limiter: peak 0.891250938125 against 0.891250938134, reduction 6.99 dB
+ok   auto preamp -6 dB
+ok   auto preamp: the sine's level changed by -0.0005 dB
+ok   dsp reset at a seek
+== S-907: EBU R128 scanner
+ok   scanner: sine -23.04 LUFS, 12 kHz true peak 0.5048, flac16/mp3/5.1 within 0.15 LU of ffmpeg, album -10.19 LUFS
+== S-907: ReplayGain tags
+ok   tags read back from flac16.flac
+ok   audio of flac16.flac untouched by the tags
+ok   tags read back from mp3.mp3
+ok   audio of mp3.mp3 untouched by the tags
+ok   tags read back from aac.m4a
+ok   audio of aac.m4a untouched by the tags
+ok   tags read back from opus.opus
+ok   audio of opus.opus untouched by the tags
+ok   opus R128 gains
+== S-907: ReplayGain playback
+ok   replaygain off bit-exact
+ok   replaygain is why not bit-perfect
+ok   clipping prevented
+ok   replaygain track, album with preamp, untagged and clip-prevented gains, worst error 0.0e+00
+== S-909: tempo, pitch, balance, mono
+ok   tempo 1 and pitch 0 stay out of the way
+ok   tempo is why not bit-perfect
+ok   tempo 2 and 0.5 keep 997 Hz; pitch +12 and -7 and tempo 1.5 with pitch -5 land on their frequencies and lengths
+ok   balance is why not bit-perfect
+ok   balance 0.5 (left at half) and mono (both sides the average), worst error 0.0e+00
+== S-908: DSD
+ok   dsd info
+ok   dsd to pcm is why not bit-perfect
+ok   dsf and dff decode alike
+ok   dsd decoded: the 1 kHz sine at 0.500 (modulated at 0.5)
+ok   dop source
+ok   dop from dff is dop from dsf
+ok   dop: 88064 frames, markers alternate True, the file's bits True
+== S-902: the output's depth as the owner asks
+ok   16-bit file widened to s32
+ok   16-bit file as s24
+ok   24-bit file capped at s24
+ok   24-bit file capped at s16, dithered
+== S-912: A/B level match
+ok   chain level +6.00 dB
+ok   side A the chain, side B the file at the chain's level, worst error 1.7e-16
+ok   chain level on the sine 6.00 dB, the model's response 6.00 dB
+ok   chain on both sides (176400 of 176400 frames metered), the switch at frame 66560 crossfaded (worst 2.8e-17), side B the file 219 frames late at +1.31 dB (worst 0.0e+00)
+== S-1405: null test
+ok   null test on a true capture
+ok   null test on a broken capture
+== S-911: formats
+ok   wv decodes as ffmpeg
+ok   tta decodes as ffmpeg
+ok   m4a decodes as ffmpeg
+ok   aiff decodes as ffmpeg
+ok   wav decodes as ffmpeg
+[caf @ 0x55ff232a2fc0] Estimating duration from bitrate, this may be inaccurate
+ok   caf decodes as ffmpeg
+ok   mka decodes as ffmpeg
+ok   oga decodes as ffmpeg
+ok   wma decodes as ffmpeg
+== S-803, S-1001: the library's probe and the waveform
+ok   flac composer
+ok   mp3 composer
+ok   m4a composer
+ok   opus composer
+ok   no composer
+ok   waveform of 50 buckets, worst error 5.2e-08
+== S-1003: embedded lyrics
+ok   flac LYRICS, escaped
+ok   mp3 USLT and SYLT
+ok   mp3 TXXX:USLT
+ok   m4a ©lyr
+ok   opus LYRICS
+ok   no lyrics
+== S-1006: embedded covers
+ok   flac PICTURE
+ok   flac MusicBrainz release
+ok   m4a covr
+ok   mp3 APIC, the front of two
+ok   opus METADATA_BLOCK_PICTURE
+ok   no cover
+ok   no such tag
+== S-808: CUE parts
+ok   flac parts as the whole
+ok   flac part alone
+ok   seek within a part
+ok   part length
+ok   mp3 parts as the whole
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'numpy'
+FAIL whole.m4a parts as the whole: expected same, got 
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'numpy'
+FAIL whole.opus parts as the whole: expected same, got 
+ok   mp3 seek exact
+2 audio test(s) failed
