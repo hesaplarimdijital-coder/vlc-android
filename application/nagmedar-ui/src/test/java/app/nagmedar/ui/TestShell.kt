@@ -79,6 +79,8 @@ fun TestShell(
     overlay: @Composable BoxScope.() -> Unit = {},
     /** A desktop window's caption bar (S-306). */
     caption: CaptionBar? = null,
+    /** What the bars show (S-1302: casting). */
+    playerInfo: PlayerBarInfo = samplePlayerInfo,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -102,7 +104,7 @@ fun TestShell(
             val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
             if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
-        player = { kind -> SamplePlayerBar(kind, queueOpen = queueOpen) },
+        player = { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
         overlay = overlay,
         caption = caption,

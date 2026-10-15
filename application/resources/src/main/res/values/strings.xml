@@ -343,6 +343,10 @@
     <string name="nagmedar_popup_pause">Pause</string>
     <string name="nagmedar_popup_fullscreen">Back to the full player</string>
     <string name="nagmedar_popup_close">Close</string>
+    <!-- Nağmedar (S-1302): casting to a Chromecast or a DLNA renderer -->
+    <string name="nagmedar_casting_to">Casting to %s</string>
+    <string name="nagmedar_cast_tracker_here">Tracker modules play only on this device: this track goes on here, the next ones are cast.</string>
+    <string name="nagmedar_cast_tracker_skipped">“%s” skipped: tracker modules can\'t be cast, they play only on this device.</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and VLC Authors.</string>

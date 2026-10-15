@@ -227,6 +227,7 @@ import org.videolan.vlc.util.ContextOption.CTX_REMOVE_FROM_PLAYLIST
 import org.videolan.vlc.util.ContextOption.CTX_SHARE
 import org.videolan.vlc.util.ContextOption.CTX_STOP_AFTER_THIS
 import org.videolan.vlc.util.DialogDelegate
+import org.videolan.vlc.util.CastPickerHook
 import org.videolan.vlc.util.FileUtils
 import org.videolan.vlc.util.FileUtils.getUri
 import org.videolan.vlc.util.FlagSet
@@ -616,6 +617,9 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         isTv = Settings.showTvUi
         // Nağmedar (S-601): with a mouse, the desktop controls stand for the overlay
         if (displayManager.isPrimary && !isTv && !isBenchmark) chrome = PlayerChrome.create()?.also { it.attach(this, rootView as FrameLayout) }
+        // Nağmedar (S-1302): cast to a renderer, the new interface's casting controls over the classic remote ones
+        // (the remote layout has no player root: they go over the window's content)
+        if (displayManager.isOnRenderer && !isTv && !isBenchmark) chrome = PlayerChrome.createCasting()?.also { it.attach(this, findViewById(android.R.id.content)) }
         if (displayManager.isPrimary) {
             // Orientation
             // Tips
@@ -2125,8 +2129,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             }
             R.id.player_overlay_navmenu -> showNavMenu()
             R.id.player_overlay_length, R.id.player_overlay_time -> toggleTimeDisplay()
-            R.id.video_renderer -> if (supportFragmentManager.findFragmentByTag("renderers") == null)
-                RenderersDialog().show(supportFragmentManager, "renderers")
+            // Nağmedar (S-1302): the new interface's device picker, when the app has it
+            R.id.video_renderer -> CastPickerHook.picker?.invoke(this) ?: run {
+                if (supportFragmentManager.findFragmentByTag("renderers") == null) RenderersDialog().show(supportFragmentManager, "renderers")
+            }
             R.id.video_secondary_display -> {
                 clone = displayManager.isSecondary
                 recreate()

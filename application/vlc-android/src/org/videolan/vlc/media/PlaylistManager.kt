@@ -106,9 +106,15 @@ import org.videolan.vlc.util.setResumeProgram
 import org.videolan.vlc.util.updateNextProgramAfterThumbnailGeneration
 import org.videolan.vlc.util.updateWithMLMeta
 import org.videolan.vlc.util.validateLocation
+import android.net.Uri
+import app.nagmedar.playback.CastHandover
+import app.nagmedar.playback.CastItem
 import app.nagmedar.playback.EngineHost
+import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.EngineRouter
+import app.nagmedar.playback.Handover
+import app.nagmedar.playback.HandoverHost
 import app.nagmedar.playback.PlaybackEngine
 import java.security.SecureRandom
 import java.util.Calendar
@@ -227,6 +233,14 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private var preBrowserVolume = -1
     private var parsed = false
     var savedTime = 0L
+
+    /** S-1302: the item handed over between the music engine and libVLC, to go on where it was. */
+    private class CastResume(val index: Int, val uri: Uri, val positionMs: Long, val paused: Boolean)
+
+    private var castResume: CastResume? = null
+
+    /** S-1302: tracker modules passed over in a row while casting: a queue of nothing else stops. */
+    private var castSkips = 0
     private var random = SecureRandom()
     private var newMedia = false
     @Volatile
@@ -574,8 +588,41 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     fun setRenderer(item: RendererItem?) {
+        val wasCasting = player.hasRenderer
         player.setRenderer(item)
         showAudioPlayer.value = PlayerController.playbackState != PlaybackStateCompat.STATE_STOPPED && (item !== null || !player.isVideoPlaying())
+        // S-1302: the music engine's track goes on in libVLC, which sends it; back to the engine afterwards
+        if (CastHandover.change(castHost, wasCasting, item != null) == Handover.StaysHere) {
+            service.showToast(ctx.getString(R.string.nagmedar_cast_tracker_here), Toast.LENGTH_LONG)
+        }
+    }
+
+    /** S-1302: the playback as a handover between the music engine and libVLC sees it. */
+    private val castHost = object : HandoverHost {
+        override val engine: EngineId get() = engines.current.engineId
+        override val index: Int get() = currentIndex.takeIf { isValidPosition(it) } ?: -1
+        override val positionMs: Long get() = engines.current.getCurrentTime()
+        override val playing: Boolean get() = engines.current.isPlaying()
+        override val paused: Boolean get() = engines.current.isPaused()
+        override val item: CastItem? get() = castItemOf(getCurrentMedia()?.uri)
+
+        override fun engineTakes(): Boolean = getCurrentMedia()?.let { musicEngine.canPlay(it.toEngineMedia()) } == true
+
+        override fun replay(replay: Handover.Replay) {
+            val uri = getCurrentMedia()?.uri ?: return
+            launch {
+                // libVLC plays a CUE sheet's track at the file's times (S-808); the engine at the track's
+                val from = if (replay.to == EngineId.NagmedarAudio && CueUri.isTrack(uri)) {
+                    withContext(Dispatchers.IO) { CueSheets.track(ctx, uri) }?.let { it.from * 1000L / CueSheet.FRAMES_PER_SECOND } ?: 0L
+                } else {
+                    0L
+                }
+                // the queue moved on meanwhile: nothing to go on with
+                if (currentIndex != replay.index || getCurrentMedia()?.uri != uri) return@launch
+                castResume = CastResume(replay.index, uri, (replay.positionMs - from).coerceAtLeast(0L), replay.paused)
+                playIndex(replay.index)
+            }
+        }
     }
 
     suspend fun playIndex(index: Int, flags: Int = 0, forceResume:Boolean = false, forceRestart:Boolean = false) {
@@ -599,6 +646,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         }
 
         val mw = mediaList.getMedia(index) ?: return
+        // S-1302: a handover between the music engine and libVLC goes on where it was
+        val resume = castResume?.takeIf { it.index == index && it.uri == mw.uri }
+        castResume = null
         val mediaFromMl = medialibrary.getMedia(mw.uri)
         if (mediaFromMl != null)
             mw.time = mediaFromMl.time
@@ -630,7 +680,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             if (title > 0) uri = "$uri#$title".toUri()
 
             val start: Long
-            if (isVideoPlaying) {
+            if (resume != null) {
+                start = resume.positionMs
+            } else if (isVideoPlaying) {
                 start = if (forceRestart
                     || videoResumeStatus == ResumeStatus.NEVER) 0L else getStartTime(mw)
                 // If we explicitly restart or NEVER resume is set, ensure any leftover savedTime is cleared
@@ -650,8 +702,17 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                     return
                 }
             }
+            // Nağmedar (S-1302): a tracker module plays on this device alone: passed over while casting, and said
+            val castItem = castItemOf(mw.uri)
+            if (player.hasRenderer && castItem != null && CastHandover.skippedWhileCasting(castItem)) {
+                service.showToast(ctx.getString(R.string.nagmedar_cast_tracker_skipped, mw.title), Toast.LENGTH_LONG)
+                if (++castSkips < mediaList.size()) skipMedia() else stop()
+                return
+            }
+            castSkips = 0
             // Nağmedar (S-901): the local music library plays through its own engine when it takes the item
             if (engines.prepareFor(mw.toEngineMedia()) === musicEngine && musicEngine.startPlayback(mw, mediaplayerEventListener, start)) {
+                if (resume?.paused == true) musicEngine.pause()
                 if (browserAudioActive) musicEngine.setVolume(0)
                 newMedia = true
                 determinePrevAndNextIndices()
@@ -681,10 +742,15 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 val from = cuePart.from.toDouble() / CueSheet.FRAMES_PER_SECOND
                 media.addOption(":start-time=${"%.3f".format(Locale.ROOT, from + start / 1000.0)}")
                 cuePart.to?.let { media.addOption(":stop-time=${"%.3f".format(Locale.ROOT, it.toDouble() / CueSheet.FRAMES_PER_SECOND)}") }
+            } else if (resume != null) {
+                // S-1302: a handover goes on to the millisecond
+                media.addOption(":start-time=${"%.3f".format(Locale.ROOT, start / 1000.0)}")
             } else {
                 media.addOption(":start-time=${start/1000L}")
             }
-            media.addOption(":no-sout-chromecast-video")
+            // Nağmedar (S-1302): music goes to a Chromecast without a picture (its cover would be
+            // sent as a film); a film keeps its picture, unless VLC's "audio only" casting is set
+            if (mw.type != MediaWrapper.TYPE_VIDEO) media.addOption(":no-sout-chromecast-video")
             // Nağmedar (S-702): the subtitles' character set, read from the film's subtitle files or chosen for it
             SubtitleEncodingHook.finder?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }?.let { finder ->
                 val kept = runCatching { SlaveRepository.getInstance(ctx).getSlaves(mw.location).map { it.uri } }.getOrDefault(emptyList())
@@ -693,7 +759,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             // Nağmedar (S-507): a film the hardware decoder would colour wrong (Dolby Vision profile 5) is decoded in software
             val software = DecodingHook.adviser?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }
                 ?.let { adviser -> runCatching { adviser.needsSoftwareDecoding(ctx, mw.uri) }.getOrDefault(false) } ?: false
-            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer())
+            // S-1302: a track handed over while paused stays paused
+            val resumePaused = if (resume?.paused == true) MediaWrapper.MEDIA_PAUSED else 0
+            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or resumePaused or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer())
             // Nağmedar (S-1301): a saved network server's sign-in, as libVLC's options take it, never in the address
             NetworkMediaHook.options?.let { hook -> withContext(Dispatchers.IO) { runCatching { hook.optionsFor(uri) }.getOrDefault(emptyList()) } }
                 ?.forEach { media.addOption(it) }

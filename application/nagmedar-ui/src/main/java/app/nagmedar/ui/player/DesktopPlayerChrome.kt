@@ -44,6 +44,8 @@ import androidx.lifecycle.lifecycleScope
 import app.nagmedar.ui.BuildConfig
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
+import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.cast.showCastPicker
 import app.nagmedar.ui.components.LocalTooltipDelay
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
@@ -231,6 +233,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
                 // S-703: the secondary subtitles, on or off
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
+                // S-1302: the device picker
+                ShortcutId.Cast -> showCastPicker(activity)
                 // S-704: the sync assistant's steps, said over the video
                 ShortcutId.SyncMarkAudio, ShortcutId.SyncMarkSubtitle, ShortcutId.SyncApply, ShortcutId.SyncUndo -> assistant?.let { assist(activity, it, id) }
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
@@ -1117,6 +1121,7 @@ internal class ActivityPlayerSource(
             hasNext = service.hasNext(),
             canPictureInPicture = AndroidDevices.pipAllowed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
             recording = Recordings.recorder?.recording == true,
+            canCast = Casting.enabled(activity),
         )
     }
 
@@ -1197,6 +1202,8 @@ internal class ActivityPlayerSource(
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
+
+    override fun cast() = showCastPicker(activity)
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

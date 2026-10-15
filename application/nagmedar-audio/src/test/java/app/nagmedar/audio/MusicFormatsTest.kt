@@ -40,6 +40,10 @@ class MusicFormatsTest {
         }
         assertTrue(MusicFormats.canPlay(Uri.parse("content://media/external/audio/media/42"), "audio/x-mod"))
         assertFalse(MusicFormats.isTracker(Uri.parse("file:///a/b.flac")))
+        // S-1302: DSD, sent to a renderer as PCM
+        assertTrue(MusicFormats.isDsd(Uri.parse("file:///a/DSD/Kind%20of%20Blue.DSF")))
+        assertTrue(MusicFormats.isDsd(Uri.parse("file:///a/b.dff")))
+        assertFalse(MusicFormats.isDsd(Uri.parse("file:///a/b.flac")))
         // a PPM is a picture, whatever libopenmpt makes of the name
         assertFalse(MusicFormats.canPlay(Uri.parse("file:///a/picture.ppm"), null))
     }

@@ -787,7 +787,7 @@ private fun kindLabel(kind: EntryKind): Int = when (kind) {
     EntryKind.Other -> R.string.nag_net_kind_other
 }
 
-/** A file's menu: play, queue, play on a renderer (S-1302); a folder's: open, play, queue, add to the library. */
+/** A file's menu: play, queue, play on a device (S-1302); a folder's: open, play, queue, add to the library. */
 private fun entryMenu(res: Resources, entry: NetworkEntry, view: FolderView, model: NetworkModel, actions: NetworkActions): List<MenuEntry> = buildList {
     if (entry.kind == EntryKind.Folder) {
         add(MenuEntry.Item(res.getString(R.string.nag_net_open), { model.open(entry, actions) }, shortcut = KeyChord(Key.Enter).label(res)))
@@ -800,12 +800,14 @@ private fun entryMenu(res: Resources, entry: NetworkEntry, view: FolderView, mod
     } else {
         add(MenuEntry.Item(res.getString(R.string.nag_play), { model.open(entry, actions) }, icon = NagIcons.Play, shortcut = KeyChord(Key.Enter).label(res)))
         add(MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { actions.enqueue(listOf(entry)) }, icon = NagIcons.Queue))
-        // S-1302: the renderers found, when sending to one is built
-        RemoteRendererHook.renderers?.let { renderers ->
+        // S-1302: the devices found, each by name, and the picker for the others
+        RemoteRendererHook.renderers?.takeIf { it.offered(entry) }?.let { renderers ->
             val files = view.playable
+            val at = files.indexOf(entry).coerceAtLeast(0)
             renderers.available().forEach { renderer ->
-                add(MenuEntry.Item(res.getString(R.string.nag_net_play_on, renderer.name), { renderers.play(renderer, files, files.indexOf(entry).coerceAtLeast(0)) }))
+                add(MenuEntry.Item(res.getString(R.string.nag_net_play_on, renderer.name), { renderers.play(renderer, files, at) }, icon = NagIcons.Cast))
             }
+            add(MenuEntry.Item(res.getString(R.string.nag_cast_play_on), { renderers.choose(files, at) }, icon = NagIcons.Cast))
         }
     }
 }
