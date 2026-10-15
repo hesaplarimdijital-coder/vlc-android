@@ -6,6 +6,16 @@
       "license"  : "apache2.0"
     },
     {
+      "title"    : "Axios",
+      "copyright": "Copyright © 2014-present Matt Zabriskie & Collaborators",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "Bootstrap",
+      "copyright": "Copyright © 2011-2023 The Bootstrap Authors",
+      "license"  : "mit"
+    },
+    {
       "title"    : "Bouncy Castle",
       "copyright": "Copyright © 2000-2023 The Legion of the Bouncy Castle Inc.",
       "license"  : "mit"
@@ -24,6 +34,11 @@
       "title"    : "FFmpeg",
       "copyright": "Copyright © 2000-2017 the FFmpeg developers",
       "license"  : "lgpl2.1"
+    },
+    {
+      "title"    : "Floating UI",
+      "copyright": "Copyright © 2021 Floating UI contributors",
+      "license"  : "mit"
     },
     {
       "title"    : "FluidLite",
@@ -54,6 +69,11 @@
       "title"    : "IBM Plex",
       "copyright": "Copyright © 2017 IBM Corp. with Reserved Font Name \"Plex\"",
       "license"  : "ofl"
+    },
+    {
+      "title"    : "js-sha256",
+      "copyright": "Copyright © 2014-2023 Chen, Yi-Cyuan",
+      "license"  : "mit"
     },
     {
       "title"    : "Konfetti",
@@ -171,6 +191,11 @@
       "license"  : "lgpl2.1"
     },
     {
+      "title"    : "Pinia",
+      "copyright": "Copyright © 2019-present Eduardo San Martin Morote",
+      "license"  : "mit"
+    },
+    {
       "title"    : "TagLib",
       "copyright": "Copyright © 2002-2024 Scott Wheeler and the TagLib authors",
       "license"  : "lgpl2.1"
@@ -274,6 +299,36 @@
       "title"    : "VLC for Android",
       "copyright": "Copyright © 1996-2026 VideoLAN and the VLC authors",
       "license"  : "gpl2"
+    },
+    {
+      "title"    : "Vue",
+      "copyright": "Copyright © 2018-present Yuxi (Evan) You",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "Vue I18n",
+      "copyright": "Copyright © 2020 kazuya kawaguchi",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "Vue Lazyload",
+      "copyright": "Copyright © 2016 Awe",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "Vue Logger Plugin",
+      "copyright": "Copyright © 2020 devtavern",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "Vue Router",
+      "copyright": "Copyright © 2019-present Eduardo San Martin Morote",
+      "license"  : "mit"
+    },
+    {
+      "title"    : "VueUse",
+      "copyright": "Copyright © 2019-present Anthony Fu",
+      "license"  : "mit"
     },
     {
       "title"    : "whisper.cpp",

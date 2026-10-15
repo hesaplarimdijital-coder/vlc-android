@@ -27,8 +27,14 @@ package org.videolan.vlc.remoteaccessserver
 import android.content.Context
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.core.os.ConfigurationCompat
 import org.videolan.vlc.BuildConfig
 
+/**
+ * The texts the web app shows: the app's own string resources, in the language of the device,
+ * named for the web app's `$t('KEY')` (S-1304 brings the Nağmedar patches' keys: [StringMapping.APP_NAME],
+ * the about texts, and the page's `LANG`).
+ */
 object TranslationMapping {
     fun generateTranslations(context: Context): Map<String, String> {
         val map = HashMap<String, String>()
@@ -38,6 +44,8 @@ object TranslationMapping {
         map["PORT"] = "android"
         map["DEVICE_NAME"] = "${Build.MANUFACTURER} - ${Build.MODEL}"
         map["APP_VERSION"] = BuildConfig.VLC_VERSION_NAME
+        // the language the page declares (<html lang>): the device's, as the strings above are
+        map["LANG"] = ConfigurationCompat.getLocales(context.resources.configuration)[0]?.toLanguageTag() ?: "en"
         return map
     }
 
@@ -118,7 +126,12 @@ object TranslationMapping {
         ABOUT(R.string.about),
         CONNECTED_DEVICE(R.string.connected_device),
         DEVICE_MODEL(R.string.model),
-        VLC_VERSION(R.string.app_name_full),
+        APP_NAME(R.string.app_name_full),
+        ABOUT_APP(R.string.about_vlc_text),
+        ABOUT_COPYRIGHT(R.string.about_copyright),
+        ABOUT_LICENSE(R.string.ra_about_license),
+        SOURCE_CODE(R.string.ra_about_source),
+        SOURCE_URL(R.string.ra_source_url),
         REMOTE_ACCESS_TITLE(R.string.remote_access),
         REMOTE_ACCESS_HASH_TITLE(R.string.remote_access_hash_title),
         REMOTE_ACCESS_VERSION_TITLE(R.string.remote_access_version_title),

@@ -2184,4 +2184,29 @@
         <item quantity="one">%1$d result for “%2$s”</item>
         <item quantity="other">%1$d results for “%2$s”</item>
     </plurals>
+    <string name="nag_ra_settings">Remote access</string>
+    <string name="nag_ra_enable">Open from a browser</string>
+    <string name="nag_ra_enable_hint">A browser on this network can browse your library and control playback from a web page. Turning it on starts the server; the page\'s address is under “Addresses and connections…”.</string>
+    <string name="nag_ra_on">On</string>
+    <string name="nag_ra_off">Off</string>
+    <string name="nag_ra_library">Library</string>
+    <string name="nag_ra_library_hint">The parts of the media library a browser can see.</string>
+    <string name="nag_ra_part_video">Videos</string>
+    <string name="nag_ra_part_audio">Music</string>
+    <string name="nag_ra_part_playlists">Playlists</string>
+    <string name="nag_ra_part_search">Search</string>
+    <string name="nag_ra_files">File browser</string>
+    <string name="nag_ra_files_hint">A browser can go through the folders of this device\'s storage.</string>
+    <string name="nag_ra_network">Network browser</string>
+    <string name="nag_ra_network_hint">A browser can go through the network shares this device finds. Changing it restarts the server.</string>
+    <string name="nag_ra_history">History</string>
+    <string name="nag_ra_history_hint">A browser can see what was played lately.</string>
+    <string name="nag_ra_playback">Playback control</string>
+    <string name="nag_ra_playback_hint">A browser can play, pause, skip and choose what plays on this device.</string>
+    <string name="nag_ra_logs">Share log files</string>
+    <string name="nag_ra_logs_hint">A browser can download this device\'s logs. Keep it off unless you are chasing a problem.</string>
+    <string name="nag_ra_security">Security</string>
+    <string name="nag_ra_security_hint">The connection is always encrypted (HTTPS) with a certificate this device made for itself, so a browser warns once: check the address, then continue. Every new browser needs a one-time code that this device shows in a notification and that stops working after 60 s. Wrong codes are slowed down. Nothing here turns these off.</string>
+    <string name="nag_ra_addresses">Addresses and connections…</string>
+    <string name="nag_ra_how">How it works…</string>
 </resources>

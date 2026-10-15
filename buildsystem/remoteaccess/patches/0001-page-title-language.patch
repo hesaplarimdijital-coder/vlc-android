@@ -1,0 +1,40 @@
+diff --git a/public/index.html b/public/index.html
+index 856cbea..ffebf8e 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -3,7 +3,11 @@
+ 
+ <head>
+     <meta charset="UTF-8" />
+-    <title>Remote access - VLC for Android</title>
++    <title>Remote access - Nağmedar</title>
++    <meta name="application-name" content="Nağmedar" />
++    <meta name="theme-color" content="#12161B" />
++    <meta name="color-scheme" content="light dark" />
++    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+ 
+     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+@@ -14,7 +18,7 @@
+ 
+ <body>
+     <noscript>
+-        <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
++        <strong>We're sorry but Nağmedar's remote access doesn't work properly without JavaScript enabled.
+                 Please enable it to continue.</strong>
+     </noscript>
+     <div id="app"></div>
+diff --git a/src/main.js b/src/main.js
+index b1b3721..a4b5c6b 100644
+--- a/src/main.js
++++ b/src/main.js
+@@ -32,6 +32,9 @@ router.beforeEach((to, from, next) => {
+ 
+ const pinia = createPinia()
+ initI18n().then(function (i18n) {
++  // the language and the title are the app's: the page says Nağmedar, in the language of the device
++  if (i18n.global.te('LANG')) document.documentElement.lang = i18n.global.t('LANG')
++  if (i18n.global.te('APP_NAME')) document.title = `${i18n.global.t('REMOTE_ACCESS_TITLE')} - ${i18n.global.t('APP_NAME')}`
+   createApp(App).directive('tooltip', tooltip).use(i18n).use(VueLazyload).use(router).use(pinia).use(logger).use(vlcUtils).mount('#app')
+ })
+ 

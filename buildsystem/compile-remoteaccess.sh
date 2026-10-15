@@ -37,7 +37,8 @@ diagnostic()
 while [ $# -gt 0 ]; do
     case $1 in
         help|--help|-h)
-            echo "Use -c to build the remote access project"
+            echo "Fetches the remote access web app at the pinned hash, applies Nağmedar's patches and assets"
+            echo "(buildsystem/remoteaccess, S-1304) and builds it into remoteaccess/dist; --init stops before the build"
             exit 0
             ;;
         --init)
@@ -57,8 +58,12 @@ done
 ##############################
 diagnostic "Setting up the Remote Access project"
 
-REMOTE_ACCESS_TESTED_HASH=bb1f07bbfca97c3fcff59ef5d4799ee87a618134
+# the pinned version of VideoLAN's web app (the environment may name another for a test)
+: ${REMOTE_ACCESS_TESTED_HASH:=bb1f07bbfca97c3fcff59ef5d4799ee87a618134}
 REMOTE_ACCESS_REPOSITORY=https://code.videolan.org/videolan/remoteaccess
+
+# Nağmedar's changes to the pinned web app (S-1304): patches/*.patch with git apply, then assets/ copied over it
+BRAND_PATH="$(cd "$(dirname "$0")" && pwd -P)/remoteaccess"
 
 : ${VLC_REMOTE_ACCESS_PATH:="$(pwd -P)/application/remote-access-client/remoteaccess"}
 diagnostic "VLC_REMOTE_ACCESS_PATH is $VLC_REMOTE_ACCESS_PATH"
@@ -67,23 +72,35 @@ if [ ! -d "$VLC_REMOTE_ACCESS_PATH" ] || [ ! -d "$VLC_REMOTE_ACCESS_PATH/.git" ]
     diagnostic "Remote access sources: not found, cloning"
     branch="main"
     if [ ! -d "$VLC_REMOTE_ACCESS_PATH" ]; then
-        git clone --single-branch --branch ${branch} "${REMOTE_ACCESS_REPOSITORY}" application/remote-access-client/remoteaccess
-        cd application/remote-access-client/remoteaccess
+        git clone --single-branch --branch ${branch} "${REMOTE_ACCESS_REPOSITORY}" "$VLC_REMOTE_ACCESS_PATH"
     else # folder exist with only the artifacts
-        cd application/remote-access-client/remoteaccess
+        cd "$VLC_REMOTE_ACCESS_PATH"
         git init
         git remote add origin "${REMOTE_ACCESS_REPOSITORY}"
         git pull origin ${branch}
+        cd - > /dev/null
     fi
-    git reset --hard ${REMOTE_ACCESS_TESTED_HASH} || fail "Remote access sources: REMOTE_ACCESS_TESTED_HASH ${REMOTE_ACCESS_TESTED_HASH} not found"
-    cd ../../..
 fi
+
+cd "$VLC_REMOTE_ACCESS_PATH"
+# always start from the pinned sources: an earlier run's patches and assets are dropped (node_modules and dist are ignored files, so they stay)
+git reset --hard ${REMOTE_ACCESS_TESTED_HASH} || { diagnostic "Remote access sources: REMOTE_ACCESS_TESTED_HASH ${REMOTE_ACCESS_TESTED_HASH} not found"; exit 1; }
+git clean -fdq
+
+for patch in "$BRAND_PATH"/patches/*.patch; do
+    diagnostic "Applying $(basename "$patch")"
+    git apply --whitespace=nowarn "$patch" || { diagnostic "$patch does not apply to ${REMOTE_ACCESS_TESTED_HASH}"; exit 1; }
+done
+cp -R "$BRAND_PATH"/assets/. .
 
 if [ "$INIT_ONLY" != 1 ]; then
     diagnostic "Building the Remote Access project"
-    cd "$VLC_REMOTE_ACCESS_PATH"
-
-    npm install
+    rm -rf dist
+    if [ -f package-lock.json ]; then
+        npm ci --no-audit --no-fund
+    else
+        npm install --no-audit --no-fund
+    fi
     npm run build-android
-    cd ..
+    "$BRAND_PATH"/check-dist.sh dist
 fi

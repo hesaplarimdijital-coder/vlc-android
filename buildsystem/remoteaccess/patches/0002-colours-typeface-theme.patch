@@ -1,0 +1,233 @@
+diff --git a/src/scss/app.scss b/src/scss/app.scss
+index 29bc36d..31ad79f 100644
+--- a/src/scss/app.scss
++++ b/src/scss/app.scss
+@@ -3,9 +3,32 @@
+ @import "~bootstrap/scss/variables";
+ @import "~bootstrap/scss/variables-dark";
+ 
++// Nağmedar: IBM Plex Sans (SIL OFL 1.1), the app's typeface, shipped in public/fonts
++@font-face {
++  font-family: "IBM Plex Sans";
++  font-weight: 400;
++  font-style: normal;
++  font-display: swap;
++  src: url("../assets/fonts/ibm-plex-sans-regular.woff2") format("woff2");
++}
+ 
++@font-face {
++  font-family: "IBM Plex Sans";
++  font-weight: 500;
++  font-style: normal;
++  font-display: swap;
++  src: url("../assets/fonts/ibm-plex-sans-medium.woff2") format("woff2");
++}
+ 
++@font-face {
++  font-family: "IBM Plex Sans";
++  font-weight: 600 700;
++  font-style: normal;
++  font-display: swap;
++  src: url("../assets/fonts/ibm-plex-sans-semibold.woff2") format("woff2");
++}
+ 
++$font-family-sans-serif: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+ 
+ $custom-theme-colors: map-merge($theme-colors, ("primary": $primary-color-dark,
+       "secondary": $primary-color,
+@@ -19,8 +42,8 @@ $breadcrumb-bg: var(--breadcrumb-bg);
+ $breadcrumb-padding-x: 1rem;
+ $breadcrumb-border-radius: 8px;
+ $breadcrumb-padding-y: 6px;
+-$dropdown-link-active-bg: #ff7700;
+-$input-focus-box-shadow:0 0 0.15rem 0.15rem rgb(255 117 0 / 20%);
++$dropdown-link-active-bg: $primary-color-dark;
++$input-focus-box-shadow:0 0 0.15rem 0.15rem rgba($primary-color-dark, 0.35);
+ $input-focus-border-color:$primary-color;
+ $card-spacer-y: 0.5rem;
+ $card-spacer-x: 0.5rem;
+@@ -36,58 +59,89 @@ $card-spacer-x: 0.5rem;
+ 
+ 
+ :root {
+-  --bs-link-hover-color: #ff610a;
+-  --bs-btn-hover-color: #ff610a;
++  --bs-body-bg: #{$background};
++  --bs-body-color: #{$text-color};
++  --bs-border-color: #{$gray-border};
++  --bs-link-color: #{$primary-color-dark};
++  --bs-link-color-rgb: #{$rgb-primary};
++  --bs-link-hover-color: #{$primary-color-dark};
++  --bs-btn-hover-color: #{$primary-color-dark};
+   .btn-primary {
+-      --bs-btn-bg: #ff610a;
++    --bs-btn-bg: #{$primary-color-dark};
++    --bs-btn-border-color: #{$primary-color-dark};
++    --bs-btn-color: #{$on-primary};
++    --bs-btn-hover-bg: #{shade-color($primary-color-dark, 12%)};
++    --bs-btn-hover-border-color: #{shade-color($primary-color-dark, 12%)};
++    --bs-btn-hover-color: #{$on-primary};
++    --bs-btn-active-bg: #{shade-color($primary-color-dark, 20%)};
++    --bs-btn-active-border-color: #{shade-color($primary-color-dark, 20%)};
++    --bs-btn-active-color: #{$on-primary};
+   }
+-  --bs-primary-rgb: 255, 97, 10;
++  --bs-primary-rgb: #{$rgb-primary};
+   --bs-primary: #{$primary-color-dark};
+-  --bs-primary-bg-subtle: #{$primary-color-dark};
+-  --bs-primary-bg-subtle-dark: #{$primary-color-dark};
+-  --img-tint: brightness(0) saturate(100%) invert(46%) sepia(2%) saturate(16%) hue-rotate(33deg) brightness(98%) contrast(92%);
+-  --img-tint-active: brightness(0) saturate(100%) invert(39%) sepia(92%) saturate(1549%) hue-rotate(355deg) brightness(100%) contrast(102%);
++  --bs-primary-bg-subtle: #{$selection};
++  --bs-primary-bg-subtle-dark: #{$selection};
++  --img-tint: #{$img-tint};
++  --img-tint-active: #{$img-tint-active};
+   --secondary-text: #{$gray-text};
+   --progress-background: #{$progress-background};
+-  --bs-card-bg: #{$lighter-gray};
++  --bs-card-bg: #{$surface};
+   --hover-gray: #{$hover-gray};
+   --light-gray: #{$light-gray};
+   --breadcrumb-bg: #{$lighter-gray};
++  --nag-chrome: #{$surface};
++  --nag-border: #{$gray-border};
++  --nag-selection: #{$selection};
+   --placeholder-animation: rgba(255, 255, 255, 0.3);
+-  --scrollbar-thumb: rgba(0, 0, 0, 0.4);
+-  --scrollbar-track: rgba(0, 0, 0, 0.05);
++  --scrollbar-thumb: rgba(18, 22, 27, 0.4);
++  --scrollbar-track: rgba(18, 22, 27, 0.05);
+   --play-button-fg: none;
+-  --list-hover-bg: rgba(0, 0, 0, .075);
++  --list-hover-bg: rgba(18, 22, 27, .06);
+ 
+   .card {
+-    --bs-card-bg: #{$lighter-gray};
++    --bs-card-bg: #{$surface};
+   }
+ }
+ 
+ [data-bs-theme="dark"] {
+-  --bs-body-bg: #111;
+-  --bs-link-hover-color: #ff8800;
+-  --bs-btn-hover-color: #ff8800;
++  --bs-body-bg: #{$body-dark};
++  --bs-body-color: #{$text-color-dark};
++  --bs-border-color: #{$gray-border-dark};
++  --bs-link-color: #{$primary-color};
++  --bs-link-color-rgb: #{$rgb-primary-dark};
++  --bs-link-hover-color: #{$primary-color};
++  --bs-btn-hover-color: #{$primary-color};
+   .btn-primary {
+-    --bs-btn-bg: #ff8800;
++    --bs-btn-bg: #{$primary-color};
++    --bs-btn-border-color: #{$primary-color};
++    --bs-btn-color: #{$on-primary-dark};
++    --bs-btn-hover-bg: #{tint-color($primary-color, 12%)};
++    --bs-btn-hover-border-color: #{tint-color($primary-color, 12%)};
++    --bs-btn-hover-color: #{$on-primary-dark};
++    --bs-btn-active-bg: #{tint-color($primary-color, 20%)};
++    --bs-btn-active-border-color: #{tint-color($primary-color, 20%)};
++    --bs-btn-active-color: #{$on-primary-dark};
+   }
+-  --bs-primary-rgb: 255, 137, 0;
++  --bs-primary-rgb: #{$rgb-primary-dark};
+   --bs-primary: #{$primary-color};
+-  --bs-primary-bg-subtle: #{$primary-color};
+-  --bs-primary-bg-subtle-dark: #{$primary-color};
+-  --img-tint: brightness(0) saturate(100%) invert(99%) sepia(1%) saturate(1716%) hue-rotate(239deg) brightness(115%) contrast(74%);
+-  --img-tint-active: brightness(0) saturate(100%) invert(53%) sepia(32%) saturate(3024%) hue-rotate(1deg) brightness(104%) contrast(107%);
++  --bs-primary-bg-subtle: #{$selection-dark};
++  --bs-primary-bg-subtle-dark: #{$selection-dark};
++  --img-tint: #{$img-tint-dark};
++  --img-tint-active: #{$img-tint-active-dark};
+   --secondary-text: #{$gray-text-dark};
+   --progress-background: #{$progress-background-dark};
+   --bs-card-bg: #{$gray-900};
+   --hover-gray: #{$dark-background};
+   --light-gray: #{$light-gray-dark};
+   --breadcrumb-bg: #{$gray-900};
++  --nag-chrome: #{$darker-background};
++  --nag-border: #{$gray-border-dark};
++  --nag-selection: #{$selection-dark};
+   --placeholder-animation: rgba(255, 255, 255, 0.03);
+-  --scrollbar-thumb: rgba(255, 255, 255, 0.4);
+-  --scrollbar-track: rgba(255, 255, 255, 0.05);
++  --scrollbar-thumb: rgba(230, 233, 237, 0.4);
++  --scrollbar-track: rgba(230, 233, 237, 0.05);
+   --play-button-fg: invert(100%) sepia(6%) saturate(28%) hue-rotate(322deg) brightness(106%) contrast(100%);
+-  --list-hover-bg: rgba(255, 255, 255, .075);
++  --list-hover-bg: rgba(230, 233, 237, .075);
+ 
+   .card {
+     --bs-card-bg: #{$gray-900};
+@@ -160,6 +214,10 @@ body {
+   align-items: center;
+ }
+ 
++.main-navbar {
++  background: var(--nag-chrome);
++}
++
+ .navbar .form-group .form-control,
+ .navbar .form-group .input-group-btn button {
+   border: 1px solid transparent;
+@@ -179,12 +237,12 @@ body {
+ .page-header {
+   padding-bottom: 9px;
+   margin: 20px 0 20px;
+-  border-bottom: 1px solid #eee;
++  border-bottom: 1px solid var(--nag-border);
+ }
+ 
+ .card-heading {
+   padding-bottom: 9px;
+-  border-bottom: 1px solid #eee;
++  border-bottom: 1px solid var(--nag-border);
+ }
+ 
+ .horizontal {
+@@ -197,7 +255,7 @@ body {
+ }
+ 
+ .navbar-default .navbar-nav>li>a {
+-  color: #777;
++  color: var(--secondary-text);
+ }
+ 
+ .flex-baseline {
+@@ -225,13 +283,20 @@ body {
+ }
+ 
+ .list-group-item {
+-  border-bottom: 1px solid #eee;
++  border-bottom: 1px solid var(--nag-border);
+ }
+ 
+ .btn {
+   border: none;
+ }
+ 
++// the one-time code's boxes take the theme's surface, not the browser's field colour
++input.digit {
++  background: var(--bs-body-bg);
++  color: var(--bs-body-color);
++  border-color: var(--secondary-text);
++}
++
+ //medias 
+ 
+ .media-overlay {
+diff --git a/src/stores/AppStore.js b/src/stores/AppStore.js
+index ba03131..2024bd1 100644
+--- a/src/stores/AppStore.js
++++ b/src/stores/AppStore.js
+@@ -18,7 +18,7 @@ export const useAppStore = defineStore('app', {
+     showAddStream: false,
+     needRefresh: false,
+     needRefreshPlaylist: false,
+-    darkTheme: reactive(useLocalStorage('darkTheme',false)),
++    darkTheme: reactive(useLocalStorage('darkTheme', window.matchMedia('(prefers-color-scheme: dark)').matches, { writeDefaults: false })),
+     showSubtitlePicker: false,
+     title: "",
+     loadingTimeout: null,

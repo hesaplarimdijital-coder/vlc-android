@@ -2156,4 +2156,29 @@
         <item quantity="one">“%2$s” için %1$d sonuç</item>
         <item quantity="other">“%2$s” için %1$d sonuç</item>
     </plurals>
+    <string name="nag_ra_settings">Uzaktan erişim</string>
+    <string name="nag_ra_enable">Tarayıcıdan aç</string>
+    <string name="nag_ra_enable_hint">Bu ağdaki bir tarayıcı, bir web sayfasından kütüphanenize bakabilir ve oynatmayı denetleyebilir. Açınca sunucu başlar; sayfanın adresi “Adresler ve bağlantılar…” altındadır.</string>
+    <string name="nag_ra_on">Açık</string>
+    <string name="nag_ra_off">Kapalı</string>
+    <string name="nag_ra_library">Kütüphane</string>
+    <string name="nag_ra_library_hint">Tarayıcının görebileceği medya kütüphanesi bölümleri.</string>
+    <string name="nag_ra_part_video">Videolar</string>
+    <string name="nag_ra_part_audio">Müzik</string>
+    <string name="nag_ra_part_playlists">Çalma listeleri</string>
+    <string name="nag_ra_part_search">Arama</string>
+    <string name="nag_ra_files">Dosya gezgini</string>
+    <string name="nag_ra_files_hint">Tarayıcı bu cihazın depolamasındaki klasörleri gezebilir.</string>
+    <string name="nag_ra_network">Ağ gezgini</string>
+    <string name="nag_ra_network_hint">Tarayıcı bu cihazın bulduğu ağ paylaşımlarını gezebilir. Değiştirmek sunucuyu yeniden başlatır.</string>
+    <string name="nag_ra_history">Geçmiş</string>
+    <string name="nag_ra_history_hint">Tarayıcı en son nelerin oynatıldığını görebilir.</string>
+    <string name="nag_ra_playback">Oynatma denetimi</string>
+    <string name="nag_ra_playback_hint">Tarayıcı bu cihazda oynatabilir, duraklatabilir, atlayabilir ve neyin oynayacağını seçebilir.</string>
+    <string name="nag_ra_logs">Günlük dosyalarını paylaş</string>
+    <string name="nag_ra_logs_hint">Tarayıcı bu cihazın günlüklerini indirebilir. Bir sorunun peşinde değilseniz kapalı tutun.</string>
+    <string name="nag_ra_security">Güvenlik</string>
+    <string name="nag_ra_security_hint">Bağlantı her zaman şifrelidir (HTTPS); sertifikayı bu cihaz kendisi üretir, bu yüzden tarayıcı bir kez uyarır: adresi denetleyin, sonra devam edin. Her yeni tarayıcı için bu cihazın bildirimde gösterdiği tek seferlik bir kod gerekir; kod 60 sn sonra geçersiz olur. Yanlış kodlar yavaşlatılır. Burada bunların hiçbiri kapatılamaz.</string>
+    <string name="nag_ra_addresses">Adresler ve bağlantılar…</string>
+    <string name="nag_ra_how">Nasıl çalışır…</string>
 </resources>
