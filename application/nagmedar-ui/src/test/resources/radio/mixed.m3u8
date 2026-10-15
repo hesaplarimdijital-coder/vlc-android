@@ -1,0 +1,16 @@
+#EXTM3U
+#EXTINF:241,Yerel dosya
+/storage/emulated/0/Music/parca.flac
+#EXTINF:-1,Göreli
+muzik/parca.mp3
+#EXTINF:-1,Dosya adresi
+file:///sdcard/a.mp3
+#EXTINF:-1,Boşluklu
+http://example.org/a b
+#EXTINF:-1,Kopya
+https://example.org/stream/aac
+#EXTINF:-1,Kopya 2
+https://example.org/stream/aac
+#EXTINF:-1,Geçerli
+mms://example.org/live
+javascript:alert(1)

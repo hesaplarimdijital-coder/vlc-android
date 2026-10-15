@@ -322,7 +322,7 @@ private fun NagmedarMain(
                         // S-804: the medialibrary's playlists, a tab each
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         // S-1105: the radio directory's search
-                        Destination.Radio -> RadioScreen(searchRequested = radioSearchRequested, onSearchHandled = { radioSearchRequested = false })
+                        Destination.Radio -> RadioScreen(searchRequested = radioSearchRequested, onSearchHandled = { radioSearchRequested = false }, undo = undo)
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)

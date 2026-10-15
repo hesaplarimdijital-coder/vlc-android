@@ -1,0 +1,9 @@
+﻿#EXTM3U x-tvg-url="https://example.org/guide.xml"
+#EXTINF:-1 tvg-id="caz" tvg-name="Gece Cazı" tvg-logo="https://example.org/caz.png" group-title="Caz, Blues",Gece Cazı - 24 saat
+https://example.org/stream/caz.mp3
+#EXTGRP:Haber
+#EXTINF:-1,Haber Hattı
+http://example.org:8000/haber
+#EXTINF:-1 tvg-name="Yalnız Ad" group-title="Müzik",
+rtsp://example.org/yalniz
+https://example.org/adsiz.aac

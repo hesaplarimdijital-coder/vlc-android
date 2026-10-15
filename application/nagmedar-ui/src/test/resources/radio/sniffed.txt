@@ -1,0 +1,3 @@
+#EXTM3U
+#EXTINF:-1,Adsız uzantı
+https://example.org/stream/gizli

@@ -3,6 +3,9 @@ package app.nagmedar.ui.radio
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import java.util.concurrent.CopyOnWriteArrayList
 
 /** S-1105: stations for the tests and the screenshots, as the directory lists them. */
@@ -65,12 +68,25 @@ class FakeDirectory : RadioDirectory {
     }
 }
 
-/** The stations kept, in memory: what the database does with the directory's stations. */
+/** The stations kept, in memory: what the database does with the directory's stations and the user's own. */
 class FakeLibrary : RadioLibrary {
     private val rows = LinkedHashMap<String, Station>()
+    private val changes = MutableStateFlow(0)
     private var next = 1L
 
     val kept: List<Station> get() = rows.values.toList()
+
+    /** When set, every call that reads or writes the database throws it (a full disk, a corrupt file). */
+    @Volatile
+    var failWith: RuntimeException? = null
+
+    private fun check() {
+        failWith?.let { throw it }
+    }
+
+    private fun changed() {
+        changes.value++
+    }
 
     private fun put(station: Station): Station {
         val known = rows[station.key]
@@ -81,17 +97,80 @@ class FakeLibrary : RadioLibrary {
             lastPlayedAt = known?.lastPlayedAt ?: station.lastPlayedAt,
         )
         rows[station.key] = row
+        changed()
         return row
     }
 
-    override suspend fun keep(station: Station): Station = put(station)
+    private fun set(station: Station): Station {
+        rows[station.key] = station
+        changed()
+        return station
+    }
 
-    override suspend fun played(station: Station, at: Long): Station = put(station).copy(lastPlayedAt = at).also { rows[it.key] = it }
+    private fun prune() {
+        rows.values.removeAll { !it.isUser && !it.favourite && it.lastPlayedAt == 0L && it.lastVotedAt == 0L }
+        changed()
+    }
 
-    override suspend fun voted(station: Station, at: Long, votes: Int): Station =
-        put(station).copy(lastVotedAt = at, votes = votes).also { rows[it.key] = it }
+    override suspend fun keep(station: Station): Station {
+        check()
+        return put(station)
+    }
 
-    override suspend fun marks(uuids: Collection<String>): Map<String, Station> = rows.values.filter { it.uuid in uuids }.associateBy { it.uuid!! }
+    override suspend fun played(station: Station, at: Long): Station {
+        check()
+        return set(put(station).copy(lastPlayedAt = at))
+    }
+
+    override suspend fun voted(station: Station, at: Long, votes: Int): Station {
+        check()
+        return set(put(station).copy(lastVotedAt = at, votes = votes))
+    }
+
+    override suspend fun marks(uuids: Collection<String>): Map<String, Station> {
+        check()
+        return rows.values.filter { it.uuid in uuids }.associateBy { it.uuid!! }
+    }
+
+    override fun favourites(): Flow<List<Station>> = changes.map { rows.values.filter { it.favourite }.sortedBy { it.name.lowercase() } }
+
+    override fun recent(limit: Int): Flow<List<Station>> =
+        changes.map { rows.values.filter { it.lastPlayedAt > 0 }.sortedByDescending { it.lastPlayedAt }.take(limit) }
+
+    override fun imported(): Flow<List<Station>> = changes.map { rows.values.filter { it.isUser }.sortedBy { it.name.lowercase() } }
+
+    override suspend fun favourite(station: Station, on: Boolean): Station {
+        check()
+        val row = set(put(station).copy(favourite = on))
+        if (!on) prune()
+        return rows[row.key] ?: row.copy(id = 0)
+    }
+
+    override suspend fun forget(station: Station) {
+        rows[station.key]?.let { set(it.copy(lastPlayedAt = 0)) }
+        prune()
+    }
+
+    override suspend fun remove(station: Station) {
+        rows.remove(station.key)
+        changed()
+    }
+
+    override suspend fun restore(station: Station) {
+        set(station.copy(id = next++))
+    }
+
+    override suspend fun import(stations: List<PlaylistStation>): ImportCounts {
+        check()
+        var added = 0
+        var present = 0
+        stations.forEach {
+            val station = Station(uuid = null, name = it.name, streamUrl = it.url, logoUrl = it.logoUrl, tags = listOfNotNull(it.group))
+            if (station.key in rows) present++ else added++
+            put(station)
+        }
+        return ImportCounts(added, present)
+    }
 }
 
 /** Where a station plays in the tests: noted. */

@@ -230,7 +230,23 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private var newMedia = false
     @Volatile
     private var expanding = false
+    @Volatile
     private var entryUrl : String? = null
+
+
+    /** The stream or playlist that was expanded, and the addresses of the media it gave. */
+    private class Expansion(val from: String, val children: Set<String>)
+
+    @Volatile
+    private var expansion: Expansion? = null
+
+    /**
+     * S-1106: the address of the stream or playlist the current media was expanded from (the radio
+     * strip follows a station through its playlist, of one entry or many); null when the current
+     * media is not one of the entries of the last expansion (another media has taken over).
+     */
+    val expandedFrom: String?
+        get() = expansion?.takeIf { getCurrentMedia()?.uri?.toString() in it.children }?.from
     val abRepeat by lazy(LazyThreadSafetyMode.NONE) { MutableLiveData<ABRepeat>().apply { value = ABRepeat() } }
     val abRepeatOn by lazy(LazyThreadSafetyMode.NONE) { MutableLiveData<Boolean>().apply { value = false } }
     val videoStatsOn by lazy(LazyThreadSafetyMode.NONE) { MutableLiveData<Boolean>().apply { value = false } }
@@ -1073,6 +1089,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     @MainThread
     private suspend fun expand(updateHistory: Boolean, skipNextParsing:Boolean = false): Int {
         entryUrl = null
+        expansion = null
         if (BuildConfig.BETA) Log.d(TAG, "expand with values: ", Exception("Call stack"))
         val index = currentIndex
         val expandedMedia = getCurrentMedia()
@@ -1082,6 +1099,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
 
         if (ml != null && ml.count > 0) {
             val mrl = if (updateHistory) expandedMedia?.location else null
+            val children = HashSet<String>()
             mediaList.removeEventListener(this)
             mediaList.remove(index)
             for (i in 0 until ml.count) {
@@ -1092,6 +1110,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
                 if (!skipNextParsing)
                     withContext(Dispatchers.IO) { child.parse() }
+                children.add(child.uri.toString())
                 if (BuildConfig.BETA)  Log.d(TAG, "inserting: ${child.uri}")
                 mediaList.insert(index + i, MLServiceLocator.getAbstractMediaWrapper(child).apply {
                     if (skipNextParsing)
@@ -1100,6 +1119,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 child.release()
             }
             mediaList.addEventListener(this)
+            if (stream && expandedMedia != null) expansion = Expansion(expandedMedia.location, children)
             addUpdateActor.trySend(Unit)
             service.onMediaListChanged()
             if (mrl !== null && ml.count == 1) {

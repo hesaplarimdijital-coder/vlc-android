@@ -1,18 +1,28 @@
 package app.nagmedar.ui.radio
 
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.playback.PlaybackActions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.vlc.BuildConfig
+import java.io.ByteArrayOutputStream
 
 /**
  * S-1105: the app's one radio: the directory client, the stations kept, the player and the
@@ -50,30 +60,8 @@ object RadioCenter {
         val library = DatabaseRadioLibrary(context)
         val player = RadioPlayer(directory, library, ServiceStationSink(context))
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-        return RadioController(directory, library, player, scope)
+        return RadioController(directory, library, player, scope, playingNow = RadioNowPlaying.flow())
     }
-}
-
-/** The radio screen in the app: its controller, and the clipboard for a stream's address. */
-@Composable
-fun RadioScreen(
-    modifier: Modifier = Modifier,
-    searchRequested: Boolean = false,
-    onSearchHandled: () -> Unit = {},
-) {
-    val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
-    val controller = remember(context) { RadioCenter.controller(context) }
-    RadioPage(
-        controller = controller,
-        modifier = modifier,
-        searchRequested = searchRequested,
-        onSearchHandled = onSearchHandled,
-        onCopyAddress = { station ->
-            clipboard.setText(AnnotatedString(station.streamUrl))
-            Toast.makeText(context, R.string.nag_radio_copied, Toast.LENGTH_SHORT).show()
-        },
-    )
 }
 
 /** A directory that cannot be reached: what tests and previews get, so nothing touches the network. */
@@ -89,4 +77,60 @@ internal object OfflineRadioDirectory : RadioDirectory {
     override suspend fun click(uuid: String): StationClick = throw RadioFailure.Offline()
 
     override suspend fun vote(uuid: String): VoteResult = throw RadioFailure.Offline()
+}
+
+/** The radio screen in the app: its controller, the clipboard for a stream's address, the picker for playlist files and play or pause. */
+@Composable
+fun RadioScreen(
+    modifier: Modifier = Modifier,
+    searchRequested: Boolean = false,
+    onSearchHandled: () -> Unit = {},
+    undo: UndoBarState? = null,
+) {
+    val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
+    val scope = rememberCoroutineScope()
+    val controller = remember(context) { RadioCenter.controller(context) }
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val file = withContext(Dispatchers.IO) { readPlaylist(context, uri) }
+            if (file == null) controller.importUnreadable() else controller.import(file.first, file.second)
+        }
+    }
+    RadioPage(
+        controller = controller,
+        modifier = modifier,
+        searchRequested = searchRequested,
+        onSearchHandled = onSearchHandled,
+        onCopyAddress = { station ->
+            clipboard.setText(AnnotatedString(station.streamUrl))
+            Toast.makeText(context, R.string.nag_radio_copied, Toast.LENGTH_SHORT).show()
+        },
+        onImport = { importer.launch(arrayOf("*/*")) },
+        onTogglePlay = { PlaybackActions.togglePlayPause() },
+        undo = undo,
+    )
+}
+
+/** The bytes (at most one more than a station list may have) and the name of the file at [uri]; null when it cannot be read. The file is only read. */
+private fun readPlaylist(context: Context, uri: Uri): Pair<ByteArray, String>? = try {
+    val name = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+        if (c.moveToFirst()) c.getString(0) else null
+    } ?: uri.lastPathSegment.orEmpty()
+    context.contentResolver.openInputStream(uri)?.use { input ->
+        val out = ByteArrayOutputStream()
+        val buffer = ByteArray(16 * 1024)
+        var total = 0
+        while (total <= StationPlaylists.MAX_BYTES) {
+            val n = input.read(buffer)
+            if (n < 0) break
+            out.write(buffer, 0, n)
+            total += n
+        }
+        out.toByteArray() to name
+    }
+} catch (e: Exception) {
+    // a provider may fail in more ways than the I/O ones (a revoked grant, a call it does not support)
+    null
 }

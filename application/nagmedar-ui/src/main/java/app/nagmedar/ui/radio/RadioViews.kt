@@ -1,8 +1,10 @@
 package app.nagmedar.ui.radio
 
 import android.content.res.Resources
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,12 +36,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,13 +62,17 @@ import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.music.PlaylistTab
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -74,11 +84,14 @@ import java.util.Locale
 private val ContentWidth = 960.dp
 
 /**
- * S-1105: the radio screen's search page: the box for the name's words, the filters (country,
- * language, tag, codec, minimum bitrate) and the order, then the stations found with their logo,
- * name, place, codec and bitrate, votes and tags. Enter on a station plays it; its menu (right
- * click, the Menu key, the button at its end) votes, copies the stream's address. [searchRequested]
- * (the search shortcut) puts the keyboard in the box and is answered with [onSearchHandled].
+ * S-1105, S-1106: the radio screen: tabs for the favourites, the recent, the directory's search
+ * (the box for the name's words, the filters for country, language, tag, codec and lowest bitrate,
+ * the order) and the imported stations, under the strip that shows the station on the air with the
+ * title its stream sends. A station shows its logo, name, place, codec and bitrate, votes and tags.
+ * Enter on a station plays it; its menu (right click, the Menu key, the button at its end) plays,
+ * favourites, votes, copies the stream's address and takes it out. [searchRequested] (the search
+ * shortcut) opens the search and puts the keyboard in the box, and is answered with
+ * [onSearchHandled]; what is taken out can be put back through [undo].
  */
 @Composable
 fun RadioPage(
@@ -87,32 +100,160 @@ fun RadioPage(
     searchRequested: Boolean = false,
     onSearchHandled: () -> Unit = {},
     onCopyAddress: (Station) -> Unit = {},
+    onImport: () -> Unit = {},
+    onTogglePlay: () -> Unit = {},
+    undo: UndoBarState? = null,
     now: () -> Long = System::currentTimeMillis,
 ) {
-    val search = controller.search
     val context = LocalContext.current
     val res = context.resources
     val compact = currentWidthClass() == WidthClass.Compact
+    val tab = controller.tab
     val focus = remember { FocusRequester() }
-    LaunchedEffect(search) {
-        search.start()
-        search.loadOptions()
-    }
-    LaunchedEffect(searchRequested) {
-        if (searchRequested) {
+    LaunchedEffect(searchRequested, tab) {
+        if (!searchRequested) return@LaunchedEffect
+        if (tab != RadioTab.Search) {
+            controller.select(RadioTab.Search)
+        } else {
             focus.requestFocus()
             onSearchHandled()
         }
     }
     val notice = controller.notice
     LaunchedEffect(notice) {
-        if (notice != null) {
-            android.widget.Toast.makeText(context, noticeText(res, notice), android.widget.Toast.LENGTH_SHORT).show()
-            controller.noticed()
+        if (notice == null) return@LaunchedEffect
+        val text = noticeText(res, notice)
+        if (notice is RadioNotice.Removed && undo != null) {
+            undo.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) { controller.undo(notice) }
+        } else {
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
         }
+        controller.noticed()
     }
     Column(modifier.fillMaxSize()) {
         PageHeader(title = stringResource(R.string.nag_nav_radio), subtitle = stringResource(R.string.nag_radio_source))
+        controller.now?.let { NowStrip(it, onTogglePlay) }
+        RadioTabs(
+            tab,
+            mapOf(RadioTab.Favourites to controller.favourites?.size, RadioTab.Recent to controller.recent?.size, RadioTab.Imported to controller.imported?.size),
+            controller::select,
+        )
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            when (tab) {
+                RadioTab.Search -> SearchTab(controller, focus, compact, now, onCopyAddress)
+                RadioTab.Favourites -> SavedTab(tab, controller.favourites, controller, compact, now, onCopyAddress, onImport)
+                RadioTab.Recent -> SavedTab(tab, controller.recent, controller, compact, now, onCopyAddress, onImport)
+                RadioTab.Imported -> SavedTab(tab, controller.imported, controller, compact, now, onCopyAddress, onImport)
+            }
+        }
+    }
+}
+
+/** What a notice says. */
+fun noticeText(res: Resources, notice: RadioNotice): String = when (notice) {
+    is RadioNotice.Voted -> res.getString(R.string.nag_radio_voted, notice.station)
+    is RadioNotice.AlreadyVoted -> res.getString(R.string.nag_radio_already_voted, notice.station)
+    is RadioNotice.VoteRefused -> res.getString(R.string.nag_radio_vote_refused)
+    RadioNotice.VoteOffline -> res.getString(R.string.nag_radio_vote_offline)
+    is RadioNotice.Removed -> res.getString(R.string.nag_radio_removed, notice.station.name)
+    is RadioNotice.Imported -> listOfNotNull(
+        notice.count.takeIf { it > 0 || notice.present == 0 }?.let { res.getQuantityString(R.plurals.nag_radio_imported, it, it) },
+        notice.present.takeIf { it > 0 }?.let { res.getQuantityString(R.plurals.nag_radio_import_present, it, it) },
+        notice.skipped.takeIf { it > 0 }?.let { res.getQuantityString(R.plurals.nag_radio_import_skipped, it, it) },
+    ).joinToString("; ")
+    RadioNotice.Failed -> res.getString(R.string.nag_radio_failed)
+    is RadioNotice.ImportFailed -> res.getString(
+        when (notice.problem) {
+            ImportProblem.NotAPlaylist -> R.string.nag_radio_import_unsupported
+            ImportProblem.Empty -> R.string.nag_radio_import_empty
+            ImportProblem.TooLarge -> R.string.nag_radio_import_large
+            ImportProblem.Unreadable -> R.string.nag_radio_import_failed
+        },
+    )
+}
+
+/** The tabs' names. */
+private fun tabName(tab: RadioTab): Int = when (tab) {
+    RadioTab.Favourites -> R.string.nag_radio_tab_favourites
+    RadioTab.Recent -> R.string.nag_radio_tab_recent
+    RadioTab.Search -> R.string.nag_radio_tab_search
+    RadioTab.Imported -> R.string.nag_radio_tab_imported
+}
+
+/** The lists' tabs, scrolled sideways when they do not fit; a count shows where the list has stations. */
+@Composable
+private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect: (RadioTab) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = NagTheme.dimens.pagePadding - 8.dp, vertical = 2.dp)
+            .testTag("radio-tabs"),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioTab.entries.forEach { tab ->
+            Box(Modifier.testTag("radio-tab-${tab.name.lowercase()}")) {
+                PlaylistTab(stringResource(tabName(tab)), counts[tab]?.takeIf { it > 0 }, selected = tab == selected, onClick = { onSelect(tab) })
+            }
+        }
+    }
+}
+
+/** The station on the air: its logo, the title its stream sends (the station's name when it sends none), who sings it, and play or pause. */
+@Composable
+private fun NowStrip(now: RadioNow, onToggle: () -> Unit) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val shape = RoundedCornerShape(dimens.radiusControl)
+    val display = now.display
+    val line = if (display.hasTrack) listOf(display.artist, display.album).filter { it.isNotEmpty() }.joinToString(" · ") else stringResource(R.string.nag_radio_live)
+    Box(Modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs)) {
+        Row(
+            Modifier
+                .widthIn(max = ContentWidth)
+                .fillMaxWidth()
+                .background(colors.surface, shape)
+                .border(1.dp, colors.border, shape)
+                .padding(8.dp)
+                .testTag("radio-now"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StationLogo(now.station, 44.dp)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                // a new title is said to a screen reader when it changes
+                Text(
+                    display.title,
+                    style = NagTheme.type.bodyStrong,
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("radio-now-title"),
+                )
+                if (line.isNotEmpty()) {
+                    Text(line, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("radio-now-line"))
+                }
+            }
+            NagIconButton(
+                if (now.playing) NagIcons.Pause else NagIcons.Play,
+                stringResource(if (now.playing) R.string.nag_pause else R.string.nag_play),
+                onToggle,
+                modifier = Modifier.testTag("radio-now-toggle"),
+            )
+        }
+    }
+}
+
+/** The directory's search: the box, the filters and what was found. */
+@Composable
+private fun SearchTab(controller: RadioController, focus: FocusRequester, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit) {
+    val search = controller.search
+    LaunchedEffect(search) {
+        search.start()
+        search.loadOptions()
+    }
+    Column(Modifier.fillMaxSize()) {
         Column(Modifier.widthIn(max = ContentWidth).padding(horizontal = NagTheme.dimens.pagePadding)) {
             RadioSearchField(search.text, search::type, search::search, focus)
             Spacer(Modifier.size(NagTheme.dimens.gapS))
@@ -125,14 +266,60 @@ fun RadioPage(
     }
 }
 
-/** What a notice says. */
-fun noticeText(res: Resources, notice: RadioNotice): String = when (notice) {
-    is RadioNotice.Voted -> res.getString(R.string.nag_radio_voted, notice.station)
-    is RadioNotice.AlreadyVoted -> res.getString(R.string.nag_radio_already_voted, notice.station)
-    is RadioNotice.VoteRefused -> res.getString(R.string.nag_radio_vote_refused)
-    RadioNotice.VoteOffline -> res.getString(R.string.nag_radio_vote_offline)
-    RadioNotice.Failed -> res.getString(R.string.nag_radio_failed)
+/** A list the user keeps (favourites, recent, imported): its stations, or what to do while it is empty. */
+@Composable
+private fun SavedTab(
+    tab: RadioTab,
+    stations: List<Station>?,
+    controller: RadioController,
+    compact: Boolean,
+    now: () -> Long,
+    onCopyAddress: (Station) -> Unit,
+    onImport: () -> Unit,
+) {
+    if (stations == null) return
+    Column(Modifier.fillMaxSize()) {
+        if (tab == RadioTab.Imported && stations.isNotEmpty()) ImportBar(onImport)
+        if (stations.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { EmptyList(tab, controller::select, onImport) }
+        } else {
+            StationList(stations, tab, controller, compact, now, onCopyAddress, footer = null, modifier = Modifier.weight(1f))
+        }
+    }
 }
+
+/** The import button over the imported stations, with the kinds of file it takes. */
+@Composable
+private fun ImportBar(onImport: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NagButton(stringResource(R.string.nag_radio_import), onImport, icon = NagIcons.FolderAdd, modifier = Modifier.testTag("radio-import"))
+        Spacer(Modifier.width(12.dp))
+        Text(stringResource(R.string.nag_radio_import_hint), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary, maxLines = 2)
+    }
+}
+
+/** A list with nothing in it yet: what it is for, and the one thing to do. */
+@Composable
+private fun EmptyList(tab: RadioTab, onSelect: (RadioTab) -> Unit, onImport: () -> Unit) {
+    val text = when (tab) {
+        RadioTab.Favourites -> EmptyText(NagIcons.Star, R.string.nag_radio_fav_empty_title, R.string.nag_radio_fav_empty_desc, R.string.nag_radio_search_stations)
+        RadioTab.Recent -> EmptyText(NagIcons.Radio, R.string.nag_radio_recent_empty_title, R.string.nag_radio_recent_empty_desc, R.string.nag_radio_search_stations)
+        else -> EmptyText(NagIcons.FolderAdd, R.string.nag_radio_imported_empty_title, R.string.nag_radio_imported_empty_desc, R.string.nag_radio_import)
+    }
+    StatePanel(
+        tone = StateTone.Neutral,
+        icon = text.icon,
+        title = stringResource(text.title),
+        description = stringResource(text.description),
+        primary = StateAction(stringResource(text.action)) { if (tab == RadioTab.Imported) onImport() else onSelect(RadioTab.Search) },
+        modifier = Modifier.testTag("radio-empty-${tab.name.lowercase()}"),
+    )
+}
+
+private class EmptyText(val icon: ImageVector, val title: Int, val description: Int, val action: Int)
 
 @Composable
 private fun RadioSearchField(text: String, onChange: (String) -> Unit, onSearch: () -> Unit, focus: FocusRequester) {
@@ -295,7 +482,16 @@ private fun Results(search: RadioSearch, controller: RadioController, compact: B
                 modifier = Modifier.testTag("radio-none"),
             )
         }
-        stations.isNotEmpty() -> StationList(search, controller, compact, now, onCopyAddress)
+        stations.isNotEmpty() -> StationList(
+            stations, RadioTab.Search, controller, compact, now, onCopyAddress,
+            footer = {
+                when {
+                    search.loading -> Text(stringResource(R.string.nag_radio_loading_more), style = NagTheme.type.label, color = NagTheme.colors.textSecondary)
+                    search.failure != null -> NagButton(stringResource(R.string.nag_radio_retry), search::retry, modifier = Modifier.testTag("radio-retry"))
+                    search.more -> NagButton(stringResource(R.string.nag_radio_more), search::loadMore, modifier = Modifier.testTag("radio-more"))
+                }
+            },
+        )
     }
 }
 
@@ -331,56 +527,79 @@ private fun FailurePanel(failure: RadioFailure, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun StationList(search: RadioSearch, controller: RadioController, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit) {
+private fun StationList(
+    stations: List<Station>,
+    tab: RadioTab,
+    controller: RadioController,
+    compact: Boolean,
+    now: () -> Long,
+    onCopyAddress: (Station) -> Unit,
+    footer: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
     val res = LocalContext.current.resources
     val locale = currentLocale()
     val dimens = NagTheme.dimens
     val moreActions = stringResource(R.string.nag_more_actions)
     LazyColumn(
-        Modifier.fillMaxSize().testTag("radio-list"),
+        modifier.fillMaxSize().testTag("radio-list"),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs),
     ) {
-        items(search.stations, key = { it.key }) { station ->
-            val menu = {
-                stationMenu(
-                    res, station, now(),
-                    onPlay = { controller.play(station) },
-                    onVote = { controller.vote(station) },
-                    onCopy = { onCopyAddress(station) },
-                )
-            }
+        items(stations, key = { it.key }) { station ->
+            val actions = StationActions(
+                onPlay = { controller.play(station) },
+                onFavourite = { controller.toggleFavourite(station) },
+                onVote = { controller.vote(station) },
+                onCopy = { onCopyAddress(station) },
+                onRemove = { controller.remove(station) },
+            )
+            val menu = { stationMenu(res, station, now(), tab, actions) }
             Box(Modifier.widthIn(max = ContentWidth)) {
-                StationRow(station, compact, locale, menu, moreActions, onPlay = { controller.play(station) })
+                StationRow(station, compact, locale, menu, moreActions, actions)
             }
         }
-        item(key = "radio-footer") {
-            Box(Modifier.widthIn(max = ContentWidth).fillMaxWidth().padding(vertical = dimens.gapM), contentAlignment = Alignment.Center) {
-                when {
-                    search.loading -> Text(stringResource(R.string.nag_radio_loading_more), style = NagTheme.type.label, color = NagTheme.colors.textSecondary)
-                    search.failure != null -> NagButton(stringResource(R.string.nag_radio_retry), search::retry, modifier = Modifier.testTag("radio-retry"))
-                    search.more -> NagButton(stringResource(R.string.nag_radio_more), search::loadMore, modifier = Modifier.testTag("radio-more"))
-                }
+        if (footer != null) {
+            item(key = "radio-footer") {
+                Box(Modifier.widthIn(max = ContentWidth).fillMaxWidth().padding(vertical = dimens.gapM), contentAlignment = Alignment.Center) { footer() }
             }
         }
     }
 }
 
-/** A station's menu: play, vote (once a day), copy the stream's address. */
-fun stationMenu(
-    res: Resources,
-    station: Station,
-    now: Long,
-    onPlay: () -> Unit,
-    onVote: () -> Unit,
-    onCopy: () -> Unit,
-): List<MenuEntry> = buildList {
-    add(MenuEntry.Item(res.getString(R.string.nag_play), onPlay, shortcut = "Enter", icon = NagIcons.Play))
+/** What a station's menu and buttons do. */
+class StationActions(
+    val onPlay: () -> Unit,
+    val onFavourite: () -> Unit,
+    val onVote: () -> Unit,
+    val onCopy: () -> Unit,
+    val onRemove: () -> Unit,
+)
+
+/**
+ * A station's menu: play, favourite, vote (once a day, directory stations only), copy the stream's
+ * address, and, in the lists the user keeps, take it out (in favourites that is un-starring).
+ */
+fun stationMenu(res: Resources, station: Station, now: Long, tab: RadioTab, actions: StationActions): List<MenuEntry> = buildList {
+    add(MenuEntry.Item(res.getString(R.string.nag_play), actions.onPlay, shortcut = "Enter", icon = NagIcons.Play))
+    add(
+        MenuEntry.Item(
+            res.getString(if (station.favourite) R.string.nag_radio_unfavourite else R.string.nag_radio_favourite),
+            actions.onFavourite,
+            icon = if (station.favourite) NagIcons.StarFilled else NagIcons.Star,
+        ),
+    )
     if (station.uuid != null) {
         val may = VoteRule.canVote(station.lastVotedAt, now)
-        add(MenuEntry.Item(res.getString(if (may) R.string.nag_radio_vote else R.string.nag_radio_voted_today), onVote, enabled = may))
+        add(MenuEntry.Item(res.getString(if (may) R.string.nag_radio_vote else R.string.nag_radio_voted_today), actions.onVote, enabled = may))
     }
     add(MenuEntry.Separator)
-    add(MenuEntry.Item(res.getString(R.string.nag_radio_copy_address), onCopy, icon = NagIcons.Streams))
+    add(MenuEntry.Item(res.getString(R.string.nag_radio_copy_address), actions.onCopy, icon = NagIcons.Streams))
+    val remove = when (tab) {
+        RadioTab.Recent -> R.string.nag_radio_remove_recent
+        RadioTab.Imported -> R.string.nag_radio_remove_imported
+        else -> null
+    }
+    if (remove != null) add(MenuEntry.Item(res.getString(remove), actions.onRemove, icon = NagIcons.Delete, destructive = true))
 }
 
 @Composable
@@ -390,7 +609,7 @@ private fun StationRow(
     locale: Locale,
     menu: () -> List<MenuEntry>,
     moreActions: String,
-    onPlay: () -> Unit,
+    actions: StationActions,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -399,6 +618,7 @@ private fun StationRow(
     val shape = RoundedCornerShape(dimens.radiusControl)
     val numbers = remember(locale) { NumberFormat.getIntegerInstance(locale) }
     val play = stringResource(R.string.nag_play)
+    val favourite = stringResource(if (station.favourite) R.string.nag_radio_unfavourite else R.string.nag_radio_favourite)
     ContextMenuArea(entries = menu, accessibilityLabel = moreActions, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Row(
@@ -407,7 +627,7 @@ private fun StationRow(
                     .heightIn(min = dimens.minTarget.coerceAtLeast(60.dp))
                     .focusRing(state, shape)
                     .background(stateBackground(state), shape)
-                    .nagClickable(interaction, onPlay, onClickLabel = play)
+                    .nagClickable(interaction, actions.onPlay, onClickLabel = play)
                     .padding(horizontal = 8.dp, vertical = 6.dp)
                     .testTag("station-${station.key}"),
                 verticalAlignment = Alignment.CenterVertically,
@@ -441,6 +661,13 @@ private fun StationRow(
                     }
                 }
             }
+            NagIconButton(
+                if (station.favourite) NagIcons.StarFilled else NagIcons.Star,
+                favourite,
+                actions.onFavourite,
+                tint = if (station.favourite) colors.accent else colors.textSecondary,
+                modifier = Modifier.testTag("favourite-${station.key}"),
+            )
             IconMenuButton(NagIcons.MoreHorizontal, moreActions, menu)
         }
     }

@@ -86,8 +86,43 @@
     <string name="nag_radio_already_voted">%1$s için bir günden kısa süre önce oy verdiniz</string>
     <string name="nag_radio_vote_refused">Rehber oyu almadı</string>
     <string name="nag_radio_vote_offline">Oy gönderilemedi. Bağlantıyı denetleyin.</string>
-    <string name="nag_radio_failed">İşlem tamamlanamadı. Yeniden deneyin.</string>
     <string name="nag_sc_radio_search">Radyo rehberinde ara</string>
+    <string name="nag_radio_tab_favourites">Favoriler</string>
+    <string name="nag_radio_tab_recent">Son çalınanlar</string>
+    <string name="nag_radio_tab_search">Ara</string>
+    <string name="nag_radio_tab_imported">İçe aktarılanlar</string>
+    <string name="nag_radio_live">Canlı yayın</string>
+    <string name="nag_radio_favourite">Favorilere ekle</string>
+    <string name="nag_radio_unfavourite">Favorilerden çıkar</string>
+    <string name="nag_radio_remove_recent">Son çalınanlardan kaldır</string>
+    <string name="nag_radio_remove_imported">Radyoyu kaldır</string>
+    <string name="nag_radio_removed">“%1$s” kaldırıldı</string>
+    <string name="nag_radio_search_stations">Radyo ara</string>
+    <string name="nag_radio_fav_empty_title">Henüz favori radyo yok</string>
+    <string name="nag_radio_fav_empty_desc">Bir radyoyu yıldızlayın, burada beklesin.</string>
+    <string name="nag_radio_recent_empty_title">Henüz bir şey çalınmadı</string>
+    <string name="nag_radio_recent_empty_desc">Dinlediğiniz radyolar burada, en yenisi üstte görünür.</string>
+    <string name="nag_radio_imported_empty_title">İçe aktarılan radyo yok</string>
+    <string name="nag_radio_imported_empty_desc">Bir M3U, M3U8 ya da PLS dosyası içe aktarın; radyoları burada saklanır.</string>
+    <string name="nag_radio_import">Dosya içe aktar…</string>
+    <string name="nag_radio_import_hint">M3U, M3U8 ya da PLS dosyası</string>
+    <plurals name="nag_radio_imported">
+        <item quantity="one">%d radyo içe aktarıldı</item>
+        <item quantity="other">%d radyo içe aktarıldı</item>
+    </plurals>
+    <plurals name="nag_radio_import_skipped">
+        <item quantity="one">%d kayıt dışarıda kaldı (akış adresi değil ya da tekrar)</item>
+        <item quantity="other">%d kayıt dışarıda kaldı (akış adresi değil ya da tekrar)</item>
+    </plurals>
+    <string name="nag_radio_import_unsupported">Çalma listesi dosyası değil (M3U, M3U8 ya da PLS)</string>
+    <string name="nag_radio_import_empty">Dosyada radyo bulunamadı</string>
+    <string name="nag_radio_import_large">Dosya bir radyo listesi için çok büyük</string>
+    <string name="nag_radio_import_failed">Dosya okunamadı</string>
+    <plurals name="nag_radio_import_present">
+        <item quantity="one">%d radyo zaten kayıtlıydı</item>
+        <item quantity="other">%d radyo zaten kayıtlıydı</item>
+    </plurals>
+    <string name="nag_radio_failed">İşlem tamamlanamadı. Yeniden deneyin.</string>
 
     <!-- Yer tutucular -->
     <string name="nag_coming_title">%1$s %2$s ile geliyor</string>

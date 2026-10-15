@@ -5,6 +5,10 @@ import android.database.sqlite.SQLiteException
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.RadioStation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /**
@@ -23,7 +27,39 @@ interface RadioLibrary {
 
     /** The kept stations among these directory ids, by directory id: their marks (favourite, plays, vote). */
     suspend fun marks(uuids: Collection<String>): Map<String, Station>
+
+    /** The favourite stations by name; follows every change. */
+    fun favourites(): Flow<List<Station>>
+
+    /** The stations played, the latest first, at most [limit]; follows every change. */
+    fun recent(limit: Int = RECENT_LIMIT): Flow<List<Station>>
+
+    /** The stations imported from playlist files, by name; follows every change. */
+    fun imported(): Flow<List<Station>>
+
+    /** [station] is a favourite, or no longer is; returns it as kept. */
+    suspend fun favourite(station: Station, on: Boolean): Station
+
+    /** [station] leaves "recent": it is no longer marked as played, and kept only if something else keeps it. */
+    suspend fun forget(station: Station)
+
+    /** The imported [station] is taken out. */
+    suspend fun remove(station: Station)
+
+    /** [station] is put back as it was (what "undo" does after [forget] or [remove]). */
+    suspend fun restore(station: Station)
+
+    /** Keeps the stations a playlist file names as the user's own; one already kept is updated and counted as present, not as added. */
+    suspend fun import(stations: List<PlaylistStation>): ImportCounts
+
+    companion object {
+        /** How many played stations "recent" lists. */
+        const val RECENT_LIMIT = 50
+    }
 }
+
+/** What an import did: stations [added] to the kept ones, and stations that were already [present]. */
+data class ImportCounts(val added: Int, val present: Int)
 
 /** [RadioLibrary] in the Nağmedar database. */
 class DatabaseRadioLibrary(context: Context) : RadioLibrary {
@@ -57,11 +93,72 @@ class DatabaseRadioLibrary(context: Context) : RadioLibrary {
         }
     }
 
+    override fun favourites(): Flow<List<Station>> = rows(dao.favorites())
+
+    override fun recent(limit: Int): Flow<List<Station>> = rows(dao.recent(limit))
+
+    override fun imported(): Flow<List<Station>> = rows(dao.imported())
+
+    override suspend fun favourite(station: Station, on: Boolean): Station = withContext(Dispatchers.IO) {
+        val id = dao.keep(station.toEntity())
+        dao.setFavorite(id, on)
+        if (!on) dao.pruneUnused()
+        dao.byId(id)?.toStation() ?: station.copy(id = 0, favourite = on)
+    }
+
+    override suspend fun forget(station: Station) = withContext(Dispatchers.IO) {
+        if (station.id != 0L) {
+            dao.forgetPlayed(station.id)
+            dao.pruneUnused()
+        }
+    }
+
+    override suspend fun remove(station: Station) = withContext(Dispatchers.IO) {
+        dao.byId(station.id)?.let(dao::delete) ?: Unit
+    }
+
+    override suspend fun restore(station: Station) = withContext(Dispatchers.IO) {
+        val id = dao.keep(station.toEntity().copy(id = 0))
+        if (station.favourite) dao.setFavorite(id, true)
+        if (station.lastPlayedAt > 0) dao.markPlayed(id, station.lastPlayedAt)
+    }
+
+    override suspend fun import(stations: List<PlaylistStation>): ImportCounts = withContext(Dispatchers.IO) {
+        val radio = dao
+        var added = 0
+        var present = 0
+        NagmedarDatabase.get(appContext).runInTransaction(
+            Runnable {
+                // a transaction that is retried counts again from nothing
+                added = 0
+                present = 0
+                stations.forEach { station ->
+                    val row = station.toEntity()
+                    if (radio.importedByUrl(row.streamUrl) == null) added++ else present++
+                    radio.keep(row)
+                }
+            },
+        )
+        ImportCounts(added, present)
+    }
+
+    /** The table's rows as stations; a database that cannot be read lists none. */
+    private fun rows(source: Flow<List<RadioStation>>): Flow<List<Station>> =
+        source.map { list -> list.map { it.toStation() } }.catch { emit(emptyList()) }.flowOn(Dispatchers.IO)
+
     private companion object {
         /** SQLite takes a limited number of variables in a query. */
         const val CHUNK = 500
     }
 }
+
+/** An imported station as a database row: no directory id, the group as its one tag. */
+internal fun PlaylistStation.toEntity(): RadioStation = RadioStation(
+    name = name,
+    streamUrl = url,
+    faviconUrl = logoUrl,
+    tags = group,
+)
 
 /** The station as a database row: tags in one comma-separated text. */
 internal fun Station.toEntity(): RadioStation = RadioStation(

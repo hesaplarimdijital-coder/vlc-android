@@ -402,7 +402,7 @@ private fun PlaylistTabs(
 }
 
 @Composable
-private fun PlaylistTab(name: String, count: Int?, selected: Boolean, icon: ImageVector? = null, onClick: () -> Unit) {
+internal fun PlaylistTab(name: String, count: Int?, selected: Boolean, icon: ImageVector? = null, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }

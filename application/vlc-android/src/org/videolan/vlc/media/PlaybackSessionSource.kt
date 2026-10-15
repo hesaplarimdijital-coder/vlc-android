@@ -1,6 +1,7 @@
 package org.videolan.vlc.media
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media3.common.Player
@@ -41,12 +42,19 @@ internal class PlaybackSessionSource(private val service: PlaybackService) : Ses
     override val currentIndex get() = service.currentMediaPosition
 
     override fun queueItem(index: Int): SessionItem? = service.playlistManager.getMedia(index)?.let { media ->
+        // S-1106: a radio stream's current title, split, with the station under it, and its logo as the artwork (also with no title)
+        val stream = media.streamDisplay()
+        val logo = media.streamLogo()
         SessionItem(
             mediaId = MediaSessionBrowser.generateMediaId(media),
-            title = media.title,
-            artist = media.artistName,
-            album = media.albumName,
-            artworkUri = ArtworkProvider.buildMediaUri(service, media),
+            title = stream?.title ?: media.title,
+            artist = stream?.artist ?: media.artistName,
+            album = stream?.album ?: media.albumName,
+            artworkUri = if (logo != null) {
+                ArtworkProvider.buildUri(service, Uri.Builder().appendPath(ArtworkProvider.REMOTE).appendQueryParameter(ArtworkProvider.PATH, logo).build())
+            } else {
+                ArtworkProvider.buildMediaUri(service, media)
+            },
             durationMs = media.length,
             isVideo = media.type == MediaWrapper.TYPE_VIDEO,
         )

@@ -25,7 +25,7 @@ class NagmedarSessionPlayerTest {
 
     private class FakeSource(size: Int = 3) : SessionSource {
         val calls = mutableListOf<String>()
-        val items = (0 until size).map { i ->
+        var items = (0 until size).map { i ->
             SessionItem("media:$i", "Parça $i", "Sanatçı", "Albüm", Uri.parse("content://art/$i"), 200_000L + i, isVideo = false)
         }
         override var hasMedia = size > 0
@@ -104,6 +104,24 @@ class NagmedarSessionPlayerTest {
         assertEquals(0, player.mediaItemCount)
         assertEquals(Player.STATE_IDLE, player.playbackState)
         assertFalse(player.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT))
+    }
+
+    @Test
+    fun aStreamsNewTitleReachesTheControllersAfterInvalidate() {
+        // S-1106: a radio stream's ICY title changes while the same media plays
+        val source = FakeSource(size = 1)
+        source.currentIndex = 0
+        source.items = listOf(SessionItem("media:0", "Gece Cazı", "Gece Cazı", "", Uri.parse("content://art/logo"), 0L, isVideo = false))
+        val player = player(source)
+        assertEquals("Gece Cazı", player.mediaMetadata.title.toString())
+
+        source.items = listOf(SessionItem("media:0", "So What", "Miles Davis", "Gece Cazı", Uri.parse("content://art/logo"), 0L, isVideo = false))
+        player.invalidate()
+        idle()
+        assertEquals("So What", player.mediaMetadata.title.toString())
+        assertEquals("Miles Davis", player.mediaMetadata.artist.toString())
+        assertEquals("Gece Cazı", player.mediaMetadata.albumTitle.toString())
+        assertEquals(Uri.parse("content://art/logo"), player.mediaMetadata.artworkUri)
     }
 
     @Test

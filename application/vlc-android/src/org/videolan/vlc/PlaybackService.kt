@@ -183,6 +183,7 @@ import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.CoverHook
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.media.MediaUtils
+import org.videolan.vlc.media.streamDisplay
 import org.videolan.vlc.media.NO_LENGTH_PROGRESS_MAX
 import org.videolan.vlc.media.PlayerController
 import org.videolan.vlc.media.PlaylistManager
@@ -1222,16 +1223,18 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         displayMsg?.let { scheduler.scheduleAction(UPDATE_META, 5_000L) }
         val bob = withContext(Dispatchers.Default) {
             val carMode = isCarMode()
-            val title = media.nowPlaying ?: media.title
+            // S-1106: a radio stream's "Artist - Title" is split, with the station under it as the album
+            val stream = media.streamDisplay()
+            val title = stream?.title ?: media.nowPlaying ?: media.title
             val coverOnLockscreen = settings.getBoolean(LOCKSCREEN_COVER, true)
             val bob = MediaMetadataCompat.Builder().apply {
                 putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                 putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, MediaSessionBrowser.generateMediaId(media))
                 putString(MediaMetadataCompat.METADATA_KEY_GENRE, MediaUtils.getMediaGenre(ctx, media))
                 putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, media.trackNumber.toLong())
-                putString(MediaMetadataCompat.METADATA_KEY_ARTIST, MediaUtils.getMediaArtist(ctx, media))
-                putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, MediaUtils.getMediaReferenceArtist(ctx, media))
-                putString(MediaMetadataCompat.METADATA_KEY_ALBUM, MediaUtils.getMediaAlbum(ctx, media))
+                putString(MediaMetadataCompat.METADATA_KEY_ARTIST, stream?.artist ?: MediaUtils.getMediaArtist(ctx, media))
+                putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, stream?.artist ?: MediaUtils.getMediaReferenceArtist(ctx, media))
+                putString(MediaMetadataCompat.METADATA_KEY_ALBUM, stream?.album ?: MediaUtils.getMediaAlbum(ctx, media))
                 putLong(MediaMetadataCompat.METADATA_KEY_DURATION, if (length != 0L) length else -1L)
             }
             if (carMode) {
@@ -1652,7 +1655,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         val queue = withContext(Dispatchers.Default) {
             ArrayList<MediaSessionCompat.QueueItem>(toIndex - fromIndex).also {
                 for ((position, media) in mediaList.subList(fromIndex, toIndex).withIndex()) {
-                    val title: String? = media.nowPlaying ?: media.title
+                    val stream = media.streamDisplay()
+                    val title: String? = stream?.title ?: media.nowPlaying ?: media.title
                     val mediaId = MediaSessionBrowser.generateMediaId(media)
                     val iconUri = when {
                         isSchemeHttpOrHttps(media.artworkMrl) -> {
@@ -1667,8 +1671,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                     }
                     val mediaDesc = MediaDescriptionCompat.Builder()
                             .setTitle(title)
-                            .setSubtitle(MediaUtils.getMediaArtist(ctx, media))
-                            .setDescription(MediaUtils.getMediaAlbum(ctx, media))
+                            .setSubtitle(stream?.artist ?: MediaUtils.getMediaArtist(ctx, media))
+                            .setDescription(stream?.album ?: MediaUtils.getMediaAlbum(ctx, media))
                             .setIconUri(iconUri)
                             .setMediaUri(media.uri)
                             .setMediaId(mediaId)

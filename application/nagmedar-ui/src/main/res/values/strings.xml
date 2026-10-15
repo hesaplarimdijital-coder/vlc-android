@@ -86,8 +86,43 @@
     <string name="nag_radio_already_voted">You voted for %1$s less than a day ago</string>
     <string name="nag_radio_vote_refused">The directory did not take the vote</string>
     <string name="nag_radio_vote_offline">The vote could not be sent. Check the connection.</string>
-    <string name="nag_radio_failed">That did not work. Try again.</string>
     <string name="nag_sc_radio_search">Search the radio directory</string>
+    <string name="nag_radio_tab_favourites">Favourites</string>
+    <string name="nag_radio_tab_recent">Recent</string>
+    <string name="nag_radio_tab_search">Search</string>
+    <string name="nag_radio_tab_imported">Imported</string>
+    <string name="nag_radio_live">Live</string>
+    <string name="nag_radio_favourite">Add to favourites</string>
+    <string name="nag_radio_unfavourite">Remove from favourites</string>
+    <string name="nag_radio_remove_recent">Remove from recent</string>
+    <string name="nag_radio_remove_imported">Remove station</string>
+    <string name="nag_radio_removed">“%1$s” removed</string>
+    <string name="nag_radio_search_stations">Search stations</string>
+    <string name="nag_radio_fav_empty_title">No favourite stations yet</string>
+    <string name="nag_radio_fav_empty_desc">Star a station and it waits here.</string>
+    <string name="nag_radio_recent_empty_title">Nothing played yet</string>
+    <string name="nag_radio_recent_empty_desc">The stations you listen to show up here, the latest first.</string>
+    <string name="nag_radio_imported_empty_title">No imported stations</string>
+    <string name="nag_radio_imported_empty_desc">Import an M3U, M3U8 or PLS file and its stations are kept here.</string>
+    <string name="nag_radio_import">Import a file…</string>
+    <string name="nag_radio_import_hint">M3U, M3U8 or PLS file</string>
+    <plurals name="nag_radio_imported">
+        <item quantity="one">%d station imported</item>
+        <item quantity="other">%d stations imported</item>
+    </plurals>
+    <plurals name="nag_radio_import_skipped">
+        <item quantity="one">%d entry left out (no stream address, or a repeat)</item>
+        <item quantity="other">%d entries left out (no stream address, or repeats)</item>
+    </plurals>
+    <string name="nag_radio_import_unsupported">Not a playlist file (M3U, M3U8 or PLS)</string>
+    <string name="nag_radio_import_empty">No stations found in the file</string>
+    <string name="nag_radio_import_large">The file is too large for a station list</string>
+    <string name="nag_radio_import_failed">The file could not be read</string>
+    <plurals name="nag_radio_import_present">
+        <item quantity="one">%d station was already kept</item>
+        <item quantity="other">%d stations were already kept</item>
+    </plurals>
+    <string name="nag_radio_failed">That did not work. Try again.</string>
 
     <!-- Placeholders -->
     <string name="nag_coming_title">%1$s arrives in %2$s</string>
