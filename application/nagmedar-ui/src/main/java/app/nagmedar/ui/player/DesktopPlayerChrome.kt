@@ -148,10 +148,13 @@ import app.nagmedar.ui.player.sync.SyncAssistant
 import app.nagmedar.ui.player.sync.SyncController
 import app.nagmedar.ui.player.sync.SyncPanel
 import app.nagmedar.ui.player.sync.preciseClock
+import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.visual.PlayerVisualizer
+import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -682,11 +685,31 @@ private fun PlayerChromeContent(
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             Box(Modifier.fillMaxSize()) {
                 SnapshotFlash(snapshots.state.flashes)
+                // S-611: the visualiser, under the controls: large over sound alone, small beside a picture
+                if (prefs.visualizer.video) {
+                    val nowPlaying = rememberNowPlaying()
+                    val audioOnly by produceState(false, uri) {
+                        while (true) {
+                            value = activity.service?.let { it.currentMediaWrapper != null && it.videoTracksCount == 0 } ?: false
+                            delay(1_000)
+                        }
+                    }
+                    PlayerVisualizer(
+                        settings = prefs.visualizer,
+                        audioOnly = audioOnly,
+                        playing = nowPlaying.playing,
+                        mediaKey = uri,
+                        onSettings = prefs::updateVisualizer,
+                        // beside a picture: above the control bar while it shows, clear of the cards on the left
+                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                    )
+                }
                 DesktopControls(
                     state.copy(
                         effectsOpen = panel.open && panel.tab == PanelTab.Effects,
                         snapshot = prefs.snapshot,
                         bookmarks = navigation.bookmarks.marks.map { it.timeMs },
+                        visualizer = prefs.visualizer.kind.takeIf { prefs.visualizer.video },
                     ),
                     source,
                     visibility,
@@ -1197,6 +1220,11 @@ internal class ActivityPlayerSource(
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
+
+    override fun setVisualizer(kind: VisualizerKind?) {
+        val settings = prefs.visualizer
+        prefs.updateVisualizer(if (kind == null) settings.copy(video = false) else settings.copy(video = true, kind = kind))
+    }
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

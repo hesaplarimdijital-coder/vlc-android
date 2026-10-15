@@ -67,7 +67,9 @@ import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.visual.PlayingVisualizer
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.media.PlaylistManager
@@ -97,6 +99,10 @@ fun PhonePlayer(
     lyrics: (@Composable (Modifier) -> Unit)? = null,
     lyricsShown: Boolean = false,
     onLyricsShown: ((Boolean) -> Unit)? = null,
+    /** S-611: the visualiser, in place of the artwork while [visualizerShown] (the lyrics come first); the top row's button turns it on and off. */
+    visualizer: (@Composable (Modifier) -> Unit)? = null,
+    visualizerShown: Boolean = false,
+    onVisualizerShown: ((Boolean) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -129,6 +135,19 @@ fun PhonePlayer(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
+            // S-611
+            if (visualizer != null && onVisualizerShown != null) {
+                NagIconButton(
+                    NagIcons.Visualizer,
+                    stringResource(R.string.nag_vis_title),
+                    {
+                        onVisualizerShown(!visualizerShown || lyricsShown)
+                        if (lyricsShown) onLyricsShown?.invoke(false)
+                    },
+                    selected = visualizerShown && !lyricsShown,
+                    modifier = Modifier.testTag("phone-visualizer"),
+                )
+            }
             // S-1004
             if (lyrics != null && onLyricsShown != null) {
                 NagIconButton(
@@ -146,6 +165,9 @@ fun PhonePlayer(
         if (lyrics != null && lyricsShown) {
             // S-1004: the lyrics scroll: no swipes over them
             lyrics(Modifier.fillMaxWidth().weight(1f))
+        } else if (visualizer != null && visualizerShown) {
+            // S-611: the visualiser's own choices take the touches
+            visualizer(Modifier.fillMaxWidth().weight(1f).padding(vertical = dimens.gapS))
         } else {
             // the artwork: swiped sideways it changes the track, down it closes the player
             BoxWithConstraints(
@@ -247,11 +269,19 @@ private val CLOSE = 140.dp
 
 /**
  * The phone player on the playback service; [onQueue] opens "Sıradaki" over it, [onFullScreenLyrics]
- * the lyrics over the whole window (S-1004). Nothing without music.
+ * the lyrics over the whole window (S-1004), [onFullScreenVisualizer] the visualiser (S-611). Nothing
+ * without music.
  */
 @Composable
-fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier = Modifier, onFullScreenLyrics: (() -> Unit)? = null) {
+fun PhonePlayerHost(
+    onClose: () -> Unit,
+    onQueue: () -> Unit,
+    modifier: Modifier = Modifier,
+    onFullScreenLyrics: (() -> Unit)? = null,
+    onFullScreenVisualizer: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
+    val prefs = rememberNagmedarPreferences()
     val nowPlaying = rememberNowPlaying()
     val media = nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
     if (media == null) {
@@ -299,5 +329,9 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
         lyricsShown = lyricsShown,
         onLyricsShown = { lyricsShown = it },
+        // S-611: on and off here as in Settings › Visualiser
+        visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
+        visualizerShown = prefs.visualizer.music,
+        onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
     )
 }

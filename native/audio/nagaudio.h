@@ -462,6 +462,46 @@ unsigned char *nag_tags_read_cover(int fd, const char *name, size_t *size);
 /** S-1006: the first value of tag [key] (TagLib's property name), UTF-8; NULL for none. The caller frees. */
 char *nag_tags_read_property(int fd, const char *name, const char *key);
 
+/* -------------------------------------------------------------- visualisers */
+
+/*
+ * S-611: the visualisers' tap. Off by default, when the render does nothing for it. On, the
+ * render keeps the last frames it played, after the DSP chain and before the volume (the first
+ * two channels; mono on both), and nag_audio_scope analyses those the listener hears now: the
+ * sink's latency is taken back from the newest.
+ */
+#define NAG_SCOPE_FFT_MIN 1024
+#define NAG_SCOPE_FFT_MAX 16384
+#define NAG_SCOPE_WAVE_MAX 1024
+#define NAG_SCOPE_FLOOR_DB -120.0
+
+typedef struct NagScopeFrame {
+    /** Frames the tap took since it was turned on; the last read's count when nothing played since. */
+    uint64_t frames;
+    int rate;
+    /** spectrum_db holds fft_size / 2 bins, bin k at k * rate / fft_size Hz. */
+    int fft_size;
+    /** Each channel's largest sample since the last read, dBFS. */
+    double peak_db[2];
+    /** Each channel's RMS over the FFT's window, dBFS (a full-scale sine reads -3.01). */
+    double rms_db[2];
+    /** Both channels' mean power per bin, Hann-windowed, in dB of a sine's amplitude (a sine of
+     * amplitude 0.5 on a bin's frequency reads -6.02 there). */
+    float spectrum_db[NAG_SCOPE_FFT_MAX / 2];
+    int wave_points;
+    /** About 20 ms of each channel from a rising zero crossing, -1..1, wave_points points. */
+    float wave[2][NAG_SCOPE_WAVE_MAX];
+} NagScopeFrame;
+
+/** Turns the tap on or off; -1 when its memory (1 MB) cannot be had. */
+int nag_audio_set_scope(NagAudio *engine, int enabled);
+int nag_audio_scope_enabled(NagAudio *engine);
+/**
+ * The analysis of what is heard now into [frame], the waveform in [wave_points] points (at most
+ * NAG_SCOPE_WAVE_MAX). -1 while the tap is off or no output is open. Not the render's thread.
+ */
+int nag_audio_scope(NagAudio *engine, NagScopeFrame *frame, int wave_points);
+
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 

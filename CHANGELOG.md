@@ -2,6 +2,13 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 0.5.0 — MVP5 (hazırlanıyor)
+
+### Görselleştirme
+- Görselleştirici: çalanın spektrumu (25 Hz–20 kHz, üçte bir oktava yakın 30 bant, tepe şapkalarıyla), stereo VU metre (RMS ve tepe, tutulan tepe, kırpılma işareti; VU ve IEC tepe ölçeri balistiğiyle) ve osiloskop (yükselen sıfır geçişinden, iki kanal). Şimdi çalıyor bölmesinde ve telefonun oynatıcısında başlıktaki düğmeyle açılır, Ctrl+Shift+V ya da bölmenin düğmesiyle tam ekrana geçer; video oynatıcıda Ses menüsünden seçilir: yalnız seste ekranın ortasında büyük, videoda görüntünün yanında küçük.
+- Müzik motoru çaldığını DSP zincirinden sonra, ses düzeyinden önce kendisi okur (çıkışın gecikmesi kadar geriden, duyulanla aynı anda) ve yerelde analiz eder; kapalıyken motora hiçbir yükü yoktur. libVLC'nin çaldığı (video, radyo, podcast) Android'in görselleştiricisinden okunur; bunun için mikrofon izni istenir, yalnızca uygulamanın kendi sesi okunur.
+- Pil: görselleştirici yalnızca bölmesi ekranda, ekran açık ve bir şey çalarken çizer; pil tasarrufunda (Ayarlar'da aksi seçilmedikçe) duraklar. Ayarlar › Görselleştirici'de kare hızı sınırı (15, 30, 60 fps) ve seçilen tür ile hızın cihazın pilinden tahmin edilen saatlik payı yazar. projectM bu sürümde yok: yayımlanan libVLC'de görselleştirme modülleri (visual, goom, projectM) bulunmuyor.
+
 ## 0.4.0 — MVP4 (hazırlanıyor)
 
 ### Radyo

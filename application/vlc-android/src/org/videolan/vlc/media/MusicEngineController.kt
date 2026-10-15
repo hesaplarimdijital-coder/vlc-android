@@ -23,6 +23,7 @@ import app.nagmedar.audio.NativeAudio
 import app.nagmedar.audio.OutputFormat
 import app.nagmedar.audio.ReplayGainMode
 import app.nagmedar.audio.ReplayGainSettings
+import app.nagmedar.audio.ScopeFrame
 import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.UsbOutput
 import app.nagmedar.audio.cue.CueSheets
@@ -268,6 +269,7 @@ class MusicEngineController(
         applyDspSettings()
         applyReplayGainSettings()
         applyAudioSettings()
+        created.scopeEnabled = scopeEnabled
         Settings.getInstance(context).registerOnSharedPreferenceChangeListener(settingsListener)
         return created
     }
@@ -369,6 +371,16 @@ class MusicEngineController(
 
     /** The clip meter (S-906); with [reset] the counts start over. */
     fun dspMeter(reset: Boolean = false): DspMeter = engine?.dspMeter(reset) ?: DspMeter(0, 0, 0.0, 0.0)
+
+    /** S-611: the visualisers' tap; it stays as set across tracks and engines, off while no visualiser shows. */
+    var scopeEnabled: Boolean = false
+        set(value) {
+            field = value
+            engine?.scopeEnabled = value
+        }
+
+    /** S-611: what the engine plays now, analysed; null while the tap is off or nothing plays. */
+    fun scope(buffer: FloatArray, wavePoints: Int): ScopeFrame? = engine?.scope(buffer, wavePoints)
 
     /** Reads NAGMEDAR_DSP into the engine. */
     fun applyDspSettings() {

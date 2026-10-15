@@ -128,6 +128,7 @@ import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
+import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -211,6 +212,8 @@ private fun NagmedarMain(
     var sleepTimerOpen by rememberSaveable { mutableStateOf(false) }
     // S-1004: the lyrics over the whole window (Ctrl+Shift+L, the panes' full-screen button)
     var lyricsOpen by rememberSaveable { mutableStateOf(false) }
+    // S-611: the visualiser over the whole window (Ctrl+Shift+V, the panes' full-screen button)
+    var visualizerOpen by rememberSaveable { mutableStateOf(false) }
     // S-1105: the radio screen's search box asked for by Ctrl+Shift+R
     var radioSearchRequested by remember { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
@@ -220,10 +223,16 @@ private fun NagmedarMain(
             showShortcutList = { shortcutListRequests++ },
             openSleepTimer = { sleepTimerOpen = true },
             toggleLyrics = { lyricsOpen = !lyricsOpen },
+            toggleVisualizer = { visualizerOpen = !visualizerOpen },
             openRadioSearch = { radioSearchRequested = true },
             closeLyrics = {
                 val open = lyricsOpen
                 lyricsOpen = false
+                open
+            },
+            closeVisualizer = {
+                val open = visualizerOpen
+                visualizerOpen = false
                 open
             },
         )
@@ -297,9 +306,15 @@ private fun NagmedarMain(
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
-                        PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle, onFullScreenLyrics = { lyricsOpen = true })
+                        PhonePlayerHost(
+                            onClose = { phonePlayer = false },
+                            onQueue = queuePanel::toggle,
+                            onFullScreenLyrics = { lyricsOpen = true },
+                            onFullScreenVisualizer = { visualizerOpen = true },
+                        )
                     }
                     if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                    if (visualizerOpen) PlayingVisualizerFullScreen(onClose = { visualizerOpen = false })
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {
                         val queue = rememberPlayQueue()
@@ -322,7 +337,11 @@ private fun NagmedarMain(
                         Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
                         Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
                         // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
-                        Destination.Music -> MusicScreen(repository, onAddFolder = addFolder, nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }) })
+                        Destination.Music -> MusicScreen(
+                            repository,
+                            onAddFolder = addFolder,
+                            nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }, onFullScreenVisualizer = { visualizerOpen = true }) },
+                        )
                         // S-804: the medialibrary's playlists, a tab each
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         // S-1105: the radio directory's search
@@ -442,6 +461,9 @@ class AppActions(
     /** S-1004: the lyrics over the whole window, opened or closed; closed, and whether they were open. */
     private val toggleLyrics: () -> Unit = {},
     private val closeLyrics: () -> Boolean = { false },
+    /** S-611: the visualiser over the whole window, opened or closed; closed, and whether it was open. */
+    private val toggleVisualizer: () -> Unit = {},
+    private val closeVisualizer: () -> Boolean = { false },
     /** S-1105: the radio screen's search box takes the keyboard. */
     private val openRadioSearch: () -> Unit = {},
 ) {
@@ -499,7 +521,7 @@ class AppActions(
     fun forward(): Boolean = navigator.forward()
 
     /** An Esc nothing else used: "Sıradaki" closes (S-310), else the screen lets go of its selection (S-405). */
-    fun escape(): Boolean = closeLyrics() || queuePanel.close() || screenCommands.escape()
+    fun escape(): Boolean = closeVisualizer() || closeLyrics() || queuePanel.close() || screenCommands.escape()
 
     fun leaveMenuBar() {
         if (menuBar.hasKeyboard) menuBar.leave()
@@ -563,6 +585,7 @@ class AppActions(
             }
             ShortcutId.SleepTimer -> openSleepTimer()
             ShortcutId.Lyrics -> toggleLyrics()
+            ShortcutId.Visualizer -> toggleVisualizer()
             ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
             ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)

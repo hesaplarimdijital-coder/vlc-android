@@ -115,6 +115,10 @@ Sözlüğü testler denetler:
 | A/B testi | A/B test | | | Zincirle (A) zincirsizin (B), zincirin düzeyinde karşılaştırılması; A-B tekrarı başka şeydir. Kısayolu Alt+B |
 | kör test | blind test | | | A/B testinde her turda X rastgele A ya da B olur; cevaplar testin sonunda açılır |
 | dalga biçimi | waveform | dalga formu | | Müzik görünümünün zaman çizelgesi: her çubuk parçanın bir kesiti, tepesi soluk, gürlüğü koyu; tıklanınca oraya atlar |
+| görselleştirici | visualiser | | visualizer | Çalanın çizimi: spektrum, VU metre ya da osiloskop; Ctrl+Shift+V tam ekranda açar. projectM bu sürümde yok |
+| spektrum | spectrum | tayf | | Görselleştiricinin frekans çubukları, 25 Hz–20 kHz |
+| VU metre | VU meter | ses ölçer | level meter | Sol ve sağ kanalın RMS'i ve tepesi, dBFS ile; tepede kırpılma işareti |
+| osiloskop | oscilloscope | | | Dalganın kendisi, yükselen sıfır geçişinden |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |

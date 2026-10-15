@@ -2,6 +2,7 @@ package app.nagmedar.ui.player
 
 import androidx.compose.runtime.Immutable
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.visual.VisualizerKind
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -59,6 +60,8 @@ data class PlayerChromeState(
     val canPictureInPicture: Boolean = false,
     /** S-607: what plays is being recorded. */
     val recording: Boolean = false,
+    /** S-611: the visualiser drawn over the player; null when it is off. */
+    val visualizer: VisualizerKind? = null,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -128,6 +131,9 @@ interface PlayerChromeActions {
 
     /** S-703: the secondary subtitles on or off (Alt+V). */
     fun toggleSecondarySubtitles()
+
+    /** S-611: the visualiser over the player, of [kind]; null turns it off. */
+    fun setVisualizer(kind: VisualizerKind?)
 
     /** Leaves the player. */
     fun close()

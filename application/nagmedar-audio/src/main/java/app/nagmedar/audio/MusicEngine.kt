@@ -307,6 +307,23 @@ class MusicEngine(
     /** S-912: side B's gain in dB, frozen when B was chosen. */
     val abGainDb: Double get() = if (available) NativeAudio.abGainDb(handle) else 0.0
 
+    /**
+     * S-611: the visualisers' tap. On, the render keeps what it plays for [scope]; off, it costs
+     * nothing. False when the engine is not there or its memory could not be had.
+     */
+    var scopeEnabled: Boolean = false
+        set(value) {
+            field = value && available && NativeAudio.setScope(handle, true) == 0
+            if (!value && available) NativeAudio.setScope(handle, false)
+        }
+
+    /** S-611: what is heard now, through [buffer] (ScopeFrame.buffer()); null while the tap is off or nothing plays. */
+    fun scope(buffer: FloatArray, wavePoints: Int): ScopeFrame? {
+        if (!available || !scopeEnabled) return null
+        val frames = NativeAudio.scope(handle, buffer, wavePoints)
+        return if (frames < 0) null else ScopeFrame.decode(buffer, frames)
+    }
+
     /** S-910: the signal path as a model. */
     val signalPathModel: SignalPath? get() = SignalPath.parse(signalPath())
 
