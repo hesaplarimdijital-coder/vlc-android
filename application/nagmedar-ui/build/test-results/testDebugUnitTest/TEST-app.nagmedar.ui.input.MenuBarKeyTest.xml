@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.MenuBarKeyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:13.488Z" hostname="runnervmmprz5" time="0.0">
+  <properties/>
+  <testcase name="altWithAnotherKeyIsAChord" classname="app.nagmedar.ui.input.MenuBarKeyTest" time="0.0"/>
+  <testcase name="f10OpensItAndAltGrDoesNot" classname="app.nagmedar.ui.input.MenuBarKeyTest" time="0.0"/>
+  <testcase name="altAloneOpensTheMenuBarOnRelease" classname="app.nagmedar.ui.input.MenuBarKeyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

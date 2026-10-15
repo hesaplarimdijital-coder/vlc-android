@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.audio.EqualizerSideTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:00.756Z" hostname="runnervmmprz5" time="0.665">
+  <properties/>
+  <testcase name="theBlindTestKeepsTheSideQuiet" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.1"/>
+  <testcase name="sideBInTheOpen" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.111"/>
+  <testcase name="theOpenTest" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.081"/>
+  <testcase name="everyStageWithItsFormat" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.077"/>
+  <testcase name="withoutTheEngine" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.068"/>
+  <testcase name="theBlindTestShowsTheAnswersAtTheEnd" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.162"/>
+  <testcase name="aBitPerfectPath" classname="app.nagmedar.ui.audio.EqualizerSideTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

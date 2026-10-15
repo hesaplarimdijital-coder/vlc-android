@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.navigate.NavigationViewsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:16:29.537Z" hostname="runnervmmprz5" time="0.458">
+  <properties/>
+  <testcase name="theBookmarksTabGoesToOneRenamesAndRemovesIt" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.09"/>
+  <testcase name="theChaptersGoToTheirStarts" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.059"/>
+  <testcase name="theTimePlayingIsThereToTypeOver" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.067"/>
+  <testcase name="whatCannotBeReadOrIsPastTheEndIsSaid" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.076"/>
+  <testcase name="fromNowAndIntoAnotherChapter" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.06"/>
+  <testcase name="noBookmarksYetSaysHowToAddOne" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.043"/>
+  <testcase name="aBookmarkIsNamed" classname="app.nagmedar.ui.player.navigate.NavigationViewsTest" time="0.063"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

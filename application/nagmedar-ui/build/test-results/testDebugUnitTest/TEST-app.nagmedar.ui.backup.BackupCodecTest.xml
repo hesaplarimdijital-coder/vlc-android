@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.backup.BackupCodecTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:07.651Z" hostname="runnervmmprz5" time="0.191">
+  <properties/>
+  <testcase name="whatIsNotABackupIsSaidSo" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.032"/>
+  <testcase name="onlyChosenCoversAreTakenFromTheFile" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.027"/>
+  <testcase name="aBackupGoesOutAndComesBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.03"/>
+  <testcase name="theManifestAloneIsABackupWithoutCovers" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.021"/>
+  <testcase name="theSettingsLeaveOutThisDevicesAndAnAccountsKeys" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.019"/>
+  <testcase name="onlyTheChosenParts" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.034"/>
+  <testcase name="unknownKeysAndBadEntriesArePassedOver" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

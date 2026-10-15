@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.info.InfoTest" tests="6" skipped="0" failures="6" errors="0" timestamp="2026-10-15T14:10:29.370Z" hostname="runnervmmprz5" time="360.145">
+  <properties/>
+  <testcase name="theTabShowsTheFilmAndItsLastSecond" classname="app.nagmedar.ui.player.info.InfoTest" time="60.029">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10133093 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10133093 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="theStatisticsKeepTheirLastMinute" classname="app.nagmedar.ui.player.info.InfoTest" time="60.025">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10202325 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10202325 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="theOverlaySaysTheBitrateAndTheLostFrames" classname="app.nagmedar.ui.player.info.InfoTest" time="60.024">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10227767 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10227767 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="theProbesStreamsWithTheirHdrMetadata" classname="app.nagmedar.ui.player.info.InfoTest" time="60.022">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10158813 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10158813 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="theReportSaysWhatTheTabShows" classname="app.nagmedar.ui.player.info.InfoTest" time="60.024">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10193963 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10193963 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="withoutAProbeLibVlcsTracks" classname="app.nagmedar.ui.player.info.InfoTest" time="60.021">
+    <failure message="androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10223850 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed ." type="androidx.test.espresso.AppNotIdleException">androidx.test.espresso.AppNotIdleException: Compose did not get idle after 10223850 attempts in 60 SECONDS. Please check your measure/layout lambdas, they may be causing an infinite composition loop. Or set Espresso's master idling policy if you require a longer timeout. The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:55)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy$runUntilIdle$1.invoke(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:33)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:48)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.runTest(ComposeUiTest.android.kt:326)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1.evaluate(AndroidComposeTestRule.android.kt:271)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

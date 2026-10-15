@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.PhysicalKeysTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:13.499Z" hostname="runnervmmprz5" time="0.162">
+  <properties/>
+  <testcase name="keysPressedAreRecordedByTheirPlace" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.031"/>
+  <testcase name="keycapsShowWhatTheKeyboardPrints" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.019"/>
+  <testcase name="aPlaceALetterTookIsNoShortcut" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.018"/>
+  <testcase name="theSameKeyIsTheSameShortcutOnTurkishQAndAUsKeyboard" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.018"/>
+  <testcase name="theSystemsListShowsTheKeysToPress" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.023"/>
+  <testcase name="turkishQIsKnownByItsKeycapsBeforeAndroid13" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.018"/>
+  <testcase name="lettersAreTheLetterOnTheKey" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.017"/>
+  <testcase name="aNewLayoutBringsNewKeycaps" classname="app.nagmedar.ui.input.PhysicalKeysTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

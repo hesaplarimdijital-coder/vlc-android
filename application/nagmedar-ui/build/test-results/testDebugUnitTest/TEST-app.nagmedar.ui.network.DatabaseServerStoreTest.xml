@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.DatabaseServerStoreTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:23.887Z" hostname="runnervmmprz5" time="0.209">
+  <properties/>
+  <testcase name="aKeyStoreThatDoesNotAnswerLosesNothing" classname="app.nagmedar.ui.network.DatabaseServerStoreTest" time="0.058"/>
+  <testcase name="aSignInThatCannotBeOpenedIsForgotten" classname="app.nagmedar.ui.network.DatabaseServerStoreTest" time="0.031"/>
+  <testcase name="changesKeepWhatWasNotChanged" classname="app.nagmedar.ui.network.DatabaseServerStoreTest" time="0.063"/>
+  <testcase name="aSignInIsSealedInItsRow" classname="app.nagmedar.ui.network.DatabaseServerStoreTest" time="0.029"/>
+  <testcase name="aRequestNamingASavedServerFindsItsSignIn" classname="app.nagmedar.ui.network.DatabaseServerStoreTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

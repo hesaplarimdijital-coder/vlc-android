@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" tests="1" skipped="1" failures="0" errors="0" timestamp="2026-10-15T14:27:32.599Z" hostname="runnervmmprz5" time="13.509">
+  <properties/>
+  <testcase name="everySizeComesBackAsItsTextScale" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="13.509">
+    <skipped/>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

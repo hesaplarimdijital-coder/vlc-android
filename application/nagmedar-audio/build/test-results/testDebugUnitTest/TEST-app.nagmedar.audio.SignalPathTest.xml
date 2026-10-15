@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.SignalPathTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:00:32.529Z" hostname="runnervmmprz5" time="0.321">
+  <properties/>
+  <testcase name="theStagesAndTheReason" classname="app.nagmedar.audio.SignalPathTest" time="0.106"/>
+  <testcase name="whatIsNotAPath" classname="app.nagmedar.audio.SignalPathTest" time="0.127"/>
+  <testcase name="dsdAsDop" classname="app.nagmedar.audio.SignalPathTest" time="0.054"/>
+  <testcase name="bitPerfectOnTheUsbOutput" classname="app.nagmedar.audio.SignalPathTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

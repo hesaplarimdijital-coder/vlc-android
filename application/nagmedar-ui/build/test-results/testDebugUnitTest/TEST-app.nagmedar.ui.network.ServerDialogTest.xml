@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.ServerDialogTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:24.676Z" hostname="runnervmmprz5" time="0.328">
+  <properties/>
+  <testcase name="nothingIsSavedWhileAFaultStays" classname="app.nagmedar.ui.network.ServerDialogTest" time="0.148"/>
+  <testcase name="aPastedAddressFillsTheForm" classname="app.nagmedar.ui.network.ServerDialogTest" time="0.087"/>
+  <testcase name="aKeptSignInStaysUnlessChanged" classname="app.nagmedar.ui.network.ServerDialogTest" time="0.092"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

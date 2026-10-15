@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.VideoScreensTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:03:15.522Z" hostname="runnervmmprz5" time="0.575">
+  <properties/>
+  <testcase name="episodesAreNotFilms" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.075"/>
+  <testcase name="showsSayWhatComesNext" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.091"/>
+  <testcase name="chipsNarrowAndClear" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.089"/>
+  <testcase name="aShowOpensOnItsCurrentSeason" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.094"/>
+  <testcase name="theShelfShowsFilmsInProgress" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.06"/>
+  <testcase name="noMatchOffersToClear" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.093"/>
+  <testcase name="foldersOpenAndGoBack" classname="app.nagmedar.ui.library.VideoScreensTest" time="0.073"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
