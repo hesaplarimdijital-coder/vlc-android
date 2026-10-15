@@ -1,11 +1,13 @@
 package app.nagmedar.ui.player.subtitles.tools
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.InputMode as ComposeInputMode
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
@@ -38,6 +40,7 @@ import org.robolectric.annotation.GraphicsMode
  * says so in words for a screen reader, and lets Save through once the times are mended; the keys
  * walk the lines; the cleaning shows its changes and the new file's name is the one to edit.
  */
+@OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
