@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Yarım Kalan</title>
+    <item>
+      <title>Tam bölüm</title>
+      <guid>full</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 GMT</pubDate>
+      <enclosure url="https://example.org/full.mp3" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Yarım böl

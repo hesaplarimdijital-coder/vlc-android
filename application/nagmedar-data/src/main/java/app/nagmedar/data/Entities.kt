@@ -6,7 +6,11 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** A podcast subscription (Podcast Index or a feed address). */
+/**
+ * A podcast subscription (Podcast Index or a feed address; S-1101). Room is the one place
+ * subscriptions live: the medialibrary's own Subscription table is not mirrored (see
+ * PodcastRepository in nagmedar-ui for why).
+ */
 @Entity(tableName = "podcast_feed", indices = [Index(value = ["feed_url"], unique = true)])
 data class PodcastFeed(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -22,6 +26,18 @@ data class PodcastFeed(
     @ColumnInfo(name = "refreshed_at") val refreshedAt: Long = 0,
     @ColumnInfo(name = "auto_download") val autoDownload: Boolean = false,
     @ColumnInfo(name = "subscribed_at") val subscribedAt: Long = 0,
+    /** S-1101: the show's own web page. */
+    val link: String? = null,
+    /** S-1101: Podcasting 2.0's `podcast:guid`, the show's identity across hosts. */
+    @ColumnInfo(name = "podcast_guid") val podcastGuid: String? = null,
+    /** S-1101: Podcasting 2.0's `podcast:funding`: where to support the show, and its words. */
+    @ColumnInfo(name = "funding_url") val fundingUrl: String? = null,
+    @ColumnInfo(name = "funding_message") val fundingMessage: String? = null,
+    /**
+     * S-1101: the other addresses the feed was reached by (the one a search result or an OPML file gave, before a
+     * permanent redirect moved it to [feedUrl]), as keys, one per line: a result is told as subscribed by any of them.
+     */
+    @ColumnInfo(name = "alias_keys", defaultValue = "''") val aliasKeys: String = "",
 )
 
 object DownloadState {
@@ -51,6 +67,20 @@ data class PodcastEpisode(
     val played: Boolean = false,
     @ColumnInfo(name = "download_path") val downloadPath: String? = null,
     @ColumnInfo(name = "download_state") val downloadState: Int = DownloadState.NONE,
+    /**
+     * S-1101: when a refresh first saw the episode. Episodes added after the subscription and not
+     * played are the feed's new ones; the first fetch's carry the subscription's own time.
+     */
+    @ColumnInfo(name = "added_at", defaultValue = "0") val addedAt: Long = 0,
+    /** S-1101: the enclosure's length in bytes as the feed says; 0 when it does not. */
+    @ColumnInfo(name = "size_bytes", defaultValue = "0") val sizeBytes: Long = 0,
+    @ColumnInfo(name = "image_url") val imageUrl: String? = null,
+    val season: Int? = null,
+    @ColumnInfo(name = "episode_number") val episodeNumber: Int? = null,
+    /** S-1101: Podcasting 2.0's `podcast:chapters` file and `podcast:transcript` file with its media type. */
+    @ColumnInfo(name = "chapters_url") val chaptersUrl: String? = null,
+    @ColumnInfo(name = "transcript_url") val transcriptUrl: String? = null,
+    @ColumnInfo(name = "transcript_type") val transcriptType: String? = null,
 )
 
 /**

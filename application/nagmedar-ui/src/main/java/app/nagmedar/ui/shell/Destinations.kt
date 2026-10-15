@@ -27,7 +27,7 @@ enum class Destination(
     Movies("movies", R.string.nag_nav_movies, NavSection.Library),
     Series("series", R.string.nag_nav_series, NavSection.Library),
     Music("music", R.string.nag_nav_music, NavSection.Library),
-    Podcasts("podcasts", R.string.nag_nav_podcasts, NavSection.Library, R.string.nag_coming_podcasts, "MVP4"),
+    Podcasts("podcasts", R.string.nag_nav_podcasts, NavSection.Library, R.string.nag_podcasts_description),
     Radio("radio", R.string.nag_nav_radio, NavSection.Library),
     Playlists("playlists", R.string.nag_nav_playlists, NavSection.Library),
     Device("device", R.string.nag_nav_device, NavSection.Sources, R.string.nag_coming_device, "MVP4"),

@@ -128,6 +128,8 @@
     <string name="nag_coming_title">%1$s arrives in %2$s</string>
     <string name="nag_coming_movies">Films with posters, technical details and TV compatibility.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
+    <string name="nag_podcasts_description">Subscriptions and new episodes.</string>
+    <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
     <string name="nag_coming_streams">Network streams and saved addresses.</string>
     <string name="nag_coming_tv_lab">Analyse files for your TV and remux them without quality loss.</string>
@@ -1843,6 +1845,7 @@
     <string name="nag_sc_lyrics">Full-screen lyrics</string>
     <string name="nag_sc_lyrics_earlier">Lyrics earlier</string>
     <string name="nag_sc_lyrics_later">Lyrics later</string>
+    <string name="nag_sc_podcast_search">Search podcasts</string>
     <!-- S-1006: album covers -->
     <string name="nag_covers_settings">Covers</string>
     <string name="nag_covers_online">Online covers (Cover Art Archive)</string>
@@ -2072,4 +2075,113 @@
     <string name="nag_net_nothing_to_play">“%s” holds nothing to play</string>
     <string name="nag_net_gathering">Reading “%s”…</string>
     <string name="nag_net_play_on">Play on %s</string>
+    <!-- S-1101, S-1102: podcasts -->
+    <string name="nag_pod_actions">Podcast actions</string>
+    <string name="nag_pod_add">Add by RSS address…</string>
+    <string name="nag_pod_add_title">Add by RSS address</string>
+    <string name="nag_pod_add_hint">Paste the address of the podcast\'s RSS feed.</string>
+    <string name="nag_pod_add_label">RSS address</string>
+    <string name="nag_pod_add_example">https://example.org/feed.xml</string>
+    <string name="nag_pod_adding">Adding…</string>
+    <string name="nag_pod_already">You are already subscribed to %s</string>
+    <string name="nag_pod_back">Back</string>
+    <string name="nag_pod_close">Close</string>
+    <string name="nag_pod_clear_search">Clear the search</string>
+    <string name="nag_pod_copied">Address copied</string>
+    <string name="nag_pod_copy_address">Copy the RSS address</string>
+    <string name="nag_pod_copy_episode_address">Copy the audio address</string>
+    <string name="nag_pod_empty_title">No podcasts yet</string>
+    <string name="nag_pod_empty_desc">Search for a show and subscribe with one tap, add one by its RSS address, or import the list from another app (OPML).</string>
+    <string name="nag_pod_episodes_loading">Reading the episodes…</string>
+    <string name="nag_pod_export_failed">The list could not be saved</string>
+    <string name="nag_pod_fail_address">This does not look like a web address.</string>
+    <string name="nag_pod_fail_empty">The address returned nothing.</string>
+    <string name="nag_pod_fail_gone">There is no feed at this address. It may have moved or been removed.</string>
+    <string name="nag_pod_fail_no_episodes">This feed has no episodes to listen to.</string>
+    <string name="nag_pod_fail_not_feed">This address is not a podcast feed (RSS or Atom).</string>
+    <string name="nag_pod_fail_not_xml">This address does not give a feed; it may be a web page.</string>
+    <string name="nag_pod_fail_offline">The server could not be reached. Check your connection.</string>
+    <string name="nag_pod_fail_redirects">The address redirects too many times.</string>
+    <string name="nag_pod_fail_server">The server answered with an error (%d).</string>
+    <string name="nag_pod_find">Find a podcast</string>
+    <string name="nag_pod_import_offline">The network seems to be out of reach. Import the file again when you are connected; the shows already added stay.</string>
+    <string name="nag_pod_import_progress">Adding shows · %1$s of %2$s</string>
+    <string name="nag_pod_import_reading">Reading the file…</string>
+    <string name="nag_pod_import_stop">Stop</string>
+    <string name="nag_pod_import_title">Import OPML</string>
+    <string name="nag_pod_less">Show less</string>
+    <string name="nag_pod_loading">Reading your podcasts…</string>
+    <string name="nag_pod_mark_played">Mark as played</string>
+    <string name="nag_pod_mark_unplayed">Mark as unplayed</string>
+    <string name="nag_pod_menu_export">Export OPML…</string>
+    <string name="nag_pod_menu_import">Import OPML…</string>
+    <string name="nag_pod_more">More actions</string>
+    <string name="nag_pod_more_text">Show all</string>
+    <string name="nag_pod_new_badge">New</string>
+    <string name="nag_pod_no_results">No podcasts found for “%s”</string>
+    <string name="nag_pod_no_results_detail">Check the spelling, try another name, or add the show by its RSS address.</string>
+    <string name="nag_pod_notice_index_failed">Podcast Index did not answer; these results are from iTunes only.</string>
+    <string name="nag_pod_notice_no_index">This build has no Podcast Index key; the results are from iTunes only.</string>
+    <string name="nag_pod_ok">OK</string>
+    <string name="nag_pod_open">Open</string>
+    <string name="nag_pod_opml_no_feeds">This OPML file lists no podcasts.</string>
+    <string name="nag_pod_opml_not_opml">This file is not an OPML list of podcasts.</string>
+    <string name="nag_pod_opml_too_large">This file is too large to be a list of podcasts.</string>
+    <string name="nag_pod_opml_title">Nağmedar podcasts</string>
+    <string name="nag_pod_opml_unreadable">The file could not be read.</string>
+    <string name="nag_pod_play">Play</string>
+    <string name="nag_pod_played">Played</string>
+    <string name="nag_pod_reading">Reading the feed…</string>
+    <string name="nag_pod_retry">Try again</string>
+    <string name="nag_pod_search">Search</string>
+    <string name="nag_pod_search_busy_desc">The service asked us to wait. Try again in a minute.</string>
+    <string name="nag_pod_search_busy_title">Search is busy</string>
+    <string name="nag_pod_search_failed_desc">The directory answered with an error. Try again, or add the show by its RSS address.</string>
+    <string name="nag_pod_search_failed_title">The search failed</string>
+    <string name="nag_pod_search_offline_desc">Searching needs a network connection. Your subscriptions are still here.</string>
+    <string name="nag_pod_search_offline_title">You are offline</string>
+    <string name="nag_pod_search_placeholder">Search podcasts</string>
+    <string name="nag_pod_searching">Searching…</string>
+    <string name="nag_pod_subscribe">Subscribe</string>
+    <string name="nag_pod_subscribed">Subscribed</string>
+    <string name="nag_pod_subscribed_to">%s added</string>
+    <string name="nag_pod_support">Support the show</string>
+    <string name="nag_pod_unplayed">Not played</string>
+    <string name="nag_pod_unsubscribe">Unsubscribe</string>
+    <string name="nag_pod_unsubscribed">Unsubscribed from %s</string>
+    <string name="nag_pod_view_grid">Show as covers</string>
+    <string name="nag_pod_view_list">Show as a list</string>
+    <string name="nag_pod_web_page">Web page</string>
+    <plurals name="nag_pod_count">
+        <item quantity="one">%d podcast</item>
+        <item quantity="other">%d podcast</item>
+    </plurals>
+    <plurals name="nag_pod_episodes">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="nag_pod_exported">
+        <item quantity="one">%d subscription saved</item>
+        <item quantity="other">%d subscriptions saved</item>
+    </plurals>
+    <plurals name="nag_pod_import_added">
+        <item quantity="one">%d show added</item>
+        <item quantity="other">%d shows added</item>
+    </plurals>
+    <plurals name="nag_pod_import_already">
+        <item quantity="one">%d already subscribed</item>
+        <item quantity="other">%d already subscribed</item>
+    </plurals>
+    <plurals name="nag_pod_import_failed">
+        <item quantity="one">%d could not be added</item>
+        <item quantity="other">%d could not be added</item>
+    </plurals>
+    <plurals name="nag_pod_new">
+        <item quantity="one">%d new</item>
+        <item quantity="other">%d new</item>
+    </plurals>
+    <plurals name="nag_pod_results">
+        <item quantity="one">%1$d result for “%2$s”</item>
+        <item quantity="other">%1$d results for “%2$s”</item>
+    </plurals>
 </resources>

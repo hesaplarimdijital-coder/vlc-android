@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <title>Atom Yayını</title>
+  <subtitle>Atom ile yayın.</subtitle>
+  <link rel="self" href="https://example.org/atom.xml"/>
+  <link rel="alternate" href="https://example.org/"/>
+  <author><name>Atom Yazar</name></author>
+  <logo>/logo.png</logo>
+  <entry>
+    <title>Atom bölümü</title>
+    <id>tag:example.org,2026:1</id>
+    <updated>2026-10-08T12:00:00Z</updated>
+    <published>2026-10-07T12:00:00Z</published>
+    <summary>Özet</summary>
+    <link rel="alternate" href="https://example.org/1"/>
+    <link rel="enclosure" type="audio/mpeg" length="1234" href="https://example.org/atom-1.mp3"/>
+  </entry>
+  <entry>
+    <title>Sesi yok</title>
+    <id>tag:example.org,2026:2</id>
+    <updated>2026-10-09T12:00:00Z</updated>
+    <link rel="alternate" href="https://example.org/2"/>
+  </entry>
+</feed>

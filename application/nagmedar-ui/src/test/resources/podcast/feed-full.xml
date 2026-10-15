@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:pi="https://podcastindex.org/namespace/1.0"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Gece Yayını</title>
+    <atom:link href="https://feeds.example.org/gece.xml" rel="self" type="application/rss+xml"/>
+    <link>https://gece.example.org</link>
+    <description><![CDATA[<p>Her hafta <b>gece</b> yarısı.</p><p>Müzik, edebiyat &amp; sohbet.</p>]]></description>
+    <language>tr-TR</language>
+    <itunes:owner>
+      <itunes:name>Gece Ekibi</itunes:name>
+      <itunes:email>gece@example.org</itunes:email>
+    </itunes:owner>
+    <itunes:image href="https://gece.example.org/kapak.jpg"/>
+    <image>
+      <url>https://gece.example.org/eski-kapak.png</url>
+      <title>Gece Yayını</title>
+      <link>https://gece.example.org</link>
+    </image>
+    <itunes:category text="Arts"><itunes:category text="Books"/></itunes:category>
+    <pi:guid>ead4c236-bf58-58c6-a2c6-a6b28d128cb6</pi:guid>
+    <pi:funding url="https://gece.example.org/destek">Gece'yi destekleyin</pi:funding>
+    <item>
+      <title>İkinci gece: Itrî</title>
+      <itunes:title>Itrî</itunes:title>
+      <guid isPermaLink="false">gece-0002</guid>
+      <pubDate>Fri, 09 Oct 2026 21:30:00 GMT</pubDate>
+      <enclosure url="https://cdn.example.org/gece/0002.m4a?src=feed" length="52428800" type="audio/x-m4a"/>
+      <itunes:duration>1:02:03</itunes:duration>
+      <itunes:season>2</itunes:season>
+      <itunes:episode>2</itunes:episode>
+      <itunes:image href="https://gece.example.org/0002.jpg"/>
+      <description>Kısa özet.</description>
+      <content:encoded><![CDATA[<p>Uzun <em>notlar</em>:</p><ul><li>Neva Kâr</li><li>Segâh</li></ul>]]></content:encoded>
+      <pi:chapters url="https://gece.example.org/0002.chapters.json" type="application/json+chapters"/>
+      <pi:transcript url="https://gece.example.org/0002.html" type="text/html"/>
+      <pi:transcript url="https://gece.example.org/0002.vtt" type="text/vtt; charset=utf-8"/>
+    </item>
+    <item>
+      <title>Birinci gece</title>
+      <guid isPermaLink="false">gece-0001</guid>
+      <pubDate>Fri, 02 Oct 2026 21:30:00 GMT</pubDate>
+      <enclosure url="https://cdn.example.org/gece/0001.mp3" length="31457280" type="audio/mpeg"/>
+      <itunes:duration>1865</itunes:duration>
+      <itunes:summary>Özetin özeti.</itunes:summary>
+      <dc:creator>Gece Ekibi</dc:creator>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <title>Nağmedar Podcast</title>
+    <link>https://example.org/nagmedar</link>
+    <language>tr</language>
+    <description>Test yayını: bölüm listesi, bölümler (chapters), yeniden yükleme.</description>
+    <itunes:author>Nağmedar</itunes:author>
+    <itunes:image href="https://example.org/nagmedar/cover.png"/>
+    <podcast:guid>6a1b6e2b-8f1c-5c4e-9f4a-6d2b1f0e5a11</podcast:guid>
+    <item>
+      <title>Bölüm 1: Kayıpsız ses</title>
+      <guid isPermaLink="false">nagmedar-ep-1</guid>
+      <pubDate>Sat, 10 Oct 2026 09:00:00 +0300</pubDate>
+      <enclosure url="https://example.org/nagmedar/episode-01.mp3" length="768412" type="audio/mpeg"/>
+      <itunes:duration>00:01:00</itunes:duration>
+      <podcast:chapters url="https://example.org/nagmedar/episode-01.chapters.json" type="application/json+chapters"/>
+    </item>
+  </channel>
+</rss>

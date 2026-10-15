@@ -128,6 +128,8 @@
     <string name="nag_coming_title">%1$s %2$s ile geliyor</string>
     <string name="nag_coming_movies">Afişler, teknik bilgiler ve TV uyumluluğuyla filmler.</string>
     <string name="nag_coming_podcasts">Abonelikler, yeni bölümler ve indirmeler.</string>
+    <string name="nag_podcasts_description">Abonelikler ve yeni bölümler.</string>
+    <string name="nag_coming_radio">İnternet radyosu rehberi, favoriler ve kayıtlar.</string>
     <string name="nag_coming_device">Bu cihazdaki ve harici disklerdeki klasörler.</string>
     <string name="nag_coming_streams">Ağ akışları ve kayıtlı adresler.</string>
     <string name="nag_coming_tv_lab">Dosyaları TV\'niz için analiz edin, kalite kaybı olmadan remux edin.</string>
@@ -1815,6 +1817,7 @@
     <string name="nag_sc_lyrics">Tam ekran sözler</string>
     <string name="nag_sc_lyrics_earlier">Sözler daha erken</string>
     <string name="nag_sc_lyrics_later">Sözler daha geç</string>
+    <string name="nag_sc_podcast_search">Podcast ara</string>
     <!-- S-1006: album covers -->
     <string name="nag_covers_settings">Kapaklar</string>
     <string name="nag_covers_online">Çevrimiçi kapaklar (Cover Art Archive)</string>
@@ -2044,4 +2047,113 @@
     <string name="nag_net_nothing_to_play">“%s” içinde oynatılacak bir şey yok</string>
     <string name="nag_net_gathering">“%s” okunuyor…</string>
     <string name="nag_net_play_on">%s cihazında oynat</string>
+    <!-- S-1101, S-1102: podcast'ler -->
+    <string name="nag_pod_actions">Podcast işlemleri</string>
+    <string name="nag_pod_add">RSS adresiyle ekle…</string>
+    <string name="nag_pod_add_title">RSS adresiyle ekle</string>
+    <string name="nag_pod_add_hint">Podcast\'in RSS adresini yapıştırın.</string>
+    <string name="nag_pod_add_label">RSS adresi</string>
+    <string name="nag_pod_add_example">https://ornek.org/yayin.xml</string>
+    <string name="nag_pod_adding">Ekleniyor…</string>
+    <string name="nag_pod_already">Zaten abonesiniz: %s</string>
+    <string name="nag_pod_back">Geri</string>
+    <string name="nag_pod_close">Kapat</string>
+    <string name="nag_pod_clear_search">Aramayı temizle</string>
+    <string name="nag_pod_copied">Adres kopyalandı</string>
+    <string name="nag_pod_copy_address">RSS adresini kopyala</string>
+    <string name="nag_pod_copy_episode_address">Ses adresini kopyala</string>
+    <string name="nag_pod_empty_title">Henüz podcast yok</string>
+    <string name="nag_pod_empty_desc">Bir podcast arayıp tek dokunuşla abone olun, RSS adresiyle ekleyin ya da başka bir uygulamadaki listenizi (OPML) içe aktarın.</string>
+    <string name="nag_pod_episodes_loading">Bölümler okunuyor…</string>
+    <string name="nag_pod_export_failed">Liste kaydedilemedi</string>
+    <string name="nag_pod_fail_address">Bu bir web adresine benzemiyor.</string>
+    <string name="nag_pod_fail_empty">Adres boş yanıt verdi.</string>
+    <string name="nag_pod_fail_gone">Bu adreste yayın yok. Taşınmış ya da kaldırılmış olabilir.</string>
+    <string name="nag_pod_fail_no_episodes">Bu yayında dinlenecek bölüm yok.</string>
+    <string name="nag_pod_fail_not_feed">Bu adres bir podcast yayını (RSS ya da Atom) değil.</string>
+    <string name="nag_pod_fail_not_xml">Bu adres bir yayın vermiyor; bir web sayfası olabilir.</string>
+    <string name="nag_pod_fail_offline">Sunucuya ulaşılamadı. Bağlantınızı denetleyin.</string>
+    <string name="nag_pod_fail_redirects">Adres çok fazla yönlendiriyor.</string>
+    <string name="nag_pod_fail_server">Sunucu hata verdi (%d).</string>
+    <string name="nag_pod_find">Podcast bul</string>
+    <string name="nag_pod_import_offline">Ağa ulaşılamıyor gibi. Bağlandığınızda dosyayı yeniden içe aktarın; eklenenler listede kalır.</string>
+    <string name="nag_pod_import_progress">Podcastler ekleniyor · %1$s / %2$s</string>
+    <string name="nag_pod_import_reading">Dosya okunuyor…</string>
+    <string name="nag_pod_import_stop">Durdur</string>
+    <string name="nag_pod_import_title">OPML içe aktar</string>
+    <string name="nag_pod_less">Daha az göster</string>
+    <string name="nag_pod_loading">Podcastleriniz okunuyor…</string>
+    <string name="nag_pod_mark_played">Dinlendi olarak işaretle</string>
+    <string name="nag_pod_mark_unplayed">Dinlenmedi olarak işaretle</string>
+    <string name="nag_pod_menu_export">OPML dışa aktar…</string>
+    <string name="nag_pod_menu_import">OPML içe aktar…</string>
+    <string name="nag_pod_more">Diğer işlemler</string>
+    <string name="nag_pod_more_text">Tümünü göster</string>
+    <string name="nag_pod_new_badge">Yeni</string>
+    <string name="nag_pod_no_results">“%s” için podcast bulunamadı</string>
+    <string name="nag_pod_no_results_detail">Yazımı denetleyin, başka bir ad deneyin ya da RSS adresiyle ekleyin.</string>
+    <string name="nag_pod_notice_index_failed">Podcast Index yanıt vermedi; sonuçlar yalnızca iTunes\'tan.</string>
+    <string name="nag_pod_notice_no_index">Bu sürümde Podcast Index anahtarı yok; sonuçlar yalnızca iTunes\'tan.</string>
+    <string name="nag_pod_ok">Tamam</string>
+    <string name="nag_pod_open">Aç</string>
+    <string name="nag_pod_opml_no_feeds">Bu OPML dosyasında podcast yok.</string>
+    <string name="nag_pod_opml_not_opml">Bu dosya bir OPML podcast listesi değil.</string>
+    <string name="nag_pod_opml_too_large">Bu dosya bir podcast listesi olamayacak kadar büyük.</string>
+    <string name="nag_pod_opml_title">Nağmedar podcastleri</string>
+    <string name="nag_pod_opml_unreadable">Dosya okunamadı.</string>
+    <string name="nag_pod_play">Oynat</string>
+    <string name="nag_pod_played">Dinlendi</string>
+    <string name="nag_pod_reading">Yayın okunuyor…</string>
+    <string name="nag_pod_retry">Yeniden dene</string>
+    <string name="nag_pod_search">Ara</string>
+    <string name="nag_pod_search_busy_desc">Hizmet beklememizi istedi. Bir dakika sonra yeniden deneyin.</string>
+    <string name="nag_pod_search_busy_title">Arama şu an meşgul</string>
+    <string name="nag_pod_search_failed_desc">Rehber hata verdi. Yeniden deneyin ya da RSS adresiyle ekleyin.</string>
+    <string name="nag_pod_search_failed_title">Arama yapılamadı</string>
+    <string name="nag_pod_search_offline_desc">Arama için ağ bağlantısı gerekir. Abonelikleriniz yerinde duruyor.</string>
+    <string name="nag_pod_search_offline_title">Çevrimdışısınız</string>
+    <string name="nag_pod_search_placeholder">Podcast ara</string>
+    <string name="nag_pod_searching">Aranıyor…</string>
+    <string name="nag_pod_subscribe">Abone ol</string>
+    <string name="nag_pod_subscribed">Abone</string>
+    <string name="nag_pod_subscribed_to">%s eklendi</string>
+    <string name="nag_pod_support">Destek ol</string>
+    <string name="nag_pod_unplayed">Dinlenmedi</string>
+    <string name="nag_pod_unsubscribe">Abonelikten çık</string>
+    <string name="nag_pod_unsubscribed">%s aboneliği kaldırıldı</string>
+    <string name="nag_pod_view_grid">Kapaklarla göster</string>
+    <string name="nag_pod_view_list">Liste olarak göster</string>
+    <string name="nag_pod_web_page">Web sayfası</string>
+    <plurals name="nag_pod_count">
+        <item quantity="one">%d podcast</item>
+        <item quantity="other">%d podcast</item>
+    </plurals>
+    <plurals name="nag_pod_episodes">
+        <item quantity="one">%d bölüm</item>
+        <item quantity="other">%d bölüm</item>
+    </plurals>
+    <plurals name="nag_pod_exported">
+        <item quantity="one">%d abonelik kaydedildi</item>
+        <item quantity="other">%d abonelik kaydedildi</item>
+    </plurals>
+    <plurals name="nag_pod_import_added">
+        <item quantity="one">%d podcast eklendi</item>
+        <item quantity="other">%d podcast eklendi</item>
+    </plurals>
+    <plurals name="nag_pod_import_already">
+        <item quantity="one">%d tanesine zaten abonesiniz</item>
+        <item quantity="other">%d tanesine zaten abonesiniz</item>
+    </plurals>
+    <plurals name="nag_pod_import_failed">
+        <item quantity="one">%d tanesi eklenemedi</item>
+        <item quantity="other">%d tanesi eklenemedi</item>
+    </plurals>
+    <plurals name="nag_pod_new">
+        <item quantity="one">%d yeni</item>
+        <item quantity="other">%d yeni</item>
+    </plurals>
+    <plurals name="nag_pod_results">
+        <item quantity="one">“%2$s” için %1$d sonuç</item>
+        <item quantity="other">“%2$s” için %1$d sonuç</item>
+    </plurals>
 </resources>

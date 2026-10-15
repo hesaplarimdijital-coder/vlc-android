@@ -36,7 +36,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 10
+        const val VERSION = 11
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -130,9 +130,22 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 10 → 11 (S-1101): what a feed's first fetch reads beyond the title, and the Podcasting 2.0 files. */
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                listOf("link TEXT", "podcast_guid TEXT", "funding_url TEXT", "funding_message TEXT", "alias_keys TEXT NOT NULL DEFAULT ''").forEach {
+                    db.execSQL("ALTER TABLE `podcast_feed` ADD COLUMN $it")
+                }
+                listOf(
+                    "added_at INTEGER NOT NULL DEFAULT 0", "size_bytes INTEGER NOT NULL DEFAULT 0", "image_url TEXT", "season INTEGER",
+                    "episode_number INTEGER", "chapters_url TEXT", "transcript_url TEXT", "transcript_type TEXT",
+                ).forEach { db.execSQL("ALTER TABLE `podcast_episode` ADD COLUMN $it") }
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11,
         )
 
         @Volatile

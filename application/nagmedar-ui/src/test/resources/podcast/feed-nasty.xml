@@ -1,0 +1,52 @@
+﻿
+
+<?xml version="1.0" encoding="UTF-8"?>
+<RSS version="2.0" xmlns:iTunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <Channel>
+    <Title>  Kötü   Yayın &amp; Ortağı  </Title>
+    <Description>Satır<br/>sonu &nbsp;ve&nbsp;boşluk &lt;b&gt;kalın&lt;/b&gt; &#252;&#x15F; &hellip;</Description>
+    <iTunes:author>Yazar</iTunes:author>
+    <item>
+      <title>Tarihi bozuk</title>
+      <guid>bad-date</guid>
+      <pubDate>geçen salı</pubDate>
+      <enclosure url="https://example.org/a.mp3" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Enclosure yok</title>
+      <guid>no-enclosure</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Ek bir pdf</title>
+      <guid>pdf</guid>
+      <enclosure url="https://example.org/notlar.pdf" length="1000" type="application/pdf"/>
+    </item>
+    <item>
+      <title>Aynı guid, ikinci</title>
+      <guid>bad-date</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 GMT</pubDate>
+      <enclosure url="https://example.org/b.mp3" type="audio/mpeg"/>
+    </item>
+    <item>
+      <guid>relative</guid>
+      <pubDate>5 Oct 26 9:05 +0300</pubDate>
+      <enclosure url="/media/relative episode.mp3" type="" length="abc"/>
+      <itunes:duration>12:xx</itunes:duration>
+    </item>
+    <item>
+      <title><![CDATA[<b>Ham</b> HTML başlık]]></title>
+      <guid>html-title</guid>
+      <pubDate>2026-10-04T08:00:00+03:00</pubDate>
+      <description>Bu açıklamada <a href="https://example.org">bağlantı</a> ve <p>ham paragraf</p> var</description>
+      <enclosure url="https://example.org/c.ogg" type="application/octet-stream"/>
+      <itunes:duration>3723.5</itunes:duration>
+    </item>
+    <item>
+      <title>Medya içeriği</title>
+      <guid>media</guid>
+      <pubDate>Sat, 03 Oct 2026 06:00:00 EST</pubDate>
+      <media:content url="https://example.org/d.mp3" type="audio/mpeg" fileSize="2048"/>
+    </item>
+  </Channel>
+</RSS>

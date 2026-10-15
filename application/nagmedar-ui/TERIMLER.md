@@ -144,6 +144,11 @@ Sözlüğü testler denetler:
 | test sesi | test tone | cıvıltı, bip | chirp, beep | Gecikme ölçümünde çalınan beş kısa ses; mikrofonla duyulan, çalınanla karşılaştırılır. “Test sesleri duyulmadı” |
 | yayılım | spread | sapma, dağılım | deviation | Ölçümün tekrarlarının birbirinden en çok ne kadar ayrıldığı (en büyük eksi en küçük): “yayılım 4 ms”; 20 ms'yi aşarsa ölçüm tutarsızdır |
 | mikrofon yolu | microphone path | kalibrasyon | calibration | Dahili hoparlörün ölçülen gidiş dönüş süresi; öteki cihazların ölçümünden düşülen referans, gecikme olarak uygulanmaz |
+| podcast, abonelik | podcast, subscription | | | “Podcastler” ekranı; Türkçede de “podcast”, çoğulu “podcastler”. “Abone ol” / “Subscribe”, eklenince “Abone” / “Subscribed”, “Abonelikten çık” / “Unsubscribe”. Bölümü “bölüm” (episode) |
+| yayın, RSS adresi | feed, RSS address | besleme | | Bir podcast'in RSS ya da Atom dosyası ve adresi: “RSS adresiyle ekle…”, “Bu adres bir podcast yayını değil” |
+| yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
+| dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu (videoda izlendi / izlenmedi): “Dinlendi olarak işaretle” |
+| OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 
 ## Özel adlar
 

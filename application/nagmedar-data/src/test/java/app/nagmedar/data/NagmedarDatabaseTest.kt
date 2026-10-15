@@ -63,6 +63,51 @@ class NagmedarDatabaseTest {
         assertTrue(runBlocking { podcasts.feeds().first() }.isEmpty())
     }
 
+    /** S-1101: the subscriptions' grid counts episodes, and a refresh's unplayed ones are the new ones. */
+    @Test
+    fun subscriptionsAreCountedAndTheirNewEpisodesTold() {
+        val podcasts = db.podcasts()
+        fun episode(guid: String, at: Long) = PodcastEpisode(
+            feedId = 0, guid = guid, title = guid, audioUrl = "https://example.org/$guid.mp3", publishedAt = at, addedAt = 1_000,
+            sizeBytes = 4_200_000, chaptersUrl = "https://example.org/$guid.json", transcriptUrl = "https://example.org/$guid.vtt",
+            transcriptType = "text/vtt", season = 2, episodeNumber = 5,
+        )
+        val id = podcasts.subscribeWith(
+            PodcastFeed(
+                feedUrl = "https://example.org/a.xml", title = "Zebra", subscribedAt = 1_000, podcastGuid = "6a1b6e2b-8f1c-5c4e-9f4a-6d2b1f0e5a11",
+                fundingUrl = "https://example.org/destek", fundingMessage = "Destek olun", link = "https://example.org",
+            ),
+            listOf(episode("a", 10), episode("b", 20)),
+        )
+        podcasts.subscribeWith(PodcastFeed(feedUrl = "https://example.org/b.xml", title = "ağaç", subscribedAt = 1_000), emptyList())
+        // the first fetch's episodes are not new
+        assertEquals(listOf("ağaç" to 0, "Zebra" to 2), runBlocking { podcasts.summaries().first() }.map { it.feed.title to it.episodeCount })
+        assertEquals(listOf(0, 0), runBlocking { podcasts.summaries().first() }.map { it.newCount })
+
+        // a refresh adds one; played, it is not new either
+        podcasts.refreshFeed(podcasts.feed(id)!!, listOf(episode("c", 30).copy(addedAt = 5_000), episode("d", 40).copy(addedAt = 5_000)))
+        val zebra = { runBlocking { podcasts.summaries().first() }.single { it.feed.id == id } }
+        assertEquals(4, zebra().episodeCount)
+        assertEquals(2, zebra().newCount)
+        podcasts.setPlayed(podcasts.episodeList(id).first { it.guid == "d" }.id, true)
+        assertEquals(1, zebra().newCount)
+        assertTrue(podcasts.episodeList(id).first { it.guid == "d" }.played)
+
+        // what the feed said beyond the basics comes back whole
+        podcasts.feed(id)!!.let {
+            assertEquals("6a1b6e2b-8f1c-5c4e-9f4a-6d2b1f0e5a11", it.podcastGuid)
+            assertEquals("Destek olun", it.fundingMessage)
+        }
+        podcasts.episodeList(id).first { it.guid == "a" }.let {
+            assertEquals(4_200_000L, it.sizeBytes)
+            assertEquals("text/vtt", it.transcriptType)
+            assertEquals(2, it.season)
+            assertEquals(5, it.episodeNumber)
+        }
+        assertEquals(listOf("ağaç", "Zebra"), podcasts.feedList().map { it.title })
+        assertNull(podcasts.feed(999))
+    }
+
     @Test
     fun radioStationsAreSavedOncePerDirectoryEntry() {
         val radio = db.radio()
@@ -463,6 +508,40 @@ class NagmedarDatabaseMigrationTest {
                 assertTrue("no language yet", c.isNull(4))
                 assertEquals(0, c.getInt(5))
                 assertEquals(0L, c.getLong(6))
+            }
+        }
+    }
+
+    /** 10 → 11 (S-1101): a subscription made before keeps its rows, and the new columns start empty. */
+    @Test
+    fun podcastRowsSurviveTheirNewColumns() {
+        assumeTrue("schema 10 not exported yet", schemaExported(10))
+        assumeTrue("schema 11 not exported yet", schemaExported(11))
+        helper.createDatabase(TEST_DB, 10).use { db ->
+            db.execSQL(
+                "INSERT INTO podcast_feed (id, feed_url, title, refreshed_at, auto_download, subscribed_at) " +
+                    "VALUES (1, 'https://example.org/feed.xml', 'Nağmedar Podcast', 5, 0, 7)",
+            )
+            db.execSQL(
+                "INSERT INTO podcast_episode (feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, download_state) " +
+                    "VALUES (1, 'ep-1', 'Bölüm 1', 'https://example.org/1.mp3', 60000, 9, 1500, 1, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 11, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT title, subscribed_at, link, podcast_guid, funding_url, alias_keys FROM podcast_feed WHERE id = 1").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Nağmedar Podcast", c.getString(0))
+                assertEquals(7L, c.getLong(1))
+                assertTrue(c.isNull(2) && c.isNull(3) && c.isNull(4))
+                assertEquals("", c.getString(5))
+            }
+            db.query("SELECT played, position_ms, added_at, size_bytes, image_url, season, chapters_url FROM podcast_episode WHERE guid = 'ep-1'").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(1, c.getInt(0))
+                assertEquals(1500L, c.getLong(1))
+                assertEquals("not new: it was there before the column", 0L, c.getLong(2))
+                assertEquals(0L, c.getLong(3))
+                assertTrue(c.isNull(4) && c.isNull(5) && c.isNull(6))
             }
         }
     }

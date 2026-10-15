@@ -15,6 +15,10 @@ android {
         // S-706: Nağmedar's own OpenSubtitles.com API key, from the build's environment (a CI secret)
         // or a Gradle property; without one the subtitles' search says so
         buildConfigField 'String', 'OPENSUBTITLES_API_KEY', "\"${openSubtitlesKey(project)}\""
+        // S-1101: Nağmedar's own Podcast Index key and secret, the same way; without them the podcast
+        // search asks iTunes alone and says so
+        buildConfigField 'String', 'PODCASTINDEX_KEY', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_KEY', 'nagmedar_podcastindex_key')}\""
+        buildConfigField 'String', 'PODCASTINDEX_SECRET', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_SECRET', 'nagmedar_podcastindex_secret')}\""
     }
 
     buildTypes {
@@ -80,4 +84,11 @@ static def openSubtitlesKey(project) {
     def key = System.getenv('NAGMEDAR_OPENSUBTITLES_API_KEY') ?: project.findProperty('nagmedar_opensubtitles_api_key') ?: ''
     // only a key's characters: nothing that would break the generated Java string
     return key.toString().replaceAll('[^A-Za-z0-9_-]', '')
+}
+
+static def podcastIndexValue(project, envName, propertyName) {
+    def value = (System.getenv(envName) ?: project.findProperty(propertyName) ?: '').toString().trim()
+    // as the text of a Java string: the secret may hold $, ^ and #, so only the backslash and the quote are escaped
+    // and control characters (a pasted line break) dropped
+    return value.replaceAll('[\\p{Cntrl}]', '').replace('\\', '\\\\').replace('"', '\\"')
 }

@@ -1,7 +1,9 @@
 package app.nagmedar.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,10 +18,36 @@ import kotlinx.coroutines.flow.Flow
  * and the upstream modules pin that Room version.
  */
 
+/** S-1101: a subscription with its episodes counted, as the subscriptions' grid shows it. */
+data class PodcastFeedSummary(
+    @Embedded val feed: PodcastFeed,
+    @ColumnInfo(name = "episode_count") val episodeCount: Int,
+    /** Unplayed episodes a refresh added after the subscription. */
+    @ColumnInfo(name = "new_count") val newCount: Int,
+)
+
 @Dao
 abstract class PodcastDao {
     @Query("SELECT * FROM podcast_feed ORDER BY title COLLATE NOCASE")
     abstract fun feeds(): Flow<List<PodcastFeed>>
+
+    @Query("SELECT * FROM podcast_feed ORDER BY title COLLATE NOCASE")
+    abstract fun feedList(): List<PodcastFeed>
+
+    @Query("SELECT * FROM podcast_feed WHERE id = :id")
+    abstract fun feed(id: Long): PodcastFeed?
+
+    @Query("SELECT * FROM podcast_feed WHERE id = :id")
+    abstract fun observeFeed(id: Long): Flow<PodcastFeed?>
+
+    /** S-1101: every subscription with its episode count and its new ones, by title. */
+    @Query(
+        "SELECT f.*, " +
+            "(SELECT COUNT(*) FROM podcast_episode e WHERE e.feed_id = f.id) AS episode_count, " +
+            "(SELECT COUNT(*) FROM podcast_episode e WHERE e.feed_id = f.id AND e.played = 0 AND e.added_at > f.subscribed_at) AS new_count " +
+            "FROM podcast_feed f ORDER BY f.title COLLATE NOCASE",
+    )
+    abstract fun summaries(): Flow<List<PodcastFeedSummary>>
 
     @Query("SELECT * FROM podcast_feed WHERE feed_url = :url")
     abstract fun feedByUrl(url: String): PodcastFeed?
@@ -53,8 +81,19 @@ abstract class PodcastDao {
     @Query("UPDATE podcast_episode SET position_ms = :positionMs, played = :played WHERE id = :episodeId")
     abstract fun savePosition(episodeId: Long, positionMs: Long, played: Boolean)
 
+    @Query("UPDATE podcast_episode SET played = :played WHERE id = :episodeId")
+    abstract fun setPlayed(episodeId: Long, played: Boolean)
+
     @Query("UPDATE podcast_episode SET download_state = :state, download_path = :path WHERE id = :episodeId")
     abstract fun setDownload(episodeId: Long, state: Int, path: String?)
+
+    /** S-1101: a new subscription with the episodes its first fetch read; the feed's id. */
+    @Transaction
+    open fun subscribeWith(feed: PodcastFeed, episodes: List<PodcastEpisode>): Long {
+        val id = subscribe(feed)
+        addEpisodes(episodes.map { it.copy(feedId = id) })
+        return id
+    }
 
     @Transaction
     open fun refreshFeed(feed: PodcastFeed, episodes: List<PodcastEpisode>) {

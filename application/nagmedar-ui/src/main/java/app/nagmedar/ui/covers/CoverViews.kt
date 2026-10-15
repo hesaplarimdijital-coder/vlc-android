@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -50,9 +51,9 @@ import org.videolan.tools.NAGMEDAR_COVERS_ONLINE
 import org.videolan.tools.Settings
 import kotlin.math.roundToInt
 
-/** S-1006: a cover, or the music note where there is none. */
+/** S-1006: a cover, or the music note (S-1101: or the [placeholder] icon of what it is a cover of) where there is none. */
 @Composable
-fun CoverTile(image: ImageBitmap?, size: Dp, modifier: Modifier = Modifier, corner: Dp = 6.dp) {
+fun CoverTile(image: ImageBitmap?, size: Dp, modifier: Modifier = Modifier, corner: Dp = 6.dp, placeholder: ImageVector = NagIcons.Music) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(corner)
     Box(
@@ -66,7 +67,7 @@ fun CoverTile(image: ImageBitmap?, size: Dp, modifier: Modifier = Modifier, corn
         if (image != null) {
             Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Icon(NagIcons.Music, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(size / 2.5f))
+            Icon(placeholder, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(size / 2.5f))
         }
     }
 }

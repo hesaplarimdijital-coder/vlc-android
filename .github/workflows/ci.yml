@@ -53,6 +53,9 @@ env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
   # S-706: Nağmedar's own OpenSubtitles.com API key; empty where the secret is not set
   NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
+  # S-1101: Nağmedar's own Podcast Index key and secret; empty where the secrets are not set
+  NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
+  NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
   # get-vlc.sh applies VLC patches with "git am", which needs a committer identity.
   GIT_AUTHOR_NAME: github-actions[bot]
   GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com

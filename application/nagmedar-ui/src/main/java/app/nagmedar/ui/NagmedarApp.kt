@@ -84,6 +84,8 @@ import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.radio.RadioScreen
+import app.nagmedar.ui.podcast.PodcastCenter
+import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
@@ -325,6 +327,8 @@ private fun NagmedarMain(
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         // S-1105: the radio directory's search
                         Destination.Radio -> RadioScreen(searchRequested = radioSearchRequested, onSearchHandled = { radioSearchRequested = false }, undo = undo)
+                        // S-1101, S-1102: subscriptions, the search of Podcast Index and iTunes, OPML
+                        Destination.Podcasts -> PodcastsScreen(undo = undo)
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)
@@ -583,6 +587,11 @@ class AppActions(
             ShortcutId.RadioSearch -> {
                 navigator.navigate(Destination.Radio)
                 openRadioSearch()
+            }
+            // S-1101: the search field of Podcasts has the keyboard
+            ShortcutId.PodcastSearch -> {
+                navigator.navigate(Destination.Podcasts)
+                PodcastCenter.requestSearchFocus()
             }
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
