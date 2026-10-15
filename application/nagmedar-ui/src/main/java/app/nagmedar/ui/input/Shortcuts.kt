@@ -154,7 +154,7 @@ enum class ShortcutId {
     Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
-    RadioSearch,
+    RadioSearch, RadioRecord, RadioRecordings,
     FolderUp, Refresh,
     PodcastSearch,
 }
@@ -260,6 +260,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.TvLab, ShortcutGroup.Tools, R.string.nag_nav_tv_lab, KeyChord(Key.T, ctrl = true, shift = true)),
         // S-1105: the radio directory's search, from anywhere
         Shortcut(ShortcutId.RadioSearch, ShortcutGroup.Tools, R.string.nag_sc_radio_search, KeyChord(Key.R, ctrl = true, shift = true)),
+        // S-1107: the station on the air recorded (again: stopped), and the radio recordings
+        Shortcut(ShortcutId.RadioRecord, ShortcutGroup.Tools, R.string.nag_sc_radio_record, KeyChord(Key.R, alt = true)),
+        Shortcut(ShortcutId.RadioRecordings, ShortcutGroup.Tools, R.string.nag_sc_radio_recordings, KeyChord(Key.R, alt = true, shift = true)),
         // View
         Shortcut(ShortcutId.CommandPalette, ShortcutGroup.View, R.string.nag_search, KeyChord(Key.K, ctrl = true)),
         Shortcut(ShortcutId.ToggleSidebar, ShortcutGroup.View, R.string.nag_sc_toggle_sidebar, KeyChord(Key.B, ctrl = true)),

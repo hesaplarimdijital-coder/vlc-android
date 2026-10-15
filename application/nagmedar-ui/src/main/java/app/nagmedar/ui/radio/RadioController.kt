@@ -46,8 +46,8 @@ sealed interface RadioNotice {
 /** Why a playlist file gave no stations. */
 enum class ImportProblem { NotAPlaylist, Empty, TooLarge, Unreadable }
 
-/** The radio screen's lists. */
-enum class RadioTab { Favourites, Recent, Search, Imported }
+/** The radio screen's lists, and (S-207) the recordings made from its stations. */
+enum class RadioTab { Favourites, Recent, Search, Imported, Recordings }
 
 /** S-1105: a vote is cast once a station a day, counted on this device. */
 object VoteRule {
@@ -186,7 +186,8 @@ class RadioController(
                 RadioTab.Favourites -> search.replace(library.favourite(station, false))
                 RadioTab.Recent -> library.forget(station)
                 RadioTab.Imported -> library.remove(station)
-                RadioTab.Search -> return@guarded
+                // the recordings are not stations: their tab has its own controller
+                RadioTab.Search, RadioTab.Recordings -> return@guarded
             }
             notice = RadioNotice.Removed(station, from)
         }

@@ -83,9 +83,12 @@ import app.nagmedar.ui.playback.QueueSheet
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
+import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.radio.RadioScreen
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastsScreen
+import app.nagmedar.ui.radio.record.RadioRecordings
+import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
@@ -213,6 +216,8 @@ private fun NagmedarMain(
     var lyricsOpen by rememberSaveable { mutableStateOf(false) }
     // S-1105: the radio screen's search box asked for by Ctrl+Shift+R
     var radioSearchRequested by remember { mutableStateOf(false) }
+    // S-207: the radio screen's Recordings tab asked for by Alt+Shift+R
+    var radioRecordingsRequested by remember { mutableStateOf(false) }
     val actions = remember(context, prefs, navigator) {
         AppActions(
             context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile,
@@ -221,6 +226,7 @@ private fun NagmedarMain(
             openSleepTimer = { sleepTimerOpen = true },
             toggleLyrics = { lyricsOpen = !lyricsOpen },
             openRadioSearch = { radioSearchRequested = true },
+            openRadioRecordings = { radioRecordingsRequested = true },
             closeLyrics = {
                 val open = lyricsOpen
                 lyricsOpen = false
@@ -326,7 +332,13 @@ private fun NagmedarMain(
                         // S-804: the medialibrary's playlists, a tab each
                         Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
                         // S-1105: the radio directory's search
-                        Destination.Radio -> RadioScreen(searchRequested = radioSearchRequested, onSearchHandled = { radioSearchRequested = false }, undo = undo)
+                        Destination.Radio -> RadioScreen(
+                            searchRequested = radioSearchRequested,
+                            onSearchHandled = { radioSearchRequested = false },
+                            recordingsRequested = radioRecordingsRequested,
+                            onRecordingsHandled = { radioRecordingsRequested = false },
+                            undo = undo,
+                        )
                         // S-1101, S-1102: subscriptions, the search of Podcast Index and iTunes, OPML
                         Destination.Podcasts -> PodcastsScreen(undo = undo)
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
@@ -444,6 +456,8 @@ class AppActions(
     private val closeLyrics: () -> Boolean = { false },
     /** S-1105: the radio screen's search box takes the keyboard. */
     private val openRadioSearch: () -> Unit = {},
+    /** S-207: the radio screen's Recordings tab. */
+    private val openRadioRecordings: () -> Unit = {},
 ) {
     private var volumeBeforeMute = 100
 
@@ -593,6 +607,12 @@ class AppActions(
                 navigator.navigate(Destination.Podcasts)
                 PodcastCenter.requestSearchFocus()
             }
+            // S-1107: the station on the air recorded, or its recording stopped
+            ShortcutId.RadioRecord -> toggleRadioRecording()
+            ShortcutId.RadioRecordings -> {
+                navigator.navigate(Destination.Radio)
+                openRadioRecordings()
+            }
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
             ShortcutId.ShortcutList -> {
@@ -602,6 +622,26 @@ class AppActions(
             else -> return false
         }
         return true
+    }
+
+    /** S-1107: records the station on the air; if its recording is going on, stops it. Said in a toast. */
+    private fun toggleRadioRecording() {
+        val station = RadioCenter.controller(context).now?.station
+        val message = if (station == null) {
+            context.getString(R.string.nag_radio_rec_none_playing)
+        } else {
+            val center = RadioRecordings.center(context)
+            val recording = station.toRecording()
+            val live = center.live.value.firstOrNull { it.request.station.key == recording.key }
+            if (live != null) {
+                center.stop(live.sessionId)
+                context.getString(R.string.nag_radio_rec_stopped, station.name)
+            } else {
+                center.start(recording)
+                context.getString(R.string.nag_radio_rec_started, station.name)
+            }
+        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     /** S-1004: the playing track's lyrics [byMs] later (earlier when negative), said in a toast. */

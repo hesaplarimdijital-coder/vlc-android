@@ -8,10 +8,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.text.format.Formatter
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.nagmedar.ui.R
+import java.util.Locale
 
 /** What the ongoing notification says: one recording's station and track, or the count of them, and how long it has gone on. */
 data class RecordingNoticeText(
@@ -110,7 +110,7 @@ object RecordingNotifications {
         if (live.isEmpty()) {
             return builder.setContentTitle(context.getString(R.string.nag_radio_rec_notif_connecting)).build()
         }
-        val text = text(live, words) { Formatter.formatShortFileSize(context, it) }
+        val text = text(live, words) { RecordingText.size(it, Locale.getDefault()) }
         builder.setContentTitle(text.title).setContentText(text.text).setSubText(text.detail)
         if (text.since > 0) builder.setWhen(text.since).setShowWhen(true).setUsesChronometer(true)
         return builder.build()
@@ -164,7 +164,7 @@ object RecordingNotifications {
         private val words = wordsOf(context)
 
         override fun ended(ended: EndedRecording) {
-            val (title, text) = endText(ended, words) { Formatter.formatShortFileSize(context, it) } ?: return
+            val (title, text) = endText(ended, words) { RecordingText.size(it, Locale.getDefault()) } ?: return
             post(context, ended.request.station.key, ALERT_ID, alert(context, title, text))
         }
 

@@ -40,6 +40,22 @@ object RadioRecordings {
         running ?: build(context.applicationContext).also { running = it }
     }
 
+    @Volatile
+    private var tab: RecordingsController? = null
+
+    /** The Recordings tab's controller: it outlives the screen, so the open recordings stay open while another screen shows. */
+    fun controller(context: Context): RecordingsController = tab ?: synchronized(this) {
+        val app = context.applicationContext
+        tab ?: RecordingsController(
+            data = store(app),
+            control = center(app),
+            settings = { settings(app) },
+            environment = AndroidRecordingEnvironment(app),
+            player = AndroidTrackPlayer(app),
+            scope = recordingsScope(),
+        ).also { tab = it }
+    }
+
     private fun build(context: Context): RecordingCenter {
         val library = store(context)
         val storage = AndroidTrackStorage(context) { settings(context).folder }
