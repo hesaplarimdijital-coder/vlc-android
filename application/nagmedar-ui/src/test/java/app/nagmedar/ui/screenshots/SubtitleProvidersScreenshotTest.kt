@@ -97,9 +97,9 @@ class SubtitleProvidersScreenshotTest {
     private fun result(provider: String, id: String, name: String, release: String, language: String, downloads: Long, hash: Boolean = false, also: List<String> = emptyList()) =
         SubtitleResult(provider, id, name, "$release.$language.srt", release, language, downloads, null, hash, alsoFrom = also, fps = 23.976, title = "Kuzey Işığı", year = 2024)
 
-    private val found = listOf(
-        result("opensubtitles", "11", "OpenSubtitles", "Kuzey.Isigi.2024.1080p.WEB-DL", "tr", 12_345, hash = true, also = listOf("Yerel klasör")),
-        result("local-folder", "a", "Yerel klasör", "Kuzey.Isigi.2024.720p.BluRay", "tr", 0),
+    private fun found(local: String) = listOf(
+        result("opensubtitles", "11", "OpenSubtitles", "Kuzey.Isigi.2024.1080p.WEB-DL", "tr", 12_345, hash = true, also = listOf(local)),
+        result("local-folder", "a", local, "Kuzey.Isigi.2024.720p.BluRay", "tr", 0),
         result("opensubtitles", "12", "OpenSubtitles", "Northern.Light.2024.1080p.WEB", "en", 48_210),
     )
 
@@ -121,23 +121,23 @@ class SubtitleProvidersScreenshotTest {
         window()
     }
 
-    private val both = OnlineSearchState(
+    private fun both(local: String) = OnlineSearchState(
         "Kuzey Işığı 2024", listOf("tr", "en"), listOf("tr", "en"),
-        results = found,
-        reports = listOf(ProviderReport("opensubtitles", "OpenSubtitles", 2), ProviderReport("local-folder", "Yerel klasör", 1)),
+        results = found(local),
+        reports = listOf(ProviderReport("opensubtitles", "OpenSubtitles", 2), ProviderReport("local-folder", local, 1)),
     )
 
-    private val partial = both.copy(
-        results = found.filter { it.provider == "opensubtitles" },
-        reports = listOf(ProviderReport("opensubtitles", "OpenSubtitles", 2), ProviderReport("local-folder", "Yerel klasör", 0, OnlineProblem.Timeout)),
+    private fun partial(local: String) = both(local).copy(
+        results = found(local).filter { it.provider == "opensubtitles" },
+        reports = listOf(ProviderReport("opensubtitles", "OpenSubtitles", 2), ProviderReport("local-folder", local, 0, OnlineProblem.Timeout)),
     )
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun searchMerged() = search("subproviders-search-dex", InputMode.Pointer, both)
+    fun searchMerged() = search("subproviders-search-dex", InputMode.Pointer, both("Yerel klasör"))
 
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
-    fun searchPartialEnglish() = search("subproviders-search-partial-dex-en", InputMode.Pointer, partial)
+    fun searchPartialEnglish() = search("subproviders-search-partial-dex-en", InputMode.Pointer, partial("Local folder"))
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun searchPhone() = search("subproviders-search-phone", InputMode.Touch, partial)
+    fun searchPhone() = search("subproviders-search-phone", InputMode.Touch, partial("Yerel klasör"))
 }
