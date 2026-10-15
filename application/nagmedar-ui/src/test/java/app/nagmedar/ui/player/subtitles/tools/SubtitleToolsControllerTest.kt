@@ -402,7 +402,7 @@ class SubtitleToolsControllerTest {
         assertTrue(controller.perform(ShortcutId.CuePrevious))
         assertEquals(3L, controller.state?.focus)
         assertTrue(controller.perform(ShortcutId.CueMerge))
-        assertFalse(controller.perform(ShortcutId.Other))
+        assertFalse(controller.perform(ShortcutId.PlayPause))
     }
 
     @Test
