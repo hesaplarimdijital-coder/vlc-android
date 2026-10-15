@@ -40,6 +40,7 @@ import org.videolan.resources.PLAYLIST_TYPE_AUDIO
 import org.videolan.resources.PLAYLIST_TYPE_VIDEO
 import org.videolan.resources.PLAY_FROM_SERVICE
 import org.videolan.resources.DecodingHook
+import org.videolan.resources.NetworkMediaHook
 import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.VLCOptions
@@ -693,6 +694,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             val software = DecodingHook.adviser?.takeIf { mw.type == MediaWrapper.TYPE_VIDEO }
                 ?.let { adviser -> runCatching { adviser.needsSoftwareDecoding(ctx, mw.uri) }.getOrDefault(false) } ?: false
             VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer())
+            // Nağmedar (S-1301): a saved network server's sign-in, as libVLC's options take it, never in the address
+            NetworkMediaHook.options?.let { hook -> withContext(Dispatchers.IO) { runCatching { hook.optionsFor(uri) }.getOrDefault(emptyList()) } }
+                ?.forEach { media.addOption(it) }
             /* keeping only video during benchmark */
             if (isBenchmark) {
                 media.addOption(":no-audio")

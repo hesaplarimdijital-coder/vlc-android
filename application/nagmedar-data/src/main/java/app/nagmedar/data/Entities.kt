@@ -227,3 +227,20 @@ data class LatencyProfileEntry(
     /** The built-in speaker's own round trip as measured, ms (the microphone's path); not applied, taken off other devices' measurements. */
     @ColumnInfo(name = "calibration_ms") val calibrationMs: Int? = null,
 )
+
+/**
+ * S-1301: a network server the user saved: its name, its address as libVLC reads it
+ * ("smb://nas.local/Filmler"; never a user or a password in it) and its sign-in, sealed with an
+ * Android Keystore key that never leaves the device (null: none kept). A system backup may carry
+ * the row to another device, where the sign-in cannot be opened and is asked for again.
+ */
+@Entity(tableName = "network_server", indices = [Index(value = ["url"], unique = true)])
+data class NetworkServerEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val url: String,
+    /** The user name and the password, sealed: the cipher's version, IV and text with its tag. */
+    val credentials: ByteArray? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    @ColumnInfo(name = "last_used_at") val lastUsedAt: Long = 0,
+)

@@ -17,6 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
+        NetworkServerEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -31,10 +32,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun trackStats(): TrackStatsDao
     abstract fun smartPlaylists(): SmartPlaylistDao
     abstract fun latencyProfiles(): LatencyProfileDao
+    abstract fun networkServers(): NetworkServerDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 9
+        const val VERSION = 10
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -117,9 +119,20 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 9 → 10 (S-1301): the saved network servers. */
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `network_server` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`url` TEXT NOT NULL, `credentials` BLOB, `created_at` INTEGER NOT NULL, `last_used_at` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_network_server_url` ON `network_server` (`url`)")
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
         )
 
         @Volatile

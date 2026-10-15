@@ -33,6 +33,7 @@ import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import app.nagmedar.ui.network.NetworkDialogs
 import org.videolan.libvlc.Dialog
 import org.videolan.libvlc.FactoryManager
 import org.videolan.libvlc.LibVLCFactory
@@ -150,6 +151,8 @@ class AppSetupDelegate : AppDelegate,
         launch(Dispatchers.IO) innerLaunch@ {
             if (!VLCInstance.testCompatibleCPU(AppContextProvider.appContext)) return@innerLaunch
             Dialog.setCallbacks(VLCInstance.getInstance(this@backgroundInit), DialogDelegate)
+            // Nağmedar (S-1301): saved network servers sign in for the library's scan and for playback
+            NetworkDialogs.install(this@backgroundInit)
             VersionMigration.migrateVersionAfterLibVLC(this@backgroundInit)
             // Scan the system fonts now, so that the first playback doesn't have to
             if (isMainProcess()) FontCache.prepare(this@backgroundInit)

@@ -241,6 +241,32 @@ class NagmedarDatabaseTest {
         assertEquals(listOf(second), runBlocking { smart.observe().first() }.map { it.id })
     }
 
+    /** S-1301: a server once per address, by name; its sealed sign-in replaced or forgotten alone. */
+    @Test
+    fun networkServersAreKeptOncePerAddress() {
+        val servers = db.networkServers()
+        val nas = servers.insert(NetworkServerEntry(name = "NAS", url = "smb://nas.local/Filmler", credentials = byteArrayOf(1, 2, 3), createdAt = 1))
+        val ftp = servers.insert(NetworkServerEntry(name = "arşiv", url = "ftp://192.168.1.20/", createdAt = 2))
+        assertEquals(listOf("arşiv", "NAS"), runBlocking { servers.observe().first() }.map { it.name })
+        val again = runCatching { servers.insert(NetworkServerEntry(name = "Yine NAS", url = "smb://nas.local/Filmler")) }
+        assertTrue("one row per address", again.isFailure)
+        assertEquals(nas, servers.byUrl("smb://nas.local/Filmler")!!.id)
+        assertTrue(byteArrayOf(1, 2, 3).contentEquals(servers.get(nas)!!.credentials))
+        servers.setCredentials(nas, byteArrayOf(9))
+        servers.used(nas, at = 50)
+        servers.get(nas)!!.let {
+            assertTrue(byteArrayOf(9).contentEquals(it.credentials))
+            assertEquals(50L, it.lastUsedAt)
+            assertEquals("the rest stays", 1L, it.createdAt)
+        }
+        servers.update(servers.get(nas)!!.copy(name = "Salondaki NAS"))
+        servers.setCredentials(nas, null)
+        assertNull(servers.get(nas)!!.credentials)
+        assertEquals("Salondaki NAS", servers.get(nas)!!.name)
+        servers.delete(ftp)
+        assertEquals(listOf(nas), servers.all().map { it.id })
+    }
+
     @Test
     fun mediaSettingsArePerFile() {
         val settings = db.mediaSettings()
@@ -408,6 +434,11 @@ class NagmedarDatabaseMigrationTest {
             db.execSQL(
                 "INSERT INTO latency_profile (device_type, device_name, device_address, delay_ms, measured, spread_ms, updated_at, calibration_ms) " +
                     "VALUES (8, 'Galaxy Buds2 Pro', 'AA:BB:CC:DD:EE:FF', 180, 1, 4, 1, NULL)",
+            )
+            // 9 -> 10 (S-1301): the saved network servers, their sign-in sealed
+            db.execSQL(
+                "INSERT INTO network_server (name, url, credentials, created_at, last_used_at) " +
+                    "VALUES ('NAS', 'smb://nas.local/Filmler', x'0102', 1, 0)",
             )
         }
     }

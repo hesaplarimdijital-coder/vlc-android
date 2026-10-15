@@ -377,3 +377,36 @@ abstract class LatencyProfileDao {
         rows.forEach(::save)
     }
 }
+
+/** S-1301: the network servers the user saved. */
+@Dao
+interface NetworkServerDao {
+    /** By name, again after each change. */
+    @Query("SELECT * FROM network_server ORDER BY name COLLATE NOCASE, id")
+    fun observe(): Flow<List<NetworkServerEntry>>
+
+    @Query("SELECT * FROM network_server ORDER BY name COLLATE NOCASE, id")
+    fun all(): List<NetworkServerEntry>
+
+    @Query("SELECT * FROM network_server WHERE id = :id")
+    fun get(id: Long): NetworkServerEntry?
+
+    @Query("SELECT * FROM network_server WHERE url = :url")
+    fun byUrl(url: String): NetworkServerEntry?
+
+    @Insert
+    fun insert(entry: NetworkServerEntry): Long
+
+    @Update
+    fun update(entry: NetworkServerEntry)
+
+    /** Its sign-in sealed anew, or forgotten (null). */
+    @Query("UPDATE network_server SET credentials = :credentials WHERE id = :id")
+    fun setCredentials(id: Long, credentials: ByteArray?)
+
+    @Query("UPDATE network_server SET last_used_at = :at WHERE id = :id")
+    fun used(id: Long, at: Long)
+
+    @Query("DELETE FROM network_server WHERE id = :id")
+    fun delete(id: Long)
+}

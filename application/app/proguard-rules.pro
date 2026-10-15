@@ -126,3 +126,6 @@
 
 # Nağmedar (S-613): the playback service finds the latency profiles' observer by name
 -keep class app.nagmedar.ui.audio.latency.LatencyObserver { <init>(); }
+
+# Nağmedar (S-1301): the playback service finds the network sign-ins' observer by name
+-keep class app.nagmedar.ui.network.NetworkSignInObserver { <init>(); }

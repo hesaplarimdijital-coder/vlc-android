@@ -37,6 +37,7 @@ class DialogDelegate : IDialogDelegate {
         var dialogCounter = 0
 
         override fun onProgressUpdate(dialog: Dialog.ProgressDialog) {
+            if (LibVlcDialogHook.handler?.progress(dialog) == true) return
             val vlcProgressDialog = dialog.context as? VlcProgressDialog ?: return
             if (vlcProgressDialog.isVisible) vlcProgressDialog.updateProgress()
         }
@@ -46,18 +47,23 @@ class DialogDelegate : IDialogDelegate {
         }
 
         override fun onDisplay(dialog: Dialog.LoginDialog) {
+            // Nağmedar (S-1301): the new interface answers or shows it first
+            if (LibVlcDialogHook.handler?.display(dialog) == true) return
             dialogEvt.value = Show(dialog)
         }
 
         override fun onDisplay(dialog: Dialog.QuestionDialog) {
+            if (LibVlcDialogHook.handler?.display(dialog) == true) return
             dialogEvt.value = Show(dialog)
         }
 
         override fun onDisplay(dialog: Dialog.ProgressDialog) {
+            if (LibVlcDialogHook.handler?.display(dialog) == true) return
             dialogEvt.value = Show(dialog)
         }
 
         override fun onCanceled(dialog: Dialog?) {
+            if (dialog != null && LibVlcDialogHook.handler?.canceled(dialog) == true) return
             (dialog?.context as? DialogFragment)?.dismiss()
             dialogEvt.value = Cancel(dialog)
         }
