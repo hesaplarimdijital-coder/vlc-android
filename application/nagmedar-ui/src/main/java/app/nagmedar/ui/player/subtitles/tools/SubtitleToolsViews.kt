@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -160,7 +161,7 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
                 Column(Modifier.weight(1f).fillMaxWidth()) {
                     when (state.tab) {
                         ToolsTab.Clean -> CleanTab(state, controller, locale, wide)
-                        ToolsTab.FrameRate -> RateTab(state, controller, locale)
+                        ToolsTab.FrameRate -> RateTab(state, controller, locale, wide)
                         ToolsTab.Edit -> LinesTab(state, controller, document, locale, wide)
                     }
                 }
@@ -241,18 +242,7 @@ private fun CleanTab(state: SubtitleToolsState, controller: SubtitleToolsControl
     val number = NumberFormat.getIntegerInstance(locale)
     // on a narrow window the options and the changes do not both fit: the list keeps a height of its own and the tab scrolls
     val body = if (wide) Modifier.fillMaxSize() else Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-    Column(body.testTag("subtools-clean"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PanelCaption(stringResource(R.string.nag_sdh_hint))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            val box = Modifier.then(if (wide) Modifier.width(470.dp) else Modifier.fillMaxWidth())
-            NagCheckbox(options.brackets, { controller.setSdh(options.copy(brackets = it)) }, stringResource(R.string.nag_sdh_brackets), box.testTag("sdh-brackets"))
-            NagCheckbox(options.parentheses, { controller.setSdh(options.copy(parentheses = it)) }, stringResource(R.string.nag_sdh_parentheses), box.testTag("sdh-parentheses"))
-            NagCheckbox(options.speakerLabels, { controller.setSdh(options.copy(speakerLabels = it)) }, stringResource(R.string.nag_sdh_speakers), box.testTag("sdh-speakers"))
-            NagCheckbox(options.namedSpeakers, { controller.setSdh(options.copy(namedSpeakers = it)) }, stringResource(R.string.nag_sdh_named), box.testTag("sdh-named"))
-            NagCheckbox(options.music, { controller.setSdh(options.copy(music = it)) }, stringResource(R.string.nag_sdh_music), box.testTag("sdh-music"))
-            NagCheckbox(options.fontTags, { controller.setSdh(options.copy(fontTags = it)) }, stringResource(R.string.nag_sdh_font), box.testTag("sdh-font"))
-        }
-        PanelRule()
+    val summary = @Composable {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             val text = when {
                 result == null || result.changes.isEmpty() -> stringResource(R.string.nag_sdh_nothing)
@@ -268,12 +258,40 @@ private fun CleanTab(state: SubtitleToolsState, controller: SubtitleToolsControl
                 modifier = Modifier.testTag("sdh-apply"),
             )
         }
-        val changes = result?.changes.orEmpty()
+    }
+    val changes = result?.changes.orEmpty()
+    val list: @Composable ColumnScope.() -> Unit = {
         LazyColumn(Modifier.fillMaxWidth().then(if (wide) Modifier.weight(1f) else Modifier.height(COMPACT_CHANGES)).testTag("sdh-changes"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             items(changes.take(MAX_SHOWN_CHANGES), key = { it.cueId }) { change -> ChangeRow(change, locale) }
             if (changes.size > MAX_SHOWN_CHANGES) {
                 item { PanelCaption(stringResource(R.string.nag_sdh_more, number.format(changes.size - MAX_SHOWN_CHANGES))) }
             }
+        }
+    }
+    val choices = @Composable {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            val box = Modifier.then(if (wide) Modifier.width(470.dp) else Modifier.fillMaxWidth())
+            NagCheckbox(options.brackets, { controller.setSdh(options.copy(brackets = it)) }, stringResource(R.string.nag_sdh_brackets), box.testTag("sdh-brackets"))
+            NagCheckbox(options.parentheses, { controller.setSdh(options.copy(parentheses = it)) }, stringResource(R.string.nag_sdh_parentheses), box.testTag("sdh-parentheses"))
+            NagCheckbox(options.speakerLabels, { controller.setSdh(options.copy(speakerLabels = it)) }, stringResource(R.string.nag_sdh_speakers), box.testTag("sdh-speakers"))
+            NagCheckbox(options.namedSpeakers, { controller.setSdh(options.copy(namedSpeakers = it)) }, stringResource(R.string.nag_sdh_named), box.testTag("sdh-named"))
+            NagCheckbox(options.music, { controller.setSdh(options.copy(music = it)) }, stringResource(R.string.nag_sdh_music), box.testTag("sdh-music"))
+            NagCheckbox(options.fontTags, { controller.setSdh(options.copy(fontTags = it)) }, stringResource(R.string.nag_sdh_font), box.testTag("sdh-font"))
+        }
+    }
+    Column(body.testTag("subtools-clean"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        PanelCaption(stringResource(R.string.nag_sdh_hint))
+        if (wide) {
+            choices()
+            PanelRule()
+            summary()
+            list()
+        } else {
+            // the result and Apply come first on a narrow window; the options are under them
+            summary()
+            list()
+            PanelRule()
+            choices()
         }
     }
 }
@@ -321,15 +339,11 @@ internal fun oneLine(text: String): String = text.replace("\n", " ↵ ")
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RateTab(state: SubtitleToolsState, controller: SubtitleToolsController, locale: Locale) {
+private fun RateTab(state: SubtitleToolsState, controller: SubtitleToolsController, locale: Locale, wide: Boolean) {
     val colors = NagTheme.colors
     val preview = state.ratePreview
     val separator = DecimalFormatSymbols.getInstance(locale).decimalSeparator
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtools-rate"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        PanelCaption(stringResource(R.string.nag_rate_hint))
-        RateRow(stringResource(R.string.nag_rate_from), state.from, locale, "rate-from") { controller.setRates(it, state.to) }
-        RateRow(stringResource(R.string.nag_rate_to), state.to, locale, "rate-to") { controller.setRates(state.from, it) }
-        PanelRule()
+    val shift = @Composable {
         Text(stringResource(R.string.nag_rate_shift), style = NagTheme.type.label, color = colors.textSecondary)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             for (step in SHIFT_STEPS_MS) {
@@ -349,7 +363,8 @@ private fun RateTab(state: SubtitleToolsState, controller: SubtitleToolsControll
             }
             NagButton(stringResource(R.string.nag_rate_shift_zero), { controller.setShift(0) }, enabled = state.shiftMs != 0L, modifier = Modifier.testTag("shift-zero"))
         }
-        PanelRule()
+    }
+    val result = @Composable {
         if (preview != null) {
             val same = state.from == state.to && state.shiftMs == 0L
             Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.testTag("rate-preview")) {
@@ -375,6 +390,22 @@ private fun RateTab(state: SubtitleToolsState, controller: SubtitleToolsControll
                 enabled = state.from != state.to || state.shiftMs != 0L,
                 modifier = Modifier.testTag("rate-apply"),
             )
+        }
+    }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtools-rate"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        PanelCaption(stringResource(R.string.nag_rate_hint))
+        RateRow(stringResource(R.string.nag_rate_from), state.from, locale, "rate-from") { controller.setRates(it, state.to) }
+        RateRow(stringResource(R.string.nag_rate_to), state.to, locale, "rate-to") { controller.setRates(state.from, it) }
+        PanelRule()
+        if (wide) {
+            shift()
+            PanelRule()
+            result()
+        } else {
+            // the result and Apply come before the shift on a narrow window, where the shift is under the fold
+            result()
+            PanelRule()
+            shift()
         }
     }
 }
