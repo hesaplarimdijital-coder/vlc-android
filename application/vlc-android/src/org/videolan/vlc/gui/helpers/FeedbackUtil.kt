@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.resources.AppContextProvider
+import org.videolan.resources.NagmedarVlcOptions
 import org.videolan.resources.VLCOptions
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.R
@@ -169,7 +170,8 @@ object FeedbackUtil {
         append("____________________________\r\n")
         append("${PreferenceParser.getChangedPrefsJson(context)}\r\n")
         append("____________________________\r\n")
-        append("vlc options: ${VLCOptions.libOptions.joinToString(" ")}\r\n")
+        // Nağmedar (S-610): the session's overlays (their text, the logo's path) stay on the device
+        append("vlc options: ${NagmedarVlcOptions.withoutSession(VLCOptions.libOptions).joinToString(" ")}\r\n")
         append("____________________________\r\n")
     }
 

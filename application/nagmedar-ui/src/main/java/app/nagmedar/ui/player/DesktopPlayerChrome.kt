@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
+import androidx.lifecycle.lifecycleScope
 import app.nagmedar.ui.BuildConfig
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
@@ -58,7 +60,12 @@ import app.nagmedar.ui.perf.PlaybackPerf
 import app.nagmedar.ui.perf.PrefsPerfStore
 import app.nagmedar.ui.perf.SystemBattery
 import app.nagmedar.ui.perf.keep
+import app.nagmedar.ui.player.effects.ActivityAdvancedVideo
 import app.nagmedar.ui.player.effects.ActivityEffectsTarget
+import app.nagmedar.ui.player.effects.AdvancedVideoActions
+import app.nagmedar.ui.player.effects.AdvancedVideoSection
+import app.nagmedar.ui.player.effects.AdvancedVideoSession
+import app.nagmedar.ui.player.effects.AdvancedVideoView
 import app.nagmedar.ui.player.effects.EffectsController
 import app.nagmedar.ui.player.effects.EffectsEngine
 import app.nagmedar.ui.player.effects.EffectsPanel
@@ -70,6 +77,7 @@ import app.nagmedar.ui.player.effects.AudioOutputView
 import app.nagmedar.ui.player.effects.DolbyVisionDecoding
 import app.nagmedar.ui.player.effects.LibVlcEffects
 import app.nagmedar.ui.player.effects.RoomEffectsStore
+import app.nagmedar.ui.player.effects.TextClock
 import app.nagmedar.ui.player.info.ActivityInfoSource
 import app.nagmedar.ui.player.info.VideoOutputChoice
 import app.nagmedar.ui.player.info.FileFacts
@@ -250,6 +258,8 @@ class DesktopPlayerChrome : PlayerChrome {
             MainScope(),
         )
         this.effects = effects
+        // S-610: the advanced effects' frame, logo and "Apply now"
+        val advanced = ActivityAdvancedVideo(activity)
         // the audio output (S-508): PCM or a bitstream, as the device says or as forced
         val output = AudioOutputController(ActivityAudioOutput(activity), PrefsAudioOutputStore(settings))
         this.output = output
@@ -326,7 +336,7 @@ class DesktopPlayerChrome : PlayerChrome {
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
         panelHost = PanelHost(activity, root, panel) { layout ->
-            PanelContent(activity, controls, panel, effects, output, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online, secondaryLayout), layout)
+            PanelContent(activity, controls, panel, effects, advanced, output, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online, secondaryLayout), layout)
         }.also { it.attach() }
     }
 
@@ -852,6 +862,7 @@ private fun PanelContent(
     visibility: ChromeVisibility,
     panel: PanelState,
     effects: EffectsController,
+    advanced: ActivityAdvancedVideo,
     output: AudioOutputController,
     sync: SyncController,
     info: PanelInfo,
@@ -956,6 +967,66 @@ private fun PanelContent(
                     PanelTab.Effects -> {
                         // S-508: what is plugged in, read again as the tab opens
                         LaunchedEffect(output) { output.refresh() }
+                        // S-610: the session's advanced effects, previewed on the frame showing as the tab opens
+                        val session = AdvancedVideoSession.controller
+                        val scope = rememberCoroutineScope()
+                        LaunchedEffect(advanced) {
+                            session.onPicture(advanced.pictureHeight())
+                            session.refresh()
+                            advanced.loadLogo(session.video)
+                            advanced.grabFrame()
+                        }
+                        val text = session.video.text
+                        val ticking = text.enabled && text.clock != TextClock.None
+                        val nowMs by produceState(System.currentTimeMillis(), ticking) {
+                            while (ticking) {
+                                value = System.currentTimeMillis()
+                                delay(1_000)
+                            }
+                        }
+                        val logoPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                            if (uri != null) {
+                                scope.launch {
+                                    advanced.pickedLogo(uri)?.let { (path, name) ->
+                                        session.update { it.copy(logo = it.logo.copy(enabled = true, file = path, name = name)) }
+                                    }
+                                }
+                            }
+                        }
+                        val advancedSection = @Composable {
+                            AdvancedVideoSection(
+                                AdvancedVideoView(
+                                    video = session.video,
+                                    transform = effects.effects.transform,
+                                    frame = advanced.frame,
+                                    source = advanced.source,
+                                    logo = advanced.logo,
+                                    pictureHeight = session.pictureHeight,
+                                    waiting = session.waiting,
+                                    canApplyNow = advanced.canReopen(),
+                                    recording = Recordings.recorder?.recording == true,
+                                    applying = advanced.applying,
+                                    logoFailed = advanced.logoFailed,
+                                    nowMs = nowMs,
+                                ),
+                                AdvancedVideoActions(
+                                    onChange = session::update,
+                                    onPickLogo = {
+                                        activity.isShowingDialog = true
+                                        runCatching { logoPicker.launch(arrayOf("image/*")) }
+                                    },
+                                    onNewFrame = { scope.launch { advanced.grabFrame() } },
+                                    // the reopen outlives the panel: the window's own scope
+                                    onApplyNow = {
+                                        activity.lifecycleScope.launch {
+                                            if (advanced.reopen()) effects.reapply()
+                                            session.refresh()
+                                            advanced.grabFrame()
+                                        }
+                                    },
+                                ),
+                            )
+                        }
                         EffectsPanel(
                             effects = effects.effects,
                             supported = effects.supported,
@@ -970,6 +1041,7 @@ private fun PanelContent(
                             output = AudioOutputView(output.mode, output.codecs, output.sinks, output.canPassthrough, output.refused),
                             onOutputMode = output::choose,
                             onOutputCodec = output::toggle,
+                            advanced = advancedSection,
                         )
                     }
                     PanelTab.Info -> InfoContent(info, navigation, layout.columns)

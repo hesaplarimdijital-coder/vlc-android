@@ -16,6 +16,59 @@ import org.videolan.tools.KEY_NAG_TRANSFORM
 
 object NagmedarVlcOptions {
 
+    /**
+     * S-610: the advanced video effects of this session, as the player sets them: the video filters
+     * before the transform (anaglyph, which reads a side-by-side picture as it comes) and after it
+     * (rotate), the sub-sources (logo, marq) and their options. Kept in memory only: they last
+     * as long as the app does, and libVLC reads them as it starts.
+     */
+    data class SessionVideo(
+        val before: List<String> = emptyList(),
+        val after: List<String> = emptyList(),
+        val subSources: List<String> = emptyList(),
+        val options: List<String> = emptyList(),
+        /** A filter works on pictures in memory: hardware decoding hands its frames over rather than drawing them itself. */
+        val cpu: Boolean = false,
+    )
+
+    @Volatile
+    var sessionVideo = SessionVideo()
+
+    /** What libVLC started with, of [sessionVideo]: the effects showing. */
+    @Volatile
+    var startedVideo = SessionVideo()
+        private set
+
+    /** The transform's type libVLC started with (S-505), null for none: the picture's turn showing. */
+    @Volatile
+    var startedTransform: String? = null
+        private set
+
+    /** libVLC was made with [session] and the settings in [pref] ([VLCInstance]): they show now. */
+    fun markStarted(session: SessionVideo, pref: SharedPreferences) {
+        startedVideo = session
+        startedTransform = transform(pref)
+    }
+
+    /**
+     * [options] without the session's effects (S-610): what the user wrote over the video and the
+     * picture's path stay on the device, out of a feedback report.
+     */
+    fun withoutSession(options: List<String>): List<String> {
+        val session = sessionVideo
+        if (session.before.isEmpty() && session.after.isEmpty() && session.subSources.isEmpty()) return options
+        val filters = (session.before + session.after).toSet()
+        return options.mapNotNull { option ->
+            when {
+                option in session.options -> null
+                option.startsWith("--sub-source=") -> null
+                option.startsWith("--video-filter=") ->
+                    option.removePrefix("--video-filter=").split(':').filter { it !in filters }.takeIf { it.isNotEmpty() }?.joinToString(":", prefix = "--video-filter=")
+                else -> option
+            }
+        }
+    }
+
     /** VLC's "opengl" setting: the video output chosen by itself, Android's own, or OpenGL. */
     const val VOUT_AUTO = -1
     const val VOUT_ANDROID = 0
@@ -67,13 +120,24 @@ object NagmedarVlcOptions {
             options.add("--gl-upscaler=$it")
             options.add("--gl-downscaler=$it")
         }
-        // S-505: the picture turned or mirrored, which the OpenGL output draws
-        transform(pref)?.let {
-            options.add("--video-filter=transform")
-            options.add("--transform-type=$it")
-        }
+        // S-505: the picture turned or mirrored, which the OpenGL output draws; S-610: the session's
+        // filters around it, and what is drawn over the picture
+        val session = sessionVideo
+        val transform = transform(pref)
+        val filters = session.before + listOfNotNull(transform?.let { "transform" }) + session.after
+        if (filters.isNotEmpty()) options.add("--video-filter=" + filters.joinToString(":"))
+        transform?.let { options.add("--transform-type=$it") }
+        if (session.subSources.isNotEmpty()) options.add("--sub-source=" + session.subSources.joinToString(":"))
+        options.addAll(session.options)
         return options
     }
+
+    /**
+     * S-610: a film's options for the session's effects: a filter that works on pictures in memory
+     * needs MediaCodec to hand its frames over (still decoded by the hardware) rather than draw them
+     * into the screen's surface itself.
+     */
+    fun mediaOptions(): List<String> = if (startedVideo.cpu) listOf(":no-mediacodec-dr", ":no-omxil-dr") else emptyList()
 
     private fun scaler(pref: SharedPreferences): Int = scalers[pref.getString(KEY_NAG_SCALER, "auto")] ?: 0
 

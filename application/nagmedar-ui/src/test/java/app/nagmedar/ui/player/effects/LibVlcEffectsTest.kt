@@ -35,6 +35,8 @@ class LibVlcEffectsTest {
     @Before
     fun clear() {
         prefs.edit().clear().commit()
+        NagmedarVlcOptions.sessionVideo = NagmedarVlcOptions.SessionVideo()
+        NagmedarVlcOptions.markStarted(NagmedarVlcOptions.SessionVideo(), prefs)
         LibVlcRestart.pending = false
     }
 
@@ -130,5 +132,44 @@ class LibVlcEffectsTest {
         assertEquals(NagmedarVlcOptions.VOUT_AUTO, LibVlcEffects.vout(HdrOutput.Auto))
         assertEquals(NagmedarVlcOptions.VOUT_ANDROID, LibVlcEffects.vout(HdrOutput.Passthrough))
         assertEquals(NagmedarVlcOptions.VOUT_OPENGL, LibVlcEffects.vout(HdrOutput.ToneMap))
+    }
+
+    /** S-610: the session's filters around the transform, the sources over the picture, and the films' options for the CPU's. */
+    @Test
+    fun theSessionsEffectsJoinVlcsOptions() {
+        prefs.edit().putString(KEY_NAG_TRANSFORM, "90").commit()
+        val options = AdvancedVideoOptions.build(
+            AdvancedVideo(
+                logo = LogoOverlay(enabled = true, file = "/cache/logo.png"),
+                text = TextOverlay(enabled = true, text = "x"),
+                angle = 15,
+                anaglyph = true,
+            ),
+        )
+        LibVlcVideoOptions.set(options)
+        assertTrue(LibVlcRestart.pending)
+        // nothing shows before libVLC starts with them: the films are not asked for their frames yet
+        assertTrue(NagmedarVlcOptions.mediaOptions().isEmpty())
+        val vlc = NagmedarVlcOptions.options(prefs)
+        assertTrue("--video-filter=anaglyph:transform:rotate" in vlc)
+        assertTrue("--transform-type=90" in vlc)
+        assertTrue("--sub-source=logo:marq" in vlc)
+        assertTrue(vlc.containsAll(options.options))
+        // reading the options (a feedback report) does not start them
+        assertEquals(VideoFilterOptions(), LibVlcVideoOptions.started())
+        // a feedback report leaves the overlays' text and the logo's path out
+        assertEquals(
+            listOf("--video-filter=transform", "--transform-type=90"),
+            NagmedarVlcOptions.withoutSession(vlc).filter { it.startsWith("--video-filter") || it.startsWith("--transform") || it.startsWith("--sub-source") || it.startsWith("--logo") || it.startsWith("--marq") || it.startsWith("--rotate") || it.startsWith("--anaglyph") },
+        )
+        // libVLC made with them: they show, and films hand their frames over
+        NagmedarVlcOptions.markStarted(NagmedarVlcOptions.sessionVideo, prefs)
+        assertEquals(options, LibVlcVideoOptions.started())
+        assertEquals("90", NagmedarVlcOptions.startedTransform)
+        assertEquals(listOf(":no-mediacodec-dr", ":no-omxil-dr"), NagmedarVlcOptions.mediaOptions())
+        LibVlcVideoOptions.set(VideoFilterOptions())
+        assertFalse(NagmedarVlcOptions.options(prefs).any { it.startsWith("--sub-source") || it.contains("rotate") })
+        NagmedarVlcOptions.markStarted(NagmedarVlcOptions.sessionVideo, prefs)
+        assertTrue(NagmedarVlcOptions.mediaOptions().isEmpty())
     }
 }

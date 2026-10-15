@@ -80,7 +80,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         setPlaybackStopped()
     }
 
-    private fun releaseMedia() = mediaplayer.media?.let {
+    private fun releaseMedia(player: MediaPlayer = mediaplayer) = player.media?.let {
         it.setEventListener(null)
         it.release()
     }
@@ -211,8 +211,9 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun release(player: MediaPlayer = mediaplayer) {
         player.setEventListener(null)
-        if (isVideoPlaying()) player.vlcVout.detachViews()
-        releaseMedia()
+        // Nağmedar (S-610): restart() releases the player it replaced: its own views and media, not the new one's
+        if (!player.isReleased && player.vlcVout.areViewsAttached()) player.vlcVout.detachViews()
+        releaseMedia(player)
         launch(Dispatchers.IO) {
             if (BuildConfig.DEBUG) { // Warn if player release is blocking
                 try {

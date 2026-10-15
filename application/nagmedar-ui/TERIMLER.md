@@ -83,6 +83,7 @@ Sözlüğü testler denetler:
 | vurgu rengi | accent colour | | | |
 | ön ayar | preset | | | “VLC”, “mpv” |
 | efekt | effect | | | “Efektler ve filtreler” (Ctrl+E); oynatıcı panelinin sekmesi “Efektler” |
+| anaglif 3B | anaglyph 3D | | | Yan yana 3B filmin iki yarısı renkli gözlük için birleştirilir (Efektler › Gelişmiş video); gözlükler: kırmızı–camgöbeği, kırmızı–yeşil, kırmızı–mavi, macenta–camgöbeği, trioskopik |
 | ekolayzer | equaliser | eşitleyici | equalizer | VLC'nin ön ayarları kendi adlarıyla: “Düz”, “Güçlü bas”, “Büyük salon” |
 | müzik motoru | music engine | ses motoru | audio engine | Nağmedar Ses Motoru'nun ayarlardaki adı; yerel müzik dosyalarını çalar, libVLC'ye dönülebilir |
 | boşluksuz | gapless | | | Bir albümün parçaları arada boşluk ya da tık olmadan birbirini izler; “kesintisiz” ekranın yenileme hızı geçişi için kalır |

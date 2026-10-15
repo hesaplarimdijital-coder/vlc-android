@@ -95,7 +95,8 @@ import kotlinx.coroutines.delay
 
 /**
  * The effects tab of the player's panel (S-603), after the mockups' "Panel · Effects": the
- * picture's colours, its shape, crop and rotation, HDR and scaling, the audio effects, then
+ * picture's colours, its shape, crop and rotation, the advanced video effects (S-610), HDR and
+ * scaling, the audio effects, then
  * "Save for this file" and "Make default". Every change applies at once ([EffectsController]);
  * what this build's player cannot do yet ([supported]) shows faded, with a note.
  */
@@ -119,6 +120,8 @@ fun EffectsPanel(
     output: AudioOutputView? = null,
     onOutputMode: (AudioOutputMode) -> Unit = {},
     onOutputCodec: (PassthroughCodec) -> Unit = {},
+    /** S-610: the advanced video section (logo, text, free angle, 3D), under the picture's shape; none hides it. */
+    advanced: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier.fillMaxSize().testTag("effects-panel")) {
         Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
@@ -132,6 +135,10 @@ fun EffectsPanel(
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                         PictureSection(effects, supported, onChange)
                         ShapeSection(effects, supported, deferred, waiting, onChange)
+                        if (advanced != null) {
+                            PanelRule()
+                            advanced()
+                        }
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                         HdrSection(effects, supported, deferred, waiting, onChange)
@@ -143,6 +150,10 @@ fun EffectsPanel(
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                     PictureSection(effects, supported, onChange)
                     ShapeSection(effects, supported, deferred, waiting, onChange)
+                    if (advanced != null) {
+                        PanelRule()
+                        advanced()
+                    }
                     PanelRule()
                     HdrSection(effects, supported, deferred, waiting, onChange)
                     PanelRule()
@@ -527,7 +538,7 @@ private fun RowScope.TransformButton(
 
 /** A setting chosen from a list: its name and a button showing the choice, which opens the list. */
 @Composable
-private fun <T : EffectOption> SelectRow(
+internal fun <T : EffectOption> SelectRow(
     label: String,
     value: T,
     options: List<T>,

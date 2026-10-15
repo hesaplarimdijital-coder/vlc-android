@@ -317,6 +317,8 @@ object VLCOptions {
             }
         } /* else automatic: use default options */
 
+        // Nağmedar (S-610): the session's video effects that need the pictures in memory
+        if (!noHardwareAcceleration && hardwareAcceleration != HW_ACCELERATION_DISABLED) NagmedarVlcOptions.mediaOptions().forEach { media.addOption(it) }
         if (noVideo) media.addOption(":no-video")
         if (paused) media.addOption(":start-paused")
         if (!prefs.getBoolean(KEY_SUBTITLES_AUTOLOAD, true)) media.addOption(":sub-language=none")

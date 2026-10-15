@@ -35,6 +35,7 @@ import org.videolan.libvlc.util.VLCUtil
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.resources.VLCInstance.init
 import org.videolan.resources.util.VLCCrashHandler
+import org.videolan.tools.Settings
 import org.videolan.tools.SingletonHolder
 
 object VLCInstance : SingletonHolder<ILibVLC, Context>({ init(it.applicationContext) }) {
@@ -55,14 +56,19 @@ object VLCInstance : SingletonHolder<ILibVLC, Context>({ init(it.applicationCont
         }
 
         // TODO change LibVLC signature to accept a List instead of an ArrayList
+        val session = NagmedarVlcOptions.sessionVideo
         sLibVLC = libVLCFactory.getFromOptions(ctx, VLCOptions.libOptions)
+        // Nağmedar (S-610): the session's video effects show from now on
+        NagmedarVlcOptions.markStarted(session, Settings.getInstance(ctx))
         return sLibVLC
     }
 
     @Throws(IllegalStateException::class)
     suspend fun restart() = withContext(Dispatchers.IO) {
         sLibVLC.release()
+        val session = NagmedarVlcOptions.sessionVideo
         sLibVLC = libVLCFactory.getFromOptions(AppContextProvider.appContext, VLCOptions.libOptions)
+        NagmedarVlcOptions.markStarted(session, Settings.getInstance(AppContextProvider.appContext))
         instance = sLibVLC
         Medialibrary.getInstance().setLibVLCInstance((sLibVLC as LibVLC).instance)
     }

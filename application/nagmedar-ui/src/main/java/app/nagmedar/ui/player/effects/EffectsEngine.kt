@@ -83,6 +83,11 @@ class EffectsEngine(private val target: PlayerEffectsTarget, private val native:
 
     private var applied = PlayerEffects()
 
+    /** S-610: a new player plays the film (libVLC started again): nothing is applied to it yet. */
+    fun reset() {
+        applied = PlayerEffects()
+    }
+
     /** What libVLC takes as it starts rather than at once. */
     val deferred: Set<Effect> get() = native.deferred
 

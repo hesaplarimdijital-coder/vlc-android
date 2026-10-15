@@ -139,6 +139,12 @@ class EffectsController(
     /** "Make default": films that remember no effects start with these. */
     fun makeDefault() = store.saveDefaults(effects)
 
+    /** S-610: the film reopened in a new player ("Apply now"): its effects go to it again. */
+    fun reapply() {
+        engine.reset()
+        engine.apply(effects, newFilm = true)
+    }
+
     /** The player goes: what is left to save is saved, and the player's next film starts without these effects. */
     fun release() {
         flush()
