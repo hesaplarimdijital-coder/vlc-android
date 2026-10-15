@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -405,17 +406,14 @@ internal fun rateLabel(rate: FrameRate, locale: Locale): String =
 
 /** A time before and after: "0:00:01,000 → 0:00:01,043". */
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 private fun PreviewLine(label: String, before: String, after: String) {
     val colors = NagTheme.colors
-    // on a narrow window the two times go under the label, whole
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, style = NagTheme.type.label, color = colors.textSecondary, modifier = Modifier.width(150.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(before, style = NagTheme.type.mono, color = colors.textTertiary, softWrap = false)
-            Text("→", style = NagTheme.type.mono, color = colors.textTertiary)
-            Text(after, style = NagTheme.type.mono, color = colors.text, softWrap = false)
-        }
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        // on a narrow window the label gives way, not the times
+        Text(label, style = NagTheme.type.label, color = colors.textSecondary, modifier = Modifier.widthIn(min = 120.dp, max = 150.dp).weight(1f, fill = false))
+        Text(before, style = NagTheme.type.mono, color = colors.textTertiary, softWrap = false)
+        Text("→", style = NagTheme.type.mono, color = colors.textTertiary)
+        Text(after, style = NagTheme.type.mono, color = colors.text, softWrap = false)
     }
 }
 
