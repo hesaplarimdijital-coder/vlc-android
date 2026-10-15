@@ -1,0 +1,178 @@
+# Nağmedar emulator smoke test
+#
+# Builds the debug APK for x86_64, boots an Android 15 emulator (KVM) and drives the real app with
+# buildsystem/ci/emulator_smoke.py: first run, every top-level destination and Settings on a tablet
+# and on a phone, Turkish, playback of a video and a music file, the command palette, rotation,
+# background / foreground. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
+# crash or ANR of the app fails the job.
+#
+# The Nağmedar native libraries (engine, lab) exist for arm64 only, so on this x86_64 emulator they
+# are missing: the app has to say so and keep working, and that is part of what is checked.
+#
+# Evidence (report.md, screenshots, dumps, filtered logcat) is force-pushed to the ci/emulator
+# branch (orphan commit), because artifacts cannot be downloaded without a login; read it with
+#   git fetch origin ci/emulator && git show origin/ci/emulator:report.md
+# Findings are annotations of the job: crashes as errors, the summary as a notice.
+#
+# Run it on any branch:
+#   gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches -f ref=<branch>
+# (the workflow file must exist on master for a dispatch; until then the pull request runs it when
+# this file or the driver change). About 40 to 60 minutes with a warm Gradle cache.
+
+name: Emulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or commit to test (default: the ref the run is started on)'
+        type: string
+        default: ''
+      passes:
+        description: 'Passes of the walk (tablet-en,phone-en,phone-tr)'
+        type: string
+        default: 'tablet-en,phone-en,phone-tr'
+  pull_request:
+    paths:
+      - '.github/workflows/emulator.yml'
+      - 'buildsystem/ci/emulator_smoke.py'
+
+concurrency:
+  group: emulator-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
+  # get-vlc.sh applies VLC patches with "git am", which needs a committer identity.
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  smoke:
+    name: Emülatör · uygulama yürüyüşü
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+
+      # the SDK, the system image, the Gradle build and the emulator want more than the runner has free
+      - name: Disk alanı aç
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk/25* /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
+      # KVM for the emulator (reactivecircus/android-emulator-runner README)
+      - name: KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK ve NDK
+        run: ./buildsystem/ci/setup-android.sh
+
+      - name: Gradle önbelleği
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            gradle-9.3.1
+          key: gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties', 'buildsystem/compile.sh') }}
+          restore-keys: gradle-
+
+      - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
+        run: ./buildsystem/compile.sh --init 2>&1 | tee init.log
+
+      # the lab's and the engine's native libraries are arm64 only: none are built here
+      - name: Derleme (debug, x86_64)
+        run: ./gradlew :application:app:assembleDebug -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+
+      - name: Hataları işaretle
+        if: failure()
+        run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      # a video and a music file for the library and for playback (video: H.264/AAC, music: MP3 with tags)
+      - name: Deneme ortamı
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install --quiet pillow
+          mkdir -p "$RUNNER_TEMP/media"
+          ffmpeg -loglevel error -f lavfi -i "sine=frequency=440:duration=30" -metadata title="Smoke tone" \
+            -metadata artist="Nagmedar QA" -metadata album="Smoke" "$RUNNER_TEMP/media/tone.mp3"
+          ffmpeg -loglevel error -f lavfi -i "testsrc=duration=30:size=640x360:rate=24" -f lavfi -i "sine=frequency=330:duration=30" \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$RUNNER_TEMP/media/smoke.mp4"
+          ls -l "$RUNNER_TEMP/media"
+
+      - name: Emülatör ve yürüyüş
+        id: walk
+        continue-on-error: true
+        timeout-minutes: 50
+        env:
+          # the driver pushes its evidence so far now and then: a hung or cancelled run leaves some
+          EMULATOR_PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_tablet
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 6000M
+          disable-animations: true
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          script: python3 buildsystem/ci/emulator_smoke.py --apk application/app/build/outputs/apk/debug --out ${{ runner.temp }}/emulator-out --media ${{ runner.temp }}/media --passes ${{ inputs.passes || 'tablet-en,phone-en,phone-tr' }} --deadline-min 40 --branch ci/emulator --source "${{ github.sha }} (${{ inputs.ref || github.ref_name }}), run ${{ github.run_id }}"
+
+      - name: Bulgular
+        if: always()
+        run: |
+          out="$RUNNER_TEMP/emulator-out"
+          if [ -f "$out/annotations.txt" ]; then cat "$out/annotations.txt"; else
+            echo "::error title=Emulator::the walk produced no report (the emulator or the setup failed before it)"
+          fi
+
+      # evidence on the ci/emulator branch, readable with git (artifacts are not)
+      - name: Kanıtları ci/emulator dalına koy
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/emulator-out"
+          [ -d "$out" ] || { mkdir -p "$out"; echo "No report: the walk did not start." > "$out/report.md"; }
+          rm -rf "$out/raw"
+          for f in init.log build.log; do [ -f "$f" ] && tail -n 300 "$f" > "$out/$f.tail.txt"; done
+          cd "$out"
+          git init -q && git checkout -q --orphan ci/emulator
+          git add -A && git commit -q -m "Emulator smoke test of ${GITHUB_SHA::7} (run ${GITHUB_RUN_ID})"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/emulator
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-smoke
+          path: ${{ runner.temp }}/emulator-out
+          if-no-files-found: ignore
+
+      - name: Sonuç
+        if: always() && steps.walk.outcome != 'success'
+        run: |
+          echo "::error title=Emulator::the smoke test failed (a crash or ANR of the app, or the setup); see the annotations above and the ci/emulator branch"
+          exit 1
