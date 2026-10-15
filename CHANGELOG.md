@@ -92,6 +92,8 @@ Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine 
 ### Altyazı
 - Dosya seçiciyle, sürükle-bırakla ya da klasörden otomatik eşlemeyle altyazı; Türkçe kodlamanın (Windows-1254) kendiliğinden tanınması.
 - Çift altyazı, senkron asistanı ve dosya başına gecikme, stil ön ayarları, OpenSubtitles.com araması ve kota göstergesi.
+- Altyazı araçları (Alt+E; oynatıcının altyazı menüsünden ve bir filmin menüsünden): işitme engelliler için notları temizleme (önce/sonra önizlemesi), kare hızı dönüştürme ve kaydırma, satır zamanlama düzenleyicisi (bölme, birleştirme, oynatma konumundan başlangıç/bitiş, hata ve çakışma denetimi). SRT ve WebVTT okunup yazılır; ASS/SSA'da stiller ve etiketler korunur. Sonuç hep yeni bir dosyadır (`film.tr.duzenlendi.srt`), özgün dosyaya dokunulmaz.
+- Altyazı sağlayıcıları: arama, Ayarlar › Altyazı'da açılıp kapatılan ve sıralanan sağlayıcılarda aynı anda yapılır (OpenSubtitles.com ve seçtiğiniz bir altyazı klasörü); sonuçlar tek listede birleşir, aynı dosya bir kez görünür, dosyaya uygun olanlar öne geçer, bir sağlayıcı yanıt vermezse öbürlerinin sonuçları kalır ve hangisinin sorun çıkardığı yazılır.
 
 ### TV Lab
 - Bir filmi oynatılacağı cihaza göre analiz eder: kapsayıcı, codec, HDR ve Dolby Vision (profil, BL/EL/RPU, FEL/MEL), ses ve altyazı izleri.

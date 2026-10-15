@@ -16,6 +16,11 @@ import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.DropPlan
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.planDrop
+import app.nagmedar.ui.player.subtitles.tools.DocumentSubtitleToolsIo
+import app.nagmedar.ui.player.subtitles.tools.SubtitleFormat
+import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsController
+import app.nagmedar.ui.player.subtitles.tools.ToolsFile
+import app.nagmedar.ui.player.subtitles.tools.ToolsPlayback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,6 +63,13 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
     /** "Subtitle encoding…" is open on the film's first subtitle file (S-702). */
     var encoding by mutableStateOf<EncodingSample?>(null)
         private set
+
+    /** The subtitle tools (S-708), over the video: the film's subtitle files cleaned, converted and edited into new files. */
+    val tools = SubtitleToolsController(
+        DocumentSubtitleToolsIo(activity.applicationContext),
+        scope,
+        activity.getString(R.string.nag_subtools_edited_word),
+    )
 
     /** The film whose folder was read: once a film. */
     private var lookedAt: String? = null
@@ -198,6 +210,39 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         }
     }
 
+    /**
+     * "Subtitle tools…" (Alt+E, S-708): the film's subtitle files (those VLC loaded and those
+     * beside the film, SRT, WebVTT and ASS/SSA) in the tools' window, with the film itself at hand
+     * for the editor: its position, going to a line, and the saved file shown at once.
+     */
+    fun openTools() {
+        val service = activity.service ?: return
+        val video = service.currentMediaWrapper?.uri ?: return
+        val context = activity.applicationContext
+        val loaded = subtitleFiles()
+        scope.launch {
+            val files = withContext(Dispatchers.IO) { toolsFiles(context, video, loaded) }
+            tools.open(files, playback())
+        }
+    }
+
+    /** The film as the editor drives it: its clock is the subtitles' (the film's less their delay). */
+    private fun playback() = object : ToolsPlayback {
+        private fun delayMs(): Long = (activity.service?.spuDelay ?: 0L) / US_PER_MS
+
+        override fun positionMs(): Long = ((activity.service?.getTime() ?: 0L) - delayMs()).coerceAtLeast(0)
+
+        override fun seekTo(ms: Long) {
+            activity.service?.seek((ms + delayMs()).coerceAtLeast(0), fromUser = true)
+        }
+
+        override suspend fun load(saved: SavedSubtitle): Boolean {
+            if (!this@PlayerSubtitles.load(Uri.parse(saved.uri), saved.name, select = true)) return false
+            note = activity.getString(R.string.nag_subtools_note, saved.name)
+            return true
+        }
+    }
+
     /** "Subtitle encoding…": the film's first subtitle file, its head read; a word when it has none. */
     fun openEncoding() {
         val service = activity.service ?: return
@@ -274,6 +319,7 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         /** The priority the classic player's picker keeps a subtitle with: the user's choice. */
         const val KEPT_PRIORITY = 2
         const val SAID_MS = 2_000
+        const val US_PER_MS = 1_000L
     }
 }
 
@@ -305,17 +351,16 @@ internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes:
     val folder = File(context.getExternalFilesDir(null) ?: context.filesDir, APP_SUBTITLES)
     return runCatching {
         folder.mkdirs()
-        val file = uniqueFile(folder, fileName)
-        file.writeBytes(bytes)
+        val file = writeNewFile(folder, fileName, bytes, source = null) ?: return@runCatching null
         SavedSubtitle(Uri.fromFile(file).toString(), file.name, beside = false)
     }.getOrNull()
 }
 
-private fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? = when (video.scheme) {
+/** [bytes] as a new file beside [video] (a local file's folder, or its picked tree); null where the app may not write. Never replaces a file. */
+internal fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? = when (video.scheme) {
     null, ContentResolver.SCHEME_FILE -> runCatching {
         val folder = File(requireNotNull(video.path)).parentFile ?: error("no folder")
-        val file = uniqueFile(folder, fileName)
-        file.writeBytes(bytes)
+        val file = writeNewFile(folder, fileName, bytes, source = File(requireNotNull(video.path))) ?: return@runCatching null
         Uri.fromFile(file)
     }.getOrNull()
     ContentResolver.SCHEME_CONTENT -> treeSave(context, video, fileName, bytes)
@@ -339,17 +384,21 @@ private fun treeSave(context: Context, video: Uri, fileName: String, bytes: Byte
     return created
 }
 
-/** [name] in [folder], or "Name (2).srt" when it is taken. */
-private fun uniqueFile(folder: File, name: String): File {
-    val first = File(folder, name)
-    if (!first.exists()) return first
-    val base = name.substringBeforeLast('.')
-    val extension = name.substringAfterLast('.', "").let { if (it.isEmpty()) "" else ".$it" }
-    return (2..MAX_COPIES).asSequence().map { File(folder, "$base ($it)$extension") }.firstOrNull { !it.exists() } ?: first
-}
-
 private const val APP_SUBTITLES = "Subtitles"
 private const val ANY_FILE = "application/octet-stream"
-private const val MAX_COPIES = 99
 
 /** The folder a tree's document is in: the provider says so from Android 8; the external storage's ids are paths before. */
+
+/**
+ * The subtitle files the tools can work on for the film [video]: [loaded] (those VLC has) and
+ * those beside the film by name, SRT, WebVTT, ASS and SSA only (pictures and other formats are not
+ * text to edit); the ones in the user's language first.
+ */
+internal fun toolsFiles(context: Context, video: Uri, loaded: List<Uri>): List<ToolsFile> {
+    val resolver = context.contentResolver
+    val beside = displayName(resolver, video)?.let { name ->
+        matchSubtitles(name, siblingFiles(context, video), prefer = Locale.getDefault().language).map { ToolsFile(it.uri, it.name) }
+    }.orEmpty()
+    val kept = loaded.mapNotNull { uri -> displayName(resolver, uri)?.let { ToolsFile(uri.toString(), it) } }
+    return (beside + kept).filter { SubtitleFormat.ofName(it.name) != null }.distinctBy { it.uri }
+}

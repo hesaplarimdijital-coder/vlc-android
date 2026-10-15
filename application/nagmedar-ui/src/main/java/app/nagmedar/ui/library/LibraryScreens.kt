@@ -94,6 +94,7 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsLauncher
 import app.nagmedar.ui.tvlab.openInTvLab
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -124,6 +125,8 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         ),
         // S-1201: the film checked against the target device
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_tvlab_analyse), { openInTvLab(context, media.uri) }, icon = NagIcons.TvLab) else null,
+        // S-708: the film's subtitle files cleaned, converted and edited into new files
+        if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_subtools_menu), { SubtitleToolsLauncher.open(media.uri, media.fileName) }, icon = NagIcons.Subtitle) else null,
     )
 }
 

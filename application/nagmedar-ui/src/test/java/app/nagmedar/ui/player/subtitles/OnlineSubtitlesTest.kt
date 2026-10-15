@@ -12,6 +12,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProvider
+import app.nagmedar.ui.player.subtitles.providers.ProviderRegistry
+import app.nagmedar.ui.player.subtitles.providers.ProviderSettings
+import app.nagmedar.ui.player.subtitles.providers.ProviderSettingsStore
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -35,6 +39,7 @@ internal class FakeOpenSubtitles(override val available: Boolean = true) : OpenS
     var byHash: List<OnlineSubtitle> = emptyList()
     var byName: List<OnlineSubtitle> = emptyList()
     var failure: Exception? = null
+    var fetchFailure: Exception? = null
     var ticket = OnlineTicket("https://dl.example/1", "Northern.Light.srt", remaining = 4, requests = 1, resetUtc = "2026-10-13T00:00:00.000Z")
 
     override suspend fun search(query: OnlineQuery): List<OnlineSubtitle> {
@@ -48,7 +53,10 @@ internal class FakeOpenSubtitles(override val available: Boolean = true) : OpenS
         return ticket
     }
 
-    override suspend fun fetch(link: String): ByteArray = SAMPLE_SRT.toByteArray()
+    override suspend fun fetch(link: String): ByteArray {
+        fetchFailure?.let { throw it }
+        return SAMPLE_SRT.toByteArray()
+    }
 }
 
 internal class FakeOnlineFilm(override val name: String = "Kuzey Işığı.mkv", private val fingerprint: String? = "8e245d9679d31e12") : OnlineFilm {
@@ -76,12 +84,26 @@ internal class FakeQuotaStore(var kept: OnlineQuota? = null) : OnlineQuotaStore 
 
 private const val SAMPLE_SRT = "1\n00:00:01,000 --> 00:00:04,000\nGece yarısı Kuzey Işığı'nda buluşalım.\n"
 
-/** Turkish timed for the file, English by name, Turkish by name. */
-internal val sampleOnline = listOf(
+/** Turkish timed for the file, English by name, Turkish by name: as OpenSubtitles' API gives them. */
+internal val sampleApi = listOf(
     OnlineSubtitle(11, "Kuzey.Isigi.2024.1080p.WEB-DL.tr.srt", "Kuzey.Isigi.2024.1080p.WEB-DL", "tr", 12_345, hashMatch = true, fps = 23.976, title = "Kuzey Işığı", year = 2024),
     OnlineSubtitle(12, "Northern.Light.2024.1080p.WEB.srt", "Northern.Light.2024.1080p.WEB", "en", 48_210, fps = 23.976, title = "Northern Light", year = 2024),
     OnlineSubtitle(13, "Kuzey.Isigi.2024.720p.BluRay.tr.srt", "Kuzey.Isigi.2024.720p.BluRay", "tr", 3_120, hearingImpaired = true, fps = 25.0, title = "Kuzey Işığı", year = 2024),
 )
+
+/** The same, in the providers' common model. */
+internal val sampleOnline = sampleApi.map { OpenSubtitlesProvider.resultOf(it) }
+
+internal class FakeProviderStore(var kept: ProviderSettings = ProviderSettings()) : ProviderSettingsStore {
+    override fun load(): ProviderSettings = kept
+
+    override fun save(settings: ProviderSettings) {
+        kept = settings
+    }
+}
+
+/** A registry of OpenSubtitles alone, as S-706 had it. */
+internal fun openSubtitlesOnly(api: OpenSubtitlesApi) = ProviderRegistry(listOf(OpenSubtitlesProvider(api)), FakeProviderStore())
 
 /**
  * S-706: OpenSubtitles.com searched by the file's fingerprint, then by its name; the fingerprint's
@@ -98,11 +120,11 @@ class OnlineSubtitlesTest {
 
     private val api = FakeOpenSubtitles()
     private val quotas = FakeQuotaStore()
-    private val online = OnlineSubtitlesController(api, quotas, CoroutineScope(Dispatchers.Unconfined), now = { NOW })
+    private val online = OnlineSubtitlesController(openSubtitlesOnly(api), quotas, CoroutineScope(Dispatchers.Unconfined), now = { NOW })
 
     @Test
     fun theFingerprintFirstThenTheName() {
-        api.byHash = listOf(sampleOnline[0])
+        api.byHash = listOf(sampleApi[0])
         val film = FakeOnlineFilm("Kuzey.Isigi.2024.1080p.WEB-DL.mkv")
         online.open(film, listOf("tr", "en"))
         assertEquals(listOf(OnlineQuery("8e245d9679d31e12", null, listOf("tr", "en"))), api.queries)
@@ -111,12 +133,12 @@ class OnlineSubtitlesTest {
 
         // nothing timed for the file: its name
         api.byHash = emptyList()
-        api.byName = sampleOnline.reversed()
+        api.byName = sampleApi.reversed()
         api.queries.clear()
         online.search()
         assertEquals(2, api.queries.size)
         assertEquals("Kuzey Isigi 2024 1080p WEB-DL", api.queries[1].name)
-        assertEquals(listOf(11L, 13L, 12L), online.state?.results?.map { it.fileId })
+        assertEquals(listOf(11L, 13L, 12L), online.state?.results?.map { it.id.toLong() })
 
         // without the fingerprint, and in English only
         online.setByHash(false)
@@ -128,7 +150,7 @@ class OnlineSubtitlesTest {
 
     @Test
     fun aDownloadGoesBesideTheFilmAndShows() {
-        api.byHash = sampleOnline
+        api.byHash = sampleApi
         val film = FakeOnlineFilm()
         online.open(film, listOf("tr", "en"))
         online.download(sampleOnline[0])
@@ -148,7 +170,7 @@ class OnlineSubtitlesTest {
         assertFalse(online.state!!.searching)
 
         api.failure = null
-        api.byHash = sampleOnline
+        api.byHash = sampleApi
         online.search()
         api.failure = OnlineFailure.QuotaOver("2026-10-13T00:00:00.000Z")
         online.download(sampleOnline[1])
@@ -168,7 +190,7 @@ class OnlineSubtitlesTest {
     @Test
     fun withoutAKeyNothingIsAsked() {
         val none = FakeOpenSubtitles(available = false)
-        val search = OnlineSubtitlesController(none, quotas, CoroutineScope(Dispatchers.Unconfined))
+        val search = OnlineSubtitlesController(openSubtitlesOnly(none), quotas, CoroutineScope(Dispatchers.Unconfined))
         search.open(FakeOnlineFilm(), listOf("tr", "en"))
         assertEquals(OnlineProblem.NoKey, search.state?.problem)
         assertTrue(none.queries.isEmpty())
@@ -248,7 +270,7 @@ class OnlineSubtitlesTest {
                         onLanguage = { actions += "language:$it" },
                         onByHash = { actions += "hash:$it" },
                         onSearch = { actions += "search" },
-                        onDownload = { actions += "download:${it.fileId}" },
+                        onDownload = { actions += "download:${it.id}" },
                         onDismiss = { actions += "close" },
                     )
                 }
@@ -263,7 +285,7 @@ class OnlineSubtitlesTest {
         compose.onNodeWithText("Kuzey.Isigi.2024.1080p.WEB-DL").assertExists()
         compose.onNodeWithText("bu dosyaya uygun · 12.345 indirme · 23,976 fps").assertExists()
         compose.onNodeWithText("OpenSubtitles kotası: 14/20").assertExists()
-        compose.onNodeWithTag("online-result-13").performClick()
+        compose.onNodeWithTag("online-result-opensubtitles/13").performClick()
         compose.onNodeWithText("İngilizce").performClick()
         compose.onNodeWithTag("online-search").performClick()
         assertEquals(listOf("download:13", "language:en", "search"), actions)

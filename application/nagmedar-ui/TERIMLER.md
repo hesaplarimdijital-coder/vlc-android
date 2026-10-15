@@ -41,6 +41,11 @@ Sözlüğü testler denetler:
 | tam ekran | fullscreen | | | “Tam ekrandan çık” / “Exit fullscreen” |
 | altyazı | subtitle | alt yazı | caption | Tek sözcük |
 | kodlama | encoding | karakter seti, kod sayfası | charset | “Altyazı kodlaması”: Otomatik, UTF-8, Türkçe · Windows-1254; film başına hatırlanır |
+| altyazı satırı | subtitle line | | | Altyazı dosyasının bir zaman aralığında gösterilen metni; “Satırlar” sekmesi, “Satırı böl”. İngilizce “cue” yazılmaz (CUE sayfasıyla karışır) |
+| altyazı sağlayıcısı | subtitle provider | | | Altyazının aranacağı yer: OpenSubtitles, Yerel klasör. Ayarlar › Altyazı'da açılıp kapatılır ve sıralanır; açık olanların hepsinde aynı anda aranır ve sonuçlar tek listede birleşir |
+| işitme engelliler için altyazı | subtitles for the hard of hearing | sağır altyazısı | deaf subtitles | Kısaca SDH: ses betimlemeleri, konuşmacı etiketleri, müzik işaretleri içerir; “Altyazı araçları › Temizle” bunları kaldırır |
+| kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
+| bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |

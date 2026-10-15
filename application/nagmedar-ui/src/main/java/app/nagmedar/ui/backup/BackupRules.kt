@@ -5,6 +5,7 @@ import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
+import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -39,6 +40,8 @@ object BackupSettings {
         KEY_OPEN_SUBTITLES_USER,
         KEY_OPEN_SUBTITLES_LIMIT,
         PrefsOnlineQuotaStore.KEY,
+        // this device's: the folder of the local subtitle provider (S-707)
+        SubtitleFolderStore.KEY,
         // the settings' version, which the backup keeps on its own
         KEY_CURRENT_SETTINGS_VERSION,
         KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION,

@@ -4,12 +4,16 @@ import android.content.ContentResolver
 import android.net.Uri
 import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
@@ -19,6 +23,7 @@ import java.nio.ByteOrder
 import java.nio.channels.FileChannel
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resumeWithException
 
 /** A subtitle file OpenSubtitles.com has for a film (S-706). */
 @Immutable
@@ -37,11 +42,20 @@ data class OnlineSubtitle(
     val title: String = "",
     val year: Int? = null,
     val machineTranslated: Boolean = false,
+    /** Users' rating, 0 to 1; null when nobody rated it. */
+    val rating: Double? = null,
 )
 
-/** What was asked for: the file's fingerprint, the film's name, the languages. */
+/** What was asked for: the file's fingerprint, the film's name, the languages; the film's IMDb number, the season and the episode of a series. */
 @Immutable
-data class OnlineQuery(val hash: String?, val name: String?, val languages: List<String>)
+data class OnlineQuery(
+    val hash: String?,
+    val name: String?,
+    val languages: List<String>,
+    val imdbId: String? = null,
+    val season: Int? = null,
+    val episode: Int? = null,
+)
 
 /** A download granted: where the file is, and how many more the day allows. */
 @Immutable
@@ -60,6 +74,9 @@ sealed class OnlineFailure(message: String, cause: Throwable? = null) : IOExcept
 
     /** Another answer: its HTTP status. */
     class Server(val status: Int) : OnlineFailure("status $status")
+
+    /** A provider that searches a folder of the user's, and none is chosen. */
+    class NoFolder : OnlineFailure("no folder")
 }
 
 /** OpenSubtitles.com's REST API (S-706), as the subtitles' search uses it. */
@@ -88,48 +105,41 @@ class OkHttpOpenSubtitles(
 
     override val available: Boolean get() = apiKey.isNotBlank()
 
-    override suspend fun search(query: OnlineQuery): List<OnlineSubtitle> = withContext(Dispatchers.IO) {
+    override suspend fun search(query: OnlineQuery): List<OnlineSubtitle> {
         val url = base.toHttpUrl().newBuilder().addPathSegment("subtitles").apply {
+            query.episode?.let { addQueryParameter("episode_number", it.toString()) }
+            // the number without its "tt"
+            query.imdbId?.filter { it.isDigit() }?.trimStart('0')?.takeIf { it.isNotEmpty() }?.let { addQueryParameter("imdb_id", it) }
             if (query.languages.isNotEmpty()) addQueryParameter("languages", query.languages.map { it.lowercase(Locale.ROOT) }.sorted().joinToString(","))
             query.hash?.let { addQueryParameter("moviehash", it.lowercase(Locale.ROOT)) }
             addQueryParameter("order_by", "download_count")
             query.name?.takeIf { it.isNotBlank() }?.let { addQueryParameter("query", it.trim().lowercase(Locale.ROOT)) }
+            query.season?.let { addQueryParameter("season_number", it.toString()) }
         }.build()
-        OpenSubtitlesJson.results(call(Request.Builder().url(url).get()))
+        return OpenSubtitlesJson.results(call(Request.Builder().url(url).get()))
     }
 
-    override suspend fun download(fileId: Long): OnlineTicket = withContext(Dispatchers.IO) {
+    override suspend fun download(fileId: Long): OnlineTicket {
         val body = JSONObject().put("file_id", fileId).toString().toRequestBody(JSON)
-        OpenSubtitlesJson.ticket(call(Request.Builder().url(base.toHttpUrl().newBuilder().addPathSegment("download").build()).post(body)))
+        return OpenSubtitlesJson.ticket(call(Request.Builder().url(base.toHttpUrl().newBuilder().addPathSegment("download").build()).post(body)))
     }
 
-    override suspend fun fetch(link: String): ByteArray = withContext(Dispatchers.IO) {
-        val response = try {
-            client.newCall(Request.Builder().url(link).header("User-Agent", userAgent).build()).execute()
-        } catch (e: IOException) {
-            throw OnlineFailure.Offline(e)
-        }
-        response.use {
+    override suspend fun fetch(link: String): ByteArray =
+        client.newCall(Request.Builder().url(link).header("User-Agent", userAgent).build()).await {
             if (!it.isSuccessful) throw OnlineFailure.Server(it.code)
             val bytes = it.body?.bytes() ?: throw OnlineFailure.Server(it.code)
             if (bytes.size > MAX_FILE_BYTES) throw OnlineFailure.Server(it.code)
             bytes
         }
-    }
 
-    private fun call(request: Request.Builder): String {
+    private suspend fun call(request: Request.Builder): String {
         if (!available) throw OnlineFailure.NoKey()
         val built = request
             .header("Api-Key", apiKey)
             .header("User-Agent", userAgent)
             .header("Accept", "application/json")
             .build()
-        val response = try {
-            client.newCall(built).execute()
-        } catch (e: IOException) {
-            throw OnlineFailure.Offline(e)
-        }
-        return response.use {
+        return client.newCall(built).await {
             val text = it.body?.string().orEmpty()
             when {
                 it.isSuccessful -> text
@@ -138,6 +148,33 @@ class OkHttpOpenSubtitles(
                 else -> throw OnlineFailure.Server(it.code)
             }
         }
+    }
+
+    /**
+     * The call, run by OkHttp's own threads and read by [read]; when the coroutine is cancelled
+     * (a timeout, the dialog closed) the call is cancelled too, so a blocked connect or a slow body
+     * ends at once instead of holding a thread until its own timeout.
+     */
+    private suspend fun <T> Call.await(read: (Response) -> T): T = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                continuation.resumeWithException(if (e is OnlineFailure) e else OnlineFailure.Offline(e))
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val result = try {
+                    Result.success(response.use(read))
+                } catch (e: OnlineFailure) {
+                    Result.failure(e)
+                } catch (e: IOException) {
+                    Result.failure(OnlineFailure.Offline(e))
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+                continuation.resumeWith(result)
+            }
+        })
     }
 
     companion object {
@@ -155,6 +192,8 @@ class OkHttpOpenSubtitles(
             OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)
+                // a slow body that keeps trickling in does not go on for ever
+                .callTimeout(45, TimeUnit.SECONDS)
                 .build()
         }
     }
@@ -162,6 +201,9 @@ class OkHttpOpenSubtitles(
 
 /** OpenSubtitles' answers, read. */
 object OpenSubtitlesJson {
+    /** Its ratings go to 10. */
+    private const val RATING_SCALE = 10.0
+
     fun results(text: String): List<OnlineSubtitle> {
         val data = JSONObject(text).optJSONArray("data") ?: return emptyList()
         return (0 until data.length()).mapNotNull { index ->
@@ -181,6 +223,7 @@ object OpenSubtitlesJson {
                 title = feature?.text("title").orEmpty(),
                 year = feature?.optInt("year", 0)?.takeIf { it > 0 },
                 machineTranslated = attributes.optBoolean("machine_translated", false) || attributes.optBoolean("ai_translated", false),
+                rating = attributes.optDouble("ratings", 0.0).takeIf { it > 0 }?.let { (it / RATING_SCALE).coerceAtMost(1.0) },
             )
         }
     }
