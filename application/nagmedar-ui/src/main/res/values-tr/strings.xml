@@ -930,8 +930,8 @@
     <string name="nag_style_ass_ours">Bu görünüm</string>
     <string name="nag_style_waiting">Yeni görünüm, oynatıcı yeniden açılınca altyazılara uygulanır.</string>
     <!-- S-706: OpenSubtitles.com'dan altyazı -->
-    <string name="nag_online_search">OpenSubtitles\'ta ara</string>
-    <string name="nag_online_title">OpenSubtitles\'ta ara</string>
+    <string name="nag_online_search">Altyazı ara</string>
+    <string name="nag_online_title">Altyazı ara</string>
     <string name="nag_online_search_short">Ara</string>
     <string name="nag_online_name">Film adı</string>
     <string name="nag_online_by_hash">Önce dosyanın parmak iziyle</string>
@@ -954,7 +954,7 @@
     <string name="nag_online_quota_over_at">Bugünkü indirme hakkı doldu; yenilenme saati: %1$s.</string>
     <string name="nag_online_server">OpenSubtitles şu an yanıt vermiyor; biraz sonra yeniden deneyin.</string>
     <string name="nag_online_unsaved">Altyazı kaydedilemedi.</string>
-    <string name="nag_online_note">%1$s · OpenSubtitles\'tan</string>
+    <string name="nag_online_note">%1$s · altyazı sağlayıcısından</string>
     <string name="nag_online_saved_beside">%1$s indirildi, filmin yanına kaydedildi</string>
     <string name="nag_online_saved_app">%1$s indirildi, uygulamanın klasörüne kaydedildi</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
@@ -2543,4 +2543,45 @@
     <string name="nag_save_saved_beside">%1$s olarak özgün dosyanın yanına kaydedildi</string>
     <string name="nag_save_saved_elsewhere">%1$s olarak kaydedildi</string>
     <string name="nag_save_loaded">filmde gösteriliyor</string>
+
+    <!-- S-707 · Altyazı sağlayıcıları -->
+    <string name="nag_online_timeout">Bir sağlayıcı zamanında yanıt vermedi; yeniden arayın.</string>
+    <string name="nag_online_no_folder">Altyazı klasörü seçilmedi; Ayarlar › Altyazı bölümünden seçin.</string>
+    <string name="nag_online_no_provider">Hiçbir altyazı sağlayıcısı açık değil; Ayarlar › Altyazı bölümünden açın.</string>
+    <string name="nag_online_report_problem">%1$s: %2$s</string>
+    <plurals name="nag_online_report_found">
+        <item quantity="one">%1$s · %2$d sonuç</item>
+        <item quantity="other">%1$s · %2$d sonuç</item>
+    </plurals>
+    <string name="nag_online_r_no_key">bu derlemede anahtar yok</string>
+    <string name="nag_online_r_no_folder">klasör seçilmedi</string>
+    <string name="nag_online_r_offline">erişilemedi</string>
+    <string name="nag_online_r_quota">bugünkü indirmeler bitti</string>
+    <string name="nag_online_r_timeout">zamanında yanıt vermedi</string>
+    <string name="nag_online_r_server">şu an yanıt vermiyor</string>
+    <string name="nag_prov_settings">Altyazı</string>
+    <string name="nag_prov_hint">Altyazılar açık olan her sağlayıcıda aynı anda aranır, sonuçlar tek listede birleştirilir. İki sağlayıcıda aynı dosya varsa üsttekinin dosyası kalır.</string>
+    <string name="nag_prov_local_name">Yerel klasör</string>
+    <string name="nag_prov_on">Açık</string>
+    <string name="nag_prov_off">Kapalı</string>
+    <string name="nag_prov_up">Yukarı</string>
+    <string name="nag_prov_down">Aşağı</string>
+    <string name="nag_prov_searches_by">Şuna göre arar: %1$s</string>
+    <string name="nag_prov_by_hash">parmak izi</string>
+    <string name="nag_prov_by_imdb">IMDb numarası</string>
+    <string name="nag_prov_by_name">ad</string>
+    <string name="nag_prov_by_episode">sezon ve bölüm</string>
+    <string name="nag_prov_by_language">dil</string>
+    <plurals name="nag_prov_limit">
+        <item quantity="one">günde %d indirme</item>
+        <item quantity="other">günde %d indirme</item>
+    </plurals>
+    <string name="nag_prov_needs_key">uygulamanın anahtarını ister</string>
+    <string name="nag_prov_needs_login">hesap ister</string>
+    <string name="nag_prov_no_network">ağ da anahtar da gerekmez</string>
+    <string name="nag_prov_no_key">Bu derlemede OpenSubtitles anahtarı yok; bu sağlayıcıda arama yapılamaz.</string>
+    <string name="nag_prov_folder">Altyazı klasörü</string>
+    <string name="nag_prov_folder_none">Klasör seçilmedi</string>
+    <string name="nag_prov_folder_choose">Klasör seç…</string>
+    <string name="nag_prov_folder_forget">Klasörü unut</string>
 </resources>

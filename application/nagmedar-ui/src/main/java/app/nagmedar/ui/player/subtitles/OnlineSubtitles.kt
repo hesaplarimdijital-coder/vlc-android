@@ -6,6 +6,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.player.subtitles.providers.ProviderRegistry
+import app.nagmedar.ui.player.subtitles.providers.ProviderReport
+import app.nagmedar.ui.player.subtitles.providers.SubtitleQuery
+import app.nagmedar.ui.player.subtitles.providers.SubtitleResult
+import app.nagmedar.ui.player.subtitles.providers.SubtitleSearch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -35,7 +40,7 @@ interface OnlineFilm {
 data class SavedSubtitle(val uri: String, val name: String, val beside: Boolean)
 
 /** Why a search or a download did not go through. */
-enum class OnlineProblem { NoKey, Offline, QuotaOver, Server, Unsaved }
+enum class OnlineProblem { NoKey, Offline, QuotaOver, Server, Unsaved, Timeout, NoFolder, NoProvider }
 
 /** The search window's state (S-706). */
 @Immutable
@@ -49,10 +54,12 @@ data class OnlineSearchState(
     /** The file's fingerprint first: the subtitles timed for this very file. */
     val byHash: Boolean = true,
     val searching: Boolean = false,
-    /** Null until the first search ends. */
-    val results: List<OnlineSubtitle>? = null,
-    /** The file being downloaded. */
-    val downloading: Long? = null,
+    /** The providers' results as one list; null until the first search ends. */
+    val results: List<SubtitleResult>? = null,
+    /** What each provider asked answered: how many it found, or what went wrong with it (S-707). */
+    val reports: List<ProviderReport> = emptyList(),
+    /** The file being downloaded: its [SubtitleResult.key]. */
+    val downloading: String? = null,
     val problem: OnlineProblem? = null,
 )
 
@@ -89,17 +96,20 @@ class PrefsOnlineQuotaStore(private val prefs: SharedPreferences) : OnlineQuotaS
 }
 
 /**
- * The search for a film's subtitles on OpenSubtitles.com (S-706): by the file's fingerprint
- * first, by its name when that finds none; in the languages chosen, the fingerprint's matches
- * first, then by language, then by downloads. A download goes beside the film, or into the app's
- * folder, and shows at once; the day's quota is kept as OpenSubtitles tells it.
+ * The search for a film's subtitles (S-706, S-707): every provider turned on is asked at once, by
+ * the file's fingerprint first and by its name, in the languages chosen; their answers are merged
+ * into one list, the fingerprint's matches first, then the languages, then the most downloaded.
+ * A provider that fails is told beside its name while the others' results stay. A download goes
+ * beside the film, or into the app's folder, and shows at once; OpenSubtitles' quota is kept as
+ * it tells it.
  */
 @Stable
 class OnlineSubtitlesController(
-    private val api: OpenSubtitlesApi,
+    private val providers: ProviderRegistry,
     private val quotas: OnlineQuotaStore,
     private val scope: CoroutineScope,
     private val now: () -> Long = System::currentTimeMillis,
+    private val engine: SubtitleSearch = SubtitleSearch(),
 ) {
     var state by mutableStateOf<OnlineSearchState?>(null)
         private set
@@ -107,8 +117,16 @@ class OnlineSubtitlesController(
     var quota by mutableStateOf(quotas.load())
         private set
 
-    /** Whether this build has an API key. */
-    val available: Boolean get() = api.available
+    /** Why nothing can be searched now (no provider on, or none ready), or null when something can. */
+    val unavailable: OnlineProblem?
+        get() {
+            val on = providers.enabled()
+            if (on.isEmpty()) return OnlineProblem.NoProvider
+            return if (on.any { it.unavailable() == null }) null else on.first().unavailable()
+        }
+
+    /** Whether something can be searched. */
+    val available: Boolean get() = unavailable == null
 
     private var film: OnlineFilm? = null
     private var hash: String? = null
@@ -123,8 +141,9 @@ class OnlineSubtitlesController(
         hashed = false
         val offered = languages.distinct()
         state = OnlineSearchState(name = searchName(film.name), languages = offered.take(2), offered = offered)
-        if (!api.available) {
-            state = state?.copy(problem = OnlineProblem.NoKey)
+        val why = unavailable
+        if (why != null) {
+            state = state?.copy(problem = why)
             return
         }
         search()
@@ -148,7 +167,7 @@ class OnlineSubtitlesController(
     fun search() {
         val current = state ?: return
         val film = film ?: return
-        if (!api.available) return
+        if (unavailable != null) return
         job?.cancel()
         state = current.copy(searching = true, problem = null)
         job = scope.launch {
@@ -157,29 +176,28 @@ class OnlineSubtitlesController(
                     hash = film.hash()
                     hashed = true
                 }
-                val fingerprint = hash.takeIf { current.byHash }
-                var found = if (fingerprint != null) api.search(OnlineQuery(fingerprint, null, current.languages)) else emptyList()
-                if (found.isEmpty() && current.name.isNotBlank()) found = api.search(OnlineQuery(null, current.name, current.languages))
-                state = state?.copy(searching = false, results = ranked(found, current.languages))
+                val query = SubtitleQuery(hash = hash.takeIf { current.byHash }, name = current.name, languages = current.languages)
+                val outcome = engine.search(providers.enabled(), query)
+                state = state?.copy(searching = false, results = outcome.results, reports = outcome.reports, problem = outcome.failure)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                state = state?.copy(searching = false, problem = problemOf(e))
+                state = state?.copy(searching = false, problem = SubtitleSearch.problemOf(e))
             }
         }
     }
 
     /** [subtitle] downloaded, saved beside the film and shown; the window closes. */
-    fun download(subtitle: OnlineSubtitle) {
+    fun download(subtitle: SubtitleResult) {
         val film = film ?: return
         if (state?.downloading != null) return
-        state = state?.copy(downloading = subtitle.fileId, problem = null)
+        val provider = providers.byId(subtitle.provider) ?: return
+        state = state?.copy(downloading = subtitle.key, problem = null)
         job = scope.launch {
             try {
-                val ticket = api.download(subtitle.fileId)
-                keep(OnlineQuota(ticket.remaining, ticket.remaining + ticket.requests, resetAt(ticket.resetUtc)))
-                val bytes = api.fetch(ticket.link)
-                val saved = film.save(fileNameFor(film.name, subtitle, ticket.fileName), bytes)
+                val file = provider.download(subtitle)
+                file.quota?.let(::keep)
+                val saved = film.save(fileNameFor(film.name, subtitle, file.fileName), file.bytes)
                 if (saved == null || !film.load(saved)) {
                     state = state?.copy(downloading = null, problem = OnlineProblem.Unsaved)
                 } else {
@@ -189,7 +207,7 @@ class OnlineSubtitlesController(
                 throw e
             } catch (e: Exception) {
                 if (e is OnlineFailure.QuotaOver) keep(OnlineQuota(0, quota?.allowed ?: ANONYMOUS_DOWNLOADS, resetAt(e.resetUtc)))
-                state = state?.copy(downloading = null, problem = problemOf(e))
+                state = state?.copy(downloading = null, problem = SubtitleSearch.problemOf(e))
             }
         }
     }
@@ -211,21 +229,6 @@ class OnlineSubtitlesController(
         /** OpenSubtitles' downloads a day without an account. */
         const val ANONYMOUS_DOWNLOADS = 5
 
-        fun problemOf(e: Exception): OnlineProblem = when (e) {
-            is OnlineFailure.NoKey -> OnlineProblem.NoKey
-            is OnlineFailure.Offline -> OnlineProblem.Offline
-            is OnlineFailure.QuotaOver -> OnlineProblem.QuotaOver
-            else -> OnlineProblem.Server
-        }
-
-        /** The fingerprint's matches first, then the languages in the order chosen, then the most downloaded. */
-        fun ranked(found: List<OnlineSubtitle>, languages: List<String>): List<OnlineSubtitle> {
-            fun place(language: String) = languages.indexOfFirst { it.equals(language, ignoreCase = true) }.let { if (it < 0) languages.size else it }
-            return found.distinctBy { it.fileId }.sortedWith(
-                compareByDescending<OnlineSubtitle> { it.hashMatch }.thenBy { place(it.language) }.thenByDescending { it.downloads },
-            )
-        }
-
         /** "Kuzey.Isigi.2024.1080p.mkv" → "Kuzey Isigi 2024 1080p": a file's name as words to search for. */
         fun searchName(fileName: String): String =
             fileName.substringBeforeLast('.').ifEmpty { fileName }.replace(Regex("[._]+"), " ").replace(Regex("\\s+"), " ").trim()
@@ -234,7 +237,7 @@ class OnlineSubtitlesController(
          * "Kuzey Işığı.tr.srt": the film's name, the subtitle's language and its kind, so that the
          * film finds it beside itself again (S-701).
          */
-        fun fileNameFor(film: String, subtitle: OnlineSubtitle, served: String): String {
+        fun fileNameFor(film: String, subtitle: SubtitleResult, served: String): String {
             val base = film.substringBeforeLast('.').ifEmpty { film }
             val extension = served.substringAfterLast('.', "").lowercase(Locale.ROOT).takeIf { it in SUBTITLE_EXTENSIONS } ?: "srt"
             val language = subtitle.language.lowercase(Locale.ROOT).ifEmpty { null }
