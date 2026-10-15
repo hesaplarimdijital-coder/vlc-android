@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -73,12 +74,17 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.music.PlaylistTab
+import app.nagmedar.ui.radio.record.RecordedTrack
+import app.nagmedar.ui.radio.record.RecordingsController
+import app.nagmedar.ui.radio.record.RecordingsTab
+import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import java.util.Locale
+import kotlinx.coroutines.flow.first
 
 /** The widest the radio screen's content grows. */
 private val ContentWidth = 960.dp
@@ -91,7 +97,8 @@ private val ContentWidth = 960.dp
  * Enter on a station plays it; its menu (right click, the Menu key, the button at its end) plays,
  * favourites, votes, copies the stream's address and takes it out. [searchRequested] (the search
  * shortcut) opens the search and puts the keyboard in the box, and is answered with
- * [onSearchHandled]; what is taken out can be put back through [undo].
+ * [onSearchHandled]; what is taken out can be put back through [undo]. With [recordings] (S-1107, S-207)
+ * a Recordings tab joins the lists, and each station's menu can record it.
  */
 @Composable
 fun RadioPage(
@@ -104,6 +111,11 @@ fun RadioPage(
     onTogglePlay: () -> Unit = {},
     undo: UndoBarState? = null,
     now: () -> Long = System::currentTimeMillis,
+    recordings: RecordingsController? = null,
+    recordingActions: RecordingActions = RecordingActions(),
+    recordingsRequested: Boolean = false,
+    onRecordingsHandled: () -> Unit = {},
+    recordingsLive: Boolean = true,
 ) {
     val context = LocalContext.current
     val res = context.resources
@@ -119,6 +131,12 @@ fun RadioPage(
             onSearchHandled()
         }
     }
+    // S-207: the recordings asked for (Alt+Shift+R)
+    LaunchedEffect(recordingsRequested) {
+        if (!recordingsRequested) return@LaunchedEffect
+        if (recordings != null) controller.select(RadioTab.Recordings)
+        onRecordingsHandled()
+    }
     val notice = controller.notice
     LaunchedEffect(notice) {
         if (notice == null) return@LaunchedEffect
@@ -130,20 +148,40 @@ fun RadioPage(
         }
         controller.noticed()
     }
+    val onRecord: ((Station) -> Unit)? = recordings?.let { rec -> { station -> rec.record(station.toRecording()) } }
     Column(modifier.fillMaxSize()) {
         PageHeader(title = stringResource(R.string.nag_nav_radio), subtitle = stringResource(R.string.nag_radio_source))
         controller.now?.let { NowStrip(it, onTogglePlay) }
         RadioTabs(
             tab,
-            mapOf(RadioTab.Favourites to controller.favourites?.size, RadioTab.Recent to controller.recent?.size, RadioTab.Imported to controller.imported?.size),
+            mapOf(
+                RadioTab.Favourites to controller.favourites?.size,
+                RadioTab.Recent to controller.recent?.size,
+                RadioTab.Imported to controller.imported?.size,
+                RadioTab.Recordings to recordings?.live?.size?.takeIf { it > 0 },
+            ),
             controller::select,
+            tabs = RadioTab.entries.filter { it != RadioTab.Recordings || recordings != null },
         )
         Box(Modifier.fillMaxWidth().weight(1f)) {
             when (tab) {
-                RadioTab.Search -> SearchTab(controller, focus, compact, now, onCopyAddress)
-                RadioTab.Favourites -> SavedTab(tab, controller.favourites, controller, compact, now, onCopyAddress, onImport)
-                RadioTab.Recent -> SavedTab(tab, controller.recent, controller, compact, now, onCopyAddress, onImport)
-                RadioTab.Imported -> SavedTab(tab, controller.imported, controller, compact, now, onCopyAddress, onImport)
+                RadioTab.Search -> SearchTab(controller, focus, compact, now, onCopyAddress, onRecord)
+                RadioTab.Favourites -> SavedTab(tab, controller.favourites, controller, compact, now, onCopyAddress, onImport, onRecord)
+                RadioTab.Recent -> SavedTab(tab, controller.recent, controller, compact, now, onCopyAddress, onImport, onRecord)
+                RadioTab.Imported -> SavedTab(tab, controller.imported, controller, compact, now, onCopyAddress, onImport, onRecord)
+                RadioTab.Recordings -> if (recordings != null) {
+                    RecordingsTab(
+                        recordings,
+                        stations = (controller.favourites.orEmpty() + controller.recent.orEmpty() + controller.imported.orEmpty()).distinctBy { it.key },
+                        undo = undo,
+                        autoRefresh = recordingsLive,
+                        onShare = recordingActions.onShare,
+                        onChooseFolder = recordingActions.onChooseFolder,
+                        onUseDefaultFolder = recordingActions.onUseDefaultFolder,
+                        onAllowExact = recordingActions.onAllowExact,
+                        onSearchStations = { controller.select(RadioTab.Search) },
+                    )
+                }
             }
         }
     }
@@ -178,21 +216,30 @@ private fun tabName(tab: RadioTab): Int = when (tab) {
     RadioTab.Recent -> R.string.nag_radio_tab_recent
     RadioTab.Search -> R.string.nag_radio_tab_search
     RadioTab.Imported -> R.string.nag_radio_tab_imported
+    RadioTab.Recordings -> R.string.nag_radio_tab_recordings
 }
 
 /** The lists' tabs, scrolled sideways when they do not fit; a count shows where the list has stations. */
 @Composable
-private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect: (RadioTab) -> Unit) {
+private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect: (RadioTab) -> Unit, tabs: List<RadioTab> = RadioTab.entries) {
+    val scroll = rememberScrollState()
+    // S-207: the last tab (Kayıtlar) is out of sight on a phone: asked for, the strip scrolls to it
+    LaunchedEffect(selected) {
+        if (selected == RadioTab.Recordings) {
+            snapshotFlow { scroll.maxValue }.first { it > 0 }
+            scroll.animateScrollTo(scroll.maxValue)
+        }
+    }
     Row(
         Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
+            .horizontalScroll(scroll)
             .padding(horizontal = NagTheme.dimens.pagePadding - 8.dp, vertical = 2.dp)
             .testTag("radio-tabs"),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RadioTab.entries.forEach { tab ->
+        tabs.forEach { tab ->
             Box(Modifier.testTag("radio-tab-${tab.name.lowercase()}")) {
                 PlaylistTab(stringResource(tabName(tab)), counts[tab]?.takeIf { it > 0 }, selected = tab == selected, onClick = { onSelect(tab) })
             }
@@ -247,7 +294,7 @@ private fun NowStrip(now: RadioNow, onToggle: () -> Unit) {
 
 /** The directory's search: the box, the filters and what was found. */
 @Composable
-private fun SearchTab(controller: RadioController, focus: FocusRequester, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit) {
+private fun SearchTab(controller: RadioController, focus: FocusRequester, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit, onRecord: ((Station) -> Unit)?) {
     val search = controller.search
     LaunchedEffect(search) {
         search.start()
@@ -261,7 +308,7 @@ private fun SearchTab(controller: RadioController, focus: FocusRequester, compac
             Spacer(Modifier.size(NagTheme.dimens.gapXs))
         }
         Box(Modifier.fillMaxWidth().weight(1f)) {
-            Results(search, controller, compact, now, onCopyAddress)
+            Results(search, controller, compact, now, onCopyAddress, onRecord)
         }
     }
 }
@@ -276,6 +323,7 @@ private fun SavedTab(
     now: () -> Long,
     onCopyAddress: (Station) -> Unit,
     onImport: () -> Unit,
+    onRecord: ((Station) -> Unit)?,
 ) {
     if (stations == null) return
     Column(Modifier.fillMaxSize()) {
@@ -283,7 +331,7 @@ private fun SavedTab(
         if (stations.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { EmptyList(tab, controller::select, onImport) }
         } else {
-            StationList(stations, tab, controller, compact, now, onCopyAddress, footer = null, modifier = Modifier.weight(1f))
+            StationList(stations, tab, controller, compact, now, onCopyAddress, onRecord, footer = null, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -463,7 +511,7 @@ private fun orderName(res: Resources, order: StationOrder): String = res.getStri
 )
 
 @Composable
-private fun Results(search: RadioSearch, controller: RadioController, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit) {
+private fun Results(search: RadioSearch, controller: RadioController, compact: Boolean, now: () -> Long, onCopyAddress: (Station) -> Unit, onRecord: ((Station) -> Unit)?) {
     val stations = search.stations
     val failure = search.failure
     when {
@@ -483,7 +531,7 @@ private fun Results(search: RadioSearch, controller: RadioController, compact: B
             )
         }
         stations.isNotEmpty() -> StationList(
-            stations, RadioTab.Search, controller, compact, now, onCopyAddress,
+            stations, RadioTab.Search, controller, compact, now, onCopyAddress, onRecord,
             footer = {
                 when {
                     search.loading -> Text(stringResource(R.string.nag_radio_loading_more), style = NagTheme.type.label, color = NagTheme.colors.textSecondary)
@@ -534,6 +582,7 @@ private fun StationList(
     compact: Boolean,
     now: () -> Long,
     onCopyAddress: (Station) -> Unit,
+    onRecord: ((Station) -> Unit)?,
     footer: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -552,6 +601,7 @@ private fun StationList(
                 onVote = { controller.vote(station) },
                 onCopy = { onCopyAddress(station) },
                 onRemove = { controller.remove(station) },
+                onRecord = onRecord?.let { record -> { record(station) } },
             )
             val menu = { stationMenu(res, station, now(), tab, actions) }
             Box(Modifier.widthIn(max = ContentWidth)) {
@@ -566,6 +616,14 @@ private fun StationList(
     }
 }
 
+/** S-207: what the Recordings tab needs of the app around it: sharing a file, the folder, the alarm permission. */
+class RecordingActions(
+    val onShare: (RecordedTrack) -> Unit = {},
+    val onChooseFolder: () -> Unit = {},
+    val onUseDefaultFolder: () -> Unit = {},
+    val onAllowExact: () -> Unit = {},
+)
+
 /** What a station's menu and buttons do. */
 class StationActions(
     val onPlay: () -> Unit,
@@ -573,6 +631,8 @@ class StationActions(
     val onVote: () -> Unit,
     val onCopy: () -> Unit,
     val onRemove: () -> Unit,
+    /** S-1107: records the station (null: the screen has no recordings). */
+    val onRecord: (() -> Unit)? = null,
 )
 
 /**
@@ -592,6 +652,7 @@ fun stationMenu(res: Resources, station: Station, now: Long, tab: RadioTab, acti
         val may = VoteRule.canVote(station.lastVotedAt, now)
         add(MenuEntry.Item(res.getString(if (may) R.string.nag_radio_vote else R.string.nag_radio_voted_today), actions.onVote, enabled = may))
     }
+    actions.onRecord?.let { record -> add(MenuEntry.Item(res.getString(R.string.nag_radio_rec_record), record, shortcut = ShortcutRegistry.chordLabel(ShortcutId.RadioRecord, res), icon = NagIcons.Record)) }
     add(MenuEntry.Separator)
     add(MenuEntry.Item(res.getString(R.string.nag_radio_copy_address), actions.onCopy, icon = NagIcons.Streams))
     val remove = when (tab) {

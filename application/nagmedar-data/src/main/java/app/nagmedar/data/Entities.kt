@@ -113,6 +113,66 @@ data class RadioStation(
 )
 
 /**
+ * One track of a radio recording (S-1107): a file in the recordings' folder that a session cut
+ * from a station's stream at a change of the stream's title. [sessionId] groups the tracks of one
+ * recording; [stationKey] is the station's directory UUID, else its address, so a station is
+ * grouped however it was reached. [trashedAt] is set while a deletion can still be taken back.
+ */
+@Entity(
+    tableName = "radio_recording",
+    indices = [
+        Index(value = ["session_id"]),
+        Index(value = ["file_uri"], unique = true),
+        Index(value = ["session_started_at"]),
+    ],
+)
+data class RadioRecording(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "session_id") val sessionId: String,
+    @ColumnInfo(name = "station_key") val stationKey: String,
+    @ColumnInfo(name = "station_name") val stationName: String,
+    @ColumnInfo(name = "stream_url") val streamUrl: String,
+    @ColumnInfo(name = "station_uuid") val stationUuid: String? = null,
+    @ColumnInfo(name = "logo_url") val logoUrl: String? = null,
+    @ColumnInfo(name = "file_uri") val fileUri: String,
+    @ColumnInfo(name = "file_name") val fileName: String,
+    val artist: String? = null,
+    val title: String? = null,
+    @ColumnInfo(name = "duration_ms") val durationMs: Long = 0,
+    @ColumnInfo(name = "size_bytes") val sizeBytes: Long = 0,
+    /** Whether the recording saw both ends of the track: the first and last ones, and short ones kept, are partial. */
+    val complete: Boolean = false,
+    val format: String,
+    @ColumnInfo(name = "started_at") val startedAt: Long,
+    @ColumnInfo(name = "session_started_at") val sessionStartedAt: Long,
+    @ColumnInfo(name = "trashed_at") val trashedAt: Long = 0,
+)
+
+/**
+ * A scheduled radio recording (S-1107): a station, the wall-clock [hour]:[minute] it starts at, how
+ * long it runs and how it repeats ([repeat] is the repeat's name; [weekday] is ISO, 1 Monday).
+ * [startAt] is the first start, epoch ms; [lastStartedAt] the start last made (0: none).
+ */
+@Entity(tableName = "radio_schedule")
+data class RadioScheduleEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "station_key") val stationKey: String,
+    @ColumnInfo(name = "station_name") val stationName: String,
+    @ColumnInfo(name = "stream_url") val streamUrl: String,
+    @ColumnInfo(name = "station_uuid") val stationUuid: String? = null,
+    @ColumnInfo(name = "logo_url") val logoUrl: String? = null,
+    @ColumnInfo(name = "start_at") val startAt: Long,
+    val hour: Int,
+    val minute: Int,
+    @ColumnInfo(name = "duration_minutes") val durationMinutes: Int,
+    val repeat: String,
+    val weekday: Int = 1,
+    val enabled: Boolean = true,
+    @ColumnInfo(name = "last_started_at") val lastStartedAt: Long = 0,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+)
+
+/**
  * Cached lyrics of a track, one row per source (LRCLIB, embedded SYLT/USLT, .lrc file, user edit).
  * [trackKey] is [LyricsKey.of] the track's tags and length.
  */

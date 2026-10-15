@@ -36,6 +36,17 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- S-1107: radio recording: the app kept in the foreground while stations are recorded (their
+             notification has the time, the size, the track and a stop action), and the alarms of the
+             scheduled recordings (set again after a restart by AlarmRescheduler below) -->
+        <service
+            android:name="app.nagmedar.ui.radio.record.RecordingService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+        <receiver
+            android:name="app.nagmedar.ui.radio.record.RecordingAlarmReceiver"
+            android:exported="false" />
+
         <!-- S-1007: the alarm; and setting it again after a restart or a change of the clock (the
              system's broadcasts reach a receiver that is not exported) -->
         <receiver

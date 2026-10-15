@@ -17,6 +17,8 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.radio.record.RecordingPrefs
+import app.nagmedar.ui.radio.record.RecordingSettings
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
@@ -94,6 +96,20 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 
     private fun readRecordingFolder(): String? = prefs.getString(KEY_RECORDING_FOLDER, null)?.takeIf { it.isNotEmpty() }
 
+    /** S-1107: radio recording's folder, shortest track, padding and limits (Settings › Radio). */
+    var radioRecording by mutableStateOf(RecordingPrefs.read(prefs))
+        private set
+
+    fun updateRadioRecording(value: RecordingSettings) {
+        radioRecording = value.copy(folder = radioRecording.folder)
+        RecordingPrefs.write(prefs.edit(), value).apply()
+    }
+
+    fun updateRadioRecordingFolder(value: String?) {
+        radioRecording = radioRecording.copy(folder = value)
+        prefs.edit().putString(RecordingPrefs.KEY_FOLDER, value).apply()
+    }
+
     /** S-612: whether the screen's refresh rate follows the film: always, if seamless, never. */
     var refreshMatch by mutableStateOf(RefreshMatch.read(prefs))
         private set
@@ -160,6 +176,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
         if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
         if (key == null || key == KEY_RECORDING_FOLDER) recordingFolder = readRecordingFolder()
+        if (key == null || key in RecordingPrefs.keys) radioRecording = RecordingPrefs.read(prefs)
         if (key == null || key == RefreshMatch.KEY || key == KEY_VIDEO_MATCH_FRAME_RATE) refreshMatch = RefreshMatch.read(prefs)
     }
 
