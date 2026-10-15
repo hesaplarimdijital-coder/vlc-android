@@ -9,6 +9,7 @@ import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.player.subtitles.whisper.WhisperPrefs
+import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
@@ -39,6 +40,7 @@ object BackupSettings {
         KEY_RECORDING_FOLDER,
         ConvertOptions.KEY_FOLDER,
         PodcastSettingsStore.KEY_FOLDER,
+        RecordingPrefs.KEY_FOLDER,
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

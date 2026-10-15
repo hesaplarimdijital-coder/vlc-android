@@ -312,6 +312,78 @@ class NagmedarDatabaseTest {
         assertEquals(listOf(nas), servers.all().map { it.id })
     }
 
+    private fun track(session: String, at: Long, uri: String, size: Long = 1_000, started: Long = 100) = RadioRecording(
+        sessionId = session, stationKey = "uuid-1", stationName = "Radyo", streamUrl = "https://radio.example/a",
+        fileUri = uri, fileName = uri.substringAfterLast('/'), artist = "Sanatçı", title = "Parça", durationMs = 180_000,
+        sizeBytes = size, complete = true, format = "mp3", startedAt = at, sessionStartedAt = started,
+    )
+
+    @Test
+    fun recordedTracksAreListedBySessionAndTheBinIsLeftOut() = runBlocking {
+        val dao = db.radioRecordings()
+        val a = dao.add(track("s1", 100, "file:///a/1.mp3", started = 100))
+        val b = dao.add(track("s1", 200, "file:///a/2.mp3", started = 100))
+        dao.add(track("s2", 300, "file:///a/3.mp3", started = 300))
+        // the newest session first, its tracks in the order they were recorded
+        assertEquals(listOf("3.mp3", "1.mp3", "2.mp3"), dao.tracks().first().map { it.fileName })
+        dao.trash(listOf(b), at = 400)
+        assertEquals(listOf("3.mp3", "1.mp3"), dao.tracks().first().map { it.fileName })
+        assertEquals(listOf(b), dao.trashed().map { it.id })
+        // a track in the bin still takes room until its file is deleted
+        assertEquals(3_000L, dao.usedBytes())
+        dao.trash(listOf(b), at = 0)
+        assertEquals(3, dao.tracks().first().size)
+        dao.delete(listOf(a, b))
+        assertEquals(listOf("3.mp3"), dao.tracks().first().map { it.fileName })
+        assertEquals(1_000L, dao.used().first())
+    }
+
+    @Test
+    fun aFileIsRecordedOnceAndRenamingKeepsTheRow() {
+        val dao = db.radioRecordings()
+        val id = dao.add(track("s1", 100, "file:///a/1.mp3"))
+        // the same file again replaces its row instead of listing it twice
+        dao.add(track("s1", 100, "file:///a/1.mp3", size = 2_000))
+        assertEquals(1, dao.sessionTracks("s1").size)
+        assertEquals(2_000L, dao.usedBytes())
+        dao.rename(dao.sessionTracks("s1").single().id, "file:///a/yeni.mp3", "yeni.mp3")
+        assertEquals("yeni.mp3", dao.sessionTracks("s1").single().fileName)
+        assertNotNull(dao.track(dao.sessionTracks("s1").single().id))
+        assertTrue(id > 0)
+    }
+
+    @Test
+    fun theOldestTracksArePrunedFirstAndTheBinBeforeThem() {
+        val dao = db.radioRecordings()
+        dao.add(track("old", 100, "file:///a/old.mp3", started = 100))
+        dao.add(track("new", 900, "file:///a/new.mp3", started = 900))
+        val binned = dao.add(track("mid", 500, "file:///a/mid.mp3", started = 500))
+        dao.trash(listOf(binned), at = 1_000)
+        assertEquals(listOf("mid.mp3", "old.mp3", "new.mp3"), dao.oldestFirst().map { it.fileName })
+    }
+
+    @Test
+    fun scheduledRecordingsAreSavedUpdatedAndDeleted() = runBlocking {
+        val dao = db.radioRecordings()
+        val entry = RadioScheduleEntry(
+            stationKey = "uuid-1", stationName = "Radyo", streamUrl = "https://radio.example/a", startAt = 1_000,
+            hour = 7, minute = 30, durationMinutes = 60, repeat = "Weekdays", weekday = 1, createdAt = 5,
+        )
+        val id = dao.keepSchedule(entry)
+        assertTrue(id > 0)
+        assertEquals(listOf(id), dao.schedules().first().map { it.id })
+        // saving it again with its id updates the row and answers the same id
+        assertEquals(id, dao.keepSchedule(entry.copy(id = id, minute = 45)))
+        assertEquals(45, dao.schedule(id)!!.minute)
+        assertEquals(1, dao.scheduleList().size)
+        dao.enableSchedule(id, false)
+        assertEquals(false, dao.schedule(id)!!.enabled)
+        dao.markScheduleStarted(id, 9_000)
+        assertEquals(9_000L, dao.schedule(id)!!.lastStartedAt)
+        dao.deleteSchedule(id)
+        assertNull(dao.schedule(id))
+    }
+
     @Test
     fun scrobblesWaitPerServiceOldestFirstAndOnlyOnce() {
         val queue = db.scrobbles()
@@ -525,6 +597,44 @@ class NagmedarDatabaseMigrationTest {
             db.query("SELECT COUNT(*) FROM scrobble_queue").use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals(1, c.getInt(0))
+            }
+            // 14 -> 15 (S-1107): the radio recordings and their schedules
+            db.execSQL(
+                "INSERT INTO radio_recording (session_id, station_key, station_name, stream_url, file_uri, file_name, " +
+                    "duration_ms, size_bytes, complete, format, started_at, session_started_at, trashed_at) " +
+                    "VALUES ('s1', 'uuid-1', 'Radyo', 'https://radio.example/a', 'file:///a.mp3', 'a.mp3', 1, 2, 1, 'mp3', 3, 3, 0)",
+            )
+            db.execSQL(
+                "INSERT INTO radio_schedule (station_key, station_name, stream_url, start_at, hour, minute, duration_minutes, " +
+                    "repeat, weekday, enabled, last_started_at, created_at) " +
+                    "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 1, 7, 30, 60, 'Daily', 1, 1, 0, 1)",
+            )
+        }
+    }
+
+    @Test
+    fun radioRecordingsAppearInFifteen() {
+        assumeTrue("schema 14 not exported yet", schemaExported(14))
+        assumeTrue("schema 15 not exported yet", schemaExported(15))
+        helper.createDatabase(TEST_DB, 14).use { db ->
+            db.execSQL(
+                "INSERT INTO radio_station (station_uuid, name, stream_url, bitrate, favorite, last_played_at, votes, last_voted_at) " +
+                    "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 128, 1, 2, 0, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 15, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            // the stations stay; the new tables are there, empty
+            db.query("SELECT name FROM radio_station").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Radyo", c.getString(0))
+            }
+            db.query("SELECT COUNT(*) FROM radio_recording").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
+            }
+            db.query("SELECT COUNT(*) FROM radio_schedule").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
             }
         }
     }

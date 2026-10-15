@@ -8,7 +8,10 @@ import android.content.Intent
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings as SystemSettings
 import android.util.Log
+import app.nagmedar.ui.radio.record.RecordingAlarms
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -45,6 +48,17 @@ object Alarms {
     fun exact(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
         return context.getSystemService(AlarmManager::class.java)?.canScheduleExactAlarms() == true
+    }
+
+    /** Opens the system's page that lets the app set alarms at the minute (Android 12 and later); nothing earlier. */
+    fun requestExact(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        runCatching {
+            context.startActivity(
+                Intent(SystemSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }
     }
 
     /** The alarm on the system's clock, at its next time; without the permission, as near as the system allows. */
@@ -156,9 +170,19 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 }
 
-/** S-1007: after a restart, a change of the time or of the alarm permission, the alarm is set again. */
+/** S-1007: after a restart, a change of the time or of the alarm permission, the alarm is set again (S-1107: and the recordings scheduled). */
 class AlarmRescheduler : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Alarms.schedule(context.applicationContext)
+        val app = context.applicationContext
+        Alarms.schedule(app)
+        // S-1107: the scheduled radio recordings are set again too (the database is read off the main thread)
+        val pending = goAsync()
+        AppScope.launch(Dispatchers.IO) {
+            try {
+                RecordingAlarms.rescheduleAll(app)
+            } finally {
+                pending.finish()
+            }
+        }
     }
 }

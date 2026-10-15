@@ -54,13 +54,28 @@ object RadioCenter {
     internal fun directory(active: Boolean, version: String?): RadioDirectory =
         if (active) OkHttpRadioBrowser.create(version) else OfflineRadioDirectory
 
+    @Volatile
+    private var shared: Parts? = null
+
+    /** The directory, the stations kept and the player the app has one of. */
+    private class Parts(val directory: RadioDirectory, val library: RadioLibrary, val player: RadioPlayer)
+
+    private fun parts(context: Context): Parts = shared ?: synchronized(this) {
+        shared ?: run {
+            RadioLogos.identify(BuildConfig.VLC_VERSION_NAME)
+            val directory = directory(active, BuildConfig.VLC_VERSION_NAME)
+            val library = DatabaseRadioLibrary(context.applicationContext)
+            Parts(directory, library, RadioPlayer(directory, library, ServiceStationSink(context.applicationContext)))
+        }.also { shared = it }
+    }
+
+    /** The player: S-1107 asks it for the address a station plays from, as the recordings must read the same stream. */
+    internal fun player(context: Context): RadioPlayer = parts(context).player
+
     private fun build(context: Context): RadioController {
-        RadioLogos.identify(BuildConfig.VLC_VERSION_NAME)
-        val directory = directory(active, BuildConfig.VLC_VERSION_NAME)
-        val library = DatabaseRadioLibrary(context)
-        val player = RadioPlayer(directory, library, ServiceStationSink(context))
+        val parts = parts(context)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-        return RadioController(directory, library, player, scope, playingNow = RadioNowPlaying.flow())
+        return RadioController(parts.directory, parts.library, parts.player, scope, playingNow = RadioNowPlaying.flow())
     }
 }
 
