@@ -48,6 +48,9 @@
 #     (whose decoders settle after a seek, as ffmpeg's own do); a part alone is ffmpeg's trim
 #     of the file; a seek within a part counts from the part's start; and a seek in MP3 lands
 #     on the sample asked (the trimmed encoder delay accounted for)
+#   - the visualisers' tap (S-611): a sine on a bin's frequency is that bin, at its amplitude in
+#     dBFS, at 48 and 96 kHz; the peak and RMS of each channel as the sine's level gives them; the
+#     waveform from a rising zero crossing; the output the same with the tap on
 set -euo pipefail
 trap 'echo "test-audio.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -880,6 +883,19 @@ check "NaN and infinities: converted" "22050" "$("$NAGAUDIO" convert conv_nan.wa
 stopped=0
 "$NAGAUDIO" convert m24.flac conv_stopped.opus --codec opus --bitrate 128000 --stop-at 0.3 > conv_stopped.json || stopped=$?
 check "stopped" "3 True" "$stopped $(json 'd["cancelled"]' < conv_stopped.json)"
+
+echo "== S-611: the visualisers' tap"
+# 1500 Hz is bin 64 of 2048 at 48 kHz, 6000 Hz bin 256 of 4096 at 96 kHz: no scalloping, no leakage
+ffmpeg -v error -y -f lavfi -i "aevalsrc=0.5*sin(2*PI*1500*t)|0.5*sin(2*PI*1500*t):s=48000:d=2" -c:a flac -sample_fmt s32 scope48.flac
+ffmpeg -v error -y -f lavfi -i "aevalsrc=0.25*sin(2*PI*6000*t):s=96000:d=2" -c:a flac -sample_fmt s32 scope96.flac
+ffmpeg -v error -y -f lavfi -i "aevalsrc=0.5*sin(2*PI*1500*t)|0.1*sin(2*PI*1500*t):s=48000:d=2" -c:a flac -sample_fmt s32 scope_lr.flac
+scope_of() { "$NAGAUDIO" decode "$1" --scope-after "$2" | json "$3"; }
+check "scope 48 kHz bin" "2048 1500.0 -6.02 True" "$(scope_of scope48.flac 48000 '"%d %.1f %.2f %s" % (d["scope"]["fft"], d["scope"]["top_hz"], d["scope"]["top_db"], d["scope"]["away_db"] < -100)')"
+check "scope 48 kHz levels" "-6.02 -6.02 -9.03 -9.03" "$(scope_of scope48.flac 48000 '" ".join("%.2f" % v for v in d["scope"]["peak_db"] + d["scope"]["rms_db"])')"
+check "scope 96 kHz bin" "4096 6000.0 -12.04 -12.04 -15.05" "$(scope_of scope96.flac 96000 '"%d %.1f %.2f %.2f %.2f" % (d["scope"]["fft"], d["scope"]["top_hz"], d["scope"]["top_db"], d["scope"]["peak_db"][0], d["scope"]["rms_db"][1])')"
+check "scope channel levels" "-6.02 -20.00 -9.03 -23.01" "$(scope_of scope_lr.flac 48000 '" ".join("%.2f" % v for v in d["scope"]["peak_db"] + d["scope"]["rms_db"])')"
+check "scope wave from a rising zero crossing" "True" "$(scope_of scope48.flac 48000 '0 <= d["scope"]["wave"][0] < 0.05 and d["scope"]["wave_points"] == 64')"
+check "scope leaves the output alone" "$(engine_md5 s32 scope48.flac)" "$("$NAGAUDIO" decode scope48.flac -f s32 --md5 --scope-after 1000 | json 'd["md5"]')"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"

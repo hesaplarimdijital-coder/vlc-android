@@ -25,7 +25,7 @@
 //                                           [--rg-untagged DB] [--rg-no-clip]
 //                                           [--tempo T] [--pitch SEMITONES] [--balance B] [--mono]
 //                                           [--dop] [--min-format FORMAT] [--max-format FORMAT]
-//                                           [--ab-after FRAMES]
+//                                           [--ab-after FRAMES] [--scope-after FRAMES]
 //           plays FILE (then FILE2 ... gapless, as a queue) through the engine's render into
 //           OUT (raw samples; "-" for stdout; none: nothing written) and prints a JSON summary.
 //           A FILE may be a part of a file, a CUE sheet's track (S-808): FILE#cue=FROM,TO with
@@ -35,7 +35,10 @@
 //           start is 0 and the seek comes while playing, after N frames rendered. The DSP
 //           options (S-906) set the chain: --graphic takes the 20 bands' dB in order, a band
 //           of --peq/--profile is pk, ls, hs, lp or hp with its Hz, dB and Q. The summary
-//           carries the clip meter, the chain's latency and the signal path.
+//           carries the clip meter, the chain's latency and the signal path. With --scope-after
+//           the visualisers' tap (S-611) is on from the start and read once, after N frames
+//           rendered: the levels, the spectrum's highest bin and what lies away from it, the
+//           waveform's first points.
 #include "nagaudio.h"
 #include "source.h"
 
@@ -290,6 +293,28 @@ static int queue_file(NagAudio *e, int64_t id, const char *arg, int crossfade)
     return nag_audio_set_next_part(e, id, name, crossfade, from, to);
 }
 
+/* S-611: the tap's read as the tests check it */
+static void print_scope(const NagScopeFrame *s, int result)
+{
+    if (result < 0) {
+        printf(",\"scope\":null");
+        return;
+    }
+    int top = 1;
+    for (int k = 1; k < s->fft_size / 2; k++)
+        if (s->spectrum_db[k] > s->spectrum_db[top])
+            top = k;
+    /* the highest bin more than eight bins from the top one: the window's leakage and the noise */
+    double away = NAG_SCOPE_FLOOR_DB;
+    for (int k = 1; k < s->fft_size / 2; k++)
+        if ((k < top - 8 || k > top + 8) && s->spectrum_db[k] > away)
+            away = s->spectrum_db[k];
+    printf(",\"scope\":{\"frames\":%llu,\"rate\":%d,\"fft\":%d,\"peak_db\":[%.4f,%.4f],\"rms_db\":[%.4f,%.4f]", (unsigned long long)s->frames, s->rate,
+           s->fft_size, s->peak_db[0], s->peak_db[1], s->rms_db[0], s->rms_db[1]);
+    printf(",\"top_hz\":%.3f,\"top_db\":%.4f,\"away_db\":%.4f,\"wave_points\":%d,\"wave\":[%.6f,%.6f,%.6f]}", (double)top * s->rate / s->fft_size,
+           s->spectrum_db[top], away, s->wave_points, s->wave[0][0], s->wave[0][1], s->wave[0][2]);
+}
+
 static int decode(int argc, char **argv)
 {
     const char *files[64];
@@ -306,6 +331,9 @@ static int decode(int argc, char **argv)
     int mono = 0, dop = 0;
     NagSampleFormat min_format = NAG_FMT_NONE, max_format = NAG_FMT_S32;
     int64_t ab_after = -1; /* S-912: side B from this many frames on */
+    int64_t scope_after = -1; /* S-611: the tap read once, after this many frames */
+    int scope_read = -1;      /* nag_audio_scope's answer */
+    NagScopeFrame *scope = NULL;
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) out_path = argv[++i];
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
@@ -367,6 +395,7 @@ static int decode(int argc, char **argv)
         else if (strcmp(argv[i], "--min-format") == 0 && i + 1 < argc) min_format = parse_format(argv[++i]);
         else if (strcmp(argv[i], "--max-format") == 0 && i + 1 < argc) max_format = parse_format(argv[++i]);
         else if (strcmp(argv[i], "--ab-after") == 0 && i + 1 < argc) ab_after = atoll(argv[++i]);
+        else if (strcmp(argv[i], "--scope-after") == 0 && i + 1 < argc) scope_after = atoll(argv[++i]);
         else if (argv[i][0] == '-' && argv[i][1]) {
             fprintf(stderr, "nagaudio: unknown option %s\n", argv[i]);
             return 2;
@@ -409,6 +438,15 @@ static int decode(int argc, char **argv)
     if (next_file < n_files) {
         queued = next_file + 1;
         queue_file(e, queued, files[next_file++], crossfade_ms > 0);
+    }
+    if (scope_after >= 0) {
+        scope = calloc(1, sizeof(*scope));
+        if (!scope || nag_audio_set_scope(e, 1) < 0) {
+            fprintf(stderr, "nagaudio: no memory for the scope\n");
+            free(scope);
+            nag_audio_free(e);
+            return 1;
+        }
     }
     nag_audio_play(e);
     FILE *out = NULL;
@@ -470,6 +508,10 @@ static int decode(int argc, char **argv)
                 nag_audio_set_ab_side(e, 1);
                 ab_after = -1;
             }
+            if (scope_after >= 0 && total >= scope_after) {
+                scope_read = nag_audio_scope(e, scope, 64);
+                scope_after = -1;
+            }
         } else {
             /* the decoder has not caught up (or a seek is under way): give it a moment */
             usleep(500);
@@ -503,6 +545,9 @@ static int decode(int argc, char **argv)
     printf(",\"meter\":{\"frames\":%lld,\"clipped\":%lld,\"peak\":%.9f,\"reduction_db\":%.4f},\"dsp_latency\":%lld",
            (long long)meter.frames, (long long)meter.clipped, meter.peak, meter.reduction_db, (long long)dsp_latency);
     printf(",\"dsp_level_db\":%.4f,\"ab_gain_db\":%.4f", dsp_level_db, ab_gain_db);
+    if (scope)
+        print_scope(scope, scope_read);
+    free(scope);
     printf(",\"signal_path\":%s", signal_path ? signal_path : "null");
     printf(",\"events\":\"%s\"}\n", seen.log);
     free(signal_path);

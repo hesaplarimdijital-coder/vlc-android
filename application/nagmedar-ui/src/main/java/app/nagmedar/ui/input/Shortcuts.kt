@@ -169,6 +169,7 @@ enum class ShortcutId {
     Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
+    Visualizer,
     RadioSearch,
     FolderUp, Refresh,
     PodcastSearch,
@@ -313,6 +314,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Refresh, ShortcutGroup.View, R.string.nag_sc_refresh, KeyChord(Key.F5)),
         // S-1101: the podcast search field, from anywhere
         Shortcut(ShortcutId.PodcastSearch, ShortcutGroup.View, R.string.nag_sc_podcast_search, KeyChord(Key.P, ctrl = true, shift = true)),
+        // S-611: what plays drawn over the whole window; a text field's Ctrl+Shift+V pastes first
+        Shortcut(ShortcutId.Visualizer, ShortcutGroup.View, R.string.nag_sc_visualizer, KeyChord(Key.V, ctrl = true, shift = true), textFirst = true),
         // Help
         Shortcut(ShortcutId.ShortcutList, ShortcutGroup.Help, R.string.nag_sc_shortcut_list, KeyChord(Key.Slash, ctrl = true)),
     )

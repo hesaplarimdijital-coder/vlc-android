@@ -37,6 +37,7 @@ import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.visual.VisualizerKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -132,6 +133,10 @@ internal class FakePlayerActions : PlayerChromeActions {
 
     override fun toggleSecondarySubtitles() {
         calls += "secondary"
+    }
+
+    override fun setVisualizer(kind: VisualizerKind?) {
+        calls += "visualizer:$kind"
     }
 
     override fun close() {
@@ -354,6 +359,22 @@ class DesktopControlsTest {
             ),
             actions.calls,
         )
+    }
+
+    @Test
+    fun theAudioMenuChoosesTheVisualiser() {
+        controls()
+        shownAndHeld()
+        compose.onNodeWithTag("player-audio").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Görselleştirici").assertExists()
+        compose.onNode(hasText("Spektrum") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        state = state.copy(visualizer = VisualizerKind.Spectrum)
+        compose.onNodeWithTag("player-audio").performClick()
+        compose.waitForIdle()
+        compose.onNode(hasText("Kapalı") and hasClickAction()).performClick()
+        assertEquals(listOf("visualizer:Spectrum", "visualizer:null"), actions.calls)
     }
 
     @Test

@@ -92,7 +92,9 @@ import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.visual.PlayingVisualizer
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import kotlin.math.max
 import kotlin.math.min
@@ -138,12 +140,27 @@ fun NowPlayingPanel(
     casting: CastDevice? = null,
     onCast: () -> Unit = {},
     onStopCasting: () -> Unit = {},
+    /** S-611: the visualiser, above the waveform while [visualizerShown]; the header's button turns it on and off. */
+    visualizer: (@Composable (Modifier) -> Unit)? = null,
+    visualizerShown: Boolean = false,
+    onVisualizerShown: ((Boolean) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(modifier.fillMaxSize().padding(dimens.gapL), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.nag_now_playing), style = NagTheme.type.labelSmall, color = colors.textTertiary, modifier = Modifier.weight(1f))
+            if (info != null && visualizer != null && onVisualizerShown != null && !(lyrics != null && lyricsShown)) {
+                NagIconButton(
+                    NagIcons.Visualizer,
+                    stringResource(R.string.nag_vis_title),
+                    { onVisualizerShown(!visualizerShown) },
+                    selected = visualizerShown,
+                    size = 24.dp,
+                    iconSize = 16.dp,
+                    modifier = Modifier.testTag("now-playing-visualizer"),
+                )
+            }
             if (info != null && lyrics != null && onLyricsShown != null) {
                 NagIconButton(
                     NagIcons.Lyrics,
@@ -167,7 +184,7 @@ fun NowPlayingPanel(
                 WaveformTimeline(waveform, progress, info.lengthMs, onSeek, height = 40.dp)
             }
             else -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-                Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate)
+                Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate, visualizer.takeIf { visualizerShown })
             }
         }
     }
@@ -197,6 +214,7 @@ private fun Playing(
     onPlayUpNext: (Int) -> Unit,
     artwork: @Composable (Dp) -> Unit,
     onRate: ((Int) -> Unit)?,
+    visualizer: (@Composable (Modifier) -> Unit)?,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -212,6 +230,8 @@ private fun Playing(
         if (info.format != null) Text(info.format, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 2)
         info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 16.dp, target = 22.dp, focusable = onRate != null, modifier = Modifier.testTag("now-playing-rating")) }
         Spacer(Modifier.height(dimens.gapXs))
+        // S-611: what plays, drawn
+        visualizer?.invoke(Modifier.fillMaxWidth().height(VISUALIZER_HEIGHT))
         WaveformTimeline(waveform, progress, info.lengthMs, onSeek)
         if (upNext.isNotEmpty()) {
             Spacer(Modifier.height(dimens.gapS))
@@ -220,6 +240,9 @@ private fun Playing(
         }
     }
 }
+
+/** The visualiser's height in the panel: the bars, and the kind's choice under them. */
+private val VISUALIZER_HEIGHT = 168.dp
 
 /** How many of the next tracks the panel lists. */
 private const val UP_NEXT = 6
@@ -383,10 +406,15 @@ private fun bucket(waveform: Waveform, index: Int, count: Int): Pair<Float, Floa
 
 // --------------------------------------------------------------- the app's panel
 
-/** The panel on the playback service: what plays, its waveform, the queue after it; or its lyrics (S-1004), which [onFullScreenLyrics] opens over the window. */
+/**
+ * The panel on the playback service: what plays, its waveform, the queue after it; or its lyrics
+ * (S-1004), which [onFullScreenLyrics] opens over the window; its visualiser (S-611), which
+ * [onFullScreenVisualizer] does.
+ */
 @Composable
-fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
+fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisualizer: (() -> Unit)? = null) {
     val context = LocalContext.current
+    val prefs = rememberNagmedarPreferences()
     val nowPlaying = rememberNowPlaying()
     val media = nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
     // S-808: its stars
@@ -432,6 +460,10 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
         casting = rememberCastDevice(),
         onCast = { Casting.openPicker() },
         onStopCasting = Casting::stop,
+        // S-611: on and off here as in Settings › Visualiser
+        visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
+        visualizerShown = prefs.visualizer.music,
+        onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
     )
 }
 

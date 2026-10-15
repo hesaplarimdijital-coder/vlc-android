@@ -69,6 +69,7 @@ import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.visual.VisualizerSection
 import app.nagmedar.ui.theme.systemAccentSeed
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
@@ -118,6 +119,8 @@ fun SettingsScreen(
         item { LatencySection() }
         // S-1008: what is played, sent to Last.fm and ListenBrainz
         item { ScrobbleSection() }
+        // S-611: the visualisers, with their battery warning
+        item { VisualizerSection(prefs) }
         // S-1007: waking to music
         item { AlarmSection() }
         // S-1003: where lyrics come from

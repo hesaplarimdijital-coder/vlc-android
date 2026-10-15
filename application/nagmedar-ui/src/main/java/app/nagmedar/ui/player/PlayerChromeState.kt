@@ -2,6 +2,7 @@ package app.nagmedar.ui.player
 
 import androidx.compose.runtime.Immutable
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.visual.VisualizerKind
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -61,6 +62,8 @@ data class PlayerChromeState(
     val recording: Boolean = false,
     /** S-1302: VLC's casting setting is on: the bar has the cast button. */
     val canCast: Boolean = false,
+    /** S-611: the visualiser drawn over the player; null when it is off. */
+    val visualizer: VisualizerKind? = null,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -133,6 +136,8 @@ interface PlayerChromeActions {
 
     /** S-1302: the device picker, to cast the film to a Chromecast or a DLNA renderer. */
     fun cast() = Unit
+    /** S-611: the visualiser over the player, of [kind]; null turns it off. */
+    fun setVisualizer(kind: VisualizerKind?)
 
     /** S-708: the subtitle tools (Alt+E): cleaning, frame rate conversion and the line timing editor, into a new file. */
     fun openSubtitleTools() {}

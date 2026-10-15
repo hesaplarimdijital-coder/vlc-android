@@ -1,6 +1,7 @@
 #include "nagaudio.h"
 #include "dsp.h"
 #include "ring.h"
+#include "scope.h"
 #include "source.h"
 #include "stretch.h"
 
@@ -156,6 +157,13 @@ struct NagAudio {
     int ab_line_pos;
     int ab_shown;     /* the side the output is on, or crossfading to */
     int ab_fade;      /* frames left of that crossfade */
+
+    /* S-611: the visualisers' tap; its memory comes with the first turn on and stays till the end */
+    NagScopeTap scope;
+    atomic_int scope_on;
+    pthread_mutex_t scope_lock; /* the readers': the tap's set-up and the analyser */
+    NagScopeAnalyser scope_analyser;
+    float *scope_frames;        /* NAG_SCOPE_FFT_MAX frames read from the tap */
 
     /* the event plane */
     NagEvent events[EVENT_QUEUE];
@@ -558,6 +566,7 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
     e->noise = 0x9E3779B9u;
     atomic_store(&e->volume, 1.0);
     pthread_mutex_init(&e->lock, NULL);
+    pthread_mutex_init(&e->scope_lock, NULL);
     sem_init(&e->event_sem, 0, 0);
     e->mix = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
     e->mix2 = malloc(sizeof(double) * MIX_FRAMES * e->cfg.channels);
@@ -581,6 +590,7 @@ NagAudio *nag_audio_new(const NagConfig *config, nag_event_fn on_event, void *op
         free(e->ab_line);
         sem_destroy(&e->event_sem);
         pthread_mutex_destroy(&e->lock);
+        pthread_mutex_destroy(&e->scope_lock);
         free(e);
         return NULL;
     }
@@ -640,6 +650,10 @@ void nag_audio_free(NagAudio *e)
     free(e->mix2);
     free(e->ab_dry);
     free(e->ab_line);
+    nag_scope_tap_free(&e->scope);
+    nag_scope_analyser_free(&e->scope_analyser);
+    free(e->scope_frames);
+    pthread_mutex_destroy(&e->scope_lock);
     free(e);
 }
 
@@ -1354,6 +1368,9 @@ static void finish_block(NagAudio *e, void *out, int n_frames, double volume, in
         e->ab_shown = atomic_load(&e->ab_side);
         e->ab_fade = 0;
     }
+    /* S-611: what is played, before the volume, for the visualisers */
+    if (atomic_load_explicit(&e->scope_on, memory_order_acquire))
+        nag_scope_tap_write(&e->scope, e->mix, n_frames, e->out.channels);
     convert(e, e->mix, out, n_frames, volume, dither);
 }
 
@@ -1606,6 +1623,60 @@ int nag_audio_render(NagAudio *e, void *out, int frames)
     atomic_fetch_add(&e->total_frames, frames);
     atomic_store(&e->rendering, 0);
     return produced;
+}
+
+/* -------------------------------------------------------------- visualisers */
+
+int nag_audio_set_scope(NagAudio *e, int enabled)
+{
+    pthread_mutex_lock(&e->scope_lock);
+    int result = 0;
+    if (enabled && !e->scope.data) {
+        e->scope_frames = malloc(sizeof(float) * 2 * NAG_SCOPE_FFT_MAX);
+        if (!e->scope_frames || nag_scope_tap_init(&e->scope) < 0) {
+            free(e->scope_frames);
+            e->scope_frames = NULL;
+            result = -1;
+        }
+    }
+    if (result == 0) {
+        if (enabled && !atomic_load(&e->scope_on)) {
+            double forget[2];
+            nag_scope_tap_take_peaks(&e->scope, forget); /* a peak from before is not shown */
+        }
+        atomic_store_explicit(&e->scope_on, enabled ? 1 : 0, memory_order_release);
+    }
+    pthread_mutex_unlock(&e->scope_lock);
+    return result;
+}
+
+int nag_audio_scope_enabled(NagAudio *e)
+{
+    return atomic_load(&e->scope_on);
+}
+
+int nag_audio_scope(NagAudio *e, NagScopeFrame *frame, int wave_points)
+{
+    pthread_mutex_lock(&e->scope_lock);
+    const int rate = e->out.rate;
+    if (!atomic_load(&e->scope_on) || !atomic_load(&e->out_valid) || rate <= 0) {
+        pthread_mutex_unlock(&e->scope_lock);
+        return -1;
+    }
+    /* what the listener hears now: the sink's latency back from the newest frame */
+    NagSink *sink = e->sink;
+    int64_t latency = sink && sink->latency_frames ? sink->latency_frames(sink) : 0;
+    const int n = nag_scope_fft_size(rate);
+    uint64_t written = 0;
+    nag_scope_tap_read(&e->scope, e->scope_frames, n, latency > 0 ? (uint64_t)latency : 0, &written);
+    int result = nag_scope_analyse(&e->scope_analyser, e->scope_frames, rate, wave_points, frame);
+    double peak[2];
+    nag_scope_tap_take_peaks(&e->scope, peak);
+    frame->frames = written;
+    frame->peak_db[0] = nag_scope_db(peak[0]);
+    frame->peak_db[1] = nag_scope_db(peak[1]);
+    pthread_mutex_unlock(&e->scope_lock);
+    return result;
 }
 
 /* -------------------------------------------------------------- signal path */

@@ -90,6 +90,7 @@ object NagIcons {
     val Record: ImageVector by lazy { icon("Record", stroke("M2.5,8a5.5,5.5 0 1 0 11,0a5.5,5.5 0 1 0 -11,0Z"), fill("M5.4,8a2.6,2.6 0 1 0 5.2,0a2.6,2.6 0 1 0 -5.2,0Z")) }
     val Stop: ImageVector by lazy { icon("Stop", fill("M5.7,4.5H10.3A1.2,1.2 0 0 1 11.5,5.7V10.3A1.2,1.2 0 0 1 10.3,11.5H5.7A1.2,1.2 0 0 1 4.5,10.3V5.7A1.2,1.2 0 0 1 5.7,4.5Z")) }
     val Cast: ImageVector by lazy { icon("Cast", stroke("M2 6V4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7a1.5 1.5 0 0 1-1.5 1.5H8.5"), stroke("M2 8.5a4.5 4.5 0 0 1 4.5 4.5M2 11a2 2 0 0 1 2 2M2 13h.01")) }
+    val Visualizer: ImageVector by lazy { icon("Visualizer", stroke("M3 13.5v-3M5.5 13.5V7M8 13.5V3.5M10.5 13.5V8M13 13.5V5.5")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -102,7 +103,7 @@ object NagIcons {
         Screenshot, Effects, PictureInPicture, Fullscreen, Search, Sort, Lyrics, Volume,
         Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle, SuccessCircle,
         Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal, FlipVertical,
-        Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
+        Sleep, Alarm, Star, StarFilled, Record, Stop, Cast, Visualizer,
     )
 }
 

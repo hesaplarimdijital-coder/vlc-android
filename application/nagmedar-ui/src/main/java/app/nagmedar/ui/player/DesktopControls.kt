@@ -72,6 +72,7 @@ import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.player.subtitles.shortLanguage
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -346,15 +347,17 @@ private fun RateMenu(state: PlayerChromeState, actions: PlayerChromeActions, vis
 private fun AudioMenu(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, labelled: Boolean) {
     val none = stringResource(R.string.nag_player_no_audio)
     val current = state.audioTracks.firstOrNull { it.id == state.audioTrack }?.name
+    // S-611: the visualisers under the tracks
+    val visualizers = visualizerEntries(state, actions)
     MenuChip(
         label = stringResource(R.string.nag_player_audio_track),
         text = if (labelled) current ?: none else null,
         icon = NagIcons.AudioTrack,
         entries = {
             if (state.audioTracks.isEmpty()) {
-                listOf(MenuEntry.Item(none, {}, enabled = false))
+                listOf(MenuEntry.Item(none, {}, enabled = false)) + visualizers
             } else {
-                state.audioTracks.map { track -> MenuEntry.Item(track.name, { actions.setAudioTrack(track.id) }, checked = track.id == state.audioTrack) }
+                state.audioTracks.map { track -> MenuEntry.Item(track.name, { actions.setAudioTrack(track.id) }, checked = track.id == state.audioTrack) } + visualizers
             }
         },
         visibility = visibility,
@@ -410,6 +413,17 @@ private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions,
         testTag = "player-subtitles",
         selected = current != null && (!labelled || secondary != null),
     )
+}
+
+/** S-611: the audio menu's visualisers, as VLC desktop's Audio › Visualizations: none, or a kind. */
+@Composable
+internal fun visualizerEntries(state: PlayerChromeState, actions: PlayerChromeActions): List<MenuEntry> {
+    val kinds = VisualizerKind.entries.map { it to stringResource(it.label) }
+    return listOf(
+        MenuEntry.Separator,
+        MenuEntry.Item(stringResource(R.string.nag_vis_menu), {}, enabled = false),
+        MenuEntry.Item(stringResource(R.string.nag_vis_off), { actions.setVisualizer(null) }, checked = state.visualizer == null),
+    ) + kinds.map { (kind, label) -> MenuEntry.Item(label, { actions.setVisualizer(kind) }, checked = state.visualizer == kind) }
 }
 
 /** "A-B": sets A, then B, then turns the loop off; lit while a point is set. */

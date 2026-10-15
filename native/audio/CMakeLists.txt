@@ -2,7 +2,7 @@
 # playback service: FFmpeg decoding, the voices and their rings, the render with the DSP
 # chain, and the sinks (AAudio, the pull sink of the bit-perfect AudioTrack path, the USB DAC);
 # the EBU R128 scanner and TagLib for the ReplayGain tags (S-907); the converter (S-1010) with
-# libopus, LAME and FFmpeg's AAC encoder.
+# libopus, LAME and FFmpeg's AAC encoder; the visualisers' tap (S-611).
 # Built by buildsystem/nagmedar-native/build.sh, which provides the static FFmpeg, TagLib,
 # libopenmpt (S-911, the tracker modules), libopus and LAME (S-1010) in DEPS_PREFIX; the host
 # build also makes the nagaudio command for the tests.
@@ -15,7 +15,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and TagLib (empty: the system's pkg-config)")
 set(LIBUSB_SOURCE "" CACHE PATH "libusb source tree, for the USB DAC sink (S-903); empty: no USB sink")
 
-set(CORE ring.c source.c dsp.c stretch.c loudness.c probe.c engine.c tags.cpp convert.c)
+set(CORE ring.c source.c dsp.c stretch.c loudness.c probe.c scope.c engine.c tags.cpp convert.c)
 
 if(DEPS_PREFIX)
     set(FFMPEG_INCLUDE ${DEPS_PREFIX}/include)

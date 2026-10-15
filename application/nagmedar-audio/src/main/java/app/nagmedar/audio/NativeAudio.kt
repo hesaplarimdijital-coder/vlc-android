@@ -69,6 +69,11 @@ object NativeAudio {
     const val DSD_PCM = 0
     const val DSD_DOP = 1
 
+    // S-611: the visualisers' tap (NAG_SCOPE_*)
+    const val SCOPE_FFT_MIN = 1024
+    const val SCOPE_FFT_MAX = 16384
+    const val SCOPE_WAVE_MAX = 1024
+
     // S-907: NagReplayGainMode
     const val REPLAYGAIN_OFF = 0
     const val REPLAYGAIN_TRACK = 1
@@ -262,4 +267,14 @@ object NativeAudio {
         tags: ByteArray?,
         listener: ConvertListener?,
     ): String?
+
+    /** S-611: the visualisers' tap on or off; -1 when its memory cannot be had. */
+    @JvmStatic external fun setScope(handle: Long, enabled: Boolean): Int
+
+    /**
+     * S-611: what is heard now, analysed into [out] (ScopeFrame.buffer's layout): rate, FFT size,
+     * peak and RMS dB of each channel, the waveform's points, then the bins and both waveforms.
+     * The tap's frame counter, or -1 while it is off.
+     */
+    @JvmStatic external fun scope(handle: Long, out: FloatArray, wavePoints: Int): Long
 }
