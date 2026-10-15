@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,7 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,9 +87,11 @@ import java.util.Locale
 internal fun LinesTab(state: SubtitleToolsState, controller: SubtitleToolsController, document: SubtitleDocument, locale: Locale, wide: Boolean) {
     val separator = DecimalFormatSymbols.getInstance(locale).decimalSeparator
     TrackClickModifiers(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().testTag("subtools-lines"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // on a narrow window the lines and the fields do not both fit: the list keeps a height of its own and the tab scrolls
+        val body = if (wide) Modifier.fillMaxSize() else Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        Column(body.testTag("subtools-lines"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             IssueBar(state, controller)
-            CueList(state, controller, document.cues, separator, wide, Modifier.weight(1f))
+            CueList(state, controller, document.cues, separator, wide, if (wide) Modifier.weight(1f) else Modifier.height(COMPACT_LIST))
             PanelRule()
             CueFields(state, controller, document.cues.firstOrNull { it.id == state.focus }, separator, locale, wide)
         }
@@ -179,6 +184,7 @@ private fun CueList(
     }
 }
 
+private val COMPACT_LIST = 200.dp
 private val NUMBER_WIDTH = 48.dp
 private val TIME_WIDTH = 112.dp
 

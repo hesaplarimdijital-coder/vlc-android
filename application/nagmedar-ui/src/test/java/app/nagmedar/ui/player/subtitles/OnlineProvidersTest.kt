@@ -14,6 +14,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.GraphicsMode
 import java.io.IOException
 
 /**
@@ -22,6 +23,7 @@ import java.io.IOException
  * provider the file came from, and with none turned on nothing is asked.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class OnlineProvidersTest {
 
     private val alpha = FakeProvider(
@@ -63,7 +65,7 @@ class OnlineProvidersTest {
 
     @Test
     fun aProviderThatFailsIsToldAndTheOthersStay() {
-        beta.failure = IOException("down")
+        beta.failure = OnlineFailure.Offline(IOException("down"))
         val online = controller(alpha, beta)
         online.open(film, listOf("tr", "en"))
         val state = online.state!!

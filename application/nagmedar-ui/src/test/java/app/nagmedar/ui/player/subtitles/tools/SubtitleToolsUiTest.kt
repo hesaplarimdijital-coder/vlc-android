@@ -180,6 +180,9 @@ class SubtitleToolsUiTest {
     @Test
     fun theFrameRateShowsTheTimesBeforeAndAfter() {
         window(SDH_SRT, ToolsTab.FrameRate)
+        // 23.976 to 25 is offered at first; the same rate on both sides and no shift is nothing to apply
+        compose.runOnIdle { controller.setRates(FrameRate.Fps25, FrameRate.Fps25) }
+        compose.waitForIdle()
         compose.onNodeWithTag("rate-apply").assertIsNotEnabled()
         compose.onNodeWithTag("shift-plus-1000").performClick()
         compose.waitForIdle()

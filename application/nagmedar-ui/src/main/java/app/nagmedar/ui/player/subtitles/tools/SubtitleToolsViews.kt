@@ -238,7 +238,9 @@ private fun CleanTab(state: SubtitleToolsState, controller: SubtitleToolsControl
     val options = state.sdh
     val result = state.sdhResult
     val number = NumberFormat.getIntegerInstance(locale)
-    Column(Modifier.fillMaxSize().testTag("subtools-clean"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    // on a narrow window the options and the changes do not both fit: the list keeps a height of its own and the tab scrolls
+    val body = if (wide) Modifier.fillMaxSize() else Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+    Column(body.testTag("subtools-clean"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PanelCaption(stringResource(R.string.nag_sdh_hint))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             val box = Modifier.then(if (wide) Modifier.width(470.dp) else Modifier.fillMaxWidth())
@@ -266,7 +268,7 @@ private fun CleanTab(state: SubtitleToolsState, controller: SubtitleToolsControl
             )
         }
         val changes = result?.changes.orEmpty()
-        LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("sdh-changes"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        LazyColumn(Modifier.fillMaxWidth().then(if (wide) Modifier.weight(1f) else Modifier.height(COMPACT_CHANGES)).testTag("sdh-changes"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             items(changes.take(MAX_SHOWN_CHANGES), key = { it.cueId }) { change -> ChangeRow(change, locale) }
             if (changes.size > MAX_SHOWN_CHANGES) {
                 item { PanelCaption(stringResource(R.string.nag_sdh_more, number.format(changes.size - MAX_SHOWN_CHANGES))) }
@@ -276,6 +278,7 @@ private fun CleanTab(state: SubtitleToolsState, controller: SubtitleToolsControl
 }
 
 private const val MAX_SHOWN_CHANGES = 300
+private val COMPACT_CHANGES = 260.dp
 
 /** One changed cue: its number and time, its text struck through, and what it became or that it goes. */
 @Composable
@@ -402,13 +405,17 @@ internal fun rateLabel(rate: FrameRate, locale: Locale): String =
 
 /** A time before and after: "0:00:01,000 → 0:00:01,043". */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun PreviewLine(label: String, before: String, after: String) {
     val colors = NagTheme.colors
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+    // on a narrow window the two times go under the label, whole
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(label, style = NagTheme.type.label, color = colors.textSecondary, modifier = Modifier.width(150.dp))
-        Text(before, style = NagTheme.type.mono, color = colors.textTertiary)
-        Text("→", style = NagTheme.type.mono, color = colors.textTertiary)
-        Text(after, style = NagTheme.type.mono, color = colors.text)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(before, style = NagTheme.type.mono, color = colors.textTertiary, softWrap = false)
+            Text("→", style = NagTheme.type.mono, color = colors.textTertiary)
+            Text(after, style = NagTheme.type.mono, color = colors.text, softWrap = false)
+        }
     }
 }
 
