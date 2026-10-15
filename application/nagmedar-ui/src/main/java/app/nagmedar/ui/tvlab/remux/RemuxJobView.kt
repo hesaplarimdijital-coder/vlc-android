@@ -3,11 +3,13 @@ package app.nagmedar.ui.tvlab.remux
 import androidx.compose.runtime.Immutable
 import app.nagmedar.data.RemuxJobEntry
 import app.nagmedar.data.RemuxJobError
+import app.nagmedar.data.RemuxJobKind
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.lab.DolbyVisionMode
 import app.nagmedar.lab.RemuxPlan
 import app.nagmedar.lab.RemuxResult
 import app.nagmedar.lab.RemuxVerification
+import app.nagmedar.ui.convert.ConvertProfile
 
 /** A job as the card shows it (S-1206): the row with its plan, stats and verdict read. */
 @Immutable
@@ -29,8 +31,14 @@ data class RemuxJobView(
     val result: RemuxResult?,
     val verification: RemuxVerification?,
     val events: List<RemuxEvent.Line>,
+    /** S-1303: a [RemuxJobKind]; a conversion has its [profile] and no [plan]. */
+    val kind: String = RemuxJobKind.REMUX,
+    val profile: ConvertProfile? = null,
 ) {
     val active: Boolean get() = state !in RemuxJobState.FINAL
+
+    /** S-1303: a conversion by libVLC's stream output, not a remux. */
+    val converts: Boolean get() = kind == RemuxJobKind.CONVERT
     val convertsDolbyVision: Boolean get() = plan?.dolbyVision == DolbyVisionMode.ConvertToProfile81
 
     /** Done with the output read back and found the same: the badge. */
@@ -66,10 +74,12 @@ data class RemuxJobView(
             finishedAt = entry.finishedAt,
             error = entry.error,
             videoHash = entry.videoHash,
-            plan = RemuxPlan.parse(entry.plan),
+            plan = if (entry.kind == RemuxJobKind.CONVERT) null else RemuxPlan.parse(entry.plan),
             result = entry.result?.let(RemuxResult::parse),
             verification = entry.verification?.let(RemuxVerification::parse),
             events = RemuxEvent.parse(entry.events),
+            kind = entry.kind,
+            profile = if (entry.kind == RemuxJobKind.CONVERT) ConvertProfile.parse(entry.plan) else null,
         )
     }
 }

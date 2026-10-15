@@ -129,6 +129,8 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
+import app.nagmedar.ui.convert.ConvertRequests
+import app.nagmedar.ui.convert.ConvertScreen
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -353,6 +355,8 @@ private fun NagmedarMain(
                         Destination.TvLab -> TvLabScreen(tvLab)
                         // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
                         Destination.Network -> NetworkScreen(undo)
+                        // S-1303: conversions, the HLS stream and the jobs shared with the TV Lab
+                        Destination.Convert -> ConvertScreen()
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -586,6 +590,9 @@ class AppActions(
             ShortcutId.SleepTimer -> openSleepTimer()
             ShortcutId.Lyrics -> toggleLyrics()
             ShortcutId.Visualizer -> toggleVisualizer()
+            // S-1303: the convert page's windows, for the media playing (or one to pick)
+            ShortcutId.ConvertSave -> ConvertRequests.open(context, ConvertRequests.Kind.Convert, null)
+            ShortcutId.StreamHls -> ConvertRequests.open(context, ConvertRequests.Kind.Stream, null)
             ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
             ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)

@@ -511,3 +511,25 @@ interface RemuxJobDao {
     @Query("DELETE FROM remux_job WHERE id = :id")
     fun delete(id: Long)
 }
+
+/** S-1303: the user's conversion profiles, by name. */
+@Dao
+interface ConvertProfileDao {
+    @Query("SELECT * FROM convert_profile ORDER BY name COLLATE NOCASE, id")
+    fun observe(): Flow<List<ConvertProfileEntry>>
+
+    @Query("SELECT * FROM convert_profile ORDER BY name COLLATE NOCASE, id")
+    fun all(): List<ConvertProfileEntry>
+
+    @Query("SELECT * FROM convert_profile WHERE id = :id")
+    fun get(id: Long): ConvertProfileEntry?
+
+    @Insert
+    fun insert(entry: ConvertProfileEntry): Long
+
+    @Update
+    fun update(entry: ConvertProfileEntry)
+
+    @Query("DELETE FROM convert_profile WHERE id = :id")
+    fun delete(id: Long)
+}

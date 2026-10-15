@@ -4,10 +4,12 @@ import android.net.Uri
 import app.nagmedar.data.RemuxJobDao
 import app.nagmedar.data.RemuxJobEntry
 import app.nagmedar.data.RemuxJobError
+import app.nagmedar.data.RemuxJobKind
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.lab.DolbyVisionMode
 import app.nagmedar.lab.RemuxPlan
 import app.nagmedar.lab.RemuxRefusal
+import app.nagmedar.ui.convert.ConvertRunner
 
 /** What a line of [RemuxJobEntry.events] records: "<millis>\t<kind>\t<detail>". */
 object RemuxEvent {
@@ -48,18 +50,23 @@ object RemuxEvent {
  * ([recoverInterrupted]): a Matroska file written halfway cannot be continued. While a job runs
  * its row is written column by column, so a cancel asked meanwhile is never overwritten.
  * Blocking: runs on the worker's thread.
+ *
+ * S-1303: the queue is the app's media jobs'; a conversion ([RemuxJobKind.CONVERT]) is run by
+ * [convert] in its turn, under the same rules.
  */
 class RemuxRunner(
     private val engine: RemuxEngine,
     private val dao: RemuxJobDao,
     private val condition: () -> DeviceCondition,
     private val now: () -> Long = System::currentTimeMillis,
+    private val convert: ConvertRunner? = null,
     private val onUpdate: (RemuxJobEntry) -> Unit = {},
 ) {
     /** The jobs the last process left running, paused or verifying: their outputs emptied, queued again, to start over. */
     fun recoverInterrupted() {
         dao.interrupted().forEach { job ->
             if (job.ownsOutput) engine.emptyOutput(Uri.parse(job.outputUri))
+            if (job.kind == RemuxJobKind.CONVERT) convert?.recover(job)
             dao.update(
                 job.copy(
                     state = RemuxJobState.QUEUED,
@@ -104,6 +111,7 @@ class RemuxRunner(
         // from here the empty document is the job's: removed with it when it fails
         dao.saveOwnsOutput(job.id, true)
         val owned = job.copy(ownsOutput = true)
+        if (job.kind == RemuxJobKind.CONVERT) return convert?.run(owned, interruption) ?: finish(owned, RemuxJobState.FAILED, RemuxJobError.NO_TOOLS)
         if (!engine.available) return finish(owned, RemuxJobState.FAILED, RemuxJobError.NO_TOOLS)
         val plan = RemuxPlan.parse(job.plan) ?: return finish(owned, RemuxJobState.FAILED, RemuxJobError.ENGINE + "bad plan")
         if (!plan.copiesEverything) return finish(owned, RemuxJobState.FAILED, RemuxJobError.ENGINE + "the engine copies streams only")

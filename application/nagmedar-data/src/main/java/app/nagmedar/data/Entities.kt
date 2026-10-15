@@ -285,6 +285,9 @@ data class NetworkServerEntry(
  * battery or heat, a restart after the process died). A job that was running when the process
  * died is started again from the beginning: a Matroska file cannot be resumed halfway. A job
  * only ever writes into an empty output ([ownsOutput]).
+ *
+ * S-1303: the queue is the app's media jobs': [kind] says what a job does, a remux or a
+ * conversion through libVLC's stream output, whose [plan] is then the conversion profile's JSON.
  */
 @Entity(tableName = "remux_job")
 data class RemuxJobEntry(
@@ -319,7 +322,18 @@ data class RemuxJobEntry(
      * is never touched.
      */
     @ColumnInfo(name = "owns_output") val ownsOutput: Boolean = false,
+    /** S-1303: a [RemuxJobKind]. */
+    @ColumnInfo(defaultValue = RemuxJobKind.REMUX) val kind: String = RemuxJobKind.REMUX,
 )
+
+/** S-1303: what a job of the queue does. */
+object RemuxJobKind {
+    /** The TV Lab's lossless remux (S-1206). */
+    const val REMUX = "remux"
+
+    /** A conversion with a profile, by libVLC's stream output (S-1303). */
+    const val CONVERT = "convert"
+}
 
 /** The states of a [RemuxJobEntry]; done, failed and cancelled are final. */
 object RemuxJobState {
@@ -353,3 +367,28 @@ object RemuxJobError {
     /** The engine's own message follows the prefix. */
     const val ENGINE = "engine:"
 }
+
+/**
+ * S-1303: a conversion profile of the user's (the presets are the app's): the container, the video
+ * (none: [videoCodec] null) with its bit rate, largest height and frame rate (0: the source's),
+ * the audio (none: [audioCodec] null) with its bit rate, channels and sample rate (0: the
+ * source's), what happens to the subtitles. Codecs, the container and the subtitles' mode by the
+ * names of the app's enums.
+ */
+@Entity(tableName = "convert_profile", indices = [Index(value = ["name"], unique = true)])
+data class ConvertProfileEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val container: String,
+    @ColumnInfo(name = "video_codec") val videoCodec: String? = null,
+    @ColumnInfo(name = "video_kbps") val videoKbps: Int = 0,
+    @ColumnInfo(name = "max_height") val maxHeight: Int = 0,
+    val fps: Int = 0,
+    @ColumnInfo(name = "audio_codec") val audioCodec: String? = null,
+    @ColumnInfo(name = "audio_kbps") val audioKbps: Int = 0,
+    val channels: Int = 2,
+    @ColumnInfo(name = "sample_rate") val sampleRate: Int = 0,
+    val subtitles: String,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+)

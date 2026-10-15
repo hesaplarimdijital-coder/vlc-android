@@ -34,6 +34,9 @@ import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.toneColors
+import app.nagmedar.ui.convert.ConvertRunner
+import app.nagmedar.ui.convert.LibVlcSoutEngine
+import app.nagmedar.ui.convert.profileSummary
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.theme.NagTheme
@@ -71,7 +74,7 @@ fun RemuxJobRow(job: RemuxJobView, onCancel: () -> Unit, onRemove: () -> Unit, m
     val colors = NagTheme.colors
     Column(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}.testTag("tvlab-remux-job"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(NagIcons.Movies, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(18.dp))
+            Icon(if (job.converts) NagIcons.Convert else NagIcons.Movies, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text(
@@ -110,6 +113,8 @@ fun RemuxJobRow(job: RemuxJobView, onCancel: () -> Unit, onRemove: () -> Unit, m
                 val known = job.totalSeconds > 0
                 val label = if (job.state == RemuxJobState.VERIFYING) {
                     stringResource(R.string.nag_tvlab_remux_verifying, percentLabel(job.progress, locale))
+                } else if (job.converts) {
+                    stringResource(R.string.nag_conv_running, percentLabel(job.progress, locale))
                 } else {
                     stringResource(R.string.nag_tvlab_remux_running, percentLabel(job.progress, locale))
                 }
@@ -186,7 +191,7 @@ private fun Verdict(job: RemuxJobView, locale: Locale) {
 fun stateLabel(res: Resources, job: RemuxJobView): String = res.getString(
     when (job.state) {
         RemuxJobState.QUEUED -> R.string.nag_tvlab_remux_queued
-        RemuxJobState.RUNNING -> R.string.nag_tvlab_remux_running_badge
+        RemuxJobState.RUNNING -> if (job.converts) R.string.nag_conv_running_badge else R.string.nag_tvlab_remux_running_badge
         RemuxJobState.PAUSED -> R.string.nag_tvlab_remux_paused
         RemuxJobState.VERIFYING -> R.string.nag_tvlab_remux_verifying_badge
         RemuxJobState.DONE -> R.string.nag_tvlab_remux_done
@@ -203,8 +208,9 @@ fun stateTone(job: RemuxJobView): StateTone = when (job.state) {
     else -> StateTone.Neutral
 }
 
-/** "6 iz · Dolby Vision P7 → P8.1 · bölümler · ekler". */
+/** "6 iz · Dolby Vision P7 → P8.1 · bölümler · ekler"; a conversion's profile (S-1303). */
 fun planLine(res: Resources, job: RemuxJobView): String {
+    job.profile?.let { return profileSummary(res, it) }
     val plan = job.plan ?: return ""
     return listOfNotNull(
         res.getQuantityString(R.plurals.nag_tvlab_remux_tracks, plan.streams.size, plan.streams.size),
@@ -235,6 +241,11 @@ fun scopeLabel(res: Resources, scope: String): String = res.getString(
 fun errorText(res: Resources, job: RemuxJobView): String {
     val error = job.error.orEmpty()
     return when {
+        // S-1303: what libVLC's stream output could not do
+        job.converts && error == RemuxJobError.ENGINE + ConvertRunner.ENCODER -> res.getString(R.string.nag_conv_e_encoder)
+        job.converts && error == RemuxJobError.ENGINE + ConvertRunner.EMPTY -> res.getString(R.string.nag_conv_e_empty)
+        job.converts && error == RemuxJobError.ENGINE + LibVlcSoutEngine.ENCODE -> res.getString(R.string.nag_conv_e_encode)
+        job.converts && error == RemuxJobError.ENGINE + LibVlcSoutEngine.OPEN_INPUT -> res.getString(R.string.nag_tvlab_remux_e_open_input)
         error.startsWith(RemuxJobError.ENGINE) -> res.getString(R.string.nag_tvlab_remux_e_engine, error.removePrefix(RemuxJobError.ENGINE))
         error == RemuxJobError.VERIFY -> res.getString(R.string.nag_tvlab_remux_e_verify)
         error == RemuxJobError.CANCELLED -> res.getString(R.string.nag_tvlab_remux_e_cancelled)

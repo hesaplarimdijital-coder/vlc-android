@@ -19,10 +19,14 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.RemuxJobEntry
+import app.nagmedar.data.RemuxJobKind
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.convert.ConvertRunner
+import app.nagmedar.ui.convert.DeviceConvertFiles
+import app.nagmedar.ui.convert.LibVlcSoutEngine
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.tvlab.percentLabel
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +51,10 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
     override suspend fun doWork(): Result {
         val dao = NagmedarDatabase.get(applicationContext).remuxJobs()
         val engine = NativeRemuxEngine(applicationContext)
-        val runner = RemuxRunner(engine, dao, DeviceConditions(applicationContext)) { job -> show(job) }
+        val conditions = DeviceConditions(applicationContext)
+        // S-1303: the conversions of the same queue, by libVLC's stream output
+        val convert = ConvertRunner(LibVlcSoutEngine(applicationContext), DeviceConvertFiles(applicationContext), dao, conditions) { job -> show(job) }
+        val runner = RemuxRunner(engine, dao, conditions, onUpdate = { job -> show(job) }, convert = convert)
         withContext(Dispatchers.IO) {
             runner.recoverInterrupted()
             val first = dao.next() ?: return@withContext
@@ -101,8 +108,9 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         }
         val locale = context.resources.locale()
         val percent = percentLabel(job?.progress ?: 0f, locale)
+        val converting = job?.kind == RemuxJobKind.CONVERT
         val text = when (job?.state) {
-            RemuxJobState.RUNNING -> context.getString(R.string.nag_tvlab_remux_running, percent)
+            RemuxJobState.RUNNING -> context.getString(if (converting) R.string.nag_conv_running else R.string.nag_tvlab_remux_running, percent)
             RemuxJobState.VERIFYING -> context.getString(R.string.nag_tvlab_remux_verifying, percent)
             RemuxJobState.PAUSED -> context.getString(R.string.nag_tvlab_remux_paused)
             else -> context.getString(R.string.nag_tvlab_remux_queued)
@@ -112,7 +120,7 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
             0,
             Intent(context, NagmedarActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.TvLab.route),
+                .putExtra(NAGMEDAR_EXTRA_DESTINATION, if (converting) Destination.Convert.route else Destination.TvLab.route),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val builder = NotificationCompat.Builder(context, CHANNEL)

@@ -153,7 +153,10 @@ import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.convert.ConvertMedia
+import app.nagmedar.ui.convert.ConvertRequests
 import app.nagmedar.ui.visual.PlayerVisualizer
+import app.nagmedar.ui.visual.VisualizerSettings
 import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -226,6 +229,15 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Snapshot -> snapshots?.take()
                 // S-607: what plays recorded, or the recording stopped
                 ShortcutId.Record -> Recordings.toggle()
+                // S-1303: what plays converted, or streamed on the network, from the library's window
+                ShortcutId.ConvertSave -> requestConvert(activity, ConvertRequests.Kind.Convert)
+                ShortcutId.StreamHls -> requestConvert(activity, ConvertRequests.Kind.Stream)
+                // S-611: the visualiser over the player, on or off
+                ShortcutId.Visualizer -> {
+                    val settings = Settings.getInstance(activity)
+                    val visualizer = VisualizerSettings.read(settings)
+                    visualizer.copy(video = !visualizer.video).write(settings.edit()).apply()
+                }
                 // S-608: the new interface's "Jump to time", bookmarks and their tab
                 ShortcutId.JumpToTime -> navigation?.jumping = true
                 ShortcutId.AddBookmark -> navigation?.addBookmark()
@@ -504,6 +516,12 @@ class DesktopPlayerChrome : PlayerChrome {
         activity = null
         keys = null
     }
+}
+
+/** S-1303: the convert page asked for the media playing. */
+private fun requestConvert(activity: VideoPlayerActivity, kind: ConvertRequests.Kind) {
+    val media = activity.service?.currentMediaWrapper?.let { ConvertMedia(it.uri, it.title ?: it.fileName.orEmpty()) }
+    ConvertRequests.open(activity, kind, media)
 }
 
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
@@ -1220,6 +1238,10 @@ internal class ActivityPlayerSource(
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
+
+    override fun convertSave() = requestConvert(activity, ConvertRequests.Kind.Convert)
+
+    override fun streamOnNetwork() = requestConvert(activity, ConvertRequests.Kind.Stream)
 
     override fun setVisualizer(kind: VisualizerKind?) {
         val settings = prefs.visualizer

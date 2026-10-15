@@ -29,10 +29,12 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.convert.HlsStream
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -156,6 +158,8 @@ class NagmedarActivity : ComponentActivity() {
         getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
         // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
         lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
+        // S-1303: the segments a dead process's HLS stream left in the app's storage
+        lifecycleScope.launch(Dispatchers.IO) { HlsStream.cleanUp(applicationContext) }
     }
 
     override fun onStop() {

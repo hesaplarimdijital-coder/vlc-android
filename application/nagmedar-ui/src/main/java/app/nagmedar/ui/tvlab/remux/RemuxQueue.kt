@@ -6,9 +6,11 @@ import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.RemuxJobDao
 import app.nagmedar.data.RemuxJobEntry
 import app.nagmedar.data.RemuxJobError
+import app.nagmedar.data.RemuxJobKind
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.RemuxPlan
+import app.nagmedar.ui.convert.ConvertProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -17,6 +19,7 @@ import kotlinx.coroutines.withContext
  * The remux queue (S-1206): jobs kept in Nağmedar's database, run one at a time by
  * [RemuxWorker] in the foreground. Queued from the TV Lab's report ([enqueue]); the batch of
  * S-1210 and the planner of S-1205 queue the same way. Watched by the screen ([observe]).
+ * The conversions of S-1303 wait in it too ([enqueueConvert]): it is the app's one job queue.
  */
 class RemuxQueue(
     context: Context,
@@ -47,6 +50,29 @@ class RemuxQueue(
                     outputName = outputName,
                     plan = plan.toJson(),
                     createdAt = System.currentTimeMillis(),
+                ),
+            )
+            RemuxWorker.ensure(context)
+            id
+        }
+
+    /**
+     * S-1303: queues a conversion of [input] with [profile] into [output], in the same queue as
+     * the remuxes; the job's id, or [REFUSED] when [output] is [input] itself.
+     */
+    suspend fun enqueueConvert(input: Uri, inputName: String, inputSize: Long, output: Uri, outputName: String, profile: ConvertProfile): Long =
+        withContext(Dispatchers.IO) {
+            if (input == output) return@withContext REFUSED
+            val id = dao.insert(
+                RemuxJobEntry(
+                    inputUri = input.toString(),
+                    inputName = inputName,
+                    inputSize = inputSize,
+                    outputUri = output.toString(),
+                    outputName = outputName,
+                    plan = profile.toJson(),
+                    createdAt = System.currentTimeMillis(),
+                    kind = RemuxJobKind.CONVERT,
                 ),
             )
             RemuxWorker.ensure(context)

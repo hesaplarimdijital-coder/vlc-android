@@ -119,6 +119,11 @@ Sözlüğü testler denetler:
 | spektrum | spectrum | tayf | | Görselleştiricinin frekans çubukları, 25 Hz–20 kHz |
 | VU metre | VU meter | ses ölçer | level meter | Sol ve sağ kanalın RMS'i ve tepesi, dBFS ile; tepede kırpılma işareti |
 | osiloskop | oscilloscope | | | Dalganın kendisi, yükselen sıfır geçişinden |
+| dönüştürmek | convert | | transcode | Bir medyayı seçilen profille yeniden kodlayıp yeni bir dosyaya yazmak (libVLC); özgün dosyaya dokunulmaz. “Dönüştür / Kaydet…” (Ctrl+R). Remux'tan farkı: ses ve görüntü yeniden kodlanır |
+| profil (dönüştürme) | profile | | | Kapsayıcı, video ve ses kodlayıcısı, bit hızı, en büyük yükseklik, altyazı; hazır olanlar “Ön ayar” (preset), kullanıcınınkiler adıyla saklanır |
+| kodlayıcı | encoder | | | Dönüştürmede yazan taraf (x264, VP8, LAME, Opus, FLAC…); “libVLC'nin bu derlemesinde bunun kodlayıcısı yok (H.265)” |
+| iş, İşler | job, Jobs | | | Dönüştürmeler ve TV Lab'in remux'ları tek sırada, birer birer çalışan işler; Dönüştür › İşler |
+| ağda yayın, ağda yayınlamak | stream on the network | | | Medyanın HLS olarak yerel ağdan (Wi-Fi, Ethernet) sunulması: adres ve QR kodu, “Yayında”, “Yayını durdur” (Ctrl+S) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |

@@ -135,6 +135,12 @@ interface PlayerChromeActions {
     /** S-611: the visualiser over the player, of [kind]; null turns it off. */
     fun setVisualizer(kind: VisualizerKind?)
 
+    /** S-1303: the media playing converted into another format (Ctrl+R), in the library's window. */
+    fun convertSave()
+
+    /** S-1303: the media playing streamed on the local network as HLS (Ctrl+S). */
+    fun streamOnNetwork()
+
     /** Leaves the player. */
     fun close()
 

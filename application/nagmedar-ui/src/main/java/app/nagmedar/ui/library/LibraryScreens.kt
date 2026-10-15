@@ -95,6 +95,8 @@ import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.tvlab.openInTvLab
+import app.nagmedar.ui.convert.ConvertMedia
+import app.nagmedar.ui.convert.ConvertRequests
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.TAG_ITEM
@@ -124,6 +126,19 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         ),
         // S-1201: the film checked against the target device
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_tvlab_analyse), { openInTvLab(context, media.uri) }, icon = NagIcons.TvLab) else null,
+        // S-1303: into another format, or on the network
+        MenuEntry.Item(
+            res.getString(R.string.nag_conv_menu),
+            { ConvertRequests.open(context, ConvertRequests.Kind.Convert, ConvertMedia(media.uri, media.fileName ?: media.title.orEmpty())) },
+            shortcut = ShortcutRegistry.chordLabel(ShortcutId.ConvertSave, res),
+            icon = NagIcons.Convert,
+        ),
+        MenuEntry.Item(
+            res.getString(R.string.nag_hls_start_menu),
+            { ConvertRequests.open(context, ConvertRequests.Kind.Stream, ConvertMedia(media.uri, media.title ?: media.fileName.orEmpty())) },
+            shortcut = ShortcutRegistry.chordLabel(ShortcutId.StreamHls, res),
+            icon = NagIcons.Streams,
+        ),
     )
 }
 

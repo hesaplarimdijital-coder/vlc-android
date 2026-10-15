@@ -354,6 +354,15 @@ class NagmedarDatabaseTest {
     @Test
     fun remuxJobsWaitInTheOrderTheyWereQueued() {
         val jobs = db.remuxJobs()
+        // S-1303: a conversion waits in the same queue, in its turn
+        val convert = jobs.insert(
+            RemuxJobEntry(
+                inputUri = "content://docs/v", inputName = "v.mkv", outputUri = "content://docs/v-out", outputName = "v.mp4",
+                plan = "{\"name\":\"x\"}", state = RemuxJobState.DONE, createdAt = 0, kind = RemuxJobKind.CONVERT,
+            ),
+        )
+        assertEquals(RemuxJobKind.CONVERT, jobs.get(convert)!!.kind)
+        jobs.delete(convert)
         fun job(name: String, at: Long, state: String = RemuxJobState.QUEUED) = RemuxJobEntry(
             inputUri = "content://docs/$name", inputName = "$name.mkv", inputSize = 1, outputUri = "content://docs/$name-out",
             outputName = "$name (remux).mkv", plan = "{}", state = state, createdAt = at,
@@ -470,6 +479,26 @@ class NagmedarDatabaseTest {
         profiles.delete(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
         assertNull(profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF"))
     }
+
+    /** S-1303: the user's conversion profiles: by name, changed, deleted; a name is used once. */
+    @Test
+    fun convertProfilesAreKeptByName() {
+        val profiles = db.convertProfiles()
+        val archive = profiles.insert(
+            ConvertProfileEntry(
+                name = "Arşiv", container = "Mkv", videoCodec = "H264", videoKbps = 6500, maxHeight = 1080, audioCodec = "Ac3",
+                audioKbps = 448, channels = 6, subtitles = "Keep", createdAt = 1, updatedAt = 1,
+            ),
+        )
+        profiles.insert(ConvertProfileEntry(name = "araba", container = "Mp3", audioCodec = "Mp3", audioKbps = 192, subtitles = "None"))
+        assertEquals(listOf("araba", "Arşiv"), runBlocking { profiles.observe().first() }.map { it.name })
+        profiles.update(profiles.get(archive)!!.copy(videoKbps = 8000, updatedAt = 2))
+        assertEquals(8000, profiles.get(archive)!!.videoKbps)
+        assertEquals(0, profiles.get(archive)!!.fps)
+        assertTrue(runCatching { profiles.insert(ConvertProfileEntry(name = "Arşiv", container = "Mp4", subtitles = "None")) }.isFailure)
+        profiles.delete(archive)
+        assertEquals(listOf("araba"), profiles.all().map { it.name })
+    }
 }
 
 /**
@@ -540,6 +569,16 @@ class NagmedarDatabaseMigrationTest {
                     "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
                     "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
             )
+            // 12 -> 13 (S-1303): the conversion profiles, and the queue's convert jobs
+            db.execSQL(
+                "INSERT INTO convert_profile (name, container, video_codec, video_kbps, max_height, fps, audio_codec, audio_kbps, channels, " +
+                    "sample_rate, subtitles, created_at, updated_at) VALUES ('Arşiv', 'Mkv', 'H264', 6500, 1080, 0, 'Ac3', 448, 6, 0, 'Keep', 1, 1)",
+            )
+            // a job queued without a kind is a remux
+            db.query("SELECT kind FROM remux_job").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("remux", c.getString(0))
+            }
         }
     }
 
@@ -597,6 +636,32 @@ class NagmedarDatabaseMigrationTest {
                 assertEquals("not new: it was there before the column", 0L, c.getLong(2))
                 assertEquals(0L, c.getLong(3))
                 assertTrue(c.isNull(4) && c.isNull(5) && c.isNull(6))
+            }
+        }
+    }
+
+    /** S-1303: the remuxes queued before 13 stay remuxes; the conversion profiles start empty. */
+    @Test
+    fun remuxJobsStayRemuxesFromTwelve() {
+        assumeTrue("schema 12 not exported yet", schemaExported(12))
+        assumeTrue("schema 13 not exported yet", schemaExported(13))
+        helper.createDatabase(TEST_DB, 12).use { db ->
+            db.execSQL(
+                "INSERT INTO remux_job (input_uri, input_name, input_size, output_uri, output_name, plan, state, progress, " +
+                    "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
+                    "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 13, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT input_name, state, kind FROM remux_job").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("a.mkv", c.getString(0))
+                assertEquals("queued", c.getString(1))
+                assertEquals("remux", c.getString(2))
+            }
+            db.query("SELECT COUNT(*) FROM convert_profile").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
             }
         }
     }

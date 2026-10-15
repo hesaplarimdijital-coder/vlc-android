@@ -112,7 +112,7 @@ fun DesktopControls(
             exit = fadeOut(tween(220)),
             modifier = Modifier.align(Alignment.TopCenter),
         ) {
-            TitleBar(state, actions, Modifier.holdsChrome(visibility))
+            TitleBar(state, actions, visibility, Modifier.holdsChrome(visibility))
         }
         AnimatedVisibility(
             visible = visibility.visible,
@@ -138,7 +138,7 @@ private fun Modifier.holdsChrome(visibility: ChromeVisibility): Modifier = point
 }
 
 @Composable
-private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, modifier: Modifier = Modifier) {
+private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, modifier: Modifier = Modifier) {
     Row(
         modifier
             .fillMaxWidth()
@@ -149,7 +149,25 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
     ) {
         NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_player_close), actions::close, tint = Color.White)
         Spacer(Modifier.width(8.dp))
-        Text(state.title, style = NagTheme.type.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(state.title, style = NagTheme.type.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Spacer(Modifier.width(8.dp))
+        // S-1303: the player's menu: what plays converted, or streamed on the network
+        val resources = LocalContext.current.resources
+        val convert = stringResource(R.string.nag_conv_menu)
+        val stream = stringResource(R.string.nag_hls_start_menu)
+        MenuChip(
+            label = stringResource(R.string.nag_player_menu),
+            text = null,
+            icon = NagIcons.MoreVertical,
+            entries = {
+                listOf(
+                    MenuEntry.Item(convert, actions::convertSave, shortcut = ShortcutRegistry.chordLabel(ShortcutId.ConvertSave, resources), icon = NagIcons.Convert),
+                    MenuEntry.Item(stream, actions::streamOnNetwork, shortcut = ShortcutRegistry.chordLabel(ShortcutId.StreamHls, resources), icon = NagIcons.Streams),
+                )
+            },
+            visibility = visibility,
+            testTag = "player-menu",
+        )
     }
 }
 
