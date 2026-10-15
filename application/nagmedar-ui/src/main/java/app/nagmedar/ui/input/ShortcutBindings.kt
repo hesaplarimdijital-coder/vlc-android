@@ -164,6 +164,8 @@ private val mpvKeys: Map<ShortcutId, KeyChord?> = mapOf(
     ShortcutId.NextChapter to KeyChord(Key.PageUp),
     ShortcutId.PreviousChapter to KeyChord(Key.PageDown),
     ShortcutId.Zoom to null,
+    // Backspace is mpv's normal speed: a folder up is Alt+↑, as in a file manager
+    ShortcutId.FolderUp to KeyChord(Key.DirectionUp, alt = true),
 )
 
 /** The overrides as the preferences keep them: "Id=Chord" lines, "Id=" for no keys. */

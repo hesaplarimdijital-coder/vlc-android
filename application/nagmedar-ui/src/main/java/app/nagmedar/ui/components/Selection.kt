@@ -196,12 +196,38 @@ class ScreenCommands {
     internal var selectAllHandler: (() -> Boolean)? = null
     internal var escapeHandler: (() -> Boolean)? = null
 
+    /** S-1301: a browser's "up a folder" (Backspace) and "refresh" (F5), on a screen that has them. */
+    internal var upHandler: (() -> Boolean)? = null
+    internal var refreshHandler: (() -> Boolean)? = null
+
     fun selectAll(): Boolean = selectAllHandler?.invoke() ?: false
 
     fun escape(): Boolean = escapeHandler?.invoke() ?: false
+
+    fun up(): Boolean = upHandler?.invoke() ?: false
+
+    fun refresh(): Boolean = refreshHandler?.invoke() ?: false
 }
 
 val LocalScreenCommands = staticCompositionLocalOf { ScreenCommands() }
+
+/** While composed, the window's "up a folder" and "refresh" shortcuts do [onUp] and [onRefresh]; each says whether it did anything. */
+@Composable
+fun BrowserCommands(onUp: () -> Boolean, onRefresh: () -> Boolean) {
+    val commands = LocalScreenCommands.current
+    val up by rememberUpdatedState(onUp)
+    val refresh by rememberUpdatedState(onRefresh)
+    DisposableEffect(commands) {
+        val upHandler = { up() }
+        val refreshHandler = { refresh() }
+        commands.upHandler = upHandler
+        commands.refreshHandler = refreshHandler
+        onDispose {
+            if (commands.upHandler === upHandler) commands.upHandler = null
+            if (commands.refreshHandler === refreshHandler) commands.refreshHandler = null
+        }
+    }
+}
 
 /** While composed, Ctrl+A selects the whole of [order] and Esc clears [selection]. */
 @Composable

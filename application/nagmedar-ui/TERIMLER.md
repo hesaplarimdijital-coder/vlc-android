@@ -50,6 +50,10 @@ Sözlüğü testler denetler:
 | akış | stream | | | “Ağ akışı aç…” |
 | radyo rehberi | radio directory | radyo dizini | | Radio Browser: ada, ülkeye, dile, etikete, kodeğe göre aranan topluluk listesi; listedeki tek öğe “radyo”, İngilizcede “station” |
 | oy vermek | to vote | | | Rehberde bir radyo için günde bir kez; “Bu radyoya oy ver” |
+| sunucu | server | | | Kaynaklar › Ağ'da kayıtlı ya da bu ağda bulunan: SMB, FTP, SFTP, NFS, UPnP/DLNA, WebDAV; “Sunucu ekle…”, “Kayıtlı sunucular”, “Bu ağda” |
+| oturum açmak | sign in | | log in, login | Sunucunun istediği kullanıcı adı ve parola; “Bu cihazda hatırla (şifreli)” seçiliyse Android Keystore'un anahtarıyla şifrelenip saklanır |
+| parola | password | | passcode | Hiçbir adreste, kayıtta ya da günlükte açık yazılmaz |
+| bağlantı noktası | port | | | Sunucu adresinin sayısı (1–65535); boşsa protokolün kendi noktası (SMB 445, FTP 21…) |
 | kısayol | shortcut | | hotkey, key binding | |
 | tuş | key | | | |
 | pencere | window | | | “Yeni pencerede aç” |

@@ -71,6 +71,8 @@ import app.nagmedar.ui.music.MusicNowPlaying
 import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
+import app.nagmedar.ui.network.LibVlcDialogHost
+import app.nagmedar.ui.network.NetworkScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
@@ -326,6 +328,8 @@ private fun NagmedarMain(
                         Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                         Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                         Destination.TvLab -> TvLabScreen(tvLab)
+                        // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
+                        Destination.Network -> NetworkScreen(undo)
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -355,6 +359,8 @@ private fun NagmedarMain(
             )
         }
     }
+    // S-1301: libVLC's sign-ins, questions and progress that no page answers, while this window is in front
+    LibVlcDialogHost()
     if (paletteOpen) {
         // the library's media come when the palette opens; commands, screens and settings at once
         val media by produceState(emptyList<PaletteItem>()) {
@@ -517,6 +523,9 @@ class AppActions(
             }
             ShortcutId.Undo -> return undo.undoLatest()
             ShortcutId.SelectAll -> return screenCommands.selectAll()
+            // S-1301: the network browser's folders
+            ShortcutId.FolderUp -> return screenCommands.up()
+            ShortcutId.Refresh -> return screenCommands.refresh()
             ShortcutId.PlayPause -> PlaybackActions.togglePlayPause()
             ShortcutId.Stop -> service?.stop()
             ShortcutId.Previous -> PlaybackActions.previous()

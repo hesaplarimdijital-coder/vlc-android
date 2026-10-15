@@ -155,6 +155,7 @@ enum class ShortcutId {
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
     RadioSearch,
+    FolderUp, Refresh,
 }
 
 @Immutable
@@ -264,6 +265,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.PlayQueue, ShortcutGroup.View, R.string.nag_sc_play_queue, KeyChord(Key.L, ctrl = true)),
         // S-1004: the playing track's lyrics over the whole window
         Shortcut(ShortcutId.Lyrics, ShortcutGroup.View, R.string.nag_sc_lyrics, KeyChord(Key.L, ctrl = true, shift = true)),
+        // S-1301: a browser's folders, as a file manager's: up a folder, and the folder read again
+        Shortcut(ShortcutId.FolderUp, ShortcutGroup.View, R.string.nag_sc_folder_up, KeyChord(Key.Backspace)),
+        Shortcut(ShortcutId.Refresh, ShortcutGroup.View, R.string.nag_sc_refresh, KeyChord(Key.F5)),
         // Help
         Shortcut(ShortcutId.ShortcutList, ShortcutGroup.Help, R.string.nag_sc_shortcut_list, KeyChord(Key.Slash, ctrl = true)),
     )
