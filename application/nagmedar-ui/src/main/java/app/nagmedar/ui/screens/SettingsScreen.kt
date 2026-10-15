@@ -58,6 +58,7 @@ import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.scrobble.ScrobbleSection
 import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
@@ -107,6 +108,8 @@ fun SettingsScreen(
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
         // S-613: what each output device plays late, and the measurement with the microphone
         item { LatencySection() }
+        // S-1008: what is played, sent to Last.fm and ListenBrainz
+        item { ScrobbleSection() }
         // S-1007: waking to music
         item { AlarmSection() }
         // S-1003: where lyrics come from

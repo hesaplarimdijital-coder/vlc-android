@@ -194,7 +194,7 @@ class DeviceLyrics(context: Context) : LocalLyrics {
     }
 
     /** The text of the .lrc named as the file is, beside it: a local folder's, or a picked folder's (S-309). */
-    private fun sidecar(media: Uri): String? {
+    internal fun sidecar(media: Uri): String? {
         val found: Uri? = when (media.scheme) {
             null, ContentResolver.SCHEME_FILE -> {
                 val file = media.path?.let(::File) ?: return null

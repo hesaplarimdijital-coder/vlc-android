@@ -519,6 +519,71 @@ static int lyrics(const char *file)
     return 0;
 }
 
+/* the whole of the file [path] ("-": standard input) as text; NULL when it cannot be read */
+static char *slurp(const char *path)
+{
+    FILE *f = strcmp(path, "-") == 0 ? stdin : fopen(path, "rb");
+    if (!f) {
+        perror(path);
+        return NULL;
+    }
+    size_t size = 0, cap = 4096;
+    char *buf = malloc(cap + 1);
+    size_t n;
+    while (buf && (n = fread(buf + size, 1, cap - size, f)) > 0) {
+        size += n;
+        if (size == cap) {
+            cap *= 2;
+            buf = realloc(buf, cap + 1);
+        }
+    }
+    if (f != stdin)
+        fclose(f);
+    if (buf)
+        buf[size] = 0;
+    return buf;
+}
+
+/* S-1005: the lyrics written into the file's tags: setlyrics FILE [--text FILE] [--synced FILE] ("-": standard input); none given removes them */
+static int setlyrics(int argc, char **argv)
+{
+    const char *file = NULL, *text_path = NULL, *synced_path = NULL;
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--text") == 0 && i + 1 < argc) text_path = argv[++i];
+        else if (strcmp(argv[i], "--synced") == 0 && i + 1 < argc) synced_path = argv[++i];
+        else file = argv[i];
+    }
+    if (!file) {
+        fprintf(stderr, "nagaudio setlyrics: a file is needed\n");
+        return 2;
+    }
+    char *text = text_path ? slurp(text_path) : NULL;
+    char *synced = synced_path ? slurp(synced_path) : NULL;
+    if ((text_path && !text) || (synced_path && !synced)) {
+        free(text);
+        free(synced);
+        return 1;
+    }
+    FILE *f = fopen(file, "r+b");
+    if (!f) {
+        perror(file);
+        free(text);
+        free(synced);
+        return 1;
+    }
+    char error[256] = {0};
+    int ret = nag_tags_write_lyrics(fileno(f), file, text, synced, error, sizeof(error));
+    fclose(f);
+    free(text);
+    free(synced);
+    if (ret < 0) {
+        fprintf(stderr, "nagaudio: %s: %s\n", file, error);
+        return 1;
+    }
+    printf("{\"written\":true}\n");
+    return 0;
+}
+
 /* S-1006: the front cover in the file's tags written to OUT; "none" when there is none */
 static int cover(const char *file, const char *out)
 {
@@ -576,6 +641,8 @@ int main(int argc, char **argv)
         return wave(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "lyrics") == 0)
         return lyrics(argv[2]);
+    if (argc >= 3 && strcmp(argv[1], "setlyrics") == 0)
+        return setlyrics(argc - 2, argv + 2);
     if (argc >= 4 && strcmp(argv[1], "cover") == 0)
         return cover(argv[2], argv[3]);
     if (argc >= 4 && strcmp(argv[1], "prop") == 0)
@@ -584,6 +651,6 @@ int main(int argc, char **argv)
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | cover FILE OUT | prop FILE KEY | version\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | setlyrics FILE [--text FILE] [--synced FILE] | cover FILE OUT | prop FILE KEY | version\n");
     return 2;
 }

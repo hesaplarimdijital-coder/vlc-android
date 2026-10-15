@@ -68,6 +68,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.playback.rememberNowPlaying
@@ -118,6 +119,7 @@ fun LyricsPane(
     onlineAllowed: Boolean = true,
     onLookAgain: (() -> Unit)? = null,
     onFullScreen: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     Column(modifier.testTag("lyrics-pane")) {
@@ -156,7 +158,9 @@ fun LyricsPane(
             }
         }
         val lyrics = (load as? LyricsLoad.Found)?.lyrics
-        if (lyrics != null || onFullScreen != null) LyricsFooter(lyrics, onDelay, onFullScreen, large)
+        // S-1005: the editor for a track that has lyrics, or has none to find
+        val edit = onEdit.takeIf { load is LyricsLoad.Found || load is LyricsLoad.Missing }
+        if (lyrics != null || onFullScreen != null || edit != null) LyricsFooter(lyrics, onDelay, onFullScreen, large, edit)
     }
 }
 
@@ -291,7 +295,7 @@ private fun PlainLines(lyrics: Lyrics, large: Boolean) {
 
 /** The delay's buttons (synced lyrics); where the lyrics came from and the full-screen button. */
 @Composable
-private fun LyricsFooter(lyrics: Lyrics?, onDelay: ((Long) -> Unit)?, onFullScreen: (() -> Unit)?, large: Boolean) {
+private fun LyricsFooter(lyrics: Lyrics?, onDelay: ((Long) -> Unit)?, onFullScreen: (() -> Unit)?, large: Boolean, onEdit: (() -> Unit)?) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val locale = currentLocale()
@@ -334,6 +338,14 @@ private fun LyricsFooter(lyrics: Lyrics?, onDelay: ((Long) -> Unit)?, onFullScre
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+            if (onEdit != null) {
+                NagButton(
+                    stringResource(if (lyrics != null && lyrics.synced) R.string.nag_lyrics_edit else R.string.nag_lyrics_time),
+                    onEdit,
+                    icon = NagIcons.Lyrics,
+                    modifier = Modifier.testTag("lyrics-edit"),
+                )
+            }
             if (onFullScreen != null && !large) {
                 NagIconButton(NagIcons.Fullscreen, stringResource(R.string.nag_sc_lyrics), onFullScreen, shortcut = ShortcutId.Lyrics, modifier = Modifier.testTag("lyrics-full-screen-button"))
             }
@@ -357,6 +369,7 @@ fun LyricsFullScreen(
     modifier: Modifier = Modifier,
     onlineAllowed: Boolean = true,
     onLookAgain: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -389,6 +402,7 @@ fun LyricsFullScreen(
             large = true,
             onlineAllowed = onlineAllowed,
             onLookAgain = onLookAgain,
+            onEdit = onEdit,
         )
     }
 }
@@ -408,6 +422,7 @@ fun PlayingLyrics(modifier: Modifier = Modifier, onFullScreen: (() -> Unit)? = n
         onlineAllowed = playing.onlineAllowed,
         onLookAgain = playing.onLookAgain,
         onFullScreen = onFullScreen,
+        onEdit = { LyricsEditorRequest.open = true },
     )
 }
 
@@ -426,6 +441,7 @@ fun PlayingLyricsFullScreen(onClose: () -> Unit, modifier: Modifier = Modifier) 
         modifier = modifier,
         onlineAllowed = playing.onlineAllowed,
         onLookAgain = playing.onLookAgain,
+        onEdit = { LyricsEditorRequest.open = true },
     )
 }
 

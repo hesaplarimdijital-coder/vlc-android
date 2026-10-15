@@ -17,7 +17,8 @@ fun menuBarSpecs(
     extras: (ShortcutGroup) -> List<MenuEntry> = { emptyList() },
 ): List<MenuSpec> = ShortcutGroup.entries.map { group ->
     MenuSpec(res.getString(group.title)) {
-        ShortcutRegistry.shortcuts.filter { it.group == group }.map { shortcut ->
+        // the lyrics editor's keys (S-1005) are its own, not the menu bar's
+        ShortcutRegistry.shortcuts.filter { it.group == group && it.scope != ShortcutScope.Editor }.map { shortcut ->
             MenuEntry.Item(
                 label = res.getString(shortcut.label),
                 onClick = { perform(shortcut.id) },

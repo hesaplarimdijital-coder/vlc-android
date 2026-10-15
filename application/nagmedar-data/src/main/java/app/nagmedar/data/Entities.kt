@@ -132,6 +132,12 @@ object LyricsSource {
     const val EMBEDDED = "embedded"
     const val FILE = "file"
     const val USER = "user"
+
+    /** S-1005: what the file's tags held before the lyrics editor wrote to them; kept once, never overwritten. */
+    const val ORIGINAL_TAG = "original_tag"
+
+    /** S-1005: what the .lrc beside the file held before the lyrics editor wrote over it; kept once. */
+    const val ORIGINAL_FILE = "original_file"
 }
 
 object LyricsKey {
@@ -274,3 +280,27 @@ data class NetworkServerEntry(
     @ColumnInfo(name = "created_at") val createdAt: Long = 0,
     @ColumnInfo(name = "last_used_at") val lastUsedAt: Long = 0,
 )
+
+/**
+ * S-1008: a scrobble waiting to be sent to [service] ("lastfm", "listenbrainz"): a track heard
+ * for half its length or four minutes, with the time it started ([listenedAt], seconds since the
+ * epoch). One row per service, so that each one's queue is sent, or stuck, on its own. The same
+ * track at the same time is queued once ([service], [artist], [track], [listenedAt] are unique).
+ */
+@Entity(tableName = "scrobble_queue", indices = [Index(value = ["service", "artist", "track", "listened_at"], unique = true)])
+data class ScrobbleEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val service: String,
+    val artist: String,
+    val track: String,
+    val album: String? = null,
+    @ColumnInfo(name = "album_artist") val albumArtist: String? = null,
+    @ColumnInfo(name = "duration_sec") val durationSec: Int = 0,
+    @ColumnInfo(name = "listened_at") val listenedAt: Long,
+    /** How often sending it failed for a reason that may pass (no network, the server busy). */
+    val attempts: Int = 0,
+    @ColumnInfo(name = "queued_at") val queuedAt: Long = 0,
+)
+
+/** The scrobbles waiting for one service. */
+data class ScrobbleCount(val service: String, val count: Int)

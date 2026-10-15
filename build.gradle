@@ -139,6 +139,7 @@ ext {
     macrobenchmarkVersion = '1.3.4'
     uiautomatorVersion = '2.3.0'
     media3Version = '1.4.1'
+    workVersion = '2.9.1'
     publishScriptPath = '../../buildsystem/publish.gradle'
 //    versionCode scheme is T M NN RR AA
 //    T: Target/Flavour (1 for Android, 2 for Chrome?)
