@@ -66,6 +66,12 @@ import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.audio.sinkLabel
+import app.nagmedar.ui.cast.CastButton
+import app.nagmedar.ui.cast.CastDevice
+import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.cast.CastingStrip
+import app.nagmedar.ui.cast.rememberCastDevice
+import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
@@ -126,6 +132,12 @@ fun NowPlayingPanel(
     lyrics: (@Composable (Modifier) -> Unit)? = null,
     lyricsShown: Boolean = false,
     onLyricsShown: ((Boolean) -> Unit)? = null,
+    /** S-1302: VLC's casting setting is on: the header has the cast button, which [onCast] answers. */
+    canCast: Boolean = false,
+    /** S-1302: the device a renderer plays the track on; null while it plays here. */
+    casting: CastDevice? = null,
+    onCast: () -> Unit = {},
+    onStopCasting: () -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -143,7 +155,10 @@ fun NowPlayingPanel(
                     modifier = Modifier.testTag("now-playing-lyrics"),
                 )
             }
+            // S-1302
+            if (info != null && (canCast || casting != null)) CastButton(casting, onCast, size = 24.dp, iconSize = 16.dp)
         }
+        if (info != null && casting != null) CastingStrip(casting, onStopCasting)
         when {
             info == null -> Text(stringResource(R.string.nag_music_nothing_playing), style = NagTheme.type.body, color = colors.textSecondary)
             lyrics != null && lyricsShown -> {
@@ -413,6 +428,10 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null) {
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
         lyricsShown = lyricsShown,
         onLyricsShown = { lyricsShown = it },
+        canCast = rememberCastingEnabled(),
+        casting = rememberCastDevice(),
+        onCast = { Casting.openPicker() },
+        onStopCasting = Casting::stop,
     )
 }
 

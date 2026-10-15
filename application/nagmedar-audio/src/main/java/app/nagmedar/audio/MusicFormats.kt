@@ -51,6 +51,9 @@ object MusicFormats {
     /** S-911: whether [uri] names a tracker module, by its extension. */
     fun isTracker(uri: Uri): Boolean = extensionOf(uri)?.let { it in trackerExtensions } ?: false
 
+    /** S-1302: whether [uri] names a DSD file (DSF, DSDIFF), by its extension: libVLC sends it to a renderer as PCM. */
+    fun isDsd(uri: Uri): Boolean = extensionOf(uri)?.let { it == "dsf" || it == "dff" } ?: false
+
     /** The extension of the last path segment, or null when it has none. */
     fun extensionOf(uri: Uri): String? {
         val name = uri.lastPathSegment?.substringAfterLast('/') ?: return null

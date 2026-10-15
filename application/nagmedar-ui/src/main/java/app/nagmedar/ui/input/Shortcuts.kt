@@ -157,6 +157,7 @@ enum class ShortcutId {
     RadioSearch,
     FolderUp, Refresh,
     PodcastSearch,
+    Cast,
 }
 
 @Immutable
@@ -218,6 +219,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.SleepTimer, ShortcutGroup.Playback, R.string.nag_sc_sleep_timer, KeyChord(Key.S, alt = true)),
         // S-607: what plays recorded, as VLC desktop's Playback › Record
         Shortcut(ShortcutId.Record, ShortcutGroup.Playback, R.string.nag_sc_record, KeyChord(Key.R, shift = true), ShortcutScope.Player),
+        // S-1302: the device picker, as VLC desktop's Playback › Renderer; C for cast
+        Shortcut(ShortcutId.Cast, ShortcutGroup.Playback, R.string.nag_sc_cast, KeyChord(Key.C, ctrl = true, shift = true)),
         // Audio
         Shortcut(ShortcutId.VolumeUp, ShortcutGroup.Audio, R.string.nag_sc_volume_up, KeyChord(Key.DirectionUp, ctrl = true)),
         Shortcut(ShortcutId.VolumeDown, ShortcutGroup.Audio, R.string.nag_sc_volume_down, KeyChord(Key.DirectionDown, ctrl = true)),

@@ -54,6 +54,8 @@ class RenderersDialog : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch { if (requireActivity().showPinIfNeeded()) dismiss() }
+        // Nağmedar (S-1302): the devices are looked for while the list shows
+        RendererDelegate.wantWhileStarted(this)
         RendererDelegate.renderers.observe(this) {
             if (it !== null) {
                 renderers = it

@@ -1086,6 +1086,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val sessionToken = media3?.compatToken ?: mediaSession.sessionToken
             val ctx = this@PlaybackService
             val metaData = mediaSession.controller.metadata
+            // Nağmedar (S-1302): where it plays while casting
+            val castingTo = renderer.value?.displayName?.let { getString(R.string.nagmedar_casting_to, it) }
             lifecycleScope.launch(Dispatchers.Default) {
                 delay(100)
                 if (isPlayingPopup || !notificationShowing) return@launch
@@ -1103,7 +1105,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                     notification = NotificationHelper.createPlaybackNotification(ctx,
                             canSwitchToVideo(), title, artist, album, cover, playing, isPausable,
                             isSeekable, speed, isPodcastMode, seekInCompactView, enabledActions,
-                            sessionToken, sessionPendingIntent)
+                            sessionToken, sessionPendingIntent,
+                            castingTo = castingTo)
                     if (isPlayingPopup) return@launch
                     if (!VlcMigrationHelper.isLolliPopOrLater || playing || audioFocusHelper.lossTransient) {
                         if (!isForeground) {
@@ -1964,6 +1967,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         playlistManager.setRenderer(item)
         if (!wasOnRenderer && item != null) audioFocusHelper.changeAudioFocus(false)
         else if (wasOnRenderer && item == null && isPlaying) audioFocusHelper.changeAudioFocus(true)
+        // Nağmedar (S-1302): the renderers are looked for while casting, so a picker lists them at once
+        RendererDelegate.want(RendererDelegate.CASTING, item != null)
+        // the notification says where it plays
+        if (wasOnRenderer != (item != null) && hasMedia() && (isPlaying || notificationShowing)) showNotification()
     }
 
     @MainThread

@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
+import app.nagmedar.ui.cast.CastPayload
+import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.LocalClickModifiers
@@ -105,6 +107,7 @@ import org.videolan.vlc.repository.SlaveRepository
 
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
+ * "Play on …" opens the device picker for it (S-1302).
  * [info] shows the details in this interface (videos, S-802); without it the classic media info opens.
  * [select] starts selecting by touch (S-310): the menu's "Seç".
  */
@@ -114,6 +117,12 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         MenuEntry.Item(res.getString(R.string.nag_play), play, shortcut = "Enter", icon = NagIcons.Play),
         MenuEntry.Item(res.getString(R.string.nag_play_next), { MediaUtils.insertNext(context, media) }, icon = NagIcons.Next),
         MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { MediaUtils.appendMedia(context, media) }, icon = NagIcons.PlaylistAdd),
+        // S-1302: on a Chromecast or a DLNA renderer, chosen in the device picker; a tracker module plays here alone
+        if (Casting.enabled(context) && Casting.offered(media.uri)) {
+            MenuEntry.Item(res.getString(R.string.nag_cast_play_on), { Casting.openPicker(CastPayload(listOf(media), 0)) }, icon = NagIcons.Cast)
+        } else {
+            null
+        },
         select?.let { MenuEntry.Item(res.getString(R.string.nag_select), it, icon = NagIcons.Check) },
         MenuEntry.Separator,
         MenuEntry.Item(

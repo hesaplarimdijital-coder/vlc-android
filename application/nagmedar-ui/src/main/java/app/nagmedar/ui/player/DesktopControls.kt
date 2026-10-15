@@ -155,7 +155,7 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
 /**
  * The control bar: the timeline over a row of controls. Wide, every control with its name; on a
  * tablet's width the tracks' names give way to their icons, and below 780, 720 and 700 dp picture
- * in picture, the screenshot button and the volume's slider go; on a phone's, the speed and the
+ * in picture, the screenshot and cast buttons and the volume's slider go; on a phone's, the speed and the
  * A-B loop make room for the rest. The full-screen button stays at every width.
  */
 @Composable
@@ -216,6 +216,8 @@ private fun ControlBar(
                 if (roomier && state.canPictureInPicture) {
                     BarButton(NagIcons.PictureInPicture, stringResource(R.string.nag_player_pip), actions::pictureInPicture)
                 }
+                // S-1302: the film to a Chromecast or a DLNA renderer
+                if (roomy && state.canCast) BarButton(NagIcons.Cast, stringResource(R.string.nag_sc_cast), actions::cast, ShortcutId.Cast)
                 Volume(state, actions, slider = sliderRoom)
                 if (state.canFullscreen) {
                     BarButton(

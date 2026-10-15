@@ -36,6 +36,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.cast.CastPickerDialog
+import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuEntry
@@ -296,6 +298,8 @@ private fun NagmedarMain(
                 caption = caption,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
+                    // S-1302: the device picker, from the cast buttons, Ctrl+Shift+C and the menus' "Play on …"
+                    Casting.request?.let { request -> CastPickerDialog(request, Casting::closePicker) }
                     if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
                         PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle, onFullScreenLyrics = { lyricsOpen = true })
                     }
@@ -562,6 +566,7 @@ class AppActions(
                 }
             }
             ShortcutId.SleepTimer -> openSleepTimer()
+            ShortcutId.Cast -> Casting.openPicker()
             ShortcutId.Lyrics -> toggleLyrics()
             ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
             ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)

@@ -54,6 +54,8 @@ open class ContentActivity : AudioPlayerContainerActivity(), SearchView.OnQueryT
         super.initAudioPlayerContainerActivity()
         if (!AndroidDevices.isChromeBook && !AndroidDevices.isAndroidTv
                 && Settings.getInstance(this).getBoolean(KEY_ENABLE_CASTING, true)) {
+            // Nağmedar (S-1302): the classic screens look for devices while they show, for their cast button
+            RendererDelegate.wantWhileStarted(this)
             PlaybackService.renderer.observe(this) {
                 val item = toolbar.menu.findItem(R.id.ml_menu_renderers) ?: return@observe
                 item.isVisible = !hideRenderers() && showRenderers

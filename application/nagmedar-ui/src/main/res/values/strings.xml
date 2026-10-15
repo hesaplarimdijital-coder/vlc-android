@@ -2184,4 +2184,40 @@
         <item quantity="one">%1$d result for “%2$s”</item>
         <item quantity="other">%1$d results for “%2$s”</item>
     </plurals>
+    <!-- S-1302: casting to a Chromecast or a DLNA renderer -->
+    <string name="nag_sc_cast">Cast…</string>
+    <string name="nag_cast_title">Cast</string>
+    <string name="nag_cast_title_play">Play on a device</string>
+    <string name="nag_cast_play_on">Play on…</string>
+    <string name="nag_cast_this_device">This device</string>
+    <string name="nag_cast_here">Plays here</string>
+    <string name="nag_cast_here_stop">Casting stops; it goes on here</string>
+    <string name="nag_cast_kind_chromecast">Chromecast</string>
+    <string name="nag_cast_kind_dlna">DLNA device</string>
+    <string name="nag_cast_kind_other">Network device</string>
+    <string name="nag_cast_now">Casting · %s</string>
+    <string name="nag_cast_searching">Looking for devices on this network…</string>
+    <string name="nag_cast_still_searching">Devices show up as they answer</string>
+    <string name="nag_cast_empty_title">No device found</string>
+    <string name="nag_cast_empty_desc">Chromecasts and DLNA TVs, receivers and speakers on this network show up here.</string>
+    <string name="nag_cast_tip_wifi">This device and the TV are on the same Wi-Fi, not a guest network.</string>
+    <string name="nag_cast_tip_multicast">The router lets devices find each other: multicast (mDNS, UPnP) on, client isolation off.</string>
+    <string name="nag_cast_tip_tv">The TV is on, with DLNA or media sharing turned on; a Chromecast is awake.</string>
+    <string name="nag_cast_tip_vpn">A VPN on this device can hide the local network.</string>
+    <string name="nag_cast_search_again">Search again</string>
+    <string name="nag_cast_no_lan_title">No local network</string>
+    <string name="nag_cast_no_lan_desc">Casting needs the Wi-Fi or Ethernet the device is on: on mobile data there is no device to find.</string>
+    <string name="nag_cast_off_title">Casting is turned off</string>
+    <string name="nag_cast_off_desc">VLC\'s “Wireless casting” setting is off: no device is looked for.</string>
+    <string name="nag_cast_turn_on">Turn on</string>
+    <string name="nag_cast_notice_tracker">This track is a tracker module: it plays on this device alone. The tracks after it are cast.</string>
+    <string name="nag_cast_notice_dsd">DSD is sent as PCM: libVLC converts it on the way.</string>
+    <string name="nag_cast_notice_engine">While casting, libVLC sends the file: the music engine\'s DSP chain, ReplayGain and crossfade do not apply.</string>
+    <string name="nag_cast_casting_to">Casting to %s</string>
+    <string name="nag_cast_stop">Stop casting</string>
+    <string name="nag_cast_volume_note">Set the volume on the TV or with its remote.</string>
+    <string name="nag_cast_remote_hint">The picture plays on %s; this screen is its remote.</string>
+    <string name="nag_cast_menu_cast">Cast to %s</string>
+    <string name="nag_cast_menu_here">Play here</string>
+    <string name="nag_cast_close">Close</string>
 </resources>

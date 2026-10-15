@@ -1,6 +1,6 @@
 /*
  * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603); the buttons
- * of picture in picture (S-609); the refresh rate's matching (S-612).
+ * of picture in picture (S-609); the refresh rate's matching (S-612); casting's controls (S-1302).
  */
 package org.videolan.vlc.gui.video
 
@@ -69,10 +69,20 @@ interface PlayerChrome {
     companion object {
         private const val TAG = "VLC/PlayerChrome"
         private const val IMPLEMENTATION = "app.nagmedar.ui.player.DesktopPlayerChrome"
+        private const val CASTING = "app.nagmedar.ui.cast.CastingPlayerChrome"
 
         /** The new interface's controls; null when the app is built without it. */
-        fun create(): PlayerChrome? = try {
-            Class.forName(IMPLEMENTATION).getDeclaredConstructor().newInstance() as PlayerChrome
+        fun create(): PlayerChrome? = named(IMPLEMENTATION)
+
+        /**
+         * S-1302: the new interface's controls while a renderer plays the film (the local picture
+         * is not drawn): where it plays, the transport, the picker, casting stopped; for mouse,
+         * keys and fingers alike. Null when the app is built without them.
+         */
+        fun createCasting(): PlayerChrome? = named(CASTING)
+
+        private fun named(name: String): PlayerChrome? = try {
+            Class.forName(name).getDeclaredConstructor().newInstance() as PlayerChrome
         } catch (e: ReflectiveOperationException) {
             Log.i(TAG, "no desktop controls: ${e.message}")
             null

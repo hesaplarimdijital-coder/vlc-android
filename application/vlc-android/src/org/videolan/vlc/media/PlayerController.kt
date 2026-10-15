@@ -236,6 +236,9 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
     fun setRenderer(renderer: RendererItem?) {
         if (!mediaplayer.isReleased) mediaplayer.setRenderer(renderer)
         hasRenderer = renderer !== null
+        // S-1302: the output's latency profile (S-613) is left out while casting, and back after
+        val delay = audioDelay.rendererChanged(hasRenderer)
+        if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.setAudioDelay(delay)
     }
 
     override fun release() = release(mediaplayer)

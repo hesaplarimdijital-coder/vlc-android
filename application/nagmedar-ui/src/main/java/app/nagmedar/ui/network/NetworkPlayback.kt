@@ -19,7 +19,7 @@ class ServiceNetworkActions(context: Context) : NetworkActions {
     override fun play(entries: List<NetworkEntry>, index: Int) {
         val media = entries.map(::mediaOf)
         if (media.isEmpty()) return
-        // S-1302 sends them to the renderer chosen in the player, when one is
+        // to the device cast to while casting (S-1302): the playback service's renderer
         PlaybackActions.playList(app, media, index.coerceIn(0, media.lastIndex))
     }
 
@@ -45,18 +45,25 @@ class ServiceNetworkActions(context: Context) : NetworkActions {
     }
 }
 
-/** S-1302's hook: a device that plays what is sent to it (a DLNA renderer, a Chromecast). */
+/** A device that plays what is sent to it (a DLNA renderer, a Chromecast). */
 @Immutable
 data class RemoteRenderer(val id: String, val name: String)
 
 /**
- * Where S-1302 plugs in sending to a DLNA renderer or a Chromecast: the renderers found now,
- * offered as "Play on …" in the network browser's menus, and the sending itself. None in this build.
+ * Sending to a DLNA renderer or a Chromecast (S-1302): the devices found now (while casting, or
+ * a picker looked for them), each offered as "Play on …" in the network browser's file menus,
+ * the device picker for the rest, and the sending itself.
  */
 interface RemoteRenderers {
     fun available(): List<RemoteRenderer>
 
     fun play(renderer: RemoteRenderer, entries: List<NetworkEntry>, index: Int)
+
+    /** The device picker, to play [entries] from [index] on the device chosen there. */
+    fun choose(entries: List<NetworkEntry>, index: Int)
+
+    /** Whether [entry] can be sent at all: a tracker module plays here alone. */
+    fun offered(entry: NetworkEntry): Boolean = true
 }
 
 object RemoteRendererHook {

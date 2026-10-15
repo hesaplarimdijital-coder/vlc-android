@@ -93,6 +93,8 @@ ICONS = {
     # S-607 recording what plays: started, stopped
     'Record': '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.6" style="fill:currentColor"/>',
     'Stop': '<rect x="4.5" y="4.5" width="7" height="7" rx="1.2" style="fill:currentColor"/>',
+    # S-1302 casting to a Chromecast or a DLNA renderer
+    'Cast': '<path d="M2 6V4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7a1.5 1.5 0 0 1-1.5 1.5H8.5"/><path d="M2 8.5a4.5 4.5 0 0 1 4.5 4.5M2 11a2 2 0 0 1 2 2M2 13h.01"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.
