@@ -124,6 +124,22 @@ class LatencyProfilesTest {
     }
 
     @Test
+    fun aRendererChangeGivesTheDelayAgain() {
+        val mix = AudioDelayMix()
+        mix.userDelayUs = 40_000L
+        mix.outputLatencyUs = 180_000L
+        // S-1302: cast to a TV: the buds' profile is not the TV's, the user's delay stays
+        assertEquals(40_000L, mix.rendererChanged(casting = true))
+        assertEquals(40_000L, mix.rendererChanged(casting = true))
+        // back on this device: the profile is under it again
+        assertEquals(-140_000L, mix.rendererChanged(casting = false))
+        // a media started while casting: the user's zero, still no profile
+        mix.rendererChanged(casting = true)
+        mix.mediaStarted()
+        assertEquals(0L, mix.combinedUs)
+    }
+
+    @Test
     fun theSystemsFirstReportIsNoOrder() {
         val order = OutputOrder()
         // registering: everything connected now, in the system's own order

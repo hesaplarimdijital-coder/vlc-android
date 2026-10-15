@@ -51,6 +51,12 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.Waveform
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.rememberSignalPath
+import app.nagmedar.ui.cast.CastButton
+import app.nagmedar.ui.cast.CastDevice
+import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.cast.CastingStrip
+import app.nagmedar.ui.cast.rememberCastDevice
+import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
@@ -97,6 +103,11 @@ fun PhonePlayer(
     lyrics: (@Composable (Modifier) -> Unit)? = null,
     lyricsShown: Boolean = false,
     onLyricsShown: ((Boolean) -> Unit)? = null,
+    /** S-1302: VLC's casting setting is on: the top row has the cast button. */
+    canCast: Boolean = false,
+    /** S-1302: the device a renderer plays the track on; null while it plays here. */
+    casting: CastDevice? = null,
+    onStopCasting: () -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -139,10 +150,13 @@ fun PhonePlayer(
                     modifier = Modifier.testTag("phone-lyrics"),
                 )
             }
+            // S-1302
+            if (canCast || casting != null) CastButton(casting, actions::cast)
             // S-1007
             SleepTimerButton()
             NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, shortcut = ShortcutId.PlayQueue)
         }
+        if (casting != null) CastingStrip(casting, onStopCasting, Modifier.padding(bottom = dimens.gapS))
         if (lyrics != null && lyricsShown) {
             // S-1004: the lyrics scroll: no swipes over them
             lyrics(Modifier.fillMaxWidth().weight(1f))
@@ -299,5 +313,8 @@ fun PhonePlayerHost(onClose: () -> Unit, onQueue: () -> Unit, modifier: Modifier
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
         lyricsShown = lyricsShown,
         onLyricsShown = { lyricsShown = it },
+        canCast = rememberCastingEnabled(),
+        casting = rememberCastDevice(),
+        onStopCasting = Casting::stop,
     )
 }

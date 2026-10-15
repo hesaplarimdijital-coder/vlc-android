@@ -221,4 +221,13 @@ class AudioDelayMix {
     fun mediaStarted() {
         userDelayUs = 0L
     }
+
+    /**
+     * S-1302: a renderer chosen ([casting]) or let go: what libVLC is to be given now, at once,
+     * changed or not, as its sound starts again on the other output.
+     */
+    fun rendererChanged(casting: Boolean): Long {
+        this.casting = casting
+        return combinedUs
+    }
 }

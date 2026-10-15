@@ -2156,4 +2156,40 @@
         <item quantity="one">“%2$s” için %1$d sonuç</item>
         <item quantity="other">“%2$s” için %1$d sonuç</item>
     </plurals>
+    <!-- S-1302: Chromecast ya da DLNA cihazına yayınlamak -->
+    <string name="nag_sc_cast">Yayınla…</string>
+    <string name="nag_cast_title">Yayınla</string>
+    <string name="nag_cast_title_play">Bir cihazda oynat</string>
+    <string name="nag_cast_play_on">Bir cihazda oynat…</string>
+    <string name="nag_cast_this_device">Bu cihaz</string>
+    <string name="nag_cast_here">Burada oynatılır</string>
+    <string name="nag_cast_here_stop">Yayın durur; burada sürer</string>
+    <string name="nag_cast_kind_chromecast">Chromecast</string>
+    <string name="nag_cast_kind_dlna">DLNA cihazı</string>
+    <string name="nag_cast_kind_other">Ağ cihazı</string>
+    <string name="nag_cast_now">Yayınlanıyor · %s</string>
+    <string name="nag_cast_searching">Bu ağdaki cihazlar aranıyor…</string>
+    <string name="nag_cast_still_searching">Cihazlar yanıt verdikçe görünür</string>
+    <string name="nag_cast_empty_title">Cihaz bulunamadı</string>
+    <string name="nag_cast_empty_desc">Bu ağdaki Chromecast\'ler ile DLNA TV\'ler, alıcılar ve hoparlörler burada görünür.</string>
+    <string name="nag_cast_tip_wifi">Bu cihaz ve TV aynı Wi-Fi\'de, misafir ağında değil.</string>
+    <string name="nag_cast_tip_multicast">Modem cihazların birbirini bulmasına izin veriyor: multicast (mDNS, UPnP) açık, istemci yalıtımı kapalı.</string>
+    <string name="nag_cast_tip_tv">TV açık, DLNA ya da medya paylaşımı açık; Chromecast uyanık.</string>
+    <string name="nag_cast_tip_vpn">Bu cihazdaki bir VPN yerel ağı gizleyebilir.</string>
+    <string name="nag_cast_search_again">Yeniden ara</string>
+    <string name="nag_cast_no_lan_title">Yerel ağ yok</string>
+    <string name="nag_cast_no_lan_desc">Yayınlamak için cihazın bağlı olduğu Wi-Fi ya da Ethernet gerekir: mobil veride bulunacak cihaz yoktur.</string>
+    <string name="nag_cast_off_title">Yayınlama kapalı</string>
+    <string name="nag_cast_off_desc">VLC\'nin “Kablosuz aktarım” ayarı kapalı: cihaz aranmıyor.</string>
+    <string name="nag_cast_turn_on">Aç</string>
+    <string name="nag_cast_notice_tracker">Bu parça bir tracker modülü: yalnızca bu cihazda çalar. Ondan sonraki parçalar yayınlanır.</string>
+    <string name="nag_cast_notice_dsd">DSD, PCM olarak gönderilir: libVLC yolda dönüştürür.</string>
+    <string name="nag_cast_notice_engine">Yayınlarken dosyayı libVLC gönderir: müzik motorunun DSP zinciri, ReplayGain ve çapraz geçişi uygulanmaz.</string>
+    <string name="nag_cast_casting_to">%s cihazına yayınlanıyor</string>
+    <string name="nag_cast_stop">Yayını durdur</string>
+    <string name="nag_cast_volume_note">Ses düzeyini TV\'den ya da kumandasından ayarlayın.</string>
+    <string name="nag_cast_remote_hint">Görüntü %s cihazında oynuyor; bu ekran onun kumandası.</string>
+    <string name="nag_cast_menu_cast">%s cihazına yayınla</string>
+    <string name="nag_cast_menu_here">Burada oynat</string>
+    <string name="nag_cast_close">Kapat</string>
 </resources>

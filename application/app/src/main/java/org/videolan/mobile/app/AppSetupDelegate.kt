@@ -33,6 +33,7 @@ import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.network.NetworkDialogs
 import org.videolan.libvlc.Dialog
 import org.videolan.libvlc.FactoryManager
@@ -148,6 +149,8 @@ class AppSetupDelegate : AppDelegate,
     private fun Context.backgroundInit() = AppScope.launch outerLaunch@ {
         VersionMigration.migrateVersion(this@backgroundInit)
         Settings.initPostMigration(this@backgroundInit)
+        // Nağmedar (S-1302): the new interface's device picker and "Play on …"
+        Casting.install()
         launch(Dispatchers.IO) innerLaunch@ {
             if (!VLCInstance.testCompatibleCPU(AppContextProvider.appContext)) return@innerLaunch
             Dialog.setCallbacks(VLCInstance.getInstance(this@backgroundInit), DialogDelegate)

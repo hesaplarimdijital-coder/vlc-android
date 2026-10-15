@@ -115,6 +115,9 @@
 # Nağmedar (S-601): the video player finds the new interface's desktop controls by name
 -keep class app.nagmedar.ui.player.DesktopPlayerChrome { <init>(); }
 
+# Nağmedar (S-1302): and its casting controls while a renderer plays the film
+-keep class app.nagmedar.ui.cast.CastingPlayerChrome { <init>(); }
+
 # Nağmedar (S-808): the playback service finds the play statistics' recorder by name
 -keep class app.nagmedar.ui.stats.PlayStatsRecorder { <init>(); }
 

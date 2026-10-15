@@ -54,6 +54,7 @@ Sözlüğü testler denetler:
 | oturum açmak | sign in | | log in, login | Sunucunun istediği kullanıcı adı ve parola; “Bu cihazda hatırla (şifreli)” seçiliyse Android Keystore'un anahtarıyla şifrelenip saklanır |
 | parola | password | | passcode | Hiçbir adreste, kayıtta ya da günlükte açık yazılmaz |
 | bağlantı noktası | port | | | Sunucu adresinin sayısı (1–65535); boşsa protokolün kendi noktası (SMB 445, FTP 21…) |
+| yayınlamak | cast | yansıtma | renderer | Videoyu ya da müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) göndermek; gönderen libVLC'dir. “Yayınla…” (Ctrl+Shift+C), “Salon TV cihazına yayınlanıyor”, “Yayını durdur”; listede “Bu cihaz” yayını bitirir. VLC'nin klasik ayarı kendi adıyla anılır: “Kablosuz aktarım” |
 | kısayol | shortcut | | hotkey, key binding | |
 | tuş | key | | | |
 | pencere | window | | | “Yeni pencerede aç” |

@@ -59,6 +59,8 @@ data class PlayerChromeState(
     val canPictureInPicture: Boolean = false,
     /** S-607: what plays is being recorded. */
     val recording: Boolean = false,
+    /** S-1302: VLC's casting setting is on: the bar has the cast button. */
+    val canCast: Boolean = false,
 ) {
     /** The index of the chapter playing at [ms], or null. */
     fun chapterAt(ms: Long): Int? = chapters.indexOfLast { it.startMs <= ms }.takeIf { it >= 0 }
@@ -128,6 +130,9 @@ interface PlayerChromeActions {
 
     /** S-703: the secondary subtitles on or off (Alt+V). */
     fun toggleSecondarySubtitles()
+
+    /** S-1302: the device picker, to cast the film to a Chromecast or a DLNA renderer. */
+    fun cast() = Unit
 
     /** Leaves the player. */
     fun close()

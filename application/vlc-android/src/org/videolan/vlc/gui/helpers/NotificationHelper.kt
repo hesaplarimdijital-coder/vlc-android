@@ -76,7 +76,8 @@ object NotificationHelper {
                                    seekable: Boolean, speed: Float, podcastMode: Boolean,
                                    seekInCompactView: Boolean, enabledActions: FlagSet<PlaybackAction>,
                                    sessionToken: MediaSessionCompat.Token?,
-                                   spi: PendingIntent?): Notification {
+                                   spi: PendingIntent?,
+                                   castingTo: String? = null): Notification {
 
         val piStop = MediaButtonReceiver.buildMediaButtonPendingIntent(ctx, PlaybackStateCompat.ACTION_STOP)
         val builder = NotificationCompat.Builder(ctx, PLAYBACK_SERVICE_CHANNEL_ID)
@@ -91,6 +92,8 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
                 .setDeleteIntent(piStop)
                 .setColor(Color.BLACK)
+        // Nağmedar (S-1302): "Casting to Salon TV" over the title while a renderer plays it
+        castingTo?.let { builder.setSubText(it) }
         spi?.let { builder.setContentIntent(it) }
         /* Previous */
         if (podcastMode) {

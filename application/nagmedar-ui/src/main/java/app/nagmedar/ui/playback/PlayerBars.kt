@@ -57,6 +57,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
+import app.nagmedar.ui.cast.CastButton
+import app.nagmedar.ui.cast.CastDevice
+import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.cast.rememberCastDevice
+import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -146,6 +151,10 @@ data class PlayerBarInfo(
     val repeating: Boolean = false,
     /** 0–100 as the system's media volume goes; the service boosts up to 200. */
     val volume: Int = 100,
+    /** S-1302: VLC's casting setting is on: the bars have the cast button. */
+    val canCast: Boolean = false,
+    /** S-1302: the device a renderer plays it on; null while it plays here. */
+    val casting: CastDevice? = null,
 )
 
 /** What the bars ask of playback: the playback service in the app, a recorder in tests. */
@@ -170,6 +179,9 @@ interface PlayerBarActions {
 
     /** "Sıradaki" opens or closes (S-310). */
     fun openQueue() = Unit
+
+    /** S-1302: the device picker. */
+    fun cast() = Unit
 }
 
 /**
@@ -217,6 +229,8 @@ class ServicePlayerBarActions(
     override fun setVolume(volume: Int) {
         PlaybackService.instance?.setVolume(volume.coerceIn(0, 200))
     }
+
+    override fun cast() = Casting.openPicker()
 }
 
 /** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
@@ -265,6 +279,8 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
         volume = PlaybackService.instance?.volume ?: 100,
+        canCast = rememberCastingEnabled(),
+        casting = rememberCastDevice(),
     )
 }
 
@@ -333,6 +349,9 @@ fun MiniPlayer(
                                 modifier = Modifier.onSizeChanged { titleHeight = it.height })
                             if (extras) {
                                 Spacer(Modifier.height(SeekRowHeight))
+                            } else if (info.casting != null) {
+                                // S-1302: where it plays
+                                CastingLine(info.casting)
                             } else {
                                 Text(
                                     listOfNotNull(info.subtitle, info.format).joinToString(" · "),
@@ -366,6 +385,8 @@ fun MiniPlayer(
                     shortcut = ShortcutId.PlayPause,
                 )
                 NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
+                // S-1302: lit while casting; with a pointer over the bar, to cast
+                if (info.casting != null || (extras && info.canCast)) CastButton(info.casting, actions::cast)
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
@@ -457,7 +478,11 @@ fun TransportBar(
                 Spacer(Modifier.width(dimens.gapM))
                 Column(Modifier.weight(1f)) {
                     Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(info.subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (info.casting != null) {
+                        CastingLine(info.casting)
+                    } else {
+                        Text(info.subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                 }
             }
             Spacer(Modifier.width(dimens.gapL))
@@ -475,14 +500,28 @@ fun TransportBar(
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 info.format?.let { FormatChip(it) }
                 Spacer(Modifier.width(dimens.gapS))
-                VolumeControl(info.volume, actions::setVolume)
+                // S-1302: a renderer's volume is the device's own
+                if (info.casting == null) VolumeControl(info.volume, actions::setVolume)
                 // S-1007: while the sleep timer runs, what is left
                 SleepTimerButton(onlyWhileRunning = true)
+                if (info.canCast || info.casting != null) CastButton(info.casting, actions::cast)
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 NagIconButton(NagIcons.OpenWindow, openLabel, actions::openPlayer)
             }
         }
     }
+}
+
+/** S-1302: "Casting to Salon TV", in place of the artist while a renderer plays. */
+@Composable
+private fun CastingLine(device: CastDevice) {
+    Text(
+        stringResource(R.string.nag_cast_casting_to, device.name),
+        style = NagTheme.type.labelSmall,
+        color = NagTheme.colors.accentText,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 /** "FLAC 24/96" in the bar's end, as the mockup shows the format. */

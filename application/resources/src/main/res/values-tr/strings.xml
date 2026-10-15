@@ -1437,4 +1437,8 @@
     <string name="nagmedar_popup_pause">Duraklat</string>
     <string name="nagmedar_popup_fullscreen">Tam oynatıcıya dön</string>
     <string name="nagmedar_popup_close">Kapat</string>
+    <!-- Nağmedar (S-1302): Chromecast ya da DLNA cihazına yayınlamak -->
+    <string name="nagmedar_casting_to">%s cihazına yayınlanıyor</string>
+    <string name="nagmedar_cast_tracker_here">Tracker modülleri yalnızca bu cihazda çalar: bu parça burada sürüyor, sonrakiler yayınlanacak.</string>
+    <string name="nagmedar_cast_tracker_skipped">“%s” atlandı: tracker modülleri yayınlanamaz, yalnızca bu cihazda çalar.</string>
 </resources>
