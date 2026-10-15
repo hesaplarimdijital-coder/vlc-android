@@ -1,0 +1,1 @@
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 168 steps, 0 crash/ANR, 18 StrictMode, 7 warnings, 35 min. Evidence: branch ci/emulator, report.md

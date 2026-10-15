@@ -1,0 +1,9 @@
+1840 s, 160 steps, pass phone-tr, 0 crashes
+153 phone-tr Open Daha fazla (overflow) ok
+154 phone-tr Open Çalma listeleri ok
+155 phone-tr Open Daha fazla (overflow) ok
+156 phone-tr Settings ok
+157 phone-tr Settings scroll 1 ok
+158 phone-tr Settings scroll 2 ok
+159 phone-tr Settings scroll 3 ok
+160 phone-tr Settings scroll 4 ok
