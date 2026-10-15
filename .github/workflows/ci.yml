@@ -11,7 +11,11 @@
 #            Nağmedar UI tests (tokens, shortcuts, layout state, accessibility gate,
 #            screenshots), compares the screenshots with src/test/screenshots and, on
 #            master, pushes them to the ci/screenshots branch for review. Compiler errors
-#            and test failures become check-run annotations.
+#            and test failures become check-run annotations. Both legs build the remote
+#            access web app (VideoLAN's, pinned, with Nağmedar's patches: S-1304) into the APK
+#            and check that it is Nağmedar's; the debug leg also walks the built page in
+#            headless Chrome and pushes its screenshots to ci/web (a pull request's to
+#            ci/web-pr-<number>).
 # release  : manual (İmzalı release APK üret) or v* tags. Signed release APKs, with the lab's
 #            libraries, into a DRAFT GitHub release with CHANGELOG.md's notes (S-1503): only those
 #            who can push see it; never published, never an artifact. Needs the keystore secrets
@@ -174,6 +178,10 @@ jobs:
       - name: Android SDK ve NDK
         run: ./buildsystem/ci/setup-android.sh
 
+      # S-1304: the remote access web app in the APK (assets of remote-access-client), Nağmedar's
+      - name: Uzaktan erişim web uygulaması
+        uses: ./.github/actions/remoteaccess-web
+
       - name: Gradle önbelleği
         uses: actions/cache@v4
         with:
@@ -258,6 +266,29 @@ jobs:
           git add -A && git commit -q -m "Screenshots for ${GITHUB_SHA::7}"
           git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$TARGET"
 
+      # S-1304: the built page in headless Chrome against a mock of the app's server (the security
+      # page, the one-time code wrong and right, the library, the player, About; Turkish and English,
+      # light and dark, desktop and phone); a pull request's go to ci/web-pr-<number>
+      - name: Uzaktan erişim web arayüzü görünümü
+        id: web-preview
+        if: always() && matrix.variant == 'debug'
+        run: |
+          pip install --quiet playwright
+          python3 buildsystem/remoteaccess/preview.py --channel chrome \
+            --dist application/remote-access-client/remoteaccess/dist --repo . --out "$RUNNER_TEMP/web-shots"
+
+      - name: Web görüntülerini dala koy
+        if: always() && matrix.variant == 'debug' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          TOKEN: ${{ github.token }}
+          TARGET: ${{ github.event_name == 'pull_request' && format('ci/web-pr-{0}', github.event.pull_request.number) || 'ci/web' }}
+        run: |
+          [ -d "$RUNNER_TEMP/web-shots" ] || exit 0
+          cd "$RUNNER_TEMP/web-shots"
+          git init -q && git checkout -q --orphan "$TARGET"
+          git add -A && git commit -q -m "Remote access web screenshots for ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$TARGET"
+
       - name: Test raporları
         if: always()
         uses: actions/upload-artifact@v4
@@ -324,6 +355,9 @@ jobs:
           VERSION=$(python3 buildsystem/release/notes.py --version)
           python3 buildsystem/release/notes.py "$VERSION" > "$RUNNER_TEMP/notes.md"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Uzaktan erişim web uygulaması
+        if: env.HAS_KEYSTORE == 'true'
+        uses: ./.github/actions/remoteaccess-web
       - name: Hazırlık
         if: env.HAS_KEYSTORE == 'true'
         run: |

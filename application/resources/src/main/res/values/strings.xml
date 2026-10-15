@@ -1373,6 +1373,9 @@
     <string name="ra_browser_audio_not_found">Media not found or cannot be played in browser</string>
     <string name="ra_browser_audio_unsupported_format">This audio format is not supported by your browser</string>
     <string name="ra_upload_subtitle">Upload subtitle</string>
+    <string name="ra_about_license">Nağmedar is free software, distributed under the GNU General Public License, version 2 or (at your option) any later version.</string>
+    <string name="ra_about_source">Source code</string>
+    <string name="ra_source_url" translatable="false">https://github.com/hesaplarimdijital-coder/vlc-android</string>
 
     <string name="ra_onboarding_welcome_desc">Welcome in Nağmedar\'s remote access\nBy enabling it you will be able to control this device\'s playback and more</string>
     <string name="ra_onboarding_how_title">Control your device</string>

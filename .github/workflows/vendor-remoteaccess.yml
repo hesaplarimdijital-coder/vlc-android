@@ -1,0 +1,61 @@
+# Remote access web app source, for reading (S-1304)
+#
+# code.videolan.org is reachable from GitHub Actions only. This job clones VideoLAN's remote access
+# web app at the hash pinned in buildsystem/compile-remoteaccess.sh and force-pushes it, as an orphan
+# commit, to the vendor/remoteaccess branch, so that it can be read with git:
+#   git fetch origin vendor/remoteaccess && git show origin/vendor/remoteaccess:package.json
+# Run it on any branch:
+#   gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/vendor-remoteaccess.yml/dispatches -f ref=<branch>
+# (the workflow file must exist on master for a dispatch; until then the pull request runs it when
+# this file changes).
+
+name: Vendor remote access
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/vendor-remoteaccess.yml'
+
+concurrency:
+  group: vendor-remoteaccess-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  vendor:
+    name: Kaynağı dala koy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Klonla ve sabitlenen sürüme getir
+        run: |
+          hash=$(sed -n 's/^: ${REMOTE_ACCESS_TESTED_HASH:=\(.*\)}$/\1/p' buildsystem/compile-remoteaccess.sh)
+          [ -n "$hash" ] || { echo "::error::the pinned hash is not in buildsystem/compile-remoteaccess.sh"; exit 1; }
+          repo=$(sed -n 's/^REMOTE_ACCESS_REPOSITORY=//p' buildsystem/compile-remoteaccess.sh)
+          git clone --single-branch --branch main "$repo" "$RUNNER_TEMP/remoteaccess"
+          git -C "$RUNNER_TEMP/remoteaccess" reset --hard "$hash"
+          echo "hash=$hash" >> "$GITHUB_ENV"
+          rm -rf "$RUNNER_TEMP/remoteaccess/.git"
+
+      - name: vendor/remoteaccess dalına koy
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/remoteaccess"
+          git init -q && git checkout -q --orphan vendor/remoteaccess
+          git add -A && git commit -q -m "remoteaccess at ${hash}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/vendor/remoteaccess

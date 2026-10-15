@@ -1,0 +1,67 @@
+diff --git a/src/components/AppHeader.vue b/src/components/AppHeader.vue
+index eb99dc9..b08727d 100644
+--- a/src/components/AppHeader.vue
++++ b/src/components/AppHeader.vue
+@@ -2,7 +2,7 @@
+   <nav class="navbar navbar-light navbar-expand-md shadow-sm sticky-top align-items-center container-fluid main-navbar">
+     <div class="flex1-collapsible">
+       <RouterLink :to="{ name: 'VideoList' }">
+-        <img id="logo" v-bind:src="$getAppAsset($getIcons().vlcIcon, 48, true)" width="48" v-on:click="iconClick()"
++        <img id="logo" :src="(`./logo.svg`)" :alt="$t('APP_NAME')" width="48" height="48" v-on:click="iconClick()"
+           v-bind:class="this.clicked > 2 && this.clicked % 2 == 1 ? 'animate' : ''">
+       </RouterLink>
+     </div>
+diff --git a/src/pages/AboutPage.vue b/src/pages/AboutPage.vue
+index 5026dc0..c32ebb8 100644
+--- a/src/pages/AboutPage.vue
++++ b/src/pages/AboutPage.vue
+@@ -3,7 +3,16 @@
+         <h5 class="media-content text-primary" v-t="'ABOUT'"></h5>
+         <div class="modal-body mt-4">
+ 
+-            <div class="table-responsive card">
++            <div class="card" id="attribution">
++                <div class="card-body">
++                    <p class="attribution-text" v-t="'ABOUT_APP'"></p>
++                    <p class="attribution-text" v-t="'ABOUT_COPYRIGHT'"></p>
++                    <p class="attribution-text" v-t="'ABOUT_LICENSE'"></p>
++                    <a :href="$t('SOURCE_URL')" target="_blank" rel="noopener" v-t="'SOURCE_CODE'"></a>
++                </div>
++            </div>
++
++            <div class="table-responsive card mt-4">
+                 <table class="table table-hover table-no-margin bottomless-table">
+                     <thead>
+                         <tr class="table-striped-columns">
+@@ -51,7 +60,7 @@
+                         </tr>
+                         <tr>
+                             <td scope="col" class="col-1">
+-                                <p v-t="'VLC_VERSION'"></p>
++                                <p v-t="'APP_NAME'"></p>
+                             </td>
+                             <td scope="col" class="col-4">
+                                 <p v-t="'APP_VERSION'"></p>
+@@ -151,6 +160,12 @@ export default {
+                     copyright: "Copyright (c) 2020 devtavern",
+                     license: "MIT"
+                 },
++                {
++                    name: "IBM Plex Sans",
++                    link: "https://github.com/IBM/plex",
++                    copyright: "Copyright (c) 2017 IBM Corp. with Reserved Font Name \"Plex\"",
++                    license: "OFL-1.1"
++                },
+             ]
+         }
+     },
+@@ -163,4 +178,9 @@ export default {
+ .bottomless-table tbody > tr:last-child > td {
+   border-bottom: 0;
+ }
++
++.attribution-text {
++  white-space: pre-line;
++  margin-bottom: 0.5rem;
++}
+ </style>

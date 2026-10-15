@@ -105,7 +105,7 @@ class RemoteAccessShareActivity : BaseActivity() {
                 copyImageView.isFocusable = true
                 copyImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_copy))
                 copyImageView.setOnClickListener {
-                    copy("VLC for Android Remote Access link", link)
+                    copy(getString(R.string.remote_access), link)
                     Snackbar.make(window.decorView.findViewById(android.R.id.content), R.string.url_copied_to_clipboard, Snackbar.LENGTH_LONG).show()
                 }
                 val outValue = TypedValue()

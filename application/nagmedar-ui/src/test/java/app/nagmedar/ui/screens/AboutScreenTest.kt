@@ -57,7 +57,7 @@ class AboutScreenTest {
 
     @Test
     fun theListIsS005s() {
-        assertEquals(61, libraries.size)
+        assertEquals(72, libraries.size)
         val byTitle = libraries.associateBy { it.title }
         // the lab's and the music engine's native additions are there, with their licences
         assertEquals("mit", byTitle.getValue("dovi_tool").license?.id)
@@ -66,6 +66,9 @@ class AboutScreenTest {
         assertEquals("lgpl2.1", byTitle.getValue("TagLib").license?.id)
         assertEquals("boost", byTitle.getValue("utfcpp").license?.id)
         assertEquals("LGPL v2.1 or later", byTitle.getValue("FFmpeg").license?.name)
+        // the remote access page's libraries (S-1304)
+        assertEquals("mit", byTitle.getValue("Vue").license?.id)
+        assertEquals("mit", byTitle.getValue("Bootstrap").license?.id)
         assertTrue(libraries.all { it.license != null })
     }
 
