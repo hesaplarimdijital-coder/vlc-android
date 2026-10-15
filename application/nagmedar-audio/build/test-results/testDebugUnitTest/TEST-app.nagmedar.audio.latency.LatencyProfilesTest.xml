@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.latency.LatencyProfilesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T14:20:02.072Z" hostname="runnervm8k3b6" time="0.011">
+  <properties/>
+  <testcase name="theDevicesDelayGoesUnderTheFilesOwn" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.003"/>
+  <testcase name="devicesAreKnownByTypeNameAndAStableAddress" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.0"/>
+  <testcase name="theStepperSnapsToTensWithinTheRange" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.0"/>
+  <testcase name="theLastRemovableDeviceConnectedIsTheOutput" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.006"/>
+  <testcase name="aProfileIsFoundByItsDeviceWithOrWithoutTheAddress" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.001"/>
+  <testcase name="theSystemsFirstReportIsNoOrder" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.001"/>
+  <testcase name="theUsersDelayAndTheOutputsAreKeptApart" classname="app.nagmedar.audio.latency.LatencyProfilesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
