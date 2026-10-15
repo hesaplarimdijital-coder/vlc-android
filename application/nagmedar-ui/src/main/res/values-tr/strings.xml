@@ -247,12 +247,13 @@
     <string name="nag_radio_rec_yesterday">Dün</string>
     <string name="nag_radio_rec_empty_title">Henüz kayıt yok</string>
     <string name="nag_radio_rec_empty_desc">Bir radyo çalarken %1$s tuşlarına basın ya da belli bir saate kayıt zamanlayın. Parçalar, radyonun yeni parça adını duyurduğu yerden kesilir; bu, örnek hassasiyetinde değildir.</string>
+    <string name="nag_radio_rec_empty_desc_menu">Bir radyonun menüsünden Kayda al\'ı seçin ya da belli bir saate kayıt zamanlayın. Parçalar, radyonun yeni parça adını duyurduğu yerden kesilir; bu, örnek hassasiyetinde değildir.</string>
     <string name="nag_radio_rec_settings_hint">Kayıtlar, radyonun yeni parça adını duyurduğu yerden kesilir. Duyuru örnek hassasiyetinde olmadığından kesim bir iki saniye kayabilir.</string>
     <string name="nag_radio_rec_folder">Kayıt klasörü</string>
     <string name="nag_radio_rec_min_length">En kısa parça</string>
-    <string name="nag_radio_rec_min_length_hint">Daha kısa parçalar eksik sayılır</string>
+    <string name="nag_radio_rec_min_length_hint">Daha kısa parçalar dışarıda bırakılır</string>
     <string name="nag_radio_rec_no_minimum">Sınır yok</string>
-    <string name="nag_radio_rec_keep_short">Eksik parçaları tut</string>
+    <string name="nag_radio_rec_keep_short">Kısa parçaları eksik diye tut</string>
     <string name="nag_radio_rec_pad_before">Parça adı değişmeden önce tut</string>
     <string name="nag_radio_rec_pad_after">Parça adı değiştikten sonra tut</string>
     <string name="nag_radio_rec_pad_hint">Birkaç saniyelik pay, parçanın başının ve sonunun kesilmesini önler</string>

@@ -143,8 +143,8 @@ class TouchTargetTest {
         assertTargets("settings")
     }
 
-    // every shortcut's row on the screen at once (S-611 and S-1303 brought three more)
-    @Test @Config(qualifiers = "tr-w411dp-h6000dp-mdpi")
+    // every shortcut's row on the screen at once (S-611, S-1303 and S-207 brought five more)
+    @Test @Config(qualifiers = "tr-w411dp-h6400dp-mdpi")
     fun shortcutEditor() {
         touch { Column { ShortcutEditor(emptyMap(), {}) } }
         assertTargets("shortcut editor")

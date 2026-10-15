@@ -1,6 +1,7 @@
 package app.nagmedar.ui.radio
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
@@ -14,8 +15,14 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import app.nagmedar.ui.R
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.playback.PlaybackActions
+import app.nagmedar.ui.radio.record.RadioRecordings
+import app.nagmedar.ui.radio.record.RecordedTrack
+import app.nagmedar.ui.radio.record.forgetRadioRecordingFolder
+import app.nagmedar.ui.radio.record.keepRadioRecordingFolder
+import app.nagmedar.ui.sleep.Alarms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -100,6 +107,8 @@ fun RadioScreen(
     modifier: Modifier = Modifier,
     searchRequested: Boolean = false,
     onSearchHandled: () -> Unit = {},
+    recordingsRequested: Boolean = false,
+    onRecordingsHandled: () -> Unit = {},
     undo: UndoBarState? = null,
 ) {
     val context = LocalContext.current
@@ -113,11 +122,34 @@ fun RadioScreen(
             if (file == null) controller.importUnreadable() else controller.import(file.first, file.second)
         }
     }
+    val prefs = rememberNagmedarPreferences()
+    val recordings = remember(context) { RadioRecordings.controller(context) }
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            keepRadioRecordingFolder(context, prefs, uri)
+            recordings.refresh()
+        }
+    }
+    val actions = remember(context) {
+        RecordingActions(
+            onShare = { track -> shareTrack(context, track) },
+            onChooseFolder = { runCatching { folderPicker.launch(null) } },
+            onUseDefaultFolder = {
+                forgetRadioRecordingFolder(context, prefs)
+                recordings.refresh()
+            },
+            onAllowExact = { Alarms.requestExact(context) },
+        )
+    }
     RadioPage(
         controller = controller,
         modifier = modifier,
         searchRequested = searchRequested,
         onSearchHandled = onSearchHandled,
+        recordings = recordings,
+        recordingActions = actions,
+        recordingsRequested = recordingsRequested,
+        onRecordingsHandled = onRecordingsHandled,
         onCopyAddress = { station ->
             clipboard.setText(AnnotatedString(station.streamUrl))
             Toast.makeText(context, R.string.nag_radio_copied, Toast.LENGTH_SHORT).show()
@@ -126,6 +158,17 @@ fun RadioScreen(
         onTogglePlay = { PlaybackActions.togglePlayPause() },
         undo = undo,
     )
+}
+
+/** S-207: the track's file offered to other apps, as audio. */
+private fun shareTrack(context: Context, track: RecordedTrack) {
+    val uri = RadioRecordings.shareable(context, track) ?: return
+    val send = Intent(Intent.ACTION_SEND)
+        .setType(if (track.format == "mp3") "audio/mpeg" else "audio/*")
+        .putExtra(Intent.EXTRA_STREAM, uri)
+        .putExtra(Intent.EXTRA_TITLE, track.displayTitle)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    runCatching { context.startActivity(Intent.createChooser(send, track.displayTitle).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }
 
 /** The bytes (at most one more than a station list may have) and the name of the file at [uri]; null when it cannot be read. The file is only read. */

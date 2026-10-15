@@ -247,12 +247,13 @@
     <string name="nag_radio_rec_yesterday">Yesterday</string>
     <string name="nag_radio_rec_empty_title">No recordings yet</string>
     <string name="nag_radio_rec_empty_desc">Press %1$s while a station plays, or schedule a recording for a set time. Tracks are cut where the station announces a new title, which is not sample-accurate.</string>
+    <string name="nag_radio_rec_empty_desc_menu">Open a station\'s menu and choose Record, or schedule a recording for a set time. Tracks are cut where the station announces a new title, which is not sample-accurate.</string>
     <string name="nag_radio_rec_settings_hint">Recordings are cut where the station announces a new title. That announcement is not sample-accurate, so a cut can be a second or two off.</string>
     <string name="nag_radio_rec_folder">Recording folder</string>
     <string name="nag_radio_rec_min_length">Shortest track</string>
-    <string name="nag_radio_rec_min_length_hint">Shorter tracks count as partial</string>
+    <string name="nag_radio_rec_min_length_hint">Shorter tracks are left out</string>
     <string name="nag_radio_rec_no_minimum">No minimum</string>
-    <string name="nag_radio_rec_keep_short">Keep partial tracks</string>
+    <string name="nag_radio_rec_keep_short">Keep shorter tracks, marked partial</string>
     <string name="nag_radio_rec_pad_before">Keep before the title change</string>
     <string name="nag_radio_rec_pad_after">Keep after the title change</string>
     <string name="nag_radio_rec_pad_hint">A few seconds of padding keep the start and end of a track from being cut off</string>
