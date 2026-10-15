@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.EncodingDialogTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:54:56.931Z" hostname="runnervm8k3b6" time="0.198">
+  <properties/>
+  <testcase name="anotherOneShowsItsReadingAndIsApplied" classname="app.nagmedar.ui.player.subtitles.EncodingDialogTest" time="0.077"/>
+  <testcase name="aFilmsChoiceOpensChosenAndAutomaticTakesItBack" classname="app.nagmedar.ui.player.subtitles.EncodingDialogTest" time="0.067"/>
+  <testcase name="theDetectedOneReadsTheTurkishLetters" classname="app.nagmedar.ui.player.subtitles.EncodingDialogTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

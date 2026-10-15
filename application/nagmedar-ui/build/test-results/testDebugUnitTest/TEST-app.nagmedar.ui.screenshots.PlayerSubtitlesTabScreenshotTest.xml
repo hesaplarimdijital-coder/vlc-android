@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:55:36.668Z" hostname="runnervm8k3b6" time="1.144">
+  <properties/>
+  <testcase name="nativeTablet" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.139"/>
+  <testcase name="dexEnglish" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.135"/>
+  <testcase name="nativeDex" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.183"/>
+  <testcase name="halfWindow" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.117"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.158"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.123"/>
+  <testcase name="dexTall" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.178"/>
+  <testcase name="nativePhone" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesTabScreenshotTest" time="0.111"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

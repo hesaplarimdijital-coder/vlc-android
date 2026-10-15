@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.lab.BitrateAnalysisTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:50:41.509Z" hostname="runnervm8k3b6" time="0.094">
+  <properties/>
+  <testcase name="errorsAndOtherVersionsAreNoAnalysis" classname="app.nagmedar.lab.BitrateAnalysisTest" time="0.063"/>
+  <testcase name="peaksAndThresholds" classname="app.nagmedar.lab.BitrateAnalysisTest" time="0.002"/>
+  <testcase name="theAnalysisIsRead" classname="app.nagmedar.lab.BitrateAnalysisTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

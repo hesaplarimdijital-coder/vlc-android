@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.RadioRecordingShortcutsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:54:39.247Z" hostname="runnervm8k3b6" time="0.063">
+  <properties/>
+  <testcase name="recordTheStationThatPlaysAndOpenTheRecordings" classname="app.nagmedar.ui.input.RadioRecordingShortcutsTest" time="0.021"/>
+  <testcase name="theVideoRecorderKeepsItsOwnKey" classname="app.nagmedar.ui.input.RadioRecordingShortcutsTest" time="0.02"/>
+  <testcase name="noOtherShortcutTakesThem" classname="app.nagmedar.ui.input.RadioRecordingShortcutsTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

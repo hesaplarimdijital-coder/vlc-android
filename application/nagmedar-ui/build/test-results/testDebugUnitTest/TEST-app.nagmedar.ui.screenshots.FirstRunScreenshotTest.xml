@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:55:19.649Z" hostname="runnervm8k3b6" time="0.864">
+  <properties/>
+  <testcase name="sourcesLight" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.111"/>
+  <testcase name="sources" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.104"/>
+  <testcase name="access" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.095"/>
+  <testcase name="audio" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.108"/>
+  <testcase name="accessRefused" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.1"/>
+  <testcase name="notifications" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.087"/>
+  <testcase name="dexWindow" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.142"/>
+  <testcase name="sourcesEnglish" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.115"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.TechLabelsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:54:41.239Z" hostname="runnervm8k3b6" time="0.073">
+  <properties/>
+  <testcase name="detailLines" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.006"/>
+  <testcase name="mainAudioSkipsCommentaries" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.0"/>
+  <testcase name="cardSummaries" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.001"/>
+  <testcase name="languagesAreShortened" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.064"/>
+  <testcase name="cardBadges" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.0"/>
+  <testcase name="musicFormats" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.001"/>
+  <testcase name="numbersFollowTheLocale" classname="app.nagmedar.ui.library.TechLabelsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

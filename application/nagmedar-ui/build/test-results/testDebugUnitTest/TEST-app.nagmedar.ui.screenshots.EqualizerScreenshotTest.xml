@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.EqualizerScreenshotTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:55:18.475Z" hostname="runnervm8k3b6" time="1.171">
+  <properties/>
+  <testcase name="tabletBypassed" classname="app.nagmedar.ui.screenshots.EqualizerScreenshotTest" time="0.373"/>
+  <testcase name="blindTestResults" classname="app.nagmedar.ui.screenshots.EqualizerScreenshotTest" time="0.129"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.EqualizerScreenshotTest" time="0.311"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.EqualizerScreenshotTest" time="0.358"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

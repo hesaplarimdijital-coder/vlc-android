@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.TvLabControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:55:57.339Z" hostname="runnervm8k3b6" time="0.106">
+  <properties/>
+  <testcase name="profilesChosenSavedAndRemoved" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.019"/>
+  <testcase name="theDriveMeasuredAgain" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.019"/>
+  <testcase name="aStopIsNotUndoneByALateReport" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.016"/>
+  <testcase name="withoutTheNativeToolsNothingRuns" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.017"/>
+  <testcase name="theStepsInOrder" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.016"/>
+  <testcase name="aFileThatIsNotMediaIsNotCounted" classname="app.nagmedar.ui.tvlab.TvLabControllerTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.StoragePolicyTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T13:55:13.093Z" hostname="runnervm8k3b6" time="0.002">
+  <properties/>
+  <testcase name="pruningAsksForWhatIsOverAndALittleMore" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="atTheMinimumRecordingStops" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="noTotalLimitMeansNone" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="eightyPercentOfTheLimitIsAWarning" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="plentyOfRoomIsFine" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="spaceCountsBeforeTheTotal" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="atTheTotalRecordingStops" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="theOldestTracksGoFirstAndTheSessionBeingRecordedStays" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.002"/>
+  <testcase name="roomNotKnownLeavesTheTotalToJudge" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <testcase name="underTwiceTheMinimumIsAWarning" classname="app.nagmedar.ui.radio.record.StoragePolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
