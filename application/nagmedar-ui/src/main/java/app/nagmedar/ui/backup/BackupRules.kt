@@ -2,6 +2,7 @@ package app.nagmedar.ui.backup
 
 import android.content.SharedPreferences
 import app.nagmedar.ui.NagmedarPreferences
+import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
@@ -27,11 +28,12 @@ object BackupSettings {
         // their own parts
         NagmedarPreferences.KEY_SHORTCUTS,
         FileProfileStore.KEY_SELECTED,
-        // this device's: folder permissions, the window on this screen, a picked snapshot or recording folder
+        // this device's: folder permissions, the window on this screen, a picked snapshot, recording or converter's folder
         NAGMEDAR_SAF_FOLDERS,
         NAGMEDAR_WINDOW_BOUNDS,
         SnapshotSettings.KEY_FOLDER,
         KEY_RECORDING_FOLDER,
+        ConvertOptions.KEY_FOLDER,
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

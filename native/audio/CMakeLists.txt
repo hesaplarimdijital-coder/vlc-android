@@ -1,10 +1,11 @@
 # libnagmedar_audio.so: Nağmedar Ses Motoru (S-901, ADR-06), the music engine behind the
 # playback service: FFmpeg decoding, the voices and their rings, the render with the DSP
 # chain, and the sinks (AAudio, the pull sink of the bit-perfect AudioTrack path, the USB DAC);
-# the EBU R128 scanner and TagLib for the ReplayGain tags (S-907).
-# Built by buildsystem/nagmedar-native/build.sh, which provides the static FFmpeg, TagLib and
-# libopenmpt (S-911, the tracker modules) in DEPS_PREFIX; the host build also makes the nagaudio
-# command for the tests.
+# the EBU R128 scanner and TagLib for the ReplayGain tags (S-907); the converter (S-1010) with
+# libopus, LAME and FFmpeg's AAC encoder.
+# Built by buildsystem/nagmedar-native/build.sh, which provides the static FFmpeg, TagLib,
+# libopenmpt (S-911, the tracker modules), libopus and LAME (S-1010) in DEPS_PREFIX; the host
+# build also makes the nagaudio command for the tests.
 cmake_minimum_required(VERSION 3.22)
 project(nagmedar_audio C CXX)
 
@@ -14,7 +15,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and TagLib (empty: the system's pkg-config)")
 set(LIBUSB_SOURCE "" CACHE PATH "libusb source tree, for the USB DAC sink (S-903); empty: no USB sink")
 
-set(CORE ring.c source.c dsp.c stretch.c loudness.c probe.c engine.c tags.cpp)
+set(CORE ring.c source.c dsp.c stretch.c loudness.c probe.c engine.c tags.cpp convert.c)
 
 if(DEPS_PREFIX)
     set(FFMPEG_INCLUDE ${DEPS_PREFIX}/include)
@@ -24,6 +25,9 @@ if(DEPS_PREFIX)
     # S-911: libopenmpt renders the tracker modules (built by buildsystem/nagmedar-native/openmpt)
     set(OPENMPT_INCLUDE ${DEPS_PREFIX}/include)
     set(OPENMPT_LIBS ${DEPS_PREFIX}/lib/libopenmpt.a)
+    # S-1010: the converter's encoders (opus/opus.h, lame/lame.h)
+    set(ENCODER_INCLUDE ${DEPS_PREFIX}/include)
+    set(ENCODER_LIBS ${DEPS_PREFIX}/lib/libopus.a ${DEPS_PREFIX}/lib/libmp3lame.a)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET libavformat libavcodec libswresample libavutil)
@@ -35,6 +39,11 @@ else()
     set(TAGLIB_LIBS PkgConfig::TAGLIB)
     set(OPENMPT_INCLUDE ${OPENMPT_INCLUDE_DIRS})
     set(OPENMPT_LIBS PkgConfig::OPENMPT)
+    pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
+    find_library(LAME_LIBRARY mp3lame REQUIRED)
+    find_path(LAME_INCLUDE lame/lame.h REQUIRED)
+    set(ENCODER_INCLUDE ${LAME_INCLUDE})
+    set(ENCODER_LIBS PkgConfig::OPUS ${LAME_LIBRARY})
 endif()
 
 find_package(Threads REQUIRED)
@@ -51,11 +60,11 @@ if(LIBUSB_SOURCE)
 endif()
 
 add_library(nagaudio_core STATIC ${CORE})
-target_include_directories(nagaudio_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${FFMPEG_INCLUDE} ${TAGLIB_INCLUDE} ${OPENMPT_INCLUDE})
+target_include_directories(nagaudio_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${FFMPEG_INCLUDE} ${TAGLIB_INCLUDE} ${OPENMPT_INCLUDE} ${ENCODER_INCLUDE})
 target_compile_options(nagaudio_core PRIVATE -fvisibility=hidden -O2 -Wall -Wextra -Wno-unused-parameter)
 # TagLib is static too: its symbols stay inside the library (TAGLIB_STATIC keeps its export macro empty)
 target_compile_definitions(nagaudio_core PRIVATE TAGLIB_STATIC)
-target_link_libraries(nagaudio_core PUBLIC ${FFMPEG_LIBS} ${TAGLIB_LIBS} ${OPENMPT_LIBS} Threads::Threads m)
+target_link_libraries(nagaudio_core PUBLIC ${FFMPEG_LIBS} ${TAGLIB_LIBS} ${OPENMPT_LIBS} ${ENCODER_LIBS} Threads::Threads m)
 if(LIBUSB_SOURCE)
     target_link_libraries(nagaudio_core PUBLIC nagaudio_usb)
 endif()

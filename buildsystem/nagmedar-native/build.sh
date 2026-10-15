@@ -2,9 +2,9 @@
 # Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper)
 # and the music engine (S-901, native/audio).
 #
-#   build.sh host    <prefix>  FFmpeg, libdovi, TagLib and libopenmpt for this machine and the
+#   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
 #                              dvconvert, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt for arm64-v8a;
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
 #
@@ -55,6 +55,8 @@ FFMPEG_COMPONENTS=(
     # the music engine's formats (S-901, S-908, S-911): Musepack, TTA, DSD, WMA, CAF
     --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf,caf
     --enable-muxer=matroska,mp4,mov,null
+    # S-1010: the converter's Ogg Opus and M4A files, and FFmpeg's own AAC encoder (libopus and LAME are the engine's)
+    --enable-muxer=ogg,ipod --enable-encoder=aac
     --enable-parser=hevc,h264,aac,ac3,mpegaudio,flac,opus,vorbis,dca,mlp
     --enable-bsf=hevc_mp4toannexb,extract_extradata
     --enable-decoder=aac,aac_latm,ac3,eac3,mp3,mp3float,mp2,flac,opus,vorbis,dca,truehd,mlp,alac,ape,wavpack
@@ -62,6 +64,22 @@ FFMPEG_COMPONENTS=(
     --enable-decoder=mpc7,mpc8,tta,wmav1,wmav2,wmapro,wmalossless,pcm_u8,pcm_s8,pcm_f64le,pcm_s24le_planar,pcm_s32le_planar
     --enable-decoder=dsd_lsbf,dsd_msbf,dsd_lsbf_planar,dsd_msbf_planar
 )
+
+# A release tarball (for sources not kept in git), checked against its SHA-256.
+fetch_tarball() { # name url sha256
+    if [ ! -f "$WORK/src/$1/.fetched" ]; then
+        log "fetch $1 $2"
+        local archive="$WORK/src/$1.tar.gz"
+        curl -fsSL --retry 5 --retry-delay 10 -o "$archive" "$2"
+        if ! echo "$3  $archive" | sha256sum -c --quiet - > /dev/null 2>&1; then
+            echo "$1: the download's SHA-256 is $(sha256sum "$archive" | cut -c1-64), versions.env says $3" >&2
+            exit 1
+        fi
+        rm -rf "$WORK/src/$1" && mkdir -p "$WORK/src/$1"
+        tar -xzf "$archive" -C "$WORK/src/$1" --strip-components=1
+        touch "$WORK/src/$1/.fetched"
+    fi
+}
 
 build_openmpt() { # extra cmake args...
     fetch openmpt "$OPENMPT_URL" "$OPENMPT_REF"
@@ -72,6 +90,35 @@ build_openmpt() { # extra cmake args...
     cmake -S "$HERE/openmpt" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DOPENMPT_SOURCE="$WORK/src/openmpt" "$@" > "$dir.configure.log" 2>&1 || fail_log "libopenmpt configure ($TARGET)" "$dir.configure.log"
     cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libopenmpt build ($TARGET)" "$dir.build.log"
+    cmake --install "$dir" > /dev/null
+}
+
+# S-1010: libopus for the converter's Opus files (its own CMake build; no DNN extensions)
+build_opus() { # extra cmake args...
+    fetch opus "$OPUS_URL" "$OPUS_REF"
+    if [ -f "$PREFIX/lib/libopus.a" ]; then return; fi
+    log "libopus $OPUS_REF ($TARGET)"
+    local dir="$WORK/build-$TARGET/opus"
+    mkdir -p "$WORK/build-$TARGET"
+    cmake -S "$WORK/src/opus" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+        -DOPUS_BUILD_SHARED_LIBRARY=OFF -DOPUS_BUILD_TESTING=OFF -DOPUS_BUILD_PROGRAMS=OFF \
+        -DOPUS_INSTALL_CMAKE_CONFIG_MODULE=OFF -DOPUS_DRED=OFF -DOPUS_OSCE=OFF -DOPUS_DEEP_PLC=OFF \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_C_FLAGS=-fvisibility=hidden \
+        "$@" > "$dir.configure.log" 2>&1 || fail_log "libopus configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "libopus build ($TARGET)" "$dir.build.log"
+    cmake --install "$dir" > /dev/null
+}
+
+# S-1010: LAME's libmp3lame for the converter's MP3 files (built by buildsystem/nagmedar-native/lame)
+build_lame() { # extra cmake args...
+    fetch_tarball lame "$LAME_URL" "$LAME_SHA256"
+    if [ -f "$PREFIX/lib/libmp3lame.a" ]; then return; fi
+    log "LAME $(basename "$LAME_URL" .tar.gz) ($TARGET)"
+    local dir="$WORK/build-$TARGET/lame"
+    mkdir -p "$WORK/build-$TARGET"
+    cmake -S "$HERE/lame" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+        -DLAME_SOURCE="$WORK/src/lame" "$@" > "$dir.configure.log" 2>&1 || fail_log "LAME configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" > "$dir.build.log" 2>&1 || fail_log "LAME build ($TARGET)" "$dir.build.log"
     cmake --install "$dir" > /dev/null
 }
 
@@ -157,6 +204,8 @@ host() {
     build_lab
     build_taglib
     build_openmpt
+    build_opus
+    build_lame
     build_audio
     cp "$WORK/build-host/audio/nagaudio" "$PREFIX/bin/"
     cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
@@ -203,6 +252,8 @@ android() {
     ls -la "$out"
     build_taglib "${ndk_cmake[@]}"
     build_openmpt "${ndk_cmake[@]}"
+    build_opus "${ndk_cmake[@]}"
+    build_lame "${ndk_cmake[@]}"
     build_audio "${ndk_cmake[@]}"
     local audio_out="$ROOT/application/nagmedar-audio/src/main/jniLibs/arm64-v8a"
     mkdir -p "$audio_out"

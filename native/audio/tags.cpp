@@ -1,5 +1,6 @@
 /*
- * Nağmedar Ses Motoru: ReplayGain tags written in place with TagLib (S-907).
+ * Nağmedar Ses Motoru: ReplayGain tags written in place with TagLib (S-907); the lyrics, covers
+ * and tags read (S-1003, S-1006); a converted file's tags copied from its source (S-1010).
  *
  * The file comes as a descriptor (a content document's on Android, which cannot be reopened
  * by path), so TagLib reads and writes it through FdStream, an IOStream over pread/pwrite.
@@ -23,8 +24,10 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
+#include <strings.h>
 #include <unistd.h>
 
 namespace {
@@ -383,5 +386,180 @@ extern "C" int nag_tags_write_replaygain(int fd, const char *name, const NagRepl
         snprintf(error, error_size, "writing the tags failed");
         return -1;
     }
+    return 0;
+}
+
+namespace {
+
+/* "-6.54 dB", "0.988" → the number; NAN for none */
+double tag_number(const TagLib::PropertyMap &properties, const char *key)
+{
+    auto found = properties.find(key);
+    if (found == properties.end() || found->second.isEmpty())
+        return NAN;
+    const std::string text = found->second.front().to8Bit(true);
+    char *end = nullptr;
+    double value = strtod(text.c_str(), &end);
+    return end == text.c_str() ? NAN : value;
+}
+
+/* what says how the source was made, or what only the source's audio was */
+bool left_behind(const TagLib::String &key)
+{
+    static const char *const keys[] = {
+        "ENCODER", "ENCODING", "ENCODERSETTINGS", "ENCODER_OPTIONS", "CUESHEET", "LENGTH",
+        "ITUNSMPB", "ITUNNORM", "ITUNPGAP", "WAVEFORMATEXTENSIBLE_CHANNEL_MASK",
+    };
+    for (const char *k : keys)
+        if (key == k)
+            return true;
+    return key.startsWith("REPLAYGAIN_") || key.startsWith("R128_");
+}
+
+bool ends_with(const char *name, const char *suffix)
+{
+    if (!name)
+        return false;
+    size_t n = strlen(name), m = strlen(suffix);
+    return n >= m && strcasecmp(name + n - m, suffix) == 0;
+}
+
+} // namespace
+
+/*
+ * S-1010: the ReplayGain the file carries: REPLAYGAIN_* (ID3v2's TXXX, Vorbis comments, MP4's
+ * freeform atoms, APE), else Opus' R128_* (Q7.8 to -23 LUFS) as ReplayGain's dB (to -18 LUFS).
+ */
+extern "C" int nag_tags_read_replaygain(int fd, const char *name, NagReplayGainTags *gain)
+{
+    if (!gain)
+        return 0;
+    gain->track_gain_db = gain->track_peak = gain->album_gain_db = gain->album_peak = NAN;
+    gain->track_lufs = gain->album_lufs = NAN;
+    if (fd < 0)
+        return 0;
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull())
+        return 0;
+    const TagLib::PropertyMap properties = file.properties();
+    gain->track_gain_db = tag_number(properties, "REPLAYGAIN_TRACK_GAIN");
+    gain->track_peak = tag_number(properties, "REPLAYGAIN_TRACK_PEAK");
+    gain->album_gain_db = tag_number(properties, "REPLAYGAIN_ALBUM_GAIN");
+    gain->album_peak = tag_number(properties, "REPLAYGAIN_ALBUM_PEAK");
+    if (std::isnan(gain->track_gain_db)) {
+        double q = tag_number(properties, "R128_TRACK_GAIN");
+        if (!std::isnan(q))
+            gain->track_gain_db = q / 256.0 + 5.0;
+    }
+    if (std::isnan(gain->album_gain_db)) {
+        double q = tag_number(properties, "R128_ALBUM_GAIN");
+        if (!std::isnan(q))
+            gain->album_gain_db = q / 256.0 + 5.0;
+    }
+    if (!std::isnan(gain->track_gain_db))
+        gain->track_lufs = -18.0 - gain->track_gain_db;
+    if (!std::isnan(gain->album_gain_db))
+        gain->album_lufs = -18.0 - gain->album_gain_db;
+    int count = 0;
+    for (double v : {gain->track_gain_db, gain->track_peak, gain->album_gain_db, gain->album_peak})
+        count += std::isnan(v) ? 0 : 1;
+    return count;
+}
+
+/*
+ * S-1010: the source's tags through TagLib's property map onto the converted file, which puts
+ * them where its format keeps them (TagLib 2 writes ID3v2.4 by default, its text UTF-8; a key
+ * MP4 has no atom for becomes a freeform iTunes atom), and the front cover (else the first
+ * picture) through the PICTURE property: APIC, METADATA_BLOCK_PICTURE, covr. The lyrics go
+ * along as the LYRICS property: USLT, LYRICS, ©lyr.
+ */
+extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const char *dst_name, const char *overrides,
+                             const NagReplayGainTags *gain, int *written, int *cover, char *error, size_t error_size)
+{
+    if (written)
+        *written = 0;
+    if (cover)
+        *cover = 0;
+    TagLib::PropertyMap properties;
+    TagLib::List<TagLib::VariantMap> pictures;
+    if (src_fd >= 0) {
+        FdStream source(src_fd, src_name);
+        TagLib::FileRef file(&source, false);
+        if (!file.isNull()) {
+            properties = file.properties();
+            for (const auto &picture : file.complexProperties("PICTURE")) {
+                if (picture.value("data").value<TagLib::ByteVector>().isEmpty())
+                    continue;
+                const bool front = picture.value("pictureType").value<TagLib::String>() == "Front Cover";
+                if (pictures.isEmpty() || front) {
+                    pictures.clear();
+                    pictures.append(picture);
+                }
+                if (front)
+                    break;
+            }
+        }
+    }
+    TagLib::PropertyMap kept;
+    for (const auto &entry : properties)
+        if (!left_behind(entry.first) && !entry.second.isEmpty())
+            kept.insert(entry.first, entry.second);
+    /* the caller's, over the source's: "KEY=value" per line */
+    if (overrides) {
+        const char *line = overrides;
+        while (*line) {
+            const char *end = strchr(line, '\n');
+            const size_t length = end ? static_cast<size_t>(end - line) : strlen(line);
+            const std::string text(line, length);
+            const size_t eq = text.find('=');
+            if (eq != std::string::npos && eq > 0) {
+                const TagLib::String key = TagLib::String(text.substr(0, eq), TagLib::String::UTF8).upper();
+                const TagLib::String value(text.substr(eq + 1), TagLib::String::UTF8);
+                if (value.isEmpty())
+                    kept.erase(key);
+                else
+                    kept.replace(key, TagLib::StringList(value));
+            }
+            line += length + (end ? 1 : 0);
+        }
+    }
+    const bool opus = ends_with(dst_name, ".opus") || ends_with(dst_name, ".ogg");
+    if (gain) {
+        if (opus) {
+            /* RFC 7845: the gains to -23 LUFS in Q7.8, never REPLAYGAIN_* */
+            if (!std::isnan(gain->track_lufs))
+                kept.replace("R128_TRACK_GAIN", TagLib::StringList(r128(gain->track_lufs)));
+            if (!std::isnan(gain->album_lufs))
+                kept.replace("R128_ALBUM_GAIN", TagLib::StringList(r128(gain->album_lufs)));
+        } else {
+            if (!std::isnan(gain->track_gain_db))
+                kept.replace("REPLAYGAIN_TRACK_GAIN", TagLib::StringList(decibels(gain->track_gain_db)));
+            if (!std::isnan(gain->track_peak))
+                kept.replace("REPLAYGAIN_TRACK_PEAK", TagLib::StringList(peak(gain->track_peak)));
+            if (!std::isnan(gain->album_gain_db))
+                kept.replace("REPLAYGAIN_ALBUM_GAIN", TagLib::StringList(decibels(gain->album_gain_db)));
+            if (!std::isnan(gain->album_peak))
+                kept.replace("REPLAYGAIN_ALBUM_PEAK", TagLib::StringList(peak(gain->album_peak)));
+        }
+    }
+    FdStream stream(dst_fd, dst_name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull()) {
+        snprintf(error, error_size, "the converted file is not one TagLib reads");
+        return -1;
+    }
+    const TagLib::PropertyMap rejected = file.setProperties(kept);
+    bool with_cover = false;
+    if (!pictures.isEmpty())
+        with_cover = file.setComplexProperties("PICTURE", pictures);
+    if (!file.save() || stream.failed()) {
+        snprintf(error, error_size, "writing the tags failed");
+        return -1;
+    }
+    if (written)
+        *written = static_cast<int>(kept.size() - rejected.size());
+    if (cover)
+        *cover = with_cover ? 1 : 0;
     return 0;
 }

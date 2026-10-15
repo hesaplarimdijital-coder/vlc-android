@@ -755,3 +755,93 @@ JNIEXPORT jdouble JNICALL Java_app_nagmedar_audio_NativeAudio_abGainDb(JNIEnv *e
     (void)cls;
     return engine_of(handle) ? nag_audio_ab_gain_db(engine_of(handle)) : 0.0;
 }
+
+/* S-1010: the converter's progress, to the Kotlin listener on the converting thread */
+typedef struct ConvertCall {
+    JNIEnv *env;
+    jobject listener;
+    jmethodID on_progress;
+} ConvertCall;
+
+static int convert_progress(void *opaque, double fraction)
+{
+    ConvertCall *call = opaque;
+    if (!call->listener)
+        return 0;
+    jboolean go = (*call->env)->CallBooleanMethod(call->env, call->listener, call->on_progress, (jdouble)fraction);
+    /* a listener that threw stops the conversion; its exception reaches the caller */
+    if ((*call->env)->ExceptionCheck(call->env))
+        return 1;
+    return go ? 0 : 1;
+}
+
+/* A JSON string's characters: quotes, backslashes and control characters escaped. */
+static void json_escape(const char *text, char *out, size_t size)
+{
+    size_t n = 0;
+    for (const unsigned char *p = (const unsigned char *)text; *p && n + 7 < size; p++) {
+        if (*p == '"' || *p == '\\') {
+            out[n++] = '\\';
+            out[n++] = (char)*p;
+        } else if (*p < 0x20) {
+            n += (size_t)snprintf(out + n, size - n, "\\u%04x", *p);
+        } else {
+            out[n++] = (char)*p;
+        }
+    }
+    out[n] = 0;
+}
+
+/*
+ * S-1010: converts the file behind [inFd] (a CUE part when [from] or [to] says so) into the
+ * one behind [outFd], its tags and cover along; [tags] are UTF-8 "KEY=value" lines over the
+ * source's (may be null). The result as JSON (nag_convert_result_json), or {"error": "...",
+ * "cancelled": true|false}; null when the listener threw. The descriptors stay the caller's.
+ */
+JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_convert(JNIEnv *env, jclass cls, jint inFd, jstring inName, jint outFd, jstring outName,
+                                                                      jint codec, jint bitrate, jint vbrQuality, jint rate, jlong from, jlong to,
+                                                                      jbyteArray tags, jobject listener)
+{
+    (void)cls;
+    char *overrides = NULL;
+    if (tags) {
+        jsize len = (*env)->GetArrayLength(env, tags);
+        overrides = calloc((size_t)len + 1, 1);
+        if (!overrides)
+            return NULL;
+        (*env)->GetByteArrayRegion(env, tags, 0, len, (jbyte *)overrides);
+    }
+    ConvertCall call = {env, listener, NULL};
+    if (listener) {
+        jclass listener_class = (*env)->GetObjectClass(env, listener);
+        call.on_progress = (*env)->GetMethodID(env, listener_class, "onProgress", "(D)Z");
+        (*env)->DeleteLocalRef(env, listener_class);
+        if (!call.on_progress) {
+            free(overrides);
+            return NULL;
+        }
+    }
+    NagConvertOptions options = {(NagConvertCodec)codec, bitrate, vbrQuality, rate, from, to, overrides};
+    const char *in_utf = inName ? (*env)->GetStringUTFChars(env, inName, NULL) : NULL;
+    const char *out_utf = outName ? (*env)->GetStringUTFChars(env, outName, NULL) : NULL;
+    NagConvertResult result;
+    char error[256] = {0};
+    int ret = nag_convert(inFd, in_utf, outFd, out_utf, &options, convert_progress, &call, &result, error, sizeof(error));
+    if (in_utf)
+        (*env)->ReleaseStringUTFChars(env, inName, in_utf);
+    if (out_utf)
+        (*env)->ReleaseStringUTFChars(env, outName, out_utf);
+    free(overrides);
+    if ((*env)->ExceptionCheck(env))
+        return NULL;
+    char json[640];
+    if (ret < 0) {
+        char escaped[512];
+        json_escape(error, escaped, sizeof(escaped));
+        snprintf(json, sizeof(json), "{\"error\":\"%s\",\"cancelled\":%s}", escaped, ret == NAG_CONVERT_CANCELLED ? "true" : "false");
+        __android_log_print(ANDROID_LOG_WARN, "NagmedarAudio", "convert: %s", error);
+    } else {
+        nag_convert_result_json(&result, json, sizeof(json));
+    }
+    return utf8(env, json);
+}

@@ -2156,4 +2156,73 @@
         <item quantity="one">“%2$s” için %1$d sonuç</item>
         <item quantity="other">“%2$s” için %1$d sonuç</item>
     </plurals>
+    <!-- S-1010: dönüştürücü -->
+    <string name="nag_convert">Dönüştür…</string>
+    <string name="nag_convert_title">Dönüştür</string>
+    <string name="nag_convert_format">Biçim</string>
+    <string name="nag_convert_quality">Kalite</string>
+    <string name="nag_convert_quality_v0">V0 (değişken)</string>
+    <string name="nag_convert_hint_opus">Aynı kalitede en küçük dosyalar. Android, tarayıcılar ve çoğu oynatıcı Opus çalar; bazı araç ses sistemleri ve eski cihazlar çalmaz.</string>
+    <string name="nag_convert_hint_mp3">Her yerde çalar. V0, LAME\'in en iyi değişken bit hızıdır: 320 kbps\'ye yakın kalite, daha küçük dosyada.</string>
+    <string name="nag_convert_hint_aac">Apple cihazlarıyla en uyumlusu; M4A dosyaları.</string>
+    <string name="nag_convert_rate">Örnekleme hızı</string>
+    <string name="nag_convert_rate_source">Kaynaktaki gibi</string>
+    <string name="nag_convert_rate_opus">Opus her zaman 48 kHz\'dir.</string>
+    <string name="nag_convert_rate_mp3">MP3 en çok 48 kHz\'dir: daha yüksek bir kaynak yeniden örneklenir.</string>
+    <string name="nag_convert_naming">Dosya adları</string>
+    <string name="nag_convert_naming_folders">Sanatçı/Albüm klasörleri</string>
+    <string name="nag_convert_naming_flat">Tek klasör</string>
+    <string name="nag_convert_example">Örnek: %1$s</string>
+    <string name="nag_convert_skip_existing">Var olan dosyaları atla</string>
+    <string name="nag_convert_folder">Hedef klasör</string>
+    <string name="nag_convert_folder_none">Henüz seçilmedi</string>
+    <plurals name="nag_convert_lossy">
+        <item quantity="one">%d parça zaten kayıplı biçimde: yeniden dönüştürülünce kalitesi biraz daha düşer.</item>
+        <item quantity="other">%d parça zaten kayıplı biçimde: yeniden dönüştürülünce kaliteleri biraz daha düşer.</item>
+    </plurals>
+    <string name="nag_convert_no_engine">Bu sürümde müzik motoru yok: dönüştürme yapılamaz.</string>
+    <string name="nag_convert_originals">Asıl dosyalara dokunulmaz; etiketler ve ön kapak yeni dosyalara taşınır.</string>
+    <string name="nag_convert_start">Dönüştür</string>
+    <string name="nag_convert_channel">Müzik dönüştürme</string>
+    <string name="nag_convert_running_title">Müzik dönüştürülüyor</string>
+    <string name="nag_convert_starting">Başlıyor…</string>
+    <string name="nag_convert_progress">%1$d / %2$d · %3$s</string>
+    <string name="nag_convert_waiting_battery">Bekliyor: pil azaldı; şarj olunca sürecek.</string>
+    <string name="nag_convert_waiting_heat">Bekliyor: cihaz ısındı; soğuyunca sürecek.</string>
+    <string name="nag_convert_waiting_resume">Bekliyor: Android işi bir süre durdurdu; kaldığı yerden sürecek.</string>
+    <string name="nag_convert_paused_title">Dönüştürme duraklatıldı</string>
+    <string name="nag_convert_cancel">İptal</string>
+    <plurals name="nag_convert_queued">
+        <item quantity="one">%d iş daha bekliyor</item>
+        <item quantity="other">%d iş daha bekliyor</item>
+    </plurals>
+    <string name="nag_convert_done_title">Dönüştürme bitti</string>
+    <string name="nag_convert_stopped_title">Dönüştürme iptal edildi</string>
+    <plurals name="nag_convert_done_converted">
+        <item quantity="one">%d dönüştürüldü</item>
+        <item quantity="other">%d dönüştürüldü</item>
+    </plurals>
+    <plurals name="nag_convert_done_skipped">
+        <item quantity="one">%d atlandı</item>
+        <item quantity="other">%d atlandı</item>
+    </plurals>
+    <plurals name="nag_convert_done_failed">
+        <item quantity="one">%d başarısız</item>
+        <item quantity="other">%d başarısız</item>
+    </plurals>
+    <string name="nag_convert_details">Ayrıntılar</string>
+    <string name="nag_convert_summary_title">Dönüştürme özeti</string>
+    <string name="nag_convert_summary_skipped">Atlananlar</string>
+    <string name="nag_convert_summary_failed">Dönüştürülemeyenler</string>
+    <string name="nag_convert_summary_loading">Özet okunuyor…</string>
+    <string name="nag_convert_reason_exists">Klasörde zaten var</string>
+    <string name="nag_convert_reason_no_engine">Bu sürümde müzik motoru yok</string>
+    <string name="nag_convert_reason_input">Kaynak dosya okunamadı</string>
+    <string name="nag_convert_reason_folder">Hedef klasör yok ya da yazılamıyor</string>
+    <string name="nag_convert_reason_output">Yeni dosya yazılamadı</string>
+    <string name="nag_convert_reason_source">Oradaki dosya kaynağın kendisi: üzerine yazılmaz</string>
+    <string name="nag_convert_reason_engine">Dosya dönüştürülemedi</string>
+    <string name="nag_convert_reason_battery">Durdu: pil çok azaldı</string>
+    <string name="nag_convert_reason_thermal">Durdu: cihaz çok ısındı</string>
+    <string name="nag_convert_reason_cancelled">İptal edildi</string>
 </resources>

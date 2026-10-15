@@ -14,6 +14,11 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - M3U, M3U8 ve PLS içe aktarma (Dosya içe aktar…, depolama erişim çerçevesi): `tvg-logo` ve `group-title` okunur, eski Türkçe kodlamalar (Windows-1254) ve uzantısız dosyalar tanınır, akış adresi olmayan satırlar ve tekrarlar atlanıp sayısı söylenir, zaten kayıtlı olanlar yeni eklenenlerden ayrı sayılır; dosya bozuksa ya da çalma listesi değilse nedeni yazılır. İçe aktarılan radyoların rehber kimliği yoktur, bu yüzden oy verilemez.
 - Boş, çevrimdışı, hata ve yükleniyor durumları her sekmede açıklanır. Sonraki hikâyeler için bağlantı noktaları: çalan radyonun ICY başlığı bir akış (`RadioNowPlaying.flow`) olarak okunabilir, akış adresi çözümü `RadioPlayer` içindedir.
 
+### Dönüştürücü
+- Müzik kütüphanesinden dönüştürme: seçilen parçalar (seçim çubuğu, parçanın menüsü) ya da bir albümün, sanatçının, klasörün parçaları (grup başlığındaki “Dönüştür…”) Opus'a (128, 160, 192 kbps), MP3'e (V0, 320 kbps) ya da AAC'ye (256 kbps, M4A) dönüştürülür. Yeni dosyalar bir kez seçilen klasöre “Sanatçı/Albüm/03 Başlık” düzeninde ya da tek klasöre “Sanatçı - Başlık” adıyla yazılır, var olanlar istenirse atlanır; asıl dosyalara dokunulmaz. Etiketler, sözler ve ön kapak taşınır (Opus'ta Vorbis yorumları ve METADATA_BLOCK_PICTURE, MP3'te ID3v2.4 ve APIC, M4A'da MP4 atomları ve covr); kaynağında ReplayGain olan parçanın kazancı yeni dosyada yeniden ölçülür, Opus'ta RFC 7845'in istediği gibi yalnızca R128 etiketleriyle. Dosyalar boşluksuz çalar: Opus'un ön atlaması (pre-skip), LAME'in gecikme ve dolgu bilgisi, AAC'nin düzenleme listesi. CUE sayfasının bir parçası kendi dosyasına, sayfadaki etiketleriyle dönüştürülür.
+- İş ön planda sürer; bildirimde ve kütüphanenin üstündeki şeritte ilerleme ve İptal görünür, sıradaki işler arkasından gelir. Pil azalınca ya da cihaz ısınınca bekler, daha kötüsünde durur; bitince dönüştürülen, atlanan ve dönüştürülemeyen parçalar nedenleriyle özetlenir. Motorda libopus 1.5.2, LAME 3.100 ve FFmpeg'in kendi AAC kodlayıcısı.
+- Müzik motoru M4A'daki AAC'nin sonundaki kodlayıcı dolgusunu da atlar (düzenleme listesinin uzunluğu kadar çalar): AAC albümleri de sonlarında boşluksuz.
+
 ## 0.2.0 — MVP2 (hazırlanıyor)
 
 ### Müzik motoru
