@@ -27,6 +27,7 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.menuBarSpecs
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -63,7 +64,7 @@ class MenuBarTest {
         val specs = menuBarSpecs(res, { performed += it }, { true })
         assertEquals(listOf("Medya", "Oynatma", "Ses", "Video", "Altyazı", "Araçlar", "Görünüm", "Yardım"), specs.map { it.title })
         ShortcutGroup.entries.zip(specs).forEach { (group, spec) ->
-            val shortcuts = ShortcutRegistry.defaults.filter { it.group == group }
+            val shortcuts = ShortcutRegistry.defaults.filter { it.group == group && it.scope != ShortcutScope.Editor }
             val items = spec.entries().filterIsInstance<MenuEntry.Item>()
             assertEquals(shortcuts.map { res.getString(it.label) }, items.map { it.label })
             assertEquals(shortcuts.map { it.chord?.label(res) }, items.map { it.shortcut })

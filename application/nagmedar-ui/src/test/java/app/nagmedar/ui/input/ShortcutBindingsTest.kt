@@ -59,10 +59,15 @@ class ShortcutBindingsTest {
         assertEquals(R.string.nag_sc_reserved_navigation, reservedReason(KeyChord(Key.Escape)))
         assertEquals(R.string.nag_sc_reserved_navigation, reservedReason(KeyChord(Key.Enter)))
         assertNull(reservedReason(KeyChord(Key.Enter, alt = true)))
+        // the lyrics editor's Enter stamps (S-1005); Tab and Esc stay the window's there too
+        assertNull(reservedReason(KeyChord(Key.Enter), ShortcutScope.Editor))
+        assertEquals(R.string.nag_sc_reserved_navigation, reservedReason(KeyChord(Key.Escape), ShortcutScope.Editor))
         assertNull(reservedReason(KeyChord(Key.K, ctrl = true)))
         // the presets keep clear of them
         ShortcutPreset.entries.forEach { preset ->
-            preset.chords.values.filterNotNull().forEach { assertNull("$preset ${it.toText()}", reservedReason(it)) }
+            preset.chords.forEach { (id, chord) ->
+                if (chord != null) assertNull("$preset ${chord.toText()}", reservedReason(chord, ShortcutRegistry.default(id).scope))
+            }
         }
     }
 

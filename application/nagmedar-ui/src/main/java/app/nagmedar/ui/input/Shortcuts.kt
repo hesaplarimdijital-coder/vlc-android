@@ -139,8 +139,21 @@ enum class ShortcutGroup(@StringRes val title: Int) {
     Help(R.string.nag_menu_help),
 }
 
-/** Where a shortcut works: everywhere in the app, or only while the player is in front. */
-enum class ShortcutScope { Global, Player }
+/**
+ * Where a shortcut works: everywhere in the app, only while the player is in front, or (S-1005)
+ * only while the lyrics editor is open, whose keys come first: a chord of the editor may be one of
+ * a global shortcut too, it wins inside the editor.
+ */
+enum class ShortcutScope {
+    Global, Player, Editor,
+    ;
+
+    /** Whether a shortcut of this scope and one of [other] can both be waiting for the same key. */
+    fun overlaps(other: ShortcutScope): Boolean = when {
+        this == Editor || other == Editor -> this == other
+        else -> true
+    }
+}
 
 enum class ShortcutId {
     OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
@@ -157,6 +170,7 @@ enum class ShortcutId {
     RadioSearch,
     FolderUp, Refresh,
     PodcastSearch,
+    LrcStamp, LrcUnstamp, LrcLineUp, LrcLineDown, LrcNudgeEarlier, LrcNudgeLater, LrcWordMode,
 }
 
 @Immutable
@@ -232,6 +246,14 @@ object ShortcutRegistry {
         // S-1004: the lyrics' delay in tenths of a second, as G and H move the subtitles' in the player
         Shortcut(ShortcutId.LyricsEarlier, ShortcutGroup.Audio, R.string.nag_sc_lyrics_earlier, KeyChord(Key.G, alt = true)),
         Shortcut(ShortcutId.LyricsLater, ShortcutGroup.Audio, R.string.nag_sc_lyrics_later, KeyChord(Key.H, alt = true)),
+        // S-1005: the lyrics editor's keys, while it is open: Enter stamps the line (the next word in word mode), Space stays play/pause
+        Shortcut(ShortcutId.LrcStamp, ShortcutGroup.Audio, R.string.nag_sc_lrc_stamp, KeyChord(Key.Enter), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcUnstamp, ShortcutGroup.Audio, R.string.nag_sc_lrc_unstamp, KeyChord(Key.Backspace), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcLineUp, ShortcutGroup.Audio, R.string.nag_sc_lrc_line_up, KeyChord(Key.DirectionUp), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcLineDown, ShortcutGroup.Audio, R.string.nag_sc_lrc_line_down, KeyChord(Key.DirectionDown), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcNudgeEarlier, ShortcutGroup.Audio, R.string.nag_sc_lrc_nudge_earlier, KeyChord(Key.Comma), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcNudgeLater, ShortcutGroup.Audio, R.string.nag_sc_lrc_nudge_later, KeyChord(Key.Period), ShortcutScope.Editor),
+        Shortcut(ShortcutId.LrcWordMode, ShortcutGroup.Audio, R.string.nag_sc_lrc_word_mode, KeyChord(Key.W), ShortcutScope.Editor),
         // Video
         Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
         Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),
@@ -324,11 +346,18 @@ object ShortcutRegistry {
         return shortcuts.firstOrNull { it.scope in scopes && it.chord?.matches(key, event) == true }
     }
 
-    /** Pairs of shortcuts bound to the same chord; the shipped table has none (ShortcutRegistryTest). */
+    /**
+     * Pairs of shortcuts bound to the same chord where both can be waiting for it ([ShortcutScope.overlaps]);
+     * the shipped table has none (ShortcutRegistryTest).
+     */
     fun conflicts(shortcuts: List<Shortcut> = this.shortcuts): List<Pair<Shortcut, Shortcut>> =
         shortcuts.filter { it.chord != null }.groupBy { it.chord }.values.filter { it.size > 1 }.flatMap { group ->
-            group.indices.flatMap { i -> (i + 1 until group.size).map { j -> group[i] to group[j] } }
+            group.indices.flatMap { i -> (i + 1 until group.size).filter { j -> group[i].scope.overlaps(group[j].scope) }.map { j -> group[i] to group[j] } }
         }
+
+    /** Whether two of [group], bound to one chord, can both be waiting for it ([ShortcutScope.overlaps]). */
+    fun clash(group: List<Shortcut>): Boolean =
+        group.indices.any { i -> (i + 1 until group.size).any { j -> group[i].scope.overlaps(group[j].scope) } }
 
     /**
      * The keyboard shortcut helper list (Meta+/ or the system's keyboard shortcuts screen). Each key

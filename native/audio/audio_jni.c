@@ -543,6 +543,26 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_readLyrics(JNIEnv 
     return result;
 }
 
+/* S-1005: lyrics written into the file's tags; 0, or negative. The descriptor stays the caller's. */
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_writeLyrics(JNIEnv *env, jclass cls, jint fd, jstring name, jstring text, jstring synced)
+{
+    (void)cls;
+    const char *file = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    const char *plain = text ? (*env)->GetStringUTFChars(env, text, NULL) : NULL;
+    const char *lines = synced ? (*env)->GetStringUTFChars(env, synced, NULL) : NULL;
+    char error[256] = {0};
+    int ret = nag_tags_write_lyrics(fd, file, plain, lines, error, sizeof(error));
+    if (lines)
+        (*env)->ReleaseStringUTFChars(env, synced, lines);
+    if (plain)
+        (*env)->ReleaseStringUTFChars(env, text, plain);
+    if (file)
+        (*env)->ReleaseStringUTFChars(env, name, file);
+    if (ret < 0)
+        __android_log_print(ANDROID_LOG_WARN, "NagmedarAudio", "tags: %s", error);
+    return ret;
+}
+
 /* S-1006: the front cover in the file's tags, its bytes; null when it has none. The descriptor stays the caller's. */
 JNIEXPORT jbyteArray JNICALL Java_app_nagmedar_audio_NativeAudio_readCover(JNIEnv *env, jclass cls, jint fd, jstring name)
 {

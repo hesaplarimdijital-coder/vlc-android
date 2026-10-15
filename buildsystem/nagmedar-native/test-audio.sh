@@ -30,7 +30,9 @@
 #     B delayed as the chain delays, the switch crossfaded
 #   - the null test (S-1405): null_test.py finds a capture's lead-in and reports no difference
 #     for a true capture, the one differing sample for a broken one
-#   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus
+#   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus; written
+#     (S-1005) into MP3 (USLT and SYLT), FLAC, M4A, Opus and Vorbis and read back, replaced,
+#     removed, the other tags and the audio untouched
 #   - the covers (S-1006): the front cover of FLAC, M4A, MP3 (of two pictures) and Opus; a tag by name
 #   - CUE parts (S-808): a file's parts, bounded in CUE frames (1/75 s), played as a queue give
 #     the whole file back, sample for sample in FLAC and MP3, within -60 dBFS in AAC and Opus
@@ -578,6 +580,67 @@ check "m4a ©lyr" '{"plain":"MP4 sözü"}' "$("$NAGAUDIO" lyrics lyrics.m4a)"
 ffmpeg -v error -y -f lavfi -i "sine=f=440:r=48000:d=1" -c:a libopus -metadata LYRICS="Opus sözü" lyrics.opus
 check "opus LYRICS" '{"plain":"Opus sözü"}' "$("$NAGAUDIO" lyrics lyrics.opus)"
 check "no lyrics" '{}' "$("$NAGAUDIO" lyrics flac16.flac)"
+
+echo "== S-1005: lyrics written"
+LRC='[00:01.00]Birinci satır
+[00:01.50]İkinci "satır" 🎵'
+printf '%s' "$LRC" > lrc.txt
+printf '%s' 'Düz söz
+ikinci' > plain.txt
+printf '%s' '[[0,"Gece"],[1200,"Yolcusu\n"],[1800,"\ud83c\udfb5 şarkı"]]' > synced.json
+EXPECT_LRC='{"plain":"[00:01.00]Birinci satır\n[00:01.50]İkinci \"satır\" 🎵"}'
+for ext_codec in "flac:flac" "m4a:aac" "opus:libopus" "ogg:libvorbis"; do
+    ext=${ext_codec%%:*}
+    codec=${ext_codec#*:}
+    rate=44100; [ "$ext" = opus ] && rate=48000
+    ffmpeg -v error -y -f lavfi -i "sine=f=440:r=$rate:d=1" -c:a "$codec" -metadata title="Başlık" -metadata LYRICS="eski söz" "wl.$ext"
+    audio_before=$(ffmpeg -v error -i "wl.$ext" -map 0:a -f md5 - 2>&1)
+    "$NAGAUDIO" setlyrics "wl.$ext" --text lrc.txt >/dev/null
+    check "$ext LRC written and read back" "$EXPECT_LRC" "$("$NAGAUDIO" lyrics "wl.$ext")"
+    check "$ext title untouched" "Başlık" "$("$NAGAUDIO" prop "wl.$ext" title)"
+    check "$ext audio untouched" "$audio_before" "$(ffmpeg -v error -i "wl.$ext" -map 0:a -f md5 - 2>&1)"
+    "$NAGAUDIO" setlyrics "wl.$ext" >/dev/null
+    check "$ext lyrics removed" '{}' "$("$NAGAUDIO" lyrics "wl.$ext")"
+done
+# MP3: USLT and SYLT, the old ones replaced, the other frames kept
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a libmp3lame -metadata title="Başlık" wl.mp3
+python3 - <<'PY2'
+from mutagen.id3 import ID3, SYLT, USLT, Encoding
+tags = ID3("wl.mp3")
+tags.add(USLT(encoding=Encoding.UTF8, lang="tur", desc="", text="eski söz"))
+tags.add(SYLT(encoding=Encoding.UTF8, lang="tur", format=2, type=1, text=[("eski", 0)]))
+tags.save("wl.mp3")
+PY2
+audio_before=$(ffmpeg -v error -i wl.mp3 -map 0:a -f md5 - 2>&1)
+"$NAGAUDIO" setlyrics wl.mp3 --text plain.txt --synced synced.json >/dev/null
+check "mp3 USLT and SYLT written" '{"plain":"Düz söz\nikinci","synced":[[0,"Gece"],[1200,"Yolcusu\n"],[1800,"🎵 şarkı"]]}' "$("$NAGAUDIO" lyrics wl.mp3)"
+check "mp3 title untouched" "Başlık" "$("$NAGAUDIO" prop wl.mp3 title)"
+python3 - <<'PY2'
+from mutagen.id3 import ID3
+tags = ID3("wl.mp3")
+sylt = tags.getall("SYLT")
+uslt = tags.getall("USLT")
+ok = len(sylt) == 1 and len(uslt) == 1 and sylt[0].format == 2 and sylt[0].type == 1 and uslt[0].text == "Düz söz\nikinci"
+print("%s one SYLT in milliseconds and one USLT" % ("ok  " if ok else "FAIL"))
+raise SystemExit(0 if ok else 1)
+PY2
+check "mp3 audio untouched" "$audio_before" "$(ffmpeg -v error -i wl.mp3 -map 0:a -f md5 - 2>&1)"
+"$NAGAUDIO" setlyrics wl.mp3 --text plain.txt >/dev/null
+check "mp3 SYLT removed, USLT kept" '{"plain":"Düz söz\nikinci"}' "$("$NAGAUDIO" lyrics wl.mp3)"
+"$NAGAUDIO" setlyrics wl.mp3 >/dev/null
+check "mp3 lyrics removed" '{}' "$("$NAGAUDIO" lyrics wl.mp3)"
+check "mp3 title still there" "Başlık" "$("$NAGAUDIO" prop wl.mp3 title)"
+# a file with no tags at all gets an ID3v2 tag; malformed synced lyrics are refused
+ffmpeg -v error -y -f lavfi -i "sine=f=440:r=44100:d=1" -c:a libmp3lame -write_id3v2 0 -write_xing 0 bare.mp3
+"$NAGAUDIO" setlyrics bare.mp3 --text lrc.txt >/dev/null
+check "mp3 without tags" "$EXPECT_LRC" "$("$NAGAUDIO" lyrics bare.mp3)"
+printf '%s' '[[0,"x"' > broken.json
+if "$NAGAUDIO" setlyrics bare.mp3 --synced broken.json >/dev/null 2>&1; then
+    check "malformed synced lyrics refused" "refused" "written"
+else
+    check "malformed synced lyrics refused" "refused" "refused"
+fi
+check "refused write leaves the lyrics" "$EXPECT_LRC" "$("$NAGAUDIO" lyrics bare.mp3)"
 
 echo "== S-1006: embedded covers"
 ffmpeg -v error -y -f lavfi -i "color=c=0x3366cc:s=64x64:d=1" -frames:v 1 front.png

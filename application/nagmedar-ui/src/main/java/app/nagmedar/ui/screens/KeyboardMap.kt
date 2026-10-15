@@ -208,8 +208,8 @@ fun KeyboardMap(table: List<Shortcut>, modifier: Modifier = Modifier) {
         val chord = layer.chord(key)
         val on = byChord[chord].orEmpty()
         return when {
-            on.size > 1 -> KeyKind.Conflict
-            on.size == 1 -> KeyKind.Bound
+            ShortcutRegistry.clash(on) -> KeyKind.Conflict
+            on.isNotEmpty() -> KeyKind.Bound
             reservedReason(chord) != null -> KeyKind.Reserved
             else -> KeyKind.Free
         }
@@ -222,12 +222,16 @@ fun KeyboardMap(table: List<Shortcut>, modifier: Modifier = Modifier) {
         val name = chord.label(res)
         val on = byChord[chord].orEmpty()
         fun title(shortcut: Shortcut) = res.getString(shortcut.label).let { label ->
-            if (shortcut.scope == ShortcutScope.Player) res.getString(R.string.nag_kb_in_player, label) else label
+            when (shortcut.scope) {
+                ShortcutScope.Player -> res.getString(R.string.nag_kb_in_player, label)
+                // the editor's labels say so themselves ("Söz düzenleyici: …")
+                ShortcutScope.Editor, ShortcutScope.Global -> label
+            }
         }
         val reserved = reservedReason(chord)
         return when {
-            on.size > 1 -> res.getString(R.string.nag_kb_conflict, name, on.joinToString(", ") { title(it) })
-            on.size == 1 -> res.getString(R.string.nag_kb_one, name, title(on.single()))
+            ShortcutRegistry.clash(on) -> res.getString(R.string.nag_kb_conflict, name, on.joinToString(", ") { title(it) })
+            on.isNotEmpty() -> res.getString(R.string.nag_kb_one, name, on.joinToString(", ") { title(it) })
             reserved != null -> res.getString(R.string.nag_kb_one, name, res.getString(reserved))
             else -> res.getString(R.string.nag_kb_free, name)
         }

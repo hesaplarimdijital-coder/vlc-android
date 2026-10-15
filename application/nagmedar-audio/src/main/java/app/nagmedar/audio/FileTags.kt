@@ -21,6 +21,24 @@ object FileTags {
     /** The first value of [uri]'s tag [key], by TagLib's property name ("MUSICBRAINZ_ALBUMID"). */
     fun tag(context: Context, uri: Uri, key: String): String? = read(context, uri) { fd, name -> NativeAudio.readTag(fd, name, key) }
 
+    /**
+     * [block] on a read-write descriptor of [track] and its name (S-1005: the lyrics editor writes tags). Only a file
+     * of its own: a CUE track (S-808) shares its file with the others and is not written. Null when the engine is
+     * missing or the file cannot be opened for writing.
+     */
+    internal fun <T> write(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {
+        if (!NativeAudio.available || CueUri.isTrack(track)) return null
+        val app = context.applicationContext
+        val descriptor = runCatching {
+            when (track.scheme) {
+                null, "file" -> track.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_WRITE) }
+                "content" -> app.contentResolver.openFileDescriptor(track, "rw")
+                else -> null
+            }
+        }.onFailure { Log.w(TAG, "cannot write the tags of $track: $it") }.getOrNull() ?: return null
+        return descriptor.use { block(it.fd, LoudnessScanner.displayName(app, track)) }
+    }
+
     /** [block] on a read-only descriptor of [uri] and its name (the type detection's); a CUE track's file (S-808) is its own. */
     internal fun <T> read(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {
         if (!NativeAudio.available) return null
