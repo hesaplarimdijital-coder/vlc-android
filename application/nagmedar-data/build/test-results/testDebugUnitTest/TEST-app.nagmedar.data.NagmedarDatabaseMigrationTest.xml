@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseMigrationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:07:57.666Z" hostname="runnervmmprz5" time="16.156">
+  <properties/>
+  <testcase name="everyVersionMigratesToTheLatest" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="15.831"/>
+  <testcase name="podcastRowsSurviveTheirNewColumns" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.193"/>
+  <testcase name="radioStationsKeepTheirRowsFromSeven" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.129"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
