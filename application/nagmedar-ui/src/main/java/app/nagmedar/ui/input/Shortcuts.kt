@@ -151,6 +151,7 @@ enum class ShortcutId {
     Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
     NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
     SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
+    SubtitleTools, CueSave, CueSplit, CueMerge, CueSetStart, CueSetEnd, CueNext, CuePrevious,
     Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
@@ -259,6 +260,15 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.SyncMarkSubtitle, ShortcutGroup.Subtitle, R.string.nag_sc_sync_mark_subtitle, KeyChord(Key.J, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.SyncApply, ShortcutGroup.Subtitle, R.string.nag_sc_sync_apply, KeyChord(Key.K, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.SyncUndo, ShortcutGroup.Subtitle, R.string.nag_sc_sync_undo, KeyChord(Key.K, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-708: the subtitle tools, and the line timing editor's keys while it is open
+        Shortcut(ShortcutId.SubtitleTools, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_tools, KeyChord(Key.E, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueSave, ShortcutGroup.Subtitle, R.string.nag_sc_cue_save, KeyChord(Key.S, ctrl = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueSplit, ShortcutGroup.Subtitle, R.string.nag_sc_cue_split, KeyChord(Key.S, ctrl = true, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueMerge, ShortcutGroup.Subtitle, R.string.nag_sc_cue_merge, KeyChord(Key.M, ctrl = true, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueSetStart, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_start, KeyChord(Key.LeftBracket, ctrl = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueSetEnd, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_end, KeyChord(Key.RightBracket, ctrl = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueNext, ShortcutGroup.Subtitle, R.string.nag_sc_cue_next, KeyChord(Key.DirectionDown, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CuePrevious, ShortcutGroup.Subtitle, R.string.nag_sc_cue_previous, KeyChord(Key.DirectionUp, alt = true), ShortcutScope.Player),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
         // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization

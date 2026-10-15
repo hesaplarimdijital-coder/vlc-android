@@ -99,6 +99,7 @@ import app.nagmedar.ui.audio.EqualizerSide
 import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.screens.AboutScreen
 import app.nagmedar.ui.tvlab.Step
+import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsHost
 import app.nagmedar.ui.tvlab.TvLabScreen
 import app.nagmedar.ui.tvlab.TvLabSession
 import app.nagmedar.ui.tvlab.percentLabel
@@ -305,6 +306,8 @@ private fun NagmedarMain(
                         PhonePlayerHost(onClose = { phonePlayer = false }, onQueue = queuePanel::toggle, onFullScreenLyrics = { lyricsOpen = true })
                     }
                     if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                    // S-708: the subtitle tools, asked for from a film's menu
+                    SubtitleToolsHost()
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {
                         val queue = rememberPlayQueue()

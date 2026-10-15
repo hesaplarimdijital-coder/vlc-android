@@ -134,6 +134,9 @@ interface PlayerChromeActions {
     /** S-1302: the device picker, to cast the film to a Chromecast or a DLNA renderer. */
     fun cast() = Unit
 
+    /** S-708: the subtitle tools (Alt+E): cleaning, frame rate conversion and the line timing editor, into a new file. */
+    fun openSubtitleTools() {}
+
     /** Leaves the player. */
     fun close()
 
