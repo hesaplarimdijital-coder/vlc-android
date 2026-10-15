@@ -1,4 +1,5 @@
-// SP-03: Dolby Vision profile 7 -> 8.1 remux with libavformat and libdovi.
+// SP-03: Dolby Vision profile 7 -> 8.1 remux with libavformat and libdovi; the NAL rewrite
+// (dvc_rewrite_packet and friends) also serves the remux engine of S-1206 (remux.c).
 //
 // Every packet of the HEVC track is rewritten NAL by NAL: enhancement-layer units
 // (UNSPEC63 or nuh_layer_id > 0) are dropped, RPUs (UNSPEC62) are converted with
@@ -22,13 +23,7 @@
 #include <string.h>
 #include <sys/resource.h>
 
-#define NAL_UNSPEC62 62
-#define NAL_UNSPEC63 63
-
-typedef struct ByteBuf {
-    uint8_t *data;
-    size_t size, cap;
-} ByteBuf;
+typedef DvcBuf ByteBuf;
 
 static int buf_reserve(ByteBuf *b, size_t extra)
 {
@@ -63,8 +58,59 @@ static int buf_put_be(ByteBuf *b, uint32_t v, int bytes)
     return buf_append(b, tmp, bytes);
 }
 
-static int nal_type(const uint8_t *nal) { return (nal[0] >> 1) & 0x3F; }
-static int nal_layer(const uint8_t *nal) { return ((nal[0] & 1) << 5) | (nal[1] >> 3); }
+int dvc_nal_type(const uint8_t *nal) { return (nal[0] >> 1) & 0x3F; }
+int dvc_nal_layer(const uint8_t *nal) { return ((nal[0] & 1) << 5) | (nal[1] >> 3); }
+
+int dvc_length_size(int codec_id, const uint8_t *ex, int size)
+{
+    if (codec_id == AV_CODEC_ID_HEVC && size >= 23 && ex[0] == 1)
+        return (ex[21] & 3) + 1;
+    if (codec_id == AV_CODEC_ID_H264 && size >= 7 && ex[0] == 1)
+        return (ex[4] & 3) + 1;
+    return 0;
+}
+
+int dvc_for_each_nal(const uint8_t *data, size_t size, int length_size, dvc_nal_fn fn, void *opaque)
+{
+    const uint8_t *p = data, *end = data + size;
+    if (length_size) {
+        while (end - p >= length_size) {
+            uint32_t n = 0;
+            for (int i = 0; i < length_size; i++)
+                n = (n << 8) | p[i];
+            p += length_size;
+            if (n > (uint32_t)(end - p))
+                return AVERROR_INVALIDDATA;
+            int ret = fn(opaque, p, n);
+            if (ret < 0)
+                return ret;
+            p += n;
+        }
+        return 0;
+    }
+    /* Annex B: split on 00 00 01 / 00 00 00 01 */
+    const uint8_t *start = NULL;
+    while (p + 3 <= end) {
+        if (p[0] == 0 && p[1] == 0 && p[2] == 1) {
+            if (start) {
+                /* as FFmpeg's ff_nal_find_startcode: the zero of a four-byte start code is not the unit's, further zeros are */
+                const uint8_t *stop = p;
+                if (stop > start && stop[-1] == 0)
+                    stop--;
+                int ret = fn(opaque, start, stop - start);
+                if (ret < 0)
+                    return ret;
+            }
+            p += 3;
+            start = p;
+        } else {
+            p++;
+        }
+    }
+    if (start && start < end)
+        return fn(opaque, start, end - start);
+    return 0;
+}
 
 /* ---- decoding timestamps ------------------------------------------------------------------
  * Matroska stores presentation times only. Without an HEVC decoder libavformat cannot learn the
@@ -72,8 +118,6 @@ static int nal_layer(const uint8_t *nal) { return ((nal[0] & 1) << 5) | (nal[1] 
  * therefore derives dts itself, as FFmpeg's muxer once did: the smallest of the last depth + 1
  * presentation times, primed with times one frame apart before the first one. The depth comes
  * from the sequence parameter set (sps_max_num_reorder_pics of the highest sub-layer). */
-
-#define MAX_REORDER 16
 
 typedef struct Bits {
     const uint8_t *data;
@@ -157,14 +201,176 @@ static int sps_reorder_depth(const uint8_t *nal, size_t size)
         reorder = bits_ue(&b);
         bits_ue(&b); /* sps_max_latency_increase_plus1 */
     }
-    return b.overrun || reorder > MAX_REORDER ? -1 : (int)reorder;
+    return b.overrun || reorder > DVC_MAX_REORDER ? -1 : (int)reorder;
 }
 
-/* reorder depth from the base layer's SPS in hvcC or Annex B extradata, or -1 */
-static int extradata_reorder_depth(const uint8_t *ex, int size)
+
+/* The RBSP of a NAL unit (header of [header] bytes skipped), emulation prevention removed. */
+static size_t nal_rbsp(const uint8_t *nal, size_t size, int header, uint8_t *rbsp, size_t cap)
+{
+    size_t n = 0;
+    for (size_t i = (size_t)header; i < size && n < cap; i++) {
+        if (i + 2 < size && nal[i] == 0 && nal[i + 1] == 0 && nal[i + 2] == 3) {
+            rbsp[n++] = 0;
+            if (n < cap)
+                rbsp[n++] = 0;
+            i += 2;
+            continue;
+        }
+        rbsp[n++] = nal[i];
+    }
+    return n;
+}
+
+static void h264_scaling_list(Bits *b, int size)
+{
+    int last = 8, next = 8;
+    for (int j = 0; j < size && !b->overrun; j++) {
+        if (next != 0) {
+            unsigned ue = bits_ue(b);
+            if (ue > 255) { /* delta_scale is -128..127: anything else is not an SPS */
+                b->overrun = 1;
+                return;
+            }
+            int delta = (int)((ue + 1) / 2) * ((ue & 1) ? 1 : -1);
+            next = (last + delta + 256) % 256;
+        }
+        last = next == 0 ? last : next;
+    }
+}
+
+static void h264_hrd(Bits *b)
+{
+    unsigned cpb = bits_ue(b) + 1;
+    bits_skip(b, 8);
+    for (unsigned i = 0; i < cpb && i < 32 && !b->overrun; i++) {
+        bits_ue(b);
+        bits_ue(b);
+        bits_skip(b, 1);
+    }
+    bits_skip(b, 20);
+}
+
+/* max_num_reorder_frames of an H.264 SPS NAL unit's VUI (header included), or -1 when the VUI does not say */
+static int h264_sps_reorder_depth(const uint8_t *nal, size_t size)
+{
+    uint8_t rbsp[1024];
+    size_t n = nal_rbsp(nal, size, 1, rbsp, sizeof(rbsp));
+    Bits b = {rbsp, n, 0, 0};
+    int profile = (int)bits_read(&b, 8);
+    bits_skip(&b, 16); /* constraint flags, level */
+    bits_ue(&b);       /* sps id */
+    if (profile == 100 || profile == 110 || profile == 122 || profile == 244 || profile == 44 || profile == 83 || profile == 86 ||
+        profile == 118 || profile == 128 || profile == 138 || profile == 139 || profile == 134 || profile == 135) {
+        unsigned chroma = bits_ue(&b);
+        if (chroma == 3)
+            bits_skip(&b, 1);
+        bits_ue(&b); /* bit_depth_luma_minus8 */
+        bits_ue(&b); /* bit_depth_chroma_minus8 */
+        bits_skip(&b, 1);
+        if (bits_read(&b, 1)) /* seq_scaling_matrix_present_flag */
+            for (int i = 0; i < (chroma != 3 ? 8 : 12); i++)
+                if (bits_read(&b, 1))
+                    h264_scaling_list(&b, i < 6 ? 16 : 64);
+    }
+    bits_ue(&b); /* log2_max_frame_num_minus4 */
+    unsigned poc_type = bits_ue(&b);
+    if (poc_type == 0) {
+        bits_ue(&b);
+    } else if (poc_type == 1) {
+        bits_skip(&b, 1);
+        bits_ue(&b);
+        bits_ue(&b);
+        unsigned cycle = bits_ue(&b);
+        for (unsigned i = 0; i < cycle && i < 256 && !b.overrun; i++)
+            bits_ue(&b);
+    }
+    bits_ue(&b);      /* max_num_ref_frames */
+    bits_skip(&b, 1); /* gaps_in_frame_num_value_allowed_flag */
+    bits_ue(&b);      /* pic_width_in_mbs_minus1 */
+    bits_ue(&b);      /* pic_height_in_map_units_minus1 */
+    if (!bits_read(&b, 1)) /* frame_mbs_only_flag */
+        bits_skip(&b, 1);
+    bits_skip(&b, 1); /* direct_8x8_inference_flag */
+    if (bits_read(&b, 1)) /* frame_cropping_flag */
+        for (int i = 0; i < 4; i++)
+            bits_ue(&b);
+    if (!bits_read(&b, 1)) /* vui_parameters_present_flag */
+        return -1;
+    if (bits_read(&b, 1)) { /* aspect_ratio_info_present_flag */
+        if (bits_read(&b, 8) == 255)
+            bits_skip(&b, 32);
+    }
+    if (bits_read(&b, 1)) /* overscan_info_present_flag */
+        bits_skip(&b, 1);
+    if (bits_read(&b, 1)) { /* video_signal_type_present_flag */
+        bits_skip(&b, 4);
+        if (bits_read(&b, 1)) /* colour_description_present_flag */
+            bits_skip(&b, 24);
+    }
+    if (bits_read(&b, 1)) { /* chroma_loc_info_present_flag */
+        bits_ue(&b);
+        bits_ue(&b);
+    }
+    if (bits_read(&b, 1)) /* timing_info_present_flag */
+        bits_skip(&b, 65);
+    int nal_hrd = (int)bits_read(&b, 1);
+    if (nal_hrd)
+        h264_hrd(&b);
+    int vcl_hrd = (int)bits_read(&b, 1);
+    if (vcl_hrd)
+        h264_hrd(&b);
+    if (nal_hrd || vcl_hrd)
+        bits_skip(&b, 1); /* low_delay_hrd_flag */
+    bits_skip(&b, 1);     /* pic_struct_present_flag */
+    if (!bits_read(&b, 1)) /* bitstream_restriction_flag */
+        return -1;
+    bits_skip(&b, 1);
+    for (int i = 0; i < 4; i++)
+        bits_ue(&b);
+    unsigned reorder = bits_ue(&b);
+    return b.overrun || reorder > DVC_MAX_REORDER ? -1 : (int)reorder;
+}
+
+/* the first SPS of avcC (type 7) */
+static int avcc_reorder_depth(const uint8_t *ex, int size)
+{
+    if (size < 7 || ex[0] != 1)
+        return -1;
+    int count = ex[5] & 0x1F;
+    const uint8_t *p = ex + 6, *end = ex + size;
+    for (int i = 0; i < count && end - p >= 2; i++) {
+        int len = (p[0] << 8) | p[1];
+        p += 2;
+        if (len > end - p)
+            return -1;
+        if (len > 1 && (p[0] & 0x1F) == 7)
+            return h264_sps_reorder_depth(p, (size_t)len);
+        p += len;
+    }
+    return -1;
+}
+
+int dvc_reorder_depth(int codec_id, const uint8_t *ex, int size)
 {
     if (!ex || size < 4)
         return -1;
+    if (codec_id == AV_CODEC_ID_H264) {
+        if (ex[0] == 1)
+            return avcc_reorder_depth(ex, size);
+        for (int i = 0; i + 3 < size; i++) {
+            if (ex[i] == 0 && ex[i + 1] == 0 && ex[i + 2] == 1 && (ex[i + 3] & 0x1F) == 7) {
+                int len = size - (i + 3);
+                for (int j = i + 4; j + 2 < size; j++)
+                    if (ex[j] == 0 && ex[j + 1] == 0 && ex[j + 2] <= 1) {
+                        len = j - (i + 3);
+                        break;
+                    }
+                return h264_sps_reorder_depth(ex + i + 3, (size_t)len);
+            }
+        }
+        return -1;
+    }
     if (size >= 23 && ex[0] == 1) {
         const uint8_t *p = ex + 23, *end = ex + size;
         for (int a = 0; a < ex[22] && end - p >= 3; a++) {
@@ -175,7 +381,7 @@ static int extradata_reorder_depth(const uint8_t *ex, int size)
                 p += 2;
                 if (len > end - p)
                     return -1;
-                if (type == 33 && len > 2 && nal_layer(p) == 0)
+                if (type == 33 && len > 2 && dvc_nal_layer(p) == 0)
                     return sps_reorder_depth(p, (size_t)len);
                 p += len;
             }
@@ -191,21 +397,20 @@ static int extradata_reorder_depth(const uint8_t *ex, int size)
                     len = j - (i + 3);
                     break;
                 }
-            if (len > 2 && nal_type(nal) == 33 && nal_layer(nal) == 0)
+            if (len > 2 && dvc_nal_type(nal) == 33 && dvc_nal_layer(nal) == 0)
                 return sps_reorder_depth(nal, (size_t)len);
         }
     }
     return -1;
 }
 
-typedef struct DtsGen {
-    int depth;
-    int primed;
-    int64_t buf[MAX_REORDER + 1];
-    int64_t last;
-} DtsGen;
+void dvc_dts_init(DvcDtsGen *g, int depth)
+{
+    memset(g, 0, sizeof(*g));
+    g->depth = depth;
+}
 
-static int64_t dts_next(DtsGen *g, int64_t pts, int64_t duration)
+int64_t dvc_dts_next(DvcDtsGen *g, int64_t pts, int64_t duration)
 {
     if (!g->primed) {
         for (int i = 1; i <= g->depth; i++)
@@ -226,10 +431,7 @@ static int64_t dts_next(DtsGen *g, int64_t pts, int64_t duration)
     return dts;
 }
 
-typedef struct Ctx {
-    DvcStats *stats;
-    int length_size; /* NAL length field size in the source packets, 0 = Annex B */
-} Ctx;
+typedef DvcRewriter Ctx;
 
 static void note_profile(DvcStats *s, const DoviRpuOpaque *rpu, int output)
 {
@@ -247,13 +449,21 @@ static void note_profile(DvcStats *s, const DoviRpuOpaque *rpu, int output)
     dovi_rpu_free_header(h);
 }
 
+typedef struct Rewrite {
+    Ctx *c;
+    ByteBuf *out;
+} Rewrite;
+
 /* Appends [nal] to [out] in the source framing, converted, or drops it. */
-static int handle_nal(Ctx *c, const uint8_t *nal, size_t size, ByteBuf *out)
+static int handle_nal(void *opaque, const uint8_t *nal, size_t size)
 {
+    Rewrite *r = opaque;
+    Ctx *c = r->c;
+    ByteBuf *out = r->out;
     if (size < 2)
         return 0;
-    int type = nal_type(nal), layer = nal_layer(nal);
-    if (type == NAL_UNSPEC63 || layer > 0) {
+    int type = dvc_nal_type(nal), layer = dvc_nal_layer(nal);
+    if (type == DVC_NAL_EL || layer > 0) {
         c->stats->el_nals_dropped++;
         c->stats->el_bytes_dropped += (int64_t)size;
         return 0;
@@ -262,7 +472,7 @@ static int handle_nal(Ctx *c, const uint8_t *nal, size_t size, ByteBuf *out)
     size_t len = size;
     const DoviData *converted = NULL;
     DoviRpuOpaque *rpu = NULL;
-    if (type == NAL_UNSPEC62) {
+    if (type == DVC_NAL_RPU) {
         rpu = dovi_parse_unspec62_nalu(nal, size);
         const char *err = rpu ? dovi_rpu_get_error(rpu) : "dovi_parse_unspec62_nalu returned NULL";
         if (!err) {
@@ -309,50 +519,15 @@ static int handle_nal(Ctx *c, const uint8_t *nal, size_t size, ByteBuf *out)
     return ret;
 }
 
-static int rewrite_packet(Ctx *c, const AVPacket *in, ByteBuf *out)
+int dvc_rewrite_packet(DvcRewriter *c, const AVPacket *in, DvcBuf *out)
 {
-    const uint8_t *p = in->data, *end = in->data + in->size;
+    Rewrite r = {c, out};
     out->size = 0;
-    if (c->length_size) {
-        while (end - p >= c->length_size) {
-            uint32_t n = 0;
-            for (int i = 0; i < c->length_size; i++)
-                n = (n << 8) | p[i];
-            p += c->length_size;
-            if (n > (uint32_t)(end - p))
-                return AVERROR_INVALIDDATA;
-            int ret = handle_nal(c, p, n, out);
-            if (ret < 0)
-                return ret;
-            p += n;
-        }
-        return 0;
-    }
-    /* Annex B: split on 00 00 01 / 00 00 00 01 */
-    const uint8_t *start = NULL;
-    while (p + 3 <= end) {
-        if (p[0] == 0 && p[1] == 0 && p[2] == 1) {
-            if (start) {
-                const uint8_t *stop = p;
-                while (stop > start && stop[-1] == 0)
-                    stop--;
-                int ret = handle_nal(c, start, stop - start, out);
-                if (ret < 0)
-                    return ret;
-            }
-            p += 3;
-            start = p;
-        } else {
-            p++;
-        }
-    }
-    if (start && start < end)
-        return handle_nal(c, start, end - start, out);
-    return 0;
+    return dvc_for_each_nal(in->data, in->size, c->length_size, handle_nal, &r);
 }
 
 /* hvcC without enhancement-layer parameter sets (layer id > 0, UNSPEC62/63 arrays). */
-static int filter_hvcc(const uint8_t *src, int size, uint8_t **dst, int *dst_size)
+int dvc_filter_hvcc(const uint8_t *src, int size, uint8_t **dst, int *dst_size)
 {
     if (size < 23 || src[0] != 1)
         return 0; /* not hvcC: leave as is */
@@ -379,7 +554,7 @@ static int filter_hvcc(const uint8_t *src, int size, uint8_t **dst, int *dst_siz
                 ret = AVERROR_INVALIDDATA;
                 goto fail;
             }
-            if (len >= 2 && type != NAL_UNSPEC62 && type != NAL_UNSPEC63 && nal_layer(p) == 0) {
+            if (len >= 2 && type != DVC_NAL_RPU && type != DVC_NAL_EL && dvc_nal_layer(p) == 0) {
                 if ((ret = buf_put_be(&units, len, 2)) < 0 || (ret = buf_append(&units, p, len)) < 0) {
                     av_free(units.data);
                     goto fail;
@@ -414,7 +589,7 @@ static void fail(DvcStats *s, const char *what, int err)
     snprintf(s->error, sizeof(s->error), "%s: %s", what, msg);
 }
 
-static int dolby_level(const AVCodecParameters *par, AVRational fps)
+int dvc_dolby_level(const AVCodecParameters *par, AVRational fps)
 {
     /* level from pixel rate when the source has no configuration record */
     double rate = (double)par->width * par->height * (fps.num && fps.den ? av_q2d(fps) : 24.0);
@@ -424,6 +599,27 @@ static int dolby_level(const AVCodecParameters *par, AVRational fps)
         if (rate <= max_rate[level])
             return level;
     return 13;
+}
+
+int dvc_profile81_record(AVCodecParameters *par, int level)
+{
+    av_packet_side_data_remove(par->coded_side_data, &par->nb_coded_side_data, AV_PKT_DATA_DOVI_CONF);
+    size_t dovi_size = 0;
+    AVDOVIDecoderConfigurationRecord *dovi = av_dovi_alloc(&dovi_size);
+    if (!dovi)
+        return AVERROR(ENOMEM);
+    dovi->dv_version_major = 1;
+    dovi->dv_profile = 8;
+    dovi->dv_level = (uint8_t)level;
+    dovi->rpu_present_flag = 1;
+    dovi->el_present_flag = 0;
+    dovi->bl_present_flag = 1;
+    dovi->dv_bl_signal_compatibility_id = 1; /* HDR10 */
+    if (!av_packet_side_data_add(&par->coded_side_data, &par->nb_coded_side_data, AV_PKT_DATA_DOVI_CONF, dovi, dovi_size, 0)) {
+        av_free(dovi);
+        return AVERROR(ENOMEM);
+    }
+    return 0;
 }
 
 int dvc_convert(const char *input, const char *output, double max_seconds, int mp4,
@@ -473,17 +669,17 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
         }
     }
     if (!level)
-        level = dolby_level(ist_video->codecpar, ist_video->avg_frame_rate);
+        level = dvc_dolby_level(ist_video->codecpar, ist_video->avg_frame_rate);
     const uint8_t *ex = ist_video->codecpar->extradata;
-    ctx.length_size = (ist_video->codecpar->extradata_size >= 23 && ex[0] == 1) ? (ex[21] & 3) + 1 : 0;
+    ctx.length_size = dvc_length_size(AV_CODEC_ID_HEVC, ex, ist_video->codecpar->extradata_size);
 
-    /* Matroska has no decoding timestamps (see dts_next) */
+    /* Matroska has no decoding timestamps (see dvc_dts_next) */
     int regen_dts = ic->iformat && strstr(ic->iformat->name, "matroska") != NULL;
-    DtsGen dts_gen = {0};
+    DvcDtsGen dts_gen;
     int64_t frame_duration = 1;
     if (regen_dts) {
-        int depth = extradata_reorder_depth(ex, ist_video->codecpar->extradata_size);
-        dts_gen.depth = depth >= 0 ? depth : 4; /* no SPS in the header: more than x265's and Blu-ray encoders' usual 2-3 */
+        int depth = dvc_reorder_depth(AV_CODEC_ID_HEVC, ex, ist_video->codecpar->extradata_size);
+        dvc_dts_init(&dts_gen, depth >= 0 ? depth : 4); /* no SPS in the header: more than x265's and Blu-ray encoders' usual 2-3 */
         AVRational fps = ist_video->avg_frame_rate.num ? ist_video->avg_frame_rate : ist_video->r_frame_rate;
         if (fps.num && fps.den)
             frame_duration = FFMAX(1, av_rescale_q(1, av_inv_q(fps), ist_video->time_base));
@@ -529,7 +725,7 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
         if ((int)i == video) {
             uint8_t *hvcc = NULL;
             int hvcc_size = 0;
-            int filtered = filter_hvcc(ist->codecpar->extradata, ist->codecpar->extradata_size, &hvcc, &hvcc_size);
+            int filtered = dvc_filter_hvcc(ist->codecpar->extradata, ist->codecpar->extradata_size, &hvcc, &hvcc_size);
             if (filtered < 0) {
                 ret = filtered;
                 fail(s, "hvcC", ret);
@@ -541,26 +737,8 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
                 ost->codecpar->extradata_size = hvcc_size;
                 memset(hvcc + hvcc_size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
             }
-            av_packet_side_data_remove(ost->codecpar->coded_side_data, &ost->codecpar->nb_coded_side_data, AV_PKT_DATA_DOVI_CONF);
-            size_t dovi_size = 0;
-            AVDOVIDecoderConfigurationRecord *dovi = av_dovi_alloc(&dovi_size);
-            if (!dovi) {
-                ret = AVERROR(ENOMEM);
+            if ((ret = dvc_profile81_record(ost->codecpar, level)) < 0)
                 goto end;
-            }
-            dovi->dv_version_major = 1;
-            dovi->dv_profile = 8;
-            dovi->dv_level = (uint8_t)level;
-            dovi->rpu_present_flag = 1;
-            dovi->el_present_flag = 0;
-            dovi->bl_present_flag = 1;
-            dovi->dv_bl_signal_compatibility_id = 1; /* HDR10 */
-            if (!av_packet_side_data_add(&ost->codecpar->coded_side_data, &ost->codecpar->nb_coded_side_data,
-                                         AV_PKT_DATA_DOVI_CONF, dovi, dovi_size, 0)) {
-                av_free(dovi);
-                ret = AVERROR(ENOMEM);
-                goto end;
-            }
         }
         map[i] = ost->index;
         s->streams_copied++;
@@ -627,7 +805,7 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
                 pkt->duration = av_rescale_q(1, av_inv_q(fps), ist->time_base);
             }
             if (regen_dts && pkt->pts != AV_NOPTS_VALUE)
-                pkt->dts = dts_next(&dts_gen, pkt->pts, pkt->duration > 0 ? pkt->duration : frame_duration);
+                pkt->dts = dvc_dts_next(&dts_gen, pkt->pts, pkt->duration > 0 ? pkt->duration : frame_duration);
             frame_index++;
             s->video_packets++;
             int64_t ts = pkt->pts != AV_NOPTS_VALUE ? pkt->pts : pkt->dts;
@@ -642,7 +820,7 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
                     break;
                 }
             }
-            if ((ret = rewrite_packet(&ctx, pkt, &buf)) < 0) {
+            if ((ret = dvc_rewrite_packet(&ctx, pkt, &buf)) < 0) {
                 if (!s->error[0])
                     fail(s, "rewrite packet", ret);
                 av_packet_unref(pkt);

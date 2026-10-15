@@ -23,6 +23,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
@@ -31,6 +32,8 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.radio.RadioCenter
+import app.nagmedar.ui.tvlab.remux.RemuxQueue
+import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
@@ -151,6 +154,8 @@ class NagmedarActivity : ComponentActivity() {
         super.onStart()
         PhysicalKeys.forget()
         getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
+        // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
+        lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
     }
 
     override fun onStop() {

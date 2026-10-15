@@ -449,3 +449,65 @@ interface NetworkServerDao {
     @Query("DELETE FROM network_server WHERE id = :id")
     fun delete(id: Long)
 }
+
+/** S-1206: the remux queue, newest first; the worker takes the oldest waiting job. */
+@Dao
+interface RemuxJobDao {
+    @Query("SELECT * FROM remux_job ORDER BY created_at DESC, id DESC")
+    fun observe(): Flow<List<RemuxJobEntry>>
+
+    /** The jobs of one film, newest first. */
+    @Query("SELECT * FROM remux_job WHERE input_uri = :inputUri ORDER BY created_at DESC, id DESC")
+    fun observeInput(inputUri: String): Flow<List<RemuxJobEntry>>
+
+    @Query("SELECT * FROM remux_job WHERE id = :id")
+    fun get(id: Long): RemuxJobEntry?
+
+    @Query("SELECT * FROM remux_job ORDER BY created_at DESC, id DESC")
+    fun all(): List<RemuxJobEntry>
+
+    /** The next job to run: the oldest waiting. */
+    @Query("SELECT * FROM remux_job WHERE state = 'queued' ORDER BY created_at, id LIMIT 1")
+    fun next(): RemuxJobEntry?
+
+    /** Jobs left running, paused or verifying by a process that died; they start again. */
+    @Query("SELECT * FROM remux_job WHERE state IN ('running', 'paused', 'verifying') ORDER BY created_at, id")
+    fun interrupted(): List<RemuxJobEntry>
+
+    @Insert
+    fun insert(entry: RemuxJobEntry): Long
+
+    /** The whole row; a cancel asked meanwhile would be lost, so the worker writes columns while a job runs. */
+    @Update
+    fun update(entry: RemuxJobEntry)
+
+    /** How far a running job got. */
+    @Query("UPDATE remux_job SET progress = :progress, media_seconds = :mediaSeconds, total_seconds = :totalSeconds, bytes_out = :bytesOut WHERE id = :id")
+    fun saveProgress(id: Long, progress: Float, mediaSeconds: Double, totalSeconds: Double, bytesOut: Long)
+
+    /** A job's state, why, and what happened; cancel_requested stays as it is. */
+    @Query("UPDATE remux_job SET state = :state, error = :error, events = :events WHERE id = :id")
+    fun saveState(id: Long, state: String, error: String?, events: String)
+
+    /** A job taken up: its attempt and start. */
+    @Query("UPDATE remux_job SET state = :state, error = NULL, progress = 0, attempts = :attempts, started_at = :startedAt, finished_at = NULL, events = :events WHERE id = :id")
+    fun saveStart(id: Long, state: String, attempts: Int, startedAt: Long, events: String)
+
+    /** The remux done, the verification next: the engine's stats kept. */
+    @Query("UPDATE remux_job SET state = :state, progress = 0, media_seconds = :mediaSeconds, total_seconds = :totalSeconds, bytes_out = :bytesOut, result = :result WHERE id = :id")
+    fun saveResult(id: Long, state: String, mediaSeconds: Double, totalSeconds: Double, bytesOut: Long, result: String)
+
+    /** The job found its output empty and writes it: its to remove from now on. */
+    @Query("UPDATE remux_job SET owns_output = :owns WHERE id = :id")
+    fun saveOwnsOutput(id: Long, owns: Boolean)
+
+    @Query("UPDATE remux_job SET cancel_requested = 1 WHERE id = :id")
+    fun requestCancel(id: Long)
+
+    /** A waiting job cancelled; 0 rows when the worker took it up meanwhile (then [requestCancel]). */
+    @Query("UPDATE remux_job SET state = 'cancelled', error = :error, finished_at = :at, cancel_requested = 0 WHERE id = :id AND state = 'queued'")
+    fun cancelQueued(id: Long, error: String, at: Long): Int
+
+    @Query("DELETE FROM remux_job WHERE id = :id")
+    fun delete(id: Long)
+}

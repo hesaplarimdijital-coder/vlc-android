@@ -97,6 +97,8 @@ Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine 
 - Bir filmi oynatılacağı cihaza göre analiz eder: kapsayıcı, codec, HDR ve Dolby Vision (profil, BL/EL/RPU, FEL/MEL), ses ve altyazı izleri.
 - Paket düzeyinde bit hızı grafiği (1 ve 5 sn tepe, USB 2.0 eşiği; PNG ve CSV olarak dışa aktarılır), harici diskte sıralı okuma testi, bulgular ve rapor.
 - Cihaz profilleri: LG OLED B4 ve Tab S11 Ultra; düzenlenebilir, JSON dosyası olarak paylaşılır ve içe aktarılır.
+- Kayıpsız remux: rapordaki “Remux” ile film, video akışına dokunulmadan yeni bir MKV'ye yazılır (kendi FFmpeg derlememizle paket paket kopyalanır; ses ve altyazı izleri, bölümler, ekler ve etiketler korunur). Dolby Vision profil 7 (UHD Blu-ray çift katman) rapor söylüyorsa profil 8.1'e çevrilir: RPU dönüştürülür (dovi_tool), iyileştirme katmanı atılır, temel katman bit bit kalır. İşler sırayla ön planda çalışır (bildirimde ilerleme ve İptal), çıktı seçilen klasörde yeni, boş bir dosyaya SAF ile yazılır (kaynağın kendisi ya da dolu bir dosya çıktı olarak kabul edilmez); pil zayıfken ya da cihaz ısınınca duraklar, kesilen iş baştan başlar; 4 GB'tan büyük dosyalar sorunsuz.
+- Doğrulama: çıktı geri okunur, videonun her paketi (dönüşümde temel katmanın NAL birimleri) kaynakla SHA-256 ile karşılaştırılır, Dolby Vision kaydı ve her karenin RPU'su denetlenir. Eşleşmezse iş başarısız sayılır ve çıktı silinir; kaynak dosya hiçbir zaman yazılmak için açılmaz. Eşleşen iş “Video bit bit aynı” rozetini alır.
 
 ### Laboratuvar ve ölçüm
 - Ayarlar › Laboratuvar: ses çıkışı ve bit-perfect, USB DAC, HDMI ekran ve 24p denemeleri; Dolby Vision profil 7'den 8.1'e dönüştürme; whisper ile konuşmadan altyazı.
