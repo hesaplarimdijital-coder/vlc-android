@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:47:10.144Z" hostname="runnervm8k3b6" time="0.738">
+  <properties/>
+  <testcase name="filmsSelectedDark" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.081"/>
+  <testcase name="showPhone" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.069"/>
+  <testcase name="filmsDark" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.074"/>
+  <testcase name="filmsSelectedPhone" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.066"/>
+  <testcase name="seriesDark" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.067"/>
+  <testcase name="showDark" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.069"/>
+  <testcase name="filmsSelectedTableLight" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.076"/>
+  <testcase name="foldersDark" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.068"/>
+  <testcase name="filmsPhone" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.095"/>
+  <testcase name="filmsFilteredLight" classname="app.nagmedar.ui.screenshots.VideoLibraryScreenshotTest" time="0.072"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

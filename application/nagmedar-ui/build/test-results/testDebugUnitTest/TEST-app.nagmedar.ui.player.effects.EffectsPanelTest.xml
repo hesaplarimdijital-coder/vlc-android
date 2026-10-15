@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.effects.EffectsPanelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:46:34.691Z" hostname="runnervm8k3b6" time="2.572">
+  <properties/>
+  <testcase name="eachControlChangesItsEffect" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="1.974"/>
+  <testcase name="listsOpenAndChoose" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="0.313"/>
+  <testcase name="whatThePlayerCannotDoYetIsFadedAndSaysWhy" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="0.087"/>
+  <testcase name="thePanelDocksBesideAWideWindowsVideoAndUnderANarrowOnes" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="0.043"/>
+  <testcase name="theTabsAndTheCloseButton" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="0.07"/>
+  <testcase name="saveForThisFileAndMakeDefault" classname="app.nagmedar.ui.player.effects.EffectsPanelTest" time="0.085"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

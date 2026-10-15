@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioNowPlayingTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:46:43.575Z" hostname="runnervm8k3b6" time="0.118">
+  <properties/>
+  <testcase name="aPlaylistStationKeepsItsStripWhenLibvlcExpandsIt" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.031"/>
+  <testcase name="nothingStartedHereOrNothingPlayingIsNoStrip" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.02"/>
+  <testcase name="aNewTitleReplacesTheOld" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.016"/>
+  <testcase name="aStreamWithoutATitleShowsTheStationAsLive" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.024"/>
+  <testcase name="theTitleTheStreamSendsIsSplitIntoArtistAndSong" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.013"/>
+  <testcase name="anotherMediaTakingOverEndsTheStrip" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

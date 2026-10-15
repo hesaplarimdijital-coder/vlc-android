@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioListsTest" tests="15" skipped="0" failures="3" errors="0" timestamp="2026-10-15T07:46:43.287Z" hostname="runnervm8k3b6" time="0.264">
+  <properties/>
+  <testcase name="aDatabaseThatFailsIsSaidAndDoesNotCrash" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.02"/>
+  <testcase name="skippedEntriesAreCounted" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="aFavouriteIsKeptAndTheStarGoesBothWays" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="takingAStationOutOfFavouritesIsUnstarringIt" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="forgettingARecentStationKeepsItsStar" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.014"/>
+  <testcase name="whatPlaysIsShownInTheController" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="takingAStationOutOfRecentForgetsItAndUndoBringsItBack" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.019">
+    <failure message="java.util.NoSuchElementException: List is empty." type="java.util.NoSuchElementException">java.util.NoSuchElementException: List is empty.
+	at kotlin.collections.CollectionsKt___CollectionsKt.single(_Collections.kt:616)
+	at app.nagmedar.ui.radio.RadioListsTest.takingAStationOutOfRecentForgetsItAndUndoBringsItBack(RadioListsTest.kt:75)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="aFileWithSomeStationsKnownCountsTheNewAndThePresent" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.017">
+    <failure message="java.lang.AssertionError: expected:&lt;3&gt; but was:&lt;2&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;3&gt; but was:&lt;2&gt;
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at app.nagmedar.ui.radio.RadioListsTest.aFileWithSomeStationsKnownCountsTheNewAndThePresent(RadioListsTest.kt:135)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="anImportedStationIsRemovedAndPutBack" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.019"/>
+  <testcase name="theListsStartUnknownThenEmptyAndTheSearchIsShown" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="aFileThatIsNoGoodSaysWhyAndKeepsTheTab" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.023"/>
+  <testcase name="theSameFileAgainAddsNothing" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.014"/>
+  <testcase name="theListStaysWhenTheMarksCannotBeRead" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <testcase name="aStationPlayedIsRecentWithTheLatestFirst" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.015">
+    <failure message="java.lang.AssertionError: expected:&lt;[Haber Hattı, Gece Cazı]&gt; but was:&lt;[]&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;[Haber Hattı, Gece Cazı]&gt; but was:&lt;[]&gt;
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at app.nagmedar.ui.radio.RadioListsTest.aStationPlayedIsRecentWithTheLatestFirst(RadioListsTest.kt:67)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:502)
+	at org.robolectric.internal.SandboxTestRunner$2.lambda$evaluate$2(SandboxTestRunner.java:285)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:104)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="aFileOfStationsIsImportedAndShown" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

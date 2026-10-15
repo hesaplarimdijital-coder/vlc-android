@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioPageTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:46:43.704Z" hostname="runnervm8k3b6" time="1.222">
+  <properties/>
+  <testcase name="enterPlaysTheStationThatHasTheKeyboard" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.131"/>
+  <testcase name="whatIsTypedIsSearched" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.073"/>
+  <testcase name="aFilterIsPickedFromTheDirectorysList" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.076"/>
+  <testcase name="aCodecAndABitrateAreFilters" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.084"/>
+  <testcase name="aBusyDirectoryAndAnErrorEachSayWhat" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.061"/>
+  <testcase name="whileItSearchesItSaysSo" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.055"/>
+  <testcase name="aClickPlaysTheStation" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.064"/>
+  <testcase name="withoutAConnectionItSaysSoAndTriesAgain" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.061"/>
+  <testcase name="aFullPageOffersMore" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.239"/>
+  <testcase name="theSearchShortcutPutsTheKeyboardInTheBox" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.054"/>
+  <testcase name="nothingFoundSaysItAndOffersToClearTheFilters" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.054"/>
+  <testcase name="theOrderIsChosen" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.082"/>
+  <testcase name="theMenuVotesAndCopiesTheAddress" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.123"/>
+  <testcase name="theBestStationsAreListedWithWhatIsKnownOfThem" classname="app.nagmedar.ui.radio.RadioPageTest" time="0.063"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

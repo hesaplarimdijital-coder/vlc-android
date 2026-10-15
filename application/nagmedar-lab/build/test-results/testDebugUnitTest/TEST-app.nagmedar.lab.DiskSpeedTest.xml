@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.lab.DiskSpeedTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:44:11.929Z" hostname="runnervm8k3b6" time="0.007">
+  <properties/>
+  <testcase name="theSpeedIsRead" classname="app.nagmedar.lab.DiskSpeedTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

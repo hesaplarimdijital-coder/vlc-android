@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.snapshot.HdrPngTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:46:38.640Z" hostname="runnervm8k3b6" time="0.06">
+  <properties/>
+  <testcase name="aLargePictureIsCutIntoChunks" classname="app.nagmedar.ui.player.snapshot.HdrPngTest" time="0.053"/>
+  <testcase name="aPqPictureSaysSoAndKeepsItsCodes" classname="app.nagmedar.ui.player.snapshot.HdrPngTest" time="0.001"/>
+  <testcase name="halfFloatsBecomeCodes" classname="app.nagmedar.ui.player.snapshot.HdrPngTest" time="0.005"/>
+  <testcase name="anHlgPictureWithoutLightLevels" classname="app.nagmedar.ui.player.snapshot.HdrPngTest" time="0.0"/>
+  <testcase name="subtitlesSitAtTheReferenceWhite" classname="app.nagmedar.ui.player.snapshot.HdrPngTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
