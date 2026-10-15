@@ -77,10 +77,10 @@ class KeyboardMapTest {
         TestLayouts.use(injected to TestLayouts.turkishQ)
         map()
         compose.onNodeWithText("Klavye: Türkçe Q · tuşlar üzerlerinde yazdığı gibi").assertExists()
-        // "Ğ" where a US keyboard has "[", Yavaşlat on it; "Ö" where it has ",", free alone
+        // "Ğ" where a US keyboard has "[", Yavaşlat on it; "Ö" where it has ",", only the lyrics editor's key
         compose.onNodeWithContentDescription("Ğ · Yavaşlat").assertExists()
         compose.onNodeWithContentDescription("- · Normal hız").assertExists()
-        compose.onNodeWithContentDescription("Ö · boş").assertExists()
+        compose.onNodeWithContentDescription("Ö · Söz düzenleyici: son damga 0,1 sn önce").assertExists()
         compose.onNodeWithContentDescription("Boşluk · Oynat / duraklat").assertExists()
         // Ctrl shows its layer: Ctrl+Ö is Ayarlar
         compose.onAllNodesWithContentDescription("Ctrl")[0].performClick()

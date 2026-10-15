@@ -67,6 +67,8 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.lyrics.LyricsSession
 import app.nagmedar.ui.lyrics.LyricsTrack
 import app.nagmedar.ui.lyrics.PlayingLyricsFullScreen
+import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
+import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.music.MusicNowPlaying
@@ -311,6 +313,8 @@ private fun NagmedarMain(
                     SubtitleToolsHost()
                     // S-709: subtitles from a film's speech, asked for from its menu, and what came of the job
                     WhisperHost(Modifier.align(Alignment.BottomEnd).padding(16.dp))
+                    // S-1005: the lyrics editor, over the lyrics
+                    if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false })
                     // "Sıradaki" beside the screen, over it on a phone (S-310)
                     if (queuePanel.open) {
                         val queue = rememberPlayQueue()

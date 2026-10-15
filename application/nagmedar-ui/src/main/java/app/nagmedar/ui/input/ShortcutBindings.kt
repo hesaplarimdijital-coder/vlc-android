@@ -98,16 +98,18 @@ fun parseChord(text: String): KeyChord? {
 
 /**
  * Why [chord] cannot be a shortcut, or null when it can: Meta's chords, Alt+Tab and Alt+F4 are the
- * system's, F10 opens the menu bar, and plain Tab, Enter and Escape move and choose in the window.
+ * system's, F10 opens the menu bar, and plain Tab, Enter and Escape move and choose in the window (Enter
+ * is free in the lyrics editor, [scope] [ShortcutScope.Editor]).
  */
 @StringRes
-fun reservedReason(chord: KeyChord): Int? {
+fun reservedReason(chord: KeyChord, scope: ShortcutScope = ShortcutScope.Global): Int? {
     val plain = !chord.ctrl && !chord.alt && !chord.meta
     return when {
         chord.meta -> R.string.nag_sc_reserved_system
         chord.alt && !chord.ctrl && (chord.key == Key.Tab || chord.key == Key.F4) -> R.string.nag_sc_reserved_system
         chord.key == Key.F10 && plain && !chord.shift -> R.string.nag_sc_reserved_menu
-        plain && (chord.key == Key.Tab || chord.key == Key.Enter || chord.key == Key.Escape) -> R.string.nag_sc_reserved_navigation
+        // the lyrics editor (S-1005) has no focus to move or control to choose: its Enter stamps
+        plain && (chord.key == Key.Tab || chord.key == Key.Escape || (chord.key == Key.Enter && scope != ShortcutScope.Editor)) -> R.string.nag_sc_reserved_navigation
         else -> null
     }
 }
@@ -221,7 +223,7 @@ object ShortcutFile {
             val id = ids[name]
             val value = bindings.optString(name).trim()
             val chord = if (value.isEmpty()) null else parseChord(value)
-            if (id == null || (value.isNotEmpty() && (chord == null || reservedReason(chord) != null))) {
+            if (id == null || (value.isNotEmpty() && (chord == null || reservedReason(chord, ShortcutRegistry.default(id).scope) != null))) {
                 skipped += name
                 continue
             }

@@ -28,6 +28,8 @@ Sözlüğü testler denetler:
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
 | kapak | cover | kapak resmi | artwork | Albümün kapağı: dosyanın etiketlerinden, klasöründen, Cover Art Archive'dan ya da elle seçilen; “Kapağı değiştir…”, “Kapağı yeniden ara” |
 | zamanlı söz, düz söz | synced lyrics, plain lyrics | senkron söz | | Satırları LRC ya da SYLT ile zamanlanmış söz çalarken izlenir; düz söz zamansızdır. Sırayla dosyanın etiketlerinden, yanındaki .lrc dosyasından, LRCLIB'den (Ayarlar › Sözler) |
+| damga, damgalamak | stamp | mühür | | Söz düzenleyicide (Düzenle / Zamanla) bir satırın ya da sözcüğün başladığı an: Enter parçanın o anki yerini satıra damgalar, Geri tuşu son damgayı geri alır; “3 / 12 satır damgalandı” |
+| yan dosya | sidecar file | | | Parçayla aynı adlı .lrc dosyası, parçanın klasöründe; düzenleyici sözleri “Dosyanın yanına (.lrc)” ya da “Etikete” yazar, önceki sözler hiç silinmez |
 | sanatçı | artist | | | |
 | albüm | album | | | |
 | çalma listesi | playlist | oynatma listesi, oynatma listeleri | | Kısa yerlerde “liste”: “Yeni liste”, “Listeye ekle…”, “Listeden kaldır” |
@@ -180,6 +182,7 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 - GNU General Public License
 - Last.fm
 - ListenBrainz
+- LRCLIB
 - ReplayGain
 - SIL Open Font License
 - VLC for Android

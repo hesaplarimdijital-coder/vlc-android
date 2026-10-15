@@ -259,8 +259,8 @@ interface LyricsDao {
     @Query("SELECT COUNT(*) FROM lyrics_cache WHERE source = 'lrclib' AND (text != '' OR language IS NOT NULL)")
     fun countDownloaded(): Int
 
-    /** S-1502: what a backup keeps of the lyrics: the user's own, and those given a delay. */
-    @Query("SELECT * FROM lyrics_cache WHERE source = 'user' OR offset_ms != 0 ORDER BY track_key, source")
+    /** S-1502: what a backup keeps of the lyrics: the user's own, those given a delay, and (S-1005) the originals the editor replaced. */
+    @Query("SELECT * FROM lyrics_cache WHERE source IN ('user', 'original_tag', 'original_file') OR offset_ms != 0 ORDER BY track_key, source")
     fun kept(): List<LyricsEntry>
 
     /** S-1502: a backup's lyrics, over what is here for the same track and source. */

@@ -223,6 +223,133 @@ TagLib::ID3v2::Tag *id3v2(TagLib::File *file)
     return nullptr;
 }
 
+/* a code point as UTF-8 */
+void appendUtf8(std::string &out, unsigned long cp)
+{
+    if (cp < 0x80) {
+        out += static_cast<char>(cp);
+    } else if (cp < 0x800) {
+        out += static_cast<char>(0xC0 | (cp >> 6));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else if (cp < 0x10000) {
+        out += static_cast<char>(0xE0 | (cp >> 12));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else {
+        out += static_cast<char>(0xF0 | (cp >> 18));
+        out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    }
+}
+
+/* four hex digits at [p], or -1 */
+long hex4(const char *p)
+{
+    long v = 0;
+    for (int i = 0; i < 4; i++) {
+        char c = p[i];
+        v <<= 4;
+        if (c >= '0' && c <= '9') v |= c - '0';
+        else if (c >= 'a' && c <= 'f') v |= c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F') v |= c - 'A' + 10;
+        else return -1;
+    }
+    return v;
+}
+
+/* the JSON string starting after its opening quote at [*p]; false when it is malformed. *p ends after the closing quote. */
+bool jsonString(const char *&p, std::string &out)
+{
+    out.clear();
+    for (; *p; p++) {
+        unsigned char c = static_cast<unsigned char>(*p);
+        if (c == '"') {
+            p++;
+            return true;
+        }
+        if (c != '\\') {
+            out += static_cast<char>(c);
+            continue;
+        }
+        switch (*++p) {
+        case '"': out += '"'; break;
+        case '\\': out += '\\'; break;
+        case '/': out += '/'; break;
+        case 'b': out += '\b'; break;
+        case 'f': out += '\f'; break;
+        case 'n': out += '\n'; break;
+        case 'r': out += '\r'; break;
+        case 't': out += '\t'; break;
+        case 'u': {
+            long cp = hex4(p + 1);
+            if (cp < 0)
+                return false;
+            p += 4;
+            if (cp >= 0xD800 && cp < 0xDC00 && p[1] == '\\' && p[2] == 'u') {
+                long low = hex4(p + 3);
+                if (low >= 0xDC00 && low < 0xE000) {
+                    cp = 0x10000 + ((cp - 0xD800) << 10) + (low - 0xDC00);
+                    p += 6;
+                }
+            }
+            appendUtf8(out, static_cast<unsigned long>(cp));
+            break;
+        }
+        default: return false;
+        }
+    }
+    return false;
+}
+
+void skipSpace(const char *&p)
+{
+    while (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+        p++;
+}
+
+/* the synced lyrics' JSON, [[ms, "line"], ...] as nag_tags_read_lyrics gives it: false when it is malformed */
+bool parseSynced(const char *json, TagLib::ID3v2::SynchronizedLyricsFrame::SynchedTextList &lines)
+{
+    const char *p = json;
+    skipSpace(p);
+    if (*p++ != '[')
+        return false;
+    skipSpace(p);
+    if (*p == ']')
+        return true;
+    for (;;) {
+        skipSpace(p);
+        if (*p++ != '[')
+            return false;
+        skipSpace(p);
+        char *end = nullptr;
+        long ms = strtol(p, &end, 10);
+        if (end == p || ms < 0)
+            return false;
+        p = end;
+        skipSpace(p);
+        if (*p++ != ',')
+            return false;
+        skipSpace(p);
+        if (*p++ != '"')
+            return false;
+        std::string text;
+        if (!jsonString(p, text))
+            return false;
+        skipSpace(p);
+        if (*p++ != ']')
+            return false;
+        lines.append(TagLib::ID3v2::SynchronizedLyricsFrame::SynchedText(static_cast<unsigned int>(ms), TagLib::String(text, TagLib::String::UTF8)));
+        skipSpace(p);
+        if (*p == ',') {
+            p++;
+            continue;
+        }
+        return *p == ']';
+    }
+}
+
 } // namespace
 
 /*
@@ -561,5 +688,66 @@ extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const
         *written = static_cast<int>(kept.size() - rejected.size());
     if (cover)
         *cover = with_cover ? 1 : 0;
+    return 0;
+}
+
+/*
+ * S-1005: the lyrics written into the file's tags, the way nag_tags_read_lyrics reads them: [text]
+ * as the plain lyrics (ID3v2's USLT, the Vorbis comments' LYRICS, MP4's ©lyr, APE's Lyrics), its
+ * text LRC when the lines are timed; [synced] as ID3v2's SYLT in milliseconds ([[ms, "line"], ...])
+ * for the formats that keep one. NULL or empty removes what the file had of the kind. Nothing else
+ * in the tags is touched.
+ */
+extern "C" int nag_tags_write_lyrics(int fd, const char *name, const char *text, const char *synced, char *error, size_t error_size)
+{
+    if (fd < 0) {
+        snprintf(error, error_size, "no file");
+        return -1;
+    }
+    TagLib::ID3v2::SynchronizedLyricsFrame::SynchedTextList lines;
+    if (synced && *synced && !parseSynced(synced, lines)) {
+        snprintf(error, error_size, "the synced lyrics are not [[ms, \"line\"], ...]");
+        return -1;
+    }
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, false);
+    if (file.isNull()) {
+        snprintf(error, error_size, "the file's format is not one TagLib writes");
+        return -1;
+    }
+    TagLib::PropertyMap properties = file.properties();
+    /* the names nag_tags_read_lyrics looks for, so that no old text outranks the new one */
+    for (const char *key : {"LYRICS", "UNSYNCEDLYRICS", "UNSYNCED LYRICS", "USLT"})
+        properties.erase(key);
+    /* and a USLT with a description, which comes as "LYRICS:<description>" */
+    TagLib::StringList described;
+    for (const auto &entry : properties) {
+        if (entry.first.startsWith("LYRICS"))
+            described.append(entry.first);
+    }
+    for (const auto &key : described)
+        properties.erase(key);
+    if (text && *text)
+        properties.replace("LYRICS", TagLib::StringList(TagLib::String(text, TagLib::String::UTF8)));
+    TagLib::PropertyMap rejected = file.setProperties(properties);
+    if (!rejected.isEmpty()) {
+        snprintf(error, error_size, "%s cannot hold %s", name ? name : "the file", rejected.begin()->first.toCString(true));
+        return -1;
+    }
+    if (TagLib::ID3v2::Tag *tag = id3v2(file.file())) {
+        tag->removeFrames("SYLT");
+        if (!lines.isEmpty()) {
+            auto *frame = new TagLib::ID3v2::SynchronizedLyricsFrame(TagLib::String::UTF8);
+            frame->setTimestampFormat(TagLib::ID3v2::SynchronizedLyricsFrame::AbsoluteMilliseconds);
+            frame->setType(TagLib::ID3v2::SynchronizedLyricsFrame::Lyrics);
+            frame->setLanguage("XXX");
+            frame->setSynchedText(lines);
+            tag->addFrame(frame);
+        }
+    }
+    if (!file.save() || stream.failed()) {
+        snprintf(error, error_size, "writing the tags failed");
+        return -1;
+    }
     return 0;
 }

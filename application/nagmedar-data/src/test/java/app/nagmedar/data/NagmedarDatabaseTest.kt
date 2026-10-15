@@ -398,7 +398,10 @@ class NagmedarDatabaseTest {
         lyrics.save(LyricsEntry("t1", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]bir", fetchedAt = 1))
         lyrics.save(LyricsEntry("t2", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]iki", offsetMs = 300, fetchedAt = 1))
         lyrics.save(LyricsEntry("t3", LyricsSource.USER, synced = false, text = "üç"))
-        assertEquals(listOf("t2", "t3"), lyrics.kept().map { it.trackKey })
+        // S-1005: and the originals the lyrics editor replaced
+        lyrics.save(LyricsEntry("t4", LyricsSource.ORIGINAL_TAG, synced = false, text = "özgün"))
+        lyrics.save(LyricsEntry("t5", LyricsSource.ORIGINAL_FILE, synced = true, text = "[00:01.00]özgün"))
+        assertEquals(listOf("t2", "t3", "t4", "t5"), lyrics.kept().map { it.trackKey })
         lyrics.saveAll(listOf(LyricsEntry("t1", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]bir", offsetMs = -200, fetchedAt = 1)))
         assertEquals(-200L, lyrics.forTrack("t1").single().offsetMs)
 

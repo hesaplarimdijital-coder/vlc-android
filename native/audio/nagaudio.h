@@ -454,6 +454,16 @@ int nag_tags_write_replaygain(int fd, const char *name, const NagReplayGainTags 
 char *nag_tags_read_lyrics(int fd, const char *name);
 
 /**
+ * S-1005: writes lyrics into the tags of the file behind [fd] (read-write; [name] with its
+ * extension helps the type detection), as nag_tags_read_lyrics reads them: [text] as the plain
+ * lyrics (USLT, LYRICS, ©lyr; LRC text when the lines are timed), [synced] as ID3v2's SYLT
+ * (MP3, AIFF, WAV), JSON [[ms, "line"], ...] in milliseconds. NULL or "" removes what the file
+ * had of the kind; nothing else in the tags changes. The descriptor stays the caller's. 0, or
+ * negative with [error].
+ */
+int nag_tags_write_lyrics(int fd, const char *name, const char *text, const char *synced, char *error, size_t error_size);
+
+/**
  * S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes
  * and their *size; NULL when there is none. The descriptor stays the caller's; the caller frees.
  */

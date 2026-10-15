@@ -36,6 +36,7 @@ import app.nagmedar.ui.theme.NagTheme
  * thickens and takes the accent when the keyboard is in it, [placeholder] while empty, dots for a
  * [secret] (a password, a token) and no suggestions or capitals for it. [onDone] answers the
  * keyboard's Done and the Enter key (the field's own, as for any one-line field); Tab moves on to the next control.
+ * With [lines] above one it is a text box of that many lines (S-1005), in which Enter starts a line.
  */
 @Composable
 fun NagTextField(
@@ -47,6 +48,7 @@ fun NagTextField(
     secret: Boolean = false,
     enabled: Boolean = true,
     onDone: (() -> Unit)? = null,
+    lines: Int = 1,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -60,14 +62,16 @@ fun NagTextField(
             value = value,
             onValueChange = onValueChange,
             enabled = enabled,
-            singleLine = true,
+            singleLine = lines <= 1,
+            minLines = lines,
+            maxLines = if (lines <= 1) 1 else lines * 2,
             textStyle = NagTheme.type.body.copy(color = colors.text),
             cursorBrush = SolidColor(colors.accent),
             visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
                 keyboardType = if (secret) KeyboardType.Password else KeyboardType.Text,
-                imeAction = ImeAction.Done,
+                imeAction = if (lines <= 1) ImeAction.Done else ImeAction.Default,
             ),
             keyboardActions = KeyboardActions(onDone = { if (onDone != null) onDone() else focusManager.clearFocus() }),
             interactionSource = interaction,

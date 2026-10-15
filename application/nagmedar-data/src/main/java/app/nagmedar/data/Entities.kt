@@ -153,6 +153,12 @@ object LyricsSource {
     const val EMBEDDED = "embedded"
     const val FILE = "file"
     const val USER = "user"
+
+    /** S-1005: what the file's tags held before the lyrics editor wrote to them; kept once, never overwritten. */
+    const val ORIGINAL_TAG = "original_tag"
+
+    /** S-1005: what the .lrc beside the file held before the lyrics editor wrote over it; kept once. */
+    const val ORIGINAL_FILE = "original_file"
 }
 
 object LyricsKey {

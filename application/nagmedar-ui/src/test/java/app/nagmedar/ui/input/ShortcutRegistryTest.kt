@@ -74,6 +74,38 @@ class ShortcutRegistryTest {
     }
 
     @Test
+    fun theEditorsKeysAnswerOnlyInTheEditorsScope() {
+        val enter = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_ENTER))
+        assertNull(ShortcutRegistry.match(enter))
+        assertNull(ShortcutRegistry.match(enter, setOf(ShortcutScope.Global, ShortcutScope.Player)))
+        assertEquals(ShortcutId.LrcStamp, ShortcutRegistry.match(enter, setOf(ShortcutScope.Editor))?.id)
+        val backspace = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_DEL))
+        assertEquals(ShortcutId.LrcUnstamp, ShortcutRegistry.match(backspace, setOf(ShortcutScope.Editor))?.id)
+        val w = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_W))
+        assertEquals(ShortcutId.LrcWordMode, ShortcutRegistry.match(w, setOf(ShortcutScope.Editor))?.id)
+    }
+
+    @Test
+    fun theEditorScopeOverlapsOnlyItself() {
+        assertTrue(ShortcutScope.Editor.overlaps(ShortcutScope.Editor))
+        assertTrue(!ShortcutScope.Editor.overlaps(ShortcutScope.Global))
+        assertTrue(!ShortcutScope.Player.overlaps(ShortcutScope.Editor))
+        assertTrue(ShortcutScope.Global.overlaps(ShortcutScope.Player))
+        val lrc = ShortcutId.entries.filter { it.name.startsWith("Lrc") }.map { ShortcutRegistry[it] }
+        assertTrue(lrc.isNotEmpty() && lrc.all { it.scope == ShortcutScope.Editor && it.chord != null })
+    }
+
+    @Test
+    fun anEditorKeyAndAPlayerKeyOnOneChordAreNotAConflictButTwoEditorKeysAre() {
+        val stamp = ShortcutRegistry[ShortcutId.LrcStamp]
+        val player = ShortcutRegistry[ShortcutId.Mute].copy(chord = stamp.chord)
+        assertTrue(!ShortcutRegistry.clash(listOf(stamp, player)))
+        assertEquals(0, ShortcutRegistry.conflicts(ShortcutRegistry.defaults.filter { it.id != ShortcutId.Mute } + player).size)
+        val twice = ShortcutRegistry.defaults + ShortcutRegistry[ShortcutId.LrcUnstamp].copy(id = ShortcutId.LrcLineUp, chord = stamp.chord)
+        assertEquals(true, ShortcutRegistry.conflicts(twice).any { (a, b) -> a.scope == ShortcutScope.Editor && b.scope == ShortcutScope.Editor })
+    }
+
+    @Test
     fun systemShortcutListCoversEveryShortcut() {
         val resources = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().resources
         val groups = ShortcutRegistry.keyboardShortcutGroups(resources)

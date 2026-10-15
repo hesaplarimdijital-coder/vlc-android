@@ -169,6 +169,13 @@ object NativeAudio {
      */
     @JvmStatic external fun readLyrics(fd: Int, name: String): String?
 
+    /**
+     * S-1005: writes lyrics into the tags of the file behind [fd] (read-write; [name] helps the
+     * type detection): [text] as the plain lyrics (USLT, LYRICS, ©lyr), [synced] as ID3v2's SYLT,
+     * JSON [[ms, "line"], ...]. Null or empty removes what the file had of the kind. 0, or negative.
+     */
+    @JvmStatic external fun writeLyrics(fd: Int, name: String, text: String?, synced: String?): Int
+
     /** S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes; null when there is none. */
     @JvmStatic external fun readCover(fd: Int, name: String): ByteArray?
 
