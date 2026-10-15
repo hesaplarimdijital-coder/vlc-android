@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OPML version="1.1">
+  <head><title></title></head>
+  <body>
+    <outline title="Türsüz" xmlurl="https://tursuz.example.org/rss"/>
+    <outline type="rss" title="Yalnız url" url="https://yalniz.example.org/rss"/>
+    <outline type="link" text="Bir bağlantı" url="https://example.org/baglanti"/>
+    <outline type="rss" text="Adressiz"/>
+    <outline type="rss" text="İki kez" xmlUrl="https://IKI.example.org:443/feed/"/>
+    <outline type="rss" text="İki kez (http)" xmlUrl="http://iki.example.org/feed"/>
+    <outline type="rss" text="Çift kaçış" xmlUrl="https://cift.example.org/rss?a=1&amp;amp;b=2"/>
+    <outline type="rss" text="Adres değil" xmlUrl="hepsi sözcük"/>
+  </body>
+</OPML>

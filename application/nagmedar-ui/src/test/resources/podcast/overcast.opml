@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<opml version="1.0">
+  <head><title>Overcast Podcast Subscriptions</title></head>
+  <body>
+    <outline text="feeds">
+      <outline type="rss" overcastId="123456" text="Gece Yayını" title="Gece Yayını" xmlUrl="https://FEEDS.example.org/gece.xml/" htmlUrl="https://gece.example.org"/>
+      <outline type="rss" overcastId="654321" text="Yolculuk" title="Yolculuk" xmlUrl="https://yolculuk.example.org/feed" htmlUrl="https://yolculuk.example.org"/>
+    </outline>
+    <outline text="episodes">
+      <outline type="podcast-episode" overcastId="777" pubDate="2026-10-09T21:30:00-04:00" title="İkinci gece" url="https://overcast.fm/+AAAA" overcastUrl="https://overcast.fm/+AAAA" enclosureUrl="https://cdn.example.org/gece/0002.m4a"/>
+    </outline>
+  </body>
+</opml>

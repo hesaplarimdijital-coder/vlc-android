@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<opml version="1.0">
+  <head>
+    <title>Pocket Casts Feeds</title>
+  </head>
+  <body>
+    <outline text="feeds">
+      <outline type="rss" text="Gece Yayını" xmlUrl="https://feeds.example.org/gece.xml" />
+      <outline type="rss" text="Yolculuk" xmlUrl="https://yolculuk.example.org/feed" />
+      <outline type="rss" text="Tarih Sohbetleri" xmlUrl="https://tarih.example.org/rss.xml" />
+    </outline>
+  </body>
+</opml>

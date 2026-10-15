@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<opml version="1.0">
+<head>
+	<title>Podcast Addict Subscriptions</title>
+</head>
+<body>
+	<outline text="Müzik" title="Müzik">
+		<outline text="Itrî'nin Mirası" title="Itrî'nin Mirası" type="rss" xmlURL="https://itri.example.org/feed.xml" htmlUrl="https://itri.example.org" />
+		<outline text="Makam Dersleri" type="RSS" XMLURL="https://makam.example.org/feed.xml" />
+	</outline>
+	<outline text="Haber">
+		<outline text="Sabah Özeti" title="Sabah Özeti" type="rss" xmlUrl="feed://sabah.example.org/ozet.rss" />
+		<outline text="Boş klasör" />
+	</outline>
+</body>
+</opml>

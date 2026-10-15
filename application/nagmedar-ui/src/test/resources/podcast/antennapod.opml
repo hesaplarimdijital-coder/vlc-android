@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>AntennaPod Subscriptions</title>
+    <dateCreated>04 Oct 26 18:21:49</dateCreated>
+  </head>
+  <body>
+    <outline text="Gece Yayını" title="Gece Yayını" type="rss" xmlUrl="https://feeds.example.org/gece.xml" htmlUrl="https://gece.example.org"/>
+    <outline text="Bilim &amp; Teknik" title="Bilim &amp; Teknik" type="rss" xmlUrl="https://feeds.example.org/bilim?format=rss&amp;lang=tr" htmlUrl="https://bilim.example.org"/>
+    <outline text="Kitap Kulübü" title="Kitap Kulübü" type="rss" xmlUrl="http://kitap.example.org/rss"/>
+  </body>
+</opml>
