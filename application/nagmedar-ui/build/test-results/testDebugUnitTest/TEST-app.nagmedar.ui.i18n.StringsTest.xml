@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.i18n.StringsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:55:22.825Z" hostname="runnervm8k3b6" time="0.061">
+  <properties/>
+  <testcase name="theSamePlaceholdersInBothLanguages" classname="app.nagmedar.ui.i18n.StringsTest" time="0.01"/>
+  <testcase name="turkishSaysSiz" classname="app.nagmedar.ui.i18n.StringsTest" time="0.038"/>
+  <testcase name="typography" classname="app.nagmedar.ui.i18n.StringsTest" time="0.011"/>
+  <testcase name="everyTextIsInBothLanguages" classname="app.nagmedar.ui.i18n.StringsTest" time="0.001"/>
+  <testcase name="pluralsHaveOneAndOther" classname="app.nagmedar.ui.i18n.StringsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

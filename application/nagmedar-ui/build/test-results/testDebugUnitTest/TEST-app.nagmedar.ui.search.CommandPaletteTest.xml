@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.CommandPaletteTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:56:16.178Z" hostname="runnervm8k3b6" time="0.346">
+  <properties/>
+  <testcase name="withoutAQueryTheRecentComeFirst" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.046"/>
+  <testcase name="theArrowsAndEnterRunAHit" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.049"/>
+  <testcase name="inEnglishTheTitlesAreEnglishCapitals" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.062"/>
+  <testcase name="aClickRunsAHitAndEscapeCloses" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.056"/>
+  <testcase name="prefixesAndTabNarrowTheSearch" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.058"/>
+  <testcase name="typingFindsTurkishWordsFuzzily" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.075"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

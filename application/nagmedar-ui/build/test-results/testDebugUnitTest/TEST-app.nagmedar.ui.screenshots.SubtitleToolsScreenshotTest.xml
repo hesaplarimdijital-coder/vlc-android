@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:56:12.452Z" hostname="runnervm8k3b6" time="1.103">
+  <properties/>
+  <testcase name="cleanTabletLight" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.075"/>
+  <testcase name="cleanPhone" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.139"/>
+  <testcase name="linesDexEnglish" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.111"/>
+  <testcase name="cleanDexEnglish" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.097"/>
+  <testcase name="linesPhone" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.089"/>
+  <testcase name="cleanDex" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.094"/>
+  <testcase name="ratePhoneLight" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.081"/>
+  <testcase name="rateDex" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.106"/>
+  <testcase name="linesDex" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.101"/>
+  <testcase name="linesTabletLight" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.083"/>
+  <testcase name="panelEntry" classname="app.nagmedar.ui.screenshots.SubtitleToolsScreenshotTest" time="0.126"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

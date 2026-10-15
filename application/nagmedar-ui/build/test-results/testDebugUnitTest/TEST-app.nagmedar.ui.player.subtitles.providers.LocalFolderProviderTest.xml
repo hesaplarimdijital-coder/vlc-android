@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:55:39.458Z" hostname="runnervm8k3b6" time="0.007">
+  <properties/>
+  <testcase name="onlySubtitleFilesAreResultsAndNothingIsFoundWithoutAName" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.003"/>
+  <testcase name="aDownloadIsTheFilesBytes" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="theClosestNameRanksFirst" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="aSeriesIsFoundByItsSeasonAndEpisode" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="withoutAFolderItCannotBeAskedAndSaysWhy" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="theLanguageIsReadFromTheNameAndFiltersWhenAsked" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="wordsAreFoldedAndCutAtTheYear" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="whatItCanDoAndWhatItAsksFor" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="theFilmsNameFindsItsFilesWhateverTheAccents" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:55:40.215Z" hostname="runnervm8k3b6" time="0.014">
+  <properties/>
+  <testcase name="anItalicSplitIsClosedAndOpenedAgain" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.007"/>
+  <testcase name="aCueOfTwoLinesSplitsBetweenThem" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <testcase name="timesAndTextAreSet" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.001"/>
+  <testcase name="theTimesAreChecked" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.005"/>
+  <testcase name="cuesAreDeleted" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <testcase name="aSplitOutsideTheCueDoesNothing" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <testcase name="aCueSplitsInTwo" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.001"/>
+  <testcase name="severalCuesShiftTogether" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <testcase name="theNextCueWithAnIssueIsFoundRoundTheList" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <testcase name="cuesMerge" classname="app.nagmedar.ui.player.subtitles.tools.CueOpsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

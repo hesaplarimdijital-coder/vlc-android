@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioPlayerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:55:44.681Z" hostname="runnervm8k3b6" time="0.228">
+  <properties/>
+  <testcase name="everyStartIsAClick" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.021"/>
+  <testcase name="theKeptAddressPlaysWhenTheDirectoryFails" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.018"/>
+  <testcase name="theAddressTheClickGivesIsTheOneThatPlays" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.013"/>
+  <testcase name="theKeptAddressPlaysWhenTheClickIsSlow" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.053"/>
+  <testcase name="aClickThatThrowsAnythingStillLetsTheStationPlay" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.011"/>
+  <testcase name="theStationIsKeptAndNotedAsPlayed" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.011"/>
+  <testcase name="theStationPlaysEvenWhenTheDatabaseFails" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.013"/>
+  <testcase name="aStationOfTheUsersIsNotReported" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.011"/>
+  <testcase name="aClickWithoutAnAddressLeavesTheKeptOne" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.014"/>
+  <testcase name="theSessionKnowsWhatPlays" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.016"/>
+  <testcase name="aSlowClickIsNotCancelledWhenThePlayerStopsWaiting" classname="app.nagmedar.ui.radio.RadioPlayerTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

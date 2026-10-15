@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.PlaylistsBrowserTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:55:26.500Z" hostname="runnervm8k3b6" time="0.3">
+  <properties/>
+  <testcase name="keysMoveAndTakeOutWithTheUndoBar" classname="app.nagmedar.ui.music.PlaylistsBrowserTest" time="0.115"/>
+  <testcase name="aPlaylistIsMadeFromTheEmptyScreen" classname="app.nagmedar.ui.music.PlaylistsBrowserTest" time="0.094"/>
+  <testcase name="tabsOpenTheirPlaylists" classname="app.nagmedar.ui.music.PlaylistsBrowserTest" time="0.091"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
