@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.PlaylistsStateTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:13.935Z" hostname="runnervmmprz5" time="0.024">
+  <properties/>
+  <testcase name="movesAndRemovalsShowAtOnceAndReachTheStore" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.017"/>
+  <testcase name="aDeletedPlaylistComesBackWithItsTracks" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.002"/>
+  <testcase name="aReloadAfterItsOwnChangeMovesNothing" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.001"/>
+  <testcase name="noPlaylistsNothingOpen" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.001"/>
+  <testcase name="anotherTabAndAppend" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.001"/>
+  <testcase name="theFirstPlaylistOpens" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.001"/>
+  <testcase name="renamedAndNamedApart" classname="app.nagmedar.ui.music.PlaylistsStateTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:24.385Z" hostname="runnervmmprz5" time="0.778">
+  <properties/>
+  <testcase name="theWindowSaysWhatWentWrong" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.158"/>
+  <testcase name="theQuotaIsKeptInTheSettings" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.058"/>
+  <testcase name="namesAndLanguages" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.054"/>
+  <testcase name="theAnswersAreReadAsTheApiWritesThem" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.059"/>
+  <testcase name="theFingerprintIsOpenSubtitlesOwn" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.077"/>
+  <testcase name="whatWentWrongIsSaid" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.063"/>
+  <testcase name="theFingerprintFirstThenTheName" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.053"/>
+  <testcase name="theWindowListsWhatWasFoundAndDownloadsIt" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.092"/>
+  <testcase name="aDownloadGoesBesideTheFilmAndShows" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.046"/>
+  <testcase name="withoutAKeyNothingIsAsked" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.046"/>
+  <testcase name="theTabsRowSaysTheQuota" classname="app.nagmedar.ui.player.subtitles.OnlineSubtitlesTest" time="0.07"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

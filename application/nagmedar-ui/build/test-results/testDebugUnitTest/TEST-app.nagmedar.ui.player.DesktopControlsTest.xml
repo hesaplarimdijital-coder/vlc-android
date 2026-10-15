@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.DesktopControlsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:16.841Z" hostname="runnervmmprz5" time="1.315">
+  <properties/>
+  <testcase name="aClickOnTheVideoShowsThemAndADoubleClickFillsTheScreen" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.1"/>
+  <testcase name="pictureInPictureFromTheBar" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.057"/>
+  <testcase name="aMovingMouseShowsThemAndTwoSecondsOfRestHideThem" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.059"/>
+  <testcase name="fingersPassThroughToTheClassicOverlay" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.051"/>
+  <testcase name="aNarrowWindowMakesRoom" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.08"/>
+  <testcase name="theScreenshotButtonTakesOneAndItsMenuChooses" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.112"/>
+  <testcase name="theTimelineSeeksAndShowsTheMomentUnderTheMouse" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.117"/>
+  <testcase name="everyControlAsksThePlayer" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.067"/>
+  <testcase name="atEveryWidthTheFullScreenButtonStaysInTheBar" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.422"/>
+  <testcase name="tracksAreChosenFromTheirMenus" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.139"/>
+  <testcase name="theyStayWhileTheMouseRestsOnThemOrAMenuIsOpen" classname="app.nagmedar.ui.player.DesktopControlsTest" time="0.109"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

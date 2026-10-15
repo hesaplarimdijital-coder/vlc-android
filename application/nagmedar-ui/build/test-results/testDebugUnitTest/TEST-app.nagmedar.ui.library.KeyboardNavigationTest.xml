@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.KeyboardNavigationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:09.829Z" hostname="runnervmmprz5" time="0.294">
+  <properties/>
+  <testcase name="spaceSelectsEnterPlaysInTheGrid" classname="app.nagmedar.ui.library.KeyboardNavigationTest" time="0.105"/>
+  <testcase name="theArrowsMoveThroughTheGrid" classname="app.nagmedar.ui.library.KeyboardNavigationTest" time="0.098"/>
+  <testcase name="spaceSelectsEnterPlaysInTheTable" classname="app.nagmedar.ui.library.KeyboardNavigationTest" time="0.091"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

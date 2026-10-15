@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.VideoLibraryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:11.496Z" hostname="runnervmmprz5" time="0.009">
+  <properties/>
+  <testcase name="filtersCombineAndOrderSorts" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.003"/>
+  <testcase name="filmsByFolderAndInProgress" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.002"/>
+  <testcase name="showsGroupTheirSeasonsAndKnowWhatComesNext" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.002"/>
+  <testcase name="sidecarSubtitles" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.001"/>
+  <testcase name="anEpisodeInProgressComesFirst" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.0"/>
+  <testcase name="episodeNames" classname="app.nagmedar.ui.library.VideoLibraryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

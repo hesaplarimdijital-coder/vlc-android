@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.sync.SyncAssistantTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:26.642Z" hostname="runnervmmprz5" time="0.83">
+  <properties/>
+  <testcase name="aFilmThatRemembersKeepsRememberingWhatIsTakenBack" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.069"/>
+  <testcase name="anotherFilmStartsAfresh" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.06"/>
+  <testcase name="theSubtitlesTabHasTheDelayAndTheAssistant" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.133"/>
+  <testcase name="nothingIsAppliedWithoutBothMarks" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.058"/>
+  <testcase name="theSubtitleFirstMakesThemLaterOntoTheDelayAlreadyThere" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.062"/>
+  <testcase name="theSubtitleLateByThreeHundredFiftyMillisecondsComesEarlier" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.063"/>
+  <testcase name="atAnotherSpeedTheClockCountsInTheFilmsTime" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.059"/>
+  <testcase name="aPauseOrAJumpInBetweenTakesTheFilmsOwnTimes" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.064"/>
+  <testcase name="aFilmsTimeToTheMillisecond" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.055"/>
+  <testcase name="inEnglish" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.078"/>
+  <testcase name="theCardGoesStepByStep" classname="app.nagmedar.ui.player.sync.SyncAssistantTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

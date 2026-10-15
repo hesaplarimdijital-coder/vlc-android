@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:25.330Z" hostname="runnervmmprz5" time="0.753">
+  <properties/>
+  <testcase name="everySizeComesBackAsItsTextScale" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.064"/>
+  <testcase name="vlcsSettingsGetTheLookLibVlcStartsWith" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.063"/>
+  <testcase name="aLookGoesIntoTheSettingsAndComesBack" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.07"/>
+  <testcase name="theClassicSettingsLookIsReadTheFirstTime" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.061"/>
+  <testcase name="aChangeSaysWhenItReachesTheSubtitles" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.113"/>
+  <testcase name="aPresetChangesTheLookAndLeavesWhereTheSubtitlesStand" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.071"/>
+  <testcase name="aLookWaitsForTheNextFilmUntilTheNativeSideTakesItAtOnce" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.067"/>
+  <testcase name="theSectionChangesTheLook" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.147"/>
+  <testcase name="inEnglish" classname="app.nagmedar.ui.player.subtitles.SubtitleStyleTest" time="0.096"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

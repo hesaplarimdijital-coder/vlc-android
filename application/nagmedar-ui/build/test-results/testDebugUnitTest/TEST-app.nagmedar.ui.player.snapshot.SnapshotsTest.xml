@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.snapshot.SnapshotsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:11:23.978Z" hostname="runnervmmprz5" time="0.19">
+  <properties/>
+  <testcase name="aPictureFitsItsView" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.018"/>
+  <testcase name="subtitlesInTheBarsWidenThePicture" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.017"/>
+  <testcase name="theDisplaySizeOfAPicture" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.016"/>
+  <testcase name="theDrawnPartOfALayer" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.026"/>
+  <testcase name="theFileIsNamedAfterTheFilmAndTheTimeInIt" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.019"/>
+  <testcase name="aPictureAloneKeepsItsOwnSize" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.018"/>
+  <testcase name="hdrFilmsByTheirTransfer" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.019"/>
+  <testcase name="theSettingsAreKept" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.021"/>
+  <testcase name="theFolderIsNamedAsAFileManagerNamesIt" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.019"/>
+  <testcase name="subtitlesOverThePictureScaleWithIt" classname="app.nagmedar.ui.player.snapshot.SnapshotsTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

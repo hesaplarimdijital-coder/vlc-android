@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:12:04.136Z" hostname="runnervmmprz5" time="0.276">
+  <properties/>
+  <testcase name="theViewReadsTheRow" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.025"/>
+  <testcase name="aDrainedBatteryStopsTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.024"/>
+  <testcase name="drainRunsEveryWaitingJobInOrder" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.018"/>
+  <testcase name="jobsLeftByADeadProcessAreQueuedAgain" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.02"/>
+  <testcase name="aJobRunsIsVerifiedAndEndsDoneWithItsHash" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <testcase name="aCancelAskedWhileRunningEndsCancelledWithoutAnOutput" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <testcase name="filesThatDoNotOpenAreToldApart" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <testcase name="withoutTheNativeToolsOrACopyOnlyPlanTheJobFailsAtOnce" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.018"/>
+  <testcase name="aLowBatteryPausesTheJobAndChargingResumesIt" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <testcase name="aMismatchFailsTheJobAndRemovesTheOutput" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="heatSlowsThenPausesTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.018"/>
+  <testcase name="aPlanWithoutConversionIsVerifiedWithoutDolbyVision" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="aCancelDuringTheVerificationCountsToo" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="theEnginesErrorFailsTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="aStoppedWorkerPutsTheJobBackInTheQueue" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
