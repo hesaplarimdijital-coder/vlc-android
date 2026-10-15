@@ -97,5 +97,9 @@ interface SubtitleProvider {
     /** Failures are thrown (see [app.nagmedar.ui.player.subtitles.OnlineFailure]); the search reports them per provider. */
     suspend fun search(query: SubtitleQuery): List<SubtitleResult>
 
-    suspend fun download(result: SubtitleResult): SubtitleFile
+    /**
+     * The file for [result]. A provider with a quota tells it to [onQuota] as soon as the
+     * provider has told it, before the file is fetched, so that it is kept when the fetch fails.
+     */
+    suspend fun download(result: SubtitleResult, onQuota: (OnlineQuota) -> Unit = {}): SubtitleFile
 }

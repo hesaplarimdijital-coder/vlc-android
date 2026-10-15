@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -25,6 +26,12 @@ data class ToolsFile(val uri: String, val name: String)
 
 /** Why a file could not be opened. */
 enum class ToolsProblem { Unreadable, Unsupported }
+
+/** What came of a write into the document the system's "save as" made. */
+enum class WriteOutcome { Written, SameFile, Failed }
+
+/** Why a save did not go through. */
+enum class SaveProblem { Failed, SameFile }
 
 /** The three tools, as tabs (S-708). */
 enum class ToolsTab { Clean, FrameRate, Edit }
@@ -37,8 +44,12 @@ interface SubtitleToolsIo {
     /** [bytes] as a new file called [name] beside [file]; null when the app may not write there. Never replaces a file. */
     suspend fun saveBeside(file: ToolsFile, name: String, bytes: ByteArray): SavedSubtitle?
 
-    /** [bytes] into the document [uri], which the system's "save as" made new. */
-    suspend fun write(uri: String, bytes: ByteArray): Boolean
+    /**
+     * [bytes] into the document [uri], which the system's "save as" made new. Nothing is written
+     * when it is [source] (or not empty): the original is never replaced, and a document made for
+     * the write that fails is not left behind.
+     */
+    suspend fun write(uri: String, source: ToolsFile, bytes: ByteArray): WriteOutcome
 }
 
 /** The playing film, when the tools are opened from the player. */
@@ -93,7 +104,9 @@ data class SubtitleToolsState(
     val saved: SavedSubtitle? = null,
     /** Whether the saved file is showing in the film. */
     val loaded: Boolean = false,
-    val saveFailed: Boolean = false,
+    val saveProblem: SaveProblem? = null,
+    /** Closing was asked while edits are not saved: the window asks what to do. */
+    val confirmClose: Boolean = false,
     /** The system's "save as" is wanted, with this name: the folder beside the file is not the app's to write in. */
     val pickName: String? = null,
 ) {
@@ -113,6 +126,8 @@ class SubtitleToolsController(
     /** The word that marks a new file: "film.tr.duzenlendi.srt". */
     private val editedWord: String,
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
+    /** How long typing rests before the previews and the issues are worked out again. */
+    private val debounceMs: Long = REFRESH_DEBOUNCE_MS,
 ) {
     var state by mutableStateOf<SubtitleToolsState?>(null)
         private set
@@ -126,6 +141,7 @@ class SubtitleToolsController(
     private var anchor: Long? = null
     private var pending: ByteArray? = null
     private var job: Job? = null
+    private var refreshJob: Job? = null
 
     /** The window opens on [files] (the first is read), with [playback] when a film plays. */
     fun open(files: List<ToolsFile>, playback: ToolsPlayback? = null) {
@@ -134,8 +150,33 @@ class SubtitleToolsController(
         files.firstOrNull()?.let { choose(it) }
     }
 
+    /**
+     * Whether the window may close now. With edits that are not in a new file yet it may not: the
+     * window asks what to do ([cancelClose], [saveInstead], or closing anyway).
+     */
+    fun askClose(): Boolean {
+        val current = state ?: return true
+        if (current.changed && current.saved == null) {
+            state = current.copy(confirmClose = true)
+            return false
+        }
+        return true
+    }
+
+    /** The question of closing answered with "keep working". */
+    fun cancelClose() {
+        state = state?.copy(confirmClose = false)
+    }
+
+    /** The question of closing answered with "save": the new file is written, the window stays to say where. */
+    fun saveInstead() {
+        state = state?.copy(confirmClose = false)
+        save()
+    }
+
     fun close() {
         job?.cancel()
+        refreshJob?.cancel()
         state = null
         original = null
         history.clear()
@@ -145,6 +186,7 @@ class SubtitleToolsController(
     /** [file] is read; what was being worked on is let go. */
     fun choose(file: ToolsFile) {
         job?.cancel()
+        refreshJob?.cancel()
         val base = state ?: SubtitleToolsState()
         history.clear()
         original = null
@@ -162,7 +204,8 @@ class SubtitleToolsController(
             selected = emptySet(),
             steps = 0,
             saved = null,
-            saveFailed = false,
+            saveProblem = null,
+            confirmClose = false,
             pickName = null,
         )
         job = scope.launch {
@@ -178,8 +221,18 @@ class SubtitleToolsController(
                 return@launch
             }
             val read = withContext(cpu) {
-                val encoding = detectEncoding(bytes)
-                SubtitleCodec.parse(file.name, decodeSubtitle(bytes, encoding))?.takeIf { it.cues.isNotEmpty() }?.let { it to encoding }
+                // a file that cannot be read as a subtitle, whatever is wrong with it, is an unsupported one
+                try {
+                    val encoding = detectEncoding(bytes)
+                    SubtitleCodec.parse(file.name, decodeSubtitle(bytes, encoding))
+                        ?.takeIf { it.cues.isNotEmpty() }
+                        // the decoding leaves the byte order mark out: it is read from the bytes
+                        ?.let { it.copy(bom = hasUtf8Bom(bytes)) to encoding }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
             }
             if (read == null) {
                 state = state?.copy(loading = false, problem = ToolsProblem.Unsupported)
@@ -194,7 +247,8 @@ class SubtitleToolsController(
                     document = document,
                     encoding = encoding,
                     format = document.format,
-                    bom = document.bom,
+                    // a file that was not UTF-8 is written in UTF-8 with its mark: the player reads it so whatever it is told
+                    bom = document.bom || encoding != SubtitleEncoding.Utf8,
                     name = suggestName(file.name, editedWord, document.format),
                     focus = document.cues.firstOrNull()?.id,
                 ),
@@ -409,11 +463,12 @@ class SubtitleToolsController(
         val current = state ?: return
         val document = current.document ?: return
         val file = current.file ?: return
-        if (current.saving || !current.issues.saveable) return
+        // the issues shown may lag behind typing: the file is checked as it is
+        if (current.saving || !CueOps.validate(document.cues).saveable) return
         val output = document.asFormat(current.format ?: document.format) ?: document
         val bytes = output.toBytes(current.bom)
         val name = namedFor(current.name, output.format)
-        state = current.copy(saving = true, saved = null, saveFailed = false, pickName = null, name = name)
+        state = current.copy(saving = true, saved = null, saveProblem = null, pickName = null, name = name)
         job = scope.launch {
             val saved = try {
                 io.saveBeside(file, name, bytes)
@@ -436,28 +491,37 @@ class SubtitleToolsController(
         val bytes = pending
         val current = state ?: return
         val name = current.pickName ?: return
+        val source = current.file
         pending = null
         if (uri == null || bytes == null) {
             state = current.copy(pickName = null)
             return
         }
+        if (source == null) {
+            state = current.copy(pickName = null, saveProblem = SaveProblem.Failed)
+            return
+        }
         state = current.copy(pickName = null, saving = true)
         job = scope.launch {
-            val written = try {
-                io.write(uri, bytes)
+            val outcome = try {
+                io.write(uri, source, bytes)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                false
+                WriteOutcome.Failed
             }
-            if (written) finish(SavedSubtitle(uri, name, beside = false)) else state = state?.copy(saving = false, saveFailed = true)
+            when (outcome) {
+                WriteOutcome.Written -> finish(SavedSubtitle(uri, name, beside = false))
+                WriteOutcome.SameFile -> state = state?.copy(saving = false, saveProblem = SaveProblem.SameFile)
+                WriteOutcome.Failed -> state = state?.copy(saving = false, saveProblem = SaveProblem.Failed)
+            }
         }
     }
 
     private suspend fun finish(saved: SavedSubtitle) {
         val current = state ?: return
         val loaded = current.loadAfter && playback?.let { runCatching { it.load(saved) }.getOrDefault(false) } == true
-        state = current.copy(saving = false, saved = saved, loaded = loaded, saveFailed = false)
+        state = current.copy(saving = false, saved = saved, loaded = loaded, saveProblem = null)
     }
 
     // ---------------------------------------------------------------- shortcuts
@@ -499,21 +563,49 @@ class SubtitleToolsController(
             if (history.size > MAX_STEPS) history.removeAt(0)
         }
         lastKey = key
-        state = refreshed(current.copy(document = next, steps = history.size, saved = null))
+        val changed = current.copy(document = next, steps = history.size, saved = null)
+        if (key == null) {
+            refreshJob?.cancel()
+            state = refreshed(changed)
+        } else {
+            // typing: the file is not gone through again on every key, only when typing rests
+            state = changed
+            scheduleRefresh()
+        }
+    }
+
+    private fun scheduleRefresh() {
+        refreshJob?.cancel()
+        refreshJob = scope.launch {
+            if (debounceMs > 0) delay(debounceMs)
+            val value = state ?: return@launch
+            val document = value.document ?: return@launch
+            val worked = withContext(cpu) { work(document.cues, value) }
+            val now = state ?: return@launch
+            // typed into again meanwhile: the later round does it
+            if (now.document !== document) return@launch
+            state = now.copy(sdhResult = worked.sdh, ratePreview = worked.rate, issues = worked.issues)
+        }
+    }
+
+    private class Worked(val sdh: SdhResult, val rate: RatePreview?, val issues: CueIssues)
+
+    private fun work(cues: List<TimedCue>, value: SubtitleToolsState): Worked {
+        val result = SdhCleaner.clean(cues, value.sdh)
+        return Worked(
+            sdh = if (value.sdh.any) result else SdhResult(cues, emptyList(), cues.size),
+            rate = ratePreview(cues, value),
+            issues = CueOps.validate(cues),
+        )
     }
 
     /** The previews and the issues of [value]'s document, and a focus that is still there. */
     private fun refreshed(value: SubtitleToolsState): SubtitleToolsState {
         val document = value.document ?: return value
         val cues = document.cues
-        val result = SdhCleaner.clean(cues, value.sdh)
+        val worked = work(cues, value)
         val focus = value.focus?.takeIf { id -> cues.any { it.id == id } } ?: cues.firstOrNull()?.id
-        return value.copy(
-            sdhResult = if (value.sdh.any) result else SdhResult(cues, emptyList(), cues.size),
-            ratePreview = ratePreview(cues, value),
-            issues = CueOps.validate(cues),
-            focus = focus,
-        )
+        return value.copy(sdhResult = worked.sdh, ratePreview = worked.rate, issues = worked.issues, focus = focus)
     }
 
     private fun ratePreview(cues: List<TimedCue>, value: SubtitleToolsState): RatePreview? {
@@ -535,6 +627,11 @@ class SubtitleToolsController(
         const val MAX_SHIFT_MS = 86_400_000L
 
         private const val MAX_STEPS = 100
+        private const val REFRESH_DEBOUNCE_MS = 150L
+
+        /** Whether [bytes] begin with the UTF-8 byte order mark. */
+        fun hasUtf8Bom(bytes: ByteArray): Boolean =
+            bytes.size >= 3 && bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte()
 
         /** "film.tr.srt" → "film.tr.duzenlendi.srt": the same name with [word] before the extension. */
         fun suggestName(original: String, word: String, format: SubtitleFormat): String {

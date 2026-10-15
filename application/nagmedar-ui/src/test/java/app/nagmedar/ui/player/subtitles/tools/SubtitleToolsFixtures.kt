@@ -75,6 +75,8 @@ internal class FakeToolsIo(
     /** Whether the folder beside the original takes a new file. */
     var beside: Boolean = true,
     var writes: Boolean = true,
+    /** The document the system's "save as" is taken to be: the original's own address makes it [WriteOutcome.SameFile]. */
+    var sameFile: Boolean = false,
 ) : SubtitleToolsIo {
     class Saved(val original: ToolsFile, val name: String, val bytes: ByteArray)
 
@@ -89,10 +91,11 @@ internal class FakeToolsIo(
         return SavedSubtitle("content://subs/$name", name, beside = true)
     }
 
-    override suspend fun write(uri: String, bytes: ByteArray): Boolean {
-        if (!writes) return false
+    override suspend fun write(uri: String, source: ToolsFile, bytes: ByteArray): WriteOutcome {
+        if (sameFile || uri == source.uri) return WriteOutcome.SameFile
+        if (!writes) return WriteOutcome.Failed
         written += uri to bytes
-        return true
+        return WriteOutcome.Written
     }
 }
 
@@ -121,7 +124,7 @@ internal fun toolsController(
     playback: ToolsPlayback? = null,
     word: String = "duzenlendi",
 ): SubtitleToolsController {
-    val controller = SubtitleToolsController(io, CoroutineScope(Dispatchers.Unconfined), word, cpu = Dispatchers.Unconfined)
+    val controller = SubtitleToolsController(io, CoroutineScope(Dispatchers.Unconfined), word, cpu = Dispatchers.Unconfined, debounceMs = 0)
     controller.open(listOf(file), playback)
     return controller
 }

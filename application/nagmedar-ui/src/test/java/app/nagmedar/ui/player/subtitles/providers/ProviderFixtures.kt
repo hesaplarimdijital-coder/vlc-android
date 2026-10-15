@@ -1,6 +1,7 @@
 package app.nagmedar.ui.player.subtitles.providers
 
 import app.nagmedar.ui.player.subtitles.OnlineProblem
+import app.nagmedar.ui.player.subtitles.OnlineQuota
 import kotlinx.coroutines.delay
 
 /** A provider the tests run: what it finds, how long it takes, how it fails. */
@@ -28,7 +29,7 @@ internal class FakeProvider(
         return results
     }
 
-    override suspend fun download(result: SubtitleResult): SubtitleFile {
+    override suspend fun download(result: SubtitleResult, onQuota: (OnlineQuota) -> Unit): SubtitleFile {
         downloads += result
         failure?.let { throw it }
         return SubtitleFile("1\n00:00:01,000 --> 00:00:02,000\nmerhaba\n".toByteArray(), result.fileName)

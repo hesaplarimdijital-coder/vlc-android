@@ -9,7 +9,9 @@ import app.nagmedar.ui.player.subtitles.OnlineSubtitle
 import app.nagmedar.ui.player.subtitles.OnlineSubtitlesController
 import app.nagmedar.ui.player.subtitles.OkHttpOpenSubtitles
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -22,6 +24,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.GraphicsMode
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /** S-707: OpenSubtitles as a provider: its answers in the common model, searched as S-706 searched. */
 @RunWith(AndroidJUnit4::class)
@@ -105,6 +112,69 @@ class OpenSubtitlesProviderTest {
         assertEquals("Northern.Light.srt", file.fileName)
         assertTrue(file.bytes.isNotEmpty())
         assertEquals(OnlineQuota(4, 5, OnlineSubtitlesController.resetAt("2026-10-13T00:00:00.000Z")), file.quota)
+    }
+
+    @Test
+    fun theQuotaIsToldAtOnceAndIsKeptWhenTheFileDoesNotArrive() {
+        api.fetchFailure = OnlineFailure.Offline()
+        val told = mutableListOf<OnlineQuota>()
+        val thrown = runCatching { runBlocking { provider.download(OpenSubtitlesProvider.resultOf(timed), onQuota = { told += it }) } }.exceptionOrNull()
+        assertTrue(thrown is OnlineFailure.Offline)
+        assertEquals(listOf(OnlineQuota(4, 5, OnlineSubtitlesController.resetAt("2026-10-13T00:00:00.000Z"))), told)
+    }
+
+    /** A server that takes the connection and never answers; [closed] counts down when the client lets go of it. */
+    private class SilentServer : AutoCloseable {
+        val socket = ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"))
+        val closed = CountDownLatch(1)
+        val base get() = "http://127.0.0.1:${socket.localPort}/api/v1/"
+
+        init {
+            thread(isDaemon = true) {
+                runCatching {
+                    socket.accept().use { client ->
+                        val input = client.getInputStream()
+                        // the request is read; then nothing is sent, until the client hangs up
+                        while (input.read() != -1) { /* wait */ }
+                    }
+                }
+                closed.countDown()
+            }
+        }
+
+        override fun close() = socket.close()
+    }
+
+    @Test
+    fun aSearchThatNeverAnswersEndsWithItsTimeoutAndTheCallIsCancelled() {
+        SilentServer().use { server ->
+            val client = OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build()
+            val real = OkHttpOpenSubtitles("key", client = client, base = server.base)
+            val started = System.nanoTime()
+            val thrown = runCatching { runBlocking { withTimeout(300) { real.search(OnlineQuery(null, "Kuzey", listOf("tr"))) } } }.exceptionOrNull()
+            assertTrue(thrown is TimeoutCancellationException)
+            assertTrue("the timeout is not held up by the blocked call", System.nanoTime() - started < TimeUnit.SECONDS.toNanos(5))
+            assertTrue("the connection is let go", server.closed.await(5, TimeUnit.SECONDS))
+        }
+    }
+
+    @Test
+    fun aFileThatNeverArrivesEndsWithItsTimeoutAndTheCallIsCancelled() {
+        SilentServer().use { server ->
+            val client = OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build()
+            val real = OkHttpOpenSubtitles("key", client = client, base = server.base)
+            val thrown = runCatching { runBlocking { withTimeout(300) { real.fetch(server.base + "file.srt") } } }.exceptionOrNull()
+            assertTrue(thrown is TimeoutCancellationException)
+            assertTrue(server.closed.await(5, TimeUnit.SECONDS))
+        }
+    }
+
+    @Test
+    fun aRefusedConnectionIsOffline() {
+        val port = ServerSocket(0).use { it.localPort }
+        val real = OkHttpOpenSubtitles("key", client = OkHttpClient(), base = "http://127.0.0.1:$port/api/v1/")
+        val thrown = runCatching { runBlocking { real.search(OnlineQuery(null, "Kuzey", listOf("tr"))) } }.exceptionOrNull()
+        assertTrue(thrown is OnlineFailure.Offline)
     }
 
     @Test

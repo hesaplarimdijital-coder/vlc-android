@@ -139,6 +139,56 @@ class SubtitleToolsUiTest {
     }
 
     @Test
+    fun escapeWithUnsavedEditsAsksFirstAndKeepsWorkingOnEscapeAgain() {
+        window(SDH_SRT, ToolsTab.Edit)
+        compose.runOnIdle { controller.setText(1, "değişti") }
+        compose.onNodeWithTag("subtools").performKeyInput { pressKey(Key.Escape) }
+        compose.waitForIdle()
+        assertEquals(0, closed)
+        compose.onNodeWithTag("subtools-ask").assertExists()
+        // the question's three answers, in both languages' words; "keep working" has the focus
+        compose.onNodeWithText("Kaydetmeden kapatılsın mı?").assertExists()
+        compose.onNodeWithTag("ask-save").assertTextContains("Kaydet")
+        compose.onNodeWithTag("ask-discard").assertTextContains("Kaydetmeden kapat")
+        compose.onNodeWithTag("ask-keep").assertTextContains("Vazgeç")
+        compose.onNodeWithTag("ask-keep").assertIsFocused()
+        compose.onNodeWithTag("ask-keep").performKeyInput { pressKey(Key.Escape) }
+        compose.waitForIdle()
+        compose.onNodeWithTag("subtools-ask").assertDoesNotExist()
+        assertEquals(0, closed)
+        assertEquals("değişti", controller.state?.document?.cues?.first()?.text)
+    }
+
+    @Test
+    fun closingWithoutSavingClosesAndSavingSavesFirst() {
+        window(SDH_SRT, ToolsTab.Edit)
+        compose.runOnIdle { controller.setText(1, "değişti") }
+        compose.onNodeWithTag("subtools").performKeyInput { pressKey(Key.Escape) }
+        compose.waitForIdle()
+        compose.onNodeWithTag("ask-save").performClick()
+        compose.waitForIdle()
+        assertEquals(1, io.saved.size)
+        compose.onNodeWithTag("subtools-ask").assertDoesNotExist()
+        assertEquals(0, closed)
+        // saved: the window now closes without asking
+        compose.onNodeWithTag("subtools").performKeyInput { pressKey(Key.Escape) }
+        compose.waitForIdle()
+        assertEquals(1, closed)
+    }
+
+    @Test
+    fun discardingFromTheQuestionClosesTheWindow() {
+        window(SDH_SRT, ToolsTab.Edit)
+        compose.runOnIdle { controller.setText(1, "değişti") }
+        compose.onNodeWithTag("subtools").performKeyInput { pressKey(Key.Escape) }
+        compose.waitForIdle()
+        compose.onNodeWithTag("ask-discard").performClick()
+        compose.waitForIdle()
+        assertEquals(1, closed)
+        assertEquals(0, io.saved.size)
+    }
+
+    @Test
     fun withoutAFilmThereAreNoButtonsForItsPosition() {
         window(SDH_SRT, ToolsTab.Edit)
         compose.onNodeWithTag("cue-set-start").assertDoesNotExist()

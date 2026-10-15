@@ -238,7 +238,7 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
 
         override suspend fun load(saved: SavedSubtitle): Boolean {
             if (!this@PlayerSubtitles.load(Uri.parse(saved.uri), saved.name, select = true)) return false
-            note = activity.getString(R.string.nag_online_note, saved.name)
+            note = activity.getString(R.string.nag_subtools_note, saved.name)
             return true
         }
     }
@@ -351,8 +351,7 @@ internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes:
     val folder = File(context.getExternalFilesDir(null) ?: context.filesDir, APP_SUBTITLES)
     return runCatching {
         folder.mkdirs()
-        val file = uniqueFile(folder, fileName)
-        file.writeBytes(bytes)
+        val file = writeNewFile(folder, fileName, bytes, source = null) ?: return@runCatching null
         SavedSubtitle(Uri.fromFile(file).toString(), file.name, beside = false)
     }.getOrNull()
 }
@@ -361,8 +360,7 @@ internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes:
 internal fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? = when (video.scheme) {
     null, ContentResolver.SCHEME_FILE -> runCatching {
         val folder = File(requireNotNull(video.path)).parentFile ?: error("no folder")
-        val file = uniqueFile(folder, fileName)
-        file.writeBytes(bytes)
+        val file = writeNewFile(folder, fileName, bytes, source = File(requireNotNull(video.path))) ?: return@runCatching null
         Uri.fromFile(file)
     }.getOrNull()
     ContentResolver.SCHEME_CONTENT -> treeSave(context, video, fileName, bytes)
@@ -386,18 +384,8 @@ private fun treeSave(context: Context, video: Uri, fileName: String, bytes: Byte
     return created
 }
 
-/** [name] in [folder], or "Name (2).srt" when it is taken. */
-private fun uniqueFile(folder: File, name: String): File {
-    val first = File(folder, name)
-    if (!first.exists()) return first
-    val base = name.substringBeforeLast('.')
-    val extension = name.substringAfterLast('.', "").let { if (it.isEmpty()) "" else ".$it" }
-    return (2..MAX_COPIES).asSequence().map { File(folder, "$base ($it)$extension") }.firstOrNull { !it.exists() } ?: first
-}
-
 private const val APP_SUBTITLES = "Subtitles"
 private const val ANY_FILE = "application/octet-stream"
-private const val MAX_COPIES = 99
 
 /** The folder a tree's document is in: the provider says so from Android 8; the external storage's ids are paths before. */
 

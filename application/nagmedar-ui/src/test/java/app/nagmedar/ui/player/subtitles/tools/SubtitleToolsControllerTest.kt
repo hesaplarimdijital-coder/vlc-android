@@ -48,9 +48,9 @@ class SubtitleToolsControllerTest {
         assertEquals("Şafak sökerken gölün üstünde ışık doğdu.", controller.texts()[0])
         controller.save()
         val written = io.saved.single().bytes
-        assertEquals(text.trimEnd(), String(written, Charsets.UTF_8).trimEnd())
-        // no byte order mark unless asked for
-        assertFalse(written[0] == 0xEF.toByte())
+        // a file that was not UTF-8 is written in UTF-8 with its mark, so that the player reads it right
+        assertTrue(SubtitleToolsController.hasUtf8Bom(written))
+        assertEquals(text.trimEnd(), String(written, 3, written.size - 3, Charsets.UTF_8).trimEnd())
     }
 
     @Test
@@ -504,7 +504,7 @@ class SubtitleToolsControllerTest {
         assertTrue(io.written.isEmpty())
         assertNull(controller.state?.pickName)
         assertNull(controller.state?.saved)
-        assertFalse(controller.state?.saveFailed == true)
+        assertNull(controller.state?.saveProblem)
     }
 
     @Test
@@ -513,7 +513,7 @@ class SubtitleToolsControllerTest {
         val controller = toolsController(io = io)
         controller.save()
         controller.savedTo("content://picked/new")
-        assertTrue(controller.state?.saveFailed == true)
+        assertEquals(SaveProblem.Failed, controller.state?.saveProblem)
         assertNull(controller.state?.saved)
         assertFalse(controller.state?.saving == true)
     }
@@ -568,5 +568,134 @@ class SubtitleToolsControllerTest {
         controller.undo()
         controller.save()
         assertNull(controller.state)
+    }
+
+    // ---------------------------------------------------------------- review fixes: the saved bytes
+
+    private val bomSrt = "1\n00:00:01,000 --> 00:00:03,000\nŞafak sökerken.\n\n2\n00:00:04,000 --> 00:00:06,000\nİçeride kimse yoktu.\n"
+
+    private fun saved(file: ToolsFile, bytes: ByteArray): ByteArray {
+        val io = FakeToolsIo(mutableMapOf(file.uri to bytes))
+        val controller = toolsController(file = file, io = io)
+        controller.save()
+        return io.saved.single().bytes
+    }
+
+    @Test
+    fun aUtf8FileWithItsMarkIsWrittenWithItsMark() {
+        val file = ToolsFile("content://subs/a.srt", "a.srt")
+        val bytes = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + bomSrt.utf8()
+        val controller = toolsController(file = file, io = FakeToolsIo(mutableMapOf(file.uri to bytes)))
+        assertTrue(controller.state?.document?.bom == true)
+        assertTrue(controller.state?.bom == true)
+        val written = saved(file, bytes)
+        assertTrue(SubtitleToolsController.hasUtf8Bom(written))
+        // the text itself has no mark inside
+        assertFalse(String(written, 3, written.size - 3, Charsets.UTF_8).startsWith("\uFEFF"))
+    }
+
+    @Test
+    fun aUtf8FileWithoutAMarkIsWrittenWithout() {
+        val file = ToolsFile("content://subs/a.srt", "a.srt")
+        val written = saved(file, bomSrt.utf8())
+        assertFalse(SubtitleToolsController.hasUtf8Bom(written))
+        assertEquals(bomSrt.trimEnd(), String(written, Charsets.UTF_8).trimEnd())
+    }
+
+    @Test
+    fun aUtf16FileIsWrittenAsUtf8WithAMark() {
+        val file = ToolsFile("content://subs/a.srt", "a.srt")
+        val bytes = byteArrayOf(0xFF.toByte(), 0xFE.toByte()) + bomSrt.toByteArray(Charsets.UTF_16LE)
+        val controller = toolsController(file = file, io = FakeToolsIo(mutableMapOf(file.uri to bytes)))
+        assertEquals(SubtitleEncoding.Utf16, controller.state?.encoding)
+        val written = saved(file, bytes)
+        assertTrue(SubtitleToolsController.hasUtf8Bom(written))
+        assertEquals(bomSrt.trimEnd(), String(written, 3, written.size - 3, Charsets.UTF_8).trimEnd())
+    }
+
+    @Test
+    fun anAssFileWithItsMarkComesBackByteForByte() {
+        val text = "[Script Info]\r\nScriptType: v4.00+\r\n\r\n[Events]\r\n" +
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n" +
+            "Dialogue: 0,0:00:01.00,0:00:03.50,Default,,0,0,0,,{\\an8}Merhaba\r\n"
+        val file = ToolsFile("content://subs/a.ass", "a.ass")
+        val bytes = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + text.utf8()
+        val io = FakeToolsIo(mutableMapOf(file.uri to bytes))
+        val controller = toolsController(file = file, io = io)
+        controller.save()
+        assertArrayEquals(bytes, io.saved.single().bytes)
+    }
+
+    // ---------------------------------------------------------------- review fixes: the original is not written
+
+    @Test
+    fun aSaveAsThatIsTheOriginalIsRefusedAndNothingIsWritten() {
+        val io = FakeToolsIo(mutableMapOf(SAMPLE_FILE.uri to SDH_SRT.utf8()), beside = false)
+        val controller = toolsController(io = io)
+        controller.save()
+        assertNotNull(controller.state?.pickName)
+        controller.savedTo(SAMPLE_FILE.uri)
+        assertEquals(SaveProblem.SameFile, controller.state?.saveProblem)
+        assertTrue(io.written.isEmpty())
+        assertNull(controller.state?.saved)
+        assertFalse(controller.state?.saving == true)
+    }
+
+    @Test
+    fun aSaveAsThatTheSystemSaysIsNotNewIsRefused() {
+        val io = FakeToolsIo(mutableMapOf(SAMPLE_FILE.uri to SDH_SRT.utf8()), beside = false, sameFile = true)
+        val controller = toolsController(io = io)
+        controller.save()
+        controller.savedTo("content://subs/other.srt")
+        assertEquals(SaveProblem.SameFile, controller.state?.saveProblem)
+        assertTrue(io.written.isEmpty())
+    }
+
+    // ---------------------------------------------------------------- review fixes: closing with edits
+
+    @Test
+    fun closingWithUnsavedEditsAsksFirst() {
+        val controller = toolsController()
+        assertTrue(controller.askClose())
+        controller.setText(1, "değişti")
+        assertFalse(controller.askClose())
+        assertTrue(controller.state?.confirmClose == true)
+        controller.cancelClose()
+        assertFalse(controller.state?.confirmClose == true)
+        assertTrue(controller.state?.changed == true)
+    }
+
+    @Test
+    fun closingAfterSavingDoesNotAsk() {
+        val controller = toolsController()
+        controller.setText(1, "değişti")
+        controller.save()
+        assertNotNull(controller.state?.saved)
+        assertTrue(controller.askClose())
+    }
+
+    @Test
+    fun theQuestionOfClosingCanBeAnsweredWithSave() {
+        val io = FakeToolsIo(mutableMapOf(SAMPLE_FILE.uri to SDH_SRT.utf8()))
+        val controller = toolsController(io = io)
+        controller.setText(1, "değişti")
+        assertFalse(controller.askClose())
+        controller.saveInstead()
+        assertFalse(controller.state?.confirmClose == true)
+        assertEquals(1, io.saved.size)
+        assertNotNull(controller.state?.saved)
+    }
+
+    // ---------------------------------------------------------------- review fixes: blank lines
+
+    @Test
+    fun editedTextWithABlankLineStillMakesOneCueInSrt() {
+        val io = FakeToolsIo(mutableMapOf(SAMPLE_FILE.uri to SDH_SRT.utf8()))
+        val again = toolsController(io = io)
+        again.setText(1, "Bir\n\n\nİki")
+        again.save()
+        val reread = SubtitleCodec.parse("a.srt", String(io.saved.single().bytes, Charsets.UTF_8))!!
+        assertEquals(9, reread.cues.size)
+        assertEquals("Bir\nİki", reread.cues[0].text)
     }
 }
