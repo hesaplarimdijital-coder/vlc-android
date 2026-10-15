@@ -1,6 +1,7 @@
 package app.nagmedar.ui.backup
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.MediaSettings
 import app.nagmedar.data.SmartPlaylistEntry
@@ -63,6 +64,12 @@ class BackupCodecTest {
         lyrics = listOf(LyricsEntry("cemre kaya|gece yolcusu|gece yolcusu|254", "user", synced = true, text = "[00:01.00]Gece", offsetMs = -300L, fetchedAt = 5L)),
         fileSettings = listOf(MediaSettings("file:///film.mkv", audioDelayMs = -120L, subtitleTrack = "3", playbackRate = 1.25f, updatedAt = 9L)),
         covers = listOf(BackupCover(coverName, png)),
+        // S-613: a measured profile, one set by hand, and the speaker's reference; a Bluetooth address stays out of a backup
+        latency = listOf(
+            LatencyProfileEntry(8, "Galaxy Buds2 Pro", delayMs = 180, measured = true, spreadMs = 4, updatedAt = 11L),
+            LatencyProfileEntry(29, "Denon AVR-X2800H", delayMs = 90, updatedAt = 12L),
+            LatencyProfileEntry(2, "SM-X936B", measured = true, spreadMs = 2, calibrationMs = 12, updatedAt = 13L),
+        ),
     )
 
     private fun bytes(backup: Backup) = ByteArrayOutputStream().also { BackupCodec.write(backup, it) }.toByteArray()
@@ -96,6 +103,10 @@ class BackupCodecTest {
         assertArrayEquals(png, back.covers!!.single().bytes)
         assertEquals(BackupPart.entries, back.parts)
         assertEquals(2, back.playlistTracks)
+        // a profile with an address goes out without it
+        val paired = read(bytes(full.copy(latency = listOf(LatencyProfileEntry(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF", delayMs = 180)))))
+        assertEquals("", paired.latency!!.single().deviceAddress)
+        assertEquals(180, paired.latency!!.single().delayMs)
     }
 
     @Test

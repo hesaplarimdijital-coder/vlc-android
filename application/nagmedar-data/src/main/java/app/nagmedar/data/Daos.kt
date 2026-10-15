@@ -345,3 +345,35 @@ interface SmartPlaylistDao {
     @Query("DELETE FROM smart_playlist WHERE id = :id")
     fun delete(id: Long)
 }
+
+/** S-613: the output devices' latency profiles. */
+@Dao
+abstract class LatencyProfileDao {
+    /** Every device seen, by kind of device and name: what the settings list. */
+    @Query("SELECT * FROM latency_profile ORDER BY device_type, device_name, device_address")
+    abstract fun observe(): Flow<List<LatencyProfileEntry>>
+
+    /** S-1502: every profile, for a backup; in the list's order. */
+    @Query("SELECT * FROM latency_profile ORDER BY device_type, device_name, device_address")
+    abstract fun all(): List<LatencyProfileEntry>
+
+    @Query("SELECT * FROM latency_profile WHERE device_type = :type AND device_name = :name AND device_address = :address")
+    abstract fun get(type: Int, name: String, address: String): LatencyProfileEntry?
+
+    /** [entry] as it is, over the device's old row. */
+    @Upsert
+    abstract fun save(entry: LatencyProfileEntry)
+
+    /** A row for a device seen, unless it has one: the list shows it at 0 until it is set. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun seen(entry: LatencyProfileEntry)
+
+    @Query("DELETE FROM latency_profile WHERE device_type = :type AND device_name = :name AND device_address = :address")
+    abstract fun delete(type: Int, name: String, address: String)
+
+    /** S-1502: a backup's profiles over these; a device's row is replaced by the backup's. */
+    @Transaction
+    open fun restore(rows: List<LatencyProfileEntry>) {
+        rows.forEach(::save)
+    }
+}

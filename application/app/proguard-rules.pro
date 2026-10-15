@@ -123,3 +123,6 @@
 
 # Nağmedar (S-607): the playback service finds the recordings' observer by name
 -keep class app.nagmedar.ui.player.record.RecordingObserver { <init>(); }
+
+# Nağmedar (S-613): the playback service finds the latency profiles' observer by name
+-keep class app.nagmedar.ui.audio.latency.LatencyObserver { <init>(); }

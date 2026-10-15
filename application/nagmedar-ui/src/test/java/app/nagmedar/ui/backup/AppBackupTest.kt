@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.ui.NagmedarPreferences
@@ -76,6 +77,8 @@ class AppBackupTest {
         mine.trackStats().rate("file:///m/01.flac", 4, 10)
         mine.trackStats().played("file:///m/02.flac", 20)
         mine.smartPlaylists().insert(SmartPlaylistEntry(name = "Sevilenler", rules = "rating|at_least|4", createdAt = 1))
+        // S-613: a device's latency profile travels too
+        mine.latencyProfiles().save(LatencyProfileEntry(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF", delayMs = 180, measured = true, spreadMs = 4, updatedAt = 11))
         val here = Playlists().apply {
             lists["Yol"] = BackupPlaylist("Yol", listOf(PlaylistEntry("/m/01.flac"), PlaylistEntry("D:/Müzik/02.flac")))
         }
@@ -100,6 +103,9 @@ class AppBackupTest {
         assertEquals(4, theirs.trackStats().get("file:///m/01.flac")!!.rating)
         assertEquals(1, theirs.trackStats().get("file:///m/02.flac")!!.playCount)
         assertEquals(listOf("Sevilenler"), theirs.smartPlaylists().all().map { it.name })
+        // without the pairing's address: found by type and name on the other device
+        assertEquals(180, theirs.latencyProfiles().get(8, "Galaxy Buds2 Pro", "")!!.delayMs)
+        assertEquals(1, report.restored[BackupPart.Latency])
         assertEquals(listOf(PlaylistEntry("/m/01.flac")), there.lists.getValue("Yol").entries)
         assertEquals(1, report.missingTracks)
         assertEquals(emptySet<BackupPart>(), report.failed)

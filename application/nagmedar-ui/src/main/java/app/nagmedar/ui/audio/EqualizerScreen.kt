@@ -34,6 +34,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -66,6 +67,7 @@ import app.nagmedar.audio.NativeAudio
 import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.withProfile
 import app.nagmedar.ui.R
+import app.nagmedar.ui.audio.latency.LatencyCenter
 import app.nagmedar.ui.components.GainSlider
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuPopup
@@ -199,7 +201,9 @@ fun EqualizerSide(
     outputDevice: String? = MusicEngineAccess.controller?.outputDevice,
     ab: AbTestState = AbTest.state,
 ) {
-    SignalPathCard(path, outputDevice, blind = ab.phase == AbTestState.Phase.Blind)
+    // S-613: the output's latency profile, on the path's last stage
+    val applied by LatencyCenter.applied.collectAsState()
+    SignalPathCard(path, outputDevice, blind = ab.phase == AbTestState.Phase.Blind, outputLatencyMs = applied?.delayMs ?: 0)
     AbTestCard(ab, path)
 }
 

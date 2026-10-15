@@ -1918,4 +1918,56 @@
     <string name="nag_backup_newer">This backup was made by a newer Nağmedar; update the app first</string>
     <string name="nag_backup_damaged">The backup file is damaged or incomplete</string>
     <string name="nag_backup_unreadable">The file could not be read</string>
+
+    <!-- S-613: latency profiles and the measurement with the microphone -->
+    <string name="nag_latency_settings">Latency profiles</string>
+    <string name="nag_latency_hint">Every output plays a little late: Bluetooth headphones, an AV receiver, a USB DAC. A device\'s profile keeps how late, in milliseconds; while it is the output, a video\'s audio delay and the lyrics\' and waveform\'s clock take it into account. Set it by hand or measure it with the microphone.</string>
+    <string name="nag_latency_measure">Measure the output</string>
+    <string name="nag_latency_measure_button">Measure…</string>
+    <string name="nag_latency_now">Now: %1$s · %2$s</string>
+    <string name="nag_latency_now_none">No output device is in use now</string>
+    <string name="nag_latency_empty">No device seen yet: the devices connected while music plays are listed here.</string>
+    <string name="nag_latency_kind_bluetooth">Bluetooth</string>
+    <string name="nag_latency_kind_usb">USB</string>
+    <string name="nag_latency_kind_hdmi">HDMI</string>
+    <string name="nag_latency_kind_wired">Wired</string>
+    <string name="nag_latency_kind_speaker">Built-in speaker</string>
+    <string name="nag_latency_kind_other">Other</string>
+    <string name="nag_latency_measured">measured · spread %d ms</string>
+    <string name="nag_latency_calibrated">mic path %1$d ms · spread %2$d ms</string>
+    <string name="nag_latency_active">In use</string>
+    <string name="nag_latency_delete">Delete the profile of %1$s</string>
+    <string name="nag_latency_step_down">%1$s: 10 ms less</string>
+    <string name="nag_latency_step_up">%1$s: 10 ms more</string>
+    <string name="nag_latency_applied">Latency profile applied: %1$s · %2$s</string>
+    <string name="nag_latency_measure_title">Measure %1$s</string>
+    <string name="nag_latency_intro">Five short test tones play through the output while the microphone listens; the time between them tells how late the device plays. It takes about ten seconds.</string>
+    <string name="nag_latency_intro_steps">Choose a quiet room, hold the phone near the speaker or the headphone\'s cup, and set the volume to about the middle.</string>
+    <string name="nag_latency_intro_bluetooth">Bluetooth codecs differ: measure each pair of headphones with the codec it plays with, and again if the result seems off.</string>
+    <string name="nag_latency_mic_reason">The microphone is used only during the measurement; nothing recorded is kept.</string>
+    <string name="nag_latency_start">Start</string>
+    <string name="nag_latency_measuring">Measuring…</string>
+    <string name="nag_latency_measuring_hint">Keep quiet and keep the phone still.</string>
+    <string name="nag_latency_result_detail">%1$d of %2$d tones · spread %3$d ms</string>
+    <string name="nag_latency_result_reference">The built-in speaker\'s share (%1$d ms) taken off: %2$s is saved</string>
+    <string name="nag_latency_result_inexact">This device gives no timestamps: the output\'s own buffer and the recorder\'s start are in the figure, so it is not saved.</string>
+    <string name="nag_latency_result_speaker">The built-in speaker\'s round trip is kept as the reference for the other devices; its own delay stays as set.</string>
+    <string name="nag_latency_result_uncertain">The tones did not agree (spread %1$d ms): repeat in a quieter room with the phone nearer.</string>
+    <string name="nag_latency_again">Measure again</string>
+    <string name="nag_latency_save">Save to profile</string>
+    <string name="nag_latency_retry">Try again</string>
+    <string name="nag_latency_mic_denied">The microphone was not allowed</string>
+    <string name="nag_latency_mic_denied_hint">The measurement needs it; when the question no longer shows, allow it in the system\'s app settings.</string>
+    <string name="nag_latency_fail_quiet">The test tones were not heard</string>
+    <string name="nag_latency_fail_quiet_hint">Turn the volume up, uncover the microphone and bring the phone nearer the speaker.</string>
+    <string name="nag_latency_fail_noisy">The test tones did not agree</string>
+    <string name="nag_latency_fail_noisy_hint">Too few were heard clearly: choose a quieter room and keep still.</string>
+    <string name="nag_latency_fail_device">The microphone or the output could not be opened</string>
+    <string name="nag_latency_fail_device_hint">Another app may be using them; close it and try again.</string>
+    <string name="nag_sp_latency">latency %1$s</string>
+    <string name="nag_backup_part_latency">Latency profiles</string>
+    <plurals name="nag_backup_latency_count">
+        <item quantity="one">%d device</item>
+        <item quantity="other">%d devices</item>
+    </plurals>
 </resources>

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.MusicSection
+import app.nagmedar.ui.audio.latency.LatencySection
 import app.nagmedar.ui.backup.BackupSection
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
@@ -104,6 +105,8 @@ fun SettingsScreen(
         item { RecordingSection(prefs) }
         // S-901: the engine behind the local music library
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
+        // S-613: what each output device plays late, and the measurement with the microphone
+        item { LatencySection() }
         // S-1007: waking to music
         item { AlarmSection() }
         // S-1003: where lyrics come from

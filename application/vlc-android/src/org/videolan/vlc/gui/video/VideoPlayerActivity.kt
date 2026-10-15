@@ -2557,8 +2557,15 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         overlayDelegate.updateOrientationIcon()
     }
 
+    /**
+     * The classic Bluetooth delay (one value for every Bluetooth device, kept as the file's own
+     * delay). With a latency profile applied to the output (S-613) it stays out: the profile
+     * already holds the device's delay underneath, and the two would add up.
+     */
     private fun toggleBtDelay(connected: Boolean) {
-        service?.setAudioDelay(if (connected) settings.getLong(KEY_BLUETOOTH_DELAY, 0) else 0L)
+        val service = service ?: return
+        if (service.playlistManager.player.outputLatencyUs != 0L) return
+        service.setAudioDelay(if (connected) settings.getLong(KEY_BLUETOOTH_DELAY, 0) else 0L)
     }
 
     fun setOrientation(value: Int) {

@@ -1,5 +1,6 @@
 package app.nagmedar.ui.backup
 
+import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.MediaSettings
 import app.nagmedar.data.SmartPlaylistEntry
@@ -19,7 +20,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 /** S-1502: the parts of a backup, in the order they are shown; each is restored on its own. */
-enum class BackupPart { Settings, Shortcuts, Profiles, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers }
+enum class BackupPart { Settings, Shortcuts, Profiles, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency }
 
 /** A preference as kept: a Boolean, Int, Long, Float, String or a set of strings. */
 data class SettingValue(val key: String, val value: Any)
@@ -55,6 +56,8 @@ data class Backup(
     val lyrics: List<LyricsEntry>? = null,
     val fileSettings: List<MediaSettings>? = null,
     val covers: List<BackupCover>? = null,
+    /** S-613: the output devices' latency profiles. */
+    val latency: List<LatencyProfileEntry>? = null,
 ) {
     /** How many things [part] holds: settings, shortcuts changed, profiles, lists, tracks, files, covers. */
     fun count(part: BackupPart): Int = when (part) {
@@ -67,6 +70,7 @@ data class Backup(
         BackupPart.Lyrics -> lyrics?.size ?: 0
         BackupPart.FileSettings -> fileSettings?.size ?: 0
         BackupPart.Covers -> covers?.size ?: 0
+        BackupPart.Latency -> latency?.size ?: 0
     }
 
     /** The parts with something in them, in order. */
@@ -88,6 +92,7 @@ data class Backup(
         lyrics = lyrics.takeIf { BackupPart.Lyrics in parts },
         fileSettings = fileSettings.takeIf { BackupPart.FileSettings in parts },
         covers = covers.takeIf { BackupPart.Covers in parts },
+        latency = latency.takeIf { BackupPart.Latency in parts },
     )
 }
 
@@ -207,6 +212,7 @@ object BackupCodec {
         backup.lyrics?.let { rows -> o.put("lyrics", JSONArray().apply { rows.forEach { put(lyrics(it)) } }) }
         backup.fileSettings?.let { rows -> o.put("file_settings", JSONArray().apply { rows.forEach { put(fileSettings(it)) } }) }
         backup.covers?.let { covers -> o.put("covers", JSONArray().apply { covers.forEach { put(it.name) } }) }
+        backup.latency?.let { rows -> o.put("latency_profiles", JSONArray().apply { rows.forEach { put(latency(it)) } }) }
         return o
     }
 
@@ -240,6 +246,7 @@ object BackupCodec {
                     coverFiles[name]?.let { BackupCover(name, it) }
                 }
             },
+            latency = o.optJSONArray("latency_profiles")?.objects()?.mapNotNull(::latency),
         )
     }
 
@@ -398,6 +405,29 @@ object BackupCodec {
             updatedAt = o.optLong("updated_at", 0L),
             effects = o.optStringOrNull("effects"),
             subtitleRate = o.optStringOrNull("subtitle_rate"),
+        )
+    }
+
+    /** S-613: a device's latency profile, without its address (a Bluetooth address names a pairing; the profile is found by type and name). */
+    private fun latency(row: LatencyProfileEntry): JSONObject = JSONObject()
+        .put("device_type", row.deviceType)
+        .put("device_name", row.deviceName)
+        .put("delay_ms", row.delayMs)
+        .put("measured", row.measured)
+        .put("spread_ms", row.spreadMs)
+        .put("calibration_ms", row.calibrationMs)
+        .put("updated_at", row.updatedAt)
+
+    private fun latency(o: JSONObject): LatencyProfileEntry? {
+        if (!o.has("device_type") || !o.has("device_name")) return null
+        return LatencyProfileEntry(
+            deviceType = o.optInt("device_type"),
+            deviceName = o.optString("device_name"),
+            delayMs = o.optInt("delay_ms", 0),
+            measured = o.optBoolean("measured", false),
+            spreadMs = o.optIntOrNull("spread_ms"),
+            updatedAt = o.optLong("updated_at", 0L),
+            calibrationMs = o.optIntOrNull("calibration_ms"),
         )
     }
 

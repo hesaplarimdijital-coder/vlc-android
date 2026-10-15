@@ -25,6 +25,7 @@ import app.nagmedar.audio.SignalPath
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
+import app.nagmedar.ui.player.panel.signed
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -41,7 +42,7 @@ internal data class PathRow(val label: String, val value: String, val changes: B
  * first reason why. [blind]: a blind test runs, so the side that plays (S-912) stays unsaid.
  */
 @Composable
-fun SignalPathCard(path: SignalPath?, outputDevice: String?, modifier: Modifier = Modifier, blind: Boolean = false) {
+fun SignalPathCard(path: SignalPath?, outputDevice: String?, modifier: Modifier = Modifier, blind: Boolean = false, outputLatencyMs: Int = 0) {
     val colors = NagTheme.colors
     val playing = path?.source != null
     val badge: @Composable () -> Unit = {
@@ -59,7 +60,7 @@ fun SignalPathCard(path: SignalPath?, outputDevice: String?, modifier: Modifier 
         if (path == null || !playing) {
             Text(stringResource(R.string.nag_sp_idle), style = NagTheme.type.labelSmall, color = colors.textTertiary)
         } else {
-            PathStages(signalPathRows(path, outputDevice, blind))
+            PathStages(signalPathRows(path, outputDevice, blind, outputLatencyMs))
             if (!path.bitPerfect) {
                 Text(stringResource(R.string.nag_sp_because, reasonLabel(path.reason)), style = NagTheme.type.labelSmall, color = colors.textSecondary)
             }
@@ -117,9 +118,12 @@ private fun PathStages(rows: List<PathRow>) {
 /** A row of the path: the QA's 26 px, short labels (QA-06). */
 private val ROW_HEIGHT = 26.dp
 
-/** The engine's stages in its order: the file, its decoding, the gains and the chain, the output. */
+/**
+ * The engine's stages in its order: the file, its decoding, the gains and the chain, the output
+ * (with what its latency profile says it plays late, S-613, when that is not 0).
+ */
 @Composable
-internal fun signalPathRows(path: SignalPath, outputDevice: String?, blind: Boolean): List<PathRow> {
+internal fun signalPathRows(path: SignalPath, outputDevice: String?, blind: Boolean, outputLatencyMs: Int = 0): List<PathRow> {
     val locale = LocalContext.current.resources.locale()
     val src = path.source ?: return emptyList()
     val number = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 2 }
@@ -206,6 +210,7 @@ internal fun signalPathRows(path: SignalPath, outputDevice: String?, blind: Bool
                 add(kiloHertz(out.rate, locale))
                 add(channelsText(out.channels))
                 add(stringResource(if (out.exclusive) R.string.nag_sp_direct else R.string.nag_sp_mixed))
+                if (outputLatencyMs != 0) add(stringResource(R.string.nag_sp_latency, stringResource(R.string.nag_sync_ms, signed(outputLatencyMs, locale))))
             }
             add(PathRow(stringResource(R.string.nag_sp_output), parts.joinToString(SEPARATOR), changes = false))
         }

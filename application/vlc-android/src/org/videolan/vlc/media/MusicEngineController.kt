@@ -27,6 +27,7 @@ import app.nagmedar.audio.SignalPath
 import app.nagmedar.audio.UsbOutput
 import app.nagmedar.audio.cue.CueSheets
 import app.nagmedar.audio.cue.CueUri
+import app.nagmedar.audio.latency.LatencyProfiles
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.PlaybackEngine
@@ -143,6 +144,17 @@ class MusicEngineController(
             else -> null
         }
 
+    /**
+     * S-613: what the output device plays late (its latency profile), ms: the clock the
+     * interface reads (the lyrics, the waveform's cursor) runs that much behind the engine's,
+     * which already takes the output's own buffers off. The observer that follows the output
+     * devices sets it.
+     */
+    @Volatile var outputLatencyMs: Int = 0
+
+    /** The engine's position as the listener hears it, within the track. */
+    private val MusicEngine.clockMs: Long get() = LatencyProfiles.clockMs(timeMs, outputLatencyMs, lengthMs)
+
     /** S-912: the A/B test's side: A the DSP chain as set, B bypassed at the chain's level. */
     var abSide: AbSide
         get() = engine?.abSide ?: AbSide.A
@@ -201,7 +213,7 @@ class MusicEngineController(
         override fun onTrackStarted(id: Long) {
             val engine = engine ?: return
             val length = engine.lengthMs
-            lastTime = engine.timeMs
+            lastTime = engine.clockMs
             updateProgress(lastTime, length)
             if (id == nextId && id != trackId) {
                 // a gapless hand-over (S-904): the manager's indices move on, then the service hears a new Playing
@@ -489,7 +501,7 @@ class MusicEngineController(
         updateProgress(time)
     }
 
-    override fun getCurrentTime() = engine?.timeMs ?: progress.value?.time ?: 0L
+    override fun getCurrentTime() = engine?.clockMs ?: progress.value?.time ?: 0L
 
     override fun getLength() = engine?.lengthMs?.takeIf { it > 0 } ?: progress.value?.length ?: 0L
 
@@ -536,7 +548,7 @@ class MusicEngineController(
         ticker = launch {
             while (isActive) {
                 val engine = engine ?: break
-                val time = engine.timeMs
+                val time = engine.clockMs
                 val length = engine.lengthMs
                 if (time != lastTime) {
                     lastTime = time

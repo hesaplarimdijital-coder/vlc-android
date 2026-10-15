@@ -319,6 +319,37 @@ class NagmedarDatabaseTest {
         smart.insert(SmartPlaylistEntry(name = "Birinci", rules = "", createdAt = 1))
         assertEquals(listOf("Birinci", "İkinci"), smart.all().map { it.name })
     }
+
+    /** S-613: a device's latency profile: seen at 0, set or measured, deleted; a backup's rows over these. */
+    @Test
+    fun latencyProfilesArePerOutputDevice() {
+        val profiles = db.latencyProfiles()
+        val buds = LatencyProfileEntry(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
+        profiles.seen(buds)
+        profiles.seen(LatencyProfileEntry(2, "Speaker"))
+        assertEquals(0, profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")!!.delayMs)
+        // the speaker's own measurement is kept apart from its delay
+        profiles.save(LatencyProfileEntry(2, "Speaker", measured = true, spreadMs = 2, calibrationMs = 12, updatedAt = 5))
+        profiles.get(2, "Speaker", "")!!.let {
+            assertEquals(0, it.delayMs)
+            assertEquals(12, it.calibrationMs)
+        }
+        profiles.save(buds.copy(delayMs = 180, measured = true, spreadMs = 4, updatedAt = 10))
+        // seen again: the delay stays
+        profiles.seen(buds)
+        profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")!!.let {
+            assertEquals(180, it.delayMs)
+            assertTrue(it.measured)
+            assertEquals(4, it.spreadMs)
+        }
+        // the list: by kind of device, then name
+        assertEquals(listOf("Speaker", "Galaxy Buds2 Pro"), runBlocking { profiles.observe().first() }.map { it.deviceName })
+        profiles.restore(listOf(buds.copy(delayMs = 200, updatedAt = 20), LatencyProfileEntry(29, "Denon AVR-X2800H", delayMs = 90)))
+        assertEquals(200, profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")!!.delayMs)
+        assertEquals(3, profiles.all().size)
+        profiles.delete(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
+        assertNull(profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF"))
+    }
 }
 
 /**
@@ -372,6 +403,11 @@ class NagmedarDatabaseMigrationTest {
             db.execSQL(
                 "INSERT INTO radio_station (station_uuid, name, stream_url, bitrate, favorite, last_played_at, country, language, votes, last_voted_at) " +
                     "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 128, 1, 2, 'Türkiye', 'turkish', 40, 3)",
+            )
+            // 8 -> 9 (S-613): the latency profiles
+            db.execSQL(
+                "INSERT INTO latency_profile (device_type, device_name, device_address, delay_ms, measured, spread_ms, updated_at, calibration_ms) " +
+                    "VALUES (8, 'Galaxy Buds2 Pro', 'AA:BB:CC:DD:EE:FF', 180, 1, 4, 1, NULL)",
             )
         }
     }

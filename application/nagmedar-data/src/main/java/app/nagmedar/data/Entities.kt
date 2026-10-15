@@ -207,3 +207,23 @@ data class SmartPlaylistEntry(
     @ColumnInfo(name = "created_at") val createdAt: Long = 0,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
 )
+
+/**
+ * S-613: an output device's latency profile: how much later than the app's clock it plays, ms,
+ * set by hand or measured with the microphone. The device is AudioDeviceInfo's type and
+ * product name, with its address where that is stable (Bluetooth); a device seen but not
+ * set has a row at 0 so the list shows it.
+ */
+@Entity(tableName = "latency_profile", primaryKeys = ["device_type", "device_name", "device_address"])
+data class LatencyProfileEntry(
+    @ColumnInfo(name = "device_type") val deviceType: Int,
+    @ColumnInfo(name = "device_name") val deviceName: String,
+    @ColumnInfo(name = "device_address") val deviceAddress: String = "",
+    @ColumnInfo(name = "delay_ms") val delayMs: Int = 0,
+    /** The delay came from a measurement, with its spread (ms). */
+    val measured: Boolean = false,
+    @ColumnInfo(name = "spread_ms") val spreadMs: Int? = null,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+    /** The built-in speaker's own round trip as measured, ms (the microphone's path); not applied, taken off other devices' measurements. */
+    @ColumnInfo(name = "calibration_ms") val calibrationMs: Int? = null,
+)

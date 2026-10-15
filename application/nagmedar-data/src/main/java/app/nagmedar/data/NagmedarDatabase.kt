@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
-        AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class,
+        AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -30,10 +30,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun audioTech(): AudioTechDao
     abstract fun trackStats(): TrackStatsDao
     abstract fun smartPlaylists(): SmartPlaylistDao
+    abstract fun latencyProfiles(): LatencyProfileDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 8
+        const val VERSION = 9
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -105,9 +106,20 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 8 → 9 (S-613): the output devices' latency profiles. */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `latency_profile` (`device_type` INTEGER NOT NULL, `device_name` TEXT NOT NULL, " +
+                        "`device_address` TEXT NOT NULL, `delay_ms` INTEGER NOT NULL, `measured` INTEGER NOT NULL, `spread_ms` INTEGER, " +
+                        "`updated_at` INTEGER NOT NULL, `calibration_ms` INTEGER, PRIMARY KEY(`device_type`, `device_name`, `device_address`))",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         )
 
         @Volatile

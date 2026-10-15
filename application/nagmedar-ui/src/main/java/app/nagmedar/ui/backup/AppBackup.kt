@@ -101,6 +101,7 @@ class AppBackup(
                     null
                 }
             },
+            latency = db.latencyProfiles().all(),
         )
     }
 
@@ -150,6 +151,7 @@ class AppBackup(
                     BackupPart.Lyrics -> backup.lyrics.orEmpty().also { db.lyrics().saveAll(it) }.size
                     BackupPart.FileSettings -> backup.fileSettings.orEmpty().also { db.mediaSettings().restore(it) }.size
                     BackupPart.Covers -> restoreCovers(backup)
+                    BackupPart.Latency -> backup.latency.orEmpty().also { db.latencyProfiles().restore(it) }.size
                 }
             } catch (e: CancellationException) {
                 throw e

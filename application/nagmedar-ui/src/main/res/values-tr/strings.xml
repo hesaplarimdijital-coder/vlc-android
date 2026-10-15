@@ -1890,4 +1890,56 @@
     <string name="nag_backup_newer">Bu yedek Nağmedar\'ın daha yeni bir sürümüyle alınmış; önce uygulamayı güncelleyin</string>
     <string name="nag_backup_damaged">Yedek dosyası bozuk ya da yarım</string>
     <string name="nag_backup_unreadable">Dosya okunamadı</string>
+
+    <!-- S-613: gecikme profilleri ve mikrofonla ölçüm -->
+    <string name="nag_latency_settings">Gecikme profilleri</string>
+    <string name="nag_latency_hint">Her çıkış biraz geç çalar: Bluetooth kulaklık, AV alıcı, USB DAC. Bir cihazın profili ne kadar geç çaldığını milisaniye olarak tutar; o cihaz çıkışken videonun ses gecikmesi ile sözlerin ve dalga biçiminin saati bunu hesaba katar. Elle ayarlayın ya da mikrofonla ölçün.</string>
+    <string name="nag_latency_measure">Çıkışı ölç</string>
+    <string name="nag_latency_measure_button">Ölç…</string>
+    <string name="nag_latency_now">Şimdi: %1$s · %2$s</string>
+    <string name="nag_latency_now_none">Şu anda kullanımda bir çıkış cihazı yok</string>
+    <string name="nag_latency_empty">Henüz cihaz görülmedi: müzik çalarken bağlanan cihazlar burada listelenir.</string>
+    <string name="nag_latency_kind_bluetooth">Bluetooth</string>
+    <string name="nag_latency_kind_usb">USB</string>
+    <string name="nag_latency_kind_hdmi">HDMI</string>
+    <string name="nag_latency_kind_wired">Kablolu</string>
+    <string name="nag_latency_kind_speaker">Dahili hoparlör</string>
+    <string name="nag_latency_kind_other">Diğer</string>
+    <string name="nag_latency_measured">ölçüldü · yayılım %d ms</string>
+    <string name="nag_latency_calibrated">mikrofon yolu %1$d ms · yayılım %2$d ms</string>
+    <string name="nag_latency_active">Kullanımda</string>
+    <string name="nag_latency_delete">%1$s profilini sil</string>
+    <string name="nag_latency_step_down">%1$s: 10 ms azalt</string>
+    <string name="nag_latency_step_up">%1$s: 10 ms artır</string>
+    <string name="nag_latency_applied">Gecikme profili uygulandı: %1$s · %2$s</string>
+    <string name="nag_latency_measure_title">%1$s ölçümü</string>
+    <string name="nag_latency_intro">Çıkıştan beş kısa test sesi çalınır, mikrofon dinler; aradaki süre cihazın ne kadar geç çaldığını gösterir. Yaklaşık on saniye sürer.</string>
+    <string name="nag_latency_intro_steps">Sessiz bir oda seçin, telefonu hoparlöre ya da kulaklığın kabına yaklaştırın, ses düzeyini yaklaşık ortaya getirin.</string>
+    <string name="nag_latency_intro_bluetooth">Bluetooth codec\'leri farklıdır: her kulaklığı çaldığı codec\'le ölçün; sonuç yanlış geliyorsa yeniden ölçün.</string>
+    <string name="nag_latency_mic_reason">Mikrofon yalnızca ölçüm sırasında kullanılır; kaydedilen hiçbir şey saklanmaz.</string>
+    <string name="nag_latency_start">Başla</string>
+    <string name="nag_latency_measuring">Ölçülüyor…</string>
+    <string name="nag_latency_measuring_hint">Sessiz kalın, telefonu kıpırdatmayın.</string>
+    <string name="nag_latency_result_detail">%2$d test sesinden %1$d tanesi · yayılım %3$d ms</string>
+    <string name="nag_latency_result_reference">Dahili hoparlörün payı (%1$d ms) çıkarıldı: %2$s kaydedilir</string>
+    <string name="nag_latency_result_inexact">Bu cihaz zaman damgası vermiyor: çıkışın kendi tamponu ve kaydın başlangıcı da sayıya dahil; bu yüzden kaydedilmez.</string>
+    <string name="nag_latency_result_speaker">Dahili hoparlörün gidiş dönüş süresi öteki cihazlar için referans olarak saklanır; kendi gecikmesi ayarlandığı gibi kalır.</string>
+    <string name="nag_latency_result_uncertain">Test sesleri uyuşmadı (yayılım %1$d ms): daha sessiz bir odada, telefon daha yakınken yineleyin.</string>
+    <string name="nag_latency_again">Yeniden ölç</string>
+    <string name="nag_latency_save">Profile kaydet</string>
+    <string name="nag_latency_retry">Yeniden dene</string>
+    <string name="nag_latency_mic_denied">Mikrofona izin verilmedi</string>
+    <string name="nag_latency_mic_denied_hint">Ölçüm için gerekli; soru artık çıkmıyorsa sistemin uygulama ayarlarından izin verin.</string>
+    <string name="nag_latency_fail_quiet">Test sesleri duyulmadı</string>
+    <string name="nag_latency_fail_quiet_hint">Sesi yükseltin, mikrofonun önünü açın, telefonu hoparlöre yaklaştırın.</string>
+    <string name="nag_latency_fail_noisy">Test sesleri uyuşmadı</string>
+    <string name="nag_latency_fail_noisy_hint">Çok azı net duyuldu: daha sessiz bir oda seçin, kıpırdamayın.</string>
+    <string name="nag_latency_fail_device">Mikrofon ya da çıkış açılamadı</string>
+    <string name="nag_latency_fail_device_hint">Başka bir uygulama kullanıyor olabilir; onu kapatıp yeniden deneyin.</string>
+    <string name="nag_sp_latency">gecikme %1$s</string>
+    <string name="nag_backup_part_latency">Gecikme profilleri</string>
+    <plurals name="nag_backup_latency_count">
+        <item quantity="one">%d cihaz</item>
+        <item quantity="other">%d cihaz</item>
+    </plurals>
 </resources>

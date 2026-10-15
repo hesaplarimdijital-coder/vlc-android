@@ -136,6 +136,10 @@ Sözlüğü testler denetler:
 | alarm | alarm | çalar saat | alarm clock | Ayarlar › Alarm; müzikle ya da internet radyosuyla çalar, ses düzeyi sessizlikten yükselir. Android'in “alarm saati” (alarm clock) olarak kurulur |
 | yedek, yedeklemek | backup, back up | | | Ayarlar › Yedekleme: ayarlar, kısayollar, cihaz profilleri, çalma ve akıllı listeler, puanlar ve çalınmalar, sözler, dosya ayarları ve elle seçilen kapaklar tek bir ZIP dosyasında; hesap girişleri ve bu cihazın klasör izinleri yazılmaz |
 | geri yüklemek | restore | | | Bir yedekten seçilen bölümleri geri koymak: aynı adlı olanlar yedektekiyle değişir, puanlar ve çalınmalar birleştirilir, hiçbir şey silinmez |
+| gecikme profili | latency profile | latans, gecikme ayarı | lag profile | Bir çıkış cihazının (Bluetooth kulaklık, AV alıcı, USB DAC) ne kadar geç çaldığı, ms olarak; cihaz çıkış olunca uygulanır. Ayarlar › Gecikme profilleri; “Şimdi: Galaxy Buds2 Pro · +180 ms”, “Kullanımda” |
+| test sesi | test tone | cıvıltı, bip | chirp, beep | Gecikme ölçümünde çalınan beş kısa ses; mikrofonla duyulan, çalınanla karşılaştırılır. “Test sesleri duyulmadı” |
+| yayılım | spread | sapma, dağılım | deviation | Ölçümün tekrarlarının birbirinden en çok ne kadar ayrıldığı (en büyük eksi en küçük): “yayılım 4 ms”; 20 ms'yi aşarsa ölçüm tutarsızdır |
+| mikrofon yolu | microphone path | kalibrasyon | calibration | Dahili hoparlörün ölçülen gidiş dönüş süresi; öteki cihazların ölçümünden düşülen referans, gecikme olarak uygulanmaz |
 
 ## Özel adlar
 

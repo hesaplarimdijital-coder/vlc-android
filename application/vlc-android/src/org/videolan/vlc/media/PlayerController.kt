@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
+import app.nagmedar.audio.latency.AudioDelayMix
 import app.nagmedar.playback.EngineId
 import app.nagmedar.playback.EngineMedia
 import app.nagmedar.playback.PlaybackEngine
@@ -99,6 +100,10 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
             }
             mediaplayer.setVideoTitleDisplay(MediaPlayer.Position.Disable, 0)
             mediaplayer.play()
+            // S-613: libVLC starts every media at no delay; the output's own goes back under it
+            audioDelay.mediaStarted()
+            audioDelay.casting = hasRenderer
+            if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
         }
     }
 
@@ -167,7 +172,24 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun setAudioDigitalOutputEnabled(enabled: Boolean) = !mediaplayer.isReleased && mediaplayer.setAudioDigitalOutputEnabled(enabled)
 
-    fun getAudioDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.audioDelay else 0L
+    /** S-613: the user's audio delay and the output device's, which libVLC gets together; not the device's while casting. */
+    private val audioDelay = AudioDelayMix()
+
+    /**
+     * S-613: what the output device plays late (its latency profile), in microseconds; applied
+     * under the audio delay the user sets, which stays the file's own. The observer that follows
+     * the output devices sets it.
+     */
+    var outputLatencyUs: Long
+        get() = audioDelay.outputLatencyUs
+        set(value) {
+            if (audioDelay.outputLatencyUs == value) return
+            audioDelay.outputLatencyUs = value
+            applyAudioDelay()
+        }
+
+    /** The audio delay as the user sees it: the file's own, the output's share left out. */
+    fun getAudioDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) audioDelay.userDelayUs else 0L
 
     fun getSpuDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.spuDelay else 0L
 
@@ -189,7 +211,16 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun getSpuTracksCount() = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSpuTracksCount() else 0
 
-    fun setAudioDelay(delay: Long) = mediaplayer.setAudioDelay(delay)
+    fun setAudioDelay(delay: Long): Boolean {
+        audioDelay.userDelayUs = delay
+        return applyAudioDelay()
+    }
+
+    /** The user's delay and the output's together into libVLC; false while there is no media to take it. */
+    private fun applyAudioDelay(): Boolean {
+        audioDelay.casting = hasRenderer
+        return !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setAudioDelay(audioDelay.combinedUs)
+    }
 
     fun setEqualizer(equalizer: MediaPlayer.Equalizer?) = mediaplayer.setEqualizer(equalizer)
 
@@ -343,7 +374,11 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
     private val eventActor = actor<MediaPlayer.Event>(capacity = Channel.UNLIMITED, start = CoroutineStart.UNDISPATCHED) {
         for (event in channel) {
             when (event.type) {
-                MediaPlayer.Event.Playing -> playbackState = PlaybackStateCompat.STATE_PLAYING
+                MediaPlayer.Event.Playing -> {
+                    playbackState = PlaybackStateCompat.STATE_PLAYING
+                    // S-613: the output's delay again, in case the input was not there to take it at the start
+                    if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
+                }
                 MediaPlayer.Event.Paused -> playbackState = PlaybackStateCompat.STATE_PAUSED
                 MediaPlayer.Event.EncounteredError -> setPlaybackStopped()
                 MediaPlayer.Event.PausableChanged -> pausable = event.pausable

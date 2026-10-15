@@ -7,9 +7,11 @@
 #include <android/api-level.h>
 #include <android/log.h>
 
+#include <pthread.h>
 #include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define TAG "NagmedarAudio"
 
@@ -19,6 +21,8 @@ typedef struct AAudioSink {
     NagFormat format;
     int exclusive;
     atomic_int lost;
+    /* the stream against its latency being read (the ticker's thread) while it is closed (the event thread, S-613) */
+    pthread_mutex_t lock;
 } AAudioSink;
 
 static aaudio_data_callback_result_t on_data(AAudioStream *stream, void *user, void *audio_data, int32_t frames)
@@ -64,11 +68,14 @@ static NagSampleFormat nag_format(aaudio_format_t f)
 
 static void close_stream(AAudioSink *a)
 {
-    if (!a->stream)
-        return;
-    AAudioStream_requestStop(a->stream);
-    AAudioStream_close(a->stream);
+    pthread_mutex_lock(&a->lock);
+    AAudioStream *stream = a->stream;
     a->stream = NULL;
+    pthread_mutex_unlock(&a->lock);
+    if (!stream)
+        return;
+    AAudioStream_requestStop(stream);
+    AAudioStream_close(stream);
 }
 
 static aaudio_result_t open_stream(NagSink *sink, const NagFormat *want, aaudio_sharing_mode_t sharing)
@@ -92,17 +99,19 @@ static aaudio_result_t open_stream(NagSink *sink, const NagFormat *want, aaudio_
 #endif
     AAudioStreamBuilder_setDataCallback(builder, on_data, sink);
     AAudioStreamBuilder_setErrorCallback(builder, on_error, sink);
-    result = AAudioStreamBuilder_openStream(builder, &a->stream);
+    AAudioStream *stream = NULL;
+    result = AAudioStreamBuilder_openStream(builder, &stream);
     AAudioStreamBuilder_delete(builder);
-    if (result != AAUDIO_OK) {
-        a->stream = NULL;
+    if (result != AAUDIO_OK)
         return result;
-    }
     /* two bursts of buffer: glitch-free with room to spare; the engine's rings hold the rest */
-    int32_t burst = AAudioStream_getFramesPerBurst(a->stream);
+    int32_t burst = AAudioStream_getFramesPerBurst(stream);
     if (burst > 0)
-        AAudioStream_setBufferSizeInFrames(a->stream, burst * 2);
-    a->exclusive = AAudioStream_getSharingMode(a->stream) == AAUDIO_SHARING_MODE_EXCLUSIVE;
+        AAudioStream_setBufferSizeInFrames(stream, burst * 2);
+    a->exclusive = AAudioStream_getSharingMode(stream) == AAUDIO_SHARING_MODE_EXCLUSIVE;
+    pthread_mutex_lock(&a->lock);
+    a->stream = stream;
+    pthread_mutex_unlock(&a->lock);
     return AAUDIO_OK;
 }
 
@@ -160,14 +169,40 @@ static void aaudio_close(NagSink *sink)
     close_stream(sink->priv);
 }
 
+/* The latency of an open stream; under the sink's lock. */
+static int64_t stream_latency(AAudioStream *stream, int rate)
+{
+    int64_t written = AAudioStream_getFramesWritten(stream);
+    int64_t read = AAudioStream_getFramesRead(stream);
+    int64_t buffered = written > read ? written - read : 0;
+    if (AAudioStream_getState(stream) != AAUDIO_STREAM_STATE_STARTED)
+        return buffered;
+    int64_t position = 0, at_ns = 0;
+    if (AAudioStream_getTimestamp(stream, CLOCK_MONOTONIC, &position, &at_ns) != AAUDIO_OK)
+        return buffered;
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    int64_t now_ns = (int64_t)now.tv_sec * 1000000000LL + now.tv_nsec;
+    int64_t played = position + (now_ns - at_ns) * rate / 1000000000LL;
+    if (played < 0 || played > written)
+        return buffered;
+    int64_t latency = written - played;
+    return latency > buffered ? latency : buffered;
+}
+
+/*
+ * The frames written that the device has not played yet. While the stream runs, AAudio's
+ * timestamp says which frame the device played when, so the device's own path (the HAL's
+ * buffers, a Bluetooth stack's) counts too (S-613); the buffer alone otherwise. Read from the
+ * ticker's thread, so the stream is held against being closed meanwhile.
+ */
 static int64_t aaudio_latency(NagSink *sink)
 {
     AAudioSink *a = sink->priv;
-    if (!a->stream)
-        return 0;
-    int64_t written = AAudioStream_getFramesWritten(a->stream);
-    int64_t read = AAudioStream_getFramesRead(a->stream);
-    return written > read ? written - read : 0;
+    pthread_mutex_lock(&a->lock);
+    int64_t latency = a->stream ? stream_latency(a->stream, a->format.rate) : 0;
+    pthread_mutex_unlock(&a->lock);
+    return latency;
 }
 
 static int aaudio_bit_perfect(NagSink *sink)
@@ -179,8 +214,10 @@ static int aaudio_bit_perfect(NagSink *sink)
 
 static void aaudio_destroy(NagSink *sink)
 {
-    close_stream(sink->priv);
-    free(sink->priv);
+    AAudioSink *a = sink->priv;
+    close_stream(a);
+    pthread_mutex_destroy(&a->lock);
+    free(a);
     free(sink);
 }
 
@@ -193,6 +230,7 @@ NagSink *nag_sink_aaudio_new(void)
         free(a);
         return NULL;
     }
+    pthread_mutex_init(&a->lock, NULL);
     sink->name = "aaudio";
     sink->open = aaudio_open;
     sink->start = aaudio_start;
