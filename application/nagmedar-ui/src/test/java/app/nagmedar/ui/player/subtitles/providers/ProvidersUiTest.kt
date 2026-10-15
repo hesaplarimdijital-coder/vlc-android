@@ -164,6 +164,38 @@ class ProvidersUiTest {
         assertNull(store.get())
     }
 
+    @Test
+    fun aNewFolderReleasesTheOldOnesPermissionAndAFailedOneIsNotStored() {
+        val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("folder-permission", Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val store = SubtitleFolderStore(prefs)
+        val taken = mutableListOf<String>()
+        val released = mutableListOf<String>()
+        assertEquals(true, FolderPermission.replace(null, "content://tree/a", { taken += it }, { released += it }, store))
+        assertEquals("content://tree/a", store.get())
+        assertEquals(true, FolderPermission.replace("content://tree/a", "content://tree/b", { taken += it }, { released += it }, store))
+        assertEquals("content://tree/b", store.get())
+        assertEquals(listOf("content://tree/a"), released)
+        // the permission cannot be kept: the folder is not stored, the old one stays with its permission
+        val refused = FolderPermission.replace("content://tree/b", "content://tree/c", { throw SecurityException("no") }, { released += it }, store)
+        assertEquals(false, refused)
+        assertEquals("content://tree/b", store.get())
+        assertEquals(listOf("content://tree/a"), released)
+        // the same folder again is not released
+        assertEquals(true, FolderPermission.replace("content://tree/b", "content://tree/b", { taken += it }, { released += it }, store))
+        assertEquals(listOf("content://tree/a"), released)
+    }
+
+    @Test
+    fun aFolderThatCouldNotBeKeptIsSaid() {
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                SubtitleProvidersSection(rows(), null, { _, _ -> }, { _, _ -> }, {}, {}, folderError = true)
+            }
+        }
+        compose.onNodeWithTag("provider-folder-error", useUnmergedTree = true).assertExists()
+    }
+
     private fun window(state: OnlineSearchState) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {

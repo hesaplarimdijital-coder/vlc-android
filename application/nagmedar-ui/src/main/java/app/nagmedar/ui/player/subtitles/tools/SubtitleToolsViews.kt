@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,6 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -68,6 +70,7 @@ import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.player.panel.ChoiceRow
 import app.nagmedar.ui.player.panel.PanelCaption
@@ -90,8 +93,10 @@ import java.util.Locale
  */
 @Composable
 fun SubtitleToolsDialog(controller: SubtitleToolsController, onOpenFile: () -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        DialogFrame(onDismiss) { SubtitleToolsSurface(controller, onOpenFile, onDismiss) }
+    // Back and a tap beside the window ask first when there are edits not yet in a new file
+    val asked = { if (controller.askClose()) onDismiss() }
+    Dialog(onDismissRequest = asked, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        DialogFrame(asked) { SubtitleToolsSurface(controller, onOpenFile, onDismiss) }
     }
 }
 
@@ -171,6 +176,26 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
                 Column(Modifier.weight(1f)) {}
             }
         }
+        if (state.confirmClose) CloseQuestion(controller, state, onDismiss)
+    }
+}
+
+/** Unsaved edits and the window is asked to close: save them, close without, or go on working. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CloseQuestion(controller: SubtitleToolsController, state: SubtitleToolsState, onDismiss: () -> Unit) {
+    val keep = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { keep.requestFocus() } }
+    // a dim over the window; a tap on it is "keep working"
+    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)).pointerInput(Unit) { detectTapGestures { controller.cancelClose() } }, contentAlignment = Alignment.Center) {
+        DialogCard(stringResource(R.string.nag_subtools_ask_title), Modifier.testTag("subtools-ask"), cardWidth = 460.dp) {
+            Text(stringResource(R.string.nag_subtools_ask), style = NagTheme.type.label, color = NagTheme.colors.text)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                NagButton(stringResource(R.string.nag_subtools_ask_save), controller::saveInstead, primary = true, enabled = state.issues.saveable, modifier = Modifier.testTag("ask-save"))
+                NagButton(stringResource(R.string.nag_subtools_ask_discard), { controller.cancelClose(); onDismiss() }, modifier = Modifier.testTag("ask-discard"))
+                NagButton(stringResource(R.string.nag_subtools_ask_keep), controller::cancelClose, modifier = Modifier.focusRequester(keep).testTag("ask-keep"))
+            }
+        }
     }
 }
 
@@ -196,7 +221,8 @@ private val CARD_HEIGHT = 780.dp
 private fun toolsKey(event: KeyEvent, controller: SubtitleToolsController, onDismiss: () -> Unit): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
     if (event.key == Key.Escape) {
-        onDismiss()
+        // with a question on screen Esc is "keep working"; else it closes, after asking when there are unsaved edits
+        if (controller.state?.confirmClose == true) controller.cancelClose() else if (controller.askClose()) onDismiss()
         return true
     }
     val shortcut = ShortcutRegistry.match(event, setOf(ShortcutScope.Player)) ?: return false
@@ -494,7 +520,8 @@ private fun SaveBar(state: SubtitleToolsState, controller: SubtitleToolsControll
         }
         val status = when {
             !state.issues.saveable -> stringResource(R.string.nag_save_blocked) to colors.warning
-            state.saveFailed -> stringResource(R.string.nag_save_failed) to colors.danger
+            state.saveProblem == SaveProblem.SameFile -> stringResource(R.string.nag_save_same_file) to colors.danger
+            state.saveProblem != null -> stringResource(R.string.nag_save_failed) to colors.danger
             state.saved != null -> {
                 val saved = state.saved
                 val where = stringResource(if (saved.beside) R.string.nag_save_saved_beside else R.string.nag_save_saved_elsewhere, saved.name)

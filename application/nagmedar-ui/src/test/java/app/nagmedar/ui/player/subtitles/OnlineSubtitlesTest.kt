@@ -39,6 +39,7 @@ internal class FakeOpenSubtitles(override val available: Boolean = true) : OpenS
     var byHash: List<OnlineSubtitle> = emptyList()
     var byName: List<OnlineSubtitle> = emptyList()
     var failure: Exception? = null
+    var fetchFailure: Exception? = null
     var ticket = OnlineTicket("https://dl.example/1", "Northern.Light.srt", remaining = 4, requests = 1, resetUtc = "2026-10-13T00:00:00.000Z")
 
     override suspend fun search(query: OnlineQuery): List<OnlineSubtitle> {
@@ -52,7 +53,10 @@ internal class FakeOpenSubtitles(override val available: Boolean = true) : OpenS
         return ticket
     }
 
-    override suspend fun fetch(link: String): ByteArray = SAMPLE_SRT.toByteArray()
+    override suspend fun fetch(link: String): ByteArray {
+        fetchFailure?.let { throw it }
+        return SAMPLE_SRT.toByteArray()
+    }
 }
 
 internal class FakeOnlineFilm(override val name: String = "Kuzey Işığı.mkv", private val fingerprint: String? = "8e245d9679d31e12") : OnlineFilm {

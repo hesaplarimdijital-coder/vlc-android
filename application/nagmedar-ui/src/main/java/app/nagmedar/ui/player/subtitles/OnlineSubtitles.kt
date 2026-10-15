@@ -195,7 +195,7 @@ class OnlineSubtitlesController(
         state = state?.copy(downloading = subtitle.key, problem = null)
         job = scope.launch {
             try {
-                val file = provider.download(subtitle)
+                val file = provider.download(subtitle, onQuota = ::keep)
                 file.quota?.let(::keep)
                 val saved = film.save(fileNameFor(film.name, subtitle, file.fileName), file.bytes)
                 if (saved == null || !film.load(saved)) {

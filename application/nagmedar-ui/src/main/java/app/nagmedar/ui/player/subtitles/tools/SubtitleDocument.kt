@@ -136,14 +136,15 @@ data class SubtitleDocument(
 
 /** The time lines of SRT and WebVTT, and the times of ASS. */
 internal object TimeLines {
-    private const val TIME = """(?:(\d+):)?(\d{1,2}):(\d{2})[,.](\d{1,3})"""
+    // hours are five digits at most: a file or a field cannot make a number too big to read
+    private const val TIME = """(?:(\d{1,5}):)?(\d{1,2}):(\d{2})[,.](\d{1,3})"""
 
     val srt = Regex("""(?m)^\s*$TIME\s*-->\s*$TIME""")
 
     /** A cue's times, then what follows them. */
     val line = Regex("""^\s*$TIME\s*-->\s*$TIME(.*)$""")
 
-    private val ass = Regex("""^\s*(\d+):(\d{1,2}):(\d{1,2})[.:](\d{1,3})\s*$""")
+    private val ass = Regex("""^\s*(\d{1,5}):(\d{1,2}):(\d{1,2})[.:](\d{1,3})\s*$""")
 
     fun parse(hours: String?, minutes: String, seconds: String, fraction: String): Long =
         (((hours?.toLong() ?: 0L) * 60 + minutes.toLong()) * 60 + seconds.toLong()) * 1000 + fraction.padEnd(3, '0').toLong()
@@ -181,7 +182,10 @@ object Clock {
         return "%d:%02d:%02d%c%03d".format(Locale.ROOT, t / 3_600_000, t / 60_000 % 60, t / 1000 % 60, separator, t % 1000)
     }
 
-    private val typed = Regex("""^\s*(?:(?:(\d+):)?(\d{1,2}):)?(\d+)(?:[,.](\d{1,3}))?\s*$""")
+    private val typed = Regex("""^\s*(?:(?:(\d{1,5}):)?(\d{1,2}):)?(\d{1,9})(?:[,.](\d{1,3}))?\s*$""")
+
+    /** The longest time a field takes: a hundred hours. */
+    const val MAX_FIELD_MS = 360_000_000L
 
     /**
      * A time typed in a field: "1:02:03,5", "62:03.250", "3723,5", with a comma or a dot; null
@@ -191,8 +195,8 @@ object Clock {
         val match = typed.matchEntire(text) ?: return null
         val (hours, minutes, seconds, fraction) = match.destructured
         val value = seconds.toLongOrNull() ?: return null
-        val total = ((hours.ifEmpty { "0" }.toLong() * 60 + minutes.ifEmpty { "0" }.toLong()) * 60 + value) * 1000 + fraction.padEnd(3, '0').toLong()
-        return total.takeIf { it >= 0 }
+        val total = ((hours.ifEmpty { "0" }.toLongOrNull() ?: return null) * 60 + (minutes.ifEmpty { "0" }.toLongOrNull() ?: return null)) * 60 + value
+        return (total * 1000 + fraction.padEnd(3, '0').toLong()).takeIf { it in 0..MAX_FIELD_MS }
     }
 }
 
@@ -236,8 +240,15 @@ object SubtitleCodec {
         for ((block, separator) in blocks) {
             val timed = parseCueBlock(block.lines().map { it.trimEnd('\r') })
             if (timed == null) {
-                // the header, a note, a style: kept before the first cue, else after the last
-                (if (cues.isEmpty()) head else tail).append(block).append(separator.ifEmpty { lineBreak })
+                val lines = block.lines().map { it.trimEnd() }
+                if (format == SubtitleFormat.Srt && cues.isNotEmpty() && !lines.all { it.isEmpty() || it.all(Char::isDigit) }) {
+                    // an SRT cue's text goes on after a blank line: it is the same cue's
+                    val last = cues.last()
+                    cues[cues.lastIndex] = last.copy(text = last.text + "\n" + lines.filter { it.isNotEmpty() }.joinToString("\n"))
+                } else {
+                    // the header, a note, a style: kept before the first cue, else after the last
+                    (if (cues.isEmpty()) head else tail).append(block).append(separator.ifEmpty { lineBreak })
+                }
             } else {
                 for (item in timed) cues += TimedCue(id++, item.start, item.end, item.text, item.source)
             }
@@ -389,11 +400,14 @@ object SubtitleCodec {
             out.append(Clock.format(cue.startMs, separator)).append(" --> ").append(Clock.format(cue.endMs, separator))
             source?.tail?.takeIf { it.isNotEmpty() }?.let { out.append(' ').append(it.trim()) }
             out.append(lb)
-            out.append(cue.text.replace("\n", lb)).append(lb).append(lb)
+            out.append(writableText(cue.text).replace("\n", lb)).append(lb).append(lb)
         }
         if (vtt) out.append(document.tail)
         return out.toString()
     }
+
+    /** A cue's text for SRT and WebVTT: a blank line ends a cue there, so the blank lines of an edited text are left out. */
+    private fun writableText(text: String): String = text.split('\n').filter { it.isNotBlank() }.joinToString("\n")
 
     private fun writeAss(document: SubtitleDocument): String {
         val byId = document.cues.associateBy { it.id }

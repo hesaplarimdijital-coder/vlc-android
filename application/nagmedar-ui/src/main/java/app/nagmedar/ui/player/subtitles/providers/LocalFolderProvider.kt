@@ -6,9 +6,14 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import app.nagmedar.ui.player.subtitles.OnlineFailure
 import app.nagmedar.ui.player.subtitles.OnlineProblem
+import app.nagmedar.ui.player.subtitles.OnlineQuota
 import app.nagmedar.ui.player.subtitles.isSubtitleFile
 import app.nagmedar.ui.player.subtitles.languageOf
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.text.Normalizer
 import java.util.Locale
@@ -55,7 +60,14 @@ class LocalFolderProvider(
         val season = query.season ?: wanted.season
         val episode = query.episode ?: wanted.episode
         if (wanted.title.isEmpty() && season == null) return emptyList()
-        return files.list().mapNotNull { file ->
+        val listed = files.list()
+        // many hundreds of names are matched off the caller's (main) thread
+        return withContext(Dispatchers.Default) { matches(listed, query, wanted, season, episode) }
+    }
+
+    private fun CoroutineScope.matches(listed: List<LocalSubtitleFile>, query: SubtitleQuery, wanted: Words, season: Int?, episode: Int?): List<SubtitleResult> =
+        listed.mapNotNull { file ->
+            ensureActive()
             if (!isSubtitleFile(file.name) || file.name.substringAfterLast('.').lowercase(Locale.ROOT) in PAIRED) return@mapNotNull null
             val found = Words.of(file.name.substringBeforeLast('.'))
             val language = found.tokens.drop(1).firstNotNullOfOrNull(::languageOf).orEmpty()
@@ -76,9 +88,8 @@ class LocalFolderProvider(
                 rating = shared * closeness,
             )
         }
-    }
 
-    override suspend fun download(result: SubtitleResult): SubtitleFile {
+    override suspend fun download(result: SubtitleResult, onQuota: (OnlineQuota) -> Unit): SubtitleFile {
         val bytes = files.read(result.id) ?: throw OnlineFailure.Server(0)
         return SubtitleFile(bytes, result.fileName)
     }
@@ -140,6 +151,51 @@ class SubtitleFolderStore(private val prefs: SharedPreferences) {
     }
 }
 
+/** A folder's entry: a document id, a name, and whether it is a folder. */
+internal class TreeEntry(val id: String, val name: String, val directory: Boolean)
+
+/**
+ * The files below [root], down [maxDepth] levels and at most [maxFiles] of them, by [children]
+ * (each folder's entries, read lazily). Cancellation is checked before every entry, so a walk of
+ * a slow or huge folder ends when its coroutine is cancelled (the search's timeout, the window
+ * closed) instead of running on; a folder that cannot be read is skipped.
+ */
+internal suspend fun walkTree(
+    root: String,
+    maxDepth: Int,
+    maxFiles: Int,
+    children: (String) -> Iterator<TreeEntry>,
+    file: (TreeEntry) -> LocalSubtitleFile,
+    into: MutableList<LocalSubtitleFile>,
+) {
+    val context = currentCoroutineContext()
+    fun walk(documentId: String, depth: Int) {
+        val entries = try {
+            children(documentId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return
+        }
+        try {
+            while (into.size < maxFiles && entries.hasNext()) {
+                context.ensureActive()
+                val entry = entries.next()
+                if (entry.directory) {
+                    if (depth < maxDepth) walk(entry.id, depth + 1)
+                } else {
+                    into += file(entry)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the rest of this folder cannot be read; what was found stays
+        }
+    }
+    walk(root, 0)
+}
+
 /** The folder's subtitle files through the system's documents: the folder and the ones in it, down two levels. */
 class DocumentLocalSubtitleFiles(private val context: Context, private val folder: SubtitleFolderStore) : LocalSubtitleFiles {
 
@@ -148,29 +204,53 @@ class DocumentLocalSubtitleFiles(private val context: Context, private val folde
     override suspend fun list(): List<LocalSubtitleFile> = withContext(Dispatchers.IO) {
         val root = folder.get()?.let(Uri::parse) ?: return@withContext emptyList()
         val found = ArrayList<LocalSubtitleFile>()
-        walk(root, DocumentsContract.getTreeDocumentId(root), 0, found)
+        walkTree(
+            root = DocumentsContract.getTreeDocumentId(root),
+            maxDepth = MAX_DEPTH,
+            maxFiles = MAX_FILES,
+            children = { documentId -> children(root, documentId) },
+            file = { entry -> LocalSubtitleFile(entry.name, DocumentsContract.buildDocumentUriUsingTree(root, entry.id).toString()) },
+            into = found,
+        )
         found
     }
 
-    private fun walk(tree: Uri, documentId: String, depth: Int, into: MutableList<LocalSubtitleFile>) {
-        val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, documentId)
-        runCatching {
+    /** The entries of a folder, read one at a time (the walk stops between two of them when it is cancelled). */
+    private fun children(tree: Uri, documentId: String): Iterator<TreeEntry> {
+        val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, documentId)
+        val cursor = runCatching {
             context.contentResolver.query(
-                children,
+                uri,
                 arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE),
                 null,
                 null,
                 null,
-            )?.use { cursor ->
-                while (cursor.moveToNext() && into.size < MAX_FILES) {
-                    val id = cursor.getString(0)
-                    val name = cursor.getString(1) ?: continue
-                    if (cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR) {
-                        if (depth < MAX_DEPTH) walk(tree, id, depth + 1, into)
-                    } else {
-                        into += LocalSubtitleFile(name, DocumentsContract.buildDocumentUriUsingTree(tree, id).toString())
+            )
+        }.getOrNull() ?: return emptyList<TreeEntry>().iterator()
+        return object : Iterator<TreeEntry> {
+            private var ready: TreeEntry? = null
+            private var done = false
+
+            private fun advance() {
+                while (ready == null && !done) {
+                    if (!cursor.moveToNext()) {
+                        done = true
+                        cursor.close()
+                        return
                     }
+                    val name = cursor.getString(1) ?: continue
+                    ready = TreeEntry(cursor.getString(0), name, cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR)
                 }
+            }
+
+            override fun hasNext(): Boolean {
+                advance()
+                return ready != null
+            }
+
+            override fun next(): TreeEntry {
+                advance()
+                return ready.also { ready = null } ?: throw NoSuchElementException()
             }
         }
     }

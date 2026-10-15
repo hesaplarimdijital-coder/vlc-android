@@ -65,6 +65,9 @@ object SdhCleaner {
     private val namedLabel = Regex("""^$LEAD\p{Lu}[\p{L}'’.\-]+(?:[ \t]+\p{Lu}[\p{L}'’.\-]+)?[ \t]*:(?:[ \t]+|$)""")
     private val leadingDash = Regex("""^((?:<[^>]*>|\{[^}]*\})*)[ \t]*[-–—][ \t]*""")
 
+    /** Spaces left between the override blocks that open a line and its words, where a description stood. */
+    private val afterOverrides = Regex("""^((?:\{[^}]*\})+)[ \t]+""")
+
     fun visible(text: String): String = text.replace(markup, "")
 
     /** [cues] cleaned by [options]; the cues left in their order, and what changed in each. */
@@ -85,12 +88,31 @@ object SdhCleaner {
         return SdhResult(kept, changes, cues.size)
     }
 
+    /** Stands for an override block while the rules look at the text around it. */
+    private const val MASK = '\uE000'
+
+    /** [rules] applied to [text] with each override block replaced by a mark; the blocks back in their places after. */
+    private fun withoutOverrides(text: String, rules: (String) -> String): String {
+        val blocks = overrides.findAll(text).map { it.value }.toList()
+        if (blocks.isEmpty()) return rules(text)
+        val result = rules(text.replace(overrides, MASK.toString()))
+        var next = 0
+        return result.map { if (it == MASK && next < blocks.size) blocks[next++] else it.toString() }.joinToString("")
+    }
+
     /** [text] cleaned; the same text when no rule touched it, null when nothing is left of it. */
     fun cleanText(text: String, options: SdhOptions): String? {
         var work = text
         if (options.fontTags) work = work.replace(fontTag, "")
-        if (options.brackets) work = work.replace(square, "")
-        if (options.parentheses) work = removeParentheses(work)
+        // descriptions are looked for in the said text only: an ASS override block ({\clip(0,0,9,9)}) is not one
+        if (options.brackets || options.parentheses) {
+            work = withoutOverrides(work) { masked ->
+                var step = masked
+                if (options.brackets) step = step.replace(square) { it.value.filter { c -> c == MASK } }
+                if (options.parentheses) step = removeParentheses(step)
+                step
+            }
+        }
         var lines = work.split('\n')
         if (options.music) lines = lines.filterNot { note.containsMatchIn(visible(it)) }
         if (options.speakerLabels) lines = lines.map { dropLabel(it, capsLabel) }
@@ -98,7 +120,7 @@ object SdhCleaner {
         val joined = lines.joinToString("\n")
         // nothing changed: the text stays as it was, spaces and all
         if (joined == text) return text
-        val tidy = lines.map { it.replace(emptyPair, "").replace(innerSpace, "$1$2").replace(spaces, " ").replace(spaceBeforePunctuation, "$1").trim() }
+        val tidy = lines.map { it.replace(emptyPair, "").replace(innerSpace, "$1$2").replace(spaces, " ").replace(spaceBeforePunctuation, "$1").trim().replace(afterOverrides, "$1") }
         var cleaned = tidy.filter { isSaid(it) }
         if (cleaned.isEmpty()) return null
         // the override tags of a line that goes (an ASS cue's position) are kept on the first line left
@@ -123,15 +145,17 @@ object SdhCleaner {
      */
     private fun removeParentheses(text: String): String = round.replace(text) { match ->
         val inside = match.groupValues[1]
+        // an override block inside is kept where it was
+        val kept = inside.filter { it == MASK }
         val letters = inside.filter { it.isLetter() }
         val capitals = letters.isNotEmpty() && letters.all { it.isUpperCase() }
         val lineStart = text.lastIndexOf('\n', match.range.first - 1) + 1
         val lineEnd = text.indexOf('\n', match.range.last + 1).let { if (it < 0) text.length else it }
         val before = text.substring(lineStart, match.range.first)
         val after = text.substring(match.range.last + 1, lineEnd)
-        if (capitals || aside(before) || aside(after)) "" else match.value
+        if (capitals || aside(before) || aside(after)) kept else match.value
     }
 
     /** Whether nothing said is left of a line's part: only markup, dashes, notes, spaces, punctuation. */
-    private fun aside(part: String): Boolean = visible(part).all { it.isWhitespace() || it in "-–—♪♫.,!?…:;" }
+    private fun aside(part: String): Boolean = visible(part).all { it.isWhitespace() || it in "-–—♪♫.,!?…:;$MASK" }
 }

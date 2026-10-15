@@ -86,6 +86,14 @@ class SdhCleanerTest {
     }
 
     @Test
+    fun assOverrideBlocksWithBracketsAndParenthesesAreLeftAlone() {
+        assertEquals("{\\clip(0,0,100,100)}Merhaba", clean("{\\clip(0,0,100,100)}[kapı çarpar] Merhaba"))
+        assertEquals("{\\clip(0,0,100,100)}Merhaba", clean("{\\clip(0,0,100,100)}Merhaba"))
+        assertEquals("{\\pos(960,540)\\fad(200,200)}Tamam.", clean("{\\pos(960,540)\\fad(200,200)}(güler) Tamam."))
+        assertEquals("{\\t(0,500,\\fs60)}Kim o?", clean("{\\t(0,500,\\fs60)}ADAM: Kim o?"))
+    }
+
+    @Test
     fun aTextNothingTouchesStaysAsItWas() {
         val text = "Merhaba   dünya ,  nasılsın ?\n  - Iyi"
         assertEquals(text, clean(text))

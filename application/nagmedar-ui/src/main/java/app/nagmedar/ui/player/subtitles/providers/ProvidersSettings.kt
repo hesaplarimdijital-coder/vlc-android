@@ -54,6 +54,7 @@ fun SubtitleProvidersSection(
     onMove: (String, Int) -> Unit,
     onChooseFolder: () -> Unit,
     onForgetFolder: () -> Unit,
+    folderError: Boolean = false,
 ) {
     val dimens = NagTheme.dimens
     SettingsSection(stringResource(R.string.nag_prov_settings)) {
@@ -84,6 +85,9 @@ fun SubtitleProvidersSection(
                         if (row.folderChosen) NagButton(stringResource(R.string.nag_prov_folder_forget), onForgetFolder, modifier = Modifier.testTag("provider-folder-forget"))
                         NagButton(stringResource(R.string.nag_prov_folder_choose), onChooseFolder, modifier = Modifier.testTag("provider-folder-choose"))
                     }
+                }
+                if (folderError) {
+                    Text(stringResource(R.string.nag_prov_folder_failed), style = NagTheme.type.labelSmall, color = NagTheme.colors.danger, modifier = Modifier.testTag("provider-folder-error"))
                 }
             }
         }
@@ -118,11 +122,18 @@ fun SubtitleProvidersSettings() {
     val registry = remember(context) { SubtitleProviders.registry(context) }
     val store = remember(context) { SubtitleProviders.folder(context) }
     var folder by remember { mutableStateOf(store.get()) }
+    var folderError by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) {
-            runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-            store.set(uri.toString())
-            folder = uri.toString()
+            val resolver = context.contentResolver
+            folderError = !FolderPermission.replace(
+                old = folder,
+                new = uri.toString(),
+                take = { resolver.takePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) },
+                release = { resolver.releasePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) },
+                store = store,
+            )
+            folder = store.get()
         }
     }
     val rows = registry.ordered.map { provider ->
@@ -146,8 +157,29 @@ fun SubtitleProvidersSettings() {
             folder?.let { runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) } }
             store.set(null)
             folder = null
+            folderError = false
         },
+        folderError = folderError,
     )
+}
+
+/** The permission of the subtitle folder, kept for one folder at a time. */
+internal object FolderPermission {
+    /**
+     * [new] becomes the folder once [take] has kept its permission; then [old]'s permission is
+     * released (it is not needed again). When [take] fails nothing is stored and [old] stays as
+     * it was; false then.
+     */
+    fun replace(old: String?, new: String, take: (String) -> Unit, release: (String) -> Unit, store: SubtitleFolderStore): Boolean {
+        if (new == old) {
+            // the same folder again: only make sure its permission is held
+            return runCatching { take(new) }.isSuccess
+        }
+        if (runCatching { take(new) }.isFailure) return false
+        store.set(new)
+        if (old != null) runCatching { release(old) }
+        return true
+    }
 }
 
 /** "Download/Subtitles" from a tree's address "…/tree/primary%3ADownload%2FSubtitles". */

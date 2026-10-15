@@ -37,10 +37,12 @@ class OpenSubtitlesProvider(private val api: OpenSubtitlesApi, override val disp
         return found.map { resultOf(it, displayName) }
     }
 
-    override suspend fun download(result: SubtitleResult): SubtitleFile {
+    override suspend fun download(result: SubtitleResult, onQuota: (OnlineQuota) -> Unit): SubtitleFile {
         val ticket = api.download(result.id.toLong())
-        val bytes = api.fetch(ticket.link)
+        // the download is counted from here, whether or not the file arrives
         val quota = OnlineQuota(ticket.remaining, ticket.remaining + ticket.requests, OnlineSubtitlesController.resetAt(ticket.resetUtc))
+        onQuota(quota)
+        val bytes = api.fetch(ticket.link)
         return SubtitleFile(bytes, ticket.fileName, quota)
     }
 

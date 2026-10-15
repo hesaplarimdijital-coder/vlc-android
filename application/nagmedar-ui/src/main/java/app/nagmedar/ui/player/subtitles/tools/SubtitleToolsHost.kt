@@ -3,6 +3,7 @@ package app.nagmedar.ui.player.subtitles.tools
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -38,9 +39,17 @@ internal class DocumentSubtitleToolsIo(private val context: Context) : SubtitleT
         SavedSubtitle(uri.toString(), displayName(context.contentResolver, uri) ?: name, beside = true)
     }
 
-    override suspend fun write(uri: String, bytes: ByteArray): Boolean = withContext(Dispatchers.IO) {
-        // the document is the one the system's "save as" has just made: new and empty
-        runCatching { context.contentResolver.openOutputStream(Uri.parse(uri), "wt")?.use { it.write(bytes) } != null }.getOrDefault(false)
+    override suspend fun write(uri: String, source: ToolsFile, bytes: ByteArray): WriteOutcome = withContext(Dispatchers.IO) {
+        val target = Uri.parse(uri)
+        val resolver = context.contentResolver
+        // the original is never written into, whatever the picker confirmed; nor is any file that is not new and empty
+        if (DocumentIdentity.same(target, Uri.parse(source.uri))) return@withContext WriteOutcome.SameFile
+        if ((DocumentIdentity.sizeOf(resolver, target) ?: 0L) > 0L) return@withContext WriteOutcome.SameFile
+        val written = runCatching { resolver.openOutputStream(target, "wt")?.use { it.write(bytes) } != null }.getOrDefault(false)
+        if (written) return@withContext WriteOutcome.Written
+        // what the picker made for this write does not stay, empty or half written
+        runCatching { DocumentsContract.deleteDocument(resolver, target) }.recoverCatching { resolver.delete(target, null, null) }
+        WriteOutcome.Failed
     }
 }
 

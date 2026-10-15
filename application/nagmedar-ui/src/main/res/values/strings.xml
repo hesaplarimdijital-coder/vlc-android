@@ -2282,6 +2282,13 @@
     <string name="nag_save_saved_beside">Saved as %1$s beside the original</string>
     <string name="nag_save_saved_elsewhere">Saved as %1$s</string>
     <string name="nag_save_loaded">showing in the film</string>
+    <string name="nag_save_same_file">That is the original file; choose a new name and the original stays as it is</string>
+    <string name="nag_subtools_ask_title">Close without saving?</string>
+    <string name="nag_subtools_ask">The changes have not been saved. They are lost if you close now.</string>
+    <string name="nag_subtools_ask_save">Save</string>
+    <string name="nag_subtools_ask_discard">Close without saving</string>
+    <string name="nag_subtools_ask_keep">Cancel</string>
+    <string name="nag_subtools_note">%1$s · from the subtitle tools</string>
 
     <!-- S-707 · Subtitle providers -->
     <string name="nag_online_timeout">A provider did not answer in time; search again.</string>
@@ -2323,4 +2330,5 @@
     <string name="nag_prov_folder_none">No folder chosen</string>
     <string name="nag_prov_folder_choose">Choose folder…</string>
     <string name="nag_prov_folder_forget">Forget the folder</string>
+    <string name="nag_prov_folder_failed">The folder could not be kept; choose it again</string>
 </resources>

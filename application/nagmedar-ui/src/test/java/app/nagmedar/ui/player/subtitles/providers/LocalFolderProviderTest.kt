@@ -125,4 +125,72 @@ class LocalFolderProviderTest {
         assertEquals(5, words.episode)
         assertEquals("isigi", LocalFolderProvider.Words.fold("Işığı"))
     }
+
+    // ---------------------------------------------------------------- the walk of a folder
+
+    private fun entries(count: Int, delayMs: Long = 0, directory: (Int) -> Boolean = { false }) = object : Iterator<TreeEntry> {
+        var next = 0
+        override fun hasNext() = next < count
+        override fun next(): TreeEntry {
+            // a blocking read of a row, as a slow provider's cursor does
+            if (delayMs > 0) Thread.sleep(delayMs)
+            val n = next++
+            return TreeEntry("id$n", "Dosya $n.srt", directory(n))
+        }
+    }
+
+    @Test
+    fun aWalkReadsTheFilesAndTheFoldersDownToItsDepth() {
+        val found = ArrayList<LocalSubtitleFile>()
+        runBlocking {
+            walkTree(
+                root = "root", maxDepth = 1, maxFiles = 100,
+                children = { id -> if (id == "root") entries(3) { it == 1 } else if (id == "id1") entries(2) { it == 0 } else entries(5) },
+                file = { LocalSubtitleFile(it.name, "content://f/${it.id}") },
+                into = found,
+            )
+        }
+        // two files at the top, one in the folder; the folder in the folder is deeper than allowed
+        assertEquals(3, found.size)
+    }
+
+    @Test
+    fun aWalkStopsAtItsFileLimit() {
+        val found = ArrayList<LocalSubtitleFile>()
+        runBlocking { walkTree("root", 2, 10, { entries(1000) }, { LocalSubtitleFile(it.name, it.id) }, found) }
+        assertEquals(10, found.size)
+    }
+
+    @Test
+    fun aWalkThatIsCancelledStopsAtOnceEvenWhileRowsBlock() {
+        val found = ArrayList<LocalSubtitleFile>()
+        val started = System.nanoTime()
+        val thrown = runCatching {
+            runBlocking {
+                kotlinx.coroutines.withTimeout(300) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        // 100 000 rows of 20 ms each: it would run for half an hour
+                        walkTree("root", 2, 200_000, { entries(100_000, delayMs = 20) }, { LocalSubtitleFile(it.name, it.id) }, found)
+                    }
+                }
+            }
+        }.exceptionOrNull()
+        assertTrue(thrown is kotlinx.coroutines.TimeoutCancellationException)
+        assertTrue(System.nanoTime() - started < java.util.concurrent.TimeUnit.SECONDS.toNanos(5))
+        assertTrue(found.size < 1000)
+    }
+
+    @Test
+    fun aFolderThatCannotBeReadIsSkippedAndTheRestKept() {
+        val found = ArrayList<LocalSubtitleFile>()
+        runBlocking {
+            walkTree(
+                "root", 2, 100,
+                { id -> if (id == "id0") error("no access") else entries(3) { it == 0 } },
+                { LocalSubtitleFile(it.name, it.id) },
+                found,
+            )
+        }
+        assertEquals(2, found.size)
+    }
 }

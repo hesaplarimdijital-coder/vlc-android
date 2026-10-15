@@ -204,4 +204,40 @@ class SubtitleDocumentTest {
         assertNull(Clock.parse("-5"))
         assertNotNull(Clock.parse("1:02"))
     }
+
+    @Test
+    fun aHugeHourNeitherCrashesNorMakesATime() {
+        val huge = "99999999999999999999999"
+        assertNull(Clock.parse("$huge:00:00"))
+        assertNull(Clock.parse("$huge,5"))
+        assertNull(Clock.parse("99999:59:59"))
+        assertNull(Clock.parse("101:00:00"))
+        assertEquals(360_000_000L, Clock.parse("100:00:00"))
+        // a file with such hours is no cue, and no crash
+        val srt = "1\n$huge:00:01,000 --> 00:00:03,000\nHello\n\n2\n00:00:04,000 --> 00:00:06,000\nWorld\n"
+        val doc = SubtitleCodec.parse("a.srt", srt)
+        assertEquals(listOf("World"), doc?.cues?.map { it.text })
+        val ass = "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n" +
+            "Dialogue: 0,$huge:00:01.00,0:00:03.50,Default,,0,0,0,,Merhaba\n" +
+            "Dialogue: 0,0:00:04.00,0:00:05.50,Default,,0,0,0,,Dünya\n"
+        assertEquals(listOf("Dünya"), SubtitleCodec.parse("a.ass", ass)?.cues?.map { it.text })
+    }
+
+    @Test
+    fun textAfterABlankLineInsideAnSrtCueIsKept() {
+        val srt = "1\n00:00:01,000 --> 00:00:03,000\nBirinci satır\n\nikinci paragraf\n\n2\n00:00:04,000 --> 00:00:06,000\nSon\n"
+        val doc = SubtitleCodec.parse("a.srt", srt)!!
+        assertEquals(2, doc.cues.size)
+        assertEquals("Birinci satır\nikinci paragraf", doc.cues[0].text)
+    }
+
+    @Test
+    fun aBlankLineInEditedTextDoesNotBreakTheSrtItIsWrittenTo() {
+        val doc = SubtitleCodec.parse("a.srt", srt)!!
+        val edited = doc.copy(cues = doc.cues.mapIndexed { i, cue -> if (i == 0) cue.copy(text = "Bir\n\n  \nİki") else cue })
+        val again = SubtitleCodec.parse("a.srt", edited.write())!!
+        assertEquals(3, again.cues.size)
+        assertEquals("Bir\nİki", again.cues[0].text)
+        assertEquals(doc.cues[1].text, again.cues[1].text)
+    }
 }
