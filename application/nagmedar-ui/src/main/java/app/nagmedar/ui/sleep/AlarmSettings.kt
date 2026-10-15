@@ -1,8 +1,5 @@
 package app.nagmedar.ui.sleep
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -75,7 +72,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import android.provider.Settings as SystemSettings
 
 /**
  * S-1007: Settings › Alarm: on or off, its time and days (none: once), what it plays (the music
@@ -208,7 +204,7 @@ private fun nextRing(at: Long, now: Long, locale: Locale): String {
 
 /** The hour or the minute of "07 : 30": typed (the digits come in from the right, as on a clock) or stepped with ↑ and ↓. */
 @Composable
-private fun TimePart(value: Int, max: Int, label: String, modifier: Modifier, onSet: (Int) -> Unit, onStep: (up: Boolean) -> Unit) {
+internal fun TimePart(value: Int, max: Int, label: String, modifier: Modifier, onSet: (Int) -> Unit, onStep: (up: Boolean) -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val focusManager = LocalFocusManager.current
@@ -364,15 +360,6 @@ private fun ExactRow(given: Boolean?) {
         horizontalArrangement = Arrangement.spacedBy(dimens.gapS),
     ) {
         Text(stringResource(R.string.nag_alarm_exact_off), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning, modifier = Modifier.weight(1f))
-        NagButton(stringResource(R.string.nag_alarm_exact_allow), {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                runCatching {
-                    context.startActivity(
-                        Intent(SystemSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}"))
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                }
-            }
-        })
+        NagButton(stringResource(R.string.nag_alarm_exact_allow), { Alarms.requestExact(context) })
     }
 }

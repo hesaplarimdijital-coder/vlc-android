@@ -449,3 +449,77 @@ interface NetworkServerDao {
     @Query("DELETE FROM network_server WHERE id = :id")
     fun delete(id: Long)
 }
+
+/** S-1107: the tracks radio recordings were cut into, and the recordings scheduled. */
+@Dao
+abstract class RadioRecordingDao {
+    /** The tracks kept, newest first; the ones in the bin are left out. */
+    @Query("SELECT * FROM radio_recording WHERE trashed_at = 0 ORDER BY session_started_at DESC, started_at ASC, id ASC")
+    abstract fun tracks(): Flow<List<RadioRecording>>
+
+    @Query("SELECT * FROM radio_recording WHERE id = :id")
+    abstract fun track(id: Long): RadioRecording?
+
+    @Query("SELECT * FROM radio_recording WHERE id IN (:ids)")
+    abstract fun byIds(ids: List<Long>): List<RadioRecording>
+
+    @Query("SELECT * FROM radio_recording WHERE session_id = :sessionId ORDER BY started_at ASC, id ASC")
+    abstract fun sessionTracks(sessionId: String): List<RadioRecording>
+
+    @Query("SELECT * FROM radio_recording WHERE trashed_at > 0")
+    abstract fun trashed(): List<RadioRecording>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun add(track: RadioRecording): Long
+
+    /** What the tracks kept take, bytes; the bin's too, since the files are still there. */
+    @Query("SELECT COALESCE(SUM(size_bytes), 0) FROM radio_recording")
+    abstract fun usedBytes(): Long
+
+    @Query("SELECT COALESCE(SUM(size_bytes), 0) FROM radio_recording")
+    abstract fun used(): Flow<Long>
+
+    /** The oldest tracks first (the bin's, then the sessions that began first), for pruning. */
+    @Query("SELECT * FROM radio_recording ORDER BY (trashed_at > 0) DESC, session_started_at ASC, started_at ASC, id ASC")
+    abstract fun oldestFirst(): List<RadioRecording>
+
+    @Query("UPDATE radio_recording SET file_uri = :uri, file_name = :name WHERE id = :id")
+    abstract fun rename(id: Long, uri: String, name: String)
+
+    @Query("UPDATE radio_recording SET trashed_at = :at WHERE id IN (:ids)")
+    abstract fun trash(ids: List<Long>, at: Long)
+
+    @Query("DELETE FROM radio_recording WHERE id IN (:ids)")
+    abstract fun delete(ids: List<Long>)
+
+    @Query("DELETE FROM radio_recording")
+    abstract fun clear()
+
+    @Query("SELECT * FROM radio_schedule ORDER BY hour, minute, id")
+    abstract fun schedules(): Flow<List<RadioScheduleEntry>>
+
+    @Query("SELECT * FROM radio_schedule ORDER BY id")
+    abstract fun scheduleList(): List<RadioScheduleEntry>
+
+    @Query("SELECT * FROM radio_schedule WHERE id = :id")
+    abstract fun schedule(id: Long): RadioScheduleEntry?
+
+    @Upsert
+    abstract fun saveSchedule(entry: RadioScheduleEntry): Long
+
+    /** Saves a schedule and returns its id (an upsert that updates answers -1). */
+    @Transaction
+    open fun keepSchedule(entry: RadioScheduleEntry): Long {
+        val inserted = saveSchedule(entry)
+        return if (inserted > 0) inserted else entry.id
+    }
+
+    @Query("UPDATE radio_schedule SET enabled = :enabled WHERE id = :id")
+    abstract fun enableSchedule(id: Long, enabled: Boolean)
+
+    @Query("UPDATE radio_schedule SET last_started_at = :at WHERE id = :id")
+    abstract fun markScheduleStarted(id: Long, at: Long)
+
+    @Query("DELETE FROM radio_schedule WHERE id = :id")
+    abstract fun deleteSchedule(id: Long)
+}

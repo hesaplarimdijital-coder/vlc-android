@@ -5,6 +5,7 @@ import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
+import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -32,6 +33,7 @@ object BackupSettings {
         NAGMEDAR_WINDOW_BOUNDS,
         SnapshotSettings.KEY_FOLDER,
         KEY_RECORDING_FOLDER,
+        RecordingPrefs.KEY_FOLDER,
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

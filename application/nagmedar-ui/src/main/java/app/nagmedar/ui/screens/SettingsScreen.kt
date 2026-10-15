@@ -52,6 +52,7 @@ import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
 import app.nagmedar.ui.player.record.RecordingSection
+import app.nagmedar.ui.radio.record.RadioRecordingSection
 import app.nagmedar.ui.player.snapshot.HdrSnapshot
 import app.nagmedar.ui.player.snapshot.SnapshotFormat
 import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
@@ -109,6 +110,8 @@ fun SettingsScreen(
         item { LatencySection() }
         // S-1007: waking to music
         item { AlarmSection() }
+        // S-1107: where radio recordings go, which tracks are kept and how much room they may take
+        item { RadioRecordingSection(prefs) }
         // S-1003: where lyrics come from
         item { LyricsSection() }
         // S-1006: where album covers come from

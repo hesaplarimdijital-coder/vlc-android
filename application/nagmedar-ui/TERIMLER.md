@@ -125,6 +125,9 @@ Sözlüğü testler denetler:
 | kota | quota | | | OpenSubtitles'ın günlük indirme hakkı: “OpenSubtitles kotası: 4/5” |
 | ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
 | kayıt, kayda almak | recording, record | | | Oynayanın akışı geldiği gibi yazılır (Shift+R, VLC'nin Playback › Record'u); “Kayda al”, “Kaydı durdur”, Ayarlar › Kayıt. “Kaydetmek” yalnızca dosyanın yazılması için: “Kaydediliyor… %45” |
+| radyo kaydı, parça kesme | radio recording, track splitting | | | Radyonun akışı ayrı bir bağlantıyla alınır, ICY parça adı değişince kare sınırında kesilir (Alt+R, Alt+Shift+R sekmeyi açar); kesim örnek hassasiyetinde değildir, bunu arayüz söyler |
+| eksik parça | partial track | | | Başı ya da sonu kesilmiş ya da en kısa süreden kısa parça; “Eksik” rozeti, “Yalnızca tam parçaları tut” |
+| zamanlanmış kayıt | scheduled recording | | | Radyo, saat, süre ya da bitiş ve tekrar: bir kez, her gün, hafta içi, haftalık |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |

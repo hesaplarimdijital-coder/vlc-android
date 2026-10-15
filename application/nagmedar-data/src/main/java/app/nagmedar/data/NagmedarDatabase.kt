@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
-        NetworkServerEntry::class,
+        NetworkServerEntry::class, RadioRecording::class, RadioScheduleEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -33,10 +33,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun smartPlaylists(): SmartPlaylistDao
     abstract fun latencyProfiles(): LatencyProfileDao
     abstract fun networkServers(): NetworkServerDao
+    abstract fun radioRecordings(): RadioRecordingDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 11
+        const val VERSION = 12
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -143,9 +144,34 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 11 → 12 (S-1107): the tracks radio recordings were cut into, and the recordings scheduled. */
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `radio_recording` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`session_id` TEXT NOT NULL, `station_key` TEXT NOT NULL, `station_name` TEXT NOT NULL, " +
+                        "`stream_url` TEXT NOT NULL, `station_uuid` TEXT, `logo_url` TEXT, `file_uri` TEXT NOT NULL, " +
+                        "`file_name` TEXT NOT NULL, `artist` TEXT, `title` TEXT, `duration_ms` INTEGER NOT NULL, " +
+                        "`size_bytes` INTEGER NOT NULL, `complete` INTEGER NOT NULL, `format` TEXT NOT NULL, " +
+                        "`started_at` INTEGER NOT NULL, `session_started_at` INTEGER NOT NULL, `trashed_at` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_radio_recording_session_id` ON `radio_recording` (`session_id`)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_radio_recording_file_uri` ON `radio_recording` (`file_uri`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_radio_recording_session_started_at` ON `radio_recording` (`session_started_at`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `radio_schedule` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`station_key` TEXT NOT NULL, `station_name` TEXT NOT NULL, `stream_url` TEXT NOT NULL, " +
+                        "`station_uuid` TEXT, `logo_url` TEXT, `start_at` INTEGER NOT NULL, `hour` INTEGER NOT NULL, " +
+                        "`minute` INTEGER NOT NULL, `duration_minutes` INTEGER NOT NULL, `repeat` TEXT NOT NULL, " +
+                        "`weekday` INTEGER NOT NULL, `enabled` INTEGER NOT NULL, `last_started_at` INTEGER NOT NULL, " +
+                        "`created_at` INTEGER NOT NULL)",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
         )
 
         @Volatile
