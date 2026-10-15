@@ -1,0 +1,47 @@
+# The remote access web app, built (S-1304)
+#
+# VideoLAN's web app at the version pinned in buildsystem/compile-remoteaccess.sh, taken from this
+# repository's vendor/remoteaccess branch (code.videolan.org only if the branch lacks it), with
+# Nağmedar's patches and assets (buildsystem/remoteaccess), built into
+# application/remote-access-client/remoteaccess/dist, which remote-access-client's webCopy puts
+# into the APK. Cached by what decides the result (the pin, the patches, the assets, the check);
+# a build that fails, or whose dist is not Nağmedar's (check-dist.sh), fails the job with an
+# annotation that carries the log's end.
+
+name: Uzaktan erişim web uygulaması
+description: Derle (yamalı, önbellekli) ve Nağmedar'ın olduğunu denetle
+
+runs:
+  using: composite
+  steps:
+    - name: Önbellek
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          application/remote-access-client/remoteaccess
+          !application/remote-access-client/remoteaccess/node_modules
+        key: remoteaccess-web-${{ hashFiles('buildsystem/compile-remoteaccess.sh', 'buildsystem/remoteaccess/patches/**', 'buildsystem/remoteaccess/assets/**', 'buildsystem/remoteaccess/check-dist.sh') }}
+
+    # the version the upstream project builds with (its CI image is Node 18/20 based)
+    - uses: actions/setup-node@v4
+      if: steps.cache.outputs.cache-hit != 'true'
+      with:
+        node-version: '20'
+
+    - name: Derle
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        REMOTE_ACCESS_VENDOR_REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
+      run: |
+        set -o pipefail
+        ./buildsystem/compile-remoteaccess.sh 2>&1 | tee "$RUNNER_TEMP/remoteaccess.log" || {
+          echo "::error title=Uzaktan erişim web uygulaması::$(tail -c 3000 "$RUNNER_TEMP/remoteaccess.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+          exit 1
+        }
+
+    # also on a cache hit: the check is cheap and the cache is only as good as it
+    - name: Nağmedar'ın olduğunu denetle
+      shell: bash
+      run: ./buildsystem/remoteaccess/check-dist.sh application/remote-access-client/remoteaccess/dist

@@ -1,0 +1,70 @@
+# Remote access web app sources on Nağmedar's own vendor/remoteaccess branch (S-1304)
+#
+# buildsystem/compile-remoteaccess.sh builds VideoLAN's remote access web app from this branch, so
+# that no build needs code.videolan.org: it takes the branch's commit whose tree is the pinned tree
+# (REMOTE_ACCESS_TESTED_TREE) and falls back to VideoLAN's repository only when there is none.
+# This job, run by hand, adds the pinned version (REMOTE_ACCESS_TESTED_HASH) to the branch: a
+# commit with exactly that version's tree, on top of the earlier ones, so that the versions older
+# branches pin stay on it. When the tree is not the one the script pins, the job says which to pin.
+#   gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/vendor-remoteaccess.yml/dispatches -f ref=<branch>
+# The branch can also be read with git:
+#   git fetch origin vendor/remoteaccess && git show FETCH_HEAD:package.json
+
+name: Vendor remote access
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: vendor-remoteaccess
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  vendor:
+    name: Kaynağı dala koy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Sabitlenen sürümü vendor/remoteaccess dalına ekle
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          script=buildsystem/compile-remoteaccess.sh
+          hash=$(sed -n 's/^REMOTE_ACCESS_TESTED_HASH=//p' "$script")
+          pinned_tree=$(sed -n 's/^REMOTE_ACCESS_TESTED_TREE=//p' "$script")
+          upstream=$(sed -n 's/^REMOTE_ACCESS_REPOSITORY=//p' "$script")
+          [ -n "$hash" ] && [ -n "$upstream" ] || { echo "::error::the pinned version is not in $script"; exit 1; }
+          own="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git clone -q --single-branch --branch main "$upstream" "$RUNNER_TEMP/remoteaccess"
+          cd "$RUNNER_TEMP/remoteaccess"
+          tree=$(git rev-parse "${hash}^{tree}")
+          if [ "$tree" != "$pinned_tree" ]; then
+            echo "::warning title=Uzaktan erişim kaynağı::$hash has tree $tree: set REMOTE_ACCESS_TESTED_TREE=$tree in $script"
+          fi
+
+          parent=
+          if git fetch -q "$own" vendor/remoteaccess; then
+            if git log --format=%T FETCH_HEAD | grep -qx "$tree"; then
+              echo "vendor/remoteaccess already holds $hash (tree $tree)"
+              exit 0
+            fi
+            parent="-p $(git rev-parse FETCH_HEAD)"
+          fi
+          commit=$(git commit-tree "$tree" $parent -m "remoteaccess at ${hash}")
+          git push -q "$own" "$commit:refs/heads/vendor/remoteaccess"
+          echo "vendor/remoteaccess: $commit (tree $tree)"

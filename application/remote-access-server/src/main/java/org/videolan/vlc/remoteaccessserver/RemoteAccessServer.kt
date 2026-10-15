@@ -432,7 +432,7 @@ class RemoteAccessServer(private val context: Context) : PlaybackService.Callbac
             cal.add(Calendar.YEAR, 25)
             val notAfter = cal.time
             // Build Certificate
-            val owner = X500Name("CN=vlc-android, O=VideoLAN, L=Paris, C=France")
+            val owner = X500Name("CN=nagmedar, O=Nagmedar")
             val builder: X509v3CertificateBuilder = JcaX509v3CertificateBuilder(owner, BigInteger(64, random), notBefore, notAfter, owner, keypair.public)
 
             val signer: ContentSigner = JcaContentSignerBuilder("SHA256WithRSAEncryption").build(privateKey)

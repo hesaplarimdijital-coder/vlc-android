@@ -509,7 +509,7 @@
     <string name="remote_access_status">Sunucu durumu</string>
     <string name="remote_access_status_summary">Sunucu durumunu görüntülemek için dokunun</string>
     <string name="remote_access_connections">Bağlantılar</string>
-    <string name="remote_access_links">Balantılar</string>
+    <string name="remote_access_links">Bağlantılar</string>
     <string name="remote_access_active">Uzaktan erişim açık</string>
     <string name="remote_access_notification">Uzaktan erişim %s üzerinde açık</string>
     <string name="remote_access_notification_stopped">Uzaktan erişim durduruldu</string>
@@ -1310,11 +1310,11 @@
     <string name="ra_log_type">Günlük türü</string>
     <string name="ra_send_files">Dosyaları gönder</string>
     <string name="ra_not_in_foreground">Uygulama ön planda değil. Görüntü başlatılamadı.</string>
-    <string name="ra_disconnected">Aygıt bağlantısı kesildi</string>
+    <string name="ra_disconnected">Cihazla bağlantı kesildi</string>
     <string name="ra_file">Dosya</string>
     <string name="ra_upload_remaining">%s dosya yükleniyor</string>
     <string name="ra_upload_all">Tümünü yükle</string>
-    <string name="ra_drop_files_tip">Aygıtınıza göndermek istediğiniz dosyaları istediğiniz yere bırakın</string>
+    <string name="ra_drop_files_tip">Cihazınıza göndermek istediğiniz dosyaları istediğiniz yere bırakın</string>
     <string name="ra_prepare_download">İndirmeniz hazırlanıyor</string>
     <string name="ra_forbidden">İçerik ayarlardan kapatılmış</string>
     <string name="ra_playback_forbidden">Oynatma denetimi ayarlardan kapatılmış</string>
@@ -1328,21 +1328,24 @@
     <string name="ra_new_code">Yeni bir kod gönder</string>
     <string name="home">Giriş</string>
     <string name="ra_code">Bu kodu yazın: %s</string>
-    <string name="ra_send_logs">Aygıt üzerinde uzaktan erişim günlüğü kaydedilsin</string>
-    <string name="ra_otp">Bir kerelik uzaktan erişim parolası</string>
+    <string name="ra_send_logs">Uzaktan erişim günlüğü bu cihaza kaydedilsin</string>
+    <string name="ra_otp">Tek seferlik uzaktan erişim parolası</string>
     <string name="ra_otp_description">Uzaktan erişim için erişim istekleri</string>
     <string name="ra_otp_title">Uzaktan erişim oturum açma girişimi</string>
-    <string name="ra_otp_subtitle">Bu girişimi siz yaptıysanız bu kodu diğer aygıta yazın</string>
+    <string name="ra_otp_subtitle">Bu girişimi siz yaptıysanız bu kodu diğer cihaza yazın</string>
     <string name="ra_otp_not_me">Ben değilim</string>
     <string name="ra_output">Ses çıkışı</string>
     <string name="ra_play_on_browser">Tarayıcıda oynat</string>
-    <string name="ra_play_on_device">Aygıtta oynat</string>
-    <string name="ra_browser_audio_not_found">Ortam bulunamadı veya tarayıcıda oynatılamıyor</string>
+    <string name="ra_play_on_device">Cihazda oynat</string>
+    <string name="ra_browser_audio_not_found">Ortam bulunamadı ya da tarayıcıda oynatılamıyor</string>
     <string name="ra_browser_audio_unsupported_format">Ses biçimi tarayıcınız tarafından desteklenmiyor</string>
+    <string name="ra_upload_subtitle">Altyazı yükle</string>
+    <string name="ra_about_license">Nağmedar özgür yazılımdır: GNU Genel Kamu Lisansı\'nın 2. sürümü ya da (seçiminize göre) daha sonraki bir sürümüyle dağıtılır.</string>
+    <string name="ra_about_source">Kaynak kodu</string>
 
-    <string name="ra_onboarding_welcome_desc">Nağmedar uygulamasının uzaktan erişim özelliğine hoş geldiniz\Bu özelliği etkinleştirerek bu aygıtın oynatma ve diğer işlemlerini denetleyebileceksiniz</string>
-    <string name="ra_onboarding_how_title">Aygıtınızı denetleyin</string>
-    <string name="ra_onboarding_how_desc">Aygıtınızdaki oynatmayı denetleyin, dosya gönderin ya da alın ve diğer işlemleri yapın</string>
+    <string name="ra_onboarding_welcome_desc">Nağmedar uygulamasının uzaktan erişim özelliğine hoş geldiniz\nBu özelliği etkinleştirerek bu cihazın oynatma ve diğer işlemlerini denetleyebileceksiniz</string>
+    <string name="ra_onboarding_how_title">Cihazınızı denetleyin</string>
+    <string name="ra_onboarding_how_desc">Cihazınızdaki oynatmayı denetleyin, dosya gönderin ya da alın ve diğer işlemleri yapın</string>
     <string name="ra_onboarding_ssl_title">Veri şifrelemesi</string>
     <string name="ra_onboarding_ssl_desc">Verilerinizin sızmasını önlemek için uzaktan erişim şifrelenir</string>
     <string name="ra_onboarding_otp_title">Kimlik doğrulaması</string>
@@ -1355,9 +1358,9 @@
     <string name="ra_disable">Kapat</string>
     <string name="ra_log_web">Uzaktan erişim günlüğü</string>
     <string name="ra_log_crash">Çökme günlüğü</string>
-    <string name="ra_log_mobile">Aygıt günlüğü</string>
+    <string name="ra_log_mobile">Cihaz günlüğü</string>
     <string name="ra_log_current">Güncel yerel günlükler</string>
-    <string name="ra_invalid_login">Aygıtınız üzerinde oturum açmalısınız</string>
+    <string name="ra_invalid_login">Cihazınızda oturum açmalısınız</string>
     <string name="ra_invalid_otp">Belirtilen kod geçersiz</string>
     <string name="learn_more">Ayrıntılı bilgi</string>
 

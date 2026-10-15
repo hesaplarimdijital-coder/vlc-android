@@ -59,6 +59,7 @@ import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
 import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.podcast.PodcastSection
+import app.nagmedar.ui.remoteaccess.RemoteAccessSection
 import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
@@ -116,6 +117,8 @@ fun SettingsScreen(
         item { CoversSection() }
         // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
         item { PodcastSection() }
+        // S-1304: the web page that browses and plays from another device
+        item { RemoteAccessSection() }
         // S-1502: the app's settings, lists and statistics in one file, and back
         item { BackupSection() }
         item {

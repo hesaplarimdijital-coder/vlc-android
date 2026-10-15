@@ -47,6 +47,8 @@ Sözlüğü testler denetler:
 | cihaz | device | aygıt | | |
 | harici disk | external drive | harici sürücü | external disk | |
 | ağ paylaşımı | network share | | | SMB, DLNA, WebDAV |
+| uzaktan erişim | remote access | uzak erişim | | Ayarlar › Uzaktan erişim: bu ağdaki bir tarayıcıdan kütüphaneye bakmak, oynatmayı denetlemek, dosya göndermek; web sayfası bu cihazdaki sunucudan gelir, “VLC for Android” tabanlı olduğu Hakkında'da yazar |
+| tek seferlik kod | one-time code | OTP, bir kerelik | OTP | Her yeni tarayıcıdan önce cihazın bildirimde gösterdiği 6 haneli, 60 sn geçerli kod; tarayıcı sayfasında “Tek seferlik uzaktan erişim parolası” da onu anar |
 | akış | stream | | | “Ağ akışı aç…” |
 | radyo rehberi | radio directory | radyo dizini | | Radio Browser: ada, ülkeye, dile, etikete, kodeğe göre aranan topluluk listesi; listedeki tek öğe “radyo”, İngilizcede “station” |
 | oy vermek | to vote | | | Rehberde bir radyo için günde bir kez; “Bu radyoya oy ver” |

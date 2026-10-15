@@ -34,7 +34,9 @@ ext {
 
 def remoteclientSourceDir = "$projectDir/remoteaccess"
 File remoteAccessPackage = file("$remoteclientSourceDir/package.json")
-def remoteAccessRevision = remoteAccessPackage.exists() ? providers.exec {
+// VideoLAN's revision: compile-remoteaccess.sh notes it, as the sources may come from Nağmedar's vendor branch (S-1304)
+File remoteAccessUpstream = file("$remoteclientSourceDir/.git/upstream-revision")
+def remoteAccessRevision = remoteAccessUpstream.exists() ? remoteAccessUpstream.text.trim().take(7) : remoteAccessPackage.exists() ? providers.exec {
     workingDir(remoteclientSourceDir)
     commandLine('git', 'rev-parse', '--short', 'HEAD')
 }.standardOutput.asText.get().trim() : 'unknown'
@@ -56,7 +58,8 @@ android {
         }
     }
 
-    task webCopy(type: Copy) {
+    // Sync: a file of an earlier build (its names carry a hash) does not stay behind
+    task webCopy(type: Sync) {
         from 'remoteaccess/dist'
         into 'assets/dist'
     }
@@ -85,6 +88,15 @@ android {
 }
 
 preBuild.dependsOn(webCopy)
+
+// A release without the web app would serve nothing at all: build it first (S-1304)
+tasks.matching { it.name == 'mergeReleaseAssets' }.configureEach {
+    doFirst {
+        if (!file("$remoteclientSourceDir/dist/index.html").exists()) {
+            throw new GradleException("The remote access web app is not built: run buildsystem/compile-remoteaccess.sh (Node.js 20 and npm) before a release build")
+        }
+    }
+}
 
 def remoteAccessVersion() {
     def code = new ByteArrayOutputStream()

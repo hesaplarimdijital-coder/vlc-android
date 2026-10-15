@@ -1,0 +1,14 @@
+{
+  "name": "Nağmedar",
+  "short_name": "Nağmedar",
+  "description": "Remote access to Nağmedar",
+  "start_url": "/",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "theme_color": "#12161B",
+  "background_color": "#12161B",
+  "display": "standalone"
+}
