@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -50,6 +51,8 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.player.subtitles.providers.ProviderReport
+import app.nagmedar.ui.player.subtitles.providers.SubtitleResult
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.player.panel.PanelCaption
@@ -62,7 +65,7 @@ import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
 
-/** "Search OpenSubtitles" (S-706) in its own window, over the video. */
+/** "Search for subtitles" (S-706, S-707) in its own window, over the video. */
 @Composable
 fun OnlineSubtitlesDialog(
     state: OnlineSearchState,
@@ -72,7 +75,7 @@ fun OnlineSubtitlesDialog(
     onLanguage: (String) -> Unit,
     onByHash: (Boolean) -> Unit,
     onSearch: () -> Unit,
-    onDownload: (OnlineSubtitle) -> Unit,
+    onDownload: (SubtitleResult) -> Unit,
     onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -95,13 +98,13 @@ fun OnlineSubtitlesSurface(
     onLanguage: (String) -> Unit,
     onByHash: (Boolean) -> Unit,
     onSearch: () -> Unit,
-    onDownload: (OnlineSubtitle) -> Unit,
+    onDownload: (SubtitleResult) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = NagTheme.colors
     val locale = currentLocale()
     val focusManager = LocalFocusManager.current
-    val usable = state.problem != OnlineProblem.NoKey
+    val usable = state.problem != OnlineProblem.NoKey && state.problem != OnlineProblem.NoProvider && state.problem != OnlineProblem.NoFolder
     DialogCard(
         stringResource(R.string.nag_online_title),
         Modifier
@@ -166,9 +169,10 @@ fun OnlineSubtitlesSurface(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             state.results.orEmpty().forEach { subtitle ->
-                ResultRow(subtitle, downloading = state.downloading == subtitle.fileId, enabled = state.downloading == null, locale = locale) { onDownload(subtitle) }
+                ResultRow(subtitle, downloading = state.downloading == subtitle.key, enabled = state.downloading == null, locale = locale) { onDownload(subtitle) }
             }
         }
+        if (state.reports.size > 1) ReportLines(state.reports)
         val status = when {
             state.problem != null -> problemText(state.problem, quota, locale)
             state.searching -> stringResource(R.string.nag_online_searching)
@@ -200,7 +204,7 @@ fun OnlineSubtitlesSurface(
  * often it was downloaded, its frame rate; the whole row downloads it.
  */
 @Composable
-private fun ResultRow(subtitle: OnlineSubtitle, downloading: Boolean, enabled: Boolean, locale: Locale, onDownload: () -> Unit) {
+private fun ResultRow(subtitle: SubtitleResult, downloading: Boolean, enabled: Boolean, locale: Locale, onDownload: () -> Unit) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
@@ -220,7 +224,7 @@ private fun ResultRow(subtitle: OnlineSubtitle, downloading: Boolean, enabled: B
             .background(stateBackground(state), shape)
             .nagClickable(interaction, onDownload, enabled = enabled, onClickLabel = stringResource(R.string.nag_online_download))
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .testTag("online-result-${subtitle.fileId}"),
+            .testTag("online-result-${subtitle.key}"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -235,20 +239,50 @@ private fun ResultRow(subtitle: OnlineSubtitle, downloading: Boolean, enabled: B
             Text(release, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(details, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Text(
-            stringResource(if (downloading) R.string.nag_online_downloading else R.string.nag_online_download),
-            style = NagTheme.type.label,
-            color = if (enabled || downloading) colors.accentText else colors.textTertiary,
-            maxLines = 1,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                stringResource(if (downloading) R.string.nag_online_downloading else R.string.nag_online_download),
+                style = NagTheme.type.label,
+                color = if (enabled || downloading) colors.accentText else colors.textTertiary,
+                maxLines = 1,
+            )
+            // which provider has it (S-707)
+            Text(subtitle.sources, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 120.dp).testTag("online-source-${subtitle.key}"))
+        }
     }
+}
+
+/** Each provider asked, and what it answered: how many it found, or what went wrong with it, while the others' results stay. */
+@Composable
+private fun ReportLines(reports: List<ProviderReport>) {
+    val colors = NagTheme.colors
+    Column(Modifier.fillMaxWidth().testTag("online-reports"), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+        reports.forEach { report ->
+            val problem = report.problem
+            Text(
+                if (problem != null) stringResource(R.string.nag_online_report_problem, report.name, stringResource(reportReason(problem))) else pluralStringResource(R.plurals.nag_online_report_found, report.found, report.name, report.found),
+                style = NagTheme.type.labelSmall,
+                color = if (problem != null) colors.warning else colors.textTertiary,
+                modifier = Modifier.testTag("online-report-${report.provider}"),
+            )
+        }
+    }
+}
+
+private fun reportReason(problem: OnlineProblem): Int = when (problem) {
+    OnlineProblem.NoKey -> R.string.nag_online_r_no_key
+    OnlineProblem.NoFolder -> R.string.nag_online_r_no_folder
+    OnlineProblem.Offline -> R.string.nag_online_r_offline
+    OnlineProblem.QuotaOver -> R.string.nag_online_r_quota
+    OnlineProblem.Timeout -> R.string.nag_online_r_timeout
+    else -> R.string.nag_online_r_server
 }
 
 private const val FPS_DIGITS = 3
 
 /** What went wrong, and what to do. */
 @Composable
-private fun problemText(problem: OnlineProblem, quota: OnlineQuota?, locale: Locale): String = when (problem) {
+internal fun problemText(problem: OnlineProblem, quota: OnlineQuota?, locale: Locale): String = when (problem) {
     OnlineProblem.NoKey -> stringResource(R.string.nag_online_no_key)
     OnlineProblem.Offline -> stringResource(R.string.nag_online_offline)
     OnlineProblem.QuotaOver -> quota?.resetAtMs?.let {
@@ -256,6 +290,9 @@ private fun problemText(problem: OnlineProblem, quota: OnlineQuota?, locale: Loc
     } ?: stringResource(R.string.nag_online_quota_over)
     OnlineProblem.Server -> stringResource(R.string.nag_online_server)
     OnlineProblem.Unsaved -> stringResource(R.string.nag_online_unsaved)
+    OnlineProblem.Timeout -> stringResource(R.string.nag_online_timeout)
+    OnlineProblem.NoFolder -> stringResource(R.string.nag_online_no_folder)
+    OnlineProblem.NoProvider -> stringResource(R.string.nag_online_no_provider)
 }
 
 /** "Türkçe", "İngilizce": a language's name in the interface's language. */
@@ -277,11 +314,12 @@ fun onlineLanguages(locale: Locale): List<String> {
 }
 
 /**
- * The subtitles' tab's last row (S-706), after the mockups' player: "Search OpenSubtitles", and
- * under it the day's downloads left, as OpenSubtitles last told them; or that this build has no key.
+ * The subtitles' tab's row (S-706, S-707), after the mockups' player: "Search for subtitles", and
+ * under it the day's downloads left, as OpenSubtitles last told them; or why nothing can be
+ * searched (this build has no key, no provider is turned on, no folder is chosen).
  */
 @Composable
-fun OnlineSection(available: Boolean, quota: OnlineQuota?, nowMs: Long, onSearch: () -> Unit) {
+fun OnlineSection(available: Boolean, quota: OnlineQuota?, nowMs: Long, reason: OnlineProblem = OnlineProblem.NoKey, onSearch: () -> Unit) {
     Column(Modifier.fillMaxWidth().testTag("subtitles-online"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         NagButton(
             stringResource(R.string.nag_online_search),
@@ -291,7 +329,7 @@ fun OnlineSection(available: Boolean, quota: OnlineQuota?, nowMs: Long, onSearch
             enabled = available,
         )
         val caption = when {
-            !available -> stringResource(R.string.nag_online_no_key)
+            !available -> problemText(reason, quota, currentLocale())
             quota != null -> stringResource(R.string.nag_online_quota, quota.remainingAt(nowMs), quota.allowed)
             else -> null
         }

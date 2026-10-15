@@ -37,11 +37,20 @@ data class OnlineSubtitle(
     val title: String = "",
     val year: Int? = null,
     val machineTranslated: Boolean = false,
+    /** Users' rating, 0 to 1; null when nobody rated it. */
+    val rating: Double? = null,
 )
 
-/** What was asked for: the file's fingerprint, the film's name, the languages. */
+/** What was asked for: the file's fingerprint, the film's name, the languages; the film's IMDb number, the season and the episode of a series. */
 @Immutable
-data class OnlineQuery(val hash: String?, val name: String?, val languages: List<String>)
+data class OnlineQuery(
+    val hash: String?,
+    val name: String?,
+    val languages: List<String>,
+    val imdbId: String? = null,
+    val season: Int? = null,
+    val episode: Int? = null,
+)
 
 /** A download granted: where the file is, and how many more the day allows. */
 @Immutable
@@ -60,6 +69,9 @@ sealed class OnlineFailure(message: String, cause: Throwable? = null) : IOExcept
 
     /** Another answer: its HTTP status. */
     class Server(val status: Int) : OnlineFailure("status $status")
+
+    /** A provider that searches a folder of the user's, and none is chosen. */
+    class NoFolder : OnlineFailure("no folder")
 }
 
 /** OpenSubtitles.com's REST API (S-706), as the subtitles' search uses it. */
@@ -90,10 +102,14 @@ class OkHttpOpenSubtitles(
 
     override suspend fun search(query: OnlineQuery): List<OnlineSubtitle> = withContext(Dispatchers.IO) {
         val url = base.toHttpUrl().newBuilder().addPathSegment("subtitles").apply {
+            query.episode?.let { addQueryParameter("episode_number", it.toString()) }
+            // the number without its "tt"
+            query.imdbId?.filter { it.isDigit() }?.trimStart('0')?.takeIf { it.isNotEmpty() }?.let { addQueryParameter("imdb_id", it) }
             if (query.languages.isNotEmpty()) addQueryParameter("languages", query.languages.map { it.lowercase(Locale.ROOT) }.sorted().joinToString(","))
             query.hash?.let { addQueryParameter("moviehash", it.lowercase(Locale.ROOT)) }
             addQueryParameter("order_by", "download_count")
             query.name?.takeIf { it.isNotBlank() }?.let { addQueryParameter("query", it.trim().lowercase(Locale.ROOT)) }
+            query.season?.let { addQueryParameter("season_number", it.toString()) }
         }.build()
         OpenSubtitlesJson.results(call(Request.Builder().url(url).get()))
     }
@@ -162,6 +178,9 @@ class OkHttpOpenSubtitles(
 
 /** OpenSubtitles' answers, read. */
 object OpenSubtitlesJson {
+    /** Its ratings go to 10. */
+    private const val RATING_SCALE = 10.0
+
     fun results(text: String): List<OnlineSubtitle> {
         val data = JSONObject(text).optJSONArray("data") ?: return emptyList()
         return (0 until data.length()).mapNotNull { index ->
@@ -181,6 +200,7 @@ object OpenSubtitlesJson {
                 title = feature?.text("title").orEmpty(),
                 year = feature?.optInt("year", 0)?.takeIf { it > 0 },
                 machineTranslated = attributes.optBoolean("machine_translated", false) || attributes.optBoolean("ai_translated", false),
+                rating = attributes.optDouble("ratings", 0.0).takeIf { it > 0 }?.let { (it / RATING_SCALE).coerceAtMost(1.0) },
             )
         }
     }

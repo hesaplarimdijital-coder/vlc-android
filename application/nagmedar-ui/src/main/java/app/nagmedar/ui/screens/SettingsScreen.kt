@@ -44,6 +44,7 @@ import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.player.subtitles.providers.SubtitleProvidersSettings
 import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
@@ -103,6 +104,8 @@ fun SettingsScreen(
         item { SnapshotSection(prefs) }
         // S-607: what Shift+R records, and where
         item { RecordingSection(prefs) }
+        // S-707: where subtitles come from
+        item { SubtitleProvidersSettings() }
         // S-901: the engine behind the local music library
         item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
         // S-613: what each output device plays late, and the measurement with the microphone

@@ -139,7 +139,7 @@ class PlayerSubtitlesScreenshotTest {
     fun onlineEnglish() = capture("player-online-dex-en") { Online(sampleSearch.copy(languages = listOf("en", "tr"), offered = listOf("en", "tr"))) }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun onlinePhone() = capture("player-online-phone", InputMode.Touch) { Online(sampleSearch.copy(downloading = sampleOnline[0].fileId)) }
+    fun onlinePhone() = capture("player-online-phone", InputMode.Touch) { Online(sampleSearch.copy(downloading = sampleOnline[0].key)) }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun onlineWithoutKey() = capture("player-online-nokey-dex") { Online(sampleSearch.copy(results = null, problem = OnlineProblem.NoKey)) }

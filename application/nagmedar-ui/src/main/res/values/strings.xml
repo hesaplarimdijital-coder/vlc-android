@@ -954,8 +954,8 @@
     <string name="nag_style_ass_ours">This look</string>
     <string name="nag_style_waiting">The new look reaches the subtitles when the player opens again.</string>
     <!-- S-706: subtitles from OpenSubtitles.com -->
-    <string name="nag_online_search">Search OpenSubtitles</string>
-    <string name="nag_online_title">Search OpenSubtitles</string>
+    <string name="nag_online_search">Search for subtitles</string>
+    <string name="nag_online_title">Search for subtitles</string>
     <string name="nag_online_search_short">Search</string>
     <string name="nag_online_name">Film name</string>
     <string name="nag_online_by_hash">The file\'s fingerprint first</string>
@@ -979,7 +979,7 @@
     <string name="nag_online_quota_over_at">Today\'s downloads are used up; they come back at %1$s.</string>
     <string name="nag_online_server">OpenSubtitles is not answering now; try again a little later.</string>
     <string name="nag_online_unsaved">The subtitles could not be saved.</string>
-    <string name="nag_online_note">%1$s · from OpenSubtitles</string>
+    <string name="nag_online_note">%1$s · from a subtitle provider</string>
     <string name="nag_online_saved_beside">%1$s downloaded and saved beside the film</string>
     <string name="nag_online_saved_app">%1$s downloaded and saved in the app\'s folder</string>
     <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
@@ -2282,4 +2282,45 @@
     <string name="nag_save_saved_beside">Saved as %1$s beside the original</string>
     <string name="nag_save_saved_elsewhere">Saved as %1$s</string>
     <string name="nag_save_loaded">showing in the film</string>
+
+    <!-- S-707 · Subtitle providers -->
+    <string name="nag_online_timeout">A provider did not answer in time; search again.</string>
+    <string name="nag_online_no_folder">No subtitle folder is chosen; choose one in Settings › Subtitles.</string>
+    <string name="nag_online_no_provider">No subtitle provider is turned on; turn one on in Settings › Subtitles.</string>
+    <string name="nag_online_report_problem">%1$s: %2$s</string>
+    <plurals name="nag_online_report_found">
+        <item quantity="one">%1$s · %2$d result</item>
+        <item quantity="other">%1$s · %2$d results</item>
+    </plurals>
+    <string name="nag_online_r_no_key">no key in this build</string>
+    <string name="nag_online_r_no_folder">no folder chosen</string>
+    <string name="nag_online_r_offline">could not be reached</string>
+    <string name="nag_online_r_quota">today\'s downloads are used up</string>
+    <string name="nag_online_r_timeout">did not answer in time</string>
+    <string name="nag_online_r_server">not answering now</string>
+    <string name="nag_prov_settings">Subtitles</string>
+    <string name="nag_prov_hint">Subtitles are searched in every provider that is on, at the same time, and the results are merged into one list. Where two providers have the same file, the one higher up is kept.</string>
+    <string name="nag_prov_local_name">Local folder</string>
+    <string name="nag_prov_on">On</string>
+    <string name="nag_prov_off">Off</string>
+    <string name="nag_prov_up">Up</string>
+    <string name="nag_prov_down">Down</string>
+    <string name="nag_prov_searches_by">Searches by %1$s</string>
+    <string name="nag_prov_by_hash">fingerprint</string>
+    <string name="nag_prov_by_imdb">IMDb number</string>
+    <string name="nag_prov_by_name">name</string>
+    <string name="nag_prov_by_episode">season and episode</string>
+    <string name="nag_prov_by_language">language</string>
+    <plurals name="nag_prov_limit">
+        <item quantity="one">%d download a day</item>
+        <item quantity="other">%d downloads a day</item>
+    </plurals>
+    <string name="nag_prov_needs_key">needs the app\'s key</string>
+    <string name="nag_prov_needs_login">needs an account</string>
+    <string name="nag_prov_no_network">no network, no key</string>
+    <string name="nag_prov_no_key">This build has no OpenSubtitles key; this provider cannot be searched.</string>
+    <string name="nag_prov_folder">Subtitle folder</string>
+    <string name="nag_prov_folder_none">No folder chosen</string>
+    <string name="nag_prov_folder_choose">Choose folder…</string>
+    <string name="nag_prov_folder_forget">Forget the folder</string>
 </resources>
