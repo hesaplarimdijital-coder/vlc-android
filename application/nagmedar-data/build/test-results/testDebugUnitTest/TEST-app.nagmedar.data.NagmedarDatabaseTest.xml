@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:49:09.175Z" hostname="runnervm8k3b6" time="2.122">
+  <properties/>
+  <testcase name="aVoteIsRememberedThroughPruning" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.273"/>
+  <testcase name="radioStationsAreSavedOncePerDirectoryEntry" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.349"/>
+  <testcase name="mediaProbesAreCachedPerFile" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.166"/>
+  <testcase name="podcastEpisodesFollowTheirFeed" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.136"/>
+  <testcase name="anImportedStationKeptAgainIsTheSameRow" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.153"/>
+  <testcase name="latencyProfilesArePerOutputDevice" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.147"/>
+  <testcase name="musicProbesAreCachedPerFile" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.057"/>
+  <testcase name="importedStationsAreThoseWithoutADirectoryId" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.068"/>
+  <testcase name="aDirectoryStationReadAgainKeepsTheUsersMarks" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.083"/>
+  <testcase name="lyricsAreKeyedByTrackAndSource" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.083"/>
+  <testcase name="smartListsAreKeptInTheOrderTheyWereMade" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.073"/>
+  <testcase name="playsSkipsAndRatingsAddUpPerTrack" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.111"/>
+  <testcase name="mediaSettingsArePerFile" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.153"/>
+  <testcase name="forgettingAPlayedStationAndPruningTheUnused" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.159"/>
+  <testcase name="aBackupsRowsAreReadAndRestored" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.108"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

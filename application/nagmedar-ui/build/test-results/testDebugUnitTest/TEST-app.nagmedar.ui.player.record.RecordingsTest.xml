@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.record.RecordingsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:52:52.060Z" hostname="runnervm8k3b6" time="0.002">
+  <properties/>
+  <testcase name="noTitleIsTheApps" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.001"/>
+  <testcase name="whatFileSystemsRefuseBecomesAnUnderscore" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <testcase name="aLongTitleIsCut" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <testcase name="theNameIsWhatPlaysAndWhen" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.001"/>
+  <testcase name="aStrangeExtensionIsLeftOut" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <testcase name="theTypeFollowsTheExtension" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <testcase name="savingSaysHowFar" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <testcase name="theDefaultFolderFollowsTheType" classname="app.nagmedar.ui.player.record.RecordingsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

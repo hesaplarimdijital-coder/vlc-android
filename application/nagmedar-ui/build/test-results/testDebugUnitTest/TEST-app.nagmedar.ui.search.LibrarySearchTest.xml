@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.LibrarySearchTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:53:35.846Z" hostname="runnervm8k3b6" time="0.124">
+  <properties/>
+  <testcase name="theQueryIsTakenApart" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.002"/>
+  <testcase name="highlightsFollowTheShownText" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.0"/>
+  <testcase name="wordsPhrasesExclusionsAndKinds" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.001"/>
+  <testcase name="tenThousandTracksInUnderAHundredMilliseconds" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.12"/>
+  <testcase name="turkishLettersMatchPlainOnes" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.0"/>
+  <testcase name="titlesStartingWithTheWordComeFirst" classname="app.nagmedar.ui.search.LibrarySearchTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

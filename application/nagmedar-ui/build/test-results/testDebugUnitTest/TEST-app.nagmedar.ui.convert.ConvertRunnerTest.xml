@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.convert.ConvertRunnerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:52:32.354Z" hostname="runnervm8k3b6" time="0.035">
+  <properties/>
+  <testcase name="anEmptyBatteryStopsTheJob" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.007"/>
+  <testcase name="aFolderGoneFailsEveryFileAtOnce" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="filesThereAreLeftAloneOrReplaced" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.02"/>
+  <testcase name="heatSlowsPausesAndStops" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.002"/>
+  <testcase name="noEngineFailsEveryFile" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="aLowBatteryWaitsForTheCharger" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="everyFileMadeInOrder" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="theRules" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="interruptedSaysNothingOfTheFileUnderWay" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="cancelledInAFile" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="aFailedFileIsRemovedAndTheRestGoOn" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

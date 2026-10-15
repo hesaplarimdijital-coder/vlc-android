@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.TvLabScreenTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:53:39.373Z" hostname="runnervm8k3b6" time="0.599">
+  <properties/>
+  <testcase name="theTargetIsChosenFromItsMenu" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.065"/>
+  <testcase name="theResults" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.051"/>
+  <testcase name="anUnreadableFile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.046"/>
+  <testcase name="theReportSaysItAll" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.031"/>
+  <testcase name="onTheTabletTheSameFilmHasOneWarning" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.043"/>
+  <testcase name="aStoppedReadingStartsAgain" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.047"/>
+  <testcase name="theEmptyPageAsksForAFile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.041"/>
+  <testcase name="everyFindingHasItsWordsInEnglishToo" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.036"/>
+  <testcase name="theEditorBuildsTheProfile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.065"/>
+  <testcase name="theChartIsExported" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.063"/>
+  <testcase name="aBuildWithoutTheToolsSaysSo" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.035"/>
+  <testcase name="whileItRuns" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.044"/>
+  <testcase name="theEditorsChoices" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

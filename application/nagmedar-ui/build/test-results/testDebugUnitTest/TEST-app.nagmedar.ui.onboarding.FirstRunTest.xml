@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.onboarding.FirstRunTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T12:52:42.939Z" hostname="runnervm8k3b6" time="0.831">
+  <properties/>
+  <testcase name="scanPathsNeedMediaAccess" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.05"/>
+  <testcase name="grantedAccessAndTheSourceCount" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.272"/>
+  <testcase name="refusedAccessOffersFolders" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.085"/>
+  <testcase name="pickedFileTypes" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.042"/>
+  <testcase name="backReturnsToThePreviousStep" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.07"/>
+  <testcase name="touchTargetsAndNames" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.054"/>
+  <testcase name="folderNames" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.042"/>
+  <testcase name="emptyLibraryWithoutAccessAsksForIt" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.102"/>
+  <testcase name="everyStepCanBeSkipped" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.113"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
