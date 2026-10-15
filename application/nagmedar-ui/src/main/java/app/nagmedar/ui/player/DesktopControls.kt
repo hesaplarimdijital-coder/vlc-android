@@ -72,6 +72,7 @@ import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.player.subtitles.shortLanguage
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -111,7 +112,7 @@ fun DesktopControls(
             exit = fadeOut(tween(220)),
             modifier = Modifier.align(Alignment.TopCenter),
         ) {
-            TitleBar(state, actions, Modifier.holdsChrome(visibility))
+            TitleBar(state, actions, visibility, Modifier.holdsChrome(visibility))
         }
         AnimatedVisibility(
             visible = visibility.visible,
@@ -137,7 +138,7 @@ private fun Modifier.holdsChrome(visibility: ChromeVisibility): Modifier = point
 }
 
 @Composable
-private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, modifier: Modifier = Modifier) {
+private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, modifier: Modifier = Modifier) {
     Row(
         modifier
             .fillMaxWidth()
@@ -148,7 +149,25 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, mod
     ) {
         NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_player_close), actions::close, tint = Color.White)
         Spacer(Modifier.width(8.dp))
-        Text(state.title, style = NagTheme.type.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(state.title, style = NagTheme.type.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Spacer(Modifier.width(8.dp))
+        // S-1303: the player's menu: what plays converted, or streamed on the network
+        val resources = LocalContext.current.resources
+        val convert = stringResource(R.string.nag_conv_menu)
+        val stream = stringResource(R.string.nag_hls_start_menu)
+        MenuChip(
+            label = stringResource(R.string.nag_player_menu),
+            text = null,
+            icon = NagIcons.MoreVertical,
+            entries = {
+                listOf(
+                    MenuEntry.Item(convert, actions::convertSave, shortcut = ShortcutRegistry.chordLabel(ShortcutId.ConvertSave, resources), icon = NagIcons.Convert),
+                    MenuEntry.Item(stream, actions::streamOnNetwork, shortcut = ShortcutRegistry.chordLabel(ShortcutId.StreamHls, resources), icon = NagIcons.Streams),
+                )
+            },
+            visibility = visibility,
+            testTag = "player-menu",
+        )
     }
 }
 
@@ -344,15 +363,17 @@ private fun RateMenu(state: PlayerChromeState, actions: PlayerChromeActions, vis
 private fun AudioMenu(state: PlayerChromeState, actions: PlayerChromeActions, visibility: ChromeVisibility, labelled: Boolean) {
     val none = stringResource(R.string.nag_player_no_audio)
     val current = state.audioTracks.firstOrNull { it.id == state.audioTrack }?.name
+    // S-611: the visualisers under the tracks
+    val visualizers = visualizerEntries(state, actions)
     MenuChip(
         label = stringResource(R.string.nag_player_audio_track),
         text = if (labelled) current ?: none else null,
         icon = NagIcons.AudioTrack,
         entries = {
             if (state.audioTracks.isEmpty()) {
-                listOf(MenuEntry.Item(none, {}, enabled = false))
+                listOf(MenuEntry.Item(none, {}, enabled = false)) + visualizers
             } else {
-                state.audioTracks.map { track -> MenuEntry.Item(track.name, { actions.setAudioTrack(track.id) }, checked = track.id == state.audioTrack) }
+                state.audioTracks.map { track -> MenuEntry.Item(track.name, { actions.setAudioTrack(track.id) }, checked = track.id == state.audioTrack) } + visualizers
             }
         },
         visibility = visibility,
@@ -400,6 +421,17 @@ private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions,
         testTag = "player-subtitles",
         selected = current != null && (!labelled || secondary != null),
     )
+}
+
+/** S-611: the audio menu's visualisers, as VLC desktop's Audio › Visualizations: none, or a kind. */
+@Composable
+internal fun visualizerEntries(state: PlayerChromeState, actions: PlayerChromeActions): List<MenuEntry> {
+    val kinds = VisualizerKind.entries.map { it to stringResource(it.label) }
+    return listOf(
+        MenuEntry.Separator,
+        MenuEntry.Item(stringResource(R.string.nag_vis_menu), {}, enabled = false),
+        MenuEntry.Item(stringResource(R.string.nag_vis_off), { actions.setVisualizer(null) }, checked = state.visualizer == null),
+    ) + kinds.map { (kind, label) -> MenuEntry.Item(label, { actions.setVisualizer(kind) }, checked = state.visualizer == kind) }
 }
 
 /** "A-B": sets A, then B, then turns the loop off; lit while a point is set. */

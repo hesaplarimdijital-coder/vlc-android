@@ -21,6 +21,9 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.tvlab.remux.sampleDoneJob
+import app.nagmedar.ui.tvlab.remux.sampleFailedJob
+import app.nagmedar.ui.tvlab.remux.sampleRunningJob
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -86,6 +89,18 @@ class TvLabScreenTest {
         override fun exportChart(format: ChartFormat) {
             calls += "chart:$format"
         }
+
+        override fun remux() {
+            calls += "remux"
+        }
+
+        override fun cancelRemux(id: Long) {
+            calls += "cancel:$id"
+        }
+
+        override fun removeRemux(id: Long) {
+            calls += "remove:$id"
+        }
     }
 
     private val res get() = ApplicationProvider.getApplicationContext<Context>().resources
@@ -97,6 +112,38 @@ class TvLabScreenTest {
             }
         }
         compose.waitForIdle()
+    }
+
+    /** S-1206, S-1209: the Remux button queues a film whose video is kept; the queue's card shows each job, its badge, a Cancel and a Remove. */
+    @Test
+    fun theRemuxQueue() {
+        show(sampleTvLabView().copy(jobs = listOf(sampleRunningJob(), sampleDoneJob(), sampleFailedJob())))
+        compose.onNodeWithTag("tvlab-remux-button").assertIsEnabled().performClick()
+        assertEquals(listOf("remux"), calls)
+        assertEquals(3, compose.onAllNodesWithTag("tvlab-remux-job").fetchSemanticsNodes().size)
+        compose.onNodeWithText("Video bit bit aynı").assertExists()
+        compose.onNode(hasText("189720 paket karşılaştırıldı", substring = true)).assertExists()
+        compose.onNode(hasText("RPU denetlendi", substring = true)).assertExists()
+        compose.onNodeWithText("Çıktının videosu kaynağınkinden farklı: dosya silindi.").assertExists()
+        assertEquals(3, compose.onAllNodes(hasText("Dolby Vision P7 → P8.1", substring = true)).fetchSemanticsNodes().size)
+        compose.onNode(hasContentDescription("Remux yapılıyor · %42")).assertExists()
+        compose.onNode(hasText("İptal") and hasClickAction()).performClick()
+        compose.onAllNodes(hasText("Kaldır") and hasClickAction())[0].performClick()
+        assertEquals(listOf("remux", "cancel:3", "remove:2"), calls)
+    }
+
+    /** S-1206: a film that needs re-encoding is not remuxed. */
+    @Test
+    fun aFilmThatNeedsReencodingHasNoRemux() {
+        show(sampleTvLabView(BuiltInProfiles.lgB4Usb.copy(videoCodecs = setOf("h264"))))
+        compose.onNodeWithTag("tvlab-remux-button").assertIsNotEnabled()
+    }
+
+    /** S-1206: nor one still being read. */
+    @Test
+    fun aFilmStillBeingReadHasNoRemuxYet() {
+        show(sampleRunningView())
+        compose.onNodeWithTag("tvlab-remux-button").assertIsNotEnabled()
     }
 
     @Test

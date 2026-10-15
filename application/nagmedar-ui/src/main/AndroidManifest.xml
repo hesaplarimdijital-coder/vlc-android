@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <!-- S-1206: the remux queue runs as a foreground job: media processing on Android 15 and later, data sync before -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
+
     <application>
         <!-- New Compose interface (preview in MVP0). Handles window resizes itself so the
              shell keeps its state when a DeX window is resized or moved between displays. -->
@@ -52,6 +57,22 @@
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- S-1206: WorkManager's foreground service with the types the remux worker asks for -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync|mediaProcessing"
+            tools:node="merge" />
+        <!-- S-1206: the remux notification's Cancel -->
+        <receiver
+            android:name="app.nagmedar.ui.tvlab.remux.RemuxCancelReceiver"
+            android:exported="false" />
+        <!-- S-1303: the HLS stream on the local network: the encoding and its server kept running
+             with a notification (media processing on Android 15 and later, data sync before) -->
+        <service
+            android:name="app.nagmedar.ui.convert.HlsService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|mediaProcessing" />
 
         <!-- S-307: the video player is a window of its own, beside the library's: a task of its own.
              Started again from any window it is the same player (singleTask), so one session plays. -->

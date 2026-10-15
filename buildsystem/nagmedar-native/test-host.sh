@@ -8,6 +8,12 @@
 #     converted 8.1), HDR10, HLG and HDR10+ streams, audio codecs, languages and flags,
 #     subtitles and chapters; a missing file is an error, not a crash.
 #   - SP-05: whisper_lab_cli decodes and transcribes a tone with whisper.cpp's test model.
+#   - S-1206, S-1209: the remux engine keeps every video packet identical (its hash, and the raw
+#     stream byte for byte), writes the streams in the planned order with the planned flags,
+#     keeps chapters, attachments and the duration; the profile 7 MEL stream becomes 8.1 with
+#     its base layer identical; a corrupted or truncated output fails the verification; B-frame
+#     H.264 and AV1 go through; the source is refused as output; a file over 4 GB goes through
+#     (when the disk has room for it).
 set -euo pipefail
 trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -246,6 +252,309 @@ if problems:
     sys.exit(1)
 print(f'ok: disk test ({whole["mb_per_s"]} MB/s here)')
 PY
+
+echo "== S-1206: remux"
+# the SDR film with a font attached: the streams reordered, the Turkish DTS made default, the forced flag cleared
+printf 'AaBb' > "$T/font.ttf"
+mkvmerge -q -o "$T/sdr-att.mkv" "$T/sdr.mkv" --attachment-mime-type font/ttf --attachment-name DejaVu.ttf --attach-file "$T/font.ttf" --chapters "$T/chapters.xml"
+printf 'dv\tkeep\nstream\tv:0\nstream\ta:1\tdefault=1\tlang=tur\nstream\ta:0\tdefault=0\ttitle=Ana\nstream\ta:2\nstream\ts:1\tforced=0\tdefault=0\nstream\ts:0\ttitle=\n' > "$T/plan-sdr.txt"
+"$PREFIX/bin/remux" run "$T/sdr-att.mkv" "$T/remux-sdr.mkv" "$T/plan-sdr.txt" > "$T/remux-sdr.json" 2> "$T/remux-sdr.log" || {
+    echo "::error title=S-1206 remux::$( { cat "$T/remux-sdr.json"; tail -c 1500 "$T/remux-sdr.log"; } | annotate)"; exit 1; }
+echo "stats: $(cat "$T/remux-sdr.json")"
+hash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-sdr.json")
+"$PREFIX/bin/remux" verify "$T/remux-sdr.mkv" nal_units "$hash" 50 > "$T/verify-sdr.json" 2> /dev/null
+python3 - "$T/remux-sdr.mkv" "$T/corrupt.mkv" "$T/trunc.mkv" <<'PY'
+import sys
+data = bytearray(open(sys.argv[1], 'rb').read())
+data[len(data) * 2 // 3] ^= 0x01  # one bit of a video packet
+open(sys.argv[2], 'wb').write(data)
+open(sys.argv[3], 'wb').write(data[: len(data) // 2])
+PY
+"$PREFIX/bin/remux" verify "$T/corrupt.mkv" nal_units "$hash" 50 > "$T/verify-corrupt.json" 2> /dev/null || true
+"$PREFIX/bin/remux" verify "$T/trunc.mkv" nal_units "$hash" 50 > "$T/verify-trunc.json" 2> /dev/null || true
+# the raw video stream of the source and the remux, byte for byte
+ffmpeg -v error -y -i "$T/sdr-att.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/src.h264"
+ffmpeg -v error -y -i "$T/remux-sdr.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/out.h264"
+cmp "$T/src.h264" "$T/out.h264"
+ffprobe -v error -print_format json -show_streams -show_chapters -show_format "$T/remux-sdr.mkv" > "$T/probe-remux-sdr.json"
+ffprobe -v error -print_format json -show_format "$T/sdr-att.mkv" > "$T/probe-sdr-att.json"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts,duration,flags "$T/sdr-att.mkv" > "$T/pkt-sdr.json"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts,duration,flags "$T/remux-sdr.mkv" > "$T/pkt-remux-sdr.json"
+# the profile 7 MEL film converted to 8.1 on the way
+printf 'dv\tconvert81\nstream\tv:0\nstream\ta:0\nstream\ts:0\n' > "$T/plan-dv.txt"
+"$PREFIX/bin/remux" run "$T/p7.mkv" "$T/remux-dv.mkv" "$T/plan-dv.txt" > "$T/remux-dv.json" 2> "$T/remux-dv.log" || {
+    echo "::error title=S-1206 remux dv::$( { cat "$T/remux-dv.json"; tail -c 1500 "$T/remux-dv.log"; } | annotate)"; exit 1; }
+echo "stats: $(cat "$T/remux-dv.json")"
+dvhash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-dv.json")
+"$PREFIX/bin/remux" verify "$T/remux-dv.mkv" base_layer_nal_units "$dvhash" 259 8 > "$T/verify-dv.json" 2> /dev/null
+# the source, hashed the same way, must give the same hash: the base layer is what was copied
+"$PREFIX/bin/remux" verify "$T/p7.mkv" base_layer_nal_units "$dvhash" 259 0 > "$T/verify-dv-source.json" 2> /dev/null
+ffprobe -v error -print_format json -show_streams -show_chapters "$T/remux-dv.mkv" > "$T/probe-remux-dv.json"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/remux-dv.mkv" > "$T/pts-remux-dv.json"
+ffmpeg -v error -y -i "$T/p7.mkv" -map 0:v:0 -c copy -bsf:v hevc_mp4toannexb -f hevc "$T/src-dv.hevc"
+ffmpeg -v error -y -i "$T/remux-dv.mkv" -map 0:v:0 -c copy -bsf:v hevc_mp4toannexb -f hevc "$T/out-dv.hevc"
+dovi_tool extract-rpu -i "$T/out-dv.hevc" -o "$T/rpu-remux.bin" > /dev/null
+dovi_tool info -s -i "$T/rpu-remux.bin" > "$T/rpu-remux.txt"
+python3 - "$T" <<'PY'
+import json, re, sys
+t = sys.argv[1]
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def load(name):
+    return json.load(open(f'{t}/{name}'))
+# the plain remux: planned order and flags, every packet, chapters, attachment, tags, duration
+stats = load('remux-sdr.json')
+check(not stats['error'] and stats['hash_scope'] == 'nal_units' and stats['video_packets'] == 50, f'sdr stats {stats}')
+check([s['ref'] for s in stats['streams']] == ['v:0', 'a:1', 'a:0', 'a:2', 's:1', 's:0'], f"refs {[s['ref'] for s in stats['streams']]}")
+check(stats['attachments'] == 1 and stats['chapters'] == 2, f"attachments {stats['attachments']} chapters {stats['chapters']}")
+probe = load('probe-remux-sdr.json')
+streams = probe['streams']
+check([s.get('codec_name', s['codec_type']) for s in streams] == ['h264', 'dts', 'eac3', 'truehd', 'subrip', 'subrip', 'attachment'], f"order {[s.get('codec_name', s['codec_type']) for s in streams]}")
+check([s['disposition']['default'] for s in streams[:6]] == [0, 1, 0, 0, 0, 1], f"default {[s['disposition']['default'] for s in streams[:6]]}")
+check([s['disposition']['forced'] for s in streams[:6]] == [0, 0, 0, 0, 0, 0], f"forced {[s['disposition']['forced'] for s in streams[:6]]}")
+check(streams[1]['tags'].get('language') == 'tur' and streams[2]['tags'].get('title') == 'Ana', f'tags {streams[1].get("tags")} {streams[2].get("tags")}')
+check(streams[3]['disposition']['comment'] == 1 and streams[3]['tags'].get('title') == 'Yorum', f'commentary {streams[3]}')
+check('title' not in streams[5].get('tags', {}), f'title not cleared {streams[5].get("tags")}')
+check(streams[6]['tags'].get('filename') == 'DejaVu.ttf' and streams[6]['tags'].get('mimetype') == 'font/ttf', f'attachment {streams[6].get("tags")}')
+check(len(probe['chapters']) == 2 and probe['chapters'][1]['tags']['title'] == 'İki', f"chapters {probe['chapters']}")
+check(probe['format']['duration'] == load('probe-sdr-att.json')['format']['duration'], f"duration {probe['format']['duration']}")
+pin = load('pkt-sdr.json')['packets']
+pout = load('pkt-remux-sdr.json')['packets']
+check([(p['pts'], p['duration'], p['flags']) for p in pin] == [(p['pts'], p['duration'], p['flags']) for p in pout], 'video timestamps or key frames changed')
+v = load('verify-sdr.json')
+check(v['ok'] and v['hash'] == stats['video_hash'] and v['packets'] == 50, f'verify {v}')
+check(not load('verify-corrupt.json')['ok'], 'a corrupted output passed')
+check(not load('verify-trunc.json')['ok'], 'a truncated output passed')
+# the Dolby Vision conversion: profile 8.1, every RPU, the base layer identical
+dv = load('remux-dv.json')
+check(not dv['error'] and dv['hash_scope'] == 'base_layer_nal_units' and dv['video_packets'] == 259, f'dv stats {dv}')
+check(dv['dv']['input_profile'] == 7 and dv['dv']['input_el_type'] == 'MEL' and dv['dv']['output_profile'] == 8, f"dv profiles {dv['dv']}")
+check(dv['dv']['rpus_converted'] == 259 and dv['dv']['rpus_failed'] == 0 and dv['dv']['el_nals_dropped'] > 0, f"dv rpus {dv['dv']}")
+vd = load('verify-dv.json')
+check(vd['ok'] and vd['dv_profile'] == 8 and vd['dv_compatibility'] == 1 and vd['dv_el_present'] == 0, f'dv verify {vd}')
+check(vd['rpus'] == 259 and vd['rpus_bad'] == 0 and vd['packets_without_rpu'] == 0, f'dv rpus {vd}')
+check(load('verify-dv-source.json')['ok'], 'the source base layer hashes differently')
+dp = load('probe-remux-dv.json')
+conf = [d for s in dp['streams'] if s['codec_type'] == 'video' for d in s.get('side_data_list', []) if d.get('side_data_type') == 'DOVI configuration record']
+check(conf and conf[0]['dv_profile'] == 8 and conf[0]['dv_bl_signal_compatibility_id'] == 1 and conf[0]['el_present_flag'] == 0, f'record {conf}')
+check([s['codec_type'] for s in dp['streams']] == ['video', 'audio', 'subtitle'] and len(dp['chapters']) == 2, f'dv streams {[s["codec_type"] for s in dp["streams"]]}')
+check(len(load('pts-remux-dv.json')['packets']) == 259, 'dv frames')
+rpu = open(f'{t}/rpu-remux.txt').read()
+check('Profile: 8' in rpu and 'Frames: 259' in rpu, 'rpu summary: ' + ' '.join(rpu.split())[:200])
+# independent of the engine's hash: the NAL units of both raw streams, without RPU and enhancement layer
+def base_layer(path):
+    data = open(path, 'rb').read()
+    starts = [m.start() for m in re.finditer(b'\x00\x00\x01', data)]
+    units = []
+    for i, s in enumerate(starts):
+        end = starts[i + 1] if i + 1 < len(starts) else len(data)
+        nal = data[s + 3:end].rstrip(b'\x00')
+        kind, layer = (nal[0] >> 1) & 0x3F, ((nal[0] & 1) << 5) | (nal[1] >> 3)
+        if kind in (62, 63) or layer > 0:
+            continue
+        units.append(nal)
+    return units
+src, out = base_layer(f'{t}/src-dv.hevc'), base_layer(f'{t}/out-dv.hevc')
+check(len(src) == len(out) and src == out, f'base layer differs: {len(src)} vs {len(out)} units')
+if problems:
+    print('::error title=S-1206 remux::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: remux ({stats['video_packets']} packets kept, dv {dv['dv']['rpus_converted']} RPUs, {len(src)} base layer units)")
+PY
+
+echo "== S-1206: B-frame H.264, AV1, refused outputs"
+# a Blu-ray-like H.264 with B-frames in Matroska: no decoding timestamps in the container, the engine derives them from the SPS
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=640x360:rate=25" -t 2 -c:v libx264 -preset veryfast -bf 3 -b-pyramid normal -pix_fmt yuv420p -f matroska "$T/bframes.mkv"
+printf 'stream\tv:0\n' > "$T/plan-video.txt"
+"$PREFIX/bin/remux" run "$T/bframes.mkv" "$T/remux-bframes.mkv" "$T/plan-video.txt" > "$T/remux-bframes.json" 2> /dev/null || {
+    echo "::error title=S-1206 B-frames::$(cat "$T/remux-bframes.json" | annotate)"; exit 1; }
+bhash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-bframes.json")
+"$PREFIX/bin/remux" verify "$T/remux-bframes.mkv" nal_units "$bhash" 50 > "$T/verify-bframes.json" 2> /dev/null
+ffmpeg -v error -y -i "$T/bframes.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/src.264"
+ffmpeg -v error -y -i "$T/remux-bframes.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/out.264"
+cmp "$T/src.264" "$T/out.264"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/bframes.mkv" > "$T/pts-bframes.json"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/remux-bframes.mkv" > "$T/pts-remux-bframes.json"
+# AV1 (when the encoder is here): Matroska drops the temporal delimiters, the hash looks past them
+av1=0
+if ffmpeg -v error -y -f lavfi -i "testsrc2=size=320x180:rate=25" -t 2 -c:v libsvtav1 -preset 12 "$T/av1.mp4" 2> /dev/null; then
+    av1=1
+    ffmpeg -v error -y -i "$T/av1.mp4" -c copy -bsf:v av1_metadata=td=insert "$T/av1-td.mkv"
+    "$PREFIX/bin/remux" run "$T/av1-td.mkv" "$T/remux-av1.mkv" "$T/plan-video.txt" > "$T/remux-av1.json" 2> /dev/null || {
+        echo "::error title=S-1206 AV1::$(cat "$T/remux-av1.json" | annotate)"; exit 1; }
+    ahash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-av1.json")
+    "$PREFIX/bin/remux" verify "$T/remux-av1.mkv" av1_obus "$ahash" 50 > "$T/verify-av1.json" 2> /dev/null
+    "$PREFIX/bin/remux" verify "$T/av1.mp4" av1_obus "$ahash" 50 > "$T/verify-av1-mp4.json" 2> /dev/null
+fi
+# the same stream with its SPS cut before the VUI: no reorder depth to read, the deepest assumed
+ffmpeg -v error -y -i "$T/bframes.mkv" -c copy -bsf:v h264_mp4toannexb -f h264 "$T/bframes.h264"
+python3 - "$T/bframes.h264" "$T/bframes-novui.h264" <<'PY'
+# The H.264 stream with its SPS cut before the VUI: the engine then knows no reorder depth (S-1206 host test).
+import sys
+data = open(sys.argv[1], 'rb').read()
+
+class Bits:
+    def __init__(self, b): self.b, self.pos = b, 0
+    def u(self, n):
+        v = 0
+        for _ in range(n):
+            v = (v << 1) | ((self.b[self.pos >> 3] >> (7 - (self.pos & 7))) & 1); self.pos += 1
+        return v
+    def ue(self):
+        z = 0
+        while self.u(1) == 0: z += 1
+        return (1 << z) - 1 + self.u(z)
+
+def unescape(nal):
+    out, i = bytearray(), 0
+    while i < len(nal):
+        if i + 2 < len(nal) and nal[i] == 0 and nal[i + 1] == 0 and nal[i + 2] == 3:
+            out += b'\0\0'; i += 3
+        else:
+            out.append(nal[i]); i += 1
+    return bytes(out)
+
+def escape(rbsp):
+    out, zeros = bytearray(), 0
+    for x in rbsp:
+        if zeros >= 2 and x <= 3:
+            out.append(3); zeros = 0
+        out.append(x)
+        zeros = zeros + 1 if x == 0 else 0
+    return bytes(out)
+
+def strip_vui(sps):
+    r = unescape(sps[1:])
+    b = Bits(r)
+    profile = b.u(8); b.u(16); b.ue()
+    if profile in (100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135):
+        chroma = b.ue()
+        if chroma == 3: b.u(1)
+        b.ue(); b.ue(); b.u(1)
+        if b.u(1):
+            for i in range(8 if chroma != 3 else 12):
+                if b.u(1):
+                    last = nxt = 8
+                    for j in range(16 if i < 6 else 64):
+                        if nxt != 0:
+                            ue = b.ue(); delta = (ue + 1) // 2 * (1 if ue & 1 else -1); nxt = (last + delta + 256) % 256
+                        last = last if nxt == 0 else nxt
+    b.ue(); poc = b.ue()
+    if poc == 0: b.ue()
+    elif poc == 1:
+        b.u(1); b.ue(); b.ue()
+        for _ in range(b.ue()): b.ue()
+    b.ue(); b.u(1); b.ue(); b.ue()
+    if not b.u(1): b.u(1)
+    b.u(1)
+    if b.u(1):
+        for _ in range(4): b.ue()
+    flag_pos = b.pos
+    assert b.u(1) == 1, 'no VUI to strip'
+    # the bits up to the flag, the flag cleared, the stop bit, zero padding
+    bits = ''.join(format(x, '08b') for x in r)[:flag_pos] + '0' + '1'
+    bits += '0' * (-len(bits) % 8)
+    return sps[:1] + escape(bytes(int(bits[i:i + 8], 2) for i in range(0, len(bits), 8)))
+
+out, i, patched = bytearray(), 0, 0
+starts = []
+while (j := data.find(b'\x00\x00\x01', i)) >= 0:
+    starts.append(j); i = j + 3
+for k, s in enumerate(starts):
+    end = starts[k + 1] if k + 1 < len(starts) else len(data)
+    head = s - 1 if s > 0 and data[s - 1] == 0 else s
+    nal_end = end - 1 if k + 1 < len(starts) and data[end - 1] == 0 else end
+    nal = data[s + 3:nal_end]
+    out += data[head:s + 3]
+    if nal and (nal[0] & 0x1F) == 7:
+        nal = strip_vui(nal); patched += 1
+    out += nal
+assert patched, 'no SPS'
+open(sys.argv[2], 'wb').write(bytes(out))
+print(f'{patched} SPS patched')
+PY
+mkvmerge -q -o "$T/bframes-novui.mkv" --default-duration 0:25p "$T/bframes-novui.h264"
+"$PREFIX/bin/remux" run "$T/bframes-novui.mkv" "$T/remux-novui.mkv" "$T/plan-video.txt" > "$T/remux-novui.json" 2> /dev/null || {
+    echo "::error title=S-1206 no VUI::$(cat "$T/remux-novui.json" | annotate)"; exit 1; }
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/bframes-novui.mkv" > "$T/pts-novui.json"
+ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/remux-novui.mkv" > "$T/pts-remux-novui.json"
+ffmpeg -v error -y -i "$T/remux-novui.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/out-novui.264" 2> /dev/null
+ffmpeg -v error -y -i "$T/bframes-novui.mkv" -map 0:v:0 -c copy -bsf:v h264_mp4toannexb -f h264 "$T/src-novui.264" 2> /dev/null
+cmp "$T/src-novui.264" "$T/out-novui.264"
+# the output must never be the source, nor a file that already holds something
+"$PREFIX/bin/remux" run "$T/bframes.mkv" "$T/bframes.mkv" "$T/plan-video.txt" > "$T/remux-same.json" 2> /dev/null || true
+cp "$T/sub.srt" "$T/taken.mkv"
+"$PREFIX/bin/remux" run "$T/bframes.mkv" "$T/taken.mkv" "$T/plan-video.txt" > "$T/remux-taken.json" 2> /dev/null || true
+cmp "$T/sub.srt" "$T/taken.mkv"
+python3 - "$T" "$av1" <<'PY'
+import json, os, sys
+t, av1 = sys.argv[1], sys.argv[2] == '1'
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def load(name):
+    return json.load(open(f'{t}/{name}'))
+b = load('remux-bframes.json')
+check(not b['error'] and b['video_packets'] == 50, f'bframes {b}')
+check(load('verify-bframes.json')['ok'], 'bframes verify')
+check([p['pts'] for p in load('pts-bframes.json')['packets']] == [p['pts'] for p in load('pts-remux-bframes.json')['packets']], 'bframes pts')
+if av1:
+    a = load('remux-av1.json')
+    check(not a['error'] and a['hash_scope'] == 'av1_obus' and a['video_packets'] == 50, f'av1 {a}')
+    check(load('verify-av1.json')['ok'], 'av1 verify')
+    check(load('verify-av1-mp4.json')['ok'], 'the MP4 source hashes differently without its temporal delimiters')
+n = load('remux-novui.json')
+check(not n['error'] and n['video_packets'] == 50, f'no VUI {n}')
+check([p['pts'] for p in load('pts-novui.json')['packets']] == [p['pts'] for p in load('pts-remux-novui.json')['packets']], 'no VUI pts')
+same = load('remux-same.json')
+check(same['refused'] == 'same_file' and same['error'].startswith('the output is the source itself'), f'same file {same["error"]}')
+check(os.path.getsize(f'{t}/bframes.mkv') > 10000, 'the source was truncated')
+taken = load('remux-taken.json')
+check(taken['refused'] == 'output_not_empty', f'taken {taken["error"]}')
+if problems:
+    print('::error title=S-1206 formats::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: B-frame H.264 kept (dts derived, and assumed without a VUI), AV1 {'kept' if av1 else 'skipped (no encoder)'}, the source and a taken file refused as output")
+PY
+
+echo "== S-1206: a file over 4 GB"
+# lossless H.264 of 1080p noise: about 650 Mbps, 4.5 GB in a minute; skipped where the disk has no room for it twice
+if [ "$(df --output=avail -B1 "$T" | tail -1)" -gt 12000000000 ]; then
+    ffmpeg -v error -y -f lavfi -i "nullsrc=size=1920x1080:rate=25,geq=lum='random(1)*255':cb=128:cr=128" \
+        -f lavfi -i "sine=f=440:sample_rate=48000" -t 56 -c:v libx264 -preset ultrafast -qp 0 -pix_fmt yuv420p -c:a flac "$T/big.mkv"
+    printf 'stream\tv:0\nstream\ta:0\n' > "$T/plan-big.txt"
+    "$PREFIX/bin/remux" run "$T/big.mkv" "$T/remux-big.mkv" "$T/plan-big.txt" > "$T/remux-big.json" 2> /dev/null || {
+        echo "::error title=S-1206 big file::$(cat "$T/remux-big.json" | annotate)"; exit 1; }
+    bighash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-big.json")
+    bigpackets=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_packets'])" "$T/remux-big.json")
+    "$PREFIX/bin/remux" verify "$T/remux-big.mkv" nal_units "$bighash" "$bigpackets" > "$T/verify-big.json" 2> /dev/null
+    python3 - "$T" <<'PY'
+import json, os, sys
+t = sys.argv[1]
+stats = json.load(open(f'{t}/remux-big.json'))
+v = json.load(open(f'{t}/verify-big.json'))
+size = os.path.getsize(f'{t}/remux-big.mkv')
+problems = []
+if stats['error'] or stats['video_packets'] != 1400 or stats['hash_scope'] != 'nal_units':
+    problems.append(f'stats {stats}')
+if size < 4_300_000_000 or abs(size - os.path.getsize(f'{t}/big.mkv')) > 1_000_000:
+    problems.append(f'size {size}')
+if not v['ok'] or v['packets'] != 1400:
+    problems.append(f'verify {v}')
+if stats['peak_rss_kb'] > 400_000:
+    problems.append(f"memory {stats['peak_rss_kb']} kB")
+if problems:
+    print('::error title=S-1206 big file::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: {size / 1e9:.2f} GB remuxed in {stats['wall_seconds']:.1f} s, verified, peak memory {stats['peak_rss_kb'] // 1024} MB")
+PY
+    rm -f "$T/big.mkv" "$T/remux-big.mkv"
+else
+    echo "skipped: not enough room on the disk for two files of 4.5 GB"
+fi
 
 echo "== SP-05: whisper pipeline smoke test"
 ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 -c:a libmp3lame "$T/tone.mp3" 2> /dev/null || ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 "$T/tone.wav"

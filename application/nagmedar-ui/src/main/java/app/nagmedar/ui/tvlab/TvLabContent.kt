@@ -81,6 +81,7 @@ import app.nagmedar.ui.library.videoLine
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.PlexMono
+import app.nagmedar.ui.tvlab.remux.RemuxCard
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -147,11 +148,15 @@ fun TvLabContent(
 
 @Composable
 private fun Analysis(view: TvLabView, report: CheckReport?, actions: TvLabActions, wide: Boolean, narrow: Boolean, locale: Locale) {
-    FileCard(view, actions, narrow)
+    // S-1206: a remux keeps the video as it is; a film that needs re-encoding is not for it
+    val canRemux = view.available && report != null && report.videoKept && view.tech?.video != null && !view.running
+    FileCard(view, actions, narrow, canRemux)
     Summary(view, report, narrow, locale)
+    val jobs: @Composable () -> Unit = { if (view.jobs.isNotEmpty()) RemuxCard(view.jobs, actions::cancelRemux, actions::removeRemux) }
     if (wide) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                jobs()
                 Findings(view, report, actions)
                 view.tech?.let { Streams(it, locale, labelWidth = 110.dp) }
             }
@@ -161,6 +166,7 @@ private fun Analysis(view: TvLabView, report: CheckReport?, actions: TvLabAction
             }
         }
     } else {
+        jobs()
         Findings(view, report, actions)
         ChartCard(view, actions, narrow = narrow, locale = locale)
         DiskCard(view, actions, locale)
@@ -247,7 +253,7 @@ private fun Empty(profile: DeviceProfile, actions: TvLabActions) {
 
 /** A card of the page. */
 @Composable
-private fun Card(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun Card(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(NagTheme.dimens.radiusCard)
     Column(
@@ -261,7 +267,7 @@ private fun Card(modifier: Modifier = Modifier, content: @Composable ColumnScope
 
 /** A card's heading: "Bit hızı", "Disk". */
 @Composable
-private fun CardTitle(text: String, modifier: Modifier = Modifier) {
+internal fun CardTitle(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
         style = NagTheme.type.bodyStrong.copy(fontWeight = FontWeight.SemiBold),
@@ -271,10 +277,10 @@ private fun CardTitle(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** The film: its name, size, drive and how long the analysis took; another file, the report, a stop. */
+/** The film: its name, size, drive and how long the analysis took; a stop, the report, a remux, another file. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FileCard(view: TvLabView, actions: TvLabActions, narrow: Boolean) {
+private fun FileCard(view: TvLabView, actions: TvLabActions, narrow: Boolean, canRemux: Boolean) {
     val res = resources()
     val locale = currentLocale()
     val colors = NagTheme.colors
@@ -292,6 +298,7 @@ private fun FileCard(view: TvLabView, actions: TvLabActions, narrow: Boolean) {
     val buttons: @Composable () -> Unit = {
         if (view.running) NagButton(stringResource(R.string.nag_tvlab_stop), actions::stop, icon = NagIcons.Close)
         NagButton(stringResource(R.string.nag_tvlab_report), actions::showReport, enabled = view.tech != null)
+        NagButton(stringResource(R.string.nag_tvlab_remux), actions::remux, enabled = canRemux, modifier = Modifier.testTag("tvlab-remux-button"))
         NagButton(stringResource(R.string.nag_tvlab_other_file), actions::chooseFile)
     }
     Card(Modifier.fillMaxWidth().testTag("tvlab-file")) {

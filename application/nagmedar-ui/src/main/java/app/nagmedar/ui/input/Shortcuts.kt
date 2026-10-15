@@ -154,6 +154,8 @@ enum class ShortcutId {
     Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
+    Visualizer,
+    ConvertSave, StreamHls,
     RadioSearch,
     FolderUp, Refresh,
     PodcastSearch,
@@ -188,6 +190,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.MediaInfo, ShortcutGroup.Media, R.string.nag_sc_media_info, KeyChord(Key.I, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true), textFirst = true),
         Shortcut(ShortcutId.SelectAll, ShortcutGroup.Media, R.string.nag_sc_select_all, KeyChord(Key.A, ctrl = true), textFirst = true),
+        // S-1303: VLC desktop's Media › Convert/Save and Stream
+        Shortcut(ShortcutId.ConvertSave, ShortcutGroup.Media, R.string.nag_sc_convert, KeyChord(Key.R, ctrl = true)),
+        Shortcut(ShortcutId.StreamHls, ShortcutGroup.Media, R.string.nag_sc_stream, KeyChord(Key.S, ctrl = true)),
         // Playback
         Shortcut(ShortcutId.PlayPause, ShortcutGroup.Playback, R.string.nag_sc_play_pause, KeyChord(Key.Spacebar)),
         Shortcut(ShortcutId.Stop, ShortcutGroup.Playback, R.string.nag_sc_stop, KeyChord(Key.S)),
@@ -271,6 +276,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Refresh, ShortcutGroup.View, R.string.nag_sc_refresh, KeyChord(Key.F5)),
         // S-1101: the podcast search field, from anywhere
         Shortcut(ShortcutId.PodcastSearch, ShortcutGroup.View, R.string.nag_sc_podcast_search, KeyChord(Key.P, ctrl = true, shift = true)),
+        // S-611: what plays drawn over the whole window; a text field's Ctrl+Shift+V pastes first
+        Shortcut(ShortcutId.Visualizer, ShortcutGroup.View, R.string.nag_sc_visualizer, KeyChord(Key.V, ctrl = true, shift = true), textFirst = true),
         // Help
         Shortcut(ShortcutId.ShortcutList, ShortcutGroup.Help, R.string.nag_sc_shortcut_list, KeyChord(Key.Slash, ctrl = true)),
     )

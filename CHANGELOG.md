@@ -2,6 +2,19 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 0.5.0 — MVP5 (hazırlanıyor)
+
+### Görselleştirme
+- Görselleştirici: çalanın spektrumu (25 Hz–20 kHz, üçte bir oktava yakın 30 bant, tepe şapkalarıyla), stereo VU metre (RMS ve tepe, tutulan tepe, kırpılma işareti; VU ve IEC tepe ölçeri balistiğiyle) ve osiloskop (yükselen sıfır geçişinden, iki kanal). Şimdi çalıyor bölmesinde ve telefonun oynatıcısında başlıktaki düğmeyle açılır, Ctrl+Shift+V ya da bölmenin düğmesiyle tam ekrana geçer; video oynatıcıda Ses menüsünden seçilir: yalnız seste ekranın ortasında büyük, videoda görüntünün yanında küçük.
+- Müzik motoru çaldığını DSP zincirinden sonra, ses düzeyinden önce kendisi okur (çıkışın gecikmesi kadar geriden, duyulanla aynı anda) ve yerelde analiz eder; kapalıyken motora hiçbir yükü yoktur. libVLC'nin çaldığı (video, radyo, podcast) Android'in görselleştiricisinden okunur; bunun için mikrofon izni istenir, yalnızca uygulamanın kendi sesi okunur.
+- Pil: görselleştirici yalnızca bölmesi ekranda, ekran açık ve bir şey çalarken çizer; pil tasarrufunda (Ayarlar'da aksi seçilmedikçe) duraklar. Ayarlar › Görselleştirici'de kare hızı sınırı (15, 30, 60 fps) ve seçilen tür ile hızın cihazın pilinden tahmin edilen saatlik payı yazar. projectM bu sürümde yok: yayımlanan libVLC'de görselleştirme modülleri (visual, goom, projectM) bulunmuyor.
+
+### Dönüştürme ve ağda yayın
+- Dönüştür / Kaydet… (Ctrl+R; oynatıcının menüsünde, kütüphanenin medya menüsünde, Dönüştür sayfasında): bir medya seçilen profille libVLC'nin akış çıkışıyla yeniden kodlanır, önce uygulamanın deposuna yazılır, sonra seçilen yere (SAF) kopyalanır; özgün dosyaya dokunulmaz. Ön ayarlar yalnızca bu libVLC derlemesinin kodlayabildikleri: H.264 + AAC (MP4, 1080p ve 720p), VP8 + Vorbis (MKV), MKV'ye kopya, MP3, Opus, FLAC, AAC (M4A). H.265'in kodlayıcısı derlemede yok: profilde seçilebilir ama başlatılamaz, nedeni yazılır. WebM de yok (derlemenin FFmpeg'inde WebM yazıcısı bulunmuyor): VP8 MKV'ye yazılır.
+- Profil düzenleyici: kapsayıcı, video kodlayıcısı, bit hızı, en büyük yükseklik, kare hızı, ses kodlayıcısı, bit hızı, kanal, örnekleme hızı, altyazı (yok, iz olarak koru, görüntüye göm); kapsayıcının taşıyamadığı bir seçim düzenleyicide söylenir. Profiller veritabanında adıyla saklanır (veritabanı 12'den 13'e).
+- İşler: dönüştürmeler TV Lab'in remux'larıyla aynı sırada, birer birer, ön planda bildirimle çalışır; ilerleme, İptal, pil zayıfken ve cihaz ısınınca duraklama, kesilen işin sıraya dönmesi remux'takiyle aynı. Dönüştür sayfası ikisini birlikte gösterir.
+- Ağda yayınla (HLS)… (Ctrl+S): medya libVLC ile HLS'ye (H.264 + AAC, 6 sn'lik bölümler; 1080p, 720p, 480p ya da yalnız ses) kodlanır ve yerel ağdaki küçük bir sunucudan adresi ve QR koduyla yayınlanır; aynı Wi-Fi'deki bir televizyon, bilgisayar ya da telefon VLC'yle ya da tarayıcıyla açar. Yalnızca Wi-Fi ya da Ethernet'te ve yalnızca yerel ağ adreslerine; bildirimde Durdur. Bölümler uygulamanın deposunda tutulur, yayın bitince (ya da uygulama yeniden açılınca) silinir.
+
 ## 0.4.0 — MVP4 (hazırlanıyor)
 
 ### Radyo
@@ -97,6 +110,8 @@ Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine 
 - Bir filmi oynatılacağı cihaza göre analiz eder: kapsayıcı, codec, HDR ve Dolby Vision (profil, BL/EL/RPU, FEL/MEL), ses ve altyazı izleri.
 - Paket düzeyinde bit hızı grafiği (1 ve 5 sn tepe, USB 2.0 eşiği; PNG ve CSV olarak dışa aktarılır), harici diskte sıralı okuma testi, bulgular ve rapor.
 - Cihaz profilleri: LG OLED B4 ve Tab S11 Ultra; düzenlenebilir, JSON dosyası olarak paylaşılır ve içe aktarılır.
+- Kayıpsız remux: rapordaki “Remux” ile film, video akışına dokunulmadan yeni bir MKV'ye yazılır (kendi FFmpeg derlememizle paket paket kopyalanır; ses ve altyazı izleri, bölümler, ekler ve etiketler korunur). Dolby Vision profil 7 (UHD Blu-ray çift katman) rapor söylüyorsa profil 8.1'e çevrilir: RPU dönüştürülür (dovi_tool), iyileştirme katmanı atılır, temel katman bit bit kalır. İşler sırayla ön planda çalışır (bildirimde ilerleme ve İptal), çıktı seçilen klasörde yeni, boş bir dosyaya SAF ile yazılır (kaynağın kendisi ya da dolu bir dosya çıktı olarak kabul edilmez); pil zayıfken ya da cihaz ısınınca duraklar, kesilen iş baştan başlar; 4 GB'tan büyük dosyalar sorunsuz.
+- Doğrulama: çıktı geri okunur, videonun her paketi (dönüşümde temel katmanın NAL birimleri) kaynakla SHA-256 ile karşılaştırılır, Dolby Vision kaydı ve her karenin RPU'su denetlenir. Eşleşmezse iş başarısız sayılır ve çıktı silinir; kaynak dosya hiçbir zaman yazılmak için açılmaz. Eşleşen iş “Video bit bit aynı” rozetini alır.
 
 ### Laboratuvar ve ölçüm
 - Ayarlar › Laboratuvar: ses çıkışı ve bit-perfect, USB DAC, HDMI ekran ve 24p denemeleri; Dolby Vision profil 7'den 8.1'e dönüştürme; whisper ile konuşmadan altyazı.

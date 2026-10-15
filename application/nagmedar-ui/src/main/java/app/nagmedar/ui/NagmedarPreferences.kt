@@ -21,6 +21,7 @@ import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.visual.VisualizerSettings
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
 import org.videolan.tools.NAGMEDAR_MIDDLE_CLICK
@@ -80,6 +81,15 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 
     fun updateSnapshot(value: SnapshotSettings) {
         snapshot = value
+        value.write(prefs.edit()).apply()
+    }
+
+    /** S-611: the visualisers: with music, in the video player, their kind, frame rate and Battery Saver. */
+    var visualizer by mutableStateOf(VisualizerSettings.read(prefs))
+        private set
+
+    fun updateVisualizer(value: VisualizerSettings) {
+        visualizer = value
         value.write(prefs.edit()).apply()
     }
 
@@ -160,6 +170,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
         if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
         if (key == null || key == KEY_RECORDING_FOLDER) recordingFolder = readRecordingFolder()
+        if (key == null || key in VisualizerSettings.keys) visualizer = VisualizerSettings.read(prefs)
         if (key == null || key == RefreshMatch.KEY || key == KEY_VIDEO_MATCH_FRAME_RATE) refreshMatch = RefreshMatch.read(prefs)
     }
 

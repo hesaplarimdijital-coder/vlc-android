@@ -93,6 +93,8 @@ ICONS = {
     # S-607 recording what plays: started, stopped
     'Record': '<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.6" style="fill:currentColor"/>',
     'Stop': '<rect x="4.5" y="4.5" width="7" height="7" rx="1.2" style="fill:currentColor"/>',
+    # S-611 the visualisers: a spectrum's bars
+    'Visualizer': '<path d="M3 13.5v-3M5.5 13.5V7M8 13.5V3.5M10.5 13.5V8M13 13.5V5.5"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

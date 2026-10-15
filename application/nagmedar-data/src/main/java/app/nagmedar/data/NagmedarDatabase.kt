@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
-        NetworkServerEntry::class,
+        NetworkServerEntry::class, RemuxJobEntry::class, ConvertProfileEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -33,10 +33,12 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun smartPlaylists(): SmartPlaylistDao
     abstract fun latencyProfiles(): LatencyProfileDao
     abstract fun networkServers(): NetworkServerDao
+    abstract fun remuxJobs(): RemuxJobDao
+    abstract fun convertProfiles(): ConvertProfileDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 11
+        const val VERSION = 13
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -143,9 +145,39 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 11 → 12 (S-1206): the remux queue. */
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`input_uri` TEXT NOT NULL, `input_name` TEXT NOT NULL, `input_size` INTEGER NOT NULL, " +
+                        "`output_uri` TEXT NOT NULL, `output_name` TEXT NOT NULL, `plan` TEXT NOT NULL, `state` TEXT NOT NULL, " +
+                        "`progress` REAL NOT NULL, `media_seconds` REAL NOT NULL, `total_seconds` REAL NOT NULL, " +
+                        "`bytes_out` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, " +
+                        "`started_at` INTEGER, `finished_at` INTEGER, `result` TEXT, `verification` TEXT, `video_hash` TEXT, " +
+                        "`error` TEXT, `events` TEXT NOT NULL, `cancel_requested` INTEGER NOT NULL, `owns_output` INTEGER NOT NULL)",
+                )
+            }
+        }
+
+        /** 12 → 13 (S-1303): the user's conversion profiles; the queue's jobs by kind (remux, conversion). */
+        private val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `remux_job` ADD COLUMN `kind` TEXT NOT NULL DEFAULT 'remux'")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `convert_profile` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`container` TEXT NOT NULL, `video_codec` TEXT, `video_kbps` INTEGER NOT NULL, `max_height` INTEGER NOT NULL, " +
+                        "`fps` INTEGER NOT NULL, `audio_codec` TEXT, `audio_kbps` INTEGER NOT NULL, `channels` INTEGER NOT NULL, " +
+                        "`sample_rate` INTEGER NOT NULL, `subtitles` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_convert_profile_name` ON `convert_profile` (`name`)")
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11,
+            MIGRATION_11_12, MIGRATION_12_13,
         )
 
         @Volatile

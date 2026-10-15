@@ -80,6 +80,9 @@ Sözlüğü testler denetler:
 | eşik | threshold | | | Bir cihaz profilinin kaldırdığı en yüksek 1 sn bit hızı: “Profil eşiği” |
 | cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
 | bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
+| remux | remux | yeniden paketleme | re-mux | TV Lab'in kayıpsız dönüşümü: video akışına dokunmadan kapsayıcı ve izler yeni bir MKV'ye yazılır; işler “Remux sırası”nda bekler, iş “sırada”, “remux yapılıyor”, “doğrulanıyor”, “tamamlandı” |
+| Video bit bit aynı | Video bit for bit identical | | bit-identical, bit-exact video | Doğrulama rozeti (S-1209): çıktının videosu kaynağınkiyle paket paket karşılaştırıldı ve aynı çıktı; müzikteki “bit-perfect” çıkış için kalır |
+| doğrulama | verification | | | Remux çıktısının geri okunup karşılaştırılması; “Doğrulanıyor” |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |
@@ -112,6 +115,15 @@ Sözlüğü testler denetler:
 | A/B testi | A/B test | | | Zincirle (A) zincirsizin (B), zincirin düzeyinde karşılaştırılması; A-B tekrarı başka şeydir. Kısayolu Alt+B |
 | kör test | blind test | | | A/B testinde her turda X rastgele A ya da B olur; cevaplar testin sonunda açılır |
 | dalga biçimi | waveform | dalga formu | | Müzik görünümünün zaman çizelgesi: her çubuk parçanın bir kesiti, tepesi soluk, gürlüğü koyu; tıklanınca oraya atlar |
+| görselleştirici | visualiser | | visualizer | Çalanın çizimi: spektrum, VU metre ya da osiloskop; Ctrl+Shift+V tam ekranda açar. projectM bu sürümde yok |
+| spektrum | spectrum | tayf | | Görselleştiricinin frekans çubukları, 25 Hz–20 kHz |
+| VU metre | VU meter | ses ölçer | level meter | Sol ve sağ kanalın RMS'i ve tepesi, dBFS ile; tepede kırpılma işareti |
+| osiloskop | oscilloscope | | | Dalganın kendisi, yükselen sıfır geçişinden |
+| dönüştürmek | convert | | transcode | Bir medyayı seçilen profille yeniden kodlayıp yeni bir dosyaya yazmak (libVLC); özgün dosyaya dokunulmaz. “Dönüştür / Kaydet…” (Ctrl+R). Remux'tan farkı: ses ve görüntü yeniden kodlanır |
+| profil (dönüştürme) | profile | | | Kapsayıcı, video ve ses kodlayıcısı, bit hızı, en büyük yükseklik, altyazı; hazır olanlar “Ön ayar” (preset), kullanıcınınkiler adıyla saklanır |
+| kodlayıcı | encoder | | | Dönüştürmede yazan taraf (x264, VP8, LAME, Opus, FLAC…); “libVLC'nin bu derlemesinde bunun kodlayıcısı yok (H.265)” |
+| iş, İşler | job, Jobs | | | Dönüştürmeler ve TV Lab'in remux'ları tek sırada, birer birer çalışan işler; Dönüştür › İşler |
+| ağda yayın, ağda yayınlamak | stream on the network | | | Medyanın HLS olarak yerel ağdan (Wi-Fi, Ethernet) sunulması: adres ve QR kodu, “Yayında”, “Yayını durdur” (Ctrl+S) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |

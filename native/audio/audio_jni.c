@@ -755,3 +755,41 @@ JNIEXPORT jdouble JNICALL Java_app_nagmedar_audio_NativeAudio_abGainDb(JNIEnv *e
     (void)cls;
     return engine_of(handle) ? nag_audio_ab_gain_db(engine_of(handle)) : 0.0;
 }
+
+/* ------------------------------------------------------- S-611 visualisers */
+
+JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_setScope(JNIEnv *env, jclass cls, jlong handle, jboolean enabled)
+{
+    (void)env;
+    (void)cls;
+    return engine_of(handle) ? nag_audio_set_scope(engine_of(handle), enabled == JNI_TRUE) : -1;
+}
+
+/* [out]: rate, FFT size, peak L, peak R, RMS L, RMS R, wave points, 0, then the FFT size / 2 bins in
+ * dB, then the left and the right waveform; NativeAudio.SCOPE_* name the places. The frame counter,
+ * or -1 while the tap is off or [out] is too small. */
+JNIEXPORT jlong JNICALL Java_app_nagmedar_audio_NativeAudio_scope(JNIEnv *env, jclass cls, jlong handle, jfloatArray out, jint wave_points)
+{
+    (void)cls;
+    NagAudio *engine = engine_of(handle);
+    if (!engine || !out)
+        return -1;
+    NagScopeFrame *frame = malloc(sizeof(*frame));
+    if (!frame)
+        return -1;
+    jlong result = -1;
+    if (nag_audio_scope(engine, frame, wave_points) == 0) {
+        const jsize bins = frame->fft_size / 2, points = frame->wave_points;
+        if ((*env)->GetArrayLength(env, out) >= 8 + bins + 2 * points) {
+            const jfloat header[8] = {(jfloat)frame->rate, (jfloat)frame->fft_size, (jfloat)frame->peak_db[0], (jfloat)frame->peak_db[1],
+                                      (jfloat)frame->rms_db[0], (jfloat)frame->rms_db[1], (jfloat)points, 0};
+            (*env)->SetFloatArrayRegion(env, out, 0, 8, header);
+            (*env)->SetFloatArrayRegion(env, out, 8, bins, frame->spectrum_db);
+            (*env)->SetFloatArrayRegion(env, out, 8 + bins, points, frame->wave[0]);
+            (*env)->SetFloatArrayRegion(env, out, 8 + bins + points, points, frame->wave[1]);
+            result = (jlong)frame->frames;
+        }
+    }
+    free(frame);
+    return result;
+}

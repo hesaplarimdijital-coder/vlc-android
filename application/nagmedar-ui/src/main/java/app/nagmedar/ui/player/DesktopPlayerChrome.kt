@@ -148,10 +148,16 @@ import app.nagmedar.ui.player.sync.SyncAssistant
 import app.nagmedar.ui.player.sync.SyncController
 import app.nagmedar.ui.player.sync.SyncPanel
 import app.nagmedar.ui.player.sync.preciseClock
+import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.convert.ConvertMedia
+import app.nagmedar.ui.convert.ConvertRequests
+import app.nagmedar.ui.visual.PlayerVisualizer
+import app.nagmedar.ui.visual.VisualizerSettings
+import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -223,6 +229,15 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Snapshot -> snapshots?.take()
                 // S-607: what plays recorded, or the recording stopped
                 ShortcutId.Record -> Recordings.toggle()
+                // S-1303: what plays converted, or streamed on the network, from the library's window
+                ShortcutId.ConvertSave -> requestConvert(activity, ConvertRequests.Kind.Convert)
+                ShortcutId.StreamHls -> requestConvert(activity, ConvertRequests.Kind.Stream)
+                // S-611: the visualiser over the player, on or off
+                ShortcutId.Visualizer -> {
+                    val settings = Settings.getInstance(activity)
+                    val visualizer = VisualizerSettings.read(settings)
+                    visualizer.copy(video = !visualizer.video).write(settings.edit()).apply()
+                }
                 // S-608: the new interface's "Jump to time", bookmarks and their tab
                 ShortcutId.JumpToTime -> navigation?.jumping = true
                 ShortcutId.AddBookmark -> navigation?.addBookmark()
@@ -503,6 +518,12 @@ class DesktopPlayerChrome : PlayerChrome {
     }
 }
 
+/** S-1303: the convert page asked for the media playing. */
+private fun requestConvert(activity: VideoPlayerActivity, kind: ConvertRequests.Kind) {
+    val media = activity.service?.currentMediaWrapper?.let { ConvertMedia(it.uri, it.title ?: it.fileName.orEmpty()) }
+    ConvertRequests.open(activity, kind, media)
+}
+
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
 
@@ -682,11 +703,31 @@ private fun PlayerChromeContent(
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             Box(Modifier.fillMaxSize()) {
                 SnapshotFlash(snapshots.state.flashes)
+                // S-611: the visualiser, under the controls: large over sound alone, small beside a picture
+                if (prefs.visualizer.video) {
+                    val nowPlaying = rememberNowPlaying()
+                    val audioOnly by produceState(false, uri) {
+                        while (true) {
+                            value = activity.service?.let { it.currentMediaWrapper != null && it.videoTracksCount == 0 } ?: false
+                            delay(1_000)
+                        }
+                    }
+                    PlayerVisualizer(
+                        settings = prefs.visualizer,
+                        audioOnly = audioOnly,
+                        playing = nowPlaying.playing,
+                        mediaKey = uri,
+                        onSettings = prefs::updateVisualizer,
+                        // beside a picture: above the control bar while it shows, clear of the cards on the left
+                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                    )
+                }
                 DesktopControls(
                     state.copy(
                         effectsOpen = panel.open && panel.tab == PanelTab.Effects,
                         snapshot = prefs.snapshot,
                         bookmarks = navigation.bookmarks.marks.map { it.timeMs },
+                        visualizer = prefs.visualizer.kind.takeIf { prefs.visualizer.video },
                     ),
                     source,
                     visibility,
@@ -1197,6 +1238,15 @@ internal class ActivityPlayerSource(
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
+
+    override fun convertSave() = requestConvert(activity, ConvertRequests.Kind.Convert)
+
+    override fun streamOnNetwork() = requestConvert(activity, ConvertRequests.Kind.Stream)
+
+    override fun setVisualizer(kind: VisualizerKind?) {
+        val settings = prefs.visualizer
+        prefs.updateVisualizer(if (kind == null) settings.copy(video = false) else settings.copy(video = true, kind = kind))
+    }
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
 

@@ -350,6 +350,64 @@ class NagmedarDatabaseTest {
         assertEquals("auto", settings.get("file:///yeni.mkv")!!.aspectRatio)
     }
 
+    /** S-1206: the remux queue: the oldest waiting job next, those a dead process left, a cancel asked. */
+    @Test
+    fun remuxJobsWaitInTheOrderTheyWereQueued() {
+        val jobs = db.remuxJobs()
+        // S-1303: a conversion waits in the same queue, in its turn
+        val convert = jobs.insert(
+            RemuxJobEntry(
+                inputUri = "content://docs/v", inputName = "v.mkv", outputUri = "content://docs/v-out", outputName = "v.mp4",
+                plan = "{\"name\":\"x\"}", state = RemuxJobState.DONE, createdAt = 0, kind = RemuxJobKind.CONVERT,
+            ),
+        )
+        assertEquals(RemuxJobKind.CONVERT, jobs.get(convert)!!.kind)
+        jobs.delete(convert)
+        fun job(name: String, at: Long, state: String = RemuxJobState.QUEUED) = RemuxJobEntry(
+            inputUri = "content://docs/$name", inputName = "$name.mkv", inputSize = 1, outputUri = "content://docs/$name-out",
+            outputName = "$name (remux).mkv", plan = "{}", state = state, createdAt = at,
+        )
+        val second = jobs.insert(job("b", 2))
+        val first = jobs.insert(job("a", 1))
+        val running = jobs.insert(job("c", 3, RemuxJobState.RUNNING))
+        jobs.insert(job("d", 4, RemuxJobState.DONE))
+        assertEquals(first, jobs.next()!!.id)
+        assertEquals(listOf(running), jobs.interrupted().map { it.id })
+        assertEquals(listOf("d", "c", "b", "a"), jobs.all().map { it.inputName.removeSuffix(".mkv") })
+        assertEquals(listOf("a"), runBlocking { jobs.observeInput("content://docs/a").first() }.map { it.inputName.removeSuffix(".mkv") })
+        jobs.requestCancel(running)
+        assertTrue(jobs.get(running)!!.cancelRequested)
+        // the worker's column writes leave the cancel asked where it is
+        jobs.saveProgress(running, 0.5f, 400.0, 800.0, 7)
+        jobs.saveState(running, RemuxJobState.PAUSED, RemuxJobError.BATTERY, "1\tpaused\tbattery\n")
+        jobs.saveResult(running, RemuxJobState.VERIFYING, 800.0, 800.0, 9, "{}")
+        jobs.get(running)!!.let {
+            assertTrue(it.cancelRequested)
+            assertEquals(RemuxJobState.VERIFYING, it.state)
+            assertEquals(RemuxJobError.BATTERY, it.error)
+            assertEquals(9L, it.bytesOut)
+            assertEquals("{}", it.result)
+        }
+        jobs.saveStart(second, RemuxJobState.RUNNING, 1, 5, "5\tstarted\t1\n")
+        assertEquals(1, jobs.get(second)!!.attempts)
+        assertEquals(5L, jobs.get(second)!!.startedAt)
+        jobs.saveOwnsOutput(second, true)
+        assertTrue(jobs.get(second)!!.ownsOutput)
+        // a cancel of a waiting job touches only a job still waiting
+        assertEquals(0, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
+        assertEquals(RemuxJobState.RUNNING, jobs.get(second)!!.state)
+        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
+        assertEquals(1, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
+        assertEquals(RemuxJobState.CANCELLED, jobs.get(second)!!.state)
+        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
+        jobs.update(jobs.get(first)!!.copy(state = RemuxJobState.DONE, videoHash = "fad1", verification = "{\"ok\":true}", finishedAt = 9))
+        assertEquals(second, jobs.next()!!.id)
+        assertEquals("fad1", jobs.get(first)!!.videoHash)
+        jobs.delete(second)
+        assertNull(jobs.next())
+        assertEquals(3, runBlocking { jobs.observe().first() }.size)
+    }
+
     /** S-1502: what a backup reads, and its rows restored over these without losing either's. */
     @Test
     fun aBackupsRowsAreReadAndRestored() {
@@ -421,6 +479,26 @@ class NagmedarDatabaseTest {
         profiles.delete(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
         assertNull(profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF"))
     }
+
+    /** S-1303: the user's conversion profiles: by name, changed, deleted; a name is used once. */
+    @Test
+    fun convertProfilesAreKeptByName() {
+        val profiles = db.convertProfiles()
+        val archive = profiles.insert(
+            ConvertProfileEntry(
+                name = "Arşiv", container = "Mkv", videoCodec = "H264", videoKbps = 6500, maxHeight = 1080, audioCodec = "Ac3",
+                audioKbps = 448, channels = 6, subtitles = "Keep", createdAt = 1, updatedAt = 1,
+            ),
+        )
+        profiles.insert(ConvertProfileEntry(name = "araba", container = "Mp3", audioCodec = "Mp3", audioKbps = 192, subtitles = "None"))
+        assertEquals(listOf("araba", "Arşiv"), runBlocking { profiles.observe().first() }.map { it.name })
+        profiles.update(profiles.get(archive)!!.copy(videoKbps = 8000, updatedAt = 2))
+        assertEquals(8000, profiles.get(archive)!!.videoKbps)
+        assertEquals(0, profiles.get(archive)!!.fps)
+        assertTrue(runCatching { profiles.insert(ConvertProfileEntry(name = "Arşiv", container = "Mp4", subtitles = "None")) }.isFailure)
+        profiles.delete(archive)
+        assertEquals(listOf("araba"), profiles.all().map { it.name })
+    }
 }
 
 /**
@@ -485,6 +563,22 @@ class NagmedarDatabaseMigrationTest {
                 "INSERT INTO network_server (name, url, credentials, created_at, last_used_at) " +
                     "VALUES ('NAS', 'smb://nas.local/Filmler', x'0102', 1, 0)",
             )
+            // 11 -> 12 (S-1206): the remux queue
+            db.execSQL(
+                "INSERT INTO remux_job (input_uri, input_name, input_size, output_uri, output_name, plan, state, progress, " +
+                    "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
+                    "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
+            )
+            // 12 -> 13 (S-1303): the conversion profiles, and the queue's convert jobs
+            db.execSQL(
+                "INSERT INTO convert_profile (name, container, video_codec, video_kbps, max_height, fps, audio_codec, audio_kbps, channels, " +
+                    "sample_rate, subtitles, created_at, updated_at) VALUES ('Arşiv', 'Mkv', 'H264', 6500, 1080, 0, 'Ac3', 448, 6, 0, 'Keep', 1, 1)",
+            )
+            // a job queued without a kind is a remux
+            db.query("SELECT kind FROM remux_job").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("remux", c.getString(0))
+            }
         }
     }
 
@@ -542,6 +636,32 @@ class NagmedarDatabaseMigrationTest {
                 assertEquals("not new: it was there before the column", 0L, c.getLong(2))
                 assertEquals(0L, c.getLong(3))
                 assertTrue(c.isNull(4) && c.isNull(5) && c.isNull(6))
+            }
+        }
+    }
+
+    /** S-1303: the remuxes queued before 13 stay remuxes; the conversion profiles start empty. */
+    @Test
+    fun remuxJobsStayRemuxesFromTwelve() {
+        assumeTrue("schema 12 not exported yet", schemaExported(12))
+        assumeTrue("schema 13 not exported yet", schemaExported(13))
+        helper.createDatabase(TEST_DB, 12).use { db ->
+            db.execSQL(
+                "INSERT INTO remux_job (input_uri, input_name, input_size, output_uri, output_name, plan, state, progress, " +
+                    "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
+                    "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 13, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT input_name, state, kind FROM remux_job").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("a.mkv", c.getString(0))
+                assertEquals("queued", c.getString(1))
+                assertEquals("remux", c.getString(2))
+            }
+            db.query("SELECT COUNT(*) FROM convert_profile").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
             }
         }
     }
