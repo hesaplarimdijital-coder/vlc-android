@@ -1,6 +1,5 @@
 package app.nagmedar.ui.player.subtitles
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.player.subtitles.providers.FakeProvider
 import app.nagmedar.ui.player.subtitles.providers.MemoryProviderStore
 import app.nagmedar.ui.player.subtitles.providers.ProviderRegistry
@@ -13,17 +12,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.annotation.GraphicsMode
 import java.io.IOException
 
 /**
  * S-707: the search window over several providers. What each finds is one list, what fails is
  * told beside the provider's name while the others' results stay, a download goes to the
- * provider the file came from, and with none turned on nothing is asked.
+ * provider the file came from, and with none turned on nothing is asked. A plain test: it
+ * changes Compose state, which in a Robolectric sandbox would leave the Compose tests after it
+ * waiting for an idle that never comes.
  */
-@RunWith(AndroidJUnit4::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class OnlineProvidersTest {
 
     private val alpha = FakeProvider(
