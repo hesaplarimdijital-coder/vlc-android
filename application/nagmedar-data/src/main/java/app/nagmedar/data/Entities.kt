@@ -472,3 +472,87 @@ object TranscodeJobError {
     /** libVLC's own reason follows the prefix. */
     const val ENGINE = "engine:"
 }
+
+/**
+ * S-1206: a job of the remux queue (the TV Lab's lossless remux): what to read, what to write,
+ * the plan (app.nagmedar.lab.RemuxPlan as JSON), where it got and what came of it. One job
+ * runs at a time; the states are [RemuxJobState]. The engine's stats and the verification
+ * (S-1209) stay as the JSON the native side wrote, for the history (S-208) to read; [videoHash]
+ * is the verified video's SHA-256, set when the output was read back and matched. [events]
+ * records what happened on the way (a line each, "<millis> <kind> <detail>": a pause for the
+ * battery or heat, a restart after the process died). A job that was running when the process
+ * died is started again from the beginning: a Matroska file cannot be resumed halfway. A job
+ * only ever writes into an empty output ([ownsOutput]).
+ */
+@Entity(tableName = "remux_job")
+data class RemuxJobEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "input_uri") val inputUri: String,
+    @ColumnInfo(name = "input_name") val inputName: String,
+    @ColumnInfo(name = "input_size") val inputSize: Long = 0,
+    @ColumnInfo(name = "output_uri") val outputUri: String,
+    @ColumnInfo(name = "output_name") val outputName: String,
+    val plan: String,
+    val state: String = RemuxJobState.QUEUED,
+    /** 0..1 of the remux, then of the verification. */
+    val progress: Float = 0f,
+    @ColumnInfo(name = "media_seconds") val mediaSeconds: Double = 0.0,
+    @ColumnInfo(name = "total_seconds") val totalSeconds: Double = 0.0,
+    @ColumnInfo(name = "bytes_out") val bytesOut: Long = 0,
+    /** How many times it was started; more than once after an interruption. */
+    val attempts: Int = 0,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    @ColumnInfo(name = "started_at") val startedAt: Long? = null,
+    @ColumnInfo(name = "finished_at") val finishedAt: Long? = null,
+    val result: String? = null,
+    val verification: String? = null,
+    @ColumnInfo(name = "video_hash") val videoHash: String? = null,
+    /** Why it failed or paused: a [RemuxJobError] code, or the engine's message after "engine:". */
+    val error: String? = null,
+    val events: String = "",
+    @ColumnInfo(name = "cancel_requested") val cancelRequested: Boolean = false,
+    /**
+     * Whether the output is the job's own to remove or empty: set once the job found it empty
+     * and began writing. An output refused (the source itself, or a file that held something)
+     * is never touched. A failed or cancelled job that still owns its output could not remove
+     * it yet: the queue tries again ([RemuxJobDao.leftovers]); once removed it is no longer owned.
+     */
+    @ColumnInfo(name = "owns_output") val ownsOutput: Boolean = false,
+)
+
+/** The states of a [RemuxJobEntry]; done, failed and cancelled are final. */
+object RemuxJobState {
+    const val QUEUED = "queued"
+    const val RUNNING = "running"
+    const val PAUSED = "paused"
+    const val VERIFYING = "verifying"
+    const val DONE = "done"
+    const val FAILED = "failed"
+    const val CANCELLED = "cancelled"
+
+    val FINAL = setOf(DONE, FAILED, CANCELLED)
+}
+
+/** Why a [RemuxJobEntry] failed or waits, as its [RemuxJobEntry.error]. */
+object RemuxJobError {
+    /** The verification found the output's video different from the source's. */
+    const val VERIFY = "verify"
+    const val CANCELLED = "cancelled"
+    const val NO_TOOLS = "no-tools"
+    const val OPEN_INPUT = "open-input"
+    const val OPEN_OUTPUT = "open-output"
+    const val BATTERY = "battery"
+    const val THERMAL = "thermal"
+    /** The output names the source itself: refused before anything is written. */
+    const val SAME_FILE = "same-file"
+    /** The output already held something (a film "replaced" in the picker): refused, untouched. */
+    const val OUTPUT_NOT_EMPTY = "output-not-empty"
+    /** The output is not a regular file (a pipe, a socket): whether it is empty cannot be known; refused, untouched. */
+    const val OUTPUT_NOT_FILE = "output-not-file"
+    /** Another job writes into the same output, or it is another job's file: refused, untouched. */
+    const val OUTPUT_IN_USE = "output-in-use"
+    /** Queued, but the system let no foreground job start from the background: it starts when the app shows. */
+    const val WAITING_APP = "waiting-app"
+    /** The engine's own message follows the prefix. */
+    const val ENGINE = "engine:"
+}

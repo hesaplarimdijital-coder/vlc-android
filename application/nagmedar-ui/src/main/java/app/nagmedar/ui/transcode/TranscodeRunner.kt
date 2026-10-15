@@ -2,7 +2,6 @@ package app.nagmedar.ui.transcode
 
 import android.content.Context
 import android.net.Uri
-import android.provider.DocumentsContract
 import app.nagmedar.data.TranscodeJobDao
 import app.nagmedar.data.TranscodeJobEntry
 import app.nagmedar.data.TranscodeJobError
@@ -11,6 +10,8 @@ import app.nagmedar.ui.convert.ConvertPolicy
 import app.nagmedar.ui.convert.ConvertReason
 import app.nagmedar.ui.convert.ConvertSteer
 import app.nagmedar.ui.convert.DeviceState
+import app.nagmedar.ui.jobs.JobOutputs
+import app.nagmedar.ui.jobs.OutputState
 import java.io.File
 import java.io.IOException
 
@@ -65,17 +66,22 @@ class DeviceTranscodeFiles(context: Context) : TranscodeFiles {
         false
     }
 
+    /** The documents' rule, shared with the remux (S-1206). */
+    private val outputs = JobOutputs(context)
+
     override fun removeOutput(output: Uri) {
-        val deleted = runCatching { DocumentsContract.deleteDocument(context.contentResolver, output) }.getOrDefault(false)
-        if (!deleted) emptyOutput(output)
+        outputs.remove(output)
     }
 
     override fun emptyOutput(output: Uri) {
-        runCatching { context.contentResolver.openOutputStream(output, "wt")?.close() }
+        outputs.empty(output)
     }
 
-    override fun outputEmpty(output: Uri): Boolean? =
-        runCatching { context.contentResolver.openFileDescriptor(output, "r")?.use { it.statSize == 0L } }.getOrNull()
+    override fun outputEmpty(output: Uri): Boolean? = when (outputs.state(output)) {
+        OutputState.Empty -> true
+        OutputState.Unreadable -> null
+        OutputState.Holds, OutputState.NotAFile -> false
+    }
 }
 
 /**

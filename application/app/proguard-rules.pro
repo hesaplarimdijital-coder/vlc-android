@@ -139,3 +139,7 @@
 # Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }
+
+# Nağmedar (S-1206): libnagmedar_lab.so asks the remux's listener how to go on by its method's name
+-keep interface app.nagmedar.lab.NativeLab$RemuxProgress { *; }
+-keepclassmembers class * implements app.nagmedar.lab.NativeLab$RemuxProgress { *; }

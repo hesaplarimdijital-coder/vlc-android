@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
@@ -16,7 +15,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.nagmedar.data.NagmedarDatabase
@@ -27,6 +25,8 @@ import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.convert.AndroidDeviceState
 import app.nagmedar.ui.convert.ConvertPolicy
+import app.nagmedar.ui.jobs.jobForegroundInfo
+import app.nagmedar.ui.jobs.stoppedForForegroundTime
 import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -128,7 +128,7 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
         runner.drain {
             when {
                 !isStopped -> null
-                Build.VERSION.SDK_INT >= 31 && stopReason == WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT -> TranscodeJobError.TIMEOUT
+                stoppedForForegroundTime() -> TranscodeJobError.TIMEOUT
                 else -> STOPPED
             }
         }
@@ -136,11 +136,7 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
 
     override suspend fun getForegroundInfo(): ForegroundInfo = foregroundInfo(notification(null))
 
-    private fun foregroundInfo(notification: Notification): ForegroundInfo = when {
-        Build.VERSION.SDK_INT >= 35 -> ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        else -> ForegroundInfo(NOTIFICATION_ID, notification)
-    }
+    private fun foregroundInfo(notification: Notification): ForegroundInfo = jobForegroundInfo(NOTIFICATION_ID, notification)
 
     /** When the notification was last changed: once a second at most (the system drops quicker updates). */
     private var shownAt = 0L

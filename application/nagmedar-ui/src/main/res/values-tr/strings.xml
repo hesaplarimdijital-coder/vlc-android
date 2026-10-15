@@ -1516,6 +1516,44 @@
     <string name="nag_tvlab_profile_imported">%1$s içe aktarıldı.</string>
     <string name="nag_tvlab_profile_exported">Profil kaydedildi.</string>
     <string name="nag_tvlab_analyse">TV Lab\'de analiz et</string>
+    <!-- S-1206, S-1209: remux kuyruğu ve doğrulama -->
+    <string name="nag_tvlab_remux">Remux</string>
+    <string name="nag_tvlab_remux_file">%1$s (remux).mkv</string>
+    <string name="nag_tvlab_remux_queue">Remux sırası</string>
+    <string name="nag_tvlab_remux_note">Video akışı yeni bir MKV\'ye bit bit kopyalanır; kaynak yalnızca okunur. Yeniden başlatmayla kesilen iş baştan başlar.</string>
+    <string name="nag_tvlab_remux_queued_notice">Remux sıraya alındı.</string>
+    <string name="nag_tvlab_remux_running_badge">Remux yapılıyor</string>
+    <string name="nag_tvlab_remux_running">Remux yapılıyor · %1$s</string>
+    <string name="nag_tvlab_remux_verifying_badge">Doğrulanıyor</string>
+    <string name="nag_tvlab_remux_verifying">Doğrulanıyor · %1$s</string>
+    <string name="nag_tvlab_remux_slowed">Cihaz ılıkken yavaşlatıldı.</string>
+    <string name="nag_tvlab_remux_identical">Video bit bit aynı</string>
+    <string name="nag_tvlab_remux_compared">%1$d paket karşılaştırıldı: %2$s</string>
+    <string name="nag_tvlab_remux_scope_packets">kaynağın ve çıktının her video paketi</string>
+    <string name="nag_tvlab_remux_scope_nal_units">videonun her NAL birimi, çerçeveleme hariç</string>
+    <string name="nag_tvlab_remux_scope_base_layer">temel katmanın NAL birimleri, RPU ve iyileştirme katmanı hariç</string>
+    <string name="nag_tvlab_remux_dv_checked">Başlıkta ve her karede Dolby Vision profil 8.1 · %1$d RPU denetlendi</string>
+    <string name="nag_tvlab_remux_e_verify">Çıktının videosu kaynağınkinden farklı: dosya silindi.</string>
+    <string name="nag_tvlab_remux_e_differs">Çıktının videosu kaynağınkinden farklı.</string>
+    <string name="nag_tvlab_remux_left">Yarım kalan dosya henüz silinemedi; Nağmedar sırayı bir sonraki çalıştırışında yeniden dener.</string>
+    <string name="nag_tvlab_remux_e_cancelled">Durduruldu; yarım kalan dosya silindi.</string>
+    <string name="nag_tvlab_remux_e_open_output">Çıktı yazılamadı.</string>
+    <string name="nag_tvlab_remux_e_battery">Durduruldu: pil bitti. Şarja takıp yeniden sıraya alın.</string>
+    <string name="nag_tvlab_remux_e_thermal">Durduruldu: cihaz fazla ısındı. Soğumasını bekleyip yeniden sıraya alın.</string>
+    <string name="nag_tvlab_remux_e_engine">Remux başarısız: %1$s</string>
+    <string name="nag_tvlab_remux_same_file">Çıktı kaynağın kendisi olamaz; başka bir dosya seçin.</string>
+    <string name="nag_tvlab_remux_not_empty">Çıktı dosyası boş değil; yeni bir dosya adı seçin. Dosyaya dokunulmadı.</string>
+    <string name="nag_tvlab_remux_not_file">Çıktı yerinde yazılabilen bir dosya değil (başka bir uygulamanın akışı); cihazda ya da bir diskte bir dosya seçin. Dosyaya dokunulmadı.</string>
+    <string name="nag_tvlab_remux_in_use">Bu dosyaya başka bir remux işi yazıyor; yeni bir dosya adı seçin.</string>
+    <string name="nag_tvlab_remux_waiting_app">Nağmedar\'ın açılması bekleniyor: sistem arka planda iş başlatmaya izin vermiyor.</string>
+    <string name="nag_tvlab_remux_timeout">Sistem durdurdu: günün ön plan süresi doldu. Nağmedar açılınca baştan başlar.</string>
+    <plurals name="nag_tvlab_remux_tracks">
+        <item quantity="one">%d iz</item>
+        <item quantity="other">%d iz</item>
+    </plurals>
+    <string name="nag_tvlab_remux_plan_dv">Dolby Vision P7 → P8.1</string>
+    <string name="nag_tvlab_remux_plan_chapters">bölümler</string>
+    <string name="nag_tvlab_remux_plan_attachments">ekler</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performans</string>
     <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>

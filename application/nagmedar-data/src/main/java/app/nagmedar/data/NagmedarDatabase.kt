@@ -18,7 +18,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
         NetworkServerEntry::class, ScrobbleEntry::class, TranscodeProfileEntry::class, TranscodeJobEntry::class,
-        RadioRecording::class, RadioScheduleEntry::class,
+        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -38,10 +38,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun transcodeProfiles(): TranscodeProfileDao
     abstract fun transcodeJobs(): TranscodeJobDao
     abstract fun radioRecordings(): RadioRecordingDao
+    abstract fun remuxJobs(): RemuxJobDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 15
+        const val VERSION = 16
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -221,10 +222,25 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 15 → 16 (S-1206): the remux queue. */
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`input_uri` TEXT NOT NULL, `input_name` TEXT NOT NULL, `input_size` INTEGER NOT NULL, " +
+                        "`output_uri` TEXT NOT NULL, `output_name` TEXT NOT NULL, `plan` TEXT NOT NULL, `state` TEXT NOT NULL, " +
+                        "`progress` REAL NOT NULL, `media_seconds` REAL NOT NULL, `total_seconds` REAL NOT NULL, " +
+                        "`bytes_out` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, " +
+                        "`started_at` INTEGER, `finished_at` INTEGER, `result` TEXT, `verification` TEXT, `video_hash` TEXT, " +
+                        "`error` TEXT, `events` TEXT NOT NULL, `cancel_requested` INTEGER NOT NULL, `owns_output` INTEGER NOT NULL)",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
-            MIGRATION_13_14, MIGRATION_14_15,
+            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
         )
 
         @Volatile

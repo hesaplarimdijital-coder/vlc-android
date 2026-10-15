@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
@@ -25,6 +24,8 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.jobs.jobForegroundInfo
+import app.nagmedar.ui.jobs.stoppedForForegroundTime
 import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -224,7 +225,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         runCatching { manager.cancel(NOTIFICATION_ID) }
         if (isStopped) {
             // Android 15's six hours of a foreground job, say: the job waits and goes on from where it was
-            if (stopReason == WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) paused(job)
+            if (stoppedForForegroundTime()) paused(job)
             return Result.retry()
         }
         finished(job, summary)
@@ -237,11 +238,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         return foregroundInfo(notification(job, null))
     }
 
-    private fun foregroundInfo(notification: Notification): ForegroundInfo = when {
-        Build.VERSION.SDK_INT >= 35 -> ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        else -> ForegroundInfo(NOTIFICATION_ID, notification)
-    }
+    private fun foregroundInfo(notification: Notification): ForegroundInfo = jobForegroundInfo(NOTIFICATION_ID, notification)
 
     /** When the notification was last changed: once a second at most (the system drops quicker updates). */
     private var shownAt = 0L

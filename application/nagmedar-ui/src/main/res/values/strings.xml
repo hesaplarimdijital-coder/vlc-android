@@ -1544,6 +1544,44 @@
     <string name="nag_tvlab_profile_imported">%1$s imported.</string>
     <string name="nag_tvlab_profile_exported">Profile saved.</string>
     <string name="nag_tvlab_analyse">Analyse in TV Lab</string>
+    <!-- S-1206, S-1209: the remux queue and its verification -->
+    <string name="nag_tvlab_remux">Remux</string>
+    <string name="nag_tvlab_remux_file">%1$s (remux).mkv</string>
+    <string name="nag_tvlab_remux_queue">Remux queue</string>
+    <string name="nag_tvlab_remux_note">The video stream is copied bit for bit into a new MKV; the source is only read. A job cut short by a restart starts again from the beginning.</string>
+    <string name="nag_tvlab_remux_queued_notice">Remux queued.</string>
+    <string name="nag_tvlab_remux_running_badge">Remuxing</string>
+    <string name="nag_tvlab_remux_running">Remuxing · %1$s</string>
+    <string name="nag_tvlab_remux_verifying_badge">Verifying</string>
+    <string name="nag_tvlab_remux_verifying">Verifying · %1$s</string>
+    <string name="nag_tvlab_remux_slowed">Slowed down while the device is warm.</string>
+    <string name="nag_tvlab_remux_identical">Video bit for bit identical</string>
+    <string name="nag_tvlab_remux_compared">%1$d packets compared: %2$s</string>
+    <string name="nag_tvlab_remux_scope_packets">every video packet of the source and the output</string>
+    <string name="nag_tvlab_remux_scope_nal_units">every NAL unit of the video, framing aside</string>
+    <string name="nag_tvlab_remux_scope_base_layer">the base layer\'s NAL units, without the RPU and the enhancement layer</string>
+    <string name="nag_tvlab_remux_dv_checked">Dolby Vision profile 8.1 in the header and in every frame · %1$d RPUs checked</string>
+    <string name="nag_tvlab_remux_e_verify">The output\'s video differs from the source\'s: the file was removed.</string>
+    <string name="nag_tvlab_remux_e_differs">The output\'s video differs from the source\'s.</string>
+    <string name="nag_tvlab_remux_left">The unfinished file could not be removed yet; Nağmedar tries again the next time it runs the queue.</string>
+    <string name="nag_tvlab_remux_e_cancelled">Stopped; the partial file was removed.</string>
+    <string name="nag_tvlab_remux_e_open_output">The output could not be written.</string>
+    <string name="nag_tvlab_remux_e_battery">Stopped: the battery ran down. Plug in and queue it again.</string>
+    <string name="nag_tvlab_remux_e_thermal">Stopped: the device got too hot. Let it cool and queue it again.</string>
+    <string name="nag_tvlab_remux_e_engine">The remux failed: %1$s</string>
+    <string name="nag_tvlab_remux_same_file">The output cannot be the source itself; choose another file.</string>
+    <string name="nag_tvlab_remux_not_empty">The output already holds something; choose a new file name. It was left as it was.</string>
+    <string name="nag_tvlab_remux_not_file">The output is not a file that can be written in place (a stream from another app); choose a file on the device or a drive. It was left as it was.</string>
+    <string name="nag_tvlab_remux_in_use">Another remux job writes into this file; choose a new file name.</string>
+    <string name="nag_tvlab_remux_waiting_app">Waiting for Nağmedar to be opened: the system lets no job start in the background.</string>
+    <string name="nag_tvlab_remux_timeout">Stopped by the system: the day\'s foreground time is used up. It starts again from the beginning when Nağmedar is opened.</string>
+    <plurals name="nag_tvlab_remux_tracks">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+    <string name="nag_tvlab_remux_plan_dv">Dolby Vision P7 → P8.1</string>
+    <string name="nag_tvlab_remux_plan_chapters">chapters</string>
+    <string name="nag_tvlab_remux_plan_attachments">attachments</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
     <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>

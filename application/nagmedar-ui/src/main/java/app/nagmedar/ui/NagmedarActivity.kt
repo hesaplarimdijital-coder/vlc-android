@@ -36,6 +36,7 @@ import app.nagmedar.ui.podcast.PodcastNotifier
 import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.transcode.HlsStream
 import app.nagmedar.ui.transcode.TranscodeQueue
+import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
@@ -167,6 +168,8 @@ class NagmedarActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.IO) { TranscodeQueue.resume(applicationContext) }
         // S-1303: the segments a dead process's HLS stream left in the app's storage
         lifecycleScope.launch(Dispatchers.IO) { HlsStream.cleanUp(applicationContext) }
+        // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
+        lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
     }
 
     override fun onStop() {

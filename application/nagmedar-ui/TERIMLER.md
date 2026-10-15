@@ -101,6 +101,9 @@ Sözlüğü testler denetler:
 | eşik | threshold | | | Bir cihaz profilinin kaldırdığı en yüksek 1 sn bit hızı: “Profil eşiği” |
 | cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
 | bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
+| remux | remux | yeniden paketleme | re-mux | TV Lab'in kayıpsız dönüşümü: video akışına dokunmadan kapsayıcı ve izler yeni bir MKV'ye yazılır; işler “Remux sırası”nda bekler, iş “sırada”, “remux yapılıyor”, “doğrulanıyor”, “tamamlandı” |
+| Video bit bit aynı | Video bit for bit identical | | bit-identical, bit-exact video | Doğrulama rozeti (S-1209): çıktının videosu kaynağınkiyle paket paket karşılaştırıldı ve aynı çıktı; müzikteki “bit-perfect” çıkış için kalır |
+| doğrulama | verification | | | Remux çıktısının geri okunup karşılaştırılması; “Doğrulanıyor” |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |

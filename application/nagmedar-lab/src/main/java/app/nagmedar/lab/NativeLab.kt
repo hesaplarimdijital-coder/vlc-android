@@ -12,6 +12,16 @@ object NativeLab {
         fun onProgress(fraction: Double, message: String)
     }
 
+    /**
+     * S-1206: a remux's progress, a few times a second: media seconds done of [totalSeconds] (0
+     * when unknown) and bytes written. The answer steers the engine: 0 goes on, a negative number
+     * stops it, a positive one is how many milliseconds to wait before asking again (the queue
+     * pauses on a low battery or a hot device).
+     */
+    fun interface RemuxProgress {
+        fun onProgress(doneSeconds: Double, totalSeconds: Double, bytesOut: Long): Int
+    }
+
     /** False when this build was made without the native lab tools (local builds). */
     val available: Boolean by lazy {
         runCatching { System.loadLibrary("nagmedar_lab") }.isSuccess
@@ -72,4 +82,27 @@ object NativeLab {
      * [maxBytes] or [maxSeconds]; see [DiskSpeed]. [fd] stays open; [cancel] stops it.
      */
     @JvmStatic external fun diskSpeed(fd: Int, offset: Long, maxBytes: Long, maxSeconds: Double, listener: Progress?): String
+
+    /**
+     * S-1206: remuxes the file behind [inputFd] into Matroska on [outputFd] (truncated first) as
+     * [plan] says (the text of [RemuxPlan.toNative] as UTF-8 bytes: a title may hold any
+     * character); the stats as JSON, see [RemuxResult]. Refused when both descriptors are the
+     * same file, before anything is written.
+     * Every packet is copied as read, the video stream hashed on the way; with the Dolby Vision
+     * conversion on, the RPUs become profile 8.1 and the enhancement layer is dropped. Long:
+     * minutes for a UHD film; [listener] is asked how to go on. [remuxCancel] stops it; the
+     * Lab's [cancel] does not.
+     */
+    @JvmStatic external fun remux(inputFd: Int, outputFd: Int, plan: ByteArray, listener: RemuxProgress?): String
+
+    /**
+     * S-1209: reads the output behind [outputFd] back and hashes its video stream in [scope]
+     * (the remux's hash_scope), against [expectedHash] and [expectedPackets]; with [dvProfile]
+     * 8 its Dolby Vision record and every RPU must be profile 8.1. The verdict as JSON, see
+     * [RemuxVerification].
+     */
+    @JvmStatic external fun remuxVerify(outputFd: Int, scope: String, expectedHash: String, expectedPackets: Long, dvProfile: Int, listener: RemuxProgress?): String
+
+    /** Stops the running remux or verification. */
+    @JvmStatic external fun remuxCancel()
 }

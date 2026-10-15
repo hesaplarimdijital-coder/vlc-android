@@ -13,6 +13,7 @@
 #include "disktest.h"
 #include "dvconvert.h"
 #include "mediaprobe.h"
+#include "remux.h"
 #include "usb_audio.h"
 #include "whisper_lab.h"
 
@@ -20,6 +21,8 @@
 #define WHISPER_LABEL "whisper.cpp 1.9.5"
 
 static volatile int g_cancel;
+/* the remux queue's own flag (S-1206): a Lab tool stopped must not stop a running job */
+static volatile int g_remux_cancel;
 
 typedef struct Callback {
     JNIEnv *env;
@@ -179,6 +182,94 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_usbTone(JNIEnv *env, j
     g_cancel = 0;
     Callback cb = callback(env, listener);
     return take(env, usb_audio_tone(fd, (unsigned)rate, bits, seconds, frequency, usb_progress, &cb, &g_cancel));
+}
+
+/* S-1206: the job's listener answers how to go on (0), to stop (-1) or to wait (milliseconds) */
+typedef struct RemuxCallback {
+    JNIEnv *env;
+    jobject listener;
+    jmethodID method;
+} RemuxCallback;
+
+static int remux_progress_cb(void *opaque, double done, double total, int64_t bytes)
+{
+    RemuxCallback *cb = opaque;
+    if (!cb->listener)
+        return 0;
+    JNIEnv *env = cb->env;
+    jint answer = (*env)->CallIntMethod(env, cb->listener, cb->method, done, total, (jlong)bytes);
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        return -1;
+    }
+    return answer;
+}
+
+static RemuxCallback remux_callback(JNIEnv *env, jobject listener)
+{
+    RemuxCallback cb = {env, listener, NULL};
+    if (listener) {
+        jclass c = (*env)->GetObjectClass(env, listener);
+        cb.method = (*env)->GetMethodID(env, c, "onProgress", "(DDJ)I");
+        (*env)->DeleteLocalRef(env, c);
+        if (!cb.method) {
+            (*env)->ExceptionClear(env);
+            cb.listener = NULL;
+        }
+    }
+    return cb;
+}
+
+JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_remuxCancel(JNIEnv *env, jclass cls)
+{
+    (void)env;
+    (void)cls;
+    g_remux_cancel = 1;
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_remux(JNIEnv *env, jclass cls, jint input_fd, jint output_fd, jbyteArray plan_utf8,
+                                                                jobject listener)
+{
+    (void)cls;
+    g_remux_cancel = 0;
+    /* the plan comes as UTF-8 bytes: GetStringUTFChars would give modified UTF-8, wrong for a title beyond the BMP */
+    jsize len = (*env)->GetArrayLength(env, plan_utf8);
+    char *text = malloc((size_t)len + 1);
+    RemuxPlan plan;
+    char err[256];
+    RemuxStats stats;
+    memset(&stats, 0, sizeof(stats));
+    if (!text) {
+        snprintf(stats.error, sizeof(stats.error), "out of memory");
+        return take(env, remux_stats_json(&stats));
+    }
+    (*env)->GetByteArrayRegion(env, plan_utf8, 0, len, (jbyte *)text);
+    text[len] = 0;
+    if (remux_plan_parse(text, &plan, err, sizeof(err)) < 0) {
+        snprintf(stats.error, sizeof(stats.error), "bad plan: %s", err);
+    } else {
+        RemuxCallback cb = remux_callback(env, listener);
+        remux_run(input_fd, output_fd, &plan, &g_remux_cancel, listener ? remux_progress_cb : NULL, &cb, &stats);
+    }
+    free(text);
+    return take(env, remux_stats_json(&stats));
+}
+
+JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_remuxVerify(JNIEnv *env, jclass cls, jint output_fd, jstring scope_name,
+                                                                      jstring expected_hash, jlong expected_packets, jint dv_profile,
+                                                                      jobject listener)
+{
+    (void)cls;
+    g_remux_cancel = 0;
+    const char *scope = (*env)->GetStringUTFChars(env, scope_name, NULL);
+    const char *hash = (*env)->GetStringUTFChars(env, expected_hash, NULL);
+    RemuxCallback cb = remux_callback(env, listener);
+    RemuxVerification result;
+    remux_verify(output_fd, remux_hash_scope_of(scope), hash, expected_packets, dv_profile, &g_remux_cancel,
+                 listener ? remux_progress_cb : NULL, &cb, &result);
+    (*env)->ReleaseStringUTFChars(env, scope_name, scope);
+    (*env)->ReleaseStringUTFChars(env, expected_hash, hash);
+    return take(env, remux_verification_json(&result));
 }
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_probe(JNIEnv *env, jclass cls, jstring input)

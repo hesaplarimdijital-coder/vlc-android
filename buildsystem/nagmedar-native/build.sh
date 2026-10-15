@@ -3,7 +3,7 @@
 # the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
 #
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
-#                              dvconvert, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
+#                              dvconvert, remux, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
@@ -245,6 +245,11 @@ host() {
         "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
         > "$WORK/dvconvert.log" 2>&1 || fail_log "dvconvert (host)" "$WORK/dvconvert.log"
+    log "remux (host)"
+    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/remux" -I"$PREFIX/include" \
+        "$ROOT/native/lab/remux.c" "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/remux_cli.c" \
+        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
+        > "$WORK/remux.log" 2>&1 || fail_log "remux (host)" "$WORK/remux.log"
     log "mediaprobe (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/mediaprobe" -I"$PREFIX/include" \
         "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
