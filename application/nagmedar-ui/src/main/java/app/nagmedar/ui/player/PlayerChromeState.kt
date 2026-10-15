@@ -129,6 +129,9 @@ interface PlayerChromeActions {
     /** S-703: the secondary subtitles on or off (Alt+V). */
     fun toggleSecondarySubtitles()
 
+    /** S-708: the subtitle tools (Alt+E): cleaning, frame rate conversion and the line timing editor, into a new file. */
+    fun openSubtitleTools() {}
+
     /** Leaves the player. */
     fun close()
 

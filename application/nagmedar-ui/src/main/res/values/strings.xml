@@ -2184,4 +2184,102 @@
         <item quantity="one">%1$d result for “%2$s”</item>
         <item quantity="other">%1$d results for “%2$s”</item>
     </plurals>
+    <!-- S-708 · Subtitle tools -->
+    <string name="nag_sc_subtitle_tools">Subtitle tools…</string>
+    <string name="nag_sc_cue_save">Subtitle tools: save the new file</string>
+    <string name="nag_sc_cue_split">Subtitle tools: split the line</string>
+    <string name="nag_sc_cue_merge">Subtitle tools: merge the lines</string>
+    <string name="nag_sc_cue_set_start">Subtitle tools: start the line here</string>
+    <string name="nag_sc_cue_set_end">Subtitle tools: end the line here</string>
+    <string name="nag_sc_cue_next">Subtitle tools: next line</string>
+    <string name="nag_sc_cue_previous">Subtitle tools: previous line</string>
+    <string name="nag_subtools_menu">Subtitle tools…</string>
+    <string name="nag_subtools_title">Subtitle tools</string>
+    <string name="nag_subtools_section_hint">Clean subtitles made for the hard of hearing, change their frame rate and edit the lines\' times. The result is a new file; the original is not touched.</string>
+    <string name="nag_subtools_edited_word">edited</string>
+    <string name="nag_subtools_loading">Reading the file…</string>
+    <string name="nag_subtools_unreadable">The file could not be read</string>
+    <string name="nag_subtools_unsupported">This is not an SRT, WebVTT or ASS/SSA file the tools can edit</string>
+    <string name="nag_subtools_none">This film has no subtitle file the tools can edit. Open one.</string>
+    <string name="nag_subtools_open_file">Open file…</string>
+    <string name="nag_subtools_info">%1$s · %2$s · %3$s</string>
+    <plurals name="nag_subtools_lines">
+        <item quantity="one">%1$s line</item>
+        <item quantity="other">%1$s lines</item>
+    </plurals>
+    <string name="nag_subtools_tab_clean">Clean</string>
+    <string name="nag_subtools_tab_rate">Frame rate</string>
+    <string name="nag_subtools_tab_lines">Lines</string>
+    <string name="nag_subtools_apply">Apply</string>
+    <string name="nag_unit_ms" translatable="false">ms</string>
+    <string name="nag_sdh_hint">Takes out what is written for the hard of hearing: sound descriptions, speaker labels, marks of music. Look at the changes below, then apply.</string>
+    <string name="nag_sdh_brackets">Sound descriptions in [brackets]</string>
+    <string name="nag_sdh_parentheses">Sound descriptions in (parentheses)</string>
+    <string name="nag_sdh_speakers">Speaker labels in capitals (JOHN:)</string>
+    <string name="nag_sdh_named">Speaker names in any case (John:); may catch “Note:”</string>
+    <string name="nag_sdh_music">Lines of music (♪ … ♪)</string>
+    <string name="nag_sdh_font">Colour tags (&lt;font&gt;)</string>
+    <string name="nag_sdh_summary">%1$s lines → %2$s lines</string>
+    <string name="nag_sdh_counts">%1$s removed, %2$s changed</string>
+    <string name="nag_sdh_more">And %1$s more changed lines</string>
+    <string name="nag_sdh_nothing">Nothing to clean with these rules</string>
+    <string name="nag_sdh_removed">(line removed)</string>
+    <string name="nag_rate_hint">Subtitles made for a film at another frame rate drift out of step as it goes on. Choose the rate they were made for and the film\'s own.</string>
+    <string name="nag_rate_from">Subtitles made for (frames per second)</string>
+    <string name="nag_rate_to">The film\'s frame rate (frames per second)</string>
+    <string name="nag_rate_shift">Shift all lines</string>
+    <string name="nag_rate_shift_zero">Reset</string>
+    <string name="nag_rate_seconds">%1$s s</string>
+    <string name="nag_rate_first">First line starts</string>
+    <string name="nag_rate_last">Last line ends</string>
+    <string name="nag_rate_factor">Times are multiplied by %1$s</string>
+    <string name="nag_rate_same">Same rate and no shift: nothing to do</string>
+    <plurals name="nag_rate_dropped">
+        <item quantity="one">%d line would fall before the start of the film and is dropped</item>
+        <item quantity="other">%d lines would fall before the start of the film and are dropped</item>
+    </plurals>
+    <string name="nag_cue_start">Start</string>
+    <string name="nag_cue_end">End</string>
+    <string name="nag_cue_text">Text</string>
+    <string name="nag_cue_none">No lines</string>
+    <string name="nag_cue_playing">On screen now</string>
+    <string name="nag_cue_row">Line %1$d, %2$s to %3$s: %4$s</string>
+    <string name="nag_cue_issue_end">Ends before it starts</string>
+    <string name="nag_cue_issue_negative">Starts before zero</string>
+    <string name="nag_cue_issue_overlap">Overlaps the next line</string>
+    <string name="nag_cue_issue_empty">No text</string>
+    <plurals name="nag_cue_errors">
+        <item quantity="one">%d line with a wrong time</item>
+        <item quantity="other">%d lines with a wrong time</item>
+    </plurals>
+    <plurals name="nag_cue_overlaps">
+        <item quantity="one">%d overlap</item>
+        <item quantity="other">%d overlaps</item>
+    </plurals>
+    <plurals name="nag_cue_empties">
+        <item quantity="one">%d empty line</item>
+        <item quantity="other">%d empty lines</item>
+    </plurals>
+    <string name="nag_cue_valid">The times are in order</string>
+    <string name="nag_cue_next_issue">Next problem</string>
+    <string name="nag_cue_undo">Undo</string>
+    <string name="nag_cue_revert">Undo all</string>
+    <string name="nag_cue_set_start">Start here</string>
+    <string name="nag_cue_set_end">End here</string>
+    <string name="nag_cue_split">Split</string>
+    <string name="nag_cue_merge">Merge</string>
+    <string name="nag_cue_remove">Remove</string>
+    <string name="nag_cue_shift">Shift chosen:</string>
+    <string name="nag_cue_hint_player">The film is at hand: “Start here” and “End here” take its position, and moving to a line takes the film there.</string>
+    <string name="nag_save_name">New file name</string>
+    <string name="nag_save_button">Save as new file</string>
+    <string name="nag_save_saving">Saving…</string>
+    <string name="nag_save_bom">Write a byte order mark (BOM)</string>
+    <string name="nag_save_load">Show it in the film</string>
+    <string name="nag_save_blocked">Fix the lines with a wrong time before saving</string>
+    <string name="nag_save_original_kept">The original is not changed; the result is a new file</string>
+    <string name="nag_save_failed">The file could not be written</string>
+    <string name="nag_save_saved_beside">Saved as %1$s beside the original</string>
+    <string name="nag_save_saved_elsewhere">Saved as %1$s</string>
+    <string name="nag_save_loaded">showing in the film</string>
 </resources>

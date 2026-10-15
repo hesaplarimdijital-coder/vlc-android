@@ -130,6 +130,8 @@ import app.nagmedar.ui.player.subtitles.PrefsForcedSubtitlesStore
 import app.nagmedar.ui.player.subtitles.PrefsSecondaryLayout
 import app.nagmedar.ui.player.subtitles.PlayerSubtitles
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
+import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsSection
+import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsWindow
 import app.nagmedar.ui.player.subtitles.PrefsSubtitleStyleStore
 import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
@@ -229,6 +231,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Bookmarks -> panel.toggle(PanelTab.Bookmarks)
                 // S-701: the system's picker rather than the classic one
                 ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
+                // S-708: the subtitle tools
+                ShortcutId.SubtitleTools -> subtitles?.openTools()
                 // S-703: the secondary subtitles, on or off
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
                 // S-704: the sync assistant's steps, said over the video
@@ -734,6 +738,8 @@ private fun PlayerChromeContent(
             }
             // S-702: the character set of the film's subtitle files
             subtitles.encoding?.let { sample -> EncodingDialog(sample, onApply = subtitles::applyEncoding, onDismiss = subtitles::closeEncoding) }
+            // S-708: the subtitle tools; a picker over the player is not leaving it
+            SubtitleToolsWindow(subtitles.tools, onClose = subtitles.tools::close, beforePicker = { activity.isShowingDialog = true })
             // S-706: subtitles from OpenSubtitles
             online.state?.let { search ->
                 OnlineSubtitlesDialog(
@@ -934,6 +940,7 @@ private fun PanelContent(
                                     subtitles.files.onlineFilm()?.let { film -> search.open(film, onlineLanguages(locale)) }
                                 }
                             },
+                            tools = { SubtitleToolsSection(onOpen = subtitles.files::openTools) },
                         )
                     }
                     PanelTab.Sync -> {
@@ -1195,6 +1202,8 @@ internal class ActivityPlayerSource(
     override fun addSubtitleFile() = subtitles.pick()
 
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
+
+    override fun openSubtitleTools() = subtitles.openTools()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 
