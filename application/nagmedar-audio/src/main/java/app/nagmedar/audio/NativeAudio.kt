@@ -223,4 +223,36 @@ object NativeAudio {
 
     /** S-912: side B's gain, dB, as frozen when B was chosen. */
     @JvmStatic external fun abGainDb(handle: Long): Double
+
+    // S-1010: NagConvertCodec
+    const val CONVERT_OPUS = 0
+    const val CONVERT_MP3 = 1
+    const val CONVERT_AAC = 2
+
+    /** S-1010: the converter's progress, 0..1, on the converting thread; false stops it. */
+    fun interface ConvertListener {
+        fun onProgress(fraction: Double): Boolean
+    }
+
+    /**
+     * S-1010: the file behind [inFd] (from CUE frame [from] to [to], -1 for its end) encoded as
+     * [codec] into the file behind [outFd] (read-write, seekable), its tags and cover along;
+     * [tags] are UTF-8 "KEY=value" lines over the source's ("KEY=" removes one). The names, with
+     * their extensions, help the tag reading. JSON: frames, rate, channels, bytes, tags, cover,
+     * lufs, gain_db; or error and cancelled. Slow: a worker thread's.
+     */
+    @JvmStatic external fun convert(
+        inFd: Int,
+        inName: String,
+        outFd: Int,
+        outName: String,
+        codec: Int,
+        bitrate: Int,
+        vbrQuality: Int,
+        rate: Int,
+        from: Long,
+        to: Long,
+        tags: ByteArray?,
+        listener: ConvertListener?,
+    ): String?
 }

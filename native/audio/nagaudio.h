@@ -462,6 +462,93 @@ unsigned char *nag_tags_read_cover(int fd, const char *name, size_t *size);
 /** S-1006: the first value of tag [key] (TagLib's property name), UTF-8; NULL for none. The caller frees. */
 char *nag_tags_read_property(int fd, const char *name, const char *key);
 
+/*
+ * S-1010: the tags and front cover of the file behind [src_fd] copied onto the file behind
+ * [dst_fd] (read-write; the names, with their extensions, help the type detection), through
+ * TagLib's property map: Vorbis comments and METADATA_BLOCK_PICTURE for Opus, ID3v2.4 with
+ * APIC for MP3, MP4 atoms with covr for M4A. [overrides] ("KEY=value" lines; "KEY=" removes a
+ * tag; may be NULL) go over the source's. What says how the source was made does not go along
+ * (ENCODER, an embedded CUESHEET, iTunes' gapless and level atoms, the source's ReplayGain
+ * and R128 tags); [gain] is written instead, as nag_tags_write_replaygain writes it, but for
+ * Opus as R128_* alone (RFC 7845 leaves REPLAYGAIN_* out of Opus). *written gets the tags
+ * written, *cover whether a cover went along. 0, or negative with [error].
+ */
+int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const char *dst_name, const char *overrides,
+                  const NagReplayGainTags *gain, int *written, int *cover, char *error, size_t error_size);
+
+/**
+ * S-1010: the ReplayGain the file behind [fd] carries, from its tags (REPLAYGAIN_*, and
+ * R128_* converted to ReplayGain's -18 LUFS); NAN where it has none. Returns how many it has.
+ */
+int nag_tags_read_replaygain(int fd, const char *name, NagReplayGainTags *gain);
+
+/* ----------------------------------------------------------------- converter */
+
+/*
+ * S-1010: a file, or a CUE sheet's part of it, decoded by the engine's source and encoded anew:
+ *   Opus  libopus in Ogg, at 48 kHz (the source resampled), VBR at the bit rate asked; the
+ *         encoder's lookahead is the header's pre-skip and the last page's granule ends the
+ *         audio on its last sample.
+ *   MP3   LAME, VBR at a quality (-V 0..9) or a constant bit rate, at the source's rate when
+ *         MP3 has it (else 44.1 or 48 kHz); the Xing/LAME frame carries the encoder delay and
+ *         the padding.
+ *   AAC   FFmpeg's encoder (AAC-LC) in an M4A, at the source's rate up to 96 kHz; the edit
+ *         list hides the priming and the padding.
+ * Mono stays mono, stereo stereo; more channels are mixed to stereo. The output goes to
+ * [out_fd] (read-write, seekable, new and empty: a file that holds anything, or is the source
+ * itself, is refused, so nothing is ever truncated), then the tags and the front cover are
+ * copied from [in_fd] (nag_tags_copy). When the source carries ReplayGain, the track's gain and
+ * peak are measured again on what was written; the album's gain stays the source's (its peak
+ * at least the track's).
+ */
+typedef enum NagConvertCodec {
+    NAG_CONVERT_OPUS = 0,
+    NAG_CONVERT_MP3 = 1,
+    NAG_CONVERT_AAC = 2,
+} NagConvertCodec;
+
+typedef struct NagConvertOptions {
+    NagConvertCodec codec;
+    /** Bits per second: Opus's target, AAC's, MP3's constant rate; 0 for MP3's VBR. */
+    int bitrate;
+    /** MP3 with bitrate 0: LAME's VBR quality, 0 (best) to 9. */
+    int vbr_quality;
+    /** The output's rate (0: the source's where the codec has it); Opus is always 48 kHz. */
+    int rate;
+    /** S-808: the CUE part, in CUE frames (1/75 s): from 0 and to -1 for the whole file. */
+    int64_t from, to;
+    /** "KEY=value" lines over the source's tags ("KEY=" removes one); NULL for none. */
+    const char *tags;
+} NagConvertOptions;
+
+typedef struct NagConvertResult {
+    int64_t frames;       /* frames encoded, at the output's rate */
+    int rate;
+    int channels;
+    int64_t bytes;        /* the output's size, tags included */
+    int tags;             /* tags written */
+    int cover;            /* whether a cover went along */
+    double lufs;          /* the output's loudness when its ReplayGain was measured, NAN otherwise */
+    double gain_db;       /* the track gain written (ReplayGain's, -18 LUFS), NAN for none */
+} NagConvertResult;
+
+/** Progress, 0..1, on the converting thread; a non-zero return stops the conversion. */
+typedef int (*nag_convert_progress_fn)(void *opaque, double fraction);
+
+#define NAG_CONVERT_CANCELLED (-2)
+
+/**
+ * Converts the file behind [in_fd] ([in_name] with its extension helps the tag reading) into
+ * [out_fd] ([out_name] likewise). 0 on success; NAG_CONVERT_CANCELLED when [progress] asked to
+ * stop; another negative value with [error] saying why. The descriptors stay the caller's; a
+ * failed or stopped output is left as it is, for the caller to remove.
+ */
+int nag_convert(int in_fd, const char *in_name, int out_fd, const char *out_name, const NagConvertOptions *options,
+                nag_convert_progress_fn progress, void *opaque, NagConvertResult *result, char *error, size_t error_size);
+
+/** The result as JSON into [out]: frames, rate, channels, bytes, tags, cover, lufs, gain_db (null when NAN). */
+void nag_convert_result_json(const NagConvertResult *result, char *out, size_t size);
+
 /** The engine's source, DSP stages and output as JSON (S-910's signal path reads it). */
 char *nag_audio_signal_path_json(NagAudio *engine);
 

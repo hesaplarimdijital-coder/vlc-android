@@ -2184,4 +2184,73 @@
         <item quantity="one">%1$d result for “%2$s”</item>
         <item quantity="other">%1$d results for “%2$s”</item>
     </plurals>
+    <!-- S-1010: the converter -->
+    <string name="nag_convert">Convert…</string>
+    <string name="nag_convert_title">Convert</string>
+    <string name="nag_convert_format">Format</string>
+    <string name="nag_convert_quality">Quality</string>
+    <string name="nag_convert_quality_v0">V0 (variable)</string>
+    <string name="nag_convert_hint_opus">The smallest files at the same quality. Android, browsers and most players play Opus; some car stereos and older devices do not.</string>
+    <string name="nag_convert_hint_mp3">Plays everywhere. V0 is LAME\'s best variable bitrate: close to 320 kbps in smaller files.</string>
+    <string name="nag_convert_hint_aac">The best fit for Apple devices, in M4A files.</string>
+    <string name="nag_convert_rate">Sample rate</string>
+    <string name="nag_convert_rate_source">As the source</string>
+    <string name="nag_convert_rate_opus">Opus is always 48 kHz.</string>
+    <string name="nag_convert_rate_mp3">MP3 goes up to 48 kHz: a higher source is resampled.</string>
+    <string name="nag_convert_naming">File names</string>
+    <string name="nag_convert_naming_folders">Artist/Album folders</string>
+    <string name="nag_convert_naming_flat">One folder</string>
+    <string name="nag_convert_example">For example: %1$s</string>
+    <string name="nag_convert_skip_existing">Leave files already there alone</string>
+    <string name="nag_convert_folder">Destination folder</string>
+    <string name="nag_convert_folder_none">Not chosen yet</string>
+    <plurals name="nag_convert_lossy">
+        <item quantity="one">%d track is lossy already: converted again, it loses a little more.</item>
+        <item quantity="other">%d tracks are lossy already: converted again, they lose a little more.</item>
+    </plurals>
+    <string name="nag_convert_no_engine">This build has no music engine: converting is not possible.</string>
+    <string name="nag_convert_originals">The original files stay as they are; the tags and the front cover go along.</string>
+    <string name="nag_convert_start">Convert</string>
+    <string name="nag_convert_channel">Converting music</string>
+    <string name="nag_convert_running_title">Converting music</string>
+    <string name="nag_convert_starting">Starting…</string>
+    <string name="nag_convert_progress">%1$d / %2$d · %3$s</string>
+    <string name="nag_convert_waiting_battery">Waiting: the battery is low; it goes on once charging.</string>
+    <string name="nag_convert_waiting_heat">Waiting: the device is hot; it goes on once it cools.</string>
+    <string name="nag_convert_waiting_resume">Waiting: Android stopped the job for a while; it goes on from where it was.</string>
+    <string name="nag_convert_paused_title">Converting paused</string>
+    <string name="nag_convert_cancel">Cancel</string>
+    <plurals name="nag_convert_queued">
+        <item quantity="one">%d more job waiting</item>
+        <item quantity="other">%d more jobs waiting</item>
+    </plurals>
+    <string name="nag_convert_done_title">Converting done</string>
+    <string name="nag_convert_stopped_title">Converting cancelled</string>
+    <plurals name="nag_convert_done_converted">
+        <item quantity="one">%d converted</item>
+        <item quantity="other">%d converted</item>
+    </plurals>
+    <plurals name="nag_convert_done_skipped">
+        <item quantity="one">%d skipped</item>
+        <item quantity="other">%d skipped</item>
+    </plurals>
+    <plurals name="nag_convert_done_failed">
+        <item quantity="one">%d failed</item>
+        <item quantity="other">%d failed</item>
+    </plurals>
+    <string name="nag_convert_details">Details</string>
+    <string name="nag_convert_summary_title">Conversion summary</string>
+    <string name="nag_convert_summary_skipped">Skipped</string>
+    <string name="nag_convert_summary_failed">Not converted</string>
+    <string name="nag_convert_summary_loading">Reading the summary…</string>
+    <string name="nag_convert_reason_exists">Already in the folder</string>
+    <string name="nag_convert_reason_no_engine">No music engine in this build</string>
+    <string name="nag_convert_reason_input">The source could not be read</string>
+    <string name="nag_convert_reason_folder">The destination folder is gone or cannot be written</string>
+    <string name="nag_convert_reason_output">The new file could not be written</string>
+    <string name="nag_convert_reason_source">The file there is the source itself: it is not written over</string>
+    <string name="nag_convert_reason_engine">The file could not be converted</string>
+    <string name="nag_convert_reason_battery">Stopped: the battery ran low</string>
+    <string name="nag_convert_reason_thermal">Stopped: the device got too hot</string>
+    <string name="nag_convert_reason_cancelled">Cancelled</string>
 </resources>

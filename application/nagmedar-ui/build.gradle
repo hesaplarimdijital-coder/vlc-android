@@ -70,6 +70,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+    // S-1010: the converter's foreground jobs
+    implementation "androidx.work:work-runtime-ktx:$rootProject.ext.workManagerVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"

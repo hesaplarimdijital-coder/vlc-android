@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <!-- S-1010: the converter runs as a foreground job: media processing on Android 15 and later, data sync before -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
+
     <application>
         <!-- New Compose interface (preview in MVP0). Handles window resizes itself so the
              shell keeps its state when a DeX window is resized or moved between displays. -->
@@ -35,6 +40,16 @@
             android:name="app.nagmedar.ui.player.record.RecordingKeeper"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- S-1010: WorkManager's foreground service with the types the converter's worker asks for -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync|mediaProcessing"
+            tools:node="merge" />
+        <!-- S-1010: the converter notification's Cancel -->
+        <receiver
+            android:name="app.nagmedar.ui.convert.ConvertCancelReceiver"
+            android:exported="false" />
 
         <!-- S-1007: the alarm; and setting it again after a restart or a change of the clock (the
              system's broadcasts reach a receiver that is not exported) -->

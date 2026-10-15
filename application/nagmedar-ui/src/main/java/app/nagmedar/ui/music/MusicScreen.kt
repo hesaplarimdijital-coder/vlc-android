@@ -71,6 +71,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.convert.ConvertHost
 import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
@@ -209,6 +210,9 @@ interface MusicActions {
 
     /** S-808: the rating window for [tracks]; null where ratings are not kept. */
     val askRating: ((List<Track>) -> Unit)? get() = null
+
+    /** S-1010: [tracks] converted to another format, in a window; null where there is no converter. */
+    val convert: ((List<Track>) -> Unit)? get() = null
 }
 
 // ------------------------------------------------------------------- the screen
@@ -233,15 +237,28 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
     // S-804: the tracks being put in a playlist, while its window is open; S-808: being rated
     var adding by remember { mutableStateOf<List<Track>?>(null) }
     var rating by remember { mutableStateOf<List<Track>?>(null) }
+    // S-1010: the tracks being converted, while the converter's window is open
+    var converting by remember { mutableStateOf<List<Track>?>(null) }
     val scope = rememberCoroutineScope()
     val actions = remember(context, byUri) {
-        ServiceMusicActions(context, byUri, onAddToPlaylist = { tracks -> adding = tracks }, onAskRating = { tracks -> rating = tracks })
+        ServiceMusicActions(
+            context, byUri,
+            onAddToPlaylist = { tracks -> adding = tracks },
+            onAskRating = { tracks -> rating = tracks },
+            onConvert = { tracks -> converting = tracks },
+        )
     }
     val state = rememberMusicBrowserState()
     Column(Modifier.fillMaxSize()) {
         PageHeader(
             title = stringResource(R.string.nag_nav_music),
             subtitle = library?.let { pluralStringResource(R.plurals.nag_tracks_count, it.tracks.size, it.tracks.size) },
+        )
+        // S-1010: the converter's job under way, or what the last one came to
+        ConvertHost(
+            converting,
+            onConverted = { converting = null },
+            modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
         )
         LibraryContent(
             loading = library == null,
@@ -319,6 +336,7 @@ internal class ServiceMusicActions(
     private val lookup: (String) -> MediaWrapper?,
     private val onAddToPlaylist: ((List<Track>) -> Unit)? = null,
     private val onAskRating: ((List<Track>) -> Unit)? = null,
+    private val onConvert: ((List<Track>) -> Unit)? = null,
 ) : MusicActions {
 
     constructor(
@@ -326,11 +344,14 @@ internal class ServiceMusicActions(
         byUri: Map<String, MediaWrapper>,
         onAddToPlaylist: ((List<Track>) -> Unit)? = null,
         onAskRating: ((List<Track>) -> Unit)? = null,
-    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating)
+        onConvert: ((List<Track>) -> Unit)? = null,
+    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating, onConvert)
 
     override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
 
     override val askRating: ((List<Track>) -> Unit)? get() = onAskRating
+
+    override val convert: ((List<Track>) -> Unit)? get() = onConvert
 
     override fun rate(tracks: List<Track>, rating: Int) = tracks.forEach { TrackStatsIndex.rate(context, it.statsKey, rating) }
 
@@ -347,10 +368,11 @@ internal class ServiceMusicActions(
 
     override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> {
         val entries = lookup(track.uri)?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
-        // after "Sıraya ekle": "Listeye ekle…", "Puan ver…"
+        // after "Sıraya ekle": "Listeye ekle…", "Puan ver…", "Dönüştür…"
         val added = listOfNotNull(
             onAddToPlaylist?.let { add -> MenuEntry.Item(context.getString(R.string.nag_pl_add), { add(listOf(track)) }, icon = NagIcons.PlaylistAdd) },
             onAskRating?.let { ask -> MenuEntry.Item(context.getString(R.string.nag_rate), { ask(listOf(track)) }, icon = NagIcons.Star) },
+            onConvert?.let { convert -> MenuEntry.Item(context.getString(R.string.nag_convert), { convert(listOf(track)) }, icon = NagIcons.Convert) },
         )
         if (added.isEmpty()) return entries
         val queueLabel = context.getString(R.string.nag_add_to_queue)
@@ -612,6 +634,13 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
             NagButton(stringResource(R.string.nag_play), { actions.play(shown, 0) }, icon = NagIcons.Play, primary = true)
             Spacer(Modifier.width(dimens.gapS))
             NagButton(stringResource(R.string.nag_shuffle), { actions.play(shown.shuffled(), 0) }, icon = NagIcons.Shuffle)
+            // S-1010: an album's, an artist's, a folder's tracks converted
+            if (state.view != MusicView.Tracks) {
+                actions.convert?.let { convert ->
+                    Spacer(Modifier.width(dimens.gapS))
+                    NagIconButton(NagIcons.Convert, stringResource(R.string.nag_convert), { convert(shown) }, modifier = Modifier.testTag("music-convert"))
+                }
+            }
             if (!compact) {
                 Spacer(Modifier.width(dimens.gapS))
                 MenuButton(stringResource(R.string.nag_music_columns), { columnMenu(state, labels) })
@@ -630,6 +659,7 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
                 NagButton(stringResource(R.string.nag_add_to_queue), { actions.queue(chosen) })
                 actions.addToPlaylist?.let { add -> NagButton(stringResource(R.string.nag_pl_add), { add(chosen) }) }
                 actions.askRating?.let { ask -> NagButton(stringResource(R.string.nag_rate), { ask(chosen) }) }
+                actions.convert?.let { convert -> NagButton(stringResource(R.string.nag_convert), { convert(chosen) }) }
             }
         }
         HorizontalRule()

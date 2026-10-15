@@ -9,6 +9,11 @@
 //   nagaudio tag FILE [--track-gain DB] [--track-peak P] [--album-gain DB] [--album-peak P]
 //                     [--track-lufs L] [--album-lufs L]
 //                                           writes the ReplayGain tags into FILE (S-907)
+//   nagaudio convert FILE OUT --codec opus|mp3|aac [--bitrate BPS] [--vbr Q] [--rate HZ]
+//                    [--tag KEY=VALUE]... [--stop-at FRACTION]
+//                                           converts FILE (or FILE#cue=FROM,TO, a CUE part) into
+//                                           OUT with its tags and cover (S-1010), JSON; with
+//                                           --stop-at the progress callback stops it there
 //   nagaudio decode FILE [FILE2 ...] [-o OUT] [-f s16|s24|s32|f32|f64] [--seek MS]
 //                                           [--seek-after FRAMES] [--volume V] [--no-dither] [--md5]
 //                                           [--crossfade MS [--linear]]
@@ -37,6 +42,7 @@
 #include <libavutil/md5.h>
 #include <libavutil/mem.h>
 
+#include <fcntl.h>
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -562,10 +568,89 @@ static int property(const char *file, const char *key)
     return 0;
 }
 
+typedef struct StopAt {
+    double at;
+    double last;
+} StopAt;
+
+static int convert_progress(void *opaque, double fraction)
+{
+    StopAt *stop = opaque;
+    if (fraction < stop->last) {
+        fprintf(stderr, "nagaudio: progress went back from %f to %f\n", stop->last, fraction);
+        return 1;
+    }
+    stop->last = fraction;
+    return stop->at >= 0 && fraction >= stop->at;
+}
+
+/* S-1010: FILE (a CUE part too) into OUT, its tags and cover along */
+static int convert(int argc, char **argv)
+{
+    const char *in_arg = NULL, *out_path = NULL;
+    NagConvertOptions opt = {NAG_CONVERT_OPUS, 0, 0, 0, 0, -1, NULL};
+    char tags[4096] = "";
+    StopAt stop = {-1, 0};
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--codec") == 0 && i + 1 < argc) {
+            const char *codec = argv[++i];
+            if (strcmp(codec, "opus") == 0) opt.codec = NAG_CONVERT_OPUS;
+            else if (strcmp(codec, "mp3") == 0) opt.codec = NAG_CONVERT_MP3;
+            else if (strcmp(codec, "aac") == 0) opt.codec = NAG_CONVERT_AAC;
+            else {
+                fprintf(stderr, "nagaudio: unknown codec %s\n", codec);
+                return 2;
+            }
+        } else if (strcmp(argv[i], "--bitrate") == 0 && i + 1 < argc) opt.bitrate = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--vbr") == 0 && i + 1 < argc) opt.vbr_quality = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--rate") == 0 && i + 1 < argc) opt.rate = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--tag") == 0 && i + 1 < argc) {
+            size_t len = strlen(tags);
+            snprintf(tags + len, sizeof(tags) - len, "%s\n", argv[++i]);
+        } else if (strcmp(argv[i], "--stop-at") == 0 && i + 1 < argc) stop.at = atof(argv[++i]);
+        else if (!in_arg) in_arg = argv[i];
+        else out_path = argv[i];
+    }
+    if (!in_arg || !out_path) {
+        fprintf(stderr, "nagaudio convert: a file and an output are needed\n");
+        return 2;
+    }
+    char name[4096];
+    split_part(in_arg, name, sizeof(name), &opt.from, &opt.to);
+    opt.tags = tags[0] ? tags : NULL;
+    FILE *in = fopen(name, "rb");
+    if (!in) {
+        perror(name);
+        return 1;
+    }
+    /* as the app does: OUT new or empty, never truncated here (the engine refuses one that holds anything) */
+    int out_fd = open(out_path, O_RDWR | O_CREAT, 0644);
+    if (out_fd < 0) {
+        perror(out_path);
+        fclose(in);
+        return 1;
+    }
+    NagConvertResult result;
+    char error[256] = {0};
+    int ret = nag_convert(fileno(in), name, out_fd, out_path, &opt, convert_progress, &stop, &result, error, sizeof(error));
+    fclose(in);
+    close(out_fd);
+    if (ret < 0) {
+        printf("{\"error\":\"%s\",\"cancelled\":%s}\n", error, ret == NAG_CONVERT_CANCELLED ? "true" : "false");
+        return ret == NAG_CONVERT_CANCELLED ? 3 : 1;
+    }
+    char json[512];
+    nag_convert_result_json(&result, json, sizeof(json));
+    printf("%s\n", json);
+    return stop.last == 1.0 ? 0 : 1;
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 3 && strcmp(argv[1], "info") == 0)
         return info(argv[2]);
+    if (argc >= 3 && strcmp(argv[1], "convert") == 0)
+        return convert(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "decode") == 0)
         return decode(argc - 2, argv + 2);
     if (argc >= 3 && strcmp(argv[1], "scan") == 0)
@@ -584,6 +669,6 @@ int main(int argc, char **argv)
         printf("nagaudio %s\n", nag_audio_version());
         return 0;
     }
-    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | cover FILE OUT | prop FILE KEY | version\n");
+    fprintf(stderr, "usage: nagaudio info FILE | decode FILE... [options] | scan FILE... [--album] | tag FILE [--track-gain DB ...] | wave FILE [--points N] | lyrics FILE | cover FILE OUT | prop FILE KEY | convert FILE OUT --codec C [options] | version\n");
     return 2;
 }

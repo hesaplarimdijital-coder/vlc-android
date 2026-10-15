@@ -44,6 +44,10 @@ struct NagSource {
     int64_t part_start;
     int64_t part_end;
     int64_t file_duration_ms; /* the whole file's, as read_info found it */
+    /* S-1010: where an MP4's AAC ends, in the stream's own count, as its iTunSMPB or edit list
+     * says: the encoder's padding after it left out (FFmpeg's demuxer trims the priming, not
+     * that); -1 when the file says neither */
+    int64_t stream_end;
     int eof_sent;      /* the decoder was told the input ended */
     int drained;       /* nothing more will come */
     NagSourceInfo info;
@@ -371,6 +375,113 @@ static int mod_seek(NagSource *s, int64_t target)
     return 0;
 }
 
+/* An MP4 box's header at the position read: its type and where it ends; 0 when none fits before [end]. */
+static int box_header(AVIOContext *pb, int64_t end, uint32_t *type, int64_t *box_end)
+{
+    int64_t start = avio_tell(pb);
+    if (start < 0 || end - start < 8)
+        return 0;
+    uint64_t size = avio_rb32(pb);
+    *type = avio_rl32(pb);
+    int header = 8;
+    if (size == 1) {
+        size = avio_rb64(pb);
+        header = 16;
+    } else if (size == 0) {
+        size = (uint64_t)(end - start);
+    }
+    if (size < (uint64_t)header || size > (uint64_t)(end - start) || pb->eof_reached)
+        return 0;
+    *box_end = start + (int64_t)size;
+    return 1;
+}
+
+/* A trak's track id and its edit list: the one segment that plays media, or none (*segment -1). */
+static void read_trak(AVIOContext *pb, int64_t end, int *track_id, int64_t *segment)
+{
+    uint32_t type;
+    int64_t box_end;
+    while (box_header(pb, end, &type, &box_end)) {
+        if (type == MKTAG('t', 'k', 'h', 'd')) {
+            int version = avio_r8(pb);
+            avio_skip(pb, 3 + (version == 1 ? 16 : 8));
+            *track_id = (int)avio_rb32(pb);
+        } else if (type == MKTAG('e', 'd', 't', 's')) {
+            read_trak(pb, box_end, track_id, segment);
+        } else if (type == MKTAG('e', 'l', 's', 't')) {
+            int version = avio_r8(pb);
+            avio_skip(pb, 3);
+            uint32_t count = avio_rb32(pb);
+            int media = 0;
+            int64_t duration = -1;
+            for (uint32_t i = 0; i < count && !pb->eof_reached && avio_tell(pb) < box_end; i++) {
+                int64_t d = version == 1 ? (int64_t)avio_rb64(pb) : (int64_t)avio_rb32(pb);
+                int64_t t = version == 1 ? (int64_t)avio_rb64(pb) : (int64_t)(int32_t)avio_rb32(pb);
+                avio_skip(pb, 4); /* the rate */
+                if (t != -1) {
+                    media++;
+                    duration = d;
+                }
+            }
+            /* one segment of media only: its length is the audio's; anything else is not ours to read */
+            *segment = media == 1 && duration > 0 ? duration : -1;
+        }
+        if (avio_seek(pb, box_end, SEEK_SET) < 0)
+            return;
+    }
+}
+
+/*
+ * S-1010: where an MP4's AAC track says its audio ends, in samples after the priming: the
+ * iTunSMPB atom's sample count (iTunes), else the track's edit list (FFmpeg, Apple), its one
+ * segment at the movie's timescale. -1 when the file says neither: the track then plays to its
+ * last decoded sample, so a file with a damaged or short header loses nothing. The boxes are
+ * read on a handle of their own; the demuxer's position is untouched.
+ */
+static int64_t mp4_audio_end(NagSource *s, const char *url, const AVStream *st)
+{
+    const AVDictionaryEntry *smpb = av_dict_get(s->ic->metadata, "iTunSMPB", NULL, 0);
+    if (smpb && smpb->value) {
+        unsigned priming = 0, remainder = 0;
+        unsigned long long samples = 0;
+        if (sscanf(smpb->value, "%*x %x %x %llx", &priming, &remainder, &samples) == 3 && samples > 0)
+            return (int64_t)samples;
+    }
+    AVIOContext *pb = NULL;
+    if (avio_open2(&pb, url, AVIO_FLAG_READ, NULL, NULL) < 0)
+        return -1;
+    const int64_t size = avio_size(pb);
+    uint32_t movie_scale = 0, type;
+    int64_t segment = -1, box_end;
+    while (size > 0 && box_header(pb, size, &type, &box_end)) {
+        if (type == MKTAG('m', 'o', 'o', 'v')) {
+            const int64_t moov_end = box_end;
+            while (box_header(pb, moov_end, &type, &box_end)) {
+                if (type == MKTAG('m', 'v', 'h', 'd')) {
+                    int version = avio_r8(pb);
+                    avio_skip(pb, 3 + (version == 1 ? 16 : 8));
+                    movie_scale = avio_rb32(pb);
+                } else if (type == MKTAG('t', 'r', 'a', 'k')) {
+                    int track_id = -1;
+                    int64_t trak_segment = -1;
+                    read_trak(pb, box_end, &track_id, &trak_segment);
+                    if (track_id == st->id)
+                        segment = trak_segment;
+                }
+                if (avio_seek(pb, box_end, SEEK_SET) < 0)
+                    break;
+            }
+            break;
+        }
+        if (avio_seek(pb, box_end, SEEK_SET) < 0)
+            break;
+    }
+    avio_closep(&pb);
+    if (segment <= 0 || movie_scale == 0)
+        return -1;
+    return av_rescale(segment, s->info.rate, movie_scale);
+}
+
 int nag_source_open(NagSource **out, const char *url, int channels, char *error, size_t error_size)
 {
     return nag_source_open_ex(out, url, channels, 0, error, error_size);
@@ -388,6 +499,7 @@ int nag_source_open_ex(NagSource **out, const char *url, int channels, int flags
     s->next_pts = 0;
     s->part_start = 0;
     s->part_end = -1;
+    s->stream_end = -1;
     /* S-911: a tracker module is libopenmpt's; anything else FFmpeg's */
     int ret = mod_open(s, url, channels, error, error_size);
     if (ret != 0) {
@@ -473,6 +585,11 @@ int nag_source_open_ex(NagSource **out, const char *url, int channels, int flags
         goto fail;
     }
     read_info(s);
+    if (st->codecpar->codec_id == AV_CODEC_ID_AAC && s->ic->iformat && strncmp(s->ic->iformat->name, "mov", 3) == 0) {
+        int64_t end = mp4_audio_end(s, url, st);
+        if (end > 0)
+            s->stream_end = end + s->pts_offset;
+    }
     *out = s;
     return 0;
 fail:
@@ -745,10 +862,17 @@ int nag_source_read(NagSource *s, double *dst, int max_frames)
         return 0;
     if (have > max_frames)
         have = max_frames;
+    const int64_t head = s->fifo_end - av_audio_fifo_size(s->fifo);
     if (s->part_end >= 0) {
         /* S-808: the part ends on its last frame exactly */
-        int64_t head = s->fifo_end - av_audio_fifo_size(s->fifo);
         int64_t left = s->part_end + s->pts_offset - head;
+        if (left <= 0)
+            return 0;
+        if (have > left)
+            have = (int)left;
+    }
+    if (s->stream_end >= 0) {
+        int64_t left = s->stream_end - head;
         if (left <= 0)
             return 0;
         if (have > left)

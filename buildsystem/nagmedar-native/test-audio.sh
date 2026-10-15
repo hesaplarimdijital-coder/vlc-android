@@ -32,6 +32,15 @@
 #     for a true capture, the one differing sample for a broken one
 #   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus
 #   - the covers (S-1006): the front cover of FLAC, M4A, MP3 (of two pictures) and Opus; a tag by name
+#   - the converter (S-1010): FLAC 16/44.1 and 24/96 into Opus, MP3 (V0 and 320) and AAC,
+#     decoded back by ffmpeg within each codec's expected SNR of the source (resampled where
+#     the codec asks), on the same sample (no shift); as long as the source, gapless in the
+#     engine's own decode (Opus' pre-skip, LAME's delay and padding, AAC's edit list); the
+#     tags, the lyrics and the front cover (of two pictures) as the source's, Turkish letters
+#     included; ID3v2.4; the ReplayGain measured again (R128_* alone for Opus); a CUE part
+#     with its own tags; a mono and a 5.1 source; a conversion stopped from its progress; the
+#     source or a file that holds anything refused as the output, untouched; NaN and infinities
+#     in a float source; an M4A plays to its end without an edit list or iTunSMPB
 #   - CUE parts (S-808): a file's parts, bounded in CUE frames (1/75 s), played as a queue give
 #     the whole file back, sample for sample in FLAC and MP3, within -60 dBFS in AAC and Opus
 #     (whose decoders settle after a seek, as ffmpeg's own do); a part alone is ffmpeg's trim
@@ -92,7 +101,20 @@ check "seek at open" "$(ffmpeg -v error -ss 1.25 -i flac24.flac -f s32le - | md5
 "$NAGAUDIO" decode flac24.flac -f s32 --seek 2000 --seek-after 12345 -o seek.raw > /dev/null
 check "seek while playing" "$(ffmpeg -v error -ss 2.0 -i flac24.flac -f s32le - | md5_of)" "$(tail -c $((96000 * 8)) seek.raw | md5_of)"
 check "mp3 f32 (gapless trim)" "$(ffmpeg -v error -i mp3.mp3 -f f32le - | md5_of)" "$(engine_md5 f32 mp3.mp3)"
-check "aac f32" "$(ffmpeg -v error -i aac.m4a -f f32le - | md5_of)" "$(engine_md5 f32 aac.m4a)"
+# S-1010: the encoder's padding after the edit list's length is not played (ffmpeg decodes it)
+aac_frames=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration_ts -of default=nw=1:nk=1 aac.m4a)
+check "aac f32, its edit list's length" "$(ffmpeg -v error -i aac.m4a -f f32le - | head -c $((aac_frames * 8)) | md5_of)" "$(engine_md5 f32 aac.m4a)"
+# without an edit list (nor iTunSMPB) the file says nothing of its padding: it plays to its last decoded sample
+ffmpeg -v error -y -i flac16.flac -c:a aac -b:a 160k -use_editlist 0 aac_noedts.m4a
+check "aac without an edit list, whole" "$(ffmpeg -v error -i aac_noedts.m4a -f f32le - | md5_of)" "$(engine_md5 f32 aac_noedts.m4a)"
+# iTunes' iTunSMPB: priming 1024, the length 176 400 samples
+cp aac_noedts.m4a aac_smpb.m4a
+python3 -c "
+from mutagen.mp4 import MP4, MP4FreeForm
+m = MP4('aac_smpb.m4a')
+m['----:com.apple.iTunes:iTunSMPB'] = [MP4FreeForm(b' 00000000 00000400 00000300 000000000002B110 00000000 00000000')]
+m.save()"
+check "aac with iTunSMPB, its length" "176400" "$("$NAGAUDIO" decode aac_smpb.m4a -f f32 | python3 -c 'import json,sys; print(json.load(sys.stdin)["frames"])')"
 check "opus f32" "$(ffmpeg -v error -i opus.opus -f f32le - | md5_of)" "$(engine_md5 f32 opus.opus)"
 check "queue flac+mp3 s16" "$( (ffmpeg -v error -i flac16.flac -f s16le -; ffmpeg -v error -i mp3.mp3 -f s16le -) | md5_of)" "$(engine_md5 s16 flac16.flac mp3.mp3 --no-dither)"
 check "mono on both channels" "$(ffmpeg -v error -i mono.flac -af 'pan=stereo|c0=c0|c1=c0' -f s16le - | md5_of)" "$(engine_md5 s16 mono.flac)"
@@ -646,6 +668,155 @@ PY
 done
 # MP3's timestamps start after the trimmed encoder delay: a seek lands on the sample asked all the same
 check "mp3 seek exact" "$(ffmpeg -v error -i whole.mp3 -af 'atrim=start_sample=88200' -f f32le - | md5_of)" "$(engine_md5 f32 whole.mp3 --seek 2000)"
+
+echo "== S-1010: the converter"
+# music-like sources: tones and a little pink noise, tagged as a library's files are (two pictures: the back first)
+convert_source() { # rate sample_fmt name
+    ffmpeg -v error -y -f lavfi -i "aevalsrc=0.3*sin(2*PI*440*t)+0.2*sin(2*PI*1250*t)+0.1*sin(2*PI*3100*t)|0.3*sin(2*PI*660*t)+0.2*sin(2*PI*1750*t)+0.05*sin(2*PI*5200*t):s=$1:d=5" \
+        -f lavfi -i "anoisesrc=r=$1:c=pink:a=0.03:d=5:s=5" -filter_complex "[0:a][1:a]amix=inputs=2:normalize=0,aformat=sample_fmts=$2" -c:a flac "$3"
+    python3 - "$3" <<'PY'
+import sys
+from mutagen.flac import FLAC, Picture
+f = FLAC(sys.argv[1])
+f.delete()
+f["TITLE"] = "Gece Yolcusu — Çığlık"
+f["ARTIST"] = "Şebnem Ağaoğlu"
+f["ALBUMARTIST"] = "Çeşitli Sanatçılar"
+f["ALBUM"] = "Işıklı Dönüş"
+f["TRACKNUMBER"] = "3"
+f["DATE"] = "1997"
+f["GENRE"] = "Türk Halk Müziği"
+f["COMPOSER"] = "Âşık Veysel"
+f["LYRICS"] = "Uzun ince bir yoldayım\nGidiyorum gündüz gece"
+f["ENCODER"] = "reference libFLAC"
+f["REPLAYGAIN_TRACK_GAIN"] = "-3.21 dB"
+f["REPLAYGAIN_TRACK_PEAK"] = "0.700000"
+f["REPLAYGAIN_ALBUM_GAIN"] = "-4.00 dB"
+f["REPLAYGAIN_ALBUM_PEAK"] = "0.900000"
+for kind, name in ((4, "back.png"), (3, "front.png")):
+    p = Picture()
+    p.type, p.mime, p.data = kind, "image/png", open(name, "rb").read()
+    f.add_picture(p)
+f.save()
+PY
+}
+convert_source 44100 s16 m16.flac
+convert_source 96000 s32 m24.flac
+cat > snr.py <<'PY'
+# the SNR of a decode against its reference (f32 stereo) at the best shift within ±8 frames,
+# and that shift: "<shift> <snr dB> <reference frames> <decoded frames>"
+import array, math, sys
+def load(name):
+    a = array.array("f")
+    a.frombytes(open(name, "rb").read())
+    return a
+ref, out = load(sys.argv[1]), load(sys.argv[2])
+n = min(len(ref), len(out)) // 2
+def corr(lag):
+    s = 0.0
+    for i in range(10000, 30000):
+        j = i + lag
+        s += ref[2 * i] * out[2 * j]
+    return s
+lag = max(range(-8, 9), key=corr)
+signal = noise = 0.0
+for i in range(max(0, -lag), min(n, n - lag)):
+    for c in (0, 1):
+        a = ref[2 * i + c]
+        b = out[2 * (i + lag) + c]
+        signal += a * a
+        noise += (a - b) * (a - b)
+print(lag, "%.1f" % (10 * math.log10(signal / noise)), len(ref) // 2, len(out) // 2)
+PY
+# preset: codec, the least SNR in dB (about 6 dB under what it gives), extension, options
+for src in m16.flac m24.flac; do
+    in_rate=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=nw=1:nk=1 "$src")
+    in_frames=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration_ts -of default=nw=1:nk=1 "$src")
+    while read -r codec least ext opts; do
+        out="conv_${src%.flac}_${codec}${opts// /}.$ext"
+        if ! "$NAGAUDIO" convert "$src" "$out" --codec "$codec" $opts > "$out.json" 2> "$out.log"; then
+            check "convert $src to $out" "done" "$(cat "$out.json"; tail -3 "$out.log")"
+            continue
+        fi
+        rate=$(json 'd["rate"]' < "$out.json")
+        expected=$(python3 -c "print(round($in_frames * $rate / $in_rate))")
+        check "$out: frames encoded" "$expected" "$(json 'd["frames"]' < "$out.json")"
+        check "$out: the engine's decode, gapless" "$expected" "$("$NAGAUDIO" decode "$out" -f f32 | json 'd["frames"]')"
+        ffmpeg -nostdin -v error -y -i "$src" -af "aresample=$rate" -f f32le conv_ref.raw
+        # AAC: ffmpeg decodes the padding after the edit list's length too
+        ffmpeg -nostdin -v error -y -i "$out" -f f32le - | head -c $((expected * 8)) > conv_dec.raw
+        read -r shift snr ref_frames dec_frames < <(python3 snr.py conv_ref.raw conv_dec.raw)
+        check "$out: ffmpeg's decode as long, on the same sample" "0 $expected" "$shift $dec_frames"
+        check "$out: SNR $snr dB at least $least" "yes" "$(python3 -c "print('yes' if $snr >= $least else 'no')")"
+        for key in TITLE ARTIST ALBUMARTIST ALBUM DATE GENRE COMPOSER; do
+            check "$out: $key" "$("$NAGAUDIO" prop "$src" "$key")" "$("$NAGAUDIO" prop "$out" "$key")"
+        done
+        check "$out: track number" "3" "$("$NAGAUDIO" prop "$out" TRACKNUMBER | cut -d/ -f1)"
+        check "$out: lyrics" "$("$NAGAUDIO" lyrics "$src")" "$("$NAGAUDIO" lyrics "$out")"
+        check "$out: no ENCODER of the source" "" "$("$NAGAUDIO" prop "$out" ENCODER)"
+        "$NAGAUDIO" cover "$out" conv_cover.out > /dev/null
+        check "$out: the front cover" "same" "$(cmp -s conv_cover.out front.png && echo same || echo different)"
+        scanned=$("$NAGAUDIO" scan "$out" | json '"%.3f" % d["tracks"][0]["gain_db"]')
+        if [ "$codec" = opus ]; then
+            check "$out: no REPLAYGAIN_* in Opus" "" "$("$NAGAUDIO" prop "$out" REPLAYGAIN_TRACK_GAIN)$("$NAGAUDIO" prop "$out" REPLAYGAIN_ALBUM_GAIN)"
+            # Q7.8 to -23 LUFS: the measured gain less 5 dB (within a step); the album's -4 dB as -9 dB
+            r128=$("$NAGAUDIO" prop "$out" R128_TRACK_GAIN)
+            check "$out: R128 gains" "yes -2304" "$(python3 -c "print('yes' if abs($r128 / 256 + 5 - $scanned) <= 1 / 256 else $r128)") $("$NAGAUDIO" prop "$out" R128_ALBUM_GAIN)"
+            check "$out: the engine reads its gain" "yes" "$("$NAGAUDIO" info "$out" | python3 -c "import json,sys; d=json.load(sys.stdin); print('yes' if abs(d['track_gain_db'] - $scanned) <= 1 / 256 else d)")"
+        else
+            scanned=$(python3 -c "print('%.2f' % $scanned)")
+            check "$out: REPLAYGAIN_TRACK_GAIN measured again" "$scanned dB" "$("$NAGAUDIO" prop "$out" REPLAYGAIN_TRACK_GAIN)"
+            check "$out: the album's gain kept" "-4.00 dB" "$("$NAGAUDIO" prop "$out" REPLAYGAIN_ALBUM_GAIN)"
+        fi
+        if [ "$codec" = mp3 ]; then
+            check "$out: ID3v2.4" "ID3 4" "$(python3 -c "import sys; d = open('$out', 'rb').read(4); print(d[:3].decode(), d[3])")"
+        fi
+    done <<'PRESETS'
+opus 30 opus --bitrate 128000
+opus 30 opus --bitrate 192000
+mp3 40 mp3 --vbr 0
+mp3 40 mp3 --bitrate 320000
+aac 29 m4a --bitrate 256000
+PRESETS
+done
+# the rates: MP3 of 96 kHz at 48, AAC keeps it; Opus at 48 whatever the source
+check "rates" "48000 48000 96000" "$(for f in conv_m24_opus--bitrate128000.opus conv_m24_mp3--vbr0.mp3 conv_m24_aac--bitrate256000.m4a; do json 'd["rate"]' < "$f.json"; done | tr '\n' ' ' | sed 's/ $//')"
+"$NAGAUDIO" convert m24.flac conv_m24_aac44.m4a --codec aac --bitrate 256000 --rate 44100 > conv_m24_aac44.json
+check "AAC at the rate asked" "44100 220500" "$(json '"%d %d" % (d["rate"], d["frames"])' < conv_m24_aac44.json)"
+# a CUE part (75 to 225: one to three seconds) with its own tags over the file's
+"$NAGAUDIO" convert "m16.flac#cue=75,225" conv_part.opus --codec opus --bitrate 160000 --tag "TITLE=İkinci bölüm" --tag TRACKNUMBER=2 --tag COMPOSER= > conv_part.json
+check "CUE part: two seconds" "96000" "$("$NAGAUDIO" decode conv_part.opus -f f32 | json 'd["frames"]')"
+check "CUE part: its tags" "İkinci bölüm|2||Işıklı Dönüş" "$("$NAGAUDIO" prop conv_part.opus TITLE)|$("$NAGAUDIO" prop conv_part.opus TRACKNUMBER)|$("$NAGAUDIO" prop conv_part.opus COMPOSER)|$("$NAGAUDIO" prop conv_part.opus ALBUM)"
+ffmpeg -nostdin -v error -y -i m16.flac -af "atrim=start_sample=44100:end_sample=132300,aresample=48000" -f f32le conv_ref.raw
+"$NAGAUDIO" decode conv_part.opus -f f32 -o conv_dec.raw > /dev/null
+read -r shift snr ref_frames dec_frames < <(python3 snr.py conv_ref.raw conv_dec.raw)
+check "CUE part: the file's audio from its start (SNR $snr dB)" "0 yes" "$shift $(python3 -c "print('yes' if $snr >= 30 else 'no')")"
+# mono stays mono, 5.1 is mixed to stereo; a source without tags gets none
+"$NAGAUDIO" convert mono.flac conv_mono.mp3 --codec mp3 --vbr 2 > conv_mono.json
+"$NAGAUDIO" convert six.flac conv_six.m4a --codec aac --bitrate 256000 > conv_six.json
+check "mono and 5.1" "1 2 0 0" "$(json 'd["channels"]' < conv_mono.json) $(json 'd["channels"]' < conv_six.json) $(json 'd["tags"]' < conv_mono.json) $(json 'str(d["cover"]).replace("False", "0")' < conv_six.json)"
+# never over a file that holds anything, the source least of all: refused, nothing truncated
+cp m16.flac conv_self.flac
+src_md5=$(md5sum < conv_self.flac)
+"$NAGAUDIO" convert conv_self.flac conv_self.flac --codec opus > conv_self.json || true
+check "the source as the output: refused, untouched" "the output is the source $src_md5" "$(json 'd["error"]' < conv_self.json) $(md5sum < conv_self.flac)"
+printf 'abc' > conv_full.opus
+"$NAGAUDIO" convert m16.flac conv_full.opus --codec opus > conv_full.json || true
+check "a file that holds anything: refused, untouched" "the output is not an empty file abc" "$(json 'd["error"]' < conv_full.json) $(cat conv_full.opus)"
+# a damaged float source's NaN and infinities: silence to LAME, no abort
+python3 - <<'PY'
+import struct, wave
+frames = [0.5, float("nan"), float("inf"), -float("inf"), -0.25] * 4410
+with open("conv_nan.raw", "wb") as f:
+    for v in frames:
+        f.write(struct.pack("<ff", v, v))
+PY
+ffmpeg -v error -y -f f32le -ar 44100 -ac 2 -i conv_nan.raw -c:a pcm_f32le conv_nan.wav
+check "NaN and infinities: converted" "22050" "$("$NAGAUDIO" convert conv_nan.wav conv_nan.mp3 --codec mp3 --vbr 2 | json 'd["frames"]')"
+# stopped from the progress callback: no result, "cancelled"
+stopped=0
+"$NAGAUDIO" convert m24.flac conv_stopped.opus --codec opus --bitrate 128000 --stop-at 0.3 > conv_stopped.json || stopped=$?
+check "stopped" "3 True" "$stopped $(json 'd["cancelled"]' < conv_stopped.json)"
 
 if [ "$failures" -gt 0 ]; then
     echo "$failures audio test(s) failed"
