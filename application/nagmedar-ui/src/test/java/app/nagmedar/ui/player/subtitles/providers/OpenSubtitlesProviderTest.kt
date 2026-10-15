@@ -8,6 +8,7 @@ import app.nagmedar.ui.player.subtitles.OnlineQuota
 import app.nagmedar.ui.player.subtitles.OnlineSubtitle
 import app.nagmedar.ui.player.subtitles.OnlineSubtitlesController
 import app.nagmedar.ui.player.subtitles.OkHttpOpenSubtitles
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -19,8 +20,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.GraphicsMode
 
 /** S-707: OpenSubtitles as a provider: its answers in the common model, searched as S-706 searched. */
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class OpenSubtitlesProviderTest {
 
     private val api = FakeOpenSubtitles()

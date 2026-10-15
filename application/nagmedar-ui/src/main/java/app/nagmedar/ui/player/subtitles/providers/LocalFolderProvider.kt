@@ -56,7 +56,7 @@ class LocalFolderProvider(
         val episode = query.episode ?: wanted.episode
         if (wanted.title.isEmpty() && season == null) return emptyList()
         return files.list().mapNotNull { file ->
-            if (!isSubtitleFile(file.name)) return@mapNotNull null
+            if (!isSubtitleFile(file.name) || file.name.substringAfterLast('.').lowercase(Locale.ROOT) in PAIRED) return@mapNotNull null
             val found = Words.of(file.name.substringBeforeLast('.'))
             val language = found.tokens.drop(1).firstNotNullOfOrNull(::languageOf).orEmpty()
             if (query.languages.isNotEmpty() && language.isNotEmpty() && query.languages.none { sameLanguage(it, language) }) return@mapNotNull null
@@ -118,6 +118,9 @@ class LocalFolderProvider(
     }
 
     companion object {
+        /** A VobSub's two files are one subtitle; one of them alone cannot be loaded. */
+        private val PAIRED = setOf("idx", "sub")
+
         const val ID = "local-folder"
         const val NAME = "Local folder"
     }

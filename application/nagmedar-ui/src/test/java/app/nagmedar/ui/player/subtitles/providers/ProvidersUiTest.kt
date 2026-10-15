@@ -3,6 +3,9 @@ package app.nagmedar.ui.player.subtitles.providers
 import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
@@ -46,7 +49,7 @@ class ProvidersUiTest {
     private val local = FakeProvider("local-folder", "Local folder", capabilities = ProviderCapabilities(searchByName = true))
     private val registry = ProviderRegistry(listOf(os, local), MemoryProviderStore(), offByDefault = setOf("local-folder"))
 
-    private var folder: String? = null
+    private val folder: String? = null
     private val log = mutableListOf<String>()
 
     private fun settings(rowsOf: () -> List<ProviderRow> = ::rows) {
@@ -104,17 +107,25 @@ class ProvidersUiTest {
 
     @Test
     fun theFolderIsChosenAndForgotten() {
-        settings()
-        compose.onAllNodesWithTag("provider-folder-forget").assertCountEquals(0)
-        compose.onNodeWithTag("provider-folder-choose").performClick()
-        assertEquals(listOf("choose"), log)
-        folder = "Download/Subtitles"
+        var chosen by mutableStateOf<String?>(null)
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
-                SubtitleProvidersSection(rows(), folder, { _, _ -> }, { _, _ -> }, {}, { log += "forget" })
+                SubtitleProvidersSection(
+                    rows = rows().map { it.copy(folderChosen = it.needsFolder && chosen != null) },
+                    folderName = chosen,
+                    onEnabled = { _, _ -> },
+                    onMove = { _, _ -> },
+                    onChooseFolder = { log += "choose"; chosen = "Download/Subtitles" },
+                    onForgetFolder = { log += "forget"; chosen = null },
+                )
             }
         }
+        compose.onAllNodesWithTag("provider-folder-forget").assertCountEquals(0)
+        compose.onNodeWithTag("provider-folder-choose").performClick()
+        compose.waitForIdle()
         compose.onNodeWithTag("provider-folder-forget").performClick()
+        compose.waitForIdle()
+        compose.onAllNodesWithTag("provider-folder-forget").assertCountEquals(0)
         assertEquals(listOf("choose", "forget"), log)
     }
 
@@ -180,8 +191,8 @@ class ProvidersUiTest {
         compose.onNodeWithTag("online-report-opensubtitles").assertExists()
         compose.onNodeWithTag("online-report-local-folder").assertExists()
         // a result says where it came from
-        compose.onNodeWithTag("online-source-opensubtitles/11").assertExists()
-        compose.onNodeWithTag("online-source-local-folder/z").assertExists()
+        compose.onNodeWithTag("online-source-opensubtitles/11", useUnmergedNode = true).assertExists()
+        compose.onNodeWithTag("online-source-local-folder/z", useUnmergedNode = true).assertExists()
     }
 
     @Test

@@ -143,7 +143,7 @@ class TouchTargetTest {
         assertTargets("settings")
     }
 
-    @Test @Config(qualifiers = "tr-w411dp-h4000dp-mdpi")
+    @Test @Config(qualifiers = "tr-w411dp-h4600dp-mdpi")
     fun shortcutEditor() {
         touch { Column { ShortcutEditor(emptyMap(), {}) } }
         assertTargets("shortcut editor")
