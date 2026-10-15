@@ -267,8 +267,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.CueMerge, ShortcutGroup.Subtitle, R.string.nag_sc_cue_merge, KeyChord(Key.M, ctrl = true, alt = true), ShortcutScope.Player),
         Shortcut(ShortcutId.CueSetStart, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_start, KeyChord(Key.LeftBracket, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.CueSetEnd, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_end, KeyChord(Key.RightBracket, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueNext, ShortcutGroup.Subtitle, R.string.nag_sc_cue_next, KeyChord(Key.DirectionDown, alt = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CuePrevious, ShortcutGroup.Subtitle, R.string.nag_sc_cue_previous, KeyChord(Key.DirectionUp, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CueNext, ShortcutGroup.Subtitle, R.string.nag_sc_cue_next, KeyChord(Key.PageDown, alt = true), ShortcutScope.Player),
+        Shortcut(ShortcutId.CuePrevious, ShortcutGroup.Subtitle, R.string.nag_sc_cue_previous, KeyChord(Key.PageUp, alt = true), ShortcutScope.Player),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
         // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization
