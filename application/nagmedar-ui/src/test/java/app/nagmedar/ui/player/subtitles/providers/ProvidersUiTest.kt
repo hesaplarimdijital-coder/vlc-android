@@ -191,8 +191,8 @@ class ProvidersUiTest {
         compose.onNodeWithTag("online-report-opensubtitles").assertExists()
         compose.onNodeWithTag("online-report-local-folder").assertExists()
         // a result says where it came from
-        compose.onNodeWithTag("online-source-opensubtitles/11", useUnmergedNode = true).assertExists()
-        compose.onNodeWithTag("online-source-local-folder/z", useUnmergedNode = true).assertExists()
+        compose.onNodeWithTag("online-source-opensubtitles/11", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("online-source-local-folder/z", useUnmergedTree = true).assertExists()
     }
 
     @Test
