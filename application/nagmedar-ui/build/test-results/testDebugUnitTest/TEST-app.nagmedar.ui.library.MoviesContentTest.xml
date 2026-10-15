@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.MoviesContentTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:48.153Z" hostname="runnervmmprz5" time="0.635">
+  <properties/>
+  <testcase name="anUnprobedFileSaysItIsBeingRead" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.129"/>
+  <testcase name="theTableHasTechnicalColumns" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.095"/>
+  <testcase name="aPointerClickSelectsAndShowsTheDetails" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.157"/>
+  <testcase name="aTapPlays" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.082"/>
+  <testcase name="aDoubleClickPlays" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.103"/>
+  <testcase name="cardsCarryTheBadgeAndTheSummary" classname="app.nagmedar.ui.library.MoviesContentTest" time="0.068"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

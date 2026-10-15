@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.PlayerKeysTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:58.003Z" hostname="runnervmmprz5" time="0.184">
+  <properties/>
+  <testcase name="whileTheEditorRecordsKeysTheyAreNotShortcuts" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.025"/>
+  <testcase name="otherKeysStayTheClassicPlayers" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.026"/>
+  <testcase name="vlcsKeysAreTheDefaults" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.027"/>
+  <testcase name="eachKeyDoesItsWorkInThePlayer" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.052"/>
+  <testcase name="theUsersKeysWin" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.027"/>
+  <testcase name="aHeldKeyActsOnceUnlessItGoesOn" classname="app.nagmedar.ui.player.PlayerKeysTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

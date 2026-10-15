@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.navigate.NavigationTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:03:02.874Z" hostname="runnervmmprz5" time="0.01">
+  <properties/>
+  <testcase name="chaptersStepForwardAndBack" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <testcase name="aFilmThatCannotKeepThemSaysSo" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.003"/>
+  <testcase name="renamedAndRemovedInTheLibrary" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="numbersWithUnits" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.003"/>
+  <testcase name="bookmarksAreAddedOnceASecondInTimeOrder" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="clockTimes" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <testcase name="anotherFilmReadsItsOwn" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="fromNowAndShares" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <testcase name="pastTheEndIsSaid" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.TouchSelectionTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:49.288Z" hostname="runnervmmprz5" time="0.386">
+  <properties/>
+  <testcase name="theMenusSelectStartsSelectingAndTapsTakeFilmsInAndOut" classname="app.nagmedar.ui.library.TouchSelectionTest" time="0.23"/>
+  <testcase name="takingTheLastOneOutEndsSelecting" classname="app.nagmedar.ui.library.TouchSelectionTest" time="0.156"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

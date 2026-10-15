@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.playback.EngineHostTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:58:57.793Z" hostname="runnervmmprz5" time="0.075">
+  <properties/>
+  <testcase name="routesLocalMusicToTheAudioEngineAndTheRestToLibVlc" classname="app.nagmedar.playback.EngineHostTest" time="0.053"/>
+  <testcase name="handOverBetweenItems" classname="app.nagmedar.playback.EngineHostTest" time="0.006"/>
+  <testcase name="aStubEngineLeavesEverythingToLibVlc" classname="app.nagmedar.playback.EngineHostTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

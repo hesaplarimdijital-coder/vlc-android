@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.SelectionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:48.792Z" hostname="runnervmmprz5" time="0.414">
+  <properties/>
+  <testcase name="aBandFromBetweenTheCardsTakesWhatItTouches" classname="app.nagmedar.ui.library.SelectionTest" time="0.08"/>
+  <testcase name="ctrlAndShiftSelectSeveralRows" classname="app.nagmedar.ui.library.SelectionTest" time="0.127"/>
+  <testcase name="ctrlATakesAllAndEscLetsGo" classname="app.nagmedar.ui.library.SelectionTest" time="0.099"/>
+  <testcase name="ctrlAndShiftSelectSeveralCards" classname="app.nagmedar.ui.library.SelectionTest" time="0.108"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

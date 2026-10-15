@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.audio.AudioOutputTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:58.198Z" hostname="runnervmmprz5" time="0.082">
+  <properties/>
+  <testcase name="codecsAreNamedByAndroidsEncodings" classname="app.nagmedar.ui.player.audio.AudioOutputTest" time="0.026"/>
+  <testcase name="aRefusalAndWhatIsPluggedInShow" classname="app.nagmedar.ui.player.audio.AudioOutputTest" time="0.028"/>
+  <testcase name="theChoiceReachesThePlayerAndTheSettings" classname="app.nagmedar.ui.player.audio.AudioOutputTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

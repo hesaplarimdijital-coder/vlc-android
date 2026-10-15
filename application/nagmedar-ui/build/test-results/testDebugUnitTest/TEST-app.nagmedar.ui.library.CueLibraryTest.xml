@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.CueLibraryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:47.630Z" hostname="runnervmmprz5" time="0.174">
+  <properties/>
+  <testcase name="aFileWithoutASheetStaysAsItIs" classname="app.nagmedar.ui.library.CueLibraryTest" time="0.043"/>
+  <testcase name="aTrackComesBackFromItsUri" classname="app.nagmedar.ui.library.CueLibraryTest" time="0.039"/>
+  <testcase name="theSheetsTracksStandForTheFile" classname="app.nagmedar.ui.library.CueLibraryTest" time="0.092"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.ChromeVisibilityTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:02:56.350Z" hostname="runnervmmprz5" time="0.001">
+  <properties/>
+  <testcase name="pictureInPictureHasNoControls" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.001"/>
+  <testcase name="aFingerHandsTheVideoBack" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <testcase name="withoutAMouseThePlayerAsksTheClassicOverlay" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <testcase name="theTimerRunsUnlessTheMouseRestsOnThemOrAMenuIsOpen" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <testcase name="theCursorHidesWithThem" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

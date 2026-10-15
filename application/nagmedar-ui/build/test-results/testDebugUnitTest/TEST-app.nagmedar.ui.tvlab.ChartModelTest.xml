@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.ChartModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:03:41.941Z" hostname="runnervmmprz5" time="0.01">
+  <properties/>
+  <testcase name="theCsv" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.003"/>
+  <testcase name="roundSteps" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.0"/>
+  <testcase name="timeTicks" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.0"/>
+  <testcase name="theFiveSecondMean" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.001"/>
+  <testcase name="marksAreApart" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.0"/>
+  <testcase name="theSampleFilmsChart" classname="app.nagmedar.ui.tvlab.ChartModelTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
