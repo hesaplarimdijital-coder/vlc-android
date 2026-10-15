@@ -1,0 +1,64 @@
+variables:
+  VLC_WEB_BUILD_IMAGE: registry.videolan.org/videolan-alpine-node:20230523124511
+
+default:
+  interruptible: true
+  image:
+    name: $VLC_WEB_BUILD_IMAGE
+  tags:
+    - amd64
+    - docker
+
+stages:
+  - webserver-install-dependencies
+  - webserver-build
+  - webserver-build
+  - webserver-audit
+
+.webserver-base:
+  image:
+    name: $VLC_WEB_BUILD_IMAGE
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_TAG =~ /^(\d+\.)?(\d+\.)?(\*|\d+)/'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+
+# This is generating the node_modules folder with the required dependencies
+# If/When we want to make it fully offline:
+# - the docker image should contain the node_modules files OR the node_modules should be included as a cache entry (see gradle on top of this file)
+# - this job should be removed and the ones depending on it should have their rules changed
+webserver-install-dependencies:
+    extends: .webserver-base
+    retry: 1
+    stage: webserver-install-dependencies
+    script:
+      - npm install
+    artifacts:
+      paths:
+        - node_modules/
+      when: on_success
+      expire_in: 1h
+
+webserver-build:
+    extends: .webserver-base
+    retry: 1
+    stage: webserver-build
+    needs:
+      - job: "webserver-install-dependencies"
+    script:
+        - npm run build-android
+        - npm run build-desktop
+    artifacts:
+      paths:
+        - dist/
+      when: on_success
+      expire_in: 1h
+
+webserver-vulnerabilities:
+    extends: .webserver-base
+    retry: 1
+    stage: webserver-build
+    needs:
+      - job: "webserver-install-dependencies"
+    script:
+        - npx audit-ci@^6 --skip-dev --config ./audit-ci.jsonc
