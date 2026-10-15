@@ -350,6 +350,55 @@ class NagmedarDatabaseTest {
         assertEquals("auto", settings.get("file:///yeni.mkv")!!.aspectRatio)
     }
 
+    /** S-1206: the remux queue: the oldest waiting job next, those a dead process left, a cancel asked. */
+    @Test
+    fun remuxJobsWaitInTheOrderTheyWereQueued() {
+        val jobs = db.remuxJobs()
+        fun job(name: String, at: Long, state: String = RemuxJobState.QUEUED) = RemuxJobEntry(
+            inputUri = "content://docs/$name", inputName = "$name.mkv", inputSize = 1, outputUri = "content://docs/$name-out",
+            outputName = "$name (remux).mkv", plan = "{}", state = state, createdAt = at,
+        )
+        val second = jobs.insert(job("b", 2))
+        val first = jobs.insert(job("a", 1))
+        val running = jobs.insert(job("c", 3, RemuxJobState.RUNNING))
+        jobs.insert(job("d", 4, RemuxJobState.DONE))
+        assertEquals(first, jobs.next()!!.id)
+        assertEquals(listOf(running), jobs.interrupted().map { it.id })
+        assertEquals(listOf("d", "c", "b", "a"), jobs.all().map { it.inputName.removeSuffix(".mkv") })
+        assertEquals(listOf("a"), runBlocking { jobs.observeInput("content://docs/a").first() }.map { it.inputName.removeSuffix(".mkv") })
+        jobs.requestCancel(running)
+        assertTrue(jobs.get(running)!!.cancelRequested)
+        // the worker's column writes leave the cancel asked where it is
+        jobs.saveProgress(running, 0.5f, 400.0, 800.0, 7)
+        jobs.saveState(running, RemuxJobState.PAUSED, RemuxJobError.BATTERY, "1\tpaused\tbattery\n")
+        jobs.saveResult(running, RemuxJobState.VERIFYING, 800.0, 800.0, 9, "{}")
+        jobs.get(running)!!.let {
+            assertTrue(it.cancelRequested)
+            assertEquals(RemuxJobState.VERIFYING, it.state)
+            assertEquals(RemuxJobError.BATTERY, it.error)
+            assertEquals(9L, it.bytesOut)
+            assertEquals("{}", it.result)
+        }
+        jobs.saveStart(second, RemuxJobState.RUNNING, 1, 5, "5\tstarted\t1\n")
+        assertEquals(1, jobs.get(second)!!.attempts)
+        assertEquals(5L, jobs.get(second)!!.startedAt)
+        jobs.saveOwnsOutput(second, true)
+        assertTrue(jobs.get(second)!!.ownsOutput)
+        // a cancel of a waiting job touches only a job still waiting
+        assertEquals(0, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
+        assertEquals(RemuxJobState.RUNNING, jobs.get(second)!!.state)
+        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
+        assertEquals(1, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
+        assertEquals(RemuxJobState.CANCELLED, jobs.get(second)!!.state)
+        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
+        jobs.update(jobs.get(first)!!.copy(state = RemuxJobState.DONE, videoHash = "fad1", verification = "{\"ok\":true}", finishedAt = 9))
+        assertEquals(second, jobs.next()!!.id)
+        assertEquals("fad1", jobs.get(first)!!.videoHash)
+        jobs.delete(second)
+        assertNull(jobs.next())
+        assertEquals(3, runBlocking { jobs.observe().first() }.size)
+    }
+
     /** S-1502: what a backup reads, and its rows restored over these without losing either's. */
     @Test
     fun aBackupsRowsAreReadAndRestored() {
@@ -484,6 +533,12 @@ class NagmedarDatabaseMigrationTest {
             db.execSQL(
                 "INSERT INTO network_server (name, url, credentials, created_at, last_used_at) " +
                     "VALUES ('NAS', 'smb://nas.local/Filmler', x'0102', 1, 0)",
+            )
+            // 11 -> 12 (S-1206): the remux queue
+            db.execSQL(
+                "INSERT INTO remux_job (input_uri, input_name, input_size, output_uri, output_name, plan, state, progress, " +
+                    "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
+                    "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
             )
         }
     }

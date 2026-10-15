@@ -15,6 +15,7 @@ import app.nagmedar.ui.library.bitrateLabel
 import app.nagmedar.ui.library.frameRateLabel
 import app.nagmedar.ui.library.subtitleLine
 import app.nagmedar.ui.library.videoLine
+import app.nagmedar.ui.tvlab.remux.RemuxJobView
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -34,6 +35,8 @@ data class TvLabView(
     val elapsedMs: Long?,
     val profiles: List<DeviceProfile>,
     val profile: DeviceProfile,
+    /** The remux queue's jobs for this film, newest first (S-1206). */
+    val jobs: List<RemuxJobView> = emptyList(),
 ) {
     /** Whether a step runs: the file is being read or measured. */
     val running: Boolean get() = probe is Step.Running || bitrateStep is Step.Running || diskStep is Step.Running
@@ -88,6 +91,13 @@ interface TvLabActions {
     fun showReport()
 
     fun exportChart(format: ChartFormat)
+
+    /** S-1206: the film queued for a lossless remux, into a file the system's picker names. */
+    fun remux()
+
+    fun cancelRemux(id: Long)
+
+    fun removeRemux(id: Long)
 }
 
 /** A screen that asks for nothing: previews and screenshots. */
@@ -111,6 +121,12 @@ object NoTvLabActions : TvLabActions {
     override fun showReport() = Unit
 
     override fun exportChart(format: ChartFormat) = Unit
+
+    override fun remux() = Unit
+
+    override fun cancelRemux(id: Long) = Unit
+
+    override fun removeRemux(id: Long) = Unit
 }
 
 /** A finding in words: what, why, and what to do about it. */

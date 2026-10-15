@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,12 +20,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.core.content.FileProvider
+import app.nagmedar.lab.MediaTech
+import app.nagmedar.lab.RemuxPlan
+import app.nagmedar.lab.StreamRef
+import app.nagmedar.lab.StreamType
+import app.nagmedar.lab.displayName
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.lab.CreateFile
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.tvlab.remux.RemuxJobView
+import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +42,8 @@ import java.io.File
 /**
  * The TV Lab screen (S-1201 … S-1204) over the app's one [TvLabController]: the file chosen with
  * the system's picker (kept readable, so that a long analysis survives the screen), the profile
- * editor, the report, the chart saved as PNG or CSV, profiles imported, exported and shared.
+ * editor, the report, the chart saved as PNG or CSV, profiles imported, exported and shared;
+ * and the film queued for a remux into a file the picker names (S-1206), its jobs watched.
  */
 @Composable
 fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
@@ -47,9 +56,16 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
     var notice by remember { mutableStateOf<String?>(null) }
     var pendingChart by remember { mutableStateOf<ChartFormat?>(null) }
     var exporting by remember { mutableStateOf<DeviceProfile?>(null) }
-    val view = controller.view()
+    val queue = remember(context) { RemuxQueue.get(context) }
+    val inputUri = controller.file?.uri
+    val jobs by produceState(emptyList<RemuxJobView>(), inputUri, queue) {
+        value = emptyList()
+        if (inputUri != null) queue.observe(inputUri).collect { rows -> value = rows.map(RemuxJobView::of) }
+    }
+    val view = controller.view().copy(jobs = jobs)
     val palette = chartPalette()
     val measurer = rememberTextMeasurer()
+    val names = remember(res, locale) { LocalizedStreamNames(res, locale) }
 
     val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -107,6 +123,27 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         }
     }
 
+    val remuxLauncher = rememberLauncherForActivityResult(CreateFile()) { uri ->
+        val file = controller.file
+        val tech = controller.tech
+        if (uri == null || file == null || tech == null) return@rememberLauncherForActivityResult
+        // the output stays writable for the queue's worker, which may run after this screen is gone
+        runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+        val report = checkOf(view, names)
+        val convert = report?.findings?.any { it.kind == FindingKind.DolbyVisionDualLayer } == true
+        val plan = RemuxPlan.default(tech, convert) { ref -> streamLabel(tech, ref, names) }
+        scope.launch {
+            val id = queue.enqueue(Uri.parse(file.uri), file.name, file.sizeBytes, uri, context.displayName(uri), plan)
+            notice = res.getString(
+                when (id) {
+                    RemuxQueue.REFUSED_SAME_FILE -> R.string.nag_tvlab_remux_same_file
+                    RemuxQueue.REFUSED_NOT_EMPTY -> R.string.nag_tvlab_remux_not_empty
+                    else -> R.string.nag_tvlab_remux_queued_notice
+                },
+            )
+        }
+    }
+
     val actions = remember(controller) {
         object : TvLabActions {
             override fun chooseFile() = fileLauncher.launch(arrayOf("video/*", "audio/*", "application/octet-stream"))
@@ -138,6 +175,19 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
                 pendingChart = format
                 chartLauncher.launch(format.mime to context.getString(R.string.nag_tvlab_chart_file, base) + "." + format.extension)
             }
+
+            override fun remux() {
+                val base = controller.file?.name?.substringBeforeLast('.') ?: return
+                remuxLauncher.launch(MKV_MIME to context.getString(R.string.nag_tvlab_remux_file, base))
+            }
+
+            override fun cancelRemux(id: Long) {
+                scope.launch { queue.cancel(id) }
+            }
+
+            override fun removeRemux(id: Long) {
+                scope.launch { queue.remove(id) }
+            }
         }
     }
 
@@ -167,7 +217,6 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
     }
     if (reportShown) {
         val commentary = stringResource(R.string.nag_tech_commentary)
-        val names = remember(res, locale) { LocalizedStreamNames(res, locale) }
         val text = remember(view, names) { tvLabReport(res, view, checkOf(view, names), locale, commentary) }
         ReportDialog(stringResource(R.string.nag_tvlab_report_title), text) { reportShown = false }
     }
@@ -183,6 +232,13 @@ fun openInTvLab(context: Context, uri: Uri) {
         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.TvLab.route)
     runCatching { context.startActivity(show) }
+}
+
+/** How the interface names the stream [ref] of [tech], for the plan's labels. */
+private fun streamLabel(tech: MediaTech, ref: StreamRef, names: LocalizedStreamNames): String = when (ref.type) {
+    StreamType.Video -> tech.video?.let(names::video).orEmpty()
+    StreamType.Audio -> tech.audio.getOrNull(ref.ordinal)?.let(names::audio).orEmpty()
+    StreamType.Subtitle -> tech.subtitles.getOrNull(ref.ordinal)?.let { names.subtitles(listOf(it)) }.orEmpty()
 }
 
 /** Writes to the document at [uri]; whether it could. */
@@ -211,3 +267,6 @@ private fun String.idOf(): String = Regex("\"id\"\\s*:\\s*\"([^\"]*)\"").find(th
 
 /** No profile is that large: a bigger file is something else. */
 private const val MAX_PROFILE_BYTES = 256 * 1024
+
+/** What the remux writes (S-1206). */
+private const val MKV_MIME = "video/x-matroska"
