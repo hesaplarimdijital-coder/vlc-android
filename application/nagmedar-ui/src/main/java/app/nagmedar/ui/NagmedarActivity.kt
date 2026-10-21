@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import app.nagmedar.ui.backup.BackupSettings
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.NAGMEDAR_DRAG
@@ -38,10 +39,12 @@ import app.nagmedar.ui.transcode.HlsStream
 import app.nagmedar.ui.transcode.TranscodeQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.videolan.tools.AppScope
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
+import java.io.File
 
 /**
  * Entry point of the new Nağmedar interface (S-006). Playback still runs in the existing
@@ -90,6 +93,7 @@ class NagmedarActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) window.decorView.setOnDragListener { _, event -> onWindowDrag(event) }
         // S-1404: a cold start-up's time to its first frame
         StartupPerf.watch(this, restored = savedInstanceState != null)
+        if (savedInstanceState == null) forgetTvLab(applicationContext)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -239,6 +243,20 @@ class NagmedarActivity : ComponentActivity() {
         // the keys as the keyboard that asked has them (S-410); the hardware keyboard's when the screen asked
         val keyboard = deviceId.takeIf { id -> runCatching { InputDevice.getDevice(id)?.isVirtual == false }.getOrDefault(false) }
         data.addAll(ShortcutRegistry.keyboardShortcutGroups(resources, keyboard))
+    }
+}
+
+/**
+ * The TV Lab's own files (its profiles, bitrate cache and shared profiles under files/tvlab) and
+ * its chosen profile, which older versions left: the TV Lab is no longer part of Nağmedar.
+ */
+private fun forgetTvLab(context: Context) {
+    AppScope.launch(Dispatchers.IO) {
+        runCatching {
+            File(context.filesDir, "tvlab").takeIf { it.exists() }?.deleteRecursively()
+            val prefs = Settings.getInstance(context)
+            if (prefs.contains(BackupSettings.LEGACY_TVLAB_PROFILE)) prefs.edit().remove(BackupSettings.LEGACY_TVLAB_PROFILE).apply()
+        }
     }
 }
 

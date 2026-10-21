@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 # Host tests of the native lab code (CI): needs `build.sh host <prefix>` first, plus ffmpeg,
-# ffprobe, mkvmerge and dovi_tool on PATH.
-#   - SP-03: a profile 7 MEL stream built from dovi_tool's test assets, with audio, subtitles
-#     and chapters, is converted to MKV and MP4; the result must be profile 8.1 with the base
-#     layer's timestamps intact, no enhancement layer and every other track kept.
-#   - S-802: the media probe reads Dolby Vision (profile 7 MEL with its enhancement layer, the
-#     converted 8.1), HDR10, HLG and HDR10+ streams, audio codecs, languages and flags,
-#     subtitles and chapters; a missing file is an error, not a crash.
+# mkvmerge and dovi_tool on PATH.
+#   - S-802: the media probe reads Dolby Vision (a profile 7 MEL stream with its enhancement
+#     layer, built from dovi_tool's test assets with audio, subtitles and chapters), HDR10, HLG
+#     and HDR10+ streams, audio codecs, languages and flags, subtitles and chapters; a missing
+#     file is an error, not a crash.
 #   - SP-05: whisper_lab_cli decodes and transcribes a tone with whisper.cpp's test model.
 set -euo pipefail
 trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
@@ -27,7 +25,7 @@ fi
 # one annotation line: GitHub reads %0A as a line break
 annotate() { sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}'; }
 
-echo "== SP-03: profile 7 test stream"
+echo "== S-802: profile 7 test stream"
 dovi_tool inject-rpu -i "$ASSETS/regular_start_code_4_muxed_el.hevc" --rpu-in "$ASSETS/regular_rpu_mel.bin" -o "$T/p7.hevc" > /dev/null
 ffmpeg -v error -f lavfi -i "sine=f=440:d=11" -c:a aac "$T/audio.m4a"
 printf '1\n00:00:01,000 --> 00:00:03,000\nAltyazı korunmalı\n' > "$T/sub.srt"
@@ -39,66 +37,6 @@ cat > "$T/chapters.xml" <<'XML'
 </EditionEntry></Chapters>
 XML
 mkvmerge -q -o "$T/p7.mkv" --default-duration 0:24000/1001p "$T/p7.hevc" "$T/audio.m4a" --language 0:tur "$T/sub.srt" --chapters "$T/chapters.xml"
-
-for container in mkv mp4; do
-    echo "== SP-03: convert to $container"
-    extra=()
-    [ "$container" = mp4 ] && extra=(--mp4)
-    if ! "$PREFIX/bin/dvconvert" "$T/p7.mkv" "$T/out.$container" "${extra[@]}" > "$T/stats.json" 2> "$T/dvconvert.log"; then
-        # the converter prints its stats (with the error) even when it fails; the log has FFmpeg's reason
-        log=$(tr '\r' '\n' < "$T/dvconvert.log" | grep -v ' MB$' | tail -c 1500)
-        echo "::error title=SP-03 $container::$( { cat "$T/stats.json"; echo "$log"; } | annotate)"
-        exit 1
-    fi
-    echo "stats: $(cat "$T/stats.json")"
-    ffprobe -v error -print_format json -show_streams -show_chapters "$T/out.$container" > "$T/probe.json"
-    ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/p7.mkv" > "$T/pts_in.json"
-    ffprobe -v error -print_format json -select_streams v:0 -show_entries packet=pts "$T/out.$container" > "$T/pts_out.json"
-    ffmpeg -v error -y -i "$T/out.$container" -map 0:v:0 -c copy -bsf:v hevc_mp4toannexb -f hevc "$T/out.hevc"
-    dovi_tool extract-rpu -i "$T/out.hevc" -o "$T/rpu.bin" > /dev/null
-    dovi_tool info -s -i "$T/rpu.bin" > "$T/rpu.txt"
-    python3 - "$T" "$container" <<'PY'
-import json, re, sys
-t, container = sys.argv[1], sys.argv[2]
-stats = json.load(open(f'{t}/stats.json'))
-probe = json.load(open(f'{t}/probe.json'))
-problems = []
-def check(ok, what):
-    if not ok:
-        problems.append(what)
-check(stats['input_profile'] == 7 and stats['input_el_type'] == 'MEL', f"input {stats['input_profile']} {stats['input_el_type']}")
-check(stats['output_profile'] == 8, f"output profile {stats['output_profile']}")
-check(stats['rpus_converted'] == 259 and stats['rpus_failed'] == 0, f"rpus {stats['rpus_converted']}/{stats['rpus_failed']}")
-check(stats['el_nals_dropped'] > 0, 'no EL dropped')
-check(not stats['error'], 'error: ' + stats['error'])
-video = [s for s in probe['streams'] if s['codec_type'] == 'video']
-conf = [d for s in video for d in s.get('side_data_list', []) if d.get('side_data_type') == 'DOVI configuration record']
-check(conf and conf[0]['dv_profile'] == 8 and conf[0]['dv_bl_signal_compatibility_id'] == 1 and conf[0]['el_present_flag'] == 0,
-      f'configuration record {conf}')
-check(any(s['codec_type'] == 'audio' for s in probe['streams']), 'audio lost')
-if container == 'mkv':
-    check(any(s['codec_type'] == 'subtitle' for s in probe['streams']), 'subtitles lost')
-    check(len(probe.get('chapters', [])) == 2, f"chapters {len(probe.get('chapters', []))}")
-else:
-    check(video and video[0].get('codec_tag_string') == 'hvc1', f"tag {video[0].get('codec_tag_string') if video else None}")
-pts_in = sorted(p['pts'] for p in json.load(open(f'{t}/pts_in.json'))['packets'])
-pts_out = sorted(p['pts'] for p in json.load(open(f'{t}/pts_out.json'))['packets'])
-check(len(pts_in) == len(pts_out) == 259, f'frames {len(pts_in)} -> {len(pts_out)}')
-data = open(f'{t}/out.hevc', 'rb').read()
-types = {}
-for m in re.finditer(b'\x00\x00\x01', data):
-    b0, b1 = data[m.start() + 3], data[m.start() + 4]
-    key = ((b0 >> 1) & 0x3F, ((b0 & 1) << 5) | (b1 >> 3))
-    types[key] = types.get(key, 0) + 1
-check(not any(k[0] == 63 or k[1] > 0 for k in types), f'enhancement layer left: {types}')
-rpu = open(f'{t}/rpu.txt').read()
-check('Profile: 8' in rpu and 'Frames: 259' in rpu, 'rpu summary: ' + ' '.join(rpu.split())[:200])
-if problems:
-    print(f'::error title=SP-03 {container}::' + '; '.join(problems))
-    sys.exit(1)
-print(f"ok: {container}, {stats['rpus_converted']} RPUs, {stats['el_nals_dropped']} EL NALs dropped")
-PY
-done
 
 echo "== S-802: media probe"
 # HDR10 with Matroska colour metadata, HLG, and HDR10+ (an ST 2094-40 SEI before every picture)
@@ -141,7 +79,7 @@ ffmpeg -v error -f lavfi -i "testsrc2=size=1920x1080:rate=25" -f lavfi -i "sine=
     -metadata:s:a:3 language=jpn -disposition:a:0 default -disposition:a:1 0 -disposition:a:2 comment -disposition:a:3 0 \
     "$T/av.mkv"
 mkvmerge -q -o "$T/sdr.mkv" "$T/av.mkv" --language 0:tur "$T/sub.srt" --language 0:eng --forced-display-flag 0:1 "$T/forced.srt"
-for name in p7.mkv out.mkv out.mp4 hdr10.mkv hlg.mkv hdr10plus.mkv sdr.mkv; do
+for name in p7.mkv hdr10.mkv hlg.mkv hdr10plus.mkv sdr.mkv; do
     "$PREFIX/bin/mediaprobe" "$T/$name" > "$T/probe-$name.json" 2> /dev/null
 done
 "$PREFIX/bin/mediaprobe" "$T/missing.mkv" > "$T/probe-missing.json" 2> /dev/null
@@ -162,9 +100,6 @@ p, v = video('p7.mkv')
 check(v.get('codec') == 'hevc' and v.get('profile') == 'Main 10' and v.get('bit_depth') == 10, f'p7 video {v}')
 check(v.get('dv_profile') == 7 and v.get('dv_el') == 'MEL' and v.get('dv_el_present') and v.get('dv_rpu'), f'p7 dv {v}')
 check(p['chapters'] == 2 and p['subtitles'] and p['subtitles'][0]['language'] == 'tur', f'p7 tracks {p["chapters"]} {p["subtitles"]}')
-for name in ('out.mkv', 'out.mp4'):
-    p, v = video(name)
-    check(v.get('dv_profile') == 8 and v.get('dv_compatibility') == 1 and not v.get('dv_el_present') and v.get('dv_rpu'), f'{name} dv {v}')
 p, v = video('hdr10.mkv')
 check(v.get('transfer') == 'smpte2084' and v.get('primaries') == 'bt2020', f'hdr10 colour {v}')
 check(abs(v.get('max_luminance', 0) - 1000) < 1 and v.get('max_cll') == 1000 and v.get('max_fall') == 400, f'hdr10 metadata {v}')
@@ -189,62 +124,7 @@ check(missing['error'].startswith('open:') and missing['version'] == 1, f'missin
 if problems:
     print('::error title=S-802 probe::' + '; '.join(problems))
     sys.exit(1)
-print('ok: media probe (Dolby Vision 7 MEL / 8.1, HDR10, HLG, HDR10+, audio, subtitles, errors)')
-PY
-
-echo "== S-1202: bitrate analysis"
-# the 2-second SDR file: every byte of its packets lands in one of its seconds; the first second alone when asked
-"$PREFIX/bin/bitrate" "$T/sdr.mkv" > "$T/bitrate-sdr.json" 2> /dev/null
-"$PREFIX/bin/bitrate" "$T/sdr.mkv" 1 > "$T/bitrate-sdr-1s.json" 2> /dev/null
-"$PREFIX/bin/bitrate" "$T/missing.mkv" > "$T/bitrate-missing.json" 2> /dev/null
-python3 - "$T" <<'PY'
-import json, os, sys
-t = sys.argv[1]
-problems = []
-def check(ok, what):
-    if not ok:
-        problems.append(what)
-b = json.load(open(f'{t}/bitrate-sdr.json'))
-check(not b['error'] and b['complete'] and b['version'] == 1, f'sdr {b.get("error")} {b.get("complete")}')
-n = b['seconds']
-check(2 <= n <= 3 and len(b['total']) == n and len(b['video']) == n, f'seconds {n} {len(b["total"])} {len(b["video"])}')
-packets = sum(s['bytes'] for s in b['streams'])
-# a second's kilobits are rounded: within 63 bytes a second of the packets' bytes
-check(abs(sum(b['total']) * 125 - packets) <= 63 * n, f'total {sum(b["total"]) * 125} vs packets {packets}')
-check(0 < packets <= os.path.getsize(f'{t}/sdr.mkv'), f'packets {packets} size {os.path.getsize(f"{t}/sdr.mkv")}')
-check(b['peak_1s_kbps'] == max(b['total']) and abs(b['peak_5s_kbps'] - sum(b['total']) / n) <= 1, f'peaks {b["peak_1s_kbps"]} {b["peak_5s_kbps"]} {b["total"]}')
-check(b['video_peak_1s_kbps'] == max(b['video']) and 0 < b['video_average_kbps'] <= b['average_kbps'], f'video {b["video"]} {b["video_average_kbps"]} {b["average_kbps"]}')
-types = [s['type'] for s in b['streams']]
-check(types[:5] == ['video', 'audio', 'audio', 'audio', 'audio'] and types.count('subtitle') == 2, f'streams {types}')
-check(b['streams'][0]['codec'] == 'h264' and abs(b['streams'][0]['bytes'] - sum(b['video']) * 125) <= 63 * n, f'video stream {b["streams"][0]}')
-one = json.load(open(f'{t}/bitrate-sdr-1s.json'))
-check(one['seconds'] == 1 and one['total'] == b['total'][:1] and one['video'] == b['video'][:1], f'one second {one["total"]} {one["video"]} vs {b["total"]} {b["video"]}')
-missing = json.load(open(f'{t}/bitrate-missing.json'))
-check(missing['error'].startswith('open:'), f'missing {missing}')
-if problems:
-    print('::error title=S-1202 bitrate::' + '; '.join(problems))
-    sys.exit(1)
-print('ok: bitrate analysis (seconds, peaks, streams, the first second alone, errors)')
-PY
-
-echo "== S-1204: disk test"
-"$PREFIX/bin/disktest" "$T/sdr.mkv" > "$T/disk.json"
-"$PREFIX/bin/disktest" "$T/sdr.mkv" 1 > "$T/disk-1mb.json"
-python3 - "$T" <<'PY'
-import json, os, sys
-t = sys.argv[1]
-problems = []
-whole = json.load(open(f'{t}/disk.json'))
-part = json.load(open(f'{t}/disk-1mb.json'))
-size = os.path.getsize(f'{t}/sdr.mkv')
-if whole['error'] or whole['bytes'] != size or whole['mb_per_s'] <= 0 or not whole['complete']:
-    problems.append(f'whole {whole} size {size}')
-if part['error'] or part['bytes'] != min(size, 1000000):
-    problems.append(f'1 MB {part}')
-if problems:
-    print('::error title=S-1204 disk test::' + '; '.join(problems))
-    sys.exit(1)
-print(f'ok: disk test ({whole["mb_per_s"]} MB/s here)')
+print('ok: media probe (Dolby Vision 7 MEL, HDR10, HLG, HDR10+, audio, subtitles, errors)')
 PY
 
 echo "== SP-05: whisper pipeline smoke test"

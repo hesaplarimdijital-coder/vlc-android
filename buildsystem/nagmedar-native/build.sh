@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper),
+# Native part of Settings > Lab (SP-02 USB audio, SP-05 whisper), the media probe (S-802),
 # the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
 #
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
-#                              dvconvert, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
+#                              mediaprobe, whisper_lab_cli and nagaudio commands (host tests in CI: test-host.sh)
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
@@ -240,24 +240,11 @@ host() {
     build_audio
     cp "$WORK/build-host/audio/nagaudio" "$PREFIX/bin/"
     cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
-    log "dvconvert (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/dvconvert" -I"$PREFIX/include" \
-        "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
-        > "$WORK/dvconvert.log" 2>&1 || fail_log "dvconvert (host)" "$WORK/dvconvert.log"
     log "mediaprobe (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/mediaprobe" -I"$PREFIX/include" \
         "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
         > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
-    log "bitrate (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/bitrate" -I"$PREFIX/include" \
-        "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
-        > "$WORK/bitrate.log" 2>&1 || fail_log "bitrate (host)" "$WORK/bitrate.log"
-    log "disktest (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/disktest" "$ROOT/native/lab/disktest.c" "$ROOT/native/lab/disktest_cli.c" \
-        > "$WORK/disktest.log" 2>&1 || fail_log "disktest (host)" "$WORK/disktest.log"
 }
 
 android() {

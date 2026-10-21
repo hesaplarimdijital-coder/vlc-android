@@ -49,9 +49,6 @@ import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.tvlab.NoTvLabActions
-import app.nagmedar.ui.tvlab.TvLabContent
-import app.nagmedar.ui.tvlab.sampleTvLabView
 
 /** Sample rows for screenshots and layout tests (the medialibrary is native and not available in JVM tests). */
 data class SampleMovie(val title: String, val resolution: String, val duration: String)
@@ -147,8 +144,6 @@ fun SampleScreen(destination: Destination) {
                 }
             }
         }
-        // S-1201: the TV Lab with the sample film analysed
-        Destination.TvLab -> TvLabContent(sampleTvLabView(), NoTvLabActions)
         else -> PlaceholderScreen(destination, onOpenClassic = {})
     }
 }

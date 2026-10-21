@@ -1,9 +1,9 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05), the
+# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/05, S-802), the
 #            music engine (S-901, native/audio) and the subtitle translation (S-710,
-#            native/translate: CTranslate2, SentencePiece) for arm64, with host tests of the
-#            Dolby Vision converter, the whisper pipeline and the engine's bit-exact decoding.
+#            native/translate: CTranslate2, SentencePiece) for arm64, with host tests of the media
+#            probe, the whisper pipeline and the engine's bit-exact decoding.
 #            Cached until native/lab, native/audio, native/translate or
 #            buildsystem/nagmedar-native changes.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
@@ -76,7 +76,7 @@ env:
 
 jobs:
   lab-native:
-    name: Laboratuvar native (SP-02/03/05)
+    name: Laboratuvar native (SP-02/05)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -114,7 +114,7 @@ jobs:
             --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
-      - name: Host derlemesi ve testleri (SP-03, SP-05)
+      - name: Host derlemesi ve testleri (S-802, SP-05)
         if: steps.cache.outputs.cache-hit != 'true' && env.NAGMEDAR_RUN_TESTS == '1'
         env:
           NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test
@@ -355,7 +355,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # the lab's native libraries (arm64): the TV Lab and the Lab's tools
+      # the lab's native libraries (arm64): the media probe and the Lab's tools
       - name: Laboratuvar kitaplıkları
         uses: actions/download-artifact@v4
         with:

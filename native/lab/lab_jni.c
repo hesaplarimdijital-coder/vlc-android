@@ -9,9 +9,6 @@
 #include <libavutil/ffversion.h>
 #include <libusb.h>
 
-#include "bitrate.h"
-#include "disktest.h"
-#include "dvconvert.h"
 #include "mediaprobe.h"
 #include "usb_audio.h"
 #include "whisper_lab.h"
@@ -81,32 +78,9 @@ static void report(Callback *cb, double fraction, const char *message)
         (*env)->ExceptionClear(env);
 }
 
-static void dv_progress(void *opaque, double done, double total, int64_t bytes)
-{
-    char msg[96];
-    snprintf(msg, sizeof(msg), "%.0f / %.0f s · %.0f MB", done, total, bytes / 1e6);
-    report(opaque, total > 0 ? done / total : 0, msg);
-}
-
 static void whisper_progress(void *opaque, double fraction, const char *stage)
 {
     report(opaque, fraction, stage);
-}
-
-static int bitrate_progress_cb(void *opaque, double fraction)
-{
-    char msg[64];
-    snprintf(msg, sizeof(msg), "%.0f %%", fraction * 100);
-    report(opaque, fraction, msg);
-    return g_cancel;
-}
-
-static int disk_progress_cb(void *opaque, double fraction, double mb_per_s)
-{
-    char msg[64];
-    snprintf(msg, sizeof(msg), "%.0f MB/s", mb_per_s);
-    report(opaque, fraction, msg);
-    return g_cancel;
 }
 
 static void usb_progress(void *opaque, double fraction, int64_t frames, int64_t errors)
@@ -131,22 +105,6 @@ JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_cancel(JNIEnv *env, jclas
     (void)env;
     (void)cls;
     g_cancel = 1;
-}
-
-JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_dvConvert(JNIEnv *env, jclass cls, jstring input, jstring output,
-                                                                     jdouble max_seconds, jboolean mp4, jobject listener)
-{
-    (void)cls;
-    g_cancel = 0;
-    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
-    const char *out = (*env)->GetStringUTFChars(env, output, NULL);
-    Callback cb = callback(env, listener);
-    DvcStats stats;
-    dvc_convert(in, out, max_seconds, mp4, &g_cancel, dv_progress, &cb, &stats);
-    jstring result = take(env, dvc_stats_json(&stats, in, out));
-    (*env)->ReleaseStringUTFChars(env, input, in);
-    (*env)->ReleaseStringUTFChars(env, output, out);
-    return result;
 }
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, jclass cls, jstring model, jstring input,
@@ -189,25 +147,4 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_probe(JNIEnv *env, jcl
     jstring result = take(env, media_probe(in, NULL));
     (*env)->ReleaseStringUTFChars(env, input, in);
     return result;
-}
-
-JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_bitrate(JNIEnv *env, jclass cls, jstring input, jdouble max_seconds,
-                                                                  jobject listener)
-{
-    (void)cls;
-    g_cancel = 0;
-    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
-    Callback cb = callback(env, listener);
-    jstring result = take(env, media_bitrate(in, max_seconds, listener ? bitrate_progress_cb : NULL, &cb, &g_cancel));
-    (*env)->ReleaseStringUTFChars(env, input, in);
-    return result;
-}
-
-JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_diskSpeed(JNIEnv *env, jclass cls, jint fd, jlong offset, jlong max_bytes,
-                                                                    jdouble max_seconds, jobject listener)
-{
-    (void)cls;
-    g_cancel = 0;
-    Callback cb = callback(env, listener);
-    return take(env, disk_read_speed(fd, offset, max_bytes, max_seconds, listener ? disk_progress_cb : NULL, &cb, &g_cancel));
 }

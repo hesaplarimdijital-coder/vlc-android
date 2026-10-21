@@ -87,6 +87,7 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 
 ### Yedekleme
 - Ayarlar › Yedekleme: ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz ve söz gecikmeleri, dosya başına ayarlar ve elle seçilen kapaklar tek bir ZIP dosyasına yazılır; içindeki nagmedar-backup.json okunabilir bir kayıttır. Geri yüklerken yedeğin bölümleri sayılarıyla gösterilir, istenenler seçilir. Buradakiler silinmez: aynı adlı ayar, liste ve profiller yedektekiyle değişir, puanlar ve çalınmalar birleştirilir; aynı yedek iki kez geri yüklense de sayılar ikilenmez. Listelerin parçaları kütüphanede yolundan, yoksa adından bulunur (başka bir cihazın yolları da); bulunamayanların sayısı söylenir. Hesap girişleri (OpenSubtitles, Last.fm, ListenBrainz), bu cihazın klasör izinleri ve pencere yerleşimi yedeğe yazılmaz.
+- Ayarlar › Yedekleme: ayarlar, kısayollar, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz ve söz gecikmeleri, dosya başına ayarlar ve elle seçilen kapaklar tek bir ZIP dosyasına yazılır; içindeki nagmedar-backup.json okunabilir bir kayıttır. Geri yüklerken yedeğin bölümleri sayılarıyla gösterilir, istenenler seçilir. Buradakiler silinmez: aynı adlı ayar ve listeler yedektekiyle değişir, puanlar ve çalınmalar birleştirilir; aynı yedek iki kez geri yüklense de sayılar ikilenmez. Listelerin parçaları kütüphanede yolundan, yoksa adından bulunur (başka bir cihazın yolları da); bulunamayanların sayısı söylenir. Hesap girişleri (OpenSubtitles), bu cihazın klasör izinleri ve pencere yerleşimi yedeğe yazılmaz.
 
 ### Podcast
 - Podcastler ekranı: abonelikler kapak ızgarası ya da liste olarak (kapak, ad, yapımcı, yeni bölüm sayısı); bir podcast'in sayfasında bölümler yeniden eskiye, tarihi, süresi ve dinlendi durumuyla listelenir, tıklanan bölüm akıştan oynar (Dinlendi ya da Dinlenmedi olarak işaretleme, RSS ve ses adresini kopyalama sağ tık menüsünde).
@@ -131,13 +132,8 @@ Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine 
 - Altyazı üretimi (Alt+W; oynatıcının altyazı menüsünden ve sekmesinden, bir filmin menüsünden): filmin seçilen ses izi bu cihazda whisper.cpp ile yazıya dökülür ve filmin yanına yeni bir SRT dosyası olarak yazılır (`film.tr.whisper.srt`; klasöre yazılamazsa uygulamanın klasörüne, oradan “Farklı kaydet…”). Dil otomatik, Türkçe ya da İngilizce; istenirse İngilizceye çevrilir. Model Ayarlar › Altyazı'dan seçilir (varsayılan small q5_1; base ve large-v3-turbo da var), ilk kullanımda boyutu söylenip onaylanınca Hugging Face'ten indirilir, kesilirse kaldığı yerden sürer, boyutu ve SHA-256'sı denetlenir, oradan silinir. İş ön planda, bildirimde yüzde, kalan süre ve İptal ile sürer; ses beşer dakikalık parçalarla çözüldüğünden iki saatlik film de aynı bellekle biter. Her altyazı satırı en çok iki sıradır, sırada yaklaşık 42 karakter; uzun konuşma süresiyle orantılı olarak bölünür. İş bitince film açıksa altyazı hemen gösterilebilir; film onu sonraki açılışta da bulur. Uygulama durdurulursa iş baştan başlar.
 - Çevrimdışı altyazı çevirisi (Türkçe ↔ İngilizce; oynatıcının altyazı menüsünde “Altyazıyı çevir…”, altyazı araçlarının “Çevir” sekmesi): çeviri cihazda, internete gönderilmeden yapılır (CTranslate2 ile Helsinki Üniversitesi'nin OPUS-MT modelleri; İngilizce → Türkçe için büyük “tc-big” modeli, 475 MB; Türkçe → İngilizce için int8 temel model, 81 MB). Model ilk kullanımda boyutu söylenerek, onayınızla indirilir, kaldığı yerden sürer, SHA-256 ile doğrulanır ve Ayarlar › Altyazı'dan silinebilir. Çeviri arka planda, ilerlemesi ve İptal'iyle sürer; zamanlar aynen kalır, italik korunur, diyalog satırları ayrı çevrilir. Sonuç özgün dosyanın yanına yeni bir dosyadır (`film.tr.srt`) ve özgünüyle birlikte ikincil altyazı olarak gösterilir; ikisinin yeri değiştirilebilir. Videonun içindeki altyazılar henüz çevrilemiyor.
 
-### TV Lab
-- Bir filmi oynatılacağı cihaza göre analiz eder: kapsayıcı, codec, HDR ve Dolby Vision (profil, BL/EL/RPU, FEL/MEL), ses ve altyazı izleri.
-- Paket düzeyinde bit hızı grafiği (1 ve 5 sn tepe, USB 2.0 eşiği; PNG ve CSV olarak dışa aktarılır), harici diskte sıralı okuma testi, bulgular ve rapor.
-- Cihaz profilleri: LG OLED B4 ve Tab S11 Ultra; düzenlenebilir, JSON dosyası olarak paylaşılır ve içe aktarılır.
-
 ### Laboratuvar ve ölçüm
-- Ayarlar › Laboratuvar: ses çıkışı ve bit-perfect, USB DAC, HDMI ekran ve 24p denemeleri; Dolby Vision profil 7'den 8.1'e dönüştürme; whisper ile konuşmadan altyazı.
+- Ayarlar › Laboratuvar: ses çıkışı ve bit-perfect, USB DAC, HDMI ekran ve 24p denemeleri; whisper ile konuşmadan altyazı.
 - Ayarlar › Performans: soğuk açılış süresi, oynatmaların kayıp kareleri ve pil tüketimi; bilgisayardan çalışan macrobenchmark'lar ve eşikleri (`buildsystem/benchmark`).
 
 ### Dil ve erişilebilirlik
@@ -146,4 +142,4 @@ Nağmedar'ın ilk sürümü: VLC for Android'in libVLC 4 (4.0.0-eap29) üzerine 
 ### Bilinen sınırlar
 - Bu cihaz, Ağ ve Akışlar ekranları MVP4'te gelir; bu sürümde ekranlarındaki düğmeyle klasik arayüzde açılır. Çalma listeleri MVP2'de, Dönüştür MVP3'te, podcast ve radyo MVP4'te.
 - APK, yayımlanmış libVLC 4 AAR'ıyla derlenir. Nağmedar'ın kendi libVLC eklemeleri (S-503 … S-508: oynarken altyazı boyutu, tam kare ileri, renk ve geçmeli tarama ayarları, ses cihazı ve kanal düzeni, kırpma) yalnızca CI'ın native libVLC derlemesinde vardır; bu APK'da olmayanlar bir şey yapmaz ve bunu söyler.
-- Laboratuvarın yerel araçları (USB, Dolby Vision, whisper) ve TV Lab'in analizi yalnızca arm64 APK'sında çalışır.
+- Laboratuvarın yerel araçları (USB, whisper) yalnızca arm64 APK'sında çalışır.

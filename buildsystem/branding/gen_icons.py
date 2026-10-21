@@ -21,7 +21,6 @@ ICONS = {
     'ExternalDrive': '<rect x="2" y="9" width="12" height="4.5" rx="1.2"/><path d="M3.5 9 5 3.5h6L12.5 9"/>',
     'Network': '<rect x="6" y="2" width="4" height="3.5" rx=".8"/><rect x="2" y="10.5" width="4" height="3.5" rx=".8"/><rect x="10" y="10.5" width="4" height="3.5" rx=".8"/><path d="M8 5.5V8M4 10.5V8h8v2.5"/>',
     'Streams': '<path d="M6.5 9.5 9.5 6.5M7 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7l-1.2 1.2M9 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2"/>',
-    'TvLab': '<path d="M6 2.5h4M6.8 2.5v4L3 13a1 1 0 0 0 .9 1.5h8.2A1 1 0 0 0 13 13L9.2 6.5v-4M4.6 10.5h6.8"/>',
     'Convert': '<path d="M3 5.5h9l-2.5-2.5M13 10.5H4l2.5 2.5"/>',
     'Downloads': '<path d="M8 2.5v8M4.8 7.5 8 10.7l3.2-3.2M3 13.5h10"/>',
     'Settings': '<circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2"/>',

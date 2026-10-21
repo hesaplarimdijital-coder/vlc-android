@@ -33,7 +33,7 @@ sealed interface ConvertSteer {
 }
 
 /**
- * S-1010: the converter's rules, the remux queue's (S-1206): on battery, it pauses under
+ * S-1010: the converter's rules: on battery, it pauses under
  * [PAUSE_BELOW] percent and goes on from [RESUME_ABOVE] or when charging; under [STOP_BELOW] it
  * stops, so a long batch never drains the device. A moderately hot device slows it down, a
  * severely hot one pauses it until it cools; critical heat stops it.
