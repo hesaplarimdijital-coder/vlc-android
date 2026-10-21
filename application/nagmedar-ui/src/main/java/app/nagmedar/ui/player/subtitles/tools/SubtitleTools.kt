@@ -263,14 +263,17 @@ class SubtitleToolsController(
     // ---------------------------------------------------------------- cleaning
 
     fun setSdh(options: SdhOptions) {
-        state = state?.let { refreshed(it.copy(sdh = options)) }
+        state = state?.copy(sdh = options) ?: return
+        scheduleRefresh()
     }
 
     /** The cleaning done on the working copy. */
     fun applySdh() {
         val current = state ?: return
-        val result = current.sdhResult ?: return
         val document = current.document ?: return
+        if (!current.sdh.any) return
+        // worked out again on the document as it is: the preview may still be the one from before the last keys
+        val result = SdhCleaner.clean(document.cues, current.sdh)
         if (result.changes.isEmpty()) return
         commit(document.withCues(result.cues), "sdh")
     }
@@ -278,11 +281,13 @@ class SubtitleToolsController(
     // ---------------------------------------------------------------- frame rate
 
     fun setRates(from: FrameRate, to: FrameRate) {
-        state = state?.let { refreshed(it.copy(from = from, to = to)) }
+        state = state?.copy(from = from, to = to) ?: return
+        scheduleRefresh()
     }
 
     fun setShift(ms: Long) {
-        state = state?.let { refreshed(it.copy(shiftMs = ms.coerceIn(-MAX_SHIFT_MS, MAX_SHIFT_MS))) }
+        state = state?.copy(shiftMs = ms.coerceIn(-MAX_SHIFT_MS, MAX_SHIFT_MS)) ?: return
+        scheduleRefresh()
     }
 
     /** The scale and the shift done on the working copy. */
@@ -582,8 +587,8 @@ class SubtitleToolsController(
             val document = value.document ?: return@launch
             val worked = withContext(cpu) { work(document.cues, value) }
             val now = state ?: return@launch
-            // typed into again meanwhile: the later round does it
-            if (now.document !== document) return@launch
+            // typed into again, or the options changed, meanwhile: the later round does it
+            if (now.document !== document || now.sdh != value.sdh || now.from != value.from || now.to != value.to || now.shiftMs != value.shiftMs) return@launch
             state = now.copy(sdhResult = worked.sdh, ratePreview = worked.rate, issues = worked.issues)
         }
     }

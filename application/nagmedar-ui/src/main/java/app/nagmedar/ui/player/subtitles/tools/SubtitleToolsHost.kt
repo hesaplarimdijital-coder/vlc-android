@@ -44,11 +44,13 @@ internal class DocumentSubtitleToolsIo(private val context: Context) : SubtitleT
         val resolver = context.contentResolver
         // the original is never written into, whatever the picker confirmed; nor is any file that is not new and empty
         if (DocumentIdentity.same(target, Uri.parse(source.uri))) return@withContext WriteOutcome.SameFile
-        if ((DocumentIdentity.sizeOf(resolver, target) ?: 0L) > 0L) return@withContext WriteOutcome.SameFile
+        val size = DocumentIdentity.sizeOf(resolver, target)
+        if (size != null && size > 0L) return@withContext WriteOutcome.SameFile
         val written = runCatching { resolver.openOutputStream(target, "wt")?.use { it.write(bytes) } != null }.getOrDefault(false)
         if (written) return@withContext WriteOutcome.Written
-        // what the picker made for this write does not stay, empty or half written
-        runCatching { DocumentsContract.deleteDocument(resolver, target) }.recoverCatching { resolver.delete(target, null, null) }
+        // what the picker made for this write (it was empty) does not stay, empty or half written;
+        // a document whose size was not told is left alone rather than removed
+        if (size == 0L) runCatching { DocumentsContract.deleteDocument(resolver, target) }.recoverCatching { resolver.delete(target, null, null) }
         WriteOutcome.Failed
     }
 }

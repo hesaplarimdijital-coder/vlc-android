@@ -2543,7 +2543,7 @@
     <string name="nag_save_saved_beside">%1$s olarak özgün dosyanın yanına kaydedildi</string>
     <string name="nag_save_saved_elsewhere">%1$s olarak kaydedildi</string>
     <string name="nag_save_loaded">filmde gösteriliyor</string>
-    <string name="nag_save_same_file">Bu özgün dosya; yeni bir ad seçin, özgün dosya olduğu gibi kalır</string>
+    <string name="nag_save_same_file">Bu dosya yeni değil; yeni bir ad seçin. Hiçbir dosya değiştirilmedi</string>
     <string name="nag_subtools_ask_title">Kaydetmeden kapatılsın mı?</string>
     <string name="nag_subtools_ask">Değişiklikler kaydedilmedi. Şimdi kapatırsanız kaybolur.</string>
     <string name="nag_subtools_ask_save">Kaydet</string>
