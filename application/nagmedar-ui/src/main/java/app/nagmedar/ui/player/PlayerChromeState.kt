@@ -140,6 +140,9 @@ interface PlayerChromeActions {
     /** S-709: "Generate subtitles…" (Alt+W): the film's speech transcribed on the device into a new SRT file. */
     fun generateSubtitles() {}
 
+    /** S-710: the tools on their translation tab: the film's subtitles translated offline, shown with the original. */
+    fun translateSubtitles() {}
+
     /** Leaves the player. */
     fun close()
 

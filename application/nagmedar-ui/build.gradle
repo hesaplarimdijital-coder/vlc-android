@@ -60,6 +60,8 @@ dependencies {
     implementation project(':application:nagmedar-lab')
     // S-901: whether this build carries the music engine (Settings › Music)
     implementation project(':application:nagmedar-audio')
+    // S-710: the offline subtitle translation's engine and models
+    implementation project(':application:nagmedar-translate')
 
     implementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     implementation 'androidx.compose.ui:ui'

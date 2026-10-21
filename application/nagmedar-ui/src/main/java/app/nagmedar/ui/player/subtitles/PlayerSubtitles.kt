@@ -21,9 +21,13 @@ import app.nagmedar.ui.player.subtitles.tools.SubtitleFormat
 import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsController
 import app.nagmedar.ui.player.subtitles.tools.ToolsFile
 import app.nagmedar.ui.player.subtitles.tools.ToolsPlayback
+import app.nagmedar.ui.player.subtitles.tools.ToolsTab
+import app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateController
+import app.nagmedar.ui.player.subtitles.translate.WorkTranslationService
 import app.nagmedar.ui.player.subtitles.whisper.WhisperController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.libvlc.interfaces.IMedia
@@ -65,15 +69,22 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
     var encoding by mutableStateOf<EncodingSample?>(null)
         private set
 
-    /** The subtitle tools (S-708), over the video: the film's subtitle files cleaned, converted and edited into new files. */
+    /**
+     * The subtitle tools (S-708), over the video: the film's subtitle files cleaned, converted and
+     * edited into new files, or translated offline (S-710) and shown with the original.
+     */
     val tools = SubtitleToolsController(
         DocumentSubtitleToolsIo(activity.applicationContext),
         scope,
         activity.getString(R.string.nag_subtools_edited_word),
+        translation = SubtitleTranslateController(WorkTranslationService(activity.applicationContext), scope, Locale.getDefault().language),
     )
 
     /** "Generate subtitles…" (S-709): the film's speech transcribed on the device. */
     val whisper = WhisperController(activity.applicationContext, scope)
+
+    /** S-703: the film's two subtitle tracks, which a translation (S-710) shows as the secondary one. */
+    var dual: DualSubtitlesController? = null
 
     /** The film whose folder was read: once a film. */
     private var lookedAt: String? = null
@@ -219,16 +230,19 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
      * beside the film, SRT, WebVTT and ASS/SSA) in the tools' window, with the film itself at hand
      * for the editor: its position, going to a line, and the saved file shown at once.
      */
-    fun openTools() {
+    fun openTools(tab: ToolsTab = ToolsTab.Clean) {
         val service = activity.service ?: return
         val video = service.currentMediaWrapper?.uri ?: return
         val context = activity.applicationContext
         val loaded = subtitleFiles()
         scope.launch {
             val files = withContext(Dispatchers.IO) { toolsFiles(context, video, loaded) }
-            tools.open(files, playback())
+            tools.open(files, playback(), tab)
         }
     }
+
+    /** "Translate subtitles…" (S-710): the tools on their translation tab. */
+    fun openTranslation() = openTools(ToolsTab.Translate)
 
     /** The film as the editor drives it: its clock is the subtitles' (the film's less their delay). */
     private fun playback() = object : ToolsPlayback {
@@ -245,6 +259,35 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
             note = activity.getString(R.string.nag_subtools_note, saved.name)
             return true
         }
+
+        override suspend fun showTranslation(original: ToolsFile, saved: SavedSubtitle): Boolean {
+            val dual = dual ?: return load(saved)
+            dual.refresh()
+            // no subtitles show: the original first, as the primary ones
+            if (dual.state.primary == null) {
+                if (!this@PlayerSubtitles.load(Uri.parse(original.uri), original.name, select = true)) return false
+                if (!waitFor { dual.refresh(); dual.state.primary != null }) return false
+            }
+            val before = dual.state.tracks.map { it.id }.toSet()
+            if (!this@PlayerSubtitles.load(Uri.parse(saved.uri), saved.name, select = false)) return false
+            note = activity.getString(R.string.nag_subtools_note, saved.name)
+            // the new track comes a moment after the file is added
+            var added: String? = null
+            if (!waitFor { dual.refresh(); added = dual.state.tracks.firstOrNull { it.id !in before }?.id; added != null }) return false
+            dual.setSecondary(added)
+            return dual.state.secondaryOn
+        }
+
+        override fun swapSubtitles(): Boolean = dual?.swap() ?: false
+    }
+
+    /** [ready] asked again every [WAIT_STEP_MS] for a few seconds; whether it came true. */
+    private suspend fun waitFor(ready: () -> Boolean): Boolean {
+        repeat(WAIT_STEPS) {
+            if (ready()) return true
+            delay(WAIT_STEP_MS)
+        }
+        return ready()
     }
 
     /**
@@ -352,6 +395,8 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         /** The audio tracks' "off". */
         const val NO_TRACK = "-1"
         const val US_PER_MS = 1_000L
+        const val WAIT_STEPS = 20
+        const val WAIT_STEP_MS = 150L
     }
 }
 

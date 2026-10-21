@@ -118,6 +118,9 @@ internal fun compactLicenseName(name: String): String =
 @ReadOnlyComposable
 internal fun licenseLabel(license: License): String = when (license.id) {
     "bsd3" -> stringResource(R.string.nag_license_bsd3)
+    // S-710: cpuinfo and darts-clone; the OPUS-MT model
+    "bsd2" -> stringResource(R.string.nag_license_bsd2)
+    "ccby4" -> "CC BY 4.0"
     "gsm" -> stringResource(R.string.nag_license_gsm)
     "harfbuzz" -> stringResource(R.string.nag_license_old_mit)
     "publicdomain" -> stringResource(R.string.nag_license_public_domain)

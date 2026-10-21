@@ -1,0 +1,26 @@
+// S-710: offline subtitle translation. libnagmedar_translate.so (CTranslate2 and SentencePiece,
+// native/translate) is built by buildsystem/nagmedar-native and dropped into src/main/jniLibs by
+// CI; without it the translation says that the build lacks it. The models are downloaded on the
+// user's consent into the app's private storage, never shipped in the APK.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.translate'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+}

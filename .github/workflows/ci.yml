@@ -1,9 +1,11 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05) and
-#            the music engine (S-901, native/audio) for arm64, with host tests of the Dolby
-#            Vision converter, the whisper pipeline and the engine's bit-exact decoding.
-#            Cached until native/lab, native/audio or buildsystem/nagmedar-native changes.
+# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05), the
+#            music engine (S-901, native/audio) and the subtitle translation (S-710,
+#            native/translate: CTranslate2, SentencePiece) for arm64, with host tests of the
+#            Dolby Vision converter, the whisper pipeline and the engine's bit-exact decoding.
+#            Cached until native/lab, native/audio, native/translate or
+#            buildsystem/nagmedar-native changes.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
 #            (compile check) and the macrobenchmarks with the benchmark build they measure
 #            (uploaded, S-1404) against the published libVLC 4 AAR, without native
@@ -89,7 +91,8 @@ jobs:
           path: |
             application/nagmedar-lab/src/main/jniLibs
             application/nagmedar-audio/src/main/jniLibs
-          key: lab-native-${{ hashFiles('native/lab/**', 'native/audio/**', 'buildsystem/nagmedar-native/**') }}
+            application/nagmedar-translate/src/main/jniLibs
+          key: lab-native-${{ hashFiles('native/lab/**', 'native/audio/**', 'native/translate/**', 'buildsystem/nagmedar-native/**') }}
 
       - uses: actions/setup-java@v5
         if: steps.cache.outputs.cache-hit != 'true'
@@ -151,6 +154,7 @@ jobs:
           path: |
             application/nagmedar-lab/src/main/jniLibs
             application/nagmedar-audio/src/main/jniLibs
+            application/nagmedar-translate/src/main/jniLibs
           if-no-files-found: error
 
   app:

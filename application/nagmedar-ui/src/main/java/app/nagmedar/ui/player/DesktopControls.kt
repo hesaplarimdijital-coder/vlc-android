@@ -379,6 +379,7 @@ private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions,
     val toolsKeys = ShortcutRegistry.chordLabel(ShortcutId.SubtitleTools, resources)
     val generate = stringResource(R.string.nag_whisper_menu)
     val generateKeys = ShortcutRegistry.chordLabel(ShortcutId.GenerateSubtitles, resources)
+    val translate = stringResource(R.string.nag_translate_menu)
     val secondaryLabel = stringResource(R.string.nag_sc_secondary_subtitles)
     val secondaryKeys = ShortcutRegistry.chordLabel(ShortcutId.SecondarySubtitles, resources)
     MenuChip(
@@ -401,6 +402,7 @@ private fun SubtitleMenu(state: PlayerChromeState, actions: PlayerChromeActions,
                     MenuEntry.Item(encoding, actions::chooseSubtitleEncoding),
                     MenuEntry.Item(tools, actions::openSubtitleTools, shortcut = toolsKeys),
                     MenuEntry.Item(generate, actions::generateSubtitles, shortcut = generateKeys),
+                    MenuEntry.Item(translate, actions::translateSubtitles),
                 )
         },
         visibility = visibility,

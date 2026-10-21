@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.player.subtitles.translate.TranslationModelRows
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 
@@ -55,6 +57,8 @@ fun SubtitleProvidersSection(
     onChooseFolder: () -> Unit,
     onForgetFolder: () -> Unit,
     folderError: Boolean = false,
+    /** S-710: what else the section holds: the translation's models. */
+    extra: @Composable ColumnScope.() -> Unit = {},
 ) {
     val dimens = NagTheme.dimens
     SettingsSection(stringResource(R.string.nag_prov_settings)) {
@@ -91,6 +95,7 @@ fun SubtitleProvidersSection(
                 }
             }
         }
+        extra()
     }
 }
 
@@ -160,6 +165,10 @@ fun SubtitleProvidersSettings() {
             folderError = false
         },
         folderError = folderError,
+        extra = {
+            Spacer(Modifier.height(NagTheme.dimens.gapM))
+            TranslationModelRows()
+        },
     )
 }
 

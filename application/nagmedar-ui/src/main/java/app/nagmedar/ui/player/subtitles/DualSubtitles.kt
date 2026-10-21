@@ -205,6 +205,21 @@ class DualSubtitlesController(
         return state.secondaryOn
     }
 
+    /**
+     * S-710: the primary and the secondary change places (which shows on top); false when only
+     * one shows.
+     */
+    fun swap(): Boolean {
+        refresh()
+        val current = state
+        val primary = current.primary ?: return false
+        val secondary = current.secondary?.takeIf { current.secondaryOn && it != primary } ?: return false
+        target.select(listOf(secondary, primary))
+        state = current.copy(primary = secondary, secondary = primary, secondaryOn = true)
+        keep()
+        return true
+    }
+
     /** A film started or went on: the secondary it keeps shows again once its tracks are there. */
     fun onMediaStarted(uri: String?) {
         if (uri == media) {

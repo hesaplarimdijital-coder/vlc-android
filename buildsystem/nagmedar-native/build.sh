@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper)
-# and the music engine (S-901, native/audio).
+# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper),
+# the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
 #
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
 #                              dvconvert, mediaprobe and nagaudio commands (host tests in CI: test-host.sh)
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
-#                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
+#                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
+#                              SentencePiece, libnagmedar_translate.so into application/nagmedar-translate
+#                              (needs ANDROID_NDK)
 #
 # Sources are cloned at the versions in versions.env into $NAGMEDAR_NATIVE_WORK
 # (default native/.work). Nothing here is needed for a build without the lab tools:
@@ -175,6 +177,33 @@ build_lab() { # extra cmake args...
     grep -E "warning:" "$dir.build.log" | grep -v "/src/libusb/" | head -20 || true
 }
 
+# S-710: CTranslate2 with the submodules its CPU build uses (spdlog, Ruy and its cpuinfo,
+# cpu_features); the CUDA ones are left out
+fetch_ct2() {
+    if [ ! -f "$WORK/src/ctranslate2/.fetched" ]; then
+        log "fetch ctranslate2 $CT2_REF"
+        rm -rf "$WORK/src/ctranslate2"
+        git clone -q --depth 1 --branch "$CT2_REF" "$CT2_URL" "$WORK/src/ctranslate2"
+        git -C "$WORK/src/ctranslate2" submodule -q update --init --depth 1 third_party/spdlog third_party/ruy third_party/cpu_features
+        git -C "$WORK/src/ctranslate2/third_party/ruy" submodule -q update --init --depth 1 third_party/cpuinfo
+        touch "$WORK/src/ctranslate2/.fetched"
+    fi
+}
+
+# S-710: libnagmedar_translate, CTranslate2 and SentencePiece built into it (their own CMake builds, as subprojects)
+build_translate() { # extra cmake args...
+    fetch_ct2
+    fetch sentencepiece "$SPM_URL" "$SPM_REF"
+    log "libnagmedar_translate ($TARGET)"
+    local dir="$WORK/build-$TARGET/translate"
+    mkdir -p "$WORK/build-$TARGET"
+    cmake -S "$ROOT/native/translate" -B "$dir" -DCMAKE_BUILD_TYPE=Release \
+        -DCT2_SOURCE="$WORK/src/ctranslate2" -DSPM_SOURCE="$WORK/src/sentencepiece" \
+        -DCT2_VERSION="${CT2_REF#v}" -DSPM_VERSION="${SPM_REF#v}" \
+        "$@" > "$dir.configure.log" 2>&1 || fail_log "translate configure ($TARGET)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" --target nagmedar_translate > "$dir.build.log" 2>&1 || fail_log "libnagmedar_translate ($TARGET)" "$dir.build.log"
+}
+
 build_taglib() { # extra cmake args...
     fetch taglib "$TAGLIB_URL" "$TAGLIB_REF"
     fetch utfcpp "$UTFCPP_URL" "$UTFCPP_REF"
@@ -262,6 +291,12 @@ android() {
     cp "$WORK/build-android/audio/libnagmedar_audio.so" "$audio_out/"
     "$tc/bin/llvm-strip" --strip-unneeded "$audio_out/libnagmedar_audio.so"
     ls -la "$audio_out"
+    build_translate "${ndk_cmake[@]}"
+    local translate_out="$ROOT/application/nagmedar-translate/src/main/jniLibs/arm64-v8a"
+    mkdir -p "$translate_out"
+    cp "$WORK/build-android/translate/libnagmedar_translate.so" "$translate_out/"
+    "$tc/bin/llvm-strip" --strip-unneeded "$translate_out/libnagmedar_translate.so"
+    ls -la "$translate_out"
 }
 
 case "$TARGET" in

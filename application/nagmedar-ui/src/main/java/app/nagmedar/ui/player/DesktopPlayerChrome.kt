@@ -327,6 +327,8 @@ class DesktopPlayerChrome : PlayerChrome {
             forcedLanguages = { forcedLanguages(activity) },
         )
         this.dual = dual
+        // S-710: a translation shows as the film's secondary subtitles
+        subtitles.dual = dual
         // the secondary subtitles' place (S-503), as libVLC's options take it
         val secondaryLayout = PrefsSecondaryLayout(settings)
         // the subtitles' look (S-705), for every film; its size at once with Nağmedar's libVLC (S-503)
@@ -975,7 +977,7 @@ private fun PanelContent(
                                     subtitles.files.onlineFilm()?.let { film -> search.open(film, onlineLanguages(locale)) }
                                 }
                             },
-                            tools = { SubtitleToolsSection(onOpen = subtitles.files::openTools) },
+                            tools = { SubtitleToolsSection(onOpen = { subtitles.files.openTools() }, onTranslate = subtitles.files::openTranslation) },
                             generate = {
                                 val status by rememberWhisperStatus()
                                 WhisperSection(status, onOpen = subtitles.files::openWhisper, onStop = { WhisperJobs.cancel(activity) })
@@ -1246,6 +1248,8 @@ internal class ActivityPlayerSource(
     override fun openSubtitleTools() = subtitles.openTools()
 
     override fun generateSubtitles() = subtitles.openWhisper()
+
+    override fun translateSubtitles() = subtitles.openTranslation()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 

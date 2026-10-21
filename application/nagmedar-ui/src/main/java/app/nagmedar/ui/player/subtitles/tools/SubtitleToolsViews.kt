@@ -80,6 +80,7 @@ import app.nagmedar.ui.player.panel.PanelRule
 import app.nagmedar.ui.player.panel.decimal
 import app.nagmedar.ui.player.panel.signed
 import app.nagmedar.ui.player.subtitles.SubtitleEncoding
+import app.nagmedar.ui.player.subtitles.translate.TranslateTab
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DecimalFormatSymbols
@@ -152,11 +153,14 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
             }
             if (document != null) {
                 PanelCaption(fileInfo(state, document, locale), Modifier.testTag("subtools-info"))
+                val translation = controller.translation
                 SegmentedChoice(
-                    options = listOf(
+                    options = listOfNotNull(
                         ToolsTab.Clean to stringResource(R.string.nag_subtools_tab_clean),
                         ToolsTab.FrameRate to stringResource(R.string.nag_subtools_tab_rate),
                         ToolsTab.Edit to stringResource(R.string.nag_subtools_tab_lines),
+                        // S-710: the offline translation, into a file of its own
+                        (ToolsTab.Translate to stringResource(R.string.nag_translate_tab)).takeIf { translation != null },
                     ),
                     selected = state.tab,
                     onSelect = controller::setTab,
@@ -168,10 +172,16 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
                         ToolsTab.Clean -> CleanTab(state, controller, locale, wide)
                         ToolsTab.FrameRate -> RateTab(state, controller, locale, wide)
                         ToolsTab.Edit -> LinesTab(state, controller, document, locale, wide)
+                        ToolsTab.Translate -> if (translation != null) {
+                            TranslateTab(translation, hasDocument = true, playing = controller.playback != null) { translation.translate(controller.state?.document) }
+                        }
                     }
                 }
-                PanelRule()
-                SaveBar(state, controller, locale)
+                // the translation writes a file of its own; the edits' Save is the other tabs'
+                if (state.tab != ToolsTab.Translate) {
+                    PanelRule()
+                    SaveBar(state, controller, locale)
+                }
             } else {
                 Column(Modifier.weight(1f)) {}
             }
@@ -199,9 +209,9 @@ private fun CloseQuestion(controller: SubtitleToolsController, state: SubtitleTo
     }
 }
 
-/** The subtitles' tab's entry to the tools (S-708): a button and a line on what they do. */
+/** The subtitles' tab's entry to the tools (S-708): a button and a line on what they do; [onTranslate], the translation's (S-710). */
 @Composable
-fun SubtitleToolsSection(onOpen: () -> Unit) {
+fun SubtitleToolsSection(onOpen: () -> Unit, onTranslate: (() -> Unit)? = null) {
     Column(Modifier.fillMaxWidth().testTag("subtitles-tools"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         NagButton(
             stringResource(R.string.nag_subtools_menu),
@@ -209,6 +219,13 @@ fun SubtitleToolsSection(onOpen: () -> Unit) {
             modifier = Modifier.fillMaxWidth().testTag("tools-open"),
             icon = NagIcons.Subtitle,
         )
+        if (onTranslate != null) {
+            NagButton(
+                stringResource(R.string.nag_translate_menu),
+                onTranslate,
+                modifier = Modifier.fillMaxWidth().testTag("tools-translate"),
+            )
+        }
         PanelCaption(stringResource(R.string.nag_subtools_section_hint))
     }
 }

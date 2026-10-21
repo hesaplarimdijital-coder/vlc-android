@@ -20,9 +20,12 @@ import app.nagmedar.ui.player.subtitles.SubtitleEncodings
 import app.nagmedar.ui.player.subtitles.displayName
 import app.nagmedar.ui.player.subtitles.saveBeside as saveNextToFile
 import app.nagmedar.ui.player.subtitles.toolsFiles
+import app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateController
+import app.nagmedar.ui.player.subtitles.translate.WorkTranslationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /**
  * The tools' files as the system's documents (S-708): read whole (with the app's character set
@@ -83,7 +86,13 @@ fun SubtitleToolsHost() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val controller = remember(context, scope) {
-        SubtitleToolsController(DocumentSubtitleToolsIo(context.applicationContext), scope, context.getString(R.string.nag_subtools_edited_word))
+        SubtitleToolsController(
+            DocumentSubtitleToolsIo(context.applicationContext),
+            scope,
+            context.getString(R.string.nag_subtools_edited_word),
+            // S-710: the offline translation, into a new file beside the original
+            translation = SubtitleTranslateController(WorkTranslationService(context.applicationContext), scope, Locale.getDefault().language),
+        )
     }
     LaunchedEffect(request) {
         val film = Uri.parse(request.film)

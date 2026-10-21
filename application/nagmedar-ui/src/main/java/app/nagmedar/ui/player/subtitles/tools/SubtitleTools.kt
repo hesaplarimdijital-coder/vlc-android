@@ -10,6 +10,7 @@ import app.nagmedar.ui.player.subtitles.SavedSubtitle
 import app.nagmedar.ui.player.subtitles.SubtitleEncoding
 import app.nagmedar.ui.player.subtitles.decodeSubtitle
 import app.nagmedar.ui.player.subtitles.detectEncoding
+import app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateController
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -33,8 +34,8 @@ enum class WriteOutcome { Written, SameFile, Failed }
 /** Why a save did not go through. */
 enum class SaveProblem { Failed, SameFile }
 
-/** The three tools, as tabs (S-708). */
-enum class ToolsTab { Clean, FrameRate, Edit }
+/** The tools, as tabs (S-708); the offline translation (S-710) where the window has it. */
+enum class ToolsTab { Clean, FrameRate, Edit, Translate }
 
 /** What the tools read and write: files as bytes (the app's own implementation uses the system's documents). */
 interface SubtitleToolsIo {
@@ -62,6 +63,15 @@ interface ToolsPlayback {
 
     /** The saved file into the film, showing. */
     suspend fun load(saved: SavedSubtitle): Boolean
+
+    /**
+     * S-710: the translation [saved] of [original] into the film as the secondary subtitles, the
+     * original showing as the primary ones (loaded first when no subtitles show); whether both show.
+     */
+    suspend fun showTranslation(original: ToolsFile, saved: SavedSubtitle): Boolean = false
+
+    /** S-710: the film's primary and secondary subtitles change places; whether they did. */
+    fun swapSubtitles(): Boolean = false
 }
 
 /** What the frame rate tab would do: the first and last times before and after, and the scale. */
@@ -128,6 +138,8 @@ class SubtitleToolsController(
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
     /** How long typing rests before the previews and the issues are worked out again. */
     private val debounceMs: Long = REFRESH_DEBOUNCE_MS,
+    /** S-710: the translation tab's controller; without one the window has no such tab. */
+    val translation: SubtitleTranslateController? = null,
 ) {
     var state by mutableStateOf<SubtitleToolsState?>(null)
         private set
@@ -144,9 +156,10 @@ class SubtitleToolsController(
     private var refreshJob: Job? = null
 
     /** The window opens on [files] (the first is read), with [playback] when a film plays. */
-    fun open(files: List<ToolsFile>, playback: ToolsPlayback? = null) {
+    fun open(files: List<ToolsFile>, playback: ToolsPlayback? = null, tab: ToolsTab = ToolsTab.Clean) {
         this.playback = playback
-        state = SubtitleToolsState(files = files, loadAfter = playback != null)
+        translation?.attach(playback)
+        state = SubtitleToolsState(files = files, loadAfter = playback != null, tab = if (tab == ToolsTab.Translate && translation == null) ToolsTab.Clean else tab)
         files.firstOrNull()?.let { choose(it) }
     }
 
@@ -177,6 +190,8 @@ class SubtitleToolsController(
     fun close() {
         job?.cancel()
         refreshJob?.cancel()
+        // a translation under way goes on in the background; the window stops following it
+        translation?.detach()
         state = null
         original = null
         history.clear()
@@ -208,6 +223,7 @@ class SubtitleToolsController(
             confirmClose = false,
             pickName = null,
         )
+        translation?.setSource(file, null)
         job = scope.launch {
             val bytes = try {
                 io.read(file)
@@ -240,6 +256,7 @@ class SubtitleToolsController(
             }
             val (document, encoding) = read
             original = document
+            translation?.setSource(file, document)
             val current = state ?: return@launch
             state = refreshed(
                 current.copy(
