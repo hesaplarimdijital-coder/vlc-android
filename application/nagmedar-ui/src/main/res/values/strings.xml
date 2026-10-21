@@ -298,7 +298,6 @@
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
     <string name="nag_coming_streams">Network streams and saved addresses.</string>
     <string name="nag_coming_convert">Conversion profiles, jobs and streaming on the network (HLS).</string>
-    <string name="nag_coming_convert">Conversion jobs.</string>
     <string name="nag_coming_downloads">Podcast episodes, subtitles and other downloads.</string>
     <string name="nag_open_classic">Open the classic interface</string>
 
