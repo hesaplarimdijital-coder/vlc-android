@@ -336,6 +336,11 @@
       "license"  : "mit"
     },
     {
+      "title"    : "Whisper models (OpenAI)",
+      "copyright": "Copyright © 2022 OpenAI",
+      "license"  : "mit"
+    },
+    {
       "title"    : "whisper.cpp",
       "copyright": "Copyright © 2023-2026 the ggml authors",
       "license"  : "mit"

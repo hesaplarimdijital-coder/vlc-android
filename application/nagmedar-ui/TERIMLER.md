@@ -46,6 +46,9 @@ Sözlüğü testler denetler:
 | işitme engelliler için altyazı | subtitles for the hard of hearing | sağır altyazısı | deaf subtitles | Kısaca SDH: ses betimlemeleri, konuşmacı etiketleri, müzik işaretleri içerir; “Altyazı araçları › Temizle” bunları kaldırır |
 | kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
+| altyazı üretmek | generate subtitles | | | Filmin konuşmasını bu cihazda Whisper ile yazıya döküp yeni bir SRT dosyası yapmak: “Altyazı üret…” (Alt+W); dosya `film.tr.whisper.srt` adıyla filmin yanına yazılır. Ayarlar'daki bölümü “Altyazı üretimi” |
+| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince boyutu onaylanıp bir kez indirilir, Ayarlar › Altyazı'dan silinir |
+| sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |

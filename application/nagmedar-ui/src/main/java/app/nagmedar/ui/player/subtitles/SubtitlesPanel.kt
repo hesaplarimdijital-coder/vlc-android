@@ -107,7 +107,8 @@ class PrefsSecondaryLayout(private val prefs: SharedPreferences) : SecondaryLayo
  * primary and the secondary one shown with it (a switch turns it on and off, as Alt+V does), the
  * file the subtitles came from; their delay and the sync assistant ([sync], S-704); their look
  * ([appearance], S-705); the secondary's place, and the forced subtitles, which wait for the
- * player's native side; subtitles from OpenSubtitles ([online], S-706); the subtitle tools ([tools], S-708).
+ * player's native side; subtitles from OpenSubtitles ([online], S-706); the subtitle tools ([tools], S-708);
+ * subtitles from the film's speech ([generate], S-709).
  */
 @Composable
 fun SubtitlesPanel(
@@ -134,8 +135,10 @@ fun SubtitlesPanel(
     appearance: (@Composable () -> Unit)? = null,
     /** Subtitles from OpenSubtitles (S-706). */
     online: (@Composable () -> Unit)? = null,
-    /** The subtitle tools (S-708), last. */
+    /** The subtitle tools (S-708). */
     tools: (@Composable () -> Unit)? = null,
+    /** Subtitles from the film's speech (S-709), last. */
+    generate: (@Composable () -> Unit)? = null,
 ) {
     Box(modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("subtitles-panel")) {
         val tracks = @Composable { TracksSection(state, note, onPrimary, onSecondary, onSecondaryOn, forced, onForced) }
@@ -164,6 +167,10 @@ fun SubtitlesPanel(
                         PanelRule()
                         tools()
                     }
+                    if (generate != null) {
+                        PanelRule()
+                        generate()
+                    }
                 }
             }
         } else {
@@ -186,6 +193,10 @@ fun SubtitlesPanel(
                 if (tools != null) {
                     PanelRule()
                     tools()
+                }
+                if (generate != null) {
+                    PanelRule()
+                    generate()
                 }
             }
         }

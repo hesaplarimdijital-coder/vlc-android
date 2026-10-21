@@ -27,6 +27,30 @@ object NativeLab {
     /** SP-05: transcribe the first audio track of [input] with the ggml model at [model]. */
     @JvmStatic external fun whisper(model: String, input: String, language: String, maxSeconds: Double, threads: Int, listener: Progress?): String
 
+    /** S-709: what a transcription tells as it goes, on the thread that runs it. */
+    interface Transcription {
+        /** [doneSeconds] of the film transcribed of [totalSeconds] (0 when the film does not say). */
+        fun onProgress(doneSeconds: Double, totalSeconds: Double)
+
+        /** One line of speech, its times in milliseconds of the film. */
+        fun onSegment(startMs: Long, endMs: Long, text: String)
+
+        /** The language whisper heard ("tr"), when it was asked to find it. */
+        fun onLanguage(code: String)
+    }
+
+    /**
+     * S-709: the speech of audio track [audioTrack] of [input] (the n-th audio track, 0 first; -1
+     * for the best one) transcribed with the ggml model at [model], in [language] ("tr", "en",
+     * "auto"), into English when [translate], on [threads] threads; five minutes at a time, so a
+     * film of any length fits in memory. Blocking; [cancelTranscription] stops it. The result is
+     * a JSON object: "error" ("" when it went through), "detail", "language", "audio_seconds".
+     */
+    @JvmStatic external fun transcribe(model: String, input: String, audioTrack: Int, language: String, translate: Boolean, threads: Int, listener: Transcription): String
+
+    /** S-709: stops the running [transcribe] soon; the Lab's [cancel] does not. */
+    @JvmStatic external fun cancelTranscription()
+
     /** SP-02: formats, clock and rates of the USB audio device behind [fd]. */
     @JvmStatic external fun usbDescribe(fd: Int): String
 

@@ -134,6 +134,11 @@ import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.providers.SubtitleProviders
 import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsSection
 import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsWindow
+import app.nagmedar.ui.player.subtitles.whisper.WhisperDialog
+import app.nagmedar.ui.player.subtitles.whisper.WhisperJobs
+import app.nagmedar.ui.player.subtitles.whisper.WhisperOutcomeCorner
+import app.nagmedar.ui.player.subtitles.whisper.WhisperSection
+import app.nagmedar.ui.player.subtitles.whisper.rememberWhisperStatus
 import app.nagmedar.ui.player.subtitles.PrefsSubtitleStyleStore
 import app.nagmedar.ui.player.subtitles.RoomSecondaryStore
 import app.nagmedar.ui.player.subtitles.SubtitleChooser
@@ -235,6 +240,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.AddSubtitleFile -> subtitles?.pick?.invoke()
                 // S-708: the subtitle tools
                 ShortcutId.SubtitleTools -> subtitles?.openTools()
+                // S-709: subtitles from the film's speech
+                ShortcutId.GenerateSubtitles -> subtitles?.openWhisper()
                 // S-703: the secondary subtitles, on or off
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
                 // S-1302: the device picker
@@ -665,6 +672,7 @@ private fun PlayerChromeContent(
     }
     var state by remember { mutableStateOf(PlayerChromeState()) }
     var uri by remember { mutableStateOf<Uri?>(null) }
+    val whisperStatus by rememberWhisperStatus()
     LaunchedEffect(source, visibility.visible) {
         while (true) {
             state = source.read()
@@ -716,6 +724,14 @@ private fun PlayerChromeContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     SubtitleChooser(subtitles.found, onChoose = subtitles::choose, onDismiss = subtitles::dismiss)
+                    // S-709: the subtitles a job made for this film, offered when it is done
+                    if (subtitles.whisper.state == null) {
+                        WhisperOutcomeCorner(
+                            whisperStatus?.takeIf { uri != null && it.request?.film == uri.toString() },
+                            onLoad = subtitles::loadGenerated,
+                            beforePicker = { activity.isShowingDialog = true },
+                        )
+                    }
                     SnapshotCard(
                         outcome = snapshots.state.outcome,
                         saving = snapshots.state.saving,
@@ -744,6 +760,21 @@ private fun PlayerChromeContent(
             subtitles.encoding?.let { sample -> EncodingDialog(sample, onApply = subtitles::applyEncoding, onDismiss = subtitles::closeEncoding) }
             // S-708: the subtitle tools; a picker over the player is not leaving it
             SubtitleToolsWindow(subtitles.tools, onClose = subtitles.tools::close, beforePicker = { activity.isShowingDialog = true })
+            // S-709: subtitles from the film's speech, the finished file shown at once when asked
+            subtitles.whisper.state?.let { dialog ->
+                WhisperDialog(
+                    subtitles.whisper,
+                    dialog,
+                    whisperStatus,
+                    onLoad = { saved ->
+                        subtitles.loadGenerated(saved)
+                        whisperStatus?.let { WhisperJobs.dismiss(activity, it.id) }
+                        subtitles.whisper.close()
+                    },
+                    onDismiss = subtitles.whisper::close,
+                    beforePicker = { activity.isShowingDialog = true },
+                )
+            }
             // S-706: subtitles from OpenSubtitles
             online.state?.let { search ->
                 OnlineSubtitlesDialog(
@@ -945,6 +976,10 @@ private fun PanelContent(
                                 }
                             },
                             tools = { SubtitleToolsSection(onOpen = subtitles.files::openTools) },
+                            generate = {
+                                val status by rememberWhisperStatus()
+                                WhisperSection(status, onOpen = subtitles.files::openWhisper, onStop = { WhisperJobs.cancel(activity) })
+                            },
                         )
                     }
                     PanelTab.Sync -> {
@@ -1209,6 +1244,8 @@ internal class ActivityPlayerSource(
     override fun chooseSubtitleEncoding() = subtitles.openEncoding()
 
     override fun openSubtitleTools() = subtitles.openTools()
+
+    override fun generateSubtitles() = subtitles.openWhisper()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 

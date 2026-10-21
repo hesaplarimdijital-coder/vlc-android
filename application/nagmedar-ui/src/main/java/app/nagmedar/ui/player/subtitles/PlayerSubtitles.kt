@@ -21,6 +21,7 @@ import app.nagmedar.ui.player.subtitles.tools.SubtitleFormat
 import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsController
 import app.nagmedar.ui.player.subtitles.tools.ToolsFile
 import app.nagmedar.ui.player.subtitles.tools.ToolsPlayback
+import app.nagmedar.ui.player.subtitles.whisper.WhisperController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,6 +71,9 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         scope,
         activity.getString(R.string.nag_subtools_edited_word),
     )
+
+    /** "Generate subtitles…" (S-709): the film's speech transcribed on the device. */
+    val whisper = WhisperController(activity.applicationContext, scope)
 
     /** The film whose folder was read: once a film. */
     private var lookedAt: String? = null
@@ -243,6 +247,31 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         }
     }
 
+    /**
+     * "Generate subtitles…" (Alt+W, S-709): the dialog on the playing film, the audio track
+     * playing chosen (its place among the film's audio tracks).
+     */
+    fun openWhisper() {
+        val service = activity.service ?: return
+        val media = service.currentMediaWrapper ?: return
+        val video = media.uri ?: return
+        val tracks = service.audioTracks.orEmpty().filter { it.getId() != NO_TRACK }
+        val playing = tracks.indexOfFirst { it.getId() == service.audioTrack }
+        whisper.open(video, media.fileName?.takeIf { it.isNotBlank() }, playing)
+    }
+
+    /** Subtitles a job made for the playing film (S-709), shown at once; a word when they could not be. */
+    fun loadGenerated(saved: SavedSubtitle) {
+        scope.launch {
+            if (load(Uri.parse(saved.uri), saved.name, select = true)) {
+                note = activity.getString(R.string.nag_whisper_note, saved.name)
+                say(activity.getString(R.string.nag_sub_added, saved.name))
+            } else {
+                say(activity.getString(R.string.nag_sub_failed, saved.name))
+            }
+        }
+    }
+
     /** "Subtitle encoding…": the film's first subtitle file, its head read; a word when it has none. */
     fun openEncoding() {
         val service = activity.service ?: return
@@ -319,6 +348,9 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
         /** The priority the classic player's picker keeps a subtitle with: the user's choice. */
         const val KEPT_PRIORITY = 2
         const val SAID_MS = 2_000
+
+        /** The audio tracks' "off". */
+        const val NO_TRACK = "-1"
         const val US_PER_MS = 1_000L
     }
 }

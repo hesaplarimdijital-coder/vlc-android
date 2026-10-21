@@ -137,6 +137,9 @@ interface PlayerChromeActions {
     /** S-708: the subtitle tools (Alt+E): cleaning, frame rate conversion and the line timing editor, into a new file. */
     fun openSubtitleTools() {}
 
+    /** S-709: "Generate subtitles…" (Alt+W): the film's speech transcribed on the device into a new SRT file. */
+    fun generateSubtitles() {}
+
     /** Leaves the player. */
     fun close()
 

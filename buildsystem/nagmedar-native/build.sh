@@ -54,6 +54,8 @@ FFMPEG_COMPONENTS=(
     --enable-demuxer=matroska,mov,hevc,mpegts,mp3,flac,ogg,wav,aac,ac3,eac3,dts,dtshd,truehd,w64,aiff,ape,wv
     # the music engine's formats (S-901, S-908, S-911): Musepack, TTA, DSD, WMA, CAF
     --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf,caf
+    # S-709: the sound of films in AVI and in MPEG programme streams (VOB) for the subtitles from speech
+    --enable-demuxer=avi,mpegps
     --enable-muxer=matroska,mp4,mov,null
     # S-1010: the converter's Ogg Opus and M4A files, and FFmpeg's own AAC encoder (libopus and LAME are the engine's)
     --enable-muxer=ogg,ipod --enable-encoder=aac
