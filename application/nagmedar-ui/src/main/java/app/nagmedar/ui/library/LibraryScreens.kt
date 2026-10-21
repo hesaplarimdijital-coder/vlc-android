@@ -106,6 +106,8 @@ import org.videolan.vlc.gui.InfoActivity
 import org.videolan.vlc.media.MediaUtils
 import kotlinx.coroutines.delay
 import org.videolan.vlc.repository.SlaveRepository
+import app.nagmedar.ui.transcode.TranscodeMedia
+import app.nagmedar.ui.transcode.TranscodeRequests
 
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
@@ -139,6 +141,19 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_subtools_menu), { SubtitleToolsLauncher.open(media.uri, media.fileName) }, icon = NagIcons.Subtitle) else null,
         // S-709: subtitles from the film's speech, made on the device
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_whisper_menu), { WhisperLauncher.open(media.uri, media.fileName) }, icon = NagIcons.Subtitle) else null,
+        // S-1303: into another format, or on the network
+        MenuEntry.Item(
+            res.getString(R.string.nag_conv_menu),
+            { TranscodeRequests.open(context, TranscodeRequests.Kind.Convert, TranscodeMedia(media.uri, media.fileName ?: media.title.orEmpty())) },
+            shortcut = ShortcutRegistry.chordLabel(ShortcutId.ConvertSave, res),
+            icon = NagIcons.Convert,
+        ),
+        MenuEntry.Item(
+            res.getString(R.string.nag_hls_start_menu),
+            { TranscodeRequests.open(context, TranscodeRequests.Kind.Stream, TranscodeMedia(media.uri, media.title ?: media.fileName.orEmpty())) },
+            shortcut = ShortcutRegistry.chordLabel(ShortcutId.StreamHls, res),
+            icon = NagIcons.Streams,
+        ),
     )
 }
 

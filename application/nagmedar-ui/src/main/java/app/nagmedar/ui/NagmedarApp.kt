@@ -147,6 +147,8 @@ import org.videolan.vlc.gui.SecondaryActivity
 import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
+import app.nagmedar.ui.transcode.TranscodeRequests
+import app.nagmedar.ui.transcode.TranscodeScreen
 
 /**
  * Root of the new interface: theme from the preferences, density from the last input device,
@@ -368,6 +370,8 @@ private fun NagmedarMain(
                         Destination.TvLab -> TvLabScreen(tvLab)
                         // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
                         Destination.Network -> NetworkScreen(undo)
+                        // S-1303: video conversions, their queue and the HLS stream
+                        Destination.Convert -> TranscodeScreen()
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
@@ -602,6 +606,9 @@ class AppActions(
             ShortcutId.Cast -> Casting.openPicker()
             ShortcutId.Lyrics -> toggleLyrics()
             ShortcutId.Visualizer -> toggleVisualizer()
+            // S-1303: the convert page's windows, for the media playing (or one to pick)
+            ShortcutId.ConvertSave -> TranscodeRequests.open(context, TranscodeRequests.Kind.Convert, null)
+            ShortcutId.StreamHls -> TranscodeRequests.open(context, TranscodeRequests.Kind.Stream, null)
             ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
             ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)

@@ -170,6 +170,7 @@ enum class ShortcutId {
     ShortcutList,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
+    ConvertSave, StreamHls,
     RadioSearch,
     FolderUp, Refresh,
     PodcastSearch,
@@ -207,6 +208,9 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.MediaInfo, ShortcutGroup.Media, R.string.nag_sc_media_info, KeyChord(Key.I, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true), textFirst = true),
         Shortcut(ShortcutId.SelectAll, ShortcutGroup.Media, R.string.nag_sc_select_all, KeyChord(Key.A, ctrl = true), textFirst = true),
+        // S-1303: VLC desktop's Media › Convert/Save and Stream
+        Shortcut(ShortcutId.ConvertSave, ShortcutGroup.Media, R.string.nag_sc_convert, KeyChord(Key.R, ctrl = true)),
+        Shortcut(ShortcutId.StreamHls, ShortcutGroup.Media, R.string.nag_sc_stream, KeyChord(Key.H, ctrl = true, shift = true)),
         // Playback
         Shortcut(ShortcutId.PlayPause, ShortcutGroup.Playback, R.string.nag_sc_play_pause, KeyChord(Key.Spacebar)),
         Shortcut(ShortcutId.Stop, ShortcutGroup.Playback, R.string.nag_sc_stop, KeyChord(Key.S)),

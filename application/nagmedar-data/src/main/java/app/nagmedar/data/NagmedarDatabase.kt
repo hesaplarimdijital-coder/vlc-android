@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
-        NetworkServerEntry::class, ScrobbleEntry::class,
+        NetworkServerEntry::class, ScrobbleEntry::class, TranscodeProfileEntry::class, TranscodeJobEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -34,10 +34,12 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun latencyProfiles(): LatencyProfileDao
     abstract fun networkServers(): NetworkServerDao
     abstract fun scrobbles(): ScrobbleDao
+    abstract fun transcodeProfiles(): TranscodeProfileDao
+    abstract fun transcodeJobs(): TranscodeJobDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 13
+        const val VERSION = 14
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -171,9 +173,31 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 13 → 14 (S-1303): the user's video conversion profiles and the conversions' queue. */
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `transcode_profile` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`container` TEXT NOT NULL, `video_codec` TEXT, `video_kbps` INTEGER NOT NULL, `max_height` INTEGER NOT NULL, " +
+                        "`fps` INTEGER NOT NULL, `audio_codec` TEXT, `audio_kbps` INTEGER NOT NULL, `channels` INTEGER NOT NULL, " +
+                        "`sample_rate` INTEGER NOT NULL, `subtitles` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_transcode_profile_name` ON `transcode_profile` (`name`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `transcode_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`input_uri` TEXT NOT NULL, `input_name` TEXT NOT NULL, `input_size` INTEGER NOT NULL, " +
+                        "`output_uri` TEXT NOT NULL, `output_name` TEXT NOT NULL, `profile` TEXT NOT NULL, `state` TEXT NOT NULL, " +
+                        "`progress` REAL NOT NULL, `media_ms` INTEGER NOT NULL, `total_ms` INTEGER NOT NULL, `bytes_out` INTEGER NOT NULL, " +
+                        "`attempts` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `started_at` INTEGER, `finished_at` INTEGER, " +
+                        "`error` TEXT, `restarted` INTEGER NOT NULL, `cancel_requested` INTEGER NOT NULL, `owns_output` INTEGER NOT NULL)",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
+            MIGRATION_13_14,
         )
 
         @Volatile

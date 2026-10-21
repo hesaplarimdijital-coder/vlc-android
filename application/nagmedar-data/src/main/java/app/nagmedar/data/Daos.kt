@@ -558,3 +558,75 @@ interface ScrobbleDao {
     @Query("DELETE FROM scrobble_queue WHERE service = :service AND listened_at < :before")
     fun dropOlderThan(service: String, before: Long): Int
 }
+
+/** S-1303: the user's video conversion profiles, by name. */
+@Dao
+interface TranscodeProfileDao {
+    @Query("SELECT * FROM transcode_profile ORDER BY name COLLATE NOCASE, id")
+    fun observe(): Flow<List<TranscodeProfileEntry>>
+
+    @Query("SELECT * FROM transcode_profile ORDER BY name COLLATE NOCASE, id")
+    fun all(): List<TranscodeProfileEntry>
+
+    @Query("SELECT * FROM transcode_profile WHERE id = :id")
+    fun get(id: Long): TranscodeProfileEntry?
+
+    @Insert
+    fun insert(entry: TranscodeProfileEntry): Long
+
+    @Update
+    fun update(entry: TranscodeProfileEntry)
+
+    @Query("DELETE FROM transcode_profile WHERE id = :id")
+    fun delete(id: Long)
+}
+
+/** S-1303: the video conversions' queue: the oldest waiting runs first, the newest shows first. */
+@Dao
+interface TranscodeJobDao {
+    @Query("SELECT * FROM transcode_job ORDER BY created_at DESC, id DESC")
+    fun observe(): Flow<List<TranscodeJobEntry>>
+
+    @Query("SELECT * FROM transcode_job WHERE id = :id")
+    fun get(id: Long): TranscodeJobEntry?
+
+    /** The next job to run: the oldest waiting. */
+    @Query("SELECT * FROM transcode_job WHERE state = 'queued' ORDER BY created_at, id LIMIT 1")
+    fun next(): TranscodeJobEntry?
+
+    /** The jobs a process that died left running or paused. */
+    @Query("SELECT * FROM transcode_job WHERE state IN ('running', 'paused')")
+    fun interrupted(): List<TranscodeJobEntry>
+
+    /** How many jobs wait or run. */
+    @Query("SELECT COUNT(*) FROM transcode_job WHERE state IN ('queued', 'running', 'paused')")
+    fun pending(): Int
+
+    @Insert
+    fun insert(job: TranscodeJobEntry): Long
+
+    @Update
+    fun update(job: TranscodeJobEntry)
+
+    @Query("UPDATE transcode_job SET state = :state, error = :error WHERE id = :id")
+    fun saveState(id: Long, state: String, error: String?)
+
+    @Query("UPDATE transcode_job SET progress = :progress, media_ms = :mediaMs, total_ms = :totalMs, bytes_out = :bytesOut WHERE id = :id")
+    fun saveProgress(id: Long, progress: Float, mediaMs: Long, totalMs: Long, bytesOut: Long)
+
+    /** The job found its output empty and writes it: its to empty or remove from now on. */
+    @Query("UPDATE transcode_job SET owns_output = 1 WHERE id = :id")
+    fun ownOutput(id: Long)
+
+    /** Asks a job that waits or runs to stop; 1 when it was asked. */
+    @Query("UPDATE transcode_job SET cancel_requested = 1 WHERE id = :id AND state IN ('queued', 'running', 'paused')")
+    fun requestCancel(id: Long): Int
+
+    /** Cancels a job that still waits (the worker may have taken it up since); 1 when it did. */
+    @Query("UPDATE transcode_job SET state = 'cancelled', error = 'cancelled', finished_at = :at, cancel_requested = 0 WHERE id = :id AND state = 'queued'")
+    fun cancelQueued(id: Long, at: Long): Int
+
+    /** Removes a finished job's row; a job that waits or runs stays. */
+    @Query("DELETE FROM transcode_job WHERE id = :id AND state IN ('done', 'failed', 'cancelled')")
+    fun deleteFinished(id: Long): Int
+}

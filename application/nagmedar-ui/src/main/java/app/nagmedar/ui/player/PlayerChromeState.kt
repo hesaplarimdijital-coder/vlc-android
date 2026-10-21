@@ -136,6 +136,7 @@ interface PlayerChromeActions {
 
     /** S-1302: the device picker, to cast the film to a Chromecast or a DLNA renderer. */
     fun cast() = Unit
+
     /** S-611: the visualiser over the player, of [kind]; null turns it off. */
     fun setVisualizer(kind: VisualizerKind?)
 
@@ -147,6 +148,12 @@ interface PlayerChromeActions {
 
     /** S-710: the tools on their translation tab: the film's subtitles translated offline, shown with the original. */
     fun translateSubtitles() {}
+
+    /** S-1303: the media playing converted into another format (Ctrl+R), in the library's window. */
+    fun convertSave()
+
+    /** S-1303: the media playing streamed on the local network as HLS (Ctrl+Shift+H). */
+    fun streamOnNetwork()
 
     /** Leaves the player. */
     fun close()

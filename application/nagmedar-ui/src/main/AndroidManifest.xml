@@ -72,6 +72,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- S-1303: the video conversions' notification Cancel -->
+        <receiver
+            android:name="app.nagmedar.ui.transcode.TranscodeCancelReceiver"
+            android:exported="false" />
+        <!-- S-1303: the HLS stream on the local network: the encoding and its server kept running
+             with a notification (media processing on Android 15 and later, data sync before) -->
+        <service
+            android:name="app.nagmedar.ui.transcode.HlsService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|mediaProcessing" />
+
         <!-- S-307: the video player is a window of its own, beside the library's: a task of its own.
              Started again from any window it is the same player (singleTask), so one session plays. -->
         <activity

@@ -131,6 +131,10 @@ Sözlüğü testler denetler:
 | spektrum | spectrum | tayf | | Görselleştiricinin frekans çubukları, 25 Hz–20 kHz |
 | VU metre | VU meter | ses ölçer | level meter | Sol ve sağ kanalın RMS'i ve tepesi, dBFS ile; tepede kırpılma işareti |
 | osiloskop | oscilloscope | | | Dalganın kendisi, yükselen sıfır geçişinden |
+| profil (dönüştürme) | profile | | | Kapsayıcı, video ve ses kodlayıcısı, bit hızı, en büyük yükseklik, altyazı; hazır olanlar “Ön ayar” (preset), kullanıcınınkiler adıyla saklanır |
+| kodlayıcı | encoder | | | Dönüştürmede yazan taraf (x264, VP8, LAME, Opus, FLAC…); “libVLC'nin bu derlemesinde bunun kodlayıcısı yok (H.265)” |
+| iş, İşler | job, Jobs | | | Video dönüştürmeleri tek sırada, birer birer çalışan işler; Dönüştür › İşler |
+| ağda yayın, ağda yayınlamak | stream on the network | | | Medyanın HLS olarak yerel ağdan (Wi-Fi, Ethernet) sunulması: adres ve QR kodu, “Yayında”, “Yayını durdur” (Ctrl+Shift+H) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
@@ -176,6 +180,7 @@ Sözlüğü testler denetler:
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | giriş, kapanış | intro, outro | | | Bir podcast bölümünün başında ve sonunda atlanan saniyeler: “Girişi atla”, “Kapanışı atla” |
 | dönüştürmek | convert | | transcode | Bir müzik dosyasını başka bir biçimde (Opus, MP3, AAC) yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz: “Dönüştür…”, “Dönüştürme bitti” |
+| dönüştürmek | convert | | transcode | Bir dosyayı başka bir biçimde yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz. Müzikte “Dönüştür…” (Opus, MP3, AAC): “Dönüştürme bitti”; videoda “Dönüştür / Kaydet…” (Ctrl+R): bir profille, libVLC'yle |
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |
 

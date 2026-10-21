@@ -139,6 +139,14 @@ internal class FakePlayerActions : PlayerChromeActions {
         calls += "visualizer:$kind"
     }
 
+    override fun convertSave() {
+        calls += "convert"
+    }
+
+    override fun streamOnNetwork() {
+        calls += "stream"
+    }
+
     override fun close() {
         calls += "close"
     }
@@ -375,6 +383,21 @@ class DesktopControlsTest {
         compose.waitForIdle()
         compose.onNode(hasText("Kapalı") and hasClickAction()).performClick()
         assertEquals(listOf("visualizer:Spectrum", "visualizer:null"), actions.calls)
+    }
+
+    @Test
+    fun thePlayersMenuConvertsAndStreams() {
+        controls()
+        shownAndHeld()
+        compose.onNodeWithTag("player-menu").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Ctrl+R").assertExists()
+        compose.onNode(hasText("Dönüştür / Kaydet…") and hasClickAction()).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("player-menu").performClick()
+        compose.waitForIdle()
+        compose.onNode(hasText("Ağda yayınla (HLS)…") and hasClickAction()).performClick()
+        assertEquals(listOf("convert", "stream"), actions.calls)
     }
 
     @Test

@@ -186,6 +186,9 @@ import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.util.getPendingIntent
 import java.util.Locale
+import app.nagmedar.ui.transcode.TranscodeMedia
+import app.nagmedar.ui.transcode.TranscodeRequests
+import app.nagmedar.ui.visual.VisualizerSettings
 
 /**
  * The new interface's controls over the classic video player (S-601), which finds them by name
@@ -235,6 +238,15 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.Snapshot -> snapshots?.take()
                 // S-607: what plays recorded, or the recording stopped
                 ShortcutId.Record -> Recordings.toggle()
+                // S-1303: what plays converted, or streamed on the network, from the library's window
+                ShortcutId.ConvertSave -> requestConvert(activity, TranscodeRequests.Kind.Convert)
+                ShortcutId.StreamHls -> requestConvert(activity, TranscodeRequests.Kind.Stream)
+                // S-611: the visualiser over the player, on or off
+                ShortcutId.Visualizer -> {
+                    val settings = Settings.getInstance(activity)
+                    val visualizer = VisualizerSettings.read(settings)
+                    visualizer.copy(video = !visualizer.video).write(settings.edit()).apply()
+                }
                 // S-608: the new interface's "Jump to time", bookmarks and their tab
                 ShortcutId.JumpToTime -> navigation?.jumping = true
                 ShortcutId.AddBookmark -> navigation?.addBookmark()
@@ -521,6 +533,12 @@ class DesktopPlayerChrome : PlayerChrome {
         activity = null
         keys = null
     }
+}
+
+/** S-1303: the convert page asked for the media playing. */
+private fun requestConvert(activity: VideoPlayerActivity, kind: TranscodeRequests.Kind) {
+    val media = activity.service?.currentMediaWrapper?.let { TranscodeMedia(it.uri, it.title ?: it.fileName.orEmpty()) }
+    TranscodeRequests.open(activity, kind, media)
 }
 
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
@@ -1277,6 +1295,10 @@ internal class ActivityPlayerSource(
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 
     override fun cast() = showCastPicker(activity)
+
+    override fun convertSave() = requestConvert(activity, TranscodeRequests.Kind.Convert)
+
+    override fun streamOnNetwork() = requestConvert(activity, TranscodeRequests.Kind.Stream)
 
     override fun setVisualizer(kind: VisualizerKind?) {
         val settings = prefs.visualizer

@@ -325,3 +325,90 @@ data class ScrobbleEntry(
 
 /** The scrobbles waiting for one service. */
 data class ScrobbleCount(val service: String, val count: Int)
+
+/**
+ * S-1303: a video conversion profile of the user's (the presets are the app's): the container,
+ * the video (none: [videoCodec] null) with its bit rate, largest height and frame rate (0: the
+ * source's), the audio (none: [audioCodec] null) with its bit rate, channels and sample rate (0:
+ * the source's), what happens to the subtitles. Codecs, the container and the subtitles' mode by
+ * the names of the app's enums.
+ */
+@Entity(tableName = "transcode_profile", indices = [Index(value = ["name"], unique = true)])
+data class TranscodeProfileEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val container: String,
+    @ColumnInfo(name = "video_codec") val videoCodec: String? = null,
+    @ColumnInfo(name = "video_kbps") val videoKbps: Int = 0,
+    @ColumnInfo(name = "max_height") val maxHeight: Int = 0,
+    val fps: Int = 0,
+    @ColumnInfo(name = "audio_codec") val audioCodec: String? = null,
+    @ColumnInfo(name = "audio_kbps") val audioKbps: Int = 0,
+    val channels: Int = 2,
+    @ColumnInfo(name = "sample_rate") val sampleRate: Int = 0,
+    val subtitles: String,
+    @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
+)
+
+/**
+ * S-1303: a video conversion waiting, under way or done: the source and the new document the
+ * system's picker made, the profile as JSON, how far it got, what came of it. One job runs at a
+ * time ([TranscodeJobState]); a job left running by a process that died starts again from the
+ * beginning. A job only ever writes into an output it found empty ([ownsOutput]), and only such
+ * an output is ever emptied or removed. While paused or failed, [error] says why
+ * ([TranscodeJobError]).
+ */
+@Entity(tableName = "transcode_job")
+data class TranscodeJobEntry(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "input_uri") val inputUri: String,
+    @ColumnInfo(name = "input_name") val inputName: String,
+    @ColumnInfo(name = "input_size") val inputSize: Long = 0,
+    @ColumnInfo(name = "output_uri") val outputUri: String,
+    @ColumnInfo(name = "output_name") val outputName: String,
+    val profile: String,
+    val state: String = TranscodeJobState.QUEUED,
+    val progress: Float = 0f,
+    @ColumnInfo(name = "media_ms") val mediaMs: Long = 0,
+    @ColumnInfo(name = "total_ms") val totalMs: Long = 0,
+    @ColumnInfo(name = "bytes_out") val bytesOut: Long = 0,
+    val attempts: Int = 0,
+    @ColumnInfo(name = "created_at") val createdAt: Long,
+    @ColumnInfo(name = "started_at") val startedAt: Long? = null,
+    @ColumnInfo(name = "finished_at") val finishedAt: Long? = null,
+    val error: String? = null,
+    /** Whether the job was started again after an interruption (the process died, the system stopped it). */
+    val restarted: Boolean = false,
+    @ColumnInfo(name = "cancel_requested") val cancelRequested: Boolean = false,
+    @ColumnInfo(name = "owns_output") val ownsOutput: Boolean = false,
+)
+
+/** S-1303: the states of a [TranscodeJobEntry]; done, failed and cancelled are final. */
+object TranscodeJobState {
+    const val QUEUED = "queued"
+    const val RUNNING = "running"
+    const val PAUSED = "paused"
+    const val DONE = "done"
+    const val FAILED = "failed"
+    const val CANCELLED = "cancelled"
+
+    val FINAL = setOf(DONE, FAILED, CANCELLED)
+}
+
+/** S-1303: why a [TranscodeJobEntry] waits, failed or stopped. */
+object TranscodeJobError {
+    const val CANCELLED = "cancelled"
+    const val BATTERY = "battery"
+    const val THERMAL = "thermal"
+    const val SAME_FILE = "same_file"
+    const val OUTPUT_NOT_EMPTY = "output_not_empty"
+    const val OPEN_INPUT = "open_input"
+    const val OPEN_OUTPUT = "open_output"
+
+    /** The system stopped the job (a foreground job's time limit): it waits for the app. */
+    const val TIMEOUT = "timeout"
+
+    /** libVLC's own reason follows the prefix. */
+    const val ENGINE = "engine:"
+}
