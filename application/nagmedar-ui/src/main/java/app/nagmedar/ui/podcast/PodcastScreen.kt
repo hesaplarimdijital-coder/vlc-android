@@ -117,9 +117,26 @@ fun PodcastsScreen(undo: UndoBarState?) {
         PodcastController(
             PodcastCenter.repository(app), PodcastCenter.search(), scope, app, undo,
             background = AppScope, imports = PodcastCenter.imports, player = ServiceEpisodePlayer(context),
+            services = EpisodeServices(
+                downloads = PodcastCenter.downloads(app),
+                extras = PodcastCenter.extras(app),
+                control = ServiceEpisodeControl,
+                progress = PodcastCenter.tracker.progress,
+                settings = { PodcastCenter.settingsStore(app).read() },
+                onSubscribed = { PodcastCenter.schedule(app) },
+            ),
         )
     }
     LaunchedEffect(controller) { controller.follow() }
+    // a notification of new episodes was tapped: the show's page
+    val requested by PodcastCenter.openRequest.collectAsState()
+    LaunchedEffect(requested) {
+        requested?.let { feedId ->
+            controller.open(feedId)
+            PodcastNotifier(app).clearNews(feedId)
+            PodcastCenter.opened()
+        }
+    }
     val clipboard = LocalClipboardManager.current
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) controller.importFile(uri) }
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(OPML_MIME)) { uri -> if (uri != null) controller.export(uri) }
@@ -142,29 +159,54 @@ fun PodcastsScreen(undo: UndoBarState?) {
             runCatching { focus.requestFocus() }
         }
     }
-    PodcastsContent(controller.model, actions, focus)
+    PodcastsContent(controller.model, actions, focus, controller::listening)
 }
 
-/** The screen below the shell: [model] drawn, [actions] called. In tests it is given a model and no repository. */
+/**
+ * The screen below the shell: [model] drawn, [actions] called. In tests it is given a model and no repository.
+ * S-205: a podcast's page is the details of the subscriptions; an episode's page is the details of that page. With room for
+ * two panes (DeX, tablet) the episodes take the list's place while an episode is open and its page is beside them; in a
+ * phone window the episode's page fills the screen and Back returns to the podcast. [listening] is the player's place in
+ * the open episode, read by the episode's page alone.
+ */
 @Composable
-fun PodcastsContent(model: PodcastScreenModel, actions: PodcastActions, focus: FocusRequester = remember { FocusRequester() }) {
+fun PodcastsContent(
+    model: PodcastScreenModel,
+    actions: PodcastActions,
+    focus: FocusRequester = remember { FocusRequester() },
+    listening: () -> Listening? = { model.episode?.listening },
+) {
     val page = model.page
     var retained by remember { mutableStateOf(page) }
     LaunchedEffect(page) { if (page != null) retained = page }
+    val side = currentWidthClass() >= WidthClass.Expanded
+    val episodeOpen = model.episodeId != null
     ListDetailPanes(
         detail = page?.summary?.feed?.id,
-        onCloseDetail = actions.onClosePage,
-        list = { PodcastList(model, actions, focus) },
-        detailPane = { _, fullScreen ->
-            (page ?: retained)?.let { PodcastPageView(it, fullScreen, actions) }
+        onCloseDetail = if (episodeOpen) actions.onCloseEpisode else actions.onClosePage,
+        list = {
+            val shown = page ?: retained
+            if (side && episodeOpen && shown != null) {
+                PodcastPageView(shown, fullScreen = false, actions = actions, downloads = model.downloads, selected = model.episodeId)
+            } else {
+                PodcastList(model, actions, focus)
+            }
         },
-        widthKey = "podcast-page",
-        defaultDetailWidth = 420.dp,
+        detailPane = { _, fullScreen ->
+            if (episodeOpen) {
+                EpisodeDetailPane(model, fullScreen, actions, listening)
+            } else {
+                (page ?: retained)?.let { PodcastPageView(it, fullScreen, actions, model.downloads) }
+            }
+        },
+        widthKey = if (episodeOpen) "podcast-episode" else "podcast-page",
+        defaultDetailWidth = if (episodeOpen) 600.dp else 420.dp,
         minDetailWidth = 340.dp,
         minListWidth = 420.dp,
     )
     model.add?.let { AddAddressDialog(it, actions.onAddSubmit, actions.onAddDismiss) }
     model.importing?.let { ImportDialog(it, actions.onImportDismiss) }
+    model.showSettings?.let { ShowSettingsDialog(it, actions) }
 }
 
 @Composable

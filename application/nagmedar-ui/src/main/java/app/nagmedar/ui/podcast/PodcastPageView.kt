@@ -54,21 +54,30 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
+import java.text.NumberFormat
 import java.util.Date
 
 /**
  * S-1101: a podcast's page: its cover, who makes it, how many episodes are new, links to its web
  * page and to where to support it, "Abonelikten çık", then the episodes, the newest first, each
- * with its date, its length and whether it was listened to. An episode plays by a click or Enter;
- * its menu marks it listened to or not and copies its address.
+ * with its date, its length and whether it was listened to. A click or Enter opens the episode's page
+ * (S-205), its play button plays it; its menu plays, downloads (S-1103), marks it listened to or not and copies its address.
+ * [downloads] are the downloads running now; [selected] is the episode whose page is open beside the list.
  */
 @Composable
-internal fun PodcastPageView(page: PodcastPage, fullScreen: Boolean, actions: PodcastActions) {
+internal fun PodcastPageView(
+    page: PodcastPage,
+    fullScreen: Boolean,
+    actions: PodcastActions,
+    downloads: Map<Long, DownloadProgress> = emptyMap(),
+    selected: Long? = null,
+) {
     val res = LocalContext.current.resources
     val dimens = NagTheme.dimens
     val feed = page.summary.feed
@@ -82,7 +91,7 @@ internal fun PodcastPageView(page: PodcastPage, fullScreen: Boolean, actions: Po
         if (episodes == null) {
             item(key = "loading") { LoadingState(stringResource(R.string.nag_pod_episodes_loading), Modifier.padding(dimens.pagePadding), posters = 0) }
         } else {
-            items(episodes, key = { it.id }) { episode -> EpisodeRow(feed, episode, dates, actions) }
+            items(episodes, key = { it.id }) { episode -> EpisodeRow(feed, episode, dates, actions, DownloadUi.of(episode, downloads[episode.id]), episode.id == selected) }
         }
     }
 }
@@ -121,6 +130,7 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
         FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
             feed.link?.let { link -> NagButton(stringResource(R.string.nag_pod_web_page), { actions.onOpenLink(link) }, icon = NagIcons.Network) }
             feed.fundingUrl?.let { url -> NagButton(stringResource(R.string.nag_pod_support), { actions.onOpenLink(url) }, icon = NagIcons.Star) }
+            NagButton(stringResource(R.string.nag_pod_show_settings), { actions.onShowSettings(feed.id) }, icon = NagIcons.Settings, modifier = Modifier.testTag("podcast-settings"))
             NagButton(stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, modifier = Modifier.testTag("podcast-unsubscribe"))
         }
         feed.description?.let { description ->
@@ -149,7 +159,7 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
 }
 
 @Composable
-private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFormat, actions: PodcastActions) {
+private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFormat, actions: PodcastActions, download: DownloadUi, selected: Boolean) {
     val res = LocalContext.current.resources
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -166,6 +176,8 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
         entries = {
             listOf(
                 MenuEntry.Item(res.getString(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, icon = NagIcons.Play),
+                MenuEntry.Item(res.getString(R.string.nag_pod_open_episode), { actions.onOpenEpisode(episode.id) }, icon = NagIcons.Info),
+                downloadEntry(res, episode, download, actions),
                 MenuEntry.Item(
                     res.getString(if (played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
                     { actions.onSetPlayed(episode.id, !played) },
@@ -182,8 +194,8 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
                 .fillMaxWidth()
                 .heightIn(min = 64.dp)
                 .focusRing(state, shape)
-                .background(stateBackground(state), shape)
-                .nagClickable(interaction, { actions.onPlay(feed, episode) }, onClickLabel = res.getString(R.string.nag_pod_play))
+                .background(stateBackground(state, selected), shape)
+                .nagClickable(interaction, { actions.onOpenEpisode(episode.id) }, onClickLabel = res.getString(R.string.nag_pod_open_episode))
                 .padding(start = 8.dp, top = 6.dp, bottom = 6.dp)
                 .testTag("podcast-episode"),
             verticalAlignment = Alignment.CenterVertically,
@@ -208,8 +220,42 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
                 if (meta.isNotEmpty()) Text(meta, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (fresh) ToneBadge(stringResource(R.string.nag_pod_new_badge), StateTone.Info, Modifier.testTag("podcast-episode-new"))
+            DownloadMark(download)
             NagIconButton(NagIcons.Play, stringResource(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
         }
+    }
+}
+
+/** The menu line of an episode's download: download, stop it, or delete the file, by where it stands. */
+private fun downloadEntry(res: android.content.res.Resources, episode: PodcastEpisode, download: DownloadUi, actions: PodcastActions): MenuEntry.Item = when (download) {
+    DownloadUi.None, DownloadUi.Failed -> MenuEntry.Item(res.getString(R.string.nag_pod_download), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads)
+    DownloadUi.Queued, is DownloadUi.Running -> MenuEntry.Item(res.getString(R.string.nag_pod_download_stop), { actions.onCancelDownload(episode.id) }, icon = NagIcons.Close)
+    is DownloadUi.Done -> MenuEntry.Item(res.getString(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, destructive = true)
+}
+
+/** What a row says of its episode's download: nothing before it, a few words while it waits or runs, a mark once it is on the device or failed. */
+@Composable
+private fun DownloadMark(download: DownloadUi) {
+    val colors = NagTheme.colors
+    when (download) {
+        DownloadUi.None -> Unit
+        DownloadUi.Queued -> Text(stringResource(R.string.nag_pod_download_queued_short), style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, modifier = Modifier.testTag("podcast-download-mark"))
+        is DownloadUi.Running -> {
+            val percent = download.progress?.fraction?.let { NumberFormat.getPercentInstance(LocalContext.current.resources.locale()).format(it.toDouble()) }
+            Text(percent ?: stringResource(R.string.nag_pod_download_starting), style = NagTheme.type.labelSmall, color = colors.accent, maxLines = 1, modifier = Modifier.testTag("podcast-download-mark"))
+        }
+        is DownloadUi.Done -> Icon(
+            NagIcons.Downloads,
+            contentDescription = stringResource(R.string.nag_pod_download_done_short),
+            tint = toneColors(StateTone.Success).icon,
+            modifier = Modifier.size(16.dp).testTag("podcast-download-mark"),
+        )
+        DownloadUi.Failed -> Icon(
+            NagIcons.Warning,
+            contentDescription = stringResource(R.string.nag_pod_download_failed_short),
+            tint = toneColors(StateTone.Warning).icon,
+            modifier = Modifier.size(16.dp).testTag("podcast-download-mark"),
+        )
     }
 }
 

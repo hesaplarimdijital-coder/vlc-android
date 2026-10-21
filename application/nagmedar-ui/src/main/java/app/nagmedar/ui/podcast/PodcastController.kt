@@ -1,6 +1,7 @@
 package app.nagmedar.ui.podcast
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -23,7 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
@@ -39,6 +42,21 @@ class ImportTracker {
 
     internal var job: Job? = null
 }
+
+/**
+ * S-1103, S-1104, S-205: what the episode pages need beside the repository: the download queue and its progress, the
+ * chapters and transcripts, the player's controls, and Settings › Podcasts. Without them (tests of other things)
+ * downloads do nothing, chapters and transcripts are missing, and nothing plays.
+ */
+class EpisodeServices(
+    val downloads: DownloadManager? = null,
+    val extras: EpisodeExtras? = null,
+    val control: EpisodeControl = NoEpisodeControl,
+    val progress: StateFlow<Map<Long, DownloadProgress>> = MutableStateFlow(emptyMap()),
+    val settings: () -> PodcastSettings = { PodcastSettings() },
+    /** Heard when the subscriptions change from none to some or back: the refresh job is scheduled or cancelled. */
+    val onSubscribed: (Boolean) -> Unit = {},
+)
 
 /**
  * S-1101, S-1102: what the Podcasts screen is doing: the subscriptions, the search and its results,
@@ -61,6 +79,7 @@ class PodcastController(
     private val undo: UndoBarState?,
     private val background: CoroutineScope = scope,
     private val imports: ImportTracker = ImportTracker(),
+    private val services: EpisodeServices = EpisodeServices(),
     private val player: EpisodePlayer,
 ) {
     private val res get() = context.resources
@@ -73,6 +92,17 @@ class PodcastController(
     private var episodes by mutableStateOf<List<PodcastEpisode>?>(null)
     private var add by mutableStateOf<AddUi?>(null)
     private var importing by mutableStateOf<ImportUi?>(imports.state.value)
+    private var openEpisodeId by mutableStateOf<Long?>(null)
+    private var episodeRow by mutableStateOf<PodcastEpisode?>(null)
+    private var notes by mutableStateOf<List<NoteBlock>>(emptyList())
+    private var chapters by mutableStateOf<ExtraUi<List<Chapter>>>(ExtraUi.Loading)
+    private var transcript by mutableStateOf<ExtraUi<Transcript>>(ExtraUi.Loading)
+    private var settingsFeedId by mutableStateOf<Long?>(null)
+    private var downloadProgress by mutableStateOf<Map<Long, DownloadProgress>>(emptyMap())
+    private var listeningState by mutableStateOf<Listening?>(null)
+    private var settingsNow by mutableStateOf(services.settings())
+    private var episodeJob: Job? = null
+    private var extrasJob: Job? = null
 
     private var searchJob: Job? = null
     private var pageJob: Job? = null
@@ -82,13 +112,54 @@ class PodcastController(
         get() {
             val list = subscriptions
             val page = openId?.let { id -> list?.firstOrNull { it.feed.id == id } }?.let { PodcastPage(it, episodes) }
-            return PodcastScreenModel(list, query, found, subscribing.toMap(), page, add, importing)
+            val row = episodeRow
+            val feed = row?.let { r -> list?.firstOrNull { it.feed.id == r.feedId }?.feed }
+            val detail = if (row != null && feed != null) {
+                val chapterState = chapters
+                val transcriptState = transcript
+                EpisodeDetailUi(
+                    feed = feed,
+                    episode = row,
+                    notes = notes,
+                    chapters = chapterState,
+                    transcript = transcriptState,
+                    download = DownloadUi.of(row, downloadProgress[row.id]),
+                    listening = listeningState,
+                    skipBackSeconds = settingsNow.skipBackSeconds,
+                    skipForwardSeconds = settingsNow.skipForwardSeconds,
+                    offline = chapterState is ExtraUi.Offline || transcriptState is ExtraUi.Offline,
+                )
+            } else {
+                null
+            }
+            val shown = settingsFeedId?.let { id -> list?.firstOrNull { it.feed.id == id }?.feed }
+            return PodcastScreenModel(list, query, found, subscribing.toMap(), page, add, importing, openEpisodeId, detail, downloadProgress, shown)
         }
 
-    /** Follows the subscriptions in Room until cancelled. */
+    /** The place of the playing episode, read apart from [model] so that only the pages that draw it follow it. */
+    fun listening(): Listening? = listeningState
+
+    /** Follows the subscriptions, the downloads and the player in Room and the services until cancelled. */
     suspend fun follow() = coroutineScope {
         launch { imports.state.collect { importing = it } }
-        repository.subscriptions().collect { subscriptions = it }
+        launch { services.progress.collect { downloadProgress = it } }
+        launch {
+            // the place of the episode whose page is open: a look a few times a second, only while one is
+            while (true) {
+                val row = episodeRow
+                listeningState = row?.let { services.control.listening(it) }
+                delay(LISTENING_MS)
+            }
+        }
+        var had: Boolean? = null
+        repository.subscriptions().collect { list ->
+            subscriptions = list
+            val any = list.isNotEmpty()
+            if (had != any) {
+                had = any
+                services.onSubscribed(any)
+            }
+        }
     }
 
     // ------------------------------------------------------------ search
@@ -224,6 +295,7 @@ class PodcastController(
 
     fun open(feedId: Long) {
         if (openId == feedId) return
+        closeEpisode()
         pageJob?.cancel()
         openId = feedId
         episodes = null
@@ -237,10 +309,164 @@ class PodcastController(
     }
 
     fun closePage() {
+        closeEpisode()
+        settingsFeedId = null
         pageJob?.cancel()
         pageJob = null
         openId = null
         episodes = null
+    }
+
+    // ------------------------------------------------------------ an episode's page
+
+    /** The page of [episodeId]: its row followed in Room, its show notes read, its chapters and transcript asked for. */
+    fun openEpisode(episodeId: Long) {
+        if (openEpisodeId == episodeId) return
+        episodeJob?.cancel()
+        extrasJob?.cancel()
+        openEpisodeId = episodeId
+        episodeRow = null
+        notes = emptyList()
+        chapters = ExtraUi.Loading
+        transcript = ExtraUi.Loading
+        settingsNow = services.settings()
+        episodeJob = scope.launch {
+            var first = true
+            repository.episode(episodeId).collect { row ->
+                episodeRow = row
+                if (first && row != null) {
+                    first = false
+                    val base = subscriptions?.firstOrNull { it.feed.id == row.feedId }?.feed?.let { it.link ?: it.feedUrl }
+                    notes = withContext(Dispatchers.Default) { ShowNotes.of(row.notesHtml, row.description, base) }
+                    loadExtras(row)
+                }
+            }
+        }
+    }
+
+    fun closeEpisode() {
+        episodeJob?.cancel()
+        extrasJob?.cancel()
+        episodeJob = null
+        extrasJob = null
+        openEpisodeId = null
+        episodeRow = null
+        listeningState = null
+    }
+
+    private fun loadExtras(row: PodcastEpisode) {
+        val extras = services.extras
+        extrasJob?.cancel()
+        if (extras == null) {
+            chapters = ExtraUi.None
+            transcript = ExtraUi.None
+            return
+        }
+        chapters = ExtraUi.Loading
+        transcript = ExtraUi.Loading
+        extrasJob = scope.launch {
+            launch { chapters = extras.chapters(row).toUi() }
+            launch { transcript = extras.transcript(row).toUi() }
+        }
+    }
+
+    private fun <T> ExtraLoad<T>.toUi(): ExtraUi<T> = when (this) {
+        is ExtraLoad.Ready -> ExtraUi.Ready(value)
+        ExtraLoad.None -> ExtraUi.None
+        ExtraLoad.Offline -> ExtraUi.Offline
+    }
+
+    /** Asks for the chapters and the transcript again, after the network failed. */
+    fun retryExtras() {
+        episodeRow?.let(::loadExtras)
+    }
+
+    /** Plays or pauses the episode the player has loaded, else starts [episode] where it was left. */
+    fun togglePlay(feed: PodcastFeed, episode: PodcastEpisode) {
+        if (services.control.listening(episode) != null) services.control.togglePlay() else player.play(feed, episode)
+    }
+
+    /** From [ms]: a seek when the player has the episode, else the episode started there. */
+    fun playAt(feed: PodcastFeed, episode: PodcastEpisode, ms: Long) {
+        val now = services.control.listening(episode)
+        if (now == null) {
+            // the place is kept first: the playback observer reads it as the place to start from
+            scope.launch {
+                repository.setPosition(episode.id, ms)
+                player.playFrom(feed, episode, ms)
+            }
+        } else {
+            services.control.seekTo(ms)
+            if (!now.playing) services.control.togglePlay()
+        }
+    }
+
+    fun seekTo(ms: Long) = services.control.seekTo(ms)
+
+    fun skip(deltaMs: Long) {
+        val row = episodeRow ?: return
+        val now = services.control.listening(row) ?: return
+        services.control.seekTo((now.positionMs + deltaMs).coerceIn(0L, now.lengthMs.takeIf { it > 0 } ?: Long.MAX_VALUE))
+    }
+
+    fun stepChapter(forward: Boolean) {
+        val row = episodeRow ?: return
+        val list = (chapters as? ExtraUi.Ready)?.value ?: return
+        val now = services.control.listening(row) ?: return
+        Chapters.step(list, now.positionMs, forward)?.let { services.control.seekTo(list[it].startMs) }
+    }
+
+    fun download(episodeId: Long) {
+        background.launch { services.downloads?.queue(listOf(episodeId)) }
+    }
+
+    fun cancelDownload(episodeId: Long) {
+        background.launch { services.downloads?.cancel(episodeId) }
+    }
+
+    fun deleteDownload(episodeId: Long) {
+        background.launch {
+            val deleted = services.downloads?.delete(episodeId) ?: return@launch
+            if (!deleted) say(res.getString(R.string.nag_pod_delete_failed), Toast.LENGTH_SHORT)
+        }
+    }
+
+    /** The sheet of the system: the episode's name, its show and its audio address. */
+    fun share(feed: PodcastFeed, episode: PodcastEpisode) {
+        val text = listOf(episode.title, feed.title, episode.audioUrl).joinToString("\n")
+        val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text).putExtra(Intent.EXTRA_SUBJECT, episode.title)
+        val chooser = Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(chooser)
+        } catch (e: android.content.ActivityNotFoundException) {
+            say(res.getString(R.string.nag_pod_share_failed), Toast.LENGTH_SHORT)
+        }
+    }
+
+    // ------------------------------------------------------------ the show's own settings
+
+    fun showSettings(feedId: Long) {
+        settingsFeedId = feedId
+    }
+
+    fun dismissShowSettings() {
+        settingsFeedId = null
+    }
+
+    fun setNotify(feedId: Long, on: Boolean) {
+        background.launch { repository.setNotify(feedId, on) }
+    }
+
+    fun setAutoDownload(feedId: Long, on: Boolean, count: Int) {
+        background.launch { repository.setAutoDownload(feedId, on, count) }
+    }
+
+    fun setKeepLatest(feedId: Long, count: Int) {
+        background.launch { repository.setKeepLatest(feedId, count) }
+    }
+
+    fun setPlayback(feedId: Long, speed: Float, introSeconds: Int, outroSeconds: Int) {
+        background.launch { repository.setPlayback(feedId, speed, introSeconds, outroSeconds) }
     }
 
     fun play(feed: PodcastFeed, episode: PodcastEpisode) = player.play(feed, episode)
@@ -346,9 +572,28 @@ class PodcastController(
         onImportDismiss = ::dismissImport,
         onExport = onExport,
         onOpenLink = onOpenLink,
+        onOpenEpisode = ::openEpisode,
+        onCloseEpisode = ::closeEpisode,
+        onTogglePlay = ::togglePlay,
+        onPlayAt = ::playAt,
+        onSeekTo = ::seekTo,
+        onSkip = ::skip,
+        onStepChapter = ::stepChapter,
+        onDownload = ::download,
+        onCancelDownload = ::cancelDownload,
+        onDeleteDownload = ::deleteDownload,
+        onShare = ::share,
+        onRetryExtras = ::retryExtras,
+        onShowSettings = ::showSettings,
+        onDismissShowSettings = ::dismissShowSettings,
+        onSetNotify = ::setNotify,
+        onSetAutoDownload = ::setAutoDownload,
+        onSetKeepLatest = ::setKeepLatest,
+        onSetPlayback = ::setPlayback,
     )
 
     private companion object {
+        const val LISTENING_MS = 400L
         val ADDRESS_PREFIXES = listOf("http://", "https://", "feed:", "itpc:", "pcast:", "podcast:")
     }
 }
