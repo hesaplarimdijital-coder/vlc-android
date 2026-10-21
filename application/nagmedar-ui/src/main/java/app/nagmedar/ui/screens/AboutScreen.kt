@@ -332,15 +332,20 @@ private fun Person(name: String, what: String) {
     }
 }
 
+/** A one-line search field with its magnifier and a clear button; the libraries' filter, and the guide's and the shortcut card's (S-1504). */
 @Composable
-private fun FilterField(query: String, onQuery: (String) -> Unit) {
+internal fun FilterField(
+    query: String,
+    onQuery: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = stringResource(R.string.nag_about_filter),
+) {
     val focusManager = LocalFocusManager.current
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
-    val placeholder = stringResource(R.string.nag_about_filter)
     Row(
-        Modifier
+        modifier
             .fillMaxWidth()
             .heightIn(min = dimens.minTarget.coerceAtLeast(40.dp))
             .background(colors.surface, shape)

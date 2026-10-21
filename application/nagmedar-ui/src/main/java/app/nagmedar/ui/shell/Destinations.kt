@@ -45,7 +45,13 @@ enum class Destination(
     About("about", R.string.nag_settings_about, NavSection.Footer),
 
     /** S-906: the music engine's equaliser, opened from Settings › Music and Audio › Equaliser…, never listed. */
-    Equalizer("equalizer", R.string.nag_eq_title, NavSection.Footer);
+    Equalizer("equalizer", R.string.nag_eq_title, NavSection.Footer),
+
+    /** S-1504: the user guide, opened from Settings, the Help menu (F1) and the palette, never listed in the navigation. */
+    Guide("guide", R.string.nag_guide_title, NavSection.Footer),
+
+    /** S-1504: every keyboard shortcut as it is now (Ctrl+/), never listed in the navigation. */
+    ShortcutCard("shortcut-card", R.string.nag_shortcut_card_title, NavSection.Footer);
 
     val icon: ImageVector
         get() = when (this) {
@@ -66,6 +72,8 @@ enum class Destination(
             Search -> NagIcons.Search
             About -> NagIcons.Info
             Equalizer -> NagIcons.Equalizer
+            Guide -> NagIcons.Info
+            ShortcutCard -> NagIcons.Keyboard
         }
 
     /**
@@ -84,7 +92,7 @@ enum class Destination(
         val rail = listOf(Home, Movies, Series, Music, Podcasts, Radio)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
-        val unlisted = setOf(Search, About, Equalizer)
+        val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard)
 
         val sidebar = entries.filter { it != More && it !in unlisted }
 

@@ -167,7 +167,7 @@ enum class ShortcutId {
     SubtitleTools, CueSave, CueSplit, CueMerge, CueSetStart, CueSetEnd, CueNext, CuePrevious,
     GenerateSubtitles,
     Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
-    ShortcutList,
+    ShortcutList, UserGuide,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
     ConvertSave, StreamHls,
@@ -322,6 +322,9 @@ object ShortcutRegistry {
         // S-611: what plays drawn over the whole window; a text field's Ctrl+Shift+V pastes first
         Shortcut(ShortcutId.Visualizer, ShortcutGroup.View, R.string.nag_sc_visualizer, KeyChord(Key.V, ctrl = true, shift = true), textFirst = true),
         // Help
+        // S-1504: the guide inside the app, as F1 opens the help elsewhere
+        Shortcut(ShortcutId.UserGuide, ShortcutGroup.Help, R.string.nag_guide_title, KeyChord(Key.F1)),
+        // the shortcut card (S-1504): every key as it is now; its button leads to the editor in Settings
         Shortcut(ShortcutId.ShortcutList, ShortcutGroup.Help, R.string.nag_sc_shortcut_list, KeyChord(Key.Slash, ctrl = true)),
     )
 

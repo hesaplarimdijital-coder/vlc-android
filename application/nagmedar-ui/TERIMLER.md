@@ -70,6 +70,8 @@ Sözlüğü testler denetler:
 | bağlantı noktası | port | | | Sunucu adresinin sayısı (1–65535); boşsa protokolün kendi noktası (SMB 445, FTP 21…) |
 | yayınlamak | cast | yansıtma | renderer | Videoyu ya da müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) göndermek; gönderen libVLC'dir. “Yayınla…” (Ctrl+Shift+C), “Salon TV cihazına yayınlanıyor”, “Yayını durdur”; listede “Bu cihaz” yayını bitirir. VLC'nin klasik ayarı kendi adıyla anılır: “Kablosuz aktarım” |
 | kısayol | shortcut | | hotkey, key binding | |
+| kısayol kartı | shortcut card | kısayol listesi, kopya kâğıdı | cheat sheet | Bütün kısayolların menülerin sırasıyla, şu anki tuşlarıyla salt okunur listesi (Ctrl+/, Yardım menüsü, Ayarlar › Yardım); aranır, düz metin olarak paylaşılır. Tuşları değiştiren “Klavye kısayolları” düzenleyicisi (Ayarlar) ayrıdır; karttaki “Kısayolları düzenle…” oraya götürür |
+| kullanıcı rehberi | user guide | kılavuz, yardım dosyası | manual, handbook | Uygulamanın içindeki, çevrimdışı okunan kısa ve görev odaklı bölümler (F1, Yardım menüsü, Ayarlar › Yardım, komut paleti); kısa yerlerde “Rehber”. Radyo rehberi (radio directory) başka şeydir. Metin `assets/guide/guide-tr.md` ve `guide-en.md`'de, iki dilde aynı bölümlerle; `{key:KısayolAdı}` işareti tuşları güncel tablodan yazar |
 | tuş | key | | | |
 | pencere | window | | | “Yeni pencerede aç” |
 | kenar çubuğu | sidebar | yan çubuk, yan menü | side bar | |

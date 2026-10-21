@@ -551,7 +551,7 @@
     <string name="nag_sc_crop">Kırparak doldur</string>
     <string name="nag_sc_zoom">Yakınlaştır</string>
     <string name="nag_sc_play_queue">Sıradaki</string>
-    <string name="nag_sc_shortcut_list">Klavye kısayolları</string>
+    <string name="nag_sc_shortcut_list">Kısayol kartı</string>
     <string name="nag_settings_shortcuts">Klavye kısayolları</string>
     <string name="nag_shortcuts_player_only">Oynatıcıda</string>
     <!-- Kısayol düzenleyici (S-402) -->
@@ -2973,5 +2973,33 @@
     <plurals name="nag_conv_sum_channels">
         <item quantity="one">%d kanal</item>
         <item quantity="other">%d kanal</item>
+
+    <!-- S-1504: the user guide and the shortcut card -->
+    <string name="nag_guide_title">Kullanıcı rehberi</string>
+    <string name="nag_shortcut_card_title">Kısayol kartı</string>
+    <string name="nag_guide_asset">guide/guide-tr.md</string>
+    <string name="nag_guide_filter">Rehberde ara</string>
+    <string name="nag_guide_none_found">Bu aramaya uyan bölüm yok</string>
+    <string name="nag_guide_unavailable">Rehber açılamadı</string>
+    <string name="nag_guide_unavailable_hint">Rehber uygulamanın içindedir ve internet gerektirmez; ama bu derlemede okunamadı. Uygulamayı yeniden kurmayı deneyin.</string>
+    <string name="nag_guide_tip">İpucu</string>
+    <string name="nag_guide_key_unassigned">(tuş atanmamış)</string>
+    <string name="nag_help_settings_hint">Rehber ve kısayol kartı bu cihazdadır; internet gerekmez.</string>
+    <string name="nag_card_filter">Kısayol, tuş ya da menü ara</string>
+    <string name="nag_card_hint">Şu an geçerli tuşlar, yaptığınız değişiklikler dahil. %1$s</string>
+    <string name="nag_card_preset">Ön ayar: %1$s</string>
+    <string name="nag_card_preset_custom">özel</string>
+    <string name="nag_card_edit">Kısayolları düzenle…</string>
+    <string name="nag_card_share">Metin olarak paylaş</string>
+    <string name="nag_card_none_found">Bu aramaya uyan kısayol yok</string>
+    <string name="nag_card_none_found_hint">Başka bir sözcük ya da tuş deneyin.</string>
+    <string name="nag_card_unassigned">Atanmamış</string>
+    <string name="nag_card_changed">değiştirildi</string>
+    <string name="nag_card_scope_player">oynatıcıda</string>
+    <string name="nag_card_scope_editor">söz düzenleyicide</string>
+    <string name="nag_card_text_title">%1$s · %2$s</string>
+    <plurals name="nag_card_count">
+        <item quantity="one">%d kısayol</item>
+        <item quantity="other">%d kısayol</item>
     </plurals>
 </resources>

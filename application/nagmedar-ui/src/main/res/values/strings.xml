@@ -551,7 +551,7 @@
     <string name="nag_sc_crop">Crop to fill</string>
     <string name="nag_sc_zoom">Zoom</string>
     <string name="nag_sc_play_queue">Up next</string>
-    <string name="nag_sc_shortcut_list">Keyboard shortcuts</string>
+    <string name="nag_sc_shortcut_list">Shortcut card</string>
     <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
     <string name="nag_shortcuts_player_only">In the player</string>
     <!-- Shortcut editor (S-402) -->
@@ -3002,5 +3002,33 @@
     <plurals name="nag_conv_sum_channels">
         <item quantity="one">%d channel</item>
         <item quantity="other">%d channels</item>
+
+    <!-- S-1504: the user guide and the shortcut card -->
+    <string name="nag_guide_title">User guide</string>
+    <string name="nag_shortcut_card_title">Shortcut card</string>
+    <string name="nag_guide_asset">guide/guide-en.md</string>
+    <string name="nag_guide_filter">Search the guide</string>
+    <string name="nag_guide_none_found">No section matches this search</string>
+    <string name="nag_guide_unavailable">The guide could not be opened</string>
+    <string name="nag_guide_unavailable_hint">The guide is part of the app and needs no internet connection, but it could not be read in this build. Try reinstalling the app.</string>
+    <string name="nag_guide_tip">Tip</string>
+    <string name="nag_guide_key_unassigned">(no key assigned)</string>
+    <string name="nag_help_settings_hint">The guide and the shortcut card are on this device; no internet connection is needed.</string>
+    <string name="nag_card_filter">Search a shortcut, a key or a menu</string>
+    <string name="nag_card_hint">The keys in use now, with your changes. %1$s</string>
+    <string name="nag_card_preset">Preset: %1$s</string>
+    <string name="nag_card_preset_custom">custom</string>
+    <string name="nag_card_edit">Edit shortcuts…</string>
+    <string name="nag_card_share">Share as text</string>
+    <string name="nag_card_none_found">No shortcut matches this search</string>
+    <string name="nag_card_none_found_hint">Try another word or key.</string>
+    <string name="nag_card_unassigned">Not assigned</string>
+    <string name="nag_card_changed">changed</string>
+    <string name="nag_card_scope_player">in the player</string>
+    <string name="nag_card_scope_editor">in the lyrics editor</string>
+    <string name="nag_card_text_title">%1$s · %2$s</string>
+    <plurals name="nag_card_count">
+        <item quantity="one">%d shortcut</item>
+        <item quantity="other">%d shortcuts</item>
     </plurals>
 </resources>

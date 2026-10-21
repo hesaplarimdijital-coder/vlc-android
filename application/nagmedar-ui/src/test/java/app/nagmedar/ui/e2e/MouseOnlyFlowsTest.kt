@@ -63,8 +63,8 @@ class MouseOnlyFlowsTest {
         click(compose.onNode(hasText("Radyo rehberinde ara") and hasText("Ctrl+Shift+R") and hasClickAction()))
         assertEquals(Destination.Radio, window.destination)
         click("Yardım")
-        click("Klavye kısayolları")
-        assertEquals(Destination.Settings, window.destination)
+        click("Kısayol kartı")
+        assertEquals(Destination.ShortcutCard, window.destination)
     }
 
     @Test

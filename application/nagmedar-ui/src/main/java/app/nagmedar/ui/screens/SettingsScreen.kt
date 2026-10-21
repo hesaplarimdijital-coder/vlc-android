@@ -43,6 +43,7 @@ import app.nagmedar.ui.backup.BackupSection
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.player.subtitles.providers.SubtitleProvidersSettings
 import app.nagmedar.ui.player.subtitles.whisper.WhisperSettings
@@ -79,8 +80,8 @@ import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
-/** Index of the keyboard shortcut section in [SettingsScreen]'s list, for "Keyboard shortcuts" (Ctrl+/). */
-const val SETTINGS_SHORTCUTS_ITEM = 3
+/** Index of the keyboard shortcut section in [SettingsScreen]'s list, for the card's "Edit shortcuts…" (S-1504). */
+const val SETTINGS_SHORTCUTS_ITEM = 4
 
 @Composable
 fun SettingsScreen(
@@ -94,6 +95,9 @@ fun SettingsScreen(
     undo: UndoBarState? = null,
     /** S-906: the music engine's equaliser. */
     onOpenEqualizer: (() -> Unit)? = null,
+    /** S-1504: the user guide and the shortcut card. */
+    onOpenGuide: (() -> Unit)? = null,
+    onOpenShortcutCard: (() -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     LazyColumn(
@@ -104,6 +108,8 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.Start,
     ) {
         item { PageHeader(title = stringResource(R.string.nag_nav_settings)) }
+        // S-1504: the guide inside the app, and every key on one card
+        item { HelpSection(onOpenGuide, onOpenShortcutCard) }
         item { AppearanceSection(prefs) }
         item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
@@ -171,6 +177,20 @@ fun SettingsScreen(
         }
         // S-1404: the start-ups and playbacks this device measured
         item { PerformanceSection(section = { title, content -> SettingsSection(title, content) }) }
+    }
+}
+
+/** Help (S-1504): the user guide and the shortcut card, both on the device; nothing when the screen opens neither. */
+@Composable
+internal fun HelpSection(onOpenGuide: (() -> Unit)?, onOpenShortcutCard: (() -> Unit)?) {
+    if (onOpenGuide == null && onOpenShortcutCard == null) return
+    SettingsSection(stringResource(R.string.nag_menu_help)) {
+        Text(stringResource(R.string.nag_help_settings_hint), style = NagTheme.type.body, color = NagTheme.colors.textSecondary)
+        Spacer(Modifier.height(NagTheme.dimens.gapM))
+        Row(horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
+            if (onOpenGuide != null) NagButton(stringResource(R.string.nag_guide_title), onOpenGuide, primary = true, icon = NagIcons.Info)
+            if (onOpenShortcutCard != null) NagButton(stringResource(R.string.nag_shortcut_card_title), onOpenShortcutCard, icon = NagIcons.Keyboard)
+        }
     }
 }
 

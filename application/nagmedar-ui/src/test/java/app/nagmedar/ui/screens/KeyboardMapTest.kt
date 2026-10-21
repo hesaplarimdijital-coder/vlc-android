@@ -86,7 +86,7 @@ class KeyboardMapTest {
         compose.onAllNodesWithContentDescription("Ctrl")[0].performClick()
         compose.waitForIdle()
         compose.onNodeWithContentDescription("Ctrl+Ö · Ayarlar").assertExists()
-        compose.onNodeWithContentDescription("Ctrl+. · Klavye kısayolları").assertExists()
+        compose.onNodeWithContentDescription("Ctrl+. · Kısayol kartı").assertExists()
     }
 
     @Test

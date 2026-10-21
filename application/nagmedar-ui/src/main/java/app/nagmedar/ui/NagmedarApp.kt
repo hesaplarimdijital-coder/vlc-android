@@ -50,6 +50,8 @@ import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
+import app.nagmedar.ui.guide.GuideScreen
+import app.nagmedar.ui.guide.ShortcutCardScreen
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -383,9 +385,17 @@ private fun NagmedarMain(
                             listState = settingsList,
                             undo = undo,
                             onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
+                            onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
+                            onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
                         )
                         // S-906, with S-910's signal path and S-912's A/B test beside the chain
                         Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
+                        // S-1504: the guide and the card of keys, each leading to the other
+                        Destination.Guide -> GuideScreen(onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) })
+                        Destination.ShortcutCard -> ShortcutCardScreen(
+                            onEdit = actions::editShortcuts,
+                            onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
+                        )
                         Destination.More -> MoreScreen(
                             destinations = Destination.overflow(
                                 when (NavKind.forWidth(widthClass)) {
@@ -535,6 +545,12 @@ class AppActions(
         return true
     }
 
+    /** The shortcut editor in Settings (S-402), scrolled to: the card of keys leads here (S-1504). */
+    fun editShortcuts() {
+        navigator.navigate(Destination.Settings)
+        showShortcutList()
+    }
+
     /** The route on screen, before a back (S-408). */
     fun currentRoute(): String? = navigator.currentRoute
 
@@ -654,10 +670,9 @@ class AppActions(
             }
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
-            ShortcutId.ShortcutList -> {
-                navigator.navigate(Destination.Settings)
-                showShortcutList()
-            }
+            // S-1504: the card of keys; its button leads to the editor in Settings
+            ShortcutId.ShortcutList -> navigator.navigate(Destination.ShortcutCard)
+            ShortcutId.UserGuide -> navigator.navigate(Destination.Guide)
             else -> return false
         }
         return true
