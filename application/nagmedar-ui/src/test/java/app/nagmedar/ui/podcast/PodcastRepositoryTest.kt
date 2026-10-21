@@ -351,7 +351,7 @@ class PodcastRepositoryTest {
 
         clock += 60_000
         serve("https://example.org/feed" to fresh(feed(episodes = listOf(episode("3", 30), episode("2", 20), episode("1", 10))), "https://example.org/feed", etag = "\"v2\""))
-        assertEquals(RefreshResult.Updated(1), repository.refresh(id))
+        assertEquals(1, (repository.refresh(id) as RefreshResult.Updated).added)
         // sent what the feed gave last time
         assertEquals("\"v1\"" to "Sat, 10 Oct 2026 06:00:00 GMT", conditions.last())
 

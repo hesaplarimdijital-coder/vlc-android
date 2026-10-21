@@ -59,8 +59,8 @@ class UnsubscribedFeed(val feed: PodcastFeed, val episodes: List<PodcastEpisode>
 
 /** What refreshing a subscription came to. */
 sealed interface RefreshResult {
-    /** [added] episodes that the feed has and the subscription did not. */
-    data class Updated(val added: Int) : RefreshResult
+    /** [added] episodes that the feed has and the subscription did not: [episodes], as stored. */
+    data class Updated(val added: Int, val episodes: List<PodcastEpisode> = emptyList()) : RefreshResult
 
     data object NotModified : RefreshResult
 
@@ -202,6 +202,26 @@ class PodcastRepository(
 
     suspend fun setPlayed(episodeId: Long, played: Boolean) = withContext(io) { dao.setPlayed(episodeId, played) }
 
+    /** S-205: one episode, followed; null once it is gone. */
+    fun episode(episodeId: Long): Flow<PodcastEpisode?> = dao.observeEpisode(episodeId)
+
+    /** S-1104: the place of an episode, set to where it is about to be played from. */
+    suspend fun setPosition(episodeId: Long, positionMs: Long) = withContext(io) { dao.savePositionOnly(episodeId, positionMs.coerceAtLeast(0L)) }
+
+    /** S-1103: whether [feedId]'s new episodes are told in a notification. */
+    suspend fun setNotify(feedId: Long, on: Boolean) = withContext(io) { dao.setNotify(feedId, on) }
+
+    /** S-1103: [feedId]'s automatic download: off, or the newest [count] of each refresh's new episodes. */
+    suspend fun setAutoDownload(feedId: Long, on: Boolean, count: Int) = withContext(io) { dao.setAutoDownload(feedId, on, count.coerceIn(1, MAX_AUTO)) }
+
+    /** S-1103: how many downloaded episodes of [feedId] are kept; 0 keeps all. */
+    suspend fun setKeepLatest(feedId: Long, count: Int) = withContext(io) { dao.setKeepLatest(feedId, count.coerceAtLeast(0)) }
+
+    /** S-1104: how [feedId]'s episodes play: [speed] within 0.5 to 3, seconds skipped at the start and before the end. */
+    suspend fun setPlayback(feedId: Long, speed: Float, introSeconds: Int, outroSeconds: Int) = withContext(io) {
+        dao.setPlayback(feedId, speed.coerceIn(PlaybackRules.MIN_SPEED, PlaybackRules.MAX_SPEED), introSeconds.coerceIn(0, PlaybackRules.MAX_SKIP_S), outroSeconds.coerceIn(0, PlaybackRules.MAX_SKIP_S))
+    }
+
     /**
      * S-1102: subscribes to each of [feeds], [PARALLEL] at a time; [progress] hears how many are done of how many.
      * Feeds already subscribed to are counted, not fetched. Never throws but for cancellation.
@@ -243,7 +263,7 @@ class PodcastRepository(
     /**
      * Reads the feed again with the validators kept (a 304 costs nothing), stores the address it moved
      * to, takes what the feed now says of the show, and adds the episodes it did not have: those are
-     * the new ones. The scheduling, notifications and downloads around it are S-1103's.
+     * the new ones. The schedule, the notifications and the downloads around it are [PodcastRefresher]'s.
      */
     suspend fun refresh(feedId: Long): RefreshResult {
         val feed = withContext(io) { dao.feed(feedId) } ?: return RefreshResult.Missing
@@ -278,8 +298,7 @@ class PodcastRepository(
         }
         is FeedFetch.Fresh -> {
             val parsed = fetch.feed
-            val before = dao.episodeList(base.id).size
-            dao.refreshFeed(
+            val added = dao.refreshFeed(
                 base.copy(
                     title = parsed.title.ifBlank { base.title },
                     author = parsed.author ?: base.author,
@@ -295,7 +314,7 @@ class PodcastRepository(
                 ),
                 parsed.episodes.map { it.toEntity(base.id, at) },
             )
-            RefreshResult.Updated(dao.episodeList(base.id).size - before)
+            RefreshResult.Updated(added.size, added)
         }
     }
 
@@ -318,10 +337,14 @@ class PodcastRepository(
         chaptersUrl = chaptersUrl,
         transcriptUrl = transcriptUrl,
         transcriptType = transcriptType,
+        notesHtml = notesHtml,
     )
 
     companion object {
         /** Feeds fetched at once by an import: quick enough for hundreds, gentle on the hosts. */
         const val PARALLEL = 4
+
+        /** The most episodes a show downloads by itself at once. */
+        const val MAX_AUTO = 20
     }
 }

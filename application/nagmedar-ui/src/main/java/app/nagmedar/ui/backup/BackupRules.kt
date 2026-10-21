@@ -6,6 +6,7 @@ import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
+import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -28,12 +29,13 @@ object BackupSettings {
         // their own parts
         NagmedarPreferences.KEY_SHORTCUTS,
         FileProfileStore.KEY_SELECTED,
-        // this device's: folder permissions, the window on this screen, a picked snapshot, recording or converter's folder
+        // this device's: folder permissions, the window on this screen, a picked snapshot, recording, converter's or podcast download folder
         NAGMEDAR_SAF_FOLDERS,
         NAGMEDAR_WINDOW_BOUNDS,
         SnapshotSettings.KEY_FOLDER,
         KEY_RECORDING_FOLDER,
         ConvertOptions.KEY_FOLDER,
+        PodcastSettingsStore.KEY_FOLDER,
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

@@ -177,7 +177,8 @@ object HtmlText {
     /** One line: [plain] with its lines joined by spaces; for titles, which feeds sometimes wrap in markup. */
     fun line(text: String?): String? = plain(text, limit = 500)?.replace(Regex("\\s*\\n\\s*"), " ")?.trim()?.takeIf { it.isNotEmpty() }
 
-    private fun decode(text: String): String {
+    /** [text] with its character references (`&amp;`, `&#39;`, `&#x27;`) decoded. */
+    internal fun decode(text: String): String {
         if ('&' !in text) return text
         val matcher = ENTITY.matcher(text)
         val out = StringBuffer()

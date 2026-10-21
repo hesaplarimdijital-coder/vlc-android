@@ -36,7 +36,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 11
+        const val VERSION = 12
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -143,9 +143,21 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 11 → 12 (S-1103, S-1104): the shows' notifications, downloads and playback settings, and the episodes' downloads, played time and show notes. */
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                listOf(
+                    "notify INTEGER NOT NULL DEFAULT 1", "auto_download_count INTEGER NOT NULL DEFAULT 3", "keep_latest INTEGER NOT NULL DEFAULT 0",
+                    "speed REAL NOT NULL DEFAULT 1.0", "skip_intro_s INTEGER NOT NULL DEFAULT 0", "skip_outro_s INTEGER NOT NULL DEFAULT 0",
+                ).forEach { db.execSQL("ALTER TABLE `podcast_feed` ADD COLUMN $it") }
+                listOf("download_bytes INTEGER NOT NULL DEFAULT 0", "played_at INTEGER NOT NULL DEFAULT 0", "notes_html TEXT")
+                    .forEach { db.execSQL("ALTER TABLE `podcast_episode` ADD COLUMN $it") }
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
         )
 
         @Volatile

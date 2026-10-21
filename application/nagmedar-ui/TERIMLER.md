@@ -150,6 +150,11 @@ Sözlüğü testler denetler:
 | yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu (videoda izlendi / izlenmedi): “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
+| kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |
+| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
+| indirmek, indirme | download | | | Podcast bölümünü cihaza almak: “İndir”, “İndirileni sil”; süren indirmeyi durdurmak “İptal” |
+| depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
+| giriş, kapanış | intro, outro | | | Bir podcast bölümünün başında ve sonunda atlanan saniyeler: “Girişi atla”, “Kapanışı atla” |
 | dönüştürmek | convert | | transcode | Bir müzik dosyasını başka bir biçimde (Opus, MP3, AAC) yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz: “Dönüştür…”, “Dönüştürme bitti” |
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |

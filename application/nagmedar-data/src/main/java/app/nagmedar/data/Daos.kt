@@ -78,14 +78,71 @@ abstract class PodcastDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun addEpisodes(episodes: List<PodcastEpisode>): List<Long>
 
-    @Query("UPDATE podcast_episode SET position_ms = :positionMs, played = :played WHERE id = :episodeId")
+    /** S-1104: the playback position and whether the episode is played; the time it was marked played stays the first one. */
+    @Query(
+        "UPDATE podcast_episode SET position_ms = :positionMs, played = :played, " +
+            "played_at = CASE WHEN :played = 0 THEN 0 WHEN played_at = 0 THEN CAST(strftime('%s','now') AS INTEGER) * 1000 ELSE played_at END " +
+            "WHERE id = :episodeId",
+    )
     abstract fun savePosition(episodeId: Long, positionMs: Long, played: Boolean)
 
-    @Query("UPDATE podcast_episode SET played = :played WHERE id = :episodeId")
+    /** S-1104: only where the episode has got to; whether it is played stays as it is. */
+    @Query("UPDATE podcast_episode SET position_ms = :positionMs WHERE id = :episodeId")
+    abstract fun savePositionOnly(episodeId: Long, positionMs: Long)
+
+    @Query(
+        "UPDATE podcast_episode SET played = :played, " +
+            "played_at = CASE WHEN :played = 0 THEN 0 WHEN played_at = 0 THEN CAST(strftime('%s','now') AS INTEGER) * 1000 ELSE played_at END " +
+            "WHERE id = :episodeId",
+    )
     abstract fun setPlayed(episodeId: Long, played: Boolean)
 
-    @Query("UPDATE podcast_episode SET download_state = :state, download_path = :path WHERE id = :episodeId")
-    abstract fun setDownload(episodeId: Long, state: Int, path: String?)
+    @Query("SELECT * FROM podcast_episode WHERE id = :id")
+    abstract fun episode(id: Long): PodcastEpisode?
+
+    @Query("SELECT * FROM podcast_episode WHERE id = :id")
+    abstract fun observeEpisode(id: Long): Flow<PodcastEpisode?>
+
+    /** S-1104: the episode that plays from [location], its enclosure's address or its downloaded copy. */
+    @Query("SELECT * FROM podcast_episode WHERE audio_url = :location OR download_path = :location ORDER BY id LIMIT 1")
+    abstract fun episodeAt(location: String): PodcastEpisode?
+
+    /** S-1103: the episodes in a download [state] (see [DownloadState]), the newest first. */
+    @Query("SELECT * FROM podcast_episode WHERE download_state = :state ORDER BY published_at DESC")
+    abstract fun episodesDownload(state: Int): List<PodcastEpisode>
+
+    /** S-1103: where an episode's download is: its [state], and the file it is in once it is done. */
+    @Query("UPDATE podcast_episode SET download_state = :state, download_path = :path, download_bytes = :bytes WHERE id = :episodeId")
+    abstract fun setDownload(episodeId: Long, state: Int, path: String?, bytes: Long)
+
+    /** S-1103: takes a queued download for the one that runs it; the number of rows taken (0 when it is not queued any more). */
+    @Query("UPDATE podcast_episode SET download_state = 2 WHERE id = :episodeId AND download_state = 1")
+    abstract fun claimDownload(episodeId: Long): Int
+
+    /** S-1103: only the state, the file (if any) stays. */
+    @Query("UPDATE podcast_episode SET download_state = :state WHERE id = :episodeId")
+    abstract fun setDownloadState(episodeId: Long, state: Int)
+
+    /** S-1103: the show notes of an episode a refresh listed again, when it has none yet (shows subscribed to before the notes were kept). */
+    @Query("UPDATE podcast_episode SET notes_html = :html WHERE feed_id = :feedId AND guid = :guid AND notes_html IS NULL")
+    abstract fun fillNotes(feedId: Long, guid: String, html: String)
+
+    @Query("UPDATE podcast_feed SET notify = :on WHERE id = :feedId")
+    abstract fun setNotify(feedId: Long, on: Boolean)
+
+    /** S-1103: the show's automatic download: off, or the newest [count] of every refresh's new episodes. */
+    @Query("UPDATE podcast_feed SET auto_download = :on, auto_download_count = :count WHERE id = :feedId")
+    abstract fun setAutoDownload(feedId: Long, on: Boolean, count: Int)
+
+    @Query("UPDATE podcast_feed SET keep_latest = :count WHERE id = :feedId")
+    abstract fun setKeepLatest(feedId: Long, count: Int)
+
+    /** S-1104: how the show's episodes play. */
+    @Query("UPDATE podcast_feed SET speed = :speed, skip_intro_s = :intro, skip_outro_s = :outro WHERE id = :feedId")
+    abstract fun setPlayback(feedId: Long, speed: Float, intro: Int, outro: Int)
+
+    @Query("UPDATE podcast_feed SET speed = :speed WHERE id = :feedId")
+    abstract fun setSpeed(feedId: Long, speed: Float)
 
     /** S-1101: a new subscription with the episodes its first fetch read; the feed's id. */
     @Transaction
@@ -95,10 +152,28 @@ abstract class PodcastDao {
         return id
     }
 
+    /**
+     * Updates the show and adds the episodes it did not have; returns those, with their ids: the new ones. The show's own
+     * settings are as they are in Room now, not as they were when the feed was fetched: a switch turned meanwhile stays.
+     */
     @Transaction
-    open fun refreshFeed(feed: PodcastFeed, episodes: List<PodcastEpisode>) {
-        updateFeed(feed)
-        addEpisodes(episodes.map { it.copy(feedId = feed.id) })
+    open fun refreshFeed(feed: PodcastFeed, episodes: List<PodcastEpisode>): List<PodcastEpisode> {
+        val now = feed(feed.id)
+        updateFeed(
+            if (now == null) {
+                feed
+            } else {
+                feed.copy(
+                    autoDownload = now.autoDownload, notify = now.notify, autoDownloadCount = now.autoDownloadCount,
+                    keepLatest = now.keepLatest, speed = now.speed, skipIntroSeconds = now.skipIntroSeconds, skipOutroSeconds = now.skipOutroSeconds,
+                )
+            },
+        )
+        val rows = episodes.map { it.copy(feedId = feed.id) }
+        val ids = addEpisodes(rows)
+        // an episode listed again keeps its playback state; its notes are filled in when it has none
+        rows.forEachIndexed { i, row -> if (ids[i] < 0) row.notesHtml?.let { fillNotes(feed.id, row.guid, it) } }
+        return rows.indices.filter { ids[it] > 0 }.map { rows[it].copy(id = ids[it]) }
     }
 }
 

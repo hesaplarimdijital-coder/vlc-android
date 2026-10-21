@@ -173,6 +173,11 @@ object FeedParser {
         var description: String? = null
         var contentEncoded: String? = null
         var summary: String? = null
+
+        /** The markup the three of them were written with, for the show notes; null when one was plain text. */
+        var descriptionHtml: String? = null
+        var contentHtml: String? = null
+        var summaryHtml: String? = null
         var imageUrl: String? = null
         var season: Int? = null
         var episode: Int? = null
@@ -347,9 +352,21 @@ object FeedParser {
                     "pubdate", "dc:date", "published" -> item.published = keep(item.published) { readText() }
                     "updated" -> item.updated = keep(item.updated) { readText() }
                     "itunes:duration" -> item.duration = readText()
-                    "description", "summary" -> item.description = keep(item.description) { HtmlText.plain(readText()) }
-                    "content:encoded", "content" -> item.contentEncoded = keep(item.contentEncoded) { HtmlText.plain(readText()) }
-                    "itunes:summary" -> item.summary = keep(item.summary) { HtmlText.plain(readText()) }
+                    "description", "summary" -> {
+                        val raw = readText()
+                        item.description = item.description ?: HtmlText.plain(raw)
+                        item.descriptionHtml = item.descriptionHtml ?: markup(raw)
+                    }
+                    "content:encoded", "content" -> {
+                        val raw = readText()
+                        item.contentEncoded = item.contentEncoded ?: HtmlText.plain(raw)
+                        item.contentHtml = item.contentHtml ?: markup(raw)
+                    }
+                    "itunes:summary" -> {
+                        val raw = readText()
+                        item.summary = item.summary ?: HtmlText.plain(raw)
+                        item.summaryHtml = item.summaryHtml ?: markup(raw)
+                    }
                     "itunes:image" -> {
                         item.imageUrl = keep(item.imageUrl) { attr("href")?.let { FeedUrl.resolve(baseUrl, it) } }
                         skip()
@@ -416,6 +433,7 @@ object FeedParser {
                 chaptersUrl = item.chaptersUrl,
                 transcriptUrl = transcript?.first,
                 transcriptType = transcript?.second,
+                notesHtml = item.contentHtml ?: item.descriptionHtml ?: item.summaryHtml,
             )
             if (episodes.size >= 2 * MAX_EPISODES) compact()
         }
@@ -446,6 +464,9 @@ object FeedParser {
             val path = enclosure.url.substringBefore('?').substringBefore('#')
             return path.substringAfterLast('.', "").lowercase(Locale.ROOT) in MEDIA_EXTENSIONS
         }
+
+        /** [raw] as the show notes keep it: only text that has markup (plain text is the description), cut at [MAX_NOTES]. */
+        private fun markup(raw: String): String? = raw.trim().takeIf { '<' in it && it.length > 1 }?.take(MAX_NOTES)
 
         /** "episode-01" from ".../episode-01.mp3": a title for an item that has none. */
         private fun fileTitle(url: String): String {
@@ -561,4 +582,7 @@ object FeedParser {
 
     /** More text than this in one element is cut: no description is that long. */
     private const val MAX_TEXT = 200_000
+
+    /** S-205: the show notes of an episode are kept up to this many characters of markup. */
+    private const val MAX_NOTES = 64_000
 }

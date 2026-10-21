@@ -50,6 +50,10 @@
         <receiver
             android:name="app.nagmedar.ui.convert.ConvertCancelReceiver"
             android:exported="false" />
+        <!-- S-1103: the podcast download notification's Cancel -->
+        <receiver
+            android:name="app.nagmedar.ui.podcast.DownloadCancelReceiver"
+            android:exported="false" />
 
         <!-- S-1007: the alarm; and setting it again after a restart or a change of the clock (the
              system's broadcasts reach a receiver that is not exported) -->

@@ -38,6 +38,18 @@ data class PodcastFeed(
      * permanent redirect moved it to [feedUrl]), as keys, one per line: a result is told as subscribed by any of them.
      */
     @ColumnInfo(name = "alias_keys", defaultValue = "''") val aliasKeys: String = "",
+    /** S-1103: a notification when the refresh finds new episodes of the show. */
+    @ColumnInfo(name = "notify", defaultValue = "1") val notify: Boolean = true,
+    /** S-1103: with [autoDownload] on, how many of the new episodes of a refresh are downloaded by themselves, the newest first. */
+    @ColumnInfo(name = "auto_download_count", defaultValue = "3") val autoDownloadCount: Int = 3,
+    /** S-1103: how many downloaded episodes of the show are kept, the newest; 0 keeps them all. */
+    @ColumnInfo(name = "keep_latest", defaultValue = "0") val keepLatest: Int = 0,
+    /** S-1104: the speed the show's episodes play at, 0.5 to 3. */
+    @ColumnInfo(name = "speed", defaultValue = "1.0") val speed: Float = 1f,
+    /** S-1104: seconds skipped at the start of every episode (the show's jingle), 0 for none. */
+    @ColumnInfo(name = "skip_intro_s", defaultValue = "0") val skipIntroSeconds: Int = 0,
+    /** S-1104: seconds before the end from which an episode counts as played and the next one starts, 0 for none. */
+    @ColumnInfo(name = "skip_outro_s", defaultValue = "0") val skipOutroSeconds: Int = 0,
 )
 
 object DownloadState {
@@ -46,6 +58,9 @@ object DownloadState {
     const val RUNNING = 2
     const val DONE = 3
     const val FAILED = 4
+
+    /** S-1103: a download taken away (by hand or by the storage limit): it is not downloaded again by itself. */
+    const val REMOVED = 5
 }
 
 @Entity(
@@ -81,6 +96,12 @@ data class PodcastEpisode(
     @ColumnInfo(name = "chapters_url") val chaptersUrl: String? = null,
     @ColumnInfo(name = "transcript_url") val transcriptUrl: String? = null,
     @ColumnInfo(name = "transcript_type") val transcriptType: String? = null,
+    /** S-1103: the size of the downloaded file in bytes; 0 while there is none. */
+    @ColumnInfo(name = "download_bytes", defaultValue = "0") val downloadBytes: Long = 0,
+    /** S-1103: when the episode was marked played, in epoch milliseconds; 0 while it is not. */
+    @ColumnInfo(name = "played_at", defaultValue = "0") val playedAt: Long = 0,
+    /** S-1103: the show notes as the feed wrote them (HTML, cut at 64 KB), drawn by the episode's page after sanitising; null when the feed gave none. */
+    @ColumnInfo(name = "notes_html") val notesHtml: String? = null,
 )
 
 /**

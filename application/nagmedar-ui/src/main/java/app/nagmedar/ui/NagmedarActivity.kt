@@ -30,6 +30,8 @@ import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.perf.StartupPerf
+import app.nagmedar.ui.podcast.PodcastCenter
+import app.nagmedar.ui.podcast.PodcastNotifier
 import app.nagmedar.ui.radio.RadioCenter
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -61,7 +63,12 @@ class NagmedarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
+        if (savedInstanceState == null) {
+            destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
+            openPodcastOf(intent)
+        }
+        // S-1103: the feeds' refresh runs in the background while there is a subscription; set again at each start, which changes nothing when it is as it was
+        if (Build.FINGERPRINT != "robolectric") PodcastCenter.schedule(this)
         // S-1006: the album covers are looked for in the app; its Robolectric tests run it too, offline
         CoverCenter.active = Build.FINGERPRINT != "robolectric"
         // S-1105: the radio directory and the station logos are asked in the app, not in its tests
@@ -178,6 +185,12 @@ class NagmedarActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         intent.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)?.let { destination = it }
+        openPodcastOf(intent)
+    }
+
+    /** S-1103: a notification of new episodes carries the show it is about: its page opens. */
+    private fun openPodcastOf(intent: Intent?) {
+        intent?.getLongExtra(PodcastNotifier.EXTRA_PODCAST, -1L)?.takeIf { it >= 0 }?.let(PodcastCenter::requestOpen)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean =

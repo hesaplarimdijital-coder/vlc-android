@@ -47,6 +47,8 @@ data class ParsedEpisode(
     /** Podcasting 2.0's `podcast:transcript` file and its media type. */
     val transcriptUrl: String? = null,
     val transcriptType: String? = null,
+    /** S-205: the show notes with their markup, as the feed wrote them; null when the feed's text had none. */
+    val notesHtml: String? = null,
 )
 
 /** Why an address is not a feed. */
