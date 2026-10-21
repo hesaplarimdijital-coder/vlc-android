@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,7 +43,9 @@ import app.nagmedar.ui.theme.NagTheme
 
 /** The requests the app's windows show, in the order they came; main thread. */
 class PromptQueue : PromptHost {
-    val shown = mutableStateListOf<LibVlcPrompt>()
+    // made in the global snapshot: the process's queue is often first touched inside a window's
+    // composition, whose snapshot another window's composition must not depend on
+    val shown: SnapshotStateList<LibVlcPrompt> = Snapshot.global { mutableStateListOf() }
 
     override fun show(prompt: LibVlcPrompt): Boolean {
         shown += prompt
