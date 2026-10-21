@@ -297,7 +297,6 @@
     <string name="nag_coming_radio">İnternet radyosu rehberi, favoriler ve kayıtlar.</string>
     <string name="nag_coming_device">Bu cihazdaki ve harici disklerdeki klasörler.</string>
     <string name="nag_coming_streams">Ağ akışları ve kayıtlı adresler.</string>
-    <string name="nag_coming_tv_lab">Dosyaları TV\'niz için analiz edin, kalite kaybı olmadan remux edin.</string>
     <string name="nag_coming_convert">Dönüştürme profilleri, işler ve ağda yayın (HLS).</string>
     <string name="nag_coming_convert">Dönüştürme işleri.</string>
     <string name="nag_coming_downloads">Podcast bölümleri, altyazılar ve diğer indirmeler.</string>
