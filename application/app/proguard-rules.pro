@@ -132,3 +132,6 @@
 
 # Nağmedar (S-1301): the playback service finds the network sign-ins' observer by name
 -keep class app.nagmedar.ui.network.NetworkSignInObserver { <init>(); }
+
+# Nağmedar (S-1104): the playback service finds the podcast episodes' observer by name
+-keep class app.nagmedar.ui.podcast.PodcastPlaybackObserver { <init>(); }

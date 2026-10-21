@@ -86,6 +86,7 @@ import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.radio.RadioScreen
+import app.nagmedar.ui.podcast.Chapters
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.screens.MoreScreen
@@ -598,6 +599,9 @@ class AppActions(
                 navigator.navigate(Destination.Podcasts)
                 PodcastCenter.requestSearchFocus()
             }
+            // S-1104: the chapters of the podcast episode that plays
+            ShortcutId.PodcastNextChapter -> stepPodcastChapter(forward = true)
+            ShortcutId.PodcastPreviousChapter -> stepPodcastChapter(forward = false)
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
             ShortcutId.ShortcutList -> {
@@ -607,6 +611,17 @@ class AppActions(
             else -> return false
         }
         return true
+    }
+
+    /** S-1104: to the next (or the previous) chapter of the podcast episode that plays; a toast says when there are none. */
+    private fun stepPodcastChapter(forward: Boolean) {
+        val chapters = PodcastCenter.playing.value?.chapters.orEmpty()
+        val target = PlaybackService.instance?.let { Chapters.step(chapters, it.getTime(), forward) }
+        if (target == null) {
+            Toast.makeText(context, R.string.nag_pod_chapter_none, Toast.LENGTH_SHORT).show()
+        } else {
+            PlaybackActions.seekToMs(chapters[target].startMs)
+        }
     }
 
     /** S-1004: the playing track's lyrics [byMs] later (earlier when negative), said in a toast. */

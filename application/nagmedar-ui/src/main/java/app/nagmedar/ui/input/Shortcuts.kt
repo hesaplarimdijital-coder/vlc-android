@@ -158,6 +158,7 @@ enum class ShortcutId {
     FolderUp, Refresh,
     PodcastSearch,
     Cast,
+    PodcastNextChapter, PodcastPreviousChapter,
 }
 
 @Immutable
@@ -213,6 +214,9 @@ object ShortcutRegistry {
         // S-608: chapters as VLC desktop steps through them, and bookmarks
         Shortcut(ShortcutId.NextChapter, ShortcutGroup.Playback, R.string.nag_sc_next_chapter, KeyChord(Key.N, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.PreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_previous_chapter, KeyChord(Key.P, shift = true), ShortcutScope.Player),
+        // S-1104: the chapters of a podcast episode (ID3 or Podcasting 2.0) are not libVLC's, so they have keys of their own, from anywhere
+        Shortcut(ShortcutId.PodcastNextChapter, ShortcutGroup.Playback, R.string.nag_sc_podcast_next_chapter, KeyChord(Key.DirectionRight, ctrl = true, alt = true)),
+        Shortcut(ShortcutId.PodcastPreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_podcast_previous_chapter, KeyChord(Key.DirectionLeft, ctrl = true, alt = true)),
         Shortcut(ShortcutId.AddBookmark, ShortcutGroup.Playback, R.string.nag_sc_add_bookmark, KeyChord(Key.D, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Bookmarks, ShortcutGroup.Playback, R.string.nag_sc_bookmarks, KeyChord(Key.B, ctrl = true, shift = true), ShortcutScope.Player),
         // S-1007: the sleep timer's window (S for sleep; VLC has none)
