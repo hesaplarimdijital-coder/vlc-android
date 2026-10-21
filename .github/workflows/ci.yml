@@ -51,6 +51,9 @@ defaults:
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
+  # Tests paused until the test phase: the app, its unit tests and the native libraries are
+  # compiled, but no test runs and no screenshot is compared. '1' runs them all again.
+  NAGMEDAR_RUN_TESTS: '0'
   # S-706: Nağmedar's own OpenSubtitles.com API key; empty where the secret is not set
   NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
   # S-1101: Nağmedar's own Podcast Index key and secret; empty where the secrets are not set
@@ -102,7 +105,7 @@ jobs:
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Host derlemesi ve testleri (SP-03, SP-05)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true' && env.NAGMEDAR_RUN_TESTS == '1'
         env:
           NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test
           TOKEN: ${{ github.token }}
@@ -198,6 +201,13 @@ jobs:
             # S-1404: the macrobenchmarks and the app's benchmark build they measure, arm64
             ./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark \
               -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee -a build.log
+          elif [ "$NAGMEDAR_RUN_TESTS" != 1 ]; then
+            # tests paused: the debug APK, and the unit tests compiled so they stay buildable
+            ./gradlew :application:app:assembleDebug :application:nagmedar-ui:compileDebugUnitTestSources \
+              :application:tools:compileDebugUnitTestSources :application:nagmedar-data:compileDebugUnitTestSources \
+              :application:nagmedar-session:compileDebugUnitTestSources :application:nagmedar-lab:compileDebugUnitTestSources \
+              :application:nagmedar-audio:compileDebugUnitTestSources \
+              -PnagmedarAbis=arm64-v8a --continue --console=plain 2>&1 | tee build.log
           else
             # arm64 only (Tab S11 Ultra); signed with the shared debug key so it updates in place
             ./gradlew :application:app:assembleDebug :application:nagmedar-ui:testDebugUnitTest \
@@ -230,7 +240,7 @@ jobs:
           git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$TARGET" || true
 
       - name: Ekran görüntülerini karşılaştır
-        if: always() && matrix.variant == 'debug'
+        if: always() && matrix.variant == 'debug' && env.NAGMEDAR_RUN_TESTS == '1'
         run: |
           pip install --quiet pillow
           python3 buildsystem/ci/screenshot_report.py \
