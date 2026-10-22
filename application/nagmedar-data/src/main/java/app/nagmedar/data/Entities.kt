@@ -191,6 +191,32 @@ data class RadioScheduleEntry(
     val enabled: Boolean = true,
     @ColumnInfo(name = "last_started_at") val lastStartedAt: Long = 0,
     @ColumnInfo(name = "created_at") val createdAt: Long = 0,
+    /** Until when the runs of this schedule were looked over for ones that were missed (ms; 0: not yet). */
+    @ColumnInfo(name = "checked_at", defaultValue = "0") val checkedAt: Long = 0,
+)
+
+/**
+ * One run of a scheduled radio recording (S-1107): the window [windowStart]..[windowEnd] (epoch ms)
+ * of [scheduleId], and what came of it: [status] is the name of the run's state (Running, Done,
+ * Stopped, Failed, Interrupted, Missed). [interruptions] counts the times a restart of the device
+ * or of the app cut it off; [sessionId] is the recording that made it. One row per window.
+ */
+@Entity(
+    tableName = "radio_schedule_run",
+    indices = [
+        Index(value = ["schedule_id", "window_start"], unique = true),
+        Index(value = ["session_id"]),
+    ],
+)
+data class RadioScheduleRun(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "schedule_id") val scheduleId: Long,
+    @ColumnInfo(name = "window_start") val windowStart: Long,
+    @ColumnInfo(name = "window_end") val windowEnd: Long,
+    val status: String,
+    val interruptions: Int = 0,
+    @ColumnInfo(name = "session_id") val sessionId: String? = null,
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = 0,
 )
 
 /**

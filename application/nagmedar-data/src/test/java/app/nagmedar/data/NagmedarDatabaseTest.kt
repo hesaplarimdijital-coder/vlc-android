@@ -665,6 +665,11 @@ class NagmedarDatabaseMigrationTest {
                     "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
                     "VALUES ('content://a', 'a.mkv', 1, 'content://b', 'b.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
             )
+            // 16 -> 17 (S-1107): the runs of a scheduled recording
+            db.execSQL(
+                "INSERT INTO radio_schedule_run (schedule_id, window_start, window_end, status, interruptions, session_id, updated_at) " +
+                    "VALUES (1, 1, 2, 'recorded', 0, NULL, 2)",
+            )
         }
     }
 

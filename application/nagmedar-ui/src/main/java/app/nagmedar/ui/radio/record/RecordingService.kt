@@ -8,6 +8,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -31,6 +32,8 @@ class RecordingService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var updater: Job? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var watchedAt = 0L
+    private var watching = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -69,6 +72,7 @@ class RecordingService : Service() {
             }
             if (live.isNotEmpty()) {
                 hold()
+                watch(live)
                 runCatching {
                     getSystemService(NotificationManager::class.java)?.notify(RecordingNotifications.ONGOING_ID, RecordingNotifications.ongoing(this, live))
                 }
@@ -87,6 +91,19 @@ class RecordingService : Service() {
         runCatching { lock?.acquire(WAKE_MS) }
     }
 
+    /**
+     * While a scheduled recording goes on, an alarm is kept ahead of the clock: if Android kills the app's
+     * process, the alarm rings after it and the recording is taken up again.
+     */
+    private fun watch(live: List<LiveRecording>) {
+        if (live.none { it.request.scheduleId != null }) return
+        val now = SystemClock.elapsedRealtime()
+        if (watching && now - watchedAt < WATCH_RENEW_MS) return
+        watchedAt = now
+        watching = true
+        RecordingAlarms.watch(this)
+    }
+
     private fun release() {
         runCatching { if (wakeLock?.isHeld == true) wakeLock?.release() }
         wakeLock = null
@@ -94,6 +111,8 @@ class RecordingService : Service() {
 
     private fun finish() {
         release()
+        if (watching) RecordingAlarms.cancelCatchUp(this)
+        watching = false
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -118,6 +137,7 @@ class RecordingService : Service() {
         private const val UPDATE_MS = 2_000L
         private const val IDLE_ROUNDS = 5
         private const val WAKE_MS = 5 * 60_000L
+        private const val WATCH_RENEW_MS = 60_000L
 
         /** Starts the service (a recording is about to begin); false when the system does not let it. */
         fun start(context: Context): Boolean = try {

@@ -174,6 +174,13 @@
     <string name="nag_radio_rec_sched_running">Şimdi kayıtta</string>
     <string name="nag_radio_rec_sched_off">Kapalı</string>
     <string name="nag_radio_rec_sched_done">Tamamlandı</string>
+    <string name="nag_radio_rec_run_done">Son çalışma: kaydedildi (%1$s)</string>
+    <string name="nag_radio_rec_run_done_resumed">Son çalışma: bir kez kesildi, yeniden başladı ve kaydedildi (%1$s)</string>
+    <string name="nag_radio_rec_run_resumed">Yeniden başlatmadan sonra kayıt sürdürüldü (%1$s)</string>
+    <string name="nag_radio_rec_run_stopped">Son çalışma: durduruldu (%1$s)</string>
+    <string name="nag_radio_rec_run_failed">Son çalışma: kayıt yapılamadı (%1$s)</string>
+    <string name="nag_radio_rec_run_interrupted">Son çalışma: cihaz ya da uygulama yeniden başlayınca kesildi (%1$s)</string>
+    <string name="nag_radio_rec_run_missed">Son çalışma: kaçırıldı (%1$s)</string>
     <string name="nag_radio_rec_storage">%2$s sınırından %1$s kullanıldı</string>
     <string name="nag_radio_rec_storage_nolimit">%1$s kullanıldı, sınır yok</string>
     <string name="nag_radio_rec_storage_free">%1$s boş</string>
@@ -217,7 +224,8 @@
     <string name="nag_radio_rec_failed_http">Radyo %1$d hatası verdi.</string>
     <string name="nag_radio_rec_failed_text">Bağlantı kurulamadı.</string>
     <string name="nag_radio_rec_unsupported_title">%1$s kayda alınamaz</string>
-    <string name="nag_radio_rec_unsupported_hls">Kayıt, parçalar halinde gelen HLS akışlarını desteklemiyor.</string>
+    <string name="nag_radio_rec_unsupported_hls">Bu adres bir HLS akışının çalma listesi değil, tek bir dosyası. Radyonun .m3u8 adresini kullanın.</string>
+    <string name="nag_radio_rec_unsupported_encrypted">Bu HLS akışı şifreli. Nağmedar şifreli akışları kayda almaz.</string>
     <string name="nag_radio_rec_unsupported_format">Akış MP3, AAC ya da Ogg değil.</string>
     <string name="nag_radio_rec_full_title">%1$s kayda alınmadı</string>
     <string name="nag_radio_rec_full_text">Aynı anda en çok %1$d radyo kayda alınabilir.</string>
@@ -2058,7 +2066,7 @@
     <!-- S-1502: yedekleme ve geri yükleme -->
     <string name="nag_backup_settings">Yedekleme</string>
     <string name="nag_backup_make">Yedek dosyası</string>
-    <string name="nag_backup_make_hint">Ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz, dosya ayarları ve seçtiğiniz kapaklar tek bir dosyaya yazılır. Hesap girişleri ve bu cihazın klasör izinleri yazılmaz.</string>
+    <string name="nag_backup_make_hint">Ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz, dosya ayarları, seçtiğiniz kapaklar ve zamanlanmış radyo kayıtlarınız tek bir dosyaya yazılır. Kaydedilen sesler yazılmaz. Hesap girişleri ve bu cihazın klasör izinleri yazılmaz.</string>
     <string name="nag_backup_make_button">Yedekle…</string>
     <string name="nag_backup_working">Yedekleniyor…</string>
     <string name="nag_backup_last">Son yedek: %1$s</string>
@@ -2159,6 +2167,11 @@
     <string name="nag_latency_fail_device_hint">Başka bir uygulama kullanıyor olabilir; onu kapatıp yeniden deneyin.</string>
     <string name="nag_sp_latency">gecikme %1$s</string>
     <string name="nag_backup_part_latency">Gecikme profilleri</string>
+    <string name="nag_backup_part_radio_schedules">Zamanlanmış radyo kayıtları</string>
+    <plurals name="nag_backup_schedules_count">
+        <item quantity="one">%d zamanlama</item>
+        <item quantity="other">%d zamanlama</item>
+    </plurals>
     <plurals name="nag_backup_latency_count">
         <item quantity="one">%d cihaz</item>
         <item quantity="other">%d cihaz</item>

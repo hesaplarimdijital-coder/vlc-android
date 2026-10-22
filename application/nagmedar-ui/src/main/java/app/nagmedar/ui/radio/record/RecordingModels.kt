@@ -11,13 +11,86 @@ data class RecordingStation(
     val key: String get() = uuid ?: "url:$streamUrl"
 }
 
-/** S-1107: one recording to make: [endAt] (epoch ms) is when it stops by itself, null to go on until stopped; [scheduleId] is the schedule it came from. */
+/**
+ * S-1107: one recording to make: [endAt] (epoch ms) is when it stops by itself, null to go on until stopped; [scheduleId] is the
+ * schedule it came from and [windowStart] the start of the run of it that this is.
+ */
 data class RecordingRequest(
     val sessionId: String,
     val station: RecordingStation,
     val endAt: Long? = null,
     val scheduleId: Long? = null,
+    val windowStart: Long? = null,
 )
+
+/** What came of one run of a scheduled recording. */
+enum class RunStatus {
+    /** It is being recorded. */
+    Running,
+
+    /** It ran for its whole time. */
+    Done,
+
+    /** The user stopped it (or Android's limit for the service did). */
+    Stopped,
+
+    /** It could not be recorded: the stream, the folder or the room failed. */
+    Failed,
+
+    /** The device or the app restarted while it was going on and it could not be taken up again in time. */
+    Interrupted,
+
+    /** Its time passed and nothing was recording (the device was off, or the app could not start). */
+    Missed,
+    ;
+
+    companion object {
+        fun of(name: String): RunStatus = entries.firstOrNull { it.name == name } ?: Failed
+
+        /** The state a recording that ended with [end] leaves its run in. */
+        fun of(end: SessionEnd): RunStatus = when (end) {
+            SessionEnd.TimeUp -> Done
+            SessionEnd.UserStopped -> Stopped
+            else -> Failed
+        }
+    }
+}
+
+/**
+ * S-1107: a run of a schedule, from [windowStart] to [windowEnd] (epoch ms), and what came of it.
+ * [interruptions] is how many times a restart cut it off; a run that was taken up again after
+ * one is Running or Done with [interruptions] above zero.
+ */
+data class ScheduleRun(
+    val scheduleId: Long,
+    val windowStart: Long,
+    val windowEnd: Long,
+    val status: RunStatus,
+    val interruptions: Int = 0,
+    val sessionId: String? = null,
+)
+
+/** S-1107: where a recording keeps what came of the runs of its schedule; none in the tests that do not need it. */
+interface ScheduleRunLog {
+    /** The run of [windowStart] is on, by the recording [sessionId] (a restart took it up again, or began it). */
+    suspend fun began(scheduleId: Long, windowStart: Long, windowEnd: Long, sessionId: String)
+
+    /** The run could not begin. */
+    suspend fun failed(scheduleId: Long, windowStart: Long, windowEnd: Long)
+
+    /** The recording [sessionId] ended: the runs it made are left as [status]. */
+    suspend fun ended(sessionId: String, status: RunStatus)
+
+    companion object {
+        val None: ScheduleRunLog = object : ScheduleRunLog {
+            override suspend fun began(scheduleId: Long, windowStart: Long, windowEnd: Long, sessionId: String) = Unit
+
+            override suspend fun failed(scheduleId: Long, windowStart: Long, windowEnd: Long) = Unit
+
+            override suspend fun ended(sessionId: String, status: RunStatus) = Unit
+        }
+    }
+}
 
 /**
  * S-1107: a track saved to a file. [complete] is true when the recording saw both the title change
@@ -95,8 +168,11 @@ sealed interface SessionEnd {
 
 /** Streams that are not recorded. */
 enum class UnsupportedStream {
-    /** HLS: a playlist of segments. */
+    /** A stream of segments that is no playlist (a bare MPEG-TS or MP4 address). */
     Segmented,
+
+    /** HLS that is encrypted (`EXT-X-KEY`): no key is fetched, nothing is decrypted. */
+    Encrypted,
 
     /** A container other than MP3, AAC (ADTS), Ogg and Opus. */
     Format,

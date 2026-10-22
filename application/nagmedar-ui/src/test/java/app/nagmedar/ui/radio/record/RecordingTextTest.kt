@@ -55,17 +55,13 @@ class RecordingTextTest {
 
     @Test
     @Config(qualifiers = "en")
-    fun sizesAreCountedAsTheSettingsCountThem() {
-        val mb = 1024L * 1024
-        val gb = 1024 * mb
+    fun sizesAreWrittenAsTheRestOfTheAppWritesThem() {
         assertEquals("900 B", RecordingText.size(900, Locale.ENGLISH))
-        assertEquals("1 KB", RecordingText.size(1024, Locale.ENGLISH))
-        assertEquals("500 MB", RecordingText.size(500 * mb, Locale.ENGLISH))
-        assertEquals("4.2 MB", RecordingText.size((4.2 * mb).toLong(), Locale.ENGLISH))
-        assertEquals("10 GB", RecordingText.size(10 * gb, Locale.ENGLISH))
-        assertEquals("1.5 GB", RecordingText.size(gb + gb / 2, Locale.ENGLISH))
-        assertEquals("124 MB", RecordingText.size(124 * mb + 300_000, Locale.ENGLISH))
-        assertEquals("4,2 MB", RecordingText.size((4.2 * mb).toLong(), Locale.forLanguageTag("tr")))
+        assertEquals("12 kB", RecordingText.size(12_000, Locale.ENGLISH))
+        assertEquals("500 MB", RecordingText.size(500_000_000, Locale.ENGLISH))
+        assertEquals("10 GB", RecordingText.size(10_000_000_000, Locale.ENGLISH))
+        assertEquals("1.5 GB", RecordingText.size(1_500_000_000, Locale.ENGLISH))
+        assertEquals("1,5 GB", RecordingText.size(1_500_000_000, Locale.forLanguageTag("tr")))
     }
 
     @Test

@@ -87,8 +87,14 @@ data class StorageUsage(val usedBytes: Long, val freeBytes: Long, val limits: St
     val wholeBytes: Long get() = if (limits.maxTotalBytes > 0) limits.maxTotalBytes else if (freeBytes >= 0) usedBytes + freeBytes else 0L
 }
 
-/** A schedule as the list shows it. */
-data class ScheduleRow(val schedule: RecordingSchedule, val next: RecordingWindow?, val running: Boolean, val conflicts: Int)
+/** A schedule as the list shows it; [lastRun] is the latest run that came of it (none yet: null). */
+data class ScheduleRow(
+    val schedule: RecordingSchedule,
+    val next: RecordingWindow?,
+    val running: Boolean,
+    val conflicts: Int,
+    val lastRun: ScheduleRun? = null,
+)
 
 /** What a word to the user says. */
 sealed interface RecordingsNotice {
@@ -245,6 +251,7 @@ class RecordingsController(
     private var used = 0L
     private var free = -1L
     private var scheduleList by mutableStateOf(emptyList<RecordingSchedule>())
+    private var runList by mutableStateOf(emptyList<ScheduleRun>())
     private var opened = false
     private var openedOnce = false
     private var clockNow by mutableLongStateOf(clock())
@@ -263,6 +270,12 @@ class RecordingsController(
         scope.launch {
             data.schedules().collect { list ->
                 scheduleList = list
+                rows()
+            }
+        }
+        scope.launch {
+            data.runs().collect { list ->
+                runList = list
                 rows()
             }
         }
@@ -357,6 +370,8 @@ class RecordingsController(
                 next = ScheduleMath.next(schedule, at, z),
                 running = control.live.value.any { it.request.scheduleId == schedule.id },
                 conflicts = ScheduleMath.conflicts(schedule, scheduleList, at, zone = z).size,
+                // the runs come latest first
+                lastRun = runList.firstOrNull { it.scheduleId == schedule.id },
             )
         }
     }

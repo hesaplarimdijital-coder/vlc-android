@@ -3,6 +3,7 @@ package app.nagmedar.ui.radio.record
 import app.nagmedar.data.RadioRecording
 import app.nagmedar.data.RadioRecordingDao
 import app.nagmedar.data.RadioScheduleEntry
+import app.nagmedar.data.RadioScheduleRun
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,7 +18,7 @@ class RecordingStore(
     private val dao: RadioRecordingDao,
     private val files: TrackFiles,
     private val clock: () -> Long = System::currentTimeMillis,
-) : SessionLibrary, RecordingsData {
+) : SessionLibrary, RecordingsData, ScheduleRunLog {
 
     // --- the session's library
 
@@ -93,17 +94,59 @@ class RecordingStore(
 
     suspend fun schedule(id: Long): RecordingSchedule? = withContext(Dispatchers.IO) { dao.schedule(id)?.toSchedule() }
 
-    /** Saves [schedule] (a new one when its id is 0); returns it with its id. */
+    /**
+     * Saves [schedule] (a new one when its id is 0); returns it with its id. Its runs are looked over
+     * from now on: what passed before it was saved is nobody's to have missed.
+     */
     override suspend fun save(schedule: RecordingSchedule): RecordingSchedule = withContext(Dispatchers.IO) {
-        val stamped = if (schedule.createdAt == 0L) schedule.copy(createdAt = clock()) else schedule
+        val now = clock()
+        // an edit keeps the start last made: the run on now is not begun a second time
+        val started = if (schedule.id != 0L) maxOf(schedule.lastStartedAt, dao.schedule(schedule.id)?.lastStartedAt ?: 0L) else schedule.lastStartedAt
+        val stamped = schedule.copy(
+            createdAt = if (schedule.createdAt == 0L) now else schedule.createdAt,
+            checkedAt = maxOf(schedule.checkedAt, now),
+            lastStartedAt = started,
+        )
         stamped.copy(id = dao.keepSchedule(stamped.toRow()))
     }
 
-    override suspend fun enable(id: Long, enabled: Boolean) = withContext(Dispatchers.IO) { dao.enableSchedule(id, enabled) }
+    /** Turns a schedule on or off; one turned on is looked over from now (its time off is not a run missed). */
+    override suspend fun enable(id: Long, enabled: Boolean) = withContext(Dispatchers.IO) {
+        dao.enableSchedule(id, enabled)
+        if (enabled) dao.markScheduleChecked(id, clock())
+    }
 
     suspend fun markStarted(id: Long, at: Long) = withContext(Dispatchers.IO) { dao.markScheduleStarted(id, at) }
 
-    override suspend fun deleteSchedule(id: Long) = withContext(Dispatchers.IO) { dao.deleteSchedule(id) }
+    suspend fun markChecked(id: Long, at: Long) = withContext(Dispatchers.IO) { dao.markScheduleChecked(id, at) }
+
+    override suspend fun deleteSchedule(id: Long) = withContext(Dispatchers.IO) {
+        dao.deleteSchedule(id)
+        dao.deleteRuns(id)
+    }
+
+    // --- what came of the runs
+
+    /** The runs kept, the latest window first; follows every change. */
+    override fun runs(): Flow<List<ScheduleRun>> = dao.runs().map { rows -> rows.map { it.toRun() } }
+
+    /** Runs a restart cut off whose window is not over at [now]. */
+    suspend fun resumable(now: Long): List<ScheduleRun> = withContext(Dispatchers.IO) { dao.resumable(now).map { it.toRun() } }
+
+    /** Nothing is recording now, so a run that is Running was cut off: it is Interrupted. */
+    suspend fun interruptRunning() = withContext(Dispatchers.IO) { dao.interruptRunning(clock()) }
+
+    /** The window of [scheduleId] from [windowStart] passed with nothing recorded. */
+    suspend fun missed(scheduleId: Long, windowStart: Long, windowEnd: Long) =
+        withContext(Dispatchers.IO) { dao.keepMissed(scheduleId, windowStart, windowEnd, clock()) }
+
+    override suspend fun began(scheduleId: Long, windowStart: Long, windowEnd: Long, sessionId: String) =
+        withContext(Dispatchers.IO) { dao.keepRun(scheduleId, windowStart, windowEnd, RunStatus.Running.name, sessionId, clock()) }
+
+    override suspend fun failed(scheduleId: Long, windowStart: Long, windowEnd: Long) =
+        withContext(Dispatchers.IO) { dao.keepRun(scheduleId, windowStart, windowEnd, RunStatus.Failed.name, null, clock()) }
+
+    override suspend fun ended(sessionId: String, status: RunStatus) = withContext(Dispatchers.IO) { dao.endRunsOf(sessionId, status.name, clock()) }
 
     companion object {
         /** How long a deletion can be taken back (the undo bar's time, and some more). */
@@ -165,6 +208,16 @@ private fun RecordingSchedule.toRow() = RadioScheduleEntry(
     enabled = enabled,
     lastStartedAt = lastStartedAt,
     createdAt = createdAt,
+    checkedAt = checkedAt,
+)
+
+private fun RadioScheduleRun.toRun() = ScheduleRun(
+    scheduleId = scheduleId,
+    windowStart = windowStart,
+    windowEnd = windowEnd,
+    status = RunStatus.of(status),
+    interruptions = interruptions,
+    sessionId = sessionId,
 )
 
 private fun RadioScheduleEntry.toSchedule() = RecordingSchedule(
@@ -179,4 +232,5 @@ private fun RadioScheduleEntry.toSchedule() = RecordingSchedule(
     enabled = enabled,
     lastStartedAt = lastStartedAt,
     createdAt = createdAt,
+    checkedAt = checkedAt,
 )

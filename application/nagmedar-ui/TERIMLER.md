@@ -165,6 +165,8 @@ Sözlüğü testler denetler:
 | radyo kaydı, parça kesme | radio recording, track splitting | | | Radyonun akışı ayrı bir bağlantıyla alınır, ICY parça adı değişince kare sınırında kesilir (Alt+R, Alt+Shift+R sekmeyi açar); kesim örnek hassasiyetinde değildir, bunu arayüz söyler |
 | eksik parça | partial track | | | Başı ya da sonu kesilmiş ya da en kısa süreden kısa parça; “Eksik” rozeti, “Yalnızca tam parçaları tut” |
 | zamanlanmış kayıt | scheduled recording | | | Radyo, saat, süre ya da bitiş ve tekrar: bir kez, her gün, hafta içi, haftalık |
+| çalışma (zamanlamanın) | run | | | Zamanlanmış kaydın bir günkü penceresi; sonucu “Son çalışma: kaydedildi / durduruldu / kesildi / kaçırıldı” diye zamanlama satırında yazar. Kesildi: cihaz ya da uygulama yeniden başlayınca yarıda kalan; kaçırıldı: zamanı kimse kayıt yapmadan geçen |
+| HLS akışı | HLS stream | | | Parça parça (.m3u8 çalma listesiyle) gelen radyo akışı; kayıtta oturum başına tek dosya olur, şifreliyse kayda alınmaz |
 | yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |

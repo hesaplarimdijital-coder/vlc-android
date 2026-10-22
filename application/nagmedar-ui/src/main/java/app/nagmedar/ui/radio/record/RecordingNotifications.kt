@@ -154,6 +154,7 @@ object RecordingNotifications {
                 (end.status?.let { words.get(R.string.nag_radio_rec_failed_http, it) } ?: words.get(R.string.nag_radio_rec_failed_text))
             is SessionEnd.Unsupported -> when (end.reason) {
                 UnsupportedStream.Segmented -> words.get(R.string.nag_radio_rec_unsupported_title, station) to words.get(R.string.nag_radio_rec_unsupported_hls)
+                UnsupportedStream.Encrypted -> words.get(R.string.nag_radio_rec_unsupported_title, station) to words.get(R.string.nag_radio_rec_unsupported_encrypted)
                 UnsupportedStream.Format -> words.get(R.string.nag_radio_rec_unsupported_title, station) to words.get(R.string.nag_radio_rec_unsupported_format)
             }
         }

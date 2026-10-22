@@ -2,13 +2,23 @@ package app.nagmedar.ui.radio.record
 
 import java.util.Locale
 
-/** S-1107: the containers a station's stream is recorded in, each as the station sends it. */
+/**
+ * S-1107: the containers a station's stream is recorded in, each as the station sends it. [Ts], [M4a]
+ * and [Mp4] are what an HLS stream is kept as when its segments are not cut into audio frames: the
+ * segments, joined as they came.
+ */
 enum class AudioFormat(val extension: String, val mime: String, val label: String) {
     Mp3("mp3", "audio/mpeg", "MP3"),
     Aac("aac", "audio/aac", "AAC"),
     Ogg("ogg", "audio/ogg", "Ogg"),
     Opus("opus", "audio/ogg", "Opus"),
+    Ts("ts", "video/mp2t", "MPEG-TS"),
+    M4a("m4a", "audio/mp4", "M4A"),
+    Mp4("mp4", "video/mp4", "MP4"),
     ;
+
+    /** Whether a file of the format begins with an ID3 tag (the formats made of bare frames). */
+    val taggable: Boolean get() = this == Mp3 || this == Aac
 
     /** Whether the stream is cut between Ogg pages (a chained stream starts a new track) rather than between frames. */
     val isOgg: Boolean get() = this == Ogg || this == Opus

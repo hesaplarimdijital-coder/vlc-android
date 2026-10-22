@@ -54,7 +54,8 @@ interface RecordingControl {
  * S-1107: the app's radio recordings: asking for one (resolving the address the station plays
  * from, as the player does), stopping them, and telling the user how they ended. [hold] keeps the
  * app alive while recordings go (a foreground service) and answers false where the system
- * refuses; [live] and [starting] are what the screens and the service show.
+ * refuses; [live] and [starting] are what the screens and the service show. [runs] is where what
+ * came of each run of a schedule is kept.
  */
 class RecordingCenter(
     val hub: RecordingHub,
@@ -62,6 +63,7 @@ class RecordingCenter(
     private val resolve: suspend (RecordingStation) -> String,
     private val hold: () -> Boolean,
     private val alerts: RecordingAlerts,
+    private val runs: ScheduleRunLog = ScheduleRunLog.None,
 ) : RecordingControl {
     private val pending = MutableStateFlow(0)
     private val noticeFlow = MutableSharedFlow<RecordingNotice>(extraBufferCapacity = 8)
@@ -74,17 +76,43 @@ class RecordingCenter(
     override val notices: SharedFlow<RecordingNotice> = noticeFlow
 
     init {
-        scope.launch { hub.ends.collect { alerts.ended(it) } }
+        scope.launch {
+            hub.ends.collect { ended ->
+                alerts.ended(ended)
+                keep { runs.ended(ended.request.sessionId, RunStatus.of(ended.end)) }
+            }
+        }
+    }
+
+    /** The log is a record, not a part of recording: a failure of it never stops one. */
+    private suspend fun keep(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the next restart finds a run left Running and takes it for interrupted: a word wrong, nothing lost
+        }
     }
 
     override fun recording(station: RecordingStation): Boolean = hub.recording(station.key)
 
     override fun start(station: RecordingStation, endAt: Long?, scheduleId: Long?) {
+        begin(station, endAt, scheduleId, null)
+    }
+
+    /**
+     * Records [station] for the run [window] of the schedule [scheduleId]; false when the system would
+     * not let the service start (the run is not begun, and is tried again when the app is in front).
+     */
+    fun startRun(station: RecordingStation, window: RecordingWindow, scheduleId: Long): Boolean = begin(station, window.end, scheduleId, window.start)
+
+    private fun begin(station: RecordingStation, endAt: Long?, scheduleId: Long?, windowStart: Long?): Boolean {
         pending.update { it + 1 }
         if (!hold()) {
             pending.update { it - 1 }
             refuse(RecordingNotice.CannotStart(station.name), scheduleId != null)
-            return
+            return false
         }
         scope.launch {
             try {
@@ -96,16 +124,26 @@ class RecordingCenter(
                     // the directory not answering never keeps a station from being recorded
                     station.streamUrl
                 }
-                val request = RecordingRequest(UUID.randomUUID().toString(), station.copy(streamUrl = address), endAt, scheduleId)
-                when (hub.start(request)) {
+                val request = RecordingRequest(UUID.randomUUID().toString(), station.copy(streamUrl = address), endAt, scheduleId, windowStart)
+                // the run is on before the recording is: one that ends at once still finds its row
+                val run = if (scheduleId != null && windowStart != null && endAt != null) Triple(scheduleId, windowStart, endAt) else null
+                if (run != null) keep { runs.began(run.first, run.second, run.third, request.sessionId) }
+                when (val result = hub.start(request)) {
                     StartResult.Started -> Unit
-                    is StartResult.Merged -> noticeFlow.tryEmit(RecordingNotice.Merged(station.name))
-                    StartResult.Full -> refuse(RecordingNotice.Full(station.name, hub.maxParallel), scheduleId != null)
+                    is StartResult.Merged -> {
+                        if (run != null) keep { runs.began(run.first, run.second, run.third, result.sessionId) }
+                        noticeFlow.tryEmit(RecordingNotice.Merged(station.name))
+                    }
+                    StartResult.Full -> {
+                        if (run != null) keep { runs.failed(run.first, run.second, run.third) }
+                        refuse(RecordingNotice.Full(station.name, hub.maxParallel), scheduleId != null)
+                    }
                 }
             } finally {
                 pending.update { it - 1 }
             }
         }
+        return true
     }
 
     /** A refusal is said on screen; one of a schedule, which nobody is waiting for, is a notification too. */

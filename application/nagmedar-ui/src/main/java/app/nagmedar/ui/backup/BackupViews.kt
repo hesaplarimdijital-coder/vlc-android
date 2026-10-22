@@ -228,6 +228,7 @@ internal fun partLabel(part: BackupPart): Int = when (part) {
     BackupPart.FileSettings -> R.string.nag_backup_part_file_settings
     BackupPart.Covers -> R.string.nag_backup_part_covers
     BackupPart.Latency -> R.string.nag_backup_part_latency
+    BackupPart.RadioSchedules -> R.string.nag_backup_part_radio_schedules
 }
 
 /** What [count] of [part] is: "214 settings", "5 lists · 312 tracks" ([tracks]: the playlists' tracks, when known). */
@@ -242,6 +243,7 @@ internal fun partCount(res: Resources, part: BackupPart, count: Int, tracks: Int
     BackupPart.FileSettings -> res.getQuantityString(R.plurals.nag_backup_files_count, count, count)
     BackupPart.Covers -> res.getQuantityString(R.plurals.nag_music_albums, count, count)
     BackupPart.Latency -> res.getQuantityString(R.plurals.nag_backup_latency_count, count, count)
+    BackupPart.RadioSchedules -> res.getQuantityString(R.plurals.nag_backup_schedules_count, count, count)
 }
 
 /** Why a file did not read as a backup, as said to the user. */

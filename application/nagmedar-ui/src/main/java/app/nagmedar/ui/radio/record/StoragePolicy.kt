@@ -20,13 +20,14 @@ data class StorageLimits(
     val action: LimitAction = LimitAction.Stop,
 ) {
     companion object {
-        const val MB = 1024L * 1024L
-        const val GB = 1024L * MB
+        /** Sizes are counted in powers of 1000, as the rest of the app and the system's storage screens count them. */
+        const val MB = 1_000_000L
+        const val GB = 1_000L * MB
         const val DEFAULT_MIN_FREE = 500 * MB
         const val DEFAULT_MAX_TOTAL = 10 * GB
 
         /** Offered for the room the device keeps free, in MB. */
-        val MIN_FREE_MB = listOf(100, 250, 500, 1024, 2048)
+        val MIN_FREE_MB = listOf(100, 250, 500, 1000, 2000)
 
         /** Offered for the room all recordings may take, in GB (0: no limit). */
         val MAX_TOTAL_GB = listOf(1, 2, 5, 10, 20, 50, 0)

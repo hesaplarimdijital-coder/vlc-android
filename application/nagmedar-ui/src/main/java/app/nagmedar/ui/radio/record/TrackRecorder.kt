@@ -211,7 +211,7 @@ class TrackRecorder(
         val name = TrackNames.unique(base, format.extension, names)
         names += name.lowercase()
         val output = storage.create(folder, name, format.mime)
-        if (!format.isOgg) {
+        if (format.taggable) {
             val date = Instant.ofEpochMilli(startedAt).atZone(zone).toLocalDate().toString()
             val id3 = Id3Tag.build(tag?.artist, tag?.title ?: name.substringBeforeLast('.'), station.name, date, station.name)
             output.write(id3, 0, id3.size)

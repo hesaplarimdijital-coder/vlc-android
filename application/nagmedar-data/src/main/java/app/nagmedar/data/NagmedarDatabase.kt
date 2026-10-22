@@ -18,7 +18,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
         NetworkServerEntry::class, ScrobbleEntry::class, TranscodeProfileEntry::class, TranscodeJobEntry::class,
-        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class,
+        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class, RadioScheduleRun::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -42,7 +42,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 16
+        const val VERSION = 17
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -237,10 +237,24 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 16 → 17 (S-1107): what came of each run of a scheduled recording, and when its runs were last looked over. */
+        private val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `radio_schedule` ADD COLUMN `checked_at` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `radio_schedule_run` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`schedule_id` INTEGER NOT NULL, `window_start` INTEGER NOT NULL, `window_end` INTEGER NOT NULL, " +
+                        "`status` TEXT NOT NULL, `interruptions` INTEGER NOT NULL, `session_id` TEXT, `updated_at` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_radio_schedule_run_schedule_id_window_start` ON `radio_schedule_run` (`schedule_id`, `window_start`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_radio_schedule_run_session_id` ON `radio_schedule_run` (`session_id`)")
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
-            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
+            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
         )
 
         @Volatile

@@ -10,6 +10,11 @@ import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.toText
 import app.nagmedar.ui.music.MediaLibraryPlaylists
+import app.nagmedar.ui.radio.record.AndroidTrackFiles
+import app.nagmedar.ui.radio.record.RecordingAlarms
+import app.nagmedar.ui.radio.record.RecordingSchedule
+import app.nagmedar.ui.radio.record.RecordingStore
+import app.nagmedar.ui.radio.record.Repeat
 import app.nagmedar.ui.sleep.Alarms
 import app.nagmedar.ui.tvlab.DeviceProfileCodec
 import app.nagmedar.ui.tvlab.TvLabSession
@@ -27,7 +32,7 @@ import java.io.IOException
 
 /** S-1502: what a restore brought back. */
 data class RestoreReport(
-    /** How many of each part's things were taken: settings, shortcuts, profiles, lists, tracks, files, covers. */
+    /** How many of each part's things were taken: settings, shortcuts, profiles, lists, tracks, files, covers, schedules. */
     val restored: Map<BackupPart, Int>,
     /** Playlist lines whose files this library does not have (yet: a scan may find them). */
     val missingTracks: Int = 0,
@@ -102,6 +107,7 @@ class AppBackup(
                 }
             },
             latency = db.latencyProfiles().all(),
+            radioSchedules = recordings().scheduleList(),
         )
     }
 
@@ -152,6 +158,7 @@ class AppBackup(
                     BackupPart.FileSettings -> backup.fileSettings.orEmpty().also { db.mediaSettings().restore(it) }.size
                     BackupPart.Covers -> restoreCovers(backup)
                     BackupPart.Latency -> backup.latency.orEmpty().also { db.latencyProfiles().restore(it) }.size
+                    BackupPart.RadioSchedules -> restoreRadioSchedules(backup)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -230,6 +237,33 @@ class AppBackup(
         if (restored > 0) CoverCenter.changed()
         return restored
     }
+
+    /** The radio recordings' database, from [db]. */
+    private fun recordings() = RecordingStore(db.radioRecordings(), AndroidTrackFiles(context))
+
+    /**
+     * The scheduled recordings of the backup that are not here already (the same station, time, length and
+     * repeat), saved and set on the system's clock. A one-off whose time has passed is not brought back, and a
+     * run that is on now is not begun: the schedule counts from the restore.
+     */
+    private suspend fun restoreRadioSchedules(backup: Backup): Int {
+        val store = recordings()
+        val here = store.scheduleList()
+        val now = System.currentTimeMillis()
+        var restored = 0
+        for (schedule in backup.radioSchedules.orEmpty()) {
+            if (here.any { sameSchedule(it, schedule) }) continue
+            if (schedule.repeat == Repeat.Once && schedule.startAt <= now) continue
+            val saved = store.save(schedule.copy(id = 0, lastStartedAt = now, checkedAt = now))
+            RecordingAlarms.set(context, saved, now)
+            restored++
+        }
+        return restored
+    }
+
+    private fun sameSchedule(a: RecordingSchedule, b: RecordingSchedule): Boolean =
+        a.station.key == b.station.key && a.hour == b.hour && a.minute == b.minute && a.durationMinutes == b.durationMinutes &&
+            a.repeat == b.repeat && (a.repeat != Repeat.Weekly || a.weekday == b.weekday) && (a.repeat != Repeat.Once || a.startAt == b.startAt)
 
     /** When the last backup was made; null when none was. */
     fun lastBackup(): Long? = prefs.getLong(BackupSettings.KEY_LAST_BACKUP, 0L).takeIf { it > 0L }

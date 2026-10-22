@@ -485,6 +485,18 @@ private fun ScheduleRowView(row: ScheduleRow, now: Long, zone: ZoneId, controlle
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("schedule-next-${schedule.id}"),
                     )
+                    row.lastRun?.let { run ->
+                        RecordingText.lastRun(res, run, now, zone, locale)?.let { text ->
+                            Text(
+                                text,
+                                style = NagTheme.type.labelSmall,
+                                color = if (RecordingText.needsAttention(run)) toneColors(StateTone.Warning).content else colors.textTertiary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.testTag("schedule-run-${schedule.id}"),
+                            )
+                        }
+                    }
                     if (row.conflicts > 0) {
                         Spacer(Modifier.size(2.dp))
                         ToneBadge(stringResource(R.string.nag_radio_rec_sched_overlap), StateTone.Warning)
@@ -680,6 +692,7 @@ private fun TrackRow(session: SessionGroup, track: RecordedTrack, controller: Re
     val gone = track.id in controller.missing
     val more = stringResource(R.string.nag_more_actions)
     val play = stringResource(R.string.nag_play)
+    val share = stringResource(R.string.nag_radio_rec_share)
     val menu = { trackMenu(res, session, track, gone, controller, onShare) }
     val line = listOfNotNull(
         track.artist?.takeIf { it.isNotBlank() },
@@ -727,6 +740,7 @@ private fun TrackRow(session: SessionGroup, track: RecordedTrack, controller: Re
                 }
             }
             NagPlayButton(play, { controller.play(session, track) }, enabled = !gone, modifier = Modifier.testTag("track-play-${track.id}"))
+            NagIconButton(NagIcons.Share, share, { onShare(track) }, enabled = !gone, modifier = Modifier.testTag("track-share-${track.id}"))
             IconMenuButton(NagIcons.MoreHorizontal, more, menu)
         }
     }
@@ -741,7 +755,7 @@ private fun trackMenu(
     onShare: (RecordedTrack) -> Unit,
 ): List<MenuEntry> = buildList {
     add(MenuEntry.Item(res.getString(R.string.nag_play), { controller.play(session, track) }, shortcut = "Enter", icon = NagIcons.Play, enabled = !gone))
-    add(MenuEntry.Item(res.getString(R.string.nag_radio_rec_share), { onShare(track) }, enabled = !gone))
+    add(MenuEntry.Item(res.getString(R.string.nag_radio_rec_share), { onShare(track) }, icon = NagIcons.Share, enabled = !gone))
     add(MenuEntry.Item(res.getString(R.string.nag_radio_rec_rename), { controller.askRename(track) }, shortcut = "F2", enabled = !gone))
     add(MenuEntry.Separator)
     add(MenuEntry.Item(res.getString(R.string.nag_radio_rec_delete), { controller.delete(listOf(track)) }, shortcut = "Del", icon = NagIcons.Delete, destructive = true))

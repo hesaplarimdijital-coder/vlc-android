@@ -11,13 +11,15 @@ interface StreamSource : Closeable {
 
 /**
  * A stream that was opened: what it is ([contentType], the `icy-name` the server gave), how often
- * its metadata comes ([metaInt], 0: it sends none) and where its bytes come from.
+ * its metadata comes ([metaInt], 0: it sends none) and where its bytes come from. An HLS stream
+ * has no bytes to read: its [playlist] is read by an [HlsReader].
  */
 class OpenedStream(
     val contentType: String?,
     val metaInt: Int,
     val source: StreamSource,
     val serverName: String? = null,
+    val playlist: HlsStart? = null,
 )
 
 /** The stream cannot be recorded: see [reason]. */

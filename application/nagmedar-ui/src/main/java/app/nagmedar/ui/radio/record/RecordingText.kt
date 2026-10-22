@@ -2,6 +2,7 @@ package app.nagmedar.ui.radio.record
 
 import android.content.res.Resources
 import app.nagmedar.ui.R
+import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.radio.Station
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -39,24 +40,8 @@ internal object RecordingText {
         else -> res.getString(R.string.nag_duration_hours_minutes, minutes / 60, minutes % 60)
     }
 
-    /**
-     * "4.2 MB", "10 GB": [bytes] counted in 1024s, as the settings count them (the system's own
-     * formatter counts in 1000s, so 10 GB would read 11 GB).
-     */
-    fun size(bytes: Long, locale: Locale): String {
-        if (bytes < 1024) return "${bytes.coerceAtLeast(0)} B"
-        var value = bytes / 1024.0
-        var unit = 0
-        while (value >= 1024 && unit < UNITS.size - 1) {
-            value /= 1024
-            unit++
-        }
-        val tenths = Math.round(value * 10) / 10.0
-        val number = if (value >= 10 || tenths == Math.floor(tenths)) String.format(locale, "%d", Math.round(value)) else String.format(locale, "%.1f", tenths)
-        return "$number ${UNITS[unit]}"
-    }
-
-    private val UNITS = listOf("KB", "MB", "GB", "TB")
+    /** "850 B", "4,2 MB", "1,8 GB": [bytes] as the rest of the app writes sizes (powers of 1000, [sizeLabel]). */
+    fun size(bytes: Long, locale: Locale): String = if (bytes < 1000) "${bytes.coerceAtLeast(0)} B" else sizeLabel(bytes, locale)
 
     /** How long a recording has gone on: "40 s", "23 min", "1 h 05 min". */
     fun elapsed(res: Resources, millis: Long): String {
@@ -108,6 +93,29 @@ internal object RecordingText {
             row.next == null -> res.getString(R.string.nag_radio_rec_sched_done)
             else -> res.getString(R.string.nag_alarm_next, comingDay(res, row.next.start, now, zone, locale), time(row.next.start, zone))
         }
+    }
+
+    /**
+     * What came of the latest run of a schedule: "Last run: missed (today 07:00)"; null while the run is
+     * on and no restart cut it (the "Recording now" line says it).
+     */
+    fun lastRun(res: Resources, run: ScheduleRun, now: Long, zone: ZoneId, locale: Locale): String? {
+        val at = began(res, run.windowStart, now, zone, locale)
+        val id = when (run.status) {
+            RunStatus.Running -> if (run.interruptions > 0) R.string.nag_radio_rec_run_resumed else return null
+            RunStatus.Done -> if (run.interruptions > 0) R.string.nag_radio_rec_run_done_resumed else R.string.nag_radio_rec_run_done
+            RunStatus.Stopped -> R.string.nag_radio_rec_run_stopped
+            RunStatus.Failed -> R.string.nag_radio_rec_run_failed
+            RunStatus.Interrupted -> R.string.nag_radio_rec_run_interrupted
+            RunStatus.Missed -> R.string.nag_radio_rec_run_missed
+        }
+        return res.getString(id, at)
+    }
+
+    /** Whether the run's word is a warning: it did not go as it was set. */
+    fun needsAttention(run: ScheduleRun): Boolean = when (run.status) {
+        RunStatus.Failed, RunStatus.Interrupted, RunStatus.Missed -> true
+        RunStatus.Running, RunStatus.Done, RunStatus.Stopped -> run.interruptions > 0
     }
 
     /** What the one-line word on a notice says. */

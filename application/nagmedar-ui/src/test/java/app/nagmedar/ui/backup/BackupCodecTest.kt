@@ -9,6 +9,9 @@ import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.music.PlaylistEntry
 import org.json.JSONObject
+import app.nagmedar.ui.radio.record.RecordingSchedule
+import app.nagmedar.ui.radio.record.RecordingStation
+import app.nagmedar.ui.radio.record.Repeat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -69,6 +72,13 @@ class BackupCodecTest {
             LatencyProfileEntry(8, "Galaxy Buds2 Pro", delayMs = 180, measured = true, spreadMs = 4, updatedAt = 11L),
             LatencyProfileEntry(29, "Denon AVR-X2800H", delayMs = 90, updatedAt = 12L),
             LatencyProfileEntry(2, "SM-X936B", measured = true, spreadMs = 2, calibrationMs = 12, updatedAt = 13L),
+        ),
+        // S-1107: a scheduled radio recording; where it stands (last start, looked over until) is not in a backup
+        radioSchedules = listOf(
+            RecordingSchedule(
+                station = RecordingStation("TRT Radyo 1", "https://radio.example/trt1.m3u8", uuid = "abc", logoUrl = null),
+                startAt = 1_760_300_000_000L, hour = 7, minute = 30, durationMinutes = 90, repeat = Repeat.Weekdays, weekday = 1, enabled = true, createdAt = 5L,
+            ),
         ),
     )
 

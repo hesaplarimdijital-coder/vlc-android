@@ -11,6 +11,7 @@ import android.os.Build
 import android.provider.Settings as SystemSettings
 import android.util.Log
 import app.nagmedar.ui.radio.record.RecordingAlarms
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
@@ -172,14 +173,24 @@ class AlarmReceiver : BroadcastReceiver() {
 
 /** S-1007: after a restart, a change of the time or of the alarm permission, the alarm is set again (S-1107: and the recordings scheduled). */
 class AlarmRescheduler : BroadcastReceiver() {
+    private companion object {
+        const val TAG = "Nagmedar/Alarm"
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.applicationContext
         Alarms.schedule(app)
-        // S-1107: the scheduled radio recordings are set again too (the database is read off the main thread)
+        // S-1107: the scheduled radio recordings are set again too, and what was missed while the device was off or the
+        // permission was gone is made up for (the database is read off the main thread)
         val pending = goAsync()
         AppScope.launch(Dispatchers.IO) {
             try {
                 RecordingAlarms.rescheduleAll(app)
+                RecordingAlarms.onProcessStart(app)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "the scheduled recordings could not be set again", e)
             } finally {
                 pending.finish()
             }

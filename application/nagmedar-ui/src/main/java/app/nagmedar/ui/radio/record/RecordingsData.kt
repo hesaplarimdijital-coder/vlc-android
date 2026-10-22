@@ -1,6 +1,7 @@
 package app.nagmedar.ui.radio.record
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /** What the Recordings tab keeps and reads: the real database in the app, fakes in the tests. */
 interface RecordingsData {
@@ -9,6 +10,9 @@ interface RecordingsData {
 
     /** The recordings scheduled; follows every change. */
     fun schedules(): Flow<List<RecordingSchedule>>
+
+    /** What came of the runs of the schedules, the latest window first; follows every change. */
+    fun runs(): Flow<List<ScheduleRun>> = flowOf(emptyList())
 
     /** What the tracks take, bytes. */
     fun used(): Flow<Long>

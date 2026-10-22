@@ -27,6 +27,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.network.NetworkDialogs
+import app.nagmedar.ui.radio.record.RecordingAlarms
 import org.videolan.libvlc.Dialog
 import org.videolan.libvlc.FactoryManager
 import org.videolan.libvlc.LibVLCFactory
@@ -151,6 +153,16 @@ class AppSetupDelegate : AppDelegate,
         Casting.install()
         // Nağmedar: a new drive is said by the new interface, not by VLC's DialogActivity
         NewStorageHook.handler = NewDrives
+        // Nağmedar (S-1107): a scheduled radio recording a restart cut off is taken up again, and the runs that passed unrecorded are marked missed
+        if (isMainProcess()) launch(Dispatchers.IO) {
+            try {
+                RecordingAlarms.onProcessStart(this@backgroundInit)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "the scheduled recordings could not be looked over", e)
+            }
+        }
         launch(Dispatchers.IO) innerLaunch@ {
             if (!VLCInstance.testCompatibleCPU(AppContextProvider.appContext)) return@innerLaunch
             Dialog.setCallbacks(VLCInstance.getInstance(this@backgroundInit), DialogDelegate)

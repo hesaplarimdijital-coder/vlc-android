@@ -133,7 +133,7 @@ private fun seconds(res: Resources, value: Int, none: Int): String =
     if (value == 0) res.getString(none) else res.getString(R.string.nag_duration_seconds, value)
 
 private fun megabytes(res: Resources, mb: Int): String =
-    if (mb >= 1024 && mb % 1024 == 0) res.getString(R.string.nag_radio_rec_unit_gb, mb / 1024) else res.getString(R.string.nag_radio_rec_unit_mb, mb)
+    if (mb >= 1000 && mb % 1000 == 0) res.getString(R.string.nag_radio_rec_unit_gb, mb / 1000) else res.getString(R.string.nag_radio_rec_unit_mb, mb)
 
 private fun gigabytes(res: Resources, gb: Int): String =
     if (gb == 0) res.getString(R.string.nag_radio_rec_no_limit) else res.getString(R.string.nag_radio_rec_unit_gb, gb)

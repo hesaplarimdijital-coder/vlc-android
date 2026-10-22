@@ -191,6 +191,7 @@ class RecordingSession(
     /** One connection: opens the stream and writes it until it ends or breaks. */
     private suspend fun pump() {
         val opened = opener.open(request.station.streamUrl)
+        opened.playlist?.let { return pumpHls(it) }
         val stream = opened.source
         source = stream
         var recorder: TrackRecorder? = null
@@ -220,6 +221,8 @@ class RecordingSession(
                 AudioFormat.Mp3 -> MpegFramer()
                 AudioFormat.Aac -> AdtsFramer()
                 AudioFormat.Ogg, AudioFormat.Opus -> OggFramer()
+                // only an HLS stream is kept as these
+                AudioFormat.Ts, AudioFormat.M4a, AudioFormat.Mp4 -> throw StreamUnsupported(UnsupportedStream.Format)
             }
             val units = { unit: MediaUnit -> rec.unit(unit) }
             val demux = IcyDemuxer(
@@ -256,17 +259,86 @@ class RecordingSession(
             }
             framer.finish(units)
         } finally {
-            withContext(NonCancellable) {
-                val rec = recorder
-                if (rec != null) {
-                    rec.finish()
-                    writtenBefore += rec.bytes
-                    publish(writtenBefore)
-                }
-                flush()
-                source = null
-                runCatching { stream.close() }
+            closeUp(recorder, stream)
+        }
+    }
+
+    /**
+     * One HLS connection: the playlist is read by an [HlsReader], whose units go to one file (an HLS
+     * stream names no titles). The files are checked for room after each segment.
+     */
+    private suspend fun pumpHls(start: HlsStart) {
+        val stopper = object : StreamSource {
+            override fun read(buffer: ByteArray): Int = -1
+
+            override fun close() = start.client.cancel()
+        }
+        source = stopper
+        var recorder: TrackRecorder? = null
+        try {
+            if (ending != null) return
+            if (!storage.writable()) throw FolderTrouble()
+            space(null)?.let { throw SpaceTrouble(it) }
+            var checked = clock()
+            var shown = checked
+            val reader = HlsReader(start.client, clock, pause) { ending != null }
+            reader.run(
+                start.url,
+                start.text,
+                object : HlsReader.Output {
+                    override fun format(format: AudioFormat) {
+                        recorder = TrackRecorder(
+                            station = request.station,
+                            format = format,
+                            storage = storage,
+                            settings = settings(),
+                            splits = false,
+                            listener = listener(),
+                            clock = clock,
+                            zone = zone,
+                        )
+                        mutable.update { it.copy(phase = Phase.Recording, format = format, splits = false) }
+                    }
+
+                    override fun unit(unit: MediaUnit) {
+                        try {
+                            recorder?.unit(unit)
+                        } catch (e: IOException) {
+                            throw FolderTrouble()
+                        }
+                    }
+
+                    override suspend fun segment() {
+                        flush()
+                        val now = clock()
+                        val rec = recorder ?: return
+                        if (now - shown >= SHOW_MS) {
+                            shown = now
+                            publish(writtenBefore + rec.bytes)
+                        }
+                        if (now - checked >= CHECK_MS) {
+                            checked = now
+                            space(rec)?.let { throw SpaceTrouble(it) }
+                        }
+                    }
+                },
+            )
+        } finally {
+            closeUp(recorder, stopper)
+        }
+    }
+
+    /** A connection is over: its file is finished and kept, what it saved goes into the library, its stream is closed. */
+    private suspend fun closeUp(recorder: TrackRecorder?, stream: StreamSource) {
+        withContext(NonCancellable) {
+            if (recorder != null) {
+                recorder.finish()
+                writtenBefore += recorder.bytes
+                publish(writtenBefore)
             }
+            flush()
+            source = null
+            runCatching { stream.close() }
         }
     }
 

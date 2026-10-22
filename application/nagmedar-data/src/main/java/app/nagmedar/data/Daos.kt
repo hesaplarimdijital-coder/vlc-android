@@ -705,8 +705,71 @@ abstract class RadioRecordingDao {
     @Query("UPDATE radio_schedule SET last_started_at = :at WHERE id = :id")
     abstract fun markScheduleStarted(id: Long, at: Long)
 
+    @Query("UPDATE radio_schedule SET checked_at = :at WHERE id = :id")
+    abstract fun markScheduleChecked(id: Long, at: Long)
+
     @Query("DELETE FROM radio_schedule WHERE id = :id")
     abstract fun deleteSchedule(id: Long)
+
+    // --- the runs of the schedules
+
+    /** The runs of every schedule, the latest window first. */
+    @Query("SELECT * FROM radio_schedule_run ORDER BY window_start DESC, id DESC")
+    abstract fun runs(): Flow<List<RadioScheduleRun>>
+
+    @Query("SELECT * FROM radio_schedule_run WHERE schedule_id = :scheduleId AND window_start = :windowStart")
+    abstract fun run(scheduleId: Long, windowStart: Long): RadioScheduleRun?
+
+    /** Runs a restart cut off whose window is not over at [now]: they are begun again. */
+    @Query("SELECT * FROM radio_schedule_run WHERE status = 'Interrupted' AND window_end > :now ORDER BY window_start")
+    abstract fun resumable(now: Long): List<RadioScheduleRun>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun insertRun(run: RadioScheduleRun): Long
+
+    @Query("UPDATE radio_schedule_run SET status = :status, window_end = :windowEnd, session_id = :sessionId, updated_at = :at WHERE id = :id")
+    abstract fun updateRun(id: Long, status: String, windowEnd: Long, sessionId: String?, at: Long)
+
+    @Query("UPDATE radio_schedule_run SET status = :status, updated_at = :at WHERE session_id = :sessionId AND status = 'Running'")
+    abstract fun endRunsOf(sessionId: String, status: String, at: Long)
+
+    /** Every run that was going on is cut off (the app began again, so nothing is recording): it is Interrupted, once more. */
+    @Query("UPDATE radio_schedule_run SET status = 'Interrupted', interruptions = interruptions + 1, updated_at = :at WHERE status = 'Running'")
+    abstract fun interruptRunning(at: Long)
+
+    @Query(
+        "DELETE FROM radio_schedule_run WHERE schedule_id = :scheduleId AND id NOT IN " +
+            "(SELECT id FROM radio_schedule_run WHERE schedule_id = :scheduleId ORDER BY window_start DESC LIMIT :keep)",
+    )
+    abstract fun trimRuns(scheduleId: Long, keep: Int)
+
+    @Query("DELETE FROM radio_schedule_run WHERE schedule_id = :scheduleId")
+    abstract fun deleteRuns(scheduleId: Long)
+
+    /** The run of [scheduleId]'s window as [status] (a row is made when there is none; the interruptions stay). */
+    @Transaction
+    open fun keepRun(scheduleId: Long, windowStart: Long, windowEnd: Long, status: String, sessionId: String?, at: Long) {
+        val same = run(scheduleId, windowStart)
+        if (same == null) {
+            insertRun(RadioScheduleRun(scheduleId = scheduleId, windowStart = windowStart, windowEnd = windowEnd, status = status, sessionId = sessionId, updatedAt = at))
+            trimRuns(scheduleId, KEPT_RUNS)
+        } else {
+            updateRun(same.id, status, windowEnd, sessionId, at)
+        }
+    }
+
+    /** A window nobody recorded: a row says Missed, unless the window has a row already. */
+    @Transaction
+    open fun keepMissed(scheduleId: Long, windowStart: Long, windowEnd: Long, at: Long) {
+        if (run(scheduleId, windowStart) != null) return
+        insertRun(RadioScheduleRun(scheduleId = scheduleId, windowStart = windowStart, windowEnd = windowEnd, status = "Missed", updatedAt = at))
+        trimRuns(scheduleId, KEPT_RUNS)
+    }
+
+    companion object {
+        /** How many runs of a schedule are kept. */
+        const val KEPT_RUNS = 30
+    }
 }
 
 /** S-1206: the remux queue, newest first; the worker takes the oldest waiting job. */

@@ -7,6 +7,9 @@ import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.covers.CoverStore
 import app.nagmedar.ui.music.PlaylistEntry
+import app.nagmedar.ui.radio.record.RecordingSchedule
+import app.nagmedar.ui.radio.record.RecordingStation
+import app.nagmedar.ui.radio.record.Repeat
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -20,7 +23,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 /** S-1502: the parts of a backup, in the order they are shown; each is restored on its own. */
-enum class BackupPart { Settings, Shortcuts, Profiles, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency }
+enum class BackupPart { Settings, Shortcuts, Profiles, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency, RadioSchedules }
 
 /** A preference as kept: a Boolean, Int, Long, Float, String or a set of strings. */
 data class SettingValue(val key: String, val value: Any)
@@ -58,6 +61,11 @@ data class Backup(
     val covers: List<BackupCover>? = null,
     /** S-613: the output devices' latency profiles. */
     val latency: List<LatencyProfileEntry>? = null,
+    /**
+     * S-1107: the radio recordings scheduled. The recording settings (shortest track, padding, limits) travel with
+     * [settings]; the recorded audio and the folder chosen (this device's permission) are not in a backup.
+     */
+    val radioSchedules: List<RecordingSchedule>? = null,
 ) {
     /** How many things [part] holds: settings, shortcuts changed, profiles, lists, tracks, files, covers. */
     fun count(part: BackupPart): Int = when (part) {
@@ -71,6 +79,7 @@ data class Backup(
         BackupPart.FileSettings -> fileSettings?.size ?: 0
         BackupPart.Covers -> covers?.size ?: 0
         BackupPart.Latency -> latency?.size ?: 0
+        BackupPart.RadioSchedules -> radioSchedules?.size ?: 0
     }
 
     /** The parts with something in them, in order. */
@@ -93,6 +102,7 @@ data class Backup(
         fileSettings = fileSettings.takeIf { BackupPart.FileSettings in parts },
         covers = covers.takeIf { BackupPart.Covers in parts },
         latency = latency.takeIf { BackupPart.Latency in parts },
+        radioSchedules = radioSchedules.takeIf { BackupPart.RadioSchedules in parts },
     )
 }
 
@@ -118,7 +128,8 @@ class BackupException(val reason: Reason, cause: Throwable? = null) : IOExceptio
  *    "settings_version":12,"settings":[{"key":"nagmedar_theme","type":"string","value":"Dark"}],
  *    "equalizers":"…","shortcuts":{"Stop":"Q","Mute":""},"profiles":[{…}],"selected_profile":"…",
  *    "playlists":[{"name":"Yol","entries":[{"location":"/storage/…/01.flac","title":"…","duration_ms":245000}]}],
- *    "smart_lists":[…],"stats":[…],"lyrics":[…],"file_settings":[…],"covers":["<sha1>.user"]}
+ *    "smart_lists":[…],"stats":[…],"lyrics":[…],"file_settings":[…],"covers":["<sha1>.user"],
+ *    "radio_schedules":[{"station_name":"…","stream_url":"https://…","hour":7,"minute":30,"duration_minutes":60,"repeat":"Weekdays",…}]}
  *
  * Unknown keys are left; an entry that does not read is passed over, the rest still comes back.
  * The manifest alone (the ZIP's JSON, taken out of it) is read as a backup without covers.
@@ -213,6 +224,7 @@ object BackupCodec {
         backup.fileSettings?.let { rows -> o.put("file_settings", JSONArray().apply { rows.forEach { put(fileSettings(it)) } }) }
         backup.covers?.let { covers -> o.put("covers", JSONArray().apply { covers.forEach { put(it.name) } }) }
         backup.latency?.let { rows -> o.put("latency_profiles", JSONArray().apply { rows.forEach { put(latency(it)) } }) }
+        backup.radioSchedules?.let { rows -> o.put("radio_schedules", JSONArray().apply { rows.forEach { put(radioSchedule(it)) } }) }
         return o
     }
 
@@ -247,6 +259,7 @@ object BackupCodec {
                 }
             },
             latency = o.optJSONArray("latency_profiles")?.objects()?.mapNotNull(::latency),
+            radioSchedules = o.optJSONArray("radio_schedules")?.objects()?.mapNotNull(::radioSchedule),
         )
     }
 
@@ -428,6 +441,46 @@ object BackupCodec {
             spreadMs = o.optIntOrNull("spread_ms"),
             updatedAt = o.optLong("updated_at", 0L),
             calibrationMs = o.optIntOrNull("calibration_ms"),
+        )
+    }
+
+    /** S-1107: a scheduled recording; where it stands (its last start, when it was looked over) belongs to the device it ran on. */
+    private fun radioSchedule(row: RecordingSchedule): JSONObject = JSONObject()
+        .put("station_name", row.station.name)
+        .put("stream_url", row.station.streamUrl)
+        .put("station_uuid", row.station.uuid)
+        .put("logo_url", row.station.logoUrl)
+        .put("start_at", row.startAt)
+        .put("hour", row.hour)
+        .put("minute", row.minute)
+        .put("duration_minutes", row.durationMinutes)
+        .put("repeat", row.repeat.name)
+        .put("weekday", row.weekday)
+        .put("enabled", row.enabled)
+        .put("created_at", row.createdAt)
+
+    private fun radioSchedule(o: JSONObject): RecordingSchedule? {
+        val url = o.optString("stream_url").trim()
+        if (!url.startsWith("http://", ignoreCase = true) && !url.startsWith("https://", ignoreCase = true)) return null
+        val repeat = Repeat.entries.firstOrNull { it.name == o.optString("repeat") } ?: return null
+        val hour = o.optInt("hour", -1)
+        val minute = o.optInt("minute", -1)
+        if (hour !in 0..23 || minute !in 0..59) return null
+        return RecordingSchedule(
+            station = RecordingStation(
+                name = o.optString("station_name").ifBlank { url },
+                streamUrl = url,
+                uuid = o.optStringOrNull("station_uuid")?.takeIf { it.isNotBlank() },
+                logoUrl = o.optStringOrNull("logo_url")?.takeIf { it.isNotBlank() },
+            ),
+            startAt = o.optLong("start_at", 0L),
+            hour = hour,
+            minute = minute,
+            durationMinutes = o.optInt("duration_minutes", 60).coerceIn(1, RecordingSchedule.MAX_MINUTES),
+            repeat = repeat,
+            weekday = o.optInt("weekday", 1).coerceIn(1, 7),
+            enabled = o.optBoolean("enabled", true),
+            createdAt = o.optLong("created_at", 0L),
         )
     }
 

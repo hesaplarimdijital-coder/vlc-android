@@ -164,11 +164,22 @@ fun RadioScreen(
 private fun shareTrack(context: Context, track: RecordedTrack) {
     val uri = RadioRecordings.shareable(context, track) ?: return
     val send = Intent(Intent.ACTION_SEND)
-        .setType(if (track.format == "mp3") "audio/mpeg" else "audio/*")
+        .setType(shareType(track.format))
         .putExtra(Intent.EXTRA_STREAM, uri)
         .putExtra(Intent.EXTRA_TITLE, track.displayTitle)
         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     runCatching { context.startActivity(Intent.createChooser(send, track.displayTitle).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
+
+/** The media type a recorded track of [format] (its extension) is offered as. */
+internal fun shareType(format: String): String = when (format) {
+    "mp3" -> "audio/mpeg"
+    "aac" -> "audio/aac"
+    "m4a" -> "audio/mp4"
+    "ogg", "opus" -> "audio/ogg"
+    "mp4" -> "video/mp4"
+    "ts" -> "video/mp2t"
+    else -> "audio/*"
 }
 
 /** The bytes (at most one more than a station list may have) and the name of the file at [uri]; null when it cannot be read. The file is only read. */

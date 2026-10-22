@@ -42,6 +42,8 @@ data class RecordingSchedule(
     val enabled: Boolean = true,
     val lastStartedAt: Long = 0,
     val createdAt: Long = 0,
+    /** Until when the runs were looked over for ones nobody recorded (ms; 0: not yet). */
+    val checkedAt: Long = 0,
 ) {
     companion object {
         /** The longest a scheduled recording runs, minutes. */
