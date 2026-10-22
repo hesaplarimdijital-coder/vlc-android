@@ -8,7 +8,11 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -83,7 +87,10 @@ class ConvertViewsTest {
         compose.onNodeWithText("V0 (değişken)").assertExists()
         compose.onNodeWithText("320 kbps").performClick()
         compose.onNodeWithText("Örnek: Şebnem Ağaoğlu/Gece Yolcusu/03 Çığlık.mp3").assertExists()
-        compose.onNodeWithText("Kaynaktaki gibi").assertExists()
+        compose.onNode(hasText("Kaynaktaki gibi") and hasAnyAncestor(hasTestTag("convert-rate"))).assertIsEnabled()
+        // MP3 is always stereo: the channels are not offered
+        compose.onNode(hasText("Stereoya indir") and hasAnyAncestor(hasTestTag("convert-channels"))).assertIsSelected().assertIsNotEnabled()
+        compose.onNodeWithText("MP3 her zaman stereodur: ikiden çok kanal stereoya indirilir.").assertExists()
         compose.onNodeWithText("Tek klasör").performScrollTo().performClick()
         compose.onNodeWithText("Örnek: Şebnem Ağaoğlu - Çığlık.mp3").assertExists()
         compose.onNodeWithTag("convert-skip").performScrollTo().performClick()
