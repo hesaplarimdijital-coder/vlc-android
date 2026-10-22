@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import org.videolan.libvlc.Dialog
+import org.videolan.tools.Settings
 import org.videolan.vlc.gui.dialogs.VlcLoginDialog
 import org.videolan.vlc.gui.dialogs.VlcProgressDialog
 import org.videolan.vlc.gui.dialogs.VlcQuestionDialog
@@ -37,7 +38,7 @@ class DialogDelegate : IDialogDelegate {
         var dialogCounter = 0
 
         override fun onProgressUpdate(dialog: Dialog.ProgressDialog) {
-            if (LibVlcDialogHook.handler?.progress(dialog) == true) return
+            if (LibVlcDialogHook.progress(dialog)) return
             val vlcProgressDialog = dialog.context as? VlcProgressDialog ?: return
             if (vlcProgressDialog.isVisible) vlcProgressDialog.updateProgress()
         }
@@ -46,24 +47,24 @@ class DialogDelegate : IDialogDelegate {
             dialogEvt.value = Cancel(dialog)
         }
 
-        override fun onDisplay(dialog: Dialog.LoginDialog) {
-            // Nağmedar (S-1301): the new interface answers or shows it first
-            if (LibVlcDialogHook.handler?.display(dialog) == true) return
-            dialogEvt.value = Show(dialog)
-        }
+        override fun onDisplay(dialog: Dialog.LoginDialog) = show(dialog)
 
-        override fun onDisplay(dialog: Dialog.QuestionDialog) {
-            if (LibVlcDialogHook.handler?.display(dialog) == true) return
-            dialogEvt.value = Show(dialog)
-        }
+        override fun onDisplay(dialog: Dialog.QuestionDialog) = show(dialog)
 
-        override fun onDisplay(dialog: Dialog.ProgressDialog) {
-            if (LibVlcDialogHook.handler?.display(dialog) == true) return
-            dialogEvt.value = Show(dialog)
+        override fun onDisplay(dialog: Dialog.ProgressDialog) = show(dialog)
+
+        /**
+         * Nağmedar (S-1301): the new interface answers or shows it, or it is kept for the new
+         * interface until that is installed (a start by a drive or a file); VLC's window
+         * (DialogActivity) shows only on a TV what the new interface does not take.
+         */
+        private fun show(dialog: Dialog) {
+            if (LibVlcDialogHook.display(dialog)) return
+            if (Settings.showTvUi) dialogEvt.value = Show(dialog) else dialog.dismiss()
         }
 
         override fun onCanceled(dialog: Dialog?) {
-            if (dialog != null && LibVlcDialogHook.handler?.canceled(dialog) == true) return
+            if (dialog != null && LibVlcDialogHook.canceled(dialog)) return
             (dialog?.context as? DialogFragment)?.dismiss()
             dialogEvt.value = Cancel(dialog)
         }

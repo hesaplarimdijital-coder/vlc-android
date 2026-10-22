@@ -15,7 +15,6 @@ import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.resources.util.getFromMl
 import org.videolan.tools.AppScope
 import org.videolan.tools.isAppStarted
-import org.videolan.vlc.gui.DialogActivity
 import org.videolan.vlc.util.NewStorageHook
 import org.videolan.vlc.util.scanAllowed
 
@@ -44,20 +43,9 @@ class StoragesMonitor : BroadcastReceiver() {
                         addDevice(action.uuid, action.path, true)
                         isNewForML
                     }
-                    // Nağmedar: said by the new interface, which leads to the library's folders
-                    val nagmedar = NewStorageHook.handler
-                    if (isNew && nagmedar != null) {
-                        nagmedar.newStorage(action.ctx, action.path)
-                    } else if (isNew) {
-                        val intent = Intent(action.ctx, DialogActivity::class.java).apply {
-                            setAction(DialogActivity.KEY_DEVICE)
-                            putExtra(DialogActivity.EXTRA_PATH, action.path)
-                            putExtra(DialogActivity.EXTRA_UUID, action.uuid)
-                            putExtra(DialogActivity.EXTRA_SCAN, isNew)
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        }
-                        action.ctx.startActivity(intent)
-                    }
+                    // Nağmedar: said by the new interface, which leads to the library's folders (kept for
+                    // it while the app starts); VLC's DialogActivity is never started for it
+                    if (isNew) NewStorageHook.newStorage(action.ctx, action.path)
                 }
             }
             is Unmount -> {

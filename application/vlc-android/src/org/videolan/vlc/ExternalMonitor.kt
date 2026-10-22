@@ -161,7 +161,7 @@ object ExternalMonitor : BroadcastReceiver(), DefaultLifecycleObserver, Coroutin
     private fun notifyNewStorage(mediaMounted: MediaMounted) {
         // Nağmedar: no classic screen follows the drives; the new interface says it
         val activity = storageObserver?.get() ?: run {
-            NewStorageHook.handler?.newStorage(ctx, mediaMounted.path)
+            NewStorageHook.newStorage(ctx, mediaMounted.path)
             return
         }
         UiTools.newStorageDetected(activity, mediaMounted.path)
