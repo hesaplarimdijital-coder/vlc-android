@@ -446,7 +446,8 @@ private fun Footer(controller: LyricsEditorController, onPickFolder: () -> Unit)
 @Composable
 private fun MessageLine(message: EditorMessage, onPickFolder: () -> Unit) {
     val colors = NagTheme.colors
-    val bad = message is EditorMessage.Incomplete || message == EditorMessage.SaveFailed || message == EditorMessage.NoRoom || message == EditorMessage.CannotPublish || message == EditorMessage.NothingToImport
+    // only a save is good news; everything else asks for something or says what failed
+    val bad = message !is EditorMessage.Saved
     val text = when (message) {
         is EditorMessage.Saved -> if (message.target == SaveTarget.File) stringResource(R.string.nag_lrc_saved_file, message.name.orEmpty()) else stringResource(R.string.nag_lrc_saved_tag)
         is EditorMessage.Incomplete -> pluralStringResource(R.plurals.nag_lrc_incomplete, message.left, message.left)
