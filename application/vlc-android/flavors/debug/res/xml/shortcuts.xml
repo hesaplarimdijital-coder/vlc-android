@@ -6,7 +6,7 @@
     <shortcut
             android:shortcutId="last_playlist"
             android:enabled="true"
-            android:icon="@drawable/ic_shortcut_resume_playback"
+            android:icon="@drawable/nagmedar_shortcut_resume"
             android:shortcutShortLabel="@string/resume_audio_playback_short_title"
             android:shortcutLongLabel="@string/resume_audio_playback_long_title">
         <intent
@@ -18,7 +18,7 @@
     <shortcut
             android:shortcutId="browser"
             android:enabled="true"
-            android:icon="@drawable/ic_shortcut_folder"
+            android:icon="@drawable/nagmedar_shortcut_device"
             android:shortcutShortLabel="@string/nagmedar_shortcut_device"
             android:shortcutLongLabel="@string/nagmedar_shortcut_device" >
         <intent
@@ -30,7 +30,7 @@
     <shortcut
             android:shortcutId="video"
             android:enabled="false"
-            android:icon="@drawable/ic_shortcut_video"
+            android:icon="@drawable/nagmedar_shortcut_video"
             android:shortcutShortLabel="@string/video"
             android:shortcutLongLabel="@string/video"
             tools:targetApi="n_mr1">
@@ -43,7 +43,7 @@
     <shortcut
             android:shortcutId="audio"
             android:enabled="false"
-            android:icon="@drawable/ic_shortcut_audio"
+            android:icon="@drawable/nagmedar_shortcut_audio"
             android:shortcutShortLabel="@string/audio"
             android:shortcutLongLabel="@string/audio">
         <intent

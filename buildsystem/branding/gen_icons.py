@@ -6,8 +6,8 @@ are filled with currentColor. Rects and circles are converted to path data, then
 becomes a lazily built Compose ImageVector (tinted by Icon()).
 
 The same icons drawn as Android vector drawables, where Compose cannot draw (drawables() below:
-the cover of a media that has none, the speed button of the notification and of Android Auto),
-are written into a resource directory when one is given.
+the cover of a media that has none, the speed button of the notification and of Android Auto,
+the launcher's shortcuts), are written into a resource directory when one is given.
 
 Usage: gen_icons.py <output .kt file> [<res directory>]
   e.g. gen_icons.py application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/NagIcons.kt \
@@ -240,6 +240,8 @@ def main(out):
 
 # The new interface's colours (theme/Palette.kt, buildsystem/branding/README.md)
 WHITE = '#FFFFFFFF'
+BRAND_BLUE = '#FF8AB0FF'
+BRAND_BACKGROUND = '#FF12161B'
 SURFACE_RAISED_DARK = '#FF1F252C'
 TEXT_TERTIARY_DARK = '#FF959FAB'
 
@@ -303,6 +305,28 @@ def tile(comment, svg):
     return vector(comment, 96, 40, body + group(svg, TEXT_TERTIARY_DARK, 1, 12))
 
 
+def disc(comment, svg):
+    """A launcher shortcut before adaptive icons (Android 7.1): the icon in the brand blue on the launcher icon's dark disc."""
+    body = '    <path\n        android:fillColor="%s"\n        android:pathData="M24,2a22,22 0 1 0 0,44a22,22 0 1 0 0,-44Z" />\n' % BRAND_BACKGROUND
+    return vector(comment, 48, 48, body + group(svg, BRAND_BLUE, 1.5, 12))
+
+
+def foreground(comment, svg):
+    """A launcher shortcut's adaptive foreground: the icon in the brand blue, 40 dp in the middle of 108."""
+    return vector(comment, 108, 108, group(svg, BRAND_BLUE, 2.5, 34))
+
+
+def adaptive(comment, name):
+    """A launcher shortcut from Android 8: the launcher icon's background, the icon over it, themed icons' monochrome."""
+    return ('<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!-- Nağmedar: %s. %s -->\n'
+            '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+            '    <background android:drawable="@drawable/ic_launcher_background" />\n'
+            '    <foreground android:drawable="@drawable/%s_foreground" />\n'
+            '    <monochrome android:drawable="@drawable/%s_foreground" />\n'
+            '</adaptive-icon>\n') % (comment, GENERATED, name, name)
+
+
 def drawables():
     """(directory, name, XML) of every drawable: see the module's docstring."""
     out = [
@@ -313,6 +337,18 @@ def drawables():
         label = ('%.2f' % speed).replace('.', '_')
         out.append(('drawable', 'nagmedar_notif_speed_' + label,
                     glyph('the playback speed button at %s×, its needle turned to it' % num(speed), speed_svg(speed), WHITE, 24)))
+    # res/xml/shortcuts.xml of vlc-android
+    shortcuts = (
+        ('resume', 'Play', 'the launcher shortcut that resumes the music'),
+        ('device', 'Device', 'the launcher shortcut to This device'),
+        ('video', 'Movies', 'the launcher shortcut to the films'),
+        ('audio', 'Music', 'the launcher shortcut to the music'),
+    )
+    for short, icon, comment in shortcuts:
+        name = 'nagmedar_shortcut_' + short
+        out.append(('drawable', name, disc(comment, ICONS[icon])))
+        out.append(('drawable', name + '_foreground', foreground(comment + ', its icon', ICONS[icon])))
+        out.append(('drawable-anydpi-v26', name, adaptive(comment, name)))
     return out
 
 
