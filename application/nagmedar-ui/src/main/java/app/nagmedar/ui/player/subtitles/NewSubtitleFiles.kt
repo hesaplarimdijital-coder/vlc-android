@@ -8,10 +8,14 @@ import java.io.File
  * null when every name is taken, when the file would be [source] itself, or when the write fails
  * (the file made for it is removed then).
  */
-internal fun writeNewFile(folder: File, name: String, bytes: ByteArray, source: File?, write: (File, ByteArray) -> Unit = File::writeBytes): File? {
+internal fun writeNewFile(folder: File, name: String, bytes: ByteArray, source: File?, write: (File, ByteArray) -> Unit = File::writeBytes): File? =
+    writeNewFile(folder, name, source) { file -> write(file, bytes) }
+
+/** As the one above, [write] filling the new file itself: a large file is copied into it, never held whole. */
+internal fun writeNewFile(folder: File, name: String, source: File?, write: (File) -> Unit): File? {
     val file = createUniqueFile(folder, name) ?: return null
     if (source != null && sameFile(file, source)) return null
-    val written = runCatching { write(file, bytes) }.isSuccess
+    val written = runCatching { write(file) }.isSuccess
     if (!written) {
         runCatching { file.delete() }
         return null

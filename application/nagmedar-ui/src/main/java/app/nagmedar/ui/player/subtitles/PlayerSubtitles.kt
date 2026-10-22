@@ -41,6 +41,7 @@ import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
 import java.io.File
+import java.io.OutputStream
 import java.util.Locale
 
 /**
@@ -447,30 +448,43 @@ internal fun siblingFiles(context: Context, video: Uri): List<Pair<String, Strin
  * chosen with the system's picker, through its document tree; where the app may not write, in
  * its own folder. Null when neither takes it.
  */
-internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes: ByteArray): SavedSubtitle? {
-    saveBeside(context, video, fileName, bytes)?.let { uri ->
+internal fun saveSubtitle(context: Context, video: Uri, fileName: String, bytes: ByteArray): SavedSubtitle? =
+    saveSubtitle(context, video, fileName) { it.write(bytes) }
+
+/**
+ * As the one above, [write] putting the file's content into the new file's stream: a large file
+ * (an extracted track) is copied into it, never held whole. It may be called twice: beside the
+ * film, then in the app's folder.
+ */
+internal fun saveSubtitle(context: Context, video: Uri, fileName: String, write: (OutputStream) -> Unit): SavedSubtitle? {
+    saveBeside(context, video, fileName, write)?.let { uri ->
         return SavedSubtitle(uri.toString(), displayName(context.contentResolver, uri) ?: fileName, beside = true)
     }
     val folder = File(context.getExternalFilesDir(null) ?: context.filesDir, APP_SUBTITLES)
     return runCatching {
         folder.mkdirs()
-        val file = writeNewFile(folder, fileName, bytes, source = null) ?: return@runCatching null
+        val file = writeNewFile(folder, fileName, source = null) { file -> file.outputStream().use(write) } ?: return@runCatching null
         SavedSubtitle(Uri.fromFile(file).toString(), file.name, beside = false)
     }.getOrNull()
 }
 
 /** [bytes] as a new file beside [video] (a local file's folder, or its picked tree); null where the app may not write. Never replaces a file. */
-internal fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? = when (video.scheme) {
+internal fun saveBeside(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? =
+    saveBeside(context, video, fileName) { it.write(bytes) }
+
+/** As the one above, [write] filling the new file's stream. */
+internal fun saveBeside(context: Context, video: Uri, fileName: String, write: (OutputStream) -> Unit): Uri? = when (video.scheme) {
     null, ContentResolver.SCHEME_FILE -> runCatching {
         val folder = File(requireNotNull(video.path)).parentFile ?: error("no folder")
-        val file = writeNewFile(folder, fileName, bytes, source = File(requireNotNull(video.path))) ?: return@runCatching null
+        val file = writeNewFile(folder, fileName, source = File(requireNotNull(video.path))) { file -> file.outputStream().use(write) }
+            ?: return@runCatching null
         Uri.fromFile(file)
     }.getOrNull()
-    ContentResolver.SCHEME_CONTENT -> treeSave(context, video, fileName, bytes)
+    ContentResolver.SCHEME_CONTENT -> treeSave(context, video, fileName, write)
     else -> null
 }
 
-private fun treeSave(context: Context, video: Uri, fileName: String, bytes: ByteArray): Uri? {
+private fun treeSave(context: Context, video: Uri, fileName: String, write: (OutputStream) -> Unit): Uri? {
     val segments = video.pathSegments
     if (segments.size < 4 || segments[0] != "tree" || segments[2] != "document") return null
     val resolver = context.contentResolver
@@ -479,7 +493,7 @@ private fun treeSave(context: Context, video: Uri, fileName: String, bytes: Byte
     val folder = DocumentsContract.buildDocumentUriUsingTree(video, parentId)
     // the provider keeps the name as it is given, and numbers it when it is taken
     val created = runCatching { DocumentsContract.createDocument(resolver, folder, ANY_FILE, fileName) }.getOrNull() ?: return null
-    val written = runCatching { resolver.openOutputStream(created)?.use { it.write(bytes) } != null }.getOrDefault(false)
+    val written = runCatching { resolver.openOutputStream(created)?.use(write) != null }.getOrDefault(false)
     if (!written) {
         runCatching { DocumentsContract.deleteDocument(resolver, created) }
         return null

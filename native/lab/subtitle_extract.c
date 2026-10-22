@@ -8,7 +8,8 @@
 // its other tags, MP4 timed text (tx3g) is its UTF-8 or UTF-16 text with its style records, and
 // ASS/SSA packets are Matroska's "ReadOrder,Layer,Style,…,Text", written back as Dialogue lines
 // under the track's own header. Only the lines are kept in memory (a film's are well under a
-// megabyte; [MAX_TEXT_BYTES] at most).
+// megabyte; [MAX_TEXT_BYTES] at most): a packet larger than what is left of it is refused before
+// its text is made, and no text being made grows past it.
 //
 // The times are the packets' own: the presentation time and the duration, in milliseconds of the
 // film (MPEG-TS and programme streams count from the file's start). A line without a duration
@@ -35,6 +36,8 @@
 #define MAX_EVENTS 2000000
 /** How long a line without a duration lasts when nothing follows it soon. */
 #define OPEN_END_MS 5000
+/** A long pass over the lines looks at the cancel flag once in this many lines. */
+#define CANCEL_EVERY 4096
 
 #define EOL "\r\n"
 
@@ -64,6 +67,20 @@ static const char *error_text(int err, char *buf, size_t size)
 {
     av_strerror(err, buf, size);
     return buf;
+}
+
+/*
+ * Why [bp] is not complete: it reached its size_max (the text left room for: too many lines'
+ * text, AVERROR(E2BIG)) or memory ran out (AVERROR(ENOMEM)). Its len and str are not to be used.
+ */
+static int incomplete(const AVBPrint *bp)
+{
+    return bp->size >= bp->size_max ? AVERROR(E2BIG) : AVERROR(ENOMEM);
+}
+
+static int stopped(const volatile int *cancel)
+{
+    return cancel && *cancel;
 }
 
 static void json_text(AVBPrint *bp, const char *s)
@@ -126,20 +143,28 @@ static int valid_utf8(const unsigned char *s)
 
 /*
  * A cue's text as SRT wants it: no carriage returns or NUL bytes, no empty or blank lines (one
- * would end the cue), nothing blank at the start or the end. NULL when nothing is left.
+ * would end the cue), nothing blank at the start or the end; [limit] bytes at most (with its NUL).
+ * NULL when nothing is left (*err 0), when it would be longer (AVERROR(E2BIG)) or when memory ran
+ * out (AVERROR(ENOMEM)).
  */
-static char *cue_text(const char *s, size_t n)
+static char *cue_text(const char *s, size_t n, unsigned limit, int *err)
 {
     AVBPrint out, line;
-    av_bprint_init(&out, 0, AV_BPRINT_SIZE_UNLIMITED);
-    av_bprint_init(&line, 0, AV_BPRINT_SIZE_UNLIMITED);
-    for (size_t i = 0; i <= n; i++) {
+    av_bprint_init(&out, 0, limit);
+    av_bprint_init(&line, 0, limit);
+    *err = 0;
+    for (size_t i = 0; i <= n && !*err; i++) {
         char c = i < n ? s[i] : '\n';
         if (c == '\r' || c == 0)
             continue;
         if (c != '\n') {
             av_bprint_chars(&line, c, 1);
             continue;
+        }
+        /* a line that did not fit: its len and str are not the line's */
+        if (!av_bprint_is_complete(&line)) {
+            *err = incomplete(&line);
+            break;
         }
         /* the line without its trailing blanks; a blank one is left out */
         size_t len = line.len;
@@ -151,14 +176,16 @@ static char *cue_text(const char *s, size_t n)
         if (lead < len) {
             if (out.len)
                 av_bprint_chars(&out, '\n', 1);
-            av_bprintf(&out, "%.*s", (int)len, line.str);
+            av_bprint_append_data(&out, line.str, (unsigned)len);
+            if (!av_bprint_is_complete(&out))
+                *err = incomplete(&out);
         }
         av_bprint_clear(&line);
     }
     av_bprint_finalize(&line, NULL);
     char *text = NULL;
-    if (av_bprint_is_complete(&out) && out.len)
-        text = strdup(out.str);
+    if (!*err && out.len && !(text = strdup(out.str)))
+        *err = AVERROR(ENOMEM);
     av_bprint_finalize(&out, NULL);
     return text;
 }
@@ -276,24 +303,26 @@ static void open_faces(AVBPrint *out, int faces)
 /*
  * An MP4 timed text sample (3GPP TS 26.245): a 16-bit length, the text (UTF-8, or UTF-16 after
  * its byte order mark), then boxes; a 'styl' box's records make bold, italic and underlined
- * stretches of characters.
+ * stretches of characters. 0, or why the text could not be made ([incomplete]): its own text
+ * takes [limit] bytes at most, as [out] does.
  */
-static void movtext_to_srt(const uint8_t *p, int size, AVBPrint *out)
+static int movtext_to_srt(const uint8_t *p, int size, AVBPrint *out, unsigned limit)
 {
     if (size < 2)
-        return;
+        return 0;
     int len = AV_RB16(p);
     if (len > size - 2)
         len = size - 2;
     AVBPrint text;
-    av_bprint_init(&text, 0, AV_BPRINT_SIZE_UNLIMITED);
+    av_bprint_init(&text, 0, limit);
     if (len >= 2 && p[2] == 0xFE && p[3] == 0xFF)
         utf16be_to_utf8(p + 4, (size_t)len - 2, &text);
     else
         av_bprint_append_data(&text, (const char *)p + 2, len);
     if (!av_bprint_is_complete(&text)) {
+        int err = incomplete(&text);
         av_bprint_finalize(&text, NULL);
-        return;
+        return err;
     }
 
     /* the characters (UTF-8 sequences) of the text and the faces each one has */
@@ -344,6 +373,7 @@ static void movtext_to_srt(const uint8_t *p, int size, AVBPrint *out)
     }
     free(faces);
     av_bprint_finalize(&text, NULL);
+    return 0;
 }
 
 /* ---- events --------------------------------------------------------------------------------- */
@@ -399,48 +429,67 @@ static int by_order(const void *a, const void *b)
     return by_start(a, b);
 }
 
+/* The same line (start, end and text) side by side, the one that came first first. */
+static int by_line(const void *a, const void *b)
+{
+    const Event *x = a, *y = b;
+    if (x->start != y->start)
+        return x->start < y->start ? -1 : 1;
+    if (x->end != y->end)
+        return x->end < y->end ? -1 : 1;
+    int text = strcmp(x->text, y->text);
+    if (text)
+        return text;
+    return x->seq < y->seq ? -1 : x->seq > y->seq;
+}
+
 /*
  * The lines in the order of their start; a line without a duration ends where the next one
  * starts (OPEN_END_MS at most); one that would end before it starts lasts a millisecond. For SRT
- * the very same line twice in a row is kept once.
+ * the very same line twice (the same start, end and text) is kept once. Sorted, then one pass
+ * each, so many lines at the same time take no longer than as many others. 0, or AVERROR_EXIT
+ * when [cancel] was set meanwhile.
  */
-static void settle(Events *e, int dedupe)
+static int settle(Events *e, int dedupe, const volatile int *cancel)
 {
     if (!e->count)
-        return;
+        return 0;
     qsort(e->items, e->count, sizeof(Event), by_start);
-    for (size_t i = 0; i < e->count; i++) {
+    /* from the last line back, the start of the first line that starts later */
+    int has_next = 0;
+    int64_t next = 0;
+    for (size_t i = e->count; i-- > 0;) {
+        if (i % CANCEL_EVERY == 0 && stopped(cancel))
+            return AVERROR_EXIT;
         Event *ev = &e->items[i];
-        if (ev->end < 0) {
-            int64_t end = ev->start + OPEN_END_MS;
-            for (size_t j = i + 1; j < e->count; j++) {
-                if (e->items[j].start > ev->start) {
-                    if (e->items[j].start < end)
-                        end = e->items[j].start;
-                    break;
-                }
-            }
-            ev->end = end;
+        if (i + 1 < e->count && e->items[i + 1].start > ev->start) {
+            next = e->items[i + 1].start;
+            has_next = 1;
         }
+        if (ev->end < 0)
+            ev->end = has_next && next < ev->start + OPEN_END_MS ? next : ev->start + OPEN_END_MS;
         if (ev->end <= ev->start)
             ev->end = ev->start + 1;
     }
     if (!dedupe)
-        return;
+        return 0;
+    qsort(e->items, e->count, sizeof(Event), by_line);
+    if (stopped(cancel))
+        return AVERROR_EXIT;
+    /* the lines are owned once: a line twice gives its text back, the others move down */
     size_t kept = 0;
     for (size_t i = 0; i < e->count; i++) {
         Event *ev = &e->items[i];
-        int twice = 0;
-        /* the same start: the lines of a group are side by side */
-        for (size_t k = kept; k > 0 && e->items[k - 1].start == ev->start && !twice; k--)
-            twice = e->items[k - 1].end == ev->end && !strcmp(e->items[k - 1].text, ev->text);
-        if (twice) {
+        const Event *before = kept ? &e->items[kept - 1] : NULL;
+        if (before && before->start == ev->start && before->end == ev->end && !strcmp(before->text, ev->text)) {
             free(ev->text);
             continue;
         }
         e->items[kept++] = *ev;
     }
     e->count = kept;
+    qsort(e->items, e->count, sizeof(Event), by_start);
+    return stopped(cancel) ? AVERROR_EXIT : 0;
 }
 
 /* ---- output --------------------------------------------------------------------------------- */
@@ -480,10 +529,12 @@ static void ass_time(char *buf, size_t size, int64_t cs)
              (long long)(cs / 100 % 60), (long long)(cs % 100));
 }
 
-static int write_srt(FILE *f, const Events *e)
+static int write_srt(FILE *f, const Events *e, const volatile int *cancel)
 {
     char a[32], b[32];
     for (size_t i = 0; i < e->count; i++) {
+        if (i % CANCEL_EVERY == 0 && stopped(cancel))
+            return -1;
         const Event *ev = &e->items[i];
         srt_time(a, sizeof(a), ev->start);
         srt_time(b, sizeof(b), ev->end);
@@ -515,7 +566,7 @@ static const char DEFAULT_ASS_HEADER[] =
  * The track's header (its extradata: script info and styles, up to the events' Format line) and
  * every line as a Dialogue line, in the original file's order.
  */
-static int write_ass(FILE *f, const Events *e, const AVCodecParameters *par, int ssa)
+static int write_ass(FILE *f, const Events *e, const AVCodecParameters *par, int ssa, const volatile int *cancel)
 {
     const char *header = DEFAULT_ASS_HEADER;
     size_t header_len = sizeof(DEFAULT_ASS_HEADER) - 1;
@@ -537,6 +588,8 @@ static int write_ass(FILE *f, const Events *e, const AVCodecParameters *par, int
     }
     char a[32], b[32];
     for (size_t i = 0; i < e->count; i++) {
+        if (i % CANCEL_EVERY == 0 && stopped(cancel))
+            return -1;
         const Event *ev = &e->items[i];
         int64_t start = (ev->start + 5) / 10, end = (ev->end + 5) / 10;
         if (end <= start)
@@ -588,7 +641,10 @@ static int pick_stream(const AVFormatContext *ic, int track)
     return -1;
 }
 
-/* One packet as a line; 0 when it holds none, a negative AVERROR when the lines are too many. */
+/*
+ * One packet as a line; 0 when it holds none, a negative AVERROR when the lines' text would be
+ * too much (E2BIG) or memory ran out (ENOMEM).
+ */
 static int take_packet(Events *e, Source source, const AVPacket *pkt, const AVStream *st, int64_t offset_ms)
 {
     int64_t ts = pkt->pts != AV_NOPTS_VALUE ? pkt->pts : pkt->dts;
@@ -607,8 +663,15 @@ static int take_packet(Events *e, Source source, const AVPacket *pkt, const AVSt
 
     const char *data = (const char *)pkt->data;
     size_t size = (size_t)pkt->size;
+    /* no line of a packet larger than the text left room for would fit: refused before its text is made */
+    size_t room = e->bytes < MAX_TEXT_BYTES ? MAX_TEXT_BYTES - e->bytes : 0;
+    if (size > room)
+        return AVERROR(E2BIG);
+    /* and no text being made grows past that room (ASS's line breaks, MP4's styles make it longer than its packet) */
+    unsigned limit = (unsigned)room + 1;
     char *text = NULL;
     int64_t order = 0;
+    int err = 0;
     if (source == SRC_ASS || source == SRC_SSA) {
         /* "ReadOrder,Layer,Style,Name,MarginL,MarginR,MarginV,Effect,Text" */
         const char *comma = memchr(data, ',', size);
@@ -617,37 +680,43 @@ static int take_packet(Events *e, Source source, const AVPacket *pkt, const AVSt
         order = strtoll(data, NULL, 10);
         size_t rest = size - (size_t)(comma + 1 - data);
         AVBPrint bp;
-        av_bprint_init(&bp, 0, AV_BPRINT_SIZE_UNLIMITED);
+        av_bprint_init(&bp, 0, limit);
         for (size_t i = 0; i < rest; i++) {
             char c = comma[1 + i];
             if (c == '\r' || c == 0)
                 continue;
             if (c == '\n')
-                av_bprintf(&bp, "\\N");
+                av_bprint_append_data(&bp, "\\N", 2);
             else
                 av_bprint_chars(&bp, c, 1);
         }
-        /* a line break the muxer left at the end is not the line's */
-        while (bp.len >= 2 && !strcmp(bp.str + bp.len - 2, "\\N"))
-            bp.str[bp.len -= 2] = 0;
-        if (av_bprint_is_complete(&bp) && bp.len && strchr(bp.str, ','))
-            text = strdup(bp.str);
+        if (!av_bprint_is_complete(&bp)) {
+            err = incomplete(&bp);
+        } else {
+            /* a line break the muxer left at the end is not the line's */
+            while (bp.len >= 2 && !strcmp(bp.str + bp.len - 2, "\\N"))
+                bp.str[bp.len -= 2] = 0;
+            if (bp.len && strchr(bp.str, ',') && !(text = strdup(bp.str)))
+                err = AVERROR(ENOMEM);
+        }
         av_bprint_finalize(&bp, NULL);
     } else if (source == SRC_WEBVTT || source == SRC_MOVTEXT) {
         AVBPrint bp;
-        av_bprint_init(&bp, 0, AV_BPRINT_SIZE_UNLIMITED);
+        av_bprint_init(&bp, 0, limit);
         if (source == SRC_WEBVTT)
             webvtt_to_srt(data, size, &bp);
         else
-            movtext_to_srt(pkt->data, pkt->size, &bp);
-        if (av_bprint_is_complete(&bp))
-            text = cue_text(bp.str, bp.len);
+            err = movtext_to_srt(pkt->data, pkt->size, &bp, limit);
+        if (!err && !av_bprint_is_complete(&bp))
+            err = incomplete(&bp);
+        if (!err)
+            text = cue_text(bp.str, bp.len, limit, &err);
         av_bprint_finalize(&bp, NULL);
     } else {
-        text = cue_text(data, size);
+        text = cue_text(data, size, limit, &err);
     }
     if (!text)
-        return 0;
+        return err;
     return add_event(e, start, end, order, text);
 }
 
@@ -666,10 +735,10 @@ char *subtitle_extract(const char *input, int track, const char *output, SeProgr
     int ret = avformat_open_input(&ic, input, NULL, &opts);
     av_dict_free(&opts);
     if (ret < 0)
-        return result(cancel && *cancel ? "cancelled" : "open", error_text(ret, err, sizeof(err)), "", "", 0, 0);
+        return result(stopped(cancel) ? "cancelled" : "open", error_text(ret, err, sizeof(err)), "", "", 0, 0);
     if ((ret = avformat_find_stream_info(ic, NULL)) < 0) {
         avformat_close_input(&ic);
-        return result(cancel && *cancel ? "cancelled" : "open", error_text(ret, err, sizeof(err)), "", "", 0, 0);
+        return result(stopped(cancel) ? "cancelled" : "open", error_text(ret, err, sizeof(err)), "", "", 0, 0);
     }
     int stream = pick_stream(ic, track);
     if (stream < 0) {
@@ -699,13 +768,13 @@ char *subtitle_extract(const char *input, int track, const char *output, SeProgr
     AVPacket *pkt = av_packet_alloc();
     int64_t size = ic->pb ? avio_size(ic->pb) : -1;
     int told = -1, partial = 0, failure = 0;
-    while (pkt && !(cancel && *cancel)) {
+    while (pkt && !stopped(cancel)) {
         ret = av_read_frame(ic, pkt);
         if (ret == AVERROR(EAGAIN))
             continue;
         if (ret < 0) {
             /* a file that ends early (a download cut short) gives what it has */
-            if (ret != AVERROR_EOF && !(cancel && *cancel))
+            if (ret != AVERROR_EOF && !stopped(cancel))
                 partial = 1;
             break;
         }
@@ -725,11 +794,11 @@ char *subtitle_extract(const char *input, int track, const char *output, SeProgr
             }
         }
     }
-    int cancelled = cancel && *cancel;
     char *json;
+    int styled = source == SRC_ASS || source == SRC_SSA;
     if (!pkt) {
         json = result("memory", "", codec, format, 0, 0);
-    } else if (cancelled) {
+    } else if (stopped(cancel)) {
         json = result("cancelled", "", codec, format, 0, 0);
     } else if (failure == AVERROR(E2BIG)) {
         json = result("too_large", "", codec, format, events.count, 0);
@@ -737,9 +806,9 @@ char *subtitle_extract(const char *input, int track, const char *output, SeProgr
         json = result("memory", "", codec, format, 0, 0);
     } else if (!events.count) {
         json = result("empty", partial ? error_text(ret, err, sizeof(err)) : "", codec, format, 0, partial);
+    } else if (settle(&events, !styled, cancel) < 0) {
+        json = result("cancelled", "", codec, format, 0, 0);
     } else {
-        int styled = source == SRC_ASS || source == SRC_SSA;
-        settle(&events, !styled);
         if (styled)
             qsort(events.items, events.count, sizeof(Event), by_order);
         /* a new file only: whatever is there already stays as it is */
@@ -748,19 +817,19 @@ char *subtitle_extract(const char *input, int track, const char *output, SeProgr
         if (written && events.utf8)
             written = fwrite("\xEF\xBB\xBF", 1, 3, f) == 3;
         if (written)
-            written = (styled ? write_ass(f, &events, st->codecpar, source == SRC_SSA) : write_srt(f, &events)) == 0;
+            written = (styled ? write_ass(f, &events, st->codecpar, source == SRC_SSA, cancel) : write_srt(f, &events, cancel)) == 0;
         int saved_errno = errno;
         if (f && fclose(f) != 0)
             written = 0;
         if (!written) {
             if (f)
                 unlink(output);
-            json = result("write", strerror(saved_errno), codec, format, 0, 0);
+            json = stopped(cancel) ? result("cancelled", "", codec, format, 0, 0) : result("write", strerror(saved_errno), codec, format, 0, 0);
         } else {
             json = result("", partial ? error_text(ret, err, sizeof(err)) : "", codec, format, events.count, partial);
         }
     }
-    if (progress && !cancelled && json && told < 1000)
+    if (progress && !stopped(cancel) && json && told < 1000)
         progress(opaque, 1.0);
     free_events(&events);
     av_packet_free(&pkt);

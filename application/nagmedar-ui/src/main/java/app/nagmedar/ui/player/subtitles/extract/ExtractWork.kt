@@ -310,8 +310,9 @@ class SubtitleExtractWorker(context: Context, params: WorkerParameters) : Corout
                 "write" -> return Outcome.Failed(ExtractFailure.Output, detail)
                 else -> return Outcome.Failed(ExtractFailure.Engine, result.optString("error") + " " + detail)
             }
-            val bytes = runCatching { scratch.readBytes() }.getOrNull() ?: return Outcome.Failed(ExtractFailure.Output)
-            val saved = runCatching { saveSubtitle(app, film, request.outputName, bytes) }.getOrNull() ?: return Outcome.Failed(ExtractFailure.Output)
+            // copied as it is read: a track of millions of lines never sits in the heap whole
+            val saved = runCatching { saveSubtitle(app, film, request.outputName) { out -> scratch.inputStream().use { it.copyTo(out) } } }.getOrNull()
+                ?: return Outcome.Failed(ExtractFailure.Output)
             // the film keeps it: among its subtitles when it plays next, wherever the file is
             if (!saved.beside || film.scheme == ContentResolver.SCHEME_CONTENT) {
                 runCatching { SlaveRepository.getInstance(app).saveSlave(request.film, IMedia.Slave.Type.Subtitle, KEPT_PRIORITY, saved.uri) }

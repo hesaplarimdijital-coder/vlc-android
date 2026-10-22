@@ -9,7 +9,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** S-708/S-706: a subtitle file is always a NEW file; one that exists is never returned, written to or replaced. */
+/**
+ * S-708/S-706: a subtitle file is always a NEW file; one that exists is never returned, written to
+ * or replaced; a large one (an extracted track) is copied in as it is read.
+ */
 class NewSubtitleFilesTest {
 
     @get:Rule
@@ -59,6 +62,17 @@ class NewSubtitleFilesTest {
         assertNotNull(file)
         assertNotEquals("altyazi", file?.name)
         assertEquals("altyazi (2)", file?.name)
+    }
+
+    @Test
+    fun aLargeFileIsCopiedIntoItsNewFileAsItIsRead() {
+        // an extracted track, millions of lines: never in the heap whole
+        val extracted = folder.newFile("job.srt").apply { outputStream().use { out -> repeat(4_000) { out.write(ByteArray(1_024) { (it % 64 + 32).toByte() }) } } }
+        val kept = folder.newFile("Film.tr.srt").apply { writeText("özgün") }
+        val file = writeNewFile(folder.root, "Film.tr.srt", source = kept) { file -> file.outputStream().use { out -> extracted.inputStream().use { it.copyTo(out) } } }
+        assertEquals("Film.tr (2).srt", file?.name)
+        assertArrayEquals(extracted.readBytes(), file?.readBytes())
+        assertEquals("özgün", kept.readText())
     }
 
     @Test

@@ -17,6 +17,10 @@
 #   - S-1207: compatibility tracks: TrueHD into E-AC-3 made default, DTS into LPCM, a 96 kHz 7.1
 #     FLAC downmixed into E-AC-3 5.1 and kept whole in LPCM (its very samples), each beside an
 #     original copied packet for packet, starting with it and lasting as long within a frame.
+#   - Embedded subtitles: SubRip, ASS, MP4 timed text and WebVTT tracks written out as files (the
+#     same line twice kept once, styles kept, never over a file there); many lines at the same
+#     time take no longer than others; a packet over the text's cap is refused before its text is
+#     made, in about its own memory.
 set -euo pipefail
 trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -634,6 +638,90 @@ PY
 else
     echo "skipped: not enough room on the disk for two files of 4.5 GB"
 fi
+
+echo "== Embedded subtitles: extraction"
+printf '1\n00:00:01,000 --> 00:00:03,000\nAltyazı <i>korunmalı</i>\n\n2\n00:00:01,000 --> 00:00:03,000\nAltyazı <i>korunmalı</i>\n\n3\n00:00:02,000 --> 00:00:04,500\nİkinci satır\nüst üste\n\n' > "$T/subs.srt"
+mkvmerge -q -o "$T/subs-srt.mkv" "$T/audio.m4a" --language 0:tur "$T/subs.srt"
+cat > "$T/subs.ass" <<'ASS'
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,60,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,40,1
+Style: Yorum,Arial,48,&H0000FFFF,&H000000FF,&H00000000,&H00000000,0,1,0,0,100,100,0,0,1,2,0,8,10,10,40,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:03.00,0:00:04.00,Yorum,,0,0,0,,Sonra gelen
+Dialogue: 0,0:00:01.00,0:00:02.50,Default,Kemal,0,0,0,,{\i1}Merhaba{\i0}\Nikinci satır
+ASS
+mkvmerge -q -o "$T/subs-ass.mkv" "$T/audio.m4a" "$T/subs.ass"
+printf '1\n00:00:01,000 --> 00:00:03,000\n<b>Kalın</b> ve <i>eğik</i>\n\n2\n00:00:03,500 --> 00:00:05,000\nDüz\n\n' > "$T/styled.srt"
+ffmpeg -v error -y -i "$T/audio.m4a" -i "$T/styled.srt" -map 0 -map 1 -c:a copy -c:s mov_text "$T/subs-tx3g.mp4"
+printf 'WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n<v Kemal><i>Selam</i> &amp; <c.yellow>hoş</c> geldin\n\n00:00:03.500 --> 00:00:05.000\n<b>Kalın</b>\n\n' > "$T/subs.vtt"
+ffmpeg -v error -y -i "$T/subs.vtt" -c:s webvtt "$T/subs-vtt.mkv"
+# 200 000 lines at the same time (each line looked at every other one of its time before), and one line of 70 MB
+python3 - "$T" <<'PY'
+import sys
+t = sys.argv[1]
+with open(f'{t}/same.srt', 'w') as f:
+    for i in range(200_000):
+        f.write(f'{i + 1}\n00:00:01,000 --> 00:00:02,000\nAynı anda {i}\n\n')
+with open(f'{t}/huge.srt', 'w') as f:
+    f.write('1\n00:00:01,000 --> 00:00:02,000\nKısa satır\n\n')
+    f.write('2\n00:00:03,000 --> 00:00:04,000\n' + 'x' * (70 * 1024 * 1024) + '\n\n')
+PY
+ffmpeg -v error -y -i "$T/same.srt" -c:s copy "$T/subs-same.mkv"
+ffmpeg -v error -y -i "$T/huge.srt" -c:s copy "$T/subs-huge.mkv"
+rm -f "$T/same.srt" "$T/huge.srt"
+python3 - "$PREFIX/bin/subextract" "$T" <<'PY'
+import json, os, resource, subprocess, sys, time
+exe, t = sys.argv[1], sys.argv[2]
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def extract(name, out):
+    started = time.monotonic()
+    p = subprocess.run([exe, f'{t}/{name}', '0', f'{t}/{out}'], capture_output=True, text=True)
+    return json.loads(p.stdout), time.monotonic() - started
+def text(out):
+    return open(f'{t}/{out}', 'rb').read()
+r, _ = extract('subs-srt.mkv', 'out.srt')
+check(not r['error'] and r['format'] == 'srt' and r['events'] == 2, f'srt {r}')
+check(text('out.srt') == ('\ufeff1\r\n00:00:01,000 --> 00:00:03,000\r\nAltyazı <i>korunmalı</i>\r\n\r\n'
+                          '2\r\n00:00:02,000 --> 00:00:04,500\r\nİkinci satır\r\nüst üste\r\n\r\n').encode(), f'srt text {text("out.srt")[:200]}')
+# never over a file that is there
+r, _ = extract('subs-srt.mkv', 'out.srt')
+check(r['error'] == 'write', f'written over a file {r}')
+r, _ = extract('subs-ass.mkv', 'out.ass')
+ass = text('out.ass').decode('utf-8-sig').replace('\r\n', '\n')
+check(not r['error'] and r['format'] == 'ass' and r['events'] == 2, f'ass {r}')
+check('Style: Yorum,Arial,48' in ass and ass.index('Sonra gelen') < ass.index('Merhaba'), f'ass header or order {ass[-400:]}')
+check('Dialogue: 0,0:00:01.00,0:00:02.50,Default,Kemal,0,0,0,,{\\i1}Merhaba{\\i0}\\Nikinci satır' in ass, f'ass line {ass[-300:]}')
+r, _ = extract('subs-tx3g.mp4', 'out-tx3g.srt')
+check(not r['error'] and r['codec'] == 'mov_text' and r['events'] == 2, f'tx3g {r}')
+check('<b>Kalın</b> ve <i>eğik</i>' in text('out-tx3g.srt').decode('utf-8-sig'), f'tx3g styles {text("out-tx3g.srt")[:200]}')
+r, _ = extract('subs-vtt.mkv', 'out-vtt.srt')
+vtt = text('out-vtt.srt').decode('utf-8-sig')
+check(not r['error'] and r['codec'] == 'webvtt' and '<i>Selam</i> & hoş geldin' in vtt and '<b>Kalın</b>' in vtt, f'webvtt {r} {vtt[:200]}')
+r, took = extract('subs-same.mkv', 'out-same.srt')
+same = text('out-same.srt').decode('utf-8-sig').split('\r\n\r\n')
+check(not r['error'] and r['events'] == 200_000 and took < 20, f'200 000 lines at once: {r} in {took:.1f} s')
+check(same[0].endswith('Aynı anda 0') and same[199_999].endswith('Aynı anda 199999'), f'their order {same[:2]} {same[-2:]}')
+r, took = extract('subs-huge.mkv', 'out-huge.srt')
+peak_mb = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss // 1024
+check(r['error'] == 'too_large' and not os.path.exists(f'{t}/out-huge.srt'), f'70 MB line {r}')
+check(peak_mb < 140, f'a 70 MB packet took {peak_mb} MB')
+if problems:
+    print('::error title=Embedded subtitles::' + '; '.join(problems))
+    sys.exit(1)
+print(f'ok: SRT, ASS, MP4 timed text and WebVTT written out; 200 000 lines at once; a 70 MB line refused in {peak_mb} MB')
+PY
+rm -f "$T/subs-same.mkv" "$T/subs-huge.mkv"
 
 echo "== SP-05: whisper pipeline smoke test"
 ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 -c:a libmp3lame "$T/tone.mp3" 2> /dev/null || ffmpeg -v error -f lavfi -i "sine=f=440:d=6" -ac 2 "$T/tone.wav"
