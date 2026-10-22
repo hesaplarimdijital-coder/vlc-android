@@ -107,11 +107,8 @@ import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
-import app.nagmedar.ui.screens.SETTINGS_APPEARANCE_ITEM
-import app.nagmedar.ui.screens.SETTINGS_BACKUP_ITEM
-import app.nagmedar.ui.screens.SETTINGS_LIBRARY_ITEM
-import app.nagmedar.ui.screens.SETTINGS_REMOTE_ACCESS_ITEM
-import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
+import app.nagmedar.ui.screens.SettingsItem
+import app.nagmedar.ui.screens.settingsItem
 import app.nagmedar.ui.audio.AbChoice
 import app.nagmedar.ui.audio.AbTest
 import app.nagmedar.ui.audio.EqualizerScreen
@@ -291,23 +288,26 @@ private fun NagmedarMain(
     val motion = NagTheme.motion
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests == 0) return@LaunchedEffect
-        if (motion.reduced) settingsList.scrollToItem(SETTINGS_SHORTCUTS_ITEM) else settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
+        val index = SettingsItem.Shortcuts.index
+        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
     }
     LaunchedEffect(libraryListRequests) {
         if (libraryListRequests == 0) return@LaunchedEffect
-        if (motion.reduced) settingsList.scrollToItem(SETTINGS_LIBRARY_ITEM) else settingsList.animateScrollToItem(SETTINGS_LIBRARY_ITEM)
+        val index = SettingsItem.Library.index
+        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
     }
     // "All settings"' lines that Nağmedar's own sections have: Settings, at that section
-    var settingsItem by remember { mutableIntStateOf(0) }
+    var settingsTarget by remember { mutableStateOf(SettingsItem.Header) }
     var settingsItemRequests by remember { mutableIntStateOf(0) }
-    val openSettingsAt: (Int) -> Unit = { index ->
+    val openSettingsAt: (SettingsItem) -> Unit = { target ->
         navigator.navigate(Destination.Settings)
-        settingsItem = index
+        settingsTarget = target
         settingsItemRequests++
     }
     LaunchedEffect(settingsItemRequests) {
         if (settingsItemRequests == 0) return@LaunchedEffect
-        if (motion.reduced) settingsList.scrollToItem(settingsItem) else settingsList.animateScrollToItem(settingsItem)
+        val index = settingsTarget.index
+        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
     }
     // a preference asked for from outside (the player's metered connection question): its page in "All settings"
     LaunchedEffect(ShellRequests.preference) {
@@ -514,12 +514,10 @@ private fun NagmedarMain(
                         Destination.AllSettings -> AllSettingsScreen(
                             onLink = { link ->
                                 when (link) {
-                                    NagmedarLink.Library -> openSettingsAt(SETTINGS_LIBRARY_ITEM)
-                                    NagmedarLink.Appearance -> openSettingsAt(SETTINGS_APPEARANCE_ITEM)
-                                    NagmedarLink.RemoteAccess -> openSettingsAt(SETTINGS_REMOTE_ACCESS_ITEM)
-                                    NagmedarLink.Backup -> openSettingsAt(SETTINGS_BACKUP_ITEM)
                                     NagmedarLink.Equalizer -> shellNavigator.navigate(Destination.Equalizer)
                                     NagmedarLink.About -> shellNavigator.navigate(Destination.About)
+                                    // Library, Appearance, Remote access, Backup: that section of Settings
+                                    else -> link.settingsItem?.let(openSettingsAt)
                                 }
                             },
                             onClose = { if (!shellNavigator.back()) shellNavigator.navigate(Destination.Settings) },

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -46,6 +47,7 @@ import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.player.subtitles.providers.SubtitleProvidersSettings
+import app.nagmedar.ui.prefs.NagmedarLink
 import app.nagmedar.ui.player.subtitles.whisper.WhisperSettings
 import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
@@ -82,20 +84,53 @@ import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
-/** Index of the keyboard shortcut section in [SettingsScreen]'s list, for the card's "Edit shortcuts…" (S-1504). */
-const val SETTINGS_SHORTCUTS_ITEM = 4
+/**
+ * The sections of [SettingsScreen], in the order its list shows them: the list is made of these, each
+ * under its [key], so a link to one (the shortcut card's "Edit shortcuts…", the home page's "Klasör
+ * ekle", "All settings"' lines) scrolls to [index], wherever sections are added or moved.
+ */
+enum class SettingsItem(val key: String) {
+    Header("header"),
+    Help("help"),
+    Appearance("appearance"),
+    Input("input"),
+    Shortcuts("shortcuts"),
+    Library("library"),
+    FilmInfo("film_info"),
+    Snapshot("snapshot"),
+    Recording("recording"),
+    SubtitleProviders("subtitle_providers"),
+    Whisper("whisper"),
+    Music("music"),
+    Latency("latency"),
+    Scrobble("scrobble"),
+    Visualizer("visualizer"),
+    Alarm("alarm"),
+    RadioRecording("radio_recording"),
+    Lyrics("lyrics"),
+    Covers("covers"),
+    Podcasts("podcasts"),
+    RemoteAccess("remote_access"),
+    Backup("backup"),
+    Start("start"),
+    About("about"),
+    Lab("lab"),
+    Performance("performance"),
+    ;
 
-/** The index of Settings › Library (the sections' folders), for the home page's "Klasör ekle". */
-const val SETTINGS_LIBRARY_ITEM = SETTINGS_SHORTCUTS_ITEM + 1
+    /** Its place in the list. */
+    val index: Int get() = entries.indexOf(this)
+}
 
-/** The index of Settings › Appearance, for "All settings"' theme line. */
-const val SETTINGS_APPEARANCE_ITEM = 2
-
-/** The index of Settings › Remote access, for "All settings"' remote access line. */
-const val SETTINGS_REMOTE_ACCESS_ITEM = 19
-
-/** The index of Settings › Backup, for "All settings"' export and restore lines. */
-const val SETTINGS_BACKUP_ITEM = SETTINGS_REMOTE_ACCESS_ITEM + 1
+/** The section of [SettingsScreen] a line of "All settings" leads to; null for a page of its own (the equaliser, About). */
+val NagmedarLink.settingsItem: SettingsItem?
+    get() = when (this) {
+        NagmedarLink.Library -> SettingsItem.Library
+        NagmedarLink.Appearance -> SettingsItem.Appearance
+        NagmedarLink.RemoteAccess -> SettingsItem.RemoteAccess
+        NagmedarLink.Backup -> SettingsItem.Backup
+        NagmedarLink.Equalizer, NagmedarLink.About -> null
+    }
 
 @Composable
 fun SettingsScreen(
@@ -122,69 +157,67 @@ fun SettingsScreen(
         contentPadding = PaddingValues(bottom = dimens.gapXl),
         horizontalAlignment = Alignment.Start,
     ) {
-        item { PageHeader(title = stringResource(R.string.nag_nav_settings)) }
-        // S-1504: the guide inside the app, and every key on one card
-        item { HelpSection(onOpenGuide, onOpenShortcutCard) }
-        item { AppearanceSection(prefs) }
-        item { InputSection(prefs) }
-        item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
-        // the folders each section of the library shows
-        item { LibrarySourcesSection(prefs) }
-        // films and series: posters, overviews and ratings from TMDB and OMDb
-        item { FilmInfoSection() }
-        item { SnapshotSection(prefs) }
-        // S-607: what Shift+R records, and where
-        item { RecordingSection(prefs) }
-        // S-707: where subtitles come from
-        item { SubtitleProvidersSettings() }
-        // S-709: the subtitles from speech: the model, the language, the models on the device
-        item { WhisperSettings() }
-        // S-901: the engine behind the local music library
-        item { MusicSection(onOpenEqualizer = onOpenEqualizer) }
-        // S-613: what each output device plays late, and the measurement with the microphone
-        item { LatencySection() }
-        // S-1008: what is played, sent to Last.fm and ListenBrainz
-        item { ScrobbleSection() }
-        // S-611: the visualisers, with their battery warning
-        item { VisualizerSection(prefs) }
-        // S-1007: waking to music
-        item { AlarmSection() }
-        // S-1107: where radio recordings go, which tracks are kept and how much room they may take
-        item { RadioRecordingSection(prefs) }
-        // S-1003: where lyrics come from
-        item { LyricsSection() }
-        // S-1006: where album covers come from
-        item { CoversSection() }
-        // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
-        item { PodcastSection() }
-        // S-1304: the web page that browses and plays from another device
-        item { RemoteAccessSection() }
-        // S-1502: the app's settings, lists and statistics in one file, and back
-        item { BackupSection() }
-        item {
-            SettingsSection(stringResource(R.string.nag_settings_start)) {
-                NagButton(stringResource(R.string.nag_settings_first_run_again), onShowFirstRun)
-            }
-        }
-        item {
-            SettingsSection(stringResource(R.string.nag_settings_about)) {
-                Text(
-                    stringResource(R.string.nag_settings_version, BuildConfig.VLC_VERSION_NAME, BuildConfig.LIBVLC_VERSION),
-                    style = NagTheme.type.body,
-                    color = NagTheme.colors.textSecondary,
-                )
-                Spacer(Modifier.height(dimens.gapM))
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-                    NagButton(stringResource(R.string.nag_about_open), onOpenAbout, primary = true)
-                    NagButton(stringResource(R.string.nag_prefs_title), onOpenAllSettings)
+        items(SettingsItem.entries, key = { it.key }) { entry ->
+            when (entry) {
+                SettingsItem.Header -> PageHeader(title = stringResource(R.string.nag_nav_settings))
+                // S-1504: the guide inside the app, and every key on one card
+                SettingsItem.Help -> HelpSection(onOpenGuide, onOpenShortcutCard)
+                SettingsItem.Appearance -> AppearanceSection(prefs)
+                SettingsItem.Input -> InputSection(prefs)
+                SettingsItem.Shortcuts -> ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo)
+                // the folders each section of the library shows
+                SettingsItem.Library -> LibrarySourcesSection(prefs)
+                // films and series: posters, overviews and ratings from TMDB and OMDb
+                SettingsItem.FilmInfo -> FilmInfoSection()
+                SettingsItem.Snapshot -> SnapshotSection(prefs)
+                // S-607: what Shift+R records, and where
+                SettingsItem.Recording -> RecordingSection(prefs)
+                // S-707: where subtitles come from
+                SettingsItem.SubtitleProviders -> SubtitleProvidersSettings()
+                // S-709: the subtitles from speech: the model, the language, the models on the device
+                SettingsItem.Whisper -> WhisperSettings()
+                // S-901: the engine behind the local music library
+                SettingsItem.Music -> MusicSection(onOpenEqualizer = onOpenEqualizer)
+                // S-613: what each output device plays late, and the measurement with the microphone
+                SettingsItem.Latency -> LatencySection()
+                // S-1008: what is played, sent to Last.fm and ListenBrainz
+                SettingsItem.Scrobble -> ScrobbleSection()
+                // S-611: the visualisers, with their battery warning
+                SettingsItem.Visualizer -> VisualizerSection(prefs)
+                // S-1007: waking to music
+                SettingsItem.Alarm -> AlarmSection()
+                // S-1107: where radio recordings go, which tracks are kept and how much room they may take
+                SettingsItem.RadioRecording -> RadioRecordingSection(prefs)
+                // S-1003: where lyrics come from
+                SettingsItem.Lyrics -> LyricsSection()
+                // S-1006: where album covers come from
+                SettingsItem.Covers -> CoversSection()
+                // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
+                SettingsItem.Podcasts -> PodcastSection()
+                // S-1304: the web page that browses and plays from another device
+                SettingsItem.RemoteAccess -> RemoteAccessSection()
+                // S-1502: the app's settings, lists and statistics in one file, and back
+                SettingsItem.Backup -> BackupSection()
+                SettingsItem.Start -> SettingsSection(stringResource(R.string.nag_settings_start)) {
+                    NagButton(stringResource(R.string.nag_settings_first_run_again), onShowFirstRun)
                 }
+                SettingsItem.About -> SettingsSection(stringResource(R.string.nag_settings_about)) {
+                    Text(
+                        stringResource(R.string.nag_settings_version, BuildConfig.VLC_VERSION_NAME, BuildConfig.LIBVLC_VERSION),
+                        style = NagTheme.type.body,
+                        color = NagTheme.colors.textSecondary,
+                    )
+                    Spacer(Modifier.height(dimens.gapM))
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                        NagButton(stringResource(R.string.nag_about_open), onOpenAbout, primary = true)
+                        NagButton(stringResource(R.string.nag_prefs_title), onOpenAllSettings)
+                    }
+                }
+                SettingsItem.Lab -> LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
+                // S-1404: the start-ups and playbacks this device measured
+                SettingsItem.Performance -> PerformanceSection(section = { title, content -> SettingsSection(title, content) })
             }
         }
-        item {
-            LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
-        }
-        // S-1404: the start-ups and playbacks this device measured
-        item { PerformanceSection(section = { title, content -> SettingsSection(title, content) }) }
     }
 }
 
