@@ -8,6 +8,9 @@ import android.os.Process
 import android.os.SystemClock
 import androidx.annotation.RequiresApi
 import androidx.core.view.OneShotPreDrawListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.videolan.tools.AppScope
 
 /**
  * S-1404: a cold start-up from the launcher, timed to its first frame and kept. From Android 15
@@ -26,8 +29,14 @@ object StartupPerf {
         if (watched) return
         watched = true
         if (restored) return
-        val store = PrefsPerfStore.get(activity)
-        val keep = { ms: Long -> if (ms in 1..120_000) store.keep(StartupRecord(System.currentTimeMillis(), ms)) }
+        val app = activity.applicationContext
+        // kept on a background thread: the records' preferences file is opened and read there, not on the main thread
+        val keep = { ms: Long ->
+            if (ms in 1..120_000) {
+                val record = StartupRecord(System.currentTimeMillis(), ms)
+                AppScope.launch(Dispatchers.IO) { PrefsPerfStore.get(app).keep(record) }
+            }
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             fromSystem(activity, keep)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

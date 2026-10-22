@@ -66,6 +66,7 @@ import org.videolan.vlc.util.NewStorageHook
 import org.videolan.vlc.util.VersionMigration
 import java.io.File
 import java.io.IOException
+import kotlin.concurrent.thread
 
 private const val TAG = "VLC/AppSetupDelegate"
 
@@ -89,6 +90,10 @@ class AppSetupDelegate : AppDelegate,
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectLeakedClosableObjects().detectLeakedSqlLiteObjects().detectActivityLeaks().penaltyLog().build())
         }
+        // Nağmedar: the preferences' file is read on a background thread while the setup below goes
+        // on; the main thread takes them once read and does not read the disk for them (a read that
+        // failed there is tried again on the main thread, which then fails as it always did)
+        val preferences = thread(name = "nagmedar-preferences") { runCatching { Settings.getInstance(this@setupApplication) } }
         // Nağmedar: the process-wide Compose state is made here, in the global snapshot, before any window composes
         ProcessState.warmUp()
         appContextProvider.init(this)
@@ -99,6 +104,7 @@ class AppSetupDelegate : AppDelegate,
         FactoryManager.registerFactory(ILibVLCFactory.factoryId, LibVLCFactory())
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
 
+        preferences.join()
         val settings = Settings.getInstance(this)
         if (BuildConfig.DEBUG) {
             if (Settings.showTvUi) {
