@@ -1887,7 +1887,21 @@
     <string name="nag_pl_empty_title">No playlists yet</string>
     <string name="nag_pl_empty_desc">Make one here, or import an M3U, M3U8, PLS or XSPF file.</string>
     <string name="nag_pl_list_empty_title">This playlist is empty</string>
-    <string name="nag_pl_list_empty_desc">In Music, select tracks and press “Add to playlist…”.</string>
+    <string name="nag_pl_list_empty_desc">In Music, select tracks and press “Add to playlist…”, then drag them by their handles to put them in order.</string>
+    <!-- S-1601: all the playlists at once -->
+    <string name="nag_pl_search">Search playlists</string>
+    <string name="nag_pl_sort_name">Name</string>
+    <string name="nag_pl_sort_recent">Last played</string>
+    <string name="nag_pl_sort_created">Created</string>
+    <string name="nag_pl_last_played">Last played: %s</string>
+    <string name="nag_pl_never_played">Never played</string>
+    <string name="nag_pl_smart_badge">Smart</string>
+    <string name="nag_pl_no_match">No playlist matches “%s”</string>
+    <string name="nag_pl_back">Back to playlists</string>
+    <string name="nag_pl_duplicate">Duplicate</string>
+    <string name="nag_pl_copy_name">%s (copy)</string>
+    <string name="nag_pl_duplicated">Created “%s”</string>
+    <string name="nag_pl_rename_action">Rename</string>
     <string name="nag_pl_browse_music">Go to Music</string>
     <plurals name="nag_pl_imported">
         <item quantity="one">“%2$s” imported: %1$d track</item>

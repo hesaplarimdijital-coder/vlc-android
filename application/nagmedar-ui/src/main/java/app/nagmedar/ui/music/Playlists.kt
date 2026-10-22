@@ -5,7 +5,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.covers.CoverTrack
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -14,6 +16,13 @@ import kotlinx.coroutines.sync.withLock
 /** S-804: a playlist as its tab shows it. */
 @Immutable
 data class PlaylistSummary(val id: Long, val name: String, val count: Int, val durationMs: Long)
+
+/**
+ * S-1601: what a playlist's card shows besides its counts: the [uris] of its lines (the plays are
+ * kept by them) and the covers of its first tracks; [count] is the lines it was read at.
+ */
+@Immutable
+data class PlaylistGlance(val count: Int, val uris: List<String>, val covers: List<CoverTrack>)
 
 /** One line of the open playlist; [key] tells two lines of one track apart and follows its line when it moves. */
 @Immutable
@@ -67,6 +76,10 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
     var lines: List<PlaylistLine> by mutableStateOf(emptyList())
         private set
 
+    /** S-1601: the playlists' glances by id; filled in the background after the playlists are read. */
+    var glances: Map<Long, PlaylistGlance> by mutableStateOf(emptyMap())
+        private set
+
     val open: PlaylistSummary? get() = playlists?.firstOrNull { it.id == openId }
 
     private val writes = Mutex()
@@ -76,6 +89,30 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
     private var edits = 0
 
     private fun lineOf(track: Track) = PlaylistLine(nextKey++, track)
+
+    private var glanceJob: Job? = null
+
+    /** The glance of [id] to be read again: its lines changed here. */
+    private fun forget(id: Long) {
+        if (id in glances) glances = glances - id
+    }
+
+    /**
+     * Reads, one playlist at a time and off the screen's way, the glances that are missing or were
+     * read at another count; glances of playlists that are gone are dropped.
+     */
+    private fun readGlances() {
+        glanceJob?.cancel()
+        glanceJob = scope.launch {
+            val wanted = playlists.orEmpty()
+            glances = glances.filterKeys { id -> wanted.any { it.id == id } }
+            for (summary in wanted) {
+                if (glances[summary.id]?.count == summary.count) continue
+                val tracks = writes.withLock { store.tracks(summary.id) }
+                glances = glances + (summary.id to PlaylistGlance(tracks.size, tracks.map { it.uri }, PlaylistCards.coversOf(tracks)))
+            }
+        }
+    }
 
     /**
      * The playlists read again after the changes on their way, the open one kept if it still is
@@ -95,12 +132,14 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
             openId = id
             lines = tracks.map(::lineOf)
         }
+        readGlances()
     }
 
     fun openList(id: Long) {
         if (id == openId) return
         openId = id
         lines = emptyList()
+        forget(id)
         scope.launch { writes.withLock { if (openId == id) lines = store.tracks(id).map(::lineOf) } }
     }
 
@@ -111,6 +150,7 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
                 block()
                 playlists = store.playlists()
             }
+            readGlances()
         }
     }
 
@@ -119,6 +159,17 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
             val id = writes.withLock { store.create(name, trackIds) }
             if (id != null) reload(prefer = id)
             done(id)
+        }
+    }
+
+    /**
+     * A copy of the playlist of [id] named [name], the same tracks in the same order, and open;
+     * [done] hears its id, null when it could not be made.
+     */
+    fun duplicate(id: Long, name: String, done: (Long?) -> Unit = {}) {
+        scope.launch {
+            val tracks = writes.withLock { store.tracks(id).map { it.id } }
+            create(name, tracks, done)
         }
     }
 
@@ -150,6 +201,7 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
         val id = openId ?: return
         if (from == to || from !in lines.indices || to !in lines.indices) return
         edits++
+        forget(id)
         lines = lines.toMutableList().apply { add(to, removeAt(from)) }
         write { store.move(id, from, to) }
     }
@@ -160,6 +212,7 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
         val gone = lines.withIndex().filter { it.value.key in keys }.map { it.index to it.value }
         if (gone.isEmpty()) return gone
         edits++
+        forget(id)
         lines = lines.filter { it.key !in keys }
         write { store.remove(id, gone.map { it.first }) }
         return gone
@@ -168,6 +221,7 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
     /** What [remove] took out, back in its places (if the same playlist is still open). */
     fun restore(gone: List<Pair<Int, PlaylistLine>>, playlist: Long) {
         edits++
+        forget(playlist)
         if (openId == playlist) {
             val next = lines.toMutableList()
             for ((position, line) in gone.sortedBy { it.first }) next.add(position.coerceAtMost(next.size), line)
@@ -180,6 +234,7 @@ class PlaylistsState(private val store: PlaylistStore, private val scope: Corout
     fun append(id: Long, tracks: List<Track>) {
         if (tracks.isEmpty()) return
         edits++
+        forget(id)
         if (id == openId) lines = lines + tracks.map(::lineOf)
         write { store.append(id, tracks.map { it.id }) }
     }

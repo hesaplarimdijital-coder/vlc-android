@@ -81,6 +81,8 @@ fun <T> DenseTable(
     onSortChange: ((TableSort) -> Unit)? = null,
     rowMenu: ((T, Int) -> List<MenuEntry>)? = null,
     rowMenuLabel: String? = null,
+    /** S-1601: where the input is touch, a row's menu is a sheet at the bottom of the window. */
+    rowMenuAsSheet: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(bottom = 8.dp),
     /** With a double-click action, a click only selects (a pointer's way: select, then open). */
     onRowDoubleClick: ((T, Int) -> Unit)? = null,
@@ -138,7 +140,7 @@ fun <T> DenseTable(
                     )
                 }
                 if (rowMenu != null) {
-                    ContextMenuArea(entries = { rowMenu(item, index) }, modifier = place, accessibilityLabel = rowMenuLabel) { row(Modifier) }
+                    ContextMenuArea(entries = { rowMenu(item, index) }, modifier = place, accessibilityLabel = rowMenuLabel, asSheet = rowMenuAsSheet) { row(Modifier) }
                 } else {
                     row(place)
                 }

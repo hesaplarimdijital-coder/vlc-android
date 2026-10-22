@@ -171,6 +171,7 @@ Sözlüğü testler denetler:
 | ipucu | tooltip | | | |
 | dokunun, tıklayın, basın | tap, click, press | | | Dokunmatikte “dokunun”, farede “tıklayın”, klavyede “basın” |
 | akıllı liste | smart list | otomatik liste, dinamik liste | auto playlist | Kurallarla kendiliğinden dolan çalma listesi; “Kuralları düzenle…”, “Parçalar uysun: tüm kurallara / herhangi bir kurala” |
+| kopyasını yapmak | duplicate | klonlamak, çoğaltmak | clone | Çalma listesinin ya da akıllı listenin aynı parçalarla ve aynı sırayla yeni bir kopyası: “Kopyasını yap”; adı “Akşam (kopya)”, geri alınır |
 | kural | rule | ölçüt | criterion | Akıllı listenin bir satırı: alan, işleç, değer (“Puan en az 4”, “Eklenme en çok 30 gün önce”) |
 | CUE sayfası | CUE sheet | cue dosyası | cue file | Tek dosyalık albümün parça listesi (album.cue): parçaları kütüphanede ayrı ayrı görünür, örnek doğruluğunda çalınır; her parça dosyasının adresi ve sayfadaki numarasıyla bilinir (“…/album.flac#cue=3”) |
 | tracker modülü | tracker module | mod dosyası, tracker şarkısı | mod file | MOD, XM, S3M, IT, MPTM… libopenmpt'nin çaldığı modül biçimleri; motor çalarken sentezler, kütüphane türünü (XM, IT…) format olarak gösterir |

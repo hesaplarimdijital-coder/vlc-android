@@ -1,12 +1,8 @@
 package app.nagmedar.ui.music
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,13 +12,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
-import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
@@ -30,7 +24,6 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
-import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.stats.TrackStats
@@ -118,9 +111,11 @@ internal fun smartSummary(list: SmartList): String {
 }
 
 /**
- * S-805: a smart list open in the playlists screen: its name, what it asks, play and shuffle,
- * its rules to edit, its menu, its tracks (null: the library still being read). The tracks are
- * the library's, in the list's order; a click plays (a pointer's: selects, a double click plays).
+ * S-805: a smart list open in the playlists screen: its head (cover, name, what it asks, play and
+ * shuffle, its rules to edit, its menu), its tracks (null: the library still being read). The
+ * tracks are the library's, in the list's order; a click plays (a pointer's: selects, a double
+ * click plays). S-1601: the name is changed where it stands ([renaming]); with [onBack] a button
+ * leads back to the lists.
  */
 @Composable
 internal fun SmartPane(
@@ -130,41 +125,34 @@ internal fun SmartPane(
     actions: MusicActions,
     onEdit: () -> Unit,
     menu: () -> List<MenuEntry>,
+    onBack: (() -> Unit)?,
+    onRename: (String) -> Unit,
+    renaming: Boolean,
+    onRenaming: (Boolean) -> Unit,
 ) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
     val pointer = NagTheme.inputMode == InputMode.Pointer
     Column(Modifier.fillMaxSize().testTag("smart-pane")) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimens.gapS),
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(list.name, style = NagTheme.type.title, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (tracks != null) {
-                    val length = tracks.sumOf { it.durationMs.coerceAtLeast(0) }
-                    Text(
-                        listOfNotNull(pluralStringResource(R.plurals.nag_tracks_count, tracks.size, tracks.size), length.takeIf { it > 0 }?.let(::formatDuration))
-                            .joinToString(" · "),
-                        style = NagTheme.type.labelSmall,
-                        color = colors.textTertiary,
-                        maxLines = 1,
-                    )
-                }
-                Text(smartSummary(list), style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            }
-            val playable = tracks.orEmpty()
-            NagButton(stringResource(R.string.nag_play), { actions.play(playable, 0) }, icon = NagIcons.Play, primary = true, enabled = playable.isNotEmpty())
-            if (!compact) {
+        val playable = tracks.orEmpty()
+        val covers = remember(tracks) { PlaylistCards.coversOf(playable) }
+        ListDetailHeader(
+            name = list.name,
+            onRename = onRename,
+            editing = renaming,
+            onEditing = onRenaming,
+            covers = covers,
+            seed = "s:${list.id}",
+            smart = true,
+            lines = listOfNotNull(tracks?.let { playlistMeta(it.size, it.sumOf { track -> track.durationMs.coerceAtLeast(0) }) }, smartSummary(list)),
+            onBack = onBack,
+            actions = { stacked ->
+                NagButton(stringResource(R.string.nag_play), { actions.play(playable, 0) }, icon = NagIcons.Play, primary = true, enabled = playable.isNotEmpty())
                 NagButton(stringResource(R.string.nag_shuffle), { actions.play(playable.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = playable.size > 1)
-                NagButton(stringResource(R.string.nag_smart_edit), onEdit, icon = NagIcons.SmartList)
-            }
-            IconMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu)
-        }
+                // beside the name there is room for the rules' button; under it they are in the menu
+                if (!stacked) NagButton(stringResource(R.string.nag_smart_edit), onEdit, icon = NagIcons.SmartList)
+                ActionMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu, sheetTitle = list.name)
+            },
+        )
         HorizontalRule()
         when {
             tracks == null -> Unit
@@ -198,6 +186,7 @@ internal fun SmartPane(
                     onRowDoubleClick = if (pointer) ({ _, index -> actions.play(tracks, index) }) else null,
                     rowMenu = { track, index -> actions.menu(track, play = { actions.play(tracks, index) }, select = null) },
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
+                    rowMenuAsSheet = true,
                     rowModifier = { track -> actions.rowModifier(track) { listOf(track) } },
                 )
             }

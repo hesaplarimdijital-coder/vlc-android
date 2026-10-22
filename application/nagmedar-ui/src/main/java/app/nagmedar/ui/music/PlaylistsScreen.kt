@@ -6,7 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -62,9 +61,9 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
-import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MultiSelection
@@ -76,6 +75,7 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
+import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
@@ -83,11 +83,9 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.rememberReorderState
 import app.nagmedar.ui.components.stateBackground
-import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.MediaRepository
-import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.rememberScanState
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
@@ -102,7 +100,7 @@ import kotlinx.coroutines.launch
 private val EXPORT_FORMATS = listOf(PlaylistFormat.M3U8, PlaylistFormat.XSPF, PlaylistFormat.PLS, PlaylistFormat.M3U)
 
 /**
- * S-804: the playlists of the medialibrary, a tab each: the open one's lines in the dense table,
+ * S-804: the playlists of the medialibrary, a card each (S-1601): the open one's lines in the dense table,
  * dragged by their handles or moved with Alt+↑/↓, taken out with Delete (the undo bar brings them
  * back); a playlist made here, renamed, deleted, read from an M3U, M3U8, PLS or XSPF file or
  * written to one through the system's picker.
@@ -202,11 +200,13 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
     rating?.let { tracks -> RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null }) }
 }
 
-/** A playlist's name being asked for: a new one, or one renamed. */
+/** A name being asked for: a new playlist's, or one renamed (a playlist's or a smart list's). */
 private sealed interface Naming {
     data object New : Naming
 
     data class Rename(val playlist: PlaylistSummary) : Naming
+
+    data class RenameSmart(val list: SmartList) : Naming
 }
 
 /** S-805: a smart list being made, or changed. */
@@ -216,7 +216,15 @@ private sealed interface SmartEditing {
     data class Edit(val list: SmartList) : SmartEditing
 }
 
-/** The playlists below their header; [state] in the app is the medialibrary's, in tests a list's. */
+/** The width of the overview beside an open list, in a window wide enough for both. */
+private val LIST_PANE_WIDTH = 340.dp
+
+/**
+ * The playlists below their header; [state] in the app is the medialibrary's, in tests a list's.
+ * S-1601: every list is a card of the overview, searched and put in order; in a wide window the
+ * overview is a narrow list with the open list beside it, in a narrow one the overview fills the
+ * window and a list opens over it (Back returns).
+ */
 @Composable
 fun PlaylistsBrowser(
     state: PlaylistsState,
@@ -237,9 +245,17 @@ fun PlaylistsBrowser(
 ) {
     val res = LocalContext.current.resources
     val locale = res.locale()
+    val width = currentWidthClass()
+    val twoPane = width >= WidthClass.Expanded
     var naming by remember { mutableStateOf<Naming?>(null) }
     var editing by remember { mutableStateOf<SmartEditing?>(null) }
     var openSmart by rememberSaveable { mutableStateOf<Long?>(null) }
+    // a narrow window: whether the open list covers the overview
+    var detail by rememberSaveable { mutableStateOf(false) }
+    // the open list's name being changed where it stands
+    var renaming by remember { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var sort by rememberSaveable { mutableStateOf(PlaylistSort.Name) }
     val playlists = state.playlists
     val smartLists = smart?.lists.orEmpty()
     // read again as the library, the ratings and the plays change
@@ -249,31 +265,148 @@ fun PlaylistsBrowser(
     }
     // a smart list open, or the first one when no playlist is
     val shownSmart = smartLists.firstOrNull { it.id == openSmart } ?: smartLists.firstOrNull().takeIf { state.open == null }
+    val open = state.open
+    val openKey = shownSmart?.let { "s:${it.id}" } ?: open?.let { "p:${it.id}" }
+    LaunchedEffect(openKey) { renaming = false }
+    val cards = remember(playlists, state.glances, smartLists, smartTracks, stats) {
+        PlaylistCards.build(playlists.orEmpty(), state.glances, smartLists, smartTracks, stats)
+    }
+    val shownCards = remember(cards, query, sort, locale) { PlaylistCards.sorted(PlaylistCards.matching(cards, query), sort, locale) }
+    val showDetail = !twoPane && detail && (shownSmart != null || open != null)
+    BackHandler(enabled = showDetail) { detail = false }
+    val undoLabel = stringResource(R.string.nag_sc_undo)
+    val undoKeys = ShortcutRegistry.chordLabel(ShortcutId.Undo, res)
     val deleteSmart = { list: SmartList ->
         openSmart = null
-        smart?.delete(list) { restore ->
-            undo?.show(res.getString(R.string.nag_pl_deleted, list.name), res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res), restore)
-        }
+        detail = false
+        smart?.delete(list) { restore -> undo?.show(res.getString(R.string.nag_pl_deleted, list.name), undoLabel, undoKeys, restore) }
+        Unit
     }
-    val smartMenu = { list: SmartList -> smartListMenu(res, list, onEdit = { editing = SmartEditing.Edit(list) }, onExport = onExportSmart, onDelete = { deleteSmart(it) }) }
     val delete = { playlist: PlaylistSummary ->
-        state.delete(playlist.id) { restore ->
-            undo?.show(res.getString(R.string.nag_pl_deleted, playlist.name), res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res), restore)
+        detail = false
+        state.delete(playlist.id) { restore -> undo?.show(res.getString(R.string.nag_pl_deleted, playlist.name), undoLabel, undoKeys, restore) }
+    }
+    // a copy is made, open, and taken back by the undo bar
+    val duplicate = { playlist: PlaylistSummary ->
+        val name = PlaylistsState.uniqueName(res.getString(R.string.nag_pl_copy_name, playlist.name), playlists.orEmpty().map { it.name })
+        openSmart = null
+        state.duplicate(playlist.id, name) { id ->
+            if (id != null) {
+                detail = true
+                undo?.show(res.getString(R.string.nag_pl_duplicated, name), undoLabel, undoKeys) { state.delete(id) { } }
+            }
         }
     }
-    val menu = { playlist: PlaylistSummary -> playlistMenu(res, playlist, onRename = { naming = Naming.Rename(playlist) }, onExport = onExport, onDelete = delete) }
+    val duplicateSmart = { list: SmartList ->
+        val name = PlaylistsState.uniqueName(res.getString(R.string.nag_pl_copy_name, list.name), smartLists.map { it.name })
+        smart?.save(list.copy(id = 0, name = name)) { id ->
+            openSmart = id
+            detail = true
+            undo?.show(res.getString(R.string.nag_pl_duplicated, name), undoLabel, undoKeys) { smart?.delete(list.copy(id = id, name = name)) { } }
+        }
+        Unit
+    }
+    // what a list's menu adds for the tracks it holds: after what plays, or at the end of the queue
+    val queueEntries = { tracks: List<Track> ->
+        listOf(
+            MenuEntry.Item(res.getString(R.string.nag_play_next), { actions.playNext(tracks) }, enabled = tracks.isNotEmpty()),
+            MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { actions.queue(tracks) }, enabled = tracks.isNotEmpty()),
+        )
+    }
+    val playlistMenuOf = { playlist: PlaylistSummary, rename: () -> Unit, extra: List<MenuEntry> ->
+        playlistMenu(res, playlist, rename, { duplicate(playlist) }, onExport, { delete(it) }, extra)
+    }
+    val smartMenuOf = { list: SmartList, rename: () -> Unit, extra: List<MenuEntry> ->
+        smartListMenu(res, list, { editing = SmartEditing.Edit(list) }, rename, { duplicateSmart(list) }, onExportSmart, { deleteSmart(it) }, extra)
+    }
+    val cardMenu = { card: PlaylistCardData ->
+        if (card.smart) {
+            smartLists.firstOrNull { it.id == card.id }?.let { list -> smartMenuOf(list, { naming = Naming.RenameSmart(list) }, emptyList()) }.orEmpty()
+        } else {
+            playlists.orEmpty().firstOrNull { it.id == card.id }?.let { playlist -> playlistMenuOf(playlist, { naming = Naming.Rename(playlist) }, emptyList()) }.orEmpty()
+        }
+    }
+    val openCard = { card: PlaylistCardData ->
+        if (card.smart) {
+            openSmart = card.id
+        } else {
+            openSmart = null
+            state.openList(card.id)
+        }
+        detail = true
+    }
+    val overview: @Composable (OverviewLayout, Modifier) -> Unit = { layout, overviewModifier ->
+        PlaylistOverview(
+            cards = shownCards,
+            total = cards.size,
+            layout = layout,
+            openKey = if (layout == OverviewLayout.Rows) openKey else null,
+            query = query,
+            onQuery = { query = it },
+            sort = sort,
+            onSort = { sort = it },
+            onOpen = openCard,
+            menu = cardMenu,
+            modifier = overviewModifier,
+        )
+    }
+    val openList: @Composable ((() -> Unit)?) -> Unit = { onBack ->
+        when {
+            shownSmart != null -> SmartPane(
+                shownSmart,
+                smartTracks[shownSmart.id],
+                stats,
+                actions,
+                onEdit = { editing = SmartEditing.Edit(shownSmart) },
+                menu = { smartMenuOf(shownSmart, { renaming = true }, queueEntries(smartTracks[shownSmart.id].orEmpty())) },
+                onBack = onBack,
+                onRename = { name -> smart?.save(shownSmart.copy(name = name)) },
+                renaming = renaming,
+                onRenaming = { renaming = it },
+            )
+            open != null -> PlaylistPane(
+                open,
+                state,
+                actions,
+                undo,
+                menu = { playlistMenuOf(open, { renaming = true }, queueEntries(state.lines.map { it.track })) },
+                onBrowseMusic = onBrowseMusic,
+                onBack = onBack,
+                renaming = renaming,
+                onRenaming = { renaming = it },
+            )
+        }
+    }
     Column(modifier.fillMaxSize()) {
-        PageHeader(
-            title = stringResource(R.string.nag_nav_playlists),
-            subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
-        ) {
-            NagButton(stringResource(R.string.nag_sc_import), onImport, icon = NagIcons.Folder)
-            if (smart != null) {
-                Spacer(Modifier.width(NagTheme.dimens.gapS))
-                NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
+        if (!showDetail) {
+            PageHeader(
+                title = stringResource(R.string.nag_nav_playlists),
+                subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
+            ) {
+                if (width == WidthClass.Compact) {
+                    // a phone's width has room for one word: the rest is in the menu
+                    NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus, modifier = Modifier.testTag("playlist-new"))
+                    ActionMenuButton(
+                        NagIcons.MoreHorizontal,
+                        stringResource(R.string.nag_more_actions),
+                        {
+                            listOfNotNull(
+                                MenuEntry.Item(res.getString(R.string.nag_sc_import), onImport, icon = NagIcons.Folder),
+                                if (smart != null) MenuEntry.Item(res.getString(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList) else null,
+                            )
+                        },
+                        sheetTitle = stringResource(R.string.nag_nav_playlists),
+                    )
+                } else {
+                    NagButton(stringResource(R.string.nag_sc_import), onImport, icon = NagIcons.Folder)
+                    if (smart != null) {
+                        Spacer(Modifier.width(NagTheme.dimens.gapS))
+                        NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
+                    }
+                    Spacer(Modifier.width(NagTheme.dimens.gapS))
+                    NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
+                }
             }
-            Spacer(Modifier.width(NagTheme.dimens.gapS))
-            NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
         }
         when {
             playlists == null -> Unit
@@ -287,33 +420,18 @@ fun PlaylistsBrowser(
                     secondary = StateAction(stringResource(R.string.nag_sc_import), onImport),
                 )
             }
-            else -> {
-                PlaylistTabs(
-                    playlists = playlists,
-                    openId = state.openId.takeIf { shownSmart == null },
-                    onOpen = { id ->
-                        openSmart = null
-                        state.openList(id)
-                    },
-                    menu = menu,
-                    smartLists = smartLists,
-                    smartCounts = smartTracks.mapValues { it.value?.size },
-                    openSmart = shownSmart?.id,
-                    onOpenSmart = { id -> openSmart = id },
-                    smartMenu = smartMenu,
-                )
-                HorizontalRule()
-                val open = state.open
-                when {
-                    shownSmart != null -> SmartPane(shownSmart, smartTracks[shownSmart.id], stats, actions, onEdit = { editing = SmartEditing.Edit(shownSmart) }, menu = { smartMenu(shownSmart) })
-                    open != null -> PlaylistPane(open, state, actions, undo, { menu(open) }, onBrowseMusic)
-                }
+            twoPane -> Row(Modifier.fillMaxSize()) {
+                overview(OverviewLayout.Rows, Modifier.width(LIST_PANE_WIDTH).fillMaxHeight())
+                VerticalRule()
+                Box(Modifier.weight(1f).fillMaxHeight()) { openList(null) }
             }
+            showDetail -> openList { detail = false }
+            else -> overview(OverviewLayout.Grid, Modifier)
         }
     }
     when (val asking = editing) {
         null -> Unit
-        SmartEditing.New -> SmartListDialog(null, library, stats, clock, onSave = { list -> smart?.save(list) { id -> openSmart = id } }, onDismiss = { editing = null })
+        SmartEditing.New -> SmartListDialog(null, library, stats, clock, onSave = { list -> smart?.save(list) { id -> openSmart = id; detail = true } }, onDismiss = { editing = null })
         is SmartEditing.Edit -> SmartListDialog(asking.list, library, stats, clock, onSave = { list -> smart?.save(list) }, onDismiss = { editing = null })
     }
     when (val asking = naming) {
@@ -322,7 +440,10 @@ fun PlaylistsBrowser(
             title = stringResource(R.string.nag_pl_new),
             initial = PlaylistsState.uniqueName(stringResource(R.string.nag_pl_new), playlists.orEmpty().map { it.name }),
             confirm = stringResource(R.string.nag_pl_create),
-            onConfirm = { name -> state.create(name) },
+            onConfirm = { name ->
+                openSmart = null
+                state.create(name) { detail = true }
+            },
             onDismiss = { naming = null },
         )
         is Naming.Rename -> PlaylistNameDialog(
@@ -332,73 +453,60 @@ fun PlaylistsBrowser(
             onConfirm = { name -> state.rename(asking.playlist.id, name) },
             onDismiss = { naming = null },
         )
+        is Naming.RenameSmart -> PlaylistNameDialog(
+            title = stringResource(R.string.nag_pl_rename_title),
+            initial = asking.list.name,
+            confirm = stringResource(R.string.nag_bm_save),
+            onConfirm = { name -> smart?.save(asking.list.copy(name = name)) },
+            onDismiss = { naming = null },
+        )
     }
 }
 
-/** S-805: a smart list's menu: its tab's and its pane's. */
+/** S-805: a smart list's menu: its card's and its pane's; [extra] (the queue's entries) follow the copy. */
 private fun smartListMenu(
     res: Resources,
     list: SmartList,
     onEdit: () -> Unit,
+    onRename: () -> Unit,
+    onDuplicate: () -> Unit,
     onExport: (SmartList, PlaylistFormat) -> Unit,
     onDelete: (SmartList) -> Unit,
+    extra: List<MenuEntry>,
 ): List<MenuEntry> = buildList {
     add(MenuEntry.Item(res.getString(R.string.nag_smart_edit), onEdit, icon = NagIcons.SmartList))
+    add(MenuEntry.Item(res.getString(R.string.nag_pl_rename), onRename))
+    add(MenuEntry.Item(res.getString(R.string.nag_pl_duplicate), onDuplicate))
+    if (extra.isNotEmpty()) {
+        add(MenuEntry.Separator)
+        addAll(extra)
+    }
     add(MenuEntry.Separator)
     EXPORT_FORMATS.forEach { format -> add(MenuEntry.Item(res.getString(R.string.nag_pl_export_as, format.name), { onExport(list, format) })) }
     add(MenuEntry.Separator)
     add(MenuEntry.Item(res.getString(R.string.nag_smart_delete), { onDelete(list) }, icon = NagIcons.Delete, destructive = true))
 }
 
-/** A playlist's menu: its tab's and its pane's. */
+/** A playlist's menu: its card's and its pane's; [extra] (the queue's entries) follow the copy. */
 private fun playlistMenu(
     res: Resources,
     playlist: PlaylistSummary,
     onRename: () -> Unit,
+    onDuplicate: () -> Unit,
     onExport: (PlaylistSummary, PlaylistFormat) -> Unit,
     onDelete: (PlaylistSummary) -> Unit,
+    extra: List<MenuEntry>,
 ): List<MenuEntry> = buildList {
     add(MenuEntry.Item(res.getString(R.string.nag_pl_rename), onRename))
+    add(MenuEntry.Item(res.getString(R.string.nag_pl_duplicate), onDuplicate))
+    if (extra.isNotEmpty()) {
+        add(MenuEntry.Separator)
+        addAll(extra)
+    }
     add(MenuEntry.Separator)
     EXPORT_FORMATS.forEach { format -> add(MenuEntry.Item(res.getString(R.string.nag_pl_export_as, format.name), { onExport(playlist, format) })) }
     add(MenuEntry.Separator)
     add(MenuEntry.Item(res.getString(R.string.nag_pl_delete), { onDelete(playlist) }, icon = NagIcons.Delete, destructive = true))
-}
-
-/** The playlists' tabs, then the smart lists' (S-805), scrolled sideways when they do not fit; each has its list's menu. */
-@Composable
-private fun PlaylistTabs(
-    playlists: List<PlaylistSummary>,
-    openId: Long?,
-    onOpen: (Long) -> Unit,
-    menu: (PlaylistSummary) -> List<MenuEntry>,
-    smartLists: List<SmartList> = emptyList(),
-    smartCounts: Map<Long, Int?> = emptyMap(),
-    openSmart: Long? = null,
-    onOpenSmart: (Long) -> Unit = {},
-    smartMenu: (SmartList) -> List<MenuEntry> = { emptyList() },
-) {
-    val dimens = NagTheme.dimens
-    val moreActions = stringResource(R.string.nag_more_actions)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = dimens.pagePadding - 8.dp, vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        playlists.forEach { playlist ->
-            ContextMenuArea(entries = { menu(playlist) }, accessibilityLabel = moreActions) {
-                PlaylistTab(playlist.name, playlist.count, selected = playlist.id == openId) { onOpen(playlist.id) }
-            }
-        }
-        smartLists.forEach { list ->
-            ContextMenuArea(entries = { smartMenu(list) }, accessibilityLabel = moreActions) {
-                PlaylistTab(list.name, smartCounts[list.id], selected = list.id == openSmart, icon = NagIcons.SmartList) { onOpenSmart(list.id) }
-            }
-        }
-    }
 }
 
 @Composable
@@ -443,7 +551,7 @@ internal fun PlaylistTab(name: String, count: Int?, selected: Boolean, icon: Ima
     }
 }
 
-/** The open playlist: its name, play and shuffle, its menu, the selection's commands, its lines. */
+/** The open playlist: its head (cover, name, play and shuffle, its menu), the selection's commands, its lines. */
 @Composable
 private fun PlaylistPane(
     open: PlaylistSummary,
@@ -452,9 +560,11 @@ private fun PlaylistPane(
     undo: UndoBarState?,
     menu: () -> List<MenuEntry>,
     onBrowseMusic: () -> Unit,
+    onBack: (() -> Unit)?,
+    renaming: Boolean,
+    onRenaming: (Boolean) -> Unit,
 ) {
     val res = LocalContext.current.resources
-    val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
     val pointer = NagTheme.inputMode == InputMode.Pointer
@@ -480,27 +590,23 @@ private fun PlaylistPane(
         }
     }
     Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimens.gapS),
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(open.name, style = NagTheme.type.title, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                val length = tracks.sumOf { it.durationMs.coerceAtLeast(0) }
-                Text(
-                    listOfNotNull(pluralStringResource(R.plurals.nag_tracks_count, tracks.size, tracks.size), length.takeIf { it > 0 }?.let(::formatDuration)).joinToString(" · "),
-                    style = NagTheme.type.labelSmall,
-                    color = colors.textTertiary,
-                    maxLines = 1,
-                )
-            }
-            NagButton(stringResource(R.string.nag_play), { actions.play(tracks, 0) }, icon = NagIcons.Play, primary = true, enabled = tracks.isNotEmpty())
-            if (!compact) NagButton(stringResource(R.string.nag_shuffle), { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = tracks.size > 1)
-            IconMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu)
-        }
+        val covers = remember(tracks) { PlaylistCards.coversOf(tracks) }
+        ListDetailHeader(
+            name = open.name,
+            onRename = { name -> state.rename(open.id, name) },
+            editing = renaming,
+            onEditing = onRenaming,
+            covers = covers,
+            seed = "p:${open.id}",
+            smart = false,
+            lines = listOf(playlistMeta(tracks.size, tracks.sumOf { it.durationMs.coerceAtLeast(0) })),
+            onBack = onBack,
+            actions = {
+                NagButton(stringResource(R.string.nag_play), { actions.play(tracks, 0) }, icon = NagIcons.Play, primary = true, enabled = tracks.isNotEmpty())
+                NagButton(stringResource(R.string.nag_shuffle), { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = tracks.size > 1)
+                ActionMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu, sheetTitle = open.name)
+            },
+        )
         if (selection.count > 1 || selection.selecting) {
             val chosen = lines.filter { it.key in selection }
             SelectionBar(
@@ -593,6 +699,7 @@ private fun PlaylistTable(
                 )
         },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
+        rowMenuAsSheet = true,
         rowModifier = { line ->
             val index = indices[line.key] ?: 0
             Modifier

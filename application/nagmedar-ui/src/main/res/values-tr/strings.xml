@@ -1859,7 +1859,21 @@
     <string name="nag_pl_empty_title">Henüz çalma listesi yok</string>
     <string name="nag_pl_empty_desc">Buradan bir liste oluşturun; M3U, M3U8, PLS ya da XSPF dosyası da içe aktarabilirsiniz.</string>
     <string name="nag_pl_list_empty_title">Bu liste boş</string>
-    <string name="nag_pl_list_empty_desc">Müzik\'te parçaları seçin ve “Listeye ekle…” düğmesine basın.</string>
+    <string name="nag_pl_list_empty_desc">Müzik\'te parçaları seçin ve “Listeye ekle…” düğmesine basın; sonra tutamaçlarından sürükleyerek sıralayın.</string>
+    <!-- S-1601: çalma listeleri, hepsi bir arada -->
+    <string name="nag_pl_search">Listelerde ara</string>
+    <string name="nag_pl_sort_name">Ad</string>
+    <string name="nag_pl_sort_recent">Son çalınma</string>
+    <string name="nag_pl_sort_created">Oluşturulma</string>
+    <string name="nag_pl_last_played">Son çalınma: %s</string>
+    <string name="nag_pl_never_played">Hiç çalınmadı</string>
+    <string name="nag_pl_smart_badge">Akıllı</string>
+    <string name="nag_pl_no_match">“%s” ile eşleşen liste yok</string>
+    <string name="nag_pl_back">Listelere dön</string>
+    <string name="nag_pl_duplicate">Kopyasını yap</string>
+    <string name="nag_pl_copy_name">%s (kopya)</string>
+    <string name="nag_pl_duplicated">“%s” oluşturuldu</string>
+    <string name="nag_pl_rename_action">Yeniden adlandır</string>
     <string name="nag_pl_browse_music">Müzik\'e git</string>
     <plurals name="nag_pl_imported">
         <item quantity="one">“%2$s” içe aktarıldı: %1$d parça</item>

@@ -28,7 +28,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuPopup
+import app.nagmedar.ui.components.MenuSheet
 import app.nagmedar.ui.components.rememberMenuState
+import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
 
 /**
@@ -89,6 +92,9 @@ fun ContextMenuArea(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     accessibilityLabel: String? = null,
+    /** S-1601: where the input is touch, the menu is a sheet at the bottom of the window ([sheetTitle] over its rows) instead of a pop-up. */
+    asSheet: Boolean = false,
+    sheetTitle: String? = null,
     content: @Composable () -> Unit,
 ) {
     val menu = rememberMenuState()
@@ -111,11 +117,15 @@ fun ContextMenuArea(
             },
     ) {
         content()
-        MenuPopup(
-            visible = menu.isOpen,
-            onDismiss = menu::close,
-            entries = if (menu.isOpen) currentEntries() else emptyList(),
-            offset = menu.offset ?: IntOffset.Zero,
-        )
+        if (asSheet && NagTheme.inputMode == InputMode.Touch) {
+            MenuSheet(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) currentEntries() else emptyList(), title = sheetTitle)
+        } else {
+            MenuPopup(
+                visible = menu.isOpen,
+                onDismiss = menu::close,
+                entries = if (menu.isOpen) currentEntries() else emptyList(),
+                offset = menu.offset ?: IntOffset.Zero,
+            )
+        }
     }
 }
