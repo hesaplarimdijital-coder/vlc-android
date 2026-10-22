@@ -33,6 +33,7 @@
 #include <libswresample/swresample.h>
 
 #include <errno.h>
+#include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1444,6 +1445,19 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
         fail(s->error, sizeof(s->error), "write trailer", ret);
         goto end;
     }
+    /* on the drive before the run counts as done: the verification is to read what the drive holds, and a USB
+     * drive pulled out once the job is done must have the whole film */
+    avio_flush(out_io);
+    if (out_io->error < 0) {
+        ret = out_io->error;
+        fail(s->error, sizeof(s->error), "write", ret);
+        goto end;
+    }
+    if (fsync(output_fd) < 0 && errno != EINVAL) {
+        ret = AVERROR(errno);
+        fail(s->error, sizeof(s->error), "sync output", ret);
+        goto end;
+    }
     if (plan->dv_convert && dv.rpus_converted == 0) {
         ret = AVERROR_INVALIDDATA;
         snprintf(s->error, sizeof(s->error), "no Dolby Vision RPU found: the output would be the HDR10 base layer only");
@@ -1548,6 +1562,10 @@ int remux_verify(int output_fd, int scope, const char *expected_hash, int64_t ex
         snprintf(v->error, sizeof(v->error), "unknown hash scope");
         goto end;
     }
+    /* read from the drive, not from the pages the writing left in memory: written out (the remux synced them,
+     * this only makes sure) and dropped from the page cache, as far as the file system lets them go */
+    fsync(output_fd);
+    posix_fadvise(output_fd, 0, 0, POSIX_FADV_DONTNEED);
     if (lseek(output_fd, 0, SEEK_SET) < 0) {
         ret = AVERROR(errno);
         fail(v->error, sizeof(v->error), "seek output", ret);

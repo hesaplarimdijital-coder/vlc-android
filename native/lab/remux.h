@@ -179,7 +179,8 @@ typedef int (*remux_progress_fn)(void *opaque, double done_seconds, double total
  * stream's RPUs are converted to profile 8.1 and its enhancement layer dropped (dvconvert.c),
  * and the hash covers the base layer only. An encode line adds a stream decoded from its source
  * and encoded (S-1207); the run fails when that stream came out empty or more than half a
- * second shorter or longer than its source. [cancel] is polled between packets.
+ * second shorter or longer than its source. [cancel] is polled between packets. A finished
+ * output is synced to its drive (fsync) before the run returns.
  * Returns 0 on success, a negative AVERROR otherwise (stats->error says why); the source is
  * only read.
  */
@@ -212,10 +213,12 @@ typedef struct RemuxVerification {
 
 /**
  * S-1209: reads the output behind [output_fd] back and hashes its first video stream in
- * [scope], comparing with [expected_hash] and [expected_packets]; with [dv_profile] > 0 the
- * stream's Dolby Vision configuration record must say that profile (8: single layer, HDR10
- * compatible, no enhancement layer) and every RPU must parse as it. [result].ok says whether
- * everything matched; a mismatch is not an error of the call.
+ * [scope], comparing with [expected_hash] and [expected_packets]; the file's pages are dropped
+ * from the page cache first (POSIX_FADV_DONTNEED), so that what is read comes from the drive
+ * where the file system allows it. With [dv_profile] > 0 the stream's Dolby Vision
+ * configuration record must say that profile (8: single layer, HDR10 compatible, no
+ * enhancement layer) and every RPU must parse as it. [result].ok says whether everything
+ * matched; a mismatch is not an error of the call.
  */
 int remux_verify(int output_fd, int scope, const char *expected_hash, int64_t expected_packets, int dv_profile,
                  volatile int *cancel, remux_progress_fn progress, void *opaque, RemuxVerification *result);
