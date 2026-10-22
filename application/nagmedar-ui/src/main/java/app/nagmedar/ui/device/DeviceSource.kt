@@ -120,28 +120,35 @@ class AndroidDeviceSource(context: Context, private val pickedFolders: () -> Set
         }
     }
 
+    /**
+     * A picked folder's files, through its provider; null when it cannot be read. The provider can
+     * fail while its rows are read as well (it died, the drive went, the permission was taken back):
+     * the folder is then unreadable, as when it cannot be opened.
+     */
     private fun listDocument(location: DeviceLocation.Document): List<DeviceEntry>? {
         val tree = Uri.parse(location.tree)
         val children = runCatching { DocumentsContract.buildChildDocumentsUriUsingTree(tree, location.documentId) }.getOrNull() ?: return null
         val cursor = runCatching { context.contentResolver.query(children, PROJECTION, null, null, null) }.getOrNull() ?: return null
-        return cursor.use { c ->
-            buildList {
-                while (c.moveToNext()) {
-                    val id = c.getString(0) ?: continue
-                    val name = c.getString(1) ?: continue
-                    val folder = c.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR
-                    add(
-                        DeviceEntry(
-                            name = name,
-                            location = DeviceLocation.Document(location.tree, id),
-                            kind = EntryKind.of(name, folder),
-                            sizeBytes = if (folder || c.isNull(4)) 0L else c.getLong(4),
-                            modifiedMs = if (c.isNull(3)) 0L else c.getLong(3),
-                        ),
-                    )
+        return runCatching {
+            cursor.use { c ->
+                buildList {
+                    while (c.moveToNext()) {
+                        val id = c.getString(0) ?: continue
+                        val name = c.getString(1) ?: continue
+                        val folder = c.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR
+                        add(
+                            DeviceEntry(
+                                name = name,
+                                location = DeviceLocation.Document(location.tree, id),
+                                kind = EntryKind.of(name, folder),
+                                sizeBytes = if (folder || c.isNull(4)) 0L else c.getLong(4),
+                                modifiedMs = if (c.isNull(3)) 0L else c.getLong(3),
+                            ),
+                        )
+                    }
                 }
             }
-        }
+        }.getOrNull()
     }
 
     private companion object {
