@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -514,8 +515,9 @@ fun TransportBar(
     val openLabel = stringResource(R.string.nag_open_player)
     Column(modifier.fillMaxWidth().background(colors.chrome).testTag("transport-bar")) {
         HorizontalRule()
+        // by touch the artist's and album's links take a finger's height (S-1407): the bar grows a little for them
         Row(
-            modifier = Modifier.fillMaxWidth().height(72.dp).padding(horizontal = dimens.gapL),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp).padding(horizontal = dimens.gapL),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(

@@ -3,7 +3,7 @@ package app.nagmedar.ui.components
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,8 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -42,11 +40,11 @@ fun LinkText(
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val lit = state.hovered || state.focused
-    // a finger needs more than the line's height
-    val target = if (NagTheme.inputMode == InputMode.Pointer) 20.dp else 32.dp
+    // a target's least size (S-1407): 24 dp with a pointer, 48 dp for a finger, more than the line's own height
+    val target = NagTheme.dimens.minTarget
     Box(
         modifier
-            .heightIn(min = target)
+            .sizeIn(minWidth = target, minHeight = target)
             .focusRing(state, RoundedCornerShape(NagTheme.dimens.radiusSmall))
             .nagClickable(interaction, onClick, onClickLabel = clickLabel)
             .testTag("link"),
