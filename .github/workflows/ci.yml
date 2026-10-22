@@ -2,10 +2,11 @@
 #
 # lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05), the
 #            music engine (S-901, native/audio) and the subtitle translation (S-710,
-#            native/translate: CTranslate2, SentencePiece) for arm64, with host tests of the
-#            Dolby Vision converter, the whisper pipeline and the engine's bit-exact decoding.
-#            Cached until native/lab, native/audio, native/translate or
-#            buildsystem/nagmedar-native changes.
+#            native/translate: CTranslate2, SentencePiece) for arm64. Cached until native/lab,
+#            native/audio, native/translate or buildsystem/nagmedar-native changes.
+# native-host: the host tests of the Dolby Vision converter, the media probe, the remux, the
+#            whisper pipeline and the engine's bit-exact decoding, on every run that runs the
+#            tests, whether lab-native's libraries came from the cache or not.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
 #            (compile check) and the macrobenchmarks with the benchmark build they measure
 #            (uploaded, S-1404) against the published libVLC 4 AAR, without native
@@ -62,17 +63,9 @@ env:
   # Tests paused until the test phase: the app, its unit tests and the native libraries are
   # compiled, but no test runs and no screenshot is compared. '1' runs them all again.
   NAGMEDAR_RUN_TESTS: '1'
-  # S-706: Nağmedar's own OpenSubtitles.com API key; empty where the secret is not set
-  NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
-  # S-1101: Nağmedar's own Podcast Index key and secret; empty where the secrets are not set
-  NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
-  NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
-  # S-1008: Nağmedar's own Last.fm API key and shared secret; empty where the secrets are not set
-  NAGMEDAR_LASTFM_API_KEY: ${{ secrets.NAGMEDAR_LASTFM_API_KEY }}
-  NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
-  # Film information: Nağmedar's own TMDB and OMDb keys; empty where the secrets are not set
-  NAGMEDAR_TMDB_API_KEY: ${{ secrets.NAGMEDAR_TMDB_API_KEY }}
-  NAGMEDAR_OMDB_API_KEY: ${{ secrets.NAGMEDAR_OMDB_API_KEY }}
+  # The app's API keys (S-706 OpenSubtitles, S-1101 Podcast Index, S-1008 Last.fm, the film
+  # information's TMDB and OMDb) are given to the Gradle builds alone, in their steps' env: the
+  # other steps, the actions and the tools they download never see them.
   # get-vlc.sh applies VLC patches with "git am", which needs a committer identity.
   GIT_AUTHOR_NAME: github-actions[bot]
   GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
@@ -119,27 +112,6 @@ jobs:
             --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
-      - name: Host derlemesi ve testleri (SP-03, SP-05)
-        if: steps.cache.outputs.cache-hit != 'true' && env.NAGMEDAR_RUN_TESTS == '1'
-        env:
-          NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test
-          TOKEN: ${{ github.token }}
-        run: |
-          set -o pipefail
-          { ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host" &&
-            ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"; } 2>&1 | tee "$RUNNER_TEMP/host.log" || {
-            echo "::error title=Host günlüğü::$(tail -c 3000 "$RUNNER_TEMP/host.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
-            # the failed test's files (small: the test streams are about 100 kB) on the ci/debug-native branch
-            if [ -d "$NAGMEDAR_TEST_DIR" ] && [ "$GITHUB_EVENT_NAME" = push ]; then
-              cp "$RUNNER_TEMP/host.log" "$NAGMEDAR_TEST_DIR/"
-              cd "$NAGMEDAR_TEST_DIR" && find . -type f -size +50M -delete
-              git init -q && git checkout -q --orphan ci/debug-native
-              git add -A && git commit -q -m "Native host test files for ${GITHUB_SHA::7}"
-              git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/debug-native || true
-            fi
-            exit 1
-          }
-
       - name: Android NDK
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./buildsystem/ci/setup-android.sh
@@ -161,6 +133,61 @@ jobs:
             application/nagmedar-audio/src/main/jniLibs
             application/nagmedar-translate/src/main/jniLibs
           if-no-files-found: error
+
+  # The native host tests, whenever the tests run: the arm64 libraries above come from their cache
+  # when native/ did not change, a test result never does. A job of its own, so that the app's
+  # jobs do not wait for it; the host build (FFmpeg, libdovi, TagLib, …) is made again each time.
+  native-host:
+    name: Laboratuvar native · host testleri
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        if: env.NAGMEDAR_RUN_TESTS == '1'
+
+      - uses: actions/setup-java@v5
+        if: env.NAGMEDAR_RUN_TESTS == '1'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Araçlar
+        if: env.NAGMEDAR_RUN_TESTS == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mkvtoolnix ffmpeg nasm
+          # S-1003: the lyrics tests write SYLT frames with it
+          pip install --quiet --break-system-packages mutagen
+          mkdir -p "$RUNNER_TEMP/bin"
+          gh release download 2.3.4 --repo quietvoid/dovi_tool \
+            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      # SP-03, SP-05, S-802, S-1206 … S-1209 (test-host.sh) and the music engine's (test-audio.sh)
+      - name: Host derlemesi ve testleri (SP-03, SP-05)
+        if: env.NAGMEDAR_RUN_TESTS == '1'
+        env:
+          NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test
+          TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          { ./buildsystem/nagmedar-native/build.sh host "$RUNNER_TEMP/native-host" &&
+            ./buildsystem/nagmedar-native/test-host.sh "$RUNNER_TEMP/native-host"; } 2>&1 | tee "$RUNNER_TEMP/host.log" || {
+            echo "::error title=Host günlüğü::$(tail -c 3000 "$RUNNER_TEMP/host.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
+            # the failed test's files (small: the test streams are about 100 kB) on the ci/debug-native branch
+            if [ -d "$NAGMEDAR_TEST_DIR" ] && [ "$GITHUB_EVENT_NAME" = push ]; then
+              cp "$RUNNER_TEMP/host.log" "$NAGMEDAR_TEST_DIR/"
+              cd "$NAGMEDAR_TEST_DIR" && find . -type f -size +50M -delete
+              git init -q && git checkout -q --orphan ci/debug-native
+              git add -A && git commit -q -m "Native host test files for ${GITHUB_SHA::7}"
+              git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/debug-native || true
+            fi
+            exit 1
+          }
 
   app:
     name: Uygulama · ${{ matrix.variant }}
@@ -216,6 +243,15 @@ jobs:
         run: ./buildsystem/ci/source_chain.sh
 
       - name: Derleme (${{ matrix.variant }})
+        env:
+          # Nağmedar's own API keys, baked into BuildConfig; empty where the secrets are not set
+          NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
+          NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
+          NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
+          NAGMEDAR_LASTFM_API_KEY: ${{ secrets.NAGMEDAR_LASTFM_API_KEY }}
+          NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
+          NAGMEDAR_TMDB_API_KEY: ${{ secrets.NAGMEDAR_TMDB_API_KEY }}
+          NAGMEDAR_OMDB_API_KEY: ${{ secrets.NAGMEDAR_OMDB_API_KEY }}
         run: |
           if [ "${{ matrix.variant }}" = release ]; then
             ./gradlew :application:app:assembleRelease --console=plain 2>&1 | tee build.log
@@ -397,6 +433,14 @@ jobs:
       - name: İmzalı derleme
         if: env.HAS_KEYSTORE == 'true'
         env:
+          # Nağmedar's own API keys, baked into BuildConfig; empty where the secrets are not set
+          NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
+          NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
+          NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
+          NAGMEDAR_LASTFM_API_KEY: ${{ secrets.NAGMEDAR_LASTFM_API_KEY }}
+          NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
+          NAGMEDAR_TMDB_API_KEY: ${{ secrets.NAGMEDAR_TMDB_API_KEY }}
+          NAGMEDAR_OMDB_API_KEY: ${{ secrets.NAGMEDAR_OMDB_API_KEY }}
           KEYSTORE_B64: ${{ secrets.NAGMEDAR_KEYSTORE_BASE64 }}
           PASSWORD_KEYSTORE: ${{ secrets.NAGMEDAR_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.NAGMEDAR_KEY_ALIAS }}
@@ -457,6 +501,15 @@ jobs:
       # Nağmedar's own libVLC (libvlcjni/nagmedar: S-503 … S-508) in the app: the dev build
       # type takes libvlcjni and the medialibrary from source, as VLC's own dev builds do
       - name: Uygulama (dev, kendi libVLC'mizle)
+        env:
+          # Nağmedar's own API keys, baked into BuildConfig; empty where the secrets are not set
+          NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
+          NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
+          NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
+          NAGMEDAR_LASTFM_API_KEY: ${{ secrets.NAGMEDAR_LASTFM_API_KEY }}
+          NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
+          NAGMEDAR_TMDB_API_KEY: ${{ secrets.NAGMEDAR_TMDB_API_KEY }}
+          NAGMEDAR_OMDB_API_KEY: ${{ secrets.NAGMEDAR_OMDB_API_KEY }}
         run: ./buildsystem/compile.sh -t -a ${{ inputs.native_abi }} 2>&1 | tee app.log
 
       - name: Hataları işaretle
