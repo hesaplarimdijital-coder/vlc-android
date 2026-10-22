@@ -855,7 +855,7 @@ static int run(Conv *c)
     if (c->rate <= 0)
         return failed(c, -1, "the codec has no such sample rate");
     if (c->rate != c->in_rate) {
-        AVChannelLayout layout;
+        AVChannelLayout layout = {0};
         av_channel_layout_default(&layout, c->channels);
         ret = swr_alloc_set_opts2(&c->swr, &layout, AV_SAMPLE_FMT_FLT, c->rate, &layout, AV_SAMPLE_FMT_DBL, c->in_rate, 0, NULL);
         av_channel_layout_uninit(&layout);

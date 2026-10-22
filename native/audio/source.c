@@ -175,13 +175,15 @@ static void read_info(NagSource *s)
 /* The converter from frames of [in_layout] in [in_fmt] to the fifo's doubles in s->channels, at the same rate. */
 static int open_swr_from(NagSource *s, const AVChannelLayout *in_layout, enum AVSampleFormat in_fmt, int rate, char *error, size_t error_size)
 {
-    AVChannelLayout out_layout;
-    if (s->channels == in_layout->nb_channels) {
-        av_channel_layout_copy(&out_layout, in_layout);
-    } else {
+    /* zeroed: av_channel_layout_copy() uninits its destination first, a custom one's map freed */
+    AVChannelLayout out_layout = {0};
+    int ret = 0;
+    if (s->channels == in_layout->nb_channels)
+        ret = av_channel_layout_copy(&out_layout, in_layout);
+    else
         av_channel_layout_default(&out_layout, s->channels);
-    }
-    int ret = swr_alloc_set_opts2(&s->swr, &out_layout, AV_SAMPLE_FMT_DBL, rate, in_layout, in_fmt, rate, 0, NULL);
+    if (ret >= 0)
+        ret = swr_alloc_set_opts2(&s->swr, &out_layout, AV_SAMPLE_FMT_DBL, rate, in_layout, in_fmt, rate, 0, NULL);
     if (ret < 0) {
         av_channel_layout_uninit(&out_layout);
         fail(error, error_size, "swresample", ret);
@@ -283,7 +285,7 @@ static int mod_open(NagSource *s, const char *url, int channels, char *error, si
     openmpt_module_set_repeat_count(s->mod, 0); /* once through, its loops as written */
     s->channels = channels > 0 ? channels : 2;
     int rendered = s->channels == 1 ? 1 : 2;
-    AVChannelLayout layout;
+    AVChannelLayout layout = {0};
     av_channel_layout_default(&layout, rendered);
     int ret = open_swr_from(s, &layout, AV_SAMPLE_FMT_FLT, MOD_RATE, error, error_size);
     av_channel_layout_uninit(&layout);
@@ -626,10 +628,8 @@ int nag_source_channels(const NagSource *s)
 
 int nag_source_channel_weights(const NagSource *s, double *weights, int max)
 {
-    AVChannelLayout layout;
-    if (s->dec && s->channels == s->dec->ch_layout.nb_channels)
-        av_channel_layout_copy(&layout, &s->dec->ch_layout);
-    else
+    AVChannelLayout layout = {0};
+    if (!s->dec || s->channels != s->dec->ch_layout.nb_channels || av_channel_layout_copy(&layout, &s->dec->ch_layout) < 0)
         av_channel_layout_default(&layout, s->channels);
     for (int i = 0; i < s->channels && i < max; i++) {
         enum AVChannel ch = av_channel_layout_channel_from_index(&layout, (unsigned)i);
@@ -655,10 +655,9 @@ int nag_source_channel_weights(const NagSource *s, double *weights, int max)
 
 int nag_source_channel_ids(const NagSource *s, int *ids, int max)
 {
-    AVChannelLayout layout;
-    if (s->dec && s->channels == s->dec->ch_layout.nb_channels && s->dec->ch_layout.order != AV_CHANNEL_ORDER_UNSPEC)
-        av_channel_layout_copy(&layout, &s->dec->ch_layout);
-    else
+    AVChannelLayout layout = {0};
+    if (!s->dec || s->channels != s->dec->ch_layout.nb_channels || s->dec->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC ||
+        av_channel_layout_copy(&layout, &s->dec->ch_layout) < 0)
         av_channel_layout_default(&layout, s->channels);
     for (int i = 0; i < s->channels && i < max; i++)
         ids[i] = (int)av_channel_layout_channel_from_index(&layout, (unsigned)i);
