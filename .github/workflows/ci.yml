@@ -13,7 +13,9 @@
 #            Nağmedar UI tests (tokens, shortcuts, layout state, accessibility gate,
 #            screenshots), compares the screenshots with src/test/screenshots and, on
 #            master, pushes them to the ci/screenshots branch for review. Compiler errors
-#            and test failures become check-run annotations. Both legs build the remote
+#            and test failures become check-run annotations, as does what the debug leg's
+#            vlc_visuals.py finds: VLC's glyphs in Nağmedar's code, VLC's orange in the
+#            launcher's icons. Both legs build the remote
 #            access web app (VideoLAN's, pinned, with Nağmedar's patches: S-1304) into the APK
 #            and check that it is Nağmedar's; the debug leg also walks the built page in
 #            headless Chrome and pushes its screenshots to ci/web (a pull request's to
@@ -239,6 +241,12 @@ jobs:
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      # VLC's notification, widget and speed glyphs out of Nağmedar's code, its orange out of the
+      # launcher's icon and shortcuts (the classic UI's review); the build's own result stays above
+      - name: Arayüzde VLC görseli yok
+        if: ${{ !cancelled() && matrix.variant == 'debug' }}
+        run: python3 buildsystem/ci/vlc_visuals.py .
 
       # a failed or hung build's log and test results on the ci/debug-app branch, readable with git
       # where the run's own logs are not (the job log names each test as it starts and ends)
