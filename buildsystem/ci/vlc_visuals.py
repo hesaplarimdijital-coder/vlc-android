@@ -28,11 +28,7 @@ GLYPH = re.compile(r'(?:R\.drawable\.|@drawable/)(ic_notif_\w+|ic_widget_\w+|ic_
 
 # Fixed by another branch of the same review: allowed until it lands, then removed from here (a
 # pair that is no longer found is reported so).
-PENDING = {
-    ('application/nagmedar-ui/src/main/java/app/nagmedar/ui/podcast/PodcastNotifier.kt', 'ic_notif_audio'),
-    ('application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/translate/TranslateWork.kt', 'ic_notif_scan'),
-    ('application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/record/RecordingKeeper.kt', 'ic_notif_video'),
-}
+PENDING: set = set()
 
 MANIFESTS = ['application/app/src/main/AndroidManifest.xml', 'application/vlc-android/AndroidManifest.xml']
 LAUNCHER_ICON = re.compile(r'<application\b[^>]*>', re.S)
