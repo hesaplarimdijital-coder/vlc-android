@@ -546,7 +546,11 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         audioMax = audiomanager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         isAudioBoostEnabled = settings.getBoolean(KEY_AUDIO_BOOST, true)
 
-        enableCloneMode = clone ?: settings.getBoolean(KEY_ENABLE_CLONE_MODE, false)
+        // Nağmedar: on a phone, a tablet or DeX the film stays in this window with the new
+        // interface's controls and the system mirrors it to a second display (HDMI, Smart View):
+        // VLC's remote-control layout for a presentation display has no Nağmedar counterpart.
+        // A TV keeps VLC's choice.
+        enableCloneMode = if (Settings.showTvUi) clone ?: settings.getBoolean(KEY_ENABLE_CLONE_MODE, false) else true
         displayManager = DisplayManager(this, PlaybackService.renderer, false, enableCloneMode, isBenchmark)
         setContentView(if (displayManager.isPrimary) R.layout.player else R.layout.player_remote_control)
 
