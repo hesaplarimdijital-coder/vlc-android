@@ -102,6 +102,7 @@ class Smoke:
         self.strict = collections.Counter()
         self.strict_total = 0
         self.strict_blocks = collections.OrderedDict()  # (class, frame) -> the first whole stack seen
+        self.strict_dropbox_count = collections.Counter()  # from the dropbox, with the stack
         self.app_errors = collections.Counter()
         self.native_warn = collections.OrderedDict()
         self.seen = set()
@@ -407,6 +408,9 @@ class Smoke:
                 i = j
                 continue
             if tag == "StrictMode" and "StrictMode policy violation" in msg:
+                if pid not in self.pids:
+                    i += 1
+                    continue
                 self.strict_total += 1
                 m = re.search(r"android\.os\.strictmode\.(\w+)", msg)
                 cls, frame, other = (m.group(1) if m else "?"), "?", "?"
@@ -836,8 +840,43 @@ class Smoke:
             for st in self.steps[-8:]:
                 f.write("%d %s %s %s\n" % (st["n"], st["pass"], st["title"], st["status"]))
 
+    def strict_dropbox(self):
+        """The app's StrictMode entries in the system's dropbox: a debuggable app runs under the system's
+        policy, whose log line names only the violation; the stack is in data_app_strictmode."""
+        _, dump = self.adb("shell", "dumpsys", "dropbox", "--print", "data_app_strictmode", timeout=180)
+        entries = re.split(r"^=+\s*$", dump, flags=re.M)
+        for e in entries:
+            if ("Process: %s" % self.pkg) not in e:
+                continue
+            lines = e.strip().splitlines()
+            start = next((k for k, l in enumerate(lines) if re.match(r"\s*android\.os\.strictmode\.\w+", l)), None)
+            if start is None:
+                continue
+            stack = lines[start:start + 160]
+            m = re.search(r"android\.os\.strictmode\.(\w+)", stack[0])
+            cls = m.group(1) if m else "?"
+            frame, other = "?", "?"
+            for l in stack[1:]:
+                m = re.search(r"at ((?:app\.nagmedar|org\.videolan)[\w.$<>]+)", l)
+                if m and frame == "?":
+                    frame = m.group(1)
+                m = re.search(r"at ((?!android\.|androidx\.|java\.|kotlin\.|kotlinx\.|dalvik\.|com\.android\.|libcore\.|sun\.|okhttp3\.|okio\.)[\w.$<>]+)", l)
+                if m and other == "?":
+                    other = m.group(1)
+            if frame == "?":
+                frame = other
+            key = (cls, frame)
+            self.strict_dropbox_count[key] += 1
+            if key not in self.strict_blocks:
+                head = [l for l in lines[:start] if l.startswith(("Process:", "Duration-Millis:", "Loop-Violation-Number:"))]
+                self.strict_blocks[key] = "\n".join(head + stack)
+
     def finish(self):
         self.logfile.close()
+        try:
+            self.strict_dropbox()
+        except Exception as e:  # the report must still be written
+            self.warnings.append("dropbox could not be read: %s" % e)
         n_fail = sum(1 for s in self.steps if s["status"] == "FAIL")
         verdict = "FAILED" if (self.crashes or self.errors) else "passed"
         dur = int(time.time() - self.t0)
@@ -877,15 +916,16 @@ class Smoke:
         else:
             md.append("No link errors were logged.")
         md.append("")
-        md.append("### StrictMode violations: %d\n" % self.strict_total)
-        for (cls, frame), cnt in self.strict.most_common(25):
+        md.append("### StrictMode violations: %d (the app's; by the system's policy for a debuggable app)\n" % self.strict_total)
+        counts = self.strict_dropbox_count if self.strict_dropbox_count else self.strict
+        for (cls, frame), cnt in counts.most_common(40):
             md.append("- %dx %s at `%s`" % (cnt, cls, frame))
         if self.strict_blocks:
             md.append("\nThe first whole stack of each is in strictmode.txt.")
         md.append("")
         with open(os.path.join(self.out, "strictmode.txt"), "w", encoding="utf-8") as f:
             for (cls, frame), block in self.strict_blocks.items():
-                f.write("==== %s at %s (%dx)\n%s\n\n" % (cls, frame, self.strict[(cls, frame)], block))
+                f.write("==== %s at %s (%dx)\n%s\n\n" % (cls, frame, counts[(cls, frame)], block))
         md.append("### Error-level log lines of the app (top 25)\n")
         for k, v in self.app_errors.most_common(25):
             md.append("- %dx `%s`" % (v, k))
