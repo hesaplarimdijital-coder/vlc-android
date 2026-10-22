@@ -20,10 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.core.content.FileProvider
-import app.nagmedar.lab.MediaTech
-import app.nagmedar.lab.RemuxPlan
-import app.nagmedar.lab.StreamRef
-import app.nagmedar.lab.StreamType
 import app.nagmedar.lab.displayName
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
@@ -31,9 +27,11 @@ import app.nagmedar.ui.lab.CreateFile
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.tvlab.remux.PlanDraft
 import app.nagmedar.ui.tvlab.remux.RemuxJobView
+import app.nagmedar.ui.tvlab.remux.RemuxPlannerDialog
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
-import app.nagmedar.ui.tvlab.remux.withCompatibilityTracks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,7 +42,8 @@ import java.io.File
  * The TV Lab screen (S-1201 … S-1204) over the app's one [TvLabController]: the file chosen with
  * the system's picker (kept readable, so that a long analysis survives the screen), the profile
  * editor, the report, the chart saved as PNG or CSV, profiles imported, exported and shared;
- * and the film queued for a remux into a file the picker names (S-1206), its jobs watched.
+ * and the film planned in the remux planner (S-1205) and queued into a file the picker names
+ * (S-1206), its jobs watched.
  */
 @Composable
 fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
@@ -124,28 +123,27 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         }
     }
 
+    // S-1205: the plan as the planner left it; queued once the system's picker has made its new, empty file
+    var planner by remember { mutableStateOf<PlanDraft?>(null) }
+    var queuing by remember { mutableStateOf<PlanDraft?>(null) }
     val remuxLauncher = rememberLauncherForActivityResult(CreateFile()) { uri ->
+        val draft = queuing
+        queuing = null
         val file = controller.file
-        val tech = controller.tech
-        if (uri == null || file == null || tech == null) return@rememberLauncherForActivityResult
+        if (draft == null || file == null) return@rememberLauncherForActivityResult
+        if (uri == null) {
+            // no place chosen: the plan comes back as it was
+            planner = draft
+            return@rememberLauncherForActivityResult
+        }
         // the output stays writable for the queue's worker, which may run after this screen is gone
         val grant = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
         runCatching { context.contentResolver.takePersistableUriPermission(uri, grant) }
-        val report = checkOf(view, names)
-        val convert = report?.findings?.any { it.kind == FindingKind.DolbyVisionDualLayer } == true
-        // S-1207: beside every audio track the profile's device cannot play, a compatibility track
-        val plan = RemuxPlan.default(tech, convert) { ref -> streamLabel(tech, ref, names) }
-            .withCompatibilityTracks(res, controller.profile, tech)
+        val plan = draft.plan()
         scope.launch {
             val name = withContext(Dispatchers.IO) { context.displayName(uri) }
             val id = queue.enqueue(Uri.parse(file.uri), file.name, file.sizeBytes, uri, name, plan)
-            val refusal = when (id) {
-                RemuxQueue.REFUSED_SAME_FILE -> R.string.nag_tvlab_remux_same_file
-                RemuxQueue.REFUSED_NOT_EMPTY -> R.string.nag_tvlab_remux_not_empty
-                RemuxQueue.REFUSED_NOT_FILE -> R.string.nag_tvlab_remux_not_file
-                RemuxQueue.REFUSED_IN_USE -> R.string.nag_tvlab_remux_in_use
-                else -> null
-            }
+            val refusal = refusalOf(id)
             // a refused output is not the queue's: its write grant goes back, unless another job of the queue writes
             // into it; the read grant stays, as the file may be one the app reads for something else (the source itself)
             if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) {
@@ -189,7 +187,10 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
 
             override fun remux() {
                 val base = controller.file?.name?.substringBeforeLast('.') ?: return
-                remuxLauncher.launch(MKV_MIME to context.getString(R.string.nag_tvlab_remux_file, base))
+                val tech = controller.tech ?: return
+                val names = LocalizedStreamNames(context.resources, context.resources.locale())
+                val report = checkOf(controller.view(), names)
+                planner = PlanDraft.of(tech, report, controller.profile, names, context.getString(R.string.nag_tvlab_remux_file, base))
             }
 
             override fun cancelRemux(id: Long) {
@@ -226,6 +227,18 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
             },
         )
     }
+    planner?.let { draft ->
+        RemuxPlannerDialog(
+            draft,
+            fileName = controller.file?.name.orEmpty(),
+            onQueue = {
+                planner = null
+                queuing = draft
+                remuxLauncher.launch(MKV_MIME to draft.outputFileName)
+            },
+            onCancel = { planner = null },
+        )
+    }
     if (reportShown) {
         val commentary = stringResource(R.string.nag_tech_commentary)
         val text = remember(view, names) { tvLabReport(res, view, checkOf(view, names), locale, commentary) }
@@ -245,11 +258,13 @@ fun openInTvLab(context: Context, uri: Uri) {
     runCatching { context.startActivity(show) }
 }
 
-/** How the interface names the stream [ref] of [tech], for the plan's labels. */
-private fun streamLabel(tech: MediaTech, ref: StreamRef, names: LocalizedStreamNames): String = when (ref.type) {
-    StreamType.Video -> tech.video?.let(names::video).orEmpty()
-    StreamType.Audio -> tech.audio.getOrNull(ref.ordinal)?.let(names::audio).orEmpty()
-    StreamType.Subtitle -> tech.subtitles.getOrNull(ref.ordinal)?.let { names.subtitles(listOf(it)) }.orEmpty()
+/** The queue's answer to an output it refused, in words; null for a job queued. */
+internal fun refusalOf(id: Long): Int? = when (id) {
+    RemuxQueue.REFUSED_SAME_FILE -> R.string.nag_tvlab_remux_same_file
+    RemuxQueue.REFUSED_NOT_EMPTY -> R.string.nag_tvlab_remux_not_empty
+    RemuxQueue.REFUSED_NOT_FILE -> R.string.nag_tvlab_remux_not_file
+    RemuxQueue.REFUSED_IN_USE -> R.string.nag_tvlab_remux_in_use
+    else -> null
 }
 
 /** Writes to the document at [uri]; whether it could. */

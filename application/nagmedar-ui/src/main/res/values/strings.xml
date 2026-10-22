@@ -1582,7 +1582,7 @@
     <string name="nag_tvlab_analyse">Analyse in TV Lab</string>
     <!-- S-1206, S-1209: the remux queue and its verification -->
     <string name="nag_tvlab_remux">Remux</string>
-    <string name="nag_tvlab_remux_file">%1$s (remux).mkv</string>
+    <string name="nag_tvlab_remux_file">%1$s.remux.mkv</string>
     <string name="nag_tvlab_remux_queue">Remux queue</string>
     <string name="nag_tvlab_remux_note">The video stream is copied bit for bit into a new MKV; the source is only read. A job cut short by a restart starts again from the beginning.</string>
     <string name="nag_tvlab_remux_queued_notice">Remux queued.</string>
@@ -1627,6 +1627,58 @@
     <string name="nag_tvlab_remux_fidelity_kept">Lossless</string>
     <string name="nag_tvlab_remux_fidelity_added_lossy">Lossy (added track)</string>
     <string name="nag_tvlab_remux_fidelity_added_lossless">Lossless (added track)</string>
+    <!-- S-1205: the remux planner -->
+    <string name="nag_tvlab_plan_title">Remux plan</string>
+    <string name="nag_tvlab_plan_note">Every step says what it keeps. The source is only read.</string>
+    <string name="nag_tvlab_plan_lossless">Lossless</string>
+    <string name="nag_tvlab_plan_lossless_tags">Lossless (tags change)</string>
+    <string name="nag_tvlab_plan_lossy">Lossy</string>
+    <string name="nag_tvlab_plan_suggestions">Suggested for %1$s</string>
+    <string name="nag_tvlab_plan_s_dv">%1$s: %2$s plays only single-layer Dolby Vision → converted to profile 8.1.</string>
+    <string name="nag_tvlab_plan_s_default">%1$s is the default track and %2$s does not play it → the default becomes %3$s, first among the tracks.</string>
+    <string name="nag_tvlab_plan_s_none">%1$s: %2$s plays none of these tracks. It needs an extra compatibility track; the original stays.</string>
+    <string name="nag_tvlab_plan_s_subs">%1$s: %2$s does not show these. Dropping them is lossy for those tracks.</string>
+    <string name="nag_tvlab_plan_apply">Apply</string>
+    <string name="nag_tvlab_plan_undo">Undo</string>
+    <string name="nag_tvlab_plan_container_text">MKV (Matroska). The packets are copied as they are; only the container is written anew.</string>
+    <string name="nag_tvlab_plan_video_text">Always copied, bit for bit.</string>
+    <string name="nag_tvlab_plan_dv_switch">Dolby Vision profile 7 → 8.1</string>
+    <string name="nag_tvlab_plan_dv_text">The base layer stays bit for bit; the enhancement layer (EL) is dropped; the RPU is converted to profile 8.1.</string>
+    <string name="nag_tvlab_plan_dv_fel">This film\'s enhancement layer is a full one (FEL): its 12 bit picture detail is lost. The base layer stays as it was.</string>
+    <string name="nag_tvlab_plan_dv_mel">This film\'s enhancement layer is a minimal one (MEL): in practice nothing of the picture is lost.</string>
+    <string name="nag_tvlab_plan_audio">Audio tracks</string>
+    <string name="nag_tvlab_plan_subtitles">Subtitles</string>
+    <string name="nag_tvlab_plan_default">Default</string>
+    <string name="nag_tvlab_plan_forced">Forced</string>
+    <string name="nag_tvlab_plan_language">Language</string>
+    <string name="nag_tvlab_plan_language_error">Three letters (ISO 639-2), as eng or tur; empty keeps the source\'s.</string>
+    <string name="nag_tvlab_plan_title_field">Title</string>
+    <string name="nag_tvlab_plan_dropped">Dropped: this track is not in the output.</string>
+    <string name="nag_tvlab_plan_not_played">%1$s does not play this track.</string>
+    <string name="nag_tvlab_plan_not_shown">%1$s does not show this track.</string>
+    <string name="nag_tvlab_plan_extra_audio">Extra audio track</string>
+    <string name="nag_tvlab_plan_extra_audio_text">A compatibility track (E-AC-3 or LPCM) beside the original is not in this version yet. The original track always stays.</string>
+    <string name="nag_tvlab_plan_more">Chapters, attachments and tags</string>
+    <string name="nag_tvlab_plan_attachments">Attachments (fonts, covers)</string>
+    <string name="nag_tvlab_plan_tags">The file\'s tags</string>
+    <string name="nag_tvlab_plan_output">Output</string>
+    <string name="nag_tvlab_plan_output_name">File name</string>
+    <string name="nag_tvlab_plan_output_text">The system\'s file dialog asks where; a new, empty file is made there. No file is written over.</string>
+    <string name="nag_tvlab_plan_summary">Summary</string>
+    <plurals name="nag_tvlab_plan_audio_count">
+        <item quantity="one">%d audio track</item>
+        <item quantity="other">%d audio tracks</item>
+    </plurals>
+    <plurals name="nag_tvlab_plan_subtitle_count">
+        <item quantity="one">%d subtitle</item>
+        <item quantity="other">%d subtitles</item>
+    </plurals>
+    <string name="nag_tvlab_plan_sum_streams">In the output: the video, %1$s, %2$s</string>
+    <string name="nag_tvlab_plan_sum_dropped">Dropped: %1$s</string>
+    <string name="nag_tvlab_plan_sum_steps">%1$d lossless · %2$d lossless with tags changed · %3$d lossy</string>
+    <string name="nag_tvlab_plan_sum_output">File: %1$s</string>
+    <string name="nag_tvlab_plan_lossy_note">A lossy step loses what it drops; the video\'s base layer stays bit for bit either way.</string>
+    <string name="nag_tvlab_plan_queue">Queue…</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
     <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>

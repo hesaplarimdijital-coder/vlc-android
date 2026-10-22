@@ -1554,7 +1554,7 @@
     <string name="nag_tvlab_analyse">TV Lab\'de analiz et</string>
     <!-- S-1206, S-1209: remux kuyruğu ve doğrulama -->
     <string name="nag_tvlab_remux">Remux</string>
-    <string name="nag_tvlab_remux_file">%1$s (remux).mkv</string>
+    <string name="nag_tvlab_remux_file">%1$s.remux.mkv</string>
     <string name="nag_tvlab_remux_queue">Remux sırası</string>
     <string name="nag_tvlab_remux_note">Video akışı yeni bir MKV\'ye bit bit kopyalanır; kaynak yalnızca okunur. Yeniden başlatmayla kesilen iş baştan başlar.</string>
     <string name="nag_tvlab_remux_queued_notice">Remux sıraya alındı.</string>
@@ -1599,6 +1599,58 @@
     <string name="nag_tvlab_remux_fidelity_kept">Kayıpsız</string>
     <string name="nag_tvlab_remux_fidelity_added_lossy">Kayıplı (eklenen iz)</string>
     <string name="nag_tvlab_remux_fidelity_added_lossless">Kayıpsız (eklenen iz)</string>
+    <!-- S-1205: the remux planner -->
+    <string name="nag_tvlab_plan_title">Remux planı</string>
+    <string name="nag_tvlab_plan_note">Her adım neyi koruduğunu söyler. Kaynak yalnızca okunur.</string>
+    <string name="nag_tvlab_plan_lossless">Kayıpsız</string>
+    <string name="nag_tvlab_plan_lossless_tags">Kayıpsız (üst veri değişir)</string>
+    <string name="nag_tvlab_plan_lossy">Kayıplı</string>
+    <string name="nag_tvlab_plan_suggestions">Öneriler: %1$s</string>
+    <string name="nag_tvlab_plan_s_dv">%1$s: %2$s yalnızca tek katmanlı Dolby Vision oynatır → profil 8.1\'e çevrilir.</string>
+    <string name="nag_tvlab_plan_s_default">%1$s varsayılan iz ve %2$s bu izi çalmaz → varsayılan %3$s olur, izlerin başına geçer.</string>
+    <string name="nag_tvlab_plan_s_none">%1$s: bu izlerin hiçbirini %2$s çalmaz. Ek bir uyumluluk izi gerekir; orijinal iz kalır.</string>
+    <string name="nag_tvlab_plan_s_subs">%1$s: %2$s bunları göstermez. Çıkarmak bu izler için kayıplıdır.</string>
+    <string name="nag_tvlab_plan_apply">Uygula</string>
+    <string name="nag_tvlab_plan_undo">Geri al</string>
+    <string name="nag_tvlab_plan_container_text">MKV (Matroska). Paketler olduğu gibi kopyalanır; yalnızca kapsayıcı yeniden yazılır.</string>
+    <string name="nag_tvlab_plan_video_text">Her zaman bit bit kopyalanır.</string>
+    <string name="nag_tvlab_plan_dv_switch">Dolby Vision profil 7 → 8.1</string>
+    <string name="nag_tvlab_plan_dv_text">Temel katman bit bit aynı kalır; iyileştirme katmanı (EL) atılır; RPU profil 8.1\'e dönüştürülür.</string>
+    <string name="nag_tvlab_plan_dv_fel">Bu filmin iyileştirme katmanı tam (FEL): 12 bit görüntü ayrıntısı kaybolur. Temel katman olduğu gibi kalır.</string>
+    <string name="nag_tvlab_plan_dv_mel">Bu filmin iyileştirme katmanı en küçük türden (MEL): pratikte görüntüden bir şey kaybolmaz.</string>
+    <string name="nag_tvlab_plan_audio">Ses izleri</string>
+    <string name="nag_tvlab_plan_subtitles">Altyazılar</string>
+    <string name="nag_tvlab_plan_default">Varsayılan</string>
+    <string name="nag_tvlab_plan_forced">Zorunlu</string>
+    <string name="nag_tvlab_plan_language">Dil</string>
+    <string name="nag_tvlab_plan_language_error">Üç harf (ISO 639-2): tur, eng gibi; boş bırakılırsa kaynağınki kalır.</string>
+    <string name="nag_tvlab_plan_title_field">Başlık</string>
+    <string name="nag_tvlab_plan_dropped">Atılır: bu iz çıktıda olmaz.</string>
+    <string name="nag_tvlab_plan_not_played">%1$s bu izi çalmaz.</string>
+    <string name="nag_tvlab_plan_not_shown">%1$s bu izi göstermez.</string>
+    <string name="nag_tvlab_plan_extra_audio">Ek ses izi</string>
+    <string name="nag_tvlab_plan_extra_audio_text">Orijinal izin yanına uyumluluk izi (E-AC-3 ya da LPCM) eklemek bu sürümde henüz yok. Orijinal iz her zaman kalır.</string>
+    <string name="nag_tvlab_plan_more">Bölümler, ekler ve etiketler</string>
+    <string name="nag_tvlab_plan_attachments">Ekler (yazı tipleri, kapaklar)</string>
+    <string name="nag_tvlab_plan_tags">Dosyanın etiketleri</string>
+    <string name="nag_tvlab_plan_output">Çıktı</string>
+    <string name="nag_tvlab_plan_output_name">Dosya adı</string>
+    <string name="nag_tvlab_plan_output_text">Yerini sistemin dosya seçicisi sorar; orada yeni, boş bir dosya açılır. Hiçbir dosyanın üstüne yazılmaz.</string>
+    <string name="nag_tvlab_plan_summary">Özet</string>
+    <plurals name="nag_tvlab_plan_audio_count">
+        <item quantity="one">%d ses izi</item>
+        <item quantity="other">%d ses izi</item>
+    </plurals>
+    <plurals name="nag_tvlab_plan_subtitle_count">
+        <item quantity="one">%d altyazı</item>
+        <item quantity="other">%d altyazı</item>
+    </plurals>
+    <string name="nag_tvlab_plan_sum_streams">Çıktıda: video, %1$s, %2$s</string>
+    <string name="nag_tvlab_plan_sum_dropped">Atılan: %1$s</string>
+    <string name="nag_tvlab_plan_sum_steps">%1$d kayıpsız · %2$d kayıpsız (üst veri değişir) · %3$d kayıplı</string>
+    <string name="nag_tvlab_plan_sum_output">Dosya: %1$s</string>
+    <string name="nag_tvlab_plan_lossy_note">Kayıplı bir adım attığını kaybeder; videonun temel katmanı her durumda bit bit kalır.</string>
+    <string name="nag_tvlab_plan_queue">Sıraya al…</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performans</string>
     <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>
