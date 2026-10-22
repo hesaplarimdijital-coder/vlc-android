@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import android.net.Uri
 import android.widget.Toast
 import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -101,8 +100,6 @@ import app.nagmedar.ui.player.subtitles.whisper.WhisperLauncher
 import app.nagmedar.ui.tvlab.openInTvLab
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
-import org.videolan.resources.TAG_ITEM
-import org.videolan.vlc.gui.InfoActivity
 import org.videolan.vlc.media.MediaUtils
 import kotlinx.coroutines.delay
 import org.videolan.vlc.repository.SlaveRepository
@@ -112,7 +109,7 @@ import app.nagmedar.ui.transcode.TranscodeRequests
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
  * "Play on …" opens the device picker for it (S-1302).
- * [info] shows the details in this interface (videos, S-802); without it the classic media info opens.
+ * [info] shows the details beside the list (videos, S-802); without it the information window opens.
  * [select] starts selecting by touch (S-310): the menu's "Seç".
  */
 fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (() -> Unit)? = null, select: (() -> Unit)? = null): List<MenuEntry> {
@@ -131,7 +128,7 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         MenuEntry.Separator,
         MenuEntry.Item(
             res.getString(R.string.nag_sc_media_info),
-            info ?: { context.startActivity(Intent(context, InfoActivity::class.java).putExtra(TAG_ITEM, media)) },
+            info ?: { MediaInfoRequests.open(media) },
             shortcut = ShortcutRegistry.chordLabel(ShortcutId.MediaInfo, res),
             icon = NagIcons.Info,
         ),

@@ -3354,4 +3354,17 @@
     <string name="nag_downloads_delete_title">İndirilen dosya silinsin mi?</string>
     <string name="nag_downloads_delete_episode">Bölüm, programının listesinde kalır ve yeniden indirilebilir.</string>
     <string name="nag_downloads_delete_model">Model, bir iş gerektirdiğinde yeniden indirilir.</string>
+    <!-- The media information window of the menus without a details pane -->
+    <string name="nag_info_close">Kapat</string>
+    <string name="nag_info_album_artist">Albüm sanatçısı</string>
+    <string name="nag_info_genre">Tür</string>
+    <string name="nag_info_year">Yıl</string>
+    <string name="nag_info_track_number">Parça no.</string>
+    <string name="nag_info_disc">Disk</string>
+    <string name="nag_info_tags">Etiketler</string>
+    <string name="nag_info_file">Dosya</string>
+    <string name="nag_info_file_name">Ad</string>
+    <string name="nag_info_location">Konum</string>
+    <string name="nag_info_copy_location">Konumu kopyala</string>
+    <string name="nag_info_location_copied">Konum kopyalandı</string>
 </resources>

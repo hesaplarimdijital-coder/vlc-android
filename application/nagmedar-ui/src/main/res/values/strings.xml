@@ -3383,4 +3383,17 @@
     <string name="nag_downloads_delete_title">Delete the downloaded file?</string>
     <string name="nag_downloads_delete_episode">The episode stays in its show\'s list and can be downloaded again.</string>
     <string name="nag_downloads_delete_model">The model is downloaded again when a job needs it.</string>
+    <!-- The media information window of the menus without a details pane -->
+    <string name="nag_info_close">Close</string>
+    <string name="nag_info_album_artist">Album artist</string>
+    <string name="nag_info_genre">Genre</string>
+    <string name="nag_info_year">Year</string>
+    <string name="nag_info_track_number">Track</string>
+    <string name="nag_info_disc">Disc</string>
+    <string name="nag_info_tags">Tags</string>
+    <string name="nag_info_file">File</string>
+    <string name="nag_info_file_name">Name</string>
+    <string name="nag_info_location">Location</string>
+    <string name="nag_info_copy_location">Copy the location</string>
+    <string name="nag_info_location_copied">Location copied</string>
 </resources>

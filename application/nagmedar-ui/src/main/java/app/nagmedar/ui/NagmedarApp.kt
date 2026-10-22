@@ -65,6 +65,7 @@ import app.nagmedar.ui.library.HomeScreen
 import app.nagmedar.ui.library.LibraryAccess
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
+import app.nagmedar.ui.library.MediaInfoHost
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.SectionSourcesDialog
@@ -359,6 +360,8 @@ private fun NagmedarMain(
                         )
                     }
                     if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                    // a media's information, asked for from a menu without a details pane (music, search)
+                    MediaInfoHost()
                     // S-708: the subtitle tools, asked for from a film's menu
                     SubtitleToolsHost()
                     // S-709: subtitles from a film's speech, asked for from its menu, and what came of the job
