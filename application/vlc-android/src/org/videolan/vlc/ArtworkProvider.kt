@@ -161,7 +161,7 @@ class ArtworkProvider : ContentProvider() {
             runBlocking(Dispatchers.IO) {
                 var bitmap = AudioUtil.readCoverBitmap(path, width)
                 if (bitmap != null) bitmap = padSquare(bitmap)
-                if (bitmap == null) bitmap = ctx.getBitmapFromDrawable(R.drawable.ic_no_media, width, width)
+                if (bitmap == null) bitmap = ctx.getBitmapFromDrawable(noCover(MediaWrapper.TYPE_AUDIO), width, width)
                 return@runBlocking BitmapUtil.encodeImage(bitmap, ENABLE_TRACING){
                     getTimestamp()
                 }
@@ -217,7 +217,7 @@ class ArtworkProvider : ContentProvider() {
      * for the currently playing song. It may be called by half-a-dozen consumers concurrently.
      *
      * For the currently playing song, a URI to this function is always specified which either returns
-     * actual cover art or a high resolution orange cone. When a track does *not* have cover art
+     * actual cover art or Nağmedar's placeholder ([noCover]). When a track does *not* have cover art
      * available, the ic_auto_nothumb drawable is passed in the MediaSessionBrowser for the *queue*.
      * By sharing a common URI between the queue and currently playing song, we vastly cut down on
      * the number of calls to the content provider, as the cache sees a higher hit ratio. Users also
@@ -225,7 +225,7 @@ class ArtworkProvider : ContentProvider() {
      *
      * If the artwork is already square on disk, we simply return the file (png, jpg)
      * If the artwork is not square, pad it square based on the max size of the largest dimension (webp)
-     * If the artwork is null, or mediaId is 0, return a 512x512 orange cone (webp)
+     * If the artwork is null, or mediaId is 0, return Nağmedar's 512x512 placeholder (webp)
      *
      * @param ctx the context used to retrieve drawables
      * @param mediaId the media ID
@@ -261,7 +261,7 @@ class ArtworkProvider : ContentProvider() {
                 if (padSquare && bitmap != null) bitmap = padSquare(bitmap)
                 if (bitmap == null) {
                     bitmap = ctx.getBitmapFromDrawable(fallbackIcon
-                            ?: R.drawable.ic_no_media, width, width)
+                            ?: noCover((mw as? MediaWrapper)?.type), width, width)
                     if (isLarge && bitmap != null) {
                         val paint = Paint()
                         val bmp = Bitmap.createBitmap(width169, height169, Bitmap.Config.ARGB_8888)
@@ -557,6 +557,14 @@ class ArtworkProvider : ContentProvider() {
         const val LAST_ADDED = "last_added"
         const val SHUFFLE = "shuffle"
         const val SHUFFLE_ALL = "shuffle_all"
+
+        /**
+         * Nağmedar: the cover of a media that has none, as the new interface draws it: a film's
+         * mark for a video, the music's for the rest, on a dark tile. The notification, the lock
+         * screen, the system's media controls, Bluetooth and Android Auto show it.
+         */
+        @DrawableRes
+        fun noCover(type: Int?): Int = if (type == MediaWrapper.TYPE_VIDEO) R.drawable.nagmedar_no_cover_video else R.drawable.nagmedar_no_cover
 
         //Used to store webp encoded bitmap of the currently playing artwork
         private val memCache: LruCache<String, ByteArray> = LruCache<String, ByteArray>(if (Build.VERSION.SDK_INT == 33) 2 else 1)

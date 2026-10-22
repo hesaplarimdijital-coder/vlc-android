@@ -6,6 +6,7 @@ Sources and generators for the Nağmedar name and icon.
 | --- | --- |
 | `svg/` | Design sources: adaptive icon layers (108 × 108 grid), monochrome layer, status bar icon (24 × 24) |
 | `gen_mark_paths.py` | Writes the VectorDrawables (launcher layers, in-app logos) with explicit paths, because VectorDrawable has no masks |
+| `gen_icons.py` | Writes `NagIcons.kt`, the new interface's icons, and the drawables drawn with them where Compose does not draw (the cover of a media that has none) |
 | `render_pngs.py` | Renders the bitmaps: legacy launcher icon, `icon.png`, `ic_stat_nagmedar` (needs Python Playwright + Chromium) |
 | `rebrand_strings.py` | Replaces the VLC product name in the English and Turkish strings |
 
@@ -14,6 +15,7 @@ Regenerate after changing the design:
 ```sh
 python3 buildsystem/branding/gen_mark_paths.py application/resources/src/main/res/drawable
 python3 buildsystem/branding/render_pngs.py .
+python3 buildsystem/branding/gen_icons.py application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/NagIcons.kt application/resources/src/main/res
 ```
 
 Colours: blue `#8AB0FF` (upper half), coral `#FF7A6E` (lower half), background `#12161B`.

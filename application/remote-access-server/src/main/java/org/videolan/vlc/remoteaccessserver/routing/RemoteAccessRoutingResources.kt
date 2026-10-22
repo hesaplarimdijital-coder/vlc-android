@@ -364,8 +364,8 @@ fun Route.resourceRouting(appContext: Context, settings: SharedPreferences) {
                 }
             }
 
-            // nothing found . Falling back on the no media bitmap
-            appContext.getBitmapFromDrawable(R.drawable.ic_no_media, 512, 512)?.let {
+            // nothing found: Nağmedar's placeholder (a film's or the music's mark on a dark tile)
+            appContext.getBitmapFromDrawable(ArtworkProvider.noCover(RemoteAccessServer.getInstance(appContext).service?.currentMediaWrapper?.type), 512, 512)?.let {
 
                 BitmapUtil.encodeImage(it, true)?.let {
 
