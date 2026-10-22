@@ -158,7 +158,6 @@ import org.videolan.tools.KEY_VIDEO_MATCH_FRAME_RATE
 import org.videolan.tools.LAST_LOCK_ORIENTATION
 import org.videolan.tools.LOCK_USE_SENSOR
 import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
-import org.videolan.tools.POPUP_FORCE_LEGACY
 import org.videolan.tools.PREF_TIPS_SHOWN
 import org.videolan.tools.SAVE_BRIGHTNESS
 import org.videolan.tools.SCREENSHOT_MODE
@@ -307,7 +306,6 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
      * For uninterrupted switching between audio and video mode
      */
     private var switchingView: Boolean = false
-    private var switchToPopup: Boolean = false
 
     //Volume
     internal lateinit var audiomanager: AudioManager
@@ -856,50 +854,42 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         outState.putBoolean(KEY_LIST, overlayDelegate.hasPlaylist)
     }
 
+    /**
+     * Nağmedar: picture in picture is Android's own, with the new interface's buttons (S-609).
+     * VLC's popup window (and its overlay permission) is not used: where the system has no
+     * picture in picture, nothing opens and the controls offer none.
+     */
     @TargetApi(Build.VERSION_CODES.O)
     fun switchToPopup() {
         if (isBenchmark) return
         optionsDelegate?.hide()
         //look for dialogs and close them
         supportFragmentManager.fragments.forEach { (it as? DialogFragment)?.dismiss() }
-        val mw = service?.currentMediaWrapper
-        if (mw == null || !AndroidDevices.pipAllowed || !isStarted()) return
-
-        val forceLegacy = Settings.getInstance(this).getBoolean(POPUP_FORCE_LEGACY, false)
-        if (AndroidDevices.hasPiP && !forceLegacy) {
-            // Nağmedar: the new controls say it when Android's settings turned it off, without the classic dialog
-            if (chrome != null) {
-                if (!Permissions.isPiPAllowed(this)) {
-                    chrome?.request(PlayerChrome.Request.PictureInPictureRefused)
-                    return
-                }
-            } else Permissions.checkPiPPermission(this)
-            if (AndroidUtil.isOOrLater)
-                try {
-                    val track = service?.playlistManager?.player?.mediaplayer?.getSelectedVideoTrack()
-                            ?: return
-                    val width = track.getWidth()
-                    val height = track.getHeight()
-                    val paramBuilder = PictureInPictureParams.Builder()
-                    if (width != 0 && height != 0 && (width.toFloat() / height.toFloat()) in 0.418410f..2.39f)
-                        paramBuilder.setAspectRatio(Rational(width, height))
-                    // Nağmedar (S-609): back, play or pause, forward in the small window
-                    paramBuilder.setActions(chrome?.pictureInPictureActions(service?.isPlaying == true) ?: listOf())
-                    enterPictureInPictureMode(paramBuilder.build())
-                } catch (e: IllegalArgumentException) { // Fallback with default parameters
-                    Log.w(TAG, e.message, e)
-                    enterPictureInPictureMode()
-                }
-            else enterPictureInPictureMode()
-        } else {
-            if (Permissions.canDrawOverlays(this)) {
-                switchingView = true
-                switchToPopup = true
-                if (service?.isPlaying != true) mw.addFlags(MediaWrapper.MEDIA_PAUSED)
-                cleanUI()
-                exitOK()
-            } else Permissions.checkDrawOverlaysPermission(this)
-        }
+        if (service?.currentMediaWrapper == null || !AndroidDevices.hasPiP || !isStarted()) return
+        // Nağmedar: the new controls say it when Android's settings turned it off, without the classic dialog
+        if (chrome != null) {
+            if (!Permissions.isPiPAllowed(this)) {
+                chrome?.request(PlayerChrome.Request.PictureInPictureRefused)
+                return
+            }
+        } else Permissions.checkPiPPermission(this)
+        if (AndroidUtil.isOOrLater)
+            try {
+                val track = service?.playlistManager?.player?.mediaplayer?.getSelectedVideoTrack()
+                        ?: return
+                val width = track.getWidth()
+                val height = track.getHeight()
+                val paramBuilder = PictureInPictureParams.Builder()
+                if (width != 0 && height != 0 && (width.toFloat() / height.toFloat()) in 0.418410f..2.39f)
+                    paramBuilder.setAspectRatio(Rational(width, height))
+                // Nağmedar (S-609): back, play or pause, forward in the small window
+                paramBuilder.setActions(chrome?.pictureInPictureActions(service?.isPlaying == true) ?: listOf())
+                enterPictureInPictureMode(paramBuilder.build())
+            } catch (e: IllegalArgumentException) { // Fallback with default parameters
+                Log.w(TAG, e.message, e)
+                enterPictureInPictureMode()
+            }
+        else enterPictureInPictureMode()
     }
 
     override fun onVisibleBehindCanceled() {
@@ -1133,13 +1123,9 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             handler.removeCallbacksAndMessages(null)
             if (hasMedia() && switchingView) {
                 if (BuildConfig.DEBUG) Log.d(TAG, "mLocation = \"$videoUri\"")
-                if (switchToPopup)
-                    switchToPopup(currentMediaPosition)
-                else {
-                    mediaplayer.detachViews()
-                    currentMediaWrapper?.addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
-                    showWithoutParse(currentMediaPosition)
-                }
+                mediaplayer.detachViews()
+                currentMediaWrapper?.addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
+                showWithoutParse(currentMediaPosition)
                 return
             }
 

@@ -87,7 +87,6 @@ import org.videolan.tools.KEY_VIDEO_JUMP_DELAY
 import org.videolan.tools.KEY_VIDEO_LONG_JUMP_DELAY
 import org.videolan.tools.Notices
 import org.videolan.tools.PLAYBACK_HISTORY
-import org.videolan.tools.POPUP_FORCE_LEGACY
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_INTERVAL
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_RESET_INTERACTION
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_WAIT
@@ -359,14 +358,6 @@ class AllSettingsController(
             KEY_INCOGNITO -> Settings.incognitoMode = values.bool(key, false)
             // PreferencesVideo
             KEY_PREFERRED_RESOLUTION -> restartLibVlc(player = true)
-            POPUP_FORCE_LEGACY -> if (values.bool(key, false) && !android.provider.Settings.canDrawOverlays(context)) {
-                runCatching {
-                    context.startActivity(
-                        Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                }
-            }
             // PreferencesVideoControls
             VIDEO_HUD_TIMEOUT -> Settings.videoHudDelay = values.int(key, 4).coerceInOrDefault(1, 15, -1)
             KEY_VIDEO_JUMP_DELAY -> Settings.videoJumpDelay = values.int(key, 10)

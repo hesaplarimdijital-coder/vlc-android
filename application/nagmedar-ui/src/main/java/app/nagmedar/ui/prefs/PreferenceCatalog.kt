@@ -102,12 +102,13 @@ object PreferenceCatalog {
      * Lines that only the classic interface's own screens read (its lists and grids, its TV mode,
      * its language, its way into Nağmedar) or that open developer tools of VLC's: not shown. Their
      * keys stay as they are. The second display's choice is gone too: the player stays in its own
-     * window and the system mirrors it (VideoPlayerActivity).
+     * window and the system mirrors it (VideoPlayerActivity); so is VLC's own popup window for
+     * picture in picture, which is always Android's.
      */
     private val dropped = setOf(
         "nagmedar_shell", "tv_ui", "set_locale", "list_title_ellipsize", "show_headers", "show_video_thumbnails",
         "media_seen", "audio_resume_card", "optional_features", "debug_logs", "nightly_install", "show_update",
-        "secondary_display_category", "secondary_display_category_summary", "enable_clone_mode",
+        "secondary_display_category", "secondary_display_category_summary", "enable_clone_mode", "popup_force_legacy",
     )
 
     /**
