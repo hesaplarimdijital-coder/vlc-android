@@ -361,7 +361,7 @@ internal class RecordingFiles(
 
         fun done(kept: KeptRecording) {
             if (!shown) return
-            RecordingKeeper.stop()
+            clear(context)
             val play = kept.uri?.let { uri ->
                 val intent = Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(uri), kept.mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
                 PendingIntent.getActivity(context, DONE_ID, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
@@ -377,7 +377,7 @@ internal class RecordingFiles(
 
         fun failed() {
             if (!shown) return
-            RecordingKeeper.stop()
+            clear(context)
             post(builder(context, name).setAutoCancel(true).setContentText(context.getString(R.string.nag_rec_failed)).build(), DONE_ID)
         }
 
@@ -419,6 +419,11 @@ internal class RecordingFiles(
                 manager.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.nag_rec_channel), NotificationManager.IMPORTANCE_LOW))
             }
 
+            /**
+             * The progress goes: the service leaves the foreground with it, and the notification
+             * the service does not hold (the system refused the service, or its time limit left
+             * the notification behind) is taken away; else it would stay at its last per cent.
+             */
             fun clear(context: Context) {
                 RecordingKeeper.stop()
                 runCatching { NotificationManagerCompat.from(context).cancel(ID) }
