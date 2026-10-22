@@ -11,6 +11,7 @@ import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.player.subtitles.whisper.WhisperPrefs
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
+import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION
@@ -28,14 +29,10 @@ object BackupSettings {
     /** When the last backup was made (ms), for Settings › Backup. */
     const val KEY_LAST_BACKUP = "nagmedar_last_backup"
 
-    /** The TV Lab's chosen profile (S-1203), which older versions kept and older backups may hold. */
-    const val LEGACY_TVLAB_PROFILE = "nagmedar_tvlab_profile"
-
     private val LEFT_OUT = setOf(
         // their own parts
         NagmedarPreferences.KEY_SHORTCUTS,
-        // the profile the TV Lab of an older version had chosen: neither kept nor brought back
-        LEGACY_TVLAB_PROFILE,
+        FileProfileStore.KEY_SELECTED,
         // this device's: folder permissions, the window on this screen, a picked snapshot, recording, converter's or podcast download folder
         NAGMEDAR_SAF_FOLDERS,
         NAGMEDAR_WINDOW_BOUNDS,

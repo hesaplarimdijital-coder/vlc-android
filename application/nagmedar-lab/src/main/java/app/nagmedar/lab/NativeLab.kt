@@ -21,6 +21,9 @@ object NativeLab {
 
     @JvmStatic external fun cancel()
 
+    /** SP-03: remux [input] to [output] with the Dolby Vision RPU converted to profile 8.1. */
+    @JvmStatic external fun dvConvert(input: String, output: String, maxSeconds: Double, mp4: Boolean, listener: Progress?): String
+
     /** SP-05: transcribe the first audio track of [input] with the ggml model at [model]. */
     @JvmStatic external fun whisper(model: String, input: String, language: String, maxSeconds: Double, threads: Int, listener: Progress?): String
 
@@ -56,4 +59,17 @@ object NativeLab {
 
     /** S-802: streams, HDR and Dolby Vision of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
     @JvmStatic external fun probe(input: String): String
+
+    /**
+     * S-1202: the bitrate of [input] second by second, from its packets, the first [maxSeconds]
+     * of it (0 for all); see [BitrateAnalysis]. Reads the whole file: slow on a big one, with
+     * [listener] told how far it is; [cancel] stops it.
+     */
+    @JvmStatic external fun bitrate(input: String, maxSeconds: Double, listener: Progress?): String
+
+    /**
+     * S-1204: how fast the drive behind [fd] reads, sequentially from [offset], at most
+     * [maxBytes] or [maxSeconds]; see [DiskSpeed]. [fd] stays open; [cancel] stops it.
+     */
+    @JvmStatic external fun diskSpeed(fd: Int, offset: Long, maxBytes: Long, maxSeconds: Double, listener: Progress?): String
 }

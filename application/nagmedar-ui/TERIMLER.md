@@ -93,8 +93,11 @@ Sözlüğü testler denetler:
 | ya da | or | veya | | |
 | özgür yazılım | free software | açık kaynak | open source | |
 | katkıcı | contributor | | | |
-| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, kbps ya da Mbps ile |
-| eşik | threshold | | | Sınırlayıcının tepeleri altında tuttuğu düzey, dBFS ile |
+| kapsayıcı | container | | | MKV, MP4 |
+| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, Mbps ile; TV Lab'de “1 sn tepe”, “5 sn ortalama” |
+| eşik | threshold | | | Bir cihaz profilinin kaldırdığı en yüksek 1 sn bit hızı: “Profil eşiği” |
+| cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
+| bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |

@@ -68,6 +68,7 @@ class BackupScreenshotTest {
         settingsVersion = 17,
         settings = List(214) { SettingValue("nagmedar_sample_$it", it) },
         shortcuts = mapOf("Stop" to "Q", "Mute" to "", "Lyrics" to "Ctrl+L", "Next" to "Alt+N", "Previous" to "Alt+P", "PlayQueue" to "Ctrl+Q"),
+        profiles = listOf("""{"schema":1,"id":"sony-bravia-8"}""", """{"schema":1,"id":"lg-oled-b4-usb"}"""),
         playlists = List(5) { list -> BackupPlaylist("Liste ${list + 1}", List(if (list == 0) 100 else 53) { PlaylistEntry("/m/$list/$it.flac") }) },
         smartLists = List(3) { SmartPlaylistEntry(name = "Akıllı ${it + 1}", rules = "") },
         stats = List(1204) { TrackStatsEntry("file:///m/$it.flac", rating = it % 6) },

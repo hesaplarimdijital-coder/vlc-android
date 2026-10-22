@@ -32,8 +32,8 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.library.resources
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.tvlab.resources
 import org.videolan.vlc.BuildConfig
 import java.text.DateFormat
 import java.text.NumberFormat

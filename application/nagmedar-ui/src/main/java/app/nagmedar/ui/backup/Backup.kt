@@ -20,7 +20,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 /** S-1502: the parts of a backup, in the order they are shown; each is restored on its own. */
-enum class BackupPart { Settings, Shortcuts, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency }
+enum class BackupPart { Settings, Shortcuts, Profiles, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency }
 
 /** A preference as kept: a Boolean, Int, Long, Float, String or a set of strings. */
 data class SettingValue(val key: String, val value: Any)
@@ -46,6 +46,9 @@ data class Backup(
     val equalizers: String? = null,
     /** The user's keys over the shipped shortcuts (S-402): a shortcut's name to its keys' text, "" for none. */
     val shortcuts: Map<String, String>? = null,
+    /** TV Lab's profiles as the user saved them (S-1203), each as its JSON file. */
+    val profiles: List<String>? = null,
+    val selectedProfile: String? = null,
     val playlists: List<BackupPlaylist>? = null,
     val smartLists: List<SmartPlaylistEntry>? = null,
     val stats: List<TrackStatsEntry>? = null,
@@ -56,10 +59,11 @@ data class Backup(
     /** S-613: the output devices' latency profiles. */
     val latency: List<LatencyProfileEntry>? = null,
 ) {
-    /** How many things [part] holds: settings, shortcuts changed, lists, tracks, files, covers. */
+    /** How many things [part] holds: settings, shortcuts changed, profiles, lists, tracks, files, covers. */
     fun count(part: BackupPart): Int = when (part) {
         BackupPart.Settings -> settings?.size ?: 0
         BackupPart.Shortcuts -> shortcuts?.size ?: 0
+        BackupPart.Profiles -> profiles?.size ?: 0
         BackupPart.Playlists -> playlists?.size ?: 0
         BackupPart.SmartLists -> smartLists?.size ?: 0
         BackupPart.Stats -> stats?.size ?: 0
@@ -80,6 +84,8 @@ data class Backup(
         settings = settings.takeIf { BackupPart.Settings in parts },
         equalizers = equalizers.takeIf { BackupPart.Settings in parts },
         shortcuts = shortcuts.takeIf { BackupPart.Shortcuts in parts },
+        profiles = profiles.takeIf { BackupPart.Profiles in parts },
+        selectedProfile = selectedProfile.takeIf { BackupPart.Profiles in parts },
         playlists = playlists.takeIf { BackupPart.Playlists in parts },
         smartLists = smartLists.takeIf { BackupPart.SmartLists in parts },
         stats = stats.takeIf { BackupPart.Stats in parts },
@@ -110,12 +116,11 @@ class BackupException(val reason: Reason, cause: Throwable? = null) : IOExceptio
  *
  *   {"type":"nagmedar-backup","format":1,"app_version":"0.2.0","created_at":1760300000000,
  *    "settings_version":12,"settings":[{"key":"nagmedar_theme","type":"string","value":"Dark"}],
- *    "equalizers":"…","shortcuts":{"Stop":"Q","Mute":""},
+ *    "equalizers":"…","shortcuts":{"Stop":"Q","Mute":""},"profiles":[{…}],"selected_profile":"…",
  *    "playlists":[{"name":"Yol","entries":[{"location":"/storage/…/01.flac","title":"…","duration_ms":245000}]}],
  *    "smart_lists":[…],"stats":[…],"lyrics":[…],"file_settings":[…],"covers":["<sha1>.user"]}
  *
- * Unknown keys are left (an older backup's TV Lab profiles, "profiles" and "selected_profile",
- * among them); an entry that does not read is passed over, the rest still comes back.
+ * Unknown keys are left; an entry that does not read is passed over, the rest still comes back.
  * The manifest alone (the ZIP's JSON, taken out of it) is read as a backup without covers.
  */
 object BackupCodec {
@@ -197,6 +202,10 @@ object BackupCodec {
         backup.settings?.let { values -> o.put("settings", JSONArray().apply { values.forEach { put(setting(it)) } }) }
         backup.equalizers?.let { o.put("equalizers", it) }
         backup.shortcuts?.let { keys -> o.put("shortcuts", JSONObject().apply { keys.toSortedMap().forEach { (id, chord) -> put(id, chord) } }) }
+        backup.profiles?.let { profiles ->
+            o.put("profiles", JSONArray().apply { profiles.forEach { text -> put(runCatching { JSONObject(text) }.getOrElse { return@forEach }) } })
+        }
+        backup.selectedProfile?.let { o.put("selected_profile", it) }
         backup.playlists?.let { lists -> o.put("playlists", JSONArray().apply { lists.forEach { put(playlist(it)) } }) }
         backup.smartLists?.let { lists -> o.put("smart_lists", JSONArray().apply { lists.forEach { put(smartList(it)) } }) }
         backup.stats?.let { rows -> o.put("stats", JSONArray().apply { rows.forEach { put(stats(it)) } }) }
@@ -224,6 +233,8 @@ object BackupCodec {
             settings = o.optJSONArray("settings")?.objects()?.mapNotNull(::setting),
             equalizers = o.optStringOrNull("equalizers"),
             shortcuts = o.optJSONObject("shortcuts")?.let { keys -> keys.keys().asSequence().associateWith { keys.optString(it) } },
+            profiles = o.optJSONArray("profiles")?.objects()?.map { it.toString(2) },
+            selectedProfile = o.optStringOrNull("selected_profile"),
             playlists = o.optJSONArray("playlists")?.objects()?.mapNotNull(::playlist),
             smartLists = o.optJSONArray("smart_lists")?.objects()?.mapNotNull(::smartList),
             stats = o.optJSONArray("stats")?.objects()?.mapNotNull(::stats),

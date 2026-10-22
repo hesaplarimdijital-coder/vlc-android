@@ -11,9 +11,13 @@ import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.toText
 import app.nagmedar.ui.music.MediaLibraryPlaylists
 import app.nagmedar.ui.sleep.Alarms
+import app.nagmedar.ui.tvlab.DeviceProfileCodec
+import app.nagmedar.ui.tvlab.TvLabSession
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.videolan.tools.AppScope
 import org.videolan.tools.NAGMEDAR_ALARM
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
@@ -23,7 +27,7 @@ import java.io.IOException
 
 /** S-1502: what a restore brought back. */
 data class RestoreReport(
-    /** How many of each part's things were taken: settings, shortcuts, lists, tracks, files, covers. */
+    /** How many of each part's things were taken: settings, shortcuts, profiles, lists, tracks, files, covers. */
     val restored: Map<BackupPart, Int>,
     /** Playlist lines whose files this library does not have (yet: a scan may find them). */
     val missingTracks: Int = 0,
@@ -61,7 +65,7 @@ class MediaLibraryBackupPlaylists(context: Context) : BackupPlaylists {
 /**
  * S-1502: the app's side of a backup: what a backup holds, read from the preferences, Nağmedar's
  * database, the playlists and the app's folders; and written back part by part. What is restored
- * joins what is here: a setting, a shortcut or a list of the same name is replaced,
+ * joins what is here: a setting, a shortcut, a profile or a list of the same name is replaced,
  * the statistics are merged ([app.nagmedar.data.RestoreMerge]), the rest stays.
  */
 class AppBackup(
@@ -71,6 +75,7 @@ class AppBackup(
 ) {
     private val context = context.applicationContext
     private val prefs: SharedPreferences = Settings.getInstance(this.context)
+    private val profiles by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { TvLabSession.profileStore(this.context) }
 
     /** Everything a backup holds, as it is now. */
     suspend fun make(now: Long = System.currentTimeMillis()): Backup = withContext(Dispatchers.IO) {
@@ -82,6 +87,8 @@ class AppBackup(
             equalizers = runCatching { EqualizerUtil.getEqualizerExportString(context) }.getOrNull(),
             shortcuts = ShortcutOverrides.parse(prefs.getString(NagmedarPreferences.KEY_SHORTCUTS, null))
                 .entries.associate { (id, chord) -> id.name to chord?.toText().orEmpty() },
+            profiles = profiles.all().filter { profiles.saved(it.id) }.map(DeviceProfileCodec::encode),
+            selectedProfile = profiles.selected,
             playlists = playlists.lists(),
             smartLists = db.smartPlaylists().all(),
             stats = db.trackStats().all(),
@@ -133,6 +140,7 @@ class AppBackup(
                 restored[part] = when (part) {
                     BackupPart.Settings -> restoreSettings(backup)
                     BackupPart.Shortcuts -> restoreShortcuts(backup)
+                    BackupPart.Profiles -> restoreProfiles(backup)
                     BackupPart.Playlists -> {
                         val (lists, gone) = restorePlaylists(backup)
                         missing += gone
@@ -182,6 +190,15 @@ class AppBackup(
         val overrides = ShortcutOverrides.parse(text)
         prefs.edit().putString(NagmedarPreferences.KEY_SHORTCUTS, ShortcutOverrides.format(overrides)).apply()
         return overrides.size
+    }
+
+    private fun restoreProfiles(backup: Backup): Int {
+        val restored = backup.profiles.orEmpty().mapNotNull { DeviceProfileCodec.decode(it) }
+        restored.forEach(profiles::save)
+        backup.selectedProfile?.let { id -> if (profiles.all().any { it.id == id }) profiles.selected = id }
+        // an open TV Lab shows them
+        AppScope.launch { TvLabSession.opened()?.reloadProfiles() }
+        return restored.size
     }
 
     /** The lists restored, and their lines not found here. */

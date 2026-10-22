@@ -118,10 +118,10 @@ val stateCards: List<StateCard> = listOf(
             )
         }
     },
-    panel("DİSK DOLU", StateTone.Error, "Dönüştür", NagIcons.DiskFull, "Hedefte yer yetersiz",
-        "2,4 GB gerekiyor, 1,1 GB boş. İş kuyrukta bekletildi.", "Başka konum seç", "Kuyrukta beklet"),
-    panel("BAŞARI", StateTone.Success, "Dönüştür · tamamlandı", NagIcons.SuccessCircle, "Gece Mavisi hazır",
-        "12 parça Opus'a dönüştürüldü · 1 dk 48 sn.", "Klasörde göster", "Çal"),
+    panel("DİSK DOLU", StateTone.Error, "TV Lab · remux", NagIcons.DiskFull, "Hedefte yer yetersiz",
+        "52,7 GB gerekiyor, 31,2 GB boş. İş kuyrukta bekletildi.", "Başka konum seç", "Kuyrukta beklet"),
+    panel("BAŞARI", StateTone.Success, "TV Lab · remux tamamlandı", NagIcons.SuccessCircle, "Kuzey_Isigi_B4.mkv hazır",
+        "Video paketleri birebir: 198 761 / 198 761 hash eşleşti · 6 dk 12 sn.", "Klasörde göster", "TV'de oynat (DLNA)"),
     StateCard("GERİ AL", StateTone.Neutral, "Bildirim çubuğu") {
         val undo = remember {
             UndoBarState().apply {

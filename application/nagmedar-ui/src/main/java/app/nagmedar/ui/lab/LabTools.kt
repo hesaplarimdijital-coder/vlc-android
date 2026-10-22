@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.core.os.ConfigurationCompat
+import app.nagmedar.lab.DvConversion
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.UsbAudioLab
 import app.nagmedar.lab.WhisperLab
@@ -22,6 +23,9 @@ enum class LabInput {
 
     /** a video or audio file to read */
     Media,
+
+    /** a file to read and a new file to write (the output type follows the "container" option) */
+    MediaAndOutput,
 }
 
 /** A value of an option, and how its button names it in the interface's language (S-1501). */
@@ -48,13 +52,14 @@ private fun kiloHertz(hertz: Int) = LabChoice("$hertz") { res ->
     NumberFormat.getNumberInstance(res.locale()).apply { maximumFractionDigits = 1 }.format(hertz / 1000.0) + " kHz"
 }
 
-/** A name that is the same in every language: "24 bit". */
+/** A name that is the same in every language: "MKV", "24 bit". */
 private fun fixed(value: String, name: String) = LabChoice(value) { name }
 
-/** Everything a running tool gets: the picked file, the chosen options and a progress sink. */
+/** Everything a running tool gets: the picked files, the chosen options and a progress sink. */
 class LabRun(
     val activity: Activity,
     val input: Uri?,
+    val output: Uri?,
     val options: Map<String, String>,
     val progress: NativeLab.Progress,
 ) {
@@ -79,6 +84,11 @@ class LabTool(
 
 object LabTools {
 
+    private val dvDuration = LabOption(
+        "seconds", R.string.nag_lab_option_duration,
+        listOf(seconds(60), LabChoice("0") { it.getString(R.string.nag_filter_all) }),
+    )
+    private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf(fixed("mkv", "MKV"), fixed("mp4", "MP4")))
     private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { fixed(it.name, it.label) })
     private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(minutes(1), minutes(10)))
     private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf(kiloHertz(96000), kiloHertz(44100), kiloHertz(192000)))
@@ -100,6 +110,12 @@ object LabTools {
             options = listOf(usbRate, usbBits, usbDuration), cancellable = true,
         ) { run ->
             UsbAudioLab.tone(run.activity, run.option("rate").toInt(), run.option("bits").toInt(), run.option("seconds").toDouble(), run.progress)
+        },
+        LabTool(
+            "SP-03", R.string.nag_lab_dv_convert, R.string.nag_lab_dv_convert_desc, input = LabInput.MediaAndOutput,
+            options = listOf(dvDuration, dvContainer), cancellable = true,
+        ) { run ->
+            DvConversion.run(run.activity, run.input!!, run.output!!, run.option("seconds").toDouble(), run.option("container") == "mp4", run.progress)
         },
         LabTool("SP-04", R.string.nag_lab_display_report, R.string.nag_lab_display_report_desc) { run ->
             DisplayReport.build(run.activity)

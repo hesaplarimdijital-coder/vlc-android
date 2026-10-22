@@ -97,7 +97,7 @@ class AccessibilityGateTest {
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun touchTargetsAndNamesRail() {
-        render(WidthClass.Expanded, InputMode.Touch, Destination.Movies)
+        render(WidthClass.Expanded, InputMode.Touch, Destination.TvLab)
         checkTargets(48.dp)
         checkNames()
     }

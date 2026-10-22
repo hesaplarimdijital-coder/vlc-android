@@ -1,6 +1,12 @@
 package app.nagmedar.ui.e2e
 
 import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -22,6 +28,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.core.app.ActivityOptionsCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.AppActions
@@ -46,13 +53,31 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.tvlab.FakeTvLabEngine
+import app.nagmedar.ui.tvlab.MemoryProfileStore
+import app.nagmedar.ui.tvlab.TvLabController
+import app.nagmedar.ui.tvlab.TvLabScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * S-1403: a DeX window as NagmedarActivity and NagmedarMain build it: the real shell with its menu
  * bar and command palette, the window's keys (WindowKeys, before the views and after them) and the
- * app's actions (AppActions). The library's screens are the samples (the medialibrary is native).
+ * app's actions (AppActions), and the TV Lab over a stand-in native lab. The library's screens are
+ * the samples (the medialibrary is native). The system's file pickers answer at once: a file to
+ * open is [picked], a place to save [saved].
  */
 class DexWindow {
+    val store = MemoryProfileStore()
+    val engine = FakeTvLabEngine()
+    val lab = TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined))
+
+    var picked: Uri? = null
+    var saved: Uri? = null
+
+    /** The pickers asked for, by their contract's name: "OpenDocument", "CreateFile". */
+    val asked = mutableListOf<String>()
+
     lateinit var actions: AppActions
         private set
     lateinit var navController: NavHostController
@@ -62,6 +87,15 @@ class DexWindow {
 
     /** The screen on show. */
     val destination: Destination get() = Destination.fromRoute(navController.currentDestination?.route)
+
+    private val pickers = object : ActivityResultRegistryOwner {
+        override val activityResultRegistry = object : ActivityResultRegistry() {
+            override fun <I, O> onLaunch(requestCode: Int, contract: ActivityResultContract<I, O>, input: I, options: ActivityOptionsCompat?) {
+                asked += contract::class.java.simpleName
+                dispatchResult(requestCode, if (contract is ActivityResultContracts.OpenDocument) picked else saved)
+            }
+        }
+    }
 
     @Composable
     fun Content() {
@@ -81,7 +115,7 @@ class DexWindow {
         // the activity's goBack: within the app, never out of it
         val keys = remember { WindowKeys({ appActions }, { nav.previousBackStackEntry != null && nav.popBackStack() }) }
         val window = remember { FocusRequester() }
-        CompositionLocalProvider(LocalScreenCommands provides screenCommands) {
+        CompositionLocalProvider(LocalActivityResultRegistryOwner provides pickers, LocalScreenCommands provides screenCommands) {
             // the window: it sees every key first, as the activity's dispatchKeyEvent, and those no view used last
             Box(
                 Modifier
@@ -101,7 +135,7 @@ class DexWindow {
                     menus = { MenuBarMenus(menuSpecs(context, appActions), menuBar) },
                     player = { kind -> SamplePlayerBar(kind) },
                     navController = nav,
-                    screen = { destination, _ -> SampleScreen(destination) },
+                    screen = { destination, _ -> if (destination == Destination.TvLab) TvLabScreen(lab) else SampleScreen(destination) },
                 )
             }
             if (paletteOpen) {

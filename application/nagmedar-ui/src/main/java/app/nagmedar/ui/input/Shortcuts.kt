@@ -166,7 +166,7 @@ enum class ShortcutId {
     SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
     SubtitleTools, CueSave, CueSplit, CueMerge, CueSetStart, CueSetEnd, CueNext, CuePrevious,
     GenerateSubtitles,
-    Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
+    Settings, Synchronization, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList, UserGuide,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
@@ -303,6 +303,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
         // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization
         Shortcut(ShortcutId.Synchronization, ShortcutGroup.Tools, R.string.nag_sc_sync, KeyChord(Key.S, ctrl = true, shift = true), ShortcutScope.Player),
+        // S-1201: the TV Lab, from anywhere
+        Shortcut(ShortcutId.TvLab, ShortcutGroup.Tools, R.string.nag_nav_tv_lab, KeyChord(Key.T, ctrl = true, shift = true)),
         // S-1105: the radio directory's search, from anywhere
         Shortcut(ShortcutId.RadioSearch, ShortcutGroup.Tools, R.string.nag_sc_radio_search, KeyChord(Key.R, ctrl = true, shift = true)),
         // S-1107: the station on the air recorded (again: stopped), and the radio recordings

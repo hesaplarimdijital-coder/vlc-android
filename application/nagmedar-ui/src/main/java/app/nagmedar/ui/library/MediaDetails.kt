@@ -1,7 +1,6 @@
 package app.nagmedar.ui.library
 
 import android.content.Context
-import android.content.res.Resources
 import android.net.Uri
 import android.os.Build
 import android.os.storage.StorageManager
@@ -114,14 +113,6 @@ private fun volumeName(context: Context, key: String): String? = runCatching {
 @Composable
 @ReadOnlyComposable
 fun currentLocale(): Locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
-
-/** The resources in the interface's language; read in composition, a change of language recomposes. */
-@Composable
-@ReadOnlyComposable
-internal fun resources(): Resources {
-    LocalConfiguration.current
-    return LocalContext.current.resources
-}
 
 /**
  * The details of a video (S-802): artwork, title, where it was left, play, and the technical

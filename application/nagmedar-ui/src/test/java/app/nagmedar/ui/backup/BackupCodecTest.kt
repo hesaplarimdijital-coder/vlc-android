@@ -8,6 +8,7 @@ import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.music.PlaylistEntry
+import org.json.JSONObject
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -46,6 +47,8 @@ class BackupCodecTest {
         ),
         equalizers = """{"equalizers":[],"currentEqualizerName":"Flat","defaultStates":[]}""",
         shortcuts = mapOf("Stop" to "Q", "Mute" to ""),
+        profiles = listOf("""{"schema":1,"id":"sony-bravia-8","name":"Sony Bravia 8"}"""),
+        selectedProfile = "sony-bravia-8",
         playlists = listOf(
             BackupPlaylist(
                 "Yol",
@@ -93,7 +96,9 @@ class BackupCodecTest {
     @Test
     fun aBackupGoesOutAndComesBack() {
         val back = read(bytes(full))
-        assertEquals(full.copy(covers = null), back.copy(covers = null))
+        assertEquals(full.copy(profiles = null, covers = null), back.copy(profiles = null, covers = null))
+        // a profile comes back as its JSON
+        assertEquals("sony-bravia-8", JSONObject(back.profiles!!.single()).getString("id"))
         assertEquals(coverName, back.covers!!.single().name)
         assertArrayEquals(png, back.covers!!.single().bytes)
         assertEquals(BackupPart.entries, back.parts)
@@ -147,8 +152,9 @@ class BackupCodecTest {
     fun onlyTheChosenParts() {
         val some = full.only(setOf(BackupPart.Playlists, BackupPart.Settings))
         assertEquals(listOf(BackupPart.Settings, BackupPart.Playlists), some.parts)
-        // the classic equalisers go with the settings
+        // the classic equalisers go with the settings, the chosen profile with the profiles
         assertEquals(full.equalizers, some.equalizers)
+        assertNull(some.selectedProfile)
         assertNull(some.shortcuts)
         assertNull(some.covers)
     }

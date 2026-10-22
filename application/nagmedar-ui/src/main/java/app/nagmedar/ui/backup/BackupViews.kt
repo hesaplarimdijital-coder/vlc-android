@@ -51,8 +51,8 @@ sealed interface RestoreState {
 }
 
 /**
- * S-1502: Settings › Backup: a backup of the app's settings, shortcuts, playlists,
- * smart lists, statistics, the user's lyrics, the files' settings and the covers chosen
+ * S-1502: Settings › Backup: a backup of the app's settings, shortcuts, TV Lab profiles,
+ * playlists, smart lists, statistics, the user's lyrics, the files' settings and the covers chosen
  * by hand, written to a file the system's picker names; and a restore of the parts chosen from
  * one. The screenshot tests give [lastBackup] (0: none) and the buttons' [onBackUp] and
  * [onRestore]; the app reads and writes the files itself.
@@ -221,6 +221,7 @@ fun RestoreSurface(state: RestoreState, onRestore: (Set<BackupPart>) -> Unit, on
 internal fun partLabel(part: BackupPart): Int = when (part) {
     BackupPart.Settings -> R.string.nag_backup_part_settings
     BackupPart.Shortcuts -> R.string.nag_backup_part_shortcuts
+    BackupPart.Profiles -> R.string.nag_backup_part_profiles
     BackupPart.Playlists -> R.string.nag_backup_part_playlists
     BackupPart.SmartLists -> R.string.nag_backup_part_smart_lists
     BackupPart.Stats -> R.string.nag_backup_part_stats
@@ -234,6 +235,7 @@ internal fun partLabel(part: BackupPart): Int = when (part) {
 internal fun partCount(res: Resources, part: BackupPart, count: Int, tracks: Int?): String = when (part) {
     BackupPart.Settings -> res.getQuantityString(R.plurals.nag_backup_settings_count, count, count)
     BackupPart.Shortcuts -> res.getQuantityString(R.plurals.nag_backup_changes_count, count, count)
+    BackupPart.Profiles -> res.getQuantityString(R.plurals.nag_backup_profiles_count, count, count)
     BackupPart.Playlists -> res.getQuantityString(R.plurals.nag_backup_lists_count, count, count) +
         (tracks?.let { SEPARATOR + res.getQuantityString(R.plurals.nag_tracks_count, it, it) } ?: "")
     BackupPart.SmartLists -> res.getQuantityString(R.plurals.nag_backup_lists_count, count, count)
