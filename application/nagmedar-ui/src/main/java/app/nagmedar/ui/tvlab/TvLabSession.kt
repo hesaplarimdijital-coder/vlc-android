@@ -68,7 +68,8 @@ interface TvLabEngine {
 
 /** The device's: the media probe through the library's cache, the native bitrate and disk tests. */
 class NativeTvLabEngine(private val context: Context) : TvLabEngine {
-    private val cacheDir = File(context.filesDir, "tvlab/bitrate")
+    /** Asked for when a bitrate is read, off the main thread: the app's filesDir looks at the disk. */
+    private val cacheDir by lazy { File(context.filesDir, "tvlab/bitrate") }
 
     override val available: Boolean get() = NativeLab.available
 
@@ -167,6 +168,7 @@ class TvLabController(
     var elapsedMs by mutableStateOf<Long?>(null)
         private set
 
+    /** The app's profiles as they came, until [reloadProfiles] has read the files (off the main thread). */
     var profileList by mutableStateOf(BuiltInProfiles.all)
         private set
     var profile by mutableStateOf(BuiltInProfiles.all.first())
@@ -265,8 +267,8 @@ class TvLabController(
     }
 
     /**
-     * The profiles read again, as a restore left them (S-1502): the files off the main thread, then
-     * shown; the chosen one kept's, else the one shown.
+     * The profiles read from their files, when the TV Lab is made and as a restore left them
+     * (S-1502): the files off the main thread, then shown; the chosen one kept's, else the one shown.
      */
     suspend fun reloadProfiles() {
         load { list, selected -> list.firstOrNull { it.id == selected } }
@@ -336,20 +338,26 @@ object TvLabSession {
     @Volatile
     private var controller: TvLabController? = null
 
+    /** Made on the main thread at the app's start (the sidebar shows an analysis): it reads no file there. */
     fun get(context: Context): TvLabController = controller ?: synchronized(this) {
         // made in the caller's snapshot: NagmedarApp asks inside its composition and reads it there,
         // which a state made in Snapshot.global, newer than that composition's snapshot, would not allow
-        controller ?: TvLabController(
-            NativeTvLabEngine(context.applicationContext),
-            profileStore(context),
-            CoroutineScope(SupervisorJob() + Dispatchers.Main),
-        ).also { controller = it }
+        controller ?: run {
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+            TvLabController(NativeTvLabEngine(context.applicationContext), profileStore(context), scope).also { lab ->
+                controller = lab
+                // the profiles saved are read from their files off the main thread; the app's show meanwhile
+                scope.launch { lab.reloadProfiles() }
+            }
+        }
     }
 
     /** The TV Lab when it was opened; null before. */
     fun opened(): TvLabController? = controller
 
     /** Where the profiles are kept: a JSON file each in the app's folder, the chosen one in the preferences. */
-    fun profileStore(context: Context): FileProfileStore =
-        FileProfileStore(File(context.applicationContext.filesDir, "tvlab/profiles"), Settings.getInstance(context.applicationContext))
+    fun profileStore(context: Context): FileProfileStore {
+        val app = context.applicationContext
+        return FileProfileStore({ File(app.filesDir, "tvlab/profiles") }, Settings.getInstance(app))
+    }
 }

@@ -105,6 +105,18 @@ class DeviceProfileStoreTest {
     }
 
     @Test
+    fun theFolderIsAskedForAtTheFirstReadNotWhenTheStoreIsMade() {
+        // the app's folder (filesDir) looks at the disk: the store is made on the main thread, read off it
+        var asked = 0
+        val dir = folder.newFolder("later")
+        val store = FileProfileStore({ asked++; dir }, prefs)
+        assertEquals(0, asked)
+        assertEquals(BuiltInProfiles.all, store.all())
+        assertFalse(store.saved(BuiltInProfiles.lgB4Usb.id))
+        assertEquals(1, asked)
+    }
+
+    @Test
     fun aBrokenFileIsLeftOut() {
         val dir = folder.newFolder("broken")
         dir.resolve("x.json").writeText("{")

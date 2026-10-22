@@ -165,6 +165,35 @@ class TvLabControllerTest {
     }
 
     @Test
+    fun theProfilesFilesAreReadOffTheMainThreadNotWhenTheLabIsMade() {
+        // the TV Lab is made on the main thread at the app's start: it shows the app's profiles, and reads the files later
+        val bravia = BuiltInProfiles.lgB4Usb.copy(id = "sony-bravia-8", name = "Sony Bravia 8", builtIn = false)
+        val store = CountingProfileStore().apply {
+            save(bravia)
+            selected = bravia.id
+        }
+        val lab = controller(FakeTvLabEngine(), store)
+        assertEquals(0, store.reads)
+        assertEquals(BuiltInProfiles.all, lab.profileList)
+        assertEquals(BuiltInProfiles.lgB4Usb, lab.profile)
+
+        runBlocking { lab.reloadProfiles() }
+        assertEquals(1, store.reads)
+        assertEquals(3, lab.profileList.size)
+        assertEquals(bravia, lab.profile)
+    }
+
+    /** A store that counts how often its profiles are read. */
+    private class CountingProfileStore(private val inner: MemoryProfileStore = MemoryProfileStore()) : ProfileStore by inner {
+        var reads = 0
+
+        override fun all(): List<DeviceProfile> {
+            reads++
+            return inner.all()
+        }
+    }
+
+    @Test
     fun profilesReadAgainAsARestoreLeftThem() {
         val store = MemoryProfileStore()
         val lab = controller(FakeTvLabEngine(), store)

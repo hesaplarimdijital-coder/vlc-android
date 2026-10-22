@@ -22,10 +22,16 @@ interface ProfileStore {
 }
 
 /**
- * The profiles as JSON files in [dir] ("<id>.json", the file a user shares), the one chosen in
- * [prefs]. An app profile saved there replaces the built-in one until it is removed.
+ * The profiles as JSON files in a folder ("<id>.json", the file a user shares), the one chosen in
+ * [prefs]. An app profile saved there replaces the built-in one until it is removed. The folder
+ * is asked of [folder] at the first read or write, not when the store is made: the app's
+ * filesDir looks at the disk, which the main thread must not.
  */
-class FileProfileStore(private val dir: File, private val prefs: SharedPreferences) : ProfileStore {
+class FileProfileStore(folder: () -> File, private val prefs: SharedPreferences) : ProfileStore {
+
+    constructor(dir: File, prefs: SharedPreferences) : this({ dir }, prefs)
+
+    private val dir by lazy(folder)
 
     override fun all(): List<DeviceProfile> {
         val saved = dir.listFiles { file -> file.extension == "json" }.orEmpty()
