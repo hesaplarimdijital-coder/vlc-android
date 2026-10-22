@@ -65,7 +65,10 @@ interface TvLabEngine {
     /** The drive's sequential read, from a part of the film [sizeBytes] long. */
     suspend fun diskSpeed(uri: Uri, sizeBytes: Long, progress: (Float, Double) -> Unit): Result<DiskSpeed>
 
-    /** Stops what runs; asked only once [available] said so, which is what loads the native library. */
+    /**
+     * Stops what runs; asked only once the library is loaded ([loaded]): nothing of it runs
+     * before, and a stop never loads it (reading [available] would, on the main thread).
+     */
     fun cancel()
 }
 
@@ -207,8 +210,8 @@ class TvLabController(
      */
     fun open(uri: Uri): Job {
         job?.cancel()
-        // the engine stops what runs only once its library is loaded: nothing loads it here, on the main thread
-        engine.cancel()
+        // what the library runs is stopped once it is loaded; without the tools nothing of it is called
+        if (engine.loaded == true) engine.cancel()
         // its name and size come from its provider (a drive that may be asleep), off the main thread
         file = TvLabFile(uri.toString(), uri.lastPathSegment.orEmpty(), 0)
         tech = null
@@ -253,7 +256,8 @@ class TvLabController(
 
     /** Stops what runs; what was found stays. */
     fun cancel() {
-        if (engine.available) engine.cancel()
+        // a Stop before the library was loaded stops nothing, and loads nothing on the main thread
+        if (engine.loaded == true) engine.cancel()
         job?.cancel()
         if (bitrateStep is Step.Running) bitrateStep = Step.Failed(CANCELLED)
         if (diskStep is Step.Running) diskStep = Step.Failed(CANCELLED)
