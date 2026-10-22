@@ -55,8 +55,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import androidx.fragment.app.FragmentActivity
 import app.nagmedar.playback.RendererKind
 import app.nagmedar.ui.R
@@ -94,7 +93,7 @@ import org.videolan.vlc.RendererDelegate
  */
 @Composable
 fun CastPickerDialog(request: CastRequest, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         CastPickerHost(request, onDismiss)
     }
 }

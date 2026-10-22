@@ -47,8 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
@@ -195,7 +194,7 @@ class ServerDraft(
 /** The add-server form in its dialog. */
 @Composable
 fun ServerDialog(draft: ServerDraft, onSave: () -> Unit, onCancel: () -> Unit, onRemove: () -> Unit = {}) {
-    Dialog(onDismissRequest = onCancel, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onCancel) {
         ServerDialogSurface(draft, onSave, onCancel, onRemove)
     }
 }

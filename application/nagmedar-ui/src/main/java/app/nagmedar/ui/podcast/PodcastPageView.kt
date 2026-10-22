@@ -52,6 +52,7 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.NagPlayButton
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
@@ -221,7 +222,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
             }
             if (fresh) ToneBadge(stringResource(R.string.nag_pod_new_badge), StateTone.Info, Modifier.testTag("podcast-episode-new"))
             DownloadMark(download)
-            NagIconButton(NagIcons.Play, stringResource(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
+            NagPlayButton(stringResource(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
         }
     }
 }

@@ -65,8 +65,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.data.LyricsSource
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
@@ -176,7 +175,7 @@ fun LyricsEditorScreen(
     if (controller.importing) ImportDialog(controller)
     PublishDialogs(controller)
     if (confirmClose) {
-        Dialog(onDismissRequest = { confirmClose = false }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        NagDialog(onDismissRequest = { confirmClose = false }) {
             DialogFrame({ confirmClose = false }) {
                 DialogCard(stringResource(R.string.nag_lrc_discard_title), Modifier.testTag("lrc-discard")) {
                     Text(stringResource(R.string.nag_lrc_discard_body), style = NagTheme.type.body, color = colors.textSecondary)
@@ -465,7 +464,7 @@ private fun ImportDialog(controller: LyricsEditorController) {
     val clipboard = LocalClipboardManager.current
     // the keys are the editor's again when the box goes
     DisposableEffect(Unit) { onDispose { controller.typing = false } }
-    Dialog(onDismissRequest = { controller.importing = false }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = { controller.importing = false }) {
         DialogFrame({ controller.importing = false }) {
             DialogCard(stringResource(R.string.nag_lrc_import_title), Modifier.testTag("lrc-import-dialog"), cardWidth = 520.dp) {
                 Text(stringResource(R.string.nag_lrc_import_hint), style = NagTheme.type.labelSmall, color = colors.textSecondary)
@@ -502,7 +501,7 @@ private fun PublishDialogs(controller: LyricsEditorController) {
     if (state == PublishState.Idle) return
     val res = LocalContext.current.resources
     val locale = currentLocale()
-    Dialog(onDismissRequest = controller::dismissPublish, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = controller::dismissPublish) {
         DialogFrame(controller::dismissPublish) {
             DialogCard(stringResource(R.string.nag_lrc_publish_title), Modifier.testTag("lrc-publish-dialog"), cardWidth = 460.dp) {
                 when (state) {

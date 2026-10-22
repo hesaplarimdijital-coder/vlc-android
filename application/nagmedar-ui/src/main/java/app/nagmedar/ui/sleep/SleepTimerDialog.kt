@@ -24,8 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.FilterChip
@@ -44,7 +43,7 @@ import java.util.Locale
 /** S-1007: the sleep timer's window: set it, or see what is left and change it. */
 @Composable
 fun SleepTimerDialog(timer: SleepTimer = Sleep.timer, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { SleepTimerSurface(timer, onDismiss) }
     }
 }

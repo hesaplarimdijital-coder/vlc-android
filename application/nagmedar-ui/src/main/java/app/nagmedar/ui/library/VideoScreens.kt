@@ -281,7 +281,7 @@ fun MoviesLibrary(
             }
         }
         val shelf = if (filters.isEmpty() && openFolder == null) library.continueMovies else emptyList()
-        val shelfHeader: @Composable () -> Unit = { ContinueShelf(shelf, tech, onPlay) }
+        val shelfHeader: @Composable () -> Unit = { ContinueShelf(shelf, tech, onPlay) { item -> menu(item, { onPlay(item) }, { onShowDetails(item) }) } }
         when {
             view == MoviesView.Folders && openFolder == null -> FolderGrid(library.folders, tech, filters, onOpenFolder)
             shown.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -310,7 +310,7 @@ fun MoviesLibrary(
 
 /** "İzlemeye devam et": the films in progress, in a row that scrolls with the grid. */
 @Composable
-fun ContinueShelf(items: List<VideoItem>, tech: Map<String, MediaTech>, onPlay: (VideoItem) -> Unit) {
+fun ContinueShelf(items: List<VideoItem>, tech: Map<String, MediaTech>, onPlay: (VideoItem) -> Unit, menu: (VideoItem) -> List<MenuEntry>) {
     val dimens = NagTheme.dimens
     Column(Modifier.fillMaxWidth().testTag("continue")) {
         Text(
@@ -321,7 +321,9 @@ fun ContinueShelf(items: List<VideoItem>, tech: Map<String, MediaTech>, onPlay: 
         )
         LazyRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
             items(items, key = { it.key }) { item ->
-                VideoCard(item, tech[item.key], Modifier.width(240.dp), onClick = { onPlay(item) })
+                ContextMenuArea(entries = { menu(item) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                    VideoCard(item, tech[item.key], Modifier.width(240.dp), onClick = { onPlay(item) })
+                }
             }
         }
     }

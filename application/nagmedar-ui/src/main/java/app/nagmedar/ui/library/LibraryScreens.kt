@@ -217,7 +217,13 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
                         item {
                             LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
                                 itemsIndexed(videoItems, key = { _, item -> item.key }) { _, item ->
-                                    VideoCard(item, tech[item.key], Modifier.width(240.dp), onClick = { item.media?.let { PlaybackActions.playVideo(context, it) } })
+                                    val play: () -> Unit = { item.media?.let { PlaybackActions.playVideo(context, it) } }
+                                    ContextMenuArea(
+                                        entries = { item.media?.let { mediaMenu(context, it, play) }.orEmpty() },
+                                        accessibilityLabel = stringResource(R.string.nag_more_actions),
+                                    ) {
+                                        VideoCard(item, tech[item.key], Modifier.width(240.dp), onClick = play)
+                                    }
                                 }
                             }
                         }
@@ -227,7 +233,13 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
                         item {
                             LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
                                 itemsIndexed(tracks, key = { _, m -> m.id }) { index, media ->
-                                    TrackCard(media, Modifier.width(150.dp)) { PlaybackActions.playList(context, tracks, index) }
+                                    val play: () -> Unit = { PlaybackActions.playList(context, tracks, index) }
+                                    ContextMenuArea(
+                                        entries = { mediaMenu(context, media, play) },
+                                        accessibilityLabel = stringResource(R.string.nag_more_actions),
+                                    ) {
+                                        TrackCard(media, Modifier.width(150.dp), onClick = play)
+                                    }
                                 }
                             }
                         }

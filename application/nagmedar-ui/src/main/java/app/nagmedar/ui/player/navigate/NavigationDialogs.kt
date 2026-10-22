@@ -49,8 +49,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.tabMovesFocus
@@ -62,7 +61,7 @@ import app.nagmedar.ui.theme.NagTheme
 /** "Jump to time" (Ctrl+T, S-608) in its own window, over the video: the keys are its own while it is open. */
 @Composable
 fun JumpDialog(nowMs: Long, lengthMs: Long, chapters: List<ChapterMark>, onJump: (Long) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { JumpSurface(nowMs, lengthMs, chapters, onJump, onDismiss) }
     }
 }
@@ -168,7 +167,7 @@ fun JumpSurface(
 /** Naming a bookmark (S-608) in its own window: its name selected, Enter keeps it, Escape leaves it. */
 @Composable
 fun RenameBookmarkDialog(mark: BookmarkMark, onRename: (String) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { RenameSurface(mark, onRename, onDismiss) }
     }
 }

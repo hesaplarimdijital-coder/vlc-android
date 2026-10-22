@@ -72,6 +72,7 @@ import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.covers.rememberCoverMenu
+import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.library.LibraryContent
@@ -438,7 +439,7 @@ fun MusicBrowser(
             }
             width >= WidthClass.Large -> Row(Modifier.fillMaxSize()) {
                 if (grouped) {
-                    GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
+                    GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
@@ -448,12 +449,12 @@ fun MusicBrowser(
                 }
             }
             wide && grouped -> Row(Modifier.fillMaxSize()) {
-                GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
+                GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
             }
             !grouped || open != null -> if (open != null) TrackPane(open, shown, state, actions, showBack = grouped, stats)
-            else -> GroupList(groups, state, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
+            else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
         }
     }
 }
@@ -508,15 +509,28 @@ private fun groupLine(group: MusicGroup, view: MusicView): String {
 }
 
 @Composable
-private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, openKey: String?, modifier: Modifier) {
+private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, actions: MusicActions, openKey: String?, modifier: Modifier) {
     val listState = rememberLazyListState()
+    val res = LocalContext.current.resources
     LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp)) {
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened
-            GroupRow(group, state.view, selected = group.key == openKey) { state.group = group.key }
+            // the menu plays the group's tracks, as the table's rows do one track
+            ContextMenuArea(entries = { groupMenu(res, group, actions) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                GroupRow(group, state.view, selected = group.key == openKey) { state.group = group.key }
+            }
         }
     }
 }
+
+/** An album's, an artist's or a folder's menu (right click, long press): play, queue, convert. */
+private fun groupMenu(res: android.content.res.Resources, group: MusicGroup, actions: MusicActions): List<MenuEntry> = listOfNotNull(
+    MenuEntry.Item(res.getString(R.string.nag_play), { actions.play(group.tracks, 0) }, icon = NagIcons.Play),
+    MenuEntry.Item(res.getString(R.string.nag_play_next), { actions.playNext(group.tracks) }, icon = NagIcons.Next),
+    MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { actions.queue(group.tracks) }, icon = NagIcons.PlaylistAdd),
+    actions.addToPlaylist?.let { add -> MenuEntry.Item(res.getString(R.string.nag_pl_add), { add(group.tracks) }, icon = NagIcons.PlaylistAdd) },
+    actions.convert?.let { convert -> MenuEntry.Item(res.getString(R.string.nag_convert), { convert(group.tracks) }, icon = NagIcons.Convert) },
+)
 
 @Composable
 private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOpen: () -> Unit) {

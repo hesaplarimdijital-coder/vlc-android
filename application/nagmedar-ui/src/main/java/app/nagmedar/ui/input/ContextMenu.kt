@@ -47,7 +47,7 @@ fun Modifier.contextMenuGesture(enabled: Boolean = true, onContextMenu: (Offset)
             if (currentEvent.buttons.isSecondaryPressed) {
                 down.consume()
                 onContextMenu(down.position)
-                consumeUntilAllUp()
+                consumePointerUntilAllUp()
                 return@awaitEachGesture
             }
             if (down.type != PointerType.Touch) return@awaitEachGesture
@@ -64,12 +64,13 @@ fun Modifier.contextMenuGesture(enabled: Boolean = true, onContextMenu: (Offset)
             }
             if (endedEarly == null) {
                 onContextMenu(down.position)
-                consumeUntilAllUp()
+                consumePointerUntilAllUp()
             }
         }
     }
 
-private suspend fun androidx.compose.ui.input.pointer.AwaitPointerEventScope.consumeUntilAllUp() {
+/** Consumes every pointer change, in the initial pass, until no pointer is down any more. */
+internal suspend fun androidx.compose.ui.input.pointer.AwaitPointerEventScope.consumePointerUntilAllUp() {
     while (true) {
         val event = awaitPointerEvent(PointerEventPass.Initial)
         event.changes.forEach { it.consume() }

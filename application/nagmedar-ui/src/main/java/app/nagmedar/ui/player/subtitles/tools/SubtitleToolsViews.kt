@@ -59,8 +59,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
@@ -96,7 +95,7 @@ import java.util.Locale
 fun SubtitleToolsDialog(controller: SubtitleToolsController, onOpenFile: () -> Unit, onDismiss: () -> Unit) {
     // Back and a tap beside the window ask first when there are edits not yet in a new file
     val asked = { if (controller.askClose()) onDismiss() }
-    Dialog(onDismissRequest = asked, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = asked) {
         DialogFrame(asked) { SubtitleToolsSurface(controller, onOpenFile, onDismiss) }
     }
 }

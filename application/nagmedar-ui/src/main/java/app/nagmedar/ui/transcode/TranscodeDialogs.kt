@@ -29,8 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
@@ -58,7 +57,7 @@ fun TranscodeDialog(
     onStart: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { TranscodeSurface(media, profiles, selected, onSelect, onPickMedia, onNewProfile, onStart, onDismiss) }
     }
 }
@@ -118,7 +117,7 @@ fun TranscodeSurface(
 /** S-1303: the profile editor, over the app. */
 @Composable
 fun ProfileEditorDialog(initial: TranscodeProfile, problemsOf: (TranscodeProfile) -> List<ProfileProblem>, onSave: (TranscodeProfile) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { ProfileEditorSurface(initial, problemsOf, onSave, onDismiss) }
     }
 }
@@ -349,7 +348,7 @@ fun HlsDialog(
     onCopy: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { HlsSurface(media, state, quality, onQuality, onPickMedia, onStart, onStop, onCopy, onDismiss) }
     }
 }

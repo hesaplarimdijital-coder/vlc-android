@@ -15,8 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
@@ -36,7 +35,7 @@ import java.time.ZoneId
 /** S-1107: the window that schedules a recording, or changes a scheduled one. */
 @Composable
 internal fun ScheduleEditor(controller: RecordingsController, draft: ScheduleDraft, stations: List<Station>, zone: ZoneId) {
-    Dialog(onDismissRequest = controller::closeEditor, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = controller::closeEditor) {
         DialogFrame(controller::closeEditor) { ScheduleSurface(controller, draft, stations, zone) }
     }
 }

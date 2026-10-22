@@ -48,8 +48,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
@@ -70,7 +69,7 @@ import java.text.NumberFormat
  */
 @Composable
 fun AddAddressDialog(add: AddUi, onSubmit: (String) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { AddAddressSurface(add, onSubmit, onDismiss) }
     }
 }
@@ -169,7 +168,7 @@ private fun Warning(text: String, modifier: Modifier = Modifier) {
  */
 @Composable
 fun ImportDialog(state: ImportUi, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         // a tap beside the window does not stop a running import
         DialogFrame(if (state is ImportUi.Done || state is ImportUi.Unusable) onDismiss else ({})) { ImportSurface(state, onDismiss) }
     }

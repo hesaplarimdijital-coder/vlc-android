@@ -37,8 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
@@ -189,7 +188,7 @@ fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: N
  */
 @Composable
 private fun PageWindow(windows: PlayerAppWindows, activity: Activity, page: @Composable () -> Unit) {
-    Dialog(onDismissRequest = windows::close, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = windows::close) {
         val colors = NagTheme.colors
         val shape = RoundedCornerShape(12.dp)
         val focus = remember { FocusRequester() }

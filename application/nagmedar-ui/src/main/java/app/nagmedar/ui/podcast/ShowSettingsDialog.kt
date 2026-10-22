@@ -17,8 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
@@ -44,7 +43,7 @@ internal fun speedLabel(speed: Float, locale: Locale): String =
  */
 @Composable
 fun ShowSettingsDialog(feed: PodcastFeed, actions: PodcastActions) {
-    Dialog(onDismissRequest = actions.onDismissShowSettings, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = actions.onDismissShowSettings) {
         DialogFrame(actions.onDismissShowSettings) { ShowSettingsSurface(feed, actions) }
     }
 }

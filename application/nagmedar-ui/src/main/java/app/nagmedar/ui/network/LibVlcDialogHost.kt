@@ -32,7 +32,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import androidx.lifecycle.compose.LifecycleStartEffect
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
@@ -75,12 +76,12 @@ fun LibVlcDialogHost() {
     val prompt = queue.shown.firstOrNull() ?: return
     // answered elsewhere, or taken back by libVLC
     LaunchedEffect(prompt) { if (prompt.settled) queue.shown.remove(prompt) }
-    Dialog(onDismissRequest = {
+    NagDialog(onDismissRequest = {
         if (prompt.kind != PromptKind.Progress || prompt.cancelText != null) {
             prompt.dismiss()
             queue.shown.remove(prompt)
         }
-    }) {
+    }, properties = DialogProperties()) {
         PromptSurface(prompt) { queue.shown.remove(prompt) }
     }
 }

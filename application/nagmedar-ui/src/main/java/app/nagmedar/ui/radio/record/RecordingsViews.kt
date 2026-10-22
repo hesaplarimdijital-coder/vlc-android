@@ -56,8 +56,8 @@ import app.nagmedar.ui.components.AlertBanner
 import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
-import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.NagPlayButton
 import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.StateAction
@@ -726,7 +726,7 @@ private fun TrackRow(session: SessionGroup, track: RecordedTrack, controller: Re
                     ToneBadge(stringResource(R.string.nag_radio_rec_partial), StateTone.Info, Modifier.testTag("track-partial-${track.id}"))
                 }
             }
-            NagIconButton(NagIcons.Play, play, { controller.play(session, track) }, enabled = !gone, modifier = Modifier.testTag("track-play-${track.id}"))
+            NagPlayButton(play, { controller.play(session, track) }, enabled = !gone, modifier = Modifier.testTag("track-play-${track.id}"))
             IconMenuButton(NagIcons.MoreHorizontal, more, menu)
         }
     }

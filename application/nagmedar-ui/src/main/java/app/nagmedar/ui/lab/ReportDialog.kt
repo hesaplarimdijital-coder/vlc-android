@@ -31,8 +31,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
@@ -47,7 +46,7 @@ fun ReportDialog(title: String, report: String, onDismiss: () -> Unit) {
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard)
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.8f).dp
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         Column(
             Modifier
                 .padding(dimens.gapL)

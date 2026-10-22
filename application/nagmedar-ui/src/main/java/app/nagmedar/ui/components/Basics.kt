@@ -73,6 +73,47 @@ fun NagIconButton(
 }
 
 /**
+ * The play button of a row (podcast episodes, recordings): an accent-filled rounded box with the
+ * play glyph on it, always drawn so, with or without hover, so it is found at a glance in a list
+ * whose tap opens the item. The hit area is 48 dp by touch and 36 dp with a pointer; the box in
+ * it is 6 dp smaller.
+ */
+@Composable
+fun NagPlayButton(
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val shape = RoundedCornerShape(dimens.radiusControl)
+    val hit = dimens.minTarget.coerceAtLeast(36.dp)
+    val fill = when {
+        state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
+        state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
+        else -> colors.accent
+    }
+    Box(
+        modifier = modifier
+            .size(hit)
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .nagClickable(interaction, onClick, enabled = enabled, onClickLabel = contentDescription),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier.size(hit - 6.dp).focusRing(state, shape).background(fill, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(NagIcons.Play, contentDescription = contentDescription, tint = colors.onAccent, modifier = Modifier.size(dimens.icon))
+        }
+        HoverTooltip(state.hovered && !state.pressed, contentDescription, null)
+    }
+}
+
+/**
  * Text button. [primary] fills it with the accent colour, or with [fill] and [onFill] when a
  * state asks for its own (the success state's green button).
  */

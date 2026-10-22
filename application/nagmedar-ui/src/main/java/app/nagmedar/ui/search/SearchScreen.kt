@@ -67,6 +67,7 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.library.Episode
@@ -75,6 +76,7 @@ import app.nagmedar.ui.library.Sidecars
 import app.nagmedar.ui.library.VideoItem
 import app.nagmedar.ui.library.buildVideoLibrary
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.rememberTech
 import app.nagmedar.ui.library.techSummary
@@ -429,7 +431,18 @@ private fun marked(text: String, query: SearchQuery): AnnotatedString {
 }
 
 @Composable
-private fun HitRow(onClick: () -> Unit, label: String, content: @Composable RowScope.() -> Unit) {
+private fun HitRow(onClick: () -> Unit, label: String, media: MediaWrapper?, content: @Composable RowScope.() -> Unit) {
+    val context = LocalContext.current
+    // the same menu as in the lists; a hit without an item of the medialibrary has none
+    ContextMenuArea(
+        entries = { media?.let { mediaMenu(context, it, onClick) }.orEmpty() },
+        enabled = media != null,
+        accessibilityLabel = stringResource(R.string.nag_more_actions),
+    ) { HitRowBody(onClick, label, content) }
+}
+
+@Composable
+private fun HitRowBody(onClick: () -> Unit, label: String, content: @Composable RowScope.() -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(NagTheme.dimens.radiusControl)
@@ -448,7 +461,7 @@ private fun HitRow(onClick: () -> Unit, label: String, content: @Composable RowS
 @Composable
 private fun VideoHit(item: VideoItem, title: String, tech: MediaTech?, query: SearchQuery, onClick: () -> Unit) {
     val colors = NagTheme.colors
-    HitRow(onClick, title) {
+    HitRow(onClick, title, item.media) {
         Box(Modifier.width(96.dp).aspectRatio(16f / 9f).clip(RoundedCornerShape(NagTheme.dimens.radiusSmall))) {
             Artwork(item.media, size = 120.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
         }
@@ -468,7 +481,7 @@ private fun VideoHit(item: VideoItem, title: String, tech: MediaTech?, query: Se
 @Composable
 private fun TrackHit(item: TrackItem, query: SearchQuery, onClick: () -> Unit) {
     val colors = NagTheme.colors
-    HitRow(onClick, item.title) {
+    HitRow(onClick, item.title, item.media) {
         Artwork(item.media, size = 40.dp, video = false)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
@@ -483,7 +496,7 @@ private fun TrackHit(item: TrackItem, query: SearchQuery, onClick: () -> Unit) {
 @Composable
 private fun CueHitRow(hit: CueHit<VideoItem>, query: SearchQuery, onClick: () -> Unit) {
     val colors = NagTheme.colors
-    HitRow(onClick, hit.video.title) {
+    HitRow(onClick, hit.video.title, hit.video.media) {
         Text(
             if (hit.cue.startMs < 1000) "0:00" else formatDuration(hit.cue.startMs),
             style = NagTheme.type.mono,

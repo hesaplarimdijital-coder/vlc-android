@@ -235,11 +235,13 @@ object RadioBrowser {
         )
     }
 
-    fun countries(text: String): List<DirectoryCountry> = list(text) { o ->
-        val name = o.text("name") ?: return@list null
-        val code = o.text("iso_3166_1") ?: return@list null
-        DirectoryCountry(name, code.uppercase(Locale.ROOT), o.optInt("stationcount", 0)).takeIf { it.stations > 0 }
-    }
+    fun countries(text: String): List<DirectoryCountry> = RadioLabels.mergeCountries(
+        list(text) { o ->
+            val name = o.text("name") ?: return@list null
+            val code = o.text("iso_3166_1") ?: return@list null
+            DirectoryCountry(name, code.uppercase(Locale.ROOT), o.optInt("stationcount", 0)).takeIf { it.stations > 0 }
+        },
+    )
 
     fun languages(text: String): List<DirectoryLanguage> = list(text) { o ->
         val name = o.text("name") ?: return@list null

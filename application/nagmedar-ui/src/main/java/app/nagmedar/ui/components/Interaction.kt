@@ -4,6 +4,8 @@ import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,10 +31,19 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.isBackPressed
+import androidx.compose.ui.input.pointer.isForwardPressed
+import androidx.compose.ui.input.pointer.isPrimaryPressed
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.isTertiaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.input.consumePointerUntilAllUp
 import app.nagmedar.ui.theme.NagTheme
 
 /** Visual state of an interactive element: hover, press and keyboard focus. */
@@ -76,6 +87,7 @@ fun Modifier.nagClickable(
 ): Modifier = this
     .pointerHoverIcon(PointerIcon.Hand)
     .hoverable(interactionSource, enabled)
+    .then(if (enabled) Modifier.ignoreSecondaryButtons() else Modifier)
     .then(
         if (onDoubleClick == null) {
             Modifier.clickable(
@@ -90,6 +102,25 @@ fun Modifier.nagClickable(
             Modifier.doubleClickable(interactionSource, enabled, onClickLabel, role, onClick, onDoubleClick)
         },
     )
+
+/**
+ * A press of a mouse button other than the primary one (right, middle, back, forward) is consumed
+ * before the click handler below sees it, so a right click never acts as a left click, wherever
+ * the element sits: a [app.nagmedar.ui.input.ContextMenuArea] around it still opens its menu, as
+ * it reads the press first (device test, 22 Oct).
+ */
+fun Modifier.ignoreSecondaryButtons(): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        val buttons = currentEvent.buttons
+        if (down.type == PointerType.Mouse && !buttons.isPrimaryPressed &&
+            (buttons.isSecondaryPressed || buttons.isTertiaryPressed || buttons.isBackPressed || buttons.isForwardPressed)
+        ) {
+            down.consume()
+            consumePointerUntilAllUp()
+        }
+    }
+}
 
 /**
  * The keys of an item in a list (S-407), as desktops have them: Enter (or the number pad's) opens

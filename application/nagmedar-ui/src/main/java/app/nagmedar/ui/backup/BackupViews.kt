@@ -23,8 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
@@ -130,7 +129,7 @@ internal fun BackupSection(
 /** S-1502: the restore's window: the parts to choose, then what came back. */
 @Composable
 fun RestoreDialog(state: RestoreState, onRestore: (Set<BackupPart>) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { RestoreSurface(state, onRestore, onDismiss) }
     }
 }

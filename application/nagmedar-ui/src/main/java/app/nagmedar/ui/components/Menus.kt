@@ -161,16 +161,10 @@ fun MenuPopup(
                         else -> false
                     }
                 }
-                .then(
-                    if (ownKeys) {
-                        Modifier
-                            .onFocusChanged { menuFocused = it.isFocused }
-                            .focusRequester(menu)
-                            .focusTarget()
-                    } else {
-                        Modifier
-                    },
-                )
+                // the menu holds the focus whoever opened it, so its keys (Esc, Up, Down) reach it
+                .onFocusChanged { menuFocused = it.isFocused }
+                .focusRequester(menu)
+                .focusTarget()
                 .verticalScroll(rememberScrollState())
                 .padding(4.dp),
         ) {
@@ -190,10 +184,7 @@ fun MenuPopup(
             }
         }
         LaunchedEffect(Unit) {
-            when {
-                focusFirst && firstEnabled >= 0 -> first.requestFocus()
-                ownKeys -> menu.requestFocus()
-            }
+            if (focusFirst && firstEnabled >= 0) first.requestFocus() else menu.requestFocus()
         }
     }
 }

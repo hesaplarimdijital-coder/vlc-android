@@ -41,8 +41,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuPopup
@@ -81,7 +80,7 @@ fun WhisperDialog(
     beforePicker: () -> Unit = {},
 ) {
     LaunchedEffect(status) { if (status != null) controller.settled() }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(
                 stringResource(R.string.nag_whisper_title),

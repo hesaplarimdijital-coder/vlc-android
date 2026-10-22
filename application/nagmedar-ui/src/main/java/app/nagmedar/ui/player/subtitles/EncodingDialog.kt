@@ -39,8 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.collectState
@@ -61,7 +60,7 @@ class EncodingSample(val name: String, val head: ByteArray, val detected: Subtit
 /** "Subtitle encoding…" (S-702) in its own window, over the video. */
 @Composable
 fun EncodingDialog(sample: EncodingSample, onApply: (SubtitleEncoding?) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { EncodingSurface(sample, onApply, onDismiss) }
     }
 }

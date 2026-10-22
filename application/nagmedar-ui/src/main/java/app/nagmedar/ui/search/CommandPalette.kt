@@ -69,8 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
@@ -78,6 +77,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.components.ignoreSecondaryButtons
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -94,7 +94,7 @@ fun CommandPalette(
     onDismiss: () -> Unit,
     onSearchAll: ((String) -> Unit)? = null,
 ) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         PaletteSurface(items, recent, onRun, onDismiss, onSearchAll = onSearchAll)
     }
 }
@@ -321,6 +321,7 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             .pointerHoverIcon(PointerIcon.Hand)
             // the field moves through the rows (↑↓); Tab changes the scope, so rows take no focus
             .focusProperties { canFocus = false }
+            .ignoreSecondaryButtons()
             .clickable(onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = 10.dp, vertical = 4.dp),

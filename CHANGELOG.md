@@ -20,6 +20,12 @@ Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0
 - İşler: dönüştürmeler sırayla, birer birer, ön planda bildirimle (ilerleme ve İptal) çalışır; yalnızca seçicinin yeni açtığı boş dosyaya yazılır. Pil zayıfken ya da cihaz ısınınca duraklar, daha kötüsünde durur (müzik dönüştürücüsünün kurallarıyla); süreç ölür ya da Android'in süre sınırı işi keserse iş sıraya döner ve baştan başlar. Dönüştür sayfası işleri, yayını ve profilleri birlikte gösterir.
 - Ağda yayınla (HLS)… (Ctrl+Shift+H): medya libVLC ile HLS'ye (H.264 + AAC, 6 sn'lik bölümler; 1080p, 720p, 480p ya da yalnız ses) kodlanır ve yerel ağdaki küçük bir sunucudan adresi ve QR koduyla yayınlanır; aynı Wi-Fi'deki bir televizyon, bilgisayar ya da telefon VLC'yle ya da tarayıcıyla açar. Yalnızca Wi-Fi ya da Ethernet'te ve yalnızca yerel ağ adreslerine; bildirimde Durdur. Bölümler uygulamanın deposunda tutulur, yayın bitince (ya da uygulama yeniden açılınca) silinir; Android 15'in süre sınırı dolunca yayın temiz biçimde durur ve nedeni yazılır.
 
+### Düzeltmeler
+- Sağ tık hiçbir yerde sol tık gibi davranmaz: ana sayfadaki “İzlemeye devam et” ve son eklenen müzik kartları, film sayfasının devam kaydı, müzikteki albüm, sanatçı ve klasör satırları ile arama sonuçları da öbür listelerdeki gibi menü açar (oynat, sıraya ekle, bilgi…); fare ikinci düğmesiyle basılan her düğme ve satırda tıklama sayılmaz.
+- Podcast bölüm listesinde ve radyo kayıtlarında oynat düğmesi vurgu renginde dolu bir kutudur, imleç üstünde olmasa da görünür (dokunmada 48 dp, imleçle 36 dp).
+- Esc ve Geri her pencereyi kapatır: podcast ayarları dahil, klavye odağı bir denetimde olmasa da; metin alanı Esc'yi kullanıyorsa (temizler, vazgeçer) önce o davranır. Fareyle açılan menü de Esc ile kapanır.
+- Radyo › Ülke süzgecinde bir ülke bir kez çıkar (“Türkiye”, “Yunanistan” iki kez görünüyordu): rehberin aynı ISO koduyla verdiği adlar tek satırda birleşir, rehberdeki radyo sayıları toplanır.
+
 ## 0.4.0 — MVP4 (hazırlanıyor)
 
 ### Radyo

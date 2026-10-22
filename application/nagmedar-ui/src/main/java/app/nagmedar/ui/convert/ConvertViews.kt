@@ -41,8 +41,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.audio.convert.AudioConverter
 import app.nagmedar.audio.convert.ConvertCodec
 import app.nagmedar.ui.R
@@ -88,7 +87,7 @@ fun ConvertDialog(tracks: List<Track>, onDismiss: () -> Unit) {
     }
     val unknownArtist = stringResource(R.string.nag_unknown_artist)
     val unknownAlbum = stringResource(R.string.nag_music_unknown_album)
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             ConvertSurface(
                 tracks = tracks,
@@ -430,7 +429,7 @@ fun ConvertSummaryDialog(jobId: String, onDismiss: () -> Unit) {
     }
     val summary = read?.getOrNull()
     LaunchedEffect(read) { if (read != null && summary == null) onDismiss() }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { ConvertSummarySurface(summary, onDismiss) }
     }
 }

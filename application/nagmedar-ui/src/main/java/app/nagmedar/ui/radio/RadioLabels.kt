@@ -41,10 +41,31 @@ object RadioLabels {
         return shown.replaceFirstChar { it.uppercase(locale) }
     }
 
-    /** The countries in the interface's alphabet, each with its label. */
+    /**
+     * One entry for each country. The directory lists a country under several names ("Turkey",
+     * "The Republic Of Türkiye") and in several cases of its code ("tr", "TR"): entries of one ISO
+     * 3166-1 code are one, with the station counts added and the name of the largest; one with
+     * no code is grouped by its name, without case, accents or spaces at the ends.
+     */
+    fun mergeCountries(list: List<DirectoryCountry>): List<DirectoryCountry> {
+        val groups = LinkedHashMap<String, MutableList<DirectoryCountry>>()
+        list.forEach { entry ->
+            val code = entry.code.trim().uppercase(Locale.ROOT)
+            val key = code.ifEmpty { "name:" + normalisedName(entry.name) }
+            groups.getOrPut(key) { mutableListOf() }.add(entry.copy(code = code))
+        }
+        return groups.values.map { group ->
+            group.maxByOrNull { it.stations }!!.copy(stations = group.sumOf { it.stations })
+        }
+    }
+
+    private fun normalisedName(name: String): String =
+        java.text.Normalizer.normalize(name.trim(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "").lowercase(Locale.ROOT)
+
+    /** The countries in the interface's alphabet, each once, with its label. */
     fun countries(list: List<DirectoryCountry>, locale: Locale): List<Pair<DirectoryCountry, String>> {
         val collator = Collator.getInstance(locale)
-        return list.map { it to country(it.code, it.name, locale) }.sortedWith { a, b -> collator.compare(a.second, b.second) }
+        return mergeCountries(list).map { it to country(it.code, it.name, locale) }.sortedWith { a, b -> collator.compare(a.second, b.second) }
     }
 
     /** The languages in the interface's alphabet, each with its label. */

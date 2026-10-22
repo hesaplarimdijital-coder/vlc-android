@@ -36,8 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.ui.components.NagDialog
 import androidx.core.content.ContextCompat
 import app.nagmedar.audio.latency.AppliedLatency
 import app.nagmedar.audio.latency.LatencyProfile
@@ -320,7 +319,7 @@ internal fun LatencyMeasureDialog(device: OutputDeviceKey, io: MeasureIo, refere
         LatencyMeasuring.end()
         onDismiss()
     }
-    Dialog(onDismissRequest = close, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = close) {
         DialogFrame(close) {
             MeasureSurface(
                 device = device,
