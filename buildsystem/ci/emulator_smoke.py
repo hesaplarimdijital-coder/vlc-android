@@ -101,6 +101,7 @@ class Smoke:
         self.warnings = []
         self.strict = collections.Counter()
         self.strict_total = 0
+        self.strict_blocks = collections.OrderedDict()  # (class, frame) -> the first whole stack seen
         self.app_errors = collections.Counter()
         self.native_warn = collections.OrderedDict()
         self.seen = set()
@@ -408,17 +409,30 @@ class Smoke:
             if tag == "StrictMode" and "StrictMode policy violation" in msg:
                 self.strict_total += 1
                 m = re.search(r"android\.os\.strictmode\.(\w+)", msg)
-                cls, frame = (m.group(1) if m else "?"), "?"
+                cls, frame, other = (m.group(1) if m else "?"), "?", "?"
+                block = [msg]
                 j = i + 1
-                while j < len(recs) and recs[j][3] == "StrictMode" and j < i + 40:
-                    m = re.search(r"android\.os\.strictmode\.(\w+)", recs[j][4])
+                # the whole stack: the frames of the app's own code come after the framework's, often deep
+                while j < len(recs) and recs[j][0] == pid and recs[j][3] == "StrictMode" and len(block) < 160 \
+                        and "StrictMode policy violation" not in recs[j][4]:
+                    line = recs[j][4]
+                    block.append(line)
+                    m = re.search(r"android\.os\.strictmode\.(\w+)", line)
                     if m and cls == "?":
                         cls = m.group(1)
-                    m = re.search(r"at ((?:app\.nagmedar|org\.videolan)[\w.$<>]+)", recs[j][4])
+                    m = re.search(r"at ((?:app\.nagmedar|org\.videolan)[\w.$<>]+)", line)
                     if m and frame == "?":
                         frame = m.group(1)
+                    m = re.search(r"at ((?!android\.|androidx\.|java\.|kotlin\.|kotlinx\.|dalvik\.|com\.android\.|libcore\.|sun\.|okhttp3\.|okio\.)[\w.$<>]+)", line)
+                    if m and other == "?":
+                        other = m.group(1)
                     j += 1
+                if frame == "?":
+                    frame = other
                 self.strict[(cls, frame)] += 1
+                key = (cls, frame)
+                if key not in self.strict_blocks:
+                    self.strict_blocks[key] = "[%s] %s\n%s" % (self.cur_pass, self.steps[-1]["title"] if self.steps else "setup", "\n".join(block))
                 i = j
                 continue
             if lvl in "EF" and (pid in self.pids):
@@ -866,7 +880,12 @@ class Smoke:
         md.append("### StrictMode violations: %d\n" % self.strict_total)
         for (cls, frame), cnt in self.strict.most_common(25):
             md.append("- %dx %s at `%s`" % (cnt, cls, frame))
+        if self.strict_blocks:
+            md.append("\nThe first whole stack of each is in strictmode.txt.")
         md.append("")
+        with open(os.path.join(self.out, "strictmode.txt"), "w", encoding="utf-8") as f:
+            for (cls, frame), block in self.strict_blocks.items():
+                f.write("==== %s at %s (%dx)\n%s\n\n" % (cls, frame, self.strict[(cls, frame)], block))
         md.append("### Error-level log lines of the app (top 25)\n")
         for k, v in self.app_errors.most_common(25):
             md.append("- %dx `%s`" % (v, k))
