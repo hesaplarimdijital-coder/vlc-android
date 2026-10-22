@@ -294,6 +294,20 @@ static int channels_known(const int *ids, int n)
 }
 
 /*
+ * The ids of the source's [count] channels as the planner takes them: a pair it has no roles for
+ * (the matrix-encoded Lt/Rt pair a MOV's or M4A's channel layout calls a "downmix", say) is the
+ * stereo pair every player plays it as, left and right.
+ */
+static void source_ids(const NagSource *src, int count, int *ids)
+{
+    nag_source_channel_ids(src, ids, MAX_CH);
+    if (count == 2 && !channels_known(ids, count)) {
+        ids[0] = AV_CHAN_FRONT_LEFT;
+        ids[1] = AV_CHAN_FRONT_RIGHT;
+    }
+}
+
+/*
  * The output's channels from the source's [ids]: mono stays mono; stereo when asked for ([stereo])
  * and always for MP3, by BS.775's matrix; otherwise the source's own layout in the codec's (the
  * smallest the codec has that holds every channel, silence for what the source lacks of it), and
@@ -830,7 +844,7 @@ static int run(Conv *c)
     {
         int ids[MAX_CH] = {0};
         ChannelPlan plan;
-        nag_source_channel_ids(c->src, ids, MAX_CH);
+        source_ids(c->src, c->src_channels, ids);
         if (plan_channels(opt->codec, opt->channels == NAG_CONVERT_STEREO, ids, c->src_channels, &plan) < 0)
             return failed(c, -1, "channels the converter does not place");
         c->channels = plan.channels;
@@ -1032,7 +1046,7 @@ int nag_convert(int in_fd, const char *in_name, int out_fd, const char *out_name
     /* the channels as the file has them; a layout the planner cannot place (heights, more than eight) is mixed to stereo by FFmpeg */
     int ids[MAX_CH] = {0};
     const int count = nag_source_channels(c->src);
-    if (count > MAX_CH || !(nag_source_channel_ids(c->src, ids, MAX_CH), channels_known(ids, count))) {
+    if (count > MAX_CH || (source_ids(c->src, count, ids), !channels_known(ids, count))) {
         nag_source_close(c->src);
         c->src = NULL;
         if ((ret = nag_source_open(&c->src, url, 2, error, error_size)) < 0)

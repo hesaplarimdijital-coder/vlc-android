@@ -42,7 +42,10 @@
 #     included; ID3v2.4; the ReplayGain measured again (R128_* alone for Opus); a CUE part
 #     with its own tags; a mono and a 5.1 source; a conversion stopped from its progress; the
 #     source or a file that holds anything refused as the output, untouched; NaN and infinities
-#     in a float source; an M4A plays to its end without an edit list or iTunSMPB
+#     in a float source; an M4A plays to its end without an edit list or iTunSMPB; each channel
+#     (a tone in each) where the codec's layout puts it: stereo to 7.1, side and back surrounds as
+#     one, a back centre where the codec has none, BS.775's stereo, and a MOV's matrix-encoded
+#     Lt/Rt pair as left and right
 #   - CUE parts (S-808): a file's parts, bounded in CUE frames (1/75 s), played as a queue give
 #     the whole file back, sample for sample in FLAC and MP3, within -60 dBFS in AAC and Opus
 #     (whose decoders settle after a seek, as ffmpeg's own do); a part alone is ffmpeg's trim
@@ -883,6 +886,136 @@ check "NaN and infinities: converted" "22050" "$("$NAGAUDIO" convert conv_nan.wa
 stopped=0
 "$NAGAUDIO" convert m24.flac conv_stopped.opus --codec opus --bitrate 128000 --stop-at 0.3 > conv_stopped.json || stopped=$?
 check "stopped" "3 True" "$stopped $(json 'd["cancelled"]' < conv_stopped.json)"
+# the channels: a tone in each of the source's, every tone where the output's layout puts it
+cat > tones.py <<'PY'
+# tones.py NAGAUDIO: the converter's channels, a tone in each channel of the source: every tone
+# where the output's layout puts it, at its level, and nothing else in any channel
+import array, json, math, subprocess, sys
+
+NAG = sys.argv[1]
+RATE = 48000
+AMP = 0.2
+H = math.sqrt(0.5)  # -3 dB
+# multiples of 10 Hz: whole periods in the 0.1 s measured, so that the tones do not leak into each other
+TONE = {"FL": 440, "FR": 550, "FC": 660, "LFE": 80, "BL": 770, "BR": 880, "BC": 990, "SL": 1100, "SR": 1210,
+        "FLC": 1320, "FRC": 1430, "DL": 440, "DR": 550}
+WINDOW = RATE // 10
+
+
+def channel_names():
+    """FFmpeg's layouts by name: their channels, in order."""
+    text = subprocess.run(["ffmpeg", "-hide_banner", "-layouts"], capture_output=True, text=True).stdout
+    names, standard = {}, False
+    for line in text.splitlines():
+        parts = line.split()
+        if line.startswith("Standard channel layouts"):
+            standard = True
+        elif standard and len(parts) == 2 and parts[0] != "NAME":
+            names[parts[0]] = parts[1].split("+")
+    return names
+
+
+NAMES = channel_names()
+TABLES = {f: [(math.cos(2 * math.pi * f * i / RATE), math.sin(2 * math.pi * f * i / RATE)) for i in range(WINDOW)]
+          for f in set(TONE.values())}
+
+
+def source(layout, ext):
+    path = "tone_%s.%s" % (layout.replace("(", "_").replace(")", ""), ext)
+    exprs = "|".join("%g*sin(2*PI*%d*t)" % (AMP, TONE[c]) for c in NAMES[layout])
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i", "aevalsrc=exprs=%s:s=%d:d=1.5:c=%s" % (exprs, RATE, layout),
+                    "-c:a", "pcm_s16le", path], check=True)
+    return path
+
+
+def levels(path):
+    """The output's layout, and each of its channels' tones (by the source channel they stand for) above -46 dBFS."""
+    probe = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-show_streams", "-of", "json", path]))["streams"][0]
+    layout = probe.get("channel_layout") or {1: "mono", 2: "stereo"}[probe["channels"]]
+    pcm = array.array("f")
+    pcm.frombytes(subprocess.check_output(["ffmpeg", "-nostdin", "-v", "error", "-i", path, "-f", "f32le", "-"]))
+    n = probe["channels"]
+    start = RATE // 2  # past the codecs' start
+    out = {}
+    for c, name in enumerate(NAMES[layout]):
+        found = {}
+        for tone, f in TONE.items():
+            if tone in ("DL", "DR"):
+                continue
+            re = im = 0.0
+            for i, (cos, sin) in enumerate(TABLES[f]):
+                x = pcm[(start + i) * n + c]
+                re += x * cos
+                im += x * sin
+            a = 2 * math.hypot(re, im) / WINDOW
+            if a > 0.005:
+                found[tone] = a
+        out[name] = found
+    return layout, out
+
+
+failures = 0
+
+
+def check(label, ok, detail=""):
+    global failures
+    print(("ok   " if ok else "FAIL ") + label + ("" if ok else ": " + detail))
+    failures += 0 if ok else 1
+
+
+def case(layout, ext, codec, want_layout, want, options=()):
+    """[want]: each output channel's source channels and their gains; a channel left out is silent."""
+    src = source(layout, ext)
+    out = "tone_%s_%s%s.%s" % (layout.replace("(", "_").replace(")", ""), codec, "".join(options).replace("-", ""),
+                               {"opus": "opus", "aac": "m4a", "mp3": "mp3"}[codec])
+    label = "%s %s to %s%s" % (layout, ext, codec, " " + " ".join(options) if options else "")
+    r = subprocess.run([NAG, "convert", src, out, "--codec", codec] + list(options), capture_output=True, text=True)
+    if r.returncode != 0:
+        check(label + ": converted", False, r.stdout.strip())
+        return
+    got_layout, got = levels(out)
+    if got_layout != want_layout:
+        check(label + ": " + want_layout, False, got_layout)
+        return
+    problems = []
+    for name, tones in got.items():
+        expected = {t: AMP * g for t, g in want.get(name, {}).items()}
+        for t in set(tones) | set(expected):
+            have, should = tones.get(t, 0.0), expected.get(t, 0.0)
+            if abs(have - should) > 0.006 + 0.08 * should:
+                problems.append("%s: %s %.3f, not %.3f" % (name, t, have, should))
+    check("%s: %s, each tone in its place" % (label, want_layout), not problems, "; ".join(problems))
+
+
+def same(*names, **moved):
+    """Each output channel carries the source's of its name, [moved] ones another's (BL="SL")."""
+    plan = {n: {n: 1.0} for n in names}
+    plan.update({n: {m: 1.0} for n, m in moved.items()})
+    return plan
+
+
+case("stereo", "wav", "opus", "stereo", same("FL", "FR"))
+case("5.1", "wav", "opus", "5.1", same("FL", "FR", "FC", "LFE", "BL", "BR"))
+case("5.1", "wav", "aac", "5.1", same("FL", "FR", "FC", "LFE", "BL", "BR"))
+# side and back surrounds are the same speakers: where the codec has the one only
+case("5.1(side)", "wav", "opus", "5.1", same("FL", "FR", "FC", "LFE", BL="SL", BR="SR"))
+case("7.1", "wav", "opus", "7.1", same("FL", "FR", "FC", "LFE", "BL", "BR", "SL", "SR"))
+case("7.1", "wav", "aac", "7.1", same("FL", "FR", "FC", "LFE", "BL", "BR", "SL", "SR"))
+# a back centre: Opus has a slot for it; AAC's 7.1 has none, it goes into both back surrounds at -3 dB
+case("6.1", "wav", "opus", "6.1", same("FL", "FR", "FC", "LFE", "BC", "SL", "SR"))
+c61 = same("FL", "FR", "FC", "LFE", "SL", "SR")
+c61.update({"BL": {"BC": H}, "BR": {"BC": H}})
+case("6.1", "wav", "aac", "7.1", c61)
+k = 1 / (1 + 2 * H)
+# BS.775's stereo: the centre and the surrounds at -3 dB, no LFE, scaled down together so that no side can pass full scale
+case("5.1", "wav", "opus", "stereo", {"FL": {"FL": k, "FC": k * H, "BL": k * H}, "FR": {"FR": k, "FC": k * H, "BR": k * H}}, ("--stereo",))
+case("5.1", "wav", "mp3", "stereo", {"FL": {"FL": k, "FC": k * H, "BL": k * H}, "FR": {"FR": k, "FC": k * H, "BR": k * H}})
+# a pair without the roles of a layout (a MOV's matrix-encoded Lt/Rt, "downmix"): left and right
+for codec in ("opus", "aac", "mp3"):
+    case("downmix", "mov", codec, "stereo", {"FL": {"FL": 1.0}, "FR": {"FR": 1.0}})
+sys.exit(1 if failures else 0)
+PY
+python3 tones.py "$NAGAUDIO" || failures=$((failures + 1))
 
 echo "== S-611: the visualisers' tap"
 # 1500 Hz is bin 64 of 2048 at 48 kHz, 6000 Hz bin 256 of 4096 at 96 kHz: no scalloping, no leakage
