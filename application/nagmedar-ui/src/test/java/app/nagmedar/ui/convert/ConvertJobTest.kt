@@ -64,6 +64,19 @@ class ConvertJobTest {
     }
 
     @Test
+    fun theStoresFolderIsAskedForAtTheFirstReadNotWhenItIsMade() {
+        // the app's folder (filesDir) looks at the disk: the store is made on the main thread, read off it
+        var asked = 0
+        val dir = folder.newFolder("later")
+        val store = ConvertStore { asked++; dir }
+        assertEquals(0, asked)
+        assertFalse(store.has("a1"))
+        store.save(job)
+        assertTrue(store.has("a1"))
+        assertEquals(1, asked)
+    }
+
+    @Test
     fun theStoreKeepsAJobUntilItIsPutAway() {
         val store = ConvertStore(folder.newFolder("convert"))
         store.save(job)

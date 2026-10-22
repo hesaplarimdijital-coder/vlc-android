@@ -1,14 +1,20 @@
 package app.nagmedar.ui.podcast
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.data.PodcastEpisode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.ByteArrayOutputStream
+import java.io.File
 
-/** S-1104: chapters from Podcasting 2.0's JSON and from the ID3 tag of an MP3 (binary tags built here, frame by frame). */
+/** S-1104: chapters from Podcasting 2.0's JSON and from the ID3 tag of an MP3 (binary tags built here, frame by frame), and where they are kept. */
 @RunWith(AndroidJUnit4::class)
 class ChaptersTest {
 
@@ -246,5 +252,29 @@ class ChaptersTest {
         assertEquals(1, Chapters.indexAt(three, 60_000))
         assertEquals(2, Chapters.indexAt(three, 999_000))
         assertNull(Chapters.indexAt(listOf(Chapter(5_000, "geç")), 1_000))
+    }
+
+    // ------------------------------------------------------------ kept
+
+    @get:Rule
+    val folder = TemporaryFolder()
+
+    @Test
+    fun theCacheFolderIsAskedForOnTheExtrasThreadNotWhenTheyAreMade() {
+        // the app's cacheDir looks at the disk: the episode pages make the extras on the main thread
+        var asked = 0
+        val dir = folder.newFolder("podcast")
+        val source = object : ExtraSource {
+            override suspend fun bytes(url: String, limit: Int, offset: Long) = """{"chapters": [{"startTime": 0, "title": "Giriş"}]}""".toByteArray()
+
+            override fun local(location: String, limit: Int): ByteArray? = null
+        }
+        val extras = EpisodeExtras(source, { asked++; dir }, io = Dispatchers.Unconfined)
+        assertEquals(0, asked)
+        val episode = PodcastEpisode(feedId = 1, id = 3, guid = "gece-3", title = "Üçüncü gece", audioUrl = "https://cdn.example.org/gece/3.mp3", chaptersUrl = "https://cdn.example.org/gece/3.json")
+        val chapters = runBlocking { extras.chapters(episode) }
+        assertEquals(listOf("Giriş"), (chapters as ExtraLoad.Ready).value.map { it.title })
+        assertEquals(1, asked)
+        assertTrue(File(dir, "chapters-3.json").isFile)
     }
 }

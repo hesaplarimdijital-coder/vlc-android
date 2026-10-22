@@ -72,10 +72,16 @@ fun looksLikeImage(bytes: ByteArray): Boolean {
 }
 
 /**
- * S-1006: the covers kept, a file each in [dir]: "<key's SHA-1>.<origin>", the user's beside the
- * one found, which it goes before; "<key's SHA-1>.miss" holds when Cover Art Archive had none.
+ * S-1006: the covers kept, a file each in a folder: "<key's SHA-1>.<origin>", the user's beside the
+ * one found, which it goes before; "<key's SHA-1>.miss" holds when Cover Art Archive had none. The
+ * folder is asked of [folder] at the first read or write, not when the store is made: the app's
+ * filesDir looks at the disk, which the main thread must not.
  */
-class CoverStore(private val dir: File) {
+class CoverStore(folder: () -> File) {
+
+    constructor(dir: File) : this({ dir })
+
+    private val dir by lazy(folder)
 
     private fun name(key: String): String =
         MessageDigest.getInstance("SHA-1").digest(key.toByteArray()).joinToString("") { ((it.toInt() and 0xFF) + 0x100).toString(16).substring(1) }

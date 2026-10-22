@@ -22,11 +22,17 @@ import java.util.Locale
 /**
  * S-1010: the jobs' files, in the app's own storage (convert/): a job's choices and files
  * (<id>.json), what came of them so far (<id>.summary.json), and the user's Stop (<id>.cancel).
- * Nothing else is kept: a job's files go when its summary is put away, or after [KEEP_MS].
+ * Nothing else is kept: a job's files go when its summary is put away, or after [KEEP_MS]. The
+ * folder is asked of [folder] at the first read or write, not when the store is made: the app's
+ * filesDir looks at the disk, which the main thread must not.
  */
-class ConvertStore(private val dir: File) {
+class ConvertStore(folder: () -> File) {
 
-    constructor(context: Context) : this(File(context.applicationContext.filesDir, "convert"))
+    constructor(dir: File) : this({ dir })
+
+    constructor(context: Context) : this({ File(context.applicationContext.filesDir, "convert") })
+
+    private val dir by lazy(folder)
 
     fun save(job: ConvertJob) {
         dir.mkdirs()

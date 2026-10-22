@@ -73,7 +73,7 @@ object TranslationJobs {
 
     fun modelWork(model: TranslationModel): String = MODEL_WORK + model.id
 
-    /** Where the models are kept: the app's private storage that backups leave out. */
+    /** Where the models are kept: the app's private storage that backups leave out. It looks at the disk: off the main thread. */
     fun store(context: Context): ModelStore = ModelStore(File(context.applicationContext.noBackupFilesDir, "translate-models"))
 
     /** [model]'s download, waiting for a network; a download under way goes on. */

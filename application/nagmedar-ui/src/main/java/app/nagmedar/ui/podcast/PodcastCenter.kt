@@ -128,7 +128,7 @@ object PodcastCenter {
     /** S-1104: the chapters and transcripts of episodes, kept in the app's cache. */
     fun extras(context: Context): EpisodeExtras {
         val app = context.applicationContext
-        return EpisodeExtras(OkHttpExtraSource(app, userAgent()), java.io.File(app.cacheDir, "podcast"))
+        return EpisodeExtras(OkHttpExtraSource(app, userAgent()), { java.io.File(app.cacheDir, "podcast") })
     }
 
     /**

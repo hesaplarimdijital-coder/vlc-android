@@ -37,16 +37,19 @@ interface ExtraSource {
 }
 
 /**
- * S-1104, S-205: an episode's chapters and transcript, fetched once and kept in [cache]. Chapters come from the feed's
- * Podcasting 2.0 file when it names one, else from the ID3 tag at the start of the audio (the downloaded file, else the
- * first bytes of the stream); the transcript from the file the feed names, read by what its text says it is. Nothing
- * is kept that came to nothing, so a later try asks again.
+ * S-1104, S-205: an episode's chapters and transcript, fetched once and kept in the cache's folder. Chapters come from
+ * the feed's Podcasting 2.0 file when it names one, else from the ID3 tag at the start of the audio (the downloaded
+ * file, else the first bytes of the stream); the transcript from the file the feed names, read by what its text says it
+ * is. Nothing is kept that came to nothing, so a later try asks again. The folder is asked of [cacheFolder] on [io], at
+ * the first read or write: the app's cacheDir looks at the disk, and the pages make this on the main thread.
  */
 class EpisodeExtras(
     private val source: ExtraSource,
-    private val cache: File,
+    cacheFolder: () -> File,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    private val cache by lazy(cacheFolder)
+
     suspend fun chapters(episode: PodcastEpisode): ExtraLoad<List<Chapter>> {
         val kept = withContext(io) { readChapters(episode.id) }
         if (kept != null) return ExtraLoad.Ready(kept)

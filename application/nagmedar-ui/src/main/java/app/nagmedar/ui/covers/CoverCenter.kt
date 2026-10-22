@@ -74,7 +74,7 @@ object CoverCenter {
     }
 
     private fun build(context: Context): CoverFinder = CoverFinder(
-        store = CoverStore(File(context.filesDir, "covers")),
+        store = CoverStore { File(context.filesDir, "covers") },
         sources = DeviceCoverSources(context),
         service = CoverArtArchive(CoverArtArchive.userAgent(BuildConfig.VLC_VERSION_NAME)),
         online = { onlineAllowed(context) },

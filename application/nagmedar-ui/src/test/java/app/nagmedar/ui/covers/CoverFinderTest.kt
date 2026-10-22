@@ -55,6 +55,17 @@ class CoverFinderTest {
     private fun find(of: CoverTrack = track) = runBlocking { finder.find(of) }
 
     @Test
+    fun theStoresFolderIsAskedForAtTheFirstReadNotWhenItIsMade() {
+        // the app's folder (filesDir) looks at the disk: the finder is made on the main thread, reads off it
+        var asked = 0
+        val dir = folder.newFolder("later")
+        val later = CoverStore { asked++; dir }
+        assertEquals(0, asked)
+        assertNull(later.kept(track.key))
+        assertEquals(1, asked)
+    }
+
+    @Test
     fun theTagsThenTheFolderThenTheArchive() {
         inTags = png
         inFolder = jpeg

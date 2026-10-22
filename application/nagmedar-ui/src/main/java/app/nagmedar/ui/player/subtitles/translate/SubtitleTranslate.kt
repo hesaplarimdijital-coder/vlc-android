@@ -276,7 +276,8 @@ class WorkTranslationService(context: Context) : TranslationService {
     override suspend fun engineAvailable(): Boolean = withContext(Dispatchers.IO) { NativeTranslate.available }
 
     override fun model(model: TranslationModel): Flow<ModelStatus> {
-        val store = TranslationJobs.store(app)
+        // the settings ask on the main thread: the store's folder (noBackupFilesDir looks at the disk) is asked for on the flow's
+        val store by lazy { TranslationJobs.store(app) }
         val work = runCatching { WorkManager.getInstance(app) }.getOrNull() ?: return flowOf(ModelStatus.Missing)
         return work.getWorkInfosForUniqueWorkFlow(TranslationJobs.modelWork(model)).map { infos ->
             val info = infos.lastOrNull()
