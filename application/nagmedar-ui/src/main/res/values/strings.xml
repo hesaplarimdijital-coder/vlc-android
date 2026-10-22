@@ -1705,6 +1705,8 @@
     <string name="nag_tvlab_queue_night_charging">Start only while charging</string>
     <string name="nag_tvlab_queue_night_inexact">Android does not let Nağmedar start at the exact minute: the queue may start a few minutes late.</string>
     <string name="nag_tvlab_queue_night_set">Run at night</string>
+    <string name="nag_tvlab_queue_charger">The night run is waiting for the charger: it starts once the device is plugged in.</string>
+    <string name="nag_tvlab_queue_charger_short">Waiting for the charger</string>
     <string name="nag_tvlab_batch_source">Folder to analyse</string>
     <string name="nag_tvlab_batch_no_folder">No folder chosen</string>
     <string name="nag_tvlab_batch_choose_folder">Choose a folder…</string>

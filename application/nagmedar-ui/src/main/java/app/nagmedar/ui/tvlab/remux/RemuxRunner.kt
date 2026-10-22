@@ -58,8 +58,9 @@ object RemuxEvent {
  * the beginning ([recoverInterrupted]): a Matroska file written halfway cannot be continued.
  * While a job runs its row is written column by column, so a cancel asked meanwhile is never
  * overwritten. The queue as a whole (S-1210) is [held] by the user (the running job waits where
- * it is, paused, no other starts) or [waits] (its night run: no job starts before the time).
- * Blocking: runs on the worker's thread, one runner at a time.
+ * it is, paused, no other starts) or [waits] (its night run: no job starts before the time); a
+ * night run that starts only once the device charges waits for the [charger] before its first
+ * job. Blocking: runs on the worker's thread, one runner at a time.
  */
 class RemuxRunner(
     private val engine: RemuxEngine,
@@ -68,6 +69,7 @@ class RemuxRunner(
     private val now: () -> Long = System::currentTimeMillis,
     private val held: () -> Boolean = { false },
     private val waits: () -> Boolean = { false },
+    private val charger: NightCharger = NightCharger.None,
     private val onUpdate: (RemuxJobEntry) -> Unit = {},
 ) {
     /** The jobs the last process left running, paused or verifying: their outputs emptied, queued again, to start over. */
@@ -90,14 +92,43 @@ class RemuxRunner(
     /**
      * Every waiting job in turn; returns when none waits, the queue is [stopped], or
      * [interruption] names a reason (null while the worker may go on), which the interrupted
-     * job records.
+     * job records. A night run waiting for the charger is waited for first ([awaitCharger]).
      */
     fun drain(interruption: () -> String? = { null }) {
         while (interruption() == null) {
             if (stopped()) return
             val job = dao.next() ?: return
+            if (charger.waiting()) {
+                if (!awaitCharger(job, interruption)) return
+                // the queue read again: the wait may have been long
+                continue
+            }
             run(job, interruption)
         }
+    }
+
+    /**
+     * S-1210: the night run that starts only once the device charges, its time come, waits here
+     * for the charger before its first job, the worker in the foreground since the alarm (one
+     * started later from the background would be refused it). [job], the first to run, is shown
+     * meanwhile. The user's pause, another night run, Start now (the night run taken off) or the
+     * worker's stop end the wait: whether the queue may go on.
+     */
+    private fun awaitCharger(job: RemuxJobEntry, interruption: () -> String?): Boolean {
+        var shown = false
+        while (charger.waiting()) {
+            if (device().charging) {
+                charger.begin()
+                return true
+            }
+            if (!shown) {
+                shown = true
+                onUpdate(job)
+            }
+            charger.await(CHARGER_CHECK_MS)
+            if (interruption() != null || stopped()) return false
+        }
+        return true
     }
 
     /** The system let no foreground job start: [job] waits, marked so, for the app to show (when it still waits). */
@@ -339,6 +370,9 @@ class RemuxRunner(
 
         /** How often a job the user paused looks whether the queue goes on. */
         const val HOLD_WAIT_MS = 1_000
+
+        /** How often a night run waiting for the charger looks again, when no plug-in wakes it first. */
+        const val CHARGER_CHECK_MS = 5_000L
     }
 }
 

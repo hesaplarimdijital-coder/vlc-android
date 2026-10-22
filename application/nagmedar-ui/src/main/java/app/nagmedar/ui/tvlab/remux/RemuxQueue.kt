@@ -131,8 +131,8 @@ class RemuxQueue(
     suspend fun resume() = withContext(Dispatchers.IO) {
         // S-1210: a night run whose alarm the system did not deliver (the device off at the time) starts now
         RemuxNight.reschedule(context)
-        // a worker already running or waiting is kept: no stack of them from every start of the app
-        if (dao.next() != null || dao.interrupted().isNotEmpty() || dao.leftovers().isNotEmpty()) RemuxWorker.ensure(context, append = false)
+        // a worker already running is kept: no stack of them from every start of the app
+        if (dao.next() != null || dao.interrupted().isNotEmpty() || dao.leftovers().isNotEmpty()) RemuxWorker.resume(context)
     }
 
     companion object {

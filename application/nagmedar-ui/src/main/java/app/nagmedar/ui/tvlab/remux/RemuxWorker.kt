@@ -8,14 +8,16 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.Constraints
+import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.nagmedar.data.NagmedarDatabase
@@ -35,57 +37,75 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
 
 /**
  * The queue's worker (S-1206): a foreground job (media processing on Android 15 and later,
  * data sync before) with an ongoing notification that shows the job, its progress and a
  * Cancel; WorkManager keeps it through a restart. One worker at a time: a new one is appended
- * at every [ensure], and finds the queue empty when the running one drained it. When the
- * system lets no foreground job start (the app in the background on Android 12 and later) the
- * job stays queued, marked so, until the app shows and [RemuxQueue.resume] asks again; when the
- * foreground time runs out (six hours a day of media processing) the job goes back to the queue
- * with that reason and the user is told.
+ * at every [ensure], and finds the queue empty when the running one drained it. It asks for the
+ * foreground first, before anything else touches a drive, while a start from the night run's
+ * alarm still lets it (S-1210); a night run that starts only once the device charges then waits
+ * for the charger in the foreground. When the system lets no foreground job start (the app in
+ * the background on Android 12 and later) the job stays queued, marked so, until the app shows
+ * and [RemuxQueue.resume] asks again; when the foreground time runs out (six hours a day of
+ * media processing) the job goes back to the queue with that reason and the user is told.
  */
 class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     private val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val control = RemuxQueueControl.get(applicationContext)
 
     override suspend fun doWork(): Result {
         val dao = NagmedarDatabase.get(applicationContext).remuxJobs()
         val engine = NativeRemuxEngine(applicationContext)
-        val control = RemuxQueueControl.get(applicationContext)
+        val charger = ChargerWatch(applicationContext, control)
         val runner = RemuxRunner(
             engine,
             dao,
             AndroidDeviceState(applicationContext),
             held = { control.current.held },
             waits = { control.current.waitsForNight(System.currentTimeMillis()) },
+            charger = charger,
         ) { job -> show(job) }
         withContext(Dispatchers.IO) {
             val scope = coroutineContext
             // one runner at a time: a worker the system stopped finishes its step (the engine sees the stop) before the next one starts
             synchronized(RUN_LOCK) {
-                runner.cleanUp()
-                runner.recoverInterrupted()
-                // S-1210: a queue paused or waiting for its night run starts nothing; Resume or the alarm asks again
-                if (runner.stopped()) return@synchronized
-                val first = dao.next() ?: return@synchronized
-                // a foreground start can be refused (Android 12+, from the background): a job that ran as a plain
-                // background job would be stopped after ten minutes and start over, so it waits for the app instead
-                val foreground = runCatching { setForegroundAsync(foregroundInfo(notification(first))).get() }.isSuccess
-                if (!foreground) {
-                    runner.waitForApp(first)
-                    return@synchronized
+                try {
+                    // the foreground first: an alarm's start lets it for seconds only, which removing what an earlier job left
+                    // on a drive just woken up could take; a worker that starts no job stays a background one
+                    val starts = !runner.stopped() && (dao.next() != null || dao.interrupted().isNotEmpty())
+                    var foreground = starts && goForeground(dao.next())
+                    runner.cleanUp()
+                    runner.recoverInterrupted()
+                    // S-1210: a queue paused or waiting for its night run starts nothing; Resume or the alarm asks again
+                    if (runner.stopped()) return@synchronized
+                    val first = dao.next() ?: return@synchronized
+                    // a job queued meanwhile, by the app on show: asked for it now
+                    if (!starts) foreground = goForeground(first)
+                    // a foreground start can be refused (Android 12+, from the background): a job that ran as a plain
+                    // background job would be stopped after ten minutes and start over, so it waits for the app instead
+                    if (!foreground) {
+                        runner.waitForApp(first)
+                        return@synchronized
+                    }
+                    var stoppedFor: String? = null
+                    runner.drain { if (scope.isActive) null else interruptionReason().also { stoppedFor = it } }
+                    runCatching { manager.cancel(NOTIFICATION_ID) }
+                    // Android 15's six hours a day of a foreground job: the job went back to the queue; said, so that the wait is not a mystery
+                    if (stoppedFor == RemuxEvent.FOREGROUND_TIMEOUT) timedOut()
+                } finally {
+                    charger.close()
                 }
-                var stoppedFor: String? = null
-                runner.drain { if (scope.isActive) null else interruptionReason().also { stoppedFor = it } }
-                runCatching { manager.cancel(NOTIFICATION_ID) }
-                // Android 15's six hours a day of a foreground job: the job went back to the queue; said, so that the wait is not a mystery
-                if (stoppedFor == RemuxEvent.FOREGROUND_TIMEOUT) timedOut()
             }
         }
         return Result.success()
     }
+
+    /** The worker in the foreground with [job]'s notification; whether the system let it. Blocking. */
+    private fun goForeground(job: RemuxJobEntry?): Boolean = runCatching { setForegroundAsync(foregroundInfo(notification(job))).get() }.isSuccess
 
     /** Why the worker was stopped: its foreground time ran out, or the system took it for another reason. */
     private fun interruptionReason(): String = if (stoppedForForegroundTime()) RemuxEvent.FOREGROUND_TIMEOUT else RemuxEvent.WORKER_STOPPED
@@ -130,7 +150,8 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
             RemuxJobState.RUNNING -> context.getString(R.string.nag_tvlab_remux_running, percent)
             RemuxJobState.VERIFYING -> context.getString(R.string.nag_tvlab_remux_verifying, percent)
             RemuxJobState.PAUSED -> context.getString(if (job.error == RemuxJobError.HELD) R.string.nag_tvlab_queue_held else R.string.nag_jobs_paused)
-            else -> context.getString(R.string.nag_jobs_queued)
+            // S-1210: the night run, its time come, waits for the charger
+            else -> context.getString(if (control.current.waitsForCharger(System.currentTimeMillis())) R.string.nag_tvlab_queue_charger_short else R.string.nag_jobs_queued)
         }
         val open = openTvLab(context)
         val builder = NotificationCompat.Builder(context, CHANNEL)
@@ -187,20 +208,60 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         )
 
         /**
-         * A worker for the queue. [append] (a job just queued) puts it after the one running, if
-         * any, so that nothing queued is missed; without it (the app showing again) one already
-         * running or waiting is kept. [charging] (the night run, S-1210): it starts once the
-         * device charges.
+         * A worker for the queue, after the one running, if any, so that nothing queued is
+         * missed. Never bound to a constraint: a worker that waited for one would start later
+         * from the background, where Android 12 and later let it no foreground, and every worker
+         * appended after it would wait as well (S-1210's night run waits for the charger itself).
          */
-        fun ensure(context: Context, append: Boolean = true, charging: Boolean = false) {
-            val request = OneTimeWorkRequestBuilder<RemuxWorker>()
-            if (charging) request.setConstraints(Constraints.Builder().setRequiresCharging(true).build())
-            WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
-                NAME,
-                if (append) ExistingWorkPolicy.APPEND_OR_REPLACE else ExistingWorkPolicy.KEEP,
-                request.build(),
-            )
+        fun ensure(context: Context) = enqueue(context, ExistingWorkPolicy.APPEND_OR_REPLACE)
+
+        /**
+         * When the app shows: a worker for whatever waits, one already running kept. When none
+         * runs, a waiting one is replaced: it may be one an older version bound to the charger,
+         * which would hold every later one back. Blocking: WorkManager's database is read.
+         */
+        fun resume(context: Context) {
+            val infos = runCatching { WorkManager.getInstance(context.applicationContext).getWorkInfosForUniqueWork(NAME).get() }.getOrNull()
+            val stuck = infos != null && infos.none { it.state == WorkInfo.State.RUNNING } &&
+                infos.any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.BLOCKED }
+            enqueue(context, if (stuck) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP)
         }
+
+        private fun enqueue(context: Context, policy: ExistingWorkPolicy) {
+            WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(NAME, policy, OneTimeWorkRequestBuilder<RemuxWorker>().build())
+        }
+    }
+}
+
+/**
+ * S-1210: the night run's charger as the worker, in the foreground since the alarm, waits for
+ * it: Android's word that the device was plugged in wakes it at once (a receiver while it
+ * waits), and the battery's state is read again every few seconds anyway.
+ */
+private class ChargerWatch(private val context: Context, private val control: RemuxQueueControl) : NightCharger, AutoCloseable {
+    private val plugged = Semaphore(0)
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = plugged.release()
+    }
+    private var registered = false
+
+    override fun waiting(): Boolean = control.current.waitsForCharger(System.currentTimeMillis())
+
+    override fun begin() = control.clearNight()
+
+    override fun await(ms: Long) {
+        if (!registered) {
+            registered = runCatching {
+                ContextCompat.registerReceiver(context, receiver, IntentFilter(Intent.ACTION_POWER_CONNECTED), ContextCompat.RECEIVER_NOT_EXPORTED)
+            }.isSuccess
+        }
+        // an interrupted wait is a wait that ended: the runner looks at the queue and the battery again
+        runCatching { plugged.tryAcquire(ms, TimeUnit.MILLISECONDS) }
+    }
+
+    override fun close() {
+        if (registered) runCatching { context.unregisterReceiver(receiver) }
+        registered = false
     }
 }
 

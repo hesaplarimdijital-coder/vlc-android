@@ -1679,6 +1679,8 @@
     <string name="nag_tvlab_queue_night_charging">Yalnızca şarjdayken başlasın</string>
     <string name="nag_tvlab_queue_night_inexact">Android, Nağmedar\'ın tam dakikasında başlamasına izin vermiyor: sıra birkaç dakika geç başlayabilir.</string>
     <string name="nag_tvlab_queue_night_set">Gece çalıştır</string>
+    <string name="nag_tvlab_queue_charger">Gece çalıştırması şarjı bekliyor: cihaz şarja takılınca başlar.</string>
+    <string name="nag_tvlab_queue_charger_short">Şarj bekleniyor</string>
     <string name="nag_tvlab_batch_source">Analiz edilecek klasör</string>
     <string name="nag_tvlab_batch_no_folder">Klasör seçilmedi</string>
     <string name="nag_tvlab_batch_choose_folder">Klasör seç…</string>

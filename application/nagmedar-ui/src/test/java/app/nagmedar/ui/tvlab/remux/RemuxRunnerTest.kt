@@ -335,6 +335,97 @@ class RemuxRunnerTest {
         assertTrue(RemuxJobView.of(done).slowed)
     }
 
+    /** S-1210: the user's pause holds the running job where it is; Resume lets it go on from there. */
+    @Test
+    fun aHeldQueueHoldsTheRunningJobWhereItIs() {
+        var held = false
+        var holds = 0
+        engine.onStep = { phase, i ->
+            if (phase == "remux" && i == 1) held = true
+            if (phase == "remux-wait" && ++holds == 2) held = false
+        }
+        val runner = RemuxRunner(engine, dao, { condition }, { clock += 1_000; clock }, held = { held }) { updates += it.state }
+        val done = runner.run(queued()) { null }
+        assertEquals(RemuxJobState.DONE, done.state)
+        assertEquals("waited twice where it was, not started again", listOf(1_000, 1_000), engine.waits)
+        assertEquals(listOf(RemuxEvent.STARTED, RemuxEvent.HELD, RemuxEvent.RESUMED), RemuxEvent.parse(done.events).map { it.kind })
+        assertTrue(dao.updates.any { it.state == RemuxJobState.PAUSED && it.error == RemuxJobError.HELD })
+        assertNull(done.error)
+        assertEquals(1, done.attempts)
+    }
+
+    /** S-1210: a queue waiting for its night run starts nothing; at its time it runs. */
+    @Test
+    fun aQueueWaitingForItsNightRunStartsNothing() {
+        queued()
+        var night = true
+        val runner = RemuxRunner(engine, dao, { condition }, { clock += 1_000; clock }, waits = { night })
+        assertTrue(runner.stopped())
+        runner.drain()
+        assertEquals(RemuxJobState.QUEUED, dao.get(1)!!.state)
+        assertTrue(engine.calls.isEmpty())
+        night = false
+        runner.drain()
+        assertEquals(RemuxJobState.DONE, dao.get(1)!!.state)
+    }
+
+    /** The night run's charger as the runner sees it: waiting until begun or taken off; every wait runs [onAwait]. */
+    private class FakeCharger : NightCharger {
+        var waiting = true
+        var begun = 0
+        var awaited = 0
+        var onAwait: (Int) -> Unit = {}
+
+        override fun waiting() = waiting
+
+        override fun begin() {
+            begun++
+            waiting = false
+        }
+
+        override fun await(ms: Long) = onAwait(++awaited)
+    }
+
+    /** S-1210: the night run that starts only once the device charges waits for the charger, then runs every job. */
+    @Test
+    fun aNightRunWaitsForTheChargerThenRunsTheQueue() {
+        queued(1)
+        dao.insert(sampleJob(id = 2).copy(outputUri = SAMPLE_OUTPUT + "-2"))
+        condition = DeviceState(80, charging = false, heat = Heat.None)
+        val charger = FakeCharger().apply { onAwait = { n -> if (n == 3) condition = DeviceState(80, charging = true, heat = Heat.None) } }
+        val runner = RemuxRunner(engine, dao, { condition }, { clock += 1_000; clock }, charger = charger) { updates += it.state }
+        runner.drain()
+        assertEquals(3, charger.awaited)
+        assertEquals("the night run began once", 1, charger.begun)
+        // the first job shown while the queue waited, then both run
+        assertEquals(RemuxJobState.QUEUED, updates.first())
+        assertEquals(RemuxJobState.DONE, dao.get(1)!!.state)
+        assertEquals(RemuxJobState.DONE, dao.get(2)!!.state)
+    }
+
+    /** The user's pause, the worker's stop or Start now end the wait for the charger; only the last runs the queue. */
+    @Test
+    fun theWaitForTheChargerEndsWithAPauseAStopOrStartNow() {
+        queued()
+        condition = DeviceState(80, charging = false, heat = Heat.None)
+        var held = false
+        val charger = FakeCharger().apply { onAwait = { held = true } }
+        val runner = RemuxRunner(engine, dao, { condition }, { clock += 1_000; clock }, held = { held }, charger = charger)
+        runner.drain()
+        assertEquals(RemuxJobState.QUEUED, dao.get(1)!!.state)
+        held = false
+        var stopped = false
+        charger.onAwait = { stopped = true }
+        runner.drain { if (stopped) RemuxEvent.WORKER_STOPPED else null }
+        assertEquals(RemuxJobState.QUEUED, dao.get(1)!!.state)
+        assertTrue("nothing started while it waited", engine.calls.isEmpty())
+        // Start now takes the night run off: the job runs on battery
+        charger.onAwait = { charger.waiting = false }
+        runner.drain()
+        assertEquals(0, charger.begun)
+        assertEquals(RemuxJobState.DONE, dao.get(1)!!.state)
+    }
+
     @Test
     fun theViewReadsTheRow() {
         val view = sampleDoneJob()

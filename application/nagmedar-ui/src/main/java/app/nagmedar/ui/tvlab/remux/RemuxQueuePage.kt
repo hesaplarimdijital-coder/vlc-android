@@ -112,16 +112,19 @@ fun RemuxQueuePage(jobs: List<RemuxJobView>, control: QueueControl, now: Long, a
     var nightDialog by remember { mutableStateOf(false) }
     Column(modifier.fillMaxSize().testTag("tvlab-queue")) {
         Column(Modifier.padding(horizontal = dimens.pagePadding, vertical = dimens.gapS), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // S-1210: a night run set, or one whose time has come and that waits for the charger
+            val night = control.waitsForNight(now) || control.waitsForCharger(now)
             val status = when {
                 control.held -> stringResource(R.string.nag_tvlab_queue_held_text)
                 control.waitsForNight(now) -> nightLine(control, locale)
+                control.waitsForCharger(now) -> stringResource(R.string.nag_tvlab_queue_charger)
                 waiting.isEmpty() && active.isEmpty() -> stringResource(R.string.nag_tvlab_queue_idle)
                 else -> pluralStringResource(R.plurals.nag_tvlab_queue_waiting, waiting.size, waiting.size)
             }
             Text(
                 status,
                 style = NagTheme.type.label,
-                color = if (control.held || control.waitsForNight(now)) toneColors(StateTone.Warning).content else colors.textSecondary,
+                color = if (control.held || night) toneColors(StateTone.Warning).content else colors.textSecondary,
                 modifier = Modifier.testTag("tvlab-queue-status"),
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -130,7 +133,7 @@ fun RemuxQueuePage(jobs: List<RemuxJobView>, control: QueueControl, now: Long, a
                 } else {
                     NagButton(stringResource(R.string.nag_tvlab_queue_pause), { actions.hold(true) }, icon = NagIcons.Pause)
                 }
-                if (control.waitsForNight(now)) {
+                if (night) {
                     NagButton(stringResource(R.string.nag_tvlab_queue_start_now), actions::cancelNight)
                     NagButton(stringResource(R.string.nag_tvlab_queue_night_change), { nightDialog = true }, icon = NagIcons.Alarm)
                 } else {
