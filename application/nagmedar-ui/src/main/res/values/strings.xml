@@ -1032,7 +1032,7 @@
     <string name="nag_out_multichannel">Multichannel PCM</string>
     <string name="nag_out_passthrough">Bitstream (passthrough)</string>
     <string name="nag_out_forced">Bitstream, forced codecs</string>
-    <string name="nag_out_refused">The player\'s output cannot send a bitstream: choose AudioTrack in the classic audio settings.</string>
+    <string name="nag_out_refused">The player\'s output cannot send a bitstream: choose AudioTrack in Settings › All settings › Advanced › Audio output.</string>
     <string name="nag_out_no_bitstream">Nothing plugged in says it takes a bitstream; the sound goes as PCM.</string>
     <string name="nag_out_pcm_only">PCM</string>
     <string name="nag_out_sink_hdmi" translatable="false">HDMI</string>
@@ -1379,7 +1379,7 @@
     <string name="nag_bm_empty">No bookmarks yet.</string>
     <string name="nag_bm_empty_keys">No bookmarks yet. %1$s marks the moment playing.</string>
     <string name="nag_bm_refused">This film can\'t keep bookmarks: the media library isn\'t ready.</string>
-    <string name="nag_bm_kept">Bookmarks are kept in the media library; VLC\'s classic player shows them too.</string>
+    <string name="nag_bm_kept">Bookmarks are kept in the media library, with the film.</string>
     <string name="nag_bm_add">Add a bookmark</string>
     <string name="nag_bm_rename">Rename…</string>
     <string name="nag_bm_remove">Remove</string>

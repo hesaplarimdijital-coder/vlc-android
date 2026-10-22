@@ -1019,7 +1019,7 @@
     <string name="nag_out_multichannel">Çok kanallı PCM</string>
     <string name="nag_out_passthrough">Bitstream (passthrough)</string>
     <string name="nag_out_forced">Bitstream, zorlanan codec\'ler</string>
-    <string name="nag_out_refused">Oynatıcının ses çıkışı bitstream gönderemiyor: klasik ses ayarlarında AudioTrack\'i seçin.</string>
+    <string name="nag_out_refused">Oynatıcının ses çıkışı bitstream gönderemiyor: Ayarlar › Tüm ayarlar › Gelişmiş › Ses çıkışı\'nda AudioTrack\'i seçin.</string>
     <string name="nag_out_no_bitstream">Takılı hiçbir cihaz bitstream aldığını söylemiyor; ses PCM olarak gidiyor.</string>
     <string name="nag_out_pcm_only">PCM</string>
     <string name="nag_out_sink_headphones">Kulaklık</string>
@@ -1351,7 +1351,7 @@
     <string name="nag_bm_empty">Henüz yer imi yok.</string>
     <string name="nag_bm_empty_keys">Henüz yer imi yok. %1$s çalan anı işaretler.</string>
     <string name="nag_bm_refused">Bu film yer imi tutamıyor: medya kütüphanesi hazır değil.</string>
-    <string name="nag_bm_kept">Yer imleri medya kütüphanesinde saklanır; VLC\'nin klasik oynatıcısı da gösterir.</string>
+    <string name="nag_bm_kept">Yer imleri medya kütüphanesinde, filmle birlikte saklanır.</string>
     <string name="nag_bm_add">Yer imi ekle</string>
     <string name="nag_bm_rename">Yeniden adlandır…</string>
     <string name="nag_bm_remove">Sil</string>
