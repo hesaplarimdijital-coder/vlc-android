@@ -3579,7 +3579,7 @@
     <string name="nag_order_size">Boyut</string>
     <string name="nag_lib_sources">Kaynak klasörler</string>
     <string name="nag_lib_sources_for">Kaynak klasörler: %1$s</string>
-    <string name="nag_lib_sources_hint">Her bölümün göstereceği klasörleri seçin; alt klasörler de dahildir. Klasörü olmayan bölüm, kütüphanede ona uyan her şeyi gösterir. Videolar için seçilen klasör Filmler ve Diziler\'den çıkar, Filmler ve Diziler\'inki de Videolar\'dan.</string>
+    <string name="nag_lib_sources_hint">Her bölümün göstereceği klasörleri seçin; alt klasörler de dahildir. Klasörü olmayan bölüm, kütüphanede ona uyan her şeyi gösterir; Filmler ve Diziler o zaman Videolar için seçilen klasörleri göstermez. Filmler\'in de Diziler\'in de göstermediği her video, örneğin Diziler klasöründe bölüm gibi adlandırılmamış bir dosya, Videolar\'da görünür.</string>
     <string name="nag_lib_sources_all">Kütüphanenin tümü</string>
     <string name="nag_lib_choose_folder">Klasör seç…</string>
     <string name="nag_lib_storage_all">%1$s (tümü)</string>

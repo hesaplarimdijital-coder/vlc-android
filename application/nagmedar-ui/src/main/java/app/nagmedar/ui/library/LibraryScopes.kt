@@ -122,18 +122,24 @@ class ScopeRules(val scopes: LibraryScopes, locate: (String) -> String?) {
     fun claims(section: LibrarySection, location: String): Boolean =
         shown.getValue(section).any { Locations.isUnder(location, it) } && !excluded(section, location)
 
+    /** [section] leaves the file at [location] out: one of its folders marked so holds it. */
+    fun leavesOut(section: LibrarySection, location: String?): Boolean = location != null && excluded(section, location)
+
     /**
-     * Whether [section] shows the file at [location]: under one of its folders when it has some,
-     * else anywhere but its excluded folders and the folders other video sections claim (a file
-     * in the folder chosen for Videos is no film). A file of no known place (null) is shown only
-     * by sections without folders.
+     * Whether [section]'s folders let it show the file at [location]: under one of its folders when
+     * it has some; else anywhere but its excluded folders and, for Films and Series, the folders
+     * chosen for Videos (a file there is a video of the phone, no film or episode). A file of no
+     * known place (null) only by sections without folders. Videos also shows what Films and Series
+     * do not ([splitVideos]).
      */
     fun inScope(section: LibrarySection, location: String?): Boolean {
         if (location == null) return !constrained(section)
         if (excluded(section, location)) return false
         if (constrained(section)) return claims(section, location)
-        if (!section.video) return true
-        return LibrarySection.entries.none { it != section && it.video && claims(it, location) }
+        return when (section) {
+            LibrarySection.Movies, LibrarySection.Series -> !claims(LibrarySection.Videos, location)
+            LibrarySection.Videos, LibrarySection.Music -> true
+        }
     }
 
     private companion object {
@@ -155,24 +161,28 @@ class VideoSplit(val films: List<VideoItem>, val episodes: List<VideoItem>, val 
 }
 
 /**
- * Which section shows each video. Series shows the episodes (by their names) in its scope; Films
- * the other videos in its scope, and without folders of its own not the camera clips either
- * ([CameraClips]); Videos what its folders hold, or without folders what neither of them shows.
- * A file can be in two sections when both have its folder.
+ * Which section shows each video. Films and Series take their own folders, or without folders
+ * the library but the folders chosen for Videos. Series shows the episodes (by their names) in its
+ * scope; Films the other videos in its scope, and without folders of its own neither the camera
+ * clips ([CameraClips]) nor what a Series folder holds (a file there that is not named like an
+ * episode is no film). Videos shows its folders and every video neither of them shows, so that no
+ * video is lost; only a folder left out keeps one out. A file can be in two sections when both
+ * chose its folder.
  */
 fun splitVideos(items: List<VideoItem>, rules: ScopeRules, locate: (VideoItem) -> String?): VideoSplit {
     val episodes = ArrayList<VideoItem>()
     val films = ArrayList<VideoItem>()
     val clips = ArrayList<VideoItem>()
     val moviesConstrained = rules.constrained(LibrarySection.Movies)
-    val videosConstrained = rules.constrained(LibrarySection.Videos)
     for (item in items) {
         val location = locate(item)
         val episode = EpisodeParser.parse(item.path) != null
         val inSeries = episode && rules.inScope(LibrarySection.Series, location)
+        val inSeriesFolder = location != null && rules.claims(LibrarySection.Series, location)
         val inFilms = !inSeries && rules.inScope(LibrarySection.Movies, location) &&
-            (moviesConstrained || (!episode && !CameraClips.isClip(location ?: item.path.lowercase(Locale.ROOT))))
-        val inVideos = rules.inScope(LibrarySection.Videos, location) && (videosConstrained || (!inSeries && !inFilms))
+            (moviesConstrained || (!episode && !inSeriesFolder && !CameraClips.isClip(location ?: item.path.lowercase(Locale.ROOT))))
+        val inVideos = !rules.leavesOut(LibrarySection.Videos, location) &&
+            ((location != null && rules.claims(LibrarySection.Videos, location)) || (!inSeries && !inFilms))
         if (inSeries) episodes += item
         if (inFilms) films += item
         if (inVideos) clips += item

@@ -32,7 +32,7 @@ Films, Series, Videos and Music can each show their own folders, subfolders incl
 2. Choose a folder with “Choose a folder…” in the system's folder chooser, or tap one of the suggested folders (one of an SD card's top folders, or the whole of a drive).
 3. To leave a subfolder out, add it too and choose “Leave out” in its menu; “Remove” takes a folder off the list.
 
-> A folder chosen for Videos leaves Films and Series, and theirs leave Videos. The folders belong to this device; they are not part of a backup.
+> Films and Series without folders of their own leave out the folders chosen for Videos. Videos also shows every video that Films and Series do not, such as a file in a Series folder that is not named like an episode, so no video is lost. The folders belong to this device; they are not part of a backup.
 
 > On a phone, the “More” page of the bottom bar lists the screens that do not fit in it.
 
@@ -43,7 +43,7 @@ Films and Series show with posters, overviews and ratings; for a series you see 
 ### Views
 - Choose the view with the buttons in the header: **Grid** (cards), **Poster** (2:3 posters; in Films a film's backdrop on top), **List** (poster thumbnail, year, IMDb and Rotten Tomatoes ratings, length, video and audio; sorted by its columns) and, in Films, **Folders**. The choice is remembered per section; on a phone the views are in one menu button.
 - In Films, the 4K, HDR, Dolby Vision, Atmos, Turkish subtitles and Unwatched filters narrow the list.
-- **Videos** shows the resolution, length, date taken and size on its cards, and sorts by date, title, size or duration. The videos of the camera, of screen recordings and of messaging apps show here, not in Films. This page deletes no file.
+- **Videos** shows the resolution, length, date taken and size on its cards, and sorts by date, title, size or duration. The videos of the camera, of screen recordings and of messaging apps show here, not in Films, and so does every video that Films and Series do not show. This page deletes no file.
 
 ### Film information
 Each film and series is looked up once on TMDB by the title and year its file name gives: the poster, backdrop, overview, year, genres, length, cast and TMDB rating come from there; OMDb gives the IMDb and Rotten Tomatoes ratings. Lookups run in the background, by default on Wi-Fi only; the library works without them, and offline too.

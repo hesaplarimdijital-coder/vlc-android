@@ -3608,7 +3608,7 @@
     <string name="nag_order_size">Size</string>
     <string name="nag_lib_sources">Source folders</string>
     <string name="nag_lib_sources_for">Source folders: %1$s</string>
-    <string name="nag_lib_sources_hint">Choose the folders each section shows; subfolders are included. A section without folders shows everything the library has for it. A folder chosen for Videos leaves Films and Series, and the other way round.</string>
+    <string name="nag_lib_sources_hint">Choose the folders each section shows; subfolders are included. A section without folders shows everything the library has for it; Films and Series then leave out the folders chosen for Videos. Videos also shows every video that Films and Series do not, such as a file in a Series folder that is not named like an episode.</string>
     <string name="nag_lib_sources_all">All of the library</string>
     <string name="nag_lib_choose_folder">Choose a folder…</string>
     <string name="nag_lib_storage_all">All of %1$s</string>

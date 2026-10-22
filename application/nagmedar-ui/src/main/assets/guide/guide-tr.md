@@ -32,7 +32,7 @@ Filmler, Diziler, Videolar ve Müzik'in her biri kendi klasörlerini gösterebil
 2. “Klasör seç…” ile sistemin seçicisinden bir klasör seçin ya da önerilen klasörlerden birine dokunun (bir SD kartın üst klasörlerinden biri ya da bir diskin tümü gibi).
 3. Bir alt klasörü göstermemek için onu da ekleyin ve menüsünden “Hariç tut” deyin; “Kaldır” klasörü listeden çıkarır.
 
-> Videolar için seçilen klasör Filmler ve Diziler'den çıkar, Filmler ve Diziler'inki de Videolar'dan. Klasörler bu cihaza özgüdür; yedeğe girmez.
+> Kendi klasörü olmayan Filmler ve Diziler, Videolar için seçilen klasörleri göstermez. Filmler'in de Diziler'in de göstermediği her video, örneğin Diziler klasöründe bölüm gibi adlandırılmamış bir dosya, Videolar'da görünür; hiçbir video kaybolmaz. Klasörler bu cihaza özgüdür; yedeğe girmez.
 
 > Telefonda alt çubuktaki “Daha fazla” sayfası alt çubuğa sığmayan ekranları listeler.
 
@@ -43,7 +43,7 @@ Filmler ve Diziler afişleri, özetleri ve puanlarıyla görünür; dizilerde ha
 ### Görünümler
 - Başlıktaki düğmelerle görünümü seçin: **Izgara** (kartlar), **Afiş** (2:3 afişler; Filmler'de üstte bir filmin geniş görseli), **Liste** (afiş küçüğü, yıl, IMDb ve Rotten Tomatoes puanı, süre, video ve ses; sütunlara göre sıralanır) ve Filmler'de **Klasörler**. Seçim bölüm başına hatırlanır; telefonda görünümler tek bir menü düğmesindedir.
 - Filmler'de 4K, HDR, Dolby Vision, Atmos, Türkçe altyazılı ve İzlenmedi filtreleri listeyi daraltır.
-- **Videolar** kartlarda çözünürlüğü, süreyi, çekildiği tarihi ve boyutu gösterir; tarihe, ada, boyuta ya da süreye göre sıralanır. Kameranın, ekran kayıtlarının ve mesajlaşma uygulamalarının videoları Filmler'de değil burada görünür. Bu sayfa hiçbir dosyayı silmez.
+- **Videolar** kartlarda çözünürlüğü, süreyi, çekildiği tarihi ve boyutu gösterir; tarihe, ada, boyuta ya da süreye göre sıralanır. Kameranın, ekran kayıtlarının ve mesajlaşma uygulamalarının videoları Filmler'de değil burada görünür; Filmler'in ve Diziler'in göstermediği her video da. Bu sayfa hiçbir dosyayı silmez.
 
 ### Film bilgileri
 Her film ve dizi, dosya adından okunan ad ve yılla bir kez TMDB'de aranır: afiş, geniş görsel, özet, yıl, türler, süre, oyuncular ve TMDB puanı gelir; IMDb puanını ve Rotten Tomatoes puanını OMDb verir. Arama arka planda, varsayılan olarak yalnızca Wi-Fi'da yapılır; kütüphane bilgisiz de, çevrimdışı da çalışır.
