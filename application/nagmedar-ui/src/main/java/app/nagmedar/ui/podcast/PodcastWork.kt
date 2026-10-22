@@ -12,10 +12,12 @@ import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import app.nagmedar.data.NagmedarDatabase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -114,21 +116,27 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) : Corout
         runCatching { setForeground(foregroundInfo(notifier.downloading("", null, ids.first(), ids.size - 1))) }
         var left = ids.size
         var shownAt = 0L
-        val outcome = PodcastCenter.runner(applicationContext).run(
-            ids,
-            final = runAttemptCount >= MAX_ATTEMPTS - 1,
-            onStart = { episode ->
-                left--
-                notifier.updateDownload(notifier.downloading(episode.title, null, episode.id, left))
-            },
-            onProgress = { episode, progress ->
-                val now = System.nanoTime()
-                if (now - shownAt >= UPDATE_EVERY_NS) {
-                    shownAt = now
-                    notifier.updateDownload(notifier.downloading(episode.title, progress.fraction, episode.id, left))
-                }
-            },
-        )
+        val outcome = try {
+            PodcastCenter.runner(applicationContext).run(
+                ids,
+                final = runAttemptCount >= MAX_ATTEMPTS - 1,
+                onStart = { episode ->
+                    left--
+                    notifier.updateDownload(notifier.downloading(episode.title, null, episode.id, left))
+                },
+                onProgress = { episode, progress ->
+                    val now = System.nanoTime()
+                    if (now - shownAt >= UPDATE_EVERY_NS) {
+                        shownAt = now
+                        notifier.updateDownload(notifier.downloading(episode.title, progress.fraction, episode.id, left))
+                    }
+                },
+            )
+        } catch (e: CancellationException) {
+            // the runner has put the running episode back in the queue; WorkManager starts the work again, so the wait is said
+            if (stopReason == WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) notifier.showDownloadsPaused()
+            throw e
+        }
         val cleanup = PodcastCenter.cleaner(applicationContext).clean(PodcastCenter.playingEpisodes())
         when {
             outcome.diskFull -> notifier.showDiskFull()

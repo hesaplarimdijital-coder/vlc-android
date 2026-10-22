@@ -66,6 +66,7 @@ import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
+import app.nagmedar.ui.components.SliderMark
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -77,6 +78,8 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.techBadge
+import app.nagmedar.ui.podcast.Chapter
+import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.InputMode
@@ -155,6 +158,8 @@ data class PlayerBarInfo(
     val canCast: Boolean = false,
     /** S-1302: the device a renderer plays it on; null while it plays here. */
     val casting: CastDevice? = null,
+    /** S-1104: the chapters of the podcast episode that plays; empty for any other media. */
+    val chapters: List<Chapter> = emptyList(),
 )
 
 /** What the bars ask of playback: the playback service in the app, a recorder in tests. */
@@ -182,6 +187,12 @@ interface PlayerBarActions {
 
     /** S-1302: the device picker. */
     fun cast() = Unit
+
+    /** S-1104: to the next chapter of the playing episode, or for [forward] false to the start of this one (the one before). */
+    fun stepChapter(forward: Boolean) = Unit
+
+    /** S-1104: to [ms] of the playing media (a chapter chosen from the list). */
+    fun seekToMs(ms: Long) = Unit
 }
 
 /**
@@ -232,6 +243,12 @@ class ServicePlayerBarActions(
     }
 
     override fun cast() = Casting.openPicker()
+
+    override fun stepChapter(forward: Boolean) {
+        ChapterSteps.step(forward)
+    }
+
+    override fun seekToMs(ms: Long) = PlaybackActions.seekToMs(ms)
 }
 
 /** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
@@ -282,6 +299,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         volume = PlaybackService.instance?.volume ?: 100,
         canCast = rememberCastingEnabled(),
         casting = rememberCastDevice(),
+        chapters = rememberPlayingChapters(),
     )
 }
 
@@ -314,6 +332,7 @@ fun MiniPlayer(
     var titleHeight by remember { mutableIntStateOf(0) }
     val shape = if (floating) RoundedCornerShape(dimens.radiusCard) else RectangleShape
     val artSize = dimens.miniPlayerHeight - if (floating) 28.dp else 20.dp
+    val marks = rememberChapterMarks(info.chapters, info.lengthMs)
     Box(modifier.fillMaxWidth().then(if (floating) Modifier.padding(horizontal = 8.dp, vertical = 6.dp) else Modifier)) {
         Column(
             Modifier
@@ -354,13 +373,7 @@ fun MiniPlayer(
                                 // S-1302: where it plays
                                 CastingLine(info.casting)
                             } else {
-                                Text(
-                                    listOfNotNull(info.subtitle, info.format).joinToString(" · "),
-                                    style = NagTheme.type.labelSmall,
-                                    color = colors.textTertiary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                                SubtitleLine(info, progress, withFormat = true)
                             }
                         }
                     }
@@ -370,7 +383,8 @@ fun MiniPlayer(
                             info.lengthMs,
                             progress,
                             actions::seekTo,
-                            Modifier
+                            marks = marks,
+                            modifier = Modifier
                                 .align(Alignment.CenterStart)
                                 .padding(start = artSize + dimens.gapM, top = with(density) { titleHeight.toDp() })
                                 .fillMaxWidth(),
@@ -378,6 +392,8 @@ fun MiniPlayer(
                     }
                 }
                 if (extras) NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, shortcut = ShortcutId.Previous)
+                // S-1104: the chapters of a podcast episode
+                if (extras && info.chapters.isNotEmpty()) ChapterButtons(actions::stepChapter)
                 NagIconButton(
                     if (info.playing) NagIcons.Pause else NagIcons.Play,
                     stringResource(if (info.playing) R.string.nag_pause else R.string.nag_play),
@@ -419,7 +435,7 @@ private fun ProgressLine(progress: () -> Float) {
 
 /** "1:42 ──●──── 4:18": seeking from a bar. */
 @Composable
-private fun SeekRow(lengthMs: Long, progress: () -> Float, onSeek: (Float) -> Unit, modifier: Modifier = Modifier) {
+private fun SeekRow(lengthMs: Long, progress: () -> Float, onSeek: (Float) -> Unit, modifier: Modifier = Modifier, marks: List<SliderMark> = emptyList()) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_position)
@@ -432,10 +448,28 @@ private fun SeekRow(lengthMs: Long, progress: () -> Float, onSeek: (Float) -> Un
             onValueChange = onSeek,
             modifier = Modifier.weight(1f).semantics { contentDescription = label },
             hoverLabel = { clock((lengthMs * it).toLong()) },
+            marks = marks,
         )
         Spacer(Modifier.width(dimens.gapS))
         Text(clock(lengthMs), style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
     }
+}
+
+/**
+ * The second line of a bar: the artist (and the format), or for a podcast episode with chapters the chapter playing
+ * (S-1104). Reads the progress itself, so that only this line changes as the episode goes on.
+ */
+@Composable
+private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat: Boolean) {
+    val chapter = if (info.chapters.isEmpty()) null else chapterNameAt(info.chapters, info.lengthMs, progress())
+    Text(
+        listOfNotNull(info.subtitle, chapter ?: info.format.takeIf { withFormat }).joinToString(" · "),
+        style = NagTheme.type.labelSmall,
+        color = NagTheme.colors.textTertiary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.testTag("bar-subtitle"),
+    )
 }
 
 /** "0:00", "1:42", "1:02:03". */
@@ -482,7 +516,7 @@ fun TransportBar(
                     if (info.casting != null) {
                         CastingLine(info.casting)
                     } else {
-                        Text(info.subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        SubtitleLine(info, progress, withFormat = false)
                     }
                 }
             }
@@ -495,10 +529,12 @@ fun TransportBar(
                     NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
                     NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_repeat), actions::cycleRepeat, selected = info.repeating, shortcut = ShortcutId.Repeat)
                 }
-                SeekRow(info.lengthMs, progress, actions::seekTo, Modifier.fillMaxWidth())
+                SeekRow(info.lengthMs, progress, actions::seekTo, Modifier.fillMaxWidth(), marks = rememberChapterMarks(info.chapters, info.lengthMs))
             }
             Spacer(Modifier.width(dimens.gapL))
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                // S-1104: the chapters of a podcast episode
+                if (info.chapters.isNotEmpty()) ChapterButtons(actions::stepChapter)
                 info.format?.let { FormatChip(it) }
                 Spacer(Modifier.width(dimens.gapS))
                 // S-1302: a renderer's volume is the device's own

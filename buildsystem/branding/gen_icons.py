@@ -111,6 +111,10 @@ ICONS = {
     'Bookmark': '<path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/>',
     'Chapters': '<path d="M2 10h12M5 7.5v5M10 7.5v5M2.5 4.5h6"/>',
     'Share': '<circle cx="11.5" cy="3.8" r="1.8"/><circle cx="4.5" cy="8" r="1.8"/><circle cx="11.5" cy="12.2" r="1.8"/><path d="M6.1 7.1 9.9 4.7M6.1 8.9l3.8 2.4"/>',
+    # S-1104 to the start of this chapter or the one before (two chevrons: not the track's "previous")
+    'ChapterPrevious': '<path d="M8 4 4 8l4 4M12.5 4l-4 4 4 4"/>',
+    # S-1104 to the next chapter
+    'ChapterNext': '<path d="M3.5 4l4 4-4 4M8 4l4 4-4 4"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

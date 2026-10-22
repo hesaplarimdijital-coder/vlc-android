@@ -48,6 +48,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -75,6 +76,11 @@ import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
+import app.nagmedar.ui.components.SliderMark
+import app.nagmedar.ui.components.TimelineLabel
+import app.nagmedar.ui.components.MarkReach
+import app.nagmedar.ui.components.nearest
+import app.nagmedar.ui.components.playingAt
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -84,10 +90,15 @@ import app.nagmedar.ui.covers.rememberCoverMenu
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.lyrics.PlayingLyrics
+import app.nagmedar.ui.podcast.Chapter
+import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.playback.ChapterStrip
+import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.QueueEntry
 import app.nagmedar.ui.playback.rememberNowPlaying
+import app.nagmedar.ui.playback.rememberPlayingChapters
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.stats.TrackStatsIndex
@@ -111,6 +122,8 @@ data class NowPlayingInfo(
     val playing: Boolean,
     /** S-808: its stars (0 none); null for what is not rated (a stream). */
     val rating: Int? = null,
+    /** S-1104: the chapters of the podcast episode that plays; empty for any other media. */
+    val chapters: List<Chapter> = emptyList(),
 )
 
 /**
@@ -144,6 +157,9 @@ fun NowPlayingPanel(
     visualizer: (@Composable (Modifier) -> Unit)? = null,
     visualizerShown: Boolean = false,
     onVisualizerShown: ((Boolean) -> Unit)? = null,
+    /** S-1104: the chapter strip's buttons: to the next chapter (true) or the previous (false), and to a chosen chapter's start. */
+    onStepChapter: (Boolean) -> Unit = {},
+    onSeekToMs: (Long) -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -181,10 +197,11 @@ fun NowPlayingPanel(
             lyrics != null && lyricsShown -> {
                 PlayingLine(info, artwork)
                 lyrics(Modifier.weight(1f).fillMaxWidth())
-                WaveformTimeline(waveform, progress, info.lengthMs, onSeek, height = 40.dp)
+                WaveformTimeline(waveform, progress, info.lengthMs, onSeek, height = 40.dp, marks = rememberChapterMarks(info.chapters, info.lengthMs))
+                ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
             }
             else -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-                Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate, visualizer.takeIf { visualizerShown })
+                Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate, visualizer.takeIf { visualizerShown }, onStepChapter, onSeekToMs)
             }
         }
     }
@@ -215,6 +232,8 @@ private fun Playing(
     artwork: @Composable (Dp) -> Unit,
     onRate: ((Int) -> Unit)?,
     visualizer: (@Composable (Modifier) -> Unit)?,
+    onStepChapter: (Boolean) -> Unit,
+    onSeekToMs: (Long) -> Unit,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -232,7 +251,8 @@ private fun Playing(
         Spacer(Modifier.height(dimens.gapXs))
         // S-611: what plays, drawn
         visualizer?.invoke(Modifier.fillMaxWidth().height(VISUALIZER_HEIGHT))
-        WaveformTimeline(waveform, progress, info.lengthMs, onSeek)
+        WaveformTimeline(waveform, progress, info.lengthMs, onSeek, marks = rememberChapterMarks(info.chapters, info.lengthMs))
+        ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
         if (upNext.isNotEmpty()) {
             Spacer(Modifier.height(dimens.gapS))
             Text(stringResource(R.string.nag_queue_title), style = NagTheme.type.labelSmall, color = colors.textTertiary)
@@ -288,90 +308,118 @@ fun WaveformTimeline(
     onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier,
     height: Dp = 64.dp,
+    /** S-1104: the chapters' starts, drawn over the waveform; the pointer near one, or the focus on the bar, names it. */
+    marks: List<SliderMark> = emptyList(),
 ) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     var widthPx by remember { mutableFloatStateOf(1f) }
+    var hoverAt by remember { mutableStateOf<Float?>(null) }
+    val reach = with(LocalDensity.current) { MarkReach.toPx() } / widthPx
     val latestSeek by rememberUpdatedState(onSeek)
     val fraction = progress().coerceIn(0f, 1f)
     val step = if (lengthMs > 0) (SEEK_STEP_MS.toFloat() / lengthMs) else 0.02f
     val description = stringResource(R.string.nag_music_waveform)
     val position = stringResource(R.string.nag_music_position, formatDuration((lengthMs * fraction).toLong()), formatDuration(lengthMs))
+    val playingMark = if (marks.isEmpty()) null else marks.playingAt(fraction)
     Column(modifier.fillMaxWidth()) {
-        Canvas(
-            Modifier
-                .fillMaxWidth()
-                .height(height)
-                .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
-                .pointerHoverIcon(PointerIcon.Hand)
-                .hoverable(interaction)
-                .focusable(interactionSource = interaction)
-                .focusRing(state, RoundedCornerShape(4.dp))
-                .semantics {
-                    contentDescription = description
-                    stateDescription = position
-                    progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
-                    setProgress { target -> latestSeek(target.coerceIn(0f, 1f)); true }
-                }
-                .onKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
-                    val target = when (event.key) {
-                        Key.DirectionLeft -> fraction - step
-                        Key.DirectionRight -> fraction + step
-                        Key.MoveHome -> 0f
-                        Key.MoveEnd -> 1f
-                        else -> return@onKeyEvent false
+        Box(Modifier.fillMaxWidth().height(height)) {
+            Canvas(
+                Modifier
+                    .fillMaxWidth()
+                    .height(height)
+                    .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
+                    .pointerHoverIcon(PointerIcon.Hand)
+                    .hoverable(interaction)
+                    .focusable(interactionSource = interaction)
+                    .focusRing(state, RoundedCornerShape(4.dp))
+                    .semantics {
+                        contentDescription = description
+                        stateDescription = playingMark?.let { "$position · ${it.label}" } ?: position
+                        progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
+                        setProgress { target -> latestSeek(target.coerceIn(0f, 1f)); true }
                     }
-                    latestSeek(target.coerceIn(0f, 1f))
-                    true
-                }
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        var dragging = false
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull() ?: continue
-                            when (event.type) {
-                                PointerEventType.Press -> {
-                                    dragging = true
-                                    latestSeek((change.position.x / widthPx).coerceIn(0f, 1f))
-                                    change.consume()
+                    .onKeyEvent { event ->
+                        if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                        val target = when (event.key) {
+                            Key.DirectionLeft -> fraction - step
+                            Key.DirectionRight -> fraction + step
+                            Key.MoveHome -> 0f
+                            Key.MoveEnd -> 1f
+                            else -> return@onKeyEvent false
+                        }
+                        latestSeek(target.coerceIn(0f, 1f))
+                        true
+                    }
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            var dragging = false
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                val change = event.changes.firstOrNull() ?: continue
+                                when (event.type) {
+                                    PointerEventType.Press -> {
+                                        dragging = true
+                                        latestSeek((change.position.x / widthPx).coerceIn(0f, 1f))
+                                        change.consume()
+                                    }
+                                    PointerEventType.Move -> if (dragging && change.pressed) {
+                                        latestSeek((change.position.x / widthPx).coerceIn(0f, 1f))
+                                        change.consume()
+                                    } else if (!change.pressed) {
+                                        hoverAt = (change.position.x / widthPx).coerceIn(0f, 1f)
+                                    }
+                                    PointerEventType.Release -> dragging = false
+                                    PointerEventType.Enter -> hoverAt = (change.position.x / widthPx).coerceIn(0f, 1f)
+                                    PointerEventType.Exit -> hoverAt = null
+                                    else -> Unit
                                 }
-                                PointerEventType.Move -> if (dragging && change.pressed) {
-                                    latestSeek((change.position.x / widthPx).coerceIn(0f, 1f))
-                                    change.consume()
-                                }
-                                PointerEventType.Release -> dragging = false
-                                else -> Unit
                             }
                         }
-                    }
-                },
-        ) {
-            val bar = 2.dp.toPx()
-            val gap = 1.dp.toPx()
-            val count = max(1, ((size.width + gap) / (bar + gap)).toInt())
-            val middle = size.height / 2
-            val played = size.width * fraction
-            for (i in 0 until count) {
-                val x = i * (bar + gap)
-                val (peak, rms) = if (waveform != null && waveform.size > 0) bucket(waveform, i, count) else FLAT
-                val lit = x + bar / 2 <= played
-                val peakHeight = max(bar, peak * size.height)
-                val rmsHeight = max(bar, min(size.height, rms * RMS_SCALE * size.height))
-                drawRoundRect(
-                    if (lit) colors.accent.copy(alpha = 0.45f) else colors.borderStrong,
-                    topLeft = Offset(x, middle - peakHeight / 2),
-                    size = Size(bar, peakHeight),
-                    cornerRadius = CornerRadius(bar / 2),
-                )
-                drawRoundRect(
-                    if (lit) colors.accent else colors.textTertiary,
-                    topLeft = Offset(x, middle - rmsHeight / 2),
-                    size = Size(bar, rmsHeight),
-                    cornerRadius = CornerRadius(bar / 2),
-                )
+                    },
+            ) {
+                val bar = 2.dp.toPx()
+                val gap = 1.dp.toPx()
+                val count = max(1, ((size.width + gap) / (bar + gap)).toInt())
+                val middle = size.height / 2
+                val played = size.width * fraction
+                for (i in 0 until count) {
+                    val x = i * (bar + gap)
+                    val (peak, rms) = if (waveform != null && waveform.size > 0) bucket(waveform, i, count) else FLAT
+                    val lit = x + bar / 2 <= played
+                    val peakHeight = max(bar, peak * size.height)
+                    val rmsHeight = max(bar, min(size.height, rms * RMS_SCALE * size.height))
+                    drawRoundRect(
+                        if (lit) colors.accent.copy(alpha = 0.45f) else colors.borderStrong,
+                        topLeft = Offset(x, middle - peakHeight / 2),
+                        size = Size(bar, peakHeight),
+                        cornerRadius = CornerRadius(bar / 2),
+                    )
+                    drawRoundRect(
+                        if (lit) colors.accent else colors.textTertiary,
+                        topLeft = Offset(x, middle - rmsHeight / 2),
+                        size = Size(bar, rmsHeight),
+                        cornerRadius = CornerRadius(bar / 2),
+                    )
+                }
+                // the chapters' starts
+                val tick = colors.text.copy(alpha = 0.6f)
+                val apart = 3.dp.toPx()
+                var last = -apart
+                for (mark in marks) {
+                    if (mark.fraction <= 0f) continue
+                    val x = size.width * mark.fraction.coerceIn(0f, 1f)
+                    if (x - last < apart) continue
+                    last = x
+                    drawRect(tick, Offset(x - 1.dp.toPx(), 0f), Size(2.dp.toPx(), size.height))
+                }
+            }
+            // under the pointer, near a mark: its time and name; with the focus on the bar: the chapter playing
+            val at = hoverAt
+            val mark = if (at != null) marks.nearest(at, reach) else if (state.focused) playingMark else null
+            if (mark != null) {
+                TimelineLabel(listOf(formatDuration((lengthMs * mark.fraction).toLong()), mark.label).joinToString(" · "), widthPx * mark.fraction, widthPx)
             }
         }
         Row(Modifier.fillMaxWidth().padding(top = 2.dp)) {
@@ -430,6 +478,7 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
     var lyricsShown by rememberSaveable { mutableStateOf(false) }
     val coverMenu = rememberCoverMenu(remember(media) { media?.let(CoverTrack::of) })
     val coverLabel = stringResource(R.string.nag_cover_menu)
+    val chapters = rememberPlayingChapters()
     val info = media?.let {
         NowPlayingInfo(
             title = it.nowPlaying ?: it.title ?: "",
@@ -439,6 +488,7 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
             lengthMs = it.length,
             playing = nowPlaying.playing,
             rating = key?.let { k -> stats[k]?.rating ?: 0 },
+            chapters = chapters,
         )
     }
     NowPlayingPanel(
@@ -464,6 +514,8 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
         visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
         visualizerShown = prefs.visualizer.music,
         onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
+        onStepChapter = { forward -> ChapterSteps.step(forward) },
+        onSeekToMs = PlaybackActions::seekToMs,
     )
 }
 

@@ -66,9 +66,12 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.playback.ChapterStrip
 import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.ServicePlayerBarActions
+import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
+import app.nagmedar.ui.playback.rememberPlayingChapters
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.stats.TrackStatsIndex
@@ -247,7 +250,9 @@ fun PhonePlayer(
             // S-808: a finger's stars
             info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 24.dp, target = 44.dp, modifier = Modifier.offset(x = (-10).dp).testTag("phone-rating")) }
             Spacer(Modifier.height(dimens.gapS))
-            WaveformTimeline(waveform, progress, info.lengthMs, actions::seekTo, height = 56.dp)
+            WaveformTimeline(waveform, progress, info.lengthMs, actions::seekTo, height = 56.dp, marks = rememberChapterMarks(info.chapters, info.lengthMs))
+            // S-1104: the chapters of a podcast episode
+            ChapterStrip(info.chapters, info.lengthMs, progress, actions::stepChapter, actions::seekToMs)
         }
         Spacer(Modifier.height(dimens.gapM))
         // the controls, low: the thumb's
@@ -327,6 +332,7 @@ fun PhonePlayerHost(
             lengthMs = media.length,
             playing = nowPlaying.playing,
             rating = key?.let { stats[it]?.rating ?: 0 },
+            chapters = rememberPlayingChapters(),
         ),
         progress = { progress },
         waveform = waveform,

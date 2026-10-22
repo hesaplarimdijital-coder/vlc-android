@@ -56,6 +56,7 @@ class PodcastScreenTest {
         onOpenSubscribed = { calls += "open-hit:${it.title}" },
         onUnsubscribe = { calls += "unsubscribe:$it" },
         onPlay = { _: PodcastFeed, episode: PodcastEpisode -> calls += "play:${episode.title}" },
+        onOpenEpisode = { calls += "open-episode:$it" },
         onSetPlayed = { id, played -> calls += "played:$id:$played" },
         onAdd = { calls += "add" },
         onAddSubmit = { calls += "submit:$it" },
@@ -153,7 +154,8 @@ class PodcastScreenTest {
         compose.onAllNodesWithTag("podcast-play")[0].performClick()
         compose.onAllNodesWithTag("podcast-episode")[1].performClick()
         compose.onNodeWithTag("podcast-unsubscribe").performClick()
-        assertEquals(listOf("play:Üçüncü gece: Neva Kâr", "play:İkinci gece: Itrî ve mirası", "unsubscribe:${PodcastSamples.gece.id}"), calls)
+        // a tap on the row opens the episode's page; playing is the play button's
+        assertEquals(listOf("play:Üçüncü gece: Neva Kâr", "open-episode:9", "unsubscribe:${PodcastSamples.gece.id}"), calls)
     }
 
     @Test

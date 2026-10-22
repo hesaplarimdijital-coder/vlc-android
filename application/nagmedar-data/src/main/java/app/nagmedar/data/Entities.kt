@@ -50,6 +50,8 @@ data class PodcastFeed(
     @ColumnInfo(name = "skip_intro_s", defaultValue = "0") val skipIntroSeconds: Int = 0,
     /** S-1104: seconds before the end from which an episode counts as played and the next one starts, 0 for none. */
     @ColumnInfo(name = "skip_outro_s", defaultValue = "0") val skipOutroSeconds: Int = 0,
+    /** Version 16: the volume boost of the show's episodes: 0 off, 1 light, 2 strong. */
+    @ColumnInfo(name = "volume_boost", defaultValue = "0") val volumeBoost: Int = 0,
 )
 
 object DownloadState {

@@ -5,6 +5,7 @@ import android.net.Uri
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastDao
 import app.nagmedar.data.PodcastEpisode
+import app.nagmedar.playback.PlaybackEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,22 +15,28 @@ import kotlinx.coroutines.withContext
 import org.videolan.tools.AppScope
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaybackObserver
+import org.videolan.vlc.media.ResumeHook
+import org.videolan.vlc.media.ResumeOwner
 
 /**
  * S-1104: what the playback service plays, followed for as long as it lives, whatever started it: when it is a podcast
  * episode (by its address, the enclosure's or the downloaded file's), the show's speed is set, the intro skipped, the
  * place kept every few seconds and when it pauses or stops, the episode marked played at its end, and the next one started
- * when the show's outro begins. The rules are [EpisodeTracker]'s; this looks, asks Room, and does what it says.
+ * when the show's outro begins, and the show's volume boost applied for as long as its episode plays. The rules are
+ * [EpisodeTracker]'s; this looks, asks Room, and does what it says.
  * A look a second while it plays, every few seconds while it does not.
  */
 class PodcastPlaybackObserver : PlaybackObserver {
     private var job: Job? = null
     private var dao: PodcastDao? = null
     private val tracker = EpisodeTracker()
+    private val booster = VolumeBooster<PlaybackEngine>({ it.getVolume() }, { engine, volume -> engine.setVolume(volume) })
 
     override fun attach(service: PlaybackService) {
         val app = service.applicationContext
         val dao = NagmedarDatabase.get(app).podcasts().also { this.dao = it }
+        // an episode follows its show's resume rule, not VLC's "resume playback" setting and its dialog
+        ResumeHook.owner = ResumeOwner { location -> episodeAt(dao, location) != null }
         job?.cancel()
         job = AppScope.launch {
             var asked: String? = null
@@ -48,6 +55,7 @@ class PodcastPlaybackObserver : PlaybackObserver {
                     location, context, service.getTime(), service.length, playing, service.rate, System.currentTimeMillis(),
                 )
                 apply(service, dao, commands)
+                runCatching { booster.update(service.playlistManager.engine, context?.episodeId, context?.volumeBoost ?: VolumeBoost.OFF) }
             }
         }
     }
@@ -55,6 +63,8 @@ class PodcastPlaybackObserver : PlaybackObserver {
     override fun detach() {
         job?.cancel()
         job = null
+        ResumeHook.owner = null
+        runCatching { booster.end() }
         // the place of what was playing is kept as the service goes
         val saves = tracker.end().filterIsInstance<TrackerCommand.SavePosition>()
         val dao = dao
@@ -101,6 +111,7 @@ class PodcastPlaybackObserver : PlaybackObserver {
                 speed = feed.speed,
                 introSeconds = feed.skipIntroSeconds,
                 outroSeconds = feed.skipOutroSeconds,
+                volumeBoost = VolumeBoost.clamp(feed.volumeBoost),
                 positionMs = episode.positionMs,
                 played = episode.played,
                 durationMs = episode.durationMs,

@@ -136,6 +136,20 @@ class PodcastNotifier(private val context: Context) {
         if (canPost()) runCatching { manager.notify(ID_DOWNLOAD, notification) }
     }
 
+    /** Android ended the foreground download job (its daily time limit): the downloads wait and go on from where they were. */
+    fun showDownloadsPaused() {
+        if (!canPost()) return
+        ensureChannel(CHANNEL_DOWNLOAD, R.string.nag_pod_channel_download, NotificationManager.IMPORTANCE_LOW)
+        val n = NotificationCompat.Builder(context, CHANNEL_DOWNLOAD)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+            .setContentTitle(context.getString(R.string.nag_pod_download_paused_title))
+            .setContentText(context.getString(R.string.nag_pod_download_paused_text))
+            .setContentIntent(open(null))
+            .setAutoCancel(true)
+            .build()
+        runCatching { manager.notify(ID_DOWNLOAD_PAUSED, n) }
+    }
+
     /** The device ran out of room: the downloads stopped. */
     fun showDiskFull() {
         if (!canPost()) return
@@ -177,6 +191,7 @@ class PodcastNotifier(private val context: Context) {
         const val ID_DOWNLOAD = 1103
         const val ID_STORAGE = 1104
         const val ID_NEWS_SUMMARY = 1105
+        const val ID_DOWNLOAD_PAUSED = 1106
         private const val ID_NEWS_BASE = 20_000
         private const val PROGRESS_MAX = 1000
 

@@ -2,6 +2,7 @@ package app.nagmedar.ui.player
 
 import androidx.compose.runtime.Immutable
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
+import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.visual.VisualizerKind
 import java.text.NumberFormat
 import java.util.Locale
@@ -9,6 +10,9 @@ import java.util.Locale
 /** A chapter of the media: where it starts, and its name (empty when the file gives none). */
 @Immutable
 data class ChapterMark(val startMs: Long, val name: String)
+
+/** S-1104: the chapters of the podcast episode that plays, as the player's marks; empty for any other media, and while they are read. */
+internal fun podcastChapterMarks(): List<ChapterMark> = PodcastCenter.playing.value?.chapters.orEmpty().map { ChapterMark(it.startMs, it.title) }
 
 /** A track the menus offer: its id for the player and its name. */
 @Immutable
@@ -30,6 +34,8 @@ data class PlayerChromeState(
     val timeMs: Long = 0L,
     val lengthMs: Long = 0L,
     val chapters: List<ChapterMark> = emptyList(),
+    /** S-1104: the chapters are a podcast episode's (the file gives none): the bar names the one playing and steps through them. */
+    val episodeChapters: Boolean = false,
     /** The A-B repeat's points, -1 when not set. */
     val abStartMs: Long = -1L,
     val abStopMs: Long = -1L,
@@ -88,6 +94,9 @@ interface PlayerChromeActions {
     fun next()
 
     fun seekTo(ms: Long)
+
+    /** S-1104: to the next chapter of the podcast episode (or for [forward] false the start of this one, the one before). */
+    fun stepChapter(forward: Boolean) = Unit
 
     fun seekBy(deltaMs: Int)
 

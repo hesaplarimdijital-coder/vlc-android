@@ -99,7 +99,8 @@ import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.remoteaccess.RemoteAccessHost
 import app.nagmedar.ui.radio.RadioScreen
-import app.nagmedar.ui.podcast.Chapters
+import app.nagmedar.ui.podcast.ChapterStep
+import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.radio.record.RadioRecordings
@@ -759,14 +760,12 @@ class AppActions(
         return true
     }
 
-    /** S-1104: to the next (or the previous) chapter of the podcast episode that plays; a toast says when there are none. */
+    /** S-1104: to the next (or the previous) chapter of the podcast episode that plays; a toast says where there is none to go to. */
     private fun stepPodcastChapter(forward: Boolean) {
-        val chapters = PodcastCenter.playing.value?.chapters.orEmpty()
-        val target = PlaybackService.instance?.let { Chapters.step(chapters, it.getTime(), forward) }
-        if (target == null) {
-            Notices.show(context, R.string.nag_pod_chapter_none)
-        } else {
-            PlaybackActions.seekToMs(chapters[target].startMs)
+        when (val step = ChapterSteps.step(forward)) {
+            ChapterStep.NoChapters -> Notices.show(context, R.string.nag_pod_chapter_none)
+            ChapterStep.AtEnd -> Notices.show(context, R.string.nag_pod_chapter_last)
+            is ChapterStep.Went -> Notices.show(context, ChapterSteps.title(context.resources, step.index, step.chapter))
         }
     }
 

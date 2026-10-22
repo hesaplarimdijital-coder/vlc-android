@@ -198,6 +198,7 @@ Sözlüğü testler denetler:
 | döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
 | indirmek, indirme | download | | | Podcast bölümünü cihaza almak: “İndir”, “İndirileni sil”; süren indirmeyi durdurmak “İptal” |
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
+| ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |
 | giriş, kapanış | intro, outro | | | Bir podcast bölümünün başında ve sonunda atlanan saniyeler: “Girişi atla”, “Kapanışı atla” |
 | dönüştürmek | convert | | transcode | Bir müzik dosyasını başka bir biçimde (Opus, MP3, AAC) yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz: “Dönüştür…”, “Dönüştürme bitti” |
 | dönüştürmek | convert | | transcode | Bir dosyayı başka bir biçimde yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz. Müzikte “Dönüştür…” (Opus, MP3, AAC): “Dönüştürme bitti”; videoda “Dönüştür / Kaydet…” (Ctrl+R): bir profille, libVLC'yle |

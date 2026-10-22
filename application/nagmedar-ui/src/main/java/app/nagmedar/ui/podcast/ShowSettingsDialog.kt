@@ -38,7 +38,7 @@ internal fun speedLabel(speed: Float, locale: Locale): String =
 
 /**
  * S-1103, S-1104: one podcast's own settings in a small window: the speed its episodes play at, the seconds skipped at the
- * start (an intro) and before the end (an outro), whether new episodes are told in a notification, and the automatic
+ * start (an intro) and before the end (an outro), the volume boost of quiet recordings, whether new episodes are told in a notification, and the automatic
  * download of the newest and how many of its episodes are kept. Each choice is kept as it is made.
  */
 @Composable
@@ -76,6 +76,17 @@ internal fun ShowSettingsSurface(feed: PodcastFeed, actions: PodcastActions) {
             }
             SettingRow(stringResource(R.string.nag_pod_set_outro), subtitle = stringResource(R.string.nag_pod_set_outro_hint)) {
                 SecondsMenu(feed.skipOutroSeconds, "podcast-set-outro") { actions.onSetPlayback(feed.id, feed.speed, feed.skipIntroSeconds, it) }
+            }
+            SettingRow(stringResource(R.string.nag_pod_set_boost), subtitle = stringResource(R.string.nag_pod_set_boost_hint)) {
+                MenuButton(
+                    boostLabel(res, feed.volumeBoost),
+                    entries = {
+                        VolumeBoost.STEPS.map { step ->
+                            MenuEntry.Item(boostLabel(res, step), { actions.onSetVolumeBoost(feed.id, step) }, checked = step == VolumeBoost.clamp(feed.volumeBoost))
+                        }
+                    },
+                    modifier = Modifier.testTag("podcast-set-boost"),
+                )
             }
             SettingRow(stringResource(R.string.nag_pod_set_notify), subtitle = stringResource(R.string.nag_pod_set_notify_hint)) {
                 NagSwitch(
@@ -142,6 +153,14 @@ private fun SecondsMenu(seconds: Int, tag: String, onSelect: (Int) -> Unit) {
         modifier = Modifier.testTag(tag),
     )
 }
+
+private fun boostLabel(res: android.content.res.Resources, boost: Int): String = res.getString(
+    when (VolumeBoost.clamp(boost)) {
+        VolumeBoost.LIGHT -> R.string.nag_pod_boost_light
+        VolumeBoost.STRONG -> R.string.nag_pod_boost_strong
+        else -> R.string.nag_pod_boost_off
+    },
+)
 
 private fun secondsLabel(res: android.content.res.Resources, seconds: Int): String =
     if (seconds == 0) res.getString(R.string.nag_pod_set_none) else res.getString(R.string.nag_pod_set_seconds, seconds)

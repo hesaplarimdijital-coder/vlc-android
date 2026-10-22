@@ -2431,6 +2431,8 @@
     <string name="nag_pod_channel_download">Podcast downloads</string>
     <string name="nag_pod_download_starting">Starting…</string>
     <string name="nag_pod_download_cancel">Cancel</string>
+    <string name="nag_pod_download_paused_title">Podcast downloads paused</string>
+    <string name="nag_pod_download_paused_text">Android stopped the download job for a while; it goes on from where it was.</string>
     <string name="nag_pod_disk_full_title">Downloads stopped: the device is full</string>
     <string name="nag_pod_disk_full_text">Free some space, or lower the storage limit in Settings › Podcasts.</string>
     <string name="nag_pod_storage_near_title">Podcast downloads are near their limit</string>
@@ -2471,6 +2473,7 @@
     <string name="nag_pod_chapter_n">Chapter %d</string>
     <string name="nag_pod_chapter_play_from">Play from %s</string>
     <string name="nag_pod_chapter_now">Playing now</string>
+    <string name="nag_pod_chapter_last">This is the last chapter</string>
     <string name="nag_pod_chapter_none">This episode has no chapters</string>
     <string name="nag_pod_chapters_loading">Reading the chapters…</string>
     <string name="nag_pod_chapters_none_title">No chapters</string>
@@ -2501,6 +2504,11 @@
     <string name="nag_pod_set_intro_hint">Seconds skipped at the start of each episode.</string>
     <string name="nag_pod_set_outro">Skip the outro</string>
     <string name="nag_pod_set_outro_hint">Seconds left out before the end: the next episode plays, or playback stops.</string>
+    <string name="nag_pod_set_boost">Volume boost</string>
+    <string name="nag_pod_set_boost_hint">Plays this show\'s episodes louder than your volume: light adds about a third, strong about two thirds. For quiet recordings; loud passages may distort. Other media play as usual.</string>
+    <string name="nag_pod_boost_off">Off</string>
+    <string name="nag_pod_boost_light">Light</string>
+    <string name="nag_pod_boost_strong">Strong</string>
     <string name="nag_pod_set_notify">Notify of new episodes</string>
     <string name="nag_pod_set_notify_hint">A notification when the refresh finds new episodes of this show.</string>
     <string name="nag_pod_set_on">On</string>

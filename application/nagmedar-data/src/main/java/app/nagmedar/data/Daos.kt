@@ -148,6 +148,10 @@ abstract class PodcastDao {
     @Query("UPDATE podcast_feed SET speed = :speed WHERE id = :feedId")
     abstract fun setSpeed(feedId: Long, speed: Float)
 
+    /** Version 16: the show's volume boost: 0 off, 1 light, 2 strong. */
+    @Query("UPDATE podcast_feed SET volume_boost = :boost WHERE id = :feedId")
+    abstract fun setVolumeBoost(feedId: Long, boost: Int)
+
     /** S-1101: a new subscription with the episodes its first fetch read; the feed's id. */
     @Transaction
     open fun subscribeWith(feed: PodcastFeed, episodes: List<PodcastEpisode>): Long {
@@ -170,6 +174,7 @@ abstract class PodcastDao {
                 feed.copy(
                     autoDownload = now.autoDownload, notify = now.notify, autoDownloadCount = now.autoDownloadCount,
                     keepLatest = now.keepLatest, speed = now.speed, skipIntroSeconds = now.skipIntroSeconds, skipOutroSeconds = now.skipOutroSeconds,
+                    volumeBoost = now.volumeBoost,
                 )
             },
         )

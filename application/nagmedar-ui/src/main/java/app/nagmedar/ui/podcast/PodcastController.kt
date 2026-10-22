@@ -467,6 +467,10 @@ class PodcastController(
         background.launch { repository.setPlayback(feedId, speed, introSeconds, outroSeconds) }
     }
 
+    fun setVolumeBoost(feedId: Long, boost: Int) {
+        background.launch { repository.setVolumeBoost(feedId, boost) }
+    }
+
     fun play(feed: PodcastFeed, episode: PodcastEpisode) = player.play(feed, episode)
 
     fun setPlayed(episodeId: Long, played: Boolean) {
@@ -588,6 +592,7 @@ class PodcastController(
         onSetAutoDownload = ::setAutoDownload,
         onSetKeepLatest = ::setKeepLatest,
         onSetPlayback = ::setPlayback,
+        onSetVolumeBoost = ::setVolumeBoost,
     )
 
     private companion object {

@@ -2403,6 +2403,8 @@
     <string name="nag_pod_channel_download">Podcast indirmeleri</string>
     <string name="nag_pod_download_starting">Başlıyor…</string>
     <string name="nag_pod_download_cancel">İptal</string>
+    <string name="nag_pod_download_paused_title">Podcast indirmeleri duraklatıldı</string>
+    <string name="nag_pod_download_paused_text">Android indirme işini bir süre durdurdu; kaldığı yerden sürecek.</string>
     <string name="nag_pod_disk_full_title">İndirmeler durdu: cihazda yer kalmadı</string>
     <string name="nag_pod_disk_full_text">Biraz yer açın ya da Ayarlar › Podcastler\'de depolama sınırını düşürün.</string>
     <string name="nag_pod_storage_near_title">Podcast indirmeleri sınıra yaklaştı</string>
@@ -2443,6 +2445,7 @@
     <string name="nag_pod_chapter_n">%d. kısım</string>
     <string name="nag_pod_chapter_play_from">%s noktasından oynat</string>
     <string name="nag_pod_chapter_now">Şimdi oynatılıyor</string>
+    <string name="nag_pod_chapter_last">Bu son kısım</string>
     <string name="nag_pod_chapter_none">Bu bölümün kısımları yok</string>
     <string name="nag_pod_chapters_loading">Kısımlar okunuyor…</string>
     <string name="nag_pod_chapters_none_title">Kısım yok</string>
@@ -2473,6 +2476,11 @@
     <string name="nag_pod_set_intro_hint">Her bölümün başında atlanan saniyeler.</string>
     <string name="nag_pod_set_outro">Kapanışı atla</string>
     <string name="nag_pod_set_outro_hint">Sondan önce atlanan saniyeler: sıradaki bölüm oynatılır ya da oynatma durur.</string>
+    <string name="nag_pod_set_boost">Ses yükseltme</string>
+    <string name="nag_pod_set_boost_hint">Bu programın bölümleri ses düzeyinizden daha yüksek çalar: hafif yaklaşık üçte bir, güçlü yaklaşık üçte iki kadar. Kısık kayıtlar içindir; yüksek bölümlerde ses bozulabilir. Diğer medya her zamanki gibi çalar.</string>
+    <string name="nag_pod_boost_off">Kapalı</string>
+    <string name="nag_pod_boost_light">Hafif</string>
+    <string name="nag_pod_boost_strong">Güçlü</string>
     <string name="nag_pod_set_notify">Yeni bölümleri bildir</string>
     <string name="nag_pod_set_notify_hint">Yenileme bu programın yeni bölümlerini bulunca bir bildirim.</string>
     <string name="nag_pod_set_on">Açık</string>

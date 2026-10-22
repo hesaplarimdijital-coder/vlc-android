@@ -8,6 +8,9 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.player.navigate.chapterStep
+import app.nagmedar.ui.podcast.ChapterStep
+import app.nagmedar.ui.podcast.ChapterSteps
+import app.nagmedar.ui.podcast.PodcastCenter
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
@@ -103,6 +106,9 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.JumpToTime -> activity.showJumpToTime()
             ShortcutId.NextChapter -> stepChapter(forward = true)
             ShortcutId.PreviousChapter -> stepChapter(forward = false)
+            // S-1104: the chapters of a podcast episode, where it plays as a video
+            ShortcutId.PodcastNextChapter -> stepEpisodeChapter(forward = true)
+            ShortcutId.PodcastPreviousChapter -> stepEpisodeChapter(forward = false)
             ShortcutId.VolumeUp -> activity.volumeStep(up = true)
             ShortcutId.VolumeDown -> activity.volumeStep(up = false)
             ShortcutId.Mute -> activity.toggleMute()
@@ -145,10 +151,24 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
     private fun stepChapter(forward: Boolean) {
         val service = activity.service ?: return
         val chapters = service.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty()
+        // a podcast episode's chapters, when the file gives none
+        if (chapters.isEmpty() && PodcastCenter.playing.value?.chapters.orEmpty().isNotEmpty()) return stepEpisodeChapter(forward)
         val index = chapterStep(chapters, service.getTime(), forward) ?: return
         service.chapterIdx = index
         val name = chapters[index].name
         say(if (name.isBlank()) activity.getString(R.string.nag_player_chapter, index + 1) else activity.getString(R.string.nag_player_chapter_named, index + 1, name))
+    }
+
+    /** Ctrl+Alt+→ and ←, as everywhere (S-1104): the next chapter of the podcast episode, or back to the start of this one; its name shows. */
+    private fun stepEpisodeChapter(forward: Boolean) {
+        when (val step = ChapterSteps.step(forward)) {
+            ChapterStep.NoChapters -> say(activity.getString(R.string.nag_pod_chapter_none))
+            ChapterStep.AtEnd -> say(activity.getString(R.string.nag_pod_chapter_last))
+            is ChapterStep.Went -> {
+                val name = step.chapter.title
+                say(if (name.isBlank()) activity.getString(R.string.nag_player_chapter, step.index + 1) else activity.getString(R.string.nag_player_chapter_named, step.index + 1, name))
+            }
+        }
     }
 
     /** A, C and Z go round their own sizes of the picture, back to fitting it; its name shows. */

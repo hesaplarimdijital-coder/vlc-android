@@ -178,4 +178,6 @@ class PodcastActions(
     val onSetAutoDownload: (Long, Boolean, Int) -> Unit = { _, _, _ -> },
     val onSetKeepLatest: (Long, Int) -> Unit = { _, _ -> },
     val onSetPlayback: (Long, Float, Int, Int) -> Unit = { _, _, _, _ -> },
+    /** S-1104: the show's volume boost ([VolumeBoost]). */
+    val onSetVolumeBoost: (Long, Int) -> Unit = { _, _ -> },
 )

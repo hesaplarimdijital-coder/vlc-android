@@ -225,7 +225,18 @@ private fun ControlBar(
                     maxLines = 1,
                     modifier = Modifier.testTag("player-time"),
                 )
-                Spacer(Modifier.weight(1f))
+                // S-1104: the chapter of a podcast episode that plays, and the buttons to move between them
+                val chapter = if (state.episodeChapters) state.chapterAt(state.timeMs)?.let { index -> state.chapters[index].name.ifBlank { stringResource(R.string.nag_pod_chapter_n, index + 1) } } else null
+                if (chapter != null) {
+                    Spacer(Modifier.width(12.dp))
+                    Text(chapter, style = NagTheme.type.label, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("player-chapter"))
+                } else {
+                    Spacer(Modifier.weight(1f))
+                }
+                if (state.episodeChapters && !narrow) {
+                    BarButton(NagIcons.ChapterPrevious, stringResource(R.string.nag_pod_chapter_previous), { actions.stepChapter(false) }, ShortcutId.PodcastPreviousChapter)
+                    BarButton(NagIcons.ChapterNext, stringResource(R.string.nag_pod_chapter_next), { actions.stepChapter(true) }, ShortcutId.PodcastNextChapter)
+                }
                 if (!narrow) RateMenu(state, actions, visibility)
                 AudioMenu(state, actions, visibility, labelled = wide)
                 SubtitleMenu(state, actions, visibility, labelled = wide)

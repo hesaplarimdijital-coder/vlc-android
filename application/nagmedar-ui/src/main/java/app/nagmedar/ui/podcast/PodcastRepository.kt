@@ -222,6 +222,9 @@ class PodcastRepository(
         dao.setPlayback(feedId, speed.coerceIn(PlaybackRules.MIN_SPEED, PlaybackRules.MAX_SPEED), introSeconds.coerceIn(0, PlaybackRules.MAX_SKIP_S), outroSeconds.coerceIn(0, PlaybackRules.MAX_SKIP_S))
     }
 
+    /** S-1104: [feedId]'s volume boost ([VolumeBoost]): off, light or strong. */
+    suspend fun setVolumeBoost(feedId: Long, boost: Int) = withContext(io) { dao.setVolumeBoost(feedId, VolumeBoost.clamp(boost)) }
+
     /**
      * S-1102: subscribes to each of [feeds], [PARALLEL] at a time; [progress] hears how many are done of how many.
      * Feeds already subscribed to are counted, not fetched. Never throws but for cancellation.

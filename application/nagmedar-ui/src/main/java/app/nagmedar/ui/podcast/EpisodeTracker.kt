@@ -10,6 +10,8 @@ data class EpisodeContext(
     val positionMs: Long,
     val played: Boolean,
     val durationMs: Long,
+    /** The show's volume boost ([VolumeBoost]): the observer applies it, the tracker does not look at it. */
+    val volumeBoost: Int = VolumeBoost.OFF,
 )
 
 /** S-1104: what [EpisodeTracker] asks the playback service and the database to do. */

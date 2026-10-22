@@ -11,6 +11,7 @@ import app.nagmedar.ui.player.ChapterMark
 import app.nagmedar.ui.player.FramePreviews
 import app.nagmedar.ui.player.RetrieverFramePreviews
 import app.nagmedar.ui.player.playerClock
+import app.nagmedar.ui.player.podcastChapterMarks
 import kotlinx.coroutines.MainScope
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 
@@ -38,7 +39,7 @@ internal class PlayerNavigation(private val activity: VideoPlayerActivity) {
     fun lengthMs(): Long = activity.service?.length ?: 0L
 
     fun chapters(): List<ChapterMark> =
-        activity.service?.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty()
+        activity.service?.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty().ifEmpty { podcastChapterMarks() }
 
     /** A precise seek, from the user: a chapter, a bookmark, a typed time. */
     fun seek(ms: Long) {

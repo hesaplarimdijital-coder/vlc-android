@@ -720,9 +720,14 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             val title = mw.getMetaLong(MediaWrapper.META_TITLE)
             if (title > 0) uri = "$uri#$title".toUri()
 
+            // Nağmedar (S-1104): a podcast episode starts where its show's rule put it (the player set its time), never by VLC's resume setting or its dialog
+            val ownResume = resume == null && withContext(Dispatchers.IO) { runCatching { ResumeHook.owner?.ownsResume(mw.location) }.getOrNull() } == true
             val start: Long
             if (resume != null) {
                 start = resume.positionMs
+            } else if (ownResume) {
+                start = if (forceRestart) 0L else getStartTime(mw)
+                if (forceRestart) savedTime = 0L
             } else if (isVideoPlaying) {
                 start = if (forceRestart
                     || videoResumeStatus == ResumeStatus.NEVER) 0L else getStartTime(mw)

@@ -42,7 +42,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 17
+        const val VERSION = 18
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -251,10 +251,17 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 17 → 18 (S-1104 follow-up): the volume boost of a show's episodes. */
+        private val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `podcast_feed` ADD COLUMN `volume_boost` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
-            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
+            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,
         )
 
         @Volatile

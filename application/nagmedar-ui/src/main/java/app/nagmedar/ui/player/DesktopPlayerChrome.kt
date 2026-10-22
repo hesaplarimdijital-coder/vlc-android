@@ -162,6 +162,7 @@ import app.nagmedar.ui.player.sync.SyncController
 import app.nagmedar.ui.player.sync.SyncPanel
 import app.nagmedar.ui.player.sync.preciseClock
 import app.nagmedar.ui.playback.rememberNowPlaying
+import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -1449,12 +1450,16 @@ internal class ActivityPlayerSource(
         val text = runCatching { service.mediaplayer.getTracks(IMedia.Track.Type.Text) }.getOrNull().orEmpty().associateBy { it.id }
         val shown = runCatching { service.mediaplayer.getSelectedTracks(IMedia.Track.Type.Text) }.getOrNull().orEmpty().map { it.id }
         val primary = service.spuTrack.takeIf { it != NO_TRACK }
+        // S-1104: a podcast episode's chapters when the file gives none
+        val own = service.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty()
+        val episode = if (own.isEmpty()) podcastChapterMarks() else emptyList()
         return PlayerChromeState(
             title = service.title.orEmpty(),
             playing = service.isPlaying,
             timeMs = service.getTime(),
             lengthMs = service.length,
-            chapters = service.getChapters(-1)?.map { ChapterMark(it.timeOffset, it.name.orEmpty()) }.orEmpty(),
+            chapters = own.ifEmpty { episode },
+            episodeChapters = episode.isNotEmpty(),
             abStartMs = ab?.start ?: -1L,
             abStopMs = ab?.stop ?: -1L,
             rate = service.rate,
@@ -1493,6 +1498,10 @@ internal class ActivityPlayerSource(
 
     override fun seekTo(ms: Long) {
         activity.service?.seek(ms, fromUser = true)
+    }
+
+    override fun stepChapter(forward: Boolean) {
+        ChapterSteps.step(forward)
     }
 
     override fun seekBy(deltaMs: Int) = activity.seekBy(deltaMs)
