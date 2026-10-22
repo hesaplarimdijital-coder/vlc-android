@@ -32,6 +32,7 @@ import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import app.nagmedar.ui.ProcessState
 import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.network.NetworkDialogs
@@ -82,6 +83,8 @@ class AppSetupDelegate : AppDelegate,
 
     @TargetApi(Build.VERSION_CODES.O)
     override fun Application.setupApplication() {
+        // Nağmedar: the process-wide Compose state is made here, in the global snapshot, before any window composes
+        ProcessState.warmUp()
         appContextProvider.init(this)
         NotificationHelper.createNotificationChannels(this)
 

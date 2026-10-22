@@ -9,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -55,8 +54,8 @@ object RadioCenter {
     private var controller: RadioController? = null
 
     fun controller(context: Context): RadioController = controller ?: synchronized(this) {
-        // made in the global snapshot: the first screen asks inside its composition, other windows read it too
-        controller ?: Snapshot.global { build(context.applicationContext) }.also { controller = it }
+        // made outside any window's composition when ProcessState.warmUp ran first; else in the caller's snapshot
+        controller ?: build(context.applicationContext).also { controller = it }
     }
 
     /** The directory to ask: the real one in the app, one that is never reachable otherwise. */

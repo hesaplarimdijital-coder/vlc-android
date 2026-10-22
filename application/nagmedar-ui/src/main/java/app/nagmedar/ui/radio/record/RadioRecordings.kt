@@ -2,7 +2,6 @@ package app.nagmedar.ui.radio.record
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.radio.Station
@@ -47,15 +46,15 @@ object RadioRecordings {
     /** The Recordings tab's controller: it outlives the screen, so the open recordings stay open while another screen shows. */
     fun controller(context: Context): RecordingsController = tab ?: synchronized(this) {
         val app = context.applicationContext
-        // made in the global snapshot: the tab asks inside its composition, other windows read it too
-        tab ?: Snapshot.global { RecordingsController(
+        // made outside any window's composition when ProcessState.warmUp ran first; else in the caller's snapshot
+        tab ?: RecordingsController(
             data = store(app),
             control = center(app),
             settings = { settings(app) },
             environment = AndroidRecordingEnvironment(app),
             player = AndroidTrackPlayer(app),
             scope = recordingsScope(),
-        ) }.also { tab = it }
+        ).also { tab = it }
     }
 
     private fun build(context: Context): RecordingCenter {

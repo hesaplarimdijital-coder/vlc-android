@@ -4,7 +4,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.ui.player.subtitles.LibVlcRestart
 import org.videolan.resources.NagmedarVlcOptions
 
@@ -74,6 +73,6 @@ object LibVlcVideoOptions : VideoOptionsTarget {
 
 /** The session's advanced effects: one for the app, kept as long as it runs, whichever player window shows them. */
 object AdvancedVideoSession {
-    // made in the global snapshot: the object is first touched inside a player window's composition
-    val controller = Snapshot.global { AdvancedVideoController(LibVlcVideoOptions) }
+    // process-wide state: made in the global snapshot by ProcessState.warmUp, before any window composes
+    val controller = AdvancedVideoController(LibVlcVideoOptions)
 }

@@ -6,7 +6,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import android.view.KeyEvent as AndroidKeyEvent
@@ -61,9 +60,9 @@ object PhysicalKeys {
 
     /**
      * Changes when a keyboard comes, goes or changes its layout: labels read it, so keycaps follow.
-     * Made in the global snapshot: the object is first touched inside a window's composition.
+     * Process-wide state: made in the global snapshot by ProcessState.warmUp, before any window composes.
      */
-    var version by Snapshot.global { mutableIntStateOf(0) }
+    var version by mutableIntStateOf(0)
         private set
 
     /** The layout of the keyboard with this device id, null for none. */

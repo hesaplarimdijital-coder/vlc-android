@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.ui.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -71,8 +70,8 @@ object Recordings {
 
     @Volatile
     private var service: PlaybackService? = null
-    // made in the global snapshot: the player's chrome may touch the object first, inside its composition
-    private var instance: Recorder? by Snapshot.global { mutableStateOf<Recorder?>(null) }
+    // process-wide state: made in the global snapshot by ProcessState.warmUp, before any window composes
+    private var instance: Recorder? by mutableStateOf<Recorder?>(null)
     private var ticking: Job? = null
     private val scope = MainScope()
 

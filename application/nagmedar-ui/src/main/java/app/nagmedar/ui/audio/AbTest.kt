@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.audio.AbSide
 import kotlin.random.Random
 
@@ -133,8 +132,8 @@ class AbTestState(
 
 /** The app's A/B test: one, whichever screen or key reaches it. */
 object AbTest {
-    // made in the global snapshot: the object is often first touched inside a window's composition
-    val state = Snapshot.global { AbTestState(engine = { side -> MusicEngineAccess.controller?.abSide = side }) }
+    // process-wide state: made in the global snapshot by ProcessState.warmUp, before any window composes
+    val state = AbTestState(engine = { side -> MusicEngineAccess.controller?.abSide = side })
 }
 
 /** The chance of [correct] or more right answers out of [rounds] by guessing: the binomial tail at one half. */

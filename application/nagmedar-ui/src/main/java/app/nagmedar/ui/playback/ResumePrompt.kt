@@ -14,7 +14,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -50,8 +49,8 @@ import org.videolan.vlc.media.WaitConfirmation
  * episode's tracker takes it to its place. The video player keeps its own question.
  */
 object ResumePrompts {
-    // made in the global snapshot: the question outlives a window, and any window may answer it
-    private val asked = Snapshot.global { mutableStateOf<Question?>(null) }
+    // process-wide state: made in the global snapshot by ProcessState.warmUp, before any window composes
+    private val asked = mutableStateOf<Question?>(null)
 
     /** The question waiting for an answer: the media's title and where it was left (0 when unknown). */
     class Question(val confirmation: WaitConfirmation, val leftAtMs: Long)
