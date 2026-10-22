@@ -92,6 +92,7 @@ import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.PlayerBar
 import app.nagmedar.ui.playback.QueuePanelState
 import app.nagmedar.ui.playback.QueueSheet
+import app.nagmedar.ui.playback.ResumePromptHost
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
@@ -499,6 +500,8 @@ private fun NagmedarMain(
     }
     // S-1301: libVLC's sign-ins, questions and progress that no page answers, while this window is in front
     LibVlcDialogHost()
+    // VLC's "Resume playback: Ask" for music, radio and streams: their question, which nothing answered here
+    ResumePromptHost()
     if (paletteOpen) {
         // the library's media come when the palette opens; commands, screens and settings at once
         val media by produceState(emptyList<PaletteItem>()) {

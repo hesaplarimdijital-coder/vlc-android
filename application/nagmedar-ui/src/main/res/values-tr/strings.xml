@@ -3452,4 +3452,7 @@
     <string name="nag_resume_always">Her video için böyle yap</string>
     <string name="nag_resume_start_over">Baştan başla</string>
     <string name="nag_resume_continue">Devam et</string>
+    <!-- Classic UI: VLC's Resume playback: Ask, for what is not a video -->
+    <string name="nag_resume_at">Kaldığı yer: %1$s</string>
+    <string name="nag_resume_for_list">Listenin kalanında da böyle yap</string>
 </resources>

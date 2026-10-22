@@ -3481,4 +3481,7 @@
     <string name="nag_resume_always">Do the same for every video</string>
     <string name="nag_resume_start_over">Start over</string>
     <string name="nag_resume_continue">Resume</string>
+    <!-- Classic UI: VLC's Resume playback: Ask, for what is not a video -->
+    <string name="nag_resume_at">Left at %1$s</string>
+    <string name="nag_resume_for_list">The same for the rest of the list</string>
 </resources>

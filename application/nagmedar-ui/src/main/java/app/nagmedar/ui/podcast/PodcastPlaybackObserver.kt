@@ -87,12 +87,12 @@ class PodcastPlaybackObserver : PlaybackObserver {
         }
     }
 
-    private companion object {
-        const val SAMPLE_MS = 1_000L
-        const val IDLE_MS = 4_000L
+    companion object {
+        private const val SAMPLE_MS = 1_000L
+        private const val IDLE_MS = 4_000L
 
         /** The episode [location] is the audio of, with what its show asks of its playback; null for any other media. */
-        fun contextOf(dao: PodcastDao, location: String): EpisodeContext? {
+        private fun contextOf(dao: PodcastDao, location: String): EpisodeContext? {
             val episode = episodeAt(dao, location) ?: return null
             val feed = dao.feed(episode.feedId) ?: return null
             return EpisodeContext(
@@ -107,8 +107,11 @@ class PodcastPlaybackObserver : PlaybackObserver {
             )
         }
 
-        /** The enclosure's address matches as it is; a downloaded file plays from a `file:` address of the path Room keeps. */
-        fun episodeAt(dao: PodcastDao, location: String): PodcastEpisode? {
+        /**
+         * The episode at [location]: the enclosure's address matches as it is; a downloaded file plays from a `file:`
+         * address of the path Room keeps. Also the resume question's (an episode is never asked). Off the main thread.
+         */
+        internal fun episodeAt(dao: PodcastDao, location: String): PodcastEpisode? {
             dao.episodeAt(location)?.let { return it }
             if (location.startsWith("file:")) Uri.parse(location).path?.let { path -> dao.episodeAt(path)?.let { return it } }
             return null

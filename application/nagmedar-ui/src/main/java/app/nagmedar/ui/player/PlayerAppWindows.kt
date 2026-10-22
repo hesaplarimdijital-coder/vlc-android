@@ -52,6 +52,7 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.hasPrecisePointer
 import app.nagmedar.ui.network.LibVlcDialogHost
+import app.nagmedar.ui.playback.ResumePromptHost
 import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.commandItems
 import app.nagmedar.ui.search.screenItems
@@ -150,6 +151,7 @@ fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: N
     val mode = if (hasPrecisePointer(activity)) InputMode.Pointer else InputMode.Touch
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
         LibVlcDialogHost()
+        ResumePromptHost()
         // the app's notices over the film, above the control bar
         Box(Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 112.dp), contentAlignment = Alignment.BottomCenter) { NoticeHost() }
         when (windows.open) {
