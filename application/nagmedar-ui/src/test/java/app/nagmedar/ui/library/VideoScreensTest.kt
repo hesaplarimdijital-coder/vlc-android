@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -174,8 +175,13 @@ class VideoScreensTest {
         compose.onNodeWithText("7 / 11 izlendi", substring = true).assertExists()
         compose.onNodeWithText("Devam et · S02E02").performClick()
         assertEquals(listOf("S02E02 Fener"), played)
-        compose.onNodeWithText("Sezon 1").performClick()
+        // each season says how much of it is watched
+        compose.onNodeWithText("Sezon 2 · 1/5").assertIsSelected()
+        compose.onNodeWithText("1 / 5 izlendi").assertExists()
+        compose.onNodeWithText("Sezon 1 · 6/6").performClick()
         compose.waitForIdle()
+        compose.onNodeWithText("Sezon 1 · 6/6").assertIsSelected()
+        compose.onNodeWithText("6 / 6 izlendi").assertExists()
         compose.onNodeWithText("Başlangıç").assertExists()
         compose.onNodeWithText("Fener").assertDoesNotExist()
         compose.onNodeWithContentDescription("Dizilere dön").performClick()
