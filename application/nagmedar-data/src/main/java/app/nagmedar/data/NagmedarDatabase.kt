@@ -223,69 +223,107 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /*
+         * 15 → 16 … 19 → 20 take nothing for granted. Before their branches were renumbered, debug builds of pull
+         * requests (which install over this one) gave some of these numbers other meanings: 16 was the radio's
+         * schedule runs in one, the podcasts' volume boost in another, the film information in a third, and 17 the
+         * remux queue's order. A database such a build left at 16 or 17 has steps of later numbers and lacks those of
+         * its own, so each step adds only what the database lacks (PRAGMA table_info for a column, IF NOT EXISTS for a
+         * table or an index), and 19 → 20 takes every step from 15 on again: whatever such a build made of it, the
+         * database ends as 20 is. (Those builds made the very tables and columns of these steps.)
+         */
+
         /** 15 → 16 (S-1206): the remux queue. */
         private val MIGRATION_15_16 = object : Migration(15, 16) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "`input_uri` TEXT NOT NULL, `input_name` TEXT NOT NULL, `input_size` INTEGER NOT NULL, " +
-                        "`output_uri` TEXT NOT NULL, `output_name` TEXT NOT NULL, `plan` TEXT NOT NULL, `state` TEXT NOT NULL, " +
-                        "`progress` REAL NOT NULL, `media_seconds` REAL NOT NULL, `total_seconds` REAL NOT NULL, " +
-                        "`bytes_out` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, " +
-                        "`started_at` INTEGER, `finished_at` INTEGER, `result` TEXT, `verification` TEXT, `video_hash` TEXT, " +
-                        "`error` TEXT, `events` TEXT NOT NULL, `cancel_requested` INTEGER NOT NULL, `owns_output` INTEGER NOT NULL)",
-                )
-            }
+            override fun migrate(db: SupportSQLiteDatabase) = remuxQueue(db)
         }
 
         /** 16 → 17 (S-1107): what came of each run of a scheduled recording, and when its runs were last looked over. */
         private val MIGRATION_16_17 = object : Migration(16, 17) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE `radio_schedule` ADD COLUMN `checked_at` INTEGER NOT NULL DEFAULT 0")
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `radio_schedule_run` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "`schedule_id` INTEGER NOT NULL, `window_start` INTEGER NOT NULL, `window_end` INTEGER NOT NULL, " +
-                        "`status` TEXT NOT NULL, `interruptions` INTEGER NOT NULL, `session_id` TEXT, `updated_at` INTEGER NOT NULL)",
-                )
-                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_radio_schedule_run_schedule_id_window_start` ON `radio_schedule_run` (`schedule_id`, `window_start`)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_radio_schedule_run_session_id` ON `radio_schedule_run` (`session_id`)")
-            }
+            override fun migrate(db: SupportSQLiteDatabase) = scheduleRuns(db)
         }
 
         /** 17 → 18 (S-1104 follow-up): the volume boost of a show's episodes. */
         private val MIGRATION_17_18 = object : Migration(17, 18) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE `podcast_feed` ADD COLUMN `volume_boost` INTEGER NOT NULL DEFAULT 0")
-            }
+            override fun migrate(db: SupportSQLiteDatabase) = volumeBoost(db)
         }
 
         /** 18 → 19 (film information): the films' and series' TMDB details and the series' episodes. */
         private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) = filmInfo(db)
+        }
+
+        /** 19 → 20 (S-1210): the remux queue's order; and every step from 15 on again, for what a pull request's build left. */
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `film_info` (`query_key` TEXT NOT NULL, `kind` TEXT NOT NULL, " +
-                        "`tmdb_id` INTEGER NOT NULL, `imdb_id` TEXT, `title` TEXT NOT NULL, `original_title` TEXT, " +
-                        "`year` INTEGER, `overview` TEXT, `language` TEXT NOT NULL, `genres` TEXT, `runtime_minutes` INTEGER, " +
-                        "`tmdb_rating` REAL, `tmdb_votes` INTEGER, `imdb_rating` REAL, `imdb_votes` INTEGER, " +
-                        "`rotten_tomatoes` INTEGER, `poster_path` TEXT, `backdrop_path` TEXT, `cast` TEXT, " +
-                        "`season_count` INTEGER, `episode_count` INTEGER, `manual` INTEGER NOT NULL, " +
-                        "`fetched_at` INTEGER NOT NULL, PRIMARY KEY(`query_key`))",
-                )
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `film_episode` (`show_id` INTEGER NOT NULL, `season` INTEGER NOT NULL, " +
-                        "`episode` INTEGER NOT NULL, `title` TEXT, `overview` TEXT, `still_path` TEXT, `air_date` TEXT, " +
-                        "`runtime_minutes` INTEGER, `language` TEXT NOT NULL, `fetched_at` INTEGER NOT NULL, " +
-                        "PRIMARY KEY(`show_id`, `season`, `episode`))",
-                )
+                remuxQueue(db)
+                scheduleRuns(db)
+                volumeBoost(db)
+                filmInfo(db)
+                remuxOrder(db)
             }
         }
 
-        /** 19 → 20 (S-1210): the remux queue's order, the jobs there kept in the order they were queued. */
-        private val MIGRATION_19_20 = object : Migration(19, 20) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE `remux_job` ADD COLUMN `position` INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("UPDATE `remux_job` SET `position` = `id`")
+        private fun remuxQueue(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`input_uri` TEXT NOT NULL, `input_name` TEXT NOT NULL, `input_size` INTEGER NOT NULL, " +
+                    "`output_uri` TEXT NOT NULL, `output_name` TEXT NOT NULL, `plan` TEXT NOT NULL, `state` TEXT NOT NULL, " +
+                    "`progress` REAL NOT NULL, `media_seconds` REAL NOT NULL, `total_seconds` REAL NOT NULL, " +
+                    "`bytes_out` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, " +
+                    "`started_at` INTEGER, `finished_at` INTEGER, `result` TEXT, `verification` TEXT, `video_hash` TEXT, " +
+                    "`error` TEXT, `events` TEXT NOT NULL, `cancel_requested` INTEGER NOT NULL, `owns_output` INTEGER NOT NULL)",
+            )
+        }
+
+        private fun scheduleRuns(db: SupportSQLiteDatabase) {
+            db.addColumn("radio_schedule", "checked_at", "INTEGER NOT NULL DEFAULT 0")
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `radio_schedule_run` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`schedule_id` INTEGER NOT NULL, `window_start` INTEGER NOT NULL, `window_end` INTEGER NOT NULL, " +
+                    "`status` TEXT NOT NULL, `interruptions` INTEGER NOT NULL, `session_id` TEXT, `updated_at` INTEGER NOT NULL)",
+            )
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_radio_schedule_run_schedule_id_window_start` ON `radio_schedule_run` (`schedule_id`, `window_start`)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_radio_schedule_run_session_id` ON `radio_schedule_run` (`session_id`)")
+        }
+
+        private fun volumeBoost(db: SupportSQLiteDatabase) {
+            db.addColumn("podcast_feed", "volume_boost", "INTEGER NOT NULL DEFAULT 0")
+        }
+
+        private fun filmInfo(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `film_info` (`query_key` TEXT NOT NULL, `kind` TEXT NOT NULL, " +
+                    "`tmdb_id` INTEGER NOT NULL, `imdb_id` TEXT, `title` TEXT NOT NULL, `original_title` TEXT, " +
+                    "`year` INTEGER, `overview` TEXT, `language` TEXT NOT NULL, `genres` TEXT, `runtime_minutes` INTEGER, " +
+                    "`tmdb_rating` REAL, `tmdb_votes` INTEGER, `imdb_rating` REAL, `imdb_votes` INTEGER, " +
+                    "`rotten_tomatoes` INTEGER, `poster_path` TEXT, `backdrop_path` TEXT, `cast` TEXT, " +
+                    "`season_count` INTEGER, `episode_count` INTEGER, `manual` INTEGER NOT NULL, " +
+                    "`fetched_at` INTEGER NOT NULL, PRIMARY KEY(`query_key`))",
+            )
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `film_episode` (`show_id` INTEGER NOT NULL, `season` INTEGER NOT NULL, " +
+                    "`episode` INTEGER NOT NULL, `title` TEXT, `overview` TEXT, `still_path` TEXT, `air_date` TEXT, " +
+                    "`runtime_minutes` INTEGER, `language` TEXT NOT NULL, `fetched_at` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`show_id`, `season`, `episode`))",
+            )
+        }
+
+        /** The queue's jobs keep the order they were queued in; a queue that had the order already (a build of 17) keeps its own. */
+        private fun remuxOrder(db: SupportSQLiteDatabase) {
+            if (db.addColumn("remux_job", "position", "INTEGER NOT NULL DEFAULT 0")) db.execSQL("UPDATE `remux_job` SET `position` = `id`")
+        }
+
+        /** ALTER TABLE … ADD COLUMN, unless [table] has [column] already; whether it was added. */
+        private fun SupportSQLiteDatabase.addColumn(table: String, column: String, definition: String): Boolean {
+            val there = query("PRAGMA table_info(`$table`)").use { c ->
+                val name = c.getColumnIndexOrThrow("name")
+                var found = false
+                while (!found && c.moveToNext()) found = c.getString(name) == column
+                found
             }
+            if (!there) execSQL("ALTER TABLE `$table` ADD COLUMN `$column` $definition")
+            return !there
         }
 
         /** Schema migrations, oldest first. */

@@ -3,6 +3,7 @@ package app.nagmedar.data
 import android.content.Context
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -779,6 +780,110 @@ class NagmedarDatabaseMigrationTest {
                 assertTrue(c.isNull(4) && c.isNull(5) && c.isNull(6))
             }
         }
+    }
+
+    /** 19 → 20 (S-1210): the jobs queued before keep the order they were queued in: each one's position is its id. */
+    @Test
+    fun remuxJobsKeepTheirOrderFromNineteen() {
+        assumeTrue("schema 19 not exported yet", schemaExported(19))
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        helper.createDatabase(TEST_DB, 19).use { db ->
+            remuxJob(db, 3)
+            remuxJob(db, 7)
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            assertEquals(listOf(3L to 3L, 7L to 7L), positions(db))
+        }
+    }
+
+    /** 15 → 20: a scheduled recording and a show from 15 cross every step, keep their rows and get their new columns at 0. */
+    @Test
+    fun scheduleAndShowCrossFromFifteen() {
+        assumeTrue("schema 15 not exported yet", schemaExported(15))
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        helper.createDatabase(TEST_DB, 15).use { db ->
+            schedule(db)
+            feed(db)
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT station_name, checked_at FROM radio_schedule").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Radyo", c.getString(0))
+                assertEquals(0L, c.getLong(1))
+            }
+            db.query("SELECT title, volume_boost FROM podcast_feed").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Nağmedar Podcast", c.getString(0))
+                assertEquals(0, c.getInt(1))
+            }
+        }
+    }
+
+    /**
+     * 16 or 17 as pull requests' debug builds left them before their numbers moved (16: the radio's schedule runs, the
+     * podcasts' volume boost or the film information; 17: the remux queue's order): each ends as 20, its rows and an
+     * order already there kept.
+     */
+    @Test
+    fun aPullRequestBuildsDatabaseEndsAsTwenty() {
+        assumeTrue("schema 15 not exported yet", schemaExported(15))
+        assumeTrue("schema 16 not exported yet", schemaExported(16))
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        fun step(from: Int) = NagmedarDatabase.MIGRATIONS.single { it.startVersion == from }
+        // what 16 → 17, 17 → 18 and 18 → 19 add is what those builds called 15 → 16
+        for ((build, theirs) in listOf("radio" to step(16), "podcast" to step(17), "films" to step(18))) {
+            val name = "$build-$TEST_DB"
+            helper.createDatabase(name, 15).use { db ->
+                schedule(db)
+                feed(db)
+                theirs.migrate(db)
+                db.execSQL("PRAGMA user_version = 16")
+            }
+            helper.runMigrationsAndValidate(name, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+                assertEquals(build, 1, count(db, "SELECT COUNT(*) FROM radio_schedule WHERE checked_at = 0"))
+                assertEquals(build, 1, count(db, "SELECT COUNT(*) FROM podcast_feed WHERE volume_boost = 0"))
+                assertEquals(build, 0, count(db, "SELECT COUNT(*) FROM remux_job"))
+            }
+        }
+        // S-1205's build: 16 with the queue's order, a job moved up by hand
+        val name = "order-$TEST_DB"
+        helper.createDatabase(name, 16).use { db ->
+            remuxJob(db, 3)
+            remuxJob(db, 7)
+            db.execSQL("ALTER TABLE `remux_job` ADD COLUMN `position` INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("UPDATE `remux_job` SET `position` = CASE `id` WHEN 3 THEN 2 ELSE 1 END")
+            db.execSQL("PRAGMA user_version = 17")
+        }
+        helper.runMigrationsAndValidate(name, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            assertEquals(listOf(3L to 2L, 7L to 1L), positions(db))
+        }
+    }
+
+    private fun schedule(db: SupportSQLiteDatabase) = db.execSQL(
+        "INSERT INTO radio_schedule (station_key, station_name, stream_url, start_at, hour, minute, duration_minutes, " +
+            "repeat, weekday, enabled, last_started_at, created_at) " +
+            "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 1, 7, 30, 60, 'Daily', 1, 1, 0, 1)",
+    )
+
+    private fun feed(db: SupportSQLiteDatabase) = db.execSQL(
+        "INSERT INTO podcast_feed (id, feed_url, title, refreshed_at, auto_download, subscribed_at) " +
+            "VALUES (1, 'https://example.org/feed.xml', 'Nağmedar Podcast', 5, 0, 7)",
+    )
+
+    private fun remuxJob(db: SupportSQLiteDatabase, id: Int) = db.execSQL(
+        "INSERT INTO remux_job (id, input_uri, input_name, input_size, output_uri, output_name, plan, state, progress, " +
+            "media_seconds, total_seconds, bytes_out, attempts, created_at, events, cancel_requested, owns_output) " +
+            "VALUES ($id, 'content://a$id', 'a$id.mkv', 1, 'content://b$id', 'b$id.mkv', '{}', 'queued', 0, 0, 0, 0, 0, 1, '', 0, 0)",
+    )
+
+    private fun positions(db: SupportSQLiteDatabase): List<Pair<Long, Long>> =
+        db.query("SELECT id, position FROM remux_job ORDER BY id").use { c ->
+            buildList { while (c.moveToNext()) add(c.getLong(0) to c.getLong(1)) }
+        }
+
+    private fun count(db: SupportSQLiteDatabase, sql: String): Int = db.query(sql).use { c ->
+        assertTrue(c.moveToFirst())
+        c.getInt(0)
     }
 
     private companion object {
