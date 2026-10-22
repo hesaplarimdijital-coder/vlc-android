@@ -819,7 +819,7 @@ static void json_escape(const char *text, char *out, size_t size)
  * "cancelled": true|false}; null when the listener threw. The descriptors stay the caller's.
  */
 JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_convert(JNIEnv *env, jclass cls, jint inFd, jstring inName, jint outFd, jstring outName,
-                                                                      jint codec, jint bitrate, jint vbrQuality, jint rate, jlong from, jlong to,
+                                                                      jint codec, jint bitrate, jint vbrQuality, jint rate, jint channels, jlong from, jlong to,
                                                                       jbyteArray tags, jobject listener)
 {
     (void)cls;
@@ -841,7 +841,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_audio_NativeAudio_convert(JNIEnv *en
             return NULL;
         }
     }
-    NagConvertOptions options = {(NagConvertCodec)codec, bitrate, vbrQuality, rate, from, to, overrides};
+    NagConvertOptions options = {(NagConvertCodec)codec, bitrate, vbrQuality, rate, channels, from, to, overrides};
     const char *in_utf = inName ? (*env)->GetStringUTFChars(env, inName, NULL) : NULL;
     const char *out_utf = outName ? (*env)->GetStringUTFChars(env, outName, NULL) : NULL;
     NagConvertResult result;

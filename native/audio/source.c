@@ -653,6 +653,19 @@ int nag_source_channel_weights(const NagSource *s, double *weights, int max)
     return s->channels;
 }
 
+int nag_source_channel_ids(const NagSource *s, int *ids, int max)
+{
+    AVChannelLayout layout;
+    if (s->dec && s->channels == s->dec->ch_layout.nb_channels && s->dec->ch_layout.order != AV_CHANNEL_ORDER_UNSPEC)
+        av_channel_layout_copy(&layout, &s->dec->ch_layout);
+    else
+        av_channel_layout_default(&layout, s->channels);
+    for (int i = 0; i < s->channels && i < max; i++)
+        ids[i] = (int)av_channel_layout_channel_from_index(&layout, (unsigned)i);
+    av_channel_layout_uninit(&layout);
+    return s->channels;
+}
+
 /* The sample position of [frame], from its timestamp when it has one; the running count otherwise. */
 static int64_t frame_position(NagSource *s, const AVFrame *frame)
 {

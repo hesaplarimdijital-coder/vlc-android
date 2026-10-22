@@ -160,6 +160,7 @@ Müzik dosyalarını başka biçime yeni dosyalar olarak çevirin; uyku zamanlay
 1. Parçaları seçin (ya da albümün, sanatçının, klasörün başlığındaki “Dönüştür…” düğmesine basın).
 2. “Dönüştür…” deyin; biçimi seçin: Opus (128, 160, 192 kbps), MP3 (V0, 320 kbps) ya da AAC (256 kbps, M4A).
 3. Hedef klasörü sistemin seçicisiyle bir kez seçin. Yeni dosyalar “Sanatçı/Albüm/03 Başlık” düzeniyle ya da tek klasöre yazılır; asıl dosyalara dokunulmaz.
+4. Çok kanallı bir kaynak (5.1, 7.1) Opus ve AAC'de kanal düzeniyle korunur; iki kanala indirmek için “Kanallar” altında “Stereoya indir” deyin. MP3 her zaman stereodur. Etiketler, ön kapak ve zamanlı sözler yeni dosyaya taşınır.
 
 İlerleme ve İptal bildirimde ve kütüphanenin üstündeki şeritte görünür. Pil azalınca ya da cihaz ısınınca iş bekler. Kayıplı bir parçayı yeniden dönüştürmek kalitesini biraz daha düşürür.
 

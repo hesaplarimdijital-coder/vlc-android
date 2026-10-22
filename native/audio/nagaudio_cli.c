@@ -9,7 +9,7 @@
 //   nagaudio tag FILE [--track-gain DB] [--track-peak P] [--album-gain DB] [--album-peak P]
 //                     [--track-lufs L] [--album-lufs L]
 //                                           writes the ReplayGain tags into FILE (S-907)
-//   nagaudio convert FILE OUT --codec opus|mp3|aac [--bitrate BPS] [--vbr Q] [--rate HZ]
+//   nagaudio convert FILE OUT --codec opus|mp3|aac [--bitrate BPS] [--vbr Q] [--rate HZ] [--stereo]
 //                    [--tag KEY=VALUE]... [--stop-at FRACTION]
 //                                           converts FILE (or FILE#cue=FROM,TO, a CUE part) into
 //                                           OUT with its tags and cover (S-1010), JSON; with
@@ -698,7 +698,7 @@ static int convert_progress(void *opaque, double fraction)
 static int convert(int argc, char **argv)
 {
     const char *in_arg = NULL, *out_path = NULL;
-    NagConvertOptions opt = {NAG_CONVERT_OPUS, 0, 0, 0, 0, -1, NULL};
+    NagConvertOptions opt = {NAG_CONVERT_OPUS, 0, 0, 0, NAG_CONVERT_SOURCE_CHANNELS, 0, -1, NULL};
     char tags[4096] = "";
     StopAt stop = {-1, 0};
     for (int i = 0; i < argc; i++) {
@@ -714,6 +714,7 @@ static int convert(int argc, char **argv)
         } else if (strcmp(argv[i], "--bitrate") == 0 && i + 1 < argc) opt.bitrate = atoi(argv[++i]);
         else if (strcmp(argv[i], "--vbr") == 0 && i + 1 < argc) opt.vbr_quality = atoi(argv[++i]);
         else if (strcmp(argv[i], "--rate") == 0 && i + 1 < argc) opt.rate = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--stereo") == 0) opt.channels = NAG_CONVERT_STEREO;
         else if (strcmp(argv[i], "--tag") == 0 && i + 1 < argc) {
             size_t len = strlen(tags);
             snprintf(tags + len, sizeof(tags) - len, "%s\n", argv[++i]);

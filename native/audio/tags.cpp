@@ -22,11 +22,14 @@
 #include <taglib/tvariant.h>
 #include <taglib/wavfile.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <utility>
+#include <vector>
 #include <strings.h>
 #include <unistd.h>
 
@@ -350,6 +353,178 @@ bool parseSynced(const char *json, TagLib::ID3v2::SynchronizedLyricsFrame::Synch
     }
 }
 
+using SyncedLines = TagLib::ID3v2::SynchronizedLyricsFrame::SynchedTextList;
+
+/* One SYLT of a source: its language, description and type, and the lines. */
+struct SyncedSet {
+    TagLib::ByteVector language;
+    TagLib::String description;
+    TagLib::ID3v2::SynchronizedLyricsFrame::Type type;
+    SyncedLines lines;
+};
+
+/* The plain lyrics in the properties, as nag_tags_read_lyrics finds them: LYRICS (or its other names), else "LYRICS:<description>". */
+std::string plainLyrics(const TagLib::PropertyMap &properties)
+{
+    for (const char *key : {"LYRICS", "UNSYNCEDLYRICS", "UNSYNCED LYRICS", "USLT"}) {
+        auto found = properties.find(key);
+        if (found != properties.end() && !found->second.isEmpty())
+            return found->second.front().to8Bit(true);
+    }
+    for (const auto &entry : properties) {
+        if (entry.first.startsWith("LYRICS") && !entry.second.isEmpty())
+            return entry.second.front().to8Bit(true);
+    }
+    return std::string();
+}
+
+/* every SYLT in milliseconds the ID3v2 tag has, with lines */
+std::vector<SyncedSet> syncedSets(TagLib::ID3v2::Tag *tag)
+{
+    std::vector<SyncedSet> sets;
+    if (!tag)
+        return sets;
+    for (TagLib::ID3v2::Frame *frame : tag->frameList("SYLT")) {
+        auto *sylt = dynamic_cast<TagLib::ID3v2::SynchronizedLyricsFrame *>(frame);
+        if (!sylt || sylt->timestampFormat() != TagLib::ID3v2::SynchronizedLyricsFrame::AbsoluteMilliseconds || sylt->synchedText().isEmpty())
+            continue;
+        sets.push_back({sylt->language(), sylt->description(), sylt->type(), sylt->synchedText()});
+    }
+    return sets;
+}
+
+/* [min:sec.fraction] of an LRC line, at [p] after its '['; the milliseconds, or -1 when the brackets hold something else (a tag such as [ar:...]). */
+long lrcStamp(const char *&p)
+{
+    const char *q = p;
+    long minutes = 0;
+    int digits = 0;
+    while (*q >= '0' && *q <= '9' && digits < 4) {
+        minutes = minutes * 10 + (*q++ - '0');
+        digits++;
+    }
+    if (digits == 0 || *q++ != ':')
+        return -1;
+    long seconds = 0;
+    digits = 0;
+    while (*q >= '0' && *q <= '9' && digits < 3) {
+        seconds = seconds * 10 + (*q++ - '0');
+        digits++;
+    }
+    if (digits == 0)
+        return -1;
+    long fraction = 0;
+    if (*q == '.' || *q == ':') {
+        q++;
+        long scale = 100;
+        digits = 0;
+        while (*q >= '0' && *q <= '9') {
+            if (digits++ < 3) {
+                fraction += (*q - '0') * scale;
+                scale /= 10;
+            }
+            q++;
+        }
+        if (digits == 0)
+            return -1;
+    }
+    if (*q++ != ']')
+        return -1;
+    p = q;
+    return (minutes * 60 + seconds) * 1000 + fraction;
+}
+
+/* a line's text without the enhanced LRC's word stamps (<mm:ss.xx>), trimmed */
+std::string lrcText(const char *p, const char *end)
+{
+    std::string text;
+    while (p < end) {
+        if (*p == '<') {
+            const char *close = static_cast<const char *>(memchr(p, '>', static_cast<size_t>(end - p)));
+            const char *q = p + 1;
+            bool stamp = close != nullptr;
+            for (; stamp && q < close; q++)
+                stamp = (*q >= '0' && *q <= '9') || *q == ':' || *q == '.';
+            if (stamp && close) {
+                p = close + 1;
+                continue;
+            }
+        }
+        text += *p++;
+    }
+    size_t first = text.find_first_not_of(" \t");
+    size_t last = text.find_last_not_of(" \t\r");
+    return first == std::string::npos ? std::string() : text.substr(first, last - first + 1);
+}
+
+/*
+ * LRC text ([mm:ss.xx]line, several stamps to a line, [offset:ms] applied, other [tag:...] lines
+ * and untimed lines skipped) as synced lines in milliseconds, sorted by time. False when it
+ * has no timed line: plain lyrics.
+ */
+bool parseLrc(const std::string &text, SyncedLines &lines)
+{
+    std::vector<std::pair<unsigned int, std::string>> timed;
+    long offset = 0;
+    const char *line = text.c_str();
+    while (*line) {
+        const char *end = strchr(line, '\n');
+        const char *stop = end ? end : line + strlen(line);
+        const char *p = line;
+        while (p < stop && (*p == ' ' || *p == '\t'))
+            p++;
+        std::vector<long> stamps;
+        while (p < stop && *p == '[') {
+            const char *inside = p + 1;
+            long ms = lrcStamp(inside);
+            if (ms >= 0) {
+                stamps.push_back(ms);
+                p = inside;
+                continue;
+            }
+            if (stamps.empty() && strncasecmp(inside, "offset:", 7) == 0)
+                offset = strtol(inside + 7, nullptr, 10);
+            break;
+        }
+        if (!stamps.empty()) {
+            const std::string words = lrcText(p, stop);
+            for (long ms : stamps)
+                timed.emplace_back(static_cast<unsigned int>(ms), words);
+        }
+        line = end ? end + 1 : stop;
+    }
+    if (timed.empty())
+        return false;
+    for (auto &entry : timed) {
+        /* a positive offset shows the lyrics sooner: their stamps move earlier */
+        const long moved = static_cast<long>(entry.first) - offset;
+        entry.first = moved < 0 ? 0 : static_cast<unsigned int>(moved);
+    }
+    std::stable_sort(timed.begin(), timed.end(), [](const auto &a, const auto &b) { return a.first < b.first; });
+    for (const auto &entry : timed)
+        lines.append(TagLib::ID3v2::SynchronizedLyricsFrame::SynchedText(entry.first, TagLib::String(entry.second, TagLib::String::UTF8)));
+    return true;
+}
+
+/* synced lines as LRC: [mm:ss.xx]line, a line to a row */
+std::string lrcFrom(const SyncedLines &lines)
+{
+    std::string out;
+    for (const auto &line : lines) {
+        const unsigned int centis = line.time / 10;
+        char stamp[32];
+        snprintf(stamp, sizeof stamp, "[%02u:%02u.%02u]", centis / 6000, (centis / 100) % 60, centis % 100);
+        std::string text = line.text.to8Bit(true);
+        for (char &c : text)
+            if (c == '\n' || c == '\r')
+                c = ' ';
+        const size_t last = text.find_last_not_of(" \t");
+        text = last == std::string::npos ? std::string() : text.substr(0, last + 1);
+        out += stamp + text + '\n';
+    }
+    return out;
+}
+
 } // namespace
 
 /*
@@ -367,25 +542,7 @@ extern "C" char *nag_tags_read_lyrics(int fd, const char *name)
     TagLib::FileRef file(&stream, false);
     if (file.isNull())
         return nullptr;
-    std::string plain;
-    const TagLib::PropertyMap properties = file.properties();
-    /* "USLT": a TXXX by that name, as ffmpeg writes "lyrics" to ID3v2 */
-    for (const char *key : {"LYRICS", "UNSYNCEDLYRICS", "UNSYNCED LYRICS", "USLT"}) {
-        auto found = properties.find(key);
-        if (found != properties.end() && !found->second.isEmpty()) {
-            plain = found->second.front().to8Bit(true);
-            break;
-        }
-    }
-    if (plain.empty()) {
-        /* a USLT with a description: "LYRICS:<description>" */
-        for (const auto &entry : properties) {
-            if (entry.first.startsWith("LYRICS") && !entry.second.isEmpty()) {
-                plain = entry.second.front().to8Bit(true);
-                break;
-            }
-        }
-    }
+    const std::string plain = plainLyrics(file.properties());
     std::string synced;
     if (TagLib::ID3v2::Tag *tag = id3v2(file.file())) {
         for (TagLib::ID3v2::Frame *frame : tag->frameList("SYLT")) {
@@ -599,7 +756,8 @@ extern "C" int nag_tags_read_replaygain(int fd, const char *name, NagReplayGainT
  * them where its format keeps them (TagLib 2 writes ID3v2.4 by default, its text UTF-8; a key
  * MP4 has no atom for becomes a freeform iTunes atom), and the front cover (else the first
  * picture) through the PICTURE property: APIC, METADATA_BLOCK_PICTURE, covr. The lyrics go
- * along as the LYRICS property: USLT, LYRICS, ©lyr.
+ * along as the LYRICS property: USLT, LYRICS, ©lyr; the synchronised ones as SYLT (MP3), or as
+ * LRC text in LYRICS (Opus, M4A), either way from the other kind where the source has that.
  */
 extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const char *dst_name, const char *overrides,
                              const NagReplayGainTags *gain, int *written, int *cover, char *error, size_t error_size)
@@ -610,11 +768,13 @@ extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const
         *cover = 0;
     TagLib::PropertyMap properties;
     TagLib::List<TagLib::VariantMap> pictures;
+    std::vector<SyncedSet> synced;
     if (src_fd >= 0) {
         FdStream source(src_fd, src_name);
         TagLib::FileRef file(&source, false);
         if (!file.isNull()) {
             properties = file.properties();
+            synced = syncedSets(id3v2(file.file()));
             for (const auto &picture : file.complexProperties("PICTURE")) {
                 if (picture.value("data").value<TagLib::ByteVector>().isEmpty())
                     continue;
@@ -670,13 +830,41 @@ extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const
                 kept.replace("REPLAYGAIN_ALBUM_PEAK", TagLib::StringList(peak(gain->album_peak)));
         }
     }
+    /*
+     * The synchronised lyrics (S-1010): an ID3v2 destination keeps the source's SYLT, or one made
+     * of LRC text in the source's lyrics; the others have the LRC text as their lyrics (Vorbis
+     * comments' LYRICS, MP4's ©lyr), made of the SYLT where the source has one.
+     */
     FdStream stream(dst_fd, dst_name);
     TagLib::FileRef file(&stream, false);
     if (file.isNull()) {
         snprintf(error, error_size, "the converted file is not one TagLib reads");
         return -1;
     }
+    auto *mpeg = dynamic_cast<TagLib::MPEG::File *>(file.file());
+    if (mpeg && synced.empty()) {
+        SyncedLines lines;
+        if (parseLrc(plainLyrics(kept), lines))
+            synced.push_back({TagLib::ByteVector("XXX"), TagLib::String(), TagLib::ID3v2::SynchronizedLyricsFrame::Lyrics, lines});
+    } else if (!mpeg && !synced.empty()) {
+        const std::string lrc = lrcFrom(synced.front().lines);
+        if (!lrc.empty())
+            kept.replace("LYRICS", TagLib::StringList(TagLib::String(lrc, TagLib::String::UTF8)));
+    }
     const TagLib::PropertyMap rejected = file.setProperties(kept);
+    if (mpeg && !synced.empty()) {
+        if (TagLib::ID3v2::Tag *tag = mpeg->ID3v2Tag(true)) {
+            for (const SyncedSet &set : synced) {
+                auto *frame = new TagLib::ID3v2::SynchronizedLyricsFrame(TagLib::String::UTF8);
+                frame->setTimestampFormat(TagLib::ID3v2::SynchronizedLyricsFrame::AbsoluteMilliseconds);
+                frame->setType(set.type);
+                frame->setLanguage(set.language);
+                frame->setDescription(set.description);
+                frame->setSynchedText(set.lines);
+                tag->addFrame(frame);
+            }
+        }
+    }
     bool with_cover = false;
     if (!pictures.isEmpty())
         with_cover = file.setComplexProperties("PICTURE", pictures);

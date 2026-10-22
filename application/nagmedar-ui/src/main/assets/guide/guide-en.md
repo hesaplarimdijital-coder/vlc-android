@@ -160,6 +160,7 @@ Write music files in another format as new files; let a sleep timer stop the mus
 1. Select tracks (or press “Convert…” on the heading of an album, an artist or a folder).
 2. Press “Convert…” and choose the format: Opus (128, 160, 192 kbps), MP3 (V0, 320 kbps) or AAC (256 kbps, M4A).
 3. Choose the destination folder once with the system's file chooser. The new files are written as “Artist/Album/03 Title” or into one folder; the original files are not touched.
+4. A multichannel source (5.1, 7.1) keeps its channel layout in Opus and AAC; to get two channels, choose “Mix down to stereo” under “Channels”. MP3 is always stereo. The tags, the cover and synced lyrics go along to the new file.
 
 Progress and Cancel show in the notification and in the strip above the library. The job waits when the battery is low or the device is hot. Converting a lossy track again lowers its quality a little more.
 

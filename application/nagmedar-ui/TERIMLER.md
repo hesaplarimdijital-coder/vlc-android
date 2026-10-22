@@ -186,6 +186,7 @@ Sözlüğü testler denetler:
 | dönüştürmek | convert | | transcode | Bir dosyayı başka bir biçimde yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz. Müzikte “Dönüştür…” (Opus, MP3, AAC): “Dönüştürme bitti”; videoda “Dönüştür / Kaydet…” (Ctrl+R): bir profille, libVLC'yle |
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |
+| stereoya indirmek | mix down | | | Çok kanallı sesi (5.1, 7.1) ITU-R BS.775'in matrisiyle iki kanala karıştırmak; LFE katılmaz, taşmayacak biçimde küçültülür: “Stereoya indir”. Dönüştürücüde MP3 her zaman stereodur |
 
 ## Özel adlar
 

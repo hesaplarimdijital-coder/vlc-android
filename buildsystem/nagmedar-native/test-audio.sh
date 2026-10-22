@@ -857,9 +857,9 @@ ffmpeg -nostdin -v error -y -i m16.flac -af "atrim=start_sample=44100:end_sample
 "$NAGAUDIO" decode conv_part.opus -f f32 -o conv_dec.raw > /dev/null
 read -r shift snr ref_frames dec_frames < <(python3 snr.py conv_ref.raw conv_dec.raw)
 check "CUE part: the file's audio from its start (SNR $snr dB)" "0 yes" "$shift $(python3 -c "print('yes' if $snr >= 30 else 'no')")"
-# mono stays mono, 5.1 is mixed to stereo; a source without tags gets none
+# mono stays mono, 5.1 asked for as stereo is mixed down; a source without tags gets none
 "$NAGAUDIO" convert mono.flac conv_mono.mp3 --codec mp3 --vbr 2 > conv_mono.json
-"$NAGAUDIO" convert six.flac conv_six.m4a --codec aac --bitrate 256000 > conv_six.json
+"$NAGAUDIO" convert six.flac conv_six.m4a --codec aac --bitrate 256000 --stereo > conv_six.json
 check "mono and 5.1" "1 2 0 0" "$(json 'd["channels"]' < conv_mono.json) $(json 'd["channels"]' < conv_six.json) $(json 'd["tags"]' < conv_mono.json) $(json 'str(d["cover"]).replace("False", "0")' < conv_six.json)"
 # never over a file that holds anything, the source least of all: refused, nothing truncated
 cp m16.flac conv_self.flac

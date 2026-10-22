@@ -197,6 +197,23 @@ fun ConvertSurface(
                     ConvertCodec.Aac -> Unit
                 }
             }
+            Labelled(stringResource(R.string.nag_convert_channels)) {
+                SegmentedChoice(
+                    options = listOf(
+                        ConvertChannels.Source to stringResource(R.string.nag_convert_channels_source),
+                        ConvertChannels.Stereo to stringResource(R.string.nag_convert_channels_stereo),
+                    ),
+                    selected = if (options.channelsApply) options.channels else ConvertChannels.Stereo,
+                    onSelect = { onOptions(options.copy(channels = it)) },
+                    enabled = options.channelsApply,
+                    modifier = Modifier.testTag("convert-channels"),
+                )
+                Text(
+                    stringResource(if (options.channelsApply) R.string.nag_convert_channels_hint else R.string.nag_convert_channels_mp3),
+                    style = NagTheme.type.labelSmall,
+                    color = colors.textSecondary,
+                )
+            }
             Labelled(stringResource(R.string.nag_convert_naming)) {
                 SegmentedChoice(
                     options = listOf(

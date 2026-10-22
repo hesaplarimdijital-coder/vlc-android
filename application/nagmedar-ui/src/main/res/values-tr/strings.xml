@@ -2319,6 +2319,11 @@
     <string name="nag_convert_rate_source">Kaynaktaki gibi</string>
     <string name="nag_convert_rate_opus">Opus her zaman 48 kHz\'dir.</string>
     <string name="nag_convert_rate_mp3">MP3 en çok 48 kHz\'dir: daha yüksek bir kaynak yeniden örneklenir.</string>
+    <string name="nag_convert_channels">Kanallar</string>
+    <string name="nag_convert_channels_source">Kaynaktaki gibi</string>
+    <string name="nag_convert_channels_stereo">Stereoya indir</string>
+    <string name="nag_convert_channels_hint">Kaynağın kanal düzeni 7.1\'e kadar korunur; yukarıdaki bit hızı bir stereo çiftinindir, kanal sayısıyla artar. Stereoya indirme ITU-R BS.775\'i izler, LFE\'yi dışarıda bırakır.</string>
+    <string name="nag_convert_channels_mp3">MP3 her zaman stereodur: ikiden çok kanal stereoya indirilir.</string>
     <string name="nag_convert_naming">Dosya adları</string>
     <string name="nag_convert_naming_folders">Sanatçı/Albüm klasörleri</string>
     <string name="nag_convert_naming_flat">Tek klasör</string>
@@ -2331,7 +2336,7 @@
         <item quantity="other">%d parça zaten kayıplı biçimde: yeniden dönüştürülünce kaliteleri biraz daha düşer.</item>
     </plurals>
     <string name="nag_convert_no_engine">Bu sürümde müzik motoru yok: dönüştürme yapılamaz.</string>
-    <string name="nag_convert_originals">Asıl dosyalara dokunulmaz; etiketler ve ön kapak yeni dosyalara taşınır.</string>
+    <string name="nag_convert_originals">Asıl dosyalara dokunulmaz; etiketler, sözler (zamanlı olanlar da) ve ön kapak yeni dosyalara taşınır.</string>
     <string name="nag_convert_start">Dönüştür</string>
     <string name="nag_convert_channel">Müzik dönüştürme</string>
     <string name="nag_convert_running_title">Müzik dönüştürülüyor</string>

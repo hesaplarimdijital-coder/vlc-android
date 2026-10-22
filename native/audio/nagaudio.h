@@ -504,7 +504,13 @@ int nag_tags_read_replaygain(int fd, const char *name, NagReplayGainTags *gain);
  *         the padding.
  *   AAC   FFmpeg's encoder (AAC-LC) in an M4A, at the source's rate up to 96 kHz; the edit
  *         list hides the priming and the padding.
- * Mono stays mono, stereo stereo; more channels are mixed to stereo. The output goes to
+ * Mono stays mono, stereo stereo. More channels stay as they are up to 7.1 where the codec
+ * has the layout (NagConvertOptions.channels asks for stereo instead): Opus in mapping family 1
+ * (Vorbis' channel order, its streams and coupled pairs), AAC in MPEG-4's channel configurations
+ * 3 to 6 and 12 (3.0, 4.0, 5.0, 5.1, 7.1); a layout the codec lacks goes into the next larger one, the
+ * channels the source lacks silent. MP3 is always mono or stereo. The downmix is ITU-R BS.775's
+ * (centre and surrounds at -3 dB, the back centre at -6 dB, no LFE), scaled so that it cannot
+ * clip; the bit rate asked is a stereo pair's and grows with the channels. The output goes to
  * [out_fd] (read-write, seekable, new and empty: a file that holds anything, or is the source
  * itself, is refused, so nothing is ever truncated), then the tags and the front cover are
  * copied from [in_fd] (nag_tags_copy). When the source carries ReplayGain, the track's gain and
@@ -517,6 +523,9 @@ typedef enum NagConvertCodec {
     NAG_CONVERT_AAC = 2,
 } NagConvertCodec;
 
+#define NAG_CONVERT_SOURCE_CHANNELS 0
+#define NAG_CONVERT_STEREO 2
+
 typedef struct NagConvertOptions {
     NagConvertCodec codec;
     /** Bits per second: Opus's target, AAC's, MP3's constant rate; 0 for MP3's VBR. */
@@ -525,6 +534,8 @@ typedef struct NagConvertOptions {
     int vbr_quality;
     /** The output's rate (0: the source's where the codec has it); Opus is always 48 kHz. */
     int rate;
+    /** NAG_CONVERT_SOURCE_CHANNELS (0): the source's layout; NAG_CONVERT_STEREO (2): stereo, mixed down. */
+    int channels;
     /** S-808: the CUE part, in CUE frames (1/75 s): from 0 and to -1 for the whole file. */
     int64_t from, to;
     /** "KEY=value" lines over the source's tags ("KEY=" removes one); NULL for none. */

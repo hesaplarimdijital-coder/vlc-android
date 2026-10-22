@@ -44,6 +44,20 @@ enum class ConvertRate(val hz: Int) {
     }
 }
 
+/**
+ * The output's channels: the source's layout up to 7.1 ([Source], for Opus and AAC), or mixed down
+ * to stereo ([Stereo]; MP3 is always stereo, whatever is chosen).
+ */
+enum class ConvertChannels {
+    Source,
+    Stereo,
+    ;
+
+    companion object {
+        fun of(key: String?, fallback: ConvertChannels = Source): ConvertChannels = entries.firstOrNull { it.name == key } ?: fallback
+    }
+}
+
 /** How the new files are named: "Artist/Album/NN Title.ext" in folders, or "Artist - Title.ext" side by side. */
 enum class ConvertNaming {
     Folders,
@@ -55,7 +69,7 @@ enum class ConvertNaming {
     }
 }
 
-/** S-1010: what the converter is asked for: format and quality, rate, naming, whether files there are left alone, where. */
+/** S-1010: what the converter is asked for: format and quality, rate, channels, naming, whether files there are left alone, where. */
 data class ConvertOptions(
     val preset: ConvertPreset = ConvertPreset.DEFAULT,
     val rate: ConvertRate = ConvertRate.Source,
@@ -63,18 +77,28 @@ data class ConvertOptions(
     val skipExisting: Boolean = true,
     /** The destination: a document tree the system's picker gave; empty until one is chosen. */
     val folder: String = "",
+    val channels: ConvertChannels = ConvertChannels.Source,
 ) {
-    /** The engine's settings: Opus takes no rate (it is always 48 kHz). */
-    fun settings(): ConvertSettings =
-        ConvertSettings(preset.codec, preset.bitrate, preset.vbrQuality, if (preset.codec == ConvertCodec.Opus) 0 else rate.hz)
+    /** The engine's settings: Opus takes no rate (it is always 48 kHz); MP3 is stereo at most whatever [channels] says. */
+    fun settings(): ConvertSettings = ConvertSettings(
+        preset.codec,
+        preset.bitrate,
+        preset.vbrQuality,
+        if (preset.codec == ConvertCodec.Opus) 0 else rate.hz,
+        stereo = channels == ConvertChannels.Stereo,
+    )
 
     /** Whether the rate is the user's to choose for this format. */
     val rateApplies: Boolean get() = preset.codec != ConvertCodec.Opus
+
+    /** Whether the channels are the user's to choose for this format (MP3 has no more than two). */
+    val channelsApply: Boolean get() = preset.codec != ConvertCodec.Mp3
 
     /** The choices as the next conversion starts from them. */
     fun write(editor: SharedPreferences.Editor): SharedPreferences.Editor = editor
         .putString(KEY_PRESET, preset.key)
         .putString(KEY_RATE, rate.name)
+        .putString(KEY_CHANNELS, channels.name)
         .putString(KEY_NAMING, naming.name)
         .putBoolean(KEY_SKIP, skipExisting)
         .putString(KEY_FOLDER, folder)
@@ -82,6 +106,7 @@ data class ConvertOptions(
     companion object {
         const val KEY_PRESET = "nagmedar_convert_preset"
         const val KEY_RATE = "nagmedar_convert_rate"
+        const val KEY_CHANNELS = "nagmedar_convert_channels"
         const val KEY_NAMING = "nagmedar_convert_naming"
         const val KEY_SKIP = "nagmedar_convert_skip_existing"
 
@@ -92,6 +117,7 @@ data class ConvertOptions(
         fun read(prefs: SharedPreferences): ConvertOptions = ConvertOptions(
             preset = ConvertPreset.of(prefs.getString(KEY_PRESET, null)),
             rate = ConvertRate.of(prefs.getString(KEY_RATE, null)),
+            channels = ConvertChannels.of(prefs.getString(KEY_CHANNELS, null)),
             naming = ConvertNaming.of(prefs.getString(KEY_NAMING, null)),
             skipExisting = prefs.getBoolean(KEY_SKIP, true),
             folder = prefs.getString(KEY_FOLDER, null).orEmpty(),

@@ -241,6 +241,10 @@ object NativeAudio {
     const val CONVERT_MP3 = 1
     const val CONVERT_AAC = 2
 
+    // S-1010: NagConvertOptions.channels
+    const val CONVERT_SOURCE_CHANNELS = 0
+    const val CONVERT_STEREO = 2
+
     /** S-1010: the converter's progress, 0..1, on the converting thread; false stops it. */
     fun interface ConvertListener {
         fun onProgress(fraction: Double): Boolean
@@ -248,7 +252,8 @@ object NativeAudio {
 
     /**
      * S-1010: the file behind [inFd] (from CUE frame [from] to [to], -1 for its end) encoded as
-     * [codec] into the file behind [outFd] (read-write, seekable), its tags and cover along;
+     * [codec] into the file behind [outFd] (read-write, seekable), its tags and cover along, its
+     * channels as the source's ([channels] CONVERT_SOURCE_CHANNELS) or mixed to stereo (CONVERT_STEREO);
      * [tags] are UTF-8 "KEY=value" lines over the source's ("KEY=" removes one). The names, with
      * their extensions, help the tag reading. JSON: frames, rate, channels, bytes, tags, cover,
      * lufs, gain_db; or error and cancelled. Slow: a worker thread's.
@@ -262,6 +267,7 @@ object NativeAudio {
         bitrate: Int,
         vbrQuality: Int,
         rate: Int,
+        channels: Int,
         from: Long,
         to: Long,
         tags: ByteArray?,

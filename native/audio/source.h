@@ -38,6 +38,13 @@ int nag_source_channels(const NagSource *source);
 int nag_source_channel_weights(const NagSource *source, double *weights, int max);
 
 /**
+ * S-1010: which channel each of the frames read carries, as libavutil's AV_CHAN_* ids, in the
+ * order of the frames. A file whose layout says nothing gets the default layout of its count.
+ * Fills up to [max]; returns the channels.
+ */
+int nag_source_channel_ids(const NagSource *source, int *ids, int max);
+
+/**
  * Up to [max_frames] frames into [dst]: how many, 0 at the end of the file, a negative
  * AVERROR on a failure the decoder could not skip.
  */

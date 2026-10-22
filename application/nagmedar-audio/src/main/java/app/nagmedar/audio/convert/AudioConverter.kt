@@ -24,10 +24,18 @@ enum class ConvertCodec(val native: Int, val extension: String) {
 
 /**
  * S-1010: how a file is encoded: [bitrate] in bits per second (Opus's target, AAC's, MP3's
- * constant rate; 0 for MP3's VBR at [vbrQuality], LAME's -V 0..9), at [rate] Hz (0: the source's
- * where the codec has it; Opus is always 48 kHz).
+ * constant rate; 0 for MP3's VBR at [vbrQuality], LAME's -V 0..9; for more than two channels the
+ * rate of a stereo pair, which the engine grows with the channels), at [rate] Hz (0: the
+ * source's where the codec has it; Opus is always 48 kHz). [stereo]: mixed down to stereo
+ * instead of keeping the source's channels up to 7.1 (MP3 is always stereo at most).
  */
-data class ConvertSettings(val codec: ConvertCodec, val bitrate: Int, val vbrQuality: Int = 0, val rate: Int = 0)
+data class ConvertSettings(
+    val codec: ConvertCodec,
+    val bitrate: Int,
+    val vbrQuality: Int = 0,
+    val rate: Int = 0,
+    val stereo: Boolean = false,
+)
 
 /** S-808: the part of a file a CUE sheet's track is, in CUE frames (1/75 s); [to] null for the file's end. */
 data class ConvertPart(val from: Long, val to: Long?)
@@ -122,6 +130,7 @@ object AudioConverter {
                     NativeAudio.convert(
                         inFd.fd, inputName, outFd.fd, outputName,
                         settings.codec.native, settings.bitrate, settings.vbrQuality, settings.rate,
+                        if (settings.stereo) NativeAudio.CONVERT_STEREO else NativeAudio.CONVERT_SOURCE_CHANNELS,
                         part?.from ?: 0L, part?.to ?: -1L,
                         tagLines(tags), NativeAudio.ConvertListener { fraction -> progress(fraction) },
                     ),

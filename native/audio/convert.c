@@ -6,10 +6,16 @@
  *   Opus  libopus, 20 ms packets into FFmpeg's Ogg muxer. The packets' timestamps start at
  *         minus the encoder's lookahead (the OpusHead's pre-skip), and the last ones are as
  *         long as the audio is, so the last granule position trims the padding (RFC 7845).
+ *         More than two channels: libopus' surround encoder, mapping family 1 (Vorbis channel
+ *         order, the coupled streams its table names).
  *   MP3   LAME writes the stream itself: its first frame is the Xing/LAME frame, filled in at
  *         the end with the encoder delay and the padding (what makes a decoder gapless).
  *   AAC   FFmpeg's own encoder into its M4A muxer (ipod), which writes the priming and the
- *         padding into the edit list.
+ *         padding into the edit list. Up to 7.1, in the channel configurations MPEG-4 names
+ *         (1 to 6, and 12 for 7.1).
+ *
+ * The channels stay as the source's up to 7.1 (a layout the codec has: what the source lacks
+ * of it is silence), or go to stereo by ITU-R BS.775's matrix when asked for, and always for MP3.
  *
  * The output is a descriptor (a content document's on Android): the muxers write through an
  * AVIOContext over it, LAME's bytes go to it directly. The tags and the front cover follow
@@ -29,6 +35,7 @@
 #include <libswresample/swresample.h>
 #include <lame/lame.h>
 #include <opus/opus.h>
+#include <opus/opus_multistream.h>
 
 #include <errno.h>
 #include <limits.h>
@@ -44,7 +51,11 @@
 /* Opus: 20 ms packets at 48 kHz */
 #define OPUS_RATE 48000
 #define OPUS_FRAME 960
-#define OPUS_MAX_PACKET 4000
+#define OPUS_MAX_PACKET 8192
+/* the most channels any output has (7.1) */
+#define MAX_CH 8
+/* a libopus request on the encoder in use: the single one (mono, stereo) or the surround one */
+#define OPUS_CTL(c, request) ((c)->opus_ms ? opus_multistream_encoder_ctl((c)->opus_ms, request) : opus_encoder_ctl((c)->opus, request))
 /* frames kept back in the fifo until the end, so that the resampler's excess can be cut off there */
 #define FIFO_RESERVE 2048
 
@@ -60,7 +71,12 @@ typedef struct Conv {
     NagSource *src;
     int in_rate;
     int rate;
-    int channels;
+    int src_channels;   /* of the frames the source gives */
+    int channels;       /* of the output */
+    int mixing;         /* the frames are mixed by [matrix] before they are encoded */
+    double matrix[MAX_CH * MAX_CH]; /* output x source gains (stride MAX_CH) */
+    int lfe_channels;   /* LFE channels among the output's */
+    uint64_t aac_mask;  /* the output's layout as FFmpeg's channel mask */
     SwrContext *swr;
     AVAudioFifo *fifo; /* float frames at the output's rate, interleaved */
     int64_t produced;  /* frames into the fifo */
@@ -68,6 +84,7 @@ typedef struct Conv {
 
     /* Opus */
     OpusEncoder *opus;
+    OpusMSEncoder *opus_ms; /* more than two channels */
     int pre_skip;
     int64_t opus_packets;
     /* AAC */
@@ -97,6 +114,238 @@ static int failed(Conv *c, int ret, const char *what)
         snprintf(c->error, c->error_size, "%s", what);
     }
     return ret < 0 ? ret : -1;
+}
+
+/* ------------------------------------------------------------------ channels */
+
+/* what a channel is for, whatever the layout calls it */
+enum {
+    ROLE_L, ROLE_R, ROLE_C, ROLE_LFE, ROLE_SL, ROLE_SR, ROLE_BL, ROLE_BR, ROLE_BC, ROLE_FLC, ROLE_FRC, ROLE_COUNT
+};
+
+static int role_of(int id)
+{
+    switch (id) {
+    case AV_CHAN_FRONT_LEFT: return ROLE_L;
+    case AV_CHAN_FRONT_RIGHT: return ROLE_R;
+    case AV_CHAN_FRONT_CENTER: return ROLE_C;
+    case AV_CHAN_LOW_FREQUENCY: return ROLE_LFE;
+    case AV_CHAN_SIDE_LEFT: return ROLE_SL;
+    case AV_CHAN_SIDE_RIGHT: return ROLE_SR;
+    case AV_CHAN_BACK_LEFT: return ROLE_BL;
+    case AV_CHAN_BACK_RIGHT: return ROLE_BR;
+    case AV_CHAN_BACK_CENTER: return ROLE_BC;
+    case AV_CHAN_FRONT_LEFT_OF_CENTER: return ROLE_FLC;
+    case AV_CHAN_FRONT_RIGHT_OF_CENTER: return ROLE_FRC;
+    default: return -1;
+    }
+}
+
+/* A layout a codec writes: its channels in the order the codec takes them. */
+typedef struct Layout {
+    int count;
+    signed char roles[MAX_CH];
+    uint64_t mask; /* FFmpeg's mask of the same channels (the AAC encoder's layouts) */
+} Layout;
+
+/*
+ * Opus' mapping family 1 (RFC 7845 section 5.1.1.2): Vorbis' channel order. Mono, stereo, 3.0,
+ * quad, 5.0, 5.1, 6.1 and 7.1; the "rear" channels of the smaller ones are the surrounds.
+ */
+static const Layout opus_layouts[] = {
+    {1, {ROLE_C}, AV_CH_LAYOUT_MONO},
+    {2, {ROLE_L, ROLE_R}, AV_CH_LAYOUT_STEREO},
+    {3, {ROLE_L, ROLE_C, ROLE_R}, 0},
+    {4, {ROLE_L, ROLE_R, ROLE_BL, ROLE_BR}, 0},
+    {5, {ROLE_L, ROLE_C, ROLE_R, ROLE_BL, ROLE_BR}, 0},
+    {6, {ROLE_L, ROLE_C, ROLE_R, ROLE_BL, ROLE_BR, ROLE_LFE}, 0},
+    {7, {ROLE_L, ROLE_C, ROLE_R, ROLE_SL, ROLE_SR, ROLE_BC, ROLE_LFE}, 0},
+    {8, {ROLE_L, ROLE_C, ROLE_R, ROLE_SL, ROLE_SR, ROLE_BL, ROLE_BR, ROLE_LFE}, 0},
+};
+
+/*
+ * The layouts of FFmpeg's AAC encoder that MPEG-4's channel configurations 1 to 6 and 12 name (the
+ * others need a program config element, which fewer players read), in FFmpeg's channel order:
+ * mono, stereo, 3.0, 4.0 (a back centre), 5.0, 5.1 and 7.1.
+ */
+static const Layout aac_layouts[] = {
+    {1, {ROLE_C}, AV_CH_LAYOUT_MONO},
+    {2, {ROLE_L, ROLE_R}, AV_CH_LAYOUT_STEREO},
+    {3, {ROLE_L, ROLE_R, ROLE_C}, AV_CH_LAYOUT_SURROUND},
+    {4, {ROLE_L, ROLE_R, ROLE_C, ROLE_BC}, AV_CH_LAYOUT_4POINT0},
+    {5, {ROLE_L, ROLE_R, ROLE_C, ROLE_BL, ROLE_BR}, AV_CH_LAYOUT_5POINT0_BACK},
+    {6, {ROLE_L, ROLE_R, ROLE_C, ROLE_LFE, ROLE_BL, ROLE_BR}, AV_CH_LAYOUT_5POINT1_BACK},
+    {8, {ROLE_L, ROLE_R, ROLE_C, ROLE_LFE, ROLE_BL, ROLE_BR, ROLE_SL, ROLE_SR}, AV_CH_LAYOUT_7POINT1},
+};
+
+typedef struct ChannelPlan {
+    int channels;                   /* of the output */
+    double matrix[MAX_CH * MAX_CH]; /* [output * MAX_CH + source] */
+    int lfe;                        /* LFE channels among the output's */
+    uint64_t mask;                  /* the layout's FFmpeg mask, 0 where the codec has no use for one */
+    int identity;                   /* the output is the source as it is */
+} ChannelPlan;
+
+static int is_left(int role) { return role == ROLE_SL || role == ROLE_BL || role == ROLE_FLC; }
+static int is_right(int role) { return role == ROLE_SR || role == ROLE_BR || role == ROLE_FRC; }
+
+/*
+ * The source's channels (by role) into [layout]: each to the slot of its own role, a surround to
+ * the other kind of surround where the layout has the one only (side and back are the same
+ * speakers to the listener), and, with [fold], a back centre into the left and right surrounds
+ * at -3 dB. Slots without a channel stay silent. 1 when every channel found a place.
+ */
+static int fit_layout(const Layout *layout, const int *roles, int n, int fold, ChannelPlan *plan)
+{
+    int slot[MAX_CH], used[MAX_CH] = {0};
+    memset(plan->matrix, 0, sizeof(plan->matrix));
+    for (int i = 0; i < n; i++) {
+        slot[i] = -1;
+        for (int s = 0; s < layout->count; s++) {
+            if (!used[s] && layout->roles[s] == roles[i]) {
+                slot[i] = s;
+                used[s] = 1;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (slot[i] >= 0 || (!is_left(roles[i]) && !is_right(roles[i])))
+            continue;
+        const int left = is_left(roles[i]);
+        for (int s = 0; s < layout->count; s++) {
+            const int role = layout->roles[s];
+            if (!used[s] && (left ? (role == ROLE_SL || role == ROLE_BL) : (role == ROLE_SR || role == ROLE_BR))) {
+                slot[i] = s;
+                used[s] = 1;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (slot[i] >= 0) {
+            plan->matrix[slot[i] * MAX_CH + i] = 1.0;
+            continue;
+        }
+        if (roles[i] != ROLE_BC || !fold)
+            return 0;
+        int l = -1, r = -1;
+        for (int s = 0; s < layout->count; s++) {
+            const int role = layout->roles[s];
+            if (!used[s] && l < 0 && (role == ROLE_SL || role == ROLE_BL))
+                l = s;
+            if (!used[s] && r < 0 && (role == ROLE_SR || role == ROLE_BR))
+                r = s;
+        }
+        if (l < 0 || r < 0)
+            return 0;
+        used[l] = used[r] = 1;
+        plan->matrix[l * MAX_CH + i] = plan->matrix[r * MAX_CH + i] = M_SQRT1_2;
+    }
+    plan->channels = layout->count;
+    plan->mask = layout->mask;
+    plan->lfe = 0;
+    for (int s = 0; s < layout->count; s++)
+        plan->lfe += layout->roles[s] == ROLE_LFE;
+    return 1;
+}
+
+/*
+ * ITU-R BS.775's downmix to stereo: the centre and the surrounds at -3 dB into both sides or
+ * their own, the back centre at -6 dB into both, the LFE left out (the recommendation has no
+ * place for it). Scaled down together when the louder side could pass full scale, so that no
+ * downmix clips.
+ */
+static void fit_stereo(const int *roles, int n, ChannelPlan *plan)
+{
+    static const double left[ROLE_COUNT] = {1, 0, M_SQRT1_2, 0, M_SQRT1_2, 0, M_SQRT1_2, 0, 0.5, 1, 0};
+    static const double right[ROLE_COUNT] = {0, 1, M_SQRT1_2, 0, 0, M_SQRT1_2, 0, M_SQRT1_2, 0.5, 0, 1};
+    memset(plan->matrix, 0, sizeof(plan->matrix));
+    double sum_left = 0, sum_right = 0;
+    for (int i = 0; i < n; i++) {
+        plan->matrix[0 * MAX_CH + i] = left[roles[i]];
+        plan->matrix[1 * MAX_CH + i] = right[roles[i]];
+        sum_left += left[roles[i]];
+        sum_right += right[roles[i]];
+    }
+    const double peak = sum_left > sum_right ? sum_left : sum_right;
+    if (peak > 1.0) {
+        for (int i = 0; i < n; i++) {
+            plan->matrix[0 * MAX_CH + i] /= peak;
+            plan->matrix[1 * MAX_CH + i] /= peak;
+        }
+    }
+    plan->channels = 2;
+    plan->mask = AV_CH_LAYOUT_STEREO;
+    plan->lfe = 0;
+}
+
+/* Whether the source's channels are ones the planner places (else FFmpeg mixes the source down to stereo). */
+static int channels_known(const int *ids, int n)
+{
+    if (n < 1 || n > MAX_CH)
+        return 0;
+    if (n == 1)
+        return 1;
+    for (int i = 0; i < n; i++)
+        if (role_of(ids[i]) < 0)
+            return 0;
+    return 1;
+}
+
+/*
+ * The output's channels from the source's [ids]: mono stays mono; stereo when asked for ([stereo])
+ * and always for MP3, by BS.775's matrix; otherwise the source's own layout in the codec's (the
+ * smallest the codec has that holds every channel, silence for what the source lacks of it), and
+ * the stereo downmix for what none holds. 0, or -1 when a channel has no known role.
+ */
+static int plan_channels(NagConvertCodec codec, int stereo, const int *ids, int n, ChannelPlan *plan)
+{
+    int roles[MAX_CH];
+    memset(plan, 0, sizeof(*plan));
+    if (!channels_known(ids, n))
+        return -1;
+    if (n == 1) {
+        plan->channels = 1;
+        plan->matrix[0] = 1.0;
+        plan->mask = AV_CH_LAYOUT_MONO;
+        plan->identity = 1;
+        return 0;
+    }
+    for (int i = 0; i < n; i++)
+        roles[i] = role_of(ids[i]);
+    int found = 0;
+    if (!stereo && codec != NAG_CONVERT_MP3) {
+        const Layout *table = codec == NAG_CONVERT_OPUS ? opus_layouts : aac_layouts;
+        const int count = codec == NAG_CONVERT_OPUS ? (int)(sizeof(opus_layouts) / sizeof(opus_layouts[0]))
+                                                    : (int)(sizeof(aac_layouts) / sizeof(aac_layouts[0]));
+        for (int fold = 0; fold <= 1 && !found; fold++)
+            for (int l = 0; l < count && !found; l++)
+                found = fit_layout(&table[l], roles, n, fold, plan);
+    }
+    if (!found)
+        fit_stereo(roles, n, plan);
+    plan->identity = plan->channels == n;
+    for (int o = 0; o < plan->channels && plan->identity; o++)
+        for (int i = 0; i < n; i++)
+            if (plan->matrix[o * MAX_CH + i] != (o == i ? 1.0 : 0.0))
+                plan->identity = 0;
+    return 0;
+}
+
+/*
+ * The bit rate for [channels]: [base] is the one asked for a stereo pair. Each full-range channel
+ * past the pair adds 0.6 of the share a pair's channel has (surrounds carry less of their own),
+ * the LFE 0.15: 5.1 gets about twice the pair's rate, 7.1 two and a half times. Mono and stereo
+ * as asked.
+ */
+static int scaled_bitrate(int base, int channels, int lfe)
+{
+    if (channels <= 2)
+        return base;
+    const double pairs = (2.0 + 0.6 * (channels - lfe - 2) + 0.15 * lfe) / 2.0;
+    const double rate = base * pairs;
+    return rate > (double)INT_MAX ? INT_MAX : (int)rate;
 }
 
 /* ----------------------------------------------------------------- output I/O */
@@ -169,26 +418,40 @@ static int open_muxer(Conv *c, const char *format, AVStream **stream)
 static int opus_open(Conv *c)
 {
     int err = 0;
-    c->opus = opus_encoder_create(OPUS_RATE, c->channels, OPUS_APPLICATION_AUDIO, &err);
-    if (err != OPUS_OK || !c->opus) {
-        snprintf(c->error, c->error_size, "libopus: %s", opus_strerror(err));
-        return -1;
+    int streams = 1, coupled = c->channels == 2;
+    unsigned char mapping[MAX_CH] = {0, 1};
+    const int bitrate = scaled_bitrate(c->opt->bitrate > 0 ? c->opt->bitrate : 128000, c->channels, c->lfe_channels);
+    if (c->channels <= 2) {
+        c->opus = opus_encoder_create(OPUS_RATE, c->channels, OPUS_APPLICATION_AUDIO, &err);
+        if (err != OPUS_OK || !c->opus) {
+            snprintf(c->error, c->error_size, "libopus: %s", opus_strerror(err));
+            return -1;
+        }
+    } else {
+        /* mapping family 1: the surround encoder knows the streams, the coupled pairs and the mapping RFC 7845 names */
+        c->opus_ms = opus_multistream_surround_encoder_create(OPUS_RATE, c->channels, 1, &streams, &coupled, mapping,
+                                                              OPUS_APPLICATION_AUDIO, &err);
+        if (err != OPUS_OK || !c->opus_ms) {
+            snprintf(c->error, c->error_size, "libopus: %s", opus_strerror(err));
+            return -1;
+        }
     }
-    opus_encoder_ctl(c->opus, OPUS_SET_BITRATE(c->opt->bitrate > 0 ? c->opt->bitrate : 128000));
-    opus_encoder_ctl(c->opus, OPUS_SET_VBR(1));
-    opus_encoder_ctl(c->opus, OPUS_SET_VBR_CONSTRAINT(0));
-    opus_encoder_ctl(c->opus, OPUS_SET_COMPLEXITY(10));
-    opus_encoder_ctl(c->opus, OPUS_SET_SIGNAL(OPUS_SIGNAL_MUSIC));
+    OPUS_CTL(c, OPUS_SET_BITRATE(bitrate));
+    OPUS_CTL(c, OPUS_SET_VBR(1));
+    OPUS_CTL(c, OPUS_SET_VBR_CONSTRAINT(0));
+    OPUS_CTL(c, OPUS_SET_COMPLEXITY(10));
+    OPUS_CTL(c, OPUS_SET_SIGNAL(OPUS_SIGNAL_MUSIC));
     opus_int32 lookahead = 0;
-    opus_encoder_ctl(c->opus, OPUS_GET_LOOKAHEAD(&lookahead));
+    OPUS_CTL(c, OPUS_GET_LOOKAHEAD(&lookahead));
     c->pre_skip = (int)lookahead;
 
     AVStream *st;
     int ret = open_muxer(c, "ogg", &st);
     if (ret < 0)
         return ret;
-    /* RFC 7845's identification header: mapping family 0 (mono or stereo) */
-    uint8_t *head = av_mallocz(19 + AV_INPUT_BUFFER_PADDING_SIZE);
+    /* RFC 7845's identification header: mapping family 0 (mono or stereo), else family 1 with its channel mapping table */
+    const int head_size = c->channels <= 2 ? 19 : 21 + c->channels;
+    uint8_t *head = av_mallocz(head_size + AV_INPUT_BUFFER_PADDING_SIZE);
     if (!head)
         return failed(c, AVERROR(ENOMEM), "out of memory");
     memcpy(head, "OpusHead", 8);
@@ -197,15 +460,20 @@ static int opus_open(Conv *c)
     AV_WL16(head + 10, c->pre_skip);
     AV_WL32(head + 12, c->in_rate);
     AV_WL16(head + 16, 0);
-    head[18] = 0;
+    head[18] = c->channels <= 2 ? 0 : 1;
+    if (c->channels > 2) {
+        head[19] = (uint8_t)streams;
+        head[20] = (uint8_t)coupled;
+        memcpy(head + 21, mapping, (size_t)c->channels);
+    }
     st->codecpar->codec_type = AVMEDIA_TYPE_AUDIO;
     st->codecpar->codec_id = AV_CODEC_ID_OPUS;
     st->codecpar->sample_rate = OPUS_RATE;
     av_channel_layout_default(&st->codecpar->ch_layout, c->channels);
     st->codecpar->extradata = head;
-    st->codecpar->extradata_size = 19;
+    st->codecpar->extradata_size = head_size;
     st->codecpar->initial_padding = c->pre_skip;
-    st->codecpar->bit_rate = c->opt->bitrate;
+    st->codecpar->bit_rate = bitrate;
     st->time_base = (AVRational){1, OPUS_RATE};
     if ((ret = avformat_write_header(c->oc, NULL)) < 0)
         return failed(c, ret, "Ogg header");
@@ -216,7 +484,8 @@ static int opus_open(Conv *c)
 static int opus_packet(Conv *c, const float *pcm, int duration)
 {
     uint8_t data[OPUS_MAX_PACKET];
-    opus_int32 size = opus_encode_float(c->opus, pcm, OPUS_FRAME, data, sizeof(data));
+    opus_int32 size = c->opus_ms ? opus_multistream_encode_float(c->opus_ms, pcm, OPUS_FRAME, data, sizeof(data))
+                                 : opus_encode_float(c->opus, pcm, OPUS_FRAME, data, sizeof(data));
     if (size < 0) {
         snprintf(c->error, c->error_size, "libopus: %s", opus_strerror(size));
         return -1;
@@ -331,11 +600,14 @@ static int aac_open(Conv *c)
         return failed(c, AVERROR(ENOMEM), "out of memory");
     c->aac->sample_fmt = AV_SAMPLE_FMT_FLTP;
     c->aac->sample_rate = c->rate;
-    av_channel_layout_default(&c->aac->ch_layout, c->channels);
-    c->aac->bit_rate = c->opt->bitrate > 0 ? c->opt->bitrate : 256000;
+    /* one of the encoder's own layouts (MPEG-4's channel configurations), else it asks for a program config element */
+    int ret = av_channel_layout_from_mask(&c->aac->ch_layout, c->aac_mask);
+    if (ret < 0)
+        return failed(c, ret, "AAC channel layout");
+    c->aac->bit_rate = scaled_bitrate(c->opt->bitrate > 0 ? c->opt->bitrate : 256000, c->channels, c->lfe_channels);
     c->aac->time_base = (AVRational){1, c->rate};
     c->aac->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-    int ret = avcodec_open2(c->aac, codec, NULL);
+    ret = avcodec_open2(c->aac, codec, NULL);
     if (ret < 0)
         return failed(c, ret, "AAC encoder");
     c->aac_frame = av_frame_alloc();
@@ -353,6 +625,14 @@ static int aac_open(Conv *c)
         return ret;
     if ((ret = avcodec_parameters_from_context(st->codecpar, c->aac)) < 0)
         return failed(c, ret, "M4A stream");
+    /*
+     * 7.1: FFmpeg's encoder writes the elements of MPEG-4's configuration 12 (centre, front pair,
+     * side pair, rear pair, LFE) under 7, which a decoder that follows the standard reads as 7.1
+     * wide (the front pair as centre-left and centre-right). The audio specific config's channel
+     * configuration (4 bits after the object type and the rate index) is made 12.
+     */
+    if (c->channels == 8 && st->codecpar->extradata_size >= 2)
+        st->codecpar->extradata[1] = (uint8_t)((st->codecpar->extradata[1] & 0x87) | (12 << 3));
     st->time_base = (AVRational){1, c->rate};
     if ((ret = avformat_write_header(c->oc, NULL)) < 0)
         return failed(c, ret, "M4A header");
@@ -470,6 +750,22 @@ static int encode_fifo(Conv *c, float *pcm, int keep)
     return 0;
 }
 
+/* [frames] source frames into the output's channels by the plan's matrix. */
+static void mix(const Conv *c, const double *in, double *out, int frames)
+{
+    for (int f = 0; f < frames; f++) {
+        const double *src = in + (size_t)f * c->src_channels;
+        double *dst = out + (size_t)f * c->channels;
+        for (int o = 0; o < c->channels; o++) {
+            const double *row = c->matrix + o * MAX_CH;
+            double sum = 0.0;
+            for (int i = 0; i < c->src_channels; i++)
+                sum += row[i] * src[i];
+            dst[o] = sum;
+        }
+    }
+}
+
 /* Frames at the source's rate (doubles) into the fifo at the output's (floats); NULL flushes. */
 static int push(Conv *c, const double *in, int frames, float *scratch, int scratch_frames)
 {
@@ -512,6 +808,8 @@ static void conv_close(Conv *c)
     avcodec_free_context(&c->aac);
     if (c->opus)
         opus_encoder_destroy(c->opus);
+    if (c->opus_ms)
+        opus_multistream_encoder_destroy(c->opus_ms);
     if (c->lame)
         lame_close(c->lame);
     free(c->mp3_buffer);
@@ -528,7 +826,19 @@ static int run(Conv *c)
     int ret;
     const NagSourceInfo *info = nag_source_info(c->src);
     c->in_rate = info->rate;
-    c->channels = nag_source_channels(c->src);
+    c->src_channels = nag_source_channels(c->src);
+    {
+        int ids[MAX_CH] = {0};
+        ChannelPlan plan;
+        nag_source_channel_ids(c->src, ids, MAX_CH);
+        if (plan_channels(opt->codec, opt->channels == NAG_CONVERT_STEREO, ids, c->src_channels, &plan) < 0)
+            return failed(c, -1, "channels the converter does not place");
+        c->channels = plan.channels;
+        c->lfe_channels = plan.lfe;
+        c->aac_mask = plan.mask;
+        c->mixing = !plan.identity;
+        memcpy(c->matrix, plan.matrix, sizeof(c->matrix));
+    }
     switch (opt->codec) {
     case NAG_CONVERT_OPUS:
         c->rate = OPUS_RATE;
@@ -565,11 +875,13 @@ static int run(Conv *c)
 
     /* buffers: the source's doubles, the resampler's output, one encoder frame */
     const int scratch_frames = (int)av_rescale_rnd(READ_FRAMES, c->rate, c->in_rate, AV_ROUND_UP) + 256;
-    double *in = malloc(sizeof(double) * READ_FRAMES * c->channels);
+    double *in = malloc(sizeof(double) * READ_FRAMES * c->src_channels);
+    double *mixed = c->mixing ? malloc(sizeof(double) * READ_FRAMES * c->channels) : NULL;
     float *scratch = malloc(sizeof(float) * (size_t)scratch_frames * c->channels);
     float *pcm = malloc(sizeof(float) * 2048 * c->channels);
-    if (!in || !scratch || !pcm) {
+    if (!in || (c->mixing && !mixed) || !scratch || !pcm) {
         free(in);
+        free(mixed);
         free(scratch);
         free(pcm);
         return failed(c, AVERROR(ENOMEM), "out of memory");
@@ -585,11 +897,13 @@ static int run(Conv *c)
         if (n == 0)
             break;
         /* a damaged float source's NaN or infinity becomes silence: no encoder sees it */
-        for (int i = 0; i < n * c->channels; i++)
+        for (int i = 0; i < n * c->src_channels; i++)
             if (!isfinite(in[i]))
                 in[i] = 0.0;
         read += n;
-        if ((ret = push(c, in, n, scratch, scratch_frames)) < 0 || (ret = encode_fifo(c, pcm, FIFO_RESERVE)) < 0)
+        if (c->mixing)
+            mix(c, in, mixed, n);
+        if ((ret = push(c, c->mixing ? mixed : in, n, scratch, scratch_frames)) < 0 || (ret = encode_fifo(c, pcm, FIFO_RESERVE)) < 0)
             break;
         double fraction = expected > 0 ? (double)read / (double)expected : 0.0;
         if (c->progress && c->progress(c->opaque, 0.95 * (fraction > 1.0 ? 1.0 : fraction))) {
@@ -669,6 +983,7 @@ static int run(Conv *c)
     if (ret >= 0 && c->io)
         avio_flush(c->io);
     free(in);
+    free(mixed);
     free(scratch);
     free(pcm);
     return ret < 0 ? ret : 0;
@@ -714,8 +1029,10 @@ int nag_convert(int in_fd, const char *in_name, int out_fd, const char *out_name
     int ret = nag_source_open(&c->src, url, 0, error, error_size);
     if (ret < 0)
         return ret;
-    /* more than two channels are mixed to stereo */
-    if (nag_source_channels(c->src) > 2) {
+    /* the channels as the file has them; a layout the planner cannot place (heights, more than eight) is mixed to stereo by FFmpeg */
+    int ids[MAX_CH] = {0};
+    const int count = nag_source_channels(c->src);
+    if (count > MAX_CH || !(nag_source_channel_ids(c->src, ids, MAX_CH), channels_known(ids, count))) {
         nag_source_close(c->src);
         c->src = NULL;
         if ((ret = nag_source_open(&c->src, url, 2, error, error_size)) < 0)

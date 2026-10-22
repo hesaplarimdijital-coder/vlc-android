@@ -12,6 +12,7 @@ data class ConvertJob(val id: String, val createdAt: Long, val options: ConvertO
         .put("created_at", createdAt)
         .put("preset", options.preset.key)
         .put("rate", options.rate.name)
+        .put("channels", options.channels.name)
         .put("naming", options.naming.name)
         .put("skip_existing", options.skipExisting)
         .put("folder", options.folder)
@@ -39,6 +40,8 @@ data class ConvertJob(val id: String, val createdAt: Long, val options: ConvertO
                 options = ConvertOptions(
                     preset = ConvertPreset.of(o.optString("preset")),
                     rate = ConvertRate.of(o.optString("rate")),
+                    // a job written before the channels were a choice mixed everything to stereo
+                    channels = ConvertChannels.of(o.optString("channels"), fallback = ConvertChannels.Stereo),
                     naming = ConvertNaming.of(o.optString("naming")),
                     skipExisting = o.optBoolean("skip_existing", true),
                     folder = o.optString("folder"),
