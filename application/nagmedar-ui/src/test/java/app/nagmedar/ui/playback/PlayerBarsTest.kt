@@ -13,8 +13,11 @@ import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -140,13 +143,15 @@ class PlayerBarsTest {
         compose.onNodeWithContentDescription("Önceki parça").performMouseInput { click() }
         compose.onNodeWithContentDescription("Durdur").performMouseInput { click() }
         assertEquals(listOf("previous", "stop"), actions.calls)
-        // the seek bar takes the second line and tells the time under the pointer
+        // the seek bar takes the second line and tells the time under the pointer, in a bubble over it
         compose.onNode(seekBar).performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
         assertEquals(listOf(0.5f), actions.seeks)
         compose.onNode(seekBar).performMouseInput { moveTo(center) }
         compose.waitForIdle()
-        compose.onNodeWithText("2:09").assertExists()
-        compose.onNodeWithText("4:18").assertExists()
+        compose.onNodeWithTag("progress-bubble").assertTextEquals("2:09")
+        // sought to the middle of 4:18: the time played and the time left either side
+        compose.onNode(hasText("2:09") and hasTestTag("progress-bubble").not()).assertExists()
+        compose.onNodeWithText("−2:09").assertExists()
         // away from the bar (the window wraps it: outside the window) and without the focus, the controls go
         compose.runOnIdle { focusManager.clearFocus() }
         compose.onRoot().performMouseInput { moveTo(Offset(-40f, -40f)) }
