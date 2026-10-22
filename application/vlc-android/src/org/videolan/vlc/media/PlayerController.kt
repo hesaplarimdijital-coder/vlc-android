@@ -117,13 +117,8 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
     @MainThread
     fun restart() {
         val mp = mediaplayer
-        val volume:Int? = if (!mp.isReleased) mp.volume else null
         mediaplayer = newMediaPlayer()
-        volume?.let {
-            if (it > 100) {
-                mediaplayer.volume = it
-            }
-        }
+        if (userVolume != 100) mediaplayer.volume = userVolume
         release(mp)
     }
 
@@ -368,9 +363,30 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         if (!mediaplayer.isReleased)  mediaplayer.title = title
     }
 
-    override fun getVolume() = if (!mediaplayer.isReleased) mediaplayer.volume else 100
+    /**
+     * Nağmedar: the volume asked for, VLC's percent (100 = the samples as they are). libVLC 4 keeps a
+     * volume only once an audio output exists, so before the first sound plays it reports none
+     * (a negative number, which read as 0 in the new interface's slider, and once set back, muted
+     * the phone); this is what the interface shows and what every new output gets.
+     */
+    private var userVolume = 100
 
-    override fun setVolume(volume: Int) = if (!mediaplayer.isReleased) mediaplayer.setVolume(volume) else -1
+    override fun getVolume(): Int {
+        val reported = if (!mediaplayer.isReleased) mediaplayer.volume else -1
+        return if (reported >= 0) reported else userVolume
+    }
+
+    override fun setVolume(volume: Int): Int {
+        userVolume = volume.coerceIn(0, 200)
+        return if (!mediaplayer.isReleased) mediaplayer.setVolume(userVolume) else -1
+    }
+
+    /** The output is there now (Playing): the volume asked for, where the output started at another. */
+    private fun applyUserVolume() {
+        if (mediaplayer.isReleased) return
+        val reported = mediaplayer.volume
+        if (reported >= 0 && reported != userVolume) mediaplayer.setVolume(userVolume)
+    }
 
     suspend fun expand(): IMediaList? {
         return mediaplayer.media?.let {
@@ -394,6 +410,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
                     playbackState = PlaybackStateCompat.STATE_PLAYING
                     // S-613: the output's delay again, in case the input was not there to take it at the start
                     if (audioDelay.outputLatencyUs != 0L || audioDelay.legacyBluetoothUs != 0L) applyAudioDelay()
+                    applyUserVolume()
                 }
                 MediaPlayer.Event.Paused -> playbackState = PlaybackStateCompat.STATE_PAUSED
                 MediaPlayer.Event.EncounteredError -> setPlaybackStopped()
