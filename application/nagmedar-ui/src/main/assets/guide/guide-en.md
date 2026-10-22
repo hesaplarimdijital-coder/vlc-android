@@ -14,19 +14,48 @@ Nağmedar builds its library from the videos and music on this device and on con
 
 ### The first time you open it
 1. **Media access:** grant the “Media files” permission, or use “Choose folder” to show only the folders you choose.
-2. **Sources:** media on this device, an external drive, the folders you chose, network shares, podcasts and radio. Tick the ones you want.
+2. **Sources:** media on this device, an external drive, the folders you chose, network shares, podcasts and radio. Tick the ones you want; later, in Settings › Library, you can choose which folders each section shows.
 3. **Audio output:** press “Play test sound”, then choose “I heard it” or “I didn't”.
 4. **Notifications:** allow them for the playback controls on the lock screen and for scan and download progress.
 
 Every step can be skipped with “Skip”. To see the steps again, go to Settings › Start-up › “Show the first-run steps again”.
 
 ### In the library
-- **Home** shows the “Continue watching” shelf. **Films** and **Series** open as a grid or a dense table; series are recognised from names (S01E02, 1x02, “1. Sezon 2. Bölüm”). There are filters for 4K, HDR, Dolby Vision and Atmos.
+- **Home** shows the “Continue watching” shelf. **Films** and **Series** open as a grid, as posters or as a list; series are recognised from names (S01E02, 1x02, “1. Sezon 2. Bölüm”). More in “Films, series and videos”.
+- **Videos** gathers the videos you recorded with this device: the camera's, screen recordings and the videos of messaging apps.
 - **Music** shows tracks, artists, albums, genres, composers, years and folders.
-- If a page is empty, use “Add folder” to add a folder.
 - The search box and {key:CommandPalette} search the library, the screens and the commands in one place, and the search looks inside subtitles too.
 
+### Each section's folders
+Films, Series, Videos and Music can each show their own folders, subfolders included. A section without folders shows everything the library has for it. Where: Settings › Library, or “Add folder” in a section's header and on its empty page.
+1. Press the section's “Add folder” button.
+2. Choose a folder with “Choose a folder…” in the system's folder chooser, or tap one of the suggested folders (one of an SD card's top folders, or the whole of a drive).
+3. To leave a subfolder out, add it too and choose “Leave out” in its menu; “Remove” takes a folder off the list.
+
+> A folder chosen for Videos leaves Films and Series, and theirs leave Videos. The folders belong to this device; they are not part of a backup.
+
 > On a phone, the “More” page of the bottom bar lists the screens that do not fit in it.
+
+## Films, series and videos {films}
+
+Films and Series show with posters, overviews and ratings; for a series you see at a glance which episodes you have watched. Videos gathers the videos you recorded with this device.
+
+### Views
+- Choose the view with the buttons in the header: **Grid** (cards), **Poster** (2:3 posters; in Films a film's backdrop on top), **List** (poster thumbnail, year, IMDb and Rotten Tomatoes ratings, length, video and audio; sorted by its columns) and, in Films, **Folders**. The choice is remembered per section; on a phone the views are in one menu button.
+- In Films, the 4K, HDR, Dolby Vision, Atmos, Turkish subtitles and Unwatched filters narrow the list.
+- **Videos** shows the resolution, length, date taken and size on its cards, and sorts by date, title, size or duration. The videos of the camera, of screen recordings and of messaging apps show here, not in Films. This page deletes no file.
+
+### Film information
+Each film and series is looked up once on TMDB by the title and year its file name gives: the poster, backdrop, overview, year, genres, length, cast and TMDB rating come from there; OMDb gives the IMDb and Rotten Tomatoes ratings. Lookups run in the background, by default on Wi-Fi only; the library works without them, and offline too.
+- “Refresh information” in a film's details or menu looks it up again.
+- If the wrong film comes up, use “Wrong film? Search…” (for a series “Wrong series? Search…”), correct the title, press “Search” and choose the right one; your choice is kept when it is refreshed too.
+- Settings › Film information: “Look up films and series” turns the feature on or off; “Only on Wi-Fi”, “Language of the overviews” (Türkçe or English), the count of what is kept and “Clear cache” (deletes the kept information and images) are there too.
+
+> If this build has no TMDB key, film information is off; without an OMDb key the IMDb and Rotten Tomatoes ratings are not shown. Settings › Film information says both.
+
+### Watched episodes
+- Each episode's row has a mark: watched (a tick), partly watched (a ring filled as far as you watched) or unwatched (an empty ring). The season selector shows the season's progress (“Season 1 · 3/10”), a series' card the number of unwatched episodes.
+- The menus of an episode, a season, a series and a film have “Mark as watched” and “Mark as unwatched”.
 
 ## Network sources {network}
 
@@ -43,13 +72,16 @@ Browse the media on SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV servers like local
 
 ## The video player {video}
 
-Films and series play with libVLC 4. On a touch screen you get VLC's gestures; with a mouse (DeX) you get the desktop control bar and a side panel. Touch the screen with a finger and the video goes back to the classic controls.
+Films and series play with libVLC 4. Touch the screen with a finger or a pen and the touch controls come; move a mouse (DeX) and you get the desktop control bar and a side panel. Both are Nağmedar's controls.
 
-### Touch gestures
+### Touch controls and gestures
+- A tap shows or hides the controls; while the film plays they hide by themselves after a few seconds. On top: back, the title, cast, picture in picture, the lock and the menu; in the middle: previous, 10 s back, play or pause, 10 s forward and next; at the bottom: the timeline (with frame previews while you drag) and subtitles, audio track, speed, picture size, screen orientation and effects.
 - Swiping up or down on the left of the screen changes the brightness, on the right the volume.
-- Swiping sideways seeks backward or forward.
-- A double tap on the left or right edge jumps 10 s back or forward; a double tap in the middle plays or pauses.
-- Tapping and holding plays faster; pinching with two fingers zooms the picture.
+- Swiping sideways shows where it will go, and seeks there when you let go.
+- A double tap on the left or right edge jumps 10 s back or forward, and each tap that follows adds 10 s; a double tap in the middle plays or pauses.
+- Pressing and holding plays fast (2×) for as long as you hold; spreading two fingers fills the screen with the picture, pinching fits it again.
+- “Lock the screen” turns off taps and gestures and holds the orientation; the lock button that comes when you tap the screen unlocks it.
+- The menu has jump to time, chapters, bookmarks, A-B loop, audio and subtitle sync, media information, the equaliser, the sleep timer, audio only, screenshot, recording, share, convert and stream on the network.
 - You choose which gestures are on under Settings › All settings › Video › Player controls.
 
 ### Mouse and keyboard
@@ -74,7 +106,7 @@ Brightness, contrast, HDR, rotation, a logo and more: the Effects tab of the pla
 
 ## Subtitles {subtitles}
 
-Add subtitles from a file, a folder or the internet; clean them up and correct them with the tools. Where: the Subtitles tab of the player panel and the player's subtitle menu.
+Add subtitles from a file, a folder or the internet, extract the ones inside a film into a file; clean them up and correct them with the tools. Where: the Subtitles tab of the player panel and the player's subtitle menu.
 
 ### Adding subtitles
 1. From a file: {key:AddSubtitleFile}, or drop the subtitle file on the video. If subtitles are found in the film's folder, it asks “Which one should be shown?”.
@@ -82,8 +114,15 @@ Add subtitles from a file, a folder or the internet; clean them up and correct t
 3. Providers: in Settings › Subtitles, OpenSubtitles.com and a subtitle folder of your choice are turned on and off and put in order; a search runs in all of them at once and the results join in one list.
 4. If the letters are wrong, use “Subtitle encoding…” and choose Automatic or “Turkish · Windows-1254”; it is remembered for the film.
 
+### Extracting embedded subtitles into a file
+To correct or translate the text subtitles inside a film (MKV, MP4, TS, AVI) with the tools, extract them into a file first.
+1. Use “Extract embedded subtitles…”: it is in the player's subtitle menu and Subtitles tab, in a film's menu in the library and in the “Embedded subtitles” section of the subtitle tools.
+2. Choose one of the film's subtitle tracks; each one shows its language, title and format. Picture subtitles (PGS, VobSub, DVB) need turning into text (OCR), so they are not extracted.
+3. The job runs in the background, with progress and Cancel in its notification. The result is written as a new file beside the film (film.tr.srt; with ASS/SSA styles film.en.ass). If the folder cannot be written, it goes to the app's folder, and from there “Save elsewhere…”. The film does not change, and no file is written over.
+4. The subtitle tools and the translation go on with the extracted file at once; the film finds it the next time it opens too.
+
 ### Subtitle tools
-{key:SubtitleTools} opens a window with four tabs: **Clean** (removes notes and speaker labels meant for the hard of hearing, with a before and after preview), **Frame rate** (converts or shifts), **Lines** (splits and merges lines, takes the start and end from the playback position, checks for errors and overlaps) and **Translate**. SRT and WebVTT are read and written; ASS/SSA keeps its styles. The result is always a new file, and the original subtitle is not touched.
+{key:SubtitleTools} opens a window with four tabs: **Clean** (removes notes and speaker labels meant for the hard of hearing, with a before and after preview), **Frame rate** (converts or shifts), **Lines** (splits and merges lines, takes the start and end from the playback position, checks for errors and overlaps) and **Translate**. SRT and WebVTT are read and written; ASS/SSA keeps its styles. The result is always a new file, and the original subtitle is not touched. The window's “Embedded subtitles” section extracts one of the subtitles inside the film into a file.
 
 The appearance (font, size, outline, shadow, background, colour, height; the “Thin”, “Yellow” and “Boxed” presets) is in the Appearance section of the Subtitles tab.
 
@@ -99,10 +138,10 @@ Make subtitles from speech, translate a subtitle, show two subtitles together. A
 3. Choose the model: base is the fastest and roughest, small is recommended, large-v3-turbo is the most accurate but can take longer than the film. A model is downloaded once, with its size told and your approval, the first time it is needed.
 4. Press “Generate”. The job runs in the background; follow it from its notification or cancel it there.
 
-The subtitle is written beside the film as `film.tr.whisper.srt`; if the folder cannot be written, it goes to the app's folder and “Save as…” is offered. You can delete the models in Settings › Subtitle generation. Whisper runs on arm64 phones and tablets.
+The subtitle is written beside the film as film.tr.whisper.srt; if the folder cannot be written, it goes to the app's folder and “Save as…” is offered. You can delete the models in Settings › Subtitle generation or in Tools › Downloads. Whisper runs on arm64 phones and tablets.
 
 ### Translating subtitles
-“Translate subtitles…” (or the Translate tab of the subtitle tools) translates Turkish ↔ English. A translation model (English → Turkish 475 MB, Turkish → English 81 MB) is downloaded with its size told and your approval, and deleted in Settings › Subtitles. The result is a new file (`film.tr.srt`) and is shown together with the original as secondary subtitles.
+“Translate subtitles…” (or the Translate tab of the subtitle tools) translates Turkish ↔ English; extract a subtitle inside a film into a file first (see Subtitles). A translation model (English → Turkish 475 MB, Turkish → English 81 MB) is downloaded with its size told and your approval, and deleted in Settings › Subtitles. The result is a new file (film.tr.srt) and is shown together with the original as secondary subtitles. If Android's time limit stops a translation, it does not start again by itself; the window and a notification say so, and started again it begins from the start.
 
 ### Dual subtitles
 {key:SecondarySubtitles} turns the secondary subtitles on or off; you choose the second track in the “Secondary subtitles” part of the Subtitles tab. It suits learning a language: read the original and the translation together.
@@ -143,14 +182,23 @@ Local music files are played by Nağmedar's own **music engine**: an FFmpeg-deco
 
 ## The music library and lists {music-library}
 
-On the Music page, filter, sort and make lists. A large window has three panes (groups, track table, now playing); on a phone, touching the mini player opens the full-screen player (swipe the cover left for the next track, right for the previous).
+On the Music page, filter, sort and make lists. A large window has three panes (groups, track table, now playing); on a phone, touching the mini player opens the full-screen player (swipe the cover left for the next track; swiping it right works like Previous).
 
-- **Filters and columns:** bit depth, sample rate and lossy-format filters; you choose the table's columns from the right-click menu of its header.
+- **Toolbar:** Artists, Albums, Genres… on the left (a menu showing the current view in a narrow window and on a phone), Play, Shuffle, Columns and Filter on the right. You choose the table's columns with “Columns” or from the right-click menu of its header.
+- **Filters:** “Filter” opens the bit depth (16, 24, 32 bit, DSD, lossy) and sample rate filters in a panel; while a filter is on, a dot shows on the button, and “Clear the filters” turns them all off.
 - **Up next** ({key:PlayQueue}): “Play next” in a track's menu puts it right after the one playing, “Add to queue” at the end. Drag by the handle to reorder, or use Alt+↑/↓.
-- **Playlists:** each list is a tab. M3U, M3U8, PLS and XSPF are imported and exported; files of lists made on another computer are found from their names.
+- **Playlists:** every list, smart lists too, shows as a card: cover, name, track count, length and last play. Search the lists; sort them by name, last play or creation. Pressing the open list's name changes it in place (Enter keeps it, Esc leaves it); its menu has rename, duplicate, Play next, Add to queue, export and delete.
+- **Import and export:** M3U, M3U8, PLS and XSPF are imported and exported; files of lists made on another computer are found from their names.
 - **Smart list:** make a list that fills itself by rules (artist, genre, rating, play count, date added…) with Playlists › Smart list; change it with “Edit rules…”.
 - **CUE sheet:** a single-file album with a CUE sheet (.cue) of the same name beside it shows in the library with its tracks and plays sample-accurately; there is nothing to do.
 - **Rating:** give 1–5 stars in the table, in the now playing pane or with “Rate…”. A track counts as played when half of it or four minutes has been heard, and as skipped if you move on before.
+
+### While it plays
+- Behind the progress bar (the now playing pane, the phone's player, the bar at the bottom) the track's waveform shows faintly, with the elapsed and remaining time. While you drag the thumb a time bubble shows, and letting go seeks there; with the bar focused, ← and → seek 5 s, Home and End go to the start and the end.
+- The playback buttons: shuffle ({key:Shuffle}), previous, play or pause in a filled circle, next and repeat ({key:Repeat}). Shuffle or repeat, when on, shows in the accent colour with a dot under it; the repeat button turns in turn into “Repeat all” and “Repeat this one”, and the second has a “1” on it.
+- The Previous button and {key:Previous} first take the track back to its start; pressed within its first 3 seconds, or within 3 seconds of that restart, they go to the previous track. The notification, the lock screen, the widget and Bluetooth follow the same rule.
+- The artist and album names are links: the artist opens that artist's tracks in Artists, the album that album's tracks in Albums.
+- The volume (the bar's slider, {key:VolumeUp}, {key:VolumeDown}, {key:Mute}) is kept: it stays the same for the next track, for a film and when you open the app again; the first time it is 100%.
 
 ## Converter, sleep timer and alarm {convert-sleep}
 
@@ -180,8 +228,10 @@ If the lyrics are late or early, {key:LyricsEarlier} and {key:LyricsLater} shift
 ### The lyrics editor
 Open it with “Edit” in the lyrics view (“Time it” for a track with no synced lyrics).
 1. While the track plays, {key:LrcStamp} stamps the current position on the line; {key:LrcUnstamp} takes back the last stamp.
-2. {key:LrcWordMode} switches between line and word modes; ↑ and ↓ choose a line, Space plays and pauses.
+2. {key:LrcWordMode} switches between line and word modes; {key:LrcLineUp} and {key:LrcLineDown} choose a line, {key:PlayPause} plays and pauses.
 3. Write the lyrics “Beside the file (.lrc)” or “To the tag”. The earlier lyrics are never deleted.
+
+> While it writes to the tag, Nağmedar keeps a copy of the file: the written file is read back, and if its audio does not come out the same, the copy is put back; if the app closes while writing, this check happens at the next start. If there is no room for the copy, the lyrics are not written and you are told why.
 
 ### Scrobbling
 In Settings › Scrobbling sign in with Last.fm (user name and password; the password is not kept) or ListenBrainz (user token). A track counts when half of it or four minutes has been heard; video, podcasts and streams are not sent. Offline, scrobbles wait on the device and are sent when the network is back.
@@ -192,23 +242,32 @@ The Podcasts screen keeps your subscriptions, new episodes and downloads. No acc
 
 1. **Finding:** type in the search box ({key:PodcastSearch}); results come from Podcast Index, and from iTunes if they fall short. “Subscribe” adds one with a single tap (there is an Undo bar). If you have an RSS address, use “Add by RSS address…” in the three-dot menu.
 2. **Moving:** “Import OPML…” brings in the list of another app; AntennaPod, Pocket Casts, Podcast Addict and Overcast read the same file. “Export OPML…” gives you your list of subscriptions.
-3. **Listening:** tap an episode; each episode resumes where you stopped and counts as played near the end or at 95%. An episode page has chapters, a transcript (it follows playback and can be searched), notes and the download. {key:PodcastNextChapter} and {key:PodcastPreviousChapter} move between chapters.
-4. **Downloading:** “Download” puts the episode on the device. In Settings › Podcasts you set how often to refresh (every 1, 3, 6, 12 or 24 hours), Wi-Fi only, notifications, the storage limit and the days after which played episodes are deleted. Each podcast's own settings have automatic download, speed (0.5–3×) and skipping the intro and the outro.
+3. **Listening:** press the Play button on an episode's row; touching the row itself opens the episode page. Each episode resumes where you stopped (or after the intro) and counts as played near the end or at 95%; you are not asked “Resume where you stopped?”. An episode page has chapters, a transcript (it follows playback and can be searched), notes and the download.
+4. **Chapters:** the playing episode's chapters are marked on the bar at the bottom, in the mini player, in the now playing pane, in the phone's player and, for a video episode, on the video player's timeline; pointing at a mark shows the chapter's name. The “Previous chapter” and “Next chapter” buttons and the list of chapters are there; {key:PodcastPreviousChapter} and {key:PodcastNextChapter} move between chapters too.
+5. **Downloading:** “Download” puts the episode on the device; Tools › Downloads shows the downloads running, waiting, done and failed. In Settings › Podcasts you set how often to refresh (every 1, 3, 6, 12 or 24 hours), Wi-Fi only, notifications, the storage limit and the days after which played episodes are deleted.
+6. **Show settings:** each podcast's “Podcast settings” window has automatic download, speed (0.5–3×), skipping the intro and the outro, and volume boost. Volume boost (Off, Light, Strong) plays a quietly recorded show's episodes louder than your volume; other media play as usual.
 
 > Podcast subscriptions are not part of a backup; export OPML instead.
 
 ## Radio {radio}
 
-The Radio screen finds internet radio stations in the Radio Browser directory. Its tabs: Favourites, Recent, Search, Imported.
+The Radio screen finds internet radio stations in the Radio Browser directory and records them. Its tabs: Favourites, Recent, Search, Imported and Recordings.
 
-1. In the **Search** tab, search by name ({key:RadioSearch} goes there); narrow by country, language, tag, codec and minimum bitrate, and sort by votes, most listened, name and bitrate.
-2. Play a station with Enter; in its right-click menu you can add it to favourites, “Vote for this station” (once a day) and copy the stream address.
+1. In the **Search** tab, search by name ({key:RadioSearch} goes there); filter by country, language, tag, codec and minimum bitrate, and sort by votes, most listened, name and bitrate.
+2. Play a station with Enter; in its right-click menu you can add it to favourites, record it, “Vote for this station” (once a day) and copy the stream address.
 3. Bring in M3U, M3U8 or PLS files with “Import a file…”; those already saved are counted apart.
 4. While one plays, the strip at the top of the page shows the station's logo, the “Artist - Track” title being broadcast and the play/pause button; the notification and the lock screen show it too.
 
-### Recording and schedules
-- **Recording:** {key:Record} (also in the screenshot button's menu in the video player, and in the options of the classic players) records what plays as it comes; it suits streams, radio and TV best. Local files played by the music engine are not recorded. A recording is written to the app's space first and, when it ends, put into the folder you chose in Settings › Recording.
-- **Schedules:** Settings › Alarm plays a radio station as a wake-up alarm at the time and on the days you choose; the new episodes of podcasts are refreshed in the background by themselves.
+### Radio recordings
+- **Recording:** {key:RadioRecord} or “Record” in a station's menu records the station that plays, and {key:RadioRecord} again stops it. The recording is cut into a new file at each new title the station announces (“Artist - Title.mp3”); the announcement is not sample-accurate, so a cut can be a second or two off. At most 3 stations are recorded at once.
+- **HLS and one file:** HLS stations (.m3u8; TRT's, for example) and streams that send no titles become one file per session. Encrypted HLS streams are not recorded.
+- **The Recordings tab** ({key:RadioRecordings}): the recordings running (“Stop recording”), the scheduled recordings and the recorded tracks, by station and day. Play, share, rename or delete a track (deleting can be undone); “Keep only complete tracks” deletes the partial ones.
+- **Scheduled recording:** with “Schedule a recording”, choose the station, the start, the length or the end, and the repeat (Once, Every day, Weekdays, Weekly); schedules that overlap are marked. If the device or the app restarts during a recording and the schedule's time has not run out, the recording goes on in a new part and its row says it was cut off; a time that passed with nothing recorded is marked missed.
+- **Settings › Radio:** the recording folder (by default the app's music folder), the shortest track, how much to keep before and after a title change, the free space to keep, the total size of recordings and what happens at the limit (“Stop recording” or “Delete the oldest”).
+- **Recording in the video player:** {key:Record} (also in the screenshot button's menu and in the touch menu) records the film, stream or TV that plays as it comes, into one file. Local files played by the music engine are not recorded. A recording is written to the app's space first and, when it ends, put into the folder you chose in Settings › Recording.
+- **Alarm:** Settings › Alarm plays a radio station as a wake-up alarm at the time and on the days you choose.
+
+> Scheduled recordings are part of a backup; the recorded audio is not. For a recording to start on the minute, allow Android's exact alarms; without them, the Recordings tab says “Scheduled recordings may start late”.
 
 ## Casting (Chromecast and DLNA) {cast}
 
@@ -222,16 +281,43 @@ Send video or music to a Chromecast or a DLNA device (a TV, a receiver, a speake
 
 > If the device does not show in the list, check that both are on the same Wi-Fi (not a guest network), the TV is on and DLNA or media sharing is on, the Chromecast is awake, and the router has multicast (mDNS, UPnP) on and client isolation off. A VPN on this device can hide the local network.
 
+## TV Lab {tvlab}
+
+TV Lab analyses a film for the device you will play it on (a TV such as the LG OLED B4, or the Tab S11 Ultra) and, if needed, writes a new MKV with a lossless remux. The source file is only read. Where: Tools › TV Lab, {key:TvLab}, or “Analyse in TV Lab” in a film's menu in the library.
+
+### Analysis
+1. Choose the device profile under “Target”, then press “Choose file”.
+2. TV Lab reads the film's streams and its HDR and Dolby Vision, and measures its bitrate second by second and the reading speed of its drive; “Result” says whether the film plays as it is.
+3. **Findings** gives each problem as critical, warning or fine, with why and the fix: dual-layer Dolby Vision, a default audio track the TV does not play, a bitrate over the threshold and so on.
+4. The bitrate chart (1 s peak, 5 s average, the profile threshold) is saved as PNG or CSV with “Export”, the analysis as text with “Report”.
+
+A device profile holds the containers, codecs, HDR and Dolby Vision profiles, audio and subtitle formats the device takes and the highest bitrate it copes with (the threshold). Change or add profiles with “Edit profile”, “New profile…” and “Import profile…”; profiles are exported as JSON files and are part of a backup.
+
+### The remux plan
+1. After an analysis, “Remux” opens the plan. The video is always copied bit for bit. Keep or drop each audio and subtitle track; change its default and forced flags, its language and title; put the tracks in order by dragging them or with Alt+↑ and Alt+↓.
+2. The device profile's suggestions are in the plan from the start, each with “Apply” or “Undo”: converting Dolby Vision profile 7 to 8.1 when the TV plays single-layer Dolby Vision only (the base layer stays bit for bit, the enhancement layer is dropped), a track the TV plays instead of a default track it does not, and dropping the subtitles it does not show.
+3. **Compatibility track:** an E-AC-3 5.1 track goes beside a TrueHD or DTS-HD track the TV does not play, and the original track stays lossless. With “Extra audio track” you can add one beside another track too, and choose its codec (E-AC-3, AC-3, LPCM), its bitrate, a mix-down to stereo and whether the device starts with it.
+4. Every step says what it keeps: “Lossless”, “Lossless (tags change)” or “Lossy”. Check the summary and press “Queue…”: the system's file chooser asks where, and a new, empty file is made there (film.remux.mkv). No file is written over.
+
+### Queue, batch and history
+- **Queue:** jobs run one at a time, with progress and Cancel in the notification. Put waiting jobs in order by dragging them or with Alt+↑ and Alt+↓. “Pause the queue” holds the running job where it is, “Resume” goes on.
+- **Run at night…:** the queue waits until the time you choose (02:00 by default) and, if you like, starts only while the device charges; it stays set when the device restarts.
+- **Batch:** choose a folder (“Choose a folder…” or one of the library's folders); its films are analysed and each gets the default plan. “Edit the plan…” gives a film its own plan. Press “Choose the output folder…” and queue the films: each goes into a new file named “name.remux.mkv”; where a file of that name is already there, the film is skipped and the file left alone.
+- **Verification:** when a remux ends, the output is read back and every packet of its video is compared with the source by SHA-256 (with the Dolby Vision conversion, the base layer and each frame's RPU). A job that matches gets the “Video bit for bit identical” badge; one that does not fails, and its output is removed.
+- **History:** every job that ended stays here with its state, how long it took, its speed and its verification report. “Run again…” writes the same plan into a new file, “Open the output” opens the film; the report is shared or saved as text or JSON. “Forget” deletes no file.
+
+> A remux pauses when the battery is low (under 15% off the charger) or the device gets very hot, and slows down while it is warm. TV Lab's tools run on arm64 phones and tablets.
+
 ## Remote access from a browser {remote-access}
 
 Look at your library, control playback and send files from the browser of a computer or phone on this network. The page comes from the server on this device; it does not pass through the internet.
 
 1. Turn on Settings › Remote access › “Open from a browser”; the server starts.
-2. “Addresses and connections…” shows the page's address; open it in the browser.
+2. “Addresses and connections…” shows the server's state (Start, Stop), each address with its QR code (Copy, Share…) and the browsers connected; open one of the addresses in the browser, or scan its QR code.
 3. The browser warns once, because this device makes its certificate itself: check the address and go on.
-4. Enter the 6-digit one-time code the device shows in a notification (valid for 60 s). Every new browser needs a new code.
+4. Enter the 6-digit one-time code the device shows in a notification (and in its window while that is in front), valid for 60 s. Every new browser needs a new code; “It is not me” turns away a connection you did not ask for.
 
-Which parts (videos, music, playlists, search), file and network browsers, history, playback control and log files are open to the browser is chosen on the Settings › Remote access page.
+Which parts (videos, music, playlists, search), file and network browsers, history, playback control and log files are open to the browser is chosen on the Settings › Remote access page. “How it works…” tells all this in five steps.
 
 > The connection is always HTTPS and there is no setting to turn that off. Turn the switch off when you are not using it; open the log files only while you are chasing a problem.
 
@@ -249,26 +335,58 @@ In a wide window (DeX, an external display) Nağmedar works like a desktop app: 
 
 > Open the guide with {key:UserGuide}. In the full-screen video player too, {key:UserGuide}, {key:ShortcutList}, {key:CommandPalette} and {key:SleepTimer} open their windows over the film, which goes on underneath; {key:Settings} opens the main window.
 
+## Where are VLC's screens? {classic}
+
+Nağmedar is based on VLC for Android, but VLC's classic screens no longer open: the app icon, the notifications and “Play with Nağmedar” in the share menu always open Nağmedar. What you knew from VLC is here now:
+
+- **VLC's settings:** Settings › About › “All settings”, in Nağmedar's design. The search on the first page looks through every page; the command palette ({key:CommandPalette}) finds each setting by its name.
+- **Network stream:** Sources › Streams. Type the address or press “Paste”, and Enter plays it; the streams played before stay below. {key:OpenNetwork} takes you there.
+- **Files:** Sources › This device opens the internal storage, SD cards and USB disks as a folder table; from a folder's menu, play it, add it to the queue or make it a section's source folder.
+- **Downloads:** Tools › Downloads shows podcast episodes and the Whisper and translation models; a running download can be cancelled, a failed one tried again, and a file is deleted only after you confirm.
+- **Media information:** “Media information” in a menu opens Nağmedar's window: the tags, the file's location (“Copy the location”) and the technical facts.
+- **The video player:** Nağmedar's controls come for touch too; the equaliser and the audio track and subtitle choices open over the film.
+- **Notices and questions:** short notices such as “Copied” show at the bottom of the window for a few seconds. A server's sign-in and certificate questions come in Nağmedar's window; with no window open, tap the “Nağmedar is asking: …” notification. When a new external drive is connected, a notice with a “Library folders” button comes.
+- **Resuming:** the “Resume where you stopped?” question comes in Nağmedar's window for music, radio and streams too: “Resume” or “Start over”, and if you like “The same for the rest of the list”.
+- **Permissions:** Android's own window asks for the media, notification and storage permissions.
+- **Widget:** there is one Nağmedar widget for the home screen: at 4×1 the cover, what plays, previous, play or pause and next; made 4×2, the cover stands beside them.
+
+## Long jobs and Android's time limit {jobs}
+
+Conversions, remuxes, generating, translating and extracting subtitles, downloads and recordings run in the background; follow them in their notification and stop them there. Conversions and remuxes wait while the battery is low or the device is hot.
+
+Android 15 and later give work in the background a time limit of six hours a day. When it is reached, Nağmedar says so in a notification and the job goes on like this:
+- **Podcast downloads** and **a translation model's download** go on later from where they stopped.
+- **Music conversion** waits, then goes on from where it was.
+- **Video conversion** and **remux** go back to the queue and start again from the beginning when Nağmedar is opened.
+- **Generating subtitles**, **translating** and **extracting embedded subtitles** stop; started again, they begin from the start.
+- **Radio recording** stops; the tracks so far are saved.
+- **Copying a recording of the video player** to its folder goes on; keep Nağmedar open until it ends.
+- **Streaming on the network (HLS)** stops; start it again to go on.
+- **The library scan** takes its notification away and goes on.
+
+> Follow downloads in Tools › Downloads, remux jobs in TV Lab's Queue tab and video conversions on the Convert page.
+
 ## Backup and restore {backup}
 
 Write your settings, lists and ratings to one ZIP file; bring them back on another device or after a reinstall. Where: Settings › Backup.
 
 ### Making a backup
-1. Press “Back up…” and choose the file's place in the system's file chooser (`nagmedar-backup-<date>.zip`).
-2. The file holds settings, shortcuts, playlists, smart lists, ratings and play counts, your own lyrics and lyrics delays, per-file settings, the covers you chose by hand and latency profiles.
+1. Press “Back up…” and choose the file's place in the system's file chooser (nagmedar-backup-<date>.zip).
+2. The file holds settings, shortcuts, TV Lab device profiles, playlists, smart lists, ratings and play counts, your own lyrics and lyrics delays, per-file settings, the covers you chose by hand, latency profiles and scheduled radio recordings.
 
 ### Restoring
 1. Press “Restore…” and choose the backup file. When it was made and by which version, and its parts with their counts, are shown.
 2. Tick the parts you want back and press “Restore”.
-3. Nothing is deleted: settings, lists and profiles of the same name are replaced by the backup's, and ratings and play counts are merged. The files of playlists are found from their names in the library; those that are not found are counted, and restoring again after the scan is enough.
+3. Nothing is deleted: settings, lists and profiles of the same name are replaced by the backup's, and ratings and play counts are merged. The files of playlists are found from their names in the library; those that are not found are counted, and restoring again after the scan is enough. The alarms of scheduled radio recordings are set again.
 
-> A backup does not hold your media files, your account sign-ins, this device's folder permissions, podcast subscriptions or radio favourites. Export OPML for podcasts.
+> A backup does not hold your media files, the recorded audio, your account sign-ins, this device's folder permissions and the sections' folders, podcast subscriptions or radio favourites. Export OPML for podcasts.
 
 ## Privacy: what goes online? {privacy}
 
 Nağmedar has no account, no ads and no tracking. Scanning happens on the device and your media stays on it. The network is used only when you use the features below; requests carry Nağmedar's name, and neither your name nor your e-mail address is in any of them.
 
 - **Subtitle search:** OpenSubtitles.com gets the film's name and the file's fingerprint (you can turn the provider off in Settings › Subtitles).
+- **Film information:** the title and year read from the file name of each film and series in Films and Series go to TMDB, and its IMDb id to OMDb; neither the files nor their paths are sent (turn it off in Settings › Film information).
 - **Lyrics:** if there are no synced lyrics in the file or beside it, the track's title, artist, album and length go to lrclib.net (turn it off in Settings › Lyrics). Uploading lyrics to LRCLIB happens only if you ask for it.
 - **Covers:** if there is no cover in the file or the folder, the album's name and artist go to MusicBrainz, and the cover comes from the Cover Art Archive (turn it off in Settings › Covers).
 - **Podcasts and radio:** the word you search for goes to Podcast Index, iTunes or Radio Browser; the shows you subscribe to are read from their own servers. Radio Browser is told of each play as a “click”, and of your vote if you vote.
@@ -277,4 +395,4 @@ Nağmedar has no account, no ads and no tracking. Scanning happens on the device
 - **Inside the same network:** casting and remote access talk only to devices on this network.
 - **Passwords and tokens:** server passwords, the ListenBrainz token and the Last.fm session key are encrypted with an Android Keystore key; the Last.fm password is never kept.
 
-> To see what is on now, look at the Subtitles, Lyrics, Covers and Scrobbling sections of Settings.
+> To see what is on now, look at the Subtitles, Film information, Lyrics, Covers and Scrobbling sections of Settings.
