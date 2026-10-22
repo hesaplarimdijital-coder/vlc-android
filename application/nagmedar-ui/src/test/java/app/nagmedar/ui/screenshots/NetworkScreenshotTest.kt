@@ -178,7 +178,10 @@ class NetworkScreenshotTest {
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun folderDexEnglish() = capture("network-dex-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer) { Opened { it.openNas() } }
 
-    /** S-1301: libVLC's question about a server's certificate, on the folder's page. */
+    /**
+     * S-1301: libVLC's question about a server's certificate, on the folder's page, as gnutls asks it in English and
+     * the window says it in the interface's language (LibVlcWords).
+     */
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun questionTablet() = capture("network-question-tablet-dark", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch) {
         val source = remember {
@@ -186,10 +189,11 @@ class NetworkScreenshotTest {
                 questions[NetworkSamples.DAV] = LibVlcPrompt(
                     PromptKind.Question,
                     "Insecure site",
-                    "You attempted to reach bulut.example.org. However the security certificate presented by the server is unknown and could not be authenticated by any trusted Certification Authority.",
-                    cancelText = "Cancel",
-                    action1 = "Accept permanently",
-                    action2 = "Accept once",
+                    "You attempted to reach bulut.example.org. However, the security certificate presented by the server is unknown " +
+                        "and could not be authenticated by any trusted Certificate Authority.\nThis problem may be stem from an attempt " +
+                        "to breach your security, compromise your privacy, or a configuration error.\n\nIf in doubt, abort now.\n",
+                    cancelText = "Abort",
+                    action1 = "View certificate",
                     warning = true,
                     reply = object : PromptReply {
                         override fun login(user: String, password: String, store: Boolean) = Unit
