@@ -37,6 +37,8 @@ import app.nagmedar.ui.tvlab.remux.PlanDraft
 import app.nagmedar.ui.tvlab.remux.RemuxBatchActions
 import app.nagmedar.ui.tvlab.remux.RemuxBatchPage
 import app.nagmedar.ui.tvlab.remux.RemuxBatchSession
+import app.nagmedar.ui.tvlab.remux.RemuxHistoryActions
+import app.nagmedar.ui.tvlab.remux.RemuxHistoryPage
 import app.nagmedar.ui.tvlab.remux.RemuxJobView
 import app.nagmedar.ui.tvlab.remux.RemuxNight
 import app.nagmedar.ui.tvlab.remux.RemuxPlannerDialog
@@ -44,7 +46,9 @@ import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import app.nagmedar.ui.tvlab.remux.RemuxQueueActions
 import app.nagmedar.ui.tvlab.remux.RemuxQueueControl
 import app.nagmedar.ui.tvlab.remux.RemuxQueuePage
+import app.nagmedar.ui.tvlab.remux.RemuxReport
 import app.nagmedar.ui.tvlab.remux.activeJobs
+import app.nagmedar.ui.tvlab.remux.finishedJobs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOn
@@ -218,6 +222,85 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
             override fun queue() = batch.queue()
         }
     }
+    // S-208: a finished job run again into a new file, its report saved where the picker says
+    var rerunning by remember { mutableStateOf<RemuxJobView?>(null) }
+    var savingReport by remember { mutableStateOf<Pair<RemuxJobView, Boolean>?>(null) }
+    val rerunLauncher = rememberLauncherForActivityResult(CreateFile()) { uri ->
+        val job = rerunning
+        rerunning = null
+        val plan = job?.plan
+        if (uri == null || job == null || plan == null) return@rememberLauncherForActivityResult
+        val grant = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        runCatching { context.contentResolver.takePersistableUriPermission(uri, grant) }
+        scope.launch {
+            val name = withContext(Dispatchers.IO) { context.displayName(uri) }
+            val id = queue.enqueue(Uri.parse(job.inputUri), job.inputName, job.inputSize, uri, name, plan)
+            val refusal = refusalOf(id)
+            if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) {
+                runCatching { context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+            }
+            notice = res.getString(refusal ?: R.string.nag_tvlab_remux_queued_notice)
+        }
+    }
+    val reportLauncher = rememberLauncherForActivityResult(CreateFile()) { uri ->
+        val (job, json) = savingReport ?: return@rememberLauncherForActivityResult
+        savingReport = null
+        if (uri == null) return@rememberLauncherForActivityResult
+        val text = if (json) RemuxReport.json(job) else RemuxReport.text(res, job, locale)
+        scope.launch {
+            val written = withContext(Dispatchers.IO) { write(context, uri) { it.write(text.toByteArray()) } }
+            notice = res.getString(if (written) R.string.nag_tvlab_history_saved else R.string.nag_tvlab_save_failed)
+        }
+    }
+    val historyActions = remember(queue) {
+        object : RemuxHistoryActions {
+            override fun rerun(job: RemuxJobView) {
+                rerunning = job
+                rerunLauncher.launch(MKV_MIME to job.outputName)
+            }
+
+            override fun open(job: RemuxJobView) {
+                val view = Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(job.outputUri), MKV_MIME).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (runCatching { context.startActivity(view) }.isFailure) notice = res.getString(R.string.nag_tvlab_history_no_app)
+            }
+
+            override fun share(job: RemuxJobView) {
+                val send = Intent(Intent.ACTION_SEND).setType(MKV_MIME).putExtra(Intent.EXTRA_STREAM, Uri.parse(job.outputUri)).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                runCatching { context.startActivity(Intent.createChooser(send, job.outputName)) }
+            }
+
+            override fun shareReport(job: RemuxJobView, json: Boolean) {
+                if (!json) {
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_SUBJECT, res.getString(R.string.nag_tvlab_history_report_title))
+                        .putExtra(Intent.EXTRA_TEXT, RemuxReport.text(res, job, locale))
+                    runCatching { context.startActivity(Intent.createChooser(send, job.outputName)) }
+                    return
+                }
+                scope.launch {
+                    val shared = withContext(Dispatchers.IO) { shareFile(context, RemuxReport.fileName(job, JSON_EXTENSION), RemuxReport.json(job)) }
+                    if (shared == null) {
+                        notice = res.getString(R.string.nag_tvlab_save_failed)
+                        return@launch
+                    }
+                    val send = Intent(Intent.ACTION_SEND).setType(JSON_MIME).putExtra(Intent.EXTRA_STREAM, shared).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    runCatching { context.startActivity(Intent.createChooser(send, job.outputName)) }
+                }
+            }
+
+            override fun saveReport(job: RemuxJobView, json: Boolean) {
+                savingReport = job to json
+                reportLauncher.launch(
+                    if (json) JSON_MIME to RemuxReport.fileName(job, JSON_EXTENSION) else "text/plain" to RemuxReport.fileName(job, context.getString(R.string.nag_tvlab_history_report_extension)),
+                )
+            }
+
+            override fun forget(job: RemuxJobView) {
+                scope.launch { queue.remove(job.id) }
+            }
+        }
+    }
     val queueActions = remember(queue) {
         object : RemuxQueueActions {
             override fun cancel(id: Long) {
@@ -299,12 +382,13 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         tabs = TABS,
         tab = tab,
         onTab = { tab = it },
-        counts = mapOf(TvLabTab.Queue to activeJobs(allJobs).size),
+        counts = mapOf(TvLabTab.Queue to activeJobs(allJobs).size, TvLabTab.History to finishedJobs(allJobs).size),
         page = { shown ->
             when (shown) {
                 TvLabTab.Batch -> RemuxBatchPage(batch, controller.profile.name, libraryFolders, batchActions)
                 TvLabTab.Queue -> RemuxQueuePage(allJobs, control, now, queueActions)
-                else -> Unit
+                TvLabTab.History -> RemuxHistoryPage(allJobs, historyActions)
+                TvLabTab.Analysis -> Unit
             }
         },
     )
@@ -388,6 +472,14 @@ private fun write(context: Context, uri: Uri, block: (java.io.OutputStream) -> U
     context.contentResolver.openOutputStream(uri, "wt")?.use(block) ?: return false
 }.isSuccess
 
+/** [text] in a file [name] the app's file provider serves, to send; null when it cannot be written. Blocking. */
+private fun shareFile(context: Context, name: String, text: String): Uri? = runCatching {
+    // under the files the provider serves (res/xml/provider_paths.xml: files-path)
+    val dir = File(context.filesDir, "tvlab/share").apply { mkdirs() }
+    val file = File(dir, name.replace('/', '_')).apply { writeText(text) }
+    FileProvider.getUriForFile(context, context.packageName + ".provider", file)
+}.getOrNull()
+
 /** The profile as a JSON file to send (S-1203), through the app's file provider. */
 private fun shareProfile(context: Context, profile: DeviceProfile) {
     runCatching {
@@ -414,7 +506,11 @@ private const val MAX_PROFILE_BYTES = 256 * 1024
 private const val MKV_MIME = "video/x-matroska"
 
 /** The TV Lab's pages, in the order of their tabs. */
-private val TABS = listOf(TvLabTab.Analysis, TvLabTab.Batch, TvLabTab.Queue)
+private val TABS = listOf(TvLabTab.Analysis, TvLabTab.Batch, TvLabTab.Queue, TvLabTab.History)
+
+/** A report as JSON (S-208). */
+private const val JSON_MIME = "application/json"
+private const val JSON_EXTENSION = "json"
 
 /** How often the queue's page looks at the clock. */
 private const val CLOCK_MS = 30_000L

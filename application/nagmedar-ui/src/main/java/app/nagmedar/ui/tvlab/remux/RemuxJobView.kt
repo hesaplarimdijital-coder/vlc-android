@@ -33,6 +33,11 @@ data class RemuxJobView(
     val leftover: Boolean = false,
     /** S-1210: its place in the queue's order. */
     val position: Long = 0,
+    /** S-208: what the history and a new run of the job need: where its files are, the source's size, when it was queued. */
+    val inputUri: String = "",
+    val outputUri: String = "",
+    val inputSize: Long = 0,
+    val createdAt: Long = 0,
 ) {
     val active: Boolean get() = state !in RemuxJobState.FINAL
     val convertsDolbyVision: Boolean get() = plan?.dolbyVision == DolbyVisionMode.ConvertToProfile81
@@ -76,6 +81,10 @@ data class RemuxJobView(
             events = RemuxEvent.parse(entry.events),
             leftover = entry.ownsOutput && (entry.state == RemuxJobState.FAILED || entry.state == RemuxJobState.CANCELLED),
             position = entry.position,
+            inputUri = entry.inputUri,
+            outputUri = entry.outputUri,
+            inputSize = entry.inputSize,
+            createdAt = entry.createdAt,
         )
     }
 }

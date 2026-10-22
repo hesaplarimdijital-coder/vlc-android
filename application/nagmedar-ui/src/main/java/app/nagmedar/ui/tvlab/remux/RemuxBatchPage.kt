@@ -79,8 +79,8 @@ fun RemuxBatchPage(
     val locale = currentLocale()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val items = batch.items
-    val chosen = items.count { it.included }
+    val films = batch.items
+    val chosen = films.count { it.included }
     LazyColumn(
         modifier.fillMaxSize().testTag("tvlab-batch"),
         contentPadding = PaddingValues(start = dimens.pagePadding, end = dimens.pagePadding, bottom = dimens.gapL, top = dimens.gapS),
@@ -105,7 +105,7 @@ fun RemuxBatchPage(
                     !batch.available -> Text(stringResource(R.string.nag_tvlab_no_tools_text), style = NagTheme.type.labelSmall, color = toneColors(StateTone.Warning).content)
                     batch.unreadable -> Text(stringResource(R.string.nag_tvlab_batch_unreadable), style = NagTheme.type.label, color = toneColors(StateTone.Error).content)
                     batch.scanning -> {
-                        val total = items.size
+                        val total = films.size
                         val label = if (total == 0) stringResource(R.string.nag_tvlab_batch_listing) else stringResource(R.string.nag_tvlab_batch_probing, batch.probed, total)
                         NagProgressBar(if (total == 0) null else batch.probed.toFloat() / total, label)
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -113,7 +113,7 @@ fun RemuxBatchPage(
                             NagButton(stringResource(R.string.nag_tvlab_stop), batch::stop, icon = NagIcons.Close)
                         }
                     }
-                    batch.source != null && items.isEmpty() -> Text(stringResource(R.string.nag_tvlab_batch_none_found), style = NagTheme.type.label, color = colors.textSecondary)
+                    batch.source != null && films.isEmpty() -> Text(stringResource(R.string.nag_tvlab_batch_none_found), style = NagTheme.type.label, color = colors.textSecondary)
                     else -> Unit
                 }
             }
@@ -133,7 +133,7 @@ fun RemuxBatchPage(
                 Text(stringResource(R.string.nag_tvlab_batch_output_text), style = NagTheme.type.labelSmall, color = colors.textSecondary)
             }
         }
-        if (items.isNotEmpty()) {
+        if (films.isNotEmpty()) {
             item(key = "films") {
                 FlowRow(
                     Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -141,7 +141,7 @@ fun RemuxBatchPage(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        pluralStringResource(R.plurals.nag_tvlab_batch_films, items.size, items.size),
+                        pluralStringResource(R.plurals.nag_tvlab_batch_films, films.size, films.size),
                         style = NagTheme.type.bodyStrong,
                         color = colors.text,
                         modifier = Modifier.align(Alignment.CenterVertically),
@@ -151,7 +151,7 @@ fun RemuxBatchPage(
                     NagButton(stringResource(R.string.nag_tvlab_batch_none), { batch.includeAll(false) })
                 }
             }
-            items(items, key = { it.uri.toString() }) { item -> FilmRow(batch, item, actions, res, locale) }
+            items(films, key = { it.uri.toString() }) { item -> FilmRow(batch, item, actions, res, locale) }
         } else if (batch.source == null) {
             item(key = "empty") {
                 Box(Modifier.fillMaxWidth().padding(top = 24.dp), contentAlignment = Alignment.TopCenter) {

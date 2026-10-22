@@ -118,6 +118,7 @@ Sözlüğü testler denetler:
 | remux planı | remux plan | | | Sıraya almadan önce bir filmin remux'u: izler, işaretler, Dolby Vision, çıktı; “Sıraya al…” |
 | toplu işlem | batch | | | TV Lab'in bir klasördeki filmleri birlikte analiz edip sıraya alan sayfası (S-1210); “varsayılan plan”, filmin “kendi planı” |
 | gece çalıştırmak | run at night | | | Remux sırasının seçilen saatte (istenirse yalnızca şarjdayken) başlaması: “Gece çalıştır…”; o saate dek sıra bekler. Sıra bütün olarak “duraklatılır” ve “sürdürülür” |
+| geçmiş (TV Lab) | history | | | Biten remux işleri ve doğrulama raporları (S-208): “Yeniden çalıştır…”, “Rapor”, “Geçmişten sil” (hiçbir dosyayı silmez) |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |
