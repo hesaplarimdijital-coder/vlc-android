@@ -25,6 +25,7 @@ import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.os.Build
+import android.os.StrictMode
 import android.os.Bundle
 import android.util.Log
 import kotlinx.coroutines.CancellationException
@@ -82,6 +83,12 @@ class AppSetupDelegate : AppDelegate,
 
     @TargetApi(Build.VERSION_CODES.O)
     override fun Application.setupApplication() {
+        // Nağmedar: a debug build names every disk or network access on the main thread and every leak in
+        // logcat (tag StrictMode, with the stack), where the emulator walk and a developer read them
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectLeakedClosableObjects().detectLeakedSqlLiteObjects().detectActivityLeaks().penaltyLog().build())
+        }
         // Nağmedar: the process-wide Compose state is made here, in the global snapshot, before any window composes
         ProcessState.warmUp()
         appContextProvider.init(this)
