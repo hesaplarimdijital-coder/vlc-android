@@ -139,6 +139,8 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.streams.StreamsCenter
+import app.nagmedar.ui.streams.StreamsScreen
 import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -431,7 +433,8 @@ private fun NagmedarMain(
                             ),
                             onSelect = shellNavigator::navigate,
                         )
-                        Destination.Streams -> PlaceholderScreen(destination) { openClassic(context, SecondaryActivity.STREAMS) }
+                        // the network streams opened by their address, and those played before
+                        Destination.Streams -> StreamsScreen(undo)
                         Destination.Device -> PlaceholderScreen(destination) { openClassic(context, SecondaryActivity.FILE_BROWSER) }
                         else -> PlaceholderScreen(destination) { openClassic(context, null) }
                     }
@@ -606,7 +609,11 @@ class AppActions(
         when (id) {
             ShortcutId.OpenFile -> openFile()
             ShortcutId.CommandPalette -> openPalette()
-            ShortcutId.OpenNetwork -> openClassic(context, SecondaryActivity.STREAMS)
+            // the Streams page, its address field taking the keyboard
+            ShortcutId.OpenNetwork -> {
+                navigator.navigate(Destination.Streams)
+                StreamsCenter.requestFocus()
+            }
             // S-307: another window of the library, on this screen
             ShortcutId.OpenInNewWindow -> {
                 val split = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && (context as? Activity)?.isInMultiWindowMode == true

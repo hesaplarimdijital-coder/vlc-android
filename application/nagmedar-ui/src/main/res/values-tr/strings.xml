@@ -3276,4 +3276,29 @@
         <item quantity="one">%d video</item>
         <item quantity="other">%d video</item>
     </plurals>
+    <!-- Sources › Streams: open a network stream, the streams played before -->
+    <plurals name="nag_streams_count">
+        <item quantity="one">%d akış</item>
+        <item quantity="other">%d akış</item>
+    </plurals>
+    <string name="nag_streams_open_title">Ağ akışı aç</string>
+    <string name="nag_streams_address">Adres</string>
+    <string name="nag_streams_address_hint">https://… · rtsp://… · udp://…</string>
+    <string name="nag_streams_paste">Yapıştır</string>
+    <string name="nag_streams_open_hint">Enter adresi oynatır; oynattığınız akışlar aşağıda kalır.</string>
+    <string name="nag_streams_invalid">Bu bir akış adresi değil: adres, https:// ya da rtsp:// gibi protokolüyle başlar.</string>
+    <string name="nag_streams_clipboard_empty">Panoda metin yok.</string>
+    <string name="nag_streams_empty_title">Henüz akış yok</string>
+    <string name="nag_streams_empty_desc">Yukarıya bir adres yapıştırıp oynatın; oynattığınız akışlar burada kalır.</string>
+    <string name="nag_streams_recent">Daha önce oynatılanlar</string>
+    <string name="nag_streams_column_name">Ad</string>
+    <string name="nag_streams_column_address">Adres</string>
+    <string name="nag_streams_rename">Yeniden adlandır…</string>
+    <string name="nag_streams_rename_title">Akışı yeniden adlandır</string>
+    <string name="nag_streams_save">Kaydet</string>
+    <string name="nag_streams_copy">Adresi kopyala</string>
+    <string name="nag_streams_copied">Adres kopyalandı</string>
+    <string name="nag_streams_remove">Geçmişten kaldır</string>
+    <string name="nag_streams_removed">%1$s geçmişten kaldırıldı</string>
+    <string name="nag_streams_playlist_failed">Akış listeye eklenemedi.</string>
 </resources>

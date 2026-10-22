@@ -3305,4 +3305,29 @@
         <item quantity="one">%d video</item>
         <item quantity="other">%d videos</item>
     </plurals>
+    <!-- Sources › Streams: open a network stream, the streams played before -->
+    <plurals name="nag_streams_count">
+        <item quantity="one">%d stream</item>
+        <item quantity="other">%d streams</item>
+    </plurals>
+    <string name="nag_streams_open_title">Open a network stream</string>
+    <string name="nag_streams_address">Address</string>
+    <string name="nag_streams_address_hint">https://… · rtsp://… · udp://…</string>
+    <string name="nag_streams_paste">Paste</string>
+    <string name="nag_streams_open_hint">Enter plays the address; the streams you play are kept below.</string>
+    <string name="nag_streams_invalid">This is not a stream address: it starts with its protocol, as in https:// or rtsp://.</string>
+    <string name="nag_streams_clipboard_empty">The clipboard holds no text.</string>
+    <string name="nag_streams_empty_title">No streams yet</string>
+    <string name="nag_streams_empty_desc">Paste an address above and play it; the streams you play are kept here.</string>
+    <string name="nag_streams_recent">Played before</string>
+    <string name="nag_streams_column_name">Name</string>
+    <string name="nag_streams_column_address">Address</string>
+    <string name="nag_streams_rename">Rename…</string>
+    <string name="nag_streams_rename_title">Rename the stream</string>
+    <string name="nag_streams_save">Save</string>
+    <string name="nag_streams_copy">Copy the address</string>
+    <string name="nag_streams_copied">Address copied</string>
+    <string name="nag_streams_remove">Remove from history</string>
+    <string name="nag_streams_removed">%1$s removed from history</string>
+    <string name="nag_streams_playlist_failed">The stream could not be added to the playlist.</string>
 </resources>
