@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -49,6 +50,10 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagProgressBar
+import app.nagmedar.ui.library.metadata.EpisodeMeta
+import app.nagmedar.ui.library.metadata.FilmImage
+import app.nagmedar.ui.library.metadata.FilmImageSize
+import app.nagmedar.ui.library.metadata.FilmInfo
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
 import java.io.File
@@ -129,10 +134,19 @@ fun MediaDetailsPanel(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     fullScreen: Boolean = false,
+    /** Film information: the film's or the series' backdrop and title. */
+    info: FilmInfo? = null,
+    /** Film information: an episode's still and title. */
+    episode: EpisodeMeta? = null,
+    /** Film information below the play button: overview, ratings, cast, refresh and search. */
+    about: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val title = stringResource(R.string.nag_details_title)
+    val picture = episode?.stillPath ?: info?.backdropPath
+    val pictureSize = if (episode?.stillPath != null) FilmImageSize.Still else FilmImageSize.Backdrop
+    val px = with(LocalDensity.current) { 560.dp.roundToPx() }
     Column(
         modifier
             .fillMaxHeight()
@@ -157,10 +171,12 @@ fun MediaDetailsPanel(
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {
-                Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
+                FilmImage(picture, pictureSize, px, Modifier.fillMaxSize()) {
+                    Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
+                }
             }
             Spacer(Modifier.height(4.dp))
-            Text(item.title, style = NagTheme.type.headline, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            Text(episode?.title ?: info?.title ?: item.title, style = NagTheme.type.headline, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.semantics { heading() })
             val summary = listOfNotNull(
                 item.durationMs.takeIf { it > 0 }?.let { durationWords(it) },
@@ -184,6 +200,7 @@ fun MediaDetailsPanel(
                 primary = true,
             )
         }
+        if (about != null) about()
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionLabel(stringResource(R.string.nag_tech_title))
             when {
@@ -234,6 +251,6 @@ fun TechBadge(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-private val BadgeGlass = androidx.compose.ui.graphics.Color(0xE6090B0E)
-private val BadgeEdge = androidx.compose.ui.graphics.Color(0x1FFFFFFF)
-private val BadgeText = androidx.compose.ui.graphics.Color(0xFFE6E9ED)
+internal val BadgeGlass = androidx.compose.ui.graphics.Color(0xE6090B0E)
+internal val BadgeEdge = androidx.compose.ui.graphics.Color(0x1FFFFFFF)
+internal val BadgeText = androidx.compose.ui.graphics.Color(0xFFE6E9ED)

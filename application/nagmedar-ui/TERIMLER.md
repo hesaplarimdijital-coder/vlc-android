@@ -89,7 +89,11 @@ Sözlüğü testler denetler:
 | seç, seçili | choose, select, selected | seçildi | pick | İngilizcede seçenek, dosya, klasör ve tuş için “Choose”; seçim kipine girmek ve “Select all” için “Select” |
 | kaldır | remove | | | Listeden, sıradan, seçimden çıkarır; dosya silinmez. Dosya gerçekten silinecekse “sil” / “delete” |
 | vazgeç | cancel | | | İletişim kutularında; süren bir işi (indirme) durdurmak için “İptal” |
-| izlendi, izlenmedi | watched, unwatched | | | |
+| izlendi, izlenmedi | watched, unwatched | | | Sonuna kadar izlenen “izlendi”; yarıda bırakılan “%40 izlendi” (yarıda); hiç açılmayan “izlenmedi”. Menüde “İzlendi olarak işaretle”, “İzlenmedi olarak işaretle”; sezonda “Sezon 1 · 3/10” |
+| afiş | poster | | | Filmin ya da dizinin 2:3 görseli (TMDB'den); “Afiş görünümü”. Albümün görseli “kapak”tır |
+| geniş görsel | backdrop | | | Filmin yatay görseli: Afiş görünümünün üstündeki tanıtım alanında ve ayrıntılarda |
+| film bilgileri | film information | | | Afiş, özet, yıl, türler, oyuncular, puanlar; TMDB'den ve OMDb'den, dosya adındaki ad ve yılla aranır. Ayarlar'daki bölümü “Film bilgileri”; “Bilgileri yenile”, “Yanlış film mi? Ara…” |
+| görünüm | view | | | Bir bölümün gösterilişi: Izgara, Afiş, Liste, Klasörler; bölüm başına hatırlanır |
 | İzlemeye devam et | Continue watching | | | Raf başlığı; düğmede “Devam et” (Resume) |
 | kaldığı yer | stopped at | | | |
 | lisans | licence | | license | İngilizcede isim İngiliz yazımıyla; özel adlar olduğu gibi (aşağıda) |
@@ -178,7 +182,7 @@ Sözlüğü testler denetler:
 | kural | rule | ölçüt | criterion | Akıllı listenin bir satırı: alan, işleç, değer (“Puan en az 4”, “Eklenme en çok 30 gün önce”) |
 | CUE sayfası | CUE sheet | cue dosyası | cue file | Tek dosyalık albümün parça listesi (album.cue): parçaları kütüphanede ayrı ayrı görünür, örnek doğruluğunda çalınır; her parça dosyasının adresi ve sayfadaki numarasıyla bilinir (“…/album.flac#cue=3”) |
 | tracker modülü | tracker module | mod dosyası, tracker şarkısı | mod file | MOD, XM, S3M, IT, MPTM… libopenmpt'nin çaldığı modül biçimleri; motor çalarken sentezler, kütüphane türünü (XM, IT…) format olarak gösterir |
-| puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi” |
+| puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi”. Filmlerde IMDb ve TMDB puanı ondalıklı (7,8), Rotten Tomatoes puanı yüzde (%87) |
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
 | scrobble | scrobbling, scrobble | | | Çalınan müziğin Last.fm ve ListenBrainz'e gönderilen kaydı (Ayarlar › Scrobble): 30 sn'den uzun bir parçanın yarısı ya da dört dakikası dinlenince sayılır; video, podcast ve akış gönderilmez. Çevrimdışıyken cihazda bekler: “3 scrobble gönderilmeyi bekliyor”. Türkçede olduğu gibi yazılır, ek kesmeyle: “scrobble'lar” |
 | belirteç | token | token, jeton | | ListenBrainz'in kullanıcıya verdiği anahtar: ayarlar sayfasından kopyalanıp yapıştırılır, cihazda şifrelenerek saklanır; “Belirteci denetle”. Last.fm'de saklanan ise “oturum anahtarı”dır, parola saklanmaz |
@@ -216,11 +220,15 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 - AutoEq
 - EBU R128
 - GNU General Public License
+- IMDb
 - Last.fm
 - ListenBrainz
 - LRCLIB
+- OMDb
 - ReplayGain
+- Rotten Tomatoes
 - SIL Open Font License
+- TMDB
 - VLC for Android
 
 ## Yazım kuralları

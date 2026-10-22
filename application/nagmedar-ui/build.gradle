@@ -23,6 +23,12 @@ android {
         // or Gradle properties; without them Last.fm stays off and Settings says so
         buildConfigField 'String', 'LASTFM_API_KEY', "\"${secretValue('NAGMEDAR_LASTFM_API_KEY', 'nagmedar_lastfm_api_key', project)}\""
         buildConfigField 'String', 'LASTFM_SECRET', "\"${secretValue('NAGMEDAR_LASTFM_SECRET', 'nagmedar_lastfm_secret', project)}\""
+        // Film information: Nağmedar's own TMDB key (a v3 API key, or a v4 read access token, which has dots)
+        // and OMDb key, from the build's environment (CI secrets) or Gradle properties; without the TMDB key
+        // no film information is looked up, without the OMDb key the IMDb and Rotten Tomatoes ratings stay
+        // out, and Settings › Film information says so
+        buildConfigField 'String', 'TMDB_API_KEY', "\"${podcastIndexValue(project, 'NAGMEDAR_TMDB_API_KEY', 'nagmedar_tmdb_api_key')}\""
+        buildConfigField 'String', 'OMDB_API_KEY', "\"${secretValue('NAGMEDAR_OMDB_API_KEY', 'nagmedar_omdb_api_key', project)}\""
     }
 
     buildTypes {

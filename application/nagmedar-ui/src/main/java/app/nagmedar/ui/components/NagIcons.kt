@@ -104,6 +104,7 @@ object NagIcons {
     val Share: ImageVector by lazy { icon("Share", stroke("M9.7,3.8a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M2.7,8a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M9.7,12.2a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M6.1 7.1 9.9 4.7M6.1 8.9l3.8 2.4")) }
     val ChapterPrevious: ImageVector by lazy { icon("ChapterPrevious", stroke("M8 4 4 8l4 4M12.5 4l-4 4 4 4")) }
     val ChapterNext: ImageVector by lazy { icon("ChapterNext", stroke("M3.5 4l4 4-4 4M8 4l4 4-4 4")) }
+    val Posters: ImageVector by lazy { icon("Posters", stroke("M2.5,3H6.5A1,1 0 0 1 7.5,4V12A1,1 0 0 1 6.5,13H2.5A1,1 0 0 1 1.5,12V4A1,1 0 0 1 2.5,3Z"), stroke("M9.5,3H13.5A1,1 0 0 1 14.5,4V12A1,1 0 0 1 13.5,13H9.5A1,1 0 0 1 8.5,12V4A1,1 0 0 1 9.5,3Z")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -118,7 +119,7 @@ object NagIcons {
         SuccessCircle, Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal,
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
         Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
-        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext,
+        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters,
     )
 }
 

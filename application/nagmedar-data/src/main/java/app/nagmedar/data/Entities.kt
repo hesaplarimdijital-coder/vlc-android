@@ -584,3 +584,59 @@ object RemuxJobError {
     /** The engine's own message follows the prefix. */
     const val ENGINE = "engine:"
 }
+
+/**
+ * Films and series (film information): what TMDB says of one film or series of the library, and
+ * the IMDb rating and Rotten Tomatoes score OMDb gives for its IMDb id. [queryKey] names what was
+ * looked for: "m:<title>:<year>" for a film, "tv:<name>" for a series, from the file names alone.
+ * A [tmdbId] of 0 is a search that found nothing, tried again later. [manual] is a match the user
+ * chose (the "wrong film? search" dialog), which a refresh keeps. [cast] holds "name\tcharacter" lines,
+ * [genres] the genre names joined by "|"; [language] is the language of the texts ("tr", "en").
+ */
+@Entity(tableName = "film_info")
+data class FilmInfoEntry(
+    @PrimaryKey @ColumnInfo(name = "query_key") val queryKey: String,
+    val kind: String,
+    @ColumnInfo(name = "tmdb_id") val tmdbId: Long,
+    @ColumnInfo(name = "imdb_id") val imdbId: String? = null,
+    val title: String,
+    @ColumnInfo(name = "original_title") val originalTitle: String? = null,
+    val year: Int? = null,
+    val overview: String? = null,
+    val language: String,
+    val genres: String? = null,
+    @ColumnInfo(name = "runtime_minutes") val runtimeMinutes: Int? = null,
+    @ColumnInfo(name = "tmdb_rating") val tmdbRating: Double? = null,
+    @ColumnInfo(name = "tmdb_votes") val tmdbVotes: Int? = null,
+    @ColumnInfo(name = "imdb_rating") val imdbRating: Double? = null,
+    @ColumnInfo(name = "imdb_votes") val imdbVotes: Int? = null,
+    @ColumnInfo(name = "rotten_tomatoes") val rottenTomatoes: Int? = null,
+    @ColumnInfo(name = "poster_path") val posterPath: String? = null,
+    @ColumnInfo(name = "backdrop_path") val backdropPath: String? = null,
+    val cast: String? = null,
+    @ColumnInfo(name = "season_count") val seasonCount: Int? = null,
+    @ColumnInfo(name = "episode_count") val episodeCount: Int? = null,
+    val manual: Boolean = false,
+    @ColumnInfo(name = "fetched_at") val fetchedAt: Long,
+)
+
+/** Film information: the kinds of a [FilmInfoEntry]. */
+object FilmKind {
+    const val MOVIE = "movie"
+    const val TV = "tv"
+}
+
+/** Film information: one episode of a series as TMDB names it, by the series' TMDB id. */
+@Entity(tableName = "film_episode", primaryKeys = ["show_id", "season", "episode"])
+data class FilmEpisodeEntry(
+    @ColumnInfo(name = "show_id") val showId: Long,
+    val season: Int,
+    val episode: Int,
+    val title: String? = null,
+    val overview: String? = null,
+    @ColumnInfo(name = "still_path") val stillPath: String? = null,
+    @ColumnInfo(name = "air_date") val airDate: String? = null,
+    @ColumnInfo(name = "runtime_minutes") val runtimeMinutes: Int? = null,
+    val language: String,
+    @ColumnInfo(name = "fetched_at") val fetchedAt: Long,
+)

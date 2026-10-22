@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -78,6 +79,15 @@ import app.nagmedar.ui.components.rubberBandOverlay
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.library.metadata.EpisodeMeta
+import app.nagmedar.ui.library.metadata.FilmInfo
+import app.nagmedar.ui.library.metadata.PosterCard
+import app.nagmedar.ui.library.metadata.PosterThumb
+import app.nagmedar.ui.library.metadata.WatchMark
+import app.nagmedar.ui.library.metadata.WatchState
+import app.nagmedar.ui.library.metadata.filmQuery
+import app.nagmedar.ui.library.metadata.ratingNumber
+import app.nagmedar.ui.library.metadata.ratingsLine
 import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.dropTarget
 import app.nagmedar.ui.input.fileDragSource
@@ -282,10 +292,17 @@ fun VideoDetailsPanes(
     onCloseDetails: () -> Unit,
     modifier: Modifier = Modifier,
     techState: (VideoItem) -> TechState = { techStateOf(it, tech) },
+    /** Film information: what the details show of the film or series. */
+    info: (VideoItem) -> FilmInfo? = { null },
+    /** Film information: an episode's own still, title and overview. */
+    episode: (VideoItem) -> EpisodeMeta? = { null },
+    /** Film information below the play button (the film's overview, ratings, cast). */
+    about: (@Composable (VideoItem) -> Unit)? = null,
     list: @Composable () -> Unit,
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val side = currentWidthClass() >= WidthClass.Expanded
+    val aboutOf: (VideoItem) -> @Composable () -> Unit = { item -> { about?.invoke(item) } }
     ListDetailPanes(
         detail = selected?.takeIf { detailsRequested || (pointer && side) },
         onCloseDetail = onCloseDetails,
@@ -299,6 +316,9 @@ fun VideoDetailsPanes(
                 onClose = onCloseDetails,
                 modifier = Modifier.fillMaxSize(),
                 fullScreen = fullScreen,
+                info = info(item),
+                episode = episode(item),
+                about = aboutOf(item).takeIf { about != null },
             )
         },
         modifier = modifier,
@@ -326,6 +346,10 @@ fun MoviesContent(
     /** Scrolls with the grid above the cards (the "İzlemeye devam et" shelf); the table has none. */
     gridHeader: (@Composable () -> Unit)? = null,
     selection: MultiSelection? = null,
+    /** The "Afiş" view: posters instead of the cards (with [grid]). */
+    poster: Boolean = false,
+    /** Film information by [FilmQuery.key]: posters, years, ratings. */
+    info: Map<String, FilmInfo> = emptyMap(),
 ) {
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val modifiers = LocalClickModifiers.current
@@ -344,10 +368,10 @@ fun MoviesContent(
     }
     val doubleClick: ((VideoItem) -> Unit)? = if (pointer && !selecting) onPlay else null
     val isSelected: (VideoItem) -> Boolean = { item -> selection?.contains(item.key) ?: (item.key == selected) }
-    if (grid) {
-        VideoGrid(items, tech, isSelected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader, selection)
-    } else {
-        VideoTable(items, tech, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails, selection)
+    when {
+        grid && poster -> PosterGrid(items, tech, info, isSelected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader, selection)
+        grid -> VideoGrid(items, tech, isSelected, click, doubleClick, menu, onPlay, onShowDetails, gridHeader, selection)
+        else -> VideoTable(items, tech, info, sort, onSortChange, selected, click, doubleClick, menu, onPlay, onShowDetails, selection)
     }
 }
 
@@ -400,10 +424,82 @@ private fun VideoGrid(
     }
 }
 
+/**
+ * The "Afiş" view (film information): 2:3 posters with the title under them, as the cards are in
+ * everything else: selection, the rubber band, drags, the menu and the keyboard.
+ */
+@Composable
+private fun PosterGrid(
+    items: List<VideoItem>,
+    tech: Map<String, MediaTech>,
+    info: Map<String, FilmInfo>,
+    isSelected: (VideoItem) -> Boolean,
+    onClick: (VideoItem, List<VideoItem>) -> Unit,
+    onDoubleClick: ((VideoItem) -> Unit)?,
+    menu: (VideoItem, () -> Unit, () -> Unit) -> List<MenuEntry>,
+    onPlay: (VideoItem) -> Unit,
+    onShowDetails: (VideoItem) -> Unit,
+    header: (@Composable () -> Unit)?,
+    selection: MultiSelection?,
+) {
+    val dimens = NagTheme.dimens
+    val pointer = NagTheme.inputMode == InputMode.Pointer
+    val band = rememberRubberBand()
+    if (selection != null) SelectionCommands(selection, items.map { it.key })
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(if (pointer) 150.dp else 160.dp),
+        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+        horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
+        verticalArrangement = Arrangement.spacedBy(dimens.gapM),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("posters")
+            .then(if (selection != null && pointer) band.area(selection).rubberBandOverlay(band) else Modifier),
+    ) {
+        if (header != null) item(key = "header", span = { GridItemSpan(maxLineSpan) }) { Box(band.keepOut("header")) { header() } }
+        itemsIndexed(items, key = { _, item -> item.key }) { _, item ->
+            val film = item.filmQuery()?.let { info[it.key] }
+            ContextMenuArea(
+                entries = { menu(item, { onPlay(item) }, { onShowDetails(item) }) },
+                accessibilityLabel = stringResource(R.string.nag_more_actions),
+            ) {
+                PosterCard(
+                    title = film?.title ?: item.title,
+                    subtitle = film?.let { posterLine(it, item) } ?: formatDuration(item.durationMs),
+                    posterPath = film?.posterPath,
+                    media = item.media,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(band.item(item.key))
+                        .filmDrags(item, items, selection, RoundedCornerShape(NagTheme.dimens.radiusCard)),
+                    selected = isSelected(item),
+                    onClick = { onClick(item, items) },
+                    onDoubleClick = onDoubleClick?.let { open -> { open(item) } },
+                    selecting = selection?.selecting == true,
+                    badge = techBadge(tech[item.key], item.width, item.height),
+                    progress = item.progress,
+                    watched = item.watched,
+                )
+            }
+        }
+    }
+}
+
+/** Under a poster: "1999 · IMDb 7,8", or the year and the length. */
+@Composable
+private fun posterLine(info: FilmInfo, item: VideoItem): String {
+    val ratings = ratingsLine(info, short = true).substringBefore(" · ")
+    return listOfNotNull(
+        info.year?.toString(),
+        ratings.takeIf { it.isNotEmpty() } ?: item.durationMs.takeIf { it > 0 }?.let { durationWords(it) },
+    ).joinToString(" · ")
+}
+
 @Composable
 private fun VideoTable(
     items: List<VideoItem>,
     tech: Map<String, MediaTech>,
+    info: Map<String, FilmInfo>,
     sort: TableSort?,
     onSortChange: (TableSort) -> Unit,
     selected: String?,
@@ -414,11 +510,13 @@ private fun VideoTable(
     onShowDetails: (VideoItem) -> Unit,
     selection: MultiSelection?,
 ) {
-    val sorted = remember(items, sort, tech) { sortVideos(items, sort, tech) }
+    val films = remember(items, info) { items.associate { item -> item.key to item.filmQuery()?.let { info[it.key] } } }
+    val columns = videoColumns(tech, films)
+    val sorted = remember(items, sort, tech, films, columns) { sortVideos(items, sort?.let { s -> columns.getOrNull(s.column)?.let { s to it.id } }, tech, films) }
     val rowShape = RoundedCornerShape(NagTheme.dimens.radiusControl)
     if (selection != null) SelectionCommands(selection, sorted.map { it.key })
     DenseTable(
-        columns = videoColumns(tech),
+        columns = columns.map { it.column },
         rows = sorted,
         key = { it.key },
         selectedKey = selected,
@@ -476,38 +574,106 @@ internal fun Modifier.filmDrags(
 private fun dragged(item: VideoItem, shown: List<VideoItem>, selection: MultiSelection?): List<VideoItem> =
     if (selection != null && item.key in selection && selection.count > 1) shown.filter { it.key in selection } else listOf(item)
 
+/** The list's columns, which [sortVideos] knows by [VideoColumn.id]. */
+private enum class VideoColumnId { Title, Year, Imdb, Tomatoes, Duration, Video, Audio }
+
+private class VideoColumn(val id: VideoColumnId, val column: TableColumn<VideoItem>)
+
+/**
+ * The "Liste" view's columns (film information): the poster and title, the year, the IMDb rating,
+ * the Rotten Tomatoes score, the length, the video and the audio; fewer where the window is
+ * narrower, the poster and title with the length on a phone, the year and rating under the title.
+ */
 @Composable
-private fun videoColumns(tech: Map<String, MediaTech>): List<TableColumn<VideoItem>> {
+private fun videoColumns(tech: Map<String, MediaTech>, films: Map<String, FilmInfo?>): List<VideoColumn> {
+    val width = currentWidthClass()
+    val locale = currentLocale()
     val title = stringResource(R.string.nag_column_title)
+    val year = stringResource(R.string.nag_column_year)
+    val imdb = stringResource(R.string.nag_column_imdb)
+    val tomatoes = stringResource(R.string.nag_column_rt)
     val video = stringResource(R.string.nag_column_video)
     val audio = stringResource(R.string.nag_column_audio)
     val duration = stringResource(R.string.nag_column_duration)
-    return remember(title, video, audio, duration, tech) {
-        listOf(
-            TableColumn<VideoItem>(title, ColumnWidth.Weight(1f)) { it.title },
-            TableColumn<VideoItem>(video, ColumnWidth.Fixed(170.dp), mono = true) { item ->
+    // read with the locale: a change of language recomposes
+    val res = LocalContext.current.resources
+    val thumb = if (NagTheme.inputMode == InputMode.Pointer) 22.dp else 30.dp
+    val compact = width < WidthClass.Medium
+    return remember(title, video, audio, duration, tech, films, width, locale, thumb, res) {
+        val titleColumn = TableColumn<VideoItem>(title, ColumnWidth.Weight(1f), content = { item, selected ->
+            FilmTitleCell(item, films[item.key], thumb, selected, compact)
+        }) { films[it.key]?.title ?: it.title }
+        listOfNotNull(
+            VideoColumn(VideoColumnId.Title, titleColumn),
+            if (compact) null else VideoColumn(VideoColumnId.Year, TableColumn<VideoItem>(year, ColumnWidth.Fixed(64.dp), mono = true) { item ->
+                films[item.key]?.year?.toString() ?: "–"
+            }),
+            if (compact) null else VideoColumn(VideoColumnId.Imdb, TableColumn<VideoItem>(imdb, ColumnWidth.Fixed(64.dp), alignEnd = true, mono = true) { item ->
+                films[item.key]?.imdbRating?.let { ratingNumber(it, locale) } ?: "–"
+            }),
+            if (width < WidthClass.Expanded) null else VideoColumn(VideoColumnId.Tomatoes, TableColumn<VideoItem>(tomatoes, ColumnWidth.Fixed(64.dp), alignEnd = true, mono = true) { item ->
+                films[item.key]?.rottenTomatoes?.let { res.getString(R.string.nag_film_percent, it) } ?: "–"
+            }),
+            if (width < WidthClass.Expanded) null else VideoColumn(VideoColumnId.Video, TableColumn<VideoItem>(video, ColumnWidth.Fixed(160.dp), mono = true) { item ->
                 tech[item.key]?.video?.let { "${it.resolution.lines} · ${rangeLabel(it)}" }
                     ?: resolutionOf(item.width, item.height)?.lines ?: "–"
-            },
-            TableColumn<VideoItem>(audio, ColumnWidth.Fixed(150.dp), mono = true) { item ->
+            }),
+            if (width < WidthClass.Expanded) null else VideoColumn(VideoColumnId.Audio, TableColumn<VideoItem>(audio, ColumnWidth.Fixed(140.dp), mono = true) { item ->
                 tech[item.key]?.mainAudio()?.let { "${audioCodecLabel(it)} ${channelLabel(it)}" + if (it.atmos) " Atmos" else "" } ?: "–"
-            },
-            TableColumn<VideoItem>(duration, ColumnWidth.Fixed(100.dp), alignEnd = true, mono = true) { formatDuration(it.durationMs) },
+            }),
+            VideoColumn(VideoColumnId.Duration, TableColumn<VideoItem>(duration, ColumnWidth.Fixed(if (compact) 72.dp else 90.dp), alignEnd = true, mono = true) {
+                formatDuration(it.durationMs)
+            }),
         )
     }
 }
 
-private fun sortVideos(list: List<VideoItem>, sort: TableSort?, tech: Map<String, MediaTech>): List<VideoItem> {
-    if (sort == null) return list
-    val comparator: Comparator<VideoItem> = when (sort.column) {
-        // by resolution, then by dynamic range: 4K Dolby Vision last
-        1 -> compareBy<VideoItem> { tech[it.key]?.video?.resolution?.ordinal ?: resolutionOf(it.width, it.height)?.ordinal ?: -1 }
-            .thenBy { tech[it.key]?.video?.dynamicRange?.ordinal ?: -1 }
-        2 -> compareBy(String.CASE_INSENSITIVE_ORDER) { item -> tech[item.key]?.mainAudio()?.let(::audioShortLabel).orEmpty() }
-        3 -> compareBy { it.durationMs }
-        else -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
+/** A list row's first cell: the poster, the title, and (on a phone) the year, rating and badge under it. */
+@Composable
+private fun FilmTitleCell(item: VideoItem, info: FilmInfo?, thumb: androidx.compose.ui.unit.Dp, selected: Boolean, compact: Boolean) {
+    val colors = NagTheme.colors
+    androidx.compose.foundation.layout.Row(Modifier.padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+        PosterThumb(info?.posterPath, item.media, thumb)
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(info?.title ?: item.title, style = NagTheme.type.bodyStrong, color = if (selected) colors.onSelection else colors.text, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+            val line = if (compact) {
+                listOfNotNull(info?.year?.toString(), info?.let { ratingsLine(it, short = true) }?.takeIf { it.isNotEmpty() }).joinToString(" · ")
+            } else {
+                info?.genres?.take(2)?.joinToString(", ").orEmpty()
+            }
+            if (line.isNotEmpty()) {
+                Text(line, style = NagTheme.type.labelSmall, color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+            }
+        }
+        if (item.watched && item.progress <= 0f) {
+            Spacer(Modifier.width(6.dp))
+            WatchMark(WatchState.Watched, 0f, selected = selected)
+        }
     }
-    return if (sort.ascending) list.sortedWith(comparator) else list.sortedWith(comparator.reversed())
+}
+
+private fun sortVideos(
+    list: List<VideoItem>,
+    sort: Pair<TableSort, VideoColumnId>?,
+    tech: Map<String, MediaTech>,
+    films: Map<String, FilmInfo?>,
+): List<VideoItem> {
+    if (sort == null) return list
+    val comparator: Comparator<VideoItem> = when (sort.second) {
+        VideoColumnId.Year -> compareBy { films[it.key]?.year ?: 0 }
+        VideoColumnId.Imdb -> compareBy { films[it.key]?.imdbRating ?: -1.0 }
+        VideoColumnId.Tomatoes -> compareBy { films[it.key]?.rottenTomatoes ?: -1 }
+        // by resolution, then by dynamic range: 4K Dolby Vision last
+        VideoColumnId.Video -> compareBy<VideoItem> { tech[it.key]?.video?.resolution?.ordinal ?: resolutionOf(it.width, it.height)?.ordinal ?: -1 }
+            .thenBy { tech[it.key]?.video?.dynamicRange?.ordinal ?: -1 }
+        VideoColumnId.Audio -> compareBy(String.CASE_INSENSITIVE_ORDER) { item -> tech[item.key]?.mainAudio()?.let(::audioShortLabel).orEmpty() }
+        VideoColumnId.Duration -> compareBy { it.durationMs }
+        VideoColumnId.Title -> compareBy(String.CASE_INSENSITIVE_ORDER) { films[it.key]?.title ?: it.title }
+    }
+    return if (sort.first.ascending) list.sortedWith(comparator) else list.sortedWith(comparator.reversed())
 }
 
 /** Saves a table sort as one Int: column * 2 + 1 when ascending, -1 for no sort. */

@@ -857,3 +857,50 @@ interface RemuxJobDao {
     @Query("DELETE FROM remux_job WHERE id = :id")
     fun delete(id: Long)
 }
+
+/** Film information: the films' and series' TMDB details and their episodes, a cache the user can clear. */
+@Dao
+abstract class FilmInfoDao {
+    @Query("SELECT * FROM film_info")
+    abstract fun observeAll(): Flow<List<FilmInfoEntry>>
+
+    @Query("SELECT * FROM film_info WHERE query_key = :key")
+    abstract fun get(key: String): FilmInfoEntry?
+
+    @Query("SELECT * FROM film_info")
+    abstract fun all(): List<FilmInfoEntry>
+
+    @Upsert
+    abstract fun save(entry: FilmInfoEntry)
+
+    @Query("SELECT COUNT(*) FROM film_info WHERE tmdb_id != 0")
+    abstract fun observeFound(): Flow<Int>
+
+    @Query("SELECT * FROM film_episode WHERE show_id = :showId ORDER BY season, episode")
+    abstract fun observeEpisodes(showId: Long): Flow<List<FilmEpisodeEntry>>
+
+    @Query("SELECT season FROM film_episode WHERE show_id = :showId GROUP BY season")
+    abstract fun seasons(showId: Long): List<Int>
+
+    @Query("SELECT DISTINCT language FROM film_episode WHERE show_id = :showId")
+    abstract fun episodeLanguages(showId: Long): List<String>
+
+    @Upsert
+    abstract fun saveEpisodes(entries: List<FilmEpisodeEntry>)
+
+    @Query("DELETE FROM film_episode WHERE show_id = :showId")
+    abstract fun clearEpisodes(showId: Long)
+
+    @Query("DELETE FROM film_info")
+    abstract fun clearInfo()
+
+    @Query("DELETE FROM film_episode")
+    abstract fun clearAllEpisodes()
+
+    /** Everything found: the next visit of the library looks it up again. */
+    @Transaction
+    open fun clear() {
+        clearAllEpisodes()
+        clearInfo()
+    }
+}

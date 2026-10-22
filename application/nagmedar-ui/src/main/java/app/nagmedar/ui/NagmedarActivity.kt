@@ -31,6 +31,7 @@ import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.library.NewDrives
+import app.nagmedar.ui.library.metadata.FilmInfoCenter
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastNotifier
@@ -84,6 +85,7 @@ class NagmedarActivity : ComponentActivity() {
         if (Build.FINGERPRINT != "robolectric") PodcastCenter.schedule(this)
         // S-1006: the album covers are looked for in the app; its Robolectric tests run it too, offline
         CoverCenter.active = Build.FINGERPRINT != "robolectric"
+        FilmInfoCenter.active = CoverCenter.active
         // S-1105: the radio directory and the station logos are asked in the app, not in its tests
         RadioCenter.active = Build.FINGERPRINT != "robolectric"
         setContent {

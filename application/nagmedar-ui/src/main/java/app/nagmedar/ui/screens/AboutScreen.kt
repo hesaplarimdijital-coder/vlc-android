@@ -64,6 +64,7 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.lab.ReportDialog
+import app.nagmedar.ui.library.metadata.FilmAttribution
 import app.nagmedar.ui.search.foldForSearch
 import app.nagmedar.ui.shell.BrandMark
 import app.nagmedar.ui.shell.WidthClass
@@ -176,6 +177,8 @@ fun AboutScreen(
             onIssues = { onOpenLink("$sourceUrl/issues") },
         )
         People(onAll = { onOpenLink("$sourceUrl/graphs/contributors") })
+        // film information: where the posters, overviews and ratings come from, as TMDB's terms ask
+        AboutCard(stringResource(R.string.nag_film_settings)) { FilmAttribution() }
     }
     if (wide) {
         Row(modifier.fillMaxSize().padding(horizontal = dimens.pagePadding)) {

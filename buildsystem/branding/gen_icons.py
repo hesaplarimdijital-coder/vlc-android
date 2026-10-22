@@ -115,6 +115,8 @@ ICONS = {
     'ChapterPrevious': '<path d="M8 4 4 8l4 4M12.5 4l-4 4 4 4"/>',
     # S-1104 to the next chapter
     'ChapterNext': '<path d="M3.5 4l4 4-4 4M8 4l4 4-4 4"/>',
+    # the films' poster view: two upright posters
+    'Posters': '<rect x="1.5" y="3" width="6" height="10" rx="1"/><rect x="8.5" y="3" width="6" height="10" rx="1"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

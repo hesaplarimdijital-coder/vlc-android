@@ -18,7 +18,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
         NetworkServerEntry::class, ScrobbleEntry::class, TranscodeProfileEntry::class, TranscodeJobEntry::class,
-        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class, RadioScheduleRun::class,
+        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class, RadioScheduleRun::class, FilmInfoEntry::class, FilmEpisodeEntry::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -39,10 +39,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun transcodeJobs(): TranscodeJobDao
     abstract fun radioRecordings(): RadioRecordingDao
     abstract fun remuxJobs(): RemuxJobDao
+    abstract fun filmInfo(): FilmInfoDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 18
+        const val VERSION = 19
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -258,10 +259,31 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 18 → 19 (film information): the films' and series' TMDB details and the series' episodes. */
+        private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `film_info` (`query_key` TEXT NOT NULL, `kind` TEXT NOT NULL, " +
+                        "`tmdb_id` INTEGER NOT NULL, `imdb_id` TEXT, `title` TEXT NOT NULL, `original_title` TEXT, " +
+                        "`year` INTEGER, `overview` TEXT, `language` TEXT NOT NULL, `genres` TEXT, `runtime_minutes` INTEGER, " +
+                        "`tmdb_rating` REAL, `tmdb_votes` INTEGER, `imdb_rating` REAL, `imdb_votes` INTEGER, " +
+                        "`rotten_tomatoes` INTEGER, `poster_path` TEXT, `backdrop_path` TEXT, `cast` TEXT, " +
+                        "`season_count` INTEGER, `episode_count` INTEGER, `manual` INTEGER NOT NULL, " +
+                        "`fetched_at` INTEGER NOT NULL, PRIMARY KEY(`query_key`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `film_episode` (`show_id` INTEGER NOT NULL, `season` INTEGER NOT NULL, " +
+                        "`episode` INTEGER NOT NULL, `title` TEXT, `overview` TEXT, `still_path` TEXT, `air_date` TEXT, " +
+                        "`runtime_minutes` INTEGER, `language` TEXT NOT NULL, `fetched_at` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`show_id`, `season`, `episode`))",
+                )
+            }
+        }
+
         /** Schema migrations, oldest first. */
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
-            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,
+            MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
         )
 
         @Volatile
