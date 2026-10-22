@@ -27,11 +27,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
@@ -67,7 +66,7 @@ fun MediaInfoHost() {
  */
 @Composable
 fun MediaInfoDialog(media: MediaWrapper, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_sc_media_info), Modifier.testTag("media-info"), cardWidth = 520.dp) {
                 MediaInfoContent(media)

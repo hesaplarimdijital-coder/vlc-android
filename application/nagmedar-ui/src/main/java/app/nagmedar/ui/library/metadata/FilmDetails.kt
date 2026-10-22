@@ -1,7 +1,6 @@
 package app.nagmedar.ui.library.metadata
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +36,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.data.FilmKind
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.collectState
@@ -53,11 +51,12 @@ import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
+import org.videolan.tools.Notices
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/** The words of a lookup's [outcome], said in a toast. */
+/** The words of a lookup's [outcome], said in a notice. */
 fun outcomeText(context: Context, outcome: FilmOutcome): String = context.resources.getString(
     when (outcome) {
         FilmOutcome.Done -> R.string.nag_film_outcome_done
@@ -71,12 +70,18 @@ fun outcomeText(context: Context, outcome: FilmOutcome): String = context.resour
     },
 )
 
+/** Says in the app's notices how a lookup the user asked for ended; one that could not be made as an error. */
+fun sayOutcome(context: Context, outcome: FilmOutcome) {
+    val failed = outcome in setOf(FilmOutcome.Offline, FilmOutcome.WaitingForWifi, FilmOutcome.KeyRefused, FilmOutcome.Limited, FilmOutcome.Failed)
+    Notices.show(context, outcomeText(context, outcome), error = failed)
+}
+
 /** What the film information can do for one film or series: refresh it, or search for the right one. */
 class FilmActions(val refresh: () -> Unit, val fix: () -> Unit)
 
 /**
  * "Bilgileri yenile" and "Yanlış film mi? Ara…" for [query], with the search dialog this opens
- * and the toast that says how a lookup ended; null when nothing names the film.
+ * and the notice that says how a lookup ended; null when nothing names the film.
  */
 @Composable
 fun rememberFilmActions(query: FilmQuery?): FilmActions? {
@@ -88,8 +93,7 @@ fun rememberFilmActions(query: FilmQuery?): FilmActions? {
     return FilmActions(
         refresh = {
             scope.launch {
-                val outcome = FilmInfoCenter.refresh(context, query)
-                Toast.makeText(context, outcomeText(context, outcome), Toast.LENGTH_SHORT).show()
+                sayOutcome(context, FilmInfoCenter.refresh(context, query))
             }
         },
         fix = { searching = true },
@@ -205,7 +209,7 @@ fun airDateLabel(date: String?, locale: Locale): String? {
  */
 @Composable
 fun FilmSearchDialog(query: FilmQuery, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) { FilmSearchSurface(query, onDismiss) }
     }
 }
@@ -259,9 +263,12 @@ private fun FilmSearchSurface(query: FilmQuery, onDismiss: () -> Unit) {
                     HitRow(hit) {
                         scope.launch {
                             val outcome = FilmInfoCenter.choose(context, query, hit)
-                            val message = if (outcome == FilmOutcome.Done) context.getString(R.string.nag_film_chosen, hit.title) else outcomeText(context, outcome)
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            if (outcome == FilmOutcome.Done) onDismiss()
+                            if (outcome == FilmOutcome.Done) {
+                                Notices.show(context, context.getString(R.string.nag_film_chosen, hit.title))
+                                onDismiss()
+                            } else {
+                                sayOutcome(context, outcome)
+                            }
                         }
                     }
                 }

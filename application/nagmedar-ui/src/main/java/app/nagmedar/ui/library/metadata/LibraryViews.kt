@@ -1,7 +1,6 @@
 package app.nagmedar.ui.library.metadata
 
 import android.content.Context
-import android.widget.Toast
 import app.nagmedar.data.FilmKind
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
@@ -39,8 +38,7 @@ fun filmMenuEntries(context: Context, query: FilmQuery?, scope: CoroutineScope, 
     return listOf(
         MenuEntry.Item(res.getString(R.string.nag_film_refresh), {
             scope.launch {
-                val outcome = FilmInfoCenter.refresh(context, query)
-                Toast.makeText(context, outcomeText(context, outcome), Toast.LENGTH_SHORT).show()
+                sayOutcome(context, FilmInfoCenter.refresh(context, query))
             }
         }, icon = NagIcons.Resume),
         MenuEntry.Item(

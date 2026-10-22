@@ -34,8 +34,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
@@ -43,6 +41,7 @@ import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.onboarding.StorageSource
@@ -89,7 +88,7 @@ fun LibrarySourcesSection(prefs: NagmedarPreferences) {
 @Composable
 fun SectionSourcesDialog(section: LibrarySection, prefs: NagmedarPreferences, onDismiss: () -> Unit) {
     val sources = rememberSourceActions(prefs)
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_lib_sources_for, sectionLabel(section)), Modifier.testTag("library-sources"), cardWidth = 520.dp) {
                 Text(stringResource(R.string.nag_lib_sources_hint), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary)
