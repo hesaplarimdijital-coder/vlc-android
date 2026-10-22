@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- the new interface's tokens (light theme; values-night: dark) for what the platform and Material Components draw -->
     <color name="nagmedar_window_background">#FAFBFC</color>
+    <color name="nagmedar_theme_surface">#FFFFFF</color>
+    <color name="nagmedar_theme_text">#12161B</color>
+    <color name="nagmedar_theme_accent">#4C618C</color>
+    <color name="nagmedar_theme_on_accent">#FFFFFF</color>
 
-    <style name="Theme.Nagmedar" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <!--
+      Classic UI: a Material Components theme (DayNight), so that what the platform or a library
+      still draws over the window (a dialog, a fragment, a picker) is in Nağmedar's colours, not in
+      VLC's or the platform's defaults. Edge to edge (transparent bars); the splash screen is the
+      window's background with the launcher icon.
+    -->
+    <style name="Theme.Nagmedar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/nagmedar_window_background</item>
         <item name="android:colorBackground">@color/nagmedar_window_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="colorPrimary">@color/nagmedar_theme_accent</item>
+        <item name="colorPrimaryVariant">@color/nagmedar_theme_accent</item>
+        <item name="colorOnPrimary">@color/nagmedar_theme_on_accent</item>
+        <item name="colorSecondary">@color/nagmedar_theme_accent</item>
+        <item name="colorSecondaryVariant">@color/nagmedar_theme_accent</item>
+        <item name="colorOnSecondary">@color/nagmedar_theme_on_accent</item>
+        <item name="colorSurface">@color/nagmedar_theme_surface</item>
+        <item name="colorOnSurface">@color/nagmedar_theme_text</item>
+        <item name="colorOnBackground">@color/nagmedar_theme_text</item>
+        <item name="android:colorAccent">@color/nagmedar_theme_accent</item>
     </style>
 </resources>

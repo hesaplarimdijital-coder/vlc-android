@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- the new interface's tokens, dark theme (Theme.Nagmedar is DayNight: values/themes.xml) -->
     <color name="nagmedar_window_background">#111418</color>
-
-    <style name="Theme.Nagmedar" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/nagmedar_window_background</item>
-        <item name="android:colorBackground">@color/nagmedar_window_background</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-    </style>
+    <color name="nagmedar_theme_surface">#1F252C</color>
+    <color name="nagmedar_theme_text">#E6E9ED</color>
+    <color name="nagmedar_theme_accent">#8AB0FF</color>
+    <color name="nagmedar_theme_on_accent">#0E1420</color>
 </resources>

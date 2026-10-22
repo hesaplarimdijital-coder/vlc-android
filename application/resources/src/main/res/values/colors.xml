@@ -129,4 +129,6 @@
     <color name="onboarding_grey_transparent_75">#BF011422</color>
     <color name="material_blue">#2196f3</color>
     <color name="material_pink">#e91e63</color>
+    <!-- Nağmedar: the new interface's blue accent on its dark theme (the video player's theme) -->
+    <color name="nagmedar_accent_dark">#8AB0FF</color>
 </resources>

@@ -16,7 +16,7 @@
         android:logo="@drawable/icon"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.VLC.Transparent"
+        android:theme="@style/Theme.Nagmedar"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         tools:targetApi="q" />
