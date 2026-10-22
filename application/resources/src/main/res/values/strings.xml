@@ -334,8 +334,9 @@
     <string name="nagmedar_new_interface_short">Nağmedar</string>
     <string name="nagmedar_player_subtitle_loaded">Subtitle loaded</string>
     <string name="nagmedar_new_interface_summary">The desktop-class interface with sidebar, menus and keyboard shortcuts; the app icon opens it</string>
-    <string name="nagmedar_classic_interface">Classic interface</string>
-    <string name="nagmedar_classic_interface_short">Classic</string>
+    <!-- Nağmedar: the share sheet's label, the launcher shortcut of Sources › This device -->
+    <string name="nagmedar_play_with">Play with Nağmedar</string>
+    <string name="nagmedar_shortcut_device">This device</string>
     <!-- Nağmedar (S-609): the small window's buttons and menu -->
     <string name="nagmedar_popup_back">Jump back 10 s</string>
     <string name="nagmedar_popup_forward">Jump forward 10 s</string>

@@ -400,7 +400,6 @@
     <string name="nag_audio_hdmi">HDMI · %1$s</string>
     <string name="nag_audio_default">Varsayılan çıkış</string>
     <string name="nag_settings_start">Başlangıç</string>
-    <string name="nag_settings_launcher">Uygulama simgesi açar</string>
     <string name="nag_settings_first_run_again">İlk açılış adımlarını yeniden göster</string>
 
     <!-- Oynatıcı -->
@@ -680,7 +679,6 @@
     <string name="nag_view_list">Liste görünümü</string>
     <string name="nag_settings_version">Sürüm %1$s · libVLC %2$s</string>
     <string name="nag_shortcut_unbound">Atanmadı</string>
-    <string name="nag_classic_interface">Klasik arayüz</string>
     <!-- Settings > Lab (MVP0 spikes) -->
     <string name="nag_settings_lab">Laboratuvar</string>
     <string name="nag_lab_intro">MVP0 deneylerinin bu cihazda çalışması gereken araçları. Her biri kopyalanabilir ya da paylaşılabilir bir rapor yazar.</string>

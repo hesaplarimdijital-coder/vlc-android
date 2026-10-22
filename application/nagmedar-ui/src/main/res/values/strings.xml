@@ -400,7 +400,6 @@
     <string name="nag_audio_hdmi">HDMI · %1$s</string>
     <string name="nag_audio_default">Default output</string>
     <string name="nag_settings_start">Start-up</string>
-    <string name="nag_settings_launcher">The app icon opens</string>
     <string name="nag_settings_first_run_again">Show the first-run steps again</string>
 
     <!-- Player -->
@@ -680,7 +679,6 @@
     <string name="nag_view_list">List view</string>
     <string name="nag_settings_version">Version %1$s · libVLC %2$s</string>
     <string name="nag_shortcut_unbound">Not assigned</string>
-    <string name="nag_classic_interface">Classic interface</string>
     <!-- Settings > Lab (MVP0 spikes) -->
     <string name="nag_settings_lab">Lab</string>
     <string name="nag_lab_intro">Tools of the MVP0 experiments that need this device. Each one writes a report to copy or share.</string>

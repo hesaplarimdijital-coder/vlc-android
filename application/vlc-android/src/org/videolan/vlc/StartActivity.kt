@@ -23,7 +23,7 @@
 
 package org.videolan.vlc
 
-import android.content.ComponentName
+import android.app.SearchManager
 import android.content.Context
 import android.app.ActivityOptions
 import android.content.Intent
@@ -49,33 +49,24 @@ import org.videolan.resources.ACTION_VIEW_ARC
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.EXTRA_FIRST_RUN
-import org.videolan.resources.EXTRA_PATH
 import org.videolan.resources.EXTRA_SEARCH_BUNDLE
-import org.videolan.resources.EXTRA_TARGET
 import org.videolan.resources.EXTRA_UPGRADE
-import org.videolan.resources.MOBILE_MAIN_ACTIVITY
-import org.videolan.resources.MOBILE_SEARCH_ACTIVITY
 import org.videolan.resources.NAGMEDAR_SHELL_ACTIVITY
 import org.videolan.resources.PREF_FIRST_RUN
-import org.videolan.resources.TV_MAIN_ACTIVITY
-import org.videolan.resources.TV_ONBOARDING_ACTIVITY
-import org.videolan.resources.TV_SEARCH_ACTIVITY
 import org.videolan.resources.util.getFromMl
 import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.parcelable
 import org.videolan.resources.util.startMedialibrary
 import org.videolan.tools.AppScope
-import org.videolan.tools.BETA_WELCOME
-import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_FRAGMENT_ID
 import org.videolan.tools.KEY_NAVIGATOR_SCREEN_UNSTABLE
-import org.videolan.tools.KEY_TV_ONBOARDING_DONE
-import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
+import org.videolan.tools.NAGMEDAR_ACTION_LIBRARY
 import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import org.videolan.tools.NAGMEDAR_EXTRA_REMOTE_ACCESS
+import org.videolan.tools.NAGMEDAR_EXTRA_SEARCH
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
-import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER
 import org.videolan.tools.PREF_TV_UI
@@ -83,10 +74,7 @@ import org.videolan.tools.Settings
 import org.videolan.tools.awaitAppIsForegroung
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.putSingle
-import org.videolan.vlc.gui.BetaWelcomeActivity
 import org.videolan.vlc.gui.helpers.hf.StoragePermissionsDelegate.Companion.getStoragePermission
-import org.videolan.vlc.gui.onboarding.ONBOARDING_DONE_KEY
-import org.videolan.vlc.gui.onboarding.startOnboarding
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.FileUtils
@@ -98,7 +86,6 @@ import videolan.org.commontools.TV_CHANNEL_PATH_VIDEO
 import videolan.org.commontools.TV_CHANNEL_QUERY_VIDEO_ID
 import videolan.org.commontools.TV_CHANNEL_SCHEME
 
-private const val SEND_CRASH_RESULT = 0
 private const val PROPAGATE_RESULT = 1
 private const val TAG = "VLC/StartActivity"
 class StartActivity : FragmentActivity() {
@@ -131,15 +118,7 @@ class StartActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        try {
-            if (!Settings.showTvUi && BuildConfig.BETA && !Settings.getInstance(this).getBoolean(BETA_WELCOME, false)) {
-                val intent = Intent(this, BetaWelcomeActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                startActivityForResult(intent, SEND_CRASH_RESULT)
-                Settings.getInstance(this).putSingle(BETA_WELCOME, true)
-                return
-            }
-        } catch (ignored: Exception) {}
+        // a beta build opens Nağmedar like any other: VLC's beta welcome screen is not shown
         resume()
     }
 
@@ -224,14 +203,14 @@ class StartActivity : FragmentActivity() {
             settings.putSingle(PREF_TV_UI, true)
         }
         val upgrade = firstRun || savedVersionNumber != currentVersionNumber
-        val tv = showTvUi()
-        if (upgrade && (tv || !firstRun)) settings.putSingle(PREF_FIRST_RUN, currentVersionNumber)
+        // Nağmedar's first-run flow keeps the version once it is done (FirstRunHost)
+        if (upgrade && !firstRun) settings.putSingle(PREF_FIRST_RUN, currentVersionNumber)
         val removeOldDevices = savedVersionNumber in 3028201..3028399
         settings.putSingle(PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER, savedVersionNumber < 3060330 && !firstRun)
         // Route search query
         if (Intent.ACTION_SEARCH == action || ACTION_SEARCH_GMS == action) {
-            intent.setClassName(applicationContext, if (tv) TV_SEARCH_ACTIVITY else MOBILE_SEARCH_ACTIVITY)
-            startActivity(intent)
+            // the system's search: Nağmedar's search page with the words asked for
+            startNagmedar(firstRun, upgrade, 0, removeOldDevices) { putExtra(NAGMEDAR_EXTRA_SEARCH, intent.getStringExtra(SearchManager.QUERY).orEmpty()) }
             finish()
             return
         } else if (MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH == action) {
@@ -242,7 +221,7 @@ class StartActivity : FragmentActivity() {
             val data = intent.data
             val path = data!!.path
             if (path == "/$TV_CHANNEL_PATH_APP")
-                startApplication(tv, firstRun, upgrade, 0, removeOldDevices)
+                startNagmedar(firstRun, upgrade, 0, removeOldDevices)
             else if (path == "/$TV_CHANNEL_PATH_VIDEO") {
                 var id = java.lang.Long.valueOf(data.getQueryParameter(TV_CHANNEL_QUERY_VIDEO_ID)!!)
                 val ctx = this@StartActivity
@@ -270,16 +249,18 @@ class StartActivity : FragmentActivity() {
                         MediaUtils.playTracks(this@StartActivity, album, 0)
                     }
                 }
-            } else if(action != null && action== "vlc.remoteaccess.share") {
-                startActivity(Intent().apply { component = ComponentName(this@StartActivity, "org.videolan.vlc.remoteaccessserver.gui.remoteaccess.RemoteAccessShareActivity") })
-            } else if (action == NAGMEDAR_ACTION_CLASSIC) {
-                startApplication(tv, firstRun, upgrade, 0, removeOldDevices, classic = true)
+            } else if (action == "vlc.remoteaccess.share") {
+                // the remote access notification: Settings, with the window of its addresses
+                startNagmedar(firstRun, upgrade, 0, removeOldDevices) {
+                    putExtra(NAGMEDAR_EXTRA_DESTINATION, "settings")
+                    putExtra(NAGMEDAR_EXTRA_REMOTE_ACCESS, true)
+                }
             } else {
                 val target = idFromShortcut
                 val service = PlaybackService.instance
                 if (target == R.id.ml_menu_last_playlist) {
                     PlaybackService.loadLastAudio(this, true)
-                    startApplication(tv, firstRun, upgrade, R.id.nav_audio, removeOldDevices)
+                    startNagmedar(firstRun, upgrade, R.id.nav_audio, removeOldDevices)
                 } else if (service != null && service.isInPiPMode.value == true) {
                     service.isInPiPMode.value = false
                     val startIntent = Intent(this, VideoPlayerActivity::class.java)
@@ -287,7 +268,7 @@ class StartActivity : FragmentActivity() {
                     startActivity(startIntent)
                 }
                 else
-                    startApplication(tv, firstRun, upgrade, target, removeOldDevices)
+                    startNagmedar(firstRun, upgrade, target, removeOldDevices)
             }
         }
         FileUtils.copyLua(applicationContext, upgrade)
@@ -298,58 +279,24 @@ class StartActivity : FragmentActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SEND_CRASH_RESULT) {
-            resume()
-        }
         if (requestCode == PROPAGATE_RESULT) {
             setResult(resultCode, data)
             finish()
         }
     }
 
-    private fun startApplication(tv: Boolean, firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices:Boolean = false, classic: Boolean = false) {
-        val settings = Settings.getInstance(this@StartActivity)
-        if (!tv && !classic && settings.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true)) {
-            startNagmedar(firstRun, upgrade, target, removeDevices)
-            return
-        }
-        val onboarding = !settings.getBoolean(if (tv) KEY_TV_ONBOARDING_DONE else ONBOARDING_DONE_KEY, false)
-        // Start Medialibrary from background to workaround Dispatchers.Main causing ANR
-        // cf https://github.com/Kotlin/kotlinx.coroutines/issues/878
-        if (!onboarding || !firstRun) {
-            Thread {
-                AppScope.launch {
-                    // workaround for a Android 9 bug
-                    // https://issuetracker.google.com/issues/113122354
-                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P && !awaitAppIsForegroung()) {
-                        return@launch
-                    }
-                    this@StartActivity.startMedialibrary(firstRun, upgrade, true, removeDevices)
-                    if (onboarding) settings.putSingle(ONBOARDING_DONE_KEY, true)
-                }
-            }.start()
-            val mainIntent = Intent(Intent.ACTION_VIEW)
-                    .setClassName(applicationContext, if (tv) TV_MAIN_ACTIVITY else MOBILE_MAIN_ACTIVITY)
-                    .putExtra(EXTRA_FIRST_RUN, firstRun)
-                    .putExtra(EXTRA_UPGRADE, upgrade)
-            if (tv && intent.hasExtra(EXTRA_PATH)) mainIntent.putExtra(EXTRA_PATH, intent.getStringExtra(EXTRA_PATH))
-            if (target != 0) mainIntent.putExtra(EXTRA_TARGET, target)
-            startActivity(mainIntent)
-        } else {
-            if (!tv) startOnboarding() else startActivity(Intent(Intent.ACTION_VIEW).apply { setClassName(applicationContext, TV_ONBOARDING_ACTIVITY) })
-        }
-    }
-
     /**
-     * S-309: the launcher opens the Nağmedar interface. Until its first-run flow is done, that
-     * flow asks for media access and starts the medialibrary with the chosen sources; afterwards
-     * the medialibrary starts here, as for the classic interface.
+     * S-309: the launcher, the shortcuts, the notifications and the system's search open the
+     * Nağmedar interface, always: the classic one is not offered any more (on a TV too). Until its
+     * first-run flow is done, that flow asks for media access and starts the medialibrary with the
+     * chosen sources; afterwards the medialibrary starts here. [extras] adds what the window is
+     * asked for (a search, the remote access page).
      */
-    private fun startNagmedar(firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices: Boolean) {
+    private fun startNagmedar(firstRun: Boolean, upgrade: Boolean, target: Int, removeDevices: Boolean, extras: Intent.() -> Unit = {}) {
         if (Settings.getInstance(this).getBoolean(NAGMEDAR_FIRST_RUN_DONE, false)) {
             Thread {
                 AppScope.launch {
-                    // workaround for a Android 9 bug, as in startApplication
+                    // workaround for a Android 9 bug
                     if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P && !awaitAppIsForegroung()) return@launch
                     this@StartActivity.startMedialibrary(firstRun, upgrade, true, removeDevices)
                 }
@@ -364,11 +311,14 @@ class StartActivity : FragmentActivity() {
         when {
             // the playback notification: the page of what plays
             this.intent?.action == NAGMEDAR_ACTION_NOW_PLAYING -> NAGMEDAR_DESTINATION_NOW_PLAYING
+            // the library scan's notification: the home page
+            this.intent?.action == NAGMEDAR_ACTION_LIBRARY -> "home"
             target == R.id.nav_video -> "movies"
             target == R.id.nav_audio -> "music"
             target == R.id.nav_directories -> "device"
             else -> null
         }?.let { intent.putExtra(NAGMEDAR_EXTRA_DESTINATION, it) }
+        intent.extras()
         // S-409: a desktop window opens where it was last (DeX, freeform windows)
         val bounds = Settings.getInstance(this).getString(NAGMEDAR_WINDOW_BOUNDS, null)?.let(Rect::unflattenFromString)
         if (bounds != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -410,13 +360,5 @@ class StartActivity : FragmentActivity() {
             }
         }
         finish()
-    }
-
-    private fun showTvUi(): Boolean {
-        val settings = Settings.getInstance(this)
-        //because the [VersionMigration] is done after the first call to this method, we have to keep the old implementation for people coming from an older version of the app
-        if (settings.getInt(KEY_CURRENT_SETTINGS_VERSION, 0) < 5) return AndroidDevices.isAndroidTv || !AndroidDevices.isChromeBook && !AndroidDevices.hasTsp ||
-                settings.getBoolean("tv_ui", false)
-        return  settings.getBoolean("tv_ui", false)
     }
 }

@@ -27,7 +27,6 @@ import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.VisualizerSettings
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
-import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
 import org.videolan.tools.NAGMEDAR_MIDDLE_CLICK
 import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.NAGMEDAR_PLAYER_FULLSCREEN
@@ -139,10 +138,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var firstRunDone by mutableStateOf(prefs.getBoolean(NAGMEDAR_FIRST_RUN_DONE, false))
         private set
 
-    /** S-309: the launcher icon opens this interface (true) or the classic one. */
-    var launchNewUi by mutableStateOf(prefs.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true))
-        private set
-
     /** S-305: what was run from the command palette, the latest first. */
     var recentCommands by mutableStateOf(prefs.getString(KEY_PALETTE_RECENT, null)?.split('\n')?.filter { it.isNotEmpty() }.orEmpty())
         private set
@@ -186,7 +181,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         if (key == null || key == NAGMEDAR_PLAYER_FULLSCREEN) playerFullscreen = prefs.getBoolean(NAGMEDAR_PLAYER_FULLSCREEN, true)
         if (key == null || key == KEY_TOOLTIP_DELAY) tooltipDelay = prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal)
         if (key == null || key == NAGMEDAR_FIRST_RUN_DONE) firstRunDone = prefs.getBoolean(NAGMEDAR_FIRST_RUN_DONE, false)
-        if (key == null || key == NAGMEDAR_LAUNCH_NEW_UI) launchNewUi = prefs.getBoolean(NAGMEDAR_LAUNCH_NEW_UI, true)
         if (key == null || key == KEY_PALETTE_RECENT) {
             recentCommands = prefs.getString(KEY_PALETTE_RECENT, null)?.split('\n')?.filter { it.isNotEmpty() }.orEmpty()
         }
@@ -231,11 +225,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     fun updateFirstRunDone(value: Boolean) {
         firstRunDone = value
         prefs.edit().putBoolean(NAGMEDAR_FIRST_RUN_DONE, value).apply()
-    }
-
-    fun updateLaunchNewUi(value: Boolean) {
-        launchNewUi = value
-        prefs.edit().putBoolean(NAGMEDAR_LAUNCH_NEW_UI, value).apply()
     }
 
     fun addSafFolder(uri: String) {

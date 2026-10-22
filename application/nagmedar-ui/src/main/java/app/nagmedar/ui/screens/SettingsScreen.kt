@@ -150,17 +150,6 @@ fun SettingsScreen(
         item { BackupSection() }
         item {
             SettingsSection(stringResource(R.string.nag_settings_start)) {
-                SettingRow(stringResource(R.string.nag_settings_launcher)) {
-                    SegmentedChoice(
-                        options = listOf(
-                            true to stringResource(R.string.nagmedar_shell_title),
-                            false to stringResource(R.string.nag_classic_interface),
-                        ),
-                        selected = prefs.launchNewUi,
-                        onSelect = prefs::updateLaunchNewUi,
-                    )
-                }
-                Spacer(Modifier.height(dimens.gapS))
                 NagButton(stringResource(R.string.nag_settings_first_run_again), onShowFirstRun)
             }
         }

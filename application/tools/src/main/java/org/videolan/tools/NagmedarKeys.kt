@@ -5,9 +5,6 @@ package org.videolan.tools
 /** S-502: publish playback through the Media3 session instead of the legacy MediaSessionCompat. */
 const val NAGMEDAR_MEDIA3_SESSION = "nagmedar_media3_session"
 
-/** S-309: the launcher icon opens the Nağmedar interface (default) instead of the classic one. */
-const val NAGMEDAR_LAUNCH_NEW_UI = "nagmedar_launch_new_ui"
-
 /** S-309: Nağmedar's first-run flow was completed or skipped. */
 const val NAGMEDAR_FIRST_RUN_DONE = "nagmedar_first_run_done"
 
@@ -23,8 +20,20 @@ const val NAGMEDAR_SAF_FOLDERS = "nagmedar_saf_folders"
 /** Extra of the Nağmedar activity: route of the screen to open (launcher shortcuts). */
 const val NAGMEDAR_EXTRA_DESTINATION = "nagmedar_destination"
 
-/** Intent action of StartActivity that opens the classic interface even when the new one is the default. */
-const val NAGMEDAR_ACTION_CLASSIC = "nagmedar.shortcut.classic"
+/** [NAGMEDAR_EXTRA_DESTINATION]'s value that opens what plays now in the Nağmedar interface: the music view, the radio, the streams. */
+const val NAGMEDAR_DESTINATION_NOW_PLAYING = "now-playing"
+
+/** Extra of the Nağmedar activity: a search to run on the search page (the system's search). */
+const val NAGMEDAR_EXTRA_SEARCH = "nagmedar_search"
+
+/** Extra of the Nağmedar activity: the remote access page with the addresses opens (the remote access notification). */
+const val NAGMEDAR_EXTRA_REMOTE_ACCESS = "nagmedar_remote_access"
+
+/** Intent action of StartActivity: the Nağmedar interface on what plays now (the playback notification). */
+const val NAGMEDAR_ACTION_NOW_PLAYING = "nagmedar.now_playing"
+
+/** Intent action of StartActivity: the Nağmedar interface on its home page (the library scan's notification). */
+const val NAGMEDAR_ACTION_LIBRARY = "nagmedar.library"
 
 /** S-408: the mouse wheel seeks in the video player (Ctrl+wheel sets the volume) instead of the other way round. */
 const val NAGMEDAR_WHEEL_SEEKS = "nagmedar_wheel_seeks"
@@ -97,9 +106,3 @@ const val NAGMEDAR_LYRICS_ONLINE = "nagmedar_lyrics_online"
 
 /** S-1006: album covers are looked up on Cover Art Archive (through MusicBrainz) when the file and its folder have none (default on). */
 const val NAGMEDAR_COVERS_ONLINE = "nagmedar_covers_online"
-
-/** [NAGMEDAR_EXTRA_DESTINATION]'s value that opens what plays now in the Nağmedar interface: the music view, the radio, the streams. */
-const val NAGMEDAR_DESTINATION_NOW_PLAYING = "now-playing"
-
-/** Intent action of StartActivity: the Nağmedar interface on what plays now (the playback notification). */
-const val NAGMEDAR_ACTION_NOW_PLAYING = "nagmedar.now_playing"

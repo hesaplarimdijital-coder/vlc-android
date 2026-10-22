@@ -34,12 +34,17 @@ import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastNotifier
 import app.nagmedar.ui.radio.RadioCenter
+import app.nagmedar.ui.remoteaccess.RemoteAccessPage
+import app.nagmedar.ui.remoteaccess.RemoteAccessPages
+import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.transcode.HlsStream
 import app.nagmedar.ui.transcode.TranscodeQueue
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import org.videolan.tools.NAGMEDAR_EXTRA_REMOTE_ACCESS
+import org.videolan.tools.NAGMEDAR_EXTRA_SEARCH
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
@@ -72,6 +77,7 @@ class NagmedarActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
             openPodcastOf(intent)
+            openAskedOf(intent)
         }
         // S-1103: the feeds' refresh runs in the background while there is a subscription; set again at each start, which changes nothing when it is as it was
         if (Build.FINGERPRINT != "robolectric") PodcastCenter.schedule(this)
@@ -198,6 +204,13 @@ class NagmedarActivity : ComponentActivity() {
         setIntent(intent)
         intent.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)?.let { destination = it }
         openPodcastOf(intent)
+        openAskedOf(intent)
+    }
+
+    /** The system's search (its words on the search page) and the remote access notification (its addresses' window). */
+    private fun openAskedOf(intent: Intent?) {
+        intent?.getStringExtra(NAGMEDAR_EXTRA_SEARCH)?.let { ShellRequests.search = it }
+        if (intent?.getBooleanExtra(NAGMEDAR_EXTRA_REMOTE_ACCESS, false) == true) RemoteAccessPages.open(RemoteAccessPage.Addresses)
     }
 
     /** S-1103: a notification of new episodes carries the show it is about: its page opens. */

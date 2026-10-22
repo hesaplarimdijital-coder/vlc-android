@@ -1431,8 +1431,9 @@
     <string name="nagmedar_new_interface_short">Nağmedar</string>
     <string name="nagmedar_player_subtitle_loaded">Altyazı yüklendi</string>
     <string name="nagmedar_new_interface_summary">Kenar çubuğu, menüler ve klavye kısayollarıyla masaüstü sınıfı arayüz; uygulama simgesi bunu açar</string>
-    <string name="nagmedar_classic_interface">Klasik arayüz</string>
-    <string name="nagmedar_classic_interface_short">Klasik</string>
+    <!-- Nağmedar: the share sheet's label, the launcher shortcut of Sources › This device -->
+    <string name="nagmedar_play_with">Nağmedar ile oynat</string>
+    <string name="nagmedar_shortcut_device">Bu cihaz</string>
     <!-- Nağmedar (S-609): the small window's buttons and menu -->
     <string name="nagmedar_popup_back">10 sn geri</string>
     <string name="nagmedar_popup_forward">10 sn ileri</string>

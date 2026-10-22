@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- S-309: every shortcut opens the Nağmedar interface: StartActivity maps their actions to its pages -->
 <shortcuts xmlns:tools="http://schemas.android.com/tools"
         xmlns:android="http://schemas.android.com/apk/res/android"
         tools:targetApi="n_mr1" >
-    <shortcut
-        android:shortcutId="nagmedar_classic"
-        android:enabled="true"
-        android:icon="@drawable/ic_nagmedar_mark"
-        android:shortcutShortLabel="@string/nagmedar_classic_interface_short"
-        android:shortcutLongLabel="@string/nagmedar_classic_interface">
-        <!-- S-309: the launcher icon opens the Nağmedar interface; this opens the classic one -->
-        <intent
-            android:action="nagmedar.shortcut.classic"
-            android:targetPackage="app.nagmedar.debug"
-            android:targetClass="org.videolan.vlc.StartActivity" />
-    </shortcut>
     <shortcut
             android:shortcutId="last_playlist"
             android:enabled="true"
@@ -30,8 +19,8 @@
             android:shortcutId="browser"
             android:enabled="true"
             android:icon="@drawable/ic_shortcut_folder"
-            android:shortcutShortLabel="@string/directories"
-            android:shortcutLongLabel="@string/directories" >
+            android:shortcutShortLabel="@string/nagmedar_shortcut_device"
+            android:shortcutLongLabel="@string/nagmedar_shortcut_device" >
         <intent
                 android:action="vlc.shortcut.browser"
                 android:targetPackage="app.nagmedar.debug"

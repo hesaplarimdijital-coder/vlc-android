@@ -49,6 +49,7 @@ import org.videolan.resources.CUSTOM_ACTION_SPEED
 import org.videolan.resources.EXTRA_CUSTOM_ACTION_ID
 import org.videolan.resources.START_ACTIVITY
 import org.videolan.tools.DrawableCache
+import org.videolan.tools.NAGMEDAR_ACTION_LIBRARY
 import org.videolan.tools.Settings
 import org.videolan.tools.getContextWithLocale
 import org.videolan.vlc.R
@@ -166,7 +167,8 @@ object NotificationHelper {
     }
 
     fun createScanNotification(ctx: Context, progressText: String, paused: Boolean, max:Int, progress: Int): Notification {
-        val intent = Intent(Intent.ACTION_VIEW).setClassName(ctx, START_ACTIVITY)
+        // the Nağmedar window on its home page (a VIEW without data opened nothing)
+        val intent = Intent(NAGMEDAR_ACTION_LIBRARY).setClassName(ctx, START_ACTIVITY)
         val scanCompatBuilder = NotificationCompat.Builder(ctx, MEDIALIBRRARY_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
                 .setSmallIcon(R.drawable.ic_notif_scan)

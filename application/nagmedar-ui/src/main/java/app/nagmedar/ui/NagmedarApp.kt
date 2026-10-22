@@ -40,7 +40,6 @@ import app.nagmedar.ui.cast.CastPickerDialog
 import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
-import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.LocalTooltipDelay
@@ -54,7 +53,6 @@ import app.nagmedar.ui.device.DeviceScreen
 import app.nagmedar.ui.downloads.DownloadsScreen
 import app.nagmedar.ui.guide.GuideScreen
 import app.nagmedar.ui.guide.ShortcutCardScreen
-import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
@@ -142,6 +140,7 @@ import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
+import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.streams.StreamsCenter
 import app.nagmedar.ui.streams.StreamsScreen
@@ -154,11 +153,8 @@ import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
-import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.vlc.PlaybackService
-import org.videolan.vlc.StartActivity
-import org.videolan.vlc.gui.SecondaryActivity
 import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
@@ -289,6 +285,13 @@ private fun NagmedarMain(
     }
     // the playback notification and the players outside the shell ask for what plays now
     var nowPlayingRequested by remember { mutableStateOf(false) }
+    // the system's search asks for the search page with its words
+    LaunchedEffect(ShellRequests.search) {
+        val query = ShellRequests.search ?: return@LaunchedEffect
+        searchQuery = query
+        navigator.navigate(Destination.Search)
+        ShellRequests.search = null
+    }
     LaunchedEffect(requestedDestination) {
         if (requestedDestination == NAGMEDAR_DESTINATION_NOW_PLAYING) {
             nowPlayingRequested = true
@@ -520,28 +523,9 @@ fun openLink(context: Context, url: String) {
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
 }
 
-/**
- * Opens the classic interface, on a given screen of SecondaryActivity when [fragment] is set.
- * StartActivity is asked for the classic interface explicitly: the launcher's default is this one.
- */
-fun openClassic(context: Context, fragment: String?) {
-    val intent = if (fragment == null) {
-        Intent(context, StartActivity::class.java).setAction(NAGMEDAR_ACTION_CLASSIC)
-    } else {
-        Intent(context, SecondaryActivity::class.java).putExtra(SecondaryActivity.KEY_FRAGMENT, fragment)
-    }
-    context.startActivity(intent)
-}
-
 /** Menu bar contents, built from the shortcut table so labels and keys match everywhere (S-302). */
 internal fun menuSpecs(context: Context, actions: AppActions): List<MenuSpec> =
-    menuBarSpecs(context.resources, { actions.perform(it) }, actions::isAvailable) { group ->
-        if (group == ShortcutGroup.Tools) {
-            listOf(MenuEntry.Separator, MenuEntry.Item(context.getString(R.string.nag_classic_interface), { openClassic(context, null) }))
-        } else {
-            emptyList()
-        }
-    }
+    menuBarSpecs(context.resources, { actions.perform(it) }, actions::isAvailable)
 
 /** What each shortcut does in the shell; player-only shortcuts are handled by the player. */
 class AppActions(
