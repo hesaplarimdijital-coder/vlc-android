@@ -61,6 +61,25 @@ object NativeLab {
     /** S-709: stops the running [transcribe] soon; the Lab's [cancel] does not. */
     @JvmStatic external fun cancelTranscription()
 
+    /** How far an extraction is: [fraction] of the film read, 0..1; on the thread that runs it. */
+    fun interface SubtitleExtraction {
+        fun onProgress(fraction: Double)
+    }
+
+    /**
+     * Subtitle track [track] of [input] (the n-th subtitle track, 0 first, as [MediaProbe] lists
+     * them; a path or /proc/self/fd/N) written into the new file [output]: SRT, or ASS/SSA kept
+     * with its header and styles. The film is read once, start to end, with only the lines in
+     * memory; picture subtitles are refused. Blocking; [cancelSubtitleExtraction] stops it. The
+     * result is a JSON object: "error" ("" when it went through, "open", "no_stream", "image",
+     * "unsupported", "empty", "too_large", "write", "cancelled"), "detail", "codec", "format"
+     * ("srt", "ass", "ssa"), "events" and "partial" (the file ended early).
+     */
+    @JvmStatic external fun extractSubtitle(input: String, track: Int, output: String, listener: SubtitleExtraction): String
+
+    /** Stops the running [extractSubtitle] soon; the Lab's [cancel] and [cancelTranscription] do not. */
+    @JvmStatic external fun cancelSubtitleExtraction()
+
     /** SP-02: formats, clock and rates of the USB audio device behind [fd]. */
     @JvmStatic external fun usbDescribe(fd: Int): String
 

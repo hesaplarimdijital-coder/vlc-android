@@ -79,6 +79,7 @@ import app.nagmedar.ui.player.panel.PanelRule
 import app.nagmedar.ui.player.panel.decimal
 import app.nagmedar.ui.player.panel.signed
 import app.nagmedar.ui.player.subtitles.SubtitleEncoding
+import app.nagmedar.ui.player.subtitles.extract.EmbeddedSection
 import app.nagmedar.ui.player.subtitles.translate.TranslateTab
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.NagTheme
@@ -139,6 +140,8 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
                 KeyCap("Esc")
             }
             FileBar(state, controller, onOpenFile)
+            // the film's own subtitle tracks, one to write into a new file
+            controller.extraction?.let { EmbeddedSection(it) }
             val document = state.document
             when {
                 state.loading -> PanelCaption(stringResource(R.string.nag_subtools_loading), Modifier.testTag("subtools-status"))
@@ -148,7 +151,10 @@ fun SubtitleToolsSurface(controller: SubtitleToolsController, onOpenFile: () -> 
                     color = colors.warning,
                     modifier = Modifier.testTag("subtools-status"),
                 )
-                document == null -> PanelCaption(stringResource(R.string.nag_subtools_none), Modifier.testTag("subtools-status"))
+                document == null -> PanelCaption(
+                    stringResource(if (controller.extraction?.state?.asked == true) R.string.nag_extract_choose else R.string.nag_subtools_none),
+                    Modifier.testTag("subtools-status"),
+                )
             }
             if (document != null) {
                 PanelCaption(fileInfo(state, document, locale), Modifier.testTag("subtools-info"))
@@ -208,9 +214,12 @@ private fun CloseQuestion(controller: SubtitleToolsController, state: SubtitleTo
     }
 }
 
-/** The subtitles' tab's entry to the tools (S-708): a button and a line on what they do; [onTranslate], the translation's (S-710). */
+/**
+ * The subtitles' tab's entry to the tools (S-708): a button and a line on what they do;
+ * [onTranslate], the translation's (S-710); [onExtract], the embedded subtitles' extraction.
+ */
 @Composable
-fun SubtitleToolsSection(onOpen: () -> Unit, onTranslate: (() -> Unit)? = null) {
+fun SubtitleToolsSection(onOpen: () -> Unit, onTranslate: (() -> Unit)? = null, onExtract: (() -> Unit)? = null) {
     Column(Modifier.fillMaxWidth().testTag("subtitles-tools"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         NagButton(
             stringResource(R.string.nag_subtools_menu),
@@ -223,6 +232,13 @@ fun SubtitleToolsSection(onOpen: () -> Unit, onTranslate: (() -> Unit)? = null) 
                 stringResource(R.string.nag_translate_menu),
                 onTranslate,
                 modifier = Modifier.fillMaxWidth().testTag("tools-translate"),
+            )
+        }
+        if (onExtract != null) {
+            NagButton(
+                stringResource(R.string.nag_extract_menu),
+                onExtract,
+                modifier = Modifier.fillMaxWidth().testTag("tools-extract"),
             )
         }
         PanelCaption(stringResource(R.string.nag_subtools_section_hint))

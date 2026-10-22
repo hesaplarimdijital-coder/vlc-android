@@ -146,6 +146,12 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_tvlab_analyse), { openInTvLab(context, media.uri) }, icon = NagIcons.TvLab) else null,
         // S-708: the film's subtitle files cleaned, converted and edited into new files
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_subtools_menu), { SubtitleToolsLauncher.open(media.uri, media.fileName) }, icon = NagIcons.Subtitle) else null,
+        // the film's embedded text subtitles written into new files beside it
+        if (media.type == MediaWrapper.TYPE_VIDEO) {
+            MenuEntry.Item(res.getString(R.string.nag_extract_menu), { SubtitleToolsLauncher.open(media.uri, media.fileName, extract = true) }, icon = NagIcons.Subtitle)
+        } else {
+            null
+        },
         // S-709: subtitles from the film's speech, made on the device
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_whisper_menu), { WhisperLauncher.open(media.uri, media.fileName) }, icon = NagIcons.Subtitle) else null,
         // S-1303: into another format, or on the network

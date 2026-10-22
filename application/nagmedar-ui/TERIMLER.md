@@ -58,6 +58,8 @@ Sözlüğü testler denetler:
 | ekran yönü | screen orientation | | | Otomatik, Yatay, Dikey, Ters yatay |
 | görüntü boyutu | picture size | | | Filmin ekrana yerleşmesi: Sığdır, Ekranı doldur (kırp), Uzat, Özgün boyut ya da oran (16:9, 2.35:1); oranlar iki dilde de noktalı |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
+| altyazı izi | subtitle track | altyazı parçası | | Videonun içindeki bir altyazı akışı (dili, adı, biçimi); müzikteki “parça”dan ayrı |
+| gömülü altyazı | embedded subtitles | dahili altyazı | built-in subtitles | Filmin dosyasının içindeki altyazı izleri (MKV, MP4, TS, AVI); “Gömülü altyazıyı dosyaya çıkar…” metin olanları filmin yanına yeni bir dosya olarak yazar, resim olanlar (PGS, VobSub, DVB) OCR gerektirdiği için çıkarılmaz |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |
 | cihaz | device | aygıt | | |

@@ -58,6 +58,8 @@ FFMPEG_COMPONENTS=(
     --enable-demuxer=mpc,mpc8,tta,dsf,iff,asf,caf
     # S-709: the sound of films in AVI and in MPEG programme streams (VOB) for the subtitles from speech
     --enable-demuxer=avi,mpegps
+    # the embedded subtitles written out as files: an AVI's GAB2 subtitles are SRT or SSA files inside it
+    --enable-demuxer=srt,ass
     --enable-muxer=matroska,mp4,mov,null
     # S-1010: the converter's Ogg Opus and M4A files, and FFmpeg's own AAC encoder (libopus and LAME are the engine's)
     --enable-muxer=ogg,ipod --enable-encoder=aac

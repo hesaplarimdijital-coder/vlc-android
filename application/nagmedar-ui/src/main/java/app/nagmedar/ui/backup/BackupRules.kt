@@ -9,6 +9,8 @@ import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
 import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
+import app.nagmedar.ui.player.subtitles.extract.ExtractJobs
+import app.nagmedar.ui.player.subtitles.translate.TranslationJobs
 import app.nagmedar.ui.player.subtitles.whisper.WhisperPrefs
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
@@ -56,6 +58,9 @@ object BackupSettings {
         // this device's: the subtitles from speech's last job (S-709)
         WhisperPrefs.KEY_SEEN,
         WhisperPrefs.KEY_TIMED_OUT,
+        // this device's: the last translation and extraction Android's time limit ended
+        TranslationJobs.KEY_TIMED_OUT,
+        ExtractJobs.KEY_TIMED_OUT,
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
         *ScrobbleSettings.keys.toTypedArray(),
         // the settings' version, which the backup keeps on its own

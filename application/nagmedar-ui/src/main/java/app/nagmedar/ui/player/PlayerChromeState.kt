@@ -158,6 +158,9 @@ interface PlayerChromeActions {
     /** S-710: the tools on their translation tab: the film's subtitles translated offline, shown with the original. */
     fun translateSubtitles() {}
 
+    /** The tools on the film's embedded subtitle tracks: one written into a new SRT (or ASS) file beside it. */
+    fun extractEmbeddedSubtitles() {}
+
     /** S-1303: the media playing converted into another format (Ctrl+R), in the library's window. */
     fun convertSave()
 

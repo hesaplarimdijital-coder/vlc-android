@@ -10,6 +10,7 @@ import app.nagmedar.ui.player.subtitles.SavedSubtitle
 import app.nagmedar.ui.player.subtitles.SubtitleEncoding
 import app.nagmedar.ui.player.subtitles.decodeSubtitle
 import app.nagmedar.ui.player.subtitles.detectEncoding
+import app.nagmedar.ui.player.subtitles.extract.SubtitleExtractController
 import app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateController
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -140,6 +141,8 @@ class SubtitleToolsController(
     private val debounceMs: Long = REFRESH_DEBOUNCE_MS,
     /** S-710: the translation tab's controller; without one the window has no such tab. */
     val translation: SubtitleTranslateController? = null,
+    /** The film's embedded subtitles written into files; without one the window lists none. */
+    val extraction: SubtitleExtractController? = null,
 ) {
     var state by mutableStateOf<SubtitleToolsState?>(null)
         private set
@@ -155,12 +158,30 @@ class SubtitleToolsController(
     private var job: Job? = null
     private var refreshJob: Job? = null
 
-    /** The window opens on [files] (the first is read), with [playback] when a film plays. */
-    fun open(files: List<ToolsFile>, playback: ToolsPlayback? = null, tab: ToolsTab = ToolsTab.Clean) {
+    /**
+     * The window opens on [files] (the first is read), with [playback] when a film plays. The
+     * [film]'s embedded subtitles are listed beside them; [extract], the window is for writing one
+     * of them into a file, and no file is read until there is one.
+     */
+    fun open(files: List<ToolsFile>, playback: ToolsPlayback? = null, tab: ToolsTab = ToolsTab.Clean, film: ToolsFile? = null, extract: Boolean = false) {
         this.playback = playback
         translation?.attach(playback)
         state = SubtitleToolsState(files = files, loadAfter = playback != null, tab = if (tab == ToolsTab.Translate && translation == null) ToolsTab.Clean else tab)
-        files.firstOrNull()?.let { choose(it) }
+        extraction?.attach(film, asked = extract, onReady = ::offer)
+        if (!extract) files.firstOrNull()?.let { choose(it) }
+    }
+
+    /**
+     * A file the extraction wrote: read at once, as any subtitle file, unless edits of the file
+     * open are not saved yet (it then waits among the files to choose from).
+     */
+    fun offer(file: ToolsFile) {
+        val current = state ?: return
+        if (current.changed && current.saved == null) {
+            if (current.files.none { it.uri == file.uri }) state = current.copy(files = current.files + file)
+            return
+        }
+        choose(file)
     }
 
     /**
@@ -190,8 +211,9 @@ class SubtitleToolsController(
     fun close() {
         job?.cancel()
         refreshJob?.cancel()
-        // a translation under way goes on in the background; the window stops following it
+        // a translation or an extraction under way goes on in the background; the window stops following it
         translation?.detach()
+        extraction?.detach()
         state = null
         original = null
         history.clear()

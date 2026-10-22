@@ -19,6 +19,8 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.player.subtitles.SavedSubtitle
 import app.nagmedar.ui.player.subtitles.SubtitleEncodings
 import app.nagmedar.ui.player.subtitles.displayName
+import app.nagmedar.ui.player.subtitles.extract.SubtitleExtractController
+import app.nagmedar.ui.player.subtitles.extract.WorkExtractService
 import app.nagmedar.ui.player.subtitles.saveBeside as saveNextToFile
 import app.nagmedar.ui.player.subtitles.toolsFiles
 import app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateController
@@ -59,21 +61,22 @@ internal class DocumentSubtitleToolsIo(private val context: Context) : SubtitleT
     }
 }
 
-/** A film from the library whose subtitles the tools are asked for. */
-class SubtitleToolsRequest(val film: String, val name: String?)
+/** A film from the library whose subtitles the tools are asked for; [extract], to write an embedded one into a file. */
+class SubtitleToolsRequest(val film: String, val name: String?, val extract: Boolean = false)
 
 /**
- * "Subtitle tools…" in a film's menu in the library (S-708): the request is made here and
- * answered by [SubtitleToolsHost], which the app's window shows above its screens. The library
- * lists no subtitle files, so the film's folder is read for them when the window opens.
+ * "Subtitle tools…" in a film's menu in the library (S-708), and "Extract embedded subtitles…":
+ * the request is made here and answered by [SubtitleToolsHost], which the app's window shows
+ * above its screens. The library lists no subtitle files, so the film's folder is read for them
+ * when the window opens, and the film's own tracks are listed beside them.
  */
 object SubtitleToolsLauncher {
     // made in the global snapshot: first read inside a window's composition
     var request by Snapshot.global { mutableStateOf<SubtitleToolsRequest?>(null) }
         private set
 
-    fun open(film: Uri, name: String? = null) {
-        request = SubtitleToolsRequest(film.toString(), name)
+    fun open(film: Uri, name: String? = null, extract: Boolean = false) {
+        request = SubtitleToolsRequest(film.toString(), name, extract)
     }
 
     fun clear() {
@@ -88,18 +91,24 @@ fun SubtitleToolsHost() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val controller = remember(context, scope) {
+        val io = DocumentSubtitleToolsIo(context.applicationContext)
         SubtitleToolsController(
-            DocumentSubtitleToolsIo(context.applicationContext),
+            io,
             scope,
             context.getString(R.string.nag_subtools_edited_word),
             // S-710: the offline translation, into a new file beside the original
             translation = SubtitleTranslateController(WorkTranslationService(context.applicationContext), scope, Locale.getDefault().language),
+            // the film's embedded subtitles, written into new files beside it
+            extraction = SubtitleExtractController(WorkExtractService(context.applicationContext), io, scope),
         )
     }
     LaunchedEffect(request) {
         val film = Uri.parse(request.film)
-        val files = withContext(Dispatchers.IO) { toolsFiles(context.applicationContext, film, emptyList()) }
-        controller.open(files)
+        val app = context.applicationContext
+        val (files, name) = withContext(Dispatchers.IO) {
+            toolsFiles(app, film, emptyList()) to (request.name?.takeIf { it.isNotBlank() } ?: displayName(app.contentResolver, film) ?: film.lastPathSegment.orEmpty())
+        }
+        controller.open(files, film = ToolsFile(request.film, name), extract = request.extract)
     }
     SubtitleToolsWindow(controller, onClose = {
         controller.close()
@@ -129,6 +138,18 @@ fun SubtitleToolsWindow(controller: SubtitleToolsController, onClose: () -> Unit
         if (pick != null) {
             beforePicker()
             if (runCatching { creator.launch(pick) }.isFailure) controller.savedTo(null)
+        }
+    }
+    // "save elsewhere" of an extracted subtitle file
+    val extraction = controller.extraction
+    val copier = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ANY_FILE)) { uri ->
+        extraction?.savedElsewhere(uri?.toString())
+    }
+    val copyName = extraction?.state?.pickName
+    LaunchedEffect(copyName) {
+        if (copyName != null) {
+            beforePicker()
+            if (runCatching { copier.launch(copyName) }.isFailure) extraction?.savedElsewhere(null)
         }
     }
     // the line playing is marked in the editor as the film goes

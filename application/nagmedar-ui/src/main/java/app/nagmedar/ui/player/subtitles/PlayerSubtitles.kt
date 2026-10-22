@@ -16,6 +16,8 @@ import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.DropPlan
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.planDrop
+import app.nagmedar.ui.player.subtitles.extract.SubtitleExtractController
+import app.nagmedar.ui.player.subtitles.extract.WorkExtractService
 import app.nagmedar.ui.player.subtitles.tools.DocumentSubtitleToolsIo
 import app.nagmedar.ui.player.subtitles.tools.SubtitleFormat
 import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsController
@@ -73,12 +75,16 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
      * The subtitle tools (S-708), over the video: the film's subtitle files cleaned, converted and
      * edited into new files, or translated offline (S-710) and shown with the original.
      */
-    val tools = SubtitleToolsController(
-        DocumentSubtitleToolsIo(activity.applicationContext),
-        scope,
-        activity.getString(R.string.nag_subtools_edited_word),
-        translation = SubtitleTranslateController(WorkTranslationService(activity.applicationContext), scope, Locale.getDefault().language),
-    )
+    val tools = DocumentSubtitleToolsIo(activity.applicationContext).let { io ->
+        SubtitleToolsController(
+            io,
+            scope,
+            activity.getString(R.string.nag_subtools_edited_word),
+            translation = SubtitleTranslateController(WorkTranslationService(activity.applicationContext), scope, Locale.getDefault().language),
+            // the film's embedded subtitles, written into new files beside it
+            extraction = SubtitleExtractController(WorkExtractService(activity.applicationContext), io, scope),
+        )
+    }
 
     /** "Generate subtitles…" (S-709): the film's speech transcribed on the device. */
     val whisper = WhisperController(activity.applicationContext, scope)
@@ -230,19 +236,26 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
      * beside the film, SRT, WebVTT and ASS/SSA) in the tools' window, with the film itself at hand
      * for the editor: its position, going to a line, and the saved file shown at once.
      */
-    fun openTools(tab: ToolsTab = ToolsTab.Clean) {
+    fun openTools(tab: ToolsTab = ToolsTab.Clean, extract: Boolean = false) {
         val service = activity.service ?: return
-        val video = service.currentMediaWrapper?.uri ?: return
+        val media = service.currentMediaWrapper ?: return
+        val video = media.uri ?: return
         val context = activity.applicationContext
         val loaded = subtitleFiles()
         scope.launch {
-            val files = withContext(Dispatchers.IO) { toolsFiles(context, video, loaded) }
-            tools.open(files, playback(), tab)
+            val (files, name) = withContext(Dispatchers.IO) {
+                toolsFiles(context, video, loaded) to (displayName(context.contentResolver, video) ?: media.fileName ?: video.lastPathSegment.orEmpty())
+            }
+            // the film's own subtitle tracks are listed beside its files
+            tools.open(files, playback(), tab, film = ToolsFile(video.toString(), name), extract = extract)
         }
     }
 
     /** "Translate subtitles…" (S-710): the tools on their translation tab. */
     fun openTranslation() = openTools(ToolsTab.Translate)
+
+    /** "Extract embedded subtitles…": the tools on the film's own subtitle tracks, one to write into a new file. */
+    fun openExtraction() = openTools(extract = true)
 
     /** The film as the editor drives it: its clock is the subtitles' (the film's less their delay). */
     private fun playback() = object : ToolsPlayback {

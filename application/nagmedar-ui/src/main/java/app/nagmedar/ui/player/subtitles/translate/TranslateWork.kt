@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 import java.io.File
 import java.io.IOException
@@ -65,6 +66,9 @@ object TranslationJobs {
     internal const val KEY_NAME = "name"
     internal const val KEY_BESIDE = "beside"
     internal const val KEY_PROBLEM = "problem"
+
+    /** The translation Android's time limit ended (WorkManager tells it only as cancelled); this device's, a backup leaves it out. */
+    const val KEY_TIMED_OUT = "nagmedar_translate_timed_out"
 
     fun modelWork(model: TranslationModel): String = MODEL_WORK + model.id
 
@@ -179,6 +183,9 @@ enum class JobProblem(val key: String) {
     NoEngine("engine"),
     WriteFailed("write"),
     Failed("failed"),
+
+    /** Android's time limit for a foreground job ended it. */
+    Timeout("timeout"),
     ;
 
     companion object {
@@ -253,8 +260,9 @@ class ModelDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
  * the model in batches, its times as they were; written as a NEW SRT file beside the original
  * (or, where the app may not write there, in its own subtitles folder). The original is not
  * touched. A Cancel stops it between two batches and nothing is written. If Android stops it
- * (the app's process, a foreground job's time limit), WorkManager starts it again from the
- * beginning, with its copy of the file; a notification tells what came of it at the end.
+ * (the app's process), WorkManager starts it again from the beginning, with its copy of the file;
+ * if Android's time limit for a foreground job ends it, it is stopped for good (again it would
+ * only meet the limit) and says so. A notification tells what came of it at the end.
  */
 class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     private var shownAt = 0L
@@ -268,11 +276,12 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
             finished(result)
             return result
         } catch (e: CancellationException) {
-            // stopped by Android rather than cancelled: the job runs again and needs its copy
-            again = stopReason != WorkInfo.STOP_REASON_CANCELLED_BY_APP && stopReason != WorkInfo.STOP_REASON_UNKNOWN
             if (TimeLimit.reached(this)) {
-                TranslationJobs.channel(applicationContext)
-                TimeLimit.tell(applicationContext, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_time_limit_translate)
+                // the limit would only be met again: not taken up again, and that is said
+                timedOut()
+            } else {
+                // stopped by Android rather than cancelled: the job runs again and needs its copy
+                again = stopReason != WorkInfo.STOP_REASON_CANCELLED_BY_APP && stopReason != WorkInfo.STOP_REASON_UNKNOWN
             }
             throw e
         } finally {
@@ -301,6 +310,15 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
             .build()
         // without the permission the tools' window says it all
         runCatching { NotificationManagerCompat.from(context).notify(id.hashCode(), notification) }
+    }
+
+    /** Android's time limit for a foreground job ended it: it is not taken up again, and that is said. */
+    private fun timedOut() {
+        val context = applicationContext
+        Settings.getInstance(context).edit().putString(TranslationJobs.KEY_TIMED_OUT, id.toString()).apply()
+        runCatching { WorkManager.getInstance(context).cancelWorkById(id) }
+        TranslationJobs.channel(context)
+        TimeLimit.tell(context, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_translate_timeout)
     }
 
     private suspend fun run(source: File): Result {

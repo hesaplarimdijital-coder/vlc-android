@@ -1283,7 +1283,13 @@ private fun PanelContent(
                                     subtitles.files.onlineFilm()?.let { film -> search.open(film, onlineLanguages(locale)) }
                                 }
                             },
-                            tools = { SubtitleToolsSection(onOpen = { subtitles.files.openTools() }, onTranslate = subtitles.files::openTranslation) },
+                            tools = {
+                                SubtitleToolsSection(
+                                    onOpen = { subtitles.files.openTools() },
+                                    onTranslate = subtitles.files::openTranslation,
+                                    onExtract = subtitles.files::openExtraction,
+                                )
+                            },
                             generate = {
                                 val status by rememberWhisperStatus()
                                 WhisperSection(status, onOpen = subtitles.files::openWhisper, onStop = { WhisperJobs.cancel(activity) })
@@ -1566,6 +1572,8 @@ internal class ActivityPlayerSource(
     override fun generateSubtitles() = subtitles.openWhisper()
 
     override fun translateSubtitles() = subtitles.openTranslation()
+
+    override fun extractEmbeddedSubtitles() = subtitles.openExtraction()
 
     override fun toggleSecondarySubtitles() = toggleSecondary(activity, dual)
 

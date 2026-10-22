@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.videolan.tools.Settings
 import java.util.UUID
 
 /** A model as the window shows it (S-710): not here, coming, here, or why it did not come. */
@@ -309,21 +310,24 @@ class WorkTranslationService(context: Context) : TranslationService {
 
     override fun job(): Flow<JobInfo?> {
         val work = runCatching { WorkManager.getInstance(app) }.getOrNull() ?: return flowOf(null)
+        val prefs = Settings.getInstance(app)
         return work.getWorkInfosForUniqueWorkFlow(TranslationJobs.TRANSLATE_WORK).map { infos ->
             val info = infos.lastOrNull() ?: return@map null
             val output = info.outputData
             val progress = info.progress
             val uri = output.getString(TranslationJobs.KEY_URI)
+            // Android's time limit ended it: WorkManager tells it as cancelled
+            val timedOut = info.state == WorkInfo.State.CANCELLED && info.id.toString() == prefs.getString(TranslationJobs.KEY_TIMED_OUT, null)
             JobInfo(
                 id = info.id.toString(),
                 finished = info.state.isFinished,
                 succeeded = info.state == WorkInfo.State.SUCCEEDED,
-                cancelled = info.state == WorkInfo.State.CANCELLED,
+                cancelled = info.state == WorkInfo.State.CANCELLED && !timedOut,
                 done = progress.getInt(TranslationJobs.KEY_DONE, 0),
                 total = if (info.state.isFinished) output.getInt(TranslationJobs.KEY_TOTAL, 0) else progress.getInt(TranslationJobs.KEY_TOTAL, 0),
                 name = progress.getString(TranslationJobs.KEY_NAME).orEmpty(),
                 saved = uri?.let { SavedSubtitle(it, output.getString(TranslationJobs.KEY_NAME).orEmpty(), output.getBoolean(TranslationJobs.KEY_BESIDE, false)) },
-                problem = output.problem(),
+                problem = if (timedOut) JobProblem.Timeout else output.problem(),
             )
         }
     }

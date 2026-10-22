@@ -180,6 +180,7 @@ internal fun problemText(problem: JobProblem): Int = when (problem) {
     JobProblem.NoEngine -> R.string.nag_translate_no_engine
     JobProblem.WriteFailed -> R.string.nag_translate_write_failed
     JobProblem.Failed -> R.string.nag_translate_failed
+    JobProblem.Timeout -> R.string.nag_translate_timeout
 }
 
 /** "English → Turkish" in the interface's language. */
