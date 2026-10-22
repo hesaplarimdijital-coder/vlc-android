@@ -6,10 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.nagmedar.lab.AudioTech
+import app.nagmedar.lab.CompatibilityTrack
+import app.nagmedar.lab.CompatibilityTracks
 import app.nagmedar.lab.DolbyVisionMode
+import app.nagmedar.lab.EncodeCodec
+import app.nagmedar.lab.EncodeSpec
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.lab.PlannedStream
 import app.nagmedar.lab.RemuxPlan
+import app.nagmedar.lab.StreamFidelity
 import app.nagmedar.lab.StreamRef
 import app.nagmedar.lab.StreamType
 import app.nagmedar.ui.library.mainAudio
@@ -72,8 +77,8 @@ enum class SuggestionKind {
     /** The track a player starts with is one the device does not play: another becomes the default and goes first. */
     DefaultAudio,
 
-    /** Not one track the device plays: an added compatibility track would be needed (the original stays). */
-    NoPlayableAudio,
+    /** Tracks the device does not play: a compatibility track (S-1207) beside each, the originals kept. */
+    Compatibility,
 
     /** Subtitles the device does not show: they may be dropped. */
     DropSubtitles,
@@ -87,6 +92,8 @@ data class PlanSuggestion(val kind: SuggestionKind, val subject: String, val tar
 @Immutable
 data class PlanOptions(
     val convertDolbyVision: Boolean = true,
+    /** S-1207: a compatibility track beside every audio track the device does not play. */
+    val addCompatibility: Boolean = true,
     val fixDefaultAudio: Boolean = true,
     val dropUnsupportedSubtitles: Boolean = false,
     val chapters: Boolean = true,
@@ -104,8 +111,49 @@ data class PlanSummary(
     val lossless: Int,
     val metadataChanged: Int,
     val lossy: Int,
+    /** S-1207: the compatibility tracks added, and how many of them lose nothing (LPCM). */
+    val added: Int = 0,
+    val addedLossless: Int = 0,
 ) {
-    val streams: Int get() = 1 + audioKept + subtitlesKept
+    val streams: Int get() = 1 + audioKept + subtitlesKept + added
+}
+
+/**
+ * S-1207's compatibility track in the planner: the audio track [source] ([track], the probe's)
+ * encoded again beside its original, which stays: its codec, bitrate, a stereo downmix, whether
+ * the device starts with it. [fidelity] says what it is: "Kayıplı (eklenen iz)" for E-AC-3 and
+ * AC-3, "Kayıpsız (eklenen iz)" for LPCM with every channel.
+ */
+@Stable
+class PlanAddedTrack(val source: StreamRef, val track: AudioTech, initial: EncodeSpec) {
+    var codec by mutableStateOf(initial.codec)
+        private set
+    var bitrateKbps by mutableStateOf(initial.bitrateKbps)
+    var stereo by mutableStateOf(initial.channels == 2)
+    var makeDefault by mutableStateOf(initial.makeDefault)
+
+    val spec: EncodeSpec
+        get() = EncodeSpec(codec, bitrateKbps.takeIf { codec != EncodeCodec.LPCM }, if (stereo) 2 else null, makeDefault)
+
+    val fidelity: StreamFidelity get() = if (spec.lossless) StreamFidelity.AddedLossless else StreamFidelity.AddedLossy
+
+    /** The bitrates [codec] is offered at, kbps; none for LPCM. */
+    val bitrates: List<Int>
+        get() = when (codec) {
+            EncodeCodec.EAC3 -> listOf(256, 448, 640, 1024)
+            EncodeCodec.AC3 -> listOf(256, 448, 640)
+            EncodeCodec.LPCM -> emptyList()
+        }
+
+    /** Another codec: its bitrate kept where it takes it, else the one this source gets by default. */
+    fun changeCodec(next: EncodeCodec) {
+        codec = next
+        if (next == EncodeCodec.LPCM) return
+        val current = bitrateKbps
+        bitrateKbps = if (current != null && current in bitrates) current else CompatibilityTracks.eac3For(track, makeDefault).bitrateKbps?.coerceAtMost(bitrates.last())
+    }
+
+    fun compatibilityTrack(): CompatibilityTrack = CompatibilityTrack(source, track, spec)
 }
 
 /**
@@ -125,6 +173,8 @@ class PlanDraft(
     subtitles: List<SourceTrack>,
     /** The target device's name, for the suggestions' words. */
     val device: String = "",
+    /** How an added track is titled in the output, in the interface's language ("Uyumluluk izi (E-AC-3 5.1)"). */
+    private val addedTitle: (CompatibilityTrack) -> String = { it.spec.describe(it.track) },
 ) {
     var audio by mutableStateOf(audio.map(::PlanTrack))
         private set
@@ -137,11 +187,42 @@ class PlanDraft(
     var outputName by mutableStateOf("")
 
     /**
-     * The compatibility tracks of S-1207 (a source track encoded beside its original, its
-     * [PlannedStream.encode] set), each written right after its original. None until the
-     * engine encodes: the planner's "Ek ses izi" stays off.
+     * The compatibility tracks of S-1207 (a source audio track encoded beside its original),
+     * each written right after its original; the device profile's suggestion fills them in
+     * ([CompatibilityTracks.suggest]), the user adds, changes and removes them.
      */
-    var compatibility by mutableStateOf(emptyList<PlannedStream>())
+    var added by mutableStateOf(emptyList<PlanAddedTrack>())
+        private set
+
+    /** What the device profile suggests adding, for its suggestion's Apply and Undo. */
+    private var suggestedAdded: List<CompatibilityTrack> = emptyList()
+
+    /** A compatibility track beside the audio track [source]: [spec], or E-AC-3 as the source's channels ask. */
+    fun addCompatibility(source: StreamRef, spec: EncodeSpec? = null) {
+        val track = tech.audio.getOrNull(source.ordinal) ?: return
+        val made = PlanAddedTrack(source, track, spec ?: CompatibilityTracks.eac3For(track, makeDefault = false))
+        added = added + made
+        if (made.makeDefault) setAddedDefault(made, true)
+    }
+
+    fun removeAdded(track: PlanAddedTrack) {
+        added = added - track
+    }
+
+    /**
+     * [track] made the one the device starts with, or not: the engine then writes every other
+     * audio track without the default flag, as the planner shows it.
+     */
+    fun setAddedDefault(track: PlanAddedTrack, on: Boolean) {
+        if (on) {
+            added.forEach { if (it !== track) it.makeDefault = false }
+            audio.forEach { it.isDefault = false }
+        }
+        track.makeDefault = on
+    }
+
+    /** The added tracks beside [source]. */
+    fun addedBeside(source: StreamRef): List<PlanAddedTrack> = added.filter { it.source == source }
 
     var suggestions by mutableStateOf(emptyList<PlanSuggestion>())
         private set
@@ -169,6 +250,8 @@ class PlanDraft(
     /** [track] made the default of its kind or not; a default is one of a kind, the others lose it. */
     fun setDefault(track: PlanTrack, on: Boolean) {
         if (on) tracks(track.ref.type).forEach { if (it !== track) it.isDefault = false }
+        // an added track the device would start with gives way
+        if (on && track.ref.type == StreamType.Audio) added.forEach { it.makeDefault = false }
         track.isDefault = on
     }
 
@@ -211,9 +294,8 @@ class PlanDraft(
         tech.video?.let { streams += PlannedStream(StreamRef(StreamType.Video, 0), it.codec, videoLabel) }
         audio.forEach { track ->
             if (track.kept) streams += planned(track)
-            streams += compatibility.filter { it.source == track.ref }
+            streams += addedBeside(track.ref).map(::planned)
         }
-        streams += compatibility.filter { added -> audio.none { it.ref == added.source } }
         streams += subtitles.filter { it.kept }.map(::planned)
         return RemuxPlan(
             streams = streams,
@@ -222,6 +304,12 @@ class PlanDraft(
             attachments = attachments,
             metadata = metadata,
         )
+    }
+
+    /** An added track as the engine reads it, titled in the interface's language. */
+    private fun planned(track: PlanAddedTrack): PlannedStream {
+        val name = addedTitle(track.compatibilityTrack())
+        return PlannedStream(track.source, track.codec.native, label = name, title = name, encode = track.spec)
     }
 
     /** Only what changed is written: the rest the engine keeps as the source has it. */
@@ -250,6 +338,8 @@ class PlanDraft(
             lossless = steps.count { it == Fidelity.Lossless },
             metadataChanged = steps.count { it == Fidelity.LosslessMetadata },
             lossy = steps.count { it == Fidelity.Lossy },
+            added = added.size,
+            addedLossless = added.count { it.fidelity == StreamFidelity.AddedLossless },
         )
     }
 
@@ -258,11 +348,11 @@ class PlanDraft(
         SuggestionKind.ConvertDolbyVision -> convertDolbyVision
         SuggestionKind.DefaultAudio -> suggestion.refs.firstOrNull()?.let { ref -> audio.firstOrNull { it.ref == ref }?.let { it.kept && it.isDefault } } == true
         SuggestionKind.DropSubtitles -> suggestion.refs.all { ref -> subtitles.none { it.ref == ref && it.kept } }
-        SuggestionKind.NoPlayableAudio -> false
+        SuggestionKind.Compatibility -> suggestion.refs.all { ref -> added.any { it.source == ref } }
     }
 
     /** Whether [suggestion] has something to apply. */
-    fun actionable(suggestion: PlanSuggestion): Boolean = suggestion.kind != SuggestionKind.NoPlayableAudio
+    fun actionable(suggestion: PlanSuggestion): Boolean = true
 
     /** [suggestion] applied ([on]) or taken back. */
     fun apply(suggestion: PlanSuggestion, on: Boolean) {
@@ -282,7 +372,11 @@ class PlanDraft(
                 }
             }
             SuggestionKind.DropSubtitles -> subtitles.filter { it.ref in suggestion.refs }.forEach { it.kept = !on }
-            SuggestionKind.NoPlayableAudio -> Unit
+            SuggestionKind.Compatibility -> if (on) {
+                suggestedAdded.filter { s -> s.source in suggestion.refs && added.none { it.source == s.source } }.forEach { addCompatibility(it.source, it.spec) }
+            } else {
+                added = added.filter { it.source !in suggestion.refs }
+            }
         }
     }
 
@@ -293,9 +387,11 @@ class PlanDraft(
                 SuggestionKind.ConvertDolbyVision -> options.convertDolbyVision
                 SuggestionKind.DefaultAudio -> options.fixDefaultAudio
                 SuggestionKind.DropSubtitles -> options.dropUnsupportedSubtitles
-                SuggestionKind.NoPlayableAudio -> return@forEach
+                SuggestionKind.Compatibility -> options.addCompatibility
             }
-            if (applied(suggestion) != on) apply(suggestion, on)
+            // a compatibility track the device starts with makes a default of another track pointless
+            val skip = suggestion.kind == SuggestionKind.DefaultAudio && on && added.any { it.makeDefault }
+            if (!skip && applied(suggestion) != on) apply(suggestion, on)
         }
         chapters = options.chapters
         attachments = options.attachments
@@ -307,8 +403,10 @@ class PlanDraft(
 
         /**
          * The plan of [tech] for [report]'s device: every track kept as it is, then the findings'
-         * suggestions applied as [options] says (the Dolby Vision conversion, a default track the
-         * device plays); [names] names the tracks as the interface does, [outputName] the file.
+         * suggestions applied as [options] says (the Dolby Vision conversion, a compatibility
+         * track beside every audio track the device does not play, a default track it plays);
+         * [names] names the tracks as the interface does, [title] the added tracks, [outputName]
+         * the file.
          */
         fun of(
             tech: MediaTech,
@@ -317,6 +415,7 @@ class PlanDraft(
             names: ProfileCheck.StreamNames,
             outputName: String,
             options: PlanOptions = PlanOptions(),
+            title: (CompatibilityTrack) -> String = { it.spec.describe(it.track) },
         ): PlanDraft {
             val audio = tech.audio.mapIndexed { i, a ->
                 SourceTrack(StreamRef(StreamType.Audio, i), a.codec, names.audio(a), a.language, a.title, a.isDefault, a.forced, profile?.let { plays(it, a) } ?: true)
@@ -327,9 +426,12 @@ class PlanDraft(
                     profile?.allowsSubtitle(subtitleKey(s)) ?: true,
                 )
             }
-            val draft = PlanDraft(tech, tech.video?.let(names::video).orEmpty(), audio, subtitles, profile?.name.orEmpty())
+            val draft = PlanDraft(tech, tech.video?.let(names::video).orEmpty(), audio, subtitles, profile?.name.orEmpty(), title)
             draft.outputName = outputName
-            draft.suggestions = suggestionsOf(tech, report, audio, subtitles, names)
+            // S-1207: E-AC-3 beside every track the device does not play, the main one's made the default
+            val compatibility = if (report == null || profile == null) emptyList() else CompatibilityTracks.suggest(tech) { plays(profile, it) }
+            draft.suggestedAdded = compatibility
+            draft.suggestions = suggestionsOf(tech, report, audio, subtitles, names, compatibility)
             draft.applyOptions(options)
             return draft
         }
@@ -345,12 +447,21 @@ class PlanDraft(
             audio: List<SourceTrack>,
             subtitles: List<SourceTrack>,
             names: ProfileCheck.StreamNames,
+            compatibility: List<CompatibilityTrack>,
         ): List<PlanSuggestion> {
             if (report == null) return emptyList()
             val found = mutableListOf<PlanSuggestion>()
             val kinds = report.findings.map { it.kind }.toSet()
             if (FindingKind.DolbyVisionDualLayer in kinds && tech.video?.dvProfile == 7) {
                 found += PlanSuggestion(SuggestionKind.ConvertDolbyVision, report.findings.first { it.kind == FindingKind.DolbyVisionDualLayer }.subject)
+            }
+            // first: a compatibility track made the default makes the default suggestion below give way
+            if (compatibility.isNotEmpty()) {
+                found += PlanSuggestion(
+                    SuggestionKind.Compatibility,
+                    compatibility.joinToString(", ") { audio[it.source.ordinal].label },
+                    refs = compatibility.map { it.source },
+                )
             }
             val main = tech.mainAudio()
             val mainIndex = main?.let { tech.audio.indexOf(it) } ?: -1
@@ -364,11 +475,7 @@ class PlanDraft(
                             .thenBy { it.index },
                     )
                     .firstOrNull()?.value
-                found += if (alternative != null) {
-                    PlanSuggestion(SuggestionKind.DefaultAudio, mainTrack.label, alternative.label, listOf(alternative.ref))
-                } else {
-                    PlanSuggestion(SuggestionKind.NoPlayableAudio, mainTrack.label)
-                }
+                if (alternative != null) found += PlanSuggestion(SuggestionKind.DefaultAudio, mainTrack.label, alternative.label, listOf(alternative.ref))
             }
             val hidden = subtitles.filter { !it.playable }
             if (hidden.isNotEmpty()) {

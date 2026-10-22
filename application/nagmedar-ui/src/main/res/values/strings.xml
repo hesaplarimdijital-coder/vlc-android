@@ -1636,7 +1636,6 @@
     <string name="nag_tvlab_plan_suggestions">Suggested for %1$s</string>
     <string name="nag_tvlab_plan_s_dv">%1$s: %2$s plays only single-layer Dolby Vision → converted to profile 8.1.</string>
     <string name="nag_tvlab_plan_s_default">%1$s is the default track and %2$s does not play it → the default becomes %3$s, first among the tracks.</string>
-    <string name="nag_tvlab_plan_s_none">%1$s: %2$s plays none of these tracks. It needs an extra compatibility track; the original stays.</string>
     <string name="nag_tvlab_plan_s_subs">%1$s: %2$s does not show these. Dropping them is lossy for those tracks.</string>
     <string name="nag_tvlab_plan_apply">Apply</string>
     <string name="nag_tvlab_plan_undo">Undo</string>
@@ -1657,7 +1656,7 @@
     <string name="nag_tvlab_plan_not_played">%1$s does not play this track.</string>
     <string name="nag_tvlab_plan_not_shown">%1$s does not show this track.</string>
     <string name="nag_tvlab_plan_extra_audio">Extra audio track</string>
-    <string name="nag_tvlab_plan_extra_audio_text">A compatibility track (E-AC-3 or LPCM) beside the original is not in this version yet. The original track always stays.</string>
+    <string name="nag_tvlab_plan_extra_audio_text">Encoded again beside an original, which stays: E-AC-3 and AC-3 are lossy, LPCM keeps every sample (and is large).</string>
     <string name="nag_tvlab_plan_more">Chapters, attachments and tags</string>
     <string name="nag_tvlab_plan_attachments">Attachments (fonts, covers)</string>
     <string name="nag_tvlab_plan_tags">The file\'s tags</string>
@@ -1818,6 +1817,23 @@
     <string name="nag_tvlab_history_e_stopped">Interrupted: the system stopped the job</string>
     <string name="nag_tvlab_history_e_interrupted">Interrupted</string>
     <string name="nag_tvlab_history_error">Why: %1$s</string>
+    <!-- S-1205 with S-1207: the compatibility tracks in the planner, the batch and the history -->
+    <string name="nag_tvlab_plan_s_compat">%1$s: %2$s does not play these → an E-AC-3 compatibility track goes beside each, the one beside the main track made the default; the originals stay.</string>
+    <string name="nag_tvlab_plan_add_beside">Beside %1$s</string>
+    <string name="nag_tvlab_plan_remove_added">Remove the compatibility track</string>
+    <string name="nag_tvlab_plan_added_lossy">Encoded again from the original, which stays as it was.</string>
+    <string name="nag_tvlab_plan_added_lossless">Every sample of the original, decoded, beside the original, which stays as it was.</string>
+    <string name="nag_tvlab_plan_bitrate">%1$d kbps</string>
+    <string name="nag_tvlab_plan_stereo">Down to stereo</string>
+    <string name="nag_tvlab_plan_added_default">The device starts with it</string>
+    <string name="nag_tvlab_plan_sum_added">%1$s added; the originals stay</string>
+    <string name="nag_tvlab_batch_o_compat">A compatibility track (E-AC-3) beside the audio the device does not play</string>
+    <string name="nag_tvlab_history_added">Added tracks</string>
+    <string name="nag_tvlab_history_added_from">+ beside %1$s</string>
+    <string name="nag_tvlab_history_added_rate">%1$s kHz</string>
+    <string name="nag_tvlab_history_added_frames">%1$s frames decoded, %2$s refused</string>
+    <string name="nag_tvlab_history_added_length">%1$s s long, the source %2$s s</string>
+    <string name="nag_tvlab_history_added_padded">%1$s s of silence for the source\'s gaps</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
     <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>

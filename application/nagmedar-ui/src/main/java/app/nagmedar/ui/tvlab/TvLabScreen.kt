@@ -48,6 +48,7 @@ import app.nagmedar.ui.tvlab.remux.RemuxQueueControl
 import app.nagmedar.ui.tvlab.remux.RemuxQueuePage
 import app.nagmedar.ui.tvlab.remux.RemuxReport
 import app.nagmedar.ui.tvlab.remux.activeJobs
+import app.nagmedar.ui.tvlab.remux.compatibilityTitle
 import app.nagmedar.ui.tvlab.remux.finishedJobs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -197,7 +198,7 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         if (uri == null) return@rememberLauncherForActivityResult
         // the films are read again by the queue's worker, later
         runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-        batch.open(BatchFolder.of(uri.toString()), controller.profile, names)
+        batch.open(BatchFolder.of(uri.toString()), controller.profile, names) { compatibilityTitle(res, it) }
     }
     val batchOutputLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -210,7 +211,8 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         object : RemuxBatchActions {
             override fun chooseFolder() = batchFolderLauncher.launch(null)
 
-            override fun open(folder: BatchFolder) = batch.open(folder, controller.profile, LocalizedStreamNames(context.resources, context.resources.locale()))
+            override fun open(folder: BatchFolder) =
+                batch.open(folder, controller.profile, LocalizedStreamNames(context.resources, context.resources.locale())) { compatibilityTitle(context.resources, it) }
 
             override fun chooseOutput() = batchOutputLauncher.launch(null)
 
@@ -360,7 +362,14 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
                 val tech = controller.tech ?: return
                 val names = LocalizedStreamNames(context.resources, context.resources.locale())
                 val report = checkOf(controller.view(), names)
-                planner = PlanDraft.of(tech, report, controller.profile, names, context.getString(R.string.nag_tvlab_remux_file, base))
+                planner = PlanDraft.of(
+                    tech,
+                    report,
+                    controller.profile,
+                    names,
+                    context.getString(R.string.nag_tvlab_remux_file, base),
+                    title = { compatibilityTitle(context.resources, it) },
+                )
             }
 
             override fun cancelRemux(id: Long) {

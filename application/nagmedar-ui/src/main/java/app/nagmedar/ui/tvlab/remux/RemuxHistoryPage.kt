@@ -214,6 +214,12 @@ private fun Details(job: RemuxJobView) {
                 plan.streams.forEach { Fact(RemuxReport.streamLine(res, it), mono = true) }
             }
         }
+        job.result?.let { result ->
+            val added = RemuxReport.addedLines(res, result, locale)
+            if (added.isNotEmpty()) {
+                Section(stringResource(R.string.nag_tvlab_history_added)) { added.forEach { Fact(it) } }
+            }
+        }
         job.verification?.let { verification ->
             Section(stringResource(R.string.nag_tvlab_history_verification)) {
                 SelectionContainer {

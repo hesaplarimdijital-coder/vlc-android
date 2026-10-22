@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.nagmedar.lab.CompatibilityTrack
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.displayName
@@ -110,15 +111,17 @@ class RemuxBatchController(context: Context, private val scope: CoroutineScope) 
     /** The device profile and the names the plans were made with: the TV Lab's, in the interface's language. */
     private var profile: DeviceProfile? = null
     private var names: ProfileCheck.StreamNames? = null
+    private var addedTitle: (CompatibilityTrack) -> String = { it.spec.describe(it.track) }
     private var job: Job? = null
 
     val available: Boolean get() = NativeLab.available
 
-    /** [folder]'s films listed and probed, against [profile]; what ran before stops. */
-    fun open(folder: BatchFolder, profile: DeviceProfile, names: ProfileCheck.StreamNames) {
+    /** [folder]'s films listed and probed, against [profile]; what ran before stops. [title] names an added track (S-1207). */
+    fun open(folder: BatchFolder, profile: DeviceProfile, names: ProfileCheck.StreamNames, title: (CompatibilityTrack) -> String) {
         job?.cancel()
         this.profile = profile
         this.names = names
+        this.addedTitle = title
         source = folder
         items = emptyList()
         report = null
@@ -244,7 +247,7 @@ class RemuxBatchController(context: Context, private val scope: CoroutineScope) 
             !check.videoKept -> BatchStatus.NeedsEncode
             else -> BatchStatus.Ready
         }
-        item.draft = PlanDraft.of(tech, check, profile, names, context.getString(R.string.nag_tvlab_remux_file, item.name.substringBeforeLast('.')), options)
+        item.draft = PlanDraft.of(tech, check, profile, names, context.getString(R.string.nag_tvlab_remux_file, item.name.substringBeforeLast('.')), options, addedTitle)
         item.included = item.status == BatchStatus.Ready && !item.queued
     }
 

@@ -202,6 +202,7 @@ private fun OptionsCard(batch: RemuxBatchController, device: String) {
         CardTitle(stringResource(R.string.nag_tvlab_batch_default_plan))
         Text(stringResource(R.string.nag_tvlab_batch_default_plan_text, device), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary)
         NagSwitch(options.convertDolbyVision, { batch.changeOptions(options.copy(convertDolbyVision = it)) }, stringResource(R.string.nag_tvlab_batch_o_dv))
+        NagSwitch(options.addCompatibility, { batch.changeOptions(options.copy(addCompatibility = it)) }, stringResource(R.string.nag_tvlab_batch_o_compat))
         NagSwitch(options.fixDefaultAudio, { batch.changeOptions(options.copy(fixDefaultAudio = it)) }, stringResource(R.string.nag_tvlab_batch_o_default_audio))
         NagSwitch(options.dropUnsupportedSubtitles, { batch.changeOptions(options.copy(dropUnsupportedSubtitles = it)) }, stringResource(R.string.nag_tvlab_batch_o_subtitles))
         NagSwitch(options.chapters, { batch.changeOptions(options.copy(chapters = it)) }, stringResource(R.string.nag_tvlab_remux_plan_chapters_title))

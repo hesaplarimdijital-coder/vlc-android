@@ -49,9 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import app.nagmedar.lab.EncodeCodec
+import app.nagmedar.lab.StreamFidelity
 import app.nagmedar.lab.StreamType
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.MenuButton
+import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagIconButton
@@ -59,6 +63,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.ReorderState
+import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.rememberReorderState
@@ -108,6 +113,11 @@ private sealed interface PlanRow {
 
     data class Track(val track: PlanTrack, val position: Int, val count: Int) : PlanRow {
         override val key: Any get() = track.ref.toString()
+    }
+
+    /** S-1207: a compatibility track, under its original. */
+    data class Added(val track: PlanAddedTrack, val index: Int) : PlanRow {
+        override val key: Any get() = "added-${track.source}-$index"
     }
 
     data object ExtraAudio : PlanRow {
@@ -162,7 +172,10 @@ fun RemuxPlannerSurface(
         add(PlanRow.Video)
         if (draft.audio.isNotEmpty()) {
             add(PlanRow.Heading(audioHeading, "h-audio"))
-            draft.audio.forEachIndexed { i, t -> add(PlanRow.Track(t, i, draft.audio.size)) }
+            draft.audio.forEachIndexed { i, t ->
+                add(PlanRow.Track(t, i, draft.audio.size))
+                draft.addedBeside(t.ref).forEach { added -> add(PlanRow.Added(added, draft.added.indexOf(added))) }
+            }
         }
         add(PlanRow.ExtraAudio)
         if (draft.subtitles.isNotEmpty()) {
@@ -178,8 +191,10 @@ fun RemuxPlannerSurface(
         // a track moves among its own kind: the list's other rows are its bounds
         val moved = rows.getOrNull(from) as? PlanRow.Track ?: return@rememberReorderState
         val type = moved.track.ref.type
-        val first = rows.indexOfFirst { it is PlanRow.Track && it.track.ref.type == type }
-        draft.move(type, moved.position, to - first)
+        // the tracks of its kind it passes: the added tracks between them move with their originals
+        fun tracksIn(range: List<PlanRow>) = range.count { it is PlanRow.Track && it.track.ref.type == type }
+        val target = if (to > from) tracksIn(rows.take(to + 1)) - 1 else tracksIn(rows.take(to))
+        draft.move(type, moved.position, target)
     }
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         val narrow = maxWidth < 600.dp
@@ -221,7 +236,8 @@ fun RemuxPlannerSurface(
                         )
                         PlanRow.Video -> VideoStep(draft)
                         is PlanRow.Track -> TrackRow(draft, row, reorder, index, narrow)
-                        PlanRow.ExtraAudio -> ExtraAudio()
+                        is PlanRow.Added -> AddedRow(draft, row.track)
+                        PlanRow.ExtraAudio -> ExtraAudio(draft)
                         PlanRow.More -> MoreStep(draft)
                         PlanRow.Output -> OutputStep(draft)
                         PlanRow.Summary -> SummaryStep(draft)
@@ -320,7 +336,7 @@ private fun SuggestionRow(draft: PlanDraft, suggestion: PlanSuggestion, res: Res
 fun suggestionText(res: Resources, draft: PlanDraft, suggestion: PlanSuggestion): String = when (suggestion.kind) {
     SuggestionKind.ConvertDolbyVision -> res.getString(R.string.nag_tvlab_plan_s_dv, suggestion.subject, draft.device)
     SuggestionKind.DefaultAudio -> res.getString(R.string.nag_tvlab_plan_s_default, suggestion.subject, draft.device, suggestion.target)
-    SuggestionKind.NoPlayableAudio -> res.getString(R.string.nag_tvlab_plan_s_none, suggestion.subject, draft.device)
+    SuggestionKind.Compatibility -> res.getString(R.string.nag_tvlab_plan_s_compat, suggestion.subject, draft.device)
     SuggestionKind.DropSubtitles -> res.getString(R.string.nag_tvlab_plan_s_subs, suggestion.subject, draft.device)
 }
 
@@ -431,14 +447,76 @@ private fun TrackRow(draft: PlanDraft, row: PlanRow.Track, reorder: ReorderState
     }
 }
 
-/** Where the compatibility track of S-1207 is added: not in this version, said so. */
+/** S-1207: a compatibility track beside one of the film's audio tracks, from the menu. */
 @Composable
-private fun ExtraAudio() {
+private fun ExtraAudio(draft: PlanDraft) {
+    val res = resources()
     PlanCard(Modifier.testTag("tvlab-planner-extra-audio")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            NagButton(stringResource(R.string.nag_tvlab_plan_extra_audio), {}, icon = NagIcons.Plus, enabled = false)
+            MenuButton(
+                text = stringResource(R.string.nag_tvlab_plan_extra_audio),
+                entries = {
+                    draft.audio.map { track ->
+                        MenuEntry.Item(res.getString(R.string.nag_tvlab_plan_add_beside, track.source.label), { draft.addCompatibility(track.ref) })
+                    }
+                },
+                icon = NagIcons.Plus,
+                modifier = Modifier.testTag("tvlab-planner-add"),
+            )
             Spacer(Modifier.width(10.dp))
             Text(stringResource(R.string.nag_tvlab_plan_extra_audio_text), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+/**
+ * S-1207: a compatibility track under its original: its title and badge ("Kayıplı (eklenen iz)",
+ * "Kayıpsız (eklenen iz)"), its codec (E-AC-3, AC-3, LPCM) and bitrate, a stereo downmix,
+ * whether the device starts with it; and its removal.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AddedRow(draft: PlanDraft, track: PlanAddedTrack) {
+    val res = resources()
+    val colors = NagTheme.colors
+    val fidelity = track.fidelity
+    PlanCard(Modifier.padding(start = 24.dp).testTag("tvlab-planner-added")) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(NagIcons.Plus, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                res.getString(R.string.nag_tvlab_remux_compat_title, track.spec.describe(track.track)),
+                style = NagTheme.type.bodyStrong,
+                color = colors.text,
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(Modifier.width(8.dp))
+            ToneBadge(stringResource(fidelity.label), if (fidelity == StreamFidelity.AddedLossless) StateTone.Success else StateTone.Warning)
+            NagIconButton(NagIcons.Close, stringResource(R.string.nag_tvlab_plan_remove_added), { draft.removeAdded(track) })
+        }
+        Text(
+            stringResource(if (fidelity == StreamFidelity.AddedLossless) R.string.nag_tvlab_plan_added_lossless else R.string.nag_tvlab_plan_added_lossy),
+            style = NagTheme.type.labelSmall,
+            color = colors.textSecondary,
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SegmentedChoice(
+                options = EncodeCodec.entries.map { it to it.label },
+                selected = track.codec,
+                onSelect = { track.changeCodec(it) },
+            )
+            if (track.bitrates.isNotEmpty()) {
+                MenuButton(
+                    text = res.getString(R.string.nag_tvlab_plan_bitrate, track.bitrateKbps ?: track.bitrates.last()),
+                    entries = {
+                        track.bitrates.map { kbps ->
+                            MenuEntry.Item(res.getString(R.string.nag_tvlab_plan_bitrate, kbps), { track.bitrateKbps = kbps }, checked = kbps == track.bitrateKbps)
+                        }
+                    },
+                )
+            }
+            if (track.track.channels > 2) NagCheckbox(track.stereo, { track.stereo = it }, stringResource(R.string.nag_tvlab_plan_stereo))
+            NagCheckbox(track.makeDefault, { draft.setAddedDefault(track, it) }, stringResource(R.string.nag_tvlab_plan_added_default))
         }
     }
 }
@@ -504,6 +582,9 @@ fun summaryLines(res: Resources, draft: PlanDraft, summary: PlanSummary = draft.
         summary.audioDropped.takeIf { it > 0 }?.let { res.getQuantityString(R.plurals.nag_tvlab_plan_audio_count, it, it) },
         summary.subtitlesDropped.takeIf { it > 0 }?.let { res.getQuantityString(R.plurals.nag_tvlab_plan_subtitle_count, it, it) },
     ).takeIf { it.isNotEmpty() }?.let { res.getString(R.string.nag_tvlab_plan_sum_dropped, it.joinToString(", ")) },
+    summary.added.takeIf { it > 0 }?.let {
+        res.getString(R.string.nag_tvlab_plan_sum_added, res.getQuantityString(R.plurals.nag_tvlab_remux_plan_compat, it, it))
+    },
     res.getString(R.string.nag_tvlab_remux_plan_dv).takeIf { draft.convertDolbyVision && draft.canConvert },
     res.getString(R.string.nag_tvlab_plan_sum_steps, summary.lossless, summary.metadataChanged, summary.lossy),
     res.getString(R.string.nag_tvlab_plan_sum_output, draft.outputFileName).takeIf { draft.outputNameValid },

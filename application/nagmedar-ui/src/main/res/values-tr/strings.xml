@@ -1608,7 +1608,6 @@
     <string name="nag_tvlab_plan_suggestions">Öneriler: %1$s</string>
     <string name="nag_tvlab_plan_s_dv">%1$s: %2$s yalnızca tek katmanlı Dolby Vision oynatır → profil 8.1\'e çevrilir.</string>
     <string name="nag_tvlab_plan_s_default">%1$s varsayılan iz ve %2$s bu izi çalmaz → varsayılan %3$s olur, izlerin başına geçer.</string>
-    <string name="nag_tvlab_plan_s_none">%1$s: bu izlerin hiçbirini %2$s çalmaz. Ek bir uyumluluk izi gerekir; orijinal iz kalır.</string>
     <string name="nag_tvlab_plan_s_subs">%1$s: %2$s bunları göstermez. Çıkarmak bu izler için kayıplıdır.</string>
     <string name="nag_tvlab_plan_apply">Uygula</string>
     <string name="nag_tvlab_plan_undo">Geri al</string>
@@ -1629,7 +1628,7 @@
     <string name="nag_tvlab_plan_not_played">%1$s bu izi çalmaz.</string>
     <string name="nag_tvlab_plan_not_shown">%1$s bu izi göstermez.</string>
     <string name="nag_tvlab_plan_extra_audio">Ek ses izi</string>
-    <string name="nag_tvlab_plan_extra_audio_text">Orijinal izin yanına uyumluluk izi (E-AC-3 ya da LPCM) eklemek bu sürümde henüz yok. Orijinal iz her zaman kalır.</string>
+    <string name="nag_tvlab_plan_extra_audio_text">Bir orijinalin yanına yeniden kodlanır, orijinal kalır: E-AC-3 ve AC-3 kayıplıdır, LPCM her örneği korur (ve büyüktür).</string>
     <string name="nag_tvlab_plan_more">Bölümler, ekler ve etiketler</string>
     <string name="nag_tvlab_plan_attachments">Ekler (yazı tipleri, kapaklar)</string>
     <string name="nag_tvlab_plan_tags">Dosyanın etiketleri</string>
@@ -1790,6 +1789,23 @@
     <string name="nag_tvlab_history_e_stopped">Kesildi: sistem işi durdurdu</string>
     <string name="nag_tvlab_history_e_interrupted">Kesildi</string>
     <string name="nag_tvlab_history_error">Neden: %1$s</string>
+    <!-- S-1205 with S-1207: the compatibility tracks in the planner, the batch and the history -->
+    <string name="nag_tvlab_plan_s_compat">%1$s: %2$s bunları çalmaz → her birinin yanına E-AC-3 uyumluluk izi eklenir, ana izin yanındaki varsayılan olur; orijinaller kalır.</string>
+    <string name="nag_tvlab_plan_add_beside">%1$s yanına</string>
+    <string name="nag_tvlab_plan_remove_added">Uyumluluk izini kaldır</string>
+    <string name="nag_tvlab_plan_added_lossy">Orijinalden yeniden kodlanır; orijinal olduğu gibi kalır.</string>
+    <string name="nag_tvlab_plan_added_lossless">Orijinalin çözülmüş her örneği, orijinalin yanında; orijinal olduğu gibi kalır.</string>
+    <string name="nag_tvlab_plan_bitrate">%1$d kbps</string>
+    <string name="nag_tvlab_plan_stereo">Stereoya indir</string>
+    <string name="nag_tvlab_plan_added_default">Cihaz bununla başlasın</string>
+    <string name="nag_tvlab_plan_sum_added">%1$s eklenir; orijinaller kalır</string>
+    <string name="nag_tvlab_batch_o_compat">Cihazın çalmadığı sesin yanına uyumluluk izi (E-AC-3)</string>
+    <string name="nag_tvlab_history_added">Eklenen izler</string>
+    <string name="nag_tvlab_history_added_from">+ %1$s yanına</string>
+    <string name="nag_tvlab_history_added_rate">%1$s kHz</string>
+    <string name="nag_tvlab_history_added_frames">%1$s kare çözüldü, %2$s reddedildi</string>
+    <string name="nag_tvlab_history_added_length">%1$s sn, kaynak %2$s sn</string>
+    <string name="nag_tvlab_history_added_padded">Kaynağın boşluklarına %1$s sn sessizlik</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performans</string>
     <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>

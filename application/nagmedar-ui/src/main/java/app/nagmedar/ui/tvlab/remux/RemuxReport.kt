@@ -4,6 +4,7 @@ import android.content.res.Resources
 import app.nagmedar.data.RemuxJobError
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.lab.PlannedStream
+import app.nagmedar.lab.RemuxResult
 import app.nagmedar.lab.RemuxVerification
 import app.nagmedar.ui.R
 import app.nagmedar.ui.library.sizeLabel
@@ -51,7 +52,45 @@ object RemuxReport {
     ).joinToString(" · ")
 
     /** A stream of the plan: "a:1 · DTS-HD MA 5.1 · Türkçe", with what the plan sets. */
-    fun streamLine(res: Resources, stream: PlannedStream): String = listOfNotNull(
+    fun streamLine(res: Resources, stream: PlannedStream): String {
+        val encode = stream.encode ?: return copiedLine(res, stream)
+        // S-1207: an added track, beside its original
+        return listOfNotNull(
+            res.getString(R.string.nag_tvlab_history_added_from, stream.source.toString()),
+            stream.label.ifEmpty { encode.codec.label },
+            encode.bitrateKbps?.let { res.getString(R.string.nag_tvlab_plan_bitrate, it) },
+            res.getString(R.string.nag_tvlab_history_set_default).takeIf { encode.makeDefault },
+            res.getString(stream.fidelity.label),
+        ).joinToString(" · ")
+    }
+
+    /**
+     * S-1207: what the engine made of each added track: from what into what, its channels, rate
+     * and bitrate, the frames decoded and refused, how long it came out against its source, the
+     * silence put into the source's gaps.
+     */
+    fun addedLines(res: Resources, result: RemuxResult, locale: Locale): List<String> {
+        val number = NumberFormat.getIntegerInstance(locale)
+        val seconds = NumberFormat.getNumberInstance(locale).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }
+        return result.streams.mapNotNull { stream ->
+            val e = stream.encoded ?: return@mapNotNull null
+            listOfNotNull(
+                listOfNotNull(stream.source?.toString(), e.sourceCodec.takeIf { it.isNotEmpty() }).joinToString(" ") + " → " + stream.codec,
+                e.layout.takeIf { it.isNotEmpty() },
+                e.sampleRate.takeIf { it > 0 }?.let { res.getString(R.string.nag_tvlab_history_added_rate, NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }.format(it / 1000.0)) },
+                e.bitRate.takeIf { it > 0 }?.let { res.getString(R.string.nag_tvlab_plan_bitrate, (it / 1000).toInt()) },
+                res.getString(R.string.nag_tvlab_history_added_frames, number.format(e.framesDecoded), number.format(e.decodeErrors)),
+                res.getString(R.string.nag_tvlab_history_added_length, seconds.format(e.seconds), seconds.format(e.sourceSeconds)),
+                e.paddedSeconds.takeIf { it > 0 }?.let { res.getString(R.string.nag_tvlab_history_added_padded, seconds.format(it)) },
+            ).joinToString(" · ")
+        }
+    }
+
+    /** A copied stream: its name, with what the plan set. */
+    private fun copiedLine(res: Resources, stream: PlannedStream): String = listOfNotNull(
         stream.source.toString(),
         stream.label.ifEmpty { stream.codec },
         stream.language?.let { res.getString(R.string.nag_tvlab_history_set_language, it) },
@@ -128,6 +167,13 @@ object RemuxReport {
         job.plan?.let { plan ->
             line(res.getString(R.string.nag_tvlab_history_plan, planLine(res, job)))
             plan.streams.forEach { line("  " + streamLine(res, it)) }
+        }
+        job.result?.let { result ->
+            val added = addedLines(res, result, locale)
+            if (added.isNotEmpty()) {
+                line(res.getString(R.string.nag_tvlab_history_added))
+                added.forEach { line("  $it") }
+            }
         }
         job.verification?.let { verification ->
             line(res.getString(R.string.nag_tvlab_history_verification))
