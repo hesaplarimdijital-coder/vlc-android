@@ -2973,6 +2973,7 @@
     <plurals name="nag_conv_sum_channels">
         <item quantity="one">%d kanal</item>
         <item quantity="other">%d kanal</item>
+    </plurals>
 
     <!-- S-1504: the user guide and the shortcut card -->
     <string name="nag_guide_title">Kullanıcı rehberi</string>
