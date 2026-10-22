@@ -126,6 +126,9 @@ enum class SnapshotFailure {
 
     /** Below Android 7 the picture cannot be copied. */
     Unsupported,
+
+    /** Before Android 10 the default folder needs the storage permission, and it was refused. */
+    Permission,
 }
 
 /** A screenshot taken, or why not, as the card over the video tells it. */

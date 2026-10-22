@@ -3405,4 +3405,5 @@
     <string name="nag_ra_code_title">Tek seferlik kod</string>
     <string name="nag_ra_code_hint">Bir tarayıcı bağlanmak istiyor. Bu kodu onun sayfasına yazın; 60 sn geçerlidir.</string>
     <string name="nag_ra_code_not_me">Ben değilim</string>
+    <string name="nag_snap_permission">Varsayılan klasöre kaydetmek için depolama izni gerekiyor. İstendiğinde izin verin ya da Ayarlar › Ekran görüntüleri\'nden bir klasör seçin.</string>
 </resources>

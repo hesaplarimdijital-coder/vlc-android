@@ -3,6 +3,7 @@ package app.nagmedar.ui.onboarding
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -10,6 +11,7 @@ import android.os.StatFs
 import android.os.storage.StorageManager
 import android.provider.Settings
 import androidx.compose.runtime.Immutable
+import androidx.core.content.ContextCompat
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.resources.ACTION_DISCOVER
 import org.videolan.resources.AndroidDevices
@@ -21,7 +23,6 @@ import org.videolan.tools.KEY_MEDIALIBRARY_SCAN
 import org.videolan.tools.ML_SCAN_ON
 import org.videolan.tools.putSingle
 import org.videolan.vlc.MediaParsingService
-import org.videolan.vlc.util.Permissions
 
 /** Media access for the first-run flow (S-309): runtime permissions, all-files access, notifications. */
 object MediaAccess {
@@ -34,7 +35,15 @@ object MediaAccess {
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
-    fun hasMediaAccess(context: Context): Boolean = Permissions.canReadStorage(context, skipCache = true)
+    /** Video or audio may be read: the media permissions (either of them), or all-files access. */
+    fun hasMediaAccess(context: Context): Boolean = when {
+        Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager() -> true
+        Build.VERSION.SDK_INT >= 33 -> granted(context, Manifest.permission.READ_MEDIA_VIDEO) || granted(context, Manifest.permission.READ_MEDIA_AUDIO)
+        else -> granted(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+
+    private fun granted(context: Context, permission: String): Boolean =
+        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     /** Android 11 and later ask for all-files access on a system settings page. */
     val canAskAllFiles: Boolean get() = Build.VERSION.SDK_INT >= 30
@@ -53,7 +62,7 @@ object MediaAccess {
     val notificationPermission: String?
         get() = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.POST_NOTIFICATIONS else null
 
-    fun hasNotifications(context: Context): Boolean = Permissions.canSendNotifications(context)
+    fun hasNotifications(context: Context): Boolean = notificationPermission?.let { granted(context, it) } ?: true
 }
 
 /** A place the medialibrary can scan: this device's shared storage or a removable drive. */

@@ -193,6 +193,7 @@ private fun Failed(failed: SnapshotOutcome.Failed, onChooseFolder: () -> Unit) {
                     SnapshotFailure.Folder -> R.string.nag_snap_folder_failed
                     SnapshotFailure.Write -> R.string.nag_snap_write_failed
                     SnapshotFailure.Unsupported -> R.string.nag_snap_unsupported
+                    SnapshotFailure.Permission -> R.string.nag_snap_permission
                 },
             ),
             style = NagTheme.type.labelSmall,

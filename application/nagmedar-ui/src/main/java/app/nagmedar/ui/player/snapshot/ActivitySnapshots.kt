@@ -18,6 +18,8 @@ import android.view.SurfaceView
 import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.IntRect
@@ -35,7 +37,6 @@ import kotlinx.coroutines.withContext
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.tools.Settings
 import org.videolan.vlc.gui.video.VideoPlayerActivity
-import org.videolan.vlc.util.Permissions
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.coroutines.resume
@@ -61,7 +62,7 @@ internal class SnapshotController(private val activity: VideoPlayerActivity) {
         if (settings.folder == null && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
             ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         ) {
-            Permissions.askWriteStoragePermission(activity, false) { take() }
+            askStorage()
             return
         }
         job = activity.lifecycleScope.launch {
@@ -80,6 +81,16 @@ internal class SnapshotController(private val activity: VideoPlayerActivity) {
                 state.saving = false
             }
         }
+    }
+
+    /** The system's own prompt for the storage permission; refused, the card says why nothing was saved. */
+    private fun askStorage() {
+        var launcher: ActivityResultLauncher<String>? = null
+        launcher = activity.activityResultRegistry.register(PERMISSION_KEY, ActivityResultContracts.RequestPermission()) { granted ->
+            launcher?.unregister()
+            if (granted) take() else state.outcome = SnapshotOutcome.Failed(SnapshotFailure.Permission)
+        }
+        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
     /** Opens the screenshot in the gallery, or what else shows pictures. */
@@ -238,6 +249,7 @@ internal class SnapshotController(private val activity: VideoPlayerActivity) {
 
     private companion object {
         const val TAG = "Nagmedar/Snapshot"
+        const val PERMISSION_KEY = "nagmedar-snapshot-storage"
         const val NO_TRACK = "-1"
 
         /** At most 8K for 8-bit pictures; HDR ones (8 bytes a pixel) at most 4K's worth. */

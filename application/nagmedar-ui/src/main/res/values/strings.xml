@@ -3434,4 +3434,5 @@
     <string name="nag_ra_code_title">One-time code</string>
     <string name="nag_ra_code_hint">A browser asks to connect. Type this code on its page; it is valid for 60 s.</string>
     <string name="nag_ra_code_not_me">It is not me</string>
+    <string name="nag_snap_permission">Saving to the default folder needs the storage permission. Give it when asked, or choose a folder in Settings › Screenshots.</string>
 </resources>
