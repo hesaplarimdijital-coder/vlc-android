@@ -3,19 +3,16 @@ package app.nagmedar.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,11 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import app.nagmedar.ui.R
-import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -83,42 +76,6 @@ fun PageHeader(
     }
 }
 
-/** Screen that a later MVP fills in: says what comes and offers the classic interface meanwhile. */
-@Composable
-fun PlaceholderScreen(destination: Destination, onOpenClassic: (() -> Unit)?) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
-    val label = stringResource(destination.label)
-    Column(Modifier.fillMaxSize()) {
-        PageHeader(title = label)
-        Box(Modifier.fillMaxSize().padding(dimens.pagePadding), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.widthIn(max = 420.dp)) {
-                Box(
-                    Modifier.size(64.dp).background(colors.surfaceRaised, RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(destination.icon, contentDescription = null, tint = colors.accentText, modifier = Modifier.size(28.dp))
-                }
-                Spacer(Modifier.height(dimens.gapL))
-                Text(
-                    text = stringResource(R.string.nag_coming_title, label, destination.comingIn ?: ""),
-                    style = NagTheme.type.title,
-                    color = colors.text,
-                    textAlign = TextAlign.Center,
-                )
-                destination.description?.let {
-                    Spacer(Modifier.height(dimens.gapS))
-                    Text(stringResource(it), style = NagTheme.type.body, color = colors.textSecondary, textAlign = TextAlign.Center)
-                }
-                if (onOpenClassic != null) {
-                    Spacer(Modifier.height(dimens.gapL))
-                    NagButton(text = stringResource(R.string.nag_open_classic), onClick = onOpenClassic)
-                }
-            }
-        }
-    }
-}
-
 /** "More": every destination that the current navigation chrome does not show. */
 @Composable
 fun MoreScreen(destinations: List<Destination>, onSelect: (Destination) -> Unit) {
@@ -157,6 +114,5 @@ private fun DestinationRow(destination: Destination, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis)
             }
         }
-        destination.comingIn?.let { Text(it, style = NagTheme.type.mono, color = colors.textTertiary) }
     }
 }

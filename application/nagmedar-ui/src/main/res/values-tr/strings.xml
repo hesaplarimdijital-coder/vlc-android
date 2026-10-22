@@ -291,7 +291,6 @@
     </plurals>
 
     <!-- Yer tutucular -->
-    <string name="nag_coming_title">%1$s %2$s ile geliyor</string>
     <string name="nag_coming_movies">Afişler, teknik bilgiler ve TV uyumluluğuyla filmler.</string>
     <string name="nag_coming_podcasts">Abonelikler, yeni bölümler ve indirmeler.</string>
     <string name="nag_podcasts_description">Abonelikler ve yeni bölümler.</string>
@@ -301,7 +300,6 @@
     <string name="nag_coming_tv_lab">Dosyaları TV\'niz için analiz edin, kalite kaybı olmadan remux edin.</string>
     <string name="nag_coming_convert">Dönüştürme profilleri, işler ve ağda yayın (HLS).</string>
     <string name="nag_coming_downloads">Podcast bölümleri, altyazılar ve diğer indirmeler.</string>
-    <string name="nag_open_classic">Klasik arayüzü aç</string>
 
     <!-- Kütüphane -->
     <string name="nag_continue_watching">İzlemeye devam et</string>
@@ -3329,4 +3327,31 @@
     <string name="nag_play_this_only">Yalnızca bunu oynat</string>
     <string name="nag_device_not_media">Medya dosyası değil</string>
     <string name="nag_device_add_to_section">Kütüphaneye ekle: %1$s</string>
+    <string name="nag_device_folder_added">%1$s kütüphaneye eklendi</string>
+    <!-- Tools › Downloads: podcast episodes, whisper and translation models -->
+    <plurals name="nag_downloads_count">
+        <item quantity="one">%d indirme</item>
+        <item quantity="other">%d indirme</item>
+    </plurals>
+    <string name="nag_downloads_empty_title">İndirilen bir şey yok</string>
+    <string name="nag_downloads_empty_desc">İndirdiğiniz podcast bölümleri ve altyazı araçlarının modelleri burada görünür.</string>
+    <string name="nag_downloads_episodes">Podcast bölümleri</string>
+    <string name="nag_downloads_models">Modeller</string>
+    <string name="nag_downloads_progress">%1$s / %2$s · %3$s</string>
+    <string name="nag_downloads_running">İndiriliyor · %1$s</string>
+    <string name="nag_downloads_queued">İndirilmeyi bekliyor</string>
+    <string name="nag_downloads_done">İndirildi · %1$s</string>
+    <string name="nag_downloads_failed">İndirilemedi</string>
+    <string name="nag_downloads_partial">Yarıda kaldı · %1$s</string>
+    <string name="nag_downloads_waiting_network">Ağ bekleniyor</string>
+    <string name="nag_downloads_delete">Sil</string>
+    <string name="nag_downloads_retry">Yeniden dene</string>
+    <string name="nag_downloads_resume">Sürdür</string>
+    <string name="nag_downloads_dismiss">Listeden çıkar</string>
+    <string name="nag_downloads_stop_job">İşi durdur</string>
+    <string name="nag_downloads_whisper_model">Altyazı üretimi modeli</string>
+    <string name="nag_downloads_translation_model">Çeviri modeli · %1$s</string>
+    <string name="nag_downloads_delete_title">İndirilen dosya silinsin mi?</string>
+    <string name="nag_downloads_delete_episode">Bölüm, programının listesinde kalır ve yeniden indirilebilir.</string>
+    <string name="nag_downloads_delete_model">Model, bir iş gerektirdiğinde yeniden indirilir.</string>
 </resources>

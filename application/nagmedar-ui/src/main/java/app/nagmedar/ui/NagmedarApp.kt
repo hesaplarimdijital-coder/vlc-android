@@ -51,6 +51,7 @@ import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
 import app.nagmedar.ui.device.DeviceScreen
+import app.nagmedar.ui.downloads.DownloadsScreen
 import app.nagmedar.ui.guide.GuideScreen
 import app.nagmedar.ui.guide.ShortcutCardScreen
 import app.nagmedar.ui.input.ShortcutGroup
@@ -101,7 +102,6 @@ import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
-import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.screens.SETTINGS_LIBRARY_ITEM
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.audio.AbChoice
@@ -447,7 +447,8 @@ private fun NagmedarMain(
                         Destination.Streams -> StreamsScreen(undo)
                         // this device's storage, its drives and the picked folders, browsed
                         Destination.Device -> DeviceScreen(prefs)
-                        else -> PlaceholderScreen(destination) { openClassic(context, null) }
+                        // the podcast episodes and the subtitle tools' models downloaded, coming down or failed
+                        Destination.Downloads -> DownloadsScreen()
                     }
                 },
             )

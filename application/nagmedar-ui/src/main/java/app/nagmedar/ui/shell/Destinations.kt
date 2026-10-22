@@ -12,16 +12,12 @@ enum class NavSection(@StringRes val title: Int?) {
     Footer(null),
 }
 
-/**
- * Top-level destinations of the navigation graph, in sidebar order. [comingIn] marks screens
- * that are placeholders in this build, with the MVP that delivers them.
- */
+/** Top-level destinations of the navigation graph, in sidebar order. */
 enum class Destination(
     val route: String,
     @StringRes val label: Int,
     val section: NavSection,
     @StringRes val description: Int? = null,
-    val comingIn: String? = null,
 ) {
     Home("home", R.string.nag_nav_home, NavSection.Library),
     Movies("movies", R.string.nag_nav_movies, NavSection.Library),
@@ -38,7 +34,7 @@ enum class Destination(
     Streams("streams", R.string.nag_nav_streams, NavSection.Sources, R.string.nag_coming_streams),
     TvLab("tvlab", R.string.nag_nav_tv_lab, NavSection.Tools, R.string.nag_coming_tv_lab),
     Convert("convert", R.string.nag_nav_convert, NavSection.Tools, R.string.nag_coming_convert),
-    Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads, "MVP4"),
+    Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),
     More("more", R.string.nag_nav_more, NavSection.Footer),
 

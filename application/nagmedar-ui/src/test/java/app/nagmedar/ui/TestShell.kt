@@ -41,7 +41,6 @@ import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.PlayerBarInfo
 import app.nagmedar.ui.playback.TransportBar
 import app.nagmedar.ui.screens.PageHeader
-import app.nagmedar.ui.screens.PlaceholderScreen
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NagmedarShell
@@ -149,7 +148,7 @@ fun SampleScreen(destination: Destination) {
         }
         // S-1201: the TV Lab with the sample film analysed
         Destination.TvLab -> TvLabContent(sampleTvLabView(), NoTvLabActions)
-        else -> PlaceholderScreen(destination, onOpenClassic = {})
+        else -> Column(Modifier.fillMaxSize()) { PageHeader(title = stringResource(destination.label)) }
     }
 }
 

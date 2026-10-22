@@ -111,6 +111,10 @@ abstract class PodcastDao {
     @Query("SELECT * FROM podcast_episode WHERE download_state = :state ORDER BY published_at DESC")
     abstract fun episodesDownload(state: Int): List<PodcastEpisode>
 
+    /** The Downloads page: the episodes being downloaded, waiting, done or failed, the newest first. */
+    @Query("SELECT * FROM podcast_episode WHERE download_state IN (1, 2, 3, 4) ORDER BY download_state = 3, published_at DESC")
+    abstract fun observeDownloads(): Flow<List<PodcastEpisode>>
+
     /** S-1103: where an episode's download is: its [state], and the file it is in once it is done. */
     @Query("UPDATE podcast_episode SET download_state = :state, download_path = :path, download_bytes = :bytes WHERE id = :episodeId")
     abstract fun setDownload(episodeId: Long, state: Int, path: String?, bytes: Long)

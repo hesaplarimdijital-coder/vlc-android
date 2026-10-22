@@ -291,7 +291,6 @@
     </plurals>
 
     <!-- Placeholders -->
-    <string name="nag_coming_title">%1$s arrives in %2$s</string>
     <string name="nag_coming_movies">Films with posters, technical details and TV compatibility.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
     <string name="nag_podcasts_description">Subscriptions and new episodes.</string>
@@ -301,7 +300,6 @@
     <string name="nag_coming_tv_lab">Analyse files for your TV and remux them without quality loss.</string>
     <string name="nag_coming_convert">Conversion profiles, jobs and streaming on the network (HLS).</string>
     <string name="nag_coming_downloads">Podcast episodes, subtitles and other downloads.</string>
-    <string name="nag_open_classic">Open the classic interface</string>
 
     <!-- Library -->
     <string name="nag_continue_watching">Continue watching</string>
@@ -3358,4 +3356,31 @@
     <string name="nag_play_this_only">Play only this</string>
     <string name="nag_device_not_media">Not a media file</string>
     <string name="nag_device_add_to_section">Add to the library: %1$s</string>
+    <string name="nag_device_folder_added">%1$s added to the library</string>
+    <!-- Tools › Downloads: podcast episodes, whisper and translation models -->
+    <plurals name="nag_downloads_count">
+        <item quantity="one">%d download</item>
+        <item quantity="other">%d downloads</item>
+    </plurals>
+    <string name="nag_downloads_empty_title">Nothing downloaded</string>
+    <string name="nag_downloads_empty_desc">Podcast episodes you download, and the models of the subtitle tools, show here.</string>
+    <string name="nag_downloads_episodes">Podcast episodes</string>
+    <string name="nag_downloads_models">Models</string>
+    <string name="nag_downloads_progress">%1$s of %2$s · %3$s</string>
+    <string name="nag_downloads_running">Downloading · %1$s</string>
+    <string name="nag_downloads_queued">Waiting to download</string>
+    <string name="nag_downloads_done">Downloaded · %1$s</string>
+    <string name="nag_downloads_failed">The download failed</string>
+    <string name="nag_downloads_partial">Half way · %1$s</string>
+    <string name="nag_downloads_waiting_network">Waiting for a network</string>
+    <string name="nag_downloads_delete">Delete</string>
+    <string name="nag_downloads_retry">Try again</string>
+    <string name="nag_downloads_resume">Go on</string>
+    <string name="nag_downloads_dismiss">Take off the list</string>
+    <string name="nag_downloads_stop_job">Stop the job</string>
+    <string name="nag_downloads_whisper_model">Subtitle generation model</string>
+    <string name="nag_downloads_translation_model">Translation model · %1$s</string>
+    <string name="nag_downloads_delete_title">Delete the downloaded file?</string>
+    <string name="nag_downloads_delete_episode">The episode stays in its show\'s list and can be downloaded again.</string>
+    <string name="nag_downloads_delete_model">The model is downloaded again when a job needs it.</string>
 </resources>
