@@ -89,10 +89,6 @@ class ShellScreenshotTest {
     @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
     fun extraLargeOled() = capture("xlarge-oled-home", WidthClass.ExtraLarge, ThemeMode.Oled, InputMode.Pointer, Destination.Home)
 
-    /** A screen a later MVP brings: what comes, and the classic interface meanwhile. */
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun placeholderLarge() = capture("large-dark-placeholder", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, Destination.Downloads)
-
     /** S-1501: the shell in English, in a DeX window and on a phone. */
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun largeDarkEnglish() = capture("large-dark-en", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer)
