@@ -44,8 +44,8 @@
 #     source or a file that holds anything refused as the output, untouched; NaN and infinities
 #     in a float source; an M4A plays to its end without an edit list or iTunSMPB; each channel
 #     (a tone in each) where the codec's layout puts it: stereo to 7.1, side and back surrounds as
-#     one, a back centre where the codec has none, BS.775's stereo, and a MOV's matrix-encoded
-#     Lt/Rt pair as left and right
+#     one, a back centre where the codec has none, front left and right of centre into the front
+#     pair and the centre, BS.775's stereo, and a MOV's matrix-encoded Lt/Rt pair as left and right
 #   - CUE parts (S-808): a file's parts, bounded in CUE frames (1/75 s), played as a queue give
 #     the whole file back, sample for sample in FLAC and MP3, within -60 dBFS in AAC and Opus
 #     (whose decoders settle after a seek, as ffmpeg's own do); a part alone is ffmpeg's trim
@@ -1006,7 +1006,15 @@ case("6.1", "wav", "opus", "6.1", same("FL", "FR", "FC", "LFE", "BC", "SL", "SR"
 c61 = same("FL", "FR", "FC", "LFE", "SL", "SR")
 c61.update({"BL": {"BC": H}, "BR": {"BC": H}})
 case("6.1", "wav", "aac", "7.1", c61)
+# front left and right of centre: into the front pair and the centre at -3 dB each, between which they
+# are heard, not into the surrounds; all scaled down together so that the centre cannot pass full scale
 k = 1 / (1 + 2 * H)
+case("7.1(wide)", "wav", "opus", "5.1", {"FL": {"FL": k, "FLC": k * H}, "FR": {"FR": k, "FRC": k * H}, "FC": {"FC": k, "FLC": k * H, "FRC": k * H},
+                                         "LFE": {"LFE": k}, "BL": {"BL": k}, "BR": {"BR": k}})
+case("7.1(wide)", "wav", "aac", "5.1", {"FL": {"FL": k, "FLC": k * H}, "FR": {"FR": k, "FRC": k * H}, "FC": {"FC": k, "FLC": k * H, "FRC": k * H},
+                                        "LFE": {"LFE": k}, "BL": {"BL": k}, "BR": {"BR": k}})
+case("7.1(wide-side)", "wav", "opus", "5.1", {"FL": {"FL": k, "FLC": k * H}, "FR": {"FR": k, "FRC": k * H}, "FC": {"FC": k, "FLC": k * H, "FRC": k * H},
+                                              "LFE": {"LFE": k}, "BL": {"SL": k}, "BR": {"SR": k}})
 # BS.775's stereo: the centre and the surrounds at -3 dB, no LFE, scaled down together so that no side can pass full scale
 case("5.1", "wav", "opus", "stereo", {"FL": {"FL": k, "FC": k * H, "BL": k * H}, "FR": {"FR": k, "FC": k * H, "BR": k * H}}, ("--stereo",))
 case("5.1", "wav", "mp3", "stereo", {"FL": {"FL": k, "FC": k * H, "BL": k * H}, "FR": {"FR": k, "FC": k * H, "BR": k * H}})

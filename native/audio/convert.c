@@ -15,7 +15,9 @@
  *         (1 to 6, and 12 for 7.1).
  *
  * The channels stay as the source's up to 7.1 (a layout the codec has: what the source lacks
- * of it is silence), or go to stereo by ITU-R BS.775's matrix when asked for, and always for MP3.
+ * of it is silence; a back centre, or a front left and right of centre, that the layout has no
+ * place for is folded in at -3 dB), or go to stereo by ITU-R BS.775's matrix when asked for, and
+ * always for MP3.
  *
  * The output is a descriptor (a content document's on Android): the muxers write through an
  * AVIOContext over it, LAME's bytes go to it directly. The tags and the front cover follow
@@ -186,14 +188,26 @@ typedef struct ChannelPlan {
     int identity;                   /* the output is the source as it is */
 } ChannelPlan;
 
-static int is_left(int role) { return role == ROLE_SL || role == ROLE_BL || role == ROLE_FLC; }
-static int is_right(int role) { return role == ROLE_SR || role == ROLE_BR || role == ROLE_FRC; }
+static int is_left(int role) { return role == ROLE_SL || role == ROLE_BL; }
+static int is_right(int role) { return role == ROLE_SR || role == ROLE_BR; }
+
+/* The slot of [role] in [layout]; -1 when it has none. */
+static int slot_of(const Layout *layout, int role)
+{
+    for (int s = 0; s < layout->count; s++)
+        if (layout->roles[s] == role)
+            return s;
+    return -1;
+}
 
 /*
  * The source's channels (by role) into [layout]: each to the slot of its own role, a surround to
  * the other kind of surround where the layout has the one only (side and back are the same
  * speakers to the listener), and, with [fold], a back centre into the left and right surrounds
- * at -3 dB. Slots without a channel stay silent. 1 when every channel found a place.
+ * at -3 dB and a front left (right) of centre into the front left (right) and the centre at
+ * -3 dB each, between which it is heard (no layout of the codecs has those two). Slots without a
+ * channel stay silent; when a fold adds to a channel that has its own, all are scaled down
+ * together so that no output can pass full scale. 1 when every channel found a place.
  */
 static int fit_layout(const Layout *layout, const int *roles, int n, int fold, ChannelPlan *plan)
 {
@@ -227,7 +241,16 @@ static int fit_layout(const Layout *layout, const int *roles, int n, int fold, C
             plan->matrix[slot[i] * MAX_CH + i] = 1.0;
             continue;
         }
-        if (roles[i] != ROLE_BC || !fold)
+        if (!fold)
+            return 0;
+        if (roles[i] == ROLE_FLC || roles[i] == ROLE_FRC) {
+            const int side = slot_of(layout, roles[i] == ROLE_FLC ? ROLE_L : ROLE_R), centre = slot_of(layout, ROLE_C);
+            if (side < 0 || centre < 0)
+                return 0;
+            plan->matrix[side * MAX_CH + i] = plan->matrix[centre * MAX_CH + i] = M_SQRT1_2;
+            continue;
+        }
+        if (roles[i] != ROLE_BC)
             return 0;
         int l = -1, r = -1;
         for (int s = 0; s < layout->count; s++) {
@@ -242,6 +265,17 @@ static int fit_layout(const Layout *layout, const int *roles, int n, int fold, C
         used[l] = used[r] = 1;
         plan->matrix[l * MAX_CH + i] = plan->matrix[r * MAX_CH + i] = M_SQRT1_2;
     }
+    double peak = 1.0;
+    for (int s = 0; s < layout->count; s++) {
+        double sum = 0.0;
+        for (int i = 0; i < n; i++)
+            sum += plan->matrix[s * MAX_CH + i];
+        if (sum > peak)
+            peak = sum;
+    }
+    if (peak > 1.0)
+        for (int k = 0; k < MAX_CH * MAX_CH; k++)
+            plan->matrix[k] /= peak;
     plan->channels = layout->count;
     plan->mask = layout->mask;
     plan->lfe = 0;
