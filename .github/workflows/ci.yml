@@ -61,7 +61,7 @@ env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4
   # Tests paused until the test phase: the app, its unit tests and the native libraries are
   # compiled, but no test runs and no screenshot is compared. '1' runs them all again.
-  NAGMEDAR_RUN_TESTS: '0'
+  NAGMEDAR_RUN_TESTS: '1'
   # S-706: Nağmedar's own OpenSubtitles.com API key; empty where the secret is not set
   NAGMEDAR_OPENSUBTITLES_API_KEY: ${{ secrets.NAGMEDAR_OPENSUBTITLES_API_KEY }}
   # S-1101: Nağmedar's own Podcast Index key and secret; empty where the secrets are not set
