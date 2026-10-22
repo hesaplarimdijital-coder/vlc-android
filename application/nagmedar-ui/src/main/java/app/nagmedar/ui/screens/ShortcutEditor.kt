@@ -1,7 +1,6 @@
 package app.nagmedar.ui.screens
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -76,6 +75,7 @@ import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.reservedReason
 import app.nagmedar.ui.theme.NagTheme
 import android.view.KeyEvent as AndroidKeyEvent
+import org.videolan.tools.Notices
 
 /** [overrides] with [id] bound to [chord]; a chord equal to the default is no override. */
 internal fun Map<ShortcutId, KeyChord?>.with(id: ShortcutId, chord: KeyChord?): Map<ShortcutId, KeyChord?> =
@@ -132,7 +132,7 @@ fun ShortcutEditor(
             if (undo != null) {
                 undo.show(message, label, ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) { onChange(previous) }
             } else {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                Notices.show(context, message)
             }
         }
     }
@@ -154,7 +154,7 @@ fun ShortcutEditor(
         val written = runCatching {
             context.contentResolver.openOutputStream(uri)?.use { it.write(ShortcutFile.export(table).toByteArray()) } != null
         }.getOrDefault(false)
-        Toast.makeText(context, if (written) R.string.nag_sc_exported else R.string.nag_sc_export_failed, Toast.LENGTH_SHORT).show()
+        Notices.show(context, if (written) R.string.nag_sc_exported else R.string.nag_sc_export_failed)
     }
     val importFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -163,7 +163,7 @@ fun ShortcutEditor(
             ShortcutFile.import(text)
         }.getOrNull()
         if (imported == null) {
-            Toast.makeText(context, R.string.nag_sc_import_failed, Toast.LENGTH_LONG).show()
+            Notices.show(context, R.string.nag_sc_import_failed, long = true)
         } else {
             val message = res.getQuantityString(R.plurals.nag_sc_imported, imported.applied, imported.applied) +
                 if (imported.skipped.isEmpty()) "" else " · " + res.getQuantityString(R.plurals.nag_sc_import_skipped, imported.skipped.size, imported.skipped.size)

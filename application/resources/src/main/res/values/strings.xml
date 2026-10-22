@@ -348,6 +348,16 @@
     <string name="nagmedar_casting_to">Casting to %s</string>
     <string name="nagmedar_cast_tracker_here">Tracker modules play only on this device: this track goes on here, the next ones are cast.</string>
     <string name="nagmedar_cast_tracker_skipped">“%s” skipped: tracker modules can\'t be cast, they play only on this device.</string>
+    <!-- Nağmedar: the notices of the window in front -->
+    <plurals name="nagmedar_queued">
+        <item quantity="one">%d item added to the queue</item>
+        <item quantity="other">%d items added to the queue</item>
+    </plurals>
+    <plurals name="nagmedar_play_next">
+        <item quantity="one">%d item plays next</item>
+        <item quantity="other">%d items play next</item>
+    </plurals>
+    <string name="nagmedar_getting_ready">Getting playback ready…</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and VLC Authors.</string>

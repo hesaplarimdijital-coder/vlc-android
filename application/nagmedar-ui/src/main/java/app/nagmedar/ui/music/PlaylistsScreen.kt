@@ -1,7 +1,6 @@
 package app.nagmedar.ui.music
 
 import android.content.res.Resources
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -95,6 +94,7 @@ import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
+import org.videolan.tools.Notices
 
 /** The order of the formats in the export menus: UTF-8's M3U first, the old M3U last. */
 private val EXPORT_FORMATS = listOf(PlaylistFormat.M3U8, PlaylistFormat.XSPF, PlaylistFormat.PLS, PlaylistFormat.M3U)
@@ -139,7 +139,7 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
         scope.launch {
             val imported = store.import(uri, state.playlists.orEmpty().map { it.name })
             if (imported == null) {
-                Toast.makeText(context, res.getString(R.string.nag_pl_import_failed), Toast.LENGTH_LONG).show()
+                Notices.show(context, res.getString(R.string.nag_pl_import_failed), long = true)
                 return@launch
             }
             state.reload(prefer = imported.id)
@@ -149,7 +149,7 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
             ).joinToString("; ")
             // taken back, the new playlist goes
             undo?.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) { state.delete(imported.id) { } }
-                ?: Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                ?: Notices.show(context, text, long = true)
         }
     }
     // which playlist (or, S-805, which smart list) the file being made is for, kept through the picker
@@ -173,7 +173,7 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
                     playlist.name to store.export(playlist.id, playlist.name, uri, format)
                 }
                 val text = if (saved) res.getString(R.string.nag_pl_exported, name, format.name) else res.getString(R.string.nag_pl_export_failed)
-                Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                Notices.show(context, text, long = true)
             }
         }
     }

@@ -1,6 +1,5 @@
 package app.nagmedar.ui.podcast
 
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -93,6 +92,7 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.AppScope
+import org.videolan.tools.Notices
 
 /** The OPML file's media type, as the apps that write it name it. */
 private const val OPML_MIME = "text/x-opml"
@@ -144,7 +144,7 @@ fun PodcastsScreen(undo: UndoBarState?) {
         controller.actions(
             onCopy = { text ->
                 clipboard.setText(AnnotatedString(text))
-                Toast.makeText(app, app.getString(R.string.nag_pod_copied), Toast.LENGTH_SHORT).show()
+                Notices.show(app, app.getString(R.string.nag_pod_copied))
             },
             onOpenLink = { url -> openLink(context, url) },
             onImport = { importer.launch(arrayOf("*/*")) },

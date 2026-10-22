@@ -2,7 +2,6 @@ package app.nagmedar.ui.backup
 
 import android.content.res.Resources
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +38,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.videolan.tools.Notices
 
 /** S-1502: where a restore is: the backup read and its parts to choose, restoring, done. */
 sealed interface RestoreState {
@@ -78,7 +78,7 @@ internal fun BackupSection(
             val written = runCatching { app.write(app.make(), uri) }.getOrDefault(false)
             working = false
             if (written) last = app.lastBackup() ?: last
-            Toast.makeText(context, if (written) R.string.nag_backup_done else R.string.nag_backup_failed, Toast.LENGTH_SHORT).show()
+            Notices.show(context, if (written) R.string.nag_backup_done else R.string.nag_backup_failed)
         }
     }
     val restoreFrom = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
@@ -87,9 +87,9 @@ internal fun BackupSection(
             try {
                 restore = RestoreState.Choosing(app.read(uri))
             } catch (e: BackupException) {
-                Toast.makeText(context, readFailure(e.reason), Toast.LENGTH_LONG).show()
+                Notices.show(context, readFailure(e.reason), long = true)
             } catch (e: IOException) {
-                Toast.makeText(context, R.string.nag_backup_unreadable, Toast.LENGTH_LONG).show()
+                Notices.show(context, R.string.nag_backup_unreadable, long = true)
             }
         }
     }

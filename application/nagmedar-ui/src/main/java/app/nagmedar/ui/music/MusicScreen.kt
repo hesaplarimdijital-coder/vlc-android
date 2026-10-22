@@ -2,7 +2,6 @@ package app.nagmedar.ui.music
 
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -96,6 +95,7 @@ import org.videolan.tools.NAGMEDAR_MUSIC_COLUMNS
 import org.videolan.tools.NAGMEDAR_MUSIC_VIEW
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
+import org.videolan.tools.Notices
 
 /**
  * S-803: where the music library is: the way in (tracks, artists, albums, genres, composers,
@@ -382,7 +382,7 @@ internal class ServiceMusicActions(
     override fun rowModifier(track: Track, others: () -> List<Track>): Modifier =
         Modifier.onMiddleClick {
             queue(listOf(track))
-            Toast.makeText(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+            Notices.show(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, 1, 1))
         }.fileDragSource(
             label = {
                 val many = others()

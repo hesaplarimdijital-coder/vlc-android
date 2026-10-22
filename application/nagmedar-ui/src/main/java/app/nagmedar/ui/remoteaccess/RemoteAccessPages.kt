@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -62,6 +61,7 @@ import org.videolan.tools.KEY_ENABLE_REMOTE_ACCESS
 import org.videolan.tools.Settings
 import org.videolan.vlc.util.RemoteAccessUtils
 import org.videolan.vlc.util.UrlUtils
+import org.videolan.tools.Notices
 
 /** The remote access windows of the Nağmedar interface. */
 enum class RemoteAccessPage { Addresses, HowItWorks }
@@ -221,7 +221,7 @@ private const val QR_PIXELS = 512
 
 private fun copy(context: Context, address: String) {
     context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.nag_ra_settings), address))
-    Toast.makeText(context, R.string.nag_ra_copied, Toast.LENGTH_SHORT).show()
+    Notices.show(context, R.string.nag_ra_copied)
 }
 
 private fun share(context: Context, address: String) {

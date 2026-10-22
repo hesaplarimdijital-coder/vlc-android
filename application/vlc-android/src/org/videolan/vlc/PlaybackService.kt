@@ -65,7 +65,6 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -138,6 +137,7 @@ import org.videolan.resources.util.getFromMl
 import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.registerReceiverCompat
 import org.videolan.resources.util.startForegroundCompat
+import org.videolan.tools.Notices
 import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
@@ -171,14 +171,11 @@ import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.getResourceUri
 import org.videolan.tools.markBidi
 import org.videolan.tools.readableSize
-import org.videolan.vlc.gui.AudioPlayerContainerActivity
 import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.dialogs.adapters.VlcTrack
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.NotificationHelper
-import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
-import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.gui.video.PopupManager
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.CoverHook
@@ -274,7 +271,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private var lastParentId = ""
     private var widget = 0
 
-    var currentToast: Toast? = null
     var lastErrorTime = 0L
     var nbErrors = 0
 
@@ -841,27 +837,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         if (meteredAction != 0 && isSchemeStreaming(currentMediaLocation)) {
             if (meteredAction == 1) {
                 stop()
-                //we also check if the current activity is AudioPlayerContainerActivity to avoid displaying the
-                //snackbar in the VideoPlayerActivity that will be closed by the call to stop()
-                (AppContextProvider.currentActivity as? AudioPlayerContainerActivity)?.let {activity ->
-                    UiTools.snackerConfirm(activity, getString(R.string.metered_connection_stopped), overAudioPlayer = activity.isAudioPlayerExpanded, confirmMessage = R.string.preferences) {
-                        lifecycleScope.launch {
-                            PreferencesActivity.launchWithPref(activity as FragmentActivity, KEY_METERED_CONNECTION)
-                        }
-                    }
-                } ?: run {
-                    Toast.makeText(this, R.string.metered_connection_stopped, Toast.LENGTH_LONG).show()
-                }
+                // Nağmedar: said in the window in front (a toast when none is up), not in VLC's snackbar
+                Notices.show(this, R.string.metered_connection_stopped, long = true)
             } else {
-                AppContextProvider.currentActivity?.let {activity ->
-                    UiTools.snackerConfirm(activity, getString(R.string.metered_connection_warning), overAudioPlayer = activity is AudioPlayerContainerActivity && activity.isAudioPlayerExpanded, confirmMessage = R.string.preferences) {
-                        lifecycleScope.launch {
-                            PreferencesActivity.launchWithPref(activity as FragmentActivity, KEY_METERED_CONNECTION)
-                        }
-                    }
-                } ?: run {
-                    Toast.makeText(this, R.string.metered_connection_warning, Toast.LENGTH_LONG).show()
-                }
+                Notices.show(this, R.string.metered_connection_warning, long = true)
             }
         }
     }
@@ -1544,7 +1523,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     fun loadLastPlaylist(type: Int) {
         forceForeground(true)
         if (!playlistManager.loadLastPlaylist(type)) {
-            Toast.makeText(this, getString(R.string.resume_playback_error), Toast.LENGTH_LONG).show()
+            Notices.show(this, R.string.resume_playback_error, long = true)
             stopService(Intent(applicationContext, PlaybackService::class.java))
         }
     }
@@ -1992,12 +1971,11 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                         nbErrors > 2 && System.currentTimeMillis() - lastErrorTime < 500 -> return
                         nbErrors >= 2 -> text = getString(R.string.playback_multiple_errors)
                     }
-                    currentToast?.cancel()
                     nbErrors++
                     lastErrorTime = System.currentTimeMillis()
                 }
-                currentToast = Toast.makeText(applicationContext, text, duration)
-                currentToast?.show()
+                // Nağmedar: in the window in front (a toast when none is up)
+                text?.let { Notices.show(applicationContext, it, long = duration == Toast.LENGTH_LONG, error = isError) }
             }
             UPDATE_META -> updateMetadata()
             END_MEDIASESSION -> if (::mediaSession.isInitialized) mediaSession.isActive = false

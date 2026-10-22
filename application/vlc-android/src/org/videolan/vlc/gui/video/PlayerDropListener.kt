@@ -9,10 +9,10 @@ import android.os.Build
 import android.provider.OpenableColumns
 import android.view.DragEvent
 import android.view.View
-import android.widget.Toast
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.Notices
 import org.videolan.vlc.R
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
@@ -59,7 +59,7 @@ class PlayerDropListener(private val activity: VideoPlayerActivity) : View.OnDra
                     service.addSubtitleTrack(uri, true)
                     SlaveRepository.getInstance(activity).saveSlave(playing.location, IMedia.Slave.Type.Subtitle, 2, uri.toString())
                 }
-                Toast.makeText(activity, R.string.nagmedar_player_subtitle_loaded, Toast.LENGTH_SHORT).show()
+                Notices.show(activity, R.string.nagmedar_player_subtitle_loaded)
             }
             else -> return false
         }

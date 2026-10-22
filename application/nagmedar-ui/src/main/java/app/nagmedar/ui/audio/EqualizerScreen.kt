@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
@@ -92,6 +91,7 @@ import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import org.videolan.tools.Notices
 
 /**
  * S-906: the equaliser's state: the chain's settings and the headphone profiles kept, read from
@@ -593,7 +593,7 @@ private fun ProfileCard(state: EqualizerState, modifier: Modifier) {
         if (uri == null) return@rememberLauncherForActivityResult
         val text = runCatching { context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } }.getOrNull()
         val profile = text?.let { HeadphoneProfile.parse(it, displayName(context, uri), pastedName) }
-        if (profile == null) Toast.makeText(context, bad, Toast.LENGTH_SHORT).show() else state.addProfile(profile)
+        if (profile == null) Notices.show(context, bad) else state.addProfile(profile)
     }
     var choosing by remember { mutableStateOf(false) }
     EqCard(
@@ -648,7 +648,7 @@ private fun ProfileCard(state: EqualizerState, modifier: Modifier) {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 val text = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()
                 val profile = text?.let { HeadphoneProfile.parse(it, null, uniqueName(pastedName, state.profiles)) }
-                if (profile == null) Toast.makeText(context, bad, Toast.LENGTH_SHORT).show() else state.addProfile(profile)
+                if (profile == null) Notices.show(context, bad) else state.addProfile(profile)
             })
         }
     }

@@ -1445,4 +1445,14 @@
     <string name="nagmedar_casting_to">%s cihazına yayınlanıyor</string>
     <string name="nagmedar_cast_tracker_here">Tracker modülleri yalnızca bu cihazda çalar: bu parça burada sürüyor, sonrakiler yayınlanacak.</string>
     <string name="nagmedar_cast_tracker_skipped">“%s” atlandı: tracker modülleri yayınlanamaz, yalnızca bu cihazda çalar.</string>
+    <!-- Nağmedar: the notices of the window in front -->
+    <plurals name="nagmedar_queued">
+        <item quantity="one">%d öğe sıraya eklendi</item>
+        <item quantity="other">%d öğe sıraya eklendi</item>
+    </plurals>
+    <plurals name="nagmedar_play_next">
+        <item quantity="one">%d öğe hemen sonra oynatılacak</item>
+        <item quantity="other">%d öğe hemen sonra oynatılacak</item>
+    </plurals>
+    <string name="nagmedar_getting_ready">Oynatma hazırlanıyor…</string>
 </resources>

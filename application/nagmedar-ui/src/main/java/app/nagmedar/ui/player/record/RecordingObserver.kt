@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,6 +21,7 @@ import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaybackObserver
 import org.videolan.vlc.media.PlaybackRecorder
 import org.videolan.vlc.media.RecordingHook
+import org.videolan.tools.Notices
 
 /**
  * S-607: the recordings follow the playback service, whatever plays in it (a film, a stream, a
@@ -105,7 +105,7 @@ object Recordings {
             val wasRecording = recording
             toggle()
             // the classic player has no indicator: a start is said; a stop is said by the outcome
-            if (!wasRecording && recording) Toast.makeText(service, R.string.nag_rec_started, Toast.LENGTH_SHORT).show()
+            if (!wasRecording && recording) Notices.show(service, R.string.nag_rec_started)
         }
     }
 
@@ -177,7 +177,7 @@ object Recordings {
             is RecordingOutcome.Saved -> context.getString(R.string.nag_rec_saved_in, outcome.folder)
             is RecordingOutcome.Failed -> context.getString(R.string.nag_rec_failed_because, context.getString(failureText(outcome.reason)))
         }
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+        Notices.show(context, text, long = true)
     }
 
     /** Plays the recording in what the system offers for it (Nağmedar too). */
@@ -193,7 +193,7 @@ object Recordings {
             start(context, Intent(Intent.ACTION_VIEW).setDataAndType(folder, DocumentsContract.Document.MIME_TYPE_DIR).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)) ||
                 start(context, Intent(Intent.ACTION_VIEW, folder).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
             )
-        if (!opened) Toast.makeText(context, context.getString(R.string.nag_rec_no_folder_app, saved.folder), Toast.LENGTH_LONG).show()
+        if (!opened) Notices.show(context, context.getString(R.string.nag_rec_no_folder_app, saved.folder), long = true)
     }
 
     /** The folder as a document: the chosen tree's, or the internal storage's Movies/Nağmedar. */

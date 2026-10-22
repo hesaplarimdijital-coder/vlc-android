@@ -2,7 +2,6 @@ package app.nagmedar.ui.library
 
 import androidx.activity.compose.BackHandler
 import android.net.Uri
-import android.widget.Toast
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -105,6 +104,7 @@ import kotlinx.coroutines.delay
 import org.videolan.vlc.repository.SlaveRepository
 import app.nagmedar.ui.transcode.TranscodeMedia
 import app.nagmedar.ui.transcode.TranscodeRequests
+import org.videolan.tools.Notices
 
 /**
  * Context menu of a media item; the same entries serve right click, long press and the Menu key.
@@ -459,7 +459,7 @@ internal fun Modifier.filmDrags(
         .onMiddleClick {
             item.media?.let { media ->
                 PlaybackActions.appendList(context, listOf(media))
-                Toast.makeText(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+                Notices.show(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1))
             }
         }
         .dropTarget("film-${item.key}", ::mayBeSubtitle, shape) { files ->
@@ -467,7 +467,7 @@ internal fun Modifier.filmDrags(
             subtitles.forEach { file ->
                 SlaveRepository.getInstance(context).saveSlave(item.media?.location ?: item.key, IMedia.Slave.Type.Subtitle, 2, file.uri)
             }
-            if (subtitles.isNotEmpty()) Toast.makeText(context, res.getString(R.string.nag_drop_subtitle_for, item.title), Toast.LENGTH_SHORT).show()
+            if (subtitles.isNotEmpty()) Notices.show(context, res.getString(R.string.nag_drop_subtitle_for, item.title))
             subtitles.isNotEmpty()
         }
 }

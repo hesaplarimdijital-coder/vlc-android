@@ -3,10 +3,7 @@ package app.nagmedar.ui.podcast
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.provider.DocumentsContract
-import android.widget.Toast
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -32,6 +29,7 @@ import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.Locale
+import org.videolan.tools.Notices
 
 /**
  * S-1102: the OPML import that is running or has just finished, kept apart from the screen: leaving the
@@ -224,7 +222,7 @@ class PodcastController(
                 }
                 is SubscribeResult.Already -> {
                     subscribing.remove(key)
-                    say(res.getString(R.string.nag_pod_already, result.feed.title), Toast.LENGTH_SHORT)
+                    say(res.getString(R.string.nag_pod_already, result.feed.title))
                     open(result.feed.id)
                 }
                 is SubscribeResult.Failed -> subscribing[key] = SubscribeUi.Failed(result.failure)
@@ -245,7 +243,7 @@ class PodcastController(
                 }
                 is SubscribeResult.Already -> {
                     add = null
-                    say(res.getString(R.string.nag_pod_already, result.feed.title), Toast.LENGTH_SHORT)
+                    say(res.getString(R.string.nag_pod_already, result.feed.title))
                     open(result.feed.id)
                 }
                 is SubscribeResult.Failed -> add = AddUi(text, failure = result.failure)
@@ -267,7 +265,7 @@ class PodcastController(
     private fun announce(feed: PodcastFeed) {
         val text = res.getString(R.string.nag_pod_subscribed_to, feed.title)
         if (undo == null) {
-            say(text, Toast.LENGTH_SHORT)
+            say(text)
         } else {
             undo.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) {
                 background.launch { repository.unsubscribe(feed.id) }
@@ -282,7 +280,7 @@ class PodcastController(
             if (openId == feedId) closePage()
             val text = res.getString(R.string.nag_pod_unsubscribed, gone.feed.title)
             if (undo == null) {
-                say(text, Toast.LENGTH_SHORT)
+                say(text)
             } else {
                 undo.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) {
                     background.launch { repository.resubscribe(gone) }
@@ -427,7 +425,7 @@ class PodcastController(
     fun deleteDownload(episodeId: Long) {
         background.launch {
             val deleted = services.downloads?.delete(episodeId) ?: return@launch
-            if (!deleted) say(res.getString(R.string.nag_pod_delete_failed), Toast.LENGTH_SHORT)
+            if (!deleted) say(res.getString(R.string.nag_pod_delete_failed))
         }
     }
 
@@ -439,7 +437,7 @@ class PodcastController(
         try {
             context.startActivity(chooser)
         } catch (e: android.content.ActivityNotFoundException) {
-            say(res.getString(R.string.nag_pod_share_failed), Toast.LENGTH_SHORT)
+            say(res.getString(R.string.nag_pod_share_failed))
         }
     }
 
@@ -511,9 +509,9 @@ class PodcastController(
         imports.state.value = null
     }
 
-    /** A short notice, shown from the main thread whichever thread the work ended on. */
-    private fun say(message: String, length: Int) {
-        Handler(Looper.getMainLooper()).post { Toast.makeText(context, message, length).show() }
+    /** A short notice in the window in front, whichever thread the work ended on. */
+    private fun say(message: String, long: Boolean = false) {
+        Notices.show(context, message, long)
     }
 
     /** Writes the subscriptions as OPML to the file at [uri] and says so; leaving the screen does not cut the file short. */
@@ -537,7 +535,7 @@ class PodcastController(
                 ok
             }
             val message = if (saved) res.getQuantityString(R.plurals.nag_pod_exported, count, count) else res.getString(R.string.nag_pod_export_failed)
-            say(message, Toast.LENGTH_LONG)
+            say(message, long = true)
         }
     }
 

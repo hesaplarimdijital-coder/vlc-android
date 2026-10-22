@@ -1,7 +1,6 @@
 package app.nagmedar.ui.radio.record
 
 import android.content.res.Resources
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -83,6 +82,7 @@ import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import java.time.ZoneId
+import org.videolan.tools.Notices
 
 /** The widest the recordings' content grows. */
 private val ContentWidth = 960.dp
@@ -129,7 +129,7 @@ fun RecordingsTab(
         if (RecordingText.undoable(notice) && undo != null) {
             undo.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) { controller.undo(notice) }
         } else {
-            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+            Notices.show(context, text)
         }
         controller.noticed()
     }

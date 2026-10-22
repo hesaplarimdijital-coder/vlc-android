@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.vlc.BuildConfig
 import java.io.ByteArrayOutputStream
+import org.videolan.tools.Notices
 
 /**
  * S-1105: the app's one radio: the directory client, the stations kept, the player and the
@@ -152,7 +152,7 @@ fun RadioScreen(
         onRecordingsHandled = onRecordingsHandled,
         onCopyAddress = { station ->
             clipboard.setText(AnnotatedString(station.streamUrl))
-            Toast.makeText(context, R.string.nag_radio_copied, Toast.LENGTH_SHORT).show()
+            Notices.show(context, R.string.nag_radio_copied)
         },
         onImport = { importer.launch(arrayOf("*/*")) },
         onTogglePlay = { PlaybackActions.togglePlayPause() },

@@ -44,6 +44,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.EqualizerScreen
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.NoticeHost
 import app.nagmedar.ui.guide.GuideScreen
 import app.nagmedar.ui.guide.ShortcutCardScreen
 import app.nagmedar.ui.input.ShortcutId
@@ -149,6 +150,8 @@ fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: N
     val mode = if (hasPrecisePointer(activity)) InputMode.Pointer else InputMode.Touch
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
         LibVlcDialogHost()
+        // the app's notices over the film, above the control bar
+        Box(Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 112.dp), contentAlignment = Alignment.BottomCenter) { NoticeHost() }
         when (windows.open) {
             PlayerAppWindow.Guide -> PageWindow(windows, activity) { GuideScreen(onOpenShortcutCard = { windows.perform(activity, ShortcutId.ShortcutList) }) }
             PlayerAppWindow.ShortcutCard -> PageWindow(windows, activity) {

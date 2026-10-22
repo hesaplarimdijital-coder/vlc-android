@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,6 +83,7 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.util.getFromMl
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
+import org.videolan.tools.Notices
 
 /** A stream played before, as the medialibrary's network history keeps it: its name and its address. */
 data class SavedStream(val id: Long, val name: String, val address: String, val media: MediaWrapper?)
@@ -193,7 +193,7 @@ fun StreamsScreen(undo: UndoBarState? = null) {
             invalid = false
             if (enqueue) {
                 MediaUtils.appendMedia(context, streamMedia(parsed))
-                Toast.makeText(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+                Notices.show(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1))
             } else {
                 MediaUtils.openMedia(context, streamMedia(parsed))
             }
@@ -204,7 +204,7 @@ fun StreamsScreen(undo: UndoBarState? = null) {
         play = { MediaUtils.openMedia(context, streamMedia(it.address, it.name)) },
         queue = {
             MediaUtils.appendMedia(context, streamMedia(it.address, it.name))
-            Toast.makeText(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1), Toast.LENGTH_SHORT).show()
+            Notices.show(context, res.getQuantityString(R.plurals.nag_drop_queued, 1, 1))
         },
         addToPlaylist = { toPlaylist = it },
         rename = { renaming = it },
@@ -229,7 +229,7 @@ fun StreamsScreen(undo: UndoBarState? = null) {
             onPaste = {
                 val pasted = clipboardText(context)
                 if (pasted.isNullOrBlank()) {
-                    Toast.makeText(context, R.string.nag_streams_clipboard_empty, Toast.LENGTH_SHORT).show()
+                    Notices.show(context, R.string.nag_streams_clipboard_empty)
                 } else {
                     address = pasted.trim()
                     invalid = false
@@ -420,7 +420,7 @@ private fun removeStream(scope: CoroutineScope, history: StreamHistory, stream: 
 private fun copyAddress(context: Context, address: String) {
     val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
     clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.nag_streams_address), address))
-    Toast.makeText(context, R.string.nag_streams_copied, Toast.LENGTH_SHORT).show()
+    Notices.show(context, R.string.nag_streams_copied)
 }
 
 /** The clipboard's text, read only when the person asks for it (the Paste button). */
@@ -468,11 +468,11 @@ private fun StreamToPlaylist(stream: SavedStream, history: StreamHistory, scope:
     val store = remember(context) { MediaLibraryPlaylists(context.applicationContext) }
     val playlists by produceState<List<PlaylistSummary>?>(null, store) { value = store.playlists() }
     val list = playlists ?: return
-    val added = { name: String -> Toast.makeText(context, res.getQuantityString(R.plurals.nag_pl_added, 1, 1, name), Toast.LENGTH_SHORT).show() }
+    val added = { name: String -> Notices.show(context, res.getQuantityString(R.plurals.nag_pl_added, 1, 1, name)) }
     fun add(name: String, into: suspend (Long) -> Boolean) {
         scope.launch {
             val id = stream.id.takeIf { it > 0 } ?: history.idOf(stream.address, stream.name)
-            if (id > 0 && into(id)) added(name) else Toast.makeText(context, R.string.nag_streams_playlist_failed, Toast.LENGTH_LONG).show()
+            if (id > 0 && into(id)) added(name) else Notices.show(context, R.string.nag_streams_playlist_failed, long = true)
         }
     }
     AddToPlaylistDialog(

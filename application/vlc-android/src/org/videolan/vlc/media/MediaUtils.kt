@@ -1,7 +1,6 @@
 package org.videolan.vlc.media
 
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -15,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,12 +47,12 @@ import org.videolan.resources.interfaces.IMediaContentResolver
 import org.videolan.resources.interfaces.ResumableList
 import org.videolan.resources.util.getFromMl
 import org.videolan.tools.AppScope
+import org.videolan.tools.Notices
 import org.videolan.tools.Settings
 import org.videolan.tools.localBroadcastManager
 import org.videolan.tools.markBidi
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
-import org.videolan.vlc.gui.AudioPlayerContainerActivity
 import org.videolan.vlc.gui.DialogActivity
 import org.videolan.vlc.gui.dialogs.SubtitleDownloaderDialogFragment
 import org.videolan.vlc.providers.medialibrary.FoldersProvider
@@ -148,12 +146,8 @@ object MediaUtils {
         if (media == null || media.isEmpty() || context == null) return
         SuspendDialogCallback(context) { service ->
             service.append(media)
-            context.let {
-                if (it is Activity) {
-                    val text = context.resources.getQuantityString(R.plurals.tracks_appended, media.size, media.size)
-                    Snackbar.make(if (it is AudioPlayerContainerActivity) it.appBarLayout else it.findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG).show()
-                }
-            }
+            // Nağmedar: said by the window in front, whichever it is
+            if (context is Activity) Notices.show(context, context.resources.getQuantityString(R.plurals.nagmedar_queued, media.size, media.size))
         }
     }
 
@@ -167,12 +161,7 @@ object MediaUtils {
         if (media == null || context == null) return
         SuspendDialogCallback(context) { service ->
             service.insertNext(media)
-            context.let {
-                if (it is Activity) {
-                    val text = context.resources.getQuantityString(R.plurals.tracks_inserted, media.size, media.size)
-                    Snackbar.make(if (it is AudioPlayerContainerActivity) it.appBarLayout else it.findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG).show()
-                }
-            }
+            if (context is Activity) Notices.show(context, context.resources.getQuantityString(R.plurals.nagmedar_play_next, media.size, media.size))
         }
     }
 
@@ -415,8 +404,12 @@ object MediaUtils {
         abstract fun onServiceReady(service: PlaybackService)
     }
 
+    /**
+     * [task] once the playback service is up; while it waits (more than a moment), Nağmedar's
+     * "Getting playback ready…" notice in the window in front, instead of VLC's progress dialog.
+     */
     class SuspendDialogCallback(context: Context, private val task: suspend (service: PlaybackService) -> Unit) {
-        private lateinit var dialog: ProgressDialog
+        private var notice = 0L
         var job: Job = Job()
         val scope = context.scope
         @OptIn(ObsoleteCoroutinesApi::class)
@@ -444,21 +437,14 @@ object MediaUtils {
         init {
             job = scope.launch {
                 delay(300)
-                dialog = ProgressDialog.show(
-                        context,
-                        "${context.applicationContext.getString(R.string.loading)}…",
-                        context.applicationContext.getString(R.string.please_wait), true)
-                dialog.setCancelable(true)
-                dialog.setOnCancelListener { actor.trySend(Disconnect) }
+                notice = Notices.progress(context.getString(R.string.nagmedar_getting_ready))
             }
             actor.trySend(Connect)
         }
 
         private fun dismiss() {
-            try {
-                if (this::dialog.isInitialized && dialog.isShowing) dialog.dismiss()
-                actor.close()
-            } catch (ignored: IllegalArgumentException) {}
+            if (notice != 0L) Notices.dismiss(notice)
+            actor.close()
         }
     }
 

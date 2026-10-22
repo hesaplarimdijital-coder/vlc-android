@@ -2,7 +2,6 @@ package app.nagmedar.ui.library
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +38,7 @@ import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.Notices
 
 /** The media whose information is asked for from a menu ("Medya bilgisi", Ctrl+I); the shell shows it. */
 object MediaInfoRequests {
@@ -123,7 +123,7 @@ private fun MediaInfoContent(media: MediaWrapper) {
         if (location != null) {
             NagButton(stringResource(R.string.nag_info_copy_location), {
                 context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(media.title, location))
-                Toast.makeText(context, R.string.nag_info_location_copied, Toast.LENGTH_SHORT).show()
+                Notices.show(context, R.string.nag_info_location_copied)
             }, icon = NagIcons.Info)
         }
         val facts = tech?.let { techRows(it, key.orEmpty()) }?.map { InfoFact(it.label, it.value) }

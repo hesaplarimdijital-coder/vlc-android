@@ -8,7 +8,6 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings as AndroidSettings
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.background
@@ -102,6 +101,7 @@ import org.videolan.tools.KEY_BROWSE_NETWORK
 import org.videolan.tools.NAGMEDAR_NETWORK_SHARES
 import org.videolan.tools.NetworkMonitor
 import org.videolan.tools.Settings
+import org.videolan.tools.Notices
 
 /** A server being added or changed in the form. */
 private sealed interface Editing {
@@ -128,7 +128,7 @@ fun NetworkScreen(undo: UndoBarState? = null) {
             DatabaseServerStore(context),
             scope,
             locale,
-            onNotice = { notice -> Toast.makeText(context, noticeText(context, notice), Toast.LENGTH_SHORT).show() },
+            onNotice = { notice -> Notices.show(context, noticeText(context, notice)) },
         )
     }
     val actions = remember(context) { ServiceNetworkActions(context) }

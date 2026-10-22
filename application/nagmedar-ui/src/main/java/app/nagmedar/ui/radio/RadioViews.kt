@@ -1,7 +1,6 @@
 package app.nagmedar.ui.radio
 
 import android.content.res.Resources
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -85,6 +84,7 @@ import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import java.util.Locale
 import kotlinx.coroutines.flow.first
+import org.videolan.tools.Notices
 
 /** The widest the radio screen's content grows. */
 private val ContentWidth = 960.dp
@@ -144,7 +144,7 @@ fun RadioPage(
         if (notice is RadioNotice.Removed && undo != null) {
             undo.show(text, res.getString(R.string.nag_sc_undo), ShortcutRegistry.chordLabel(ShortcutId.Undo, res)) { controller.undo(notice) }
         } else {
-            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+            Notices.show(context, text)
         }
         controller.noticed()
     }

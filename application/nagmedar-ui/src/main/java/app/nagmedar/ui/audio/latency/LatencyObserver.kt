@@ -8,7 +8,6 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
 import app.nagmedar.audio.latency.AppliedLatency
 import app.nagmedar.audio.latency.LatencyProfile
 import app.nagmedar.audio.latency.LatencyProfiles
@@ -26,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.videolan.tools.AppScope
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaybackObserver
+import org.videolan.tools.Notices
 
 /**
  * S-613: the output devices as the app sees them: which plays media now, by Android's own order
@@ -161,7 +161,7 @@ class LatencyObserver : PlaybackObserver {
         if (now != null && profile != null && delayMs != 0 && before?.device != now.device) {
             val res = context.resources
             val delay = res.getString(R.string.nag_sync_ms, signed(delayMs, res.locale()))
-            Toast.makeText(context, res.getString(R.string.nag_latency_applied, deviceLabel(res, now.device), delay), Toast.LENGTH_SHORT).show()
+            Notices.show(context, res.getString(R.string.nag_latency_applied, deviceLabel(res, now.device), delay))
         }
     }
 }

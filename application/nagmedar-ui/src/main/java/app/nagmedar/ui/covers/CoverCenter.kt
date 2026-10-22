@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.LruCache
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import java.io.InputStream
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
+import org.videolan.tools.Notices
 
 /** S-1006: the app's one cover finder, and the word that a cover changed. */
 object CoverCenter {
@@ -247,7 +247,7 @@ fun rememberCoverMenu(track: CoverTrack?): () -> List<MenuEntry> {
                 }
             }
             val cover = bytes?.let { CoverCenter.finder(context).choose(track, withContext(Dispatchers.IO) { fitForKeeping(it) }) }
-            if (cover == null) Toast.makeText(context, R.string.nag_cover_not_image, Toast.LENGTH_SHORT).show() else CoverCenter.changed()
+            if (cover == null) Notices.show(context, R.string.nag_cover_not_image) else CoverCenter.changed()
         }
     }
     return {

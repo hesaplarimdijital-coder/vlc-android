@@ -5,10 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -41,6 +42,7 @@ import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.NoticeHost
 import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.LocalTooltipDelay
 import app.nagmedar.ui.components.ScreenCommands
@@ -160,6 +162,7 @@ import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
 import app.nagmedar.ui.transcode.TranscodeRequests
 import app.nagmedar.ui.transcode.TranscodeScreen
+import org.videolan.tools.Notices
 
 /**
  * Root of the new interface: theme from the preferences, density from the last input device,
@@ -411,7 +414,15 @@ private fun NagmedarMain(
                             undo = undo,
                         )
                     }
-                    UndoBarHost(undo, Modifier.align(Alignment.BottomCenter).padding(16.dp))
+                    // the app's notices (what the library, the service and the screens say), over the undo bars
+                    Column(
+                        Modifier.align(Alignment.BottomCenter).padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        NoticeHost()
+                        UndoBarHost(undo)
+                    }
                     if (dropTargets.incoming && dropTargets.hovered == null) DropOverlay()
                 },
                 screen = { destination, shellNavigator ->
@@ -585,7 +596,7 @@ class AppActions(
             DropPlan.SubtitlesNeedAVideo -> res.getString(R.string.nag_drop_subtitle_needs_video)
             DropPlan.Nothing -> res.getString(R.string.nag_drop_nothing)
         }
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Notices.show(context, message)
         return true
     }
 
@@ -594,7 +605,7 @@ class AppActions(
         val media = files.filter { it.playable }
         if (media.isEmpty()) return false
         MediaUtils.appendMedia(context, media.map { MLServiceLocator.getAbstractMediaWrapper(Uri.parse(it.uri)) })
-        Toast.makeText(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, media.size, media.size), Toast.LENGTH_SHORT).show()
+        Notices.show(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, media.size, media.size))
         return true
     }
 
@@ -625,7 +636,7 @@ class AppActions(
     fun perform(id: ShortcutId): Boolean {
         if (!isAvailable(id)) {
             if (ShortcutRegistry[id].scope == ShortcutScope.Global) {
-                Toast.makeText(context, R.string.nag_unavailable_mvp, Toast.LENGTH_SHORT).show()
+                Notices.show(context, R.string.nag_unavailable_mvp)
                 return true
             }
             return false
@@ -705,7 +716,7 @@ class AppActions(
                         AbChoice.X -> R.string.nag_ab_now_x
                     }
                 }
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                Notices.show(context, message)
             }
             ShortcutId.TvLab -> navigator.navigate(Destination.TvLab)
             ShortcutId.RadioSearch -> {
@@ -741,7 +752,7 @@ class AppActions(
         val chapters = PodcastCenter.playing.value?.chapters.orEmpty()
         val target = PlaybackService.instance?.let { Chapters.step(chapters, it.getTime(), forward) }
         if (target == null) {
-            Toast.makeText(context, R.string.nag_pod_chapter_none, Toast.LENGTH_SHORT).show()
+            Notices.show(context, R.string.nag_pod_chapter_none)
         } else {
             PlaybackActions.seekToMs(chapters[target].startMs)
         }
@@ -764,7 +775,7 @@ class AppActions(
                 context.getString(R.string.nag_radio_rec_started, station.name)
             }
         }
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Notices.show(context, message)
     }
 
     /** S-1004: the playing track's lyrics [byMs] later (earlier when negative), said in a toast. */
@@ -779,7 +790,7 @@ class AppActions(
         } else {
             context.getString(R.string.nag_lyrics_delay_now, context.getString(R.string.nag_lyrics_delay_value, delayNumber(delay, context.resources.locale())))
         }
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Notices.show(context, message)
     }
 
     private fun seekBy(deltaMs: Long) {

@@ -3,7 +3,6 @@ package app.nagmedar.ui.transcode
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.videolan.tools.Notices
 
 /** S-1303: the page's windows: the convert window, the HLS sheet, the profile editor. */
 private sealed interface TranscodeWindow {
@@ -94,7 +94,7 @@ fun TranscodeScreen(modifier: Modifier = Modifier) {
                 TranscodeQueue.enqueue(context, input.uri, input.name, input.size, output, outputName, profile)
             }
             val message = if (id == TranscodeQueue.REFUSED) R.string.nag_jobs_same_file else R.string.nag_conv_queued
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            Notices.show(context, message)
             window = null
         }
     }
@@ -128,7 +128,7 @@ fun TranscodeScreen(modifier: Modifier = Modifier) {
         onStopStream = { HlsStream.stop(context) },
         onCopy = { url ->
             clipboard.setText(AnnotatedString(url))
-            Toast.makeText(context, R.string.nag_hls_copied, Toast.LENGTH_SHORT).show()
+            Notices.show(context, R.string.nag_hls_copied)
         },
         onDismissFailure = HlsStream::dismiss,
         modifier = modifier,
@@ -160,7 +160,7 @@ fun TranscodeScreen(modifier: Modifier = Modifier) {
             onStop = { HlsStream.stop(context) },
             onCopy = { url ->
                 clipboard.setText(AnnotatedString(url))
-                Toast.makeText(context, R.string.nag_hls_copied, Toast.LENGTH_SHORT).show()
+                Notices.show(context, R.string.nag_hls_copied)
             },
             onDismiss = {
                 HlsStream.dismiss()

@@ -3,7 +3,6 @@ package app.nagmedar.ui.device
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -97,6 +96,7 @@ import org.videolan.tools.AppScope
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
+import org.videolan.tools.Notices
 
 /** The browser's own choices, kept for the next visit: hidden files shown, and the order. */
 private const val KEY_HIDDEN = "nagmedar_device_hidden"
@@ -215,7 +215,7 @@ private class DeviceActions(
     fun queue(entries: List<DeviceEntry>) {
         if (entries.isEmpty()) return
         PlaybackActions.appendList(context, entries.map(::mediaOf))
-        Toast.makeText(context, res.getQuantityString(R.plurals.nag_drop_queued, entries.size, entries.size), Toast.LENGTH_SHORT).show()
+        Notices.show(context, res.getQuantityString(R.plurals.nag_drop_queued, entries.size, entries.size))
     }
 
     /** A folder's playable files, played or queued; a word when it has none. */
@@ -223,7 +223,7 @@ private class DeviceActions(
         scope.launch {
             val files = model.playableIn(entry)
             when {
-                files.isEmpty() -> Toast.makeText(context, res.getString(R.string.nag_device_nothing_to_play, entry.name), Toast.LENGTH_SHORT).show()
+                files.isEmpty() -> Notices.show(context, res.getString(R.string.nag_device_nothing_to_play, entry.name))
                 enqueue -> queue(files)
                 else -> play(files, 0)
             }

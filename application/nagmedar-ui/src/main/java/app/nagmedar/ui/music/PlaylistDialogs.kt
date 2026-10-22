@@ -1,6 +1,5 @@
 package app.nagmedar.ui.music
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -60,6 +59,7 @@ import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.videolan.tools.Notices
 
 /**
  * S-804: a playlist's name asked in a small window: a new list's, or one renamed. The name comes
@@ -223,13 +223,13 @@ internal fun AddToPlaylistHost(tracks: List<Track>, scope: CoroutineScope, onDis
     val ids = remember(tracks) { tracks.map { it.id }.filter { it > 0 } }
     LaunchedEffect(ids) {
         if (ids.isEmpty()) {
-            Toast.makeText(context, res.getString(R.string.nag_pl_add_none), Toast.LENGTH_LONG).show()
+            Notices.show(context, res.getString(R.string.nag_pl_add_none), long = true)
             onDismiss()
         }
     }
     val list = playlists
     if (list == null || ids.isEmpty()) return
-    val added = { name: String -> Toast.makeText(context, res.getQuantityString(R.plurals.nag_pl_added, ids.size, ids.size, name), Toast.LENGTH_SHORT).show() }
+    val added = { name: String -> Notices.show(context, res.getQuantityString(R.plurals.nag_pl_added, ids.size, ids.size, name)) }
     AddToPlaylistDialog(
         count = ids.size,
         playlists = list,
