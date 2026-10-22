@@ -21,6 +21,9 @@
 #     same line twice kept once, styles kept, never over a file there); many lines at the same
 #     time take no longer than others; a packet over the text's cap is refused before its text is
 #     made, in about its own memory.
+#   - S-1206, S-1202, SP-03: a TS whose PMT names a third stream halfway through is remuxed,
+#     verified, analysed and converted, the late stream left out, under AddressSanitizer and UBSan
+#     when the host build made the *-asan commands.
 set -euo pipefail
 trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -525,6 +528,147 @@ if problems:
     print('::error title=S-1206 formats::' + '; '.join(problems))
     sys.exit(1)
 print(f"ok: B-frame H.264 kept (dts derived, and assumed without a VUI), AV1 {'kept' if av1 else 'skipped (no encoder)'}, the source and a taken file refused as output")
+PY
+
+# the remux, the bitrate analysis and the converter under AddressSanitizer and UBSan where build.sh made them
+sanitized() { if [ -x "$PREFIX/bin/$1-asan" ]; then echo "$PREFIX/bin/$1-asan"; else echo "$PREFIX/bin/$1"; fi; }
+# a sanitizer's report fails the command; its first lines go into the annotation
+failed_run() { # title json log
+    echo "::error title=$1::$( { cat "$2" 2> /dev/null; tr '\r' '\n' < "$3" | grep -v ' MB$' | grep -v '^ *[0-9]* %$' | head -c 2500; } | annotate)"
+    exit 1
+}
+
+echo "== S-1206, S-1202, SP-03: a stream that comes in halfway through a TS"
+# a recording whose programme gains a track for a while: the PMT names a third stream in the middle third only. The
+# remux, the bitrate analysis and the converter know the streams of the file's start; the late one's packets are
+# left out, never looked up past the end of their tables
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=320x240:rate=25" -f lavfi -i "sine=f=440:sample_rate=48000" \
+    -f lavfi -i "sine=f=880:sample_rate=48000" -t 12 -map 0:v -map 1:a -map 2:a -c:v libx264 -preset ultrafast -g 25 \
+    -pix_fmt yuv420p -c:a mp2 -f mpegts "$T/late-src.ts"
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=320x240:rate=25" -f lavfi -i "sine=f=440:sample_rate=48000" \
+    -f lavfi -i "sine=f=880:sample_rate=48000" -t 12 -map 0:v -map 1:a -map 2:a -c:v libx265 -preset ultrafast \
+    -x265-params log-level=error:keyint=25 -pix_fmt yuv420p -c:a mp2 -f mpegts "$T/late-hevc-src.ts"
+python3 - "$T/late-src.ts" "$T/late.ts" "$T/late-hevc-src.ts" "$T/late-hevc.ts" <<'PY'
+# The TS with its last stream in its middle third only: before and after it the PMT does not name it (the
+# section rewritten, its CRC with it) and its packets are left out.
+import sys
+
+
+def crc32(b):
+    crc = 0xFFFFFFFF
+    for x in b:
+        crc ^= x << 24
+        for _ in range(8):
+            crc = ((crc << 1) ^ 0x04C11DB7) & 0xFFFFFFFF if crc & 0x80000000 else (crc << 1) & 0xFFFFFFFF
+    return crc
+
+
+def pid(p):
+    return ((p[1] & 0x1F) << 8) | p[2]
+
+
+def section(p):
+    """Where the section a packet starts begins, or None."""
+    if not p[1] & 0x40:
+        return None
+    afc = (p[3] >> 4) & 3
+    off = 4 + (1 + p[4] if afc & 2 else 0)
+    return off + 1 + p[off] if afc & 1 else None
+
+
+def entries(sec):
+    """The PMT's streams: (pid, start, end) of each entry."""
+    end = 3 + (((sec[1] & 0x0F) << 8) | sec[2]) - 4
+    i = 12 + (((sec[10] & 0x0F) << 8) | sec[11])
+    found = []
+    while i < end:
+        n = 5 + (((sec[i + 3] & 0x0F) << 8) | sec[i + 4])
+        found.append((((sec[i + 1] & 0x1F) << 8) | sec[i + 2], i, i + n))
+        i += n
+    return found
+
+
+def hide_last_stream(src, dst):
+    data = open(src, 'rb').read()
+    assert len(data) % 188 == 0 and data[0] == 0x47, 'not a TS'
+    packets = [data[i:i + 188] for i in range(0, len(data), 188)]
+    pat = next(p for p in packets if pid(p) == 0 and section(p) is not None)
+    s = section(pat)
+    programs = [(pat[s + 8 + k] << 8 | pat[s + 9 + k], (pat[s + 10 + k] & 0x1F) << 8 | pat[s + 11 + k])
+                for k in range(0, (((pat[s + 1] & 0x0F) << 8) | pat[s + 2]) - 9, 4)]
+    pmt = next(pmt_pid for number, pmt_pid in programs if number)
+    first = next(p for p in packets if pid(p) == pmt and section(p) is not None)
+    late = entries(first[section(first):])[-1][0]
+
+    def without_late(p):
+        s = section(p)
+        sec = bytearray(p[s:])
+        kept = bytearray(sec[:12 + (((sec[10] & 0x0F) << 8) | sec[11])])
+        for es, a, b in entries(sec):
+            if es != late:
+                kept += sec[a:b]
+        length = len(kept) - 3 + 4
+        kept[1] = (kept[1] & 0xF0) | (length >> 8)
+        kept[2] = length & 0xFF
+        kept += crc32(kept).to_bytes(4, 'big')
+        out = bytes(p[:s]) + bytes(kept)
+        return out + b'\xff' * (188 - len(out))
+
+    n, out, shown = len(packets), [], 0
+    for i, p in enumerate(packets):
+        middle = n // 3 <= i < 2 * n // 3
+        if pid(p) == late and not middle:
+            continue
+        if pid(p) == pmt and section(p) is not None and not middle:
+            p = without_late(p)
+        shown += pid(p) == late
+        out.append(p)
+    assert shown > 100, f'too little of the late stream: {shown} packets'
+    open(dst, 'wb').write(b''.join(out))
+
+
+for k in range(1, len(sys.argv), 2):
+    hide_last_stream(sys.argv[k], sys.argv[k + 1])
+PY
+printf 'stream\tv:0\nstream\ta:0\n' > "$T/plan-late.txt"
+"$(sanitized remux)" run "$T/late.ts" "$T/remux-late.mkv" "$T/plan-late.txt" > "$T/remux-late.json" 2> "$T/remux-late.log" ||
+    failed_run "S-1206 late stream" "$T/remux-late.json" "$T/remux-late.log"
+lhash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-late.json")
+"$(sanitized remux)" verify "$T/remux-late.mkv" nal_units "$lhash" 300 > "$T/verify-late.json" 2> "$T/verify-late.log" ||
+    failed_run "S-1209 late stream" "$T/verify-late.json" "$T/verify-late.log"
+"$(sanitized bitrate)" "$T/late.ts" > "$T/bitrate-late.json" 2> "$T/bitrate-late.log" ||
+    failed_run "S-1202 late stream" "$T/bitrate-late.json" "$T/bitrate-late.log"
+"$(sanitized dvconvert)" "$T/late-hevc.ts" "$T/dv-late.mkv" > "$T/dv-late.json" 2> "$T/dv-late.log" ||
+    failed_run "SP-03 late stream" "$T/dv-late.json" "$T/dv-late.log"
+ffprobe -v error -print_format json -show_streams "$T/remux-late.mkv" > "$T/probe-remux-late.json"
+ffprobe -v error -print_format json -show_streams "$T/dv-late.mkv" > "$T/probe-dv-late.json"
+python3 - "$T" "$(sanitized remux)" <<'PY'
+import json, sys
+t, asan = sys.argv[1], sys.argv[2].endswith('-asan')
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def load(name):
+    return json.load(open(f'{t}/{name}'))
+stats = load('remux-late.json')
+check(not stats['error'] and stats['video_packets'] == 300 and [s['ref'] for s in stats['streams']] == ['v:0', 'a:0'], f"remux {stats['error']} {stats['video_packets']}")
+check(load('verify-late.json')['ok'], 'the remux of the TS does not verify')
+check([s['codec_type'] for s in load('probe-remux-late.json')['streams']] == ['video', 'audio'], 'the late stream got into the remux')
+b = load('bitrate-late.json')
+# two streams: the third was not known at the start, and its packets were read past
+check(not b['error'] and b['complete'] and [s['type'] for s in b['streams']] == ['video', 'audio'] and 12 <= b['seconds'] <= 14, f"bitrate {b.get('error')} {b.get('seconds')} {[s['type'] for s in b['streams']]}")
+dv = load('dv-late.json')
+# a stream without Dolby Vision: converted all the same, and said so
+check(dv['video_packets'] == 300 and dv['streams_copied'] == 2 and dv['streams_skipped'] == 0 and 'no Dolby Vision RPU' in dv['error'], f'dvconvert {dv}')
+check([s['codec_type'] for s in load('probe-dv-late.json')['streams']] == ['video', 'audio'], 'the late stream got into the conversion')
+for log in ('remux-late.log', 'verify-late.log', 'bitrate-late.log', 'dv-late.log'):
+    text = open(f'{t}/{log}', errors='replace').read()
+    check('AddressSanitizer' not in text and 'runtime error' not in text, f'{log}: a sanitizer report')
+if problems:
+    print('::error title=Late TS stream::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: a stream that comes in halfway left out by the remux, the verification, the bitrate analysis and the converter{' under AddressSanitizer and UBSan' if asan else ''}")
 PY
 
 echo "== S-1207: compatibility tracks"

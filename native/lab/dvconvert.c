@@ -629,6 +629,7 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
     AVFormatContext *ic = NULL, *oc = NULL;
     AVPacket *pkt = av_packet_alloc(), *outpkt = av_packet_alloc();
     int *map = NULL, video = -1, ret;
+    unsigned streams = 0;
     ByteBuf buf = {0};
     int64_t started = av_gettime_relative(), last_report = 0, start_pts = AV_NOPTS_VALUE;
     Ctx ctx = {.stats = s};
@@ -691,12 +692,15 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
     }
     if (mp4)
         oc->strict_std_compliance = FF_COMPLIANCE_UNOFFICIAL; /* dvvC */
-    map = av_calloc(ic->nb_streams, sizeof(*map));
+    /* the streams known once the file is open; one the demuxer adds while reading (a TS whose PMT names one
+     * more) is not copied, its packets are left out */
+    streams = ic->nb_streams;
+    map = av_calloc(streams, sizeof(*map));
     if (!map) {
         ret = AVERROR(ENOMEM);
         goto end;
     }
-    for (unsigned i = 0; i < ic->nb_streams; i++) {
+    for (unsigned i = 0; i < streams; i++) {
         AVStream *ist = ic->streams[i];
         enum AVMediaType type = ist->codecpar->codec_type;
         int keep = (int)i == video || type == AVMEDIA_TYPE_AUDIO;
@@ -789,7 +793,7 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
             fail(s, "read", ret);
             goto end;
         }
-        int out_index = map[pkt->stream_index];
+        int out_index = (unsigned)pkt->stream_index < streams ? map[pkt->stream_index] : -1;
         if (out_index < 0) {
             av_packet_unref(pkt);
             continue;

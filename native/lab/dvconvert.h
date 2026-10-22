@@ -39,7 +39,9 @@ typedef void (*dvc_progress_fn)(void *opaque, double done_seconds, double total_
 /**
  * Remuxes [input] to [output] (Matroska, or MP4 when [mp4] is set): the HEVC base layer is
  * copied bit for bit, enhancement-layer NAL units are dropped and every RPU is converted to
- * profile 8.1 (libdovi mode 2). Other streams are copied; MP4 keeps only audio and mov_text.
+ * profile 8.1 (libdovi mode 2). Other streams are copied; MP4 keeps only audio and mov_text. A
+ * stream the demuxer finds only after the file is open (an MPEG-TS whose PMT names one more
+ * halfway) is left out.
  * [max_seconds] > 0 stops after that much media. [cancel] is polled between packets.
  * Returns 0 on success, a negative AVERROR otherwise (stats->error says why).
  */

@@ -1062,6 +1062,7 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
     AVIOContext *in_io = NULL, *out_io = NULL;
     AVPacket *pkt = av_packet_alloc(), *outpkt = av_packet_alloc();
     int *map = NULL, video = -1, ret, encode_default = 0;
+    unsigned streams = 0;
     AudioEncoder *encoders[REMUX_MAX_STREAMS] = {0};
     DvcBuf buf = {0};
     DvcStats dv = {0};
@@ -1126,13 +1127,17 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
     if ((ret = open_input(input_fd, &ic, &in_io, s->error, sizeof(s->error))) < 0)
         goto end;
     s->source_seconds = ic->duration > 0 ? ic->duration / (double)AV_TIME_BASE : 0;
+    /* the streams the plan can name: those known once the file is open (as the probe lists them); a stream the
+     * demuxer adds while reading (a TS whose PMT names one more, a programme stream's subtitles that start
+     * late) is in no plan and its packets are left out (remuxing.c of FFmpeg's examples does the same) */
+    streams = ic->nb_streams;
 
-    map = av_malloc_array(ic->nb_streams, sizeof(*map));
+    map = av_malloc_array(streams, sizeof(*map));
     if (!map) {
         ret = AVERROR(ENOMEM);
         goto end;
     }
-    for (unsigned i = 0; i < ic->nb_streams; i++)
+    for (unsigned i = 0; i < streams; i++)
         map[i] = -1;
     for (int n = 0; n < plan->count; n++) {
         int src = resolve_ref(ic, plan->streams[n].ref);
@@ -1272,7 +1277,7 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
         av_strlcpy(ss->codec, avcodec_get_name(ist->codecpar->codec_id), sizeof(ss->codec));
     }
     if (plan->attachments) {
-        for (unsigned i = 0; i < ic->nb_streams; i++) {
+        for (unsigned i = 0; i < streams; i++) {
             AVStream *ist = ic->streams[i];
             if (ist->codecpar->codec_type != AVMEDIA_TYPE_ATTACHMENT)
                 continue;
@@ -1351,6 +1356,10 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
         if (ret < 0) {
             fail(s->error, sizeof(s->error), "read", ret);
             goto end;
+        }
+        if ((unsigned)pkt->stream_index >= streams) {
+            av_packet_unref(pkt);
+            continue;
         }
         /* the compatibility tracks decode the packet before the copy takes it */
         for (int n = 0; n < plan->count; n++) {

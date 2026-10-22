@@ -24,9 +24,12 @@ extern "C" {
  *
  * Streams are written in the order of their lines. A stream is named by its type and its
  * ordinal in the source: v:N the N-th video stream (cover pictures not counted), a:N the N-th
- * audio, s:N the N-th subtitle, as the media probe (S-802) lists them. Each key after the
- * name is optional and overrides the source's: default and forced flags (0/1), the language
- * (ISO 639-2) and the title (empty clears it). Without a stream line nothing is written.
+ * audio, s:N the N-th subtitle, as the media probe (S-802) lists them: the streams known once
+ * the file is open. A stream the demuxer finds only later (an MPEG-TS whose PMT names one more
+ * halfway, a programme stream's subtitles that start late) is in no plan; its packets are left
+ * out. Each key after the name is optional and overrides the source's: default and forced
+ * flags (0/1), the language (ISO 639-2) and the title (empty clears it). Without a stream line
+ * nothing is written.
  *
  * An encode line (S-1207) adds a stream: the audio stream it names decoded and encoded again,
  * written where the line stands (the planner puts it right after the copied original, which

@@ -214,16 +214,19 @@ char *media_bitrate(const char *input, double max_seconds, bitrate_progress prog
         return error_json("stream info", ret);
     }
 
+    /* the streams known once the file is open, as the probe lists them; a stream the demuxer adds while reading
+     * (a TS whose PMT names one more) is not counted */
+    const unsigned streams = ic->nb_streams;
     int video = -1;
-    for (unsigned i = 0; i < ic->nb_streams && video < 0; i++) {
+    for (unsigned i = 0; i < streams && video < 0; i++) {
         const AVStream *st = ic->streams[i];
         if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO && !(st->disposition & AV_DISPOSITION_ATTACHED_PIC))
             video = (int)i;
     }
 
     Seconds total = {0}, video_seconds = {0};
-    StreamSum *sums = calloc(ic->nb_streams ? ic->nb_streams : 1, sizeof(*sums));
-    int *last = calloc(ic->nb_streams ? ic->nb_streams : 1, sizeof(*last));
+    StreamSum *sums = calloc(streams ? streams : 1, sizeof(*sums));
+    int *last = calloc(streams ? streams : 1, sizeof(*last));
     AVPacket *pkt = av_packet_alloc();
     int complete = 1, failed = sums == NULL || last == NULL || pkt == NULL;
     int64_t size = ic->pb ? avio_size(ic->pb) : 0;
@@ -241,7 +244,7 @@ char *media_bitrate(const char *input, double max_seconds, bitrate_progress prog
             break;
         }
         unsigned index = (unsigned)pkt->stream_index;
-        if (index < ic->nb_streams && pkt->size > 0) {
+        if (index < streams && pkt->size > 0) {
             const AVStream *st = ic->streams[index];
             int second = second_of(st, pkt, last[index]);
             last[index] = second;
@@ -281,7 +284,7 @@ char *media_bitrate(const char *input, double max_seconds, bitrate_progress prog
         avformat_close_input(&ic);
         return error_json("memory", AVERROR(ENOMEM));
     }
-    for (unsigned i = 0; i < ic->nb_streams; i++)
+    for (unsigned i = 0; i < streams; i++)
         stream_finish(&sums[i]);
 
     uint64_t all_bytes = 0, video_bytes = 0;
@@ -317,7 +320,7 @@ char *media_bitrate(const char *input, double max_seconds, bitrate_progress prog
     put_int(&bp, &first, "video_peak_5s_kbps", peak_window(&video_seconds, PEAK_WINDOW));
     key(&bp, &first, "streams");
     av_bprint_chars(&bp, '[', 1);
-    for (unsigned i = 0; i < ic->nb_streams; i++) {
+    for (unsigned i = 0; i < streams; i++) {
         const AVStream *st = ic->streams[i];
         const AVCodecDescriptor *codec = avcodec_descriptor_get(st->codecpar->codec_id);
         int sfirst = 1;

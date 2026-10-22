@@ -3,7 +3,8 @@
 # the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
 #
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
-#                              dvconvert, remux, mediaprobe, subextract and nagaudio commands (host tests in CI: test-host.sh)
+#                              dvconvert, remux, mediaprobe, subextract and nagaudio commands (host tests in CI: test-host.sh);
+#                              remux, bitrate and dvconvert also with AddressSanitizer (*-asan) where cc has it
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
@@ -272,6 +273,21 @@ host() {
         "$ROOT/native/lab/subtitle_extract.c" "$ROOT/native/lab/subtitle_extract_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
         > "$WORK/subextract.log" 2>&1 || fail_log "subextract (host)" "$WORK/subextract.log"
+    # the remux, the bitrate analysis and the converter again under AddressSanitizer and UBSan, where the
+    # compiler has them: test-host.sh runs the files that once made them read past their tables with these
+    if echo 'int main(void) { return 0; }' | "${CC:-cc}" -x c -fsanitize=address,undefined -o "$WORK/sanitizer-check" - > /dev/null 2>&1; then
+        local san=(-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all -Wall -I"$PREFIX/include")
+        local libs=(-L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl)
+        log "remux, bitrate and dvconvert with AddressSanitizer (host)"
+        { "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/remux-asan" "$ROOT/native/lab/remux.c" "$ROOT/native/lab/dvconvert.c" \
+              "$ROOT/native/lab/remux_cli.c" "${libs[@]}" &&
+          "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/bitrate-asan" "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" "${libs[@]}" &&
+          "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/dvconvert-asan" "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" "${libs[@]}"
+        } > "$WORK/sanitizers.log" 2>&1 || fail_log "sanitizer builds (host)" "$WORK/sanitizers.log"
+    else
+        log "no AddressSanitizer in ${CC:-cc}: the host tests run the plain commands"
+        rm -f "$PREFIX/bin/remux-asan" "$PREFIX/bin/bitrate-asan" "$PREFIX/bin/dvconvert-asan"
+    fi
 }
 
 android() {

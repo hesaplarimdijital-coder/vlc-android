@@ -29,7 +29,9 @@ typedef int (*bitrate_progress)(void *opaque, double fraction);
  *
  * A second's figure is the bytes of the packets whose timestamps fall in it, as kilobits per
  * second (1 000 bits). The 5-second peak is the highest mean of five consecutive seconds, what a
- * player's buffer must take. [progress], when not NULL, is called about every half a percent;
+ * player's buffer must take. The streams are those known once the file is open; one the demuxer
+ * finds only later (an MPEG-TS whose PMT names one more halfway) is not counted.
+ * [progress], when not NULL, is called about every half a percent;
  * [cancel], when not NULL, is polled while packets are read.
  */
 char *media_bitrate(const char *input, double max_seconds, bitrate_progress progress, void *opaque, volatile int *cancel);
