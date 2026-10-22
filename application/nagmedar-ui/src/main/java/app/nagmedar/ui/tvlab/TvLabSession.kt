@@ -8,7 +8,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.lab.BitrateAnalysis
 import app.nagmedar.lab.DiskSpeed
 import app.nagmedar.lab.MediaTech
@@ -338,14 +337,13 @@ object TvLabSession {
     private var controller: TvLabController? = null
 
     fun get(context: Context): TvLabController = controller ?: synchronized(this) {
-        // made in the global snapshot: the first window asks inside its composition (NagmedarApp), other windows read it too
-        controller ?: Snapshot.global {
-            TvLabController(
-                NativeTvLabEngine(context.applicationContext),
-                profileStore(context),
-                CoroutineScope(SupervisorJob() + Dispatchers.Main),
-            )
-        }.also { controller = it }
+        // made in the caller's snapshot: NagmedarApp asks inside its composition and reads it there,
+        // which a state made in Snapshot.global, newer than that composition's snapshot, would not allow
+        controller ?: TvLabController(
+            NativeTvLabEngine(context.applicationContext),
+            profileStore(context),
+            CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        ).also { controller = it }
     }
 
     /** The TV Lab when it was opened; null before. */

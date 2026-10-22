@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.lab.CompatibilityTrack
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.lab.NativeLab
@@ -341,7 +340,7 @@ object RemuxBatchSession {
     private var controller: RemuxBatchController? = null
 
     fun get(context: Context): RemuxBatchController = controller ?: synchronized(this) {
-        // made in the global snapshot: the TV Lab asks inside its composition, other windows read it too
-        controller ?: Snapshot.global { RemuxBatchController(context.applicationContext, CoroutineScope(SupervisorJob() + Dispatchers.Main)) }.also { controller = it }
+        // made in the caller's snapshot, as the TV Lab's controller is (TvLabSession.get)
+        controller ?: RemuxBatchController(context.applicationContext, CoroutineScope(SupervisorJob() + Dispatchers.Main)).also { controller = it }
     }
 }
