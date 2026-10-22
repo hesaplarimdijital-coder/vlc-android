@@ -540,10 +540,12 @@ data class RemuxJobEntry(
     val events: String = "",
     @ColumnInfo(name = "cancel_requested") val cancelRequested: Boolean = false,
     /**
-     * Whether the output is the job's own to remove or empty: set once the job found it empty
-     * and began writing. An output refused (the source itself, or a file that held something)
-     * is never touched. A failed or cancelled job that still owns its output could not remove
-     * it yet: the queue tries again ([RemuxJobDao.leftovers]); once removed it is no longer owned.
+     * Whether the output is the job's own to remove or empty: set when the job is queued into an
+     * empty output (the document the picker or a batch has just made for it), or once it found it
+     * empty and began writing; while no attempt has written into it, it is removed only while it
+     * is still empty. An output refused (the source itself, or a file that held something) is
+     * never touched. A failed or cancelled job that still owns its output could not remove it
+     * yet: the queue tries again ([RemuxJobDao.leftovers]); once removed it is no longer owned.
      */
     @ColumnInfo(name = "owns_output") val ownsOutput: Boolean = false,
     /**

@@ -49,13 +49,15 @@ object RemuxEvent {
  * [ConvertPolicy]), verifying, then done with the verified hash, or failed with why, or
  * cancelled. A job is taken up only while it still waits ([RemuxJobDao.claim]): a cancel that
  * came first wins. It writes only into an output it found empty and no other job uses, and only
- * such an output ([RemuxJobEntry.ownsOutput], recorded before the first byte) is ever removed or
- * emptied: the source, or a file that held something, is refused and left alone. Nothing of a
- * job that is not done stays on the disk: a failed or cancelled job's output is removed (one
- * that cannot be removed yet stays the job's and is removed later, [cleanUp]), an interrupted
- * one's emptied until it starts over. A job whose worker is stopped (the interruption says why)
- * goes back to the queue, and a job left running by a process that died is started again from
- * the beginning ([recoverInterrupted]): a Matroska file written halfway cannot be continued.
+ * such an output ([RemuxJobEntry.ownsOutput]: the empty document it was queued with, or one it
+ * found empty before its first byte) is ever removed or emptied, and one no attempt wrote into
+ * only while it is still empty: the source, or a file that held something, is refused and left
+ * alone. Nothing of a job that is not done stays on the disk: a failed or cancelled job's output
+ * is removed (one that cannot be removed yet stays the job's and is removed later, [cleanUp]),
+ * an interrupted one's emptied until it starts over. A job whose worker is stopped (the
+ * interruption says why) goes back to the queue, and a job left running by a process that died
+ * is started again from the beginning ([recoverInterrupted]): a Matroska file written halfway
+ * cannot be continued.
  * While a job runs its row is written column by column, so a cancel asked meanwhile is never
  * overwritten. The queue as a whole (S-1210) is [held] by the user (the running job waits where
  * it is, paused, no other starts) or [waits] (its night run: no job starts before the time); a
@@ -151,14 +153,16 @@ class RemuxRunner(
             events = events,
         )
         onUpdate(current)
+        // whether an earlier attempt wrote into the output: until one did, it is the empty document the job was queued with
+        val written = job.attempts > 0
         // a cancel asked while an earlier attempt ran, seen only after the worker stopped under it
-        if (dao.get(job.id)?.cancelRequested != false) return finish(current, RemuxJobState.CANCELLED, RemuxJobError.CANCELLED)
+        if (dao.get(job.id)?.cancelRequested != false) return finish(current, RemuxJobState.CANCELLED, RemuxJobError.CANCELLED, written)
         if (job.inputUri == job.outputUri) return refuse(current, RemuxJobError.SAME_FILE)
         if (dao.othersUsing(job.outputUri, job.id) > 0) return refuse(current, RemuxJobError.OUTPUT_IN_USE)
         val output = Uri.parse(job.outputUri)
         // only into an empty output: a document the picker made, never a film it "replaced"
         var found = engine.outputState(output)
-        if (found == OutputState.Holds && job.ownsOutput) {
+        if (found == OutputState.Holds && job.ownsOutput && written) {
             // what an earlier attempt of this job left when emptying it failed then: its own, emptied now
             engine.emptyOutput(output)
             found = engine.outputState(output)
@@ -166,21 +170,23 @@ class RemuxRunner(
         }
         when (found) {
             OutputState.Empty -> Unit
+            // filled by something else since it was queued, or never the job's: left as it is
             OutputState.Holds -> return refuse(current, RemuxJobError.OUTPUT_NOT_EMPTY)
             OutputState.NotAFile -> return refuse(current, RemuxJobError.OUTPUT_NOT_FILE)
-            // one the job owned stays its own, removed when it can be
-            OutputState.Unreadable -> return if (job.ownsOutput) finish(current, RemuxJobState.FAILED, RemuxJobError.OPEN_OUTPUT) else refuse(current, RemuxJobError.OPEN_OUTPUT)
+            // one an earlier attempt wrote stays the job's, removed when it can be
+            OutputState.Unreadable -> return if (job.ownsOutput && written) finish(current, RemuxJobState.FAILED, RemuxJobError.OPEN_OUTPUT) else refuse(current, RemuxJobError.OPEN_OUTPUT)
         }
         // from here the empty document is the job's, before the first byte: removed with it when it fails
         dao.saveOwnsOutput(job.id, true)
         current = current.copy(ownsOutput = true)
-        if (!engine.available) return finish(current, RemuxJobState.FAILED, RemuxJobError.NO_TOOLS)
-        val plan = RemuxPlan.parse(job.plan) ?: return finish(current, RemuxJobState.FAILED, RemuxJobError.ENGINE + "bad plan")
+        if (!engine.available) return finish(current, RemuxJobState.FAILED, RemuxJobError.NO_TOOLS, written)
+        val plan = RemuxPlan.parse(job.plan) ?: return finish(current, RemuxJobState.FAILED, RemuxJobError.ENGINE + "bad plan", written)
         val steering = Steering(current, RemuxJobState.RUNNING, interruption)
         val result = try {
             engine.remux(Uri.parse(job.inputUri), output, plan, steering::step)
         } catch (e: RemuxOpenException) {
-            return finish(steering.latest(), RemuxJobState.FAILED, if (e.output) RemuxJobError.OPEN_OUTPUT else RemuxJobError.OPEN_INPUT)
+            // the engine wrote nothing
+            return finish(steering.latest(), RemuxJobState.FAILED, if (e.output) RemuxJobError.OPEN_OUTPUT else RemuxJobError.OPEN_INPUT, written)
         }
         current = steering.latest()
         val interruptedWhile = steering.interrupted
@@ -225,13 +231,21 @@ class RemuxRunner(
 
     /**
      * The job's end: anything but done leaves no output behind, when the output is the job's
-     * own; one that cannot be removed now stays the job's, for [cleanUp] to remove later.
+     * own; one that cannot be removed now stays the job's, for [cleanUp] to remove later. One
+     * no attempt has [written] into is the empty document the job was queued with: removed while
+     * it is still empty, else (or when it cannot be removed now) left as it is, the job's no
+     * longer: at worst an empty file stays, never one that holds something goes.
      */
-    private fun finish(job: RemuxJobEntry, state: String, error: String?): RemuxJobEntry {
+    private fun finish(job: RemuxJobEntry, state: String, error: String?, written: Boolean = true): RemuxJobEntry {
+        val output = Uri.parse(job.outputUri)
         val owns = when {
             state == RemuxJobState.DONE -> job.ownsOutput
             !job.ownsOutput -> false
-            else -> !engine.removeOutput(Uri.parse(job.outputUri))
+            written -> !engine.removeOutput(output)
+            else -> {
+                if (engine.outputState(output) == OutputState.Empty) engine.removeOutput(output)
+                false
+            }
         }
         val done = job.copy(state = state, error = error, finishedAt = now(), cancelRequested = false, ownsOutput = owns)
         dao.update(done)
@@ -382,12 +396,18 @@ class RemuxOpenException(val output: Boolean) : RuntimeException(if (output) "ou
 /**
  * Removes the output a failed or cancelled [job] still owns, when it is only that job's (no
  * other job writes into it or keeps it) and still a file: whether the job owns none now. One
- * shared with another job, or no longer a file, is given up and left alone.
+ * shared with another job, or no longer a file, is given up and left alone. A job that never
+ * ran owns only the empty document it was queued with: removed while it is still empty; one
+ * that holds something now is not the job's and is left alone, one that does not open now is
+ * tried again later.
  */
 internal fun removeOwnedOutput(engine: RemuxEngine, dao: RemuxJobDao, job: RemuxJobEntry): Boolean {
     if (!job.ownsOutput) return true
     val output = Uri.parse(job.outputUri)
-    val ours = dao.othersUsing(job.outputUri, job.id) == 0 && engine.outputState(output) != OutputState.NotAFile
+    val found = engine.outputState(output)
+    val ran = job.attempts > 0
+    if (!ran && found == OutputState.Unreadable) return false
+    val ours = dao.othersUsing(job.outputUri, job.id) == 0 && found != OutputState.NotAFile && (ran || found == OutputState.Empty)
     if (ours && !engine.removeOutput(output)) return false
     dao.saveOwnsOutput(job.id, false)
     return true

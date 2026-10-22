@@ -35,14 +35,18 @@ class RemuxQueue(
      * (both the picker's "replace"), [REFUSED_NOT_FILE] when it is not a regular file, or
      * [REFUSED_IN_USE] when another job writes into it or keeps it: a job writes only into an
      * empty, new file of its own, and the source is never written. The runner and the engine
-     * check the same again before writing. The job goes last in the queue's order (S-1210);
-     * [start] false leaves the worker to the caller (a batch asks once, at its end).
+     * check the same again before writing. An output found empty is the job's from now on (the
+     * document the picker or the batch has just made for it): a job cancelled before it ran
+     * removes it again, as long as it is still empty ([removeOwnedOutput]). The job goes last in
+     * the queue's order (S-1210); [start] false leaves the worker to the caller (a batch asks
+     * once, at its end).
      */
     suspend fun enqueue(input: Uri, inputName: String, inputSize: Long, output: Uri, outputName: String, plan: RemuxPlan, start: Boolean = true): Long =
         withContext(Dispatchers.IO) {
             if (input == output) return@withContext REFUSED_SAME_FILE
             if (dao.othersUsing(output.toString(), 0) > 0) return@withContext REFUSED_IN_USE
-            when (engine.outputState(output)) {
+            val found = engine.outputState(output)
+            when (found) {
                 OutputState.Holds -> return@withContext REFUSED_NOT_EMPTY
                 OutputState.NotAFile -> return@withContext REFUSED_NOT_FILE
                 // one that does not open now is refused by the runner, untouched
@@ -57,6 +61,7 @@ class RemuxQueue(
                     outputName = outputName,
                     plan = plan.toJson(),
                     createdAt = System.currentTimeMillis(),
+                    ownsOutput = found == OutputState.Empty,
                     position = dao.nextPosition(),
                 ),
             )
@@ -84,9 +89,9 @@ class RemuxQueue(
 
     /**
      * Stops a job: a waiting one is marked cancelled at once and, when the output is its own
-     * (what an interrupted attempt left) and still only its own, that output removed (or later,
-     * when it cannot be now); a running one is asked to stop and marks itself when the engine
-     * returns, its partial output removed.
+     * (the empty document it was queued with, or what an interrupted attempt left) and still
+     * only its own, that output removed (or later, when it cannot be now); a running one is
+     * asked to stop and marks itself when the engine returns, its partial output removed.
      */
     suspend fun cancel(id: Long) = withContext(Dispatchers.IO) { cancelNow(id) }
 

@@ -137,6 +137,31 @@ class RemuxRunnerTest {
         assertTrue(engine.removed.isEmpty())
     }
 
+    /**
+     * The document a job was queued with (its own from the start) that something else filled
+     * since: refused and left as it is, never emptied; a job cancelled as the worker takes it up
+     * removes its document only while it is still empty.
+     */
+    @Test
+    fun aQueuedDocumentFilledSinceIsLeftAsItIs() {
+        val id = dao.insert(sampleJob(ownsOutput = true))
+        engine.outputsEmpty = false
+        val (runner, active) = runner()
+        val failed = runner.run(dao.get(id)!!, active)
+        assertEquals(RemuxJobError.OUTPUT_NOT_EMPTY, failed.error)
+        assertTrue(engine.removed.isEmpty() && engine.emptied.isEmpty())
+        assertEquals(false, failed.ownsOutput)
+        val filled = dao.insert(sampleJob(id = 2, ownsOutput = true).copy(outputUri = SAMPLE_OUTPUT + "-2", cancelRequested = true))
+        val cancelled = runner.run(dao.get(filled)!!, active)
+        assertEquals(RemuxJobState.CANCELLED, cancelled.state)
+        assertTrue(engine.removed.isEmpty())
+        assertEquals(false, cancelled.ownsOutput)
+        engine.outputsEmpty = true
+        val empty = dao.insert(sampleJob(id = 3, ownsOutput = true).copy(outputUri = SAMPLE_OUTPUT + "-3", cancelRequested = true))
+        assertEquals(false, runner.run(dao.get(empty)!!, active).ownsOutput)
+        assertEquals(listOf(Uri.parse(SAMPLE_OUTPUT + "-3")), engine.removed)
+    }
+
     /** The engine sees one file behind two descriptors (device and inode, or the path): refused before a byte, left alone. */
     @Test
     fun theEnginesRefusalIsNeverARemoval() {
