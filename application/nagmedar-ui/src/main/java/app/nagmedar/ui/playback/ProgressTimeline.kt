@@ -2,7 +2,6 @@ package app.nagmedar.ui.playback
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
@@ -37,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -95,6 +95,7 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -114,13 +115,13 @@ enum class TimelineStyle {
 
 /**
  * The player's progress, as the music apps draw it: a rounded track, the part played in the accent, over the track's
- * [waveform] drawn soft (its loudness, bar by bar); the elapsed and the remaining time in even figures. The position
- * moves on every frame between the service's readings ([progress], a few a second) at the speed of [rate], so it
- * glides instead of stepping. The thumb grows under the pointer, under a finger and with the focus; dragging shows
- * the time (and the chapter) in a bubble above it and seeks where it is let go, with a light tick of the phone each
- * time it crosses a chapter's start. Left and Right step five seconds, Home and End go to the ends; screen readers
- * read and set it as a seek bar. [marks] are the chapters' starts (S-1104), drawn as ticks and named under the
- * pointer, in the bubble and with the focus.
+ * [waveform] drawn soft (its loudness, bar by bar); the elapsed and the remaining time in even figures. Between the
+ * service's readings ([progress], twice a second) the position moves on at the speed of [rate], a pixel at a time, so
+ * it glides instead of stepping (with "Remove animations", with the readings alone). The thumb grows under the
+ * pointer, under a finger and with the focus; dragging shows the time (and the chapter) in a bubble above it and
+ * seeks where it is let go, with a light tick of the phone each time it crosses a chapter's start. Left and Right
+ * step five seconds, Home and End go to the ends; screen readers read and set it as a seek bar. [marks] are the
+ * chapters' starts (S-1104), drawn as ticks and named under the pointer, in the bubble and with the focus.
  */
 @Composable
 fun ProgressTimeline(
@@ -144,15 +145,13 @@ fun ProgressTimeline(
     val smooth = remember { SmoothProgress() }
     val latestProgress = rememberUpdatedState(progress)
     val latestLength by rememberUpdatedState(lengthMs)
+    var widthPx by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(smooth) { snapshotFlow { latestProgress.value() }.collect { smooth.report(it.coerceIn(0f, 1f), latestLength) } }
-    LaunchedEffect(playing, lengthMs) {
-        if (!playing || lengthMs <= 0L) return@LaunchedEffect
-        // the frames the position is drawn on; a test's clock or "Remove animations" ends the loop, the readings stay
-        while (true) withInfiniteAnimationFrameNanos { smooth.frameNanos = it }
+    LaunchedEffect(playing, lengthMs, rate, widthPx, motion.reduced) {
+        if (playing && !motion.reduced) smooth.glide(lengthMs, rate, widthPx)
     }
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
-    var widthPx by remember { mutableFloatStateOf(1f) }
     var dragging by remember { mutableStateOf(false) }
     var dragValue by remember { mutableFloatStateOf(0f) }
     var hoverAt by remember { mutableStateOf<Float?>(null) }
@@ -445,9 +444,25 @@ private const val RMS_SCALE = 2.2f
 internal class SmoothProgress {
     private var anchor by mutableFloatStateOf(0f)
     private var anchorNanos by mutableLongStateOf(0L)
+
+    /** The frame the position was last carried on to ([glide]). */
     var frameNanos by mutableLongStateOf(0L)
+        private set
     private var held = -1f
     private var heldUntil = 0L
+
+    /**
+     * Carries the position on while it plays: a pixel of a timeline [widthPx] wide at a time, as often as [rate]
+     * moves it one ([glideStepMs]), each step on a frame, so that none is drawn while the window is out of sight.
+     * Returns at once when a reading moves it less than a pixel: the readings alone do then.
+     */
+    suspend fun glide(lengthMs: Long, rate: Float, widthPx: Float) {
+        val step = glideStepMs(lengthMs, rate, widthPx) ?: return
+        while (true) {
+            delay(step)
+            withFrameNanos { frameNanos = it }
+        }
+    }
 
     fun fraction(playing: Boolean, lengthMs: Long, rate: Float): Float {
         val base = anchor
@@ -480,18 +495,34 @@ internal class SmoothProgress {
     }
 }
 
+/**
+ * How often a timeline [widthPx] wide moves on between the readings of a media [lengthMs] long playing at [rate]:
+ * once a pixel, at most every [GLIDE_MIN_STEP_MS]; null when a pixel takes longer than the readings' interval
+ * ([PROGRESS_READING_MS]), the readings alone moving it then (a track on a phone's bar, a film anywhere).
+ */
+internal fun glideStepMs(lengthMs: Long, rate: Float, widthPx: Float): Long? {
+    if (lengthMs <= 0L || rate <= 0f || widthPx < 1f) return null
+    val pixelMs = lengthMs / (rate * widthPx)
+    if (pixelMs >= PROGRESS_READING_MS) return null
+    return max(pixelMs.toLong(), GLIDE_MIN_STEP_MS)
+}
+
+/** The shortest step of a glide, some fifty a second: more would not show on a timeline. */
+internal const val GLIDE_MIN_STEP_MS = 20L
+
 /** The played part of what plays as a hairline (the compact bars), gliding as [ProgressTimeline] does; read as the position. */
 @Composable
 fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, modifier: Modifier = Modifier, rate: Float = 1f) {
     val colors = NagTheme.colors
+    val reduced = NagTheme.motion.reduced
     val label = stringResource(R.string.nag_position)
     val smooth = remember { SmoothProgress() }
     val latestProgress = rememberUpdatedState(progress)
     val latestLength by rememberUpdatedState(lengthMs)
+    var widthPx by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(smooth) { snapshotFlow { latestProgress.value() }.collect { smooth.report(it.coerceIn(0f, 1f), latestLength) } }
-    LaunchedEffect(playing, lengthMs) {
-        if (!playing || lengthMs <= 0L) return@LaunchedEffect
-        while (true) withInfiniteAnimationFrameNanos { smooth.frameNanos = it }
+    LaunchedEffect(playing, lengthMs, rate, widthPx, reduced) {
+        if (playing && !reduced) smooth.glide(lengthMs, rate, widthPx)
     }
     val percent by remember(lengthMs, playing, rate) { derivedStateOf { (smooth.fraction(playing, lengthMs, rate) * 100).toInt() } }
     val rest = colors.border
@@ -500,6 +531,7 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
         modifier
             .fillMaxWidth()
             .height(2.dp)
+            .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
             .semantics {
                 contentDescription = label
                 progressBarRangeInfo = ProgressBarRangeInfo(percent / 100f, 0f..1f)

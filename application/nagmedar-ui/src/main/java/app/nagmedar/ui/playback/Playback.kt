@@ -15,11 +15,18 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.radio.RadioSession
 import app.nagmedar.ui.shell.Destination
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.PLAY_EXTRA_START_TIME
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
@@ -28,6 +35,7 @@ import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
+import org.videolan.vlc.media.Progress
 
 /** What the existing PlaybackService is playing, observed from its LiveData. */
 @Immutable
@@ -43,18 +51,52 @@ fun rememberNowPlaying(): NowPlaying {
     return NowPlaying(media, playing)
 }
 
+/** How often the position of what plays is read while it plays and the window is in sight. */
+internal const val PROGRESS_READING_MS = 500L
+
 /**
- * Position of the current media as 0..1, read twice a second while playing and every second while paused (a seek
- * from the notification shows); the timelines glide between the readings.
+ * Position of the current media as 0..1 while the window is in sight: read twice a second while it plays; paused,
+ * once and again whenever the service's position is set (a seek from the notification, the lock screen or a headset
+ * shows); nothing is read while no media is there. The timelines glide between the readings.
  */
 @Composable
-fun rememberPlaybackProgress(nowPlaying: NowPlaying): State<Float> = produceState(0f, nowPlaying.media, nowPlaying.playing) {
-    while (true) {
-        val service = PlaybackService.instance
-        val length = service?.length ?: 0L
-        value = if (service != null && length > 0) (service.preciseTime().toFloat() / length).coerceIn(0f, 1f) else 0f
-        delay(if (nowPlaying.playing) 500L else 1_000L)
+fun rememberPlaybackProgress(nowPlaying: NowPlaying): State<Float> {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    return produceState(0f, nowPlaying.media, nowPlaying.playing, lifecycle) {
+        if (nowPlaying.media == null) {
+            value = 0f
+            return@produceState
+        }
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            value = currentProgress()
+            if (nowPlaying.playing) {
+                while (true) {
+                    delay(PROGRESS_READING_MS)
+                    value = currentProgress()
+                }
+            } else {
+                PlaybackService.instance?.positionSets()?.collect { value = currentProgress() }
+            }
+        }
     }
+}
+
+/** Where the service's media is, 0..1; 0 without a service or a length. */
+private fun currentProgress(): Float {
+    val service = PlaybackService.instance ?: return 0f
+    val length = service.length
+    return if (length > 0) (service.preciseTime().toFloat() / length).coerceIn(0f, 1f) else 0f
+}
+
+/**
+ * Each time the service's position is set: a seek of either engine, a new length; while libVLC plays, its steps of a
+ * second too. The service's own progress, which both engines feed.
+ */
+private fun PlaybackService.positionSets(): Flow<Unit> = callbackFlow {
+    val progress = playlistManager.player.progress
+    val observer = Observer<Progress> { trySend(Unit) }
+    progress.observeForever(observer)
+    awaitClose { progress.removeObserver(observer) }
 }
 
 /** The speed of what plays (1 for its own); the timelines move at it. */
@@ -62,7 +104,8 @@ fun playbackRate(): Float = PlaybackService.instance?.rate?.takeIf { it > 0f } ?
 
 /**
  * S-1004: where the current media is, in milliseconds, for the lyrics: read ten times a second
- * while it plays (once when paused); a seek of [seekTo] shows at once, paused or not.
+ * while it plays and the window is in sight (once when paused); a seek of [seekTo] shows at once,
+ * paused or not.
  */
 @Stable
 class PlaybackTime internal constructor() {
@@ -79,11 +122,14 @@ class PlaybackTime internal constructor() {
 @Composable
 fun rememberPlaybackTime(nowPlaying: NowPlaying): PlaybackTime {
     val time = remember { PlaybackTime() }
-    LaunchedEffect(nowPlaying.media, nowPlaying.playing) {
-        while (true) {
-            time.ms = PlaybackService.instance?.preciseTime() ?: 0L
-            if (!nowPlaying.playing) break
-            delay(100)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(nowPlaying.media, nowPlaying.playing, lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                time.ms = PlaybackService.instance?.preciseTime() ?: 0L
+                if (!nowPlaying.playing) break
+                delay(100)
+            }
         }
     }
     return time
