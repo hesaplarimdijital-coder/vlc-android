@@ -213,8 +213,11 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         object : RemuxBatchActions {
             override fun chooseFolder() = batchFolderLauncher.launch(null)
 
-            override fun open(folder: BatchFolder) =
-                batch.open(folder, controller.profile, LocalizedStreamNames(context.resources, context.resources.locale())) { compatibilityTitle(context.resources, it) }
+            override fun open(folder: BatchFolder) {
+                // the batch outlives this window: it keeps the window's resources, never the window itself
+                val resources = context.resources
+                batch.open(folder, controller.profile, LocalizedStreamNames(resources, resources.locale())) { compatibilityTitle(resources, it) }
+            }
 
             override fun chooseOutput() = batchOutputLauncher.launch(null)
 
