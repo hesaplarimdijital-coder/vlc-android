@@ -132,6 +132,13 @@ internal fun PlayerSheetView(title: String, entries: List<MenuEntry>, onDismiss:
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
                     .semantics { paneTitle = title }
                     .onPreviewKeyEvent { event ->
+                        // Esc and Back close it wherever its focus is (an item that has it would hand it
+                        // back to the sheet with them); on their release, as the menus do, so that the
+                        // release does not reach the player's window below
+                        if (event.key == Key.Escape || event.key == Key.Back) {
+                            if (event.type == KeyEventType.KeyUp) onDismiss()
+                            return@onPreviewKeyEvent true
+                        }
                         // the sheet itself has the focus (a finger opened it): Down and Up go to its items
                         if (!sheetFocused || firstEnabled < 0) return@onPreviewKeyEvent false
                         val target = when (event.key) {
