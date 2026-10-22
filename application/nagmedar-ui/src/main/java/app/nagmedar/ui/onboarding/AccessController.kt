@@ -86,7 +86,10 @@ class AccessController internal constructor(private val context: Context, privat
     }
 
     fun removeFolder(uri: String) {
-        runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        // a section of the library may show the same folder (Settings › Library): it keeps the permission
+        if (uri !in prefs.librarySources.trees) {
+            runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        }
         SafLibrary.forget(uri)
         prefs.removeSafFolder(uri)
     }

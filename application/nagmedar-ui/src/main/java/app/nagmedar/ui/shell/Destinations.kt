@@ -26,6 +26,9 @@ enum class Destination(
     Home("home", R.string.nag_nav_home, NavSection.Library),
     Movies("movies", R.string.nag_nav_movies, NavSection.Library),
     Series("series", R.string.nag_nav_series, NavSection.Library),
+
+    /** The phone's own videos: camera clips, recordings, what is neither film nor episode. */
+    Videos("videos", R.string.nag_nav_videos, NavSection.Library),
     Music("music", R.string.nag_nav_music, NavSection.Library),
     Podcasts("podcasts", R.string.nag_nav_podcasts, NavSection.Library, R.string.nag_podcasts_description),
     Radio("radio", R.string.nag_nav_radio, NavSection.Library),
@@ -59,6 +62,7 @@ enum class Destination(
             Home -> NagIcons.Home
             Movies -> NagIcons.Movies
             Series -> NagIcons.Series
+            Videos -> NagIcons.Videos
             Music -> NagIcons.Music
             Podcasts -> NagIcons.Podcasts
             Radio -> NagIcons.Radio
@@ -91,7 +95,7 @@ enum class Destination(
 
     companion object {
         val bottomBar = listOf(Home, Movies, Music, Podcasts, More)
-        val rail = listOf(Home, Movies, Series, Music, Podcasts, Radio, TvLab)
+        val rail = listOf(Home, Movies, Series, Videos, Music, Podcasts, Radio, TvLab)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
         val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard)

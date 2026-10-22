@@ -14,6 +14,7 @@ object NagIcons {
     val Home: ImageVector by lazy { icon("Home", stroke("M3 7.5 8 3l5 4.5V13H9.5V9.5h-3V13H3z")) }
     val Movies: ImageVector by lazy { icon("Movies", stroke("M4,3H12A1.5,1.5 0 0 1 13.5,4.5V11.5A1.5,1.5 0 0 1 12,13H4A1.5,1.5 0 0 1 2.5,11.5V4.5A1.5,1.5 0 0 1 4,3Z"), stroke("M5.5 3v10M10.5 3v10M2.5 6.5h3M2.5 9.5h3M10.5 6.5h3M10.5 9.5h3")) }
     val Series: ImageVector by lazy { icon("Series", stroke("M3.5,3.5H12.5A1.5,1.5 0 0 1 14,5V10A1.5,1.5 0 0 1 12.5,11.5H3.5A1.5,1.5 0 0 1 2,10V5A1.5,1.5 0 0 1 3.5,3.5Z"), stroke("M6 14h4")) }
+    val Videos: ImageVector by lazy { icon("Videos", stroke("M3,4H9.5A1.5,1.5 0 0 1 11,5.5V10.5A1.5,1.5 0 0 1 9.5,12H3A1.5,1.5 0 0 1 1.5,10.5V5.5A1.5,1.5 0 0 1 3,4Z"), stroke("M11 7 14.5 5v6L11 9")) }
     val Music: ImageVector by lazy { icon("Music", stroke("M6 12V4l7-1.5v8"), stroke("M3,12a1.5,1.5 0 1 0 3,0a1.5,1.5 0 1 0 -3,0Z"), stroke("M10,10.5a1.5,1.5 0 1 0 3,0a1.5,1.5 0 1 0 -3,0Z")) }
     val Podcasts: ImageVector by lazy { icon("Podcasts", stroke("M8,2H8A2,2 0 0 1 10,4V7.5A2,2 0 0 1 8,9.5H8A2,2 0 0 1 6,7.5V4A2,2 0 0 1 8,2Z"), stroke("M3.5 8a4.5 4.5 0 0 0 9 0M8 12.5v2")) }
     val Radio: ImageVector by lazy { icon("Radio", stroke("M3.5,5.5H12.5A1.5,1.5 0 0 1 14,7V12A1.5,1.5 0 0 1 12.5,13.5H3.5A1.5,1.5 0 0 1 2,12V7A1.5,1.5 0 0 1 3.5,5.5Z"), stroke("M4.5 5.5 11 2.5M4.5 8.5h3M4.5 10.5h3"), stroke("M8.7,9.5a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z")) }
@@ -94,16 +95,17 @@ object NagIcons {
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
-        Home, Movies, Series, Music, Podcasts, Radio, Device, ExternalDrive,
-        Network, Streams, TvLab, Convert, Downloads, Settings, Plus, Grid,
-        ListView, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Check, Play, Resume,
-        Forward, OpenWindow, Subtitle, Info, PlaylistAdd, Folder, Delete, Close,
-        MoreHorizontal, MoreVertical, Shuffle, Previous, Next, Pause, Repeat, Queue,
-        Artists, Albums, History, Equalizer, SmartList, FramePrevious, FrameNext, AudioTrack,
-        Screenshot, Effects, PictureInPicture, Fullscreen, Search, Sort, Lyrics, Volume,
-        Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle, SuccessCircle,
-        Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal, FlipVertical,
-        Sleep, Alarm, Star, StarFilled, Record, Stop, Cast, Visualizer,
+        Home, Movies, Series, Videos, Music, Podcasts, Radio, Device,
+        ExternalDrive, Network, Streams, TvLab, Convert, Downloads, Settings, Plus,
+        Grid, ListView, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Check, Play,
+        Resume, Forward, OpenWindow, Subtitle, Info, PlaylistAdd, Folder, Delete,
+        Close, MoreHorizontal, MoreVertical, Shuffle, Previous, Next, Pause, Repeat,
+        Queue, Artists, Albums, History, Equalizer, SmartList, FramePrevious, FrameNext,
+        AudioTrack, Screenshot, Effects, PictureInPicture, Fullscreen, Search, Sort, Lyrics,
+        Volume, Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle,
+        SuccessCircle, Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal,
+        FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
+        Visualizer,
     )
 }
 

@@ -36,7 +36,8 @@ import kotlin.math.abs
 
 /**
  * Whether the app may read media files, and the folders picked instead (S-309). Without either,
- * an empty library asks for access rather than for folders.
+ * an empty library asks for access rather than for folders. [scopes] are the sections' own
+ * folders (Settings › Library); the screens load again when they change.
  */
 @Immutable
 class LibraryAccess(
@@ -44,6 +45,7 @@ class LibraryAccess(
     val folders: Set<String>,
     val requestMedia: () -> Unit,
     val pickFolder: () -> Unit,
+    val scopes: LibraryScopes = LibraryScopes.Empty,
 )
 
 /** Provided by NagmedarApp; absent in tests and previews, where the library has access. */

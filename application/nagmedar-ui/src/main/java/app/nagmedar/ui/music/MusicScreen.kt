@@ -79,6 +79,7 @@ import app.nagmedar.ui.covers.rememberCoverMenu
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.library.LibraryContent
+import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.formatDuration
@@ -285,8 +286,9 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
 fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<MediaWrapper>? {
     val context = LocalContext.current
     val access = LocalLibraryAccess.current
-    val media by produceState<List<MediaWrapper>?>(null, scanning, access?.media, access?.folders) {
-        loadWhileScanning(scanning) { repository.tracks() }
+    // the music of the section's folders (Settings › Library)
+    val media by produceState<List<MediaWrapper>?>(null, scanning, access?.media, access?.folders, access?.scopes) {
+        loadWhileScanning(scanning) { repository.tracks(LibrarySection.Music) }
     }
     LaunchedEffect(media) {
         // S-808: a CUE sheet's tracks share their file, probed once

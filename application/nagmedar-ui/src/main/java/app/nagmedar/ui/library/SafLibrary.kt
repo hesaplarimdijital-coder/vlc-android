@@ -27,9 +27,16 @@ object SafLibrary {
         DocumentsContract.Document.COLUMN_DISPLAY_NAME,
         DocumentsContract.Document.COLUMN_MIME_TYPE,
         DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+        DocumentsContract.Document.COLUMN_SIZE,
     )
 
     private val cache = ConcurrentHashMap<String, List<MediaWrapper>>()
+
+    /** The listed documents' sizes in bytes, by URI: the Videos page sorts by them. */
+    private val sizes = ConcurrentHashMap<String, Long>()
+
+    /** A listed document's size in bytes, 0 when unknown. */
+    fun sizeOf(uri: String): Long = sizes[uri] ?: 0L
 
     /** Videos ([MediaWrapper.TYPE_VIDEO]) or songs ([MediaWrapper.TYPE_AUDIO]) of [folders], sorted by title. */
     suspend fun media(context: Context, folders: Set<String>, type: Int): List<MediaWrapper> = withContext(Dispatchers.IO) {
@@ -84,7 +91,9 @@ object SafLibrary {
                     }
                     val type = typeOf(name, mime)
                     if (type != MediaWrapper.TYPE_VIDEO && type != MediaWrapper.TYPE_AUDIO) continue
-                    val media = MLServiceLocator.getAbstractMediaWrapper(DocumentsContract.buildDocumentUriUsingTree(tree, id))
+                    val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)
+                    val media = MLServiceLocator.getAbstractMediaWrapper(uri)
+                    if (!c.isNull(4)) sizes[uri.toString()] = c.getLong(4)
                     media.setType(type)
                     media.setTitle(name.substringBeforeLast('.'))
                     media.setLastModified(c.getLong(3) / 1000)

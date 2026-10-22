@@ -61,10 +61,13 @@ import app.nagmedar.ui.input.rememberInputModeState
 import app.nagmedar.ui.input.trackInputMode
 import app.nagmedar.ui.library.HomeScreen
 import app.nagmedar.ui.library.LibraryAccess
+import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MoviesScreen
+import app.nagmedar.ui.library.SectionSourcesDialog
 import app.nagmedar.ui.library.SeriesScreen
+import app.nagmedar.ui.library.VideosScreen
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.lyrics.LyricsSession
 import app.nagmedar.ui.lyrics.LyricsTrack
@@ -232,6 +235,8 @@ private fun NagmedarMain(
     var radioSearchRequested by remember { mutableStateOf(false) }
     // S-207: the radio screen's Recordings tab asked for by Alt+Shift+R
     var radioRecordingsRequested by remember { mutableStateOf(false) }
+    // the folders of a section, asked for from its header or its empty state
+    var sourcesFor by rememberSaveable { mutableStateOf<LibrarySection?>(null) }
     val actions = remember(context, prefs, navigator) {
         AppActions(
             context, prefs, navigator, undo, menuBar, screenCommands, dropTargets, queuePanel, onOpenFile,
@@ -256,7 +261,9 @@ private fun NagmedarMain(
     }
     // media access asked for from the library starts the scan of this device's storage
     val access = rememberAccessController(prefs) { scanSources(context, listOf(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)) }
-    val libraryAccess = LibraryAccess(access.mediaAccess, access.folders, access::requestMedia, access::pickFolder)
+    // the sections' picked trees count as picked folders; a change of any section's folders reloads the screens
+    val sources = prefs.librarySources
+    val libraryAccess = LibraryAccess(access.mediaAccess, access.folders + sources.trees, access::requestMedia, access::pickFolder, sources)
     // without media access a folder is picked with the system picker; with it, the medialibrary's folders open
     val addFolder = { if (access.mediaAccess) openClassic(context, SecondaryActivity.STORAGE_BROWSER) else access.pickFolder() }
     LaunchedEffect(actions) { onActionsReady(actions) }
@@ -270,9 +277,15 @@ private fun NagmedarMain(
         navigator.navigate(destination)
         onDestinationShown()
     }
-    val counts by produceState<Map<Destination, String>>(emptyMap(), access.mediaAccess, access.folders) {
-        val c = repository.counts()
-        value = mapOf(Destination.Movies to c.videos.toString(), Destination.Music to c.tracks.toString())
+    // what each section shows by its folders (Settings › Library)
+    val counts by produceState<Map<Destination, String>>(emptyMap(), access.mediaAccess, access.folders, sources) {
+        val c = repository.sectionCounts()
+        value = mapOf(
+            Destination.Movies to c.films.toString(),
+            Destination.Series to c.shows.toString(),
+            Destination.Videos to c.clips.toString(),
+            Destination.Music to c.tracks.toString(),
+        )
     }
     // S-1202: a long analysis goes on while other screens show; the sidebar says how far it is
     val tvLab = remember(context) { TvLabSession.get(context) }
@@ -322,6 +335,7 @@ private fun NagmedarMain(
                 caption = caption,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
+                    sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
                     // S-1302: the device picker, from the cast buttons, Ctrl+Shift+C and the menus' "Play on …"
                     Casting.request?.let { request -> CastPickerDialog(request, Casting::closePicker) }
                     if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
@@ -359,12 +373,14 @@ private fun NagmedarMain(
                 screen = { destination, shellNavigator ->
                     when (destination) {
                         Destination.Home -> HomeScreen(repository, onAddFolder = addFolder, onBrowse = shellNavigator::navigate)
-                        Destination.Movies -> MoviesScreen(repository, onAddFolder = addFolder)
-                        Destination.Series -> SeriesScreen(repository, onAddFolder = addFolder)
+                        // "Klasör ekle" opens the section's own folders
+                        Destination.Movies -> MoviesScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Movies })
+                        Destination.Series -> SeriesScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Series })
+                        Destination.Videos -> VideosScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Videos })
                         // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
                         Destination.Music -> MusicScreen(
                             repository,
-                            onAddFolder = addFolder,
+                            onAddFolder = { sourcesFor = LibrarySection.Music },
                             nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }, onFullScreenVisualizer = { visualizerOpen = true }) },
                         )
                         // S-804: the medialibrary's playlists, a tab each

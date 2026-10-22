@@ -22,15 +22,27 @@ class MediaRepository(private val context: Context) {
         getVideos(Medialibrary.SORT_ALPHA, false, Settings.includeMissing, false)?.toList().orEmpty()
     } + picked(MediaWrapper.TYPE_VIDEO)
 
+    /** The sections' folders as the preferences have them now. */
+    fun sources(): LibraryScopes = LibrarySources.read(Settings.getInstance(context))
+
     /**
      * The music: the medialibrary's (or the picked folders'), a file with a CUE sheet beside it
      * (S-808) replaced by the sheet's tracks. Each folder is listed once for its sheets.
      */
-    suspend fun tracks(): List<MediaWrapper> {
+    suspend fun tracks(section: LibrarySection? = null): List<MediaWrapper> {
+        val files = audio(section)
+        return withContext(Dispatchers.IO) { CueLibrary.expand(context, files) }
+    }
+
+    /** The audio files, those of [section]'s folders when it is given (the Music page, its smart lists). */
+    private suspend fun audio(section: LibrarySection?): List<MediaWrapper> {
         val files = context.getFromMl {
             getAudio(Medialibrary.SORT_ARTIST, false, Settings.includeMissing, false)?.toList().orEmpty()
         } + picked(MediaWrapper.TYPE_AUDIO)
-        return withContext(Dispatchers.IO) { CueLibrary.expand(context, files) }
+        val scopes = sources()
+        if (section == null || scopes.of(section).isEmpty()) return files
+        val rules = LibrarySources.rules(scopes)
+        return withContext(Dispatchers.Default) { files.filter { rules.inScope(section, LibrarySources.locationOf(it.uri)) } }
     }
 
     /**
@@ -55,6 +67,56 @@ class MediaRepository(private val context: Context) {
         }
     }
 
+    /**
+     * The videos [section] shows (Films, Series, Videos), by its folders and the other sections'
+     * (Settings › Library); without folders anywhere as before, camera clips aside from the films.
+     */
+    suspend fun videoItems(section: LibrarySection): List<VideoItem> {
+        val items = videoItems()
+        val rules = LibrarySources.rules(sources())
+        return withContext(Dispatchers.Default) { splitVideos(items, rules) { LibrarySources.locationOf(it.media?.uri) }.of(section) }
+    }
+
+    /** The Videos page's videos with when each was taken (from its name, else its date) and its size. */
+    suspend fun clips(): List<VideoClip> {
+        val items = videoItems(LibrarySection.Videos)
+        return withContext(Dispatchers.IO) {
+            items.map { item ->
+                val name = item.media?.fileName ?: item.path.substringAfterLast('/')
+                val modified = (item.media?.lastModified ?: 0L) * 1000
+                VideoClip(item, ClipDates.fromName(name) ?: modified.takeIf { it > 0 } ?: item.addedAt * 1000, sizeOf(item))
+            }
+        }
+    }
+
+    private fun sizeOf(item: VideoItem): Long {
+        val uri = item.media?.uri ?: return 0
+        return when (uri.scheme) {
+            "file" -> uri.path?.let { runCatching { File(it).length() }.getOrNull() } ?: 0
+            else -> SafLibrary.sizeOf(uri.toString())
+        }
+    }
+
+    /**
+     * What each section has by its folders (S-309's counts when none has any): the sidebar's
+     * numbers and whether the library is empty.
+     */
+    suspend fun sectionCounts(): SectionCounts {
+        val scopes = sources()
+        val rules = LibrarySources.rules(scopes)
+        val items = videos().map { it.toVideoItem() }
+        val split = withContext(Dispatchers.Default) { splitVideos(items, rules) { LibrarySources.locationOf(it.media?.uri) } }
+        val tracks = if (scopes.of(LibrarySection.Music).isEmpty()) counts().tracks else audio(LibrarySection.Music).size
+        return SectionCounts(split.films.size, split.showCount, split.clips.size, tracks)
+    }
+
+    /** Nothing to show in any section: by their folders when some have any. */
+    suspend fun libraryEmpty(): Boolean = if (sources().isEmpty) {
+        counts().let { it.videos + it.tracks == 0 }
+    } else {
+        sectionCounts().empty
+    }
+
     suspend fun recentVideos(): List<MediaWrapper> = context.getFromMl { recentVideos?.toList().orEmpty() }
 
     suspend fun recentAudio(): List<MediaWrapper> = context.getFromMl { recentAudio?.toList().orEmpty() }
@@ -65,14 +127,28 @@ class MediaRepository(private val context: Context) {
         return LibraryCounts(indexed.videos + picked(MediaWrapper.TYPE_VIDEO).size, indexed.tracks + picked(MediaWrapper.TYPE_AUDIO).size)
     }
 
+    /**
+     * Media of the folders picked with the system picker: without media access all of them (S-309's
+     * and the sections'), with it only the sections' trees that have no path the medialibrary could
+     * scan (a USB drive or a cloud provider's folder).
+     */
     private suspend fun picked(type: Int): List<MediaWrapper> {
-        if (MediaAccess.hasMediaAccess(context)) return emptyList()
-        val folders = Settings.getInstance(context).getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
-        return if (folders.isEmpty()) emptyList() else SafLibrary.media(context, folders, type)
+        val media = MediaAccess.hasMediaAccess(context)
+        val settings = Settings.getInstance(context)
+        val folders = buildSet {
+            if (!media) addAll(settings.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty())
+            LibrarySources.trees(settings).forEach { tree -> if (!media || LibrarySources.pathOfFolder(tree) == null) add(tree) }
+        }
+        return if (folders.isEmpty()) emptyList() else SafLibrary.media(context, folders, type).distinctBy { it.uri }
     }
 }
 
 data class LibraryCounts(val videos: Int, val tracks: Int)
+
+/** What the sections show by their folders: films, shows, other videos and tracks. */
+data class SectionCounts(val films: Int, val shows: Int, val clips: Int, val tracks: Int) {
+    val empty: Boolean get() = films + shows + clips + tracks == 0
+}
 
 /** "1:52:07" / "3:41" */
 fun formatDuration(millis: Long): String {

@@ -179,10 +179,10 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
     val dimens = NagTheme.dimens
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
-    val home by produceState<HomeContent?>(null, scan.active, access?.media, access?.folders) {
+    // what continues is everything; whether the library is empty follows the sections' folders
+    val home by produceState<HomeContent?>(null, scan.active, access?.media, access?.folders, access?.scopes) {
         loadWhileScanning(scan.active) {
-            val counts = repository.counts()
-            HomeContent(repository.recentVideos(), repository.recentAudio(), counts.videos + counts.tracks == 0)
+            HomeContent(repository.recentVideos(), repository.recentAudio(), repository.libraryEmpty())
         }
     }
     val loaded = home
@@ -426,16 +426,23 @@ private fun VideoTable(
 
 /**
  * A film dragged out with the mouse (S-406), with the others selected when it is one of them, and a
- * subtitle dropped on it kept with it: the player loads it next time the film plays.
+ * subtitle dropped on it kept with it: the player loads it next time the film plays. [dragLabel]
+ * counts what is dragged ("3 film"; the Videos page's "3 video").
  */
-private fun Modifier.filmDrags(item: VideoItem, shown: List<VideoItem>, selection: MultiSelection?, shape: Shape): Modifier = composed {
+internal fun Modifier.filmDrags(
+    item: VideoItem,
+    shown: List<VideoItem>,
+    selection: MultiSelection?,
+    shape: Shape,
+    dragLabel: Int = R.plurals.nag_drag_films,
+): Modifier = composed {
     val context = LocalContext.current
     val res = context.resources
     this
         .fileDragSource(
             label = {
                 val many = dragged(item, shown, selection)
-                if (many.size > 1) res.getQuantityString(R.plurals.nag_drag_films, many.size, many.size) else item.title
+                if (many.size > 1) res.getQuantityString(dragLabel, many.size, many.size) else item.title
             },
             files = { dragged(item, shown, selection).map { Uri.parse(it.key) } },
         )

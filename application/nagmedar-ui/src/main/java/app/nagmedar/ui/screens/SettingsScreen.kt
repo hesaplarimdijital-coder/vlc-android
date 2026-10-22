@@ -52,6 +52,7 @@ import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.covers.CoversSection
 import app.nagmedar.ui.lab.LabSection
+import app.nagmedar.ui.library.LibrarySourcesSection
 import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
 import app.nagmedar.ui.player.record.RecordingSection
@@ -113,6 +114,8 @@ fun SettingsScreen(
         item { AppearanceSection(prefs) }
         item { InputSection(prefs) }
         item { ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo) }
+        // the folders each section of the library shows
+        item { LibrarySourcesSection(prefs) }
         item { SnapshotSection(prefs) }
         // S-607: what Shift+R records, and where
         item { RecordingSection(prefs) }

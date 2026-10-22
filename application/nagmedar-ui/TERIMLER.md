@@ -58,6 +58,9 @@ Sözlüğü testler denetler:
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |
 | cihaz | device | aygıt | | |
 | harici disk | external drive | harici sürücü | external disk | |
+| Videolar | Videos | | | Kütüphanenin bölümü: bu cihazla çekilen videolar (kamera, ekran kaydı, mesajlaşma uygulamaları), film ya da dizi bölümü olmayanlar. Tekili “video”: “12 video”, “3 video seçili” |
+| kaynak klasör | source folder | | | Bir bölümün (Filmler, Diziler, Videolar, Müzik) gösterdiği klasör; Ayarlar › Kütüphane'den ya da bölümün “Klasör ekle” düğmesinden seçilir, alt klasörleri de kapsar. Hiç seçilmezse bölüm kütüphanede ona uyan her şeyi gösterir: “Kaynak klasörler: Filmler”, “Kütüphanenin tümü” |
+| hariç tutmak | leave out | | | Bir bölümün klasörlerinden birini göstermemek: menüde “Hariç tut”, klasörün rozeti “Hariç” |
 | ağ paylaşımı | network share | | | SMB, DLNA, WebDAV |
 | uzaktan erişim | remote access | uzak erişim | | Ayarlar › Uzaktan erişim: bu ağdaki bir tarayıcıdan kütüphaneye bakmak, oynatmayı denetlemek, dosya göndermek; web sayfası bu cihazdaki sunucudan gelir, “VLC for Android” tabanlı olduğu Hakkında'da yazar |
 | tek seferlik kod | one-time code | OTP, bir kerelik | OTP | Her yeni tarayıcıdan önce cihazın bildirimde gösterdiği 6 haneli, 60 sn geçerli kod; tarayıcı sayfasında “Tek seferlik uzaktan erişim parolası” da onu anar |

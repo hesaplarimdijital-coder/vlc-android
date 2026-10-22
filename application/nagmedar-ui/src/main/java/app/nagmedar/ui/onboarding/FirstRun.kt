@@ -418,6 +418,12 @@ private fun SourcesStep(state: FirstRunState, drives: List<StorageSource>, folde
             checked = state.onlineSources,
             onCheckedChange = { state.onlineSources = it },
         )
+        // each section's own folders are chosen later, in Settings › Library
+        OptionCard(
+            icon = NagIcons.Folder,
+            title = stringResource(R.string.nag_fr_sources_sections),
+            description = stringResource(R.string.nag_fr_sources_sections_desc),
+        )
     }
 }
 

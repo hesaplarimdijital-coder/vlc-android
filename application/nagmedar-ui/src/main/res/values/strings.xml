@@ -3234,4 +3234,33 @@
         <item quantity="one">%d shortcut</item>
         <item quantity="other">%d shortcuts</item>
     </plurals>
+    <!-- Library: each section's folders and the Videos page -->
+    <string name="nag_nav_videos">Videos</string>
+    <string name="nag_lib_no_clips_desc">Videos you recorded with this device, the camera\'s and screen recordings, appear here. You can choose their folders in Settings › Library.</string>
+    <string name="nag_order_date">Date</string>
+    <string name="nag_order_size">Size</string>
+    <string name="nag_lib_sources">Source folders</string>
+    <string name="nag_lib_sources_for">Source folders: %1$s</string>
+    <string name="nag_lib_sources_hint">Choose the folders each section shows; subfolders are included. A section without folders shows everything the library has for it. A folder chosen for Videos leaves Films and Series, and the other way round.</string>
+    <string name="nag_lib_sources_all">All of the library</string>
+    <string name="nag_lib_choose_folder">Choose a folder…</string>
+    <string name="nag_lib_storage_all">All of %1$s</string>
+    <string name="nag_lib_excluded">Left out</string>
+    <string name="nag_lib_exclude">Leave out</string>
+    <string name="nag_lib_folder_actions">Actions for %1$s</string>
+    <string name="nag_lib_done">Done</string>
+    <string name="nag_fr_sources_sections">Folders for each section</string>
+    <string name="nag_fr_sources_sections_desc">Later, in Settings › Library, you can choose which folders Films, Series, Videos and Music each show.</string>
+    <plurals name="nag_lib_videos_count">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d videos</item>
+    </plurals>
+    <plurals name="nag_lib_selected_videos">
+        <item quantity="one">%d video selected</item>
+        <item quantity="other">%d videos selected</item>
+    </plurals>
+    <plurals name="nag_lib_drag_videos">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d videos</item>
+    </plurals>
 </resources>

@@ -14,6 +14,8 @@ import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.library.LibraryScopes
+import app.nagmedar.ui.library.LibrarySources
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.refresh.RefreshMatch
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
@@ -157,6 +159,15 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var safFolders by mutableStateOf(prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty())
         private set
 
+    /** The folders each section of the library shows (Settings › Library); none for everything. */
+    var librarySources by mutableStateOf(LibrarySources.read(prefs))
+        private set
+
+    fun updateLibrarySources(value: LibraryScopes) {
+        librarySources = value
+        LibrarySources.write(prefs.edit(), value).apply()
+    }
+
     /** A preference changed in another window (S-307): this one follows. Held here: preferences keep listeners weakly. */
     private val changes = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> reload(key) }
 
@@ -184,6 +195,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
             ShortcutRegistry.overrides = shortcutOverrides
         }
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
+        if (key == null || key in LibrarySources.keys) librarySources = LibrarySources.read(prefs)
         if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
         if (key == null || key == KEY_RECORDING_FOLDER) recordingFolder = readRecordingFolder()
         if (key == null || key in VisualizerSettings.keys) visualizer = VisualizerSettings.read(prefs)

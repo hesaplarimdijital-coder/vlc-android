@@ -3205,4 +3205,33 @@
         <item quantity="one">%d kısayol</item>
         <item quantity="other">%d kısayol</item>
     </plurals>
+    <!-- Library: each section's folders and the Videos page -->
+    <string name="nag_nav_videos">Videolar</string>
+    <string name="nag_lib_no_clips_desc">Bu cihazla çektiğiniz videolar, kameranınkiler ve ekran kayıtları burada görünür. Klasörlerini Ayarlar › Kütüphane\'den seçebilirsiniz.</string>
+    <string name="nag_order_date">Tarih</string>
+    <string name="nag_order_size">Boyut</string>
+    <string name="nag_lib_sources">Kaynak klasörler</string>
+    <string name="nag_lib_sources_for">Kaynak klasörler: %1$s</string>
+    <string name="nag_lib_sources_hint">Her bölümün göstereceği klasörleri seçin; alt klasörler de dahildir. Klasörü olmayan bölüm, kütüphanede ona uyan her şeyi gösterir. Videolar için seçilen klasör Filmler ve Diziler\'den çıkar, Filmler ve Diziler\'inki de Videolar\'dan.</string>
+    <string name="nag_lib_sources_all">Kütüphanenin tümü</string>
+    <string name="nag_lib_choose_folder">Klasör seç…</string>
+    <string name="nag_lib_storage_all">%1$s (tümü)</string>
+    <string name="nag_lib_excluded">Hariç</string>
+    <string name="nag_lib_exclude">Hariç tut</string>
+    <string name="nag_lib_folder_actions">%1$s için işlemler</string>
+    <string name="nag_lib_done">Tamam</string>
+    <string name="nag_fr_sources_sections">Bölüm başına klasörler</string>
+    <string name="nag_fr_sources_sections_desc">Filmler, Diziler, Videolar ve Müzik\'in hangi klasörleri göstereceğini sonra Ayarlar › Kütüphane\'den seçebilirsiniz.</string>
+    <plurals name="nag_lib_videos_count">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d video</item>
+    </plurals>
+    <plurals name="nag_lib_selected_videos">
+        <item quantity="one">%d video seçili</item>
+        <item quantity="other">%d video seçili</item>
+    </plurals>
+    <plurals name="nag_lib_drag_videos">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d video</item>
+    </plurals>
 </resources>

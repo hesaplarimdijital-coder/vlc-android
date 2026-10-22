@@ -68,6 +68,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.tools.AppScope
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
+import app.nagmedar.ui.library.LibrarySources
 import org.videolan.tools.Settings
 
 // ------------------------------------------------------------------- the window
@@ -128,7 +129,7 @@ private fun keepFolder(context: Context, prefs: SharedPreferences, before: Strin
             val used = setOfNotNull(prefs.getString(KEY_RECORDING_FOLDER, null), prefs.getString(SnapshotSettings.KEY_FOLDER, null)) +
                 ConvertStore(app).activeFolders()
             if (before !in used) {
-                val library = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty()
+                val library = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty() + LibrarySources.trees(prefs)
                 val release = if (before in library) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(before), release) }
             }

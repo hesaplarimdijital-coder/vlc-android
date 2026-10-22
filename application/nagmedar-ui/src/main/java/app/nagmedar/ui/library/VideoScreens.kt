@@ -89,10 +89,11 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val context = LocalContext.current
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
-    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders) {
-        loadWhileScanning(scan.active) { repository.videoItems() }
+    // the films of the section's folders (Settings › Library)
+    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders, access?.scopes) {
+        loadWhileScanning(scan.active) { repository.videoItems(LibrarySection.Movies) }
     }
-    val library = remember(items) { items?.let(::buildVideoLibrary) }
+    val library = remember(items) { items?.let { buildVideoLibrary(it, moviesOnly = true) } }
     val tech by rememberTech(items)
     val pointer = NagTheme.inputMode == InputMode.Pointer
     var view by rememberSaveable { mutableStateOf(if (pointer) MoviesView.Table else MoviesView.Grid) }
@@ -394,8 +395,9 @@ fun SeriesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val context = LocalContext.current
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
-    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders) {
-        loadWhileScanning(scan.active) { repository.videoItems() }
+    // the episodes of the section's folders (Settings › Library)
+    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders, access?.scopes) {
+        loadWhileScanning(scan.active) { repository.videoItems(LibrarySection.Series) }
     }
     val library = remember(items) { items?.let(::buildVideoLibrary) }
     val tech by rememberTech(items)

@@ -133,11 +133,12 @@ class VideoLibrary(val movies: List<VideoItem>, val shows: List<Show>, val folde
     }
 }
 
-fun buildVideoLibrary(items: List<VideoItem>): VideoLibrary {
+/** [moviesOnly]: every item is a film, as the Films section's are when its folders hold episodes too. */
+fun buildVideoLibrary(items: List<VideoItem>, moviesOnly: Boolean = false): VideoLibrary {
     val episodes = mutableListOf<Episode>()
     val movies = mutableListOf<VideoItem>()
     for (item in items) {
-        val info = EpisodeParser.parse(item.path)
+        val info = if (moviesOnly) null else EpisodeParser.parse(item.path)
         if (info != null) episodes += Episode(item, info) else movies += item
     }
     val shows = episodes.groupBy { EpisodeParser.showKey(it.info.show) }.map { (key, group) ->
