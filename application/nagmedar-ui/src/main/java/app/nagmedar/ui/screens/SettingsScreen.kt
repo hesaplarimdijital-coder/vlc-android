@@ -84,6 +84,9 @@ import org.videolan.vlc.BuildConfig
 /** Index of the keyboard shortcut section in [SettingsScreen]'s list, for the card's "Edit shortcuts…" (S-1504). */
 const val SETTINGS_SHORTCUTS_ITEM = 4
 
+/** The index of Settings › Library (the sections' folders), for the home page's "Klasör ekle". */
+const val SETTINGS_LIBRARY_ITEM = SETTINGS_SHORTCUTS_ITEM + 1
+
 @Composable
 fun SettingsScreen(
     prefs: NagmedarPreferences,

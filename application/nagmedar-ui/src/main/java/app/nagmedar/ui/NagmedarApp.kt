@@ -50,6 +50,7 @@ import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
+import app.nagmedar.ui.device.DeviceScreen
 import app.nagmedar.ui.guide.GuideScreen
 import app.nagmedar.ui.guide.ShortcutCardScreen
 import app.nagmedar.ui.input.ShortcutGroup
@@ -101,6 +102,7 @@ import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PlaceholderScreen
+import app.nagmedar.ui.screens.SETTINGS_LIBRARY_ITEM
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.audio.AbChoice
 import app.nagmedar.ui.audio.AbTest
@@ -266,13 +268,21 @@ private fun NagmedarMain(
     // the sections' picked trees count as picked folders; a change of any section's folders reloads the screens
     val sources = prefs.librarySources
     val libraryAccess = LibraryAccess(access.mediaAccess, access.folders + sources.trees, access::requestMedia, access::pickFolder, sources)
-    // without media access a folder is picked with the system picker; with it, the medialibrary's folders open
-    val addFolder = { if (access.mediaAccess) openClassic(context, SecondaryActivity.STORAGE_BROWSER) else access.pickFolder() }
+    // the home page's "Klasör ekle": every section's folders, in Settings › Library
+    var libraryListRequests by remember { mutableIntStateOf(0) }
+    val addFolder: () -> Unit = {
+        navigator.navigate(Destination.Settings)
+        libraryListRequests++
+    }
     LaunchedEffect(actions) { onActionsReady(actions) }
     val motion = NagTheme.motion
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests == 0) return@LaunchedEffect
         if (motion.reduced) settingsList.scrollToItem(SETTINGS_SHORTCUTS_ITEM) else settingsList.animateScrollToItem(SETTINGS_SHORTCUTS_ITEM)
+    }
+    LaunchedEffect(libraryListRequests) {
+        if (libraryListRequests == 0) return@LaunchedEffect
+        if (motion.reduced) settingsList.scrollToItem(SETTINGS_LIBRARY_ITEM) else settingsList.animateScrollToItem(SETTINGS_LIBRARY_ITEM)
     }
     LaunchedEffect(requestedDestination) {
         val destination = Destination.entries.firstOrNull { it.route == requestedDestination } ?: return@LaunchedEffect
@@ -435,7 +445,8 @@ private fun NagmedarMain(
                         )
                         // the network streams opened by their address, and those played before
                         Destination.Streams -> StreamsScreen(undo)
-                        Destination.Device -> PlaceholderScreen(destination) { openClassic(context, SecondaryActivity.FILE_BROWSER) }
+                        // this device's storage, its drives and the picked folders, browsed
+                        Destination.Device -> DeviceScreen(prefs)
                         else -> PlaceholderScreen(destination) { openClassic(context, null) }
                     }
                 },

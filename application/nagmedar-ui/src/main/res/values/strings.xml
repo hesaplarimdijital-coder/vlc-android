@@ -3330,4 +3330,32 @@
     <string name="nag_streams_remove">Remove from history</string>
     <string name="nag_streams_removed">%1$s removed from history</string>
     <string name="nag_streams_playlist_failed">The stream could not be added to the playlist.</string>
+    <!-- Sources › This device: the device's storage, drives and picked folders -->
+    <string name="nag_device_view_menu">Order and hidden files</string>
+    <string name="nag_device_pick_folder">Choose a folder…</string>
+    <string name="nag_device_sort_name">By name</string>
+    <string name="nag_device_sort_size">By size</string>
+    <string name="nag_device_sort_date">By date changed</string>
+    <string name="nag_device_show_hidden">Show hidden files</string>
+    <string name="nag_device_nothing_to_play">%1$s holds nothing to play</string>
+    <string name="nag_device_internal">Internal storage</string>
+    <string name="nag_device_no_access">Without media access the folders of this device do not show. Give the access, or choose a folder.</string>
+    <string name="nag_device_grant">Give access</string>
+    <string name="nag_device_drives">Storage and drives</string>
+    <string name="nag_device_picked">Chosen folders</string>
+    <string name="nag_device_picked_none">Folders chosen with Choose a folder… show here.</string>
+    <string name="nag_device_picked_detail">Chosen folder</string>
+    <string name="nag_device_drive">Drive</string>
+    <string name="nag_device_room">%1$s free of %2$s</string>
+    <string name="nag_device_choose_title">Choose a place</string>
+    <string name="nag_device_choose_desc">The internal storage, an SD card, a USB disk or a chosen folder: its folders open here.</string>
+    <string name="nag_device_unreadable_title">This folder cannot be read</string>
+    <string name="nag_device_unreadable_desc">%1$s may be on a drive that was taken out, or the app may not read it.</string>
+    <string name="nag_device_empty_desc">%1$s holds no files or folders.</string>
+    <string name="nag_device_only_hidden_desc">%1$s holds only hidden files; Show hidden files lists them.</string>
+    <string name="nag_device_column_size">Size</string>
+    <string name="nag_device_column_modified">Changed</string>
+    <string name="nag_play_this_only">Play only this</string>
+    <string name="nag_device_not_media">Not a media file</string>
+    <string name="nag_device_add_to_section">Add to the library: %1$s</string>
 </resources>

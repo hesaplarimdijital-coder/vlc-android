@@ -3301,4 +3301,32 @@
     <string name="nag_streams_remove">Geçmişten kaldır</string>
     <string name="nag_streams_removed">%1$s geçmişten kaldırıldı</string>
     <string name="nag_streams_playlist_failed">Akış listeye eklenemedi.</string>
+    <!-- Sources › This device: the device's storage, drives and picked folders -->
+    <string name="nag_device_view_menu">Sıralama ve gizli dosyalar</string>
+    <string name="nag_device_pick_folder">Klasör seç…</string>
+    <string name="nag_device_sort_name">Ada göre</string>
+    <string name="nag_device_sort_size">Boyuta göre</string>
+    <string name="nag_device_sort_date">Değiştirilme tarihine göre</string>
+    <string name="nag_device_show_hidden">Gizli dosyaları göster</string>
+    <string name="nag_device_nothing_to_play">%1$s içinde oynatılacak bir şey yok</string>
+    <string name="nag_device_internal">Dahili depolama</string>
+    <string name="nag_device_no_access">Medya izni olmadan bu cihazın klasörleri görünmez. İzni verin ya da bir klasör seçin.</string>
+    <string name="nag_device_grant">İzin ver</string>
+    <string name="nag_device_drives">Depolama ve diskler</string>
+    <string name="nag_device_picked">Seçilen klasörler</string>
+    <string name="nag_device_picked_none">Klasör seç… ile seçtiğiniz klasörler burada görünür.</string>
+    <string name="nag_device_picked_detail">Seçilen klasör</string>
+    <string name="nag_device_drive">Disk</string>
+    <string name="nag_device_room">%1$s boş, toplam %2$s</string>
+    <string name="nag_device_choose_title">Bir yer seçin</string>
+    <string name="nag_device_choose_desc">Dahili depolama, SD kart, USB disk ya da seçtiğiniz bir klasör: klasörleri burada açılır.</string>
+    <string name="nag_device_unreadable_title">Bu klasör okunamıyor</string>
+    <string name="nag_device_unreadable_desc">%1$s çıkarılmış bir diskte olabilir ya da uygulamanın onu okuma izni olmayabilir.</string>
+    <string name="nag_device_empty_desc">%1$s içinde dosya ya da klasör yok.</string>
+    <string name="nag_device_only_hidden_desc">%1$s içinde yalnızca gizli dosyalar var; Gizli dosyaları göster onları listeler.</string>
+    <string name="nag_device_column_size">Boyut</string>
+    <string name="nag_device_column_modified">Değiştirilme</string>
+    <string name="nag_play_this_only">Yalnızca bunu oynat</string>
+    <string name="nag_device_not_media">Medya dosyası değil</string>
+    <string name="nag_device_add_to_section">Kütüphaneye ekle: %1$s</string>
 </resources>
