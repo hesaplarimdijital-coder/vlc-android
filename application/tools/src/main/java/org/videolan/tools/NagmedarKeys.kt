@@ -56,6 +56,13 @@ const val NAGMEDAR_WINDOW_BOUNDS = "nagmedar_window_bounds"
 /** S-409: the video player opened from a desktop window asks to fill the screen (Android 14 and later). */
 const val NAGMEDAR_PLAYER_FULLSCREEN = "nagmedar_player_fullscreen"
 
+/**
+ * The volume the user set last, VLC's percent (0–200, 100 the samples as they are): from the bars'
+ * slider, the volume keys and the mute button; both engines start at it. The sleep timer's fade,
+ * the alarm's rise, ducking and a podcast's boost never touch it.
+ */
+const val NAGMEDAR_VOLUME = "nagmedar_volume"
+
 /** S-901: the local music library plays through Nağmedar Ses Motoru (default) rather than libVLC. */
 const val NAGMEDAR_MUSIC_ENGINE = "nagmedar_music_engine"
 

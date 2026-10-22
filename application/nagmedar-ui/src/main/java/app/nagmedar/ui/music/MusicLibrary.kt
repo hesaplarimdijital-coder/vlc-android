@@ -124,15 +124,15 @@ class MusicLibrary(val tracks: List<Track>, locale: Locale = Locale.getDefault()
         val shown = if (filter.active) tracks.filter(filter::matches) else tracks
         return when (view) {
             MusicView.Tracks -> listOf(MusicGroup("", null, null, null, sortTracks(shown)))
-            MusicView.Artists -> group(shown, { it.filedArtist?.let(::fold) }, { it.filedArtist }).sortedWith(byTitle)
-            MusicView.Albums -> shown.groupBy { (it.filedArtist?.let(::fold) ?: "") + "\u0000" + (it.album?.let(::fold) ?: "") }
+            MusicView.Artists -> group(shown, { it.filedArtist?.let { artistKey(it) } }, { it.filedArtist }).sortedWith(byTitle)
+            MusicView.Albums -> shown.groupBy { albumKey(it.filedArtist, it.album) }
                 .map { (key, list) ->
                     val first = list.first()
-                    MusicGroup("album:$key", first.album?.takeIf { it.isNotBlank() }, first.filedArtist, list.mapNotNull { it.year }.maxOrNull(), sortTracks(list))
+                    MusicGroup(key, first.album?.takeIf { it.isNotBlank() }, first.filedArtist, list.mapNotNull { it.year }.maxOrNull(), sortTracks(list))
                 }
                 .sortedWith(compareBy<MusicGroup, String?>(nullsLast(collator)) { it.artist }.then(compareBy(nullsLast()) { it.year }).then(byTitle))
-            MusicView.Genres -> group(shown, { it.genre?.takeIf(String::isNotBlank)?.let(::fold) }, { it.genre }).sortedWith(byTitle)
-            MusicView.Composers -> group(shown, { it.composer?.let(::fold) }, { it.composer }).sortedWith(byTitle)
+            MusicView.Genres -> group(shown, { it.genre?.takeIf(String::isNotBlank)?.let { fold(it) } }, { it.genre }).sortedWith(byTitle)
+            MusicView.Composers -> group(shown, { it.composer?.let { fold(it) } }, { it.composer }).sortedWith(byTitle)
             MusicView.Years -> shown.groupBy { it.year?.takeIf { y -> y > 0 } }
                 .map { (year, list) -> MusicGroup("year:${year ?: ""}", year?.toString(), null, year, sortTracks(list)) }
                 .sortedWith(compareByDescending<MusicGroup> { it.year ?: Int.MIN_VALUE })
@@ -155,5 +155,14 @@ class MusicLibrary(val tracks: List<Track>, locale: Locale = Locale.getDefault()
             .thenBy(collator) { it.title },
     )
 
-    private fun fold(text: String): String = text.trim().lowercase(Locale.ROOT)
+    companion object {
+        /** The key of the artists' group of [filedArtist] (an album artist, else the track's): case and spaces folded. */
+        fun artistKey(filedArtist: String): String = fold(filedArtist)
+
+        /** The key of the albums' group of [album] filed under [filedArtist]. */
+        fun albumKey(filedArtist: String?, album: String?): String =
+            "album:" + (filedArtist?.let { fold(it) } ?: "") + "\u0000" + (album?.let { fold(it) } ?: "")
+
+        private fun fold(text: String): String = text.trim().lowercase(Locale.ROOT)
+    }
 }

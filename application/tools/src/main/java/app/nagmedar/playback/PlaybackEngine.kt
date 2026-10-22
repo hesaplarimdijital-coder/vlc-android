@@ -97,3 +97,22 @@ class EngineHost(private val router: EngineRouter, private val onEngineChanged: 
         return current
     }
 }
+
+/**
+ * What Previous does, the same for both engines and every surface (the bars, the keys, the
+ * notification, the media session, the widget): a press restarts the track playing; the track
+ * before plays when the press comes within [WINDOW_MS] of the track's start or of the last
+ * restart, when the item cannot be seeked, or when [force]d. Without a track before, it restarts.
+ */
+object PreviousRule {
+    /** VLC's PREVIOUS_LIMIT_DELAY, as the media session's own (Media3's maxSeekToPreviousPosition). */
+    const val WINDOW_MS = 3_000L
+
+    /** True: to the track before; false: to the start of this one. [sinceRestartMs] null: no restart before. */
+    fun goesBack(force: Boolean, hasPrevious: Boolean, seekable: Boolean, timeMs: Long, sinceRestartMs: Long?): Boolean {
+        if (!hasPrevious) return false
+        if (force || !seekable) return true
+        if (sinceRestartMs != null && sinceRestartMs in 0 until WINDOW_MS) return true
+        return timeMs in 0 until WINDOW_MS
+    }
+}

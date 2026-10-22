@@ -161,10 +161,9 @@ class NagmedarSessionPlayer(looper: Looper, private val source: SessionSource) :
         val currentInWindow = source.currentIndex - windowStart
         when (seekCommand) {
             Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> source.next()
-            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM ->
-                // Media3 asks for position 0 of the current item when it is past the first seconds
-                if (mediaItemIndex == currentInWindow && positionMs == 0L && seekCommand == Player.COMMAND_SEEK_TO_PREVIOUS) source.seekTo(0L)
-                else source.previous()
+            // the playback service decides between the start of this item and the one before, by its own clock and
+            // the last restart, as for the app's buttons; Media3's guess from its last position report would differ
+            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> source.previous()
             else -> when {
                 mediaItemIndex == C.INDEX_UNSET -> Unit
                 mediaItemIndex != currentInWindow -> source.skipToIndex(windowStart + mediaItemIndex)

@@ -140,6 +140,8 @@ import org.videolan.tools.Notices
 import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
+import org.videolan.tools.NAGMEDAR_VOLUME
+import org.videolan.tools.putSingle
 import app.nagmedar.session.Media3SessionHost
 import app.nagmedar.session.SessionAction
 import org.videolan.vlc.media.PlaybackObserver
@@ -888,6 +890,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         observers.forEach { it.detach() }
         dispatcher.onServicePreSuperOnDestroy()
         PlaylistManager.playingState.value = false
+        PlaylistManager.enginePlaying.value = false
         super.onDestroy()
         browserCallback.removeCallbacks()
         if (!settings.getBoolean(AUDIO_RESUME_PLAYBACK, true)) (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationIds.PLAYBACK.id)
@@ -970,6 +973,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     }
 
     fun getTime() = playlistManager.engine.getCurrentTime()
+
+    /** Nağmedar: where the current item is, to the millisecond on both engines (libVLC's [getTime] moves by seconds). */
+    @MainThread
+    fun preciseTime() = playlistManager.currentTime()
 
     fun onMediaPlayerEvent(event: MediaPlayer.Event) = mediaPlayerListener.onEvent(event)
 
@@ -1813,6 +1820,23 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     @MainThread
     fun setVolume(volume: Int) = playlistManager.engine.setVolume(volume)
+
+    private var volumeSave: Job? = null
+
+    /**
+     * Nağmedar: the volume the user sets (the bars' slider, the volume keys, mute), kept for the
+     * next start a moment after the last change; the fades and ramps use [setVolume].
+     */
+    @MainThread
+    fun setUserVolume(volume: Int) {
+        val level = volume.coerceIn(0, 200)
+        setVolume(level)
+        volumeSave?.cancel()
+        volumeSave = lifecycleScope.launch {
+            delay(400L)
+            settings.putSingle(NAGMEDAR_VOLUME, level)
+        }
+    }
 
     @MainThread
     @JvmOverloads

@@ -1887,6 +1887,10 @@
     <string name="nag_music_nothing_playing">Çalan bir şey yok. Bir parça seçin: dalga biçimiyle burada görünür.</string>
     <string name="nag_music_waveform">Dalga biçimi</string>
     <string name="nag_music_position">%1$s / %2$s</string>
+    <string name="nag_music_open_artist">Sanatçının parçalarını göster</string>
+    <string name="nag_music_open_album">Albümün parçalarını göster</string>
+    <string name="nag_music_link_missing">Bu parça müzik kütüphanesinde yok</string>
+    <string name="nag_time_remaining">−%1$s</string>
     <!-- S-804: çalma listeleri -->
     <plurals name="nag_pl_count">
         <item quantity="one">%d liste</item>

@@ -79,6 +79,7 @@ import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.music.MusicNowPlaying
 import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
@@ -370,6 +371,13 @@ private fun NagmedarMain(
             } else if (PlaybackActions.playsVideo()) {
                 PlaybackActions.openPlayer(context)
             }
+        }
+        // a player's artist or album link: the music view takes it (the phone's player closes for it)
+        val musicLink = MusicLinks.pending
+        LaunchedEffect(musicLink) {
+            if (musicLink == null) return@LaunchedEffect
+            phonePlayer = false
+            navigator.navigate(Destination.Music)
         }
         LaunchedEffect(nowPlayingRequested) {
             if (nowPlayingRequested) {
@@ -740,14 +748,15 @@ class AppActions(
                 }
             }
             ShortcutId.Shuffle -> service?.shuffle()
-            ShortcutId.VolumeUp -> service?.let { it.setVolume((it.volume + 5).coerceAtMost(200)) }
-            ShortcutId.VolumeDown -> service?.let { it.setVolume((it.volume - 5).coerceAtLeast(0)) }
+            // the user's volume: kept for the next start
+            ShortcutId.VolumeUp -> service?.let { it.setUserVolume((it.volume + 5).coerceAtMost(200)) }
+            ShortcutId.VolumeDown -> service?.let { it.setUserVolume((it.volume - 5).coerceAtLeast(0)) }
             ShortcutId.Mute -> service?.let {
                 if (it.volume > 0) {
                     volumeBeforeMute = it.volume
-                    it.setVolume(0)
+                    it.setUserVolume(0)
                 } else {
-                    it.setVolume(volumeBeforeMute)
+                    it.setUserVolume(volumeBeforeMute)
                 }
             }
             ShortcutId.SleepTimer -> openSleepTimer()

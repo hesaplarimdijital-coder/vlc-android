@@ -3,6 +3,8 @@ package app.nagmedar.ui.music
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +35,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,28 +71,36 @@ import app.nagmedar.ui.lyrics.PlayingLyrics
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.ChapterStrip
 import app.nagmedar.ui.playback.PlayerBarActions
+import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.ServicePlayerBarActions
+import app.nagmedar.ui.playback.TimelineStyle
+import app.nagmedar.ui.playback.TransportControls
+import app.nagmedar.ui.playback.TransportSize
+import app.nagmedar.ui.playback.playbackRate
 import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
-import app.nagmedar.ui.playback.rememberPlayingChapters
 import app.nagmedar.ui.playback.rememberPlaybackProgress
+import app.nagmedar.ui.playback.rememberPlayingChapters
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
-import app.nagmedar.ui.rememberNagmedarPreferences
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.PlayingVisualizer
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.media.PlaylistManager
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 /**
- * S-1002: the phone's music player, over the whole window: the artwork, what plays and how, the
- * waveform as the timeline, and the controls low, where one thumb reaches them. The artwork swiped
- * left plays the next track and right the previous; swiped down, or Back, closes the player. The
- * same artwork, words and controls as the lock screen's, from the same media session.
+ * S-1002: the phone's music player, over the whole window: the artwork large (it settles back a
+ * little while paused), what plays and how, the progress over the waveform, and the controls low,
+ * where one thumb reaches them. The artwork swiped left plays the next track and right the
+ * previous; swiped down, or Back, closes the player. The artist and the album open their tracks in
+ * the music view ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock
+ * screen's, from the same media session.
  */
 @Composable
 fun PhonePlayer(
@@ -117,9 +128,13 @@ fun PhonePlayer(
     visualizer: (@Composable (Modifier) -> Unit)? = null,
     visualizerShown: Boolean = false,
     onVisualizerShown: ((Boolean) -> Unit)? = null,
+    repeatOne: Boolean = false,
+    onOpenArtist: (() -> Unit)? = null,
+    onOpenAlbum: (() -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val motion = NagTheme.motion
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipe = remember { Animatable(0f) }
@@ -135,6 +150,8 @@ fun PhonePlayer(
             .fillMaxSize()
             .offset { IntOffset(0, drop.value.roundToInt()) }
             .background(colors.background)
+            // a glow of the accent from the top, faint
+            .background(Brush.verticalGradient(0f to colors.accent.copy(alpha = if (colors.isDark) 0.16f else 0.09f), 0.6f to colors.accent.copy(alpha = 0f)))
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(horizontal = dimens.gapL),
@@ -238,47 +255,58 @@ fun PhonePlayer(
                 contentAlignment = Alignment.Center,
             ) {
                 val side = minOf(maxWidth, maxHeight, 420.dp)
-                Box(Modifier.offset { IntOffset(swipe.value.roundToInt(), 0) }) { artwork(side) }
+                val widthPx = with(density) { maxWidth.toPx() }.coerceAtLeast(1f)
+                // playing, the artwork comes forward; paused, it settles back a little
+                val scale by animateFloatAsState(if (info.playing) 1f else PAUSED_SCALE, motion.standard(NagMotion.LONG), label = "artwork")
+                val lift by animateDpAsState(if (info.playing) 24.dp else 6.dp, motion.standard(NagMotion.LONG), label = "lift")
+                Box(
+                    Modifier
+                        .offset { IntOffset(swipe.value.roundToInt(), 0) }
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            // swiped aside, it fades as it goes
+                            alpha = 1f - (abs(swipe.value) / widthPx).coerceIn(0f, 0.6f)
+                            rotationZ = swipe.value / widthPx * 4f
+                        }
+                        .shadow(lift, RoundedCornerShape(12.dp), clip = false),
+                ) { artwork(side) }
             }
         }
         Spacer(Modifier.height(dimens.gapM))
         Column(Modifier.fillMaxWidth().widthIn(max = 560.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(info.title, style = NagTheme.type.title, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            val line = listOfNotNull(info.artist?.takeIf { it.isNotBlank() }, info.album?.takeIf { it.isNotBlank() }).joinToString(" · ")
-            if (line.isNotEmpty()) Text(line, style = NagTheme.type.body, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(info.title, style = NagTheme.type.headline, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            PlayingArtistAlbum(info, Links(onOpenArtist, onOpenAlbum), NagTheme.type.body)
             if (info.format != null) Text(info.format, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             // S-808: a finger's stars
             info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 24.dp, target = 44.dp, modifier = Modifier.offset(x = (-10).dp).testTag("phone-rating")) }
-            Spacer(Modifier.height(dimens.gapS))
-            WaveformTimeline(waveform, progress, info.lengthMs, actions::seekTo, height = 56.dp, marks = rememberChapterMarks(info.chapters, info.lengthMs))
+            Spacer(Modifier.height(dimens.gapM))
+            ProgressTimeline(
+                progress, info.lengthMs, actions::seekTo,
+                playing = info.playing, rate = info.rate, waveform = waveform,
+                marks = rememberChapterMarks(info.chapters, info.lengthMs), style = TimelineStyle.Phone,
+                label = stringResource(R.string.nag_music_waveform),
+            )
             // S-1104: the chapters of a podcast episode
             ChapterStrip(info.chapters, info.lengthMs, progress, actions::stepChapter, actions::seekToMs)
         }
         Spacer(Modifier.height(dimens.gapM))
         // the controls, low: the thumb's
-        Row(
-            Modifier.fillMaxWidth().widthIn(max = 560.dp).padding(bottom = dimens.gapL),
+        TransportControls(
+            playing = info.playing,
+            shuffling = shuffling,
+            repeating = repeating,
+            actions = actions,
+            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp).padding(bottom = dimens.gapL),
+            size = TransportSize.Phone,
+            repeatOne = repeatOne,
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            NagIconButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, selected = shuffling, size = 56.dp)
-            NagIconButton(NagIcons.Previous, previous, actions::previous, size = 64.dp, iconSize = 28.dp)
-            Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(72.dp).clip(CircleShape).background(colors.accent))
-                NagIconButton(
-                    if (info.playing) NagIcons.Pause else NagIcons.Play,
-                    stringResource(if (info.playing) R.string.nag_pause else R.string.nag_play),
-                    actions::togglePlayPause,
-                    size = 80.dp,
-                    iconSize = 36.dp,
-                    tint = colors.onAccent,
-                )
-            }
-            NagIconButton(NagIcons.Next, next, actions::next, size = 64.dp, iconSize = 28.dp)
-            NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_repeat), actions::cycleRepeat, selected = repeating, size = 56.dp)
-        }
+        )
     }
 }
+
+/** How small the artwork settles while paused. */
+private const val PAUSED_SCALE = 0.88f
 
 /** A sideways swipe this long changes the track. */
 private val SWIPE = 80.dp
@@ -323,6 +351,8 @@ fun PhonePlayerHost(
     val coverMenu = rememberCoverMenu(remember(media) { CoverTrack.of(media) })
     val coverLabel = stringResource(R.string.nag_cover_menu)
     val actions = remember(context) { ServicePlayerBarActions(context, { latestQueue() }) }
+    val artistLink = remember(media) { MusicLinks.artistOf(media) }
+    val albumLink = remember(media) { MusicLinks.albumOf(media) }
     PhonePlayer(
         info = NowPlayingInfo(
             title = media.nowPlaying ?: media.title ?: "",
@@ -333,6 +363,7 @@ fun PhonePlayerHost(
             playing = nowPlaying.playing,
             rating = key?.let { stats[it]?.rating ?: 0 },
             chapters = rememberPlayingChapters(),
+            rate = playbackRate(),
         ),
         progress = { progress },
         waveform = waveform,
@@ -341,6 +372,7 @@ fun PhonePlayerHost(
         modifier = modifier,
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
+        repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
         // S-1006: the album's cover changed from its menu (a long press)
         artwork = { size ->
             ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = 12.dp, video = false) }
@@ -356,5 +388,8 @@ fun PhonePlayerHost(
         visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
         visualizerShown = prefs.visualizer.music,
         onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
+        // the music view opens the artist's or the album's tracks; the player closes for it
+        onOpenArtist = artistLink?.let { link -> { MusicLinks.open(link) } },
+        onOpenAlbum = albumLink?.let { link -> { MusicLinks.open(link) } },
     )
 }

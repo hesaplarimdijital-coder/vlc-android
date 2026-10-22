@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -49,9 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -62,6 +59,7 @@ import app.nagmedar.ui.cast.CastDevice
 import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.cast.rememberCastDevice
 import app.nagmedar.ui.cast.rememberCastingEnabled
+import app.nagmedar.ui.components.ArtistAlbumLine
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -74,21 +72,21 @@ import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.library.audioFormatLabel
-import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.library.techBadge
+import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.podcast.Chapter
 import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
+import kotlin.math.roundToInt
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.util.ThumbnailsProvider
-import kotlin.math.roundToInt
 
 /**
  * Cover or video thumbnail of [media], loaded through the classic thumbnail cache. Without one, a
@@ -160,6 +158,14 @@ data class PlayerBarInfo(
     val casting: CastDevice? = null,
     /** S-1104: the chapters of the podcast episode that plays; empty for any other media. */
     val chapters: List<Chapter> = emptyList(),
+    /** The album of the library's music (null for anything else); with [linked] it opens its tracks. */
+    val album: String? = null,
+    /** The artist ([subtitle]) and the album are links to their tracks in the music view (music of the library). */
+    val linked: Boolean = false,
+    /** Repeat one: the repeat button has its "1". */
+    val repeatOne: Boolean = false,
+    /** The playing speed: the timelines move at it between the service's readings. */
+    val rate: Float = 1f,
 )
 
 /** What the bars ask of playback: the playback service in the app, a recorder in tests. */
@@ -193,6 +199,12 @@ interface PlayerBarActions {
 
     /** S-1104: to [ms] of the playing media (a chapter chosen from the list). */
     fun seekToMs(ms: Long) = Unit
+
+    /** The artist's tracks of what plays, in the music view. */
+    fun openArtist() = Unit
+
+    /** The album's tracks of what plays, in the music view. */
+    fun openAlbum() = Unit
 }
 
 /**
@@ -238,9 +250,8 @@ class ServicePlayerBarActions(
         }
     }
 
-    override fun setVolume(volume: Int) {
-        PlaybackService.instance?.setVolume(volume.coerceIn(0, 200))
-    }
+    /** The user's volume: kept for the next start (never the sleep timer's fade nor the alarm's rise, which go round it). */
+    override fun setVolume(volume: Int) = PlaybackActions.setVolume(volume.coerceIn(0, 200))
 
     override fun cast() = Casting.openPicker()
 
@@ -249,6 +260,14 @@ class ServicePlayerBarActions(
     }
 
     override fun seekToMs(ms: Long) = PlaybackActions.seekToMs(ms)
+
+    override fun openArtist() {
+        MusicLinks.artistOf(PlaybackService.instance?.currentMediaWrapper)?.let(MusicLinks::open)
+    }
+
+    override fun openAlbum() {
+        MusicLinks.albumOf(PlaybackService.instance?.currentMediaWrapper)?.let(MusicLinks::open)
+    }
 }
 
 /** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
@@ -287,6 +306,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
     val tech = rememberTechOf(media.uri?.toString())
     val video = media.type == MediaWrapper.TYPE_VIDEO
     val artist = media.artistName
+    val links = remember(media) { MusicLinks.artistOf(media) to MusicLinks.albumOf(media) }
     return PlayerBarInfo(
         title = media.nowPlaying ?: media.title ?: "",
         subtitle = if (artist.isNullOrBlank()) stringResource(R.string.nag_now_playing) else artist,
@@ -300,6 +320,10 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         canCast = rememberCastingEnabled(),
         casting = rememberCastDevice(),
         chapters = rememberPlayingChapters(),
+        album = if (links.second != null) media.albumName else null,
+        linked = links.first != null && !artist.isNullOrBlank(),
+        repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
+        rate = playbackRate(),
     )
 }
 
@@ -346,7 +370,7 @@ fun MiniPlayer(
         ) {
             if (!floating) {
                 HorizontalRule()
-                ProgressLine(progress)
+                ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
             }
             Row(
                 Modifier.fillMaxWidth().height(dimens.miniPlayerHeight - if (floating) 8.dp else 0.dp).padding(horizontal = if (floating) 8.dp else dimens.gapM),
@@ -380,7 +404,7 @@ fun MiniPlayer(
                     if (extras) {
                         // where the second line was, beside the click target rather than in it
                         SeekRow(
-                            info.lengthMs,
+                            info,
                             progress,
                             actions::seekTo,
                             marks = marks,
@@ -391,77 +415,73 @@ fun MiniPlayer(
                         )
                     }
                 }
-                if (extras) NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, shortcut = ShortcutId.Previous)
+                val button = dimens.minTarget.coerceAtLeast(dimens.controlHeight)
+                if (extras) TransportButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, button, dimens.icon, strong = true, shortcut = ShortcutId.Previous)
                 // S-1104: the chapters of a podcast episode
                 if (extras && info.chapters.isNotEmpty()) ChapterButtons(actions::stepChapter)
-                NagIconButton(
+                TransportButton(
                     if (info.playing) NagIcons.Pause else NagIcons.Play,
                     stringResource(if (info.playing) R.string.nag_pause else R.string.nag_play),
                     actions::togglePlayPause,
-                    tint = colors.text,
+                    button,
+                    dimens.icon,
+                    strong = true,
                     shortcut = ShortcutId.PlayPause,
                 )
-                NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
+                TransportButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, button, dimens.icon, strong = true, shortcut = ShortcutId.Next)
                 // S-1302: lit while casting; with a pointer over the bar, to cast
                 if (info.casting != null || (extras && info.canCast)) CastButton(info.casting, actions::cast)
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
-            if (floating) ProgressLine(progress)
+            if (floating) ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
         }
     }
 }
 
 private val SeekRowHeight = 24.dp
 
-/** The played part as a hairline; read as the position by screen readers. */
+/** "1:42 ━━━●──── −2:36": seeking from a bar, the times either side in even figures. */
 @Composable
-private fun ProgressLine(progress: () -> Float) {
-    val colors = NagTheme.colors
-    val label = stringResource(R.string.nag_position)
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(2.dp)
-            .background(colors.border)
-            .semantics {
-                contentDescription = label
-                progressBarRangeInfo = ProgressBarRangeInfo(progress().coerceIn(0f, 1f), 0f..1f)
-            },
-    ) {
-        Box(Modifier.fillMaxWidth(progress().coerceIn(0f, 1f)).fillMaxHeight().background(colors.accent))
-    }
-}
-
-/** "1:42 ──●──── 4:18": seeking from a bar. */
-@Composable
-private fun SeekRow(lengthMs: Long, progress: () -> Float, onSeek: (Float) -> Unit, modifier: Modifier = Modifier, marks: List<SliderMark> = emptyList()) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
-    val label = stringResource(R.string.nag_position)
-    val fraction = progress()
-    Row(modifier.height(SeekRowHeight), verticalAlignment = Alignment.CenterVertically) {
-        Text(clock((lengthMs * fraction).toLong()), style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
-        Spacer(Modifier.width(dimens.gapS))
-        NagSlider(
-            value = fraction,
-            onValueChange = onSeek,
-            modifier = Modifier.weight(1f).semantics { contentDescription = label },
-            hoverLabel = { clock((lengthMs * it).toLong()) },
-            marks = marks,
-        )
-        Spacer(Modifier.width(dimens.gapS))
-        Text(clock(lengthMs), style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
-    }
+private fun SeekRow(info: PlayerBarInfo, progress: () -> Float, onSeek: (Float) -> Unit, modifier: Modifier = Modifier, marks: List<SliderMark> = emptyList()) {
+    ProgressTimeline(
+        progress,
+        info.lengthMs,
+        onSeek,
+        modifier.height(SeekRowHeight),
+        playing = info.playing,
+        rate = info.rate,
+        marks = marks,
+        style = TimelineStyle.Bar,
+    )
 }
 
 /**
  * The second line of a bar: the artist (and the format), or for a podcast episode with chapters the chapter playing
- * (S-1104). Reads the progress itself, so that only this line changes as the episode goes on.
+ * (S-1104). Reads the progress itself, so that only this line changes as the episode goes on. With [actions] (the
+ * transport bar's line, without the format), the library's music has its artist and album as links to their tracks.
  */
 @Composable
-private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat: Boolean) {
+private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat: Boolean, actions: PlayerBarActions? = null) {
     val chapter = if (info.chapters.isEmpty()) null else chapterNameAt(info.chapters, info.lengthMs, progress())
+    if (actions != null && info.linked && chapter == null && !withFormat) {
+        val colors = NagTheme.colors
+        val style = NagTheme.type.labelSmall
+        Row(Modifier.testTag("bar-subtitle"), verticalAlignment = Alignment.CenterVertically) {
+            ArtistAlbumLine(
+                info.subtitle,
+                info.album,
+                style,
+                colors.textTertiary,
+                Modifier.weight(1f, fill = false),
+                onArtist = actions::openArtist,
+                onAlbum = actions::openAlbum,
+                artistLabel = stringResource(R.string.nag_music_open_artist),
+                albumLabel = stringResource(R.string.nag_music_open_album),
+            )
+        }
+        return
+    }
     Text(
         listOfNotNull(info.subtitle, chapter ?: info.format.takeIf { withFormat }).joinToString(" · "),
         style = NagTheme.type.labelSmall,
@@ -471,9 +491,6 @@ private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat:
         modifier = Modifier.testTag("bar-subtitle"),
     )
 }
-
-/** "0:00", "1:42", "1:02:03". */
-private fun clock(millis: Long): String = if (millis <= 0) "0:00" else formatDuration(millis)
 
 /**
  * Large windows: the transport bar of the mockups across the bottom of every screen (S-304). The
@@ -516,20 +533,14 @@ fun TransportBar(
                     if (info.casting != null) {
                         CastingLine(info.casting)
                     } else {
-                        SubtitleLine(info, progress, withFormat = false)
+                        SubtitleLine(info, progress, withFormat = false, actions = actions)
                     }
                 }
             }
             Spacer(Modifier.width(dimens.gapL))
             Column(Modifier.widthIn(min = 360.dp, max = 640.dp).weight(1.4f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NagIconButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, selected = info.shuffling, shortcut = ShortcutId.Shuffle)
-                    NagIconButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, shortcut = ShortcutId.Previous)
-                    PlayPauseButton(info.playing, actions::togglePlayPause)
-                    NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, shortcut = ShortcutId.Next)
-                    NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_repeat), actions::cycleRepeat, selected = info.repeating, shortcut = ShortcutId.Repeat)
-                }
-                SeekRow(info.lengthMs, progress, actions::seekTo, Modifier.fillMaxWidth(), marks = rememberChapterMarks(info.chapters, info.lengthMs))
+                TransportControls(info.playing, info.shuffling, info.repeating, actions, repeatOne = info.repeatOne, horizontalArrangement = Arrangement.spacedBy(8.dp))
+                SeekRow(info, progress, actions::seekTo, Modifier.fillMaxWidth(), marks = rememberChapterMarks(info.chapters, info.lengthMs))
             }
             Spacer(Modifier.width(dimens.gapL))
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
@@ -606,21 +617,4 @@ private fun VolumeControl(volume: Int, onVolume: (Int) -> Unit) {
         },
         modifier = Modifier.width(96.dp).semantics { contentDescription = label },
     )
-}
-
-@Composable
-private fun PlayPauseButton(playing: Boolean, onClick: () -> Unit) {
-    val colors = NagTheme.colors
-    val size = NagTheme.dimens.minTarget.coerceAtLeast(36.dp)
-    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
-        Box(Modifier.size(size - 4.dp).clip(CircleShape).background(colors.accent))
-        NagIconButton(
-            icon = if (playing) NagIcons.Pause else NagIcons.Play,
-            contentDescription = stringResource(if (playing) R.string.nag_pause else R.string.nag_play),
-            onClick = onClick,
-            size = size,
-            tint = colors.onAccent,
-            shortcut = ShortcutId.PlayPause,
-        )
-    }
 }

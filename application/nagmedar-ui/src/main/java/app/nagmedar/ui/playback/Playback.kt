@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,21 +38,27 @@ data class NowPlaying(val media: MediaWrapper?, val playing: Boolean) {
 @Composable
 fun rememberNowPlaying(): NowPlaying {
     val media by PlaylistManager.currentPlayedMedia.observeAsState()
-    val playing by PlaylistManager.playingState.observeAsState(false)
-    return NowPlaying(media, playing == true)
+    // the engine's own state, either engine: playingState only says that the service has something to play
+    val playing by PlaylistManager.enginePlaying.collectAsState()
+    return NowPlaying(media, playing)
 }
 
-/** Position of the current media as 0..1, refreshed twice a second while playing. */
+/**
+ * Position of the current media as 0..1, read twice a second while playing and every second while paused (a seek
+ * from the notification shows); the timelines glide between the readings.
+ */
 @Composable
 fun rememberPlaybackProgress(nowPlaying: NowPlaying): State<Float> = produceState(0f, nowPlaying.media, nowPlaying.playing) {
     while (true) {
         val service = PlaybackService.instance
         val length = service?.length ?: 0L
-        value = if (service != null && length > 0) (service.getTime().toFloat() / length).coerceIn(0f, 1f) else 0f
-        if (!nowPlaying.playing) break
-        delay(500)
+        value = if (service != null && length > 0) (service.preciseTime().toFloat() / length).coerceIn(0f, 1f) else 0f
+        delay(if (nowPlaying.playing) 500L else 1_000L)
     }
 }
+
+/** The speed of what plays (1 for its own); the timelines move at it. */
+fun playbackRate(): Float = PlaybackService.instance?.rate?.takeIf { it > 0f } ?: 1f
 
 /**
  * S-1004: where the current media is, in milliseconds, for the lyrics: read ten times a second
@@ -74,7 +81,7 @@ fun rememberPlaybackTime(nowPlaying: NowPlaying): PlaybackTime {
     val time = remember { PlaybackTime() }
     LaunchedEffect(nowPlaying.media, nowPlaying.playing) {
         while (true) {
-            time.ms = PlaybackService.instance?.getTime() ?: 0L
+            time.ms = PlaybackService.instance?.preciseTime() ?: 0L
             if (!nowPlaying.playing) break
             delay(100)
         }
@@ -111,8 +118,14 @@ object PlaybackActions {
         PlaybackService.instance?.next()
     }
 
+    /** The track restarts, or within three seconds of its start the one before plays (PlaylistManager.previous). */
     fun previous() {
         PlaybackService.instance?.previous(false)
+    }
+
+    /** The volume the user sets (the bars' slider, the keys, mute), 0–200: kept for the next start. */
+    fun setVolume(volume: Int) {
+        PlaybackService.instance?.setUserVolume(volume)
     }
 
     /** S-1004: to [ms] of the current media (a line of its lyrics). */

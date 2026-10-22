@@ -96,6 +96,8 @@ import org.videolan.tools.NAGMEDAR_MUSIC_VIEW
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.tools.Notices
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * S-803: where the music library is: the way in (tracks, artists, albums, genres, composers,
@@ -123,6 +125,17 @@ class MusicBrowserState(
 
     var columns by mutableStateOf(columns)
         private set
+
+    /** A group to scroll the list to once (a player's artist or album link); null for none. */
+    var reveal by mutableStateOf<String?>(null)
+
+    /** A player's link: [view] with the group [key] open, the list scrolled to it, no filter hiding its tracks. */
+    fun show(view: MusicView, key: String, clearFilter: Boolean) {
+        open(view)
+        if (clearFilter) filter = TechFilter()
+        group = key
+        reveal = key
+    }
 
     fun open(next: MusicView) {
         if (next == view) return
@@ -425,6 +438,25 @@ fun MusicBrowser(
     val sort = effectiveSort(state)
     val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
     val shown = remember(open, sort, locale, sortStats) { open?.let { sortTracks(it.tracks, sort, locale, sortStats) }.orEmpty() }
+    // a player's artist or album link: its group, wherever the library was
+    val context = LocalContext.current
+    val link = MusicLinks.pending
+    LaunchedEffect(link, library) {
+        val asked = link ?: return@LaunchedEffect
+        val filter = state.filter
+        // the groups are sorted with the reader's collator: off the main thread for a large library
+        val (key, hidden) = withContext(Dispatchers.Default) {
+            val all = library.groups(asked.view)
+            val found = asked.keys.firstOrNull { k -> all.any { it.key == k } }
+            found to (found != null && filter.active && library.groups(asked.view, filter).none { it.key == found })
+        }
+        MusicLinks.taken(asked)
+        if (key == null) {
+            Notices.show(context, R.string.nag_music_link_missing)
+            return@LaunchedEffect
+        }
+        state.show(asked.view, key, clearFilter = hidden)
+    }
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
         MusicToolbar(state, actions, shown, showColumns = width != WidthClass.Compact, probing = probing)
@@ -512,6 +544,14 @@ private fun groupLine(group: MusicGroup, view: MusicView): String {
 private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, actions: MusicActions, openKey: String?, modifier: Modifier) {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
+    LaunchedEffect(state.reveal, groups) {
+        val key = state.reveal ?: return@LaunchedEffect
+        val index = groups.indexOfFirst { it.key == key }
+        if (index >= 0) {
+            listState.animateScrollToItem(index)
+            state.reveal = null
+        }
+    }
     LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp)) {
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened

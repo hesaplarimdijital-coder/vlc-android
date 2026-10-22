@@ -2,6 +2,7 @@ package org.videolan.vlc.media
 
 import android.content.Intent
 import android.support.v4.media.session.PlaybackStateCompat
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.MainThread
@@ -76,6 +77,7 @@ import org.videolan.tools.KEY_SAVE_INDIVIDUAL_AUDIO_DELAY
 import org.videolan.tools.KEY_VIDEO_APP_SWITCH
 import org.videolan.tools.KEY_VIDEO_CONFIRM_RESUME
 import org.videolan.tools.MEDIA_SHUFFLING
+import org.videolan.tools.NAGMEDAR_VOLUME
 import org.videolan.tools.PLAYBACK_HISTORY
 import org.videolan.tools.POSITION_IN_AUDIO_LIST
 import org.videolan.tools.POSITION_IN_MEDIA
@@ -116,6 +118,7 @@ import app.nagmedar.playback.EngineRouter
 import app.nagmedar.playback.Handover
 import app.nagmedar.playback.HandoverHost
 import app.nagmedar.playback.PlaybackEngine
+import app.nagmedar.playback.PreviousRule
 import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Locale
@@ -123,7 +126,6 @@ import java.util.Stack
 import kotlin.math.max
 
 private const val TAG = "VLC/PlaylistManager"
-private const val PREVIOUS_LIMIT_DELAY = 5000L
 private const val PLAYLIST_AUDIO_REPEAT_MODE_KEY = "audio_repeat_mode"
 private const val PLAYLIST_VIDEO_REPEAT_MODE_KEY = "video_repeat_mode"
 
@@ -135,6 +137,13 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         val showAudioPlayer = MutableLiveData<Boolean>().apply { value = false }
         val currentPlayedMedia = MutableLiveData<MediaWrapper?>().apply { value = null }
         val playingState = MutableLiveData<Boolean>().apply { value = false }
+
+        /**
+         * Nağmedar: whether the engine plays right now, either engine: true on Playing, false on
+         * Paused and Stopped. [playingState] says only that the service has something to play (VLC
+         * shows its audio player by it), so it stayed true while the music was paused.
+         */
+        val enginePlaying = MutableStateFlow(false)
         // The playback will periodically modify the media by saving its meta
         // When playing audio, it will have no impact on UI but will trigger the media modified ML callback
         // On slow devices, it will trigger an unwanted "refresh animation". This flag prevents it
@@ -156,7 +165,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     val musicEngine by lazy(LazyThreadSafetyMode.NONE) {
         MusicEngineController(service.applicationContext, player.progress, player.speed).also { it.onHandOver = { onEngineHandOver() } }
     }
-    val engines by lazy(LazyThreadSafetyMode.NONE) { EngineHost(EngineRouter(listOf(musicEngine, player))) }
+    val engines by lazy(LazyThreadSafetyMode.NONE) {
+        EngineHost(EngineRouter(listOf(musicEngine, player))).also {
+            // Nağmedar: both engines start at the volume the user set last
+            settings.getInt(NAGMEDAR_VOLUME, 100).takeIf { volume -> volume != 100 }?.let(::restoreVolume)
+        }
+    }
 
     /** The engine playing the current item: the transport goes through it. */
     val engine: PlaybackEngine get() = engines.current
@@ -541,13 +555,42 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             player.cancel()
         }
         playingState.value = false
+        enginePlaying.value = false
     }
 
+    /**
+     * Nağmedar: where the current item is now, ms. libVLC's progress moves in steps of a second
+     * (its TimeChanged is taken only then), so its player is asked; the music engine's clock is
+     * its own.
+     */
+    @MainThread
+    fun currentTime(): Long {
+        val engine = engine
+        if (engine === player && !player.mediaplayer.isReleased) {
+            val time = player.mediaplayer.time
+            if (time >= 0L) return time
+        }
+        return engine.getCurrentTime()
+    }
+
+    /** Nağmedar: the volume the user set last (bars, keys, mute), on both engines once they are made. */
+    private fun restoreVolume(volume: Int) {
+        val level = volume.coerceIn(0, 200)
+        player.setVolume(level)
+        musicEngine.setVolume(level)
+    }
+
+    /**
+     * Previous: the track restarts; within [PreviousRule.WINDOW_MS] of its start or of that
+     * restart the one before plays (Nağmedar: one rule for both engines, by the engine's own
+     * clock, whatever surface asked).
+     */
     @MainThread
     fun previous(force: Boolean) {
         mediaList.getMedia(currentIndex)?.let { if (it.type == MediaWrapper.TYPE_VIDEO) saveMediaMeta() }
-        if (hasPrevious() &&
-                ((force || !engine.seekable || (engine.getCurrentTime() < PREVIOUS_LIMIT_DELAY) || (lastPrevious != -1L && System.currentTimeMillis() - lastPrevious < PREVIOUS_LIMIT_DELAY)))) {
+        val now = SystemClock.elapsedRealtime()
+        val sinceRestart = if (lastPrevious != -1L) now - lastPrevious else null
+        if (PreviousRule.goesBack(force, hasPrevious(), engine.seekable, currentTime(), sinceRestart)) {
             val size = mediaList.size()
             currentIndex = prevIndex
             if (previous.size > 0) previous.pop()
@@ -560,7 +603,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             lastPrevious = -1L
         } else {
             if (engine === player) player.setPosition(0F) else engine.setTime(0L)
-            lastPrevious = System.currentTimeMillis()
+            lastPrevious = now
         }
     }
 
@@ -1472,6 +1515,11 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         private var lastTimeMetaSaved = 0L
 
         override suspend fun onEvent(event: MediaPlayer.Event) {
+            // Nağmedar: the play and pause buttons of every surface follow the engine, either one
+            when (event.type) {
+                MediaPlayer.Event.Playing -> enginePlaying.value = true
+                MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped -> enginePlaying.value = engine.isPlaying()
+            }
             when (event.type) {
                 MediaPlayer.Event.Playing -> {
                     val mw = withContext(Dispatchers.IO) {

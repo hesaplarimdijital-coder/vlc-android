@@ -1915,6 +1915,10 @@
     <string name="nag_music_nothing_playing">Nothing plays. Choose a track: it shows here with its waveform.</string>
     <string name="nag_music_waveform">Waveform</string>
     <string name="nag_music_position">%1$s of %2$s</string>
+    <string name="nag_music_open_artist">Show the artist\'s tracks</string>
+    <string name="nag_music_open_album">Show the album\'s tracks</string>
+    <string name="nag_music_link_missing">This track is not in the music library</string>
+    <string name="nag_time_remaining">−%1$s</string>
     <!-- S-804: playlists -->
     <plurals name="nag_pl_count">
         <item quantity="one">%d playlist</item>
