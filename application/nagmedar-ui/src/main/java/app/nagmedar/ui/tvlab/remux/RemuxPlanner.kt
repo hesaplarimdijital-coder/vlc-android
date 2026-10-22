@@ -197,6 +197,9 @@ class PlanDraft(
     /** What the device profile suggests adding, for its suggestion's Apply and Undo. */
     private var suggestedAdded: List<CompatibilityTrack> = emptyList()
 
+    /** The audio tracks that were the default when an added track took the flag: they get it back when no added track has it. */
+    private var defaultsBeforeAdded: List<PlanTrack> = emptyList()
+
     /** A compatibility track beside the audio track [source]: [spec], or E-AC-3 as the source's channels ask. */
     fun addCompatibility(source: StreamRef, spec: EncodeSpec? = null) {
         val track = tech.audio.getOrNull(source.ordinal) ?: return
@@ -205,20 +208,38 @@ class PlanDraft(
         if (made.makeDefault) setAddedDefault(made, true)
     }
 
+    /** [track] taken off the plan; when the device started with it, the audio default goes back to where it was. */
     fun removeAdded(track: PlanAddedTrack) {
         added = added - track
+        if (track.makeDefault) restoreDefaults()
     }
 
     /**
      * [track] made the one the device starts with, or not: the engine then writes every other
-     * audio track without the default flag, as the planner shows it.
+     * audio track without the default flag, as the planner shows it; taken back, the tracks that
+     * had the flag before have it again.
      */
     fun setAddedDefault(track: PlanAddedTrack, on: Boolean) {
         if (on) {
+            if (added.none { it !== track && it.makeDefault }) defaultsBeforeAdded = audio.filter { it.isDefault }
             added.forEach { if (it !== track) it.makeDefault = false }
             audio.forEach { it.isDefault = false }
+            track.makeDefault = true
+        } else {
+            track.makeDefault = false
+            restoreDefaults()
         }
-        track.makeDefault = on
+    }
+
+    /**
+     * No added track is the one the device starts with any more: the audio tracks that were the
+     * default before one took the flag have it again, unless the user made another the default
+     * since. A film is never written without a default audio track because a suggestion was undone.
+     */
+    private fun restoreDefaults() {
+        if (added.any { it.makeDefault }) return
+        if (audio.none { it.isDefault }) defaultsBeforeAdded.forEach { it.isDefault = true }
+        defaultsBeforeAdded = emptyList()
     }
 
     /** The added tracks beside [source]. */
@@ -250,8 +271,11 @@ class PlanDraft(
     /** [track] made the default of its kind or not; a default is one of a kind, the others lose it. */
     fun setDefault(track: PlanTrack, on: Boolean) {
         if (on) tracks(track.ref.type).forEach { if (it !== track) it.isDefault = false }
-        // an added track the device would start with gives way
-        if (on && track.ref.type == StreamType.Audio) added.forEach { it.makeDefault = false }
+        // an added track the device would start with gives way; the user's choice is the one kept
+        if (on && track.ref.type == StreamType.Audio) {
+            added.forEach { it.makeDefault = false }
+            defaultsBeforeAdded = emptyList()
+        }
         track.isDefault = on
     }
 
@@ -375,7 +399,10 @@ class PlanDraft(
             SuggestionKind.Compatibility -> if (on) {
                 suggestedAdded.filter { s -> s.source in suggestion.refs && added.none { it.source == s.source } }.forEach { addCompatibility(it.source, it.spec) }
             } else {
-                added = added.filter { it.source !in suggestion.refs }
+                val undone = added.filter { it.source in suggestion.refs }
+                added = added - undone.toSet()
+                // the device started with one of them: the audio default goes back to where it was
+                if (undone.any { it.makeDefault }) restoreDefaults()
             }
         }
     }
