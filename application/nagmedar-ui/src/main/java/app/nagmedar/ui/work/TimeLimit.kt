@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -41,7 +40,7 @@ object TimeLimit {
      * [app.nagmedar.ui.notify.NotificationIds]', and the request code of the tap's PendingIntent.
      */
     @SuppressLint("MissingPermission")
-    fun tell(context: Context, channel: String, id: Int, @DrawableRes icon: Int, @StringRes text: Int) {
+    fun tell(context: Context, channel: String, id: Int, @StringRes text: Int) {
         val message = context.getString(text)
         val open = PendingIntent.getActivity(
             context,
@@ -50,7 +49,7 @@ object TimeLimit {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = NotificationCompat.Builder(context, channel)
-            .setSmallIcon(icon)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_time_limit_title))
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))

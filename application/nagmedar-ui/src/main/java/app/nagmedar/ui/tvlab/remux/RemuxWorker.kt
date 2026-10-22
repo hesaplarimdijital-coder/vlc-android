@@ -96,7 +96,7 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         val context = applicationContext
         channel(context)
         val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_scan)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_tvlab_remux_queue))
             .setContentText(context.getString(R.string.nag_tvlab_remux_timeout))
             .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.nag_tvlab_remux_timeout)))
@@ -134,7 +134,7 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         }
         val open = openTvLab(context)
         val builder = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_scan)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(job?.inputName ?: context.getString(R.string.nag_tvlab_remux_queue))
             .setContentText(text)
             .setContentIntent(open)
@@ -152,7 +152,7 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
                 Intent(context, RemuxCancelReceiver::class.java).setAction(ACTION_CANCEL).putExtra(EXTRA_JOB, job.id),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-            builder.addAction(org.videolan.resources.R.drawable.ic_widget_close_w, context.getString(R.string.nag_jobs_cancel), cancel)
+            builder.addAction(org.videolan.resources.R.drawable.nagmedar_notif_close, context.getString(R.string.nag_jobs_cancel), cancel)
         }
         return builder.build()
     }

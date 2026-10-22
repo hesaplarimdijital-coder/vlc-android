@@ -157,7 +157,7 @@ class PodcastNotifier(private val context: Context) {
     fun showTimeLimit() {
         if (!canPost()) return
         ensureChannel(CHANNEL_DOWNLOAD, R.string.nag_pod_channel_download, NotificationManager.IMPORTANCE_LOW)
-        TimeLimit.tell(context, CHANNEL_DOWNLOAD, ID_TIME_LIMIT, org.videolan.resources.R.drawable.ic_notif_audio, R.string.nag_time_limit_podcast)
+        TimeLimit.tell(context, CHANNEL_DOWNLOAD, ID_TIME_LIMIT, R.string.nag_time_limit_podcast)
     }
 
     /** The downloads fill the limit of Settings › Podcasts, or nearly. */

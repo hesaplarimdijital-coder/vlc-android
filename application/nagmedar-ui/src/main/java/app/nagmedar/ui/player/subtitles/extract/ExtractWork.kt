@@ -378,7 +378,7 @@ class SubtitleExtractWorker(context: Context, params: WorkerParameters) : Corout
         channel(context)
         val text = if (fraction == null) context.getString(R.string.nag_extract_starting) else percent(context, fraction)
         return NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_extract_running_title, request?.filmName.orEmpty()))
             .setContentText(text)
             .setContentIntent(openApp(context))
@@ -387,7 +387,7 @@ class SubtitleExtractWorker(context: Context, params: WorkerParameters) : Corout
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setProgress(PROGRESS_MAX, ((fraction ?: 0f) * PROGRESS_MAX).toInt(), fraction == null)
-            .addAction(R.drawable.ic_widget_close_w, context.getString(R.string.nag_extract_cancel), WorkManager.getInstance(context).createCancelPendingIntent(id))
+            .addAction(R.drawable.nagmedar_notif_close, context.getString(R.string.nag_extract_cancel), WorkManager.getInstance(context).createCancelPendingIntent(id))
             .build()
     }
 
@@ -404,7 +404,7 @@ class SubtitleExtractWorker(context: Context, params: WorkerParameters) : Corout
         val context = applicationContext
         channel(context)
         val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))

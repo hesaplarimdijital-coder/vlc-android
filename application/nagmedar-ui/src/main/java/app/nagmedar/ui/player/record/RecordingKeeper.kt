@@ -66,7 +66,7 @@ class RecordingKeeper : Service() {
      */
     override fun onTimeout(startId: Int, fgsType: Int) {
         RecordingFiles.Notice.channel(this)
-        TimeLimit.tell(this, RecordingFiles.Notice.CHANNEL, RecordingFiles.Notice.TIME_LIMIT_ID, R.drawable.ic_notif_video, R.string.nag_time_limit_recording)
+        TimeLimit.tell(this, RecordingFiles.Notice.CHANNEL, RecordingFiles.Notice.TIME_LIMIT_ID, R.string.nag_time_limit_recording)
         finish(keepNotification = true)
     }
 

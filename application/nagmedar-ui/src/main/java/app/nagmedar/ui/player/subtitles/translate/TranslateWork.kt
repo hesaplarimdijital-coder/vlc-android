@@ -209,7 +209,7 @@ class ModelDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         // Android 15's daily time limit: the download goes on from its ".part" when WorkManager starts it again; the user is told
         TimeLimit.onReached(this) {
             TranslationJobs.channel(applicationContext)
-            TimeLimit.tell(applicationContext, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_time_limit_model)
+            TimeLimit.tell(applicationContext, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.string.nag_time_limit_model)
         }
         val downloader = TranslationModelDownloader(TranslationModelDownloader.client, store, userAgent())
         val outcome = downloader.download(model) { done ->
@@ -319,7 +319,7 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
         Settings.getInstance(context).edit().putString(TranslationJobs.KEY_TIMED_OUT, id.toString()).apply()
         runCatching { WorkManager.getInstance(context).cancelWorkById(id) }
         TranslationJobs.channel(context)
-        TimeLimit.tell(context, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_translate_timeout)
+        TimeLimit.tell(context, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.string.nag_translate_timeout)
     }
 
     private suspend fun run(source: File): Result {
