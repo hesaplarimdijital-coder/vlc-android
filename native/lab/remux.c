@@ -1277,22 +1277,16 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
         av_strlcpy(ss->codec, avcodec_get_name(ist->codecpar->codec_id), sizeof(ss->codec));
     }
     if (plan->attachments) {
+        /* fonts and other files, and the cover pictures (a video stream of one picture to the demuxer, never in the
+         * plan): attachments again, after the streams */
         for (unsigned i = 0; i < streams; i++) {
-            AVStream *ist = ic->streams[i];
-            if (ist->codecpar->codec_type != AVMEDIA_TYPE_ATTACHMENT)
-                continue;
-            AVStream *ost = avformat_new_stream(oc, NULL);
-            if (!ost) {
-                ret = AVERROR(ENOMEM);
+            int attached = dvc_copy_attachment(oc, ic->streams[i]);
+            if (attached < 0) {
+                ret = attached;
+                fail(s->error, sizeof(s->error), "attachment", ret);
                 goto end;
             }
-            if ((ret = avcodec_parameters_copy(ost->codecpar, ist->codecpar)) < 0)
-                goto end;
-            ost->codecpar->codec_tag = 0;
-            ost->time_base = ist->time_base;
-            ost->disposition = ist->disposition;
-            av_dict_copy(&ost->metadata, ist->metadata, 0);
-            s->attachments++;
+            s->attachments += attached;
         }
     }
     if (plan->metadata)

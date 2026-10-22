@@ -17,7 +17,9 @@ extern "C" {
  *
  *   dv<TAB>keep|convert81          Dolby Vision: copied as it is, or profile 7 -> 8.1
  *   chapters<TAB>0|1               (default 1) chapters copied
- *   attachments<TAB>0|1            (default 1) attachments (fonts, covers) copied after the streams
+ *   attachments<TAB>0|1            (default 1) attachments copied after the streams: fonts and other files,
+ *                                  and cover pictures (to the demuxer a video stream of one picture) as the
+ *                                  picture files they were
  *   metadata<TAB>0|1               (default 1) the file's tags copied
  *   stream<TAB>v:0<TAB>default=1<TAB>forced=0<TAB>lang=tur<TAB>title=Yorum
  *   encode<TAB>a:0<TAB>eac3<TAB>bitrate=640<TAB>channels=6<TAB>default=1<TAB>lang=tur<TAB>title=...

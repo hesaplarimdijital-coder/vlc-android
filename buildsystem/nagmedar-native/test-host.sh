@@ -21,6 +21,8 @@
 #     same line twice kept once, styles kept, never over a file there); many lines at the same
 #     time take no longer than others; a packet over the text's cap is refused before its text is
 #     made, in about its own memory.
+#   - S-1206: cover pictures (JPEG and PNG in Matroska, an MP4's covr) and fonts come out as
+#     attachments, byte for byte, under their names and types.
 #   - S-1206, S-1202, SP-03: a TS whose PMT names a third stream halfway through is remuxed,
 #     verified, analysed and converted, the late stream left out, under AddressSanitizer and UBSan
 #     when the host build made the *-asan commands.
@@ -537,6 +539,54 @@ failed_run() { # title json log
     echo "::error title=$1::$( { cat "$2" 2> /dev/null; tr '\r' '\n' < "$3" | grep -v ' MB$' | grep -v '^ *[0-9]* %$' | head -c 2500; } | annotate)"
     exit 1
 }
+
+echo "== S-1206: covers and fonts kept as attachments"
+# Matroska's demuxer makes every picture attachment a video stream of one picture: a JPEG and a PNG cover beside
+# a font, and an MP4's covr picture, come out as attachments, byte for byte, under their names and types
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=300x300" -frames:v 1 "$T/cover.jpg"
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=120x120" -frames:v 1 "$T/small_cover.png"
+mkvmerge -q -o "$T/covers.mkv" "$T/bframes.mkv" \
+    --attachment-mime-type image/jpeg --attachment-name cover.jpg --attach-file "$T/cover.jpg" \
+    --attachment-mime-type font/ttf --attachment-name DejaVu.ttf --attach-file "$T/font.ttf" \
+    --attachment-mime-type image/png --attachment-name small_cover.png --attachment-description "Small cover" --attach-file "$T/small_cover.png"
+ffmpeg -v error -y -i "$T/bframes.mkv" -i "$T/cover.jpg" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "$T/covr.mp4"
+"$(sanitized remux)" run "$T/covers.mkv" "$T/remux-covers.mkv" "$T/plan-video.txt" > "$T/remux-covers.json" 2> "$T/remux-covers.log" ||
+    failed_run "S-1206 covers" "$T/remux-covers.json" "$T/remux-covers.log"
+"$(sanitized remux)" run "$T/covr.mp4" "$T/remux-covr.mkv" "$T/plan-video.txt" > "$T/remux-covr.json" 2> "$T/remux-covr.log" ||
+    failed_run "S-1206 covr" "$T/remux-covr.json" "$T/remux-covr.log"
+mkvmerge -J "$T/remux-covers.mkv" > "$T/ident-covers.json"
+mkvmerge -J "$T/remux-covr.mkv" > "$T/ident-covr.json"
+mkdir -p "$T/attached"
+mkvextract "$T/remux-covers.mkv" attachments 1:"$T/attached/1" 2:"$T/attached/2" 3:"$T/attached/3" > /dev/null
+mkvextract "$T/remux-covr.mkv" attachments 1:"$T/attached/covr" > /dev/null
+python3 - "$T" <<'PY'
+import json, sys
+t = sys.argv[1]
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def load(name):
+    return json.load(open(f'{t}/{name}'))
+def same(a, b):
+    return open(f'{t}/{a}', 'rb').read() == open(f'{t}/{b}', 'rb').read()
+stats = load('remux-covers.json')
+check(not stats['error'] and stats['attachments'] == 3 and stats['video_packets'] == 50, f"covers {stats['error']} {stats['attachments']}")
+found = [(a['file_name'], a['content_type'], a.get('description', '')) for a in load('ident-covers.json').get('attachments', [])]
+check(found == [('cover.jpg', 'image/jpeg', ''), ('DejaVu.ttf', 'font/ttf', ''), ('small_cover.png', 'image/png', 'Small cover')], f'attachments {found}')
+tracks = [x['type'] for x in load('ident-covers.json')['tracks']]
+check(tracks == ['video'], f'tracks {tracks}: a cover is no track')
+check(same('attached/1', 'cover.jpg') and same('attached/2', 'font.ttf') and same('attached/3', 'small_cover.png'), 'the attachments changed')
+covr = load('remux-covr.json')
+check(not covr['error'] and covr['attachments'] == 1, f"covr {covr['error']} {covr['attachments']}")
+found = [(a['file_name'], a['content_type']) for a in load('ident-covr.json').get('attachments', [])]
+check(found == [('cover.jpg', 'image/jpeg')], f'covr attachment {found}')
+check(same('attached/covr', 'cover.jpg'), 'the covr picture changed')
+if problems:
+    print('::error title=S-1206 covers::' + '; '.join(problems))
+    sys.exit(1)
+print('ok: two covers and a font, and an MP4 cover, kept as attachments byte for byte')
+PY
 
 echo "== S-1206, S-1202, SP-03: a stream that comes in halfway through a TS"
 # a recording whose programme gains a track for a while: the PMT names a third stream in the middle third only. The

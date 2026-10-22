@@ -39,7 +39,8 @@ typedef void (*dvc_progress_fn)(void *opaque, double done_seconds, double total_
 /**
  * Remuxes [input] to [output] (Matroska, or MP4 when [mp4] is set): the HEVC base layer is
  * copied bit for bit, enhancement-layer NAL units are dropped and every RPU is converted to
- * profile 8.1 (libdovi mode 2). Other streams are copied; MP4 keeps only audio and mov_text. A
+ * profile 8.1 (libdovi mode 2). Other streams are copied (Matroska keeps the attachments and
+ * the cover pictures as attachments, dvc_copy_attachment); MP4 keeps only audio and mov_text. A
  * stream the demuxer finds only after the file is open (an MPEG-TS whose PMT names one more
  * halfway) is left out.
  * [max_seconds] > 0 stops after that much media. [cancel] is polled between packets.
@@ -134,6 +135,18 @@ typedef struct DvcDtsGen {
 
 void dvc_dts_init(DvcDtsGen *g, int depth);
 int64_t dvc_dts_next(DvcDtsGen *g, int64_t pts, int64_t duration);
+
+struct AVFormatContext;
+struct AVStream;
+
+/**
+ * [ist] written into the Matroska output [oc] as an attachment, when it is one: a font or any
+ * other attached file as it is, or a cover picture, which the demuxer turned into a video stream
+ * with the picture as its only packet (Matroska's image attachments, MP4's covr), back as the
+ * picture file, its name and type kept ("cover.jpg" and the picture's type when the source has
+ * none). 1 when written, 0 when [ist] is not an attachment, a negative AVERROR.
+ */
+int dvc_copy_attachment(struct AVFormatContext *oc, const struct AVStream *ist);
 
 #ifdef __cplusplus
 }

@@ -622,6 +622,61 @@ int dvc_profile81_record(AVCodecParameters *par, int level)
     return 0;
 }
 
+/* What Matroska calls a cover of each picture type: the name players look for. */
+static const char *cover_name(enum AVCodecID id)
+{
+    switch (id) {
+    case AV_CODEC_ID_MJPEG: return "cover.jpg";
+    case AV_CODEC_ID_PNG: return "cover.png";
+    case AV_CODEC_ID_GIF: return "cover.gif";
+    case AV_CODEC_ID_BMP: return "cover.bmp";
+    case AV_CODEC_ID_TIFF: return "cover.tif";
+    case AV_CODEC_ID_WEBP: return "cover.webp";
+    default: return "cover";
+    }
+}
+
+int dvc_copy_attachment(AVFormatContext *oc, const AVStream *ist)
+{
+    const AVCodecParameters *par = ist->codecpar;
+    int ret;
+    if (par->codec_type == AVMEDIA_TYPE_ATTACHMENT) {
+        AVStream *ost = avformat_new_stream(oc, NULL);
+        if (!ost)
+            return AVERROR(ENOMEM);
+        if ((ret = avcodec_parameters_copy(ost->codecpar, par)) < 0)
+            return ret;
+        ost->codecpar->codec_tag = 0;
+        ost->time_base = ist->time_base;
+        ost->disposition = ist->disposition;
+        av_dict_copy(&ost->metadata, ist->metadata, 0);
+        return 1;
+    }
+    if (par->codec_type != AVMEDIA_TYPE_VIDEO || !(ist->disposition & AV_DISPOSITION_ATTACHED_PIC) || ist->attached_pic.size <= 0)
+        return 0;
+    /* the muxer writes no attachment without a type: the source's, else the picture codec's own */
+    const AVDictionaryEntry *mime = av_dict_get(ist->metadata, "mimetype", NULL, 0);
+    const AVCodecDescriptor *desc = avcodec_descriptor_get(par->codec_id);
+    const char *type = mime ? mime->value : desc && desc->mime_types ? desc->mime_types[0] : NULL;
+    if (!type)
+        return 0;
+    AVStream *ost = avformat_new_stream(oc, NULL);
+    if (!ost)
+        return AVERROR(ENOMEM);
+    ost->codecpar->codec_type = AVMEDIA_TYPE_ATTACHMENT;
+    ost->codecpar->codec_id = par->codec_id;
+    ost->codecpar->extradata = av_mallocz((size_t)ist->attached_pic.size + AV_INPUT_BUFFER_PADDING_SIZE);
+    if (!ost->codecpar->extradata)
+        return AVERROR(ENOMEM);
+    memcpy(ost->codecpar->extradata, ist->attached_pic.data, (size_t)ist->attached_pic.size);
+    ost->codecpar->extradata_size = ist->attached_pic.size;
+    av_dict_copy(&ost->metadata, ist->metadata, 0);
+    av_dict_set(&ost->metadata, "mimetype", type, 0);
+    if (!av_dict_get(ost->metadata, "filename", NULL, 0))
+        av_dict_set(&ost->metadata, "filename", cover_name(par->codec_id), 0);
+    return 1;
+}
+
 int dvc_convert(const char *input, const char *output, double max_seconds, int mp4,
                 volatile int *cancel, dvc_progress_fn progress, void *opaque, DvcStats *s)
 {
@@ -703,13 +758,24 @@ int dvc_convert(const char *input, const char *output, double max_seconds, int m
     for (unsigned i = 0; i < streams; i++) {
         AVStream *ist = ic->streams[i];
         enum AVMediaType type = ist->codecpar->codec_type;
+        map[i] = -1;
+        /* Matroska keeps the attachments, the cover pictures among them, as attachments: they have no packets */
+        int attached = mp4 ? 0 : dvc_copy_attachment(oc, ist);
+        if (attached < 0) {
+            ret = attached;
+            fail(s, "attachment", ret);
+            goto end;
+        }
+        if (attached) {
+            s->streams_copied++;
+            continue;
+        }
         int keep = (int)i == video || type == AVMEDIA_TYPE_AUDIO;
-        if (!mp4 && (type == AVMEDIA_TYPE_SUBTITLE || type == AVMEDIA_TYPE_ATTACHMENT))
+        if (!mp4 && type == AVMEDIA_TYPE_SUBTITLE)
             keep = 1;
         if (mp4 && type == AVMEDIA_TYPE_SUBTITLE && ist->codecpar->codec_id == AV_CODEC_ID_MOV_TEXT)
             keep = 1;
         if (!keep) {
-            map[i] = -1;
             s->streams_skipped++;
             continue;
         }
