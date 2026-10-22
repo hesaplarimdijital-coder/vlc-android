@@ -94,6 +94,8 @@ class LatencyMeasureSession(
     private val signal: TestSignal = LatencyDsp.testSignal(),
     /** Where the correlation runs; the tests keep it on their thread. */
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
+    /** Told once a measurement started here ends, done or failed (not when it is reset), on [scope]. */
+    private val onEnded: (State) -> Unit = {},
 ) {
     sealed interface State {
         /** The explanation, before anything sounds. */
@@ -123,9 +125,11 @@ class LatencyMeasureSession(
                 throw e
             } catch (e: Exception) {
                 state = State.Failed(MeasureFailure.Device)
+                onEnded(state)
                 return@launch
             }
             state = withContext(cpu) { evaluate(recording) }
+            onEnded(state)
         }
     }
 

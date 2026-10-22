@@ -503,14 +503,9 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             service?.let { service ->
                 when (intent.action) {
                     BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
-                        val savedDelay = settings.getLong(KEY_BLUETOOTH_DELAY, 0L)
-                        val currentDelay = service.audioDelay
-                        if (savedDelay != 0L) {
-                            val connected = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, -1) == BluetoothA2dp.STATE_CONNECTED
-                            if (connected && currentDelay == 0L)
-                                toggleBtDelay(true)
-                            else if (!connected && savedDelay == currentDelay)
-                                toggleBtDelay(false)
+                        // Nağmedar (S-613): the classic Bluetooth delay is the output's share, under the file's own
+                        if (settings.getLong(KEY_BLUETOOTH_DELAY, 0L) != 0L) {
+                            toggleBtDelay(intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, -1) == BluetoothA2dp.STATE_CONNECTED)
                         }
                     }
                 }
@@ -942,6 +937,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     override fun onStart() {
         medialibrary.pauseBackgroundOperations()
         super.onStart()
+        shown = true
         startedScope = MainScope()
         PlaybackService.start(this)
         PlaybackService.serviceFlow.onEach { onServiceChanged(it) }.launchIn(startedScope)
@@ -982,6 +978,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onStop() {
         super.onStop()
+        shown = false
         service?.playlistManager?.let {
             savedMediaList = ArrayList(it.getMediaList())
             savedMediaIndex = it.currentIndex
@@ -1090,7 +1087,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     private fun setPlaybackParameters() {
         service?.run {
             if (audioDelay != 0L && audioDelay != audioDelay) setAudioDelay(audioDelay)
-            else if (audiomanager.isBluetoothA2dpOn || audiomanager.isBluetoothScoOn) toggleBtDelay(true)
+            // Nağmedar (S-613): given for every media (a new one starts without it), taken back without Bluetooth
+            toggleBtDelay(audiomanager.isBluetoothA2dpOn || audiomanager.isBluetoothScoOn)
             if (spuDelay != 0L && spuDelay != spuDelay) setSpuDelay(spuDelay)
         }
     }
@@ -2564,14 +2562,14 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     /**
-     * The classic Bluetooth delay (one value for every Bluetooth device, kept as the file's own
-     * delay). With a latency profile applied to the output (S-613) it stays out: the profile
-     * already holds the device's delay underneath, and the two would add up.
+     * The classic Bluetooth delay (one value for every Bluetooth device). Nağmedar (S-613): it is
+     * the output's share of libVLC's delay, under the file's own, which it no longer overwrites; a
+     * latency profile of the output wins over it whenever the profile comes (the player's mix
+     * decides, not the order the two arrive in), so the two never add up.
      */
     private fun toggleBtDelay(connected: Boolean) {
         val service = service ?: return
-        if (service.playlistManager.player.outputLatencyUs != 0L) return
-        service.setAudioDelay(if (connected) settings.getLong(KEY_BLUETOOTH_DELAY, 0) else 0L)
+        service.playlistManager.player.legacyBluetoothDelayUs = if (connected) settings.getLong(KEY_BLUETOOTH_DELAY, 0L) else 0L
     }
 
     fun setOrientation(value: Int) {
@@ -2707,6 +2705,15 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     companion object {
 
         private const val TAG = "VLC/VideoPlayerActivity"
+
+        /**
+         * Nağmedar (S-1302): whether the player is on screen. Casting that stops while it is shows
+         * the film here again by itself (the player is made again for this screen); otherwise the
+         * playlist manager brings the player back.
+         */
+        @Volatile
+        var shown = false
+            private set
 
         private val ACTION_RESULT = "player.result".buildPkgString()
         private const val EXTRA_POSITION = "extra_position"

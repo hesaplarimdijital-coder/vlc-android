@@ -67,6 +67,7 @@ Sözlüğü testler denetler:
 | sunucu | server | | | Kaynaklar › Ağ'da kayıtlı ya da bu ağda bulunan: SMB, FTP, SFTP, NFS, UPnP/DLNA, WebDAV; “Sunucu ekle…”, “Kayıtlı sunucular”, “Bu ağda” |
 | oturum açmak | sign in | | log in, login | Sunucunun istediği kullanıcı adı ve parola; “Bu cihazda hatırla (şifreli)” seçiliyse Android Keystore'un anahtarıyla şifrelenip saklanır |
 | parola | password | | passcode | Hiçbir adreste, kayıtta ya da günlükte açık yazılmaz |
+| sertifika | certificate | | | Sunucunun güvenlik sertifikası (HTTPS, WebDAV); libVLC tanımadığı ya da değişen sertifikayı sorar: “Sertifikayı göster”, “24 saat kabul et”, “Kalıcı olarak kabul et”, “Vazgeç” |
 | bağlantı noktası | port | | | Sunucu adresinin sayısı (1–65535); boşsa protokolün kendi noktası (SMB 445, FTP 21…) |
 | yayınlamak | cast | yansıtma | renderer | Videoyu ya da müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) göndermek; gönderen libVLC'dir. “Yayınla…” (Ctrl+Shift+C), “Salon TV cihazına yayınlanıyor”, “Yayını durdur”; listede “Bu cihaz” yayını bitirir. VLC'nin klasik ayarı kendi adıyla anılır: “Kablosuz aktarım” |
 | kısayol | shortcut | | hotkey, key binding | |

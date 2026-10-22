@@ -34,12 +34,18 @@ object PlayerKeys {
     )
 
     private val scopes = setOf(ShortcutScope.Global, ShortcutScope.Player)
+    private val playerScope = setOf(ShortcutScope.Player)
 
-    /** Whether the key [event] pressed is the table's in the player; [target] does what it says. */
+    /**
+     * Whether the key [event] pressed is the table's in the player; [target] does what it says:
+     * the player's own keys, and the app's (the guide, the shortcut card, the palette…). The
+     * shipped tables and the presets keep the two apart (no conflicts); a chord the user gave
+     * both, which the shortcut editor shows as a conflict, stays the player's here.
+     */
     fun handle(event: KeyEvent, target: PlayerKeyTarget): Boolean {
         if (event.action != KeyEvent.ACTION_DOWN || ShortcutRegistry.recording) return false
         val key = ComposeKeyEvent(event)
-        val shortcut = ShortcutRegistry.match(key, scopes)
+        val shortcut = ShortcutRegistry.match(key, playerScope) ?: ShortcutRegistry.match(key, scopes)
         if (shortcut == null) {
             // VLC's key, given away by the user: not the classic player's any more
             return ShortcutRegistry.defaults.any { it.scope in scopes && it.chord?.matches(key) == true }

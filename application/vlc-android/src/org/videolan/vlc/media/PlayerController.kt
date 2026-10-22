@@ -103,7 +103,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
             // S-613: libVLC starts every media at no delay; the output's own goes back under it
             audioDelay.mediaStarted()
             audioDelay.casting = hasRenderer
-            if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
+            if (audioDelay.outputLatencyUs != 0L || audioDelay.legacyBluetoothUs != 0L) applyAudioDelay()
         }
     }
 
@@ -185,6 +185,19 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         set(value) {
             if (audioDelay.outputLatencyUs == value) return
             audioDelay.outputLatencyUs = value
+            applyAudioDelay()
+        }
+
+    /**
+     * S-613: VLC's classic Bluetooth delay, given by the video player while a Bluetooth output
+     * plays (0 otherwise): the output's share only when no latency profile has one, so a profile
+     * applied before or after it always wins and the two never add up. Main thread.
+     */
+    var legacyBluetoothDelayUs: Long
+        get() = audioDelay.legacyBluetoothUs
+        set(value) {
+            if (audioDelay.legacyBluetoothUs == value) return
+            audioDelay.legacyBluetoothUs = value
             applyAudioDelay()
         }
 
@@ -380,7 +393,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
                 MediaPlayer.Event.Playing -> {
                     playbackState = PlaybackStateCompat.STATE_PLAYING
                     // S-613: the output's delay again, in case the input was not there to take it at the start
-                    if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
+                    if (audioDelay.outputLatencyUs != 0L || audioDelay.legacyBluetoothUs != 0L) applyAudioDelay()
                 }
                 MediaPlayer.Event.Paused -> playbackState = PlaybackStateCompat.STATE_PAUSED
                 MediaPlayer.Event.EncounteredError -> setPlaybackStopped()

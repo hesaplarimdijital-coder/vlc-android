@@ -190,8 +190,11 @@ class VideoDelayDelegate(private val player: VideoPlayerActivity) : View.OnClick
             }
             R.id.delay_apply_bt -> {
                 player.service?.let {
-                    Settings.getInstance(player).putSingle(KEY_BLUETOOTH_DELAY, it.audioDelay)
-                    UiTools.snacker(player, player.getString(R.string.audio_delay_bt, "${it.audioDelay / 1000L}"))
+                    // Nağmedar (S-613): the Bluetooth delay is the output's share under the file's own: what is heard now is kept
+                    val controller = it.playlistManager.player
+                    val bluetooth = it.audioDelay + if (controller.outputLatencyUs == 0L) controller.legacyBluetoothDelayUs else 0L
+                    Settings.getInstance(player).putSingle(KEY_BLUETOOTH_DELAY, bluetooth)
+                    UiTools.snacker(player, player.getString(R.string.audio_delay_bt, "${bluetooth / 1000L}"))
                 }
             }
             R.id.close -> endPlaybackSetting()

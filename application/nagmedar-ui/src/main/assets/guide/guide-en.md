@@ -39,6 +39,8 @@ Browse the media on SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV servers like local
 
 > If you keep a password with “Remember on this device (encrypted)”, it is encrypted with an Android Keystore key. If you do not, library scans cannot sign in after the app restarts.
 
+> For an HTTPS or WebDAV server with a self-signed certificate, libVLC asks whether to accept the certificate (in the video player too): “View certificate”, then “Accept for 24 hours” or “Accept permanently”; if in doubt, “Cancel”.
+
 ## The video player {video}
 
 Films and series play with libVLC 4. On a touch screen you get VLC's gestures; with a mouse (DeX) you get the desktop control bar and a side panel. Touch the screen with a finger and the video goes back to the classic controls.
@@ -114,7 +116,7 @@ When the subtitles or the sound drift, there are three ways: small steps, the sy
 3. The **Sync** tab of the panel shows the audio and subtitle delay, the subtitle speed and refresh-rate matching (such as 23.976 Hz on HDMI). A delay you set is remembered for that file.
 
 ### Latency profiles
-A Bluetooth headset, an AV receiver and a USB DAC each play the sound with a different delay. In Settings › Latency profiles, record a device's delay by hand or by measuring it with the microphone (five short test tones are played); when the device becomes the output, its profile is applied by itself and a short notice is shown.
+A Bluetooth headset, an AV receiver and a USB DAC each play the sound with a different delay. In Settings › Latency profiles, record a device's delay by hand or by measuring it with the microphone (five short test tones are played); when the device becomes the output, its profile is applied by itself and a short notice is shown. The profile takes the place of the single Bluetooth delay of VLC's classic player; the two are not added. Playback paused for a measurement goes on when it ends, even if you closed the settings.
 
 > Measure in a quiet room. If the repeats differ by more than 20 ms, the measurement is inconsistent and says so.
 
@@ -215,6 +217,7 @@ Send video or music to a Chromecast or a DLNA device (a TV, a receiver, a speake
 2. Press the Cast button in the bottom bar, in the mini player, in the now playing pane or in the player; {key:Cast} or the Playback menu opens it too.
 3. Choose the device; found devices are updated as they come and go. “This device” ends the cast.
 4. While casting, the player's controls drive the remote device.
+5. If you stop casting a film from the mini player, the notification or the list, the film goes on in the video player on this device where it was; with the app in the background it is paused there, and opening the player goes on from that point.
 
 > If the device does not show in the list, check that both are on the same Wi-Fi (not a guest network), the TV is on and DLNA or media sharing is on, the Chromecast is awake, and the router has multicast (mDNS, UPnP) on and client isolation off. A VPN on this device can hide the local network.
 
@@ -243,7 +246,7 @@ In a wide window (DeX, an external display) Nağmedar works like a desktop app: 
 - **Shortcuts:** the shortcut card ({key:ShortcutList}) lists them all; to change one, click it in Settings › Keyboard shortcuts and press the new keys. There are VLC and mpv presets, export and import, and a keyboard map that shows where the keys are on a Turkish Q keyboard.
 - Settings › Input: interface density, tooltip delay, the player opening full screen, the mouse wheel and the middle click.
 
-> Open the guide with {key:UserGuide}. The full-screen video player is a screen of its own: app shortcuts such as {key:CommandPalette} and {key:UserGuide} work in the main window, not there.
+> Open the guide with {key:UserGuide}. In the full-screen video player too, {key:UserGuide}, {key:ShortcutList}, {key:CommandPalette} and {key:SleepTimer} open their windows over the film, which goes on underneath; {key:Settings} opens the main window.
 
 ## Backup and restore {backup}
 

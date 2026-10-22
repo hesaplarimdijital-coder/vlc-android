@@ -222,6 +222,9 @@ class DesktopPlayerChrome : PlayerChrome {
     private var perf: PlaybackPerf? = null
     private var perfJob: Job? = null
 
+    /** The app's windows over the film: the guide, the shortcut card, the palette, the sleep timer. */
+    private val appWindows = PlayerAppWindows()
+
     override val active: Boolean get() = controls.active
 
     // S-612: the screen's refresh rate follows the film as the sync tab's choice says
@@ -261,6 +264,9 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
                 // S-1302: the device picker
                 ShortcutId.Cast -> showCastPicker(activity)
+                // the app's shortcuts (F1, Ctrl+/, Ctrl+K, Alt+S, Ctrl+,): their windows over the film
+                ShortcutId.UserGuide, ShortcutId.ShortcutList, ShortcutId.CommandPalette, ShortcutId.SleepTimer, ShortcutId.Settings ->
+                    return@PlayerKeyTarget appWindows.perform(activity, id)
                 // S-704: the sync assistant's steps, said over the video
                 ShortcutId.SyncMarkAudio, ShortcutId.SyncMarkSubtitle, ShortcutId.SyncApply, ShortcutId.SyncUndo -> assistant?.let { assist(activity, it, id) }
                 // the delays' keys: the sync tab shows (and remembers) where they took the delays
@@ -360,7 +366,10 @@ class DesktopPlayerChrome : PlayerChrome {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online) }
+            setContent {
+                PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online)
+                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences()) { id -> keys?.perform(id) }
+            }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks

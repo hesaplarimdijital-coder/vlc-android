@@ -214,12 +214,29 @@ class AudioDelayMix {
     var outputLatencyUs = 0L
     var casting = false
 
-    /** What libVLC is given. */
-    val combinedUs: Long get() = LatencyProfiles.combinedDelayUs(userDelayUs, if (casting) 0 else (outputLatencyUs / 1_000L).toInt())
+    /**
+     * VLC's classic Bluetooth delay (one value for every Bluetooth device, an audio delay as the
+     * user sets one), as the video player gives it while one plays: the output's share when no
+     * latency profile has one, never on top of a profile's, whichever of the two comes first. Not
+     * the user's delay, so the file's own is neither overwritten nor added to twice.
+     */
+    var legacyBluetoothUs = 0L
 
-    /** A new media: libVLC begins it at no delay, the user's part starts over, the output's stays. */
+    /** What libVLC is given: the user's delay with the output's share (its profile, else the classic Bluetooth delay; none while casting). */
+    val combinedUs: Long
+        get() = when {
+            casting -> userDelayUs
+            outputLatencyUs != 0L -> LatencyProfiles.combinedDelayUs(userDelayUs, (outputLatencyUs / 1_000L).toInt())
+            else -> userDelayUs + legacyBluetoothUs
+        }
+
+    /**
+     * A new media: libVLC begins it at no delay, the user's part starts over, the profile's
+     * stays; the classic Bluetooth delay is the video player's to give again for it.
+     */
     fun mediaStarted() {
         userDelayUs = 0L
+        legacyBluetoothUs = 0L
     }
 
     /**

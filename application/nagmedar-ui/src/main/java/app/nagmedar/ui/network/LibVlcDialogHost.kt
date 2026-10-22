@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -97,7 +99,7 @@ fun PromptSurface(prompt: LibVlcPrompt, onDone: () -> Unit) {
         .border(1.dp, colors.borderStrong, shape)
     when (prompt.kind) {
         PromptKind.Login -> LoginPrompt(prompt, surface, onDone)
-        PromptKind.Question -> PromptPanel(prompt, surface) { action ->
+        PromptKind.Question -> PromptPanel(prompt, surface, focusFirst = true) { action ->
             if (action == null) prompt.dismiss() else prompt.action(action)
             onDone()
         }
@@ -117,19 +119,29 @@ fun PromptSurface(prompt: LibVlcPrompt, onDone: () -> Unit) {
 /**
  * libVLC's question in its own words (a server's certificate, a file to overwrite), on a folder's
  * page or in a window: its actions, the first one foremost, and its way out; [onAnswer] hears 1,
- * 2 or null (turned down).
+ * 2 or null (turned down). The words libVLC writes in English are said in the interface's
+ * language where they are known ([LibVlcWords]: a certificate's "accept for 24 hours", "accept
+ * permanently", "cancel"). In a window ([focusFirst]) the keyboard starts on the way out, the
+ * safe answer; Tab goes through the actions, Enter answers, Esc turns it down.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PromptPanel(prompt: LibVlcPrompt, modifier: Modifier = Modifier, onAnswer: (Int?) -> Unit) {
+fun PromptPanel(prompt: LibVlcPrompt, modifier: Modifier = Modifier, focusFirst: Boolean = false, onAnswer: (Int?) -> Unit) {
     val dimens = NagTheme.dimens
+    val res = LocalContext.current.resources
+    val cancel = remember { FocusRequester() }
+    if (focusFirst) LaunchedEffect(prompt) { runCatching { cancel.requestFocus() } }
     Column(modifier.widthIn(max = 480.dp).padding(dimens.gapL), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         StateIconTile(if (prompt.warning) NagIcons.Warning else NagIcons.Shield, if (prompt.warning) StateTone.Warning else StateTone.Info)
         PromptWords(prompt)
         FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            NagButton(prompt.cancelText ?: stringResource(R.string.nag_sc_cancel), { onAnswer(null) }, modifier = Modifier.testTag("prompt-cancel"))
-            prompt.action2?.let { NagButton(it, { onAnswer(2) }, modifier = Modifier.testTag("prompt-action-2")) }
-            prompt.action1?.let { NagButton(it, { onAnswer(1) }, primary = true, modifier = Modifier.testTag("prompt-action-1")) }
+            NagButton(
+                prompt.cancelText?.let { LibVlcWords.localized(res, it) } ?: stringResource(R.string.nag_sc_cancel),
+                { onAnswer(null) },
+                modifier = Modifier.focusRequester(cancel).testTag("prompt-cancel"),
+            )
+            prompt.action2?.let { NagButton(LibVlcWords.localized(res, it), { onAnswer(2) }, modifier = Modifier.testTag("prompt-action-2")) }
+            prompt.action1?.let { NagButton(LibVlcWords.localized(res, it), { onAnswer(1) }, primary = true, modifier = Modifier.testTag("prompt-action-1")) }
         }
     }
 }
@@ -137,11 +149,12 @@ fun PromptPanel(prompt: LibVlcPrompt, modifier: Modifier = Modifier, onAnswer: (
 @Composable
 private fun PromptWords(prompt: LibVlcPrompt) {
     val colors = NagTheme.colors
+    val res = LocalContext.current.resources
     Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (prompt.title.isNotEmpty()) {
-            Text(prompt.title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
+            Text(LibVlcWords.localized(res, prompt.title), style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
         }
-        if (prompt.text.isNotEmpty()) Text(prompt.text, style = NagTheme.type.body, color = colors.textSecondary)
+        if (prompt.text.isNotEmpty()) Text(LibVlcWords.localized(res, prompt.text), style = NagTheme.type.body, color = colors.textSecondary)
     }
 }
 

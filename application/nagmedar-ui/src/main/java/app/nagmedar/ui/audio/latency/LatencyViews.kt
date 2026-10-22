@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -187,7 +186,10 @@ internal object LatencyMeasuring {
     var session: LatencyMeasureSession? = null
         private set
 
-    /** Playback was on when the measurement started, so it goes on again after. */
+    /**
+     * Playback was on when the measurement started, so it goes on again after: as soon as the
+     * measurement ends, done or failed, whether its window (or the settings) is still open or not.
+     */
     var resume: Boolean = false
 
     /** The session for [device]: the one under way, or a new one. */
@@ -195,14 +197,22 @@ internal object LatencyMeasuring {
         session?.takeIf { this.device == device }?.let { return it }
         session?.reset()
         this.device = device
-        return LatencyMeasureSession(io, AppScope, referenceMs).also { session = it }
+        return LatencyMeasureSession(io, AppScope, referenceMs, onEnded = { resumePlayback() }).also { session = it }
     }
 
+    /** What was paused for the measurement plays again, once. Main thread. */
+    fun resumePlayback() {
+        if (!resume) return
+        resume = false
+        runCatching { PlaybackService.instance?.play() }
+    }
+
+    /** The measurement is over (saved, cancelled): one under way stops, and what was paused plays again. */
     fun end() {
         session?.reset()
         session = null
         device = null
-        resume = false
+        resumePlayback()
     }
 }
 
@@ -305,17 +315,9 @@ internal fun LatencyMeasureDialog(device: OutputDeviceKey, io: MeasureIo, refere
     }
     val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> if (granted) start() else denied = true }
     val state = session.state
-    LaunchedEffect(state) {
-        if ((state is LatencyMeasureSession.State.Done || state is LatencyMeasureSession.State.Failed) && LatencyMeasuring.resume) {
-            LatencyMeasuring.resume = false
-            runCatching { PlaybackService.instance?.play() }
-        }
-    }
+    // done or failed, what played goes on by itself (LatencyMeasuring); cancelled under way, too
     val close = {
-        // cancelled under way: what played goes on
-        val resume = LatencyMeasuring.resume
         LatencyMeasuring.end()
-        if (resume) runCatching { PlaybackService.instance?.play() }
         onDismiss()
     }
     Dialog(onDismissRequest = close, properties = DialogProperties(usePlatformDefaultWidth = false)) {

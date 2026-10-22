@@ -2055,6 +2055,16 @@
     <string name="nag_net_nothing_to_play">“%s” holds nothing to play</string>
     <string name="nag_net_gathering">Reading “%s”…</string>
     <string name="nag_net_play_on">Play on %s</string>
+    <!-- S-1301: libVLC's server certificate question (gnutls), in the interface's language -->
+    <string name="nag_cert_insecure_site">Insecure site</string>
+    <string name="nag_cert_view">View certificate</string>
+    <string name="nag_cert_accept_day">Accept for 24 hours</string>
+    <string name="nag_cert_accept_always">Accept permanently</string>
+    <string name="nag_cert_unknown">You tried to reach %1$s. Its security certificate is unknown: no trusted certificate authority vouches for it.\nThis can be an attempt to break into your connection or your privacy, or a server set up wrongly.\n\nIf in doubt, cancel.</string>
+    <string name="nag_cert_changed">You tried to reach %1$s. Its security certificate changed since the last visit, and no trusted certificate authority vouches for it.\nThis can be an attempt to break into your connection or your privacy, or a server set up wrongly.\n\nIf in doubt, cancel.</string>
+    <string name="nag_cert_presented">The certificate %1$s presents:\n%2$s\n\nIf in doubt, cancel.</string>
+    <!-- the guide, the shortcut card over the video player -->
+    <string name="nag_player_window_close">Close</string>
     <!-- S-1101, S-1102: podcasts -->
     <string name="nag_pod_actions">Podcast actions</string>
     <string name="nag_pod_add">Add by RSS address…</string>

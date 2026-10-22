@@ -1961,9 +1961,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     @MainThread
     fun setRenderer(item: RendererItem?) {
         val wasOnRenderer = hasRenderer()
-        if (wasOnRenderer && !hasRenderer() && canSwitchToVideo())
-            VideoPlayerActivity.startOpened(applicationContext,
-                    playlistManager.getCurrentMedia()!!.uri, playlistManager.currentIndex)
+        // Nağmedar (S-1302): a film cast until now comes back to the video player (the playlist manager's)
         playlistManager.setRenderer(item)
         if (!wasOnRenderer && item != null) audioFocusHelper.changeAudioFocus(false)
         else if (wasOnRenderer && item == null && isPlaying) audioFocusHelper.changeAudioFocus(true)

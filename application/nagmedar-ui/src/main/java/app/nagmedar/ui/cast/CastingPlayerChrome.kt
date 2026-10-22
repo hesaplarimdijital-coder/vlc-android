@@ -24,6 +24,8 @@ import app.nagmedar.ui.input.hasPrecisePointer
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.player.ActivityKeyTarget
 import app.nagmedar.ui.player.PlayerKeyTarget
+import app.nagmedar.ui.player.PlayerAppWindows
+import app.nagmedar.ui.player.PlayerAppWindowsHost
 import app.nagmedar.ui.player.PlayerKeys
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
@@ -43,6 +45,9 @@ class CastingPlayerChrome : PlayerChrome {
     private var view: View? = null
     private var keys: PlayerKeyTarget? = null
 
+    /** The app's windows over the casting controls: the guide, the shortcut card, the palette, the sleep timer. */
+    private val appWindows = PlayerAppWindows()
+
     override val active: Boolean get() = view != null
 
     override fun attach(activity: VideoPlayerActivity, root: FrameLayout) {
@@ -50,6 +55,8 @@ class CastingPlayerChrome : PlayerChrome {
         keys = PlayerKeyTarget { id ->
             when (id) {
                 ShortcutId.Cast -> showCastPicker(activity)
+                ShortcutId.UserGuide, ShortcutId.ShortcutList, ShortcutId.CommandPalette, ShortcutId.SleepTimer, ShortcutId.Settings ->
+                    return@PlayerKeyTarget appWindows.perform(activity, id)
                 else -> return@PlayerKeyTarget classic.perform(id)
             }
             true
@@ -58,7 +65,10 @@ class CastingPlayerChrome : PlayerChrome {
         ShortcutRegistry.overrides = ShortcutOverrides.parse(Settings.getInstance(activity).getString(NagmedarPreferences.KEY_SHORTCUTS, null))
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            setContent { CastingChromeContent(activity) }
+            setContent {
+                CastingChromeContent(activity)
+                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences()) { id -> keys?.perform(id) }
+            }
         }
         root.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         view = content

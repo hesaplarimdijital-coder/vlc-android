@@ -234,10 +234,16 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     private var parsed = false
     var savedTime = 0L
 
-    /** S-1302: the item handed over between the music engine and libVLC, to go on where it was. */
-    private class CastResume(val index: Int, val uri: Uri, val positionMs: Long, val paused: Boolean)
+    /**
+     * S-1302: the item handed over between the music engine and libVLC, to go on where it was;
+     * [film]: a film cast until now, which the video player takes back.
+     */
+    private class CastResume(val index: Int, val uri: Uri, val positionMs: Long, val paused: Boolean, val film: Boolean = false)
 
     private var castResume: CastResume? = null
+
+    /** S-1302: casting ends for something else to play here: the film cast until now is not brought back. */
+    private var quietCastEnd = false
 
     /** S-1302: tracker modules passed over in a row while casting: a queue of nothing else stops. */
     private var castSkips = 0
@@ -589,12 +595,45 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
 
     fun setRenderer(item: RendererItem?) {
         val wasCasting = player.hasRenderer
+        // S-1302: a film cast until now, held where it is before its sound comes out here
+        val film = if (wasCasting && item == null) filmBack() else null
+        quietCastEnd = false
         player.setRenderer(item)
         showAudioPlayer.value = PlayerController.playbackState != PlaybackStateCompat.STATE_STOPPED && (item !== null || !player.isVideoPlaying())
         // S-1302: the music engine's track goes on in libVLC, which sends it; back to the engine afterwards
         if (CastHandover.change(castHost, wasCasting, item != null) == Handover.StaysHere) {
             service.showToast(ctx.getString(R.string.nagmedar_cast_tracker_here), Toast.LENGTH_LONG)
         }
+        // in front, the video player opens on it; in the background it waits, paused, for the player to open
+        if (film != null && isAppStarted()) switchToVideo()
+    }
+
+    /** S-1302: casting is about to end for something else to play here: the film cast until now stays closed. Main thread. */
+    fun castEndsForNewPlayback() {
+        if (player.hasRenderer) quietCastEnd = true
+    }
+
+    /**
+     * S-1302: casting a film ended from the music side (the mini player, the notification, the
+     * picker) while the video player is not on screen: the film is paused where it is (nothing
+     * plays out loud here meanwhile) and kept for the video player, which goes on there: playing
+     * if it played and the app is in front, else paused. Null when there is no film to bring
+     * back (the player on screen does it itself; a live stream that cannot pause goes on as it is).
+     */
+    private fun filmBack(): CastResume? {
+        if (quietCastEnd || VideoPlayerActivity.shown) return null
+        val media = getCurrentMedia() ?: return null
+        if (media.type != MediaWrapper.TYPE_VIDEO || engines.current.engineId != EngineId.LibVlc) return null
+        val index = castHost.index
+        val playing = castHost.playing
+        if (index < 0 || !(playing || castHost.paused)) return null
+        if (playing && !player.pause()) return null
+        val inFront = isAppStarted()
+        media.removeFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
+        // in the background its picture waits for the player: libVLC's new video track does not open it
+        videoBackground = !inFront
+        return CastResume(index, media.uri, castHost.positionMs.coerceAtLeast(0L), paused = !playing || !inFront, film = true)
+            .also { castResume = it }
     }
 
     /** S-1302: the playback as a handover between the music engine and libVLC sees it. */
@@ -649,6 +688,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         // S-1302: a handover between the music engine and libVLC goes on where it was
         val resume = castResume?.takeIf { it.index == index && it.uri == mw.uri }
         castResume = null
+        // the position comes from the handover, not from what the video player kept
+        if (resume != null) savedTime = 0L
         val mediaFromMl = medialibrary.getMedia(mw.uri)
         if (mediaFromMl != null)
             mw.time = mediaFromMl.time
@@ -782,6 +823,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             determinePrevAndNextIndices()
             service.onNewPlayback()
         } else { //Start VideoPlayer for first video, it will trigger playIndex when ready.
+            // S-1302: the film brought back from casting goes on where it was once the player plays it
+            castResume = resume
             if (engine.isPlaying()) engine.stop()
             VideoPlayerActivity.startOpened(ctx, mw.uri, currentIndex)
         }
@@ -812,8 +855,12 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     @MainThread
     fun switchToVideo(): Boolean {
         val media = getCurrentMedia()
-        if (media === null || media.hasFlag(MediaWrapper.MEDIA_FORCE_AUDIO) || !player.canSwitchToVideo())
+        // S-1302: a film brought back from casting opens even before libVLC shows its picture here
+        val castFilm = media != null && castResume?.let { it.film && it.index == currentIndex && it.uri == media.uri } == true
+        if (media === null || (!castFilm && (media.hasFlag(MediaWrapper.MEDIA_FORCE_AUDIO) || !player.canSwitchToVideo())))
             return false
+        // played on meanwhile: the player takes it as it plays, not from the handover's position
+        if (castFilm && player.isPlaying()) castResume = null
         val hasRenderer = player.hasRenderer
         videoBackground = false
         showAudioPlayer.postValue(false)

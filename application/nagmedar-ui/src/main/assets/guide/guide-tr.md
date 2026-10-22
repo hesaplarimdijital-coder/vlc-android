@@ -39,6 +39,8 @@ SMB, FTP, SFTP, NFS, UPnP/DLNA ve WebDAV sunucularındaki medyaya yerel dosya gi
 
 > Parolayı “Bu cihazda hatırla (şifreli)” ile saklarsanız Android Keystore'un anahtarıyla şifrelenir. Saklamazsanız, uygulama yeniden başlayınca kütüphane taramaları oturum açamaz.
 
+> Kendi imzaladığı sertifikayla çalışan bir HTTPS ya da WebDAV sunucusu için libVLC sertifikayı kabul edip etmeyeceğinizi sorar (video oynatıcıda da): “Sertifikayı göster”, ardından “24 saat kabul et” ya da “Kalıcı olarak kabul et”; emin değilseniz “Vazgeç”.
+
 ## Video oynatıcı {video}
 
 Filmler ve diziler libVLC 4 ile oynar. Dokunmatik ekranda VLC'nin hareketleri, fareyle (DeX) masaüstü denetim çubuğu ve yan panel kullanılır; parmakla dokunursanız video klasik denetimlere döner.
@@ -114,7 +116,7 @@ Altyazı ya da ses kayıyorsa üç yol var: küçük adımlar, senkron asistanı
 3. Panelin **Senkron** sekmesi ses ve altyazı gecikmesini, altyazı hızını ve yenileme hızı eşlemeyi (HDMI'de 23,976 Hz gibi) gösterir. Yaptığınız gecikme o dosya için hatırlanır.
 
 ### Gecikme profilleri
-Bluetooth kulaklık, AV alıcı ve USB DAC gibi her çıkış cihazı sesi farklı gecikmeyle çalar. Ayarlar › Gecikme profilleri'nde cihazın gecikmesini elle ya da mikrofonla (beş kısa “test sesi” çalınır) ölçerek kaydedin; cihaz çıkış olunca profili kendiliğinden uygulanır ve kısa bir bildirim gösterilir.
+Bluetooth kulaklık, AV alıcı ve USB DAC gibi her çıkış cihazı sesi farklı gecikmeyle çalar. Ayarlar › Gecikme profilleri'nde cihazın gecikmesini elle ya da mikrofonla (beş kısa “test sesi” çalınır) ölçerek kaydedin; cihaz çıkış olunca profili kendiliğinden uygulanır ve kısa bir bildirim gösterilir. Profil, VLC'nin klasik oynatıcısındaki tek Bluetooth gecikmesinin yerini alır; ikisi toplanmaz. Ölçüm için duraklatılan oynatma, ölçüm bitince ayarları kapatmış olsanız da sürer.
 
 > Ölçüm sessiz bir odada yapılmalıdır. Tekrarlar birbirinden 20 ms'den fazla ayrılırsa ölçüm tutarsızdır ve bunu söyler.
 
@@ -215,6 +217,7 @@ Videoyu ya da müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, 
 2. Alt çubuktaki, mini oynatıcıdaki, şimdi çalıyor bölmesindeki ya da oynatıcıdaki Yayınla düğmesine basın; {key:Cast} ya da Oynatma menüsü de açar.
 3. Listeden cihazı seçin; bulunan cihazlar geldikçe ve gittikçe güncellenir. “Bu cihaz” yayını bitirir.
 4. Yayın sürerken oynatıcı denetimleri uzaktaki cihazı yönetir.
+5. Bir filmin yayınını mini oynatıcıdan, bildirimden ya da listeden durdurursanız film bu cihazda kaldığı yerden video oynatıcıda sürer; uygulama arka plandaysa o yerde duraklatılır ve oynatıcıyı açınca oradan devam eder.
 
 > Cihaz listede görünmüyorsa denetleyin: ikisi de aynı Wi-Fi'de olsun (misafir ağında değil), TV açık ve DLNA ya da medya paylaşımı açık olsun, Chromecast uyanık olsun, modemde multicast (mDNS, UPnP) açık ve istemci yalıtımı kapalı olsun. Bu cihazdaki bir VPN yerel ağı gizleyebilir.
 
@@ -243,7 +246,7 @@ Geniş pencerede (DeX, harici ekran) Nağmedar masaüstü gibi çalışır: üst
 - **Kısayollar:** kısayol kartı ({key:ShortcutList}) hepsini listeler; değiştirmek için Ayarlar › Klavye kısayolları'nda bir tuşa tıklayıp yenisine basın. VLC ve mpv ön ayarları, dışa ve içe aktarma ve Türkçe Q klavyede tuşların yerini gösteren bir klavye haritası vardır.
 - Ayarlar › Giriş: arayüz yoğunluğu, ipucu gecikmesi, oynatıcının tam ekran açılması, fare tekerleği ve orta tık.
 
-> Rehberi {key:UserGuide} ile açarsınız. Tam ekran video oynatıcı ayrı bir ekrandır: {key:CommandPalette} ve {key:UserGuide} gibi uygulama kısayolları orada değil, ana pencerede çalışır.
+> Rehberi {key:UserGuide} ile açarsınız. Tam ekran video oynatıcıda da {key:UserGuide}, {key:ShortcutList}, {key:CommandPalette} ve {key:SleepTimer} pencerelerini filmin üstünde açar, film altta sürer; {key:Settings} ana pencereyi açar.
 
 ## Yedekleme ve geri yükleme {backup}
 
