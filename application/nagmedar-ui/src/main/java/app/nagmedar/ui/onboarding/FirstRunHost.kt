@@ -3,7 +3,9 @@ package app.nagmedar.ui.onboarding
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -11,7 +13,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.ui.NagmedarPreferences
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.PREF_FIRST_RUN
 import org.videolan.resources.util.startMedialibrary
@@ -34,7 +38,8 @@ fun FirstRunHost(prefs: NagmedarPreferences, onDone: () -> Unit) {
     // the step survives rotation and window resizes; the rest is cheap to ask again
     val savedStep = rememberSaveable { mutableIntStateOf(0) }
     val state = remember { FirstRunState(FirstRunStep.entries[savedStep.intValue]) }
-    val drives = remember { storageSources(context) }
+    // the drives' sizes are read off the main thread (StatFs); the removable ones show once read
+    val drives by produceState(emptyList<StorageSource>()) { value = withContext(Dispatchers.IO) { storageSources(context) } }
     LaunchedEffect(state) { snapshotFlow { state.step.ordinal }.collect { savedStep.intValue = it } }
     SideEffect {
         state.mediaAccess = access.mediaAccess
