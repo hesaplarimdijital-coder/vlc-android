@@ -124,7 +124,6 @@ import org.videolan.medialibrary.media.MediaLibraryItem
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.EXIT_PLAYER
-import org.videolan.resources.MOBILE_MAIN_ACTIVITY
 import org.videolan.resources.PLAYLIST_TYPE_ALL
 import org.videolan.resources.PLAY_DISABLE_HARDWARE
 import org.videolan.resources.PLAY_EXTRA_FROM_START
@@ -158,6 +157,7 @@ import org.videolan.tools.KEY_VIDEO_CONFIRM_RESUME
 import org.videolan.tools.KEY_VIDEO_MATCH_FRAME_RATE
 import org.videolan.tools.LAST_LOCK_ORIENTATION
 import org.videolan.tools.LOCK_USE_SENSOR
+import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
 import org.videolan.tools.POPUP_FORCE_LEGACY
 import org.videolan.tools.PREF_TIPS_SHOWN
 import org.videolan.tools.SAVE_BRIGHTNESS
@@ -180,6 +180,7 @@ import org.videolan.tools.setVisible
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
+import org.videolan.vlc.StartActivity
 import org.videolan.vlc.VlcMigrationHelper
 import org.videolan.vlc.getAllTracks
 import org.videolan.vlc.getSelectedVideoTrack
@@ -1929,11 +1930,11 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         if (service == null) return
         switchingView = true
         PlaylistManager.playingAsAudio = showUI
-        // Show the MainActivity if it is not in background.
+        // Opened from outside (the notification, the system's media controls, another app), the
+        // sound goes on in Nağmedar's window, on the page of what plays; a TV keeps its classic audio player
         if (showUI && intent.getBooleanExtra(FROM_EXTERNAL, false)) {
-            val i = Intent().apply {
-                setClassName(applicationContext, if (isTv) TV_AUDIOPLAYER_ACTIVITY else MOBILE_MAIN_ACTIVITY)
-            }
+            val i = if (isTv) Intent().setClassName(applicationContext, TV_AUDIOPLAYER_ACTIVITY)
+            else Intent(this, StartActivity::class.java).setAction(NAGMEDAR_ACTION_NOW_PLAYING)
             startActivity(i)
         }
         exitOK()
