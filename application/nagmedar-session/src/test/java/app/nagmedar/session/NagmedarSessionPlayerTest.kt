@@ -134,7 +134,8 @@ class NagmedarSessionPlayerTest {
         idle()
         assertEquals(listOf("next", "seek 30000", "skip 2"), source.calls)
 
-        // past the first seconds, "previous" restarts the item; at its start it goes back
+        // "previous" reaches the service wherever Media3 thinks the item is: the service restarts it or goes back by
+        // its own clock (PreviousRule), as for the app's buttons
         source.calls.clear()
         source.positionMs = 42_000L
         player.invalidate()
@@ -143,7 +144,7 @@ class NagmedarSessionPlayerTest {
         player.invalidate()
         player.seekToPrevious()
         idle()
-        assertEquals(listOf("seek 0", "previous"), source.calls)
+        assertEquals(listOf("previous", "previous"), source.calls)
     }
 
     @Test
