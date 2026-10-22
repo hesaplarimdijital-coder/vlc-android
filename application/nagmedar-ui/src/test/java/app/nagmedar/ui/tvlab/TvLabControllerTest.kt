@@ -1,6 +1,7 @@
 package app.nagmedar.ui.tvlab
 
 import android.net.Uri
+import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -12,6 +13,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 
 /**
  * S-1201 … S-1204: the TV Lab's steps in order (the streams, the drive, its speed, the bitrate),
@@ -180,29 +182,37 @@ class TvLabControllerTest {
 
     @Test
     fun theProfilesFilesAreReadOffTheMainThreadNotWhenTheLabIsMade() {
-        // the TV Lab is made on the main thread at the app's start: it shows the app's profiles, and reads the files later
+        // the TV Lab is made on the main thread at the app's start, as TvLabSession makes it (its scope on
+        // the main dispatcher, its files on IO): it shows the app's profiles, and reads the files later
+        val main = Thread.currentThread()
         val bravia = BuiltInProfiles.lgB4Usb.copy(id = "sony-bravia-8", name = "Sony Bravia 8", builtIn = false)
         val store = CountingProfileStore().apply {
             save(bravia)
             selected = bravia.id
         }
-        val lab = controller(FakeTvLabEngine(), store)
+        val lab = TvLabController(FakeTvLabEngine(), store, CoroutineScope(Dispatchers.Main), Dispatchers.IO)
         assertEquals(0, store.reads)
         assertEquals(BuiltInProfiles.all, lab.profileList)
         assertEquals(BuiltInProfiles.lgB4Usb, lab.profile)
 
-        runBlocking { lab.reloadProfiles() }
+        waitFor("the profiles") {
+            shadowOf(Looper.getMainLooper()).idle()
+            lab.profile == bravia
+        }
         assertEquals(1, store.reads)
+        assertTrue("read on ${store.readers}", store.readers.none { it === main })
         assertEquals(3, lab.profileList.size)
-        assertEquals(bravia, lab.profile)
     }
 
-    /** A store that counts how often its profiles are read. */
+    /** A store that counts how often its profiles are read, and on which threads. */
     private class CountingProfileStore(private val inner: MemoryProfileStore = MemoryProfileStore()) : ProfileStore by inner {
+        @Volatile
         var reads = 0
+        val readers: MutableList<Thread> = Collections.synchronizedList(mutableListOf())
 
         override fun all(): List<DeviceProfile> {
             reads++
+            readers += Thread.currentThread()
             return inner.all()
         }
     }
