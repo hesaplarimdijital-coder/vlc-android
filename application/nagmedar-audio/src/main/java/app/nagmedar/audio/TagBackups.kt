@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.util.Log
+import app.nagmedar.audio.TagLeftovers.Fate
 import org.json.JSONObject
 import java.io.File
 import java.io.FileDescriptor
@@ -33,10 +34,12 @@ enum class TagWrite {
  * storage (never into backups); after the write TagLib reads the file again and its audio
  * (length, sample rate, channels) must be as it was, and when the file's size changed (its audio
  * was moved, which those values, read from headers, cannot vouch for) its decoded waveform must be
- * the copy's too. A failure puts the copy back. A note beside the copy names the file: a process
- * that died while writing leaves both, and [recover] (at the next start) puts the copy back when
- * the file's audio is not as it was, else just deletes it. A copy lives no longer than its write,
- * but for a file that cannot be opened again (a card taken out), which is waited for [KEEP_MS].
+ * the copy's too. A failure puts the copy back. A note beside the copy names the file, its size
+ * and last change before the write and when the write began: a process that died while writing
+ * leaves both, and [recover] (at the next start) deletes the copy when the file reads as it was,
+ * puts it back when that write was the last to change the file, and otherwise leaves the file
+ * alone and moves the copy into a folder the user sees, as it does with the copy of a file not
+ * found for a week ([TagLeftovers]).
  */
 internal object TagBackups {
     private const val TAG = "NagmedarAudio"
@@ -44,11 +47,11 @@ internal object TagBackups {
     private const val COPY = ".audio"
     private const val NOTE = ".json"
 
+    /** A note being replaced, beside it until it is whole. */
+    private const val NEXT = ".next"
+
     /** Room left over beside the copy, for the app and the device. */
     private const val SPARE_BYTES = 32L * 1024 * 1024
-
-    /** A copy whose file is not there (a card taken out) is kept this long for it. */
-    private const val KEEP_MS = 7L * 24 * 60 * 60 * 1000
 
     /** The waveform's points the checks compare: enough to tell moved audio. */
     private const val POINTS = 2048
@@ -85,7 +88,7 @@ internal object TagBackups {
             val note = File(dir, stem + NOTE)
             try {
                 copyOut(descriptor.fileDescriptor, size, copy)
-                writeNote(note, track, name, size, before)
+                writeNote(note, track, name, size, statOf(descriptor.fileDescriptor), before)
             } catch (e: Exception) {
                 // IOException, ErrnoException
                 Log.w(TAG, "no copy of $name to write its tags: $e")
@@ -117,22 +120,25 @@ internal object TagBackups {
         }
 
     /**
-     * What a process that died while writing tags left: each file whose audio is not as it was (or cannot be told) gets
-     * its copy back; the copies go. Reads and writes files: off the main thread.
+     * What a process that died while writing tags left. A file that reads as it did loses its copy; one that does not
+     * gets the copy back when the interrupted write was the last to change it. A file changed elsewhere since is left
+     * as it is, and its copy, like that of a file not found for a week, is moved into [keepIn]: the copies moved there
+     * are returned, for the user to be told. Reads, decodes and writes files: off the main thread.
      */
-    fun recover(context: Context) {
-        if (!NativeAudio.available) return
+    fun recover(context: Context, keepIn: File?): List<File> {
+        if (!NativeAudio.available) return emptyList()
         synchronized(lock) {
             val dir = File(context.applicationContext.noBackupFilesDir, DIR)
-            val files = dir.listFiles() ?: return
+            val files = dir.listFiles() ?: return emptyList()
             val stems = files.filter { it.name.endsWith(NOTE) }.map { it.name.removeSuffix(NOTE) }.toSet()
-            // a copy without its note: the write had not begun
-            files.filter { it.name.endsWith(COPY) && it.name.removeSuffix(COPY) !in stems }.forEach { it.delete() }
-            for (stem in stems) recoverOne(context, File(dir, stem + NOTE), File(dir, stem + COPY))
+            // a copy without its note: the write had not begun; a note's replacement left half written
+            files.filter { (it.name.endsWith(COPY) && it.name.removeSuffix(COPY) !in stems) || it.name.endsWith(NEXT) }.forEach { it.delete() }
+            return stems.mapNotNull { stem -> recoverOne(context, File(dir, stem + NOTE), File(dir, stem + COPY), keepIn) }
         }
     }
 
-    private fun recoverOne(context: Context, note: File, copy: File) {
+    /** One leftover copy deleted, put back, left waiting for its file or moved into [keepIn]; the copy there when it was. */
+    private fun recoverOne(context: Context, note: File, copy: File, keepIn: File?): File? {
         val saved = runCatching { JSONObject(note.readText()) }.getOrNull() ?: JSONObject()
         val track = saved.optString("uri").takeIf { it.isNotEmpty() }?.let(Uri::parse)
         val size = saved.optLong("size", -1L)
@@ -140,27 +146,36 @@ internal object TagBackups {
         if (track == null || before.rate <= 0 || !copy.isFile || copy.length() != size) {
             note.delete()
             copy.delete()
-            return
+            return null
         }
         val name = saved.optString("name")
+        // a note of an older version knows neither: the note's own time is when the write began
+        val started = saved.optLong("started_at", note.lastModified())
+        val stat = if (saved.has("modified_s")) TagLeftovers.Stat(size, saved.optLong("modified_s")) else null
         val descriptor = runCatching { FileTags.openWritable(context.applicationContext, track) }.getOrNull()
-        if (descriptor == null) {
+        val fate = if (descriptor == null) {
             // the file is not there now: its copy waits a while for it
-            if (System.currentTimeMillis() - note.lastModified() > KEEP_MS) {
-                note.delete()
-                copy.delete()
+            TagLeftovers.missing(started, System.currentTimeMillis())
+        } else {
+            descriptor.use { pfd ->
+                if (sameBytes(pfd, copy) || intact(pfd.fd, name, before, copy)) {
+                    note.delete()
+                    copy.delete()
+                    return null
+                }
+                TagLeftovers.damaged(statOf(pfd.fileDescriptor), stat, started).also {
+                    if (it == Fate.PutBack) {
+                        Log.w(TAG, "$name was left half written: it goes back as it was")
+                        // the putting back is the file's last change now: a next start takes it for this write's
+                        runCatching { replaceNote(note, saved.put("started_at", System.currentTimeMillis())) }
+                        putBack(pfd.fileDescriptor, copy, size, before, pfd.fd, name, note)
+                    } else {
+                        Log.w(TAG, "$name changed after its tag write was cut short: the file stays, its copy is kept aside")
+                    }
+                }
             }
-            return
         }
-        descriptor.use { pfd ->
-            if (sameBytes(pfd, copy) || intact(pfd.fd, name, before, copy)) {
-                note.delete()
-                copy.delete()
-            } else {
-                Log.w(TAG, "$name was left half written: it goes back as it was")
-                putBack(pfd.fileDescriptor, copy, size, before, pfd.fd, name, note)
-            }
-        }
+        return if (fate == Fate.KeepAside) keepAside(copy, note, name, keepIn) else null
     }
 
     /** Whether the file behind [fd] has the audio of [copy]: as TagLib reads it, and decoded. */
@@ -238,12 +253,42 @@ internal object TagBackups {
         }
     }
 
+    /**
+     * [copy] moved into [folder], the folder the user sees, under its file's [name] (another beside a file of that name
+     * there), and its note deleted. The copy there, or null when it cannot go there now (no folder, no room): then both
+     * stay for the next start.
+     */
+    private fun keepAside(copy: File, note: File, name: String, folder: File?): File? {
+        if (folder == null || !(folder.isDirectory || folder.mkdirs()) || folder.usableSpace < copy.length() + SPARE_BYTES) return null
+        val target = File(folder, TagLeftovers.freeName(name.ifBlank { copy.name }) { File(folder, it).exists() })
+        return try {
+            FileInputStream(copy).use { input ->
+                FileOutputStream(target).use { out ->
+                    input.copyTo(out, BUFFER)
+                    out.fd.sync()
+                }
+            }
+            if (target.length() != copy.length()) throw IOException("the copy came out short")
+            note.delete()
+            copy.delete()
+            Log.w(TAG, "the copy of $name from before its tag write is kept in $target")
+            target
+        } catch (e: Exception) {
+            Log.w(TAG, "the copy of $name could not be kept in $folder: $e")
+            target.delete()
+            null
+        }
+    }
+
     private fun audioOf(fd: Int, name: String): Audio? = try {
         Audio.of(NativeAudio.tagAudio(fd, name))
     } catch (e: UnsatisfiedLinkError) {
         // an engine without the call: nothing is written
         null
     }
+
+    /** The size and last change of the file behind [fd] as fstat sees them; null when it cannot tell. */
+    private fun statOf(fd: FileDescriptor): TagLeftovers.Stat? = runCatching { Os.fstat(fd).let { TagLeftovers.Stat(it.st_size, it.st_mtime) } }.getOrNull()
 
     private fun dir(context: Context): File? = File(context.applicationContext.noBackupFilesDir, DIR).takeIf { it.isDirectory || it.mkdirs() }
 
@@ -261,7 +306,8 @@ internal object TagBackups {
         }
     }
 
-    private fun writeNote(note: File, track: Uri, name: String, size: Long, audio: Audio) {
+    /** The note beside a copy: the file, its size and last change before the write ([stat]), its audio and when the write began. */
+    private fun writeNote(note: File, track: Uri, name: String, size: Long, stat: TagLeftovers.Stat?, audio: Audio) {
         val text = JSONObject()
             .put("uri", track.toString())
             .put("name", name)
@@ -269,10 +315,24 @@ internal object TagBackups {
             .put("length_ms", audio.lengthMs)
             .put("rate", audio.rate)
             .put("channels", audio.channels)
-            .toString()
+            .put("started_at", System.currentTimeMillis())
+        if (stat != null) text.put("modified_s", stat.modifiedS)
         FileOutputStream(note).use { out ->
-            out.write(text.toByteArray())
+            out.write(text.toString().toByteArray())
             out.fd.sync()
+        }
+    }
+
+    /** [note] replaced by [text] whole or not at all: written beside it, then renamed over it. */
+    private fun replaceNote(note: File, text: JSONObject) {
+        val next = File(note.path + NEXT)
+        FileOutputStream(next).use { out ->
+            out.write(text.toString().toByteArray())
+            out.fd.sync()
+        }
+        if (!next.renameTo(note)) {
+            next.delete()
+            throw IOException("the note was not replaced")
         }
     }
 }

@@ -46,10 +46,12 @@ object FileTags {
     }
 
     /**
-     * S-1005: what a tag write left when the process died during it: the file put back from its copy when its audio is
-     * not as it was, the copy deleted. Called at the app's start; reads and writes files: off the main thread.
+     * S-1005: what a tag write left when the process died during it: the copy deleted when the file reads as it was, put
+     * back when that write left the file damaged; the copy of a file changed elsewhere since, or not found for a week,
+     * moved into [keepIn] (a folder the user sees). Returns the copies moved there, for the user to be told. Called at
+     * the app's start; reads, decodes and writes files: off the main thread.
      */
-    fun recover(context: Context) = TagBackups.recover(context)
+    fun recover(context: Context, keepIn: File?): List<File> = TagBackups.recover(context, keepIn)
 
     /** [block] on a read-only descriptor of [uri] and its name (the type detection's); a CUE track's file (S-808) is its own. */
     internal fun <T> read(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {

@@ -231,7 +231,7 @@ Söz görünümündeki “Düzenle” (zamanlı sözü olmayan parçada “Zaman
 2. {key:LrcWordMode} satır ve sözcük kipleri arasında geçirir; {key:LrcLineUp} ve {key:LrcLineDown} satır seçer, {key:PlayPause} oynatır ve duraklatır.
 3. Sözleri “Dosyanın yanına (.lrc)” ya da “Etikete” yazın. Önceki sözler hiç silinmez.
 
-> Etikete yazarken Nağmedar dosyanın bir kopyasını tutar: yazılan dosya yeniden okunur, sesi aynı çıkmazsa kopya geri konur; uygulama yazarken kapanırsa bu denetim sonraki açılışta yapılır. Kopyaya yer yoksa sözler yazılmaz ve nedeni söylenir.
+> Etikete yazarken Nağmedar dosyanın bir kopyasını tutar: yazılan dosya yeniden okunur, sesi aynı çıkmazsa kopya geri konur; uygulama yazarken kapanırsa bu denetim sonraki açılışta yapılır. O arada başka yerde değişmiş ya da bir hafta bulunamamış bir dosyaya dokunulmaz: kopyası uygulamanın depodaki klasöründe “Kurtarılan”a konur ve nerede olduğu bir kısa haberle söylenir. Kopyaya yer yoksa sözler yazılmaz ve nedeni söylenir.
 
 ### Scrobble
 Ayarlar › Scrobble'da Last.fm (kullanıcı adı ve parola; parola saklanmaz) ya da ListenBrainz (kullanıcı belirteci) ile giriş yapın. Bir parça yarısı ya da dört dakikası dinlenince sayılır; video, podcast ve akış gönderilmez. Çevrimdışıyken scrobble'lar cihazda bekler ve ağ gelince gönderilir.

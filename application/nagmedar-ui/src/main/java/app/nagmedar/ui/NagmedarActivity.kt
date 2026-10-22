@@ -50,8 +50,10 @@ import org.videolan.tools.NAGMEDAR_EXTRA_PREFERENCE
 import org.videolan.tools.NAGMEDAR_EXTRA_REMOTE_ACCESS
 import org.videolan.tools.NAGMEDAR_EXTRA_SEARCH
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
+import org.videolan.tools.Notices
 import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
+import java.io.File
 
 /**
  * Entry point of the new Nağmedar interface (S-006). Playback still runs in the existing
@@ -182,7 +184,24 @@ class NagmedarActivity : ComponentActivity() {
         // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
         lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
         // S-1005: a tag write a dead process left half done: the file back from its copy, the copy gone
-        lifecycleScope.launch(Dispatchers.IO) { FileTags.recover(applicationContext) }
+        lifecycleScope.launch(Dispatchers.IO) { recoverTagWrites() }
+    }
+
+    /**
+     * S-1005: the copies that a dead process's tag writes left. One that cannot go back (its file changed elsewhere
+     * since, or not found for a week) is moved into “Recovered” in the app's folder on the storage, and the user is
+     * told where. Reads and writes files: off the main thread.
+     */
+    private fun recoverTagWrites() {
+        val folder = getExternalFilesDir(null)?.let { File(it, getString(R.string.nag_tag_recovered_folder)) }
+        val kept = FileTags.recover(applicationContext, folder)
+        if (kept.isEmpty() || folder == null) return
+        val text = if (kept.size == 1) {
+            getString(R.string.nag_tag_recovered_file, kept.single().name, folder.path)
+        } else {
+            resources.getQuantityString(R.plurals.nag_tag_recovered_files, kept.size, kept.size, folder.path)
+        }
+        Notices.show(applicationContext, text, long = true)
     }
 
     override fun onStop() {

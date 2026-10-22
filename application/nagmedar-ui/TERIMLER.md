@@ -221,6 +221,7 @@ Sözlüğü testler denetler:
 | widget | widget | pencere öğesi, araç takımı | | Ana ekrandaki Nağmedar oynatıcısı (4×1, büyütülünce kapaklı 4×2); Türkçede de “widget”: “Nağmedar'ın widget'ı” |
 | kısa haber | notice | | toast, snackbar | Pencerenin altında birkaç saniye görünen söz: “Kopyalandı”, “Sıraya eklendi”, “Oynatma hazırlanıyor…”. Android'in bildirim çekmecesindekine “bildirim” denir |
 | süre sınırı | time limit | | | Android 15'in arka plandaki (ön plan hizmeti olarak süren) işlere koyduğu günlük sınır: veri eşitleme ve medya işleme için ayrı ayrı günde altı saat; “Android'in süre sınırı doldu” |
+| Kurtarılan (klasör) | Recovered (folder) | | | Yarıda kalmış bir etiket yazımının, dosyaya geri konamayan (dosya o arada başka yerde değişmiş ya da bir hafta bulunamamış) önceki kopyasının konduğu klasör; uygulamanın depodaki klasöründe (Android/data/…/files). Kısa haber nerede olduğunu söyler |
 
 ## Özel adlar
 

@@ -3289,6 +3289,13 @@
     <string name="nag_lrc_pick_folder">Choose the folder</string>
     <string name="nag_lrc_save_failed">Could not save. The file may not be writable.</string>
     <string name="nag_lrc_save_no_room">Not saved: Nağmedar keeps a copy of the file while it writes the tags, and there is no room for it. Free some space and try again.</string>
+    <!-- S-1005: the copy of a file whose tag write was cut short, kept where the user sees it (the app's folder on the storage) -->
+    <string name="nag_tag_recovered_folder">Recovered</string>
+    <string name="nag_tag_recovered_file">A tag write was cut short. The copy of %1$s from before it is kept in %2$s.</string>
+    <plurals name="nag_tag_recovered_files">
+        <item quantity="one">A tag write was cut short. The copy of %1$d file from before it is kept in %2$s.</item>
+        <item quantity="other">Tag writes were cut short. The copies of %1$d files from before them are kept in %2$s.</item>
+    </plurals>
     <string name="nag_lrc_publish">Send to LRCLIB</string>
     <string name="nag_lrc_publish_cannot">LRCLIB needs the track\'s title, artist and length, and every line stamped.</string>
     <string name="nag_lrc_publish_title">Send these lyrics to LRCLIB?</string>

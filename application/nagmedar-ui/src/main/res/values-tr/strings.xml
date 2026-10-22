@@ -3260,6 +3260,13 @@
     <string name="nag_lrc_pick_folder">Klasörü seç</string>
     <string name="nag_lrc_save_failed">Kaydedilemedi. Dosya yazılabilir olmayabilir.</string>
     <string name="nag_lrc_save_no_room">Kaydedilmedi: Nağmedar etiketleri yazarken dosyanın bir kopyasını tutar ve buna yer yok. Biraz yer açıp yeniden deneyin.</string>
+    <!-- S-1005: the copy of a file whose tag write was cut short, kept where the user sees it (the app's folder on the storage) -->
+    <string name="nag_tag_recovered_folder">Kurtarılan</string>
+    <string name="nag_tag_recovered_file">Bir etiket yazımı yarıda kaldı. %1$s dosyasının yazımdan önceki kopyası %2$s klasöründe saklanıyor.</string>
+    <plurals name="nag_tag_recovered_files">
+        <item quantity="one">Bir etiket yazımı yarıda kaldı. %1$d dosyanın yazımdan önceki kopyası %2$s klasöründe saklanıyor.</item>
+        <item quantity="other">Etiket yazımları yarıda kaldı. %1$d dosyanın yazımdan önceki kopyaları %2$s klasöründe saklanıyor.</item>
+    </plurals>
     <string name="nag_lrc_publish">LRCLIB\'e gönder</string>
     <string name="nag_lrc_publish_cannot">LRCLIB için parçanın adı, sanatçısı ve süresi bilinmeli, her satır damgalı olmalı.</string>
     <string name="nag_lrc_publish_title">Bu sözler LRCLIB\'e gönderilsin mi?</string>

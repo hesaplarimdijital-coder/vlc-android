@@ -231,7 +231,7 @@ Open it with “Edit” in the lyrics view (“Time it” for a track with no sy
 2. {key:LrcWordMode} switches between line and word modes; {key:LrcLineUp} and {key:LrcLineDown} choose a line, {key:PlayPause} plays and pauses.
 3. Write the lyrics “Beside the file (.lrc)” or “To the tag”. The earlier lyrics are never deleted.
 
-> While it writes to the tag, Nağmedar keeps a copy of the file: the written file is read back, and if its audio does not come out the same, the copy is put back; if the app closes while writing, this check happens at the next start. If there is no room for the copy, the lyrics are not written and you are told why.
+> While it writes to the tag, Nağmedar keeps a copy of the file: the written file is read back, and if its audio does not come out the same, the copy is put back; if the app closes while writing, this check happens at the next start. A file changed elsewhere meanwhile, or not found for a week, is left alone: its copy goes into “Recovered” in the app's folder on the storage, and a notice says where. If there is no room for the copy, the lyrics are not written and you are told why.
 
 ### Scrobbling
 In Settings › Scrobbling sign in with Last.fm (user name and password; the password is not kept) or ListenBrainz (user token). A track counts when half of it or four minutes has been heard; video, podcasts and streams are not sent. Offline, scrobbles wait on the device and are sent when the network is back.
