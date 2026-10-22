@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import app.nagmedar.ui.NagmedarPreferences
+import app.nagmedar.ui.onboarding.FolderGrants
 
 /**
  * S-1107: the settings of radio recording (Settings › Radio), kept in the app's preferences: the
@@ -60,26 +61,19 @@ object RecordingPrefs {
 
 /**
  * A folder chosen for the radio recordings: written in from now on, the permission kept across
- * restarts. The folder before it lets go of its permission unless something else uses it.
+ * restarts. The folder before it lets go of its permission as far as nothing else uses it
+ * (the player's recordings, the screenshots, the library…: [FolderGrants]).
  */
 fun keepRadioRecordingFolder(context: Context, prefs: NagmedarPreferences, uri: Uri) {
-    val modes = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    runCatching { context.contentResolver.takePersistableUriPermission(uri, modes) }
+    runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
     val before = prefs.radioRecording.folder
-    if (before != null && before != uri.toString()) release(context, prefs, before)
     prefs.updateRadioRecordingFolder(uri.toString())
+    if (before != null && before != uri.toString()) FolderGrants.release(context, before)
 }
 
-/** Back to the app's own music folder: the chosen folder lets go of its permission. */
+/** Back to the app's own music folder: the chosen folder lets go of its permission as far as nothing else uses it. */
 fun forgetRadioRecordingFolder(context: Context, prefs: NagmedarPreferences) {
     val before = prefs.radioRecording.folder ?: return
-    release(context, prefs, before)
     prefs.updateRadioRecordingFolder(null)
-}
-
-/** Another setting (the player's recordings, the screenshots, the library) may hold the same tree: what it uses stays. */
-private fun release(context: Context, prefs: NagmedarPreferences, folder: String) {
-    if (folder == prefs.snapshot.folder || folder == prefs.recordingFolder) return
-    val release = if (folder in prefs.safFolders) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(folder), release) }
+    FolderGrants.release(context, before)
 }

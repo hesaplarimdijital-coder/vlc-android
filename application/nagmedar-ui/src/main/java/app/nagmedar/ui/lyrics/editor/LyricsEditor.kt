@@ -94,6 +94,8 @@ import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.onboarding.FolderGrants
+import app.nagmedar.ui.onboarding.GrantHolder
 import java.text.NumberFormat
 
 /** The shortcuts that act once per press: a key held down does not stamp a line after line. */
@@ -130,6 +132,8 @@ fun LyricsEditorScreen(
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         if (uri != null) {
             runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+            // later saves write there again: the other settings leave the folder's permission alone
+            FolderGrants.note(context, GrantHolder.Lyrics, uri.toString())
             controller.save(uri)
         }
     }

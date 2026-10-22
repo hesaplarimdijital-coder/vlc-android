@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
+import app.nagmedar.ui.onboarding.FolderGrants
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -116,34 +117,19 @@ internal class SnapshotFiles(private val context: Context) {
 
 /**
  * A folder chosen for the screenshots (Settings, or the screenshot button's menu): written in from
- * now on, the permission kept across restarts. The folder before it lets go of its writing
- * permission; its reading one stays when the library reads it too.
+ * now on, the permission kept across restarts. The folder before it lets go of its permission as
+ * far as nothing else uses it (the recordings, the library…: [FolderGrants]).
  */
 fun keepSnapshotFolder(context: Context, prefs: NagmedarPreferences, uri: Uri) {
-    val resolver = context.contentResolver
-    val modes = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    runCatching { resolver.takePersistableUriPermission(uri, modes) }
+    runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
     val before = prefs.snapshot.folder
-    // S-607: the recordings may be written into the same folder
-    if (before != null && before != uri.toString() && before != prefs.recordingFolder) {
-        val release = if (before in prefs.safFolders) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else modes
-        runCatching { resolver.releasePersistableUriPermission(Uri.parse(before), release) }
-    }
     prefs.updateSnapshot(prefs.snapshot.copy(folder = uri.toString()))
+    if (before != null && before != uri.toString()) FolderGrants.release(context, before)
 }
 
-/** Back to Pictures/Nağmedar: the chosen folder lets go of its writing permission. */
+/** Back to Pictures/Nağmedar: the chosen folder lets go of its permission as far as nothing else uses it. */
 fun forgetSnapshotFolder(context: Context, prefs: NagmedarPreferences) {
     val before = prefs.snapshot.folder ?: return
-    if (before == prefs.recordingFolder) {
-        prefs.updateSnapshot(prefs.snapshot.copy(folder = null))
-        return
-    }
-    val release = if (before in prefs.safFolders) {
-        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    } else {
-        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    }
-    runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(before), release) }
     prefs.updateSnapshot(prefs.snapshot.copy(folder = null))
+    FolderGrants.release(context, before)
 }

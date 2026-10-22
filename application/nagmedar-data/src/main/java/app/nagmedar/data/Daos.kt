@@ -115,6 +115,10 @@ abstract class PodcastDao {
     @Query("SELECT * FROM podcast_episode WHERE download_state IN (1, 2, 3, 4) ORDER BY download_state = 3, published_at DESC")
     abstract fun observeDownloads(): Flow<List<PodcastEpisode>>
 
+    /** The downloaded episodes kept in a folder the system's picker gave (their documents): the folder's permission stays while they are. */
+    @Query("SELECT download_path FROM podcast_episode WHERE download_path LIKE 'content:%'")
+    abstract fun downloadedDocuments(): List<String>
+
     /** S-1103: where an episode's download is: its [state], and the file it is in once it is done. */
     @Query("UPDATE podcast_episode SET download_state = :state, download_path = :path, download_bytes = :bytes WHERE id = :episodeId")
     abstract fun setDownload(episodeId: Long, state: Int, path: String?, bytes: Long)

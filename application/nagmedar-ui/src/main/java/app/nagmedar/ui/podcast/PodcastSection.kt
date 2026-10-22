@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +41,7 @@ import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.library.sizeLabel
+import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
@@ -90,7 +90,13 @@ internal fun PodcastSection(
     }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> blocked = !granted }
     val folder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        if (uri != null) change(current.copy(downloadFolder = keepDownloadFolder(context, current.downloadFolder, uri)))
+        if (uri != null) {
+            // kept for good (read and write); the one before lets go as far as nothing uses it, the episodes downloaded there included
+            val before = current.downloadFolder
+            runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+            change(current.copy(downloadFolder = uri.toString()))
+            if (before.isNotEmpty() && before != uri.toString()) FolderGrants.release(context, before)
+        }
     }
     PodcastSectionContent(
         settings = current,
@@ -104,8 +110,9 @@ internal fun PodcastSection(
         },
         onPickFolder = { runCatching { folder.launch(null) } },
         onDefaultFolder = {
-            releaseDownloadFolder(context, current.downloadFolder)
+            val before = current.downloadFolder
             change(current.copy(downloadFolder = ""))
+            if (before.isNotEmpty()) FolderGrants.release(context, before)
         },
         onClean = {
             scope.launch {
@@ -114,21 +121,6 @@ internal fun PodcastSection(
             }
         },
     )
-}
-
-/** The folder the system's picker gave, kept for good (read and write), the one before it let go; the new one as the setting holds it. */
-private fun keepDownloadFolder(context: Context, before: String, uri: Uri): String {
-    val resolver = context.contentResolver
-    runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
-    if (before.isNotEmpty() && before != uri.toString()) releaseDownloadFolder(context, before)
-    return uri.toString()
-}
-
-private fun releaseDownloadFolder(context: Context, folder: String) {
-    if (folder.isEmpty()) return
-    runCatching {
-        context.contentResolver.releasePersistableUriPermission(Uri.parse(folder), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-    }
 }
 
 /** The section's lines, over the values it is given: what the app and the screenshot tests both draw. */

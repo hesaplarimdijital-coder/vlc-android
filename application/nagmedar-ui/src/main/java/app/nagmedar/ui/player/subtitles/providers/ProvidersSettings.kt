@@ -26,6 +26,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.player.subtitles.translate.TranslationModelRows
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
@@ -135,7 +136,8 @@ fun SubtitleProvidersSettings() {
                 old = folder,
                 new = uri.toString(),
                 take = { resolver.takePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) },
-                release = { resolver.releasePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) },
+                // the same folder may serve the library or the recordings: they keep it
+                release = { FolderGrants.release(context, it, FolderGrants.READ) },
                 store = store,
             )
             folder = store.get()
@@ -159,10 +161,11 @@ fun SubtitleProvidersSettings() {
         onMove = registry::move,
         onChooseFolder = { runCatching { picker.launch(null) } },
         onForgetFolder = {
-            folder?.let { runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(it), Intent.FLAG_GRANT_READ_URI_PERMISSION) } }
+            val before = folder
             store.set(null)
             folder = null
             folderError = false
+            before?.let { FolderGrants.release(context, it, FolderGrants.READ) }
         },
         folderError = folderError,
         extra = {

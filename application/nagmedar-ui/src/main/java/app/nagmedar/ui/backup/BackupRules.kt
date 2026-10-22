@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.library.LibrarySources
+import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
 import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
@@ -51,6 +52,8 @@ object BackupSettings {
         RecordingPrefs.KEY_FOLDER,
         // this device's: the folders each section of the library shows (paths and picked trees)
         *LibrarySources.keys.toTypedArray(),
+        // this device's: the picked folders the TV Lab's batch and the lyrics editor were given
+        *FolderGrants.keptKeys.toTypedArray(),
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

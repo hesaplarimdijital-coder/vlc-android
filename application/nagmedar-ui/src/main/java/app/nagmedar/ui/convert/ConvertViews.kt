@@ -45,6 +45,7 @@ import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.audio.convert.AudioConverter
 import app.nagmedar.audio.convert.ConvertCodec
 import app.nagmedar.ui.R
+import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
@@ -58,16 +59,12 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
-import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
-import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.tools.AppScope
-import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
-import app.nagmedar.ui.library.LibrarySources
 import org.videolan.tools.Settings
 
 // ------------------------------------------------------------------- the window
@@ -113,27 +110,15 @@ fun ConvertDialog(tracks: List<Track>, onDismiss: () -> Unit) {
 }
 
 /**
- * A folder the picker gave: its permission kept; the converter's earlier one let go when nothing
- * uses it any more: no job still writes there, nor the recordings, the screenshots or the library
- * (which keeps its reading permission).
+ * A folder the picker gave: its permission kept; the converter's earlier one let go as far as
+ * nothing uses it any more (a job still writing there, the recordings, the library…: [FolderGrants]).
  */
 private fun keepFolder(context: Context, prefs: SharedPreferences, before: String, uri: Uri): String {
     val resolver = context.contentResolver
     runCatching { resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
     val folder = uri.toString()
     prefs.edit().putString(ConvertOptions.KEY_FOLDER, folder).apply()
-    if (before.isNotEmpty() && before != folder) {
-        val app = context.applicationContext
-        AppScope.launch(Dispatchers.IO) {
-            val used = setOfNotNull(prefs.getString(KEY_RECORDING_FOLDER, null), prefs.getString(SnapshotSettings.KEY_FOLDER, null)) +
-                ConvertStore(app).activeFolders()
-            if (before !in used) {
-                val library = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty() + LibrarySources.trees(prefs)
-                val release = if (before in library) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(before), release) }
-            }
-        }
-    }
+    if (before.isNotEmpty() && before != folder) FolderGrants.release(context, before)
     return folder
 }
 

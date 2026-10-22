@@ -29,6 +29,8 @@ import app.nagmedar.ui.lab.CreateFile
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.onboarding.FolderGrants
+import app.nagmedar.ui.onboarding.GrantHolder
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.tvlab.remux.BatchFolder
@@ -185,19 +187,18 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
             val name = withContext(Dispatchers.IO) { context.displayName(uri) }
             val id = queue.enqueue(Uri.parse(file.uri), file.name, file.sizeBytes, uri, name, plan)
             val refusal = refusalOf(id)
-            // a refused output is not the queue's: its write grant goes back, unless another job of the queue writes
-            // into it; the read grant stays, as the file may be one the app reads for something else (the source itself)
-            if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) {
-                runCatching { context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
-            }
+            // a refused output is not the queue's: its write grant goes back, unless another job of the queue (or anything
+            // else) writes into it; the read grant stays, as the file may be one the app reads for something else (the source)
+            if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) FolderGrants.release(context, uri.toString(), FolderGrants.WRITE)
             notice = res.getString(refusal ?: R.string.nag_tvlab_remux_queued_notice)
         }
     }
 
     val batchFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
-        // the films are read again by the queue's worker, later
+        // the films are read again by the queue's worker, later: the other settings leave the folder's permission alone
         runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        FolderGrants.note(context, GrantHolder.TvLab, uri.toString())
         batch.open(BatchFolder.of(uri.toString()), controller.profile, names) { compatibilityTitle(res, it) }
     }
     val batchOutputLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -205,6 +206,7 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         // the new files are made now and written by the worker later
         val grant = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
         runCatching { context.contentResolver.takePersistableUriPermission(uri, grant) }
+        FolderGrants.note(context, GrantHolder.TvLab, uri.toString())
         batch.chooseOutput(BatchFolder.of(uri.toString()))
     }
     val batchActions = remember(batch) {
@@ -238,9 +240,7 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
             val name = withContext(Dispatchers.IO) { context.displayName(uri) }
             val id = queue.enqueue(Uri.parse(job.inputUri), job.inputName, job.inputSize, uri, name, plan)
             val refusal = refusalOf(id)
-            if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) {
-                runCatching { context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
-            }
+            if (refusal != null && id != RemuxQueue.REFUSED_IN_USE) FolderGrants.release(context, uri.toString(), FolderGrants.WRITE)
             notice = res.getString(refusal ?: R.string.nag_tvlab_remux_queued_notice)
         }
     }
