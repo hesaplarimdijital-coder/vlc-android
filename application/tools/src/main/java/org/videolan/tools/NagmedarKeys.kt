@@ -97,3 +97,9 @@ const val NAGMEDAR_LYRICS_ONLINE = "nagmedar_lyrics_online"
 
 /** S-1006: album covers are looked up on Cover Art Archive (through MusicBrainz) when the file and its folder have none (default on). */
 const val NAGMEDAR_COVERS_ONLINE = "nagmedar_covers_online"
+
+/** [NAGMEDAR_EXTRA_DESTINATION]'s value that opens what plays now in the Nağmedar interface: the music view, the radio, the streams. */
+const val NAGMEDAR_DESTINATION_NOW_PLAYING = "now-playing"
+
+/** Intent action of StartActivity: the Nağmedar interface on what plays now (the playback notification). */
+const val NAGMEDAR_ACTION_NOW_PLAYING = "nagmedar.now_playing"

@@ -14,12 +14,16 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.nagmedar.ui.NagmedarActivity
+import app.nagmedar.ui.podcast.PodcastCenter
+import app.nagmedar.ui.radio.RadioSession
+import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.PLAY_EXTRA_START_TIME
-import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
+import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
+import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.vlc.PlaybackService
-import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
@@ -124,16 +128,42 @@ object PlaybackActions {
         if (length > 0) service.seek((length * fraction.coerceIn(0f, 1f)).toLong(), fromUser = true)
     }
 
-    /** Brings back the player: the video player for videos, the classic audio player otherwise. */
+    /** Whether what plays is a video (or a stream showing one): the video player shows it. */
+    fun playsVideo(): Boolean {
+        val service = PlaybackService.instance ?: return false
+        return service.currentMediaWrapper?.type == MediaWrapper.TYPE_VIDEO || service.isVideoPlaying
+    }
+
+    /**
+     * The page of the shell that shows what plays, when it is not a video: the music view for
+     * music, Podcasts for an episode, Radio for a station, Streams for any other stream; null when
+     * nothing plays or a video does.
+     */
+    fun nowPlayingDestination(): Destination? {
+        val service = PlaybackService.instance ?: return null
+        val media = service.currentMediaWrapper ?: return null
+        if (playsVideo()) return null
+        if (media.type == MediaWrapper.TYPE_AUDIO) return Destination.Music
+        if (PodcastCenter.playing.value != null) return Destination.Podcasts
+        val station = RadioSession.playing.value
+        if (station != null && (service.currentMediaLocation == station.url || media.title == station.station.name)) return Destination.Radio
+        return Destination.Streams
+    }
+
+    /**
+     * Brings back the player: the video player for videos; anything else in the Nağmedar window,
+     * on the page that shows it (an open window takes the request instead of a new one).
+     */
     fun openPlayer(context: Context) {
         val service = PlaybackService.instance
-        if (service != null && service.currentMediaWrapper?.type == MediaWrapper.TYPE_VIDEO) {
+        if (service != null && playsVideo()) {
             service.switchToVideo()
         } else {
-            // the launcher's default is the new interface: ask StartActivity for the classic one
-            context.startActivity(
-                Intent(context, StartActivity::class.java).setAction(NAGMEDAR_ACTION_CLASSIC).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            )
+            val intent = Intent(context, NagmedarActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .putExtra(NAGMEDAR_EXTRA_DESTINATION, NAGMEDAR_DESTINATION_NOW_PLAYING)
+            if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { context.startActivity(intent) }
         }
     }
 }

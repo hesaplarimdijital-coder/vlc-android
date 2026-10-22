@@ -138,6 +138,7 @@ import org.videolan.resources.util.getFromMl
 import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.registerReceiverCompat
 import org.videolan.resources.util.startForegroundCompat
+import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import app.nagmedar.session.Media3SessionHost
@@ -415,8 +416,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                     val notificationIntent = Intent(ACTION_REMOTE_SWITCH_VIDEO)
                     PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 }
-                else -> { /* Show audio player */
-                    val notificationIntent = Intent(this, StartActivity::class.java)
+                else -> { /* the Nağmedar window, on the page of what plays */
+                    val notificationIntent = Intent(this, StartActivity::class.java).setAction(NAGMEDAR_ACTION_NOW_PLAYING)
                     PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 }
             }

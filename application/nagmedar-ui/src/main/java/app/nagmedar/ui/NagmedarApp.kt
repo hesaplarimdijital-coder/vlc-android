@@ -154,6 +154,7 @@ import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
+import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.SecondaryActivity
@@ -285,7 +286,14 @@ private fun NagmedarMain(
         if (libraryListRequests == 0) return@LaunchedEffect
         if (motion.reduced) settingsList.scrollToItem(SETTINGS_LIBRARY_ITEM) else settingsList.animateScrollToItem(SETTINGS_LIBRARY_ITEM)
     }
+    // the playback notification and the players outside the shell ask for what plays now
+    var nowPlayingRequested by remember { mutableStateOf(false) }
     LaunchedEffect(requestedDestination) {
+        if (requestedDestination == NAGMEDAR_DESTINATION_NOW_PLAYING) {
+            nowPlayingRequested = true
+            onDestinationShown()
+            return@LaunchedEffect
+        }
         val destination = Destination.entries.firstOrNull { it.route == requestedDestination } ?: return@LaunchedEffect
         navigator.navigate(destination)
         onDestinationShown()
@@ -307,6 +315,27 @@ private fun NagmedarMain(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
         val nowPlaying = rememberNowPlaying()
+        val openNowPlaying: (NavKind) -> Unit = { navKind ->
+            val page = PlaybackActions.nowPlayingDestination()
+            if (page == Destination.Music) {
+                // on a desktop window the music view with its now playing pane, else the phone's player
+                if (navKind == NavKind.Sidebar) {
+                    navigator.navigate(Destination.Music)
+                } else {
+                    phonePlayer = true
+                }
+            } else if (page != null) {
+                navigator.navigate(page)
+            } else if (PlaybackActions.playsVideo()) {
+                PlaybackActions.openPlayer(context)
+            }
+        }
+        LaunchedEffect(nowPlayingRequested) {
+            if (nowPlayingRequested) {
+                openNowPlaying(NavKind.forWidth(widthClass))
+                nowPlayingRequested = false
+            }
+        }
         CompositionLocalProvider(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,
@@ -334,14 +363,8 @@ private fun NagmedarMain(
                         },
                         queueOpen = queuePanel.open,
                         onQueue = queuePanel::toggle,
-                        // music opens here: on a desktop window the music view with its now playing pane
-                        onOpenAudio = {
-                            if (navKind == NavKind.Sidebar) {
-                                navigator.navigate(Destination.Music)
-                            } else {
-                                phonePlayer = true
-                            }
-                        },
+                        // what is not a video opens here: music in the music view (the phone's player), radio, podcasts, streams on their pages
+                        onOpenAudio = { openNowPlaying(navKind) },
                     )
                 },
                 navController = navController,

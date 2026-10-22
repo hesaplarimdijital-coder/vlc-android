@@ -186,7 +186,8 @@ interface PlayerBarActions {
 
 /**
  * [PlayerBarActions] on the existing playback service (ADR-05: one service, one session). With
- * [onOpenAudio], music opens in the new interface (S-1002: the phone player, the music view).
+ * [onOpenAudio], what is not a video opens in the new interface (S-1002: the phone player, the music
+ * view; the radio, podcasts and streams pages).
  */
 class ServicePlayerBarActions(
     private val context: Context,
@@ -194,9 +195,9 @@ class ServicePlayerBarActions(
     private val onOpenAudio: (() -> Unit)? = null,
 ) : PlayerBarActions {
     override fun openPlayer() {
-        val audio = PlaybackService.instance?.currentMediaWrapper?.type == MediaWrapper.TYPE_AUDIO
+        // a video goes to the video player; music, radio, podcasts and streams stay in this interface
         val open = onOpenAudio
-        if (audio && open != null) open() else PlaybackActions.openPlayer(context)
+        if (!PlaybackActions.playsVideo() && open != null) open() else PlaybackActions.openPlayer(context)
     }
 
     override fun openQueue() = onQueue()

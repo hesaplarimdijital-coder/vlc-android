@@ -71,6 +71,8 @@ import org.videolan.tools.KEY_FRAGMENT_ID
 import org.videolan.tools.KEY_NAVIGATOR_SCREEN_UNSTABLE
 import org.videolan.tools.KEY_TV_ONBOARDING_DONE
 import org.videolan.tools.NAGMEDAR_ACTION_CLASSIC
+import org.videolan.tools.NAGMEDAR_ACTION_NOW_PLAYING
+import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_LAUNCH_NEW_UI
@@ -359,10 +361,12 @@ class StartActivity : FragmentActivity() {
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(EXTRA_FIRST_RUN, firstRun)
             .putExtra(EXTRA_UPGRADE, upgrade)
-        when (target) {
-            R.id.nav_video -> "movies"
-            R.id.nav_audio -> "music"
-            R.id.nav_directories -> "device"
+        when {
+            // the playback notification: the page of what plays
+            this.intent?.action == NAGMEDAR_ACTION_NOW_PLAYING -> NAGMEDAR_DESTINATION_NOW_PLAYING
+            target == R.id.nav_video -> "movies"
+            target == R.id.nav_audio -> "music"
+            target == R.id.nav_directories -> "device"
             else -> null
         }?.let { intent.putExtra(NAGMEDAR_EXTRA_DESTINATION, it) }
         // S-409: a desktop window opens where it was last (DeX, freeform windows)
