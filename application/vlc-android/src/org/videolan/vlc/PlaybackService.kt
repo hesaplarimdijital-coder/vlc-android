@@ -187,6 +187,7 @@ import org.videolan.vlc.media.streamDisplay
 import org.videolan.vlc.media.NO_LENGTH_PROGRESS_MAX
 import org.videolan.vlc.media.PlayerController
 import org.videolan.vlc.media.PlaylistManager
+import org.videolan.vlc.media.ResumeHook
 import org.videolan.vlc.util.AccessControl
 import org.videolan.vlc.util.FlagSet
 import org.videolan.vlc.util.LifecycleAwareScheduler
@@ -1813,13 +1814,32 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private var volumeSave: Job? = null
 
     /**
+     * Nağmedar: the volume the user has set, which the bars and the volume keys show and change: the
+     * engine's, without a podcast show's boost (S-1104) that may raise it now.
+     */
+    val userVolume: Int
+        @MainThread
+        get() = volume.let { engine -> ResumeHook.volume?.listenerVolume(engine) ?: engine }
+
+    /**
+     * Nağmedar: the engines at the user's [volume], raised by a show's boost (S-1104) while one holds
+     * them; not kept. What lowered the volume for a while (the ducking) puts it back with this.
+     */
+    @MainThread
+    fun applyUserVolume(volume: Int) {
+        val level = volume.coerceIn(0, 200)
+        setVolume(ResumeHook.volume?.engineVolume(level) ?: level)
+    }
+
+    /**
      * Nağmedar: the volume the user sets (the bars' slider, the volume keys, mute), kept for the
-     * next start a moment after the last change; the fades and ramps use [setVolume].
+     * next start a moment after the last change; the fades and ramps use [setVolume]. It is the
+     * user's own: during a boosted podcast episode the engines play above it and the next media at it.
      */
     @MainThread
     fun setUserVolume(volume: Int) {
         val level = volume.coerceIn(0, 200)
-        setVolume(level)
+        applyUserVolume(level)
         volumeSave?.cancel()
         volumeSave = lifecycleScope.launch {
             delay(400L)

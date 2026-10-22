@@ -746,12 +746,12 @@ class AppActions(
                 }
             }
             ShortcutId.Shuffle -> service?.shuffle()
-            // the user's volume: kept for the next start
-            ShortcutId.VolumeUp -> service?.let { it.setUserVolume((it.volume + 5).coerceAtMost(200)) }
-            ShortcutId.VolumeDown -> service?.let { it.setUserVolume((it.volume - 5).coerceAtLeast(0)) }
+            // the user's volume, without a podcast show's boost over it: kept for the next start
+            ShortcutId.VolumeUp -> service?.let { it.setUserVolume((it.userVolume + 5).coerceAtMost(200)) }
+            ShortcutId.VolumeDown -> service?.let { it.setUserVolume((it.userVolume - 5).coerceAtLeast(0)) }
             ShortcutId.Mute -> service?.let {
-                if (it.volume > 0) {
-                    volumeBeforeMute = it.volume
+                if (it.userVolume > 0) {
+                    volumeBeforeMute = it.userVolume
                     it.setUserVolume(0)
                 } else {
                     it.setUserVolume(volumeBeforeMute)

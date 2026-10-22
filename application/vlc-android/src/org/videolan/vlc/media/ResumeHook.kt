@@ -15,11 +15,19 @@ fun interface ResumeOwner {
 
 /**
  * A show's volume boost (S-1104) is the engine's volume raised above the listener's: [restore] puts it back. The playlist
- * calls it before any other media starts, so that nothing but the episode ever plays boosted.
+ * calls it before any other media starts, so that nothing but the episode ever plays boosted. While a boost holds the
+ * engine, the volume the user sees and sets is still their own ([listenerVolume], [engineVolume]): the boosted one is
+ * never kept as theirs.
  */
 fun interface VolumeRestorer {
     /** Gives the engines the volume the listener set. Called on the main thread; cheap when nothing is boosted. */
     fun restore()
+
+    /** The listener's own volume while the engine plays at [engine]: without the boost, while one holds it. */
+    fun listenerVolume(engine: Int): Int = engine
+
+    /** The listener sets [volume]: the engine's volume for it, raised by the boost that holds it now (which goes on over [volume]). */
+    fun engineVolume(volume: Int): Int = volume
 }
 
 object ResumeHook {

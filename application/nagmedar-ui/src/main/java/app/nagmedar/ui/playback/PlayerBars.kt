@@ -316,7 +316,8 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         format = tech?.let { if (video) techBadge(it, media.width, media.height) else it.mainAudio()?.let(::audioFormatLabel) },
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
-        volume = PlaybackService.instance?.volume ?: 100,
+        // the listener's own volume: a podcast show's boost (S-1104) plays over it and is never kept as theirs
+        volume = PlaybackService.instance?.userVolume ?: 100,
         canCast = rememberCastingEnabled(),
         casting = rememberCastDevice(),
         chapters = rememberPlayingChapters(),

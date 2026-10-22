@@ -128,9 +128,9 @@ class VLCAudioFocusHelper(private val service: PlaybackService) {
                             if (AndroidDevices.isAmazon || podcastPlaying) {
                                 pausePlayback()
                             } else if (service.settings.getBoolean(AUDIO_DUCKING, true)) {
-                                val volume = service.volume
-                                lossTransientVolume = volume
-                                service.setVolume(volume / 3)
+                                // Nağmedar: the user's own volume comes back, a podcast show's boost over it only while its episode plays
+                                lossTransientVolume = service.userVolume
+                                service.setVolume(service.volume / 3)
                             }
                         }
                     }
@@ -139,7 +139,7 @@ class VLCAudioFocusHelper(private val service: PlaybackService) {
                         if (BuildConfig.DEBUG) Log.i(TAG, "AUDIOFOCUS_GAIN: ")
                         // Resume playback
                         if (lossTransientVolume != -1) {
-                            service.setVolume(lossTransientVolume)
+                            service.applyUserVolume(lossTransientVolume)
                             lossTransientVolume = -1
                         }
 

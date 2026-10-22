@@ -38,8 +38,17 @@ class PodcastPlaybackObserver : PlaybackObserver {
         val dao = NagmedarDatabase.get(app).podcasts().also { this.dao = it }
         // an episode follows its show's resume rule, not VLC's "resume playback" setting and its dialog
         ResumeHook.owner = ResumeOwner { location -> episodeAt(dao, location) != null }
-        // the playlist gives the volume back before any other media starts: nothing but the episode plays boosted
-        ResumeHook.volume = VolumeRestorer { runCatching { booster.end() } }
+        // the playlist gives the volume back before any other media starts: nothing but the episode plays boosted; the
+        // bars and the volume keys show and set the listener's own volume, the boost goes on over it
+        ResumeHook.volume = object : VolumeRestorer {
+            override fun restore() {
+                runCatching { booster.end() }
+            }
+
+            override fun listenerVolume(engine: Int): Int = booster.listenerVolume(engine)
+
+            override fun engineVolume(volume: Int): Int = booster.listenerSets(volume)
+        }
         job?.cancel()
         job = AppScope.launch {
             var asked: String? = null

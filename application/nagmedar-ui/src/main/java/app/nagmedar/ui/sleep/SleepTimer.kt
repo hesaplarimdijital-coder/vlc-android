@@ -20,6 +20,12 @@ interface SleepTarget {
 
     fun setVolume(volume: Int)
 
+    /** The volume the next play starts at: the listener's own, without a podcast show's boost over [volume]. */
+    val userVolume: Int get() = volume
+
+    /** Puts the listener's [volume] back (with the boost over it while a boosted episode still plays). */
+    fun restoreUserVolume(volume: Int) = setVolume(volume)
+
     /** What is left of the item playing, ms; null when its length is not known (a stream). */
     val trackLeftMs: Long?
 
@@ -52,8 +58,11 @@ class SleepTimer(
 
     private var job: Job? = null
 
-    /** The volume before the fade began, put back when the timer ends. */
+    /** The volume before the fade began, which the fade lets down. */
     private var faded: Int? = null
+
+    /** The listener's volume before the fade began, put back when the timer ends. */
+    private var restored: Int? = null
 
     /** What is left of the time, ms; null without a time. */
     fun remainingMs(): Long? = running.value?.endsAt?.let { (it - now()).coerceAtLeast(0) }
@@ -94,9 +103,10 @@ class SleepTimer(
 
     /** The volume the fade took, back on [player]: it plays at it next time. */
     private fun restoreVolume(player: SleepTarget?) {
-        val volume = faded ?: return
+        val volume = restored ?: return
         faded = null
-        player?.setVolume(volume)
+        restored = null
+        player?.restoreUserVolume(volume)
     }
 
     private fun watch() {
@@ -145,7 +155,11 @@ class SleepTimer(
     /** The volume let down as [left] ms run out of the last [FADE_MS]. */
     private fun fade(player: SleepTarget, left: Long) {
         if (left > FADE_MS) return
-        val start = faded ?: player.volume.also { faded = it }
+        val start = faded ?: player.volume.also {
+            faded = it
+            // not a podcast show's boost, which ends with its episode: the listener's own volume
+            restored = player.userVolume
+        }
         player.setVolume((start * left.coerceAtLeast(0) / FADE_MS).toInt().coerceIn(0, start))
     }
 
@@ -180,6 +194,10 @@ private class ServiceSleepTarget(private val service: PlaybackService) : SleepTa
     override fun setVolume(volume: Int) {
         service.setVolume(volume)
     }
+
+    override val userVolume: Int get() = service.userVolume
+
+    override fun restoreUserVolume(volume: Int) = service.applyUserVolume(volume)
 
     override val trackLeftMs: Long?
         get() {
