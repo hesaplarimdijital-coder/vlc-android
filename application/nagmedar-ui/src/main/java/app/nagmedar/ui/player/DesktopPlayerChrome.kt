@@ -891,7 +891,9 @@ internal class ChromeFrame(context: Context, private val controls: ChromeVisibil
         isFocusable = false
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean = !controls.pictureInPicture && super.dispatchTouchEvent(event)
+    // a cancel still reaches a gesture under way when picture in picture begins
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean =
+        (!controls.pictureInPicture || event.actionMasked == MotionEvent.ACTION_CANCEL) && super.dispatchTouchEvent(event)
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onResolvePointerIcon(event: MotionEvent, pointerIndex: Int): PointerIcon? =

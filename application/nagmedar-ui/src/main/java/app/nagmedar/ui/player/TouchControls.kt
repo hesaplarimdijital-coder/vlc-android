@@ -164,6 +164,10 @@ internal fun TouchControls(
     val gestures = rememberUpdatedState(
         TouchGestures(actions, touch, visibility, osd, session, fastLabel),
     )
+    // picture in picture takes the video from under a gesture: its fast play and its line end with it
+    LaunchedEffect(visibility.pictureInPicture) {
+        if (visibility.pictureInPicture) gestures.value.interrupted()
+    }
     Box(modifier.fillMaxSize().testTag("player-touch")) {
         // the gestures, under the bars: a touch on a bar is the bar's
         Box(
@@ -175,8 +179,12 @@ internal fun TouchControls(
                         onDoubleTap = { at -> gestures.value.doubleTap(at, size) },
                         onLongPress = { gestures.value.longPress() },
                         onPress = {
-                            tryAwaitRelease()
-                            gestures.value.released()
+                            // the layout may go mid-press (a mouse moved, the controls changed): the fast play ends then too
+                            try {
+                                tryAwaitRelease()
+                            } finally {
+                                gestures.value.released()
+                            }
                         },
                     )
                 }
@@ -539,6 +547,19 @@ private class TouchGestures(
         }
     }
 
+    /** A swipe cut short (the controls went from under it): it seeks nowhere, and its line goes. */
+    fun cancel(mode: SwipeMode) {
+        if (mode != SwipeMode.Seek) return
+        session.seekTarget = -1L
+        osd.clear(session.holdSerial)
+    }
+
+    /** The video was taken from under the gestures (picture in picture): whatever one held ends. */
+    fun interrupted() {
+        released()
+        cancel(SwipeMode.Seek)
+    }
+
     companion object {
         /** The double tap's sides: a third of the width each. */
         const val SIDE = 0.35f
@@ -580,39 +601,45 @@ private suspend fun PointerInputScope.swipes(gestures: () -> TouchGestures) {
         var mode: SwipeMode? = null
         var drag = Offset.Zero
         var zoom = 1f
-        while (true) {
-            val event = awaitPointerEvent()
-            val pressed = event.changes.count { it.pressed }
-            if (pressed == 0) break
-            if (pressed >= 2 && (mode == null || mode == SwipeMode.Pinch)) {
-                if (mode == null) mode = gestures().start(SwipeMode.Pinch)
-                zoom *= event.calculateZoom()
-                event.changes.forEach { it.consume() }
-                continue
-            }
-            if (mode == SwipeMode.Pinch || mode == SwipeMode.None) continue
-            val change = event.changes.firstOrNull { it.id == down.id } ?: break
-            // a long press took the touch: nothing to swipe
-            if (change.isConsumed) {
-                if (mode == null) return@awaitEachGesture
-                break
-            }
-            drag += change.positionChange()
-            if (mode == null) {
-                if (drag.getDistance() < viewConfiguration.touchSlop) continue
-                val wanted = when {
-                    abs(drag.x) > abs(drag.y) -> SwipeMode.Seek
-                    down.position.x < size.width / 2 -> SwipeMode.Brightness
-                    else -> SwipeMode.Volume
+        var ended = false
+        try {
+            while (true) {
+                val event = awaitPointerEvent()
+                val pressed = event.changes.count { it.pressed }
+                if (pressed == 0) break
+                if (pressed >= 2 && (mode == null || mode == SwipeMode.Pinch)) {
+                    if (mode == null) mode = gestures().start(SwipeMode.Pinch)
+                    zoom *= event.calculateZoom()
+                    event.changes.forEach { it.consume() }
+                    continue
                 }
-                mode = gestures().start(wanted)
-                if (mode == SwipeMode.None) continue
+                if (mode == SwipeMode.Pinch || mode == SwipeMode.None) continue
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                // a long press took the touch: nothing to swipe
+                if (change.isConsumed) {
+                    if (mode == null) return@awaitEachGesture
+                    break
+                }
+                drag += change.positionChange()
+                if (mode == null) {
+                    if (drag.getDistance() < viewConfiguration.touchSlop) continue
+                    val wanted = when {
+                        abs(drag.x) > abs(drag.y) -> SwipeMode.Seek
+                        down.position.x < size.width / 2 -> SwipeMode.Brightness
+                        else -> SwipeMode.Volume
+                    }
+                    mode = gestures().start(wanted)
+                    if (mode == SwipeMode.None) continue
+                }
+                val current = mode ?: continue
+                gestures().move(current, drag, size, ::swipeSeekText)
+                change.consume()
             }
-            val current = mode ?: continue
-            gestures().move(current, drag, size, ::swipeSeekText)
-            change.consume()
+            ended = true
+        } finally {
+            // the layout may go mid-swipe (a mouse moved): its held line goes with it
+            mode?.let { if (ended) gestures().end(it, zoom) else gestures().cancel(it) }
         }
-        mode?.let { gestures().end(it, zoom) }
     }
 }
 
