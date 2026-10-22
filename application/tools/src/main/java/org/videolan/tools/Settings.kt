@@ -63,7 +63,9 @@ object Settings : SingletonHolder<SharedPreferences, Context>({ init(it.applicat
         showTrackNumber = prefs.getBoolean(ALBUMS_SHOW_TRACK_NUMBER, true)
         tvFoldersFirst = prefs.getBoolean(TV_FOLDERS_FIRST, true)
         incognitoMode = prefs.getBoolean(KEY_INCOGNITO, false)
-        safeMode = prefs.getBoolean(KEY_SAFE_MODE, false) && prefs.getString(KEY_SAFE_MODE_PIN, "")?.isNotBlank() == true
+        // Nağmedar: VLC's safe mode is the TV interface's; Nağmedar's (phones, tablets, DeX) does not
+        // offer it, and VLC's PIN window never opens there
+        safeMode = device.isTv && prefs.getBoolean(KEY_SAFE_MODE, false) && prefs.getString(KEY_SAFE_MODE_PIN, "")?.isNotBlank() == true
         remoteAccessEnabled.postValue(prefs.getBoolean(KEY_ENABLE_REMOTE_ACCESS, false))
         return prefs
     }

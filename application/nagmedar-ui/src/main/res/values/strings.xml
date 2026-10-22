@@ -2346,7 +2346,7 @@
     <!-- S-1502: backup and restore -->
     <string name="nag_backup_settings">Backup</string>
     <string name="nag_backup_make">Backup file</string>
-    <string name="nag_backup_make_hint">Settings, shortcuts, TV Lab device profiles, playlists, smart lists, ratings and play counts, your own lyrics, per-file settings, the covers you chose and your scheduled radio recordings go into one file. The recorded audio is not included. Account sign-ins and this device\'s folder permissions are left out.</string>
+    <string name="nag_backup_make_hint">Settings, shortcuts, TV Lab device profiles, playlists, smart lists, ratings and play counts, your own lyrics, per-file settings, the covers you chose and your scheduled radio recordings go into one file. The recorded audio is not included. Account sign-ins, the parental control\'s PIN and this device\'s folder permissions are left out.</string>
     <string name="nag_backup_make_button">Back up…</string>
     <string name="nag_backup_working">Backing up…</string>
     <string name="nag_backup_last">Last backup: %1$s</string>

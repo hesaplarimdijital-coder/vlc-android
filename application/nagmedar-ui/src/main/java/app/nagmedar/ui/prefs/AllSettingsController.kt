@@ -65,7 +65,6 @@ import org.videolan.tools.KEY_PREFER_SMBV1
 import org.videolan.tools.KEY_QUICK_PLAY
 import org.videolan.tools.KEY_QUICK_PLAY_DEFAULT
 import org.videolan.tools.KEY_RESTRICT_SETTINGS
-import org.videolan.tools.KEY_SAFE_MODE
 import org.videolan.tools.KEY_SAFE_MODE_PIN
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR
@@ -333,7 +332,6 @@ class AllSettingsController(
 
     fun savePin(pin: String) {
         values.putString(KEY_SAFE_MODE_PIN, sha256(pin))
-        Settings.safeMode = values.bool(KEY_SAFE_MODE, false)
     }
 
     /** The app starts again: its window opens anew, then this process ends (VLC's restart dialog only ended it). */
@@ -433,8 +431,6 @@ class AllSettingsController(
             KEY_PLAYBACK_SPEED_AUDIO_GLOBAL -> PlaybackService.instance?.let { service ->
                 service.playlistManager.getCurrentMedia()?.let { service.playlistManager.restoreSpeed(it) }
             }
-            // PreferencesParentalControl
-            KEY_SAFE_MODE -> Settings.safeMode = values.bool(key, false) && pinSet
         }
         if (key in audioControls) Settings.onAudioControlsChanged()
         if (key in androidAuto) PlaybackService.updateState()

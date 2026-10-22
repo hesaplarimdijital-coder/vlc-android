@@ -23,6 +23,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_OPEN_SUBTITLES_USER
+import org.videolan.tools.KEY_RESTRICT_SETTINGS
+import org.videolan.tools.KEY_SAFE_MODE
+import org.videolan.tools.KEY_SAFE_MODE_PIN
 import org.videolan.tools.KEY_SET_LOCALE
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -220,5 +223,24 @@ class BackupCodecTest {
         assertFalse(prefs.contains(PREF_TV_UI))
         assertFalse(prefs.contains(KEY_SET_LOCALE))
         assertEquals("Dark", prefs.getString("nagmedar_theme", null))
+    }
+
+    @Test
+    fun theParentalControlNeitherGoesOutNorComesBack() {
+        // a backup made before the PIN would otherwise take the PIN and the restriction away without it
+        val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("backup-pin", Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_SAFE_MODE_PIN, "kept").putBoolean(KEY_RESTRICT_SETTINGS, true).commit()
+        val values = listOf(
+            SettingValue(KEY_SAFE_MODE_PIN, ""),
+            SettingValue(KEY_RESTRICT_SETTINGS, false),
+            SettingValue(KEY_SAFE_MODE, true),
+            SettingValue("nagmedar_theme", "Light"),
+        )
+        assertEquals(listOf("nagmedar_theme"), BackupSettings.collect(values.associate { it.key to it.value }).map { it.key })
+        BackupSettings.write(values, prefs.edit()).commit()
+        assertEquals("kept", prefs.getString(KEY_SAFE_MODE_PIN, null))
+        assertTrue(prefs.getBoolean(KEY_RESTRICT_SETTINGS, false))
+        assertFalse(prefs.contains(KEY_SAFE_MODE))
+        assertEquals("Light", prefs.getString("nagmedar_theme", null))
     }
 }

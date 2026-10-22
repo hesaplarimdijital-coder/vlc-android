@@ -20,6 +20,9 @@ import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION
 import org.videolan.tools.KEY_OPEN_SUBTITLES_LIMIT
 import org.videolan.tools.KEY_OPEN_SUBTITLES_USER
+import org.videolan.tools.KEY_RESTRICT_SETTINGS
+import org.videolan.tools.KEY_SAFE_MODE
+import org.videolan.tools.KEY_SAFE_MODE_PIN
 import org.videolan.tools.KEY_SET_LOCALE
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -68,6 +71,10 @@ object BackupSettings {
         // a TV's: VLC's TV interface and its language, which a phone, a tablet or DeX ignores
         PREF_TV_UI,
         KEY_SET_LOCALE,
+        // this device's: the parental control's PIN and what it guards; a restore would undo them without the PIN
+        KEY_SAFE_MODE_PIN,
+        KEY_RESTRICT_SETTINGS,
+        KEY_SAFE_MODE,
         // the settings' version, which the backup keeps on its own
         KEY_CURRENT_SETTINGS_VERSION,
         KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION,

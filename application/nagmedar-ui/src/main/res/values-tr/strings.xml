@@ -2318,7 +2318,7 @@
     <!-- S-1502: yedekleme ve geri yükleme -->
     <string name="nag_backup_settings">Yedekleme</string>
     <string name="nag_backup_make">Yedek dosyası</string>
-    <string name="nag_backup_make_hint">Ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz, dosya ayarları, seçtiğiniz kapaklar ve zamanlanmış radyo kayıtlarınız tek bir dosyaya yazılır. Kaydedilen sesler yazılmaz. Hesap girişleri ve bu cihazın klasör izinleri yazılmaz.</string>
+    <string name="nag_backup_make_hint">Ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz, dosya ayarları, seçtiğiniz kapaklar ve zamanlanmış radyo kayıtlarınız tek bir dosyaya yazılır. Kaydedilen sesler yazılmaz. Hesap girişleri, ebeveyn denetiminin PIN\'i ve bu cihazın klasör izinleri yazılmaz.</string>
     <string name="nag_backup_make_button">Yedekle…</string>
     <string name="nag_backup_working">Yedekleniyor…</string>
     <string name="nag_backup_last">Son yedek: %1$s</string>
