@@ -397,7 +397,7 @@ internal class RecordingFiles(
             private const val NOTIFY_FROM = 64L * 1024 * 1024
 
             internal fun builder(context: Context, name: String): NotificationCompat.Builder = NotificationCompat.Builder(context, CHANNEL)
-                .setSmallIcon(R.drawable.ic_notif_video)
+                .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setContentTitle(name)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)

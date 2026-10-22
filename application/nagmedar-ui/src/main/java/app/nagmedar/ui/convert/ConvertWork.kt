@@ -261,7 +261,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             else -> context.getString(R.string.nag_convert_progress, progress.index + 1, progress.total, progress.title)
         }
         val builder = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_convert_running_title))
             .setContentText(text)
             .setContentIntent(openMusic(context))
@@ -277,7 +277,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 Intent(context, ConvertCancelReceiver::class.java).setAction(ACTION_CANCEL).putExtra(ConvertQueue.KEY_JOB, job.id),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-            builder.addAction(R.drawable.ic_widget_close_w, context.getString(R.string.nag_convert_cancel), stop)
+            builder.addAction(R.drawable.nagmedar_notif_close, context.getString(R.string.nag_convert_cancel), stop)
         }
         return builder.build()
     }
@@ -289,7 +289,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val failed = summary.failed.count { it.reason != ConvertReason.Cancelled }
         val title = context.getString(if (summary.cancelled) R.string.nag_convert_stopped_title else R.string.nag_convert_done_title)
         val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(countsLine(context.resources, summary.converted, summary.skipped, failed))
             .setContentIntent(openMusic(context))
@@ -305,7 +305,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val context = applicationContext
         channel(context)
         val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_convert_paused_title))
             .setContentText(context.getString(R.string.nag_convert_waiting_resume))
             .setContentIntent(openMusic(context))

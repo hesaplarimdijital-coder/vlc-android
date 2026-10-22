@@ -169,7 +169,7 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val builder = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_scan)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_conv_running_badge))
             .setContentText(text)
             .setContentIntent(open)
@@ -185,7 +185,7 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
                 Intent(context, TranscodeCancelReceiver::class.java).setAction(ACTION_CANCEL).putExtra(EXTRA_JOB, job.id),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-            builder.addAction(org.videolan.resources.R.drawable.ic_widget_close_w, context.getString(R.string.nag_jobs_cancel), cancel)
+            builder.addAction(org.videolan.resources.R.drawable.nagmedar_notif_close, context.getString(R.string.nag_jobs_cancel), cancel)
         }
         return builder.build()
     }

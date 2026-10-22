@@ -48,9 +48,7 @@ import org.videolan.resources.CUSTOM_ACTION_BOOKMARK
 import org.videolan.resources.CUSTOM_ACTION_SPEED
 import org.videolan.resources.EXTRA_CUSTOM_ACTION_ID
 import org.videolan.resources.START_ACTIVITY
-import org.videolan.tools.DrawableCache
 import org.videolan.tools.NAGMEDAR_ACTION_LIBRARY
-import org.videolan.tools.Settings
 import org.videolan.tools.getContextWithLocale
 import org.videolan.vlc.R
 import org.videolan.vlc.StartActivity
@@ -72,7 +70,7 @@ object NotificationHelper {
 
     private val notificationIntent = Intent()
 
-    fun createPlaybackNotification(ctx: Context, video: Boolean, title: String, artist: String,
+    fun createPlaybackNotification(ctx: Context, title: String, artist: String,
                                    album: String, cover: Bitmap?, playing: Boolean, pausable: Boolean,
                                    seekable: Boolean, speed: Float, podcastMode: Boolean,
                                    seekInCompactView: Boolean, enabledActions: FlagSet<PlaybackAction>,
@@ -82,7 +80,8 @@ object NotificationHelper {
 
         val piStop = MediaButtonReceiver.buildMediaButtonPendingIntent(ctx, PlaybackStateCompat.ACTION_STOP)
         val builder = NotificationCompat.Builder(ctx, PLAYBACK_SERVICE_CHANNEL_ID)
-        builder.setSmallIcon(if (video) R.drawable.ic_notif_video else R.drawable.ic_notif_audio)
+        // Nağmedar: its mark, and its icons on the buttons
+        builder.setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(title)
                 .setContentText(TextUtils.separatedString(artist, album))
@@ -113,33 +112,33 @@ object NotificationHelper {
                     buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_SPEED)
             ))
         } else {
-            builder.addAction(NotificationCompat.Action(R.drawable.ic_notif_previous, ctx.getString(R.string.previous),
+            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_previous, ctx.getString(R.string.previous),
                     buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_PREVIOUS)))
         }
         /* Rewind */
         builder.addAction(NotificationCompat.Action(
-                DrawableCache.getDrawableFromMemCache(ctx, "ic_notif_rewind_${Settings.audioJumpDelay}", R.drawable.ic_notif_rewind),
+                R.drawable.nagmedar_pip_back,
                 ctx.getString(R.string.playback_rewind),
                 buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_REWIND)))
         /* Play/Pause or Stop */
         if (pausable) {
-            if (playing) builder.addAction(NotificationCompat.Action(R.drawable.ic_widget_pause_w, ctx.getString(R.string.pause),
+            if (playing) builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_pip_pause, ctx.getString(R.string.pause),
                     MediaButtonReceiver.buildMediaButtonPendingIntent(ctx, PlaybackStateCompat.ACTION_PLAY_PAUSE)))
-            else builder.addAction(NotificationCompat.Action(R.drawable.ic_widget_play_w, ctx.getString(R.string.play),
+            else builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_pip_play, ctx.getString(R.string.play),
                     MediaButtonReceiver.buildMediaButtonPendingIntent(ctx, PlaybackStateCompat.ACTION_PLAY_PAUSE)))
-        } else builder.addAction(NotificationCompat.Action(R.drawable.ic_widget_close_w, ctx.getString(R.string.stop), piStop))
+        } else builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_stop, ctx.getString(R.string.stop), piStop))
         /* Fast Forward */
         builder.addAction(NotificationCompat.Action(
-                DrawableCache.getDrawableFromMemCache(ctx, "ic_notif_forward_${Settings.audioJumpDelay}", R.drawable.ic_notif_forward),
+                R.drawable.nagmedar_pip_forward,
                 ctx.getString(R.string.playback_forward),
                 buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_FAST_FORWARD)))
         /* Next */
         if (podcastMode) {
-            builder.addAction(NotificationCompat.Action(R.drawable.ic_notif_bookmark_add, ctx.getString(R.string.add_bookmark),
+            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_bookmark, ctx.getString(R.string.add_bookmark),
                     buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_BOOKMARK)
             ))
         } else {
-            builder.addAction(NotificationCompat.Action(R.drawable.ic_notif_next, ctx.getString(R.string.next),
+            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_next, ctx.getString(R.string.next),
                     buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_NEXT)))
         }
         if (AndroidDevices.showMediaStyle) {
@@ -171,7 +170,7 @@ object NotificationHelper {
         val intent = Intent(NAGMEDAR_ACTION_LIBRARY).setClassName(ctx, START_ACTIVITY)
         val scanCompatBuilder = NotificationCompat.Builder(ctx, MEDIALIBRRARY_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
-                .setSmallIcon(R.drawable.ic_notif_scan)
+                .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(ctx.getString(R.string.ml_scanning))
                 .setProgress(max, progress, max < 1 || progress < 1)
@@ -184,9 +183,9 @@ object NotificationHelper {
         notificationIntent.`package` = ctx.packageName
         val pi = PendingIntent.getBroadcast(ctx.applicationContext.getContextWithLocale(AppContextProvider.locale), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val playpause = if (paused)
-            NotificationCompat.Action(R.drawable.ic_play_notif, ctx.getString(R.string.resume), pi)
+            NotificationCompat.Action(R.drawable.nagmedar_pip_play, ctx.getString(R.string.resume), pi)
         else
-            NotificationCompat.Action(R.drawable.ic_pause_notif, ctx.getString(R.string.pause), pi)
+            NotificationCompat.Action(R.drawable.nagmedar_pip_pause, ctx.getString(R.string.pause), pi)
         scanCompatBuilder.addAction(playpause)
         return scanCompatBuilder.build()
     }
@@ -195,7 +194,7 @@ object NotificationHelper {
         val intent = Intent(ctx, StartActivity::class.java).apply { action = "vlc.remoteaccess.share" }
         val remoteAccessCompatBuilder = NotificationCompat.Builder(ctx, REMOTE_ACCESS_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
-                .setSmallIcon(R.drawable.ic_notif_remote_access)
+                .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(ctx.getString(R.string.ra_server_running))
                 .setAutoCancel(false)
@@ -208,7 +207,7 @@ object NotificationHelper {
         disableIntent.action = ACTION_DISABLE_SERVER
         disableIntent.`package` = ctx.packageName
         val piDisable = PendingIntent.getBroadcast(ctx.applicationContext.getContextWithLocale(AppContextProvider.locale), 0, disableIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val disableAction =    NotificationCompat.Action(R.drawable.ic_popup_close_w,ctx.getString(R.string.ra_disable), piDisable)
+        val disableAction =    NotificationCompat.Action(R.drawable.nagmedar_notif_close, ctx.getString(R.string.ra_disable), piDisable)
         remoteAccessCompatBuilder.addAction(disableAction)
 
         //Start / Stop
@@ -216,14 +215,14 @@ object NotificationHelper {
         notificationIntent.action = if (started) ACTION_STOP_SERVER else ACTION_START_SERVER
         notificationIntent.`package` = ctx.packageName
         val pi = PendingIntent.getBroadcast(ctx.applicationContext.getContextWithLocale(AppContextProvider.locale), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val action = NotificationCompat.Action(if (started) R.drawable.ic_pause_notif else R.drawable.ic_play_notif, if (started) ctx.getString(R.string.stop) else ctx.getString(R.string.start), pi)
+        val action = NotificationCompat.Action(if (started) R.drawable.nagmedar_notif_stop else R.drawable.nagmedar_pip_play, if (started) ctx.getString(R.string.stop) else ctx.getString(R.string.start), pi)
         remoteAccessCompatBuilder.addAction(action)
         return remoteAccessCompatBuilder.build()
     }
 
     fun createRemoteAccessOtpNotification(ctx: Context, code:String): Notification {
         val remoteAccessCompatBuilder = NotificationCompat.Builder(ctx, REMOTE_ACCESS_OTP_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notif_remote_access)
+                .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(ctx.getString(R.string.ra_otp_title))
                 .setAutoCancel(true)

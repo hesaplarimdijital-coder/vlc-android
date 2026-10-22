@@ -146,7 +146,7 @@ object TranslationJobs {
         val max = PROGRESS_MAX
         val at = if (total > 0) (done.coerceIn(0, total) * max / total).toInt() else 0
         return NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(text)
             .setOngoing(true)
@@ -154,7 +154,7 @@ object TranslationJobs {
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setProgress(max, at, total <= 0)
-            .addAction(R.drawable.ic_widget_close_w, context.getString(R.string.nag_translate_cancel), cancel)
+            .addAction(R.drawable.nagmedar_notif_close, context.getString(R.string.nag_translate_cancel), cancel)
             .build()
     }
 
@@ -283,7 +283,7 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
         val text = output?.getString(TranslationJobs.KEY_NAME)
             ?: context.getString(problemText((result as? Result.Failure)?.outputData?.problem() ?: JobProblem.Failed))
         val notification = NotificationCompat.Builder(context, TranslationJobs.CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(if (output != null) R.string.nag_translate_done_title else R.string.nag_translate_failed_title))
             .setContentText(text)
             .setAutoCancel(true)

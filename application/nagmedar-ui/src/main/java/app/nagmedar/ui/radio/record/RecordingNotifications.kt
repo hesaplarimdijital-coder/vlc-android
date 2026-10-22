@@ -99,7 +99,7 @@ object RecordingNotifications {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val builder = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_audio)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
@@ -129,7 +129,7 @@ object RecordingNotifications {
     private fun alert(context: Context, title: String, text: String): Notification {
         channels(context)
         return NotificationCompat.Builder(context, CHANNEL_ALERTS)
-            .setSmallIcon(R.drawable.ic_notif_audio)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))

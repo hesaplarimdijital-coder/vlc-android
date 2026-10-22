@@ -56,7 +56,7 @@ class PodcastNotifier(private val context: Context) {
                 if (notice.count > notice.titles.size) style.setSummaryText(res.getQuantityString(R.plurals.nag_pod_notice_more, notice.count - notice.titles.size, notice.count - notice.titles.size))
             }
             val builder = NotificationCompat.Builder(context, CHANNEL_NEW)
-                .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+                .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
                 .setContentTitle(notice.feedTitle)
                 .setContentText(res.getQuantityString(R.plurals.nag_pod_notice_count, notice.count, notice.count))
                 .setStyle(lines)
@@ -69,7 +69,7 @@ class PodcastNotifier(private val context: Context) {
         }
         if (plan.summary) {
             val summary = NotificationCompat.Builder(context, CHANNEL_NEW)
-                .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+                .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
                 .setContentTitle(context.getString(R.string.nag_pod_channel_new))
                 .setContentText(res.getQuantityString(R.plurals.nag_pod_notice_summary, plan.total, plan.total, plan.feeds.size))
                 .setContentIntent(open(null))
@@ -113,7 +113,7 @@ class PodcastNotifier(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         return NotificationCompat.Builder(context, CHANNEL_DOWNLOAD)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(
                 listOfNotNull(
@@ -128,7 +128,7 @@ class PodcastNotifier(private val context: Context) {
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(org.videolan.resources.R.drawable.ic_widget_close_w, context.getString(R.string.nag_pod_download_cancel), cancel)
+            .addAction(org.videolan.resources.R.drawable.nagmedar_notif_close, context.getString(R.string.nag_pod_download_cancel), cancel)
             .build()
     }
 
@@ -141,7 +141,7 @@ class PodcastNotifier(private val context: Context) {
         if (!canPost()) return
         ensureChannel(CHANNEL_DOWNLOAD, R.string.nag_pod_channel_download, NotificationManager.IMPORTANCE_LOW)
         val n = NotificationCompat.Builder(context, CHANNEL_DOWNLOAD)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_pod_disk_full_title))
             .setContentText(context.getString(R.string.nag_pod_disk_full_text))
             .setContentIntent(open(null))
@@ -155,7 +155,7 @@ class PodcastNotifier(private val context: Context) {
         if (!canPost()) return
         ensureChannel(CHANNEL_DOWNLOAD, R.string.nag_pod_channel_download, NotificationManager.IMPORTANCE_LOW)
         val n = NotificationCompat.Builder(context, CHANNEL_DOWNLOAD)
-            .setSmallIcon(org.videolan.resources.R.drawable.ic_notif_audio)
+            .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_pod_storage_near_title))
             .setContentText(context.getString(R.string.nag_pod_storage_near_text, sizeLabel(usedBytes, context.resources.locale()), sizeLabel(limitBytes, context.resources.locale())))
             .setContentIntent(open(null))

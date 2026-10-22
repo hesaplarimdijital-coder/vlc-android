@@ -320,7 +320,7 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
     private fun showNotification() {
         val piStop = service.getPendingIntent(Intent(ACTION_REMOTE_STOP))
         val builder = NotificationCompat.Builder(service, MISC_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notif_video)
+                .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(service.title)
                 .setContentText(service.getString(R.string.popup_playback))
@@ -336,10 +336,10 @@ class PopupManager(private val service: PlaybackService) : PlaybackService.Callb
         val piPlay = service.getPendingIntent(Intent(ACTION_REMOTE_PLAYPAUSE))
 
         if (service.isPlaying)
-            builder.addAction(R.drawable.ic_popup_pause, service.getString(R.string.pause), piPlay)
+            builder.addAction(R.drawable.nagmedar_pip_pause, service.getString(R.string.pause), piPlay)
         else
-            builder.addAction(R.drawable.ic_popup_play, service.getString(R.string.play), piPlay)
-        builder.addAction(R.drawable.ic_popup_fullscreen, service.getString(R.string.popup_expand), piExpand)
+            builder.addAction(R.drawable.nagmedar_pip_play, service.getString(R.string.play), piPlay)
+        builder.addAction(R.drawable.nagmedar_notif_fullscreen, service.getString(R.string.popup_expand), piExpand)
         service.startForegroundCompat(NotificationIds.PLAYBACK, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
     }
 

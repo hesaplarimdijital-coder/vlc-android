@@ -246,7 +246,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val text = status?.let { progressLine(context, it) } ?: context.getString(R.string.nag_whisper_starting)
         val fraction = status?.fraction
         return NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_whisper_running_title, request?.name.orEmpty()))
             .setContentText(text)
             .setContentIntent(openApp(context))
@@ -255,7 +255,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setProgress(PROGRESS_MAX, ((fraction ?: 0f) * PROGRESS_MAX).toInt(), fraction == null)
-            .addAction(R.drawable.ic_widget_close_w, context.getString(R.string.nag_whisper_cancel), WorkManager.getInstance(context).createCancelPendingIntent(id))
+            .addAction(R.drawable.nagmedar_notif_close, context.getString(R.string.nag_whisper_cancel), WorkManager.getInstance(context).createCancelPendingIntent(id))
             .build()
     }
 
@@ -285,7 +285,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     private fun say(context: Context, title: String, text: String) {
         channel(context)
         val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_scan)
+            .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))

@@ -959,7 +959,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         val notification = if (this::notification.isInitialized && !stopped) notification
         else {
             val pi = if (::playlistManager.isInitialized) sessionPendingIntent else null
-            NotificationHelper.createPlaybackNotification(ctx, false,
+            NotificationHelper.createPlaybackNotification(ctx,
                     ctx.resources.getString(R.string.loading), "", "", null, false, true,
                     true, speed, isPodcastMode, false, enabledActions, null, pi)
         }
@@ -1083,7 +1083,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                         cover = ctx.getBitmapFromDrawable(R.drawable.ic_no_media)
 
                     notification = NotificationHelper.createPlaybackNotification(ctx,
-                            canSwitchToVideo(), title, artist, album, cover, playing, isPausable,
+                            title, artist, album, cover, playing, isPausable,
                             isSeekable, speed, isPodcastMode, seekInCompactView, enabledActions,
                             sessionToken, sessionPendingIntent,
                             castingTo = castingTo)
@@ -1332,7 +1332,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         when {
             podcastMode -> {
                 manageAutoActions(actions, pscb, repeatType, true)
-                pscb.addCustomAction(CUSTOM_ACTION_BOOKMARK, getString(R.string.add_bookmark), R.drawable.ic_bookmark_add)
+                pscb.addCustomAction(CUSTOM_ACTION_BOOKMARK, getString(R.string.add_bookmark), R.drawable.nagmedar_notif_bookmark)
             }
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isCarMode() -> addCustomSeekActions(pscb)
             else -> manageAutoActions(actions, pscb, repeatType)

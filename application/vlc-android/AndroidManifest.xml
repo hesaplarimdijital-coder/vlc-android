@@ -80,10 +80,10 @@
             android:resource="@xml/automotive_app_desc"/>
         <meta-data
             android:name="androidx.car.app.TintableAttributionIcon"
-            android:resource="@drawable/ic_auto_notif_audio"/>
+            android:resource="@drawable/ic_nagmedar_mark_mono"/>
         <meta-data
             android:name="com.google.android.gms.car.notification.SmallIcon"
-            android:resource="@drawable/icon"/>
+            android:resource="@drawable/ic_nagmedar_mark_mono"/>
         <meta-data
             android:name="android.max_aspect"
             android:value="3.0"/>
