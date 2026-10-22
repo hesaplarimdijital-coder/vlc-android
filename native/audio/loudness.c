@@ -243,10 +243,11 @@ int nag_loudness_scan_file(NagLoudnessScan *album, const char *url, NagLoudnessR
         frames += n;
     }
     free(buf);
+    /* the info goes with the source: what is kept of it was read above */
     nag_source_close(src);
     if (ret >= 0) {
         result->frames = frames;
-        result->rate = info->rate;
+        result->rate = (int)rate;
         result->loudness_lufs = gated_loudness(&blocks);
         result->sample_peak = sample_peak;
         result->true_peak = true_peak > sample_peak ? true_peak : sample_peak;
