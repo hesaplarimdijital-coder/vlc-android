@@ -204,6 +204,8 @@ fun ColumnScope.TranslationModelRows() {
     val locale = currentLocale()
     var refresh by remember { mutableIntStateOf(0) }
     var offline by remember { mutableStateOf(false) }
+    // the engine's library is loaded off the main thread; until it has, the engine counts as there
+    val engine by produceState(true, service) { value = service.engineAvailable() }
     PanelCaption(stringResource(R.string.nag_translate_settings_hint))
     for (model in TranslationModels.all) {
         val flow = remember(service, model, refresh) { service.model(model) }
@@ -251,7 +253,7 @@ fun ColumnScope.TranslationModelRows() {
                                 offline = !service.online()
                                 if (!offline) service.download(model)
                             },
-                            enabled = service.engineAvailable,
+                            enabled = engine,
                             icon = NagIcons.Downloads,
                             modifier = Modifier.testTag("translate-get-${model.id}"),
                         )
@@ -261,5 +263,5 @@ fun ColumnScope.TranslationModelRows() {
         }
     }
     if (offline) Text(stringResource(R.string.nag_translate_no_network), style = NagTheme.type.labelSmall, color = NagTheme.colors.danger, modifier = Modifier.testTag("translate-offline"))
-    if (!service.engineAvailable) Text(stringResource(R.string.nag_translate_no_engine), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning)
+    if (!engine) Text(stringResource(R.string.nag_translate_no_engine), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning)
 }

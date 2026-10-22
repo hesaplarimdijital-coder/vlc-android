@@ -110,12 +110,13 @@ class TechRepository internal constructor(
 
     /** Probes the [keys] (media URIs) that have no current result, in the background. */
     fun probeMissing(keys: List<String>) {
-        if (!NativeLab.available) return
+        // the screens ask on the main thread: the lab's library is loaded on the probe's
+        if (NativeLab.loaded == false) return
         for (key in keys) {
             if (!queued.add(key)) continue
             scope.launch {
                 try {
-                    probeIfStale(key)
+                    if (NativeLab.available) probeIfStale(key)
                 } finally {
                     queued.remove(key)
                 }

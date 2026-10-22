@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -65,6 +66,24 @@ class SubtitleExtractControllerTest {
         service.finish()
         assertTrue(extraction.state.run is ExtractRun.Done)
         assertEquals("Kuzey Işığı.tr.srt", tools.state?.file?.name)
+    }
+
+    @Test
+    fun aMissingLibraryIsToldOnceTheProbeHasLookedForIt() {
+        // the window opens on the main thread, which does not load the native library: the probe, off it, finds it missing
+        val missing = object : ExtractService by FakeExtractService(emptyList()) {
+            var probed = false
+            override val available: Boolean get() = !probed
+
+            override suspend fun tracks(film: ToolsFile): List<EmbeddedTrack> {
+                probed = true
+                return emptyList()
+            }
+        }
+        val lonely = SubtitleExtractController(missing, io, scope)
+        lonely.attach(film, asked = true) {}
+        assertFalse(lonely.state.loading)
+        assertFalse(lonely.state.available)
     }
 
     @Test

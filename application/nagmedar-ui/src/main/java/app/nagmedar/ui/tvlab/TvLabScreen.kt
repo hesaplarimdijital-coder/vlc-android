@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,6 +90,8 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
     val allJobs by produceState(emptyList<RemuxJobView>(), queue) {
         queue.observe().map { rows -> rows.map(RemuxJobView::of) }.flowOn(Dispatchers.Default).collect { value = it }
     }
+    // whether the tools are there: asked off the main thread, where their library loads the first time
+    LaunchedEffect(controller) { controller.checkTools() }
     val view = controller.view().copy(jobs = jobs)
     val palette = chartPalette()
     val measurer = rememberTextMeasurer()
@@ -397,7 +400,7 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         counts = mapOf(TvLabTab.Queue to activeJobs(allJobs).size, TvLabTab.History to finishedJobs(allJobs).size),
         page = { shown ->
             when (shown) {
-                TvLabTab.Batch -> RemuxBatchPage(batch, controller.profile.name, libraryFolders, batchActions)
+                TvLabTab.Batch -> RemuxBatchPage(batch, controller.profile.name, libraryFolders, batchActions, available = view.available)
                 TvLabTab.Queue -> RemuxQueuePage(allJobs, control, now, queueActions)
                 TvLabTab.History -> RemuxHistoryPage(allJobs, historyActions)
                 TvLabTab.Analysis -> Unit

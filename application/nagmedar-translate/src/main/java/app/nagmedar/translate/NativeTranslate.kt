@@ -10,7 +10,10 @@ import java.io.IOException
  */
 object NativeTranslate {
 
-    /** False when this build was made without the translation engine (local builds). */
+    /**
+     * False when this build was made without the translation engine (local builds). The first ask
+     * loads the library, which reads the APK: never on the main thread.
+     */
     val available: Boolean by lazy {
         runCatching { System.loadLibrary("nagmedar_translate") }.isSuccess
     }

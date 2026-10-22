@@ -65,6 +65,7 @@ interface RemuxBatchActions {
  * folder) with how far its probes got; the default plan for every film, against the TV Lab's
  * device; the output folder; then the films, each with what the probe found, its plan in a
  * line, whether it is chosen, its own plan or the default one; and the queuing with what came of it.
+ * Without the native tools ([available], the TV Lab's answer) nothing can be analysed.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -73,6 +74,7 @@ fun RemuxBatchPage(
     device: String,
     libraryFolders: List<BatchFolder>,
     actions: RemuxBatchActions,
+    available: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val res = resources()
@@ -97,12 +99,12 @@ fun RemuxBatchPage(
                     overflow = TextOverflow.Ellipsis,
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NagButton(stringResource(R.string.nag_tvlab_batch_choose_folder), actions::chooseFolder, icon = NagIcons.Folder, enabled = batch.available, modifier = Modifier.testTag("tvlab-batch-folder"))
-                    libraryFolders.forEach { folder -> NagButton(folder.label, { actions.open(folder) }, icon = NagIcons.Movies, enabled = batch.available) }
+                    NagButton(stringResource(R.string.nag_tvlab_batch_choose_folder), actions::chooseFolder, icon = NagIcons.Folder, enabled = available, modifier = Modifier.testTag("tvlab-batch-folder"))
+                    libraryFolders.forEach { folder -> NagButton(folder.label, { actions.open(folder) }, icon = NagIcons.Movies, enabled = available) }
                 }
                 if (libraryFolders.isNotEmpty()) Text(stringResource(R.string.nag_tvlab_batch_library_note), style = NagTheme.type.labelSmall, color = colors.textTertiary)
                 when {
-                    !batch.available -> Text(stringResource(R.string.nag_tvlab_no_tools_text), style = NagTheme.type.labelSmall, color = toneColors(StateTone.Warning).content)
+                    !available -> Text(stringResource(R.string.nag_tvlab_no_tools_text), style = NagTheme.type.labelSmall, color = toneColors(StateTone.Warning).content)
                     batch.unreadable -> Text(stringResource(R.string.nag_tvlab_batch_unreadable), style = NagTheme.type.label, color = toneColors(StateTone.Error).content)
                     batch.scanning -> {
                         val total = films.size

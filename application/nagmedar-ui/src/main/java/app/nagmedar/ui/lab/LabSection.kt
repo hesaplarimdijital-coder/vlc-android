@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -127,10 +128,12 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
         }
     }
 
+    val tools = rememberLabAvailable()
+
     section(stringResource(R.string.nag_settings_lab)) {
         header()
         Text(stringResource(R.string.nag_lab_intro), style = NagTheme.type.labelSmall, color = colors.textTertiary)
-        if (!NativeLab.available) {
+        if (tools == false) {
             Text(stringResource(R.string.nag_lab_native_missing), style = NagTheme.type.labelSmall, color = colors.warning,
                 modifier = Modifier.padding(top = 4.dp))
         }
@@ -145,7 +148,7 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
                         Text(stringResource(tool.description), style = NagTheme.type.labelSmall, color = colors.textTertiary)
                     }
                     if (current?.tool === tool && tool.cancellable) {
-                        NagButton(stringResource(R.string.nag_lab_stop), onClick = { NativeLab.takeIf { it.available }?.cancel() })
+                        NagButton(stringResource(R.string.nag_lab_stop), onClick = { if (NativeLab.loaded == true) NativeLab.cancel() })
                     } else {
                         NagButton(
                             text = stringResource(if (current?.tool === tool) R.string.nag_lab_running else R.string.nag_lab_run),
@@ -202,4 +205,13 @@ private fun ProgressLine(fraction: Double, message: String) {
         if (message.isNotEmpty()) Text(message, style = NagTheme.type.caption, color = colors.textTertiary, modifier = Modifier.padding(top = 2.dp))
     }
 }
+
+/**
+ * Whether this build has the native lab tools, for a composition: what is known at once (null
+ * before the library's first load), then the answer of a load made off the main thread. The
+ * library reads the APK as it loads; the main thread never loads it nor waits for it.
+ */
+@Composable
+fun rememberLabAvailable(): Boolean? =
+    produceState(NativeLab.loaded) { value = withContext(Dispatchers.IO) { NativeLab.available } }.value
 

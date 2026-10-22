@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.nagmedar.lab.CompatibilityTrack
 import app.nagmedar.lab.MediaTech
-import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.displayName
 import app.nagmedar.ui.R
 import app.nagmedar.ui.jobs.JobOutputs
@@ -113,8 +112,6 @@ class RemuxBatchController(context: Context, private val scope: CoroutineScope) 
     private var names: ProfileCheck.StreamNames? = null
     private var addedTitle: (CompatibilityTrack) -> String = { it.spec.describe(it.track) }
     private var job: Job? = null
-
-    val available: Boolean get() = NativeLab.available
 
     /** [folder]'s films listed and probed, against [profile]; what ran before stops. [title] names an added track (S-1207). */
     fun open(folder: BatchFolder, profile: DeviceProfile, names: ProfileCheck.StreamNames, title: (CompatibilityTrack) -> String) {

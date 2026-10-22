@@ -71,6 +71,10 @@ data class ExtractState(
 
 /** What the extraction works with (the app's: the media probe and WorkManager). */
 interface ExtractService {
+    /**
+     * This build has the native extraction, as far as is known without loading its library: true
+     * until its load (by the media probe, off the main thread) found it missing.
+     */
     val available: Boolean
 
     /** The film's subtitle tracks as the media probe lists them; empty when it cannot be read. */
@@ -131,7 +135,8 @@ class SubtitleExtractController(
             } catch (e: Exception) {
                 emptyList()
             }
-            state = state.copy(loading = false, tracks = tracks)
+            // asked again: the probe may have loaded the native library meanwhile, or found it missing
+            state = state.copy(loading = false, tracks = tracks, available = service.available)
         }
     }
 
@@ -251,7 +256,7 @@ class SubtitleExtractController(
 class WorkExtractService(context: Context) : ExtractService {
     private val app = context.applicationContext
 
-    override val available: Boolean get() = NativeLab.available
+    override val available: Boolean get() = NativeLab.loaded != false
 
     override suspend fun tracks(film: ToolsFile): List<EmbeddedTrack> = withContext(Dispatchers.IO) {
         // the library's probe of the film; a film it does not keep (a document that does not tell its size) is probed here

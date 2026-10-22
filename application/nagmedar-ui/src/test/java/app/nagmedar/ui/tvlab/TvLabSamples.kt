@@ -151,10 +151,14 @@ fun sampleTvLabView(profile: DeviceProfile = BuiltInProfiles.lgB4Usb) = TvLabVie
 /** The sample film read, its drive measured, its packets being counted. */
 fun sampleRunningView() = sampleTvLabView().copy(bitrate = null, bitrateStep = Step.Running(0.42f), elapsedMs = null)
 
-/** The native lab's stand-in: the sample film read at once, its bitrate held at [bitrateGate] when set. */
+/**
+ * The native lab's stand-in: the sample film read at once, its bitrate held at [bitrateGate] when
+ * set; [loaded] null as a library not loaded yet.
+ */
 class FakeTvLabEngine(
     override val available: Boolean = true,
     var tech: MediaTech? = sampleTech(),
+    override val loaded: Boolean? = available,
 ) : TvLabEngine {
     val calls = mutableListOf<String>()
     var bitrateGate: CompletableDeferred<Unit>? = null

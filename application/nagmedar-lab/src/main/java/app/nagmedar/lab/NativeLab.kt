@@ -22,10 +22,16 @@ object NativeLab {
         fun onProgress(doneSeconds: Double, totalSeconds: Double, bytesOut: Long): Int
     }
 
-    /** False when this build was made without the native lab tools (local builds). */
-    val available: Boolean by lazy {
-        runCatching { System.loadLibrary("nagmedar_lab") }.isSuccess
-    }
+    private val load = lazy { runCatching { System.loadLibrary("nagmedar_lab") }.isSuccess }
+
+    /**
+     * False when this build was made without the native lab tools (local builds). The first ask
+     * loads the library, which reads the APK: never on the main thread, which reads [loaded].
+     */
+    val available: Boolean by load
+
+    /** [available] once the library's load has been tried, null before: it never loads nor waits. */
+    val loaded: Boolean? get() = if (load.isInitialized()) load.value else null
 
     @JvmStatic external fun version(): String
 

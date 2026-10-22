@@ -99,7 +99,8 @@ data class JobInfo(
 
 /** What the translation works with: the models, their downloads and the jobs (the app's: WorkManager). */
 interface TranslationService {
-    val engineAvailable: Boolean
+    /** Whether this build has the engine; the first ask loads its library, off the main thread. */
+    suspend fun engineAvailable(): Boolean
 
     fun model(model: TranslationModel): Flow<ModelStatus>
 
@@ -133,7 +134,8 @@ class SubtitleTranslateController(
     /** The interface's language ("tr"): the direction for a file that says nothing of its own. */
     private val interfaceLanguage: String,
 ) {
-    var state by mutableStateOf(TranslateState(engine = service.engineAvailable))
+    /** The engine is counted as there until [attach] has asked (its library loads off the main thread). */
+    var state by mutableStateOf(TranslateState())
         private set
 
     private var watchers: List<Job> = emptyList()
@@ -149,12 +151,15 @@ class SubtitleTranslateController(
     fun attach(playback: ToolsPlayback?) {
         this.playback = playback
         watchers.forEach { it.cancel() }
-        state = TranslateState(engine = service.engineAvailable)
+        state = TranslateState()
         watchers = TranslationModels.all.map { model ->
             scope.launch {
                 service.model(model).collect { status -> state = state.copy(models = state.models + (model.direction to status)) }
             }
-        } + scope.launch { service.job().collect(::onJob) }
+        } + scope.launch { service.job().collect(::onJob) } + scope.launch {
+            val engine = service.engineAvailable()
+            state = state.copy(engine = engine)
+        }
     }
 
     /** The window closed: nothing is followed; a translation under way goes on in the background. */
@@ -268,7 +273,7 @@ class SubtitleTranslateController(
 class WorkTranslationService(context: Context) : TranslationService {
     private val app = context.applicationContext
 
-    override val engineAvailable: Boolean get() = NativeTranslate.available
+    override suspend fun engineAvailable(): Boolean = withContext(Dispatchers.IO) { NativeTranslate.available }
 
     override fun model(model: TranslationModel): Flow<ModelStatus> {
         val store = TranslationJobs.store(app)

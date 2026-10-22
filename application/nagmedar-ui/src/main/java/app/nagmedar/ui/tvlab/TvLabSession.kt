@@ -47,8 +47,11 @@ sealed interface Step {
 
 /** What the analysis needs from the device: the probe, the bitrate, the drive and its speed (native/lab). */
 interface TvLabEngine {
-    /** Whether this build has the native lab tools. */
+    /** Whether this build has the native lab tools. The first ask may load their library: off the main thread. */
     val available: Boolean
+
+    /** [available] as far as it is known without loading anything; null before the library's load. */
+    val loaded: Boolean? get() = available
 
     fun describe(uri: Uri): TvLabFile?
 
@@ -72,6 +75,8 @@ class NativeTvLabEngine(private val context: Context) : TvLabEngine {
     private val cacheDir by lazy { File(context.filesDir, "tvlab/bitrate") }
 
     override val available: Boolean get() = NativeLab.available
+
+    override val loaded: Boolean? get() = NativeLab.loaded
 
     override fun describe(uri: Uri): TvLabFile? = runCatching {
         val size = when (uri.scheme) {
@@ -111,7 +116,10 @@ class NativeTvLabEngine(private val context: Context) : TvLabEngine {
         DiskSpeed.parse(json)?.let { Result.success(it) } ?: Result.failure(IllegalStateException(DiskSpeed.error(json) ?: "?"))
     }
 
-    override fun cancel() = NativeLab.cancel()
+    /** Nothing of the library's runs before it is loaded: then nothing is stopped, and nothing loads it on the main thread. */
+    override fun cancel() {
+        if (NativeLab.loaded == true) NativeLab.cancel()
+    }
 
     /** [block] with a path the native side opens: the file's own, or /proc/self/fd/N of the document. */
     private fun <T> withFd(uri: Uri, block: (String) -> T): T? = runCatching {
@@ -145,7 +153,12 @@ class TvLabController(
     private val io: CoroutineContext = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
-    val available: Boolean get() = engine.available
+    /**
+     * Whether this build has the native tools: as far as the engine knows without loading their
+     * library, then as [checkTools] or an analysis found out, off the main thread.
+     */
+    var available by mutableStateOf(engine.loaded != false)
+        private set
 
     var file by mutableStateOf<TvLabFile?>(null)
         private set
@@ -183,14 +196,19 @@ class TvLabController(
         scope.launch { load { list, selected -> list.firstOrNull { it.id == selected } } }
     }
 
+    /** Asks the engine whether the tools are there, off the main thread: the first ask loads their library. */
+    suspend fun checkTools() {
+        available = withContext(Dispatchers.IO) { engine.available }
+    }
+
     /**
      * Analyses the film at [uri]: its streams, its drive, then its bitrate. What ran for the
-     * film before stops; the job is returned for the tests.
+     * film before stops; without the native tools nothing runs. The job is returned for the tests.
      */
-    fun open(uri: Uri): Job? {
+    fun open(uri: Uri): Job {
         job?.cancel()
-        // the native library loads when [available] is first read: nothing of it is called before
-        if (engine.available) engine.cancel()
+        // the engine stops what runs only once its library is loaded: nothing loads it here, on the main thread
+        engine.cancel()
         // its name and size come from its provider (a drive that may be asleep), off the main thread
         file = TvLabFile(uri.toString(), uri.lastPathSegment.orEmpty(), 0)
         tech = null
@@ -200,15 +218,15 @@ class TvLabController(
         elapsedMs = null
         bitrateStep = Step.Idle
         diskStep = Step.Idle
-        if (!engine.available) {
-            probe = Step.Failed(NO_TOOLS)
-            job = scope.launch { describe(uri) }
-            return null
-        }
         probe = Step.Running(null)
         val started = now()
         return scope.launch {
             describe(uri)
+            checkTools()
+            if (!available) {
+                probe = Step.Failed(NO_TOOLS)
+                return@launch
+            }
             tech = engine.probe(uri)
             probe = if (tech != null) Step.Done else Step.Failed(UNREADABLE)
             drive = withContext(Dispatchers.IO) { engine.drive(uri) }
@@ -342,14 +360,11 @@ object TvLabSession {
     fun get(context: Context): TvLabController = controller ?: synchronized(this) {
         // made in the caller's snapshot: NagmedarApp asks inside its composition and reads it there,
         // which a state made in Snapshot.global, newer than that composition's snapshot, would not allow
-        controller ?: run {
-            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-            TvLabController(NativeTvLabEngine(context.applicationContext), profileStore(context), scope).also { lab ->
-                controller = lab
-                // the profiles saved are read from their files off the main thread; the app's show meanwhile
-                scope.launch { lab.reloadProfiles() }
-            }
-        }
+        controller ?: TvLabController(
+            NativeTvLabEngine(context.applicationContext),
+            profileStore(context),
+            CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        ).also { controller = it }
     }
 
     /** The TV Lab when it was opened; null before. */

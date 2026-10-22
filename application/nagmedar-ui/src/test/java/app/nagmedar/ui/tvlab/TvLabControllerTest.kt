@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.util.Collections
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +38,7 @@ class TvLabControllerTest {
     fun theStepsInOrder() {
         val engine = FakeTvLabEngine()
         val lab = controller(engine)
-        runBlocking { lab.open(uri)!!.join() }
+        runBlocking { lab.open(uri).join() }
         assertEquals(listOf("cancel", "probe", "drive", "disk:${sampleFile.sizeBytes}", "bitrate"), engine.calls)
         assertEquals(sampleFile, lab.file)
         assertEquals(Step.Done, lab.probe)
@@ -55,7 +55,7 @@ class TvLabControllerTest {
     fun aFileThatIsNotMediaIsNotCounted() {
         val engine = FakeTvLabEngine(tech = null)
         val lab = controller(engine)
-        runBlocking { lab.open(uri)!!.join() }
+        runBlocking { lab.open(uri).join() }
         assertEquals(Step.Failed(TvLabController.UNREADABLE), lab.probe)
         // its drive is measured all the same; its packets are not read
         assertEquals(Step.Done, lab.diskStep)
@@ -67,7 +67,8 @@ class TvLabControllerTest {
     fun withoutTheNativeToolsNothingRuns() {
         val engine = FakeTvLabEngine(available = false)
         val lab = controller(engine)
-        assertNull(lab.open(uri))
+        assertFalse(lab.available)
+        runBlocking { lab.open(uri).join() }
         assertEquals(Step.Failed(TvLabController.NO_TOOLS), lab.probe)
         // not even the cancel: the native library is not there to load
         assertEquals(emptyList<String>(), engine.calls)
@@ -102,10 +103,23 @@ class TvLabControllerTest {
     }
 
     @Test
+    fun theToolsAreAskedForOffTheMainThread() {
+        // their library not loaded yet: the screen shows the tools until the engine, asked off the main thread, says
+        val missing = controller(FakeTvLabEngine(available = false, loaded = null))
+        assertTrue(missing.available)
+        runBlocking { missing.checkTools() }
+        assertFalse(missing.available)
+
+        val there = controller(FakeTvLabEngine(loaded = null))
+        runBlocking { there.checkTools() }
+        assertTrue(there.available)
+    }
+
+    @Test
     fun aStopIsNotUndoneByALateReport() {
         val engine = FakeTvLabEngine().apply { bitrateGate = CompletableDeferred() }
         val lab = controller(engine)
-        val job = lab.open(uri)!!
+        val job = lab.open(uri)
         waitFor("the bitrate half read") { lab.bitrateStep == Step.Running(0.5f) }
         lab.cancel()
         assertEquals(Step.Failed(TvLabController.CANCELLED), lab.bitrateStep)
@@ -127,7 +141,7 @@ class TvLabControllerTest {
     fun theDriveMeasuredAgain() {
         val engine = FakeTvLabEngine()
         val lab = controller(engine)
-        runBlocking { lab.open(uri)!!.join() }
+        runBlocking { lab.open(uri).join() }
         engine.calls.clear()
         lab.measureDiskAgain()
         waitFor("the disk") { lab.diskStep == Step.Done && engine.calls.isNotEmpty() }

@@ -79,6 +79,7 @@ import app.nagmedar.ui.components.rubberBandOverlay
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.lab.rememberLabAvailable
 import app.nagmedar.ui.library.metadata.EpisodeMeta
 import app.nagmedar.ui.library.metadata.FilmInfo
 import app.nagmedar.ui.library.metadata.PosterCard
@@ -277,10 +278,13 @@ private fun ShelfTitle(text: String) {
 
 // ---------------------------------------------------------------- Movies
 
-/** Probed, still probing, or never: the native probe is missing from this build. */
-fun techStateOf(item: VideoItem, tech: Map<String, MediaTech>): TechState = when {
+/**
+ * Probed, still probing, or never: the native probe is missing from this build ([lab] false; null
+ * while its library has not been loaded, off the main thread).
+ */
+fun techStateOf(item: VideoItem, tech: Map<String, MediaTech>, lab: Boolean? = NativeLab.loaded): TechState = when {
     tech.containsKey(item.key) -> TechState.Ready
-    NativeLab.available -> TechState.Probing
+    lab != false -> TechState.Probing
     else -> TechState.Unavailable
 }
 
@@ -297,7 +301,7 @@ fun VideoDetailsPanes(
     onPlay: (VideoItem) -> Unit,
     onCloseDetails: () -> Unit,
     modifier: Modifier = Modifier,
-    techState: (VideoItem) -> TechState = { techStateOf(it, tech) },
+    techState: (VideoItem) -> TechState = rememberLabAvailable().let { lab -> { item: VideoItem -> techStateOf(item, tech, lab) } },
     /** Film information: what the details show of the film or series. */
     info: (VideoItem) -> FilmInfo? = { null },
     /** Film information: an episode's own still, title and overview. */

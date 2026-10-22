@@ -27,11 +27,11 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.lab.rememberLabAvailable
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.playback.Artwork
@@ -84,6 +84,7 @@ private fun MediaInfoContent(media: MediaWrapper) {
     val context = LocalContext.current
     val key = media.uri?.toString()
     val tech = rememberTechOf(key)
+    val lab = rememberLabAvailable()
     val video = media.type == MediaWrapper.TYPE_VIDEO
     Column(Modifier.heightIn(max = 560.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -128,8 +129,8 @@ private fun MediaInfoContent(media: MediaWrapper) {
         val facts = tech?.let { techRows(it, key.orEmpty()) }?.map { InfoFact(it.label, it.value) }
         when {
             facts != null -> InfoSection(stringResource(R.string.nag_tech_title), facts)
-            // a file of this device or a document is probed; a stream is not
-            key != null && NativeLab.available && media.uri?.scheme in PROBED_SCHEMES -> InfoNote(stringResource(R.string.nag_tech_title), stringResource(R.string.nag_tech_probing))
+            // a file of this device or a document is probed; a stream is not (nor anything while the lab is known to be missing)
+            key != null && lab != false && media.uri?.scheme in PROBED_SCHEMES -> InfoNote(stringResource(R.string.nag_tech_title), stringResource(R.string.nag_tech_probing))
             else -> InfoNote(stringResource(R.string.nag_tech_title), stringResource(R.string.nag_tech_unavailable))
         }
     }
