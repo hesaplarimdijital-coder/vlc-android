@@ -3261,6 +3261,7 @@
     <string name="nag_lrc_needs_folder">Bu klasöre yazılamıyor. Parçanın klasörünü seçin; izin bir kez istenir.</string>
     <string name="nag_lrc_pick_folder">Klasörü seç</string>
     <string name="nag_lrc_save_failed">Kaydedilemedi. Dosya yazılabilir olmayabilir.</string>
+    <string name="nag_lrc_save_no_room">Kaydedilmedi: Nağmedar etiketleri yazarken dosyanın bir kopyasını tutar ve buna yer yok. Biraz yer açıp yeniden deneyin.</string>
     <string name="nag_lrc_publish">LRCLIB\'e gönder</string>
     <string name="nag_lrc_publish_cannot">LRCLIB için parçanın adı, sanatçısı ve süresi bilinmeli, her satır damgalı olmalı.</string>
     <string name="nag_lrc_publish_title">Bu sözler LRCLIB\'e gönderilsin mi?</string>
@@ -3435,6 +3436,12 @@
     <string name="nag_jobs_progress_detail">%1$s / %2$s · %3$s yazıldı</string>
     <string name="nag_jobs_restarted">Kesintiden sonra baştan başladı (%1$d. deneme).</string>
     <string name="nag_jobs_timeout">Android\'in arka plan işleri için süre sınırı durdurdu. Nağmedar açılınca baştan başlar.</string>
+    <!-- Android 15'in ön plan işleri için günlük süre sınırı -->
+    <string name="nag_time_limit_title">Android\'in süre sınırı doldu</string>
+    <string name="nag_time_limit_podcast">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. İndirmeler daha sonra kaldıkları yerden sürer.</string>
+    <string name="nag_time_limit_model">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. Modelin indirilmesi daha sonra kaldığı yerden sürer.</string>
+    <string name="nag_time_limit_translate">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. Çeviri baştan yeniden başlar.</string>
+    <string name="nag_time_limit_recording">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. Kayıt kopyalanana dek Nağmedar\'ı açık tutun; kopya yarıda kalırsa oynatma yeniden başladığında baştan yapılır.</string>
     <string name="nag_jobs_e_cancelled">Durduruldu; yarım kalan dosya silindi.</string>
     <string name="nag_jobs_e_open_input">Kaynak açılamadı.</string>
     <string name="nag_jobs_e_open_output">Yeni dosya yazılamadı.</string>

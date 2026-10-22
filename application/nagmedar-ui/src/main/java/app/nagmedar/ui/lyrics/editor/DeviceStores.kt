@@ -8,6 +8,7 @@ import android.provider.DocumentsContract
 import app.nagmedar.audio.FolderFiles
 import app.nagmedar.audio.LoudnessScanner
 import app.nagmedar.audio.TagLyrics
+import app.nagmedar.audio.TagWrite
 import app.nagmedar.ui.lyrics.DeviceLyrics
 import app.nagmedar.ui.lyrics.LyricLine
 import app.nagmedar.ui.lyrics.Lyrics
@@ -139,10 +140,10 @@ class EngineTags(context: Context) : TagStore {
 
     override fun read(track: LyricsTrack): Lyrics? = runCatching { TagLyrics.read(context, Uri.parse(track.uri))?.let { Lyrics.of(it) } }.getOrNull()
 
-    override fun write(track: LyricsTrack, lines: List<LyricLine>): Boolean {
+    override fun write(track: LyricsTrack, lines: List<LyricLine>): TagWrite {
         val uri = Uri.parse(track.uri)
         val id3 = LrcDocument.usesId3(LoudnessScanner.displayName(context, uri))
         val (text, synced) = LrcDocument.tagPayload(lines, id3)
-        return runCatching { TagLyrics.write(context, uri, text, synced) }.getOrDefault(false)
+        return runCatching { TagLyrics.write(context, uri, text, synced) }.getOrDefault(TagWrite.Failed)
     }
 }

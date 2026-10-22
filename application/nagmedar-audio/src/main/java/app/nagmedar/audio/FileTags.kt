@@ -22,22 +22,34 @@ object FileTags {
     fun tag(context: Context, uri: Uri, key: String): String? = read(context, uri) { fd, name -> NativeAudio.readTag(fd, name, key) }
 
     /**
-     * [block] on a read-write descriptor of [track] and its name (S-1005: the lyrics editor writes tags). Only a file
-     * of its own: a CUE track (S-808) shares its file with the others and is not written. Null when the engine is
-     * missing or the file cannot be opened for writing.
+     * [block] on a read-write descriptor of [track] and its name (S-1005: the lyrics editor writes tags), guarded by
+     * [TagBackups]: a copy of the file is kept while it is written and put back if the file does not read as it was.
+     * Only a file of its own: a CUE track (S-808) shares its file with the others and is not written. [TagWrite.Failed]
+     * when the engine is missing or the file cannot be opened for writing.
      */
-    internal fun <T> write(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {
-        if (!NativeAudio.available || CueUri.isTrack(track)) return null
+    internal fun write(context: Context, track: Uri, block: (fd: Int, name: String) -> Boolean): TagWrite {
+        if (!NativeAudio.available || CueUri.isTrack(track)) return TagWrite.Failed
         val app = context.applicationContext
-        val descriptor = runCatching {
-            when (track.scheme) {
-                null, "file" -> track.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_WRITE) }
-                "content" -> app.contentResolver.openFileDescriptor(track, "rw")
-                else -> null
-            }
-        }.onFailure { Log.w(TAG, "cannot write the tags of $track: $it") }.getOrNull() ?: return null
-        return descriptor.use { block(it.fd, LoudnessScanner.displayName(app, track)) }
+        val descriptor = runCatching { openWritable(app, track) }
+            .onFailure { Log.w(TAG, "cannot write the tags of $track: $it") }.getOrNull() ?: return TagWrite.Failed
+        return descriptor.use { TagBackups.guarded(app, track, it, LoudnessScanner.displayName(app, track), block) }
     }
+
+    /** A read-write descriptor of [track]'s own file; null for a CUE track or an address that is not a file. Throws when it cannot be opened. */
+    internal fun openWritable(context: Context, track: Uri): ParcelFileDescriptor? {
+        if (CueUri.isTrack(track)) return null
+        return when (track.scheme) {
+            null, "file" -> track.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_WRITE) }
+            "content" -> context.contentResolver.openFileDescriptor(track, "rw")
+            else -> null
+        }
+    }
+
+    /**
+     * S-1005: what a tag write left when the process died during it: the file put back from its copy when its audio is
+     * not as it was, the copy deleted. Called at the app's start; reads and writes files: off the main thread.
+     */
+    fun recover(context: Context) = TagBackups.recover(context)
 
     /** [block] on a read-only descriptor of [uri] and its name (the type detection's); a CUE track's file (S-808) is its own. */
     internal fun <T> read(context: Context, track: Uri, block: (fd: Int, name: String) -> T?): T? {

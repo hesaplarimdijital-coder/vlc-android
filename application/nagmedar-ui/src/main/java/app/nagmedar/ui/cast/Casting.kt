@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.audio.MusicFormats
 import app.nagmedar.ui.network.NetworkEntry
@@ -51,7 +52,8 @@ class CastRequest(val payload: CastPayload? = null)
 object Casting : RemoteRenderers {
 
     /** The device picker open, and what for; null while it is closed. */
-    var request: CastRequest? by mutableStateOf(null)
+    // made in the global snapshot: the object is often first touched inside a window's composition
+    var request: CastRequest? by Snapshot.global { mutableStateOf<CastRequest?>(null) }
         private set
 
     /** The new interface's picker and menus: installed when the app starts. */
@@ -72,7 +74,7 @@ object Casting : RemoteRenderers {
     fun enabled(context: Context): Boolean = Settings.getInstance(context).getBoolean(KEY_ENABLE_CASTING, true)
 
     /** Changes when the picker turns casting on, for the cast buttons to show. */
-    var settingChanges by mutableIntStateOf(0)
+    var settingChanges by Snapshot.global { mutableIntStateOf(0) }
         private set
 
     fun turnOn(context: Context) {

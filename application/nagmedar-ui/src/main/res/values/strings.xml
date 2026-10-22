@@ -3290,6 +3290,7 @@
     <string name="nag_lrc_needs_folder">This folder cannot be written to. Choose the track\'s folder; you are asked once.</string>
     <string name="nag_lrc_pick_folder">Choose the folder</string>
     <string name="nag_lrc_save_failed">Could not save. The file may not be writable.</string>
+    <string name="nag_lrc_save_no_room">Not saved: Nağmedar keeps a copy of the file while it writes the tags, and there is no room for it. Free some space and try again.</string>
     <string name="nag_lrc_publish">Send to LRCLIB</string>
     <string name="nag_lrc_publish_cannot">LRCLIB needs the track\'s title, artist and length, and every line stamped.</string>
     <string name="nag_lrc_publish_title">Send these lyrics to LRCLIB?</string>
@@ -3464,6 +3465,12 @@
     <string name="nag_jobs_progress_detail">%1$s / %2$s · %3$s written</string>
     <string name="nag_jobs_restarted">Started again from the beginning after an interruption (attempt %1$d).</string>
     <string name="nag_jobs_timeout">Stopped by Android\'s time limit for background work. It starts again from the beginning when Nağmedar is opened.</string>
+    <!-- Android 15's daily time limit for foreground work -->
+    <string name="nag_time_limit_title">Android\'s time limit reached</string>
+    <string name="nag_time_limit_podcast">Android limits how long work may run in the background each day. The downloads go on from where they stopped later.</string>
+    <string name="nag_time_limit_model">Android limits how long work may run in the background each day. The model\'s download goes on from where it stopped later.</string>
+    <string name="nag_time_limit_translate">Android limits how long work may run in the background each day. The translation starts again from the beginning.</string>
+    <string name="nag_time_limit_recording">Android limits how long work may run in the background each day. Keep Nağmedar open until the recording is copied; if the copy is cut short, it is made again when playback next starts.</string>
     <string name="nag_jobs_e_cancelled">Stopped; the unfinished file was removed.</string>
     <string name="nag_jobs_e_open_input">The source could not be opened.</string>
     <string name="nag_jobs_e_open_output">The new file could not be written.</string>

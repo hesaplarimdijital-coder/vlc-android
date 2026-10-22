@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.ui.R
 import app.nagmedar.ui.player.subtitles.SavedSubtitle
@@ -67,7 +68,8 @@ class SubtitleToolsRequest(val film: String, val name: String?)
  * lists no subtitle files, so the film's folder is read for them when the window opens.
  */
 object SubtitleToolsLauncher {
-    var request by mutableStateOf<SubtitleToolsRequest?>(null)
+    // made in the global snapshot: first read inside a window's composition
+    var request by Snapshot.global { mutableStateOf<SubtitleToolsRequest?>(null) }
         private set
 
     fun open(film: Uri, name: String? = null) {

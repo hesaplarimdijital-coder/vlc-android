@@ -879,6 +879,27 @@ extern "C" int nag_tags_copy(int src_fd, const char *src_name, int dst_fd, const
     return 0;
 }
 
+/* S-1005: the audio TagLib reads in the file, for a tag write to be checked against */
+extern "C" int nag_tags_audio(int fd, const char *name, long long *length_ms, int *rate, int *channels)
+{
+    if (fd < 0)
+        return -1;
+    FdStream stream(fd, name);
+    TagLib::FileRef file(&stream, true, TagLib::AudioProperties::Average);
+    if (file.isNull() || !file.audioProperties())
+        return -1;
+    const TagLib::AudioProperties *audio = file.audioProperties();
+    if (audio->sampleRate() <= 0 || audio->channels() <= 0)
+        return -1;
+    if (length_ms)
+        *length_ms = audio->lengthInMilliseconds();
+    if (rate)
+        *rate = audio->sampleRate();
+    if (channels)
+        *channels = audio->channels();
+    return 0;
+}
+
 /*
  * S-1005: the lyrics written into the file's tags, the way nag_tags_read_lyrics reads them: [text]
  * as the plain lyrics (ID3v2's USLT, the Vorbis comments' LYRICS, MP4's ©lyr, APE's Lyrics), its

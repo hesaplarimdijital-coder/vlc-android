@@ -17,6 +17,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import app.nagmedar.data.NagmedarDatabase
+import app.nagmedar.ui.work.TimeLimit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -114,6 +115,8 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) : Corout
         val ids = inputData.getLongArray(WorkManagerDownloadScheduler.KEY_IDS)?.toList().orEmpty()
         if (ids.isEmpty()) return Result.success()
         runCatching { setForeground(foregroundInfo(notifier.downloading("", null, ids.first(), ids.size - 1))) }
+        // Android 15's daily time limit: the downloads go back to the queue as any stop sends them, and the user is told
+        TimeLimit.onReached(this) { notifier.showTimeLimit() }
         var left = ids.size
         var shownAt = 0L
         val outcome = try {

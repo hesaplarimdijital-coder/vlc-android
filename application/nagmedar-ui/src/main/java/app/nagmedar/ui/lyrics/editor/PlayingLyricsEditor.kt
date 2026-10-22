@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.ui.lyrics.DatabaseLyricsCache
@@ -23,7 +24,8 @@ import org.videolan.vlc.PlaybackService
 
 /** S-1005: whether the lyrics editor is asked for (the lyrics views' "Düzenle" and "Zamanla"); the window shows it over everything. */
 object LyricsEditorRequest {
-    var open: Boolean by mutableStateOf(false)
+    // made in the global snapshot: first read inside a window's composition
+    var open: Boolean by Snapshot.global { mutableStateOf(false) }
 }
 
 /**

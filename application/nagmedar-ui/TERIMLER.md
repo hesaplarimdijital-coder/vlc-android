@@ -218,6 +218,7 @@ Sözlüğü testler denetler:
 | stereoya indirmek | mix down | | | Çok kanallı sesi (5.1, 7.1) ITU-R BS.775'in matrisiyle iki kanala karıştırmak; LFE katılmaz, taşmayacak biçimde küçültülür: “Stereoya indir”. Dönüştürücüde MP3 her zaman stereodur |
 | widget | widget | pencere öğesi, araç takımı | | Ana ekrandaki Nağmedar oynatıcısı (4×1, büyütülünce kapaklı 4×2); Türkçede de “widget”: “Nağmedar'ın widget'ı” |
 | kısa haber | notice | | toast, snackbar | Pencerenin altında birkaç saniye görünen söz: “Kopyalandı”, “Sıraya eklendi”, “Oynatma hazırlanıyor…”. Android'in bildirim çekmecesindekine “bildirim” denir |
+| süre sınırı | time limit | | | Android 15'in arka plandaki (ön plan hizmeti olarak süren) işlere koyduğu günlük sınır: veri eşitleme ve medya işleme için ayrı ayrı günde altı saat; “Android'in süre sınırı doldu” |
 
 ## Özel adlar
 

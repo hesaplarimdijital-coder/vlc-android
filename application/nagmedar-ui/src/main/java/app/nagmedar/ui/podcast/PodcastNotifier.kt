@@ -16,6 +16,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.work.TimeLimit
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import java.text.NumberFormat
 
@@ -164,6 +165,13 @@ class PodcastNotifier(private val context: Context) {
         runCatching { manager.notify(ID_STORAGE, n) }
     }
 
+    /** Android's daily time limit for background work stopped the downloads: they go on later. */
+    fun showTimeLimit() {
+        if (!canPost()) return
+        ensureChannel(CHANNEL_DOWNLOAD, R.string.nag_pod_channel_download, NotificationManager.IMPORTANCE_LOW)
+        TimeLimit.tell(context, CHANNEL_DOWNLOAD, ID_TIME_LIMIT, org.videolan.resources.R.drawable.ic_notif_audio, R.string.nag_time_limit_podcast)
+    }
+
     /** The downloads fill the limit of Settings › Podcasts, or nearly. */
     fun showStorageNear(usedBytes: Long, limitBytes: Long) {
         if (!canPost()) return
@@ -192,6 +200,7 @@ class PodcastNotifier(private val context: Context) {
         const val ID_STORAGE = 1104
         const val ID_NEWS_SUMMARY = 1105
         const val ID_DOWNLOAD_PAUSED = 1106
+        const val ID_TIME_LIMIT = 1107
         private const val ID_NEWS_BASE = 20_000
         private const val PROGRESS_MAX = 1000
 

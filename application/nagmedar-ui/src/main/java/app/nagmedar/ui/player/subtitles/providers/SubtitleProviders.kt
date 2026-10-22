@@ -1,6 +1,7 @@
 package app.nagmedar.ui.player.subtitles.providers
 
 import android.content.Context
+import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.ui.BuildConfig
 import app.nagmedar.ui.R
 import app.nagmedar.ui.player.subtitles.OkHttpOpenSubtitles
@@ -19,7 +20,8 @@ object SubtitleProviders {
     private var folder: SubtitleFolderStore? = null
 
     fun registry(context: Context): ProviderRegistry = registry ?: synchronized(this) {
-        registry ?: build(context.applicationContext).also { registry = it }
+        // made in the global snapshot: a window's composition may ask first, other windows read it too
+        registry ?: Snapshot.global { build(context.applicationContext) }.also { registry = it }
     }
 
     /** The folder the local provider searches. */

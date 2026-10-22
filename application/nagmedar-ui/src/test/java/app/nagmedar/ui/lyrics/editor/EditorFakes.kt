@@ -1,6 +1,7 @@
 package app.nagmedar.ui.lyrics.editor
 
 import android.net.Uri
+import app.nagmedar.audio.TagWrite
 import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.LyricsSource
 import app.nagmedar.ui.lyrics.LyricLine
@@ -50,11 +51,11 @@ class FakeTags(var lyrics: Lyrics? = null, var writable: Boolean = true) : TagSt
 
     override fun read(track: LyricsTrack): Lyrics? = lyrics
 
-    override fun write(track: LyricsTrack, lines: List<LyricLine>): Boolean {
-        if (!writable) return false
+    override fun write(track: LyricsTrack, lines: List<LyricLine>): TagWrite {
+        if (!writable) return TagWrite.Failed
         written = lines
         lyrics = Lyrics(lines, LyricsOrigin.Embedded)
-        return true
+        return TagWrite.Written
     }
 }
 

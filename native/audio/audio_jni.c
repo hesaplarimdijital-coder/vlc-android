@@ -563,6 +563,26 @@ JNIEXPORT jint JNICALL Java_app_nagmedar_audio_NativeAudio_writeLyrics(JNIEnv *e
     return ret;
 }
 
+/* S-1005: the audio TagLib reads in the file: {length ms, rate, channels}; null when it reads none. The descriptor stays the caller's. */
+JNIEXPORT jlongArray JNICALL Java_app_nagmedar_audio_NativeAudio_tagAudio(JNIEnv *env, jclass cls, jint fd, jstring name)
+{
+    (void)cls;
+    const char *file = name ? (*env)->GetStringUTFChars(env, name, NULL) : NULL;
+    long long length_ms = 0;
+    int rate = 0, channels = 0;
+    int ret = nag_tags_audio(fd, file, &length_ms, &rate, &channels);
+    if (file)
+        (*env)->ReleaseStringUTFChars(env, name, file);
+    if (ret < 0)
+        return NULL;
+    jlongArray result = (*env)->NewLongArray(env, 3);
+    if (!result)
+        return NULL;
+    const jlong values[3] = {(jlong)length_ms, (jlong)rate, (jlong)channels};
+    (*env)->SetLongArrayRegion(env, result, 0, 3, values);
+    return result;
+}
+
 /* S-1006: the front cover in the file's tags, its bytes; null when it has none. The descriptor stays the caller's. */
 JNIEXPORT jbyteArray JNICALL Java_app_nagmedar_audio_NativeAudio_readCover(JNIEnv *env, jclass cls, jint fd, jstring name)
 {

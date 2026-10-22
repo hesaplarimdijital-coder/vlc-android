@@ -10,6 +10,8 @@ import android.media.AudioTimestamp
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -120,7 +122,8 @@ class LatencyMeasureSession(
         state = State.Measuring(0f)
         job = scope.launch {
             val recording = try {
-                io.playAndRecord(signal, TAIL_MS) { progress -> state = State.Measuring(progress.coerceIn(0f, 1f)) }
+                // a progress posted before a reset does not bring the indicator back
+                io.playAndRecord(signal, TAIL_MS) { progress -> if (state is State.Measuring) state = State.Measuring(progress.coerceIn(0f, 1f)) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -173,6 +176,9 @@ class LatencyMeasureSession(
 class AndroidMeasureIo(context: Context) : MeasureIo {
     private val context = context.applicationContext
 
+    /** The progress goes to the main thread, where the session's Compose state is written. */
+    private val main = Handler(Looper.getMainLooper())
+
     /** The screen asks for the microphone before this is called (the system's dialog, with the reason). */
     @SuppressLint("MissingPermission")
     override suspend fun playAndRecord(signal: TestSignal, tailMs: Int, onProgress: (Float) -> Unit): Recording = withContext(Dispatchers.IO) {
@@ -217,13 +223,13 @@ class AndroidMeasureIo(context: Context) : MeasureIo {
                 val n = output.write(pcm, written, minOf(rate / 10, pcm.size - written))
                 if (n < 0) break
                 written += n
-                onProgress(written.toFloat() / totalFrames)
+                written.toFloat().let { done -> main.post { onProgress(done / totalFrames) } }
             }
             // the output's timestamp once everything is written and the tail drains: settled, and nothing left to underrun
             val trackStamp = timestamp(output)
             // the tail: the last chirp comes in however late the output is
             while (recordedFrames.get() < totalFrames && reader.isAlive && isActive) {
-                onProgress(recordedFrames.get().toFloat() / totalFrames)
+                recordedFrames.get().toFloat().let { done -> main.post { onProgress(done / totalFrames) } }
                 delay(100)
             }
             val recordStamp = if (Build.VERSION.SDK_INT >= 24) AudioTimestamp().takeIf { input.getTimestamp(it, AudioTimestamp.TIMEBASE_MONOTONIC) == AudioRecord.SUCCESS } else null

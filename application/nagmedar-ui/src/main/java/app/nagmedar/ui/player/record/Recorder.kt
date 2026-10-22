@@ -322,8 +322,10 @@ class Recorder(
             val total = withContext(io) { left.file.length() }
             if (phase is Phase.Saving) phase = Phase.Saving(total)
             val result = try {
-                // called from the copy's thread: only the indicator follows it
-                val kept = storage.keep(left.file, left.name, left.durationMs) { copied, all -> status = RecordingStatus.Saving(copied, all) }
+                // called from the copy's thread: only the indicator follows it, on the scope's thread
+                val kept = storage.keep(left.file, left.name, left.durationMs) { copied, all ->
+                    scope.launch { if (phase is Phase.Saving) status = RecordingStatus.Saving(copied, all) }
+                }
                 withContext(io) { storage.discard(left.folder) }
                 RecordingOutcome.Saved(kept.uri, left.name, kept.folder, kept.tree, kept.mime, total, left.durationMs, left.forSpace)
             } catch (e: CancellationException) {

@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import app.nagmedar.ui.R
+import app.nagmedar.ui.work.TimeLimit
 
 /**
  * S-607: the app kept in the foreground (a dataSync service) while a recording is copied into its
@@ -46,8 +47,8 @@ class RecordingKeeper : Service() {
         super.onDestroy()
     }
 
-    private fun finish() {
-        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+    private fun finish(keepNotification: Boolean = false) {
+        ServiceCompat.stopForeground(this, if (keepNotification) ServiceCompat.STOP_FOREGROUND_DETACH else ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
@@ -57,9 +58,15 @@ class RecordingKeeper : Service() {
         return RecordingFiles.Notice.progressNotification(this, getString(R.string.nag_rec_notice_saving), 0)
     }
 
-    /** Android 15's limit for dataSync reached: the copy goes on as it can. */
+    /**
+     * Android 15's limit for dataSync reached: the service goes within the seconds the system
+     * gives; the copy goes on as it can, its notification stays, and the user is told to keep
+     * the app open (a copy cut short is deleted and made again by RecordingFiles' recovery).
+     */
     override fun onTimeout(startId: Int, fgsType: Int) {
-        finish()
+        RecordingFiles.Notice.channel(this)
+        TimeLimit.tell(this, RecordingFiles.Notice.CHANNEL, RecordingFiles.Notice.TIME_LIMIT_ID, R.drawable.ic_notif_video, R.string.nag_time_limit_recording)
+        finish(keepNotification = true)
     }
 
     companion object {

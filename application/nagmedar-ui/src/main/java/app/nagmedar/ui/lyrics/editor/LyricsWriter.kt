@@ -1,6 +1,7 @@
 package app.nagmedar.ui.lyrics.editor
 
 import android.net.Uri
+import app.nagmedar.audio.TagWrite
 import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.LyricsSource
 import app.nagmedar.ui.lyrics.LyricLine
@@ -34,8 +35,8 @@ interface TagStore {
     /** The lyrics the tags hold; null for none. */
     fun read(track: LyricsTrack): Lyrics?
 
-    /** Writes [lines] into the tags in the form the file's format keeps; false when it cannot. */
-    fun write(track: LyricsTrack, lines: List<LyricLine>): Boolean
+    /** Writes [lines] into the tags in the form the file's format keeps; what came of it. */
+    fun write(track: LyricsTrack, lines: List<LyricLine>): TagWrite
 }
 
 /** Where a save went, or why it did not. */
@@ -45,6 +46,9 @@ sealed interface SaveResult {
 
     /** Saving beside the file needs a folder the user picks. */
     data object NeedsFolder : SaveResult
+
+    /** No room in the app's storage for the copy of the file kept while its tags are written. */
+    data object NoRoom : SaveResult
 
     data object Failed : SaveResult
 }
@@ -82,7 +86,11 @@ class LyricsWriter(
     /** Saves [lines] into the tags of [track]. */
     fun toTag(track: LyricsTrack, lines: List<LyricLine>): SaveResult {
         tags.read(track)?.let { keepOriginal(track, LyricsSource.ORIGINAL_TAG, it.cacheText) }
-        if (!tags.write(track, lines)) return SaveResult.Failed
+        when (tags.write(track, lines)) {
+            TagWrite.Written -> Unit
+            TagWrite.NoRoom -> return SaveResult.NoRoom
+            TagWrite.Failed -> return SaveResult.Failed
+        }
         keepAsUser(track, LrcDocument.lrc(lines))
         return SaveResult.Saved(null)
     }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.TranscodeProfileDao
 import app.nagmedar.data.TranscodeProfileEntry
@@ -112,7 +113,8 @@ object TranscodeRequests {
     @Immutable
     data class Request(val kind: Kind, val media: TranscodeMedia?)
 
-    var pending by mutableStateOf<Request?>(null)
+    // made in the global snapshot: first read inside a window's composition
+    var pending by Snapshot.global { mutableStateOf<Request?>(null) }
 
     /** Asks for [kind] of [media] and shows the convert page (in a window of the library's, from the player). */
     fun open(context: Context, kind: Kind, media: TranscodeMedia?) {

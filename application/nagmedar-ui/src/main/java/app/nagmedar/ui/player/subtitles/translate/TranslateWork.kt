@@ -33,6 +33,7 @@ import app.nagmedar.ui.player.subtitles.decodeSubtitle
 import app.nagmedar.ui.player.subtitles.detectEncoding
 import app.nagmedar.ui.player.subtitles.saveSubtitle
 import app.nagmedar.ui.player.subtitles.tools.SubtitleCodec
+import app.nagmedar.ui.work.TimeLimit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -197,6 +198,11 @@ class ModelDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         val model = TranslationModels.all.firstOrNull { it.id == inputData.getString(TranslationJobs.KEY_MODEL) } ?: return Result.failure()
         val store = TranslationJobs.store(applicationContext)
         runCatching { setForeground(foregroundInfo(model, store.downloaded(model))) }
+        // Android 15's daily time limit: the download goes on from its ".part" when WorkManager starts it again; the user is told
+        TimeLimit.onReached(this) {
+            TranslationJobs.channel(applicationContext)
+            TimeLimit.tell(applicationContext, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_time_limit_model)
+        }
         val downloader = TranslationModelDownloader(TranslationModelDownloader.client, store, userAgent())
         val outcome = downloader.download(model) { done ->
             // once a second: WorkManager keeps each progress in its database
@@ -236,6 +242,7 @@ class ModelDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
 
     private companion object {
         const val NOTIFICATION_ID = 7101
+        const val TIME_LIMIT_ID = 7103
         const val NOTIFY_EVERY_MS = 1_000L
         const val MAX_ATTEMPTS = 5
     }
@@ -263,6 +270,10 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
         } catch (e: CancellationException) {
             // stopped by Android rather than cancelled: the job runs again and needs its copy
             again = stopReason != WorkInfo.STOP_REASON_CANCELLED_BY_APP && stopReason != WorkInfo.STOP_REASON_UNKNOWN
+            if (TimeLimit.reached(this)) {
+                TranslationJobs.channel(applicationContext)
+                TimeLimit.tell(applicationContext, TranslationJobs.CHANNEL, TIME_LIMIT_ID, R.drawable.ic_notif_scan, R.string.nag_time_limit_translate)
+            }
             throw e
         } finally {
             runCatching { NotificationManagerCompat.from(applicationContext).cancel(NOTIFICATION_ID) }
@@ -374,6 +385,7 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
 
     private companion object {
         const val NOTIFICATION_ID = 7102
+        const val TIME_LIMIT_ID = 7104
         const val NOTIFY_EVERY_MS = 1_000L
 
         /** Lines a call: enough for the CPU's vector units, few enough for Cancel to answer within a second or two. */

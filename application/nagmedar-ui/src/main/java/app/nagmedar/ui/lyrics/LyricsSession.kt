@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -113,9 +114,9 @@ class LyricsSession(
         @Volatile
         private var shared: LyricsSession? = null
 
-        /** The app's session, on the main thread's scope. */
+        /** The app's session, on the main thread's scope; made in the global snapshot, as a window's composition may ask first. */
         fun get(context: Context): LyricsSession = shared ?: synchronized(this) {
-            shared ?: context.applicationContext.let { app -> LyricsSession({ LyricsCenter.finder(app) }, MainScope()) }.also { shared = it }
+            shared ?: context.applicationContext.let { app -> Snapshot.global { LyricsSession({ LyricsCenter.finder(app) }, MainScope()) } }.also { shared = it }
         }
     }
 }

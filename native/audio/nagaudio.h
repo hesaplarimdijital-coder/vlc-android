@@ -464,6 +464,14 @@ char *nag_tags_read_lyrics(int fd, const char *name);
 int nag_tags_write_lyrics(int fd, const char *name, const char *text, const char *synced, char *error, size_t error_size);
 
 /**
+ * S-1005: the audio TagLib reads in the file behind [fd] (read; [name] with its extension helps
+ * the type detection): its length in milliseconds, sample rate and channels, which a tag write
+ * must leave as they were. 0, or -1 when TagLib does not read the file or finds no audio in it.
+ * The descriptor stays the caller's.
+ */
+int nag_tags_audio(int fd, const char *name, long long *length_ms, int *rate, int *channels);
+
+/**
  * S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes
  * and their *size; NULL when there is none. The descriptor stays the caller's; the caller frees.
  */

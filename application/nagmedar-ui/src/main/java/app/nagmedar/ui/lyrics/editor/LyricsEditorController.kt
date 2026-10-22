@@ -42,6 +42,9 @@ sealed interface EditorMessage {
 
     data object SaveFailed : EditorMessage
 
+    /** The app's storage has no room for the copy of the file it keeps while writing the tags. */
+    data object NoRoom : EditorMessage
+
     /** LRCLIB needs the track's title, artist and length, and every line timed. */
     data object CannotPublish : EditorMessage
 
@@ -214,6 +217,7 @@ class LyricsEditorController(
                     EditorMessage.Saved(chosen, result.name)
                 }
                 SaveResult.NeedsFolder -> EditorMessage.NeedsFolder
+                SaveResult.NoRoom -> EditorMessage.NoRoom
                 SaveResult.Failed -> EditorMessage.SaveFailed
             }
             loadOriginals()

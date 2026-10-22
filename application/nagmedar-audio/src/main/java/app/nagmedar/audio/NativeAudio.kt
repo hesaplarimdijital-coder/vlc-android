@@ -181,6 +181,12 @@ object NativeAudio {
      */
     @JvmStatic external fun writeLyrics(fd: Int, name: String, text: String?, synced: String?): Int
 
+    /**
+     * S-1005: the audio TagLib reads in the file behind [fd] (read; [name] helps the type
+     * detection): its length in milliseconds, sample rate and channels; null when it reads none.
+     */
+    @JvmStatic external fun tagAudio(fd: Int, name: String): LongArray?
+
     /** S-1006: the front cover in the tags of the file behind [fd] (else its first picture), its bytes; null when there is none. */
     @JvmStatic external fun readCover(fd: Int, name: String): ByteArray?
 

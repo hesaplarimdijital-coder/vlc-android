@@ -20,11 +20,12 @@ data class TagLyrics(val plain: String?, val synced: List<Line>) {
         /**
          * S-1005: writes lyrics into [uri]'s tags: [text] as the plain lyrics (USLT, LYRICS, ©lyr; LRC text when timed),
          * [synced] as ID3v2's SYLT, JSON `[[ms, "text"], ...]` (MP3, AIFF, WAV only). Null or empty removes what the file
-         * had of the kind. False when the file cannot be opened for writing or its format takes no tags. Writes the
-         * file: off the main thread.
+         * had of the kind. [TagWrite.Failed] when the file cannot be opened for writing or its format takes no tags;
+         * [TagWrite.NoRoom] when the app has no room for the copy it keeps while the file is written. Writes the file:
+         * off the main thread.
          */
-        fun write(context: Context, uri: Uri, text: String?, synced: String?): Boolean =
-            FileTags.write(context, uri) { fd, name -> NativeAudio.writeLyrics(fd, name, text, synced) == 0 } ?: false
+        fun write(context: Context, uri: Uri, text: String?, synced: String?): TagWrite =
+            FileTags.write(context, uri) { fd, name -> NativeAudio.writeLyrics(fd, name, text, synced) == 0 }
 
         /** The engine's JSON read; null for none (null, "{}", blank text and no lines). */
         fun parse(json: String?): TagLyrics? {

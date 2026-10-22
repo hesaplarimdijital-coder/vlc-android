@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -196,7 +197,8 @@ internal object LatencyMeasuring {
         session?.takeIf { this.device == device }?.let { return it }
         session?.reset()
         this.device = device
-        return LatencyMeasureSession(io, AppScope, referenceMs, onEnded = { resumePlayback() }).also { session = it }
+        // made in the global snapshot: begun inside a composition, the session outlives it
+        return Snapshot.global { LatencyMeasureSession(io, AppScope, referenceMs, onEnded = { resumePlayback() }) }.also { session = it }
     }
 
     /** What was paused for the measurement plays again, once. Main thread. */

@@ -391,7 +391,10 @@ internal class RecordingFiles(
             /** The copy's notification: the foreground service's too. */
             const val ID = 6070
             private const val DONE_ID = 6071
-            private const val CHANNEL = "nagmedar_recordings"
+
+            /** Android's time limit ended the copy's foreground service (S-607). */
+            internal const val TIME_LIMIT_ID = 6072
+            internal const val CHANNEL = "nagmedar_recordings"
 
             /** A copy this big takes a while: its progress shows. */
             private const val NOTIFY_FROM = 64L * 1024 * 1024

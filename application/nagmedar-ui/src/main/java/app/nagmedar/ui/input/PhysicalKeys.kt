@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import android.view.KeyEvent as AndroidKeyEvent
@@ -58,8 +59,11 @@ object PhysicalKeys {
     /** Keys with something printed on them: the letters, the [places] and the key between Shift and Z of ISO keyboards. */
     private fun isPrinted(key: Int) = key in letters || key in places || key == AndroidKeyEvent.KEYCODE_PLUS
 
-    /** Changes when a keyboard comes, goes or changes its layout: labels read it, so keycaps follow. */
-    var version by mutableIntStateOf(0)
+    /**
+     * Changes when a keyboard comes, goes or changes its layout: labels read it, so keycaps follow.
+     * Made in the global snapshot: the object is first touched inside a window's composition.
+     */
+    var version by Snapshot.global { mutableIntStateOf(0) }
         private set
 
     /** The layout of the keyboard with this device id, null for none. */

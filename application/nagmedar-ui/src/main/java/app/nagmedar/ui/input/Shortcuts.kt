@@ -11,6 +11,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.isAltPressed
@@ -334,9 +335,10 @@ object ShortcutRegistry {
 
     /**
      * The user's keys over [defaults] (S-402): a chord, or null for none. Compose state, so menus,
-     * tooltips, the palette and the shortcut list follow a change at once.
+     * tooltips, the palette and the shortcut list follow a change at once. Made in the global
+     * snapshot: the registry is first read inside a window's composition, other windows read it too.
      */
-    var overrides: Map<ShortcutId, KeyChord?> by mutableStateOf(emptyMap())
+    var overrides: Map<ShortcutId, KeyChord?> by Snapshot.global { mutableStateOf<Map<ShortcutId, KeyChord?>>(emptyMap()) }
 
     /** What keeps keys from being shortcuts: the shortcut editor recording them, the key map trying them (S-410). */
     private val pausedBy = HashSet<Any>()

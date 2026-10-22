@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import app.nagmedar.audio.FileTags
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.input.DroppedFile
 import app.nagmedar.ui.input.NAGMEDAR_DRAG
@@ -180,6 +181,8 @@ class NagmedarActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.IO) { HlsStream.cleanUp(applicationContext) }
         // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
         lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
+        // S-1005: a tag write a dead process left half done: the file back from its copy, the copy gone
+        lifecycleScope.launch(Dispatchers.IO) { FileTags.recover(applicationContext) }
     }
 
     override fun onStop() {

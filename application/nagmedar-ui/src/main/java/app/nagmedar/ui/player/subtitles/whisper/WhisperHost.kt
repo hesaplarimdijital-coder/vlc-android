@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.ConfigurationCompat
@@ -210,7 +211,8 @@ class WhisperLaunch(val film: String, val name: String?)
  * [WhisperHost], which the app's window shows above its screens.
  */
 object WhisperLauncher {
-    var request by mutableStateOf<WhisperLaunch?>(null)
+    // made in the global snapshot: first read inside a window's composition
+    var request by Snapshot.global { mutableStateOf<WhisperLaunch?>(null) }
         private set
 
     fun open(film: Uri, name: String? = null) {

@@ -443,6 +443,15 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         showProgress(parsing, discovery)
     }
 
+    /**
+     * Nağmedar: Android 15's daily time limit for data-sync services reached. The service leaves
+     * the foreground within the seconds the system gives (else the app is ended); the scan goes on
+     * without its notification.
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        hideNotification()
+    }
+
     private fun hideNotification() {
         lastNotificationTime = -1L
         stopForegroundCompat()
