@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,6 +55,7 @@ import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.R
 import app.nagmedar.ui.cast.CastPayload
 import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.components.ColumnSort
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.LocalClickModifiers
@@ -85,9 +85,9 @@ import app.nagmedar.ui.library.metadata.PosterCard
 import app.nagmedar.ui.library.metadata.PosterThumb
 import app.nagmedar.ui.library.metadata.WatchMark
 import app.nagmedar.ui.library.metadata.WatchState
-import app.nagmedar.ui.library.metadata.filmQuery
 import app.nagmedar.ui.library.metadata.ratingNumber
 import app.nagmedar.ui.library.metadata.ratingsLine
+import app.nagmedar.ui.library.metadata.rememberFilmKeys
 import app.nagmedar.ui.input.DropKind
 import app.nagmedar.ui.input.dropTarget
 import app.nagmedar.ui.input.fileDragSource
@@ -342,8 +342,8 @@ fun MoviesContent(
     items: List<VideoItem>,
     tech: Map<String, MediaTech>,
     grid: Boolean,
-    sort: TableSort?,
-    onSortChange: (TableSort) -> Unit,
+    sort: ColumnSort?,
+    onSortChange: (ColumnSort) -> Unit,
     selected: String?,
     onSelect: (VideoItem) -> Unit,
     onShowDetails: (VideoItem) -> Unit,
@@ -451,6 +451,7 @@ private fun PosterGrid(
     val dimens = NagTheme.dimens
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val band = rememberRubberBand()
+    val keys = rememberFilmKeys(items)
     if (selection != null) SelectionCommands(selection, items.map { it.key })
     LazyVerticalGrid(
         columns = GridCells.Adaptive(if (pointer) 150.dp else 160.dp),
@@ -464,7 +465,7 @@ private fun PosterGrid(
     ) {
         if (header != null) item(key = "header", span = { GridItemSpan(maxLineSpan) }) { Box(band.keepOut("header")) { header() } }
         itemsIndexed(items, key = { _, item -> item.key }) { _, item ->
-            val film = item.filmQuery()?.let { info[it.key] }
+            val film = keys[item.key]?.let { info[it] }
             ContextMenuArea(
                 entries = { menu(item, { onPlay(item) }, { onShowDetails(item) }) },
                 accessibilityLabel = stringResource(R.string.nag_more_actions),
@@ -506,8 +507,8 @@ private fun VideoTable(
     items: List<VideoItem>,
     tech: Map<String, MediaTech>,
     info: Map<String, FilmInfo>,
-    sort: TableSort?,
-    onSortChange: (TableSort) -> Unit,
+    sort: ColumnSort?,
+    onSortChange: (ColumnSort) -> Unit,
     selected: String?,
     onClick: (VideoItem, List<VideoItem>) -> Unit,
     onDoubleClick: ((VideoItem) -> Unit)?,
@@ -516,9 +517,14 @@ private fun VideoTable(
     onShowDetails: (VideoItem) -> Unit,
     selection: MultiSelection?,
 ) {
-    val films = remember(items, info) { items.associate { item -> item.key to item.filmQuery()?.let { info[it.key] } } }
+    // the names are read once for the list; the film information changes with every background save
+    val keys = rememberFilmKeys(items)
+    val films = remember(keys, info) { keys.mapValues { (_, key) -> key?.let { info[it] } } }
     val columns = videoColumns(tech, films)
-    val sorted = remember(items, sort, tech, films, columns) { sortVideos(items, sort?.let { s -> columns.getOrNull(s.column)?.let { s to it.id } }, tech, films) }
+    // the sort stays on its column when the window's width takes columns away or brings them back
+    val ids = remember(columns) { columns.map { it.id.name } }
+    val shownSort = sort?.among(ids)
+    val sorted = remember(items, shownSort, tech, films, columns) { sortVideos(items, shownSort?.let { s -> s to columns[s.column].id }, tech, films) }
     val rowShape = RoundedCornerShape(NagTheme.dimens.radiusControl)
     if (selection != null) SelectionCommands(selection, sorted.map { it.key })
     DenseTable(
@@ -527,8 +533,8 @@ private fun VideoTable(
         key = { it.key },
         selectedKey = selected,
         selectedKeys = selection?.keys,
-        sort = sort,
-        onSortChange = onSortChange,
+        sort = shownSort,
+        onSortChange = { s -> ColumnSort.of(s, ids)?.let(onSortChange) },
         onRowClick = { item, _ -> onClick(item, sorted) },
         onRowDoubleClick = onDoubleClick?.let { open -> { item, _ -> open(item) } },
         rowMenu = { item, _ -> menu(item, { onPlay(item) }, { onShowDetails(item) }) },
@@ -681,12 +687,6 @@ private fun sortVideos(
     }
     return if (sort.first.ascending) list.sortedWith(comparator) else list.sortedWith(comparator.reversed())
 }
-
-/** Saves a table sort as one Int: column * 2 + 1 when ascending, -1 for no sort. */
-internal val TableSortSaver = Saver<TableSort?, Int>(
-    save = { sort -> sort?.let { it.column * 2 + if (it.ascending) 1 else 0 } ?: -1 },
-    restore = { saved -> if (saved < 0) null else TableSort(saved / 2, saved % 2 == 1) },
-)
 
 /**
  * A video card (S-802): artwork with the technical badge ("4K DV") and the watched part, the

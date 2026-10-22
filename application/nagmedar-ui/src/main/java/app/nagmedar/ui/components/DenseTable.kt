@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -59,6 +60,27 @@ class TableColumn<T>(
 
 @Immutable
 data class TableSort(val column: Int, val ascending: Boolean)
+
+/**
+ * A table's sort kept by its column's [id] rather than its place: a narrower window takes columns away and a wider
+ * one brings them back, and the sort stays with its column; while that column is not shown nothing is sorted by it.
+ */
+@Immutable
+data class ColumnSort(val id: String, val ascending: Boolean) {
+    /** The sort among the columns shown now, [ids] in their order; null while its column is not one of them. */
+    fun among(ids: List<String>): TableSort? = ids.indexOf(id).takeIf { it >= 0 }?.let { TableSort(it, ascending) }
+
+    companion object {
+        /** [sort] of a table showing the columns [ids], by its column's id. */
+        fun of(sort: TableSort, ids: List<String>): ColumnSort? = ids.getOrNull(sort.column)?.let { ColumnSort(it, sort.ascending) }
+
+        /** Kept with the window's state as "+id" (ascending) or "-id". */
+        val StateSaver: Saver<ColumnSort?, String> = Saver(
+            save = { sort -> sort?.let { (if (it.ascending) "+" else "-") + it.id } },
+            restore = { saved -> saved.takeIf { it.length > 1 && (it[0] == '+' || it[0] == '-') }?.let { ColumnSort(it.substring(1), it[0] == '+') } },
+        )
+    }
+}
 
 /**
  * Dense, desktop-style table (S-202): sticky header with sortable columns, 32 dp rows in

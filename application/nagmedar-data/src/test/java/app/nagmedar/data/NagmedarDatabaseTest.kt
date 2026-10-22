@@ -571,6 +571,23 @@ class NagmedarDatabaseTest {
         profiles.delete(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
         assertNull(profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF"))
     }
+
+    /** Film information: a season TMDB has no episodes of is kept as asked, and asked again only once it is old. */
+    @Test
+    fun aSeasonWithoutEpisodesIsAskedAgainOnlyWhenOld() {
+        val films = db.filmInfo()
+        fun episode(season: Int, episode: Int, at: Long) = FilmEpisodeEntry(70, season, episode, title = "Bölüm $episode", language = "tr", fetchedAt = at)
+        fun none(season: Int, at: Long) = FilmEpisodeEntry(70, season, FilmEpisodeEntry.NO_EPISODES, language = "tr", fetchedAt = at)
+        films.saveEpisodes(listOf(episode(1, 1, 100), episode(1, 2, 100), none(0, 100), none(3, 900)))
+        assertEquals(listOf(0, 1, 3), films.seasons(70).sorted())
+        // the specials were asked at 100: older than 500; the third season at 900 is not
+        assertEquals(listOf(0), films.emptySeasonsAskedBefore(70, before = 500))
+        assertEquals(listOf(0, 3), films.emptySeasonsAskedBefore(70, before = 1_000).sorted())
+        // a season that has episodes since is no empty one, its old row aside
+        films.saveEpisodes(listOf(episode(0, 1, 2_000)))
+        assertEquals(listOf(3), films.emptySeasonsAskedBefore(70, before = 3_000))
+        assertTrue(films.emptySeasonsAskedBefore(71, before = 3_000).isEmpty())
+    }
 }
 
 /**

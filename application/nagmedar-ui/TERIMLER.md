@@ -95,7 +95,7 @@ Sözlüğü testler denetler:
 | izlendi, izlenmedi | watched, unwatched | | | Sonuna kadar izlenen “izlendi”; yarıda bırakılan “%40 izlendi” (yarıda); hiç açılmayan “izlenmedi”. Menüde “İzlendi olarak işaretle”, “İzlenmedi olarak işaretle”; sezonda “Sezon 1 · 3/10” |
 | afiş | poster | | | Filmin ya da dizinin 2:3 görseli (TMDB'den); “Afiş görünümü”. Albümün görseli “kapak”tır |
 | geniş görsel | backdrop | | | Filmin yatay görseli: Afiş görünümünün üstündeki tanıtım alanında ve ayrıntılarda |
-| film bilgileri | film information | | | Afiş, özet, yıl, türler, oyuncular, puanlar; TMDB'den ve OMDb'den, dosya adındaki ad ve yılla aranır. Ayarlar'daki bölümü “Film bilgileri”; “Bilgileri yenile”, “Yanlış film mi? Ara…” |
+| film bilgileri | film information | | | Afiş, özet, yıl, türler, oyuncular, puanlar; TMDB'den ve OMDb'den, dosya adındaki (o bir şey söylemiyorsa klasörün adındaki) ad ve yılla aranır. Ayarlar'daki bölümü “Film bilgileri”; “Bilgileri yenile”, “Yanlış film mi? Ara…” |
 | görünüm | view | | | Bir bölümün gösterilişi: Izgara, Afiş, Liste, Klasörler; bölüm başına hatırlanır |
 | İzlemeye devam et | Continue watching | | | Raf başlığı; düğmede “Devam et” (Resume) |
 | kaldığı yer | stopped at | | | |

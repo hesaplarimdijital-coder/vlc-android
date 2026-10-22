@@ -195,7 +195,10 @@ object FilmInfoCenter {
 
     /** A series' episodes as TMDB names them, by season and episode. */
     fun episodes(context: Context, showId: Long): Flow<Map<Pair<Int, Int>, EpisodeMeta>> = dao(context).observeEpisodes(showId)
-        .map { rows -> rows.associate { (it.season to it.episode) to EpisodeMeta(it.title, it.overview, it.stillPath, it.airDate, it.runtimeMinutes) } }
+        .map { rows ->
+            rows.filter { it.episode != FilmEpisodeEntry.NO_EPISODES }
+                .associate { (it.season to it.episode) to EpisodeMeta(it.title, it.overview, it.stillPath, it.airDate, it.runtimeMinutes) }
+        }
         .flowOn(Dispatchers.Default)
 
     /** How many films and series are found. */
@@ -240,9 +243,16 @@ object FilmInfoCenter {
         entry == null -> true
         entry.tmdbId <= 0 -> now - entry.fetchedAt > RETRY_NOT_FOUND_MS
         entry.language != language -> true
-        query.kind == FilmKind.TV -> !dao.seasons(entry.tmdbId).toSet().containsAll(query.seasons)
+        query.kind == FilmKind.TV -> !knownSeasons(dao, entry.tmdbId, now).containsAll(query.seasons)
         else -> false
     }
+
+    /**
+     * The seasons of [showId] that need no asking: those with episodes, and those TMDB had none of
+     * (S00's specials, a season of another match) when asked within [RETRY_NOT_FOUND_MS].
+     */
+    private fun knownSeasons(dao: FilmInfoDao, showId: Long, now: Long): Set<Int> =
+        dao.seasons(showId).toSet() - dao.emptySeasonsAskedBefore(showId, now - RETRY_NOT_FOUND_MS).toSet()
 
     private suspend fun work(context: Context) {
         while (true) {
@@ -398,17 +408,22 @@ object FilmInfoCenter {
         )
         if (series) {
             val changed = force || existing == null || existing.language != language.code || existing.tmdbId != details.id
-            val have = if (changed) emptySet() else dao.seasons(details.id).toSet()
+            val have = if (changed) emptySet() else knownSeasons(dao, details.id, System.currentTimeMillis())
             for (season in query.seasons.sorted()) {
                 if (season in have) continue
                 delay(REQUEST_GAP_MS)
                 val episodes = tmdb.season(details.id, season, language.tmdb)
                 val now = System.currentTimeMillis()
-                dao.saveEpisodes(
-                    episodes.map { e ->
-                        FilmEpisodeEntry(details.id, e.season, e.episode, e.title, e.overview, e.stillPath, e.airDate, e.runtimeMinutes, language.code, now)
-                    },
-                )
+                val rows = episodes.map { e ->
+                    FilmEpisodeEntry(details.id, e.season, e.episode, e.title, e.overview, e.stillPath, e.airDate, e.runtimeMinutes, language.code, now)
+                }
+                // TMDB has no such season: kept as asked, else every visit of Series would ask for the show and its season again
+                val none = if (rows.none { it.season == season }) {
+                    listOf(FilmEpisodeEntry(details.id, season, FilmEpisodeEntry.NO_EPISODES, language = language.code, fetchedAt = now))
+                } else {
+                    emptyList()
+                }
+                dao.saveEpisodes(rows + none)
             }
         }
         return true

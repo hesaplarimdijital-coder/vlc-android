@@ -46,7 +46,7 @@ Films and Series show with posters, overviews and ratings; for a series you see 
 - **Videos** shows the resolution, length, date taken and size on its cards, and sorts by date, title, size or duration. The videos of the camera, of screen recordings and of messaging apps show here, not in Films, and so does every video that Films and Series do not show. This page deletes no file.
 
 ### Film information
-Each film and series is looked up once on TMDB by the title and year its file name gives: the poster, backdrop, overview, year, genres, length, cast and TMDB rating come from there; OMDb gives the IMDb and Rotten Tomatoes ratings. Lookups run in the background, by default on Wi-Fi only; the library works without them, and offline too.
+Each film and series is looked up once on TMDB by the title and year its file name gives (its folder's name when the file name says nothing, such as video.mp4): the poster, backdrop, overview, year, genres, length, cast and TMDB rating come from there; OMDb gives the IMDb and Rotten Tomatoes ratings. Lookups run in the background, by default on Wi-Fi only; a refresh or search you ask for goes ahead on any connection and may use mobile data. The library works without them, and offline too.
 - “Refresh information” in a film's details or menu looks it up again.
 - If the wrong film comes up, use “Wrong film? Search…” (for a series “Wrong series? Search…”), correct the title, press “Search” and choose the right one; your choice is kept when it is refreshed too.
 - Settings › Film information: “Look up films and series” turns the feature on or off; “Only on Wi-Fi”, “Language of the overviews” (Türkçe or English), the count of what is kept and “Clear cache” (deletes the kept information and images) are there too.
@@ -386,7 +386,7 @@ Write your settings, lists and ratings to one ZIP file; bring them back on anoth
 Nağmedar has no account, no ads and no tracking. Scanning happens on the device and your media stays on it. The network is used only when you use the features below; requests carry Nağmedar's name, and neither your name nor your e-mail address is in any of them.
 
 - **Subtitle search:** OpenSubtitles.com gets the film's name and the file's fingerprint (you can turn the provider off in Settings › Subtitles).
-- **Film information:** the title and year read from the file name of each film and series in Films and Series go to TMDB, and its IMDb id to OMDb; neither the files nor their paths are sent (turn it off in Settings › Film information).
+- **Film information:** the title and year read from the file name (or, when it says nothing, its folder's name) of each film and series in Films and Series go to TMDB, and its IMDb id to OMDb; neither the files nor their full paths are sent (turn it off in Settings › Film information).
 - **Lyrics:** if there are no synced lyrics in the file or beside it, the track's title, artist, album and length go to lrclib.net (turn it off in Settings › Lyrics). Uploading lyrics to LRCLIB happens only if you ask for it.
 - **Covers:** if there is no cover in the file or the folder, the album's name and artist go to MusicBrainz, and the cover comes from the Cover Art Archive (turn it off in Settings › Covers).
 - **Podcasts and radio:** the word you search for goes to Podcast Index, iTunes or Radio Browser; the shows you subscribe to are read from their own servers. Radio Browser is told of each play as a “click”, and of your vote if you vote.

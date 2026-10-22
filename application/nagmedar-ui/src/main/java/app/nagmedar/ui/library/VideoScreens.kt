@@ -64,7 +64,7 @@ import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SelectionBar
 import app.nagmedar.ui.components.StateAction
-import app.nagmedar.ui.components.TableSort
+import app.nagmedar.ui.components.ColumnSort
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -110,6 +110,7 @@ import app.nagmedar.ui.library.metadata.ratingsLine
 import app.nagmedar.ui.library.metadata.rememberEpisodeMeta
 import app.nagmedar.ui.library.metadata.rememberFilmActions
 import app.nagmedar.ui.library.metadata.rememberFilmInfo
+import app.nagmedar.ui.library.metadata.rememberFilmKeys
 import app.nagmedar.ui.library.metadata.watchState
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -156,7 +157,8 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     var filters by rememberSaveable { mutableStateOf(emptySet<MovieFilter>()) }
     var order by rememberSaveable { mutableStateOf(MovieOrder.Added) }
     var folder by rememberSaveable { mutableStateOf<String?>(null) }
-    var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
+    // by its column: the columns a window shows change with its width
+    var sort by rememberSaveable(stateSaver = ColumnSort.StateSaver) { mutableStateOf<ColumnSort?>(null) }
     // one selected film has its details; several have the selection bar (S-405)
     val selection = rememberMultiSelection()
     val selected = selection.keys.singleOrNull() as? String
@@ -325,8 +327,8 @@ fun MoviesLibrary(
     order: MovieOrder,
     folder: String?,
     onOpenFolder: (String?) -> Unit,
-    sort: TableSort?,
-    onSortChange: (TableSort) -> Unit,
+    sort: ColumnSort?,
+    onSortChange: (ColumnSort) -> Unit,
     selected: String?,
     onSelect: (VideoItem) -> Unit,
     onShowDetails: (VideoItem) -> Unit,
@@ -373,7 +375,13 @@ fun MoviesLibrary(
         }
         val shelf = if (filters.isEmpty() && openFolder == null) library.continueMovies else emptyList()
         // the "Afiş" view opens with a film's backdrop, as the streaming apps do
-        val hero = if (view == MoviesView.Poster && filters.isEmpty() && openFolder == null) remember(library, info) { heroOf(library.movies, info) } else null
+        val hero = if (view == MoviesView.Poster && filters.isEmpty() && openFolder == null) {
+            // the films' names are read once for the library, not again with each change of the film information
+            val keys = rememberFilmKeys(library.movies)
+            remember(library, keys, info) { heroOf(library.movies, keys, info) }
+        } else {
+            null
+        }
         val top: @Composable () -> Unit = {
             Column(verticalArrangement = Arrangement.spacedBy(dimens.gapL)) {
                 if (hero != null) FilmHero(hero.second, hero.first, onPlay = { onPlay(hero.first) }, onDetails = { onShowDetails(hero.first) })
@@ -731,6 +739,9 @@ private fun ShowPosterGrid(shows: List<Show>, info: Map<String, FilmInfo>, onOpe
     }
 }
 
+/** The columns of the series' "Liste" view, which its sort is kept by. */
+private enum class ShowColumnId { Title, Year, Seasons, Episodes, Watched, Imdb }
+
 /** The "Liste" view of the series: poster, name, year, seasons, episodes, watched, ratings; sortable. */
 @Composable
 private fun ShowTable(shows: List<Show>, info: Map<String, FilmInfo>, onOpen: (String) -> Unit, showMenu: (Show) -> List<MenuEntry>) {
@@ -748,40 +759,42 @@ private fun ShowTable(shows: List<Show>, info: Map<String, FilmInfo>, onOpen: (S
     val openLabel = stringResource(R.string.nag_series_open)
     // read with the locale: a change of language recomposes
     val res = LocalContext.current.resources
-    var sort by rememberSaveable(stateSaver = TableSortSaver) { mutableStateOf<TableSort?>(null) }
+    // by its column: the columns a window shows change with its width
+    var sort by rememberSaveable(stateSaver = ColumnSort.StateSaver) { mutableStateOf<ColumnSort?>(null) }
     val columns = remember(films, compact, width, locale, thumb, res) {
         listOfNotNull(
-            TableColumn<Show>(title, ColumnWidth.Weight(1f), content = { show, selected -> ShowTitleCell(show, films[show.key], thumb, selected, compact) }) {
+            ShowColumnId.Title to TableColumn<Show>(title, ColumnWidth.Weight(1f), content = { show, selected -> ShowTitleCell(show, films[show.key], thumb, selected, compact) }) {
                 films[it.key]?.title ?: it.title
             },
-            if (compact) null else TableColumn<Show>(year, ColumnWidth.Fixed(64.dp), mono = true) { films[it.key]?.year?.toString() ?: "–" },
-            if (compact) null else TableColumn<Show>(seasons, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true) { it.seasons.size.toString() },
-            if (width < WidthClass.Expanded) null else TableColumn<Show>(episodes, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true) { it.episodes.size.toString() },
-            TableColumn<Show>(watched, ColumnWidth.Fixed(if (compact) 64.dp else 84.dp), alignEnd = true, mono = true) { "${it.watched}/${it.episodes.size}" },
-            if (compact) null else TableColumn<Show>(imdb, ColumnWidth.Fixed(64.dp), alignEnd = true, mono = true) { s ->
+            if (compact) null else ShowColumnId.Year to TableColumn<Show>(year, ColumnWidth.Fixed(64.dp), mono = true) { films[it.key]?.year?.toString() ?: "–" },
+            if (compact) null else ShowColumnId.Seasons to TableColumn<Show>(seasons, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true) { it.seasons.size.toString() },
+            if (width < WidthClass.Expanded) null else ShowColumnId.Episodes to TableColumn<Show>(episodes, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true) { it.episodes.size.toString() },
+            ShowColumnId.Watched to TableColumn<Show>(watched, ColumnWidth.Fixed(if (compact) 64.dp else 84.dp), alignEnd = true, mono = true) { "${it.watched}/${it.episodes.size}" },
+            if (compact) null else ShowColumnId.Imdb to TableColumn<Show>(imdb, ColumnWidth.Fixed(64.dp), alignEnd = true, mono = true) { s ->
                 films[s.key]?.imdbRating?.let { ratingNumber(it, locale) } ?: "–"
             },
         )
     }
-    val sorted = remember(shows, sort, columns, films) {
-        val s = sort ?: return@remember shows
-        val column = columns.getOrNull(s.column) ?: return@remember shows
-        val comparator: Comparator<Show> = when (column.title) {
-            year -> compareBy { films[it.key]?.year ?: 0 }
-            seasons -> compareBy { it.seasons.size }
-            episodes -> compareBy { it.episodes.size }
-            watched -> compareBy { it.watched.toFloat() / it.episodes.size }
-            imdb -> compareBy { films[it.key]?.imdbRating ?: -1.0 }
-            else -> compareBy(String.CASE_INSENSITIVE_ORDER) { films[it.key]?.title ?: it.title }
+    val ids = remember(columns) { columns.map { it.first.name } }
+    val shownSort = sort?.among(ids)
+    val sorted = remember(shows, shownSort, columns, films) {
+        val s = shownSort ?: return@remember shows
+        val comparator: Comparator<Show> = when (columns[s.column].first) {
+            ShowColumnId.Year -> compareBy { films[it.key]?.year ?: 0 }
+            ShowColumnId.Seasons -> compareBy { it.seasons.size }
+            ShowColumnId.Episodes -> compareBy { it.episodes.size }
+            ShowColumnId.Watched -> compareBy { it.watched.toFloat() / it.episodes.size }
+            ShowColumnId.Imdb -> compareBy { films[it.key]?.imdbRating ?: -1.0 }
+            ShowColumnId.Title -> compareBy(String.CASE_INSENSITIVE_ORDER) { films[it.key]?.title ?: it.title }
         }
         if (s.ascending) shows.sortedWith(comparator) else shows.sortedWith(comparator.reversed())
     }
     DenseTable(
-        columns = columns,
+        columns = columns.map { it.second },
         rows = sorted,
         key = { it.key },
-        sort = sort,
-        onSortChange = { sort = it },
+        sort = shownSort,
+        onSortChange = { s -> sort = ColumnSort.of(s, ids) },
         onRowClick = { show, _ -> onOpen(show.key) },
         rowMenu = { show, _ -> listOf(MenuEntry.Item(openLabel, { onOpen(show.key) }, shortcut = "Enter", icon = NagIcons.ChevronRight)) + showMenu(show) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),

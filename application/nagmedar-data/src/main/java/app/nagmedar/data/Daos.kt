@@ -890,6 +890,10 @@ abstract class FilmInfoDao {
     @Query("SELECT season FROM film_episode WHERE show_id = :showId GROUP BY season")
     abstract fun seasons(showId: Long): List<Int>
 
+    /** The seasons of [showId] TMDB had no episodes of ([FilmEpisodeEntry.NO_EPISODES] alone), last asked before [before]. */
+    @Query("SELECT season FROM film_episode WHERE show_id = :showId GROUP BY season HAVING MAX(episode) < 0 AND MAX(fetched_at) < :before")
+    abstract fun emptySeasonsAskedBefore(showId: Long, before: Long): List<Int>
+
     @Query("SELECT DISTINCT language FROM film_episode WHERE show_id = :showId")
     abstract fun episodeLanguages(showId: Long): List<String>
 

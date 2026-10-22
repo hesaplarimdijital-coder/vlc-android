@@ -633,7 +633,11 @@ object FilmKind {
     const val TV = "tv"
 }
 
-/** Film information: one episode of a series as TMDB names it, by the series' TMDB id. */
+/**
+ * Film information: one episode of a series as TMDB names it, by the series' TMDB id. A season TMDB
+ * has no episodes of is kept as one row numbered [NO_EPISODES], so that it is not asked for again
+ * on every visit.
+ */
 @Entity(tableName = "film_episode", primaryKeys = ["show_id", "season", "episode"])
 data class FilmEpisodeEntry(
     @ColumnInfo(name = "show_id") val showId: Long,
@@ -646,4 +650,9 @@ data class FilmEpisodeEntry(
     @ColumnInfo(name = "runtime_minutes") val runtimeMinutes: Int? = null,
     val language: String,
     @ColumnInfo(name = "fetched_at") val fetchedAt: Long,
-)
+) {
+    companion object {
+        /** The episode number of a season's row that says TMDB had no episodes of it when it was asked ([fetchedAt]). */
+        const val NO_EPISODES = -1
+    }
+}

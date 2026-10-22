@@ -3831,9 +3831,9 @@
     <string name="nag_episode_aired">İlk yayın: %1$s</string>
     <string name="nag_film_settings">Film bilgileri</string>
     <string name="nag_film_settings_on">Filmleri ve dizileri ara</string>
-    <string name="nag_film_settings_on_hint">Afiş, özet, oyuncular ve puanlar TMDB ve OMDb\'den gelir. Yalnızca dosya adlarından okunan ad ve yıl gönderilir; dosyalar da yolları da asla.</string>
+    <string name="nag_film_settings_on_hint">Afiş, özet, oyuncular ve puanlar TMDB ve OMDb\'den gelir. Yalnızca filmi ya da diziyi adlandıran gönderilir: dosya adından ya da ad bir şey söylemiyorsa (örneğin video.mp4) klasörünün adından okunan ad ve yıl; dosyalar da tam yolları da asla.</string>
     <string name="nag_film_settings_wifi">Yalnızca Wi-Fi\'da</string>
-    <string name="nag_film_settings_wifi_hint">Kotalı bir bağlantıda hiçbir şey aranmaz, görsel indirilmez; saklananlar yine görünür.</string>
+    <string name="nag_film_settings_wifi_hint">Kotalı bir bağlantıda arka planda hiçbir şey aranmaz, görsel indirilmez; saklananlar yine görünür. Sizin istediğiniz yenileme ya da arama her bağlantıda yapılır ve mobil veri kullanabilir.</string>
     <string name="nag_film_settings_language">Özetlerin dili</string>
     <string name="nag_film_settings_language_hint">Adlar, özetler ve türler; TMDB\'de Türkçe özet yoksa İngilizcesi.</string>
     <string name="nag_film_lang_tr">Türkçe</string>

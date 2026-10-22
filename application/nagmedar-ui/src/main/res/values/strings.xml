@@ -3860,9 +3860,9 @@
     <string name="nag_episode_aired">First shown on %1$s</string>
     <string name="nag_film_settings">Film information</string>
     <string name="nag_film_settings_on">Look up films and series</string>
-    <string name="nag_film_settings_on_hint">Posters, overviews, cast and ratings from TMDB and OMDb. Only the titles and years read from the file names are sent, never the files or their paths.</string>
+    <string name="nag_film_settings_on_hint">Posters, overviews, cast and ratings from TMDB and OMDb. Only what names a film or series is sent: a title and a year, read from the file name or, when that says nothing (such as video.mp4), from its folder\'s name; never the files or their full paths.</string>
     <string name="nag_film_settings_wifi">Only on Wi-Fi</string>
-    <string name="nag_film_settings_wifi_hint">On a metered connection nothing is looked up and no image is fetched; what is kept still shows.</string>
+    <string name="nag_film_settings_wifi_hint">On a metered connection nothing is looked up in the background and no image is fetched; what is kept still shows. A refresh or search you ask for goes ahead on any connection and may use mobile data.</string>
     <string name="nag_film_settings_language">Language of the overviews</string>
     <string name="nag_film_settings_language_hint">Titles, overviews and genres; where TMDB has no Turkish overview, the English one.</string>
     <string name="nag_film_lang_tr">Türkçe</string>

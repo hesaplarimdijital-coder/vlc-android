@@ -46,7 +46,7 @@ Filmler ve Diziler afişleri, özetleri ve puanlarıyla görünür; dizilerde ha
 - **Videolar** kartlarda çözünürlüğü, süreyi, çekildiği tarihi ve boyutu gösterir; tarihe, ada, boyuta ya da süreye göre sıralanır. Kameranın, ekran kayıtlarının ve mesajlaşma uygulamalarının videoları Filmler'de değil burada görünür; Filmler'in ve Diziler'in göstermediği her video da. Bu sayfa hiçbir dosyayı silmez.
 
 ### Film bilgileri
-Her film ve dizi, dosya adından okunan ad ve yılla bir kez TMDB'de aranır: afiş, geniş görsel, özet, yıl, türler, süre, oyuncular ve TMDB puanı gelir; IMDb puanını ve Rotten Tomatoes puanını OMDb verir. Arama arka planda, varsayılan olarak yalnızca Wi-Fi'da yapılır; kütüphane bilgisiz de, çevrimdışı da çalışır.
+Her film ve dizi, dosya adından (ad bir şey söylemiyorsa, video.mp4 gibi, klasörün adından) okunan ad ve yılla bir kez TMDB'de aranır: afiş, geniş görsel, özet, yıl, türler, süre, oyuncular ve TMDB puanı gelir; IMDb puanını ve Rotten Tomatoes puanını OMDb verir. Arama arka planda, varsayılan olarak yalnızca Wi-Fi'da yapılır; sizin istediğiniz yenileme ya da arama her bağlantıda yapılır ve mobil veri kullanabilir. Kütüphane bilgisiz de, çevrimdışı da çalışır.
 - Filmin ayrıntılarındaki ya da menüsündeki “Bilgileri yenile” filmi yeniden arar.
 - Yanlış film geldiyse “Yanlış film mi? Ara…” (dizide “Yanlış dizi mi? Ara…”) deyin, adı düzeltip “Ara”ya basın ve doğrusunu seçin; seçtiğiniz, yenilemede de korunur.
 - Ayarlar › Film bilgileri: “Filmleri ve dizileri ara” özelliği açar ya da kapatır; “Yalnızca Wi-Fi'da”, “Özetlerin dili” (Türkçe ya da English), saklananların sayısı ve “Önbelleği temizle” (saklanan bilgileri ve görselleri siler) de oradadır.
@@ -386,7 +386,7 @@ Ayarlarınızı, listelerinizi ve puanlarınızı tek bir ZIP dosyasına yazın;
 Nağmedar'da hesap, reklam ve izleme yoktur. Taramalar cihazda yapılır, medyanız cihazınızda kalır. Ağ yalnızca aşağıdaki özellikleri kullandığınızda açılır; istekler Nağmedar'ın adını taşır; adınız ya da e-posta adresiniz hiçbirinde yoktur.
 
 - **Altyazı arama:** OpenSubtitles.com'a film adı ve dosyanın parmak izi gider (Ayarlar › Altyazı'dan sağlayıcıyı kapatabilirsiniz).
-- **Film bilgileri:** Filmler ve Diziler'deki her film ve dizi için dosya adından okunan ad ve yıl TMDB'ye, IMDb kimliği OMDb'ye gider; dosyalar da yolları da gönderilmez (Ayarlar › Film bilgileri'nden kapatılır).
+- **Film bilgileri:** Filmler ve Diziler'deki her film ve dizi için dosya adından (o bir şey söylemiyorsa klasörün adından) okunan ad ve yıl TMDB'ye, IMDb kimliği OMDb'ye gider; dosyalar da tam yolları da gönderilmez (Ayarlar › Film bilgileri'nden kapatılır).
 - **Sözler:** dosyada ve yanında zamanlı söz yoksa parçanın adı, sanatçısı, albümü ve süresi lrclib.net'e gider (Ayarlar › Sözler'den kapatılır). Sözü LRCLIB'e yüklemek yalnızca siz isterseniz olur.
 - **Kapaklar:** dosyada ve klasörde kapak yoksa albümün adı ve sanatçısı MusicBrainz'e, kapak için Cover Art Archive'a gider (Ayarlar › Kapaklar'dan kapatılır).
 - **Podcastler ve radyo:** aradığınız sözcük Podcast Index'e, iTunes'a ya da Radio Browser'a gider; abone olduğunuz yayınlar kendi sunucularından okunur. Radio Browser'a her çalmada bir “tıklama” bildirilir, oy verirseniz oy gider.

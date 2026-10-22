@@ -81,6 +81,13 @@ import java.util.Locale
 fun VideoItem.filmQuery(): FilmQuery? =
     (FilmNameParser.parse(path.ifEmpty { title }) ?: FilmNameParser.parseName(title))?.let(FilmQuery::movie)
 
+/**
+ * The film information key ([FilmQuery.key]) of each of [items], by the item's key: the names are read once for the
+ * list, not again on each change of the film information (every background save) or recomposition.
+ */
+@Composable
+fun rememberFilmKeys(items: List<VideoItem>): Map<String, String?> = remember(items) { items.associate { it.key to it.filmQuery()?.key } }
+
 /** The series [Show] is, with the seasons the library has of it. */
 fun Show.filmQuery(): FilmQuery = FilmQuery.show(title, seasons.map { it.number }.toSet())
 
@@ -371,10 +378,13 @@ fun FilmHero(info: FilmInfo, item: VideoItem, onPlay: () -> Unit, onDetails: () 
     }
 }
 
-/** The film the hero shows: the one in progress most recently added, else the newest; each with a backdrop. */
-fun heroOf(items: List<VideoItem>, info: Map<String, FilmInfo>): Pair<VideoItem, FilmInfo>? {
+/**
+ * The film the hero shows: the one in progress most recently added, else the newest; each with a backdrop. [keys]
+ * are the items' film information keys ([rememberFilmKeys]).
+ */
+fun heroOf(items: List<VideoItem>, keys: Map<String, String?>, info: Map<String, FilmInfo>): Pair<VideoItem, FilmInfo>? {
     val withBackdrop = items.mapNotNull { item ->
-        item.filmQuery()?.let { query -> info[query.key] }?.takeIf { it.backdropPath != null }?.let { item to it }
+        keys[item.key]?.let { info[it] }?.takeIf { it.backdropPath != null }?.let { item to it }
     }
     return withBackdrop.filter { it.first.progress > 0f }.maxByOrNull { it.first.addedAt } ?: withBackdrop.maxByOrNull { it.first.addedAt }
 }
