@@ -31,6 +31,7 @@ import android.graphics.Color
 import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
@@ -97,18 +98,7 @@ object NotificationHelper {
         spi?.let { builder.setContentIntent(it) }
         /* Previous */
         if (podcastMode) {
-            val speedIcons = hashMapOf(
-                    0.50f to R.drawable.ic_notif_speed_0_50,
-                    0.80f to R.drawable.ic_notif_speed_0_80,
-                    1.00f to R.drawable.ic_notif_speed_1_00,
-                    1.10f to R.drawable.ic_notif_speed_1_10,
-                    1.20f to R.drawable.ic_notif_speed_1_20,
-                    1.50f to R.drawable.ic_notif_speed_1_50,
-                    2.00f to R.drawable.ic_notif_speed_2_00
-            )
-            val speedResId = speedIcons[speedIcons.keys.minByOrNull { (speed - it).absoluteValue }]
-                ?: R.drawable.ic_notif_speed_1_00
-            builder.addAction(NotificationCompat.Action(speedResId, ctx.getString(R.string.playback_speed),
+            builder.addAction(NotificationCompat.Action(speedIcon(speed), ctx.getString(R.string.playback_speed),
                     buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_SPEED)
             ))
         } else {
@@ -152,6 +142,25 @@ object NotificationHelper {
         }
         return builder.build()
     }
+
+    /** Nağmedar's speed gauges, by the speed each needle shows. */
+    private val speedIcons = listOf(
+            0.50f to R.drawable.nagmedar_notif_speed_0_50,
+            0.80f to R.drawable.nagmedar_notif_speed_0_80,
+            1.00f to R.drawable.nagmedar_notif_speed_1_00,
+            1.10f to R.drawable.nagmedar_notif_speed_1_10,
+            1.20f to R.drawable.nagmedar_notif_speed_1_20,
+            1.50f to R.drawable.nagmedar_notif_speed_1_50,
+            2.00f to R.drawable.nagmedar_notif_speed_2_00,
+    )
+
+    /**
+     * Nağmedar: the playback speed button's icon, the new interface's speed gauge with its needle
+     * turned to the nearest of the speeds drawn (the podcast notification, the system's media
+     * controls, Android Auto).
+     */
+    @DrawableRes
+    fun speedIcon(speed: Float): Int = speedIcons.minBy { (speed - it.first).absoluteValue }.second
 
     private fun buildMediaButtonPendingIntent(ctx: Context, enabledActions: FlagSet<PlaybackAction>, action: PlaybackAction, allowIntent: Boolean = true): PendingIntent? {
         return if (allowIntent && enabledActions.contains(action))

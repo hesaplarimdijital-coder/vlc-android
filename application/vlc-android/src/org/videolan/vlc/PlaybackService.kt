@@ -206,7 +206,6 @@ import org.videolan.vlc.util.isSchemeStreaming
 import videolan.org.commontools.LiveEvent
 import java.util.ArrayDeque
 import java.util.Calendar
-import kotlin.math.absoluteValue
 
 private const val TAG = "VLC/PlaybackService"
 
@@ -1386,18 +1385,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private fun addCustomSpeedActions(pscb: PlaybackStateCompat.Builder, showSpeedActions: Boolean = true) {
         if (showSpeedActions) {
-            val speedIcons = hashMapOf(
-                    0.50f to R.drawable.ic_auto_speed_0_50,
-                    0.80f to R.drawable.ic_auto_speed_0_80,
-                    1.00f to R.drawable.ic_auto_speed_1_00,
-                    1.10f to R.drawable.ic_auto_speed_1_10,
-                    1.20f to R.drawable.ic_auto_speed_1_20,
-                    1.50f to R.drawable.ic_auto_speed_1_50,
-                    2.00f to R.drawable.ic_auto_speed_2_00
-            )
-            val speedResId = speedIcons[speedIcons.keys.minByOrNull { (speed - it).absoluteValue }]
-                    ?: R.drawable.ic_auto_speed
-            pscb.addCustomAction(CUSTOM_ACTION_SPEED, getString(R.string.playback_speed), speedResId)
+            // Nağmedar's speed gauge, as on the notification
+            pscb.addCustomAction(CUSTOM_ACTION_SPEED, getString(R.string.playback_speed), NotificationHelper.speedIcon(speed))
         }
     }
 
