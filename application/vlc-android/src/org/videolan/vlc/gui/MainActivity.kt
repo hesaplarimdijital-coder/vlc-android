@@ -77,7 +77,7 @@ import org.videolan.vlc.gui.helpers.INavigator
 import org.videolan.vlc.gui.helpers.Navigator
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.isTablet
-import org.videolan.vlc.gui.preferences.PreferencesActivity
+import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.gui.preferences.search.PreferenceParser
 import org.videolan.vlc.gui.video.VideoGridFragment
 import org.videolan.vlc.interfaces.Filterable
@@ -185,9 +185,7 @@ class MainActivity : ContentActivity(),
                     PreferenceParser.checkRestoreFile(file.path.toUri())
                 } catch (_: Exception) {
                     UiTools.snackerConfirm(this@MainActivity, getString(R.string.obsolete_restore_settings), confirmMessage = R.string.ok, indefinite = true) {
-                        lifecycleScope.launch {
-                            PreferencesActivity.launchWithPref(this@MainActivity, "export_settings")
-                        }
+                        openNagmedarSettings("export_settings")
                     }
                 }
             }

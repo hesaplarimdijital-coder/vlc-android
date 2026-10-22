@@ -40,7 +40,7 @@ import org.videolan.tools.putSingle
 import org.videolan.vlc.R
 import org.videolan.vlc.databinding.DialogWhatsNewBinding
 import org.videolan.vlc.gui.EqualizerSettingsActivity
-import org.videolan.vlc.gui.preferences.PreferencesActivity
+import org.videolan.vlc.gui.preferences.openNagmedarSettings
 
 class WhatsNewDialog : VLCBottomSheetDialogFragment() {
     override fun getDefaultState(): Int = STATE_EXPANDED
@@ -64,16 +64,12 @@ class WhatsNewDialog : VLCBottomSheetDialogFragment() {
             }
         }
         binding.showInSettings2.setOnClickListener {
-            lifecycleScope.launch {
-                PreferencesActivity.launchWithPref(requireActivity(), "export_settings")
-                dismiss()
-            }
+            requireActivity().openNagmedarSettings("export_settings")
+            dismiss()
         }
         binding.showInSettings3.setOnClickListener {
-            lifecycleScope.launch {
-                PreferencesActivity.launchWithPref(requireActivity(), "playback_speed_audio_global")
-                dismiss()
-            }
+            requireActivity().openNagmedarSettings("playback_speed_audio_global")
+            dismiss()
         }
         binding.neverAgain.setOnCheckedChangeListener { _, isChecked ->
             Settings.getInstance(requireActivity()).putSingle(KEY_SHOW_WHATS_NEW, !isChecked)

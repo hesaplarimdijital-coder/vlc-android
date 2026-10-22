@@ -38,6 +38,9 @@ import org.videolan.vlc.gui.preferences.search.PreferenceItem
 import org.videolan.vlc.gui.view.NumberPickerPreference
 import org.videolan.vlc.gui.view.NumberPickerPreferenceDialog
 
+/** The extra with the [PreferenceItem] a preference screen scrolls to (the TV's preferences). */
+const val EXTRA_PREF_END_POINT = "extra_pref_end_point"
+
 abstract class BasePreferenceFragment : PreferenceFragmentCompat() {
 
     protected abstract fun getXml(): Int
@@ -51,15 +54,6 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat() {
         super.onCreate(savedInstanceState)
         val settings = Settings.getInstance(requireActivity())
         PreferenceVisibilityManager.manageVisibility(settings, preferenceScreen, false)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        (activity as? PreferencesActivity)?.let {
-            it.expandBar()
-            if (it.supportActionBar != null && getTitleId() != 0)
-                it.supportActionBar!!.title = getString(getTitleId())
-        }
     }
 
     protected fun loadFragment(fragment: Fragment) {

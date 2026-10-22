@@ -54,7 +54,7 @@ import org.videolan.vlc.gui.network.IStreamsFragmentDelegate
 import org.videolan.vlc.gui.network.KeyboardListener
 import org.videolan.vlc.gui.network.MRLAdapter
 import org.videolan.vlc.gui.network.StreamsFragmentDelegate
-import org.videolan.vlc.gui.preferences.PreferencesActivity
+import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.gui.view.EmptyLoadingState
 import org.videolan.vlc.gui.view.TitleListView
 import org.videolan.vlc.interfaces.IHistory
@@ -162,7 +162,7 @@ class MoreFragment : BaseFragment(), IRefreshable, IHistory, IDialogManager,
         }
 
         settingsButton.setOnClickListener {
-            requireActivity().startActivityForResult(Intent(requireActivity(), PreferencesActivity::class.java), ACTIVITY_RESULT_PREFERENCES)
+            requireActivity().openNagmedarSettings()
         }
         aboutButton.setOnClickListener {
             val i = Intent(requireActivity(), SecondaryActivity::class.java)

@@ -164,7 +164,7 @@ import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.helpers.BitmapUtil.vectorToBitmap
 import org.videolan.vlc.gui.helpers.hf.PinCodeDelegate
 import org.videolan.vlc.gui.helpers.hf.checkPIN
-import org.videolan.vlc.gui.preferences.PreferencesActivity
+import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.getAll
 import org.videolan.vlc.providers.medialibrary.MedialibraryProvider
@@ -416,11 +416,7 @@ object UiTools {
     fun snackerMissing(activity: FragmentActivity) {
         val view = getSnackAnchorView(activity) ?: return
         val snack = Snackbar.make(view, activity.getString(R.string.missing_media_snack), Snackbar.LENGTH_LONG)
-                .setAction(R.string.ok) {
-                    activity.lifecycleScope.launch {
-                        PreferencesActivity.launchWithPref(activity, KEY_INCLUDE_MISSING)
-                    }
-                }
+                .setAction(R.string.ok) { activity.openNagmedarSettings(KEY_INCLUDE_MISSING) }
         if (VlcMigrationHelper.isLolliPopOrLater)
             snack.view.elevation = view.resources.getDimensionPixelSize(R.dimen.audio_player_elevation).toFloat()
         snack.show()

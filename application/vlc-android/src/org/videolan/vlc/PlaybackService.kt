@@ -172,6 +172,7 @@ import org.videolan.tools.markBidi
 import org.videolan.tools.readableSize
 import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.dialogs.adapters.VlcTrack
+import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.NotificationHelper
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
@@ -808,9 +809,13 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             if (meteredAction == 1) {
                 stop()
                 // Nağmedar: said in the window in front (a toast when none is up), not in VLC's snackbar
-                Notices.show(this, R.string.metered_connection_stopped, long = true)
+                Notices.show(this, getString(R.string.metered_connection_stopped), long = true, actionLabel = getString(R.string.preferences)) {
+                    openNagmedarSettings(KEY_METERED_CONNECTION)
+                }
             } else {
-                Notices.show(this, R.string.metered_connection_warning, long = true)
+                Notices.show(this, getString(R.string.metered_connection_warning), long = true, actionLabel = getString(R.string.preferences)) {
+                    openNagmedarSettings(KEY_METERED_CONNECTION)
+                }
             }
         }
     }
