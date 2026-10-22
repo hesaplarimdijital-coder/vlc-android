@@ -142,6 +142,7 @@ Sözlüğü testler denetler:
 | iş, İşler | job, Jobs | | | Video dönüştürmeleri tek sırada, birer birer çalışan işler; Dönüştür › İşler |
 | ağda yayın, ağda yayınlamak | stream on the network | | | Medyanın HLS olarak yerel ağdan (Wi-Fi, Ethernet) sunulması: adres ve QR kodu, “Yayında”, “Yayını durdur” (Ctrl+Shift+H) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
+| filtre, Filtrele | filter | süzgeç | | Müzik kütüphanesinin araç çubuğundaki düğme ve açtığı panel; başlıklar altında (Bit derinliği, Örnekleme hızı) seçilir, düğmede açık filtre bir noktayla görünür |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |

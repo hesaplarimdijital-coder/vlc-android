@@ -98,6 +98,8 @@ ICONS = {
     'Cast': '<path d="M2 6V4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7a1.5 1.5 0 0 1-1.5 1.5H8.5"/><path d="M2 8.5a4.5 4.5 0 0 1 4.5 4.5M2 11a2 2 0 0 1 2 2M2 13h.01"/>',
     # S-611 the visualisers: a spectrum's bars
     'Visualizer': '<path d="M3 13.5v-3M5.5 13.5V7M8 13.5V3.5M10.5 13.5V8M13 13.5V5.5"/>',
+    # S-1001 the music library's filter button: a funnel
+    'Filter': '<path d="M2.5 3.5h11L9.5 8v4.5l-3 1.5V8z"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.

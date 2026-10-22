@@ -1812,6 +1812,10 @@
     </plurals>
     <string name="nag_music_no_match">No track fits the filters</string>
     <string name="nag_music_columns">Columns</string>
+    <string name="nag_music_filter">Filter</string>
+    <string name="nag_music_filter_on">Filters on</string>
+    <string name="nag_music_filter_depth">Bit depth</string>
+    <string name="nag_music_filter_rate">Sample rate</string>
     <string name="nag_music_back">Back to the list</string>
     <string name="nag_column_album_artist">Album artist</string>
     <string name="nag_column_genre">Genre</string>

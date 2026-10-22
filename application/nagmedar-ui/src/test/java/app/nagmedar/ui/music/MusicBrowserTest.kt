@@ -6,9 +6,9 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.shell.LocalWidthClass
@@ -65,6 +65,9 @@ class MusicBrowserTest {
     @Test
     fun aPhoneOpensAnAlbumAndComesBack() {
         val state = show(WidthClass.Compact, InputMode.Touch)
+        // a phone chooses the way in from a menu
+        compose.onNodeWithTag("music-views").performClick()
+        compose.waitForIdle()
         compose.onNodeWithText("Albümler").performClick()
         compose.waitForIdle()
         assertEquals(MusicView.Albums, state.view)
@@ -90,12 +93,14 @@ class MusicBrowserTest {
     @Test
     fun theDepthFilter() {
         val state = show(WidthClass.Compact, InputMode.Touch)
-        compose.onNodeWithText("24 bit").performScrollTo().performClick()
+        compose.onNode(hasContentDescription("Filtrele")).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("24 bit").performClick()
         compose.waitForIdle()
         assertEquals(setOf(Depth.Bits24), state.filter.depths)
         compose.onNodeWithText("Neva Kâr").assertExists()
         compose.onNodeWithText("Yağmur").assertDoesNotExist()
-        compose.onNodeWithText("Tümü").performScrollTo().performClick()
+        compose.onNodeWithText("Filtreleri temizle").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Yağmur").assertExists()
     }

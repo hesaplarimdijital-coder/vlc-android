@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,12 +49,9 @@ import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
-import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.DenseTable
-import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.LocalClickModifiers
-import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
@@ -399,8 +395,8 @@ internal class ServiceMusicActions(
 // ------------------------------------------------------------------ the browser
 
 /**
- * S-803 and S-1001: the music library below its header. The ways in and the depth and rate
- * filter on top; then, by the window's width: a phone shows the groups, then the tracks of the
+ * S-803 and S-1001: the music library below its header. The toolbar on top (the ways in, Play,
+ * Shuffle, the columns and the filter); then, by the window's width: a phone shows the groups, then the tracks of the
  * one opened (Back returns); a tablet the groups beside the tracks; a desktop window the groups,
  * the track table and [nowPlaying] side by side.
  */
@@ -423,14 +419,20 @@ fun MusicBrowser(
     // a wide window always shows a group; a narrow one shows the list until one is opened
     val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide }
     if (!wide && grouped && state.group != null) BackHandler { state.group = null }
+    // the toolbar's Play and Shuffle take the open group's tracks as the table shows them
+    val locale = LocalContext.current.resources.locale()
+    val sort = effectiveSort(state)
+    val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
+    val shown = remember(open, sort, locale, sortStats) { open?.let { sortTracks(it.tracks, sort, locale, sortStats) }.orEmpty() }
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
-        ViewChips(state)
-        FilterRow(state, probing)
+        MusicToolbar(state, actions, shown, showColumns = width != WidthClass.Compact, probing = probing)
         when {
             groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 NoResultsState(
                     title = stringResource(R.string.nag_music_no_match),
+                    // the files still being read may yet fit
+                    detail = if (probing > 0 && state.filter.active) pluralStringResource(R.plurals.nag_music_probing, probing, probing) else null,
                     suggestions = listOf(StateAction(stringResource(R.string.nag_clear_filters)) { state.filter = TechFilter() }),
                 )
             }
@@ -439,7 +441,7 @@ fun MusicBrowser(
                     GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false, stats) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
                 if (nowPlaying != null) {
                     VerticalRule()
                     Box(Modifier.width(300.dp).fillMaxHeight()) { nowPlaying() }
@@ -448,51 +450,11 @@ fun MusicBrowser(
             wide && grouped -> Row(Modifier.fillMaxSize()) {
                 GroupList(groups, state, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, state, actions, showBack = false, stats) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
             }
-            !grouped || open != null -> if (open != null) TrackPane(open, state, actions, showBack = grouped, stats)
+            !grouped || open != null -> if (open != null) TrackPane(open, shown, state, actions, showBack = grouped, stats)
             else -> GroupList(groups, state, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
         }
-    }
-}
-
-/** The ways in, one at a time. */
-@Composable
-private fun ViewChips(state: MusicBrowserState) {
-    val dimens = NagTheme.dimens
-    ChipRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapXs)) {
-        MusicView.entries.forEach { view ->
-            FilterChip(stringResource(viewLabel(view)), view == state.view, { state.open(view) })
-        }
-    }
-}
-
-/** The depths and the rates: none chosen lets every track through. */
-@Composable
-private fun FilterRow(state: MusicBrowserState, probing: Int) {
-    val dimens = NagTheme.dimens
-    val locale = LocalContext.current.resources.locale()
-    val filter = state.filter
-    ChipRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapXs)) {
-        FilterChip(stringResource(R.string.nag_filter_all), !filter.active, { state.filter = TechFilter() })
-        Depth.entries.forEach { depth ->
-            FilterChip(depthLabel(depth), depth in filter.depths, { on ->
-                state.filter = filter.copy(depths = if (on) filter.depths + depth else filter.depths - depth)
-            })
-        }
-        RateBand.entries.forEach { band ->
-            FilterChip(rateLabel(band, locale), band in filter.rates, { on ->
-                state.filter = filter.copy(rates = if (on) filter.rates + band else filter.rates - band)
-            })
-        }
-    }
-    if (probing > 0 && filter.active) {
-        Text(
-            pluralStringResource(R.plurals.nag_music_probing, probing, probing),
-            style = NagTheme.type.labelSmall,
-            color = NagTheme.colors.textTertiary,
-            modifier = Modifier.padding(horizontal = dimens.pagePadding),
-        )
     }
 }
 
@@ -506,10 +468,10 @@ internal fun depthLabel(depth: Depth): String = when (depth) {
 }
 
 @Composable
-private fun rateLabel(band: RateBand, locale: java.util.Locale): String =
+internal fun rateLabel(band: RateBand, locale: java.util.Locale): String =
     if (band == RateBand.R192) stringResource(R.string.nag_music_rate_and_up, kiloHertz(192_000, locale)) else kiloHertz(band.maxHz, locale)
 
-private fun viewLabel(view: MusicView): Int = when (view) {
+internal fun viewLabel(view: MusicView): Int = when (view) {
     MusicView.Tracks -> R.string.nag_music_view_tracks
     MusicView.Artists -> R.string.nag_music_view_artists
     MusicView.Albums -> R.string.nag_music_view_albums
@@ -594,18 +556,13 @@ private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOp
     }
 }
 
-/** A group's tracks: its name, play and shuffle, the columns, the table. */
+/** A group's tracks, [shown] in the order the table has: its name and the way back, then the table. */
 @Composable
-private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: MusicActions, showBack: Boolean, stats: Map<String, TrackStats>) {
+private fun TrackPane(group: MusicGroup, shown: List<Track>, state: MusicBrowserState, actions: MusicActions, showBack: Boolean, stats: Map<String, TrackStats>) {
     val dimens = NagTheme.dimens
-    val locale = LocalContext.current.resources.locale()
     val compact = currentWidthClass() == WidthClass.Compact
     val pointer = NagTheme.inputMode == InputMode.Pointer
-    // the whole library sorts by artist when nothing else is asked; a group plays in album order
-    val sort = state.sort ?: if (state.view == MusicView.Tracks) MusicSort(MusicColumn.Artist, true) else null
-    // sorted by a rating or a count, the order follows them; else a play counted does not resort
-    val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
-    val shown = remember(group, sort, locale, sortStats) { sortTracks(group.tracks, sort, locale, sortStats) }
+    val sort = effectiveSort(state)
     val columns = if (compact) listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Duration) else state.columns
     val tableColumns = rememberMusicColumns(columns, stats, onRate = if (actions.askRating != null) ({ track, stars -> actions.rate(listOf(track), stars) }) else null)
     val labels = MusicColumn.entries.associateWith { stringResource(it.label) }
@@ -616,36 +573,25 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
     SelectionCommands(selection, keys)
     BackHandler(enabled = selection.selecting) { selection.clear() }
     Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimens.pagePadding - 4.dp, vertical = dimens.gapXs),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (showBack) NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), { state.group = null })
-            // S-1006: an album's cover, its menu to change it
-            if (state.view == MusicView.Albums) AlbumCover(group, Modifier.padding(start = 4.dp, end = 4.dp))
-            if (state.view != MusicView.Tracks) {
+        // a group's name and line; the way back on a phone; an album's cover; the group's conversion
+        if (state.view != MusicView.Tracks) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimens.pagePadding - 4.dp, vertical = dimens.gapXs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (showBack) NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), { state.group = null })
+                // S-1006: an album's cover, its menu to change it
+                if (state.view == MusicView.Albums) AlbumCover(group, Modifier.padding(start = 4.dp, end = 4.dp))
                 Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
                     Text(groupTitle(group, state.view), style = NagTheme.type.title, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(groupLine(group, state.view), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-            } else {
-                Spacer(Modifier.weight(1f))
-            }
-            NagButton(stringResource(R.string.nag_play), { actions.play(shown, 0) }, icon = NagIcons.Play, primary = true)
-            Spacer(Modifier.width(dimens.gapS))
-            NagButton(stringResource(R.string.nag_shuffle), { actions.play(shown.shuffled(), 0) }, icon = NagIcons.Shuffle)
-            // S-1010: an album's, an artist's, a folder's tracks converted
-            if (state.view != MusicView.Tracks) {
+                // S-1010: an album's, an artist's, a folder's tracks converted
                 actions.convert?.let { convert ->
-                    Spacer(Modifier.width(dimens.gapS))
                     NagIconButton(NagIcons.Convert, stringResource(R.string.nag_convert), { convert(shown) }, modifier = Modifier.testTag("music-convert"))
                 }
-            }
-            if (!compact) {
-                Spacer(Modifier.width(dimens.gapS))
-                MenuButton(stringResource(R.string.nag_music_columns), { columnMenu(state, labels) })
             }
         }
         if (selection.count > 1 || selection.selecting) {
@@ -699,11 +645,15 @@ private fun TrackPane(group: MusicGroup, state: MusicBrowserState, actions: Musi
     }
 }
 
-/** S-808: the columns whose order the statistics decide. */
+/** The table's sort: the whole library by artist when nothing else is asked; a group plays in album order. */
+private fun effectiveSort(state: MusicBrowserState): MusicSort? =
+    state.sort ?: if (state.view == MusicView.Tracks) MusicSort(MusicColumn.Artist, true) else null
+
+/** S-808: the columns whose order the statistics decide; sorted by one, the order follows the ratings and counts. */
 private val STATS_COLUMNS = setOf(MusicColumn.Rating, MusicColumn.Plays, MusicColumn.Skips, MusicColumn.LastPlayed)
 
 /** The columns to show, each with its check; the title always. */
-private fun columnMenu(state: MusicBrowserState, labels: Map<MusicColumn, String>): List<MenuEntry> =
+internal fun columnMenu(state: MusicBrowserState, labels: Map<MusicColumn, String>): List<MenuEntry> =
     MusicColumn.entries.filter { it != MusicColumn.Title }.map { column ->
         MenuEntry.Item(labels.getValue(column), { state.toggle(column) }, checked = column in state.columns)
     }

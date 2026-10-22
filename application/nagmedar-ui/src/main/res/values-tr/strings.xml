@@ -1784,6 +1784,10 @@
     </plurals>
     <string name="nag_music_no_match">Filtrelere uyan parça yok</string>
     <string name="nag_music_columns">Sütunlar</string>
+    <string name="nag_music_filter">Filtrele</string>
+    <string name="nag_music_filter_on">Filtre açık</string>
+    <string name="nag_music_filter_depth">Bit derinliği</string>
+    <string name="nag_music_filter_rate">Örnekleme hızı</string>
     <string name="nag_music_back">Listeye dön</string>
     <string name="nag_column_album_artist">Albüm sanatçısı</string>
     <string name="nag_column_genre">Tür</string>
