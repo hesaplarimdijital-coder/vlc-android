@@ -120,10 +120,11 @@ class MenuBarScreenshotTest {
         const val COLUMNS = 4
     }
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
+    // tall enough for the longest column: Playback, with Tools under it
+    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi")
     fun menusDark() = capture("menubar-menus-dark", ThemeMode.Dark, InputMode.Pointer) { Menus() }
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi")
     fun menusLight() = capture("menubar-menus-light", ThemeMode.Light, InputMode.Pointer) { Menus() }
 
     /** Alt and Right: the second title has the keyboard, the window's focus stays where it was. */
