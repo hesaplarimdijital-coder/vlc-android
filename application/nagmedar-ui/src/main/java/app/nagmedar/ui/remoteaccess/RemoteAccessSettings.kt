@@ -1,8 +1,6 @@
 package app.nagmedar.ui.remoteaccess
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -162,7 +160,7 @@ class RemoteAccessSettings(private val prefs: SharedPreferences, private val con
     }
 }
 
-/** The app's [RemoteAccessControl]: the service and the pages of the classic interface. */
+/** The app's [RemoteAccessControl]: the service, and the Nağmedar windows of [RemoteAccessPages]. */
 class AppRemoteAccessControl(private val context: Context) : RemoteAccessControl {
     override fun start() = context.startRemoteAccess()
 
@@ -170,17 +168,7 @@ class AppRemoteAccessControl(private val context: Context) : RemoteAccessControl
 
     override fun restart() = context.restartRemoteAccess()
 
-    // the classic start-up's own route to the status page, as the classic settings take it
-    override fun showAddresses() = open(Intent().setClassName(context, START_ACTIVITY).setAction(SHARE_ACTION))
+    override fun showAddresses() = RemoteAccessPages.open(RemoteAccessPage.Addresses)
 
-    override fun showHowItWorks() = open(Intent(Intent.ACTION_VIEW).setComponent(ComponentName(context, REMOTE_ACCESS_ONBOARDING)))
-
-    private fun open(intent: Intent) {
-        runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-    }
-
-    private companion object {
-        const val START_ACTIVITY = "org.videolan.vlc.StartActivity"
-        const val SHARE_ACTION = "vlc.remoteaccess.share"
-    }
+    override fun showHowItWorks() = RemoteAccessPages.open(RemoteAccessPage.HowItWorks)
 }

@@ -54,6 +54,7 @@ import org.videolan.tools.Settings
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.putSingle
 import org.videolan.vlc.gui.helpers.NotificationHelper
+import org.videolan.vlc.util.RemoteAccessUtils
 
 
 class RemoteAccessService : LifecycleService(), CoroutineScope by MainScope() {
@@ -137,8 +138,14 @@ class RemoteAccessService : LifecycleService(), CoroutineScope by MainScope() {
                )
                    server.start()
                withContext(Dispatchers.Main) {
-                   server.serverStatus.observe(this@RemoteAccessService) {
+                   server.serverStatus.observe(this@RemoteAccessService) { status ->
                        forceForeground()
+                       // what the Nağmedar interface's remote access page shows
+                       RemoteAccessUtils.statusFlow.value = status.name
+                       RemoteAccessUtils.addressesFlow.value = if (status == ServerStatus.STARTED) server.getServerAddresses() else emptyList()
+                   }
+                   server.serverConnections.observe(this@RemoteAccessService) { connections ->
+                       RemoteAccessUtils.connectionsFlow.value = connections.map { it.ip }
                    }
                }
         }
@@ -173,6 +180,9 @@ class RemoteAccessService : LifecycleService(), CoroutineScope by MainScope() {
     }
 
     override fun onDestroy() {
+        RemoteAccessUtils.statusFlow.value = ServerStatus.STOPPED.name
+        RemoteAccessUtils.addressesFlow.value = emptyList()
+        RemoteAccessUtils.connectionsFlow.value = emptyList()
         if (::server.isInitialized) lifecycleScope.launch { server.stop() }
         unregisterReceiver(receiver)
         super.onDestroy()

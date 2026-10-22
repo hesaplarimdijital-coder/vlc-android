@@ -30,4 +30,13 @@ object RemoteAccessUtils {
     val otpFlow = MutableStateFlow<String?>(null)
     val otpCodeRemoveFlow = MutableStateFlow<String?>(null)
 
+    /** The server's state, by the name of its ServerStatus ("STARTED", "STOPPED"…), for the pages of the Nağmedar interface. */
+    val statusFlow = MutableStateFlow("NOT_INIT")
+
+    /** The addresses the server answers on while it runs ("http://192.168.1.20:8080"). */
+    val addressesFlow = MutableStateFlow<List<String>>(emptyList())
+
+    /** The addresses of the browsers connected since the server started. */
+    val connectionsFlow = MutableStateFlow<List<String>>(emptyList())
+
 }

@@ -96,6 +96,7 @@ import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberQueuePanelState
 import app.nagmedar.ui.radio.RadioCenter
+import app.nagmedar.ui.remoteaccess.RemoteAccessHost
 import app.nagmedar.ui.radio.RadioScreen
 import app.nagmedar.ui.podcast.Chapters
 import app.nagmedar.ui.podcast.PodcastCenter
@@ -385,6 +386,8 @@ private fun NagmedarMain(
                     if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
                     // a media's information, asked for from a menu without a details pane (music, search)
                     MediaInfoHost()
+                    // remote access's addresses, how it works, and the one-time code a new browser asks for
+                    RemoteAccessHost()
                     // S-708: the subtitle tools, asked for from a film's menu
                     SubtitleToolsHost()
                     // S-709: subtitles from a film's speech, asked for from its menu, and what came of the job
