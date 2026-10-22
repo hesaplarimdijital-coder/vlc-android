@@ -70,7 +70,8 @@ import kotlinx.coroutines.Dispatchers
 class DexWindow {
     val store = MemoryProfileStore()
     val engine = FakeTvLabEngine()
-    val lab = TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined))
+    // the profiles' files and the film's provider read at once too: the flows check what a save chose
+    val lab = TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined), Dispatchers.Unconfined)
 
     var picked: Uri? = null
     var saved: Uri? = null

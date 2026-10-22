@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.videolan.tools.Settings
 import java.io.File
 import java.security.MessageDigest
+import kotlin.coroutines.CoroutineContext
 
 /** The film being analysed: where it is, its name and size. */
 @Immutable
@@ -62,6 +63,7 @@ interface TvLabEngine {
     /** The drive's sequential read, from a part of the film [sizeBytes] long. */
     suspend fun diskSpeed(uri: Uri, sizeBytes: Long, progress: (Float, Double) -> Unit): Result<DiskSpeed>
 
+    /** Stops what runs; asked only once [available] said so, which is what loads the native library. */
     fun cancel()
 }
 
@@ -131,13 +133,16 @@ class NativeTvLabEngine(private val context: Context) : TvLabEngine {
 /**
  * The TV Lab (S-1201 … S-1204): a film opened, probed (its streams, HDR and Dolby Vision), its
  * drive measured, its bitrate read from every packet; and checked against the profile chosen.
- * Lives as long as the app does, so that a long analysis goes on while other screens show.
+ * Lives as long as the app does, so that a long analysis goes on while other screens show. The
+ * film's name and size and the profiles' files are read on [io], never on the main thread: the
+ * app's own profiles show until the store has been read.
  */
 @Stable
 class TvLabController(
     private val engine: TvLabEngine,
     private val profiles: ProfileStore,
     private val scope: CoroutineScope,
+    private val io: CoroutineContext = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     val available: Boolean get() = engine.available
@@ -163,12 +168,19 @@ class TvLabController(
     var elapsedMs by mutableStateOf<Long?>(null)
         private set
 
-    var profileList by mutableStateOf(profiles.all())
+    var profileList by mutableStateOf(BuiltInProfiles.all)
         private set
-    var profile by mutableStateOf(profileList.firstOrNull { it.id == profiles.selected } ?: profileList.first())
+    var profile by mutableStateOf(BuiltInProfiles.all.first())
         private set
 
+    /** The profiles kept as the user saved them, read with the list. */
+    private var savedIds by mutableStateOf(emptySet<String>())
+
     private var job: Job? = null
+
+    init {
+        scope.launch { load { list, selected -> list.firstOrNull { it.id == selected } } }
+    }
 
     /**
      * Analyses the film at [uri]: its streams, its drive, then its bitrate. What ran for the
@@ -176,9 +188,10 @@ class TvLabController(
      */
     fun open(uri: Uri): Job? {
         job?.cancel()
-        engine.cancel()
-        val described = engine.describe(uri)
-        file = described ?: TvLabFile(uri.toString(), uri.lastPathSegment.orEmpty(), 0)
+        // the native library loads when [available] is first read: nothing of it is called before
+        if (engine.available) engine.cancel()
+        // its name and size come from its provider (a drive that may be asleep), off the main thread
+        file = TvLabFile(uri.toString(), uri.lastPathSegment.orEmpty(), 0)
         tech = null
         bitrate = null
         disk = null
@@ -188,11 +201,13 @@ class TvLabController(
         diskStep = Step.Idle
         if (!engine.available) {
             probe = Step.Failed(NO_TOOLS)
+            job = scope.launch { describe(uri) }
             return null
         }
         probe = Step.Running(null)
         val started = now()
         return scope.launch {
+            describe(uri)
             tech = engine.probe(uri)
             probe = if (tech != null) Step.Done else Step.Failed(UNREADABLE)
             drive = withContext(Dispatchers.IO) { engine.drive(uri) }
@@ -219,7 +234,7 @@ class TvLabController(
 
     /** Stops what runs; what was found stays. */
     fun cancel() {
-        engine.cancel()
+        if (engine.available) engine.cancel()
         job?.cancel()
         if (bitrateStep is Step.Running) bitrateStep = Step.Failed(CANCELLED)
         if (diskStep is Step.Running) diskStep = Step.Failed(CANCELLED)
@@ -234,17 +249,20 @@ class TvLabController(
 
     /** [edited] kept, and chosen. */
     fun saveProfile(edited: DeviceProfile) {
-        profiles.save(edited)
-        profileList = profiles.all()
-        choose(edited.id)
+        scope.launch {
+            withContext(io) { profiles.save(edited) }
+            load { list, _ -> list.firstOrNull { it.id == edited.id } }
+            choose(edited.id)
+        }
     }
 
     /** A user's profile removed, an app's back to as it came; the chosen one stays if it can. */
     fun removeProfile(id: String) {
-        profiles.remove(id)
-        profileList = profiles.all()
-        profile = profileList.firstOrNull { it.id == profile.id } ?: profileList.first()
-        profiles.selected = profile.id
+        scope.launch {
+            withContext(io) { profiles.remove(id) }
+            load { _, _ -> null }
+            profiles.selected = profile.id
+        }
     }
 
     /**
@@ -252,16 +270,33 @@ class TvLabController(
      * shown; the chosen one kept's, else the one shown.
      */
     suspend fun reloadProfiles() {
-        val (list, chosen) = withContext(Dispatchers.IO) { profiles.all() to profiles.selected }
-        profileList = list
-        profile = list.firstOrNull { it.id == chosen } ?: list.firstOrNull { it.id == profile.id } ?: list.first()
+        load { list, selected -> list.firstOrNull { it.id == selected } }
     }
 
     /** An id for a new profile named [name]. */
     fun newId(name: String): String = FileProfileStore.newId(name, profileList.map { it.id })
 
     /** Whether the profile [id] is one the user saved: theirs, or an app's they changed. */
-    fun saved(id: String): Boolean = profiles.saved(id)
+    fun saved(id: String): Boolean = id in savedIds
+
+    /**
+     * The profiles, the choice and which are saved, read on [io]; the profile shown is the one
+     * [pick] finds in the list (given the store's choice), else the one shown so far, else the first.
+     */
+    private suspend fun load(pick: (List<DeviceProfile>, String?) -> DeviceProfile?) {
+        val (list, selected, saved) = withContext(io) {
+            val all = profiles.all()
+            Triple(all, profiles.selected, all.map { it.id }.filter(profiles::saved).toSet())
+        }
+        profileList = list
+        savedIds = saved
+        profile = pick(list, selected) ?: list.firstOrNull { it.id == profile.id } ?: list.first()
+    }
+
+    /** The film's name and size from its provider, on [io]; kept as opened when it does not say. */
+    private suspend fun describe(uri: Uri) {
+        withContext(io) { engine.describe(uri) }?.let { file = it }
+    }
 
     private suspend fun measureDisk(uri: Uri) {
         val size = file?.sizeBytes ?: 0L

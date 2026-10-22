@@ -6,6 +6,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import java.util.Collections
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -23,7 +24,7 @@ class TvLabControllerTest {
     private var clock = 1_000L
 
     private fun controller(engine: TvLabEngine, store: ProfileStore = MemoryProfileStore()) =
-        TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined)) { clock.also { clock += 42_000 } }
+        TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined), Dispatchers.Unconfined) { clock.also { clock += 42_000 } }
 
     private fun waitFor(what: String, condition: () -> Boolean) {
         val until = System.currentTimeMillis() + 5_000
@@ -68,8 +69,36 @@ class TvLabControllerTest {
         val lab = controller(engine)
         assertNull(lab.open(uri))
         assertEquals(Step.Failed(TvLabController.NO_TOOLS), lab.probe)
-        assertEquals(listOf("cancel"), engine.calls)
+        // not even the cancel: the native library is not there to load
+        assertEquals(emptyList<String>(), engine.calls)
+        lab.cancel()
+        assertEquals(emptyList<String>(), engine.calls)
         assertEquals(sampleFile, lab.file)
+    }
+
+    /** The film's provider and the profiles' files are read on the controller's IO context, never on the caller's thread. */
+    @Test
+    fun theProviderAndTheProfilesAreReadOffTheCallersThread() {
+        val caller = Thread.currentThread()
+        val readers: MutableList<Thread> = Collections.synchronizedList(mutableListOf())
+        val engine = object : TvLabEngine by FakeTvLabEngine() {
+            override fun describe(uri: Uri): TvLabFile {
+                readers += Thread.currentThread()
+                return sampleFile
+            }
+        }
+        val store = object : ProfileStore by MemoryProfileStore() {
+            override fun all(): List<DeviceProfile> {
+                readers += Thread.currentThread()
+                return BuiltInProfiles.all
+            }
+        }
+        val lab = TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined), Dispatchers.IO)
+        runBlocking { lab.open(uri)!!.join() }
+        waitFor("the profiles") { readers.size >= 2 }
+        assertTrue("read on $readers", readers.none { it === caller })
+        assertEquals(sampleFile, lab.file)
+        assertEquals(BuiltInProfiles.lgB4Usb, lab.profile)
     }
 
     @Test
