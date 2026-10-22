@@ -3484,4 +3484,17 @@
     <!-- Classic UI: VLC's Resume playback: Ask, for what is not a video -->
     <string name="nag_resume_at">Left at %1$s</string>
     <string name="nag_resume_for_list">The same for the rest of the list</string>
+    <!-- Classic UI: libVLC's questions with no window in front, a new external drive -->
+    <string name="nag_prompt_channel">Questions and sign-ins</string>
+    <string name="nag_prompt_asking">Nağmedar is asking something</string>
+    <string name="nag_prompt_asking_about">Nağmedar is asking: %1$s</string>
+    <string name="nag_prompt_tap">Tap to answer it in Nağmedar.</string>
+    <string name="nag_drive_channel">External drives</string>
+    <string name="nag_drive_new">External drive connected: %1$s</string>
+    <string name="nag_drive_new_text">Choose its folders for the library in Settings › Library.</string>
+    <string name="nag_drive_open">Library folders</string>
+    <plurals name="nag_prompt_waiting">
+        <item quantity="one">%d question waits for an answer. Tap to answer it in Nağmedar.</item>
+        <item quantity="other">%d questions wait for an answer. Tap to answer them in Nağmedar.</item>
+    </plurals>
 </resources>

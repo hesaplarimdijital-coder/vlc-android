@@ -51,6 +51,7 @@ import org.videolan.tools.*
 import org.videolan.tools.livedata.LiveDataset
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.hf.OtgAccess
+import org.videolan.vlc.util.NewStorageHook
 import java.lang.ref.WeakReference
 
 private const val TAG = "VLC/ExternalMonitor"
@@ -158,7 +159,11 @@ object ExternalMonitor : BroadcastReceiver(), DefaultLifecycleObserver, Coroutin
     @Synchronized
     @OptIn(ObsoleteCoroutinesApi::class)
     private fun notifyNewStorage(mediaMounted: MediaMounted) {
-        val activity = storageObserver?.get() ?: return
+        // Nağmedar: no classic screen follows the drives; the new interface says it
+        val activity = storageObserver?.get() ?: run {
+            NewStorageHook.handler?.newStorage(ctx, mediaMounted.path)
+            return
+        }
         UiTools.newStorageDetected(activity, mediaMounted.path)
         storageChannel.tryEmit(mediaMounted)
     }

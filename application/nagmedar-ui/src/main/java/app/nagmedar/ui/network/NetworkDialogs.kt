@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.libvlc.Dialog
 import org.videolan.tools.AppScope
-import org.videolan.vlc.util.DialogDelegate
 import org.videolan.vlc.util.LibVlcDialogHandler
 import org.videolan.vlc.util.LibVlcDialogHook
 import java.util.IdentityHashMap
@@ -16,7 +15,9 @@ import java.util.IdentityHashMap
 /**
  * S-1301: libVLC's requests as Nağmedar takes them ([LibVlcDialogHook], before VLC's windows):
  * each one made a [LibVlcPrompt] and sent where [router] says. Installed when the app starts, so
- * that the library's scan of a saved server and a file played after a restart sign in too.
+ * that the library's scan of a saved server and a file played after a restart sign in too. What
+ * nobody answers waits in [queue] for a window of the app; with none in front, a notification
+ * says so (VLC's DialogActivity is no longer started from the background).
  */
 object NetworkDialogs : LibVlcDialogHandler {
     private val main = Handler(Looper.getMainLooper())
@@ -24,41 +25,45 @@ object NetworkDialogs : LibVlcDialogHandler {
     /** The requests taken, by libVLC's dialog; main thread. */
     private val taken = IdentityHashMap<Dialog, LibVlcPrompt>()
 
-    /** Requests given back to VLC's windows: not taken again when they come through them; main thread. */
-    private val handedBack = java.util.Collections.newSetFromMap(IdentityHashMap<Dialog, Boolean>())
-
     @Volatile
     private var store: ServerStore? = null
 
-    val router = DialogRouter(savedSignIn = ::savedSignIn, now = SystemClock::elapsedRealtime, handBack = ::handBack)
+    @Volatile
+    private var notification: PromptNotification? = null
+
+    val router = DialogRouter(savedSignIn = ::savedSignIn, now = SystemClock::elapsedRealtime)
 
     /**
      * The requests the app's window shows, kept here for as long as the process lives: a window
-     * recreated (a new language) shows them again; with none in front for [HANDOVER_MS], they go
-     * to VLC's windows, so libVLC does not wait for nobody.
+     * recreated (a new language) shows them again; one taken while no window is in front, or left
+     * unanswered [NOTIFY_AFTER_MS] after the last window went, is said in a notification.
      */
     val queue = PromptQueue()
     private var windows = 0
-    private val handOver = Runnable {
-        if (windows == 0) queue.shown.toList().forEach(::handBack)
-    }
+    private val notify = Runnable { if (windows == 0) notifyWaiting() }
 
     /** A window of the new interface is in front: it shows the requests. Main thread. */
     fun windowStarted() {
         windows++
-        main.removeCallbacks(handOver)
-        router.host = queue
+        main.removeCallbacks(notify)
+        notification?.cancel()
     }
 
-    /** It is no longer in front; with none left, the requests go to VLC's windows a little later. Main thread. */
+    /** It is no longer in front; with none left, what waits is said in a notification a little later. Main thread. */
     fun windowStopped() {
         windows = (windows - 1).coerceAtLeast(0)
         if (windows > 0) return
-        router.host = null
-        main.postDelayed(handOver, HANDOVER_MS)
+        main.postDelayed(notify, NOTIFY_AFTER_MS)
     }
 
-    private const val HANDOVER_MS = 10_000L
+    private const val NOTIFY_AFTER_MS = 10_000L
+
+    /** The questions and sign-ins waiting (a progress needs no answer), in a notification; none left takes it away. */
+    private fun notifyWaiting() {
+        val waiting = queue.shown.filter { it.kind != PromptKind.Progress && !it.settled }
+        val notification = notification ?: return
+        if (waiting.isEmpty()) notification.cancel() else notification.post(waiting.first(), waiting.size)
+    }
 
     /** Takes libVLC's requests from now on, and follows the saved servers' hosts. */
     @Synchronized
@@ -66,6 +71,21 @@ object NetworkDialogs : LibVlcDialogHandler {
         if (store != null) return
         val servers = DatabaseServerStore(context)
         store = servers
+        notification = PromptNotification(context.applicationContext)
+        // the window shows what nobody else answers; with no window in front, the notification says it waits
+        router.host = object : PromptHost {
+            override fun show(prompt: LibVlcPrompt): Boolean {
+                queue.show(prompt)
+                if (windows == 0) notifyWaiting()
+                return true
+            }
+
+            override fun gone(prompt: LibVlcPrompt): Boolean {
+                val shown = queue.gone(prompt)
+                if (shown && windows == 0) notifyWaiting()
+                return shown
+            }
+        }
         LibVlcDialogHook.handler = this
         AppScope.launch {
             runCatching {
@@ -77,7 +97,6 @@ object NetworkDialogs : LibVlcDialogHandler {
     }
 
     override fun display(dialog: Dialog): Boolean {
-        if (handedBack.remove(dialog)) return false
         val prompt = promptOf(dialog) ?: return false
         // known before it is routed: an answer at once lets go of it
         taken[dialog] = prompt
@@ -86,22 +105,7 @@ object NetworkDialogs : LibVlcDialogHandler {
         return false
     }
 
-    /** [prompt] given to VLC's windows, as if Nağmedar had not seen it. Main thread. */
-    private fun handBack(prompt: LibVlcPrompt) {
-        queue.shown.remove(prompt)
-        val dialog = taken.entries.firstOrNull { it.value === prompt }?.key ?: return
-        taken.remove(dialog)
-        handedBack += dialog
-        when (dialog) {
-            is Dialog.LoginDialog -> DialogDelegate.onDisplay(dialog)
-            is Dialog.QuestionDialog -> DialogDelegate.onDisplay(dialog)
-            is Dialog.ProgressDialog -> DialogDelegate.onDisplay(dialog)
-            else -> handedBack -= dialog
-        }
-    }
-
     override fun canceled(dialog: Dialog): Boolean {
-        handedBack -= dialog
         val prompt = taken.remove(dialog) ?: return false
         router.canceled(prompt)
         return true

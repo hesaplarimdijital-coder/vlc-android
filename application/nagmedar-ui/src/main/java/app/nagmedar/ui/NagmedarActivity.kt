@@ -30,6 +30,7 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.isMediaOrSubtitleType
+import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastNotifier
@@ -207,10 +208,11 @@ class NagmedarActivity : ComponentActivity() {
         openAskedOf(intent)
     }
 
-    /** The system's search (its words on the search page) and the remote access notification (its addresses' window). */
+    /** The system's search (its words on the search page), the remote access notification (its addresses' window), a new drive's (the library's folders). */
     private fun openAskedOf(intent: Intent?) {
         intent?.getStringExtra(NAGMEDAR_EXTRA_SEARCH)?.let { ShellRequests.search = it }
         if (intent?.getBooleanExtra(NAGMEDAR_EXTRA_REMOTE_ACCESS, false) == true) RemoteAccessPages.open(RemoteAccessPage.Addresses)
+        if (intent?.getBooleanExtra(NewDrives.EXTRA_LIBRARY_SOURCES, false) == true) ShellRequests.librarySources = true
     }
 
     /** S-1103: a notification of new episodes carries the show it is about: its page opens. */

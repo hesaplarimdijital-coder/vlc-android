@@ -296,6 +296,12 @@ private fun NagmedarMain(
         navigator.navigate(Destination.Search)
         ShellRequests.search = null
     }
+    // a new drive's notice and notification ask for the library's folders
+    LaunchedEffect(ShellRequests.librarySources) {
+        if (!ShellRequests.librarySources) return@LaunchedEffect
+        addFolder()
+        ShellRequests.librarySources = false
+    }
     LaunchedEffect(requestedDestination) {
         if (requestedDestination == NAGMEDAR_DESTINATION_NOW_PLAYING) {
             nowPlayingRequested = true

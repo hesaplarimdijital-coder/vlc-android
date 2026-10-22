@@ -122,7 +122,7 @@ interface PromptHost {
  * HTTP's sign-ins name only a realm: they go to the one WebDAV server being opened, never when
  * two are. A sign-in naming a saved server (the library's scan, a file played after a restart) is
  * answered with its kept sign-in, once: asked again, it was turned down, and the person is asked
- * until it is typed anew ([savedSignIn] finds it off the main thread). Hosts are matched whole. The rest goes to [host] while the app's window is in front, else to VLC's windows.
+ * until it is typed anew ([savedSignIn] finds it off the main thread). Hosts are matched whole. The rest goes to [host]: the app's window, which a notification calls when none is in front.
  */
 class DialogRouter(
     /** The kept sign-in of the one saved server whose host is in the words; [reply] on any thread. */

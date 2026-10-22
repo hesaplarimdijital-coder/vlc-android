@@ -34,6 +34,7 @@ import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.network.NetworkDialogs
 import org.videolan.libvlc.Dialog
 import org.videolan.libvlc.FactoryManager
@@ -61,6 +62,7 @@ import org.videolan.vlc.gui.helpers.NotificationHelper
 import org.videolan.vlc.util.DialogDelegate
 import org.videolan.vlc.util.FontCache
 import org.videolan.vlc.util.NetworkConnectionManager
+import org.videolan.vlc.util.NewStorageHook
 import org.videolan.vlc.util.VersionMigration
 import org.videolan.vlc.widget.MiniPlayerAppWidgetProvider
 import java.io.File
@@ -151,6 +153,8 @@ class AppSetupDelegate : AppDelegate,
         Settings.initPostMigration(this@backgroundInit)
         // Nağmedar (S-1302): the new interface's device picker and "Play on …"
         Casting.install()
+        // Nağmedar: a new drive is said by the new interface, not by VLC's DialogActivity
+        NewStorageHook.handler = NewDrives
         launch(Dispatchers.IO) innerLaunch@ {
             if (!VLCInstance.testCompatibleCPU(AppContextProvider.appContext)) return@innerLaunch
             Dialog.setCallbacks(VLCInstance.getInstance(this@backgroundInit), DialogDelegate)

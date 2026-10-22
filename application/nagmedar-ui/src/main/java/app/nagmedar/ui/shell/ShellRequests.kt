@@ -8,4 +8,7 @@ import androidx.compose.runtime.setValue
 object ShellRequests {
     /** The words of a search to run on the search page. */
     var search by mutableStateOf<String?>(null)
+
+    /** Settings › Library, the sections' folders (a new drive's notification). */
+    var librarySources by mutableStateOf(false)
 }

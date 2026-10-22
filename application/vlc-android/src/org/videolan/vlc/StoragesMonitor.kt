@@ -16,6 +16,7 @@ import org.videolan.resources.util.getFromMl
 import org.videolan.tools.AppScope
 import org.videolan.tools.isAppStarted
 import org.videolan.vlc.gui.DialogActivity
+import org.videolan.vlc.util.NewStorageHook
 import org.videolan.vlc.util.scanAllowed
 
 
@@ -43,7 +44,11 @@ class StoragesMonitor : BroadcastReceiver() {
                         addDevice(action.uuid, action.path, true)
                         isNewForML
                     }
-                    if (isNew) {
+                    // Nağmedar: said by the new interface, which leads to the library's folders
+                    val nagmedar = NewStorageHook.handler
+                    if (isNew && nagmedar != null) {
+                        nagmedar.newStorage(action.ctx, action.path)
+                    } else if (isNew) {
                         val intent = Intent(action.ctx, DialogActivity::class.java).apply {
                             setAction(DialogActivity.KEY_DEVICE)
                             putExtra(DialogActivity.EXTRA_PATH, action.path)

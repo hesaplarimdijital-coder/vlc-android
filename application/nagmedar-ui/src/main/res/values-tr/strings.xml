@@ -3455,4 +3455,17 @@
     <!-- Classic UI: VLC's Resume playback: Ask, for what is not a video -->
     <string name="nag_resume_at">Kaldığı yer: %1$s</string>
     <string name="nag_resume_for_list">Listenin kalanında da böyle yap</string>
+    <!-- Classic UI: libVLC's questions with no window in front, a new external drive -->
+    <string name="nag_prompt_channel">Sorular ve oturum açma</string>
+    <string name="nag_prompt_asking">Nağmedar bir soru soruyor</string>
+    <string name="nag_prompt_asking_about">Nağmedar bir soru soruyor: %1$s</string>
+    <string name="nag_prompt_tap">Nağmedar\'da yanıtlamak için dokunun.</string>
+    <string name="nag_drive_channel">Harici diskler</string>
+    <string name="nag_drive_new">Harici disk takıldı: %1$s</string>
+    <string name="nag_drive_new_text">Kütüphaneye girecek klasörlerini Ayarlar › Kütüphane\'de seçebilirsiniz.</string>
+    <string name="nag_drive_open">Kütüphane klasörleri</string>
+    <plurals name="nag_prompt_waiting">
+        <item quantity="one">%d soru yanıt bekliyor. Nağmedar\'da yanıtlamak için dokunun.</item>
+        <item quantity="other">%d soru yanıt bekliyor. Nağmedar\'da yanıtlamak için dokunun.</item>
+    </plurals>
 </resources>
