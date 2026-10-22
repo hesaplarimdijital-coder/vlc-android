@@ -2,12 +2,10 @@ package app.nagmedar.audio
 
 import android.content.Context
 import android.net.Uri
-import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
 import app.nagmedar.audio.cue.CueUri
 import java.io.Closeable
-import java.io.File
 
 /** S-907: a file's loudness as the EBU R128 scanner measured it, and its ReplayGain 2.0 gain. */
 data class Loudness(
@@ -77,21 +75,22 @@ class LoudnessScanner(context: Context) : Closeable {
 
         /**
          * Writes [track] (and [album], when given) as ReplayGain tags into [uri], which must be
-         * writable: a file of the app's reach, or a document opened read-write. False when the
-         * file could not be opened for writing or its format takes no tags.
+         * writable: a file of the app's reach, or a document opened read-write. Through
+         * [FileTags.write], as the lyrics are (S-1005): a copy of the file is kept while it is
+         * written and put back if the file does not read as it was. False when the file could not
+         * be opened for writing, its format takes no tags, it is a CUE track (whose file the album's
+         * other tracks share) or the app has no room for the copy; the file is then as it was.
+         * Copies, writes and reads the file: off the main thread.
          */
-        fun writeTags(context: Context, uri: Uri, track: Loudness, album: Loudness?): Boolean {
-            if (!NativeAudio.available) return false
-            val descriptor = openReadWrite(context.applicationContext, uri) ?: return false
-            return descriptor.use {
+        fun writeTags(context: Context, uri: Uri, track: Loudness, album: Loudness?): Boolean =
+            FileTags.write(context, uri) { fd, name ->
                 NativeAudio.writeReplayGain(
-                    it.fd, displayName(context, uri),
+                    fd, name,
                     track.gainDb, track.truePeak,
                     album?.gainDb ?: Double.NaN, album?.truePeak ?: Double.NaN,
                     track.lufs, album?.lufs ?: Double.NaN,
                 ) == 0
-            }
-        }
+            } == TagWrite.Written
 
         /** The file's name with its extension, for the tag writer's type detection; a CUE track's (S-808) is its file's. */
         fun displayName(context: Context, track: Uri): String {
@@ -105,14 +104,6 @@ class LoudnessScanner(context: Context) : Closeable {
             }
             return uri.lastPathSegment?.substringAfterLast('/') ?: ""
         }
-
-        private fun openReadWrite(context: Context, uri: Uri): ParcelFileDescriptor? = runCatching {
-            when (uri.scheme) {
-                null, "file" -> ParcelFileDescriptor.open(File(uri.path!!), ParcelFileDescriptor.MODE_READ_WRITE)
-                "content" -> context.contentResolver.openFileDescriptor(uri, "rw")
-                else -> null
-            }
-        }.onFailure { Log.w(TAG, "cannot write $uri: $it") }.getOrNull()
 
         private inline fun <T> withReadPath(context: Context, track: Uri, block: (String) -> T?): T? {
             val uri = CueUri.file(track)

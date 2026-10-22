@@ -171,7 +171,7 @@ Local music files are played by Nağmedar's own **music engine**: an FFmpeg-deco
 ### Gapless, crossfade, ReplayGain
 - The tracks of an album follow each other with no gap or click: the next track is decoded ahead and taken over sample-accurately.
 - Crossfade (2, 4, 8 s; “Equal power” or “Linear”) is in Settings › Music; it is off by itself between consecutive tracks of an album.
-- ReplayGain brings tracks to the same loudness: track or album gain, preamp, clipping prevention. “Scan the library” measures albums and writes the ReplayGain tags into the files when you start it.
+- ReplayGain brings tracks to the same loudness: track or album gain, preamp, clipping prevention. “Scan the library” measures albums and writes the ReplayGain tags into the files when you start it; as with lyrics, a copy of each file is kept while it is written. A CUE sheet's tracks are skipped: they all share one file.
 
 ### Equaliser and tests
 - {key:Equalizer} (Audio › Equaliser…): a 20-band graphic equaliser, a 10-band parametric equaliser, an AutoEq headphone profile and a limiter. “Bypass the chain” turns all of it off with one key and makes the output bit-perfect.

@@ -5,6 +5,7 @@ import android.util.Log
 import app.nagmedar.audio.Loudness
 import app.nagmedar.audio.LoudnessScanner
 import app.nagmedar.audio.MusicFormats
+import app.nagmedar.audio.cue.CueUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,8 +22,9 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 /**
  * S-907: the library's albums measured (EBU R128) and tagged with their ReplayGain, in the
  * background. One album at a time: its tracks scanned into the album's gain, then each track's
- * tags written (track and album gain and peak; R128 for Opus). Tracks that carry a gain already
- * are skipped unless [start] is told to redo them. Progress is a state the settings screen shows.
+ * tags written (track and album gain and peak; R128 for Opus) through the copy-guarded tag write
+ * (S-1005). Tracks that carry a gain already are skipped unless [start] is told to redo them.
+ * Progress is a state the settings screen shows.
  */
 object ReplayGainScan {
 
@@ -84,9 +86,15 @@ object ReplayGainScan {
         }
     }
 
-    /** One album: the tracks the engine can read and tag (a tracker module takes no tags, S-911), measured together; the tags of each written. */
+    /**
+     * One album: the tracks the engine can read and tag, measured together; the tags of each written, a copy of its file
+     * kept meanwhile (S-1005). A tracker module takes no tags (S-911), and a CUE sheet's track is left out: its file is
+     * the other tracks' too (S-808), each track's gain would overwrite the one before.
+     */
     internal fun scanAlbum(context: Context, album: Album, redo: Boolean) {
-        val tracks = album.tracks.filter { track -> MusicFormats.canPlay(track.uri, null) && !MusicFormats.isTracker(track.uri) }
+        val tracks = album.tracks.filter { track ->
+            MusicFormats.canPlay(track.uri, null) && !MusicFormats.isTracker(track.uri) && !CueUri.isTrack(track.uri)
+        }
         if (tracks.isEmpty()) return
         val todo = if (redo) tracks else tracks.filter { track -> LoudnessScanner.probe(context, track.uri)?.hasReplayGain != true }
         if (todo.isEmpty()) {

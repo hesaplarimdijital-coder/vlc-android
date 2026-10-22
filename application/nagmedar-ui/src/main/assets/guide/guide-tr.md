@@ -171,7 +171,7 @@ Yerel müzik dosyalarını Nağmedar'ın kendi **müzik motoru** çalar: FFmpeg 
 ### Boşluksuz, çapraz geçiş, ReplayGain
 - Bir albümün parçaları arada boşluk ya da tık olmadan birbirini izler: sıradaki parça önceden çözülür ve örnek doğruluğunda devralınır.
 - Çapraz geçiş (2, 4, 8 sn; “Eşit güç” ya da “Doğrusal”) Ayarlar › Müzik'tedir; albüm içindeki ardışık parçalarda kendiliğinden kapalıdır.
-- ReplayGain parçaları aynı gürlüğe getirir: parça ya da albüm kazancı, ön kazanç, kırpılmayı önleme. “Kütüphaneyi tara” albümleri ölçüp ReplayGain etiketlerini dosyalara siz başlatınca yazar.
+- ReplayGain parçaları aynı gürlüğe getirir: parça ya da albüm kazancı, ön kazanç, kırpılmayı önleme. “Kütüphaneyi tara” albümleri ölçüp ReplayGain etiketlerini dosyalara siz başlatınca yazar; her dosyanın kopyası, sözlerde olduğu gibi, yazılırken tutulur. CUE sayfasının parçaları atlanır: hepsi aynı dosyadadır.
 
 ### Ekolayzer ve test
 - {key:Equalizer} (Ses › Ekolayzer…): 20 bantlı grafik ekolayzer, 10 bantlı parametrik ekolayzer, AutoEq kulaklık profili ve sınırlayıcı. “Zinciri atla” tek tuşla hepsini devre dışı bırakır ve çıkışı bit-perfect yapar.
