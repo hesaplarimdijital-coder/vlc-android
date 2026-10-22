@@ -1,9 +1,6 @@
 package app.nagmedar.ui.player
 
 import android.content.Context
-import android.view.InputDevice
-import android.view.MotionEvent
-import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.getValue
@@ -207,7 +204,7 @@ class DesktopControlsTest {
     val compose = createComposeRule()
 
     private val actions = FakePlayerActions()
-    private val visibility = ChromeVisibility(active = true)
+    private val visibility = ChromeVisibility()
     private val previews = FakePreviews()
     private var state by mutableStateOf(samplePlayerState)
 
@@ -504,28 +501,5 @@ class DesktopControlsTest {
         compose.onNodeWithText("1:11:45").assertExists()
         compose.onNodeWithTag("player-audio").assertExists()
         compose.onNodeWithTag("player-subtitles").assertExists()
-    }
-
-    @Test
-    fun fingersPassThroughToTheClassicOverlay() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val frame = MouseOnlyFrame(context, visibility)
-        val received = mutableListOf<Int>()
-        val child = View(context).apply { setOnTouchListener { _, event -> received += event.getToolType(0); true } }
-        frame.addView(child, 100, 100)
-        frame.measure(View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY))
-        frame.layout(0, 0, 100, 100)
-        assertFalse("a finger is not the controls'", frame.dispatchTouchEvent(press(MotionEvent.TOOL_TYPE_FINGER, InputDevice.SOURCE_TOUCHSCREEN)))
-        assertTrue("a mouse is", frame.dispatchTouchEvent(press(MotionEvent.TOOL_TYPE_MOUSE, InputDevice.SOURCE_MOUSE)))
-        assertEquals(listOf(MotionEvent.TOOL_TYPE_MOUSE), received)
-        // after a finger the controls are not active: the mouse's next press makes them so first
-        visibility.onFinger()
-        assertFalse(frame.dispatchTouchEvent(press(MotionEvent.TOOL_TYPE_MOUSE, InputDevice.SOURCE_MOUSE)))
-    }
-
-    private fun press(toolType: Int, source: Int): MotionEvent {
-        val properties = arrayOf(MotionEvent.PointerProperties().apply { id = 0; this.toolType = toolType })
-        val coords = arrayOf(MotionEvent.PointerCoords().apply { x = 50f; y = 50f })
-        return MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 1, properties, coords, 0, 0, 1f, 1f, 0, 0, source, 0)
     }
 }

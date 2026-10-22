@@ -7,15 +7,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 /**
- * When the desktop controls show (S-601): a mouse moving over the video shows them, and they hide
- * [HIDE_AFTER_MS] after it stops, unless it rests on them or one of their menus is open; the
- * cursor hides with them. A finger hands the video back to the classic overlay and its gestures:
- * the controls are not [active] until a mouse moves again. In picture in picture there are none.
+ * When the player's controls show and in which layout (S-601). They are the player's only
+ * controls: a mouse moving over the video brings their desktop layout, which hides
+ * [HIDE_AFTER_MS] after the mouse stops unless it rests on them or one of their menus is open;
+ * a finger or a pen brings their [touch] layout, which a tap shows and hides and which hides
+ * [TOUCH_HIDE_AFTER_MS] after the last touch. The cursor hides with them; TalkBack keeps them
+ * shown; the touch lock ([locked]) puts them and the gestures away; in picture in picture there
+ * are none.
  */
 @Stable
-class ChromeVisibility(active: Boolean = false) {
-    /** A mouse is in use: the controls stand for the classic overlay. */
-    var active by mutableStateOf(active)
+class ChromeVisibility(touch: Boolean = false) {
+    /** A finger or a pen touched the video last: the touch layout, its gestures and its larger targets. */
+    var touch by mutableStateOf(touch)
         private set
 
     var visible by mutableStateOf(false)
@@ -24,37 +27,59 @@ class ChromeVisibility(active: Boolean = false) {
     var pictureInPicture by mutableStateOf(false)
         private set
 
+    /** The touch lock: no controls and no gestures but the lock's own button. */
+    var locked by mutableStateOf(false)
+        private set
+
     /** The pointer is on the bars: they stay. */
     var overBars by mutableStateOf(false)
 
-    /** A menu of the bars is open: they stay. */
+    /** A menu of the bars, or one of the touch layout's sheets, is open: they stay. */
     var menuOpen by mutableStateOf(false)
 
-    /** Counts the mouse's moves: each starts the hide timer again. */
+    /** TalkBack explores the screen by touch: the controls stay while it does. */
+    var explored by mutableStateOf(false)
+
+    /** Counts what asked for the controls while locked: each shows the lock's button again for a while. */
+    var lockHints by mutableIntStateOf(0)
+        private set
+
+    /** Counts the moves and the touches: each starts the hide timer again. */
     var moves by mutableIntStateOf(0)
         private set
 
     /** The cursor hides with the controls over a playing video. */
-    val cursorHidden: Boolean get() = active && !visible && !pictureInPicture
+    val cursorHidden: Boolean get() = !touch && !visible && !pictureInPicture
 
     /** Whether the hide timer runs. */
-    val hiding: Boolean get() = visible && !overBars && !menuOpen
-
-    /** A mouse is connected: the controls stand for the overlay from the start. */
-    fun activate() {
-        active = true
-    }
+    val hiding: Boolean get() = visible && !overBars && !menuOpen && !explored
 
     fun onMouseMoved() {
-        active = true
+        touch = false
         show()
     }
 
-    /** Shows the controls for a while: the mouse moved, or the player asked for its overlay. */
+    /** A finger or a pen touched the video: the touch layout takes over; a tap then shows it. */
+    fun onTouched() {
+        if (touch) return
+        touch = true
+        overBars = false
+    }
+
+    /** Shows the controls for a while: a move, a touch, or the player asked for its overlay; locked, the lock's button. */
     fun show() {
-        if (pictureInPicture || !active) return
+        if (pictureInPicture) return
+        if (locked) {
+            lockHints++
+            return
+        }
         visible = true
         moves++
+    }
+
+    /** Something was touched on the controls: the timer starts again, nothing else changes. */
+    fun poke() {
+        if (visible) moves++
     }
 
     fun hide() {
@@ -62,11 +87,19 @@ class ChromeVisibility(active: Boolean = false) {
         overBars = false
     }
 
-    /** A finger touched the screen: the classic overlay and its gestures take over. */
-    fun onFinger() {
-        active = false
-        hide()
+    /** A tap on the video: the touch layout shows, or goes. */
+    fun toggle() = if (visible) hide() else show()
+
+    /** The touch lock (S-601): the controls go, and only the lock's button comes back when the video is tapped. */
+    fun lock() {
+        locked = true
         menuOpen = false
+        hide()
+    }
+
+    fun unlock() {
+        locked = false
+        show()
     }
 
     fun onPictureInPicture(inPictureInPicture: Boolean) {
@@ -78,7 +111,10 @@ class ChromeVisibility(active: Boolean = false) {
     }
 
     companion object {
-        /** S-601: the controls hide two seconds after the mouse stops. */
+        /** S-601: the desktop controls hide two seconds after the mouse stops. */
         const val HIDE_AFTER_MS = 2_000L
+
+        /** The touch layout hides four seconds after the last touch, as VLC's overlay does. */
+        const val TOUCH_HIDE_AFTER_MS = 4_000L
     }
 }

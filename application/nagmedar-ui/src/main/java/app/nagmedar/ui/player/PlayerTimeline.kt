@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -64,7 +65,8 @@ private const val SEEK_EVERY_MS = 120L
 /**
  * The player's timeline (S-601): what has played, the chapters' starts as ticks, the bookmarks as
  * diamonds (S-608), the A-B loop's marks with its stretch lit; under the mouse a frame of that
- * moment with its time and chapter. A click seeks there; a drag seeks as it goes.
+ * moment with its time and chapter. A click seeks there; a drag seeks as it goes. For a finger
+ * ([touch]) it is a 48 dp target and shows the frame while the finger drags.
  */
 @Composable
 fun PlayerTimeline(
@@ -74,7 +76,10 @@ fun PlayerTimeline(
     modifier: Modifier = Modifier,
     /** The mouse's place in the timeline, for tests and screenshots: 0..1, null when it is elsewhere. */
     initialHover: Float? = null,
+    /** The touch layout's timeline: taller, its frame shown only while a finger drags. */
+    touch: Boolean = false,
 ) {
+    val height = if (touch) TouchTimelineHeight else TimelineHeight
     val colors = NagTheme.colors
     val length = state.lengthMs
     val label = stringResource(R.string.nag_player_position)
@@ -102,7 +107,7 @@ fun PlayerTimeline(
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
-            .height(TimelineHeight)
+            .height(height)
             .testTag("player-timeline")
             .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
             .pointerHoverIcon(PointerIcon.Hand)
@@ -134,11 +139,15 @@ fun PlayerTimeline(
                                     change.consume()
                                 }
                             }
-                            PointerEventType.Release -> if (drag != null) {
-                                // where the drag ended, unless it was sought there already (a click)
-                                if (at != lastSought) seek(at, force = true)
-                                drag = null
-                                change.consume()
+                            PointerEventType.Release -> {
+                                if (drag != null) {
+                                    // where the drag ended, unless it was sought there already (a click)
+                                    if (at != lastSought) seek(at, force = true)
+                                    drag = null
+                                    change.consume()
+                                }
+                                // a finger leaves no pointer resting on the timeline
+                                if (change.type != PointerType.Mouse) hover = null
                             }
                             PointerEventType.Enter -> hover = at
                             PointerEventType.Exit -> hover = null
@@ -148,7 +157,7 @@ fun PlayerTimeline(
             },
     ) {
         val density = LocalDensity.current
-        Canvas(Modifier.fillMaxWidth().height(TimelineHeight)) {
+        Canvas(Modifier.fillMaxWidth().height(height)) {
             val y = size.height - TrackFromBottom.toPx()
             val thickness = (if (emphasised) 6.dp else 4.dp).toPx()
             val radius = CornerRadius(thickness / 2, thickness / 2)
@@ -207,6 +216,7 @@ fun PlayerTimeline(
 }
 
 private val TimelineHeight = 34.dp
+private val TouchTimelineHeight = 48.dp
 private val TrackFromBottom = 10.dp
 private val PreviewWidth = 192.dp
 private val PreviewHeight = 108.dp

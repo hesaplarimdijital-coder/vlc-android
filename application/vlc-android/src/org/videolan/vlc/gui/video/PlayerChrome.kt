@@ -1,6 +1,7 @@
 /*
  * Nağmedar (S-601): the desktop control bar over the video player; its panel (S-603); the buttons
- * of picture in picture (S-609); the refresh rate's matching (S-612); casting's controls (S-1302).
+ * of picture in picture (S-609); the refresh rate's matching (S-612); casting's controls (S-1302);
+ * the only controls of the player, for fingers, pens, mice and keys alike.
  */
 package org.videolan.vlc.gui.video
 
@@ -14,16 +15,42 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 
 /**
- * The controls a mouse uses over the video: drawn by Nağmedar's new interface, which depends on
- * this module and is therefore found by name. With a mouse they stand for the classic overlay;
- * a finger brings the classic overlay and its gestures back.
+ * The player's controls over the video: drawn by Nağmedar's new interface, which depends on this
+ * module and is therefore found by name. Once attached they are the player's only controls: the
+ * classic overlay, its gestures, its option sheets and its dialogs are never shown; what the
+ * player would show there it hands to them instead ([request], [showInfo], [showLevel]…).
  */
 interface PlayerChrome {
+
+    /** What the player asks of the controls where the classic overlay had a view of its own. */
+    enum class Request {
+        /** The audio and subtitle tracks (V, the classic tracks button). */
+        Tracks,
+
+        /** The player's options (D-pad up, the classic "advanced options"). */
+        Options,
+        Equalizer,
+        JumpToTime,
+
+        /** A subtitle file to add, from the system's picker. */
+        PickSubtitles,
+        Bookmarks,
+        AddBookmark,
+
+        /** The screen locked against touches, or unlocked. */
+        Lock,
+
+        /** Picture in picture is turned off for the app in Android's settings. */
+        PictureInPictureRefused,
+    }
+
+    /** The levels the gestures, the wheel and the keys change. */
+    enum class Level { Volume, Brightness }
 
     /** Adds the controls to [root], over the video and under the classic panels. */
     fun attach(activity: VideoPlayerActivity, root: FrameLayout)
 
-    /** Whether the mouse is in use: the classic overlay then shows these controls instead. */
+    /** Whether the controls are attached: they stand for the classic overlay, which then never shows. */
     val active: Boolean
 
     /** The player asked for its overlay (a key, a new media): the controls show for a moment. */
@@ -31,7 +58,7 @@ interface PlayerChrome {
 
     /**
      * A pointer moved, pressed or scrolled over the window, before the views see it: a mouse's
-     * makes the controls stand for the overlay, a finger's hands the overlay back to the player.
+     * brings the desktop layout of the controls, a finger's or a pen's their touch layout.
      */
     fun onMotion(event: MotionEvent)
 
@@ -63,6 +90,37 @@ interface PlayerChrome {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     fun pictureInPictureActions(playing: Boolean): List<RemoteAction> = emptyList()
+
+    /** Nağmedar: [request] answered by the controls; false when they have nothing for it. */
+    fun request(request: Request): Boolean = false
+
+    /** Nağmedar: [text] said over the video for [durationMs], where the classic overlay wrote it. */
+    fun showInfo(text: String, durationMs: Int): Boolean = false
+
+    /** Nağmedar: the volume or the brightness, in percent, as a key, the wheel or a gesture set it. */
+    fun showLevel(level: Level, percent: Int): Boolean = false
+
+    /** Nağmedar: the subtitles' delay ([subtitles]) or the audio's, now [delayUs], as the keys set it. */
+    fun showDelay(subtitles: Boolean, delayUs: Long): Boolean = false
+
+    /** Nağmedar: a seek by [deltaMs] (the keys, the ±10 s), now at [timeMs] of [lengthMs]. */
+    fun showSeek(deltaMs: Int, timeMs: Long, lengthMs: Long): Boolean = false
+
+    /** Nağmedar: the media is loading or buffering: the controls show it instead of the classic cone. */
+    fun showLoading(loading: Boolean): Boolean = false
+
+    /**
+     * Nağmedar: whether the video [title] goes on where it stopped. [answer] gets true to resume,
+     * false to start again, null to leave the player; [always] for every video until the player
+     * closes, as the classic dialog's "do the same for all" box. False leaves it to the classic dialog.
+     */
+    fun askResume(title: String, answer: (resume: Boolean?, always: Boolean) -> Unit): Boolean = false
+
+    /** The question of [askResume] was answered elsewhere or went. */
+    fun closeResume() = Unit
+
+    /** Back: true when the controls took it (a sheet closed, the lock said so). */
+    fun onBack(): Boolean = false
 
     fun detach()
 

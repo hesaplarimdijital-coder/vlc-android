@@ -59,7 +59,7 @@ class PlayerSubtitlesScreenshotTest {
 
     private fun capture(name: String, input: InputMode = InputMode.Pointer, overVideo: @Composable BoxScope.() -> Unit) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

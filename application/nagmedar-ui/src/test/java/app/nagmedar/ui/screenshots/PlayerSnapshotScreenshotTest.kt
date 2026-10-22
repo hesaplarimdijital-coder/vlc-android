@@ -66,7 +66,7 @@ class PlayerSnapshotScreenshotTest {
 
     private fun capture(name: String, overVideo: @Composable BoxScope.() -> Unit) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

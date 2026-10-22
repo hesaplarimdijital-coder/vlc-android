@@ -91,7 +91,7 @@ class PlayerNavigationScreenshotTest {
 
     private fun jump(name: String, typed: String, input: InputMode) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

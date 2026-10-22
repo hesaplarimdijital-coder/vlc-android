@@ -1,45 +1,18 @@
 package app.nagmedar.ui.player
 
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * S-601: the controls stand for the classic overlay once a mouse is in use; a finger hands the
- * video back to the classic overlay and its gestures; picture in picture has no controls; the
- * cursor hides with them.
+ * S-601: the controls hide unless the mouse rests on them or a menu is open; picture in picture
+ * has no controls; the cursor hides with them.
  */
 class ChromeVisibilityTest {
 
     @Test
-    fun withoutAMouseThePlayerAsksTheClassicOverlay() {
-        val visibility = ChromeVisibility()
-        visibility.show()
-        assertFalse("a finger's player: the classic overlay shows", visibility.visible)
-        visibility.onMouseMoved()
-        assertTrue(visibility.active)
-        assertTrue(visibility.visible)
-        assertEquals(1, visibility.moves)
-    }
-
-    @Test
-    fun aFingerHandsTheVideoBack() {
-        val visibility = ChromeVisibility(active = true)
-        visibility.show()
-        visibility.menuOpen = true
-        visibility.onFinger()
-        assertFalse(visibility.active)
-        assertFalse(visibility.visible)
-        assertFalse(visibility.menuOpen)
-        // until the mouse moves again
-        visibility.show()
-        assertFalse(visibility.visible)
-    }
-
-    @Test
     fun theTimerRunsUnlessTheMouseRestsOnThemOrAMenuIsOpen() {
-        val visibility = ChromeVisibility(active = true)
+        val visibility = ChromeVisibility()
         visibility.show()
         assertTrue(visibility.hiding)
         visibility.overBars = true
@@ -54,7 +27,7 @@ class ChromeVisibilityTest {
 
     @Test
     fun pictureInPictureHasNoControls() {
-        val visibility = ChromeVisibility(active = true)
+        val visibility = ChromeVisibility()
         visibility.show()
         visibility.onPictureInPicture(true)
         assertFalse(visibility.visible)
@@ -69,7 +42,6 @@ class ChromeVisibilityTest {
     @Test
     fun theCursorHidesWithThem() {
         val visibility = ChromeVisibility()
-        assertFalse(visibility.cursorHidden)
         visibility.onMouseMoved()
         assertFalse(visibility.cursorHidden)
         visibility.hide()

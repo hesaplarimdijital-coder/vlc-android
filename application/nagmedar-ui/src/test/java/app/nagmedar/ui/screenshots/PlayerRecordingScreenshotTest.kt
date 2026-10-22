@@ -50,7 +50,7 @@ class PlayerRecordingScreenshotTest {
 
     private fun capture(name: String, status: RecordingStatus, controls: Boolean = true, input: InputMode = InputMode.Pointer, card: @Composable BoxScope.() -> Unit) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

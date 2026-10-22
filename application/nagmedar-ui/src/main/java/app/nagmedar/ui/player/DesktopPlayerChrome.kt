@@ -13,6 +13,8 @@ import android.view.MotionEvent
 import android.view.PointerIcon
 import android.view.View
 import android.view.ViewGroup
+import android.media.AudioManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.FrameLayout
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,8 +41,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.lifecycleScope
+import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.cast.Casting
@@ -170,6 +174,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.resources.ACTION_REMOTE_PLAYPAUSE
 import org.videolan.resources.AndroidDevices
@@ -178,6 +183,14 @@ import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.EXTRA_SEEK_DELAY
 import org.videolan.resources.DecodingHook
 import org.videolan.resources.SubtitleEncodingHook
+import org.videolan.tools.ENABLE_BRIGHTNESS_GESTURE
+import org.videolan.tools.ENABLE_DOUBLE_TAP_PLAY
+import org.videolan.tools.ENABLE_DOUBLE_TAP_SEEK
+import org.videolan.tools.ENABLE_FASTPLAY
+import org.videolan.tools.ENABLE_SCALE_GESTURE
+import org.videolan.tools.ENABLE_SWIPE_SEEK
+import org.videolan.tools.ENABLE_VOLUME_GESTURE
+import org.videolan.tools.FASTPLAY_SPEED
 import org.videolan.tools.KEY_SUBTITLE_PREFERRED_LANGUAGE
 import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
@@ -185,6 +198,7 @@ import org.videolan.vlc.gui.video.PlayerChrome
 import org.videolan.vlc.gui.video.PlayerWindow
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.util.getPendingIntent
+import java.io.File
 import java.util.Locale
 import app.nagmedar.ui.transcode.TranscodeMedia
 import app.nagmedar.ui.transcode.TranscodeRequests
@@ -192,12 +206,26 @@ import app.nagmedar.ui.visual.VisualizerSettings
 
 /**
  * The new interface's controls over the classic video player (S-601), which finds them by name
- * ([PlayerChrome.create]): a view over the video that a mouse drives and fingers pass through to
- * the classic overlay's gestures; and its panel (S-603), docked beside or under the video, with
- * the effects of the playing film.
+ * ([PlayerChrome.create]): the player's only controls, for fingers, pens, mice and keys. A view
+ * over the video with the desktop layout for a mouse ([DesktopControls]) and the touch layout,
+ * its gestures and its sheets for a finger ([TouchControls]); the OSD ([PlayerOsd]) where the
+ * classic overlay wrote; the resume question; and the panel (S-603), docked beside or under the
+ * video. The classic overlay, its gestures, sheets and dialogs never show while they are attached.
  */
 class DesktopPlayerChrome : PlayerChrome {
     private val controls = ChromeVisibility()
+    private val osd = PlayerOsd()
+    private val sheets = PlayerSheets()
+
+    /** The resume question waiting for its answer. */
+    private var resume by mutableStateOf<ResumeQuestion?>(null)
+
+    /** The video's gestures, as the classic settings have them when the player opens. */
+    private var gestureSettings = TouchGestureSettings()
+
+    /** The lock turned the screen's orientation lock on: unlocking turns it off again. */
+    private var lockedOrientation = false
+    private var explorer: AccessibilityManager.TouchExplorationStateChangeListener? = null
     private val panel = PanelState()
     private val info = InfoState()
     private val live = LiveStats()
@@ -225,7 +253,7 @@ class DesktopPlayerChrome : PlayerChrome {
     /** The app's windows over the film: the guide, the shortcut card, the palette, the sleep timer. */
     private val appWindows = PlayerAppWindows()
 
-    override val active: Boolean get() = controls.active
+    override val active: Boolean get() = activity != null
 
     // S-612: the screen's refresh rate follows the film as the sync tab's choice says
     override val matchesFrameRate: Boolean get() = true
@@ -264,8 +292,8 @@ class DesktopPlayerChrome : PlayerChrome {
                 ShortcutId.SecondarySubtitles -> dual?.let { toggleSecondary(activity, it) }
                 // S-1302: the device picker
                 ShortcutId.Cast -> showCastPicker(activity)
-                // the app's shortcuts (F1, Ctrl+/, Ctrl+K, Alt+S, Ctrl+,): their windows over the film
-                ShortcutId.UserGuide, ShortcutId.ShortcutList, ShortcutId.CommandPalette, ShortcutId.SleepTimer, ShortcutId.Settings ->
+                // the app's shortcuts (F1, Ctrl+/, Ctrl+K, Alt+S, Ctrl+,) and the equaliser: their windows over the film
+                ShortcutId.UserGuide, ShortcutId.ShortcutList, ShortcutId.CommandPalette, ShortcutId.SleepTimer, ShortcutId.Settings, ShortcutId.Equalizer ->
                     return@PlayerKeyTarget appWindows.perform(activity, id)
                 // S-704: the sync assistant's steps, said over the video
                 ShortcutId.SyncMarkAudio, ShortcutId.SyncMarkSubtitle, ShortcutId.SyncApply, ShortcutId.SyncUndo -> assistant?.let { assist(activity, it, id) }
@@ -281,8 +309,16 @@ class DesktopPlayerChrome : PlayerChrome {
         }
         // the user's keys (S-402), before the first key arrives
         ShortcutRegistry.overrides = ShortcutOverrides.parse(Settings.getInstance(activity).getString(NagmedarPreferences.KEY_SHORTCUTS, null))
-        // a desktop with a mouse starts with these controls; a finger later hands the video back
-        if (hasPrecisePointer(activity)) controls.activate()
+        // without a mouse the touch layout comes first; a mouse moving, or a finger, changes it later
+        if (!hasPrecisePointer(activity)) controls.onTouched()
+        gestureSettings = readGestureSettings(activity)
+        // TalkBack: the controls stay while it explores the screen
+        activity.getSystemService(AccessibilityManager::class.java)?.let { manager ->
+            controls.explored = manager.isTouchExplorationEnabled
+            val listener = AccessibilityManager.TouchExplorationStateChangeListener { on -> controls.explored = on }
+            manager.addTouchExplorationStateChangeListener(listener)
+            explorer = listener
+        }
         // the effects (S-603): the classic player's own, and libVLC's through Nağmedar's additions (S-505, S-506)
         val settings = Settings.getInstance(activity)
         val autoCrop = ActivityAutoCrop(activity, MainScope())
@@ -362,17 +398,20 @@ class DesktopPlayerChrome : PlayerChrome {
         // subtitles from the providers turned on: OpenSubtitles.com with Nağmedar's own key (S-706), a folder of the user's (S-707)
         val online = OnlineSubtitlesController(SubtitleProviders.registry(activity), PrefsOnlineQuotaStore(Settings.getInstance(activity)), MainScope())
         this.online = online
-        val frame = MouseOnlyFrame(activity, controls)
+        val frame = ChromeFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
             setContent {
-                PlayerChromeContent(activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online)
+                PlayerChromeContent(
+                    activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online,
+                    ChromeExtras(osd, sheets, touchActions(activity), resume, { resume = null }, appWindows),
+                )
                 PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences()) { id -> keys?.perform(id) }
             }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        // over the video, under the classic panels (delays, tracks, playlist), which keep their clicks
+        // over the video, under the classic views, none of which is shown any more
         val video = activity.videoLayout?.let { root.indexOfChild(it) } ?: -1
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
@@ -388,21 +427,148 @@ class DesktopPlayerChrome : PlayerChrome {
             when (event.actionMasked) {
                 MotionEvent.ACTION_HOVER_ENTER, MotionEvent.ACTION_HOVER_MOVE, MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_MOVE, MotionEvent.ACTION_SCROLL,
-                -> {
-                    // the mouse takes over from the classic overlay
-                    if (!controls.active) activity?.takeIf { it.isShowing }?.overlayDelegate?.hideOverlay(true)
-                    controls.onMouseMoved()
-                }
+                -> controls.onMouseMoved()
             }
-        } else if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            controls.onFinger()
+        } else if (event.actionMasked == MotionEvent.ACTION_DOWN && !controls.explored) {
+            // a finger or a pen: the touch layout (TalkBack's touches explore, they choose no layout)
+            controls.onTouched()
         }
     }
 
+    override fun request(request: PlayerChrome.Request): Boolean {
+        val activity = activity ?: return false
+        when (request) {
+            PlayerChrome.Request.Tracks -> sheets.show(PlayerSheet.Audio)
+            PlayerChrome.Request.Options -> sheets.show(PlayerSheet.More)
+            PlayerChrome.Request.Equalizer -> appWindows.perform(activity, ShortcutId.Equalizer)
+            PlayerChrome.Request.JumpToTime -> navigation?.jumping = true
+            PlayerChrome.Request.PickSubtitles -> subtitles?.pick?.invoke()
+            PlayerChrome.Request.Bookmarks -> panel.show(PanelTab.Bookmarks)
+            PlayerChrome.Request.AddBookmark -> navigation?.addBookmark()
+            PlayerChrome.Request.Lock -> if (controls.locked) unlock(activity) else lock(activity)
+            PlayerChrome.Request.PictureInPictureRefused -> osd.say(activity.getString(R.string.nag_osd_pip_off), PIP_OFF_SAID_MS)
+        }
+        return true
+    }
+
+    override fun showInfo(text: String, durationMs: Int): Boolean {
+        osd.say(text, durationMs.toLong().coerceAtLeast(MIN_SAID_MS))
+        return true
+    }
+
+    override fun showLevel(level: PlayerChrome.Level, percent: Int): Boolean {
+        val max = if (level == PlayerChrome.Level.Volume) activity?.maxVolumePercent ?: 100 else 100
+        osd.level(if (level == PlayerChrome.Level.Volume) OsdLevel.Volume else OsdLevel.Brightness, percent, max)
+        return true
+    }
+
+    override fun showDelay(subtitles: Boolean, delayUs: Long): Boolean {
+        val activity = activity ?: return false
+        val locale = ConfigurationCompat.getLocales(activity.resources.configuration)[0] ?: Locale.getDefault()
+        val ms = signed(delayUs / 1000, locale)
+        osd.say(activity.getString(if (subtitles) R.string.nag_osd_subtitle_delay else R.string.nag_osd_audio_delay, ms))
+        sync?.refresh()
+        return true
+    }
+
+    override fun showSeek(deltaMs: Int, timeMs: Long, lengthMs: Long): Boolean {
+        osd.seeked(deltaMs, timeMs, lengthMs, System.currentTimeMillis())
+        return true
+    }
+
+    override fun showLoading(loading: Boolean): Boolean {
+        osd.loading = loading
+        return true
+    }
+
+    override fun askResume(title: String, answer: (resume: Boolean?, always: Boolean) -> Unit): Boolean {
+        resume = ResumeQuestion(title, answer)
+        return true
+    }
+
+    override fun closeResume() {
+        resume = null
+    }
+
+    override fun onBack(): Boolean {
+        when {
+            sheets.open != null -> sheets.close()
+            // locked, Back says how to unlock rather than leaving the film
+            controls.locked -> controls.show()
+            panel.shown -> panel.close()
+            else -> return false
+        }
+        return true
+    }
+
+    /**
+     * The touch lock: the controls and the gestures go until its button is tapped; the screen
+     * keeps the orientation it has meanwhile, as VLC's lock does.
+     */
+    private fun lock(activity: VideoPlayerActivity) {
+        lockedOrientation = !activity.orientationMode.locked
+        if (lockedOrientation) activity.toggleOrientationLock()
+        activity.isLocked = true
+        sheets.close()
+        panel.close()
+        controls.lock()
+        osd.say(activity.getString(R.string.nag_osd_locked))
+    }
+
+    private fun unlock(activity: VideoPlayerActivity) {
+        activity.isLocked = false
+        if (lockedOrientation) activity.toggleOrientationLock()
+        lockedOrientation = false
+        controls.unlock()
+        osd.say(activity.getString(R.string.nag_osd_unlocked))
+    }
+
+    /** What the touch layout does on the player: its gestures, its sheets, the panel, the lock. */
+    private fun touchActions(activity: VideoPlayerActivity): TouchActions = object : TouchActions {
+        override val gestures = gestureSettings
+
+        override fun jump(deltaMs: Int) {
+            val service = activity.service ?: return
+            if (!service.isSeekable || service.length <= 0) return
+            activity.seek((activity.time + deltaMs).coerceIn(0L, service.length), fromUser = true, fast = false)
+        }
+
+        override fun timeMs(): Long = activity.time
+
+        override fun lengthMs(): Long = activity.service?.takeIf { it.isSeekable }?.length ?: 0L
+
+        override fun playing(): Boolean = activity.service?.isPlaying == true
+
+        override fun rate(): Float = activity.service?.rate ?: 1f
+
+        override fun volumePercent(): Int = activity.volumePercent
+
+        override fun maxVolumePercent(): Int = activity.maxVolumePercent
+
+        override fun brightness(): Float = activity.brightnessLevel.takeIf { it >= 0f } ?: systemBrightness(activity)
+
+        override fun setBrightness(level: Float) {
+            activity.brightnessLevel = level
+        }
+
+        override fun zoom(fill: Boolean) =
+            applyPictureSize(activity, if (fill) MediaPlayer.ScaleType.SURFACE_FIT_SCREEN else MediaPlayer.ScaleType.SURFACE_BEST_FIT)
+
+        override fun openSheet(sheet: PlayerSheet) = sheets.show(sheet)
+
+        override fun openPanel(tab: PanelTab) = panel.show(tab)
+
+        override fun lock() = lock(activity)
+
+        override fun unlock() = unlock(activity)
+    }
+
     override fun onKey(event: KeyEvent): Boolean {
-        // Escape closes the panel before it leaves anything else
-        if (event.keyCode == KeyEvent.KEYCODE_ESCAPE && panel.shown) {
-            if (event.action == KeyEvent.ACTION_DOWN) panel.close()
+        // Escape closes a sheet, then the panel, before it leaves anything else
+        if (event.keyCode == KeyEvent.KEYCODE_ESCAPE && (sheets.open != null || panel.shown)) {
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                if (sheets.open != null) sheets.close() else panel.close()
+            }
             return true
         }
         return keys?.let { PlayerKeys.handle(event, it) } ?: false
@@ -410,6 +576,7 @@ class DesktopPlayerChrome : PlayerChrome {
 
     override fun onPictureInPicture(inPictureInPicture: Boolean) {
         controls.onPictureInPicture(inPictureInPicture)
+        if (inPictureInPicture) sheets.close()
         // the small window shows the video alone; the panel comes back with the big one
         panel.suspended = inPictureInPicture
     }
@@ -506,6 +673,9 @@ class DesktopPlayerChrome : PlayerChrome {
     }
 
     override fun detach() {
+        explorer?.let { listener -> activity?.getSystemService(AccessibilityManager::class.java)?.removeTouchExplorationStateChangeListener(listener) }
+        explorer = null
+        resume = null
         // the playback ends with the player: its record is kept (S-1404)
         perfJob?.cancel()
         perfJob = null
@@ -553,6 +723,69 @@ private fun requestConvert(activity: VideoPlayerActivity, kind: TranscodeRequest
 /** Picture in picture's step back and forward, in seconds: the control bar's. */
 private const val PIP_STEP_S = 10L
 
+/**
+ * What shares the media at [uri]: a document as it is, a file through the app's provider (null when
+ * it is gone), anything else (a stream) by its address. Reads the disk: off the main thread.
+ */
+private fun shareIntent(context: Context, uri: Uri): Intent? = when (uri.scheme) {
+    "content" -> Intent(Intent.ACTION_SEND).setType(VIDEO_TYPE).putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    "file", null -> uri.path?.let(::File)?.takeIf { it.isFile }?.let { file ->
+        val shared = FileProvider.getUriForFile(context, context.packageName + ".provider", file)
+        Intent(Intent.ACTION_SEND).setType(VIDEO_TYPE).putExtra(Intent.EXTRA_STREAM, shared).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    else -> Intent(Intent.ACTION_SEND).setType(TEXT_TYPE).putExtra(Intent.EXTRA_TEXT, uri.toString())
+}
+
+private const val VIDEO_TYPE = "video/*"
+private const val TEXT_TYPE = "text/plain"
+
+/** The OSD's shortest line, and the longer one saying picture in picture is off. */
+private const val MIN_SAID_MS = 600L
+private const val PIP_OFF_SAID_MS = 4_000L
+
+/** The resume question (VLC's "resume where you left off?"), and where its answer goes. */
+private class ResumeQuestion(val title: String, val answer: (resume: Boolean?, always: Boolean) -> Unit)
+
+/**
+ * The gestures as Video › Controls in the classic settings has them (VLC's keys and defaults); the
+ * volume's needs a volume the app may change; the long press is on unless turned off there.
+ */
+private fun readGestureSettings(activity: VideoPlayerActivity): TouchGestureSettings {
+    val settings = Settings.getInstance(activity)
+    val fixedVolume = activity.getSystemService(AudioManager::class.java)?.isVolumeFixed == true
+    val rate = runCatching { settings.getInt(FASTPLAY_SPEED, FASTPLAY_DEFAULT) / 10f }.getOrDefault(FAST_RATE)
+    return TouchGestureSettings(
+        volume = settings.getBoolean(ENABLE_VOLUME_GESTURE, true) && !fixedVolume,
+        brightness = settings.getBoolean(ENABLE_BRIGHTNESS_GESTURE, true),
+        doubleTapSeek = settings.getBoolean(ENABLE_DOUBLE_TAP_SEEK, true),
+        doubleTapPlay = settings.getBoolean(ENABLE_DOUBLE_TAP_PLAY, true),
+        swipeSeek = settings.getBoolean(ENABLE_SWIPE_SEEK, true),
+        pinch = settings.getBoolean(ENABLE_SCALE_GESTURE, true),
+        fastPlay = !settings.contains(ENABLE_FASTPLAY) || settings.getBoolean(ENABLE_FASTPLAY, true),
+        fastRate = rate.coerceIn(MIN_FAST_RATE, MAX_FAST_RATE),
+    )
+}
+
+/** VLC's long press speed setting: tenths, 20 for 2×; its range 1.1× to 8×. */
+private const val FASTPLAY_DEFAULT = 20
+private const val MIN_FAST_RATE = 1.1f
+private const val MAX_FAST_RATE = 8f
+
+/** The system's brightness, 0..1, before a swipe sets the window's own. */
+private fun systemBrightness(activity: VideoPlayerActivity): Float = runCatching {
+    android.provider.Settings.System.getInt(activity.contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS) / 255f
+}.getOrDefault(0.5f).coerceIn(0.01f, 1f)
+
+/** What the controls' content shows beyond the desktop layout: the OSD, the sheets, the touch layout's actions, the resume question. */
+private class ChromeExtras(
+    val osd: PlayerOsd,
+    val sheets: PlayerSheets,
+    val touch: TouchActions,
+    val resume: ResumeQuestion?,
+    val answered: () -> Unit,
+    val windows: PlayerAppWindows,
+)
+
 /** What the subtitles' tab reads and drives: the film's subtitle files and its two tracks (S-703), the sync assistant (S-704), the look (S-705), OpenSubtitles (S-706). */
 private class PanelSubtitles(
     val files: PlayerSubtitles,
@@ -584,7 +817,7 @@ private fun toggleSecondary(activity: VideoPlayerActivity, dual: DualSubtitlesCo
         state.primary == null || state.tracks.size < 2 -> activity.getString(R.string.nag_subs_secondary_missing)
         else -> activity.getString(R.string.nag_subs_secondary_off)
     }
-    activity.overlayDelegate.showInfo(text, SAID_MS)
+    activity.chrome?.showInfo(text, SAID_MS)
 }
 
 private const val SAID_MS = 1_500
@@ -617,19 +850,20 @@ private fun assist(activity: VideoPlayerActivity, assistant: SyncAssistant, step
             ?: activity.getString(if (assistant.clearMarks()) R.string.nag_assist_osd_cleared else R.string.nag_assist_osd_nothing)
         else -> return
     }
-    activity.overlayDelegate.showInfo(text, SAID_MS)
+    activity.chrome?.showInfo(text, SAID_MS)
 }
 
 /** The player's id of "no subtitles". */
 private const val NO_SUBTITLES = "-1"
 
 /**
- * Over the video: a mouse reaches the controls, a finger or a pen passes through to the classic
- * overlay's gestures. The keys stay the player's (Space, the arrows, the shortcuts): nothing in
- * here takes the focus. The cursor hides with the controls when the video fills the screen.
+ * Over the video: the controls take every touch, a mouse's, a finger's and a pen's, and TalkBack's
+ * exploring; in picture in picture none (the window is the system's then). The keys stay the
+ * player's (Space, the arrows, the shortcuts): nothing in here takes the focus. The cursor hides
+ * with the controls when the video fills the screen.
  */
 @SuppressLint("ViewConstructor")
-internal class MouseOnlyFrame(context: Context, private val controls: ChromeVisibility) : FrameLayout(context) {
+internal class ChromeFrame(context: Context, private val controls: ChromeVisibility) : FrameLayout(context) {
 
     /** Whether the cursor hides with the controls: the video fills the screen. */
     var hidesCursor = false
@@ -639,12 +873,7 @@ internal class MouseOnlyFrame(context: Context, private val controls: ChromeVisi
         isFocusable = false
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean =
-        controls.active && !controls.pictureInPicture && PlayerChrome.isMouse(event) && super.dispatchTouchEvent(event)
-
-    override fun dispatchHoverEvent(event: MotionEvent): Boolean = controls.active && super.dispatchHoverEvent(event)
-
-    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean = controls.active && super.dispatchGenericMotionEvent(event)
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean = !controls.pictureInPicture && super.dispatchTouchEvent(event)
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onResolvePointerIcon(event: MotionEvent, pointerIndex: Int): PointerIcon? =
@@ -658,15 +887,17 @@ internal class MouseOnlyFrame(context: Context, private val controls: ChromeVisi
 
 /**
  * The controls in the app: the player's state twice a second while they show, its commands,
- * frames for the timeline; the statistics over the video when asked (S-605), sampled every second
- * while they or the Info tab show; the screenshots' flash and card (S-606).
+ * frames for the timeline, in the desktop layout or the touch one as the last pointer was; the
+ * OSD, the touch layout's sheets, the lock and the resume question; the statistics over the
+ * video when asked (S-605), sampled every second while they or the Info tab show; the
+ * screenshots' flash and card (S-606).
  */
 @Composable
 private fun PlayerChromeContent(
     activity: VideoPlayerActivity,
     visibility: ChromeVisibility,
     panel: PanelState,
-    frame: MouseOnlyFrame,
+    frame: ChromeFrame,
     infoSource: ActivityInfoSource,
     info: InfoState,
     live: LiveStats,
@@ -675,9 +906,10 @@ private fun PlayerChromeContent(
     subtitles: PlayerSubtitles,
     dual: DualSubtitlesController,
     online: OnlineSubtitlesController,
+    extras: ChromeExtras,
 ) {
     val prefs = rememberNagmedarPreferences()
-    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, dual, prefs) }
+    val source = remember(activity, prefs) { ActivityPlayerSource(activity, panel, snapshots, subtitles, dual, prefs, extras.osd, extras.windows) }
     // the screenshots' folder, chosen with the system's picker: written in, kept across restarts
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) keepSnapshotFolder(activity, prefs, uri)
@@ -726,9 +958,17 @@ private fun PlayerChromeContent(
             delay(1_000)
         }
     }
-    NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = InputMode.Pointer) {
+    // the sheets keep the controls shown while they are open
+    LaunchedEffect(extras.sheets.open) { visibility.menuOpen = extras.sheets.open != null }
+    NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.touch) InputMode.Touch else InputMode.Pointer) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             Box(Modifier.fillMaxSize()) {
+                // the cards and the small visualiser stay above the control bar while it shows; the touch layout's is taller
+                val barRoom = when {
+                    !visibility.visible -> 24.dp
+                    visibility.touch -> 176.dp
+                    else -> 120.dp
+                }
                 SnapshotFlash(snapshots.state.flashes)
                 // S-611: the visualiser, under the controls: large over sound alone, small beside a picture
                 if (prefs.visualizer.video) {
@@ -746,20 +986,20 @@ private fun PlayerChromeContent(
                         mediaKey = uri,
                         onSettings = prefs::updateVisualizer,
                         // beside a picture: above the control bar while it shows, clear of the cards on the left
-                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = barRoom),
                     )
                 }
-                DesktopControls(
-                    state.copy(
-                        effectsOpen = panel.open && panel.tab == PanelTab.Effects,
-                        snapshot = prefs.snapshot,
-                        bookmarks = navigation.bookmarks.marks.map { it.timeMs },
-                        visualizer = prefs.visualizer.kind.takeIf { prefs.visualizer.video },
-                    ),
-                    source,
-                    visibility,
-                    previews,
+                val chromeState = state.copy(
+                    effectsOpen = panel.open && panel.tab == PanelTab.Effects,
+                    snapshot = prefs.snapshot,
+                    bookmarks = navigation.bookmarks.marks.map { it.timeMs },
+                    visualizer = prefs.visualizer.kind.takeIf { prefs.visualizer.video },
                 )
+                if (visibility.touch) {
+                    TouchControls(chromeState, source, extras.touch, visibility, extras.osd, previews, canRotate = source.fillsScreen())
+                } else {
+                    DesktopControls(chromeState, source, visibility, previews)
+                }
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
                 // S-607: a recording's mark, under the title while it shows
                 val recorder = Recordings.recorder
@@ -772,7 +1012,7 @@ private fun PlayerChromeContent(
                 }
                 // above the control bar while it shows: the subtitles found beside the film (S-701), a screenshot's card
                 Column(
-                    Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = if (visibility.visible) 120.dp else 24.dp),
+                    Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = barRoom),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     SubtitleChooser(subtitles.found, onChoose = subtitles::choose, onDismiss = subtitles::dismiss)
@@ -807,6 +1047,21 @@ private fun PlayerChromeContent(
                     }
                 }
                 if (subtitles.dragging) SubtitleDropOverlay()
+                // the small window shows the film alone
+                if (!visibility.pictureInPicture) PlayerOsdHost(extras.osd)
+                // the lock's own button, whichever layout the last pointer chose
+                if (visibility.locked && !visibility.pictureInPicture) LockOverlay(visibility.lockHints, onUnlock = extras.touch::unlock)
+                extras.sheets.open?.let { sheet ->
+                    val content = sheetContent(sheet, chromeState, source, extras.sheets, extras.touch, navigation, canRotate = source.fillsScreen())
+                    PlayerSheetView(content.title, content.entries, onDismiss = extras.sheets::close)
+                }
+            }
+            // VLC's "resume where you left off?", in the app's own dialog
+            extras.resume?.let { question ->
+                ResumePrompt(question.title) { resume, always ->
+                    extras.answered()
+                    question.answer(resume, always)
+                }
             }
             // S-702: the character set of the film's subtitle files
             subtitles.encoding?.let { sample -> EncodingDialog(sample, onApply = subtitles::applyEncoding, onDismiss = subtitles::closeEncoding) }
@@ -965,7 +1220,7 @@ private fun PanelContent(
     layout: PanelLayout,
 ) {
     val prefs = rememberNagmedarPreferences()
-    NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.active) InputMode.Pointer else InputMode.Touch) {
+    NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = if (visibility.touch) InputMode.Touch else InputMode.Pointer) {
         CompositionLocalProvider(LocalTooltipDelay provides prefs.tooltipDelay.millis) {
             PlayerPanel(panel, listOf(PanelTab.Subtitles, PanelTab.Sync, PanelTab.Effects, PanelTab.Info, PanelTab.Bookmarks), layout.dock, Modifier.fillMaxSize()) { tab ->
                 when (tab) {
@@ -1179,6 +1434,8 @@ internal class ActivityPlayerSource(
     private val subtitles: PlayerSubtitles,
     private val dual: DualSubtitlesController,
     private val prefs: NagmedarPreferences,
+    private val osd: PlayerOsd,
+    private val windows: PlayerAppWindows,
 ) : PlayerChromeActions {
 
     /** Opens the folder picker: the composition's launcher. */
@@ -1315,6 +1572,51 @@ internal class ActivityPlayerSource(
     }
 
     override fun close() = activity.onBackPressedDispatcher.onBackPressed()
+
+    /** One of the app's windows over the film: the equaliser, the sleep timer, the guide; Settings in the library's window. */
+    fun openWindow(id: ShortcutId) {
+        windows.perform(activity, id)
+    }
+
+    fun pictureSize(): MediaPlayer.ScaleType = activity.currentScaleType
+
+    fun setPictureSize(scale: MediaPlayer.ScaleType) = applyPictureSize(activity, scale)
+
+    fun orientation(): ScreenOrientation? = ScreenOrientation.of(activity.orientationMode.locked, activity.orientationMode.orientation)
+
+    /** The screen held in [orientation], or turning with the device again; said over the video. */
+    fun setOrientation(orientation: ScreenOrientation) {
+        activity.setOrientation(orientation.value)
+        osd.say(activity.getString(orientation.label))
+    }
+
+    /**
+     * The film goes on as sound alone, as the classic "play as audio": the player closes, the
+     * library's window shows it playing; its bar brings the picture back.
+     */
+    fun audioOnly() {
+        runCatching { activity.startActivity(Intent(activity, NagmedarActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)) }
+        // not the classic app's main screen, which the classic switch opens for a film from another app
+        activity.intent.removeExtra(VideoPlayerActivity.FROM_EXTERNAL)
+        activity.switchToAudioMode(true)
+    }
+
+    /** The film shared with the system's sheet: the file itself where there is one, its address otherwise. */
+    fun share() {
+        val media = activity.service?.currentMediaWrapper ?: return
+        val title = media.title ?: media.fileName.orEmpty()
+        activity.lifecycleScope.launch {
+            // a file outside the provider's folders cannot be shared as a file
+            val send = withContext(Dispatchers.IO) { runCatching { shareIntent(activity, media.uri) }.getOrNull() }
+            if (send == null) {
+                osd.say(activity.getString(R.string.nag_player_share_missing))
+                return@launch
+            }
+            // a sheet over the player is not leaving it: no small window
+            activity.isShowingDialog = true
+            runCatching { activity.startActivity(Intent.createChooser(send, activity.getString(R.string.nag_player_share_title, title))) }
+        }
+    }
 
     private companion object {
         /** The player's id of "no track". */

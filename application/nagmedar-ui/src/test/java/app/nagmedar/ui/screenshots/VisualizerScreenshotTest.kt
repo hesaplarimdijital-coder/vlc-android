@@ -186,7 +186,7 @@ class VisualizerScreenshotTest {
     /** The video player: over sound alone the visualiser fills the middle; beside a picture it is small, above the controls. */
     private fun player(name: String, audioOnly: Boolean, kind: VisualizerKind, input: InputMode = InputMode.Pointer, problem: ScopeProblem? = null) {
         val state = still().apply { this.problem = problem }
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

@@ -53,6 +53,10 @@ Sözlüğü testler denetler:
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
 | çeviri, çevirmek | translation, translate | | | Altyazının cihazda, internete gönderilmeden bir dilden ötekine çevrilmesi (S-710): “Altyazıyı çevir…”, araçların “Çevir” sekmesi; Türkçe → İngilizce, İngilizce → Türkçe. Sonuç yeni bir dosyadır (`film.tr.srt`) |
 | çeviri modeli | translation model | | | Çevirinin bir yön için indirilen dosyaları (OPUS-MT); boyutu söylenip onayla indirilir, Ayarlar › Altyazı'dan silinir. Kısa yerlerde “model” |
+| ekranı kilitlemek | lock the screen | | | Video oynatıcıda dokunuşları ve hareketleri kapatır, ekranın yönünü tutar: “Ekranı kilitle”; ekrana dokununca çıkan düğme “Kilidi aç” |
+| parlaklık | brightness | | | Video oynatıcıda sol yarıda yukarı-aşağı kaydırma; yalnız oynatıcının penceresini aydınlatır, sistemin ayarı değişmez |
+| ekran yönü | screen orientation | | | Otomatik, Yatay, Dikey, Ters yatay |
+| görüntü boyutu | picture size | | | Filmin ekrana yerleşmesi: Sığdır, Ekranı doldur (kırp), Uzat, Özgün boyut ya da oran (16:9, 2.35:1); oranlar iki dilde de noktalı |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |

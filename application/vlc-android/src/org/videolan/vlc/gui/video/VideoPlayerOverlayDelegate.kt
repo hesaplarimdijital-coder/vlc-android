@@ -225,6 +225,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      * Shows the fold layout snackbar if needed
      */
     private fun showHingeSnackIfNeeded() {
+        // Nağmedar: no classic snackbar over the new controls
+        if (player.chrome?.active == true) return
         if (!hingeSnackShown) {
             UiTools.snackerConfirm(player, player.getString(R.string.fold_optimized), confirmMessage = R.string.undo) {
                 player.resizeDelegate.showResizeOverlay()
@@ -323,6 +325,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      */
     fun showInfo(text: String, duration: Int, subText:String = "") {
         if (player.isInPictureInPictureMode) return
+        // Nağmedar: said by the new controls
+        if (player.chrome?.showInfo(text, duration) == true) return
         initInfoOverlay()
         overlayInfo.setVisible()
         info.setVisible()
@@ -364,6 +368,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      * @param brightness the brightness value
      */
     fun showBrightnessBar(brightness: Int) {
+        if (player.chrome?.showLevel(PlayerChrome.Level.Brightness, brightness) == true) return
         player.handler.sendEmptyMessage(VideoPlayerActivity.FADE_OUT_VOLUME_INFO)
         player.findViewById<ViewStubCompat>(R.id.player_brightness_stub)?.setVisible()
         playerOverlayBrightness = player.findViewById(R.id.player_overlay_brightness)
@@ -383,6 +388,10 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      * @param volume the volume value
      */
     fun showVolumeBar(volume: Int) {
+        if (player.chrome?.showLevel(PlayerChrome.Level.Volume, volume) == true) {
+            player.service?.let { resetSleepTimer(it) }
+            return
+        }
         player.handler.sendEmptyMessage(VideoPlayerActivity.FADE_OUT_BRIGHTNESS_INFO)
         player.findViewById<ViewStubCompat>(R.id.player_volume_stub)?.setVisible()
         playerOverlayVolume = player.findViewById(R.id.player_overlay_volume)
@@ -442,8 +451,10 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
      */
     fun showOverlayTimeout(timeout: Int) {
         // Nağmedar (S-601): with a mouse, the desktop controls show instead
+        // Nağmedar: the new controls show instead, for fingers and mice alike
         player.chrome?.takeIf { it.active }?.let { chrome ->
             chrome.show()
+            player.service?.let { resetSleepTimer(it) }
             return
         }
         player.service?.let { service ->
@@ -1112,6 +1123,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
 
     /** The file picker for a subtitle; Nağmedar (S-602): also Ctrl+Shift+A. */
     fun pickSubtitles() {
+        // Nağmedar: the system's picker, through the new controls
+        if (player.chrome?.request(PlayerChrome.Request.PickSubtitles) == true) return
         val uri = player.videoUri ?: return
         val media = if (uri.scheme.isSchemeFile() || uri.scheme.isSchemeNetwork()) MediaWrapperImpl(FileUtils.getParent(uri.toString())!!.toUri()) else null
         player.isShowingDialog = true
@@ -1126,6 +1139,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
     }
 
     fun showBookmarks() {
+        if (player.chrome?.request(PlayerChrome.Request.Bookmarks) == true) return
         player.service?.let {
             if (bookmarkListDelegate == null) {
                 bookmarkListDelegate = BookmarkListDelegate(player, it, player.bookmarkModel, true)

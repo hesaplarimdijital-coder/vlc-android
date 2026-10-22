@@ -296,8 +296,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     val resumeDialogObserver: (t: WaitConfirmation?) -> Unit = {
         if (it != null)
             showConfirmResumeDialog(it)
-        else
+        else {
+            chrome?.closeResume()
             currentConfirmationDialog?.dismiss()
+        }
     }
 
     /**
@@ -610,7 +612,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
         // Extra initialization when no secondary display is detected
         isTv = Settings.showTvUi
-        // Nağmedar (S-601): with a mouse, the desktop controls stand for the overlay
+        // Nağmedar: the new interface's controls stand for the classic overlay, for fingers, pens, mice and keys
         if (displayManager.isPrimary && !isTv && !isBenchmark) chrome = PlayerChrome.create()?.also { it.attach(this, rootView as FrameLayout) }
         // Nağmedar (S-1302): cast to a renderer, the new interface's casting controls over the classic remote ones
         // (the remote layout has no player root: they go over the window's content)
@@ -618,8 +620,9 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         if (displayManager.isPrimary) {
             // Orientation
             // Tips
+            // Nağmedar: the classic gestures' tips, which the new controls do not have
             if (!BuildConfig.DEBUG && !isTv && !settings.getBoolean(PREF_TIPS_SHOWN, false)
-                && !isBenchmark
+                && !isBenchmark && chrome == null
             ) {
                 tipsDelegate.init()
             }
@@ -669,6 +672,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // Nağmedar: the new controls' sheets and lock first
+                if (chrome?.onBack() == true) return
                 if (optionsDelegate?.isShowing() == true) {
                     optionsDelegate?.hide()
                 } else if (resizeDelegate.isShowing()) {
@@ -857,7 +862,13 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
         val forceLegacy = Settings.getInstance(this).getBoolean(POPUP_FORCE_LEGACY, false)
         if (AndroidDevices.hasPiP && !forceLegacy) {
-            Permissions.checkPiPPermission(this)
+            // Nağmedar: the new controls say it when Android's settings turned it off, without the classic dialog
+            if (chrome != null) {
+                if (!Permissions.isPiPAllowed(this)) {
+                    chrome?.request(PlayerChrome.Request.PictureInPictureRefused)
+                    return
+                }
+            } else Permissions.checkPiPPermission(this)
             if (AndroidUtil.isOOrLater)
                 try {
                     val track = service?.playlistManager?.player?.mediaplayer?.getSelectedVideoTrack()
@@ -1460,6 +1471,11 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     override fun showEqualizer() {
+        // Nağmedar: the app's own equaliser over the film
+        chrome?.let {
+            it.request(PlayerChrome.Request.Equalizer)
+            return
+        }
         val newFragment = EqualizerFragmentDialog()
         newFragment.onDismissListener = DialogInterface.OnDismissListener { overlayDelegate.dimStatusBar(true) }
         newFragment.show(supportFragmentManager, "equalizer")
@@ -1510,6 +1526,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     override fun bookmark() {
+        chrome?.let {
+            it.request(PlayerChrome.Request.AddBookmark)
+            return
+        }
         bookmarkModel.addBookmark(this)
         UiTools.snackerConfirm(this, getString(R.string.bookmark_added), confirmMessage = R.string.show) {
             overlayDelegate.showOverlay()
@@ -1523,6 +1543,11 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     override fun isReadyForDirectional() = false
 
     override fun showAdvancedOptions() {
+        // Nağmedar: the new controls' options instead of the classic sheet
+        chrome?.let {
+            it.request(PlayerChrome.Request.Options)
+            return
+        }
         if (optionsDelegate == null) service?.let {
             optionsDelegate = PlayerOptionsDelegate(this, it)
             optionsDelegate!!.setBookmarkClickedListener {
@@ -1588,6 +1613,17 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     fun delaySubtitles(deltaUs: Long) = delayBy(deltaUs, IPlaybackSettingsController.DelayState.SUBS)
 
     private fun delayBy(deltaUs: Long, state: IPlaybackSettingsController.DelayState) {
+        // Nağmedar: the delay set, and said over the video, without the classic delay controls
+        chrome?.let { chrome ->
+            val service = service ?: return
+            val subtitles = state == IPlaybackSettingsController.DelayState.SUBS
+            val current = if (subtitles) service.spuDelay else service.audioDelay
+            // a step from a value that is not one of its multiples goes to the next multiple first, as VLC's buttons do
+            val delay = current + if (current % deltaUs != 0L) deltaUs - (current % deltaUs) else deltaUs
+            if (subtitles) service.setSpuDelay(delay) else service.setAudioDelay(delay)
+            chrome.showDelay(subtitles, delay)
+            return
+        }
         delayDelegate.showDelayControls()
         delayDelegate.delayAudioOrSpu(delta = deltaUs, delayState = state)
         handler.removeMessages(HIDE_SETTINGS)
@@ -1596,6 +1632,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     /** Nağmedar (S-602): Ctrl+T, VLC's "jump to time". */
     fun showJumpToTime() {
+        chrome?.let {
+            it.request(PlayerChrome.Request.JumpToTime)
+            return
+        }
         if (supportFragmentManager.isStateSaved) return
         JumpToTimeDialog.newInstance().show(supportFragmentManager, "time")
     }
@@ -1941,6 +1981,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Nağmedar: the new controls have the gestures; none reaches the classic ones
+        if (chrome?.active == true) return false
         return service != null && touchDelegate.onTouchEvent(event)
     }
 
@@ -2011,6 +2053,14 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         overlayDelegate.showInfo(if (isMute) R.string.sound_off else R.string.sound_on, 1000)
     }
 
+    /**
+     * Nağmedar: the window's brightness, 0..1, as the new controls' gesture sets it; -1 while it is
+     * the system's.
+     */
+    var brightnessLevel: Float
+        get() = window.attributes.screenBrightness
+        set(value) = setWindowBrightness(value.coerceIn(0.01f, 1f))
+
     internal fun changeBrightness(delta: Float) {
         // Estimate and adjust Brightness
         val lp = window.attributes
@@ -2028,6 +2078,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     open fun onAudioSubClick(anchor: View?) {
+        chrome?.let {
+            it.request(PlayerChrome.Request.Tracks)
+            return
+        }
         overlayDelegate.showTracks()
         overlayDelegate.hideOverlay(false)
     }
@@ -2197,6 +2251,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     }
 
     fun toggleLock() {
+        chrome?.let {
+            it.request(PlayerChrome.Request.Lock)
+            return
+        }
         if (isLocked)
             overlayDelegate.unlockScreen()
         else
@@ -2520,6 +2578,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         }
         service?.pause()
         PlaybackService.waitConfirmation.postValue(confirmation.title)
+        // Nağmedar: the new interface's question
+        if (chrome?.askResume(confirmation.title) { resume, always -> answerResume(confirmation, resume, always) } == true) return
         val inflater = this.layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_video_resume, null)
         val resumeAllCheck = dialogView.findViewById<CheckBox>(R.id.video_resume_checkbox)
@@ -2550,6 +2610,23 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
                 currentConfirmationDialog = this
                     show()
                 }
+    }
+
+    /** Nağmedar: the new interface's answer to the resume question; null leaves the player, as Back does in the classic dialog. */
+    private fun answerResume(confirmation: WaitConfirmation, resume: Boolean?, always: Boolean) {
+        PlaybackService.waitConfirmation.postValue(null)
+        val manager = service?.playlistManager
+        when (resume) {
+            null -> finish()
+            true -> {
+                if (always) manager?.videoResumeStatus = ResumeStatus.ALWAYS
+                lifecycleScope.launch { service?.playlistManager?.playIndex(confirmation.index, confirmation.flags, forceResume = true) }
+            }
+            false -> {
+                if (always) manager?.videoResumeStatus = ResumeStatus.NEVER
+                lifecycleScope.launch { service?.playlistManager?.playIndex(confirmation.index, confirmation.flags, forceRestart = true) }
+            }
+        }
     }
 
     fun toggleOrientationLock() {
@@ -2591,6 +2668,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
     private fun startLoading() {
         if (isLoading) return
         isLoading = true
+        // Nağmedar: the new controls' own spinner rather than the cone
+        if (chrome?.showLoading(true) == true) return
         val anim = AnimationSet(true)
         val rotate = RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
         rotate.duration = 800
@@ -2608,6 +2687,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         handler.removeMessages(LOADING_ANIMATION)
         if (!isLoading) return
         isLoading = false
+        chrome?.showLoading(false)
         loadingImageView.setInvisible()
         loadingImageView?.clearAnimation()
     }

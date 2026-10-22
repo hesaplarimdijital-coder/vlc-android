@@ -161,7 +161,7 @@ internal fun PlayerWithPanel(
                 SampleVideo(Modifier.fillMaxWidth().aspectRatio(16 / 9f))
                 if (controls) {
                     val visibility = remember {
-                        ChromeVisibility(active = true).apply {
+                        ChromeVisibility().apply {
                             onMouseMoved()
                             overBars = true
                         }

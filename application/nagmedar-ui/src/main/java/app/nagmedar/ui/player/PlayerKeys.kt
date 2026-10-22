@@ -57,7 +57,10 @@ object PlayerKeys {
     }
 }
 
-/** The classic video player doing the table's shortcuts (S-602). */
+/**
+ * The classic video player doing the table's shortcuts (S-602); what they change is said by the
+ * new interface's OSD ([say]), never by the classic overlay.
+ */
 internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : PlayerKeyTarget {
 
     override fun perform(id: ShortcutId): Boolean {
@@ -85,17 +88,18 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
                     PlaybackStateCompat.REPEAT_MODE_ALL -> PlaybackStateCompat.REPEAT_MODE_ONE
                     else -> PlaybackStateCompat.REPEAT_MODE_NONE
                 }
-                activity.overlayDelegate.showInfo(
-                    when (service.repeatType) {
-                        PlaybackStateCompat.REPEAT_MODE_ALL -> R.string.nag_player_repeat_all
-                        PlaybackStateCompat.REPEAT_MODE_ONE -> R.string.nag_player_repeat_one
-                        else -> R.string.nag_player_repeat_none
-                    },
-                    1000,
+                say(
+                    activity.getString(
+                        when (service.repeatType) {
+                            PlaybackStateCompat.REPEAT_MODE_ALL -> R.string.nag_player_repeat_all
+                            PlaybackStateCompat.REPEAT_MODE_ONE -> R.string.nag_player_repeat_one
+                            else -> R.string.nag_player_repeat_none
+                        },
+                    ),
                 )
             }
             ShortcutId.Shuffle -> service.shuffle()
-            ShortcutId.ShowTime -> activity.overlayDelegate.showOverlay()
+            ShortcutId.ShowTime -> activity.chrome?.show()
             ShortcutId.JumpToTime -> activity.showJumpToTime()
             ShortcutId.NextChapter -> stepChapter(forward = true)
             ShortcutId.PreviousChapter -> stepChapter(forward = false)
@@ -106,7 +110,8 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.AudioDelayUp -> activity.delayAudio(DELAY_STEP_US)
             ShortcutId.NextAudioTrack -> nextTrack(audio = true)
             ShortcutId.Fullscreen -> PlayerWindow.toggleFullscreen(activity)
-            ShortcutId.Snapshot -> activity.takeScreenshot()
+            // the controls take the screenshot themselves (S-606); casting has no picture to take
+            ShortcutId.Snapshot -> return false
             ShortcutId.Equalizer -> activity.showEqualizer()
             ShortcutId.AspectRatio -> nextScale(aspectRatios)
             ShortcutId.Crop -> nextScale(crops)
@@ -114,7 +119,8 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
             ShortcutId.NextSubtitle -> nextTrack(audio = false)
             ShortcutId.SubtitleDelayDown -> activity.delaySubtitles(-DELAY_STEP_US)
             ShortcutId.SubtitleDelayUp -> activity.delaySubtitles(DELAY_STEP_US)
-            ShortcutId.AddSubtitleFile -> activity.overlayDelegate.pickSubtitles()
+            // the controls open the system's picker themselves (S-701)
+            ShortcutId.AddSubtitleFile -> return false
             else -> return false
         }
         return true
@@ -129,10 +135,7 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
         val next = tracks[(tracks.indexOfFirst { it.getId() == current } + 1).mod(tracks.size)]
         if (audio) service.setAudioTrack(next.getId()) else service.setSpuTrack(next.getId())
         val name = if (next.getId() == NO_TRACK) activity.getString(R.string.nag_player_subtitles_off) else next.getName()
-        activity.overlayDelegate.showInfo(
-            activity.getString(if (audio) R.string.nag_player_audio_track_now else R.string.nag_player_subtitles_now, name),
-            1000,
-        )
+        say(activity.getString(if (audio) R.string.nag_player_audio_track_now else R.string.nag_player_subtitles_now, name))
     }
 
     /**
@@ -145,21 +148,25 @@ internal class ActivityKeyTarget(private val activity: VideoPlayerActivity) : Pl
         val index = chapterStep(chapters, service.getTime(), forward) ?: return
         service.chapterIdx = index
         val name = chapters[index].name
-        activity.overlayDelegate.showInfo(
-            if (name.isBlank()) activity.getString(R.string.nag_player_chapter, index + 1) else activity.getString(R.string.nag_player_chapter_named, index + 1, name),
-            1000,
-        )
+        say(if (name.isBlank()) activity.getString(R.string.nag_player_chapter, index + 1) else activity.getString(R.string.nag_player_chapter_named, index + 1, name))
     }
 
-    /** A, C and Z go round their own sizes of the picture, back to fitting it. */
+    /** A, C and Z go round their own sizes of the picture, back to fitting it; its name shows. */
     private fun nextScale(cycle: List<MediaPlayer.ScaleType>) {
         val index = cycle.indexOf(activity.currentScaleType)
-        activity.resizeDelegate.setVideoScale(cycle[(index + 1).mod(cycle.size)])
+        applyPictureSize(activity, cycle[(index + 1).mod(cycle.size)])
+    }
+
+    /** [text] said over the video by the new interface's OSD. */
+    private fun say(text: String) {
+        activity.chrome?.showInfo(text, SAID_MS)
     }
 
     private companion object {
         /** VLC's step of the delays: 50 ms, in µs. */
         const val DELAY_STEP_US = 50_000L
+
+        const val SAID_MS = 1_000
 
         const val NO_TRACK = "-1"
 

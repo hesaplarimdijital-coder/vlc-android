@@ -53,7 +53,7 @@ class PlayerChromeScreenshotTest {
     private fun capture(name: String, state: PlayerChromeState, hover: Float?) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         // the mouse rests on the bar: they stay
-        val visibility = ChromeVisibility(active = true).apply {
+        val visibility = ChromeVisibility().apply {
             onMouseMoved()
             overBars = true
         }

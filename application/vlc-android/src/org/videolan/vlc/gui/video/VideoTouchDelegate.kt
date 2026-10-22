@@ -533,6 +533,8 @@ class VideoTouchDelegate(private val player: VideoPlayerActivity,
             if (position < 0) position = 0
             if (position > service.length) position = service.length
             player.seek(position, fast = false)
+            // Nağmedar: the new controls show where it went
+            if (player.chrome?.showSeek(delta, position, service.length) == true) return
             val sb = StringBuilder()
             val seekForward = delta >= 0
 

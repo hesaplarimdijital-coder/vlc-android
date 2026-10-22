@@ -93,6 +93,15 @@ object NagIcons {
     val Cast: ImageVector by lazy { icon("Cast", stroke("M2 6V4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7a1.5 1.5 0 0 1-1.5 1.5H8.5"), stroke("M2 8.5a4.5 4.5 0 0 1 4.5 4.5M2 11a2 2 0 0 1 2 2M2 13h.01")) }
     val Visualizer: ImageVector by lazy { icon("Visualizer", stroke("M3 13.5v-3M5.5 13.5V7M8 13.5V3.5M10.5 13.5V8M13 13.5V5.5")) }
     val Filter: ImageVector by lazy { icon("Filter", stroke("M2.5 3.5h11L9.5 8v4.5l-3 1.5V8z")) }
+    val Unlock: ImageVector by lazy { icon("Unlock", stroke("M4.7,7H11.3A1.2,1.2 0 0 1 12.5,8.2V12.3A1.2,1.2 0 0 1 11.3,13.5H4.7A1.2,1.2 0 0 1 3.5,12.3V8.2A1.2,1.2 0 0 1 4.7,7Z"), stroke("M5.5 7V5a2.5 2.5 0 0 1 4.8-1")) }
+    val Rotate: ImageVector by lazy { icon("Rotate", stroke("M6.2,3.5H9.8A1.2,1.2 0 0 1 11,4.7V11.3A1.2,1.2 0 0 1 9.8,12.5H6.2A1.2,1.2 0 0 1 5,11.3V4.7A1.2,1.2 0 0 1 6.2,3.5Z"), stroke("M2 7a6 6 0 0 1 2.5-4.2M14 9a6 6 0 0 1-2.5 4.2M2 4.2V7h2.8M14 11.8V9h-2.8")) }
+    val Speed: ImageVector by lazy { icon("Speed", stroke("M2.5 11.5a5.5 5.5 0 1 1 11 0"), stroke("M8 11.5l2.6-3.6")) }
+    val AspectRatio: ImageVector by lazy { icon("AspectRatio", stroke("M3.5,3.5H12.5A1.5,1.5 0 0 1 14,5V11A1.5,1.5 0 0 1 12.5,12.5H3.5A1.5,1.5 0 0 1 2,11V5A1.5,1.5 0 0 1 3.5,3.5Z"), stroke("M4.5 7.5V6h2M11.5 8.5V10h-2")) }
+    val Brightness: ImageVector by lazy { icon("Brightness", stroke("M5.5,8a2.5,2.5 0 1 0 5,0a2.5,2.5 0 1 0 -5,0Z"), stroke("M8 1.8v1.4M8 12.8v1.4M1.8 8h1.4M12.8 8h1.4M3.6 3.6l1 1M11.4 11.4l1 1M3.6 12.4l1-1M11.4 4.6l1-1")) }
+    val Headphones: ImageVector by lazy { icon("Headphones", stroke("M2.5 11V8.5a5.5 5.5 0 0 1 11 0V11"), stroke("M3.5,9.5H4.5A1,1 0 0 1 5.5,10.5V12.5A1,1 0 0 1 4.5,13.5H3.5A1,1 0 0 1 2.5,12.5V10.5A1,1 0 0 1 3.5,9.5Z"), stroke("M11.5,9.5H12.5A1,1 0 0 1 13.5,10.5V12.5A1,1 0 0 1 12.5,13.5H11.5A1,1 0 0 1 10.5,12.5V10.5A1,1 0 0 1 11.5,9.5Z")) }
+    val Bookmark: ImageVector by lazy { icon("Bookmark", stroke("M4.5 2.5h7v11L8 11l-3.5 2.5z")) }
+    val Chapters: ImageVector by lazy { icon("Chapters", stroke("M2 10h12M5 7.5v5M10 7.5v5M2.5 4.5h6")) }
+    val Share: ImageVector by lazy { icon("Share", stroke("M9.7,3.8a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M2.7,8a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M9.7,12.2a1.8,1.8 0 1 0 3.6,0a1.8,1.8 0 1 0 -3.6,0Z"), stroke("M6.1 7.1 9.9 4.7M6.1 8.9l3.8 2.4")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -106,7 +115,8 @@ object NagIcons {
         Volume, Menu, Waveform, Keyboard, SidebarToggle, FolderAdd, Shield, ErrorCircle,
         SuccessCircle, Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal,
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
-        Visualizer, Filter,
+        Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
+        Bookmark, Chapters, Share,
     )
 }
 

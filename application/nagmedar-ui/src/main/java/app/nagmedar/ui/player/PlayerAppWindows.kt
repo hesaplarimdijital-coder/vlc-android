@@ -41,6 +41,7 @@ import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
+import app.nagmedar.ui.audio.EqualizerScreen
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.guide.GuideScreen
@@ -65,13 +66,14 @@ import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 
-/** The app's own windows the video player opens over the film (S-1504, S-1007, S-305). */
-enum class PlayerAppWindow { Guide, ShortcutCard, Palette, SleepTimer }
+/** The app's own windows the video player opens over the film (S-1504, S-1007, S-305), and the equaliser. */
+enum class PlayerAppWindow { Guide, ShortcutCard, Palette, SleepTimer, Equalizer }
 
 /**
  * The app's shortcuts in the full-screen video player: the user guide (F1), the shortcut card
- * (Ctrl+/), the command palette (Ctrl+K) and the sleep timer (Alt+S) open over the film, as
- * they do over the library, so the film goes on under them; Settings (Ctrl+,) opens in the
+ * (Ctrl+/), the command palette (Ctrl+K), the sleep timer (Alt+S) and the equaliser (the app's
+ * own, never VLC's dialog) open over the film, as they do over the library, so the film goes on
+ * under them; Settings (Ctrl+,) opens in the
  * library's window, as the convert page does from the player. The keys are the shortcut table's
  * ([PlayerKeys]); the player's own keys stay its own. Compose state.
  */
@@ -97,6 +99,7 @@ class PlayerAppWindows {
             ShortcutId.ShortcutList -> open = PlayerAppWindow.ShortcutCard
             ShortcutId.CommandPalette -> open = PlayerAppWindow.Palette
             ShortcutId.SleepTimer -> open = PlayerAppWindow.SleepTimer
+            ShortcutId.Equalizer -> open = PlayerAppWindow.Equalizer
             ShortcutId.Settings -> openInLibrary(activity, Destination.Settings)
             else -> return false
         }
@@ -176,6 +179,7 @@ fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: N
                 )
             }
             PlayerAppWindow.SleepTimer -> SleepTimerDialog(onDismiss = windows::close)
+            PlayerAppWindow.Equalizer -> PageWindow(windows, activity) { EqualizerScreen() }
             null -> Unit
         }
     }
