@@ -186,6 +186,7 @@ import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.EXTRA_SEEK_DELAY
 import org.videolan.resources.DecodingHook
 import org.videolan.resources.SubtitleEncodingHook
+import org.videolan.tools.AppScope
 import org.videolan.tools.ENABLE_BRIGHTNESS_GESTURE
 import org.videolan.tools.ENABLE_DOUBLE_TAP_PLAY
 import org.videolan.tools.ENABLE_DOUBLE_TAP_SEEK
@@ -620,7 +621,7 @@ class DesktopPlayerChrome : PlayerChrome {
         val activity = activity ?: return
         val perf = perf ?: return
         val name = infoSource?.fileName() ?: Uri.parse(uri).lastPathSegment.orEmpty()
-        perf.start(uri, name)?.let { PrefsPerfStore.get(activity).keep(it) }
+        perf.start(uri, name)?.let { record -> val app = activity.applicationContext; AppScope.launch(Dispatchers.IO) { PrefsPerfStore.get(app).keep(record) } }
         MainScope().launch {
             val video = runCatching { TechRepository.get(activity).cached(uri) }.getOrNull()?.video ?: return@launch
             perf.describe(uri, video.width, video.height, rangeLabel(video))
@@ -685,7 +686,7 @@ class DesktopPlayerChrome : PlayerChrome {
         // the playback ends with the player: its record is kept (S-1404)
         perfJob?.cancel()
         perfJob = null
-        activity?.let { activity -> perf?.finish()?.let { PrefsPerfStore.get(activity).keep(it) } }
+        activity?.applicationContext?.let { app -> perf?.finish()?.let { record -> AppScope.launch(Dispatchers.IO) { PrefsPerfStore.get(app).keep(record) } } }
         perf = null
         infoSource = null
         effects?.release()
