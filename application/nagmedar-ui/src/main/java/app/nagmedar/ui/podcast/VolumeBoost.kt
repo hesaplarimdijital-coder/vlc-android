@@ -46,6 +46,7 @@ class VolumeBooster<E : Any>(private val read: (E) -> Int, private val write: (E
      * One look: [engine] is what plays now (null for nothing), [episodeId] the podcast episode it plays (null for any
      * other media) and [boost] its show's step.
      */
+    @Synchronized
     fun update(engine: E?, episodeId: Long?, boost: Int) {
         val percent = if (engine == null || episodeId == null) 100 else VolumeBoost.percent(boost)
         if (episodeId != overriddenFor) overriddenFor = null
@@ -75,7 +76,8 @@ class VolumeBooster<E : Any>(private val read: (E) -> Int, private val write: (E
         held = engine
     }
 
-    /** The playback is going: the volume as it was. */
+    /** The playback is going, or another media starts: the volume as it was. Safe from any thread. */
+    @Synchronized
     fun end() {
         held?.let(::release)
     }

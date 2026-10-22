@@ -168,6 +168,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
      */
     private fun onEngineHandOver() {
         clearABRepeat()
+        // the item that follows plays at the listener's volume, whatever the last one was boosted to
+        ResumeHook.volume?.restore()
         getCurrentMedia()?.addFlags(MediaWrapper.MEDIA_FROM_START)
         if (repeating.value != PlaybackStateCompat.REPEAT_MODE_ONE && isValidPosition(nextIndex)) {
             previous.push(currentIndex)
@@ -502,6 +504,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
 
     fun stop(systemExit: Boolean = false, video: Boolean = false) {
         clearABRepeat()
+        ResumeHook.volume?.restore()
         if (stopAfter != -1) Settings.getInstance(AppContextProvider.appContext).putSingle(AUDIO_STOP_AFTER, stopAfter)
         stopAfter = -1
         videoBackground = false
@@ -665,6 +668,17 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     suspend fun playIndex(index: Int, flags: Int = 0, forceResume:Boolean = false, forceRestart:Boolean = false) {
+        // Nağmedar (S-1104): a podcast show's volume boost never reaches the next media: the volume is given back before
+        // anything is prepared (the engines carry it over), and the boost waits until the new media is playing
+        ResumeHook.mediaChanging()
+        try {
+            startIndex(index, flags, forceResume, forceRestart)
+        } finally {
+            ResumeHook.mediaChanged()
+        }
+    }
+
+    private suspend fun startIndex(index: Int, flags: Int, forceResume: Boolean, forceRestart: Boolean) {
         // The fonts are scanned when the first text renderer is created, which would otherwise
         // delay the playback by several seconds on the first run. See [FontCache]
         // Wait before reading any state, as the queue can change in the meantime

@@ -16,6 +16,7 @@ import org.videolan.tools.AppScope
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaybackObserver
 import org.videolan.vlc.media.ResumeHook
+import org.videolan.vlc.media.VolumeRestorer
 import org.videolan.vlc.media.ResumeOwner
 
 /**
@@ -37,11 +38,14 @@ class PodcastPlaybackObserver : PlaybackObserver {
         val dao = NagmedarDatabase.get(app).podcasts().also { this.dao = it }
         // an episode follows its show's resume rule, not VLC's "resume playback" setting and its dialog
         ResumeHook.owner = ResumeOwner { location -> episodeAt(dao, location) != null }
+        // the playlist gives the volume back before any other media starts: nothing but the episode plays boosted
+        ResumeHook.volume = VolumeRestorer { runCatching { booster.end() } }
         job?.cancel()
         job = AppScope.launch {
             var asked: String? = null
             var context: EpisodeContext? = null
             var playing = false
+            var looks = 0
             while (isActive) {
                 delay(if (playing) SAMPLE_MS else IDLE_MS)
                 playing = runCatching { service.isPlaying }.getOrDefault(false)
@@ -50,12 +54,18 @@ class PodcastPlaybackObserver : PlaybackObserver {
                     asked = location
                     context = location?.let { withContext(Dispatchers.IO) { contextOf(dao, it) } }
                     publish(app, context)
+                } else if (context != null && location != null && ++looks % REFRESH_LOOKS == 0) {
+                    // the show's settings may have changed meanwhile (its boost, its skips): they apply to this episode too
+                    context = withContext(Dispatchers.IO) { contextOf(dao, location) }
                 }
                 val commands = tracker.sample(
                     location, context, service.getTime(), service.length, playing, service.rate, System.currentTimeMillis(),
                 )
                 apply(service, dao, commands)
-                runCatching { booster.update(service.playlistManager.engine, context?.episodeId, context?.volumeBoost ?: VolumeBoost.OFF) }
+                // while another media is being started the volume is the listener's; the boost waits for the episode
+                if (!ResumeHook.switching) {
+                    runCatching { booster.update(service.playlistManager.engine, context?.episodeId, context?.volumeBoost ?: VolumeBoost.OFF) }
+                }
             }
         }
     }
@@ -64,6 +74,7 @@ class PodcastPlaybackObserver : PlaybackObserver {
         job?.cancel()
         job = null
         ResumeHook.owner = null
+        ResumeHook.volume = null
         runCatching { booster.end() }
         // the place of what was playing is kept as the service goes
         val saves = tracker.end().filterIsInstance<TrackerCommand.SavePosition>()
@@ -100,6 +111,9 @@ class PodcastPlaybackObserver : PlaybackObserver {
     companion object {
         private const val SAMPLE_MS = 1_000L
         private const val IDLE_MS = 4_000L
+
+        /** How many looks between re-reading the playing show's settings. */
+        const val REFRESH_LOOKS = 5
 
         /** The episode [location] is the audio of, with what its show asks of its playback; null for any other media. */
         private fun contextOf(dao: PodcastDao, location: String): EpisodeContext? {
