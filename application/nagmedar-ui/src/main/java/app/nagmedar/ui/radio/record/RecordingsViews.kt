@@ -55,6 +55,7 @@ import app.nagmedar.ui.components.AlertBanner
 import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagPlayButton
 import app.nagmedar.ui.components.NagProgressBar
