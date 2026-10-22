@@ -175,9 +175,12 @@ internal fun PlayerSheetView(title: String, entries: List<MenuEntry>, onDismiss:
                     }
                 }
             }
-        }
-        LaunchedEffect(Unit) {
-            runCatching { if (focusFirst && firstEnabled >= 0) first.requestFocus() else sheet.requestFocus() }
+            // asked here, in what BoxWithConstraints composes as it measures: asked beside it, the
+            // request ran before the sheet and its items existed, and the window's own focus went
+            // to the sheet, never to its first item
+            LaunchedEffect(Unit) {
+                runCatching { if (focusFirst && firstEnabled >= 0) first.requestFocus() else sheet.requestFocus() }
+            }
         }
     }
 }
