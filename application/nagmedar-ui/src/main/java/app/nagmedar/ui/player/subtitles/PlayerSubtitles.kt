@@ -29,6 +29,7 @@ import app.nagmedar.ui.player.subtitles.translate.WorkTranslationService
 import app.nagmedar.ui.player.subtitles.whisper.WhisperController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,6 +50,7 @@ import java.util.Locale
  * with the film, as the classic player's picker keeps it, and its document's access with the app.
  * Each is read in its own character set (S-702): VLC is told the film's as it starts, a file in
  * another one is read into UTF-8 first; "Subtitle encoding…" chooses one for the film ([encoding]).
+ * [scope] is its own: [release] ends it with the player.
  */
 @Stable
 internal class PlayerSubtitles(private val activity: VideoPlayerActivity, private val scope: CoroutineScope) {
@@ -94,6 +96,17 @@ internal class PlayerSubtitles(private val activity: VideoPlayerActivity, privat
 
     /** The film whose folder was read: once a film. */
     private var lookedAt: String? = null
+
+    /**
+     * The player goes: the subtitle tools' window and the dialog of the subtitles from speech
+     * close, and nothing goes on here (what follows the jobs, a file being read); a translation,
+     * an extraction or a transcription under way goes on in the background.
+     */
+    fun release() {
+        tools.close()
+        whisper.close()
+        scope.cancel()
+    }
 
     /** A film started or went on: its folder is read once for its subtitles, unless it has some. */
     fun onMediaStarted() {

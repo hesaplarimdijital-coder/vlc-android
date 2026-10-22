@@ -701,6 +701,8 @@ class DesktopPlayerChrome : PlayerChrome {
         navigation = null
         refresh?.release()
         refresh = null
+        // the subtitle tools' window goes with the player; their jobs go on in the background
+        subtitles?.release()
         subtitles = null
         dual = null
         // a look changed meanwhile reaches the next film: libVLC starts again once nothing plays
