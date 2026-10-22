@@ -20,8 +20,10 @@ import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION
 import org.videolan.tools.KEY_OPEN_SUBTITLES_LIMIT
 import org.videolan.tools.KEY_OPEN_SUBTITLES_USER
+import org.videolan.tools.KEY_SET_LOCALE
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
+import org.videolan.tools.PREF_TV_UI
 import org.videolan.tools.Settings
 
 /**
@@ -63,6 +65,9 @@ object BackupSettings {
         ExtractJobs.KEY_TIMED_OUT,
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
         *ScrobbleSettings.keys.toTypedArray(),
+        // a TV's: VLC's TV interface and its language, which a phone, a tablet or DeX ignores
+        PREF_TV_UI,
+        KEY_SET_LOCALE,
         // the settings' version, which the backup keeps on its own
         KEY_CURRENT_SETTINGS_VERSION,
         KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION,

@@ -42,11 +42,14 @@ object Settings : SingletonHolder<SharedPreferences, Context>({ init(it.applicat
 
     fun init(context: Context) : SharedPreferences{
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        device = DeviceInfo(context)
         showVideoThumbs = prefs.getBoolean(SHOW_VIDEO_THUMBNAILS, true)
-        tvUI = prefs.getBoolean(PREF_TV_UI, false)
+        // Nağmedar: VLC's TV interface belongs to a TV; a phone, a tablet or DeX ignores the setting
+        // (left by the classic interface or brought by a backup), so the player never falls back to
+        // the classic layout there
+        tvUI = device.isTv && prefs.getBoolean(PREF_TV_UI, false)
         listTitleEllipsize = prefs.getString(LIST_TITLE_ELLIPSIZE, "0")?.toInt() ?: 0
         videoHudDelay = prefs.getInt(VIDEO_HUD_TIMEOUT, 4).coerceInOrDefault(1, 15, -1)
-        device = DeviceInfo(context)
         includeMissing = prefs.getBoolean(KEY_INCLUDE_MISSING, true)
         showHeaders = prefs.getBoolean(KEY_SHOW_HEADERS, true)
         showAudioTrackInfo = prefs.getBoolean(KEY_SHOW_TRACK_INFO, false)
@@ -79,6 +82,13 @@ object Settings : SingletonHolder<SharedPreferences, Context>({ init(it.applicat
     }
 
     fun Context.isPinCodeSet() = getInstance(this).getString(KEY_SAFE_MODE_PIN, "")?.isNotBlank() == true
+
+    /**
+     * Nağmedar: the language of the app's services, notifications and players. VLC's TV interface
+     * chooses one (set_locale); a phone, a tablet or DeX follows the system's, as Nağmedar's window
+     * does, whatever a setting left by the classic interface or brought by a backup says.
+     */
+    fun appLocale(prefs: SharedPreferences): String = if (device.isTv) prefs.getString(KEY_SET_LOCALE, "").orEmpty() else ""
 
 
     /**

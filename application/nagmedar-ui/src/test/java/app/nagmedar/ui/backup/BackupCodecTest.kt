@@ -1,5 +1,7 @@
 package app.nagmedar.ui.backup
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.LyricsEntry
@@ -21,8 +23,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_OPEN_SUBTITLES_USER
+import org.videolan.tools.KEY_SET_LOCALE
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
+import org.videolan.tools.PREF_TV_UI
 import org.videolan.tools.Settings
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -204,5 +208,17 @@ class BackupCodecTest {
         assertEquals(listOf("nagmedar_crossfade_ms", "nagmedar_sources", "nagmedar_theme"), BackupSettings.collect(all).map { it.key })
         // VLC's own export leaves out the last queue and remote access's keys: so does a backup
         assertTrue(BackupSettings.leftOut().containsAll(Settings.getRestoreBlacklist().toList()))
+    }
+
+    @Test
+    fun aTvsOwnSettingsNeitherGoOutNorComeBack() {
+        // VLC's TV interface and its language: a phone, a tablet or DeX ignores them, a backup carries neither
+        val values = listOf(SettingValue(PREF_TV_UI, true), SettingValue(KEY_SET_LOCALE, "fr"), SettingValue("nagmedar_theme", "Dark"))
+        assertEquals(listOf("nagmedar_theme"), BackupSettings.collect(values.associate { it.key to it.value }).map { it.key })
+        val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("backup-tv", Context.MODE_PRIVATE)
+        BackupSettings.write(values, prefs.edit()).commit()
+        assertFalse(prefs.contains(PREF_TV_UI))
+        assertFalse(prefs.contains(KEY_SET_LOCALE))
+        assertEquals("Dark", prefs.getString("nagmedar_theme", null))
     }
 }
