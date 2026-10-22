@@ -23,6 +23,7 @@
 
 package org.videolan.vlc
 
+import android.Manifest
 import android.app.SearchManager
 import android.content.Context
 import android.app.ActivityOptions
@@ -30,6 +31,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -37,6 +39,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,7 +77,6 @@ import org.videolan.tools.Settings
 import org.videolan.tools.awaitAppIsForegroung
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.putSingle
-import org.videolan.vlc.gui.helpers.hf.StoragePermissionsDelegate.Companion.getStoragePermission
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.FileUtils
@@ -89,6 +91,13 @@ import videolan.org.commontools.TV_CHANNEL_SCHEME
 private const val PROPAGATE_RESULT = 1
 private const val TAG = "VLC/StartActivity"
 class StartActivity : FragmentActivity() {
+
+    /** The answer to Android's storage prompt, while it is asked ([askStoragePermission]). */
+    private var storageAnswer: CompletableDeferred<Boolean>? = null
+
+    private val storagePrompt = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+        storageAnswer?.complete(granted.values.any { it })
+    }
 
     private val idFromShortcut: Int
         get() {
@@ -328,6 +337,28 @@ class StartActivity : FragmentActivity() {
         }
     }
 
+    /**
+     * A file another app opens here and that is not shared through a content provider needs the
+     * storage permission: Android's own prompt asks for it (VLC's explanation window is not shown).
+     * True when it is given; refused, the file is not opened.
+     */
+    private suspend fun askStoragePermission(): Boolean {
+        if (isFinishing) return false
+        val answer = CompletableDeferred<Boolean>()
+        storageAnswer = answer
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if (runCatching { storagePrompt.launch(permissions) }.isFailure) return false
+        val granted = answer.await()
+        storageAnswer = null
+        // the helper keeps the last answer for a while: it reads the new one now
+        if (granted) Permissions.canReadStorage(applicationContext, skipCache = true)
+        return granted
+    }
+
     private fun startPlaybackFromApp(intent: Intent) = lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
         // workaround for a Android 9 bug
         // https://issuetracker.google.com/issues/113122354
@@ -342,7 +373,7 @@ class StartActivity : FragmentActivity() {
         // be read without permissions.
         // If not should check for permission, and ask them if we don't have them
         if ((intent.data != null && intent.data!!.scheme == "content" && FileUtils.getUri(intent.data) != null)
-            || (Permissions.canReadStorage(applicationContext) || getStoragePermission())) when {
+            || (Permissions.canReadStorage(applicationContext) || askStoragePermission())) when {
             intent.type?.startsWith("video") == true -> try {
                 startActivityForResult(intent.setClass(this@StartActivity, VideoPlayerActivity::class.java).apply { putExtra(VideoPlayerActivity.FROM_EXTERNAL, true) }, PROPAGATE_RESULT, Util.getFullScreenBundle())
                 return@launch
