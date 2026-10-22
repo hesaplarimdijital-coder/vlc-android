@@ -23,6 +23,7 @@
 #include <taglib/wavfile.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -41,14 +42,28 @@ public:
 
     TagLib::FileName name() const override { return name_.c_str(); }
 
+    /*
+     * Up to [length] bytes from the position: fewer only at the end of the file. A read that
+     * fails (EIO on a card) or ends before the file does marks the stream failed: what TagLib
+     * writes after it (the audio it moves) would be wrong, so the write is not taken.
+     */
     TagLib::ByteVector readBlock(size_t length) override
     {
         TagLib::ByteVector buffer(static_cast<unsigned int>(length));
         size_t done = 0;
         while (done < length) {
             ssize_t n = pread(fd_, buffer.data() + done, length - done, pos_ + static_cast<off_t>(done));
-            if (n <= 0)
+            if (n < 0 && errno == EINTR)
+                continue;
+            if (n < 0) {
+                failed_ = true;
                 break;
+            }
+            if (n == 0) {
+                if (pos_ + static_cast<TagLib::offset_t>(done) < this->length())
+                    failed_ = true;
+                break;
+            }
             done += static_cast<size_t>(n);
         }
         buffer.resize(static_cast<unsigned int>(done));
@@ -56,11 +71,16 @@ public:
         return buffer;
     }
 
+    /* Nothing more is written once the stream failed: the copy kept by the app goes back over less. */
     void writeBlock(const TagLib::ByteVector &data) override
     {
+        if (failed_)
+            return;
         size_t done = 0;
         while (done < data.size()) {
             ssize_t n = pwrite(fd_, data.data() + done, data.size() - done, pos_ + static_cast<off_t>(done));
+            if (n < 0 && errno == EINTR)
+                continue;
             if (n <= 0) {
                 failed_ = true;
                 break;
@@ -72,6 +92,8 @@ public:
 
     void insert(const TagLib::ByteVector &data, TagLib::offset_t start, size_t replace) override
     {
+        if (failed_)
+            return;
         if (data.size() == replace) {
             seek(start);
             writeBlock(data);
@@ -95,9 +117,12 @@ public:
             TagLib::ByteVector aboutToOverwrite = readBlock(bufferLength);
             const size_t bytesRead = aboutToOverwrite.size();
             readPosition += static_cast<TagLib::offset_t>(bufferLength);
+            /* a failed read: nothing more is moved over what the copy has to put back */
+            if (failed_)
+                break;
             seek(writePosition);
             writeBlock(buffer);
-            if (bytesRead == 0)
+            if (bytesRead == 0 || failed_)
                 break;
             writePosition += static_cast<TagLib::offset_t>(buffer.size());
             buffer = aboutToOverwrite;
@@ -106,6 +131,8 @@ public:
 
     void removeBlock(TagLib::offset_t start, size_t length) override
     {
+        if (failed_)
+            return;
         TagLib::offset_t readPosition = start + static_cast<TagLib::offset_t>(length);
         TagLib::offset_t writePosition = start;
         for (;;) {
@@ -113,12 +140,15 @@ public:
             TagLib::ByteVector buffer = readBlock(kBuffer);
             const size_t bytesRead = buffer.size();
             readPosition += static_cast<TagLib::offset_t>(bytesRead);
-            if (bytesRead == 0)
+            if (bytesRead == 0 || failed_)
                 break;
             seek(writePosition);
             writeBlock(buffer);
+            if (failed_)
+                break;
             writePosition += static_cast<TagLib::offset_t>(bytesRead);
         }
+        /* not cut short after a failed read or write (truncate() does nothing then): its end is still the audio's */
         truncate(writePosition);
     }
 
@@ -147,7 +177,7 @@ public:
 
     void truncate(TagLib::offset_t length) override
     {
-        if (ftruncate(fd_, static_cast<off_t>(length)) != 0)
+        if (!failed_ && ftruncate(fd_, static_cast<off_t>(length)) != 0)
             failed_ = true;
     }
 

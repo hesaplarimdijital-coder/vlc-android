@@ -31,11 +31,12 @@ enum class TagWrite {
  * S-1005: a tag write that an interruption cannot leave half done. TagLib rewrites the file in
  * place (a longer tag moves the audio after it), so the file is first copied into the app's own
  * storage (never into backups); after the write TagLib reads the file again and its audio
- * (length, sample rate, channels) must be as it was. A failure puts the copy back. A note beside
- * the copy names the file: a process that died while writing leaves both, and [recover] (at the
- * next start) puts the copy back when the file's audio is not as it was, else just deletes it.
- * A copy lives no longer than its write, but for a file that cannot be opened again (a card taken
- * out), which is waited for [KEEP_MS].
+ * (length, sample rate, channels) must be as it was, and when the file's size changed (its audio
+ * was moved, which those values, read from headers, cannot vouch for) its decoded waveform must be
+ * the copy's too. A failure puts the copy back. A note beside the copy names the file: a process
+ * that died while writing leaves both, and [recover] (at the next start) puts the copy back when
+ * the file's audio is not as it was, else just deletes it. A copy lives no longer than its write,
+ * but for a file that cannot be opened again (a card taken out), which is waited for [KEEP_MS].
  */
 internal object TagBackups {
     private const val TAG = "NagmedarAudio"
@@ -49,7 +50,7 @@ internal object TagBackups {
     /** A copy whose file is not there (a card taken out) is kept this long for it. */
     private const val KEEP_MS = 7L * 24 * 60 * 60 * 1000
 
-    /** The waveform's points the recovery compares: enough to tell moved audio. */
+    /** The waveform's points the checks compare: enough to tell moved audio. */
     private const val POINTS = 2048
 
     private const val BUFFER = 1024 * 1024
@@ -68,7 +69,7 @@ internal object TagBackups {
 
     /**
      * [write] on [descriptor] (read-write, [track]'s, [name] its display name), with a copy of the file kept until it is
-     * read back as it was. Writes the file: off the main thread.
+     * read back as it was. Writes the file and may decode it twice: off the main thread.
      */
     fun guarded(context: Context, track: Uri, descriptor: ParcelFileDescriptor, name: String, write: (fd: Int, name: String) -> Boolean): TagWrite =
         synchronized(lock) {
@@ -99,8 +100,7 @@ internal object TagBackups {
                 false
             }
             runCatching { Os.fsync(descriptor.fileDescriptor) }
-            // read back through a descriptor of its own, as any reader will
-            if (written && before.same(FileTags.read(context, track) { readFd, readName -> Audio.of(NativeAudio.tagAudio(readFd, readName)) })) {
+            if (written && readsAsBefore(context, track, before, copy, moved = descriptor.statSize != size)) {
                 note.delete()
                 copy.delete()
                 return TagWrite.Written
@@ -164,8 +164,18 @@ internal object TagBackups {
     }
 
     /** Whether the file behind [fd] has the audio of [copy]: as TagLib reads it, and decoded. */
-    private fun intact(fd: Int, name: String, before: Audio, copy: File): Boolean {
-        if (!before.same(audioOf(fd, name))) return false
+    private fun intact(fd: Int, name: String, before: Audio, copy: File): Boolean = before.same(audioOf(fd, name)) && sameWaveform(fd, copy)
+
+    /**
+     * Whether [track], read through a descriptor of its own as any reader will, has the audio it had: as TagLib reads it
+     * and, when [moved] (its size changed: the audio after the tag was moved), decoded the same as [copy]. That decodes
+     * both whole, about 0.7 s for a 100 MB FLAC on a desktop core.
+     */
+    private fun readsAsBefore(context: Context, track: Uri, before: Audio, copy: File, moved: Boolean): Boolean =
+        FileTags.read(context, track) { fd, name -> before.same(audioOf(fd, name)) && (!moved || sameWaveform(fd, copy)) } == true
+
+    /** Whether the audio decoded from [fd] is [copy]'s: the peak and RMS of each of [POINTS] buckets the same. */
+    private fun sameWaveform(fd: Int, copy: File): Boolean {
         val now = runCatching { NativeAudio.waveform("/proc/self/fd/$fd", POINTS) }.getOrNull() ?: return false
         val was = runCatching { NativeAudio.waveform(copy.path, POINTS) }.getOrNull() ?: return false
         return now.contentEquals(was)

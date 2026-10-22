@@ -32,7 +32,8 @@
 #     for a true capture, the one differing sample for a broken one
 #   - the lyrics (S-1003): USLT, SYLT, LYRICS and ©lyr read from MP3, FLAC, M4A and Opus; written
 #     (S-1005) into MP3 (USLT and SYLT), FLAC, M4A, Opus and Vorbis and read back, replaced,
-#     removed, the other tags and the audio untouched
+#     removed, the other tags and the audio untouched; a write during which the file's reads
+#     fail (EIO, or an end before the file's) refused, never reported done
 #   - the covers (S-1006): the front cover of FLAC, M4A, MP3 (of two pictures) and Opus; a tag by name
 #   - the converter (S-1010): FLAC 16/44.1 and 24/96 into Opus, MP3 (V0 and 320) and AAC,
 #     decoded back by ffmpeg within each codec's expected SNR of the source (resampled where
@@ -669,6 +670,57 @@ else
     check "malformed synced lyrics refused" "refused" "refused"
 fi
 check "refused write leaves the lyrics" "$EXPECT_LRC" "$("$NAGAUDIO" lyrics bare.mp3)"
+# a card that fails while TagLib moves the audio: every read after the first write gives EIO, or
+# ends before the file does; the write is refused, never reported done over a file it left damaged
+# (the app then puts its copy back). The LRC is longer than the FLAC's padding, so the audio moves.
+cat > failread.c <<'C'
+#define _GNU_SOURCE
+#include <dlfcn.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+static int wrote;
+ssize_t pwrite(int fd, const void *buf, size_t n, off_t off)
+{
+    static ssize_t (*real)(int, const void *, size_t, off_t);
+    if (!real)
+        real = (ssize_t (*)(int, const void *, size_t, off_t))dlsym(RTLD_NEXT, "pwrite");
+    wrote = 1;
+    return real(fd, buf, n, off);
+}
+ssize_t pwrite64(int fd, const void *buf, size_t n, off_t off) { return pwrite(fd, buf, n, off); }
+ssize_t pread(int fd, void *buf, size_t n, off_t off)
+{
+    static ssize_t (*real)(int, void *, size_t, off_t);
+    if (!real)
+        real = (ssize_t (*)(int, void *, size_t, off_t))dlsym(RTLD_NEXT, "pread");
+    if (wrote && strcmp(getenv("NAG_FAIL") ? getenv("NAG_FAIL") : "", "short") == 0)
+        return 0;
+    if (wrote) {
+        errno = EIO;
+        return -1;
+    }
+    return real(fd, buf, n, off);
+}
+ssize_t pread64(int fd, void *buf, size_t n, off_t off) { return pread(fd, buf, n, off); }
+C
+cc -shared -fPIC -O2 -o failread.so failread.c -ldl
+ffmpeg -v error -y -f lavfi -i "anoisesrc=r=44100:c=pink:a=0.3:d=20:s=3,aformat=channel_layouts=stereo" -af aformat=sample_fmts=s16 -c:a flac wl_big.flac
+python3 -c "print('\n'.join('[00:%02d.00]Uzun ince bir yoldayım, gidiyorum gündüz gece %d' % (i % 60, i) for i in range(600)))" > long.txt
+for how in eio short; do
+    cp wl_big.flac wl_fail.flac
+    if NAG_FAIL=$how LD_PRELOAD="$PWD/failread.so" "$NAGAUDIO" setlyrics wl_fail.flac --text long.txt > /dev/null 2>&1; then
+        check "a read that fails ($how) while the audio moves: the write refused" "refused" "written"
+    else
+        check "a read that fails ($how) while the audio moves: the write refused" "refused" "refused"
+    fi
+done
+cp wl_big.flac wl_moved.flac
+"$NAGAUDIO" setlyrics wl_moved.flac --text long.txt > /dev/null
+check "the same write without a failure: the audio moved, as it was" "$(ffmpeg -v error -i wl_big.flac -map 0:a -f md5 - 2>&1) bigger" \
+    "$(ffmpeg -v error -i wl_moved.flac -map 0:a -f md5 - 2>&1) $([ "$(stat -c %s wl_moved.flac)" -gt "$(stat -c %s wl_big.flac)" ] && echo bigger)"
 
 echo "== S-1006: embedded covers"
 ffmpeg -v error -y -f lavfi -i "color=c=0x3366cc:s=64x64:d=1" -frames:v 1 front.png
