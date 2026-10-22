@@ -118,7 +118,11 @@ fun RemuxJobRow(job: RemuxJobView, onCancel: () -> Unit, onRemove: () -> Unit, m
                 Text(progressDetail(res, job, locale), style = NagTheme.type.labelSmall, color = colors.textSecondary)
                 job.pauseReason?.let { reason ->
                     Text(
-                        stringResource(if (reason == RemuxJobError.BATTERY) R.string.nag_jobs_paused_battery else R.string.nag_jobs_paused_thermal, ConvertPolicy.RESUME_ABOVE),
+                        when (reason) {
+                            RemuxJobError.HELD -> stringResource(R.string.nag_tvlab_queue_held_text)
+                            RemuxJobError.BATTERY -> stringResource(R.string.nag_jobs_paused_battery, ConvertPolicy.RESUME_ABOVE)
+                            else -> stringResource(R.string.nag_jobs_paused_thermal, ConvertPolicy.RESUME_ABOVE)
+                        },
                         style = NagTheme.type.label,
                         color = toneColors(StateTone.Warning).content,
                     )

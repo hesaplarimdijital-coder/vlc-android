@@ -116,6 +116,8 @@ Sözlüğü testler denetler:
 | uyumluluk izi | compatibility track | | | Remux'ta bir ses izinin yanına eklenen E-AC-3 ya da LPCM iz (S-1207), TrueHD ve DTS-HD çalmayan TV için: başlığı “Uyumluluk izi (E-AC-3 5.1)”; orijinal iz kayıpsız kalır, eklenen iz “Kayıplı (eklenen iz)” ya da “Kayıpsız (eklenen iz)” |
 | kayıpsız, kayıplı | lossless, lossy | | | Remux planındaki her adımın rozeti (S-1205): “Kayıpsız”, “Kayıpsız (üst veri değişir)” (izin işaretleri, dili, başlığı ya da sırası değişir; paketleri aynı kalır), “Kayıplı” (atılan iz, bölüm, ek; FEL'li dönüşüm); “Lossless (tags change)” |
 | remux planı | remux plan | | | Sıraya almadan önce bir filmin remux'u: izler, işaretler, Dolby Vision, çıktı; “Sıraya al…” |
+| toplu işlem | batch | | | TV Lab'in bir klasördeki filmleri birlikte analiz edip sıraya alan sayfası (S-1210); “varsayılan plan”, filmin “kendi planı” |
+| gece çalıştırmak | run at night | | | Remux sırasının seçilen saatte (istenirse yalnızca şarjdayken) başlaması: “Gece çalıştır…”; o saate dek sıra bekler. Sıra bütün olarak “duraklatılır” ve “sürdürülür” |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |

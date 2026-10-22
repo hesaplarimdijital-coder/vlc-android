@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,8 +31,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -78,6 +79,7 @@ import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.library.subtitleLine
 import app.nagmedar.ui.library.videoCodecLabel
 import app.nagmedar.ui.library.videoLine
+import app.nagmedar.ui.music.PlaylistTab
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.PlexMono
@@ -114,6 +116,12 @@ fun TvLabContent(
     modifier: Modifier = Modifier,
     notice: String? = null,
     onDismissNotice: () -> Unit = {},
+    /** S-1210, S-208: the page's tabs (none: the analysis alone), the one shown, how many each holds, the other pages. */
+    tabs: List<TvLabTab> = emptyList(),
+    tab: TvLabTab = TvLabTab.Analysis,
+    onTab: (TvLabTab) -> Unit = {},
+    counts: Map<TvLabTab, Int> = emptyMap(),
+    page: @Composable (TvLabTab) -> Unit = {},
 ) {
     val res = resources()
     val locale = currentLocale()
@@ -127,23 +135,59 @@ fun TvLabContent(
             PageHeader(title = stringResource(R.string.nag_nav_tv_lab), subtitle = stringResource(R.string.nag_tvlab_subtitle)) {
                 if (!narrow) TargetPicker(view, actions, compact = false)
             }
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = dimens.pagePadding, end = dimens.pagePadding, bottom = dimens.gapL),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (narrow) TargetPicker(view, actions, compact = true, modifier = Modifier.fillMaxWidth())
-                notice?.let { Notice(it, onDismissNotice) }
-                when {
-                    view.file == null && !view.available -> NoTools()
-                    view.file == null -> Empty(view.profile, actions)
-                    else -> Analysis(view, report, actions, wide = wide, narrow = narrow, locale = locale)
+            if (tabs.isNotEmpty()) Tabs(tabs, tab, counts, onTab)
+            if (tab != TvLabTab.Analysis) {
+                notice?.let { Box(Modifier.padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs)) { Notice(it, onDismissNotice) } }
+                Box(Modifier.fillMaxSize()) { page(tab) }
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = dimens.pagePadding, end = dimens.pagePadding, bottom = dimens.gapL),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (narrow) TargetPicker(view, actions, compact = true, modifier = Modifier.fillMaxWidth())
+                    notice?.let { Notice(it, onDismissNotice) }
+                    when {
+                        view.file == null && !view.available -> NoTools()
+                        view.file == null -> Empty(view.profile, actions)
+                        else -> Analysis(view, report, actions, wide = wide, narrow = narrow, locale = locale)
+                    }
                 }
             }
         }
     }
+}
+
+/** The TV Lab's pages (S-1210, S-208): the analysis of one film, the batch of a folder, the remux queue, its history. */
+enum class TvLabTab { Analysis, Batch, Queue, History }
+
+/** The pages' tabs, scrolled sideways when they do not fit; a count where a page holds jobs. */
+@Composable
+private fun Tabs(tabs: List<TvLabTab>, selected: TvLabTab, counts: Map<TvLabTab, Int>, onSelect: (TvLabTab) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = NagTheme.dimens.pagePadding - 8.dp, vertical = 2.dp)
+            .testTag("tvlab-tabs"),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        tabs.forEach { tab ->
+            Box(Modifier.testTag("tvlab-tab-${tab.name.lowercase(Locale.ROOT)}")) {
+                PlaylistTab(stringResource(tabName(tab)), counts[tab]?.takeIf { it > 0 }, selected = tab == selected, onClick = { onSelect(tab) })
+            }
+        }
+    }
+}
+
+private fun tabName(tab: TvLabTab): Int = when (tab) {
+    TvLabTab.Analysis -> R.string.nag_tvlab_tab_analysis
+    TvLabTab.Batch -> R.string.nag_tvlab_tab_batch
+    TvLabTab.Queue -> R.string.nag_tvlab_tab_queue
+    TvLabTab.History -> R.string.nag_tvlab_tab_history
 }
 
 @Composable

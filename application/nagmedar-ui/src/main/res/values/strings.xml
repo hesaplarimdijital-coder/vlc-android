@@ -1679,6 +1679,85 @@
     <string name="nag_tvlab_plan_sum_output">File: %1$s</string>
     <string name="nag_tvlab_plan_lossy_note">A lossy step loses what it drops; the video\'s base layer stays bit for bit either way.</string>
     <string name="nag_tvlab_plan_queue">Queue…</string>
+    <!-- S-1210: the TV Lab's pages, the remux queue as a whole, its night run, the batch -->
+    <string name="nag_tvlab_tab_analysis">Analysis</string>
+    <string name="nag_tvlab_tab_batch">Batch</string>
+    <string name="nag_tvlab_tab_queue">Queue</string>
+    <string name="nag_tvlab_tab_history">History</string>
+    <string name="nag_tvlab_plan_done">Done</string>
+    <string name="nag_tvlab_remux_plan_chapters_title">Chapters</string>
+    <string name="nag_tvlab_queue_held">Queue paused</string>
+    <string name="nag_tvlab_queue_held_text">The queue is paused: the running job waits where it is, no other starts.</string>
+    <string name="nag_tvlab_queue_idle">Nothing waits.</string>
+    <plurals name="nag_tvlab_queue_waiting">
+        <item quantity="one">%d job waits.</item>
+        <item quantity="other">%d jobs wait.</item>
+    </plurals>
+    <string name="nag_tvlab_queue_pause">Pause the queue</string>
+    <string name="nag_tvlab_queue_resume">Resume</string>
+    <string name="nag_tvlab_queue_start_now">Start now</string>
+    <string name="nag_tvlab_queue_night">Run at night…</string>
+    <string name="nag_tvlab_queue_night_title">Run at night</string>
+    <string name="nag_tvlab_queue_night_change">Change the time…</string>
+    <string name="nag_tvlab_queue_note">Jobs run one at a time, in this order: drag a waiting one, or move it with Alt+↑ and Alt+↓. The battery and heat rules apply at night too.</string>
+    <string name="nag_tvlab_queue_empty">Nothing in the queue</string>
+    <string name="nag_tvlab_queue_empty_text">Jobs queued from a film\'s remux plan or from a batch show here; finished ones move to History.</string>
+    <string name="nag_tvlab_queue_night_at">Starts %1$s</string>
+    <string name="nag_tvlab_queue_night_charging_short">only while charging</string>
+    <string name="nag_tvlab_queue_night_text">The queue waits until then; a job running now finishes first. It starts at that time, or once the device charges if you ask for that.</string>
+    <string name="nag_tvlab_queue_night_start">Starts at</string>
+    <string name="nag_tvlab_queue_night_charging">Start only while charging</string>
+    <string name="nag_tvlab_queue_night_inexact">Android does not let Nağmedar start at the exact minute: the queue may start a few minutes late.</string>
+    <string name="nag_tvlab_queue_night_set">Run at night</string>
+    <string name="nag_tvlab_batch_source">Folder to analyse</string>
+    <string name="nag_tvlab_batch_no_folder">No folder chosen</string>
+    <string name="nag_tvlab_batch_choose_folder">Choose a folder…</string>
+    <string name="nag_tvlab_batch_library_note">Or one of the library\'s folders (Settings › Library).</string>
+    <string name="nag_tvlab_batch_unreadable">The folder could not be read.</string>
+    <string name="nag_tvlab_batch_listing">Listing the films…</string>
+    <string name="nag_tvlab_batch_probing">%1$d / %2$d films analysed</string>
+    <string name="nag_tvlab_batch_none_found">No film in this folder.</string>
+    <string name="nag_tvlab_batch_output">Output folder</string>
+    <string name="nag_tvlab_batch_choose_output">Choose the output folder…</string>
+    <string name="nag_tvlab_batch_output_text">Each film goes into a new file named “name.remux.mkv”. Where a file of that name is already there, that film is skipped and the file left alone.</string>
+    <plurals name="nag_tvlab_batch_films">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d films</item>
+    </plurals>
+    <string name="nag_tvlab_batch_all">Choose all</string>
+    <string name="nag_tvlab_batch_none">Choose none</string>
+    <string name="nag_tvlab_batch_empty">Analyse a folder</string>
+    <string name="nag_tvlab_batch_empty_text">Its films are read and checked against the TV Lab\'s device; each gets the default plan, which you can change film by film.</string>
+    <plurals name="nag_tvlab_batch_queued">
+        <item quantity="one">%d film queued.</item>
+        <item quantity="other">%d films queued.</item>
+    </plurals>
+    <string name="nag_tvlab_batch_refused">%1$s: %2$s</string>
+    <string name="nag_tvlab_batch_needs_output">Choose the output folder first.</string>
+    <plurals name="nag_tvlab_batch_queue">
+        <item quantity="one">Queue %d film</item>
+        <item quantity="other">Queue %d films</item>
+    </plurals>
+    <string name="nag_tvlab_batch_default_plan">Default plan</string>
+    <string name="nag_tvlab_batch_default_plan_text">For every film, aimed at %1$s. A film whose plan you changed keeps its own.</string>
+    <string name="nag_tvlab_batch_o_dv">Dolby Vision profile 7 → 8.1 where the device needs it</string>
+    <string name="nag_tvlab_batch_o_default_audio">A default audio track the device plays</string>
+    <string name="nag_tvlab_batch_o_subtitles">Drop the subtitles the device does not show (lossy)</string>
+    <string name="nag_tvlab_batch_was_queued">Queued</string>
+    <string name="nag_tvlab_batch_s_waiting">Waiting</string>
+    <string name="nag_tvlab_batch_s_not_read">Not analysed</string>
+    <string name="nag_tvlab_batch_s_probing">Analysing</string>
+    <string name="nag_tvlab_batch_s_ready">Ready</string>
+    <string name="nag_tvlab_batch_s_unreadable">Unreadable</string>
+    <plurals name="nag_tvlab_batch_suggestions">
+        <item quantity="one">%d suggestion applied</item>
+        <item quantity="other">%d suggestions applied</item>
+    </plurals>
+    <string name="nag_tvlab_batch_own_plan">Own plan</string>
+    <string name="nag_tvlab_batch_edit_plan">Edit the plan…</string>
+    <string name="nag_tvlab_batch_default_again">Back to the default plan</string>
+    <string name="nag_tvlab_batch_r_exists">A file of that name is already in the output folder; it was left alone.</string>
+    <string name="nag_tvlab_batch_r_not_created">The output folder made no new file.</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
     <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>

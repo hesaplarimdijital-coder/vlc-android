@@ -777,7 +777,7 @@ abstract class RadioRecordingDao {
     }
 }
 
-/** S-1206: the remux queue, newest first; the worker takes the oldest waiting job. */
+/** S-1206: the remux queue, newest first; the worker takes the first waiting job in the queue's order (S-1210). */
 @Dao
 interface RemuxJobDao {
     @Query("SELECT * FROM remux_job ORDER BY created_at DESC, id DESC")
@@ -793,9 +793,17 @@ interface RemuxJobDao {
     @Query("SELECT * FROM remux_job ORDER BY created_at DESC, id DESC")
     fun all(): List<RemuxJobEntry>
 
-    /** The next job to run: the oldest waiting. */
-    @Query("SELECT * FROM remux_job WHERE state = 'queued' ORDER BY created_at, id LIMIT 1")
+    /** The next job to run: the first waiting in the queue's order (S-1210), then the oldest. */
+    @Query("SELECT * FROM remux_job WHERE state = 'queued' ORDER BY position, created_at, id LIMIT 1")
     fun next(): RemuxJobEntry?
+
+    /** S-1210: the place after the last job, for a new one. */
+    @Query("SELECT COALESCE(MAX(position), 0) + 1 FROM remux_job")
+    fun nextPosition(): Long
+
+    /** S-1210: job [id] moved to [position] in the queue. */
+    @Query("UPDATE remux_job SET position = :position WHERE id = :id")
+    fun savePosition(id: Long, position: Long)
 
     /** Jobs left running, paused or verifying by a process that died; they start again. */
     @Query("SELECT * FROM remux_job WHERE state IN ('running', 'paused', 'verifying') ORDER BY created_at, id")

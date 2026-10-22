@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -23,16 +24,31 @@ import androidx.core.content.FileProvider
 import app.nagmedar.lab.displayName
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.lab.CreateFile
 import app.nagmedar.ui.lab.ReportDialog
+import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.shell.Destination
-import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.tvlab.remux.BatchFolder
+import app.nagmedar.ui.tvlab.remux.BatchItem
 import app.nagmedar.ui.tvlab.remux.PlanDraft
+import app.nagmedar.ui.tvlab.remux.RemuxBatchActions
+import app.nagmedar.ui.tvlab.remux.RemuxBatchPage
+import app.nagmedar.ui.tvlab.remux.RemuxBatchSession
 import app.nagmedar.ui.tvlab.remux.RemuxJobView
+import app.nagmedar.ui.tvlab.remux.RemuxNight
 import app.nagmedar.ui.tvlab.remux.RemuxPlannerDialog
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
+import app.nagmedar.ui.tvlab.remux.RemuxQueueActions
+import app.nagmedar.ui.tvlab.remux.RemuxQueueControl
+import app.nagmedar.ui.tvlab.remux.RemuxQueuePage
+import app.nagmedar.ui.tvlab.remux.activeJobs
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
@@ -58,14 +74,34 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
     var exporting by remember { mutableStateOf<DeviceProfile?>(null) }
     val queue = remember(context) { RemuxQueue.get(context) }
     val inputUri = controller.file?.uri
+    // the rows' JSON (plan, stats, verdict) read off the main thread: a running job writes its row every second
     val jobs by produceState(emptyList<RemuxJobView>(), inputUri, queue) {
         value = emptyList()
-        if (inputUri != null) queue.observe(inputUri).collect { rows -> value = rows.map(RemuxJobView::of) }
+        if (inputUri != null) queue.observe(inputUri).map { rows -> rows.map(RemuxJobView::of) }.flowOn(Dispatchers.Default).collect { value = it }
+    }
+    val allJobs by produceState(emptyList<RemuxJobView>(), queue) {
+        queue.observe().map { rows -> rows.map(RemuxJobView::of) }.flowOn(Dispatchers.Default).collect { value = it }
     }
     val view = controller.view().copy(jobs = jobs)
     val palette = chartPalette()
     val measurer = rememberTextMeasurer()
     val names = remember(res, locale) { LocalizedStreamNames(res, locale) }
+    // S-1210: the pages, the queue as a whole, the batch
+    var tab by rememberSaveable { mutableStateOf(TvLabTab.Analysis) }
+    val control by remember(context) { RemuxQueueControl.get(context).state }.collectAsState()
+    val batch = remember(context) { RemuxBatchSession.get(context) }
+    val prefs = rememberNagmedarPreferences()
+    val libraryFolders = remember(prefs.librarySources) {
+        LibrarySection.entries.filter { it.video }.flatMap { prefs.librarySources.of(it) }.filter { !it.exclude }.map { it.location }.distinct().map(BatchFolder::of)
+    }
+    var batchEditing by remember { mutableStateOf<Pair<BatchItem, String>?>(null) }
+    // the night run's "starts at" said against a clock that moves on
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            value = System.currentTimeMillis()
+            delay(CLOCK_MS)
+        }
+    }
 
     val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -153,6 +189,57 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         }
     }
 
+    val batchFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        // the films are read again by the queue's worker, later
+        runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        batch.open(BatchFolder.of(uri.toString()), controller.profile, names)
+    }
+    val batchOutputLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        // the new files are made now and written by the worker later
+        val grant = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        runCatching { context.contentResolver.takePersistableUriPermission(uri, grant) }
+        batch.chooseOutput(BatchFolder.of(uri.toString()))
+    }
+    val batchActions = remember(batch) {
+        object : RemuxBatchActions {
+            override fun chooseFolder() = batchFolderLauncher.launch(null)
+
+            override fun open(folder: BatchFolder) = batch.open(folder, controller.profile, LocalizedStreamNames(context.resources, context.resources.locale()))
+
+            override fun chooseOutput() = batchOutputLauncher.launch(null)
+
+            override fun editPlan(item: BatchItem) {
+                val plan = item.draft?.plan() ?: return
+                batchEditing = item to plan.toJson()
+            }
+
+            override fun queue() = batch.queue()
+        }
+    }
+    val queueActions = remember(queue) {
+        object : RemuxQueueActions {
+            override fun cancel(id: Long) {
+                scope.launch { queue.cancel(id) }
+            }
+
+            override fun remove(id: Long) {
+                scope.launch { queue.remove(id) }
+            }
+
+            override fun reorder(ids: List<Long>) {
+                scope.launch { queue.reorder(ids) }
+            }
+
+            override fun hold(on: Boolean) = queue.hold(on)
+
+            override fun night(at: Long, charging: Boolean) = RemuxNight.set(context, at, charging)
+
+            override fun cancelNight() = RemuxNight.cancel(context)
+        }
+    }
+
     val actions = remember(controller) {
         object : TvLabActions {
             override fun chooseFile() = fileLauncher.launch(arrayOf("video/*", "audio/*", "application/octet-stream"))
@@ -203,7 +290,36 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         }
     }
 
-    TvLabContent(view, actions, modifier, notice = notice, onDismissNotice = { notice = null })
+    TvLabContent(
+        view,
+        actions,
+        modifier,
+        notice = notice,
+        onDismissNotice = { notice = null },
+        tabs = TABS,
+        tab = tab,
+        onTab = { tab = it },
+        counts = mapOf(TvLabTab.Queue to activeJobs(allJobs).size),
+        page = { shown ->
+            when (shown) {
+                TvLabTab.Batch -> RemuxBatchPage(batch, controller.profile.name, libraryFolders, batchActions)
+                TvLabTab.Queue -> RemuxQueuePage(allJobs, control, now, queueActions)
+                else -> Unit
+            }
+        },
+    )
+
+    batchEditing?.let { (item, before) ->
+        val editing = item.draft
+        val close = {
+            // the plan changed is the film's own from now on; looked at and left as it was, it stays the default one
+            if (editing != null && editing.plan().toJson() != before) batch.edited(item)
+            batchEditing = null
+        }
+        if (editing != null) {
+            RemuxPlannerDialog(editing, item.name, onQueue = close, onCancel = close, confirm = stringResource(R.string.nag_tvlab_plan_done), cancellable = false)
+        }
+    }
 
     draft?.let { editing ->
         ProfileEditorDialog(
@@ -296,3 +412,9 @@ private const val MAX_PROFILE_BYTES = 256 * 1024
 
 /** What the remux writes (S-1206). */
 private const val MKV_MIME = "video/x-matroska"
+
+/** The TV Lab's pages, in the order of their tabs. */
+private val TABS = listOf(TvLabTab.Analysis, TvLabTab.Batch, TvLabTab.Queue)
+
+/** How often the queue's page looks at the clock. */
+private const val CLOCK_MS = 30_000L

@@ -546,6 +546,11 @@ data class RemuxJobEntry(
      * it yet: the queue tries again ([RemuxJobDao.leftovers]); once removed it is no longer owned.
      */
     @ColumnInfo(name = "owns_output") val ownsOutput: Boolean = false,
+    /**
+     * S-1210: where the job stands in the queue; the worker takes the waiting job with the
+     * lowest, the queue's screen reorders them. A new job goes last ([RemuxJobDao.nextPosition]).
+     */
+    @ColumnInfo(defaultValue = "0") val position: Long = 0,
 )
 
 /** The states of a [RemuxJobEntry]; done, failed and cancelled are final. */
@@ -581,6 +586,8 @@ object RemuxJobError {
     const val OUTPUT_IN_USE = "output-in-use"
     /** Queued, but the system let no foreground job start from the background: it starts when the app shows. */
     const val WAITING_APP = "waiting-app"
+    /** S-1210: paused with the whole queue by the user; it goes on when the queue is resumed. */
+    const val HELD = "held"
     /** The engine's own message follows the prefix. */
     const val ENGINE = "engine:"
 }

@@ -24,6 +24,9 @@ object RemuxEvent {
     const val STOPPED = "stopped"
     const val INTERRUPTED = "interrupted"
 
+    /** S-1210: the whole queue paused by the user; [RESUMED] when it goes on. */
+    const val HELD = "held"
+
     /** Why a job was interrupted (the detail of [INTERRUPTED]): the worker stopped, its foreground time ran out, the process died. */
     const val WORKER_STOPPED = "worker-stopped"
     const val FOREGROUND_TIMEOUT = "foreground-timeout"
@@ -54,13 +57,17 @@ object RemuxEvent {
  * goes back to the queue, and a job left running by a process that died is started again from
  * the beginning ([recoverInterrupted]): a Matroska file written halfway cannot be continued.
  * While a job runs its row is written column by column, so a cancel asked meanwhile is never
- * overwritten. Blocking: runs on the worker's thread, one runner at a time.
+ * overwritten. The queue as a whole (S-1210) is [held] by the user (the running job waits where
+ * it is, paused, no other starts) or [waits] (its night run: no job starts before the time).
+ * Blocking: runs on the worker's thread, one runner at a time.
  */
 class RemuxRunner(
     private val engine: RemuxEngine,
     private val dao: RemuxJobDao,
     private val device: () -> DeviceState,
     private val now: () -> Long = System::currentTimeMillis,
+    private val held: () -> Boolean = { false },
+    private val waits: () -> Boolean = { false },
     private val onUpdate: (RemuxJobEntry) -> Unit = {},
 ) {
     /** The jobs the last process left running, paused or verifying: their outputs emptied, queued again, to start over. */
@@ -77,12 +84,17 @@ class RemuxRunner(
         dao.leftovers().forEach { removeOwnedOutput(engine, dao, it) }
     }
 
+    /** Whether the queue starts no job now: paused by the user, or waiting for its night run. */
+    fun stopped(): Boolean = held() || waits()
+
     /**
-     * Every waiting job in turn; returns when none waits or [interruption] names a reason (null
-     * while the worker may go on), which the interrupted job records.
+     * Every waiting job in turn; returns when none waits, the queue is [stopped], or
+     * [interruption] names a reason (null while the worker may go on), which the interrupted
+     * job records.
      */
     fun drain(interruption: () -> String? = { null }) {
         while (interruption() == null) {
+            if (stopped()) return
             val job = dao.next() ?: return
             run(job, interruption)
         }
@@ -229,6 +241,8 @@ class RemuxRunner(
             private set
         private var paused = false
         private var slowed = false
+        /** Paused with the whole queue by the user (S-1210). */
+        private var holding = false
         /** The engine asks again after a wait: a slowed step waits once, then goes on. */
         private var slowWaited = false
         private var lastSave = 0L
@@ -248,6 +262,19 @@ class RemuxRunner(
             }
             val fraction = if (progress.totalSeconds > 0) (progress.doneSeconds / progress.totalSeconds).toFloat().coerceIn(0f, 1f) else 0f
             job = job.copy(progress = fraction, mediaSeconds = progress.doneSeconds, totalSeconds = progress.totalSeconds, bytesOut = progress.bytesOut)
+            // the user's pause comes first: the job waits where it is, the battery and heat looked at again after it
+            if (held()) {
+                if (!holding) {
+                    holding = true
+                    transition(RemuxJobState.PAUSED, RemuxJobError.HELD, RemuxEvent.HELD)
+                }
+                return HOLD_WAIT_MS
+            }
+            if (holding) {
+                holding = false
+                paused = false
+                transition(activeState, null, RemuxEvent.RESUMED)
+            }
             return when (val steer = ConvertPolicy.decide(device(), paused)) {
                 ConvertSteer.Go -> {
                     slowWaited = false
@@ -309,6 +336,9 @@ class RemuxRunner(
     private companion object {
         /** The row (and the notification) follow the engine this often. */
         const val SAVE_EVERY_MS = 1_000L
+
+        /** How often a job the user paused looks whether the queue goes on. */
+        const val HOLD_WAIT_MS = 1_000
     }
 }
 

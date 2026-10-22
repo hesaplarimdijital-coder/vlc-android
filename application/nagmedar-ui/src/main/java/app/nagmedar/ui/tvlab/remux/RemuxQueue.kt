@@ -35,9 +35,10 @@ class RemuxQueue(
      * (both the picker's "replace"), [REFUSED_NOT_FILE] when it is not a regular file, or
      * [REFUSED_IN_USE] when another job writes into it or keeps it: a job writes only into an
      * empty, new file of its own, and the source is never written. The runner and the engine
-     * check the same again before writing.
+     * check the same again before writing. The job goes last in the queue's order (S-1210);
+     * [start] false leaves the worker to the caller (a batch asks once, at its end).
      */
-    suspend fun enqueue(input: Uri, inputName: String, inputSize: Long, output: Uri, outputName: String, plan: RemuxPlan): Long =
+    suspend fun enqueue(input: Uri, inputName: String, inputSize: Long, output: Uri, outputName: String, plan: RemuxPlan, start: Boolean = true): Long =
         withContext(Dispatchers.IO) {
             if (input == output) return@withContext REFUSED_SAME_FILE
             if (dao.othersUsing(output.toString(), 0) > 0) return@withContext REFUSED_IN_USE
@@ -56,11 +57,30 @@ class RemuxQueue(
                     outputName = outputName,
                     plan = plan.toJson(),
                     createdAt = System.currentTimeMillis(),
+                    position = dao.nextPosition(),
                 ),
             )
-            RemuxWorker.ensure(context)
+            if (start) RemuxWorker.ensure(context)
             id
         }
+
+    /** S-1210: the worker asked for what was queued (after a batch). */
+    fun start() = RemuxWorker.ensure(context)
+
+    /** S-1210: the waiting jobs in the order of [ids], first to run first; the others keep their places after them. */
+    suspend fun reorder(ids: List<Long>) = withContext(Dispatchers.IO) {
+        val base = ids.mapNotNull { dao.get(it)?.position }.minOrNull() ?: return@withContext
+        ids.forEachIndexed { i, id -> dao.savePosition(id, base + i) }
+    }
+
+    /**
+     * S-1210: the whole queue paused ([on]) or resumed: paused, the running job waits where it
+     * is and no other starts; resumed, it goes on and the worker is asked again.
+     */
+    fun hold(on: Boolean) {
+        RemuxQueueControl.get(context).hold(on)
+        if (!on) RemuxWorker.ensure(context)
+    }
 
     /**
      * Stops a job: a waiting one is marked cancelled at once and, when the output is its own
@@ -109,6 +129,8 @@ class RemuxQueue(
      * unfinished output still to remove).
      */
     suspend fun resume() = withContext(Dispatchers.IO) {
+        // S-1210: a night run whose alarm the system did not deliver (the device off at the time) starts now
+        RemuxNight.reschedule(context)
         // a worker already running or waiting is kept: no stack of them from every start of the app
         if (dao.next() != null || dao.interrupted().isNotEmpty() || dao.leftovers().isNotEmpty()) RemuxWorker.ensure(context, append = false)
     }

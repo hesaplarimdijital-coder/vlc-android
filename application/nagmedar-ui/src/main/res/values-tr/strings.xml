@@ -1651,6 +1651,85 @@
     <string name="nag_tvlab_plan_sum_output">Dosya: %1$s</string>
     <string name="nag_tvlab_plan_lossy_note">Kayıplı bir adım attığını kaybeder; videonun temel katmanı her durumda bit bit kalır.</string>
     <string name="nag_tvlab_plan_queue">Sıraya al…</string>
+    <!-- S-1210: the TV Lab's pages, the remux queue as a whole, its night run, the batch -->
+    <string name="nag_tvlab_tab_analysis">Analiz</string>
+    <string name="nag_tvlab_tab_batch">Toplu işlem</string>
+    <string name="nag_tvlab_tab_queue">Sıra</string>
+    <string name="nag_tvlab_tab_history">Geçmiş</string>
+    <string name="nag_tvlab_plan_done">Tamam</string>
+    <string name="nag_tvlab_remux_plan_chapters_title">Bölümler</string>
+    <string name="nag_tvlab_queue_held">Sıra duraklatıldı</string>
+    <string name="nag_tvlab_queue_held_text">Sıra duraklatıldı: çalışan iş olduğu yerde bekler, yenisi başlamaz.</string>
+    <string name="nag_tvlab_queue_idle">Bekleyen iş yok.</string>
+    <plurals name="nag_tvlab_queue_waiting">
+        <item quantity="one">%d iş bekliyor.</item>
+        <item quantity="other">%d iş bekliyor.</item>
+    </plurals>
+    <string name="nag_tvlab_queue_pause">Sırayı duraklat</string>
+    <string name="nag_tvlab_queue_resume">Sürdür</string>
+    <string name="nag_tvlab_queue_start_now">Şimdi başlat</string>
+    <string name="nag_tvlab_queue_night">Gece çalıştır…</string>
+    <string name="nag_tvlab_queue_night_title">Gece çalıştır</string>
+    <string name="nag_tvlab_queue_night_change">Saati değiştir…</string>
+    <string name="nag_tvlab_queue_note">İşler bu sırayla, birer birer çalışır: bekleyen bir işi sürükleyin ya da Alt+↑ ve Alt+↓ ile taşıyın. Pil ve ısı kuralları gece de geçerlidir.</string>
+    <string name="nag_tvlab_queue_empty">Sırada iş yok</string>
+    <string name="nag_tvlab_queue_empty_text">Bir filmin remux planından ya da toplu işlemden sıraya alınan işler burada görünür; bitenler Geçmiş\'e geçer.</string>
+    <string name="nag_tvlab_queue_night_at">Başlangıç: %1$s</string>
+    <string name="nag_tvlab_queue_night_charging_short">yalnızca şarjdayken</string>
+    <string name="nag_tvlab_queue_night_text">Sıra o saate kadar bekler; şu an çalışan iş önce biter. O saatte, isterseniz cihaz şarja takılınca başlar.</string>
+    <string name="nag_tvlab_queue_night_start">Başlama saati</string>
+    <string name="nag_tvlab_queue_night_charging">Yalnızca şarjdayken başlasın</string>
+    <string name="nag_tvlab_queue_night_inexact">Android, Nağmedar\'ın tam dakikasında başlamasına izin vermiyor: sıra birkaç dakika geç başlayabilir.</string>
+    <string name="nag_tvlab_queue_night_set">Gece çalıştır</string>
+    <string name="nag_tvlab_batch_source">Analiz edilecek klasör</string>
+    <string name="nag_tvlab_batch_no_folder">Klasör seçilmedi</string>
+    <string name="nag_tvlab_batch_choose_folder">Klasör seç…</string>
+    <string name="nag_tvlab_batch_library_note">Ya da kütüphanenin klasörlerinden biri (Ayarlar › Kütüphane).</string>
+    <string name="nag_tvlab_batch_unreadable">Klasör okunamadı.</string>
+    <string name="nag_tvlab_batch_listing">Filmler listeleniyor…</string>
+    <string name="nag_tvlab_batch_probing">%1$d / %2$d film analiz edildi</string>
+    <string name="nag_tvlab_batch_none_found">Bu klasörde film yok.</string>
+    <string name="nag_tvlab_batch_output">Çıktı klasörü</string>
+    <string name="nag_tvlab_batch_choose_output">Çıktı klasörünü seç…</string>
+    <string name="nag_tvlab_batch_output_text">Her film “ad.remux.mkv” adlı yeni bir dosyaya yazılır. O adda bir dosya zaten varsa film atlanır, dosyaya dokunulmaz.</string>
+    <plurals name="nag_tvlab_batch_films">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d film</item>
+    </plurals>
+    <string name="nag_tvlab_batch_all">Tümünü seç</string>
+    <string name="nag_tvlab_batch_none">Hiçbirini seçme</string>
+    <string name="nag_tvlab_batch_empty">Bir klasörü analiz edin</string>
+    <string name="nag_tvlab_batch_empty_text">İçindeki filmler okunur ve TV Lab\'in cihazına göre denetlenir; her biri varsayılan planı alır, planı film film değiştirebilirsiniz.</string>
+    <plurals name="nag_tvlab_batch_queued">
+        <item quantity="one">%d film sıraya alındı.</item>
+        <item quantity="other">%d film sıraya alındı.</item>
+    </plurals>
+    <string name="nag_tvlab_batch_refused">%1$s: %2$s</string>
+    <string name="nag_tvlab_batch_needs_output">Önce çıktı klasörünü seçin.</string>
+    <plurals name="nag_tvlab_batch_queue">
+        <item quantity="one">%d filmi sıraya al</item>
+        <item quantity="other">%d filmi sıraya al</item>
+    </plurals>
+    <string name="nag_tvlab_batch_default_plan">Varsayılan plan</string>
+    <string name="nag_tvlab_batch_default_plan_text">Her film için, hedef %1$s. Planını değiştirdiğiniz film kendi planını korur.</string>
+    <string name="nag_tvlab_batch_o_dv">Cihaz gerektiriyorsa Dolby Vision profil 7 → 8.1</string>
+    <string name="nag_tvlab_batch_o_default_audio">Cihazın çaldığı bir varsayılan ses izi</string>
+    <string name="nag_tvlab_batch_o_subtitles">Cihazın göstermediği altyazıları çıkar (kayıplı)</string>
+    <string name="nag_tvlab_batch_was_queued">Sıraya alındı</string>
+    <string name="nag_tvlab_batch_s_waiting">Bekliyor</string>
+    <string name="nag_tvlab_batch_s_not_read">Analiz edilmedi</string>
+    <string name="nag_tvlab_batch_s_probing">Analiz ediliyor</string>
+    <string name="nag_tvlab_batch_s_ready">Hazır</string>
+    <string name="nag_tvlab_batch_s_unreadable">Okunamadı</string>
+    <plurals name="nag_tvlab_batch_suggestions">
+        <item quantity="one">%d öneri uygulandı</item>
+        <item quantity="other">%d öneri uygulandı</item>
+    </plurals>
+    <string name="nag_tvlab_batch_own_plan">Kendi planı</string>
+    <string name="nag_tvlab_batch_edit_plan">Planı düzenle…</string>
+    <string name="nag_tvlab_batch_default_again">Varsayılan plana dön</string>
+    <string name="nag_tvlab_batch_r_exists">Çıktı klasöründe bu adda bir dosya var; dosyaya dokunulmadı.</string>
+    <string name="nag_tvlab_batch_r_not_created">Çıktı klasöründe yeni dosya açılamadı.</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performans</string>
     <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>

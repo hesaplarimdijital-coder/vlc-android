@@ -11,6 +11,7 @@ import android.os.Build
 import android.provider.Settings as SystemSettings
 import android.util.Log
 import app.nagmedar.ui.radio.record.RecordingAlarms
+import app.nagmedar.ui.tvlab.remux.RemuxNight
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -171,7 +172,7 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 }
 
-/** S-1007: after a restart, a change of the time or of the alarm permission, the alarm is set again (S-1107: and the recordings scheduled). */
+/** S-1007: after a restart, a change of the time or of the alarm permission, the alarm is set again (S-1107: and the recordings scheduled; S-1210: the remux night run). */
 class AlarmRescheduler : BroadcastReceiver() {
     private companion object {
         const val TAG = "Nagmedar/Alarm"
@@ -191,6 +192,10 @@ class AlarmRescheduler : BroadcastReceiver() {
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "the scheduled recordings could not be set again", e)
+            }
+            try {
+                // S-1210: the remux queue's night run, whatever came of the recordings
+                RemuxNight.reschedule(app)
             } finally {
                 pending.finish()
             }

@@ -96,6 +96,10 @@
         <receiver
             android:name="app.nagmedar.ui.tvlab.remux.RemuxCancelReceiver"
             android:exported="false" />
+        <!-- S-1210: the remux queue's night run (set again after a restart by AlarmRescheduler) -->
+        <receiver
+            android:name="app.nagmedar.ui.tvlab.remux.RemuxNightReceiver"
+            android:exported="false" />
 
         <!-- Classic UI: Nağmedar's home screen widget, in place of VLC's three -->
         <receiver

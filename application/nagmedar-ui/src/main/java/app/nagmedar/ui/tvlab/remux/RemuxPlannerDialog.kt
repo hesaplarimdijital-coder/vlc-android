@@ -69,11 +69,22 @@ import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.tvlab.resources
 
-/** The planner in its dialog (S-1205): [onQueue] when the plan is to be queued, [onCancel] when it is left. */
+/**
+ * The planner in its dialog (S-1205): [onQueue] when the plan is to be queued, [onCancel] when it
+ * is left. [confirm] names the main button ("Sıraya al…"; the batch's "Tamam", S-1210, whose
+ * edits are the film's plan at once and so have no Cancel: [cancellable] false).
+ */
 @Composable
-fun RemuxPlannerDialog(draft: PlanDraft, fileName: String, onQueue: () -> Unit, onCancel: () -> Unit) {
+fun RemuxPlannerDialog(
+    draft: PlanDraft,
+    fileName: String,
+    onQueue: () -> Unit,
+    onCancel: () -> Unit,
+    confirm: String? = null,
+    cancellable: Boolean = true,
+) {
     Dialog(onDismissRequest = onCancel, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        RemuxPlannerSurface(draft, fileName, onQueue, onCancel)
+        RemuxPlannerSurface(draft, fileName, onQueue, onCancel, confirm = confirm, cancellable = cancellable)
     }
 }
 
@@ -125,7 +136,15 @@ private sealed interface PlanRow {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RemuxPlannerSurface(draft: PlanDraft, fileName: String, onQueue: () -> Unit, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+fun RemuxPlannerSurface(
+    draft: PlanDraft,
+    fileName: String,
+    onQueue: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    confirm: String? = null,
+    cancellable: Boolean = true,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard)
@@ -212,12 +231,13 @@ fun RemuxPlannerSurface(draft: PlanDraft, fileName: String, onQueue: () -> Unit,
             HorizontalRule()
             Spacer(Modifier.padding(top = dimens.gapM))
             FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                NagButton(stringResource(R.string.nag_sc_cancel), onCancel)
+                if (cancellable) NagButton(stringResource(R.string.nag_sc_cancel), onCancel)
                 NagButton(
-                    stringResource(R.string.nag_tvlab_plan_queue),
+                    confirm ?: stringResource(R.string.nag_tvlab_plan_queue),
                     onQueue,
                     primary = true,
-                    enabled = draft.valid,
+                    // the batch's plan is checked when it is queued
+                    enabled = draft.valid || !cancellable,
                     modifier = Modifier.testTag("tvlab-planner-queue"),
                 )
             }

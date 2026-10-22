@@ -670,6 +670,12 @@ class NagmedarDatabaseMigrationTest {
                 "INSERT INTO radio_schedule_run (schedule_id, window_start, window_end, status, interruptions, session_id, updated_at) " +
                     "VALUES (1, 1, 2, 'recorded', 0, NULL, 2)",
             )
+            // 19 -> 20 (S-1210): the remux queue's order, the job queued before kept first
+            db.query("SELECT position FROM remux_job WHERE input_uri = 'content://a'").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0L, c.getLong(0))
+            }
+            db.execSQL("UPDATE remux_job SET position = 2 WHERE input_uri = 'content://a'")
         }
     }
 

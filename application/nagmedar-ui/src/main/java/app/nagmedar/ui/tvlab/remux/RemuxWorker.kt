@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -19,6 +20,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.RemuxJobEntry
+import app.nagmedar.data.RemuxJobError
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
@@ -50,13 +52,22 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
     override suspend fun doWork(): Result {
         val dao = NagmedarDatabase.get(applicationContext).remuxJobs()
         val engine = NativeRemuxEngine(applicationContext)
-        val runner = RemuxRunner(engine, dao, AndroidDeviceState(applicationContext)) { job -> show(job) }
+        val control = RemuxQueueControl.get(applicationContext)
+        val runner = RemuxRunner(
+            engine,
+            dao,
+            AndroidDeviceState(applicationContext),
+            held = { control.current.held },
+            waits = { control.current.waitsForNight(System.currentTimeMillis()) },
+        ) { job -> show(job) }
         withContext(Dispatchers.IO) {
             val scope = coroutineContext
             // one runner at a time: a worker the system stopped finishes its step (the engine sees the stop) before the next one starts
             synchronized(RUN_LOCK) {
                 runner.cleanUp()
                 runner.recoverInterrupted()
+                // S-1210: a queue paused or waiting for its night run starts nothing; Resume or the alarm asks again
+                if (runner.stopped()) return@synchronized
                 val first = dao.next() ?: return@synchronized
                 // a foreground start can be refused (Android 12+, from the background): a job that ran as a plain
                 // background job would be stopped after ten minutes and start over, so it waits for the app instead
@@ -117,7 +128,7 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         val text = when (job?.state) {
             RemuxJobState.RUNNING -> context.getString(R.string.nag_tvlab_remux_running, percent)
             RemuxJobState.VERIFYING -> context.getString(R.string.nag_tvlab_remux_verifying, percent)
-            RemuxJobState.PAUSED -> context.getString(R.string.nag_jobs_paused)
+            RemuxJobState.PAUSED -> context.getString(if (job.error == RemuxJobError.HELD) R.string.nag_tvlab_queue_held else R.string.nag_jobs_paused)
             else -> context.getString(R.string.nag_jobs_queued)
         }
         val open = openTvLab(context)
@@ -176,13 +187,16 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         /**
          * A worker for the queue. [append] (a job just queued) puts it after the one running, if
          * any, so that nothing queued is missed; without it (the app showing again) one already
-         * running or waiting is kept.
+         * running or waiting is kept. [charging] (the night run, S-1210): it starts once the
+         * device charges.
          */
-        fun ensure(context: Context, append: Boolean = true) {
+        fun ensure(context: Context, append: Boolean = true, charging: Boolean = false) {
+            val request = OneTimeWorkRequestBuilder<RemuxWorker>()
+            if (charging) request.setConstraints(Constraints.Builder().setRequiresCharging(true).build())
             WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
                 NAME,
                 if (append) ExistingWorkPolicy.APPEND_OR_REPLACE else ExistingWorkPolicy.KEEP,
-                OneTimeWorkRequestBuilder<RemuxWorker>().build(),
+                request.build(),
             )
         }
     }

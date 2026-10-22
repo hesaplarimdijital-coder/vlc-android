@@ -31,6 +31,8 @@ data class RemuxJobView(
     val events: List<RemuxEvent.Line>,
     /** Failed or cancelled, its unfinished output not removed yet: the queue tries again. */
     val leftover: Boolean = false,
+    /** S-1210: its place in the queue's order. */
+    val position: Long = 0,
 ) {
     val active: Boolean get() = state !in RemuxJobState.FINAL
     val convertsDolbyVision: Boolean get() = plan?.dolbyVision == DolbyVisionMode.ConvertToProfile81
@@ -73,6 +75,7 @@ data class RemuxJobView(
             verification = entry.verification?.let(RemuxVerification::parse),
             events = RemuxEvent.parse(entry.events),
             leftover = entry.ownsOutput && (entry.state == RemuxJobState.FAILED || entry.state == RemuxJobState.CANCELLED),
+            position = entry.position,
         )
     }
 }

@@ -153,7 +153,11 @@ class MemoryRemuxJobDao : RemuxJobDao {
 
     override fun all(): List<RemuxJobEntry> = sorted(desc = true)
 
-    override fun next(): RemuxJobEntry? = sorted(desc = false).firstOrNull { it.state == RemuxJobState.QUEUED }
+    override fun next(): RemuxJobEntry? = sorted(desc = false).sortedBy { it.position }.firstOrNull { it.state == RemuxJobState.QUEUED }
+
+    override fun nextPosition(): Long = (rows.value.values.maxOfOrNull { it.position } ?: 0) + 1
+
+    override fun savePosition(id: Long, position: Long) = change(id) { it.copy(position = position) }
 
     override fun interrupted(): List<RemuxJobEntry> =
         sorted(desc = false).filter { it.state in setOf(RemuxJobState.RUNNING, RemuxJobState.PAUSED, RemuxJobState.VERIFYING) }
