@@ -443,8 +443,9 @@ class DesktopPlayerChrome : PlayerChrome {
     override fun request(request: PlayerChrome.Request): Boolean {
         val activity = activity ?: return false
         when (request) {
-            PlayerChrome.Request.Tracks -> sheets.show(PlayerSheet.Audio)
-            PlayerChrome.Request.Options -> sheets.show(PlayerSheet.More)
+            // the player's keys ask for these (V, Up, the menu key): the sheet's first item has the keyboard
+            PlayerChrome.Request.Tracks -> sheets.show(PlayerSheet.Audio, byKeys = true)
+            PlayerChrome.Request.Options -> sheets.show(PlayerSheet.More, byKeys = true)
             PlayerChrome.Request.Equalizer -> appWindows.perform(activity, ShortcutId.Equalizer)
             PlayerChrome.Request.JumpToTime -> navigation?.jumping = true
             PlayerChrome.Request.PickSubtitles -> subtitles?.pick?.invoke()
@@ -879,8 +880,9 @@ private const val NO_SUBTITLES = "-1"
 /**
  * Over the video: the controls take every touch, a mouse's, a finger's and a pen's, and TalkBack's
  * exploring; in picture in picture none (the window is the system's then). The keys stay the
- * player's (Space, the arrows, the shortcuts): nothing in here takes the focus. The cursor hides
- * with the controls when the video fills the screen.
+ * player's (Space, the arrows, the shortcuts): nothing in here takes the focus; the sheets and the
+ * dialogs over the video are windows of their own, which have the keyboard while they show. The
+ * cursor hides with the controls when the video fills the screen.
  */
 @SuppressLint("ViewConstructor")
 internal class ChromeFrame(context: Context, private val controls: ChromeVisibility) : FrameLayout(context) {
@@ -1075,7 +1077,7 @@ private fun PlayerChromeContent(
                 if (visibility.locked && !visibility.pictureInPicture) LockOverlay(visibility.lockHints, onUnlock = extras.touch::unlock)
                 extras.sheets.open?.let { sheet ->
                     val content = sheetContent(sheet, chromeState, source, extras.sheets, extras.touch, navigation, canRotate = source.fillsScreen())
-                    PlayerSheetView(content.title, content.entries, onDismiss = extras.sheets::close)
+                    PlayerSheetView(content.title, content.entries, onDismiss = extras.sheets::close, focusFirst = extras.sheets.byKeys)
                 }
             }
             // VLC's "resume where you left off?", in the app's own dialog

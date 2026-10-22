@@ -36,7 +36,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -53,6 +62,7 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuItemRow
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.player.navigate.DialogCard
@@ -63,73 +73,111 @@ import kotlinx.coroutines.delay
 /** The touch layout's sheets: what the classic overlay's option sheets and pickers were. */
 enum class PlayerSheet { More, Audio, Speed, Picture, Orientation, Chapters }
 
-/** Which sheet is open over the video, if any. Compose state. */
+/** Which sheet is open over the video, if any, and whether a key opened it. Compose state. */
 @Stable
 class PlayerSheets {
     var open by mutableStateOf<PlayerSheet?>(null)
         private set
 
-    fun show(sheet: PlayerSheet) {
+    /** A key opened [open] (Up, V, the menu key): its first item has the keyboard. */
+    var byKeys by mutableStateOf(false)
+        private set
+
+    fun show(sheet: PlayerSheet, byKeys: Boolean = false) {
         open = sheet
+        this.byKeys = byKeys
     }
 
     fun close() {
         open = null
+        byKeys = false
     }
 }
 
 /**
  * A sheet over the video, along the bottom: its title with a close button, then its items as
- * the menus have them, touch-sized; a tap beside it or Back closes it, an item closes it as it
- * acts. As wide as a phone at most, centred on a tablet.
+ * the menus have them, touch-sized; a tap beside it, Back or Esc closes it, an item closes it as
+ * it acts. As wide as a phone at most, centred on a tablet. It is a window of its own, which has
+ * the keyboard while it shows (the player's frame keeps the focus from its own views): opened by
+ * a key ([focusFirst]) its first item has the focus, otherwise Down and Up go to its first or
+ * last item; the arrows move from item to item, Enter acts.
  */
 @Composable
-internal fun PlayerSheetView(title: String, entries: List<MenuEntry>, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = NagTheme.colors
-    val shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-    BoxWithConstraints(
-        modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.4f))
-            .pointerInput(Unit) { detectTapGestures { onDismiss() } }
-            .testTag("player-sheet"),
-    ) {
-        Column(
+internal fun PlayerSheetView(title: String, entries: List<MenuEntry>, onDismiss: () -> Unit, focusFirst: Boolean = false) {
+    NagDialog(onDismissRequest = onDismiss) {
+        val colors = NagTheme.colors
+        val shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        val sheet = remember { FocusRequester() }
+        val first = remember { FocusRequester() }
+        val last = remember { FocusRequester() }
+        var sheetFocused by remember { mutableStateOf(false) }
+        val firstEnabled = entries.indexOfFirst { it is MenuEntry.Item && it.enabled }
+        val lastEnabled = entries.indexOfLast { it is MenuEntry.Item && it.enabled }
+        BoxWithConstraints(
             Modifier
-                .align(Alignment.BottomCenter)
-                .widthIn(max = 560.dp)
-                .fillMaxWidth()
-                .heightIn(max = maxHeight * 0.8f)
-                .background(colors.surface, shape)
-                .border(1.dp, colors.borderStrong, shape)
-                // taps inside stay inside
-                .pointerInput(Unit) { detectTapGestures { } }
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
-                .semantics { paneTitle = title }
-                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+                .fillMaxSize()
+                .pointerInput(Unit) { detectTapGestures { onDismiss() } }
+                .testTag("player-sheet"),
         ) {
-            Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    title,
-                    style = NagTheme.type.title,
-                    color = colors.text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).semantics { heading() },
-                )
-                NagIconButton(NagIcons.Close, stringResource(R.string.nag_player_window_close), onDismiss)
-            }
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                entries.forEach { entry ->
-                    when (entry) {
-                        is MenuEntry.Item -> MenuItemRow(entry) {
-                            onDismiss()
-                            entry.onClick()
+            Column(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .widthIn(max = 560.dp)
+                    .fillMaxWidth()
+                    .heightIn(max = maxHeight * 0.8f)
+                    .background(colors.surface, shape)
+                    .border(1.dp, colors.borderStrong, shape)
+                    // taps inside stay inside
+                    .pointerInput(Unit) { detectTapGestures { } }
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
+                    .semantics { paneTitle = title }
+                    .onPreviewKeyEvent { event ->
+                        // the sheet itself has the focus (a finger opened it): Down and Up go to its items
+                        if (!sheetFocused || firstEnabled < 0) return@onPreviewKeyEvent false
+                        val target = when (event.key) {
+                            Key.DirectionDown -> first
+                            Key.DirectionUp -> last
+                            else -> return@onPreviewKeyEvent false
                         }
-                        MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
+                        if (event.type == KeyEventType.KeyDown) target.requestFocus()
+                        true
+                    }
+                    .onFocusChanged { sheetFocused = it.isFocused }
+                    .focusRequester(sheet)
+                    .focusTarget()
+                    .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+            ) {
+                Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        title,
+                        style = NagTheme.type.title,
+                        color = colors.text,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).semantics { heading() },
+                    )
+                    NagIconButton(NagIcons.Close, stringResource(R.string.nag_player_window_close), onDismiss)
+                }
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    entries.forEachIndexed { index, entry ->
+                        when (entry) {
+                            is MenuEntry.Item -> {
+                                val focus = Modifier
+                                    .then(if (index == firstEnabled) Modifier.focusRequester(first) else Modifier)
+                                    .then(if (index == lastEnabled) Modifier.focusRequester(last) else Modifier)
+                                MenuItemRow(entry, focus) {
+                                    onDismiss()
+                                    entry.onClick()
+                                }
+                            }
+                            MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
+                        }
                     }
                 }
             }
+        }
+        LaunchedEffect(Unit) {
+            runCatching { if (focusFirst && firstEnabled >= 0) first.requestFocus() else sheet.requestFocus() }
         }
     }
 }
