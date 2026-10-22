@@ -2655,8 +2655,6 @@
     <string name="nag_pod_channel_download">Podcast indirmeleri</string>
     <string name="nag_pod_download_starting">Başlıyor…</string>
     <string name="nag_pod_download_cancel">İptal</string>
-    <string name="nag_pod_download_paused_title">Podcast indirmeleri duraklatıldı</string>
-    <string name="nag_pod_download_paused_text">Android indirme işini bir süre durdurdu; kaldığı yerden sürecek.</string>
     <string name="nag_pod_disk_full_title">İndirmeler durdu: cihazda yer kalmadı</string>
     <string name="nag_pod_disk_full_text">Biraz yer açın ya da Ayarlar › Podcastler\'de depolama sınırını düşürün.</string>
     <string name="nag_pod_storage_near_title">Podcast indirmeleri sınıra yaklaştı</string>
@@ -3476,7 +3474,7 @@
     <string name="nag_jobs_timeout">Android\'in arka plan işleri için süre sınırı durdurdu. Nağmedar açılınca baştan başlar.</string>
     <!-- Android 15'in ön plan işleri için günlük süre sınırı -->
     <string name="nag_time_limit_title">Android\'in süre sınırı doldu</string>
-    <string name="nag_time_limit_podcast">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. İndirmeler daha sonra kaldıkları yerden sürer.</string>
+    <string name="nag_time_limit_podcast">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. İndirmeler duraklatıldı; daha sonra kaldıkları yerden sürer.</string>
     <string name="nag_time_limit_model">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. Modelin indirilmesi daha sonra kaldığı yerden sürer.</string>
     <string name="nag_time_limit_recording">Android, arka plandaki işlerin günde ne kadar süreceğini sınırlar. Kayıt kopyalanana dek Nağmedar\'ı açık tutun; kopya yarıda kalırsa oynatma yeniden başladığında baştan yapılır.</string>
     <string name="nag_jobs_e_cancelled">Durduruldu; yarım kalan dosya silindi.</string>

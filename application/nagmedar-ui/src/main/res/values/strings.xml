@@ -2683,8 +2683,6 @@
     <string name="nag_pod_channel_download">Podcast downloads</string>
     <string name="nag_pod_download_starting">Starting…</string>
     <string name="nag_pod_download_cancel">Cancel</string>
-    <string name="nag_pod_download_paused_title">Podcast downloads paused</string>
-    <string name="nag_pod_download_paused_text">Android stopped the download job for a while; it goes on from where it was.</string>
     <string name="nag_pod_disk_full_title">Downloads stopped: the device is full</string>
     <string name="nag_pod_disk_full_text">Free some space, or lower the storage limit in Settings › Podcasts.</string>
     <string name="nag_pod_storage_near_title">Podcast downloads are near their limit</string>
@@ -3505,7 +3503,7 @@
     <string name="nag_jobs_timeout">Stopped by Android\'s time limit for background work. It starts again from the beginning when Nağmedar is opened.</string>
     <!-- Android 15's daily time limit for foreground work -->
     <string name="nag_time_limit_title">Android\'s time limit reached</string>
-    <string name="nag_time_limit_podcast">Android limits how long work may run in the background each day. The downloads go on from where they stopped later.</string>
+    <string name="nag_time_limit_podcast">Android limits how long work may run in the background each day. The downloads are paused and go on later from where they stopped.</string>
     <string name="nag_time_limit_model">Android limits how long work may run in the background each day. The model\'s download goes on from where it stopped later.</string>
     <string name="nag_time_limit_recording">Android limits how long work may run in the background each day. Keep Nağmedar open until the recording is copied; if the copy is cut short, it is made again when playback next starts.</string>
     <string name="nag_jobs_e_cancelled">Stopped; the unfinished file was removed.</string>

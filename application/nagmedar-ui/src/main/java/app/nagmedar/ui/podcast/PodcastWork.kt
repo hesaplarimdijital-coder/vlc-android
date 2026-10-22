@@ -12,13 +12,11 @@ import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.ui.work.TimeLimit
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -115,7 +113,8 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) : Corout
         val ids = inputData.getLongArray(WorkManagerDownloadScheduler.KEY_IDS)?.toList().orEmpty()
         if (ids.isEmpty()) return Result.success()
         runCatching { setForeground(foregroundInfo(notifier.downloading("", null, ids.first(), ids.size - 1))) }
-        // Android 15's daily time limit: the downloads go back to the queue as any stop sends them, and the user is told
+        // Android 15's daily time limit: the runner puts the running episode back in the queue, as any stop does, and
+        // WorkManager starts the work again; the user is told once, by this notice
         TimeLimit.onReached(this) { notifier.showTimeLimit() }
         var left = ids.size
         var shownAt = 0L
@@ -135,10 +134,10 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) : Corout
                     }
                 },
             )
-        } catch (e: CancellationException) {
-            // the runner has put the running episode back in the queue; WorkManager starts the work again, so the wait is said
-            if (stopReason == WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) notifier.showDownloadsPaused()
-            throw e
+        } finally {
+            // WorkManager takes away the notification of a foreground it started; one posted while the system refused
+            // the foreground (after the daily limit, say) is the app's own and would stay, ongoing
+            notifier.cancelDownload()
         }
         val cleanup = PodcastCenter.cleaner(applicationContext).clean(PodcastCenter.playingEpisodes())
         when {
