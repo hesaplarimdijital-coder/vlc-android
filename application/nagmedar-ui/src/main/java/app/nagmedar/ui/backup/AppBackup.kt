@@ -203,7 +203,7 @@ class AppBackup(
         val restored = backup.profiles.orEmpty().mapNotNull { DeviceProfileCodec.decode(it) }
         restored.forEach(profiles::save)
         backup.selectedProfile?.let { id -> if (profiles.all().any { it.id == id }) profiles.selected = id }
-        // an open TV Lab shows them
+        // an open TV Lab shows them: it reads them off the main thread, then shows them on it
         AppScope.launch { TvLabSession.opened()?.reloadProfiles() }
         return restored.size
     }

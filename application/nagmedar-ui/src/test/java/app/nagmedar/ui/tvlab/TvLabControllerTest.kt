@@ -134,4 +134,25 @@ class TvLabControllerTest {
         val remembered = MemoryProfileStore().apply { selected = BuiltInProfiles.tabS11Ultra.id }
         assertEquals(BuiltInProfiles.tabS11Ultra, controller(FakeTvLabEngine(), remembered).profile)
     }
+
+    @Test
+    fun profilesReadAgainAsARestoreLeftThem() {
+        val store = MemoryProfileStore()
+        val lab = controller(FakeTvLabEngine(), store)
+        // a restore (S-1502) writes the store behind the open TV Lab's back
+        val bravia = BuiltInProfiles.lgB4Usb.copy(id = "sony-bravia-8", name = "Sony Bravia 8", builtIn = false)
+        store.save(bravia)
+        store.selected = bravia.id
+        assertEquals(2, lab.profileList.size)
+
+        runBlocking { lab.reloadProfiles() }
+        assertEquals(3, lab.profileList.size)
+        assertEquals(bravia, lab.profile)
+
+        // a choice that is not among them: the one shown stays
+        lab.choose(BuiltInProfiles.tabS11Ultra.id)
+        store.selected = "nothing"
+        runBlocking { lab.reloadProfiles() }
+        assertEquals(BuiltInProfiles.tabS11Ultra, lab.profile)
+    }
 }

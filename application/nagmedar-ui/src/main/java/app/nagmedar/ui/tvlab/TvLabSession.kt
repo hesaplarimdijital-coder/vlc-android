@@ -246,10 +246,14 @@ class TvLabController(
         profiles.selected = profile.id
     }
 
-    /** The profiles read again, as a restore left them (S-1502): the chosen one kept's, else the one shown. */
-    fun reloadProfiles() {
-        profileList = profiles.all()
-        profile = profileList.firstOrNull { it.id == profiles.selected } ?: profileList.firstOrNull { it.id == profile.id } ?: profileList.first()
+    /**
+     * The profiles read again, as a restore left them (S-1502): the files off the main thread, then
+     * shown; the chosen one kept's, else the one shown.
+     */
+    suspend fun reloadProfiles() {
+        val (list, chosen) = withContext(Dispatchers.IO) { profiles.all() to profiles.selected }
+        profileList = list
+        profile = list.firstOrNull { it.id == chosen } ?: list.firstOrNull { it.id == profile.id } ?: list.first()
     }
 
     /** An id for a new profile named [name]. */
