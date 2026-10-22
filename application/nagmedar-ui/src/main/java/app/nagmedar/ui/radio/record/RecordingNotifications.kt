@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import java.util.Locale
 
 /** What the ongoing notification says: one recording's station and track, or the count of them, and how long it has gone on. */
@@ -35,8 +36,8 @@ interface RecordingWords {
 object RecordingNotifications {
 
     /** The ongoing notification's id: the foreground service's. */
-    const val ONGOING_ID = 6110
-    private const val ALERT_ID = 6111
+    const val ONGOING_ID = NotificationIds.RADIO_RECORDING
+    private const val ALERT_ID = NotificationIds.RADIO_RECORDING_ALERT
     private const val CHANNEL = "nagmedar_radio_recording"
     private const val CHANNEL_ALERTS = "nagmedar_radio_recording_alerts"
 

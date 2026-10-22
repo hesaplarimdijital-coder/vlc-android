@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import org.videolan.tools.Notices
 import org.videolan.vlc.util.NewStorageHandler
 import java.io.File
@@ -67,14 +68,16 @@ object NewDrives : NewStorageHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && manager.getNotificationChannel(CHANNEL) == null) {
             manager.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.nag_drive_channel), NotificationManager.IMPORTANCE_DEFAULT))
         }
+        // one per drive; its tap's PendingIntent is its own (NotificationIds)
+        val id = NotificationIds.NEW_DRIVE.idOf(path.hashCode())
         val builder = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(text)
             .setContentText(context.getString(R.string.nag_drive_new_text))
             .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.nag_drive_new_text)))
-            .setContentIntent(PendingIntent.getActivity(context, CHANNEL.hashCode(), open(context), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+            .setContentIntent(PendingIntent.getActivity(context, id, open(context), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
-        runCatching { manager.notify(path.hashCode(), builder.build()) }
+        runCatching { manager.notify(id, builder.build()) }
     }
 }

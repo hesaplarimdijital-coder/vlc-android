@@ -29,6 +29,7 @@ import app.nagmedar.translate.TranslationDirection
 import app.nagmedar.translate.TranslationModel
 import app.nagmedar.translate.TranslationModels
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.player.subtitles.decodeSubtitle
 import app.nagmedar.ui.player.subtitles.detectEncoding
 import app.nagmedar.ui.player.subtitles.saveSubtitle
@@ -248,8 +249,8 @@ class ModelDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         "Nagmedar/${BuildConfig.VLC_VERSION_NAME.takeIf { it.isNotBlank() } ?: "1.0"} (+https://github.com/hesaplarimdijital-coder/vlc-android)"
 
     private companion object {
-        const val NOTIFICATION_ID = 7101
-        const val TIME_LIMIT_ID = 7103
+        const val NOTIFICATION_ID = NotificationIds.MODEL_DOWNLOAD
+        const val TIME_LIMIT_ID = NotificationIds.MODEL_TIME_LIMIT
         const val NOTIFY_EVERY_MS = 1_000L
         const val MAX_ATTEMPTS = 5
     }
@@ -309,7 +310,7 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
             .setAutoCancel(true)
             .build()
         // without the permission the tools' window says it all
-        runCatching { NotificationManagerCompat.from(context).notify(id.hashCode(), notification) }
+        runCatching { NotificationManagerCompat.from(context).notify(NotificationIds.TRANSLATE_DONE.idOf(id.hashCode()), notification) }
     }
 
     /** Android's time limit for a foreground job ended it: it is not taken up again, and that is said. */
@@ -402,8 +403,8 @@ class SubtitleTranslateWorker(context: Context, params: WorkerParameters) : Coro
     }
 
     private companion object {
-        const val NOTIFICATION_ID = 7102
-        const val TIME_LIMIT_ID = 7104
+        const val NOTIFICATION_ID = NotificationIds.TRANSLATE
+        const val TIME_LIMIT_ID = NotificationIds.TRANSLATE_TIME_LIMIT
         const val NOTIFY_EVERY_MS = 1_000L
 
         /** Lines a call: enough for the CPU's vector units, few enough for Cancel to answer within a second or two. */

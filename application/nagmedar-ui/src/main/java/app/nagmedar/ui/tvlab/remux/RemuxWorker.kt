@@ -28,6 +28,7 @@ import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.convert.AndroidDeviceState
 import app.nagmedar.ui.jobs.jobForegroundInfo
 import app.nagmedar.ui.jobs.stoppedForForegroundTime
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.tvlab.percentLabel
 import kotlinx.coroutines.Dispatchers
@@ -161,8 +162,8 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         const val CHANNEL = "nagmedar_remux"
         const val ACTION_CANCEL = "app.nagmedar.ui.tvlab.remux.CANCEL"
         const val EXTRA_JOB = "job"
-        private const val NOTIFICATION_ID = 1206
-        private const val TIMEOUT_NOTIFICATION_ID = 12061
+        private const val NOTIFICATION_ID = NotificationIds.REMUX
+        private const val TIMEOUT_NOTIFICATION_ID = NotificationIds.REMUX_TIME_LIMIT
         private const val PROGRESS_MAX = 1000
         private val RUN_LOCK = Any()
 
@@ -175,9 +176,10 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
             )
         }
 
+        /** The tap of the queue's notifications: the TV Lab. Their own PendingIntent ([NotificationIds]). */
         private fun openTvLab(context: Context): PendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            NOTIFICATION_ID,
             Intent(context, NagmedarActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.TvLab.route),

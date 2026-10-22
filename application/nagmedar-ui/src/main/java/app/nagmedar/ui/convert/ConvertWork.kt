@@ -26,6 +26,7 @@ import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.jobs.jobForegroundInfo
 import app.nagmedar.ui.jobs.stoppedForForegroundTime
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -296,7 +297,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             .setAutoCancel(true)
             .build()
         // without the permission the music library's summary says it all
-        runCatching { NotificationManagerCompat.from(context).notify(job.id.hashCode(), notification) }
+        runCatching { NotificationManagerCompat.from(context).notify(NotificationIds.CONVERT_DONE.idOf(job.id.hashCode()), notification) }
     }
 
     /** Android stopped the job (a foreground job's time limit): said, so that the wait is not a mystery. */
@@ -311,12 +312,13 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             .setContentIntent(openMusic(context))
             .setAutoCancel(true)
             .build()
-        runCatching { NotificationManagerCompat.from(context).notify(job.id.hashCode(), notification) }
+        runCatching { NotificationManagerCompat.from(context).notify(NotificationIds.CONVERT_DONE.idOf(job.id.hashCode()), notification) }
     }
 
+    /** The tap of the converter's notifications: the music library. Their own PendingIntent ([NotificationIds]). */
     private fun openMusic(context: Context): PendingIntent = PendingIntent.getActivity(
         context,
-        0,
+        NOTIFICATION_ID,
         Intent(context, NagmedarActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.Music.route),
@@ -326,7 +328,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     companion object {
         const val CHANNEL = "nagmedar_convert"
         const val ACTION_CANCEL = "app.nagmedar.ui.convert.CANCEL"
-        private const val NOTIFICATION_ID = 1010
+        private const val NOTIFICATION_ID = NotificationIds.CONVERT
         private const val PROGRESS_MAX = 1000
         private const val NOTIFY_EVERY_MS = 1000L
 

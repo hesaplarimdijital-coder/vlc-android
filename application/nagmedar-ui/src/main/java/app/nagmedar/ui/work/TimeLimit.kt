@@ -35,7 +35,11 @@ object TimeLimit {
         currentCoroutineContext()[Job]?.invokeOnCompletion { cause -> if (cause != null && reached(worker)) runCatching(tell) }
     }
 
-    /** Tells the user, on [channel] (made by the caller), that the limit stopped the work and [text] what comes of it; a tap opens the app. */
+    /**
+     * Tells the user, on [channel] (made by the caller), that the limit stopped the work and
+     * [text] what comes of it; a tap opens the app. [id] is one of
+     * [app.nagmedar.ui.notify.NotificationIds]', and the request code of the tap's PendingIntent.
+     */
     @SuppressLint("MissingPermission")
     fun tell(context: Context, channel: String, id: Int, @DrawableRes icon: Int, @StringRes text: Int) {
         val message = context.getString(text)

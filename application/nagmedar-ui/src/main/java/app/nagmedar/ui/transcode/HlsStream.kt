@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -193,9 +194,10 @@ class HlsService : Service() {
                 NotificationChannel(CHANNEL, getString(R.string.nag_hls_title), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) },
             )
         }
+        // the tap's own PendingIntent (NotificationIds): another notification's extras never replace its page
         val open = PendingIntent.getActivity(
             this,
-            0,
+            ID,
             Intent(this, NagmedarActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.Convert.route),
@@ -306,6 +308,6 @@ class HlsService : Service() {
         const val EXTRA_TITLE = "title"
         const val EXTRA_QUALITY = "quality"
         private const val CHANNEL = "nagmedar_hls"
-        private const val ID = 1303
+        private const val ID = NotificationIds.HLS
     }
 }

@@ -27,6 +27,7 @@ import app.nagmedar.ui.convert.AndroidDeviceState
 import app.nagmedar.ui.convert.ConvertPolicy
 import app.nagmedar.ui.jobs.jobForegroundInfo
 import app.nagmedar.ui.jobs.stoppedForForegroundTime
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.shell.Destination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -160,9 +161,10 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
             job.state == TranscodeJobState.PAUSED -> context.getString(R.string.nag_jobs_paused_thermal)
             else -> job.outputName
         }
+        // the tap's own PendingIntent (NotificationIds): another notification's extras never replace its page
         val open = PendingIntent.getActivity(
             context,
-            0,
+            NOTIFICATION_ID,
             Intent(context, NagmedarActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.Convert.route),
@@ -195,7 +197,7 @@ class TranscodeWorker(context: Context, params: WorkerParameters) : CoroutineWor
         const val ACTION_CANCEL = "app.nagmedar.ui.transcode.CANCEL"
         const val EXTRA_JOB = "job"
         private const val STOPPED = "stopped"
-        private const val NOTIFICATION_ID = 13030
+        private const val NOTIFICATION_ID = NotificationIds.TRANSCODE
         private const val PROGRESS_MAX = 1000
         private const val NOTIFY_EVERY_MS = 1000L
         private val RUN_LOCK = Any()

@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.work.TimeLimit
 
 /**
@@ -73,7 +74,7 @@ class RecordingKeeper : Service() {
         private const val TAG = "Nagmedar/Recording"
 
         /** The copy's notification's id ([RecordingFiles]'), which the service shows. */
-        private const val ID = 6070
+        private const val ID = NotificationIds.RECORDING_COPY
 
         @Volatile
         private var pending: Notification? = null

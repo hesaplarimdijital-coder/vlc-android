@@ -15,6 +15,7 @@ import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.library.sizeLabel
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.work.TimeLimit
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
@@ -61,7 +62,7 @@ class PodcastNotifier(private val context: Context) {
                 .setContentTitle(notice.feedTitle)
                 .setContentText(res.getQuantityString(R.plurals.nag_pod_notice_count, notice.count, notice.count))
                 .setStyle(lines)
-                .setContentIntent(open(notice.feedId))
+                .setContentIntent(open(newsId(notice.feedId), notice.feedId))
                 .setAutoCancel(true)
                 .setGroup(GROUP_NEW)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
@@ -73,7 +74,7 @@ class PodcastNotifier(private val context: Context) {
                 .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
                 .setContentTitle(context.getString(R.string.nag_pod_channel_new))
                 .setContentText(res.getQuantityString(R.plurals.nag_pod_notice_summary, plan.total, plan.total, plan.feeds.size))
-                .setContentIntent(open(null))
+                .setContentIntent(open(ID_NEWS_SUMMARY))
                 .setAutoCancel(true)
                 .setGroup(GROUP_NEW)
                 .setGroupSummary(true)
@@ -87,17 +88,13 @@ class PodcastNotifier(private val context: Context) {
         runCatching { manager.cancel(newsId(feedId)) }
     }
 
-    private fun open(feedId: Long?): PendingIntent {
+    /** The tap of the notification [id]: the podcasts, on the show [feedId] if one is given. Its own PendingIntent ([NotificationIds]). */
+    private fun open(id: Int, feedId: Long? = null): PendingIntent {
         val intent = Intent(context, NagmedarActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(NAGMEDAR_EXTRA_DESTINATION, Destination.Podcasts.route)
         if (feedId != null) intent.putExtra(EXTRA_PODCAST, feedId)
-        return PendingIntent.getActivity(
-            context,
-            feedId?.hashCode() ?: 0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        return PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     // ------------------------------------------------------------ downloads
@@ -123,7 +120,7 @@ class PodcastNotifier(private val context: Context) {
                 ).joinToString(" · ").ifEmpty { context.getString(R.string.nag_pod_download_starting) },
             )
             .setProgress(PROGRESS_MAX, ((fraction ?: 0f) * PROGRESS_MAX).toInt(), fraction == null)
-            .setContentIntent(open(null))
+            .setContentIntent(open(ID_DOWNLOAD))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -150,7 +147,7 @@ class PodcastNotifier(private val context: Context) {
             .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_pod_disk_full_title))
             .setContentText(context.getString(R.string.nag_pod_disk_full_text))
-            .setContentIntent(open(null))
+            .setContentIntent(open(ID_STORAGE))
             .setAutoCancel(true)
             .build()
         runCatching { manager.notify(ID_STORAGE, n) }
@@ -171,7 +168,7 @@ class PodcastNotifier(private val context: Context) {
             .setSmallIcon(org.videolan.resources.R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_pod_storage_near_title))
             .setContentText(context.getString(R.string.nag_pod_storage_near_text, sizeLabel(usedBytes, context.resources.locale()), sizeLabel(limitBytes, context.resources.locale())))
-            .setContentIntent(open(null))
+            .setContentIntent(open(ID_STORAGE))
             .setAutoCancel(true)
             .build()
         runCatching { manager.notify(ID_STORAGE, n) }
@@ -187,15 +184,14 @@ class PodcastNotifier(private val context: Context) {
         /** The Long extra of the intent a notification starts the app with: the show to open. */
         const val EXTRA_PODCAST = "nagmedar_podcast_feed"
 
-        const val ID_DOWNLOAD = 1103
-        const val ID_STORAGE = 1104
-        const val ID_NEWS_SUMMARY = 1105
-        const val ID_TIME_LIMIT = 1107
-        private const val ID_NEWS_BASE = 20_000
+        const val ID_DOWNLOAD = NotificationIds.PODCAST_DOWNLOAD
+        const val ID_STORAGE = NotificationIds.PODCAST_STORAGE
+        const val ID_NEWS_SUMMARY = NotificationIds.PODCAST_NEWS_SUMMARY
+        const val ID_TIME_LIMIT = NotificationIds.PODCAST_TIME_LIMIT
         private const val PROGRESS_MAX = 1000
 
         /** The id of a show's news notification: stable, so that a later refresh replaces it. */
-        fun newsId(feedId: Long): Int = ID_NEWS_BASE + (feedId % 100_000).toInt()
+        fun newsId(feedId: Long): Int = NotificationIds.PODCAST_NEWS.idOf(feedId)
     }
 }
 

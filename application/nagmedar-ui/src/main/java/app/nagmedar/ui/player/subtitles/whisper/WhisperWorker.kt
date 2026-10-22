@@ -25,6 +25,7 @@ import androidx.work.workDataOf
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.player.subtitles.SavedSubtitle
 import app.nagmedar.ui.player.subtitles.saveSubtitle
 import app.nagmedar.ui.podcast.OkHttpFeedSource
@@ -305,8 +306,8 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     companion object {
         const val CHANNEL = "nagmedar_whisper"
-        private const val NOTIFICATION_ID = 709
-        private const val OUTCOME_ID = 7090
+        private const val NOTIFICATION_ID = NotificationIds.WHISPER
+        private const val OUTCOME_ID = NotificationIds.WHISPER_DONE
         private const val PROGRESS_MAX = 1000
         private const val TELL_EVERY_MS = 1000L
         private const val DETAIL_CHARS = 300

@@ -15,6 +15,7 @@ import android.widget.RemoteViews
 import androidx.annotation.LayoutRes
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -149,7 +150,7 @@ internal object PlayerWidgets {
     /** From this height (dp) the widget shows its cover beside the text. */
     private const val TALL_DP = 100
     private const val COVER_PX = 256
-    private const val OPEN_REQUEST = 0x4E57
+    private const val OPEN_REQUEST = NotificationIds.WIDGET_TAP
 }
 
 /**

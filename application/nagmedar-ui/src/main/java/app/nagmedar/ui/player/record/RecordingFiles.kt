@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -389,11 +390,11 @@ internal class RecordingFiles(
 
         companion object {
             /** The copy's notification: the foreground service's too. */
-            const val ID = 6070
-            private const val DONE_ID = 6071
+            const val ID = NotificationIds.RECORDING_COPY
+            private const val DONE_ID = NotificationIds.RECORDING_SAVED
 
             /** Android's time limit ended the copy's foreground service (S-607). */
-            internal const val TIME_LIMIT_ID = 6072
+            internal const val TIME_LIMIT_ID = NotificationIds.RECORDING_TIME_LIMIT
             internal const val CHANNEL = "nagmedar_recordings"
 
             /** A copy this big takes a while: its progress shows. */

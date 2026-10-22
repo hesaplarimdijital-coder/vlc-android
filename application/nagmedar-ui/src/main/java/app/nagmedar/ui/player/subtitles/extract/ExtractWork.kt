@@ -29,6 +29,7 @@ import androidx.work.workDataOf
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.player.subtitles.SavedSubtitle
 import app.nagmedar.ui.player.subtitles.saveSubtitle
 import kotlinx.coroutines.CancellationException
@@ -423,8 +424,8 @@ class SubtitleExtractWorker(context: Context, params: WorkerParameters) : Corout
 
     companion object {
         const val CHANNEL = "nagmedar_subtitle_extract"
-        private const val NOTIFICATION_ID = 7110
-        private const val OUTCOME_ID = 7111
+        private const val NOTIFICATION_ID = NotificationIds.EXTRACT
+        private const val OUTCOME_ID = NotificationIds.EXTRACT_DONE
         private const val PROGRESS_MAX = 1000
         private const val TELL_EVERY_MS = 1000L
         private const val DETAIL_CHARS = 300

@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
+import app.nagmedar.ui.notify.NotificationIds
 
 /**
  * Classic UI: libVLC asks something (a sign-in, a certificate to accept) while no window of the
@@ -59,6 +60,6 @@ internal class PromptNotification(private val context: Context) {
 
     private companion object {
         const val CHANNEL = "nagmedar_questions"
-        const val ID = 0x4E51
+        const val ID = NotificationIds.PROMPT
     }
 }
