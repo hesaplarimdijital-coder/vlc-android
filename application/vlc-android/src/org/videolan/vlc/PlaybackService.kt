@@ -230,6 +230,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private val binder = LocalBinder()
     internal lateinit var medialibrary: Medialibrary
     private lateinit var artworkMap: MutableMap<String, Uri>
+    // Nağmedar: the queue's artwork looked for off the main thread (updateMediaQueue)
+    private var mediaQueueUpdate: Job? = null
 
     private val callbacks = mutableListOf<Callback>()
     private val subtitleMessage = ArrayDeque<Pair<String,Long>>(1)
@@ -1519,29 +1521,37 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     @MainThread
     fun load(mediaList: List<MediaWrapper>, position: Int) = lifecycleScope.launch { playlistManager.load(mediaList, position) }
 
-    private fun updateMediaQueue() = lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
-        if (!this@PlaybackService::mediaSession.isInitialized) initMediaSession()
-        artworkMap = HashMap<String, Uri>().also {
+    private fun updateMediaQueue() {
+        // Nağmedar: a newer queue's artwork replaces the one still looked for
+        mediaQueueUpdate?.cancel()
+        mediaQueueUpdate = lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            if (!this@PlaybackService::mediaSession.isInitialized) initMediaSession()
             val ctx = this@PlaybackService
-            val artworkToUriCache = HashMap<String, Uri>()
-            for (media in playlistManager.getMediaList()) {
-                try {
-                    // S-1009: Nağmedar's album cover, kept in the app's own folder, else the medialibrary's art
-                    val ownCover = CoverHook.file(media)
-                    val artworkMrl = ownCover?.path ?: media.artworkMrl
-                    if (!artworkMrl.isNullOrEmpty() && (ownCover != null || isPathValid(artworkMrl))) {
-                        val artworkUri = artworkToUriCache.getOrPut(artworkMrl) { ArtworkProvider.buildMediaUri(ctx, media) }
-                        val key = MediaSessionBrowser.generateMediaId(media)
-                        it[key] = artworkUri
+            val mediaList = playlistManager.getMediaList()
+            // Nağmedar: the artworks' files (the covers kept, the art's paths) are looked at off the main thread
+            artworkMap = withContext(Dispatchers.IO) {
+                HashMap<String, Uri>().also {
+                    val artworkToUriCache = HashMap<String, Uri>()
+                    for (media in mediaList) {
+                        try {
+                            // S-1009: Nağmedar's album cover, kept in the app's own folder, else the medialibrary's art
+                            val ownCover = CoverHook.file(media)
+                            val artworkMrl = ownCover?.path ?: media.artworkMrl
+                            if (!artworkMrl.isNullOrEmpty() && (ownCover != null || isPathValid(artworkMrl))) {
+                                val artworkUri = artworkToUriCache.getOrPut(artworkMrl) { ArtworkProvider.buildMediaUri(ctx, media) }
+                                val key = MediaSessionBrowser.generateMediaId(media)
+                                it[key] = artworkUri
+                            }
+                        } catch (e: java.lang.NullPointerException) {
+                            Log.e("PlaybackService", "Caught NullPointerException", e)
+                            VLCCrashHandler.saveLog(e, "NullPointerException in PlaybackService updateMediaQueue")
+                        }
                     }
-                } catch (e: java.lang.NullPointerException) {
-                    Log.e("PlaybackService", "Caught NullPointerException", e)
-                    VLCCrashHandler.saveLog(e, "NullPointerException in PlaybackService updateMediaQueue")
+                    artworkToUriCache.clear()
                 }
             }
-            artworkToUriCache.clear()
+            updateMediaQueueSlidingWindow(true)
         }
-        updateMediaQueueSlidingWindow(true)
     }
 
     /**
