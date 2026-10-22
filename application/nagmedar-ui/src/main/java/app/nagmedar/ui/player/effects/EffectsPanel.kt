@@ -88,6 +88,7 @@ import app.nagmedar.ui.player.panel.SwitchRow
 import app.nagmedar.ui.player.panel.TextAction
 import app.nagmedar.ui.player.panel.decimal
 import app.nagmedar.ui.player.panel.signed
+import app.nagmedar.ui.player.ratioLabel
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import kotlin.math.roundToInt
@@ -217,7 +218,7 @@ private fun ShapeSection(effects: PlayerEffects, supported: Set<Effect>, deferre
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             AspectChoice.entries.forEach { aspect ->
-                PanelChip(stringResource(aspect.label), selected = effects.aspect == aspect, enabled = Effect.Aspect in supported) {
+                PanelChip(aspectLabel(aspect), selected = effects.aspect == aspect, enabled = Effect.Aspect in supported) {
                     onChange { it.copy(aspect = aspect) }
                 }
             }
@@ -553,6 +554,14 @@ internal fun <T : EffectOption> SelectRow(
         DropButton(shown ?: stringResource(value.label), enabled, label) { open = true }
         MenuPopup(visible = open, onDismiss = { open = false }, entries = entries, offset = IntOffset(0, 0), minWidth = 200.dp)
     }
+}
+
+/** An aspect chip's text: a ratio as the picture sizes write it ("2,39:1" in Turkish), else its word. */
+@Composable
+private fun aspectLabel(aspect: AspectChoice): String = when (aspect) {
+    AspectChoice.Auto -> stringResource(R.string.nag_fx_auto)
+    AspectChoice.Fill -> stringResource(R.string.nag_fx_aspect_fill)
+    else -> ratioLabel(aspect.width, aspect.height, currentLocale())
 }
 
 /** The equaliser: the player's own, off, or one of VLC's presets. */

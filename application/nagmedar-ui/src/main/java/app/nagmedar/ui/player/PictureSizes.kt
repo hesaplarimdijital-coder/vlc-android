@@ -1,12 +1,15 @@
 package app.nagmedar.ui.player
 
 import android.content.res.Resources
+import androidx.core.os.ConfigurationCompat
 import app.nagmedar.ui.R
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.tools.Settings
 import org.videolan.tools.VIDEO_RATIO
 import org.videolan.tools.putSingle
 import org.videolan.vlc.gui.video.VideoPlayerActivity
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
  * The picture's sizes the player offers, in the touch layout's sheet and for A, C and Z: libVLC's
@@ -19,21 +22,37 @@ internal val pictureSizes: List<MediaPlayer.ScaleType> = listOf(
     MediaPlayer.ScaleType.SURFACE_235_1, MediaPlayer.ScaleType.SURFACE_239_1, MediaPlayer.ScaleType.SURFACE_5_4,
 )
 
-/** A picture size's name: "Fit", "Fill the screen (crop)"; a ratio as it is written in both languages, "2.35:1". */
-internal fun pictureSizeLabel(resources: Resources, scale: MediaPlayer.ScaleType): String = when (scale) {
-    MediaPlayer.ScaleType.SURFACE_BEST_FIT -> resources.getString(R.string.nag_scale_fit)
-    MediaPlayer.ScaleType.SURFACE_FIT_SCREEN -> resources.getString(R.string.nag_scale_fill)
-    MediaPlayer.ScaleType.SURFACE_FILL -> resources.getString(R.string.nag_scale_stretch)
-    MediaPlayer.ScaleType.SURFACE_ORIGINAL -> resources.getString(R.string.nag_scale_original)
-    MediaPlayer.ScaleType.SURFACE_16_9 -> "16:9"
-    MediaPlayer.ScaleType.SURFACE_4_3 -> "4:3"
-    MediaPlayer.ScaleType.SURFACE_16_10 -> "16:10"
-    MediaPlayer.ScaleType.SURFACE_2_1 -> "2:1"
-    MediaPlayer.ScaleType.SURFACE_221_1 -> "2.21:1"
-    MediaPlayer.ScaleType.SURFACE_235_1 -> "2.35:1"
-    MediaPlayer.ScaleType.SURFACE_239_1 -> "2.39:1"
-    MediaPlayer.ScaleType.SURFACE_5_4 -> "5:4"
-    else -> resources.getString(R.string.nag_scale_fit)
+/** A picture size's name: "Fit", "Fill the screen (crop)"; a ratio as [ratioLabel] writes it, "2,35:1" in Turkish. */
+internal fun pictureSizeLabel(resources: Resources, scale: MediaPlayer.ScaleType): String {
+    val locale = ConfigurationCompat.getLocales(resources.configuration)[0] ?: Locale.getDefault()
+    return when (scale) {
+        MediaPlayer.ScaleType.SURFACE_BEST_FIT -> resources.getString(R.string.nag_scale_fit)
+        MediaPlayer.ScaleType.SURFACE_FIT_SCREEN -> resources.getString(R.string.nag_scale_fill)
+        MediaPlayer.ScaleType.SURFACE_FILL -> resources.getString(R.string.nag_scale_stretch)
+        MediaPlayer.ScaleType.SURFACE_ORIGINAL -> resources.getString(R.string.nag_scale_original)
+        MediaPlayer.ScaleType.SURFACE_16_9 -> ratioLabel(16.0, 9, locale)
+        MediaPlayer.ScaleType.SURFACE_4_3 -> ratioLabel(4.0, 3, locale)
+        MediaPlayer.ScaleType.SURFACE_16_10 -> ratioLabel(16.0, 10, locale)
+        MediaPlayer.ScaleType.SURFACE_2_1 -> ratioLabel(2.0, 1, locale)
+        MediaPlayer.ScaleType.SURFACE_221_1 -> ratioLabel(2.21, 1, locale)
+        MediaPlayer.ScaleType.SURFACE_235_1 -> ratioLabel(2.35, 1, locale)
+        MediaPlayer.ScaleType.SURFACE_239_1 -> ratioLabel(2.39, 1, locale)
+        MediaPlayer.ScaleType.SURFACE_5_4 -> ratioLabel(5.0, 4, locale)
+        else -> resources.getString(R.string.nag_scale_fit)
+    }
+}
+
+/**
+ * A ratio of the picture, [width] to [height], its decimals as the language writes them
+ * (TERIMLER): "2,39:1" in Turkish, "2.39:1" in English; "16:9". The picture sizes and the
+ * effects tab write their ratios with it.
+ */
+internal fun ratioLabel(width: Double, height: Int, locale: Locale): String {
+    val format = NumberFormat.getNumberInstance(locale).apply {
+        maximumFractionDigits = 2
+        isGroupingUsed = false
+    }
+    return format.format(width) + ":" + height
 }
 
 /** The film's picture at [scale], kept for the next films as the classic player keeps it; its name said over the video. */

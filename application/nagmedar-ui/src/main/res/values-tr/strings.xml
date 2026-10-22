@@ -978,7 +978,6 @@
     <string name="nag_fx_shape">En-boy ve kırpma</string>
     <string name="nag_fx_auto">Otomatik</string>
     <string name="nag_fx_off">Kapalı</string>
-    <string name="nag_fx_aspect_239">2,39:1</string>
     <string name="nag_fx_aspect_fill">Doldur</string>
     <string name="nag_fx_auto_crop">Siyah bantları algıla</string>
     <string name="nag_fx_auto_crop_hint">Görüntünün üstündeki ve altındaki siyah bantları kırpar</string>

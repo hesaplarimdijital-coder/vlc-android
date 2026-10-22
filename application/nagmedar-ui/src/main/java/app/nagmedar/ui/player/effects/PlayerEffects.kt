@@ -56,13 +56,21 @@ data class ColorAdjust(
     }
 }
 
-/** The picture's shape: as the file says, a ratio forced on it, or cropped to fill the screen. */
-enum class AspectChoice(override val key: String, override val label: Int) : EffectOption {
-    Auto("auto", R.string.nag_fx_auto),
-    Wide("16:9", R.string.nag_fx_aspect_16_9),
-    Scope("2.39:1", R.string.nag_fx_aspect_239),
-    Classic("4:3", R.string.nag_fx_aspect_4_3),
-    Fill("fill", R.string.nag_fx_aspect_fill),
+/**
+ * The picture's shape: as the file says, a ratio forced on it ([width] to [height], written as
+ * the interface's language writes it: "2,39:1" in Turkish), or cropped to fill the screen.
+ */
+enum class AspectChoice(val key: String, val width: Double = 0.0, val height: Int = 0) {
+    Auto("auto"),
+    Wide("16:9", 16.0, 9),
+    Scope("2.39:1", 2.39, 1),
+    Classic("4:3", 4.0, 3),
+    Fill("fill"),
+    ;
+
+    companion object {
+        fun of(key: String?): AspectChoice = entries.firstOrNull { it.key == key } ?: Auto
+    }
 }
 
 /** The picture turned by quarter turns and mirrored. */
@@ -210,7 +218,7 @@ object EffectsCodec {
         if (settings.effects == null && settings.aspectRatio == null && settings.deinterlace == null && settings.equalizerPreset == null) return null
         val json = settings.effects?.let { runCatching { JSONObject(it) }.getOrNull() } ?: JSONObject()
         return read(json).copy(
-            aspect = option(AspectChoice.entries, settings.aspectRatio, AspectChoice.Auto),
+            aspect = AspectChoice.of(settings.aspectRatio),
             deinterlace = option(Deinterlace.entries, settings.deinterlace, Deinterlace.Auto),
             equalizer = equalizer(settings.equalizerPreset),
         )
@@ -234,7 +242,7 @@ object EffectsCodec {
     fun decodeDefaults(text: String?): PlayerEffects? {
         val json = text?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return null
         return read(json).copy(
-            aspect = option(AspectChoice.entries, json.optString(KEY_ASPECT), AspectChoice.Auto),
+            aspect = AspectChoice.of(json.optString(KEY_ASPECT)),
             deinterlace = option(Deinterlace.entries, json.optString(KEY_DEINTERLACE), Deinterlace.Auto),
             equalizer = equalizer(json.optString(KEY_EQUALIZER)),
         )

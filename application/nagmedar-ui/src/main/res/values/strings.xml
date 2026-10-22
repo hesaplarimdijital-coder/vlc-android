@@ -978,9 +978,6 @@
     <string name="nag_fx_shape">Aspect ratio and crop</string>
     <string name="nag_fx_auto">Auto</string>
     <string name="nag_fx_off">Off</string>
-    <string name="nag_fx_aspect_16_9" translatable="false">16:9</string>
-    <string name="nag_fx_aspect_239">2.39:1</string>
-    <string name="nag_fx_aspect_4_3" translatable="false">4:3</string>
     <string name="nag_fx_aspect_fill">Fill</string>
     <string name="nag_fx_auto_crop">Detect black bars</string>
     <string name="nag_fx_auto_crop_hint">Crops the black bars above and below the picture</string>

@@ -56,7 +56,7 @@ Sözlüğü testler denetler:
 | ekranı kilitlemek | lock the screen | | | Video oynatıcıda dokunuşları ve hareketleri kapatır, ekranın yönünü tutar: “Ekranı kilitle”; ekrana dokununca çıkan düğme “Kilidi aç” |
 | parlaklık | brightness | | | Video oynatıcıda sol yarıda yukarı-aşağı kaydırma; yalnız oynatıcının penceresini aydınlatır, sistemin ayarı değişmez |
 | ekran yönü | screen orientation | | | Otomatik, Yatay, Dikey, Ters yatay |
-| görüntü boyutu | picture size | | | Filmin ekrana yerleşmesi: Sığdır, Ekranı doldur (kırp), Uzat, Özgün boyut ya da oran (16:9, 2.35:1); oranlar iki dilde de noktalı |
+| görüntü boyutu | picture size | | | Filmin ekrana yerleşmesi: Sığdır, Ekranı doldur (kırp), Uzat, Özgün boyut ya da oran (16:9, 2,35:1); oranın ondalığı dile göre: Türkçede virgül (2,35:1), İngilizcede nokta (2.35:1) |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | altyazı izi | subtitle track | altyazı parçası | | Videonun içindeki bir altyazı akışı (dili, adı, biçimi); müzikteki “parça”dan ayrı |
 | gömülü altyazı | embedded subtitles | dahili altyazı | built-in subtitles | Filmin dosyasının içindeki altyazı izleri (MKV, MP4, TS, AVI); “Gömülü altyazıyı dosyaya çıkar…” metin olanları filmin yanına yeni bir dosya olarak yazar, resim olanlar (PGS, VobSub, DVB) OCR gerektirdiği için çıkarılmaz |
