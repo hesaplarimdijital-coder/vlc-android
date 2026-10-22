@@ -31,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND
 import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY
 import org.videolan.tools.KEY_SUBTITLES_BOLD
@@ -71,6 +72,7 @@ internal class FakeNativeStyle(override val liveSize: Boolean) : NativeSubtitleS
  * it waits for libVLC to start again. The section shows each change in its preview.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class SubtitleStyleTest {
 

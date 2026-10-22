@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.util.Locale
 
 /** The assistant over the sync tab's delays, as the player's chrome puts it; the moment now set by the test. */
@@ -57,6 +58,7 @@ internal const val HEARD_MS = 4_302_180L
  * step, the next one lit, and does it on a click.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class SyncAssistantTest {
 

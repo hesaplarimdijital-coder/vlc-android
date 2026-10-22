@@ -25,10 +25,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /** S-1005: the editor on screen: the keys, the import, saving and the confirmation before LRCLIB. */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class LyricsEditorScreenTest {
 

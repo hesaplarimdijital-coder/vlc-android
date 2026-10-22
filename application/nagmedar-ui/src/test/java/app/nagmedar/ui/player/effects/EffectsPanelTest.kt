@@ -38,6 +38,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-603: the effects panel changes the film's effects at once, each control its own; "Save for
@@ -45,6 +46,7 @@ import org.robolectric.annotation.Config
  * and says why; the panel docks beside a wide window's video and under a narrow one's.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class EffectsPanelTest {
 

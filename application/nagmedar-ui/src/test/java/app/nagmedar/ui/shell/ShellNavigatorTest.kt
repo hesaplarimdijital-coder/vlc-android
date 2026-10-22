@@ -13,9 +13,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.GraphicsMode
 
 /** S-408: the mouse's back button leaves a screen the forward button returns to; going elsewhere forgets it. */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ShellNavigatorTest {
 
     @get:Rule

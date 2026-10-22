@@ -31,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /** Kuzey Işığı playing its Turkish DTS track with Turkish subtitles, as libVLC lists them. */
 internal val sampleTracks = PlayerTracks(
@@ -55,6 +56,7 @@ internal val sampleFile = FileFacts("Kuzey_Isigi_2160p_UHD_Remux.mkv", "58,4 GB 
  * minute; the report and the overlay say the same as the tab.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class InfoTest {
 

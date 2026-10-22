@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /** The player's delays, as VLC keeps them; null before there is a player. */
 internal class FakeSyncTarget(var audio: Long? = 0, var subtitles: Long? = 0) : SyncTarget {
@@ -78,6 +79,7 @@ internal class FakeSyncStore : SyncStore {
  * them back over VLC's own; the sync tab does each of these from its controls.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class SyncTest {
 

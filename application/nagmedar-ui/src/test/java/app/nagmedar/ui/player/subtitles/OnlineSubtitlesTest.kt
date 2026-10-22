@@ -29,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.Locale
@@ -112,6 +113,7 @@ internal fun openSubtitlesOnly(api: OpenSubtitlesApi) = ProviderRegistry(listOf(
  * answers' JSON is read as the API writes it; the fingerprint is OpenSubtitles' own.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
 class OnlineSubtitlesTest {
 
