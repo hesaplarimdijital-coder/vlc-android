@@ -94,12 +94,13 @@ class RemuxRunner(
     /**
      * Every waiting job in turn; returns when none waits, the queue is [stopped], or
      * [interruption] names a reason (null while the worker may go on), which the interrupted
-     * job records. A night run waiting for the charger is waited for first ([awaitCharger]).
+     * job records. A night run waiting for the charger is waited for first ([awaitCharger]);
+     * with nothing left to run it is over ([endNight]).
      */
     fun drain(interruption: () -> String? = { null }) {
         while (interruption() == null) {
             if (stopped()) return
-            val job = dao.next() ?: return
+            val job = dao.next() ?: return endNight()
             if (charger.waiting()) {
                 if (!awaitCharger(job, interruption)) return
                 // the queue read again: the wait may have been long
@@ -114,7 +115,8 @@ class RemuxRunner(
      * for the charger before its first job, the worker in the foreground since the alarm (one
      * started later from the background would be refused it). [job], the first to run, is shown
      * meanwhile. The user's pause, another night run, Start now (the night run taken off) or the
-     * worker's stop end the wait: whether the queue may go on.
+     * worker's stop end the wait: whether the queue may go on. So does the last job taken off
+     * the queue meanwhile: the queue goes on, to find nothing.
      */
     private fun awaitCharger(job: RemuxJobEntry, interruption: () -> String?): Boolean {
         var shown = false
@@ -129,8 +131,18 @@ class RemuxRunner(
             }
             charger.await(CHARGER_CHECK_MS)
             if (interruption() != null || stopped()) return false
+            if (dao.next() == null) return true
         }
         return true
+    }
+
+    /**
+     * S-1210: nothing waits to run. A night run that still waited for the charger has nothing
+     * to wait for any more and is over, as one without the charger is once its time comes: a job
+     * queued later is not held back for a charger.
+     */
+    fun endNight() {
+        if (charger.waiting()) charger.begin()
     }
 
     /** The system let no foreground job start: [job] waits, marked so, for the app to show (when it still waits). */

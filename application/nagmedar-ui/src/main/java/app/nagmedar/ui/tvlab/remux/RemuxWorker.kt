@@ -82,7 +82,8 @@ class RemuxWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
                     runner.recoverInterrupted()
                     // S-1210: a queue paused or waiting for its night run starts nothing; Resume or the alarm asks again
                     if (runner.stopped()) return@synchronized
-                    val first = dao.next() ?: return@synchronized
+                    // nothing waits: a night run still waiting for the charger is over
+                    val first = dao.next() ?: return@synchronized runner.endNight()
                     // a job queued meanwhile, by the app on show: asked for it now
                     if (!starts) foreground = goForeground(first)
                     // a foreground start can be refused (Android 12+, from the background): a job that ran as a plain

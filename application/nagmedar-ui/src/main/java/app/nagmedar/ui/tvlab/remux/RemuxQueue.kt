@@ -134,8 +134,11 @@ class RemuxQueue(
      * unfinished output still to remove).
      */
     suspend fun resume() = withContext(Dispatchers.IO) {
-        // S-1210: a night run whose alarm the system did not deliver (the device off at the time) starts now
-        RemuxNight.reschedule(context)
+        // S-1210: a night run whose alarm the system did not deliver (the device off at the time) starts now; one whose
+        // time came and that waits for the charger with a job to run has its worker, kept below (or started again when
+        // it is gone), not one more at every start of the app
+        val charger = RemuxQueueControl.get(context).current.waitsForCharger(System.currentTimeMillis())
+        if (!charger || dao.next() == null) RemuxNight.reschedule(context)
         // a worker already running is kept: no stack of them from every start of the app
         if (dao.next() != null || dao.interrupted().isNotEmpty() || dao.leftovers().isNotEmpty()) RemuxWorker.resume(context)
     }

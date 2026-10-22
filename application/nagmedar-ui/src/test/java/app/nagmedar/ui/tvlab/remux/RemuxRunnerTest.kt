@@ -451,6 +451,26 @@ class RemuxRunnerTest {
         assertEquals(RemuxJobState.DONE, dao.get(1)!!.state)
     }
 
+    /** S-1210: with nothing left to run, a night run waiting for the charger is over: a job queued later is not held back. */
+    @Test
+    fun aNightRunWithNothingLeftToRunIsOver() {
+        condition = DeviceState(80, charging = false, heat = Heat.None)
+        val charger = FakeCharger()
+        val runner = RemuxRunner(engine, dao, { condition }, { clock += 1_000; clock }, charger = charger)
+        runner.drain()
+        assertEquals("over at once: nothing was queued", 1, charger.begun)
+        assertEquals(0, charger.awaited)
+
+        // the only job taken off the queue while the night run waited for the charger
+        queued()
+        charger.waiting = true
+        charger.onAwait = { dao.cancelQueued(1, RemuxJobError.CANCELLED, clock) }
+        runner.drain()
+        assertEquals(1, charger.awaited)
+        assertEquals(2, charger.begun)
+        assertTrue("nothing started", engine.calls.isEmpty())
+    }
+
     @Test
     fun theViewReadsTheRow() {
         val view = sampleDoneJob()
