@@ -2537,7 +2537,7 @@
     <string name="nag_convert_channels">Channels</string>
     <string name="nag_convert_channels_source">As the source</string>
     <string name="nag_convert_channels_stereo">Mix down to stereo</string>
-    <string name="nag_convert_channels_hint">The source\'s layout is kept up to 7.1, and the bit rate above is a stereo pair\'s: it grows with the channels. Mixing down follows ITU-R BS.775 and leaves the LFE out.</string>
+    <string name="nag_convert_channels_hint">The source\'s layout is kept up to 7.1, and the bitrate above is a stereo pair\'s: it grows with the channels. Mixing down follows ITU-R BS.775 and leaves the LFE out.</string>
     <string name="nag_convert_channels_mp3">MP3 is always stereo: more channels are mixed down.</string>
     <string name="nag_convert_naming">File names</string>
     <string name="nag_convert_naming_folders">Artist/Album folders</string>
