@@ -50,7 +50,7 @@ Films and series play with libVLC 4. On a touch screen you get VLC's gestures; w
 - Swiping sideways seeks backward or forward.
 - A double tap on the left or right edge jumps 10 s back or forward; a double tap in the middle plays or pauses.
 - Tapping and holding plays faster; pinching with two fingers zooms the picture.
-- You choose which gestures are on under Settings › “All settings (classic interface)”.
+- You choose which gestures are on under Settings › All settings › Video › Player controls.
 
 ### Mouse and keyboard
 - The control bar has a timeline with chapter marks, frame previews, A-B loop, and speed, volume and track menus. The mouse wheel changes the volume, and seeks while Ctrl is held; you can swap the two in Settings › Input.

@@ -106,7 +106,10 @@ import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
+import app.nagmedar.ui.screens.SETTINGS_APPEARANCE_ITEM
+import app.nagmedar.ui.screens.SETTINGS_BACKUP_ITEM
 import app.nagmedar.ui.screens.SETTINGS_LIBRARY_ITEM
+import app.nagmedar.ui.screens.SETTINGS_REMOTE_ACCESS_ITEM
 import app.nagmedar.ui.screens.SETTINGS_SHORTCUTS_ITEM
 import app.nagmedar.ui.audio.AbChoice
 import app.nagmedar.ui.audio.AbTest
@@ -121,6 +124,9 @@ import app.nagmedar.ui.tvlab.TvLabScreen
 import app.nagmedar.ui.tvlab.TvLabSession
 import app.nagmedar.ui.tvlab.percentLabel
 import app.nagmedar.ui.screens.SettingsScreen
+import app.nagmedar.ui.prefs.AllSettingsScreen
+import app.nagmedar.ui.prefs.NagmedarLink
+import app.nagmedar.ui.prefs.preferencePaletteItems
 import app.nagmedar.ui.screens.rememberThirdParties
 import app.nagmedar.ui.input.DropPlan
 import app.nagmedar.ui.input.DropTargets
@@ -154,13 +160,14 @@ import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
 import app.nagmedar.ui.widget.PlayerWidgetMigration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.vlc.PlaybackService
-import org.videolan.vlc.gui.preferences.PreferencesActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.SlaveRepository
 import app.nagmedar.ui.transcode.TranscodeRequests
@@ -288,6 +295,22 @@ private fun NagmedarMain(
     LaunchedEffect(libraryListRequests) {
         if (libraryListRequests == 0) return@LaunchedEffect
         if (motion.reduced) settingsList.scrollToItem(SETTINGS_LIBRARY_ITEM) else settingsList.animateScrollToItem(SETTINGS_LIBRARY_ITEM)
+    }
+    // "All settings"' lines that Nağmedar's own sections have: Settings, at that section
+    var settingsItem by remember { mutableIntStateOf(0) }
+    var settingsItemRequests by remember { mutableIntStateOf(0) }
+    val openSettingsAt: (Int) -> Unit = { index ->
+        navigator.navigate(Destination.Settings)
+        settingsItem = index
+        settingsItemRequests++
+    }
+    LaunchedEffect(settingsItemRequests) {
+        if (settingsItemRequests == 0) return@LaunchedEffect
+        if (motion.reduced) settingsList.scrollToItem(settingsItem) else settingsList.animateScrollToItem(settingsItem)
+    }
+    // a preference asked for from outside (the player's metered connection question): its page in "All settings"
+    LaunchedEffect(ShellRequests.preference) {
+        if (ShellRequests.preference != null) navigator.navigate(Destination.AllSettings)
     }
     // the playback notification and the players outside the shell ask for what plays now
     var nowPlayingRequested by remember { mutableStateOf(false) }
@@ -470,7 +493,7 @@ private fun NagmedarMain(
                         Destination.Convert -> TranscodeScreen()
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
-                            onOpenClassicSettings = { context.startActivity(Intent(context, PreferencesActivity::class.java)) },
+                            onOpenAllSettings = { shellNavigator.navigate(Destination.AllSettings) },
                             onOpenAbout = { shellNavigator.navigate(Destination.About) },
                             onShowFirstRun = { prefs.updateFirstRunDone(false) },
                             listState = settingsList,
@@ -478,6 +501,22 @@ private fun NagmedarMain(
                             onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
                             onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
                             onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
+                        )
+                        // VLC's preference pages, drawn as Nağmedar's
+                        Destination.AllSettings -> AllSettingsScreen(
+                            onLink = { link ->
+                                when (link) {
+                                    NagmedarLink.Library -> openSettingsAt(SETTINGS_LIBRARY_ITEM)
+                                    NagmedarLink.Appearance -> openSettingsAt(SETTINGS_APPEARANCE_ITEM)
+                                    NagmedarLink.RemoteAccess -> openSettingsAt(SETTINGS_REMOTE_ACCESS_ITEM)
+                                    NagmedarLink.Backup -> openSettingsAt(SETTINGS_BACKUP_ITEM)
+                                    NagmedarLink.Equalizer -> shellNavigator.navigate(Destination.Equalizer)
+                                    NagmedarLink.About -> shellNavigator.navigate(Destination.About)
+                                }
+                            },
+                            onClose = { if (!shellNavigator.back()) shellNavigator.navigate(Destination.Settings) },
+                            requestedKey = ShellRequests.preference,
+                            onRequestHandled = { ShellRequests.preference = null },
                         )
                         // S-906, with S-910's signal path and S-912's A/B test beside the chain
                         Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
@@ -519,11 +558,18 @@ private fun NagmedarMain(
                 if (item.type == MediaWrapper.TYPE_VIDEO) PlaybackActions.playVideo(context, item) else PlaybackActions.playList(context, listOf(item), 0)
             }
         }
+        // every line of "All settings", read from its XML away from the main thread
+        val preferences by produceState(emptyList<PaletteItem>()) {
+            value = withContext(Dispatchers.Default) {
+                preferencePaletteItems(context) { key -> ShellRequests.preference = key }
+            }
+        }
         val wallpaperAccent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        val items = remember(media, actions) {
+        val items = remember(media, preferences, actions) {
             commandItems(context.resources, actions::isAvailable, { actions.perform(it) }) +
                 screenItems(context.resources, navigator::navigate) +
                 settingItems(context.resources, prefs, wallpaperAccent) +
+                preferences +
                 media
         }
         CommandPalette(

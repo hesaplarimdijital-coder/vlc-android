@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagIcons
+import org.videolan.tools.NAGMEDAR_DESTINATION_ALL_SETTINGS
 
 enum class NavSection(@StringRes val title: Int?) {
     Library(R.string.nag_section_library),
@@ -51,7 +52,10 @@ enum class Destination(
     Guide("guide", R.string.nag_guide_title, NavSection.Footer),
 
     /** S-1504: every keyboard shortcut as it is now (Ctrl+/), never listed in the navigation. */
-    ShortcutCard("shortcut-card", R.string.nag_shortcut_card_title, NavSection.Footer);
+    ShortcutCard("shortcut-card", R.string.nag_shortcut_card_title, NavSection.Footer),
+
+    /** VLC's preference pages drawn by Nağmedar, opened from Settings, never listed in the navigation. */
+    AllSettings(NAGMEDAR_DESTINATION_ALL_SETTINGS, R.string.nag_prefs_title, NavSection.Footer);
 
     val icon: ImageVector
         get() = when (this) {
@@ -76,6 +80,7 @@ enum class Destination(
             Equalizer -> NagIcons.Equalizer
             Guide -> NagIcons.Info
             ShortcutCard -> NagIcons.Keyboard
+            AllSettings -> NagIcons.Settings
         }
 
     /**
@@ -94,7 +99,7 @@ enum class Destination(
         val rail = listOf(Home, Movies, Series, Videos, Music, Podcasts, Radio, TvLab)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
-        val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard)
+        val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard, AllSettings)
 
         val sidebar = entries.filter { it != More && it !in unlisted }
 

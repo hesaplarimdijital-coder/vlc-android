@@ -26,6 +26,12 @@ const val NAGMEDAR_DESTINATION_NOW_PLAYING = "now-playing"
 /** Extra of the Nağmedar activity: a search to run on the search page (the system's search). */
 const val NAGMEDAR_EXTRA_SEARCH = "nagmedar_search"
 
+/** [NAGMEDAR_EXTRA_DESTINATION]'s value that opens "All settings", VLC's preference pages drawn by Nağmedar. */
+const val NAGMEDAR_DESTINATION_ALL_SETTINGS = "all-settings"
+
+/** Extra of the Nağmedar activity: the preference key whose page "All settings" opens (VLC's launchWithPref). */
+const val NAGMEDAR_EXTRA_PREFERENCE = "nagmedar_preference"
+
 /** Extra of the Nağmedar activity: the remote access page with the addresses opens (the remote access notification). */
 const val NAGMEDAR_EXTRA_REMOTE_ACCESS = "nagmedar_remote_access"
 

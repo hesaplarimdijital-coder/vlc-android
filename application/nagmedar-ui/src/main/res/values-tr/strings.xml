@@ -466,7 +466,39 @@
     <string name="nag_density_touch">Dokunmatik</string>
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>
-    <string name="nag_settings_classic_settings">Tüm ayarlar (klasik arayüz)</string>
+    <!-- All settings: VLC's preference pages drawn by Nağmedar -->
+    <string name="nag_prefs_title">Tüm ayarlar</string>
+    <string name="nag_prefs_search">Ayarlarda ara</string>
+    <string name="nag_prefs_search_hint">Donanım hızlandırması, altyazı boyutu, ağ ön belleği…</string>
+    <string name="nag_prefs_no_results">“%1$s” geçen bir ayar yok</string>
+    <string name="nag_prefs_path">%1$s › %2$s</string>
+    <string name="nag_prefs_loading">Ayarlar okunuyor…</string>
+    <string name="nag_prefs_back">Geri</string>
+    <string name="nag_prefs_on">Açık</string>
+    <string name="nag_prefs_off">Kapalı</string>
+    <string name="nag_prefs_choose">Seçin…</string>
+    <string name="nag_prefs_none">Hiçbiri</string>
+    <string name="nag_prefs_not_set">Ayarlanmadı</string>
+    <string name="nag_prefs_in_settings">Ayarlar › %1$s bölümünde</string>
+    <string name="nag_prefs_opens_page">%1$s sayfasını açar</string>
+    <string name="nag_prefs_speed">%1$s×</string>
+    <string name="nag_prefs_turn_off">Kapat</string>
+    <string name="nag_prefs_file_failed">Dosya okunamadı.</string>
+    <string name="nag_prefs_database_saved">Veri tabanı kaydedildi.</string>
+    <string name="nag_prefs_restart_now">Şimdi yeniden başlat</string>
+    <string name="nag_prefs_later">Sonra</string>
+    <string name="nag_prefs_minus">−</string>
+    <string name="nag_prefs_plus">+</string>
+    <string name="nag_prefs_range">Değer (%1$d–%2$d)</string>
+    <string name="nag_prefs_colour_code">Renk kodu (#RRGGBB)</string>
+    <string name="nag_prefs_save">Kaydet</string>
+    <string name="nag_prefs_sleep_minutes">Dakika</string>
+    <string name="nag_prefs_sleep_off">Kapat</string>
+    <string name="nag_prefs_granted">İzin verildi</string>
+    <string name="nag_prefs_not_granted">İzin verilmedi</string>
+    <string name="nag_prefs_change">Değiştir…</string>
+    <string name="nag_prefs_allow">İzin ver</string>
+    <string name="nag_prefs_next">İleri</string>
 
     <!-- Shortcuts and actions -->
     <string name="nag_shuffle">Karıştır</string>

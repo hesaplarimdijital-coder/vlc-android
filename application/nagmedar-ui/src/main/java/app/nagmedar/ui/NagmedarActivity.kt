@@ -45,6 +45,7 @@ import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
+import org.videolan.tools.NAGMEDAR_EXTRA_PREFERENCE
 import org.videolan.tools.NAGMEDAR_EXTRA_REMOTE_ACCESS
 import org.videolan.tools.NAGMEDAR_EXTRA_SEARCH
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
@@ -210,9 +211,10 @@ class NagmedarActivity : ComponentActivity() {
         openAskedOf(intent)
     }
 
-    /** The system's search (its words on the search page), the remote access notification (its addresses' window), a new drive's (the library's folders). */
+    /** The system's search (its words on the search page), a preference's page, the remote access notification (its addresses' window), a new drive's (the library's folders). */
     private fun openAskedOf(intent: Intent?) {
         intent?.getStringExtra(NAGMEDAR_EXTRA_SEARCH)?.let { ShellRequests.search = it }
+        intent?.getStringExtra(NAGMEDAR_EXTRA_PREFERENCE)?.let { ShellRequests.preference = it }
         if (intent?.getBooleanExtra(NAGMEDAR_EXTRA_REMOTE_ACCESS, false) == true) RemoteAccessPages.open(RemoteAccessPage.Addresses)
         if (intent?.getBooleanExtra(NewDrives.EXTRA_LIBRARY_SOURCES, false) == true) ShellRequests.librarySources = true
     }

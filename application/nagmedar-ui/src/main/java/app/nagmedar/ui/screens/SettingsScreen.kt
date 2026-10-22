@@ -88,10 +88,20 @@ const val SETTINGS_SHORTCUTS_ITEM = 4
 /** The index of Settings › Library (the sections' folders), for the home page's "Klasör ekle". */
 const val SETTINGS_LIBRARY_ITEM = SETTINGS_SHORTCUTS_ITEM + 1
 
+/** The index of Settings › Appearance, for "All settings"' theme line. */
+const val SETTINGS_APPEARANCE_ITEM = 2
+
+/** The index of Settings › Remote access, for "All settings"' remote access line. */
+const val SETTINGS_REMOTE_ACCESS_ITEM = 19
+
+/** The index of Settings › Backup, for "All settings"' export and restore lines. */
+const val SETTINGS_BACKUP_ITEM = SETTINGS_REMOTE_ACCESS_ITEM + 1
+
 @Composable
 fun SettingsScreen(
     prefs: NagmedarPreferences,
-    onOpenClassicSettings: () -> Unit,
+    /** VLC's preference pages, drawn by Nağmedar ("All settings"). */
+    onOpenAllSettings: () -> Unit,
     /** S-209: about and licences. */
     onOpenAbout: () -> Unit,
     onShowFirstRun: () -> Unit,
@@ -166,7 +176,7 @@ fun SettingsScreen(
                 Spacer(Modifier.height(dimens.gapM))
                 Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
                     NagButton(stringResource(R.string.nag_about_open), onOpenAbout, primary = true)
-                    NagButton(stringResource(R.string.nag_settings_classic_settings), onOpenClassicSettings)
+                    NagButton(stringResource(R.string.nag_prefs_title), onOpenAllSettings)
                 }
             }
         }

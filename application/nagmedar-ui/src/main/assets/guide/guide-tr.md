@@ -50,7 +50,7 @@ Filmler ve diziler libVLC 4 ile oynar. Dokunmatik ekranda VLC'nin hareketleri, f
 - Yatay kaydırmak ileri ya da geri sarar.
 - Sol ya da sağ kenara çift dokunmak 10 sn geri ya da ileri atlar, ortaya çift dokunmak oynatır ya da duraklatır.
 - Dokunup tutmak hızlı oynatır; iki parmakla yakınlaştırmak görüntüyü büyütür.
-- Hangi hareketlerin açık olduğunu Ayarlar › “Tüm ayarlar (klasik arayüz)” altından seçersiniz.
+- Hangi hareketlerin açık olduğunu Ayarlar › Tüm ayarlar › Video › Oynatıcı denetimleri'nden seçersiniz.
 
 ### Fare ve klavye
 - Denetim çubuğunda bölüm işaretli zaman çizelgesi, kare önizleme, A-B tekrarı, hız, ses ve iz menüleri bulunur. Fare tekerleği ses düzeyini değiştirir, Ctrl ile basılıyken sarar; bunu Ayarlar › Giriş'ten ters çevirebilirsiniz.
