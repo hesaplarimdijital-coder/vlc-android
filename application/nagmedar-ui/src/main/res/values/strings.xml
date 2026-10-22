@@ -2000,6 +2000,25 @@
     <string name="nag_eq_meter_clean">No clipping</string>
     <string name="nag_eq_meter_limiter">Limiter %1$s</string>
     <string name="nag_eq_meter_reset">Reset the meter</string>
+    <!-- the player's equaliser: VLC's, which libVLC plays through -->
+    <string name="nag_peq_subtitle">VLC\'s equaliser: films, radio, podcasts and streams play through it</string>
+    <string name="nag_peq_failed">VLC\'s equalisers could not be read.</string>
+    <string name="nag_peq_on">Equaliser on</string>
+    <string name="nag_peq_off_note">The equaliser is off: the sound plays as it is.</string>
+    <string name="nag_peq_copy">Make a copy</string>
+    <string name="nag_peq_copy_name">%1$s copy</string>
+    <string name="nag_peq_name">Name</string>
+    <string name="nag_peq_name_taken">Another equaliser has this name, or it is empty: the old name stays.</string>
+    <string name="nag_peq_delete_own">Delete this equaliser</string>
+    <string name="nag_peq_delete_title">Delete “%1$s”?</string>
+    <string name="nag_peq_delete_message">Your equaliser goes for good. VLC\'s presets stay.</string>
+    <string name="nag_peq_delete">Delete</string>
+    <string name="nag_peq_bands">Preamp and bands</string>
+    <string name="nag_peq_preset_hint">VLC\'s presets stay as they are: make a copy of one to change it.</string>
+    <string name="nag_peq_own_hint">Ten bands, ±20 dB. Click or tap a band twice to put it back to 0 dB.</string>
+    <string name="nag_peq_film_title">This film</string>
+    <string name="nag_peq_film_own">It plays with its own equaliser from the effects tab: %1$s. What is set here is heard in the films that follow the player\'s setting.</string>
+    <string name="nag_peq_film_follow">Use the player\'s setting for this film</string>
     <!-- S-910: the signal path panel -->
     <string name="nag_sp_title">Signal path</string>
     <string name="nag_sp_hint">Every stage between the file and the output, with its format.</string>

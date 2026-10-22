@@ -1,5 +1,7 @@
 package app.nagmedar.ui.player.effects
 
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
+
 /**
  * The native side of the effects panel (S-603): what libVLC applies while a film plays once the
  * native work lands, the video filters (S-505: colours, crop, rotation, deinterlacing, debanding),
@@ -68,6 +70,12 @@ interface PlayerEffectsTarget {
      * for the player's own setting; [gainDb] raises or lowers the sound on top of it.
      */
     fun setEqualizer(choice: String?, gainDb: Float)
+
+    /**
+     * The player's own setting as its equaliser window has it now: [own], or none while it is
+     * off; [gainDb] on top. By default it is read where VLC keeps it.
+     */
+    fun setPlayersEqualizer(own: VlcEqualizer?, gainDb: Float) = setEqualizer(null, gainDb)
 }
 
 /**
@@ -118,5 +126,13 @@ class EffectsEngine(private val target: PlayerEffectsTarget, private val native:
         if (Effect.NightMode in can && effects.nightMode != last.nightMode) native.setNightMode(effects.nightMode)
         if (Effect.Dialogue in can && effects.dialogueDb != last.dialogueDb) native.setDialogueBoost(effects.dialogueDb)
         if (Effect.ChannelLayout in can && effects.channelLayout != last.channelLayout) native.setChannelLayout(effects.channelLayout)
+    }
+
+    /**
+     * The player's own equaliser changed (its window): a film that follows it ([PlayerEffects.equalizer]
+     * null) hears [own] at once (null: off), with its gain on top; a film with its own keeps it.
+     */
+    fun playersEqualizerChanged(effects: PlayerEffects, own: VlcEqualizer?) {
+        if (effects.equalizer == null) target.setPlayersEqualizer(own, effects.gainDb)
     }
 }

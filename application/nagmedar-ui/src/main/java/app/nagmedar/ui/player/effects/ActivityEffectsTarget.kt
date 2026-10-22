@@ -1,7 +1,9 @@
 package app.nagmedar.ui.player.effects
 
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
+import app.nagmedar.ui.player.equalizer.VlcEqualizerStore
+import app.nagmedar.ui.player.equalizer.toLibVlc
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,12 +34,19 @@ internal class ActivityEffectsTarget(private val activity: VideoPlayerActivity) 
     }
 
     override fun setEqualizer(choice: String?, gainDb: Float) {
-        // the player's own equaliser is in VLC's database: read off the main thread, the latest call wins
+        // the player's own equaliser is in VLC's database: read after what its window wrote, the latest call wins
         equalizing?.cancel()
         equalizing = activity.lifecycleScope.launch {
-            val equalizer = withContext(Dispatchers.IO) { equalizer(choice, gainDb) }
+            val equalizer = withContext(VlcEqualizerStore.thread) { equalizer(choice, gainDb) }
             activity.service?.setEqualizer(equalizer)
         }
+    }
+
+    override fun setPlayersEqualizer(own: VlcEqualizer?, gainDb: Float) {
+        // what the window shows, not what the database has yet: nothing read, nothing older after it
+        equalizing?.cancel()
+        equalizing = null
+        activity.service?.setEqualizer(withGain(own?.toLibVlc(), gainDb))
     }
 
     private fun equalizer(choice: String?, gainDb: Float): MediaPlayer.Equalizer? {
@@ -46,6 +55,11 @@ internal class ActivityEffectsTarget(private val activity: VideoPlayerActivity) 
             PlayerEffects.EQUALIZER_OFF -> null
             else -> EqualizerPreset.of(choice)?.let { MediaPlayer.Equalizer.createFromPreset(it.ordinal) }
         }
+        return withGain(base, gainDb)
+    }
+
+    /** [base] (none: the sound as it is) with the gain on its preamp. */
+    private fun withGain(base: MediaPlayer.Equalizer?, gainDb: Float): MediaPlayer.Equalizer? {
         if (gainDb == 0f) return base
         val equalizer = base ?: MediaPlayer.Equalizer.create().apply { setPreAmp(FLAT_PREAMP_DB) }
         equalizer.setPreAmp((equalizer.getPreAmp() + gainDb).coerceIn(MIN_PREAMP_DB, MAX_PREAMP_DB))

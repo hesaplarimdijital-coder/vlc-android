@@ -130,6 +130,7 @@ Sözlüğü testler denetler:
 | efekt | effect | | | “Efektler ve filtreler” (Ctrl+E); oynatıcı panelinin sekmesi “Efektler” |
 | anaglif 3B | anaglyph 3D | | | Yan yana 3B filmin iki yarısı renkli gözlük için birleştirilir (Efektler › Gelişmiş video); gözlükler: kırmızı–camgöbeği, kırmızı–yeşil, kırmızı–mavi, macenta–camgöbeği, trioskopik |
 | ekolayzer | equaliser | eşitleyici | equalizer | VLC'nin ön ayarları kendi adlarıyla: “Düz”, “Güçlü bas”, “Büyük salon” |
+| oynatıcının ekolayzeri | the player's equaliser | | | VLC'nin ekolayzeri: filmler, radyo, podcastler ve akışlar bununla çalar (Ctrl+Shift+E oynatıcıda); açık ya da kapalı, VLC'nin ön ayarlarından biri ya da kullanıcının kendisininki (bir ön ayarın “Rock kopyası” gibi kopyası). Efektler sekmesindeki “Oynatıcının ayarı” budur. Müzik motorununki DSP zinciridir |
 | müzik motoru | music engine | ses motoru | audio engine | Nağmedar Ses Motoru'nun ayarlardaki adı; yerel müzik dosyalarını çalar, libVLC'ye dönülebilir |
 | boşluksuz | gapless | | | Bir albümün parçaları arada boşluk ya da tık olmadan birbirini izler; “kesintisiz” ekranın yenileme hızı geçişi için kalır |
 | çapraz geçiş | crossfade | | cross-fade | Sonraki parça çalanın sonunun üstüne girer; süresi saniyeyle, eğrisi “Eşit güç” ya da “Doğrusal” |

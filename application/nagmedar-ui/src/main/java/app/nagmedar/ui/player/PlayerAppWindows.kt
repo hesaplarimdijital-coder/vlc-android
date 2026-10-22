@@ -23,6 +23,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.EqualizerScreen
+import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NoticeHost
@@ -53,6 +55,11 @@ import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.hasPrecisePointer
 import app.nagmedar.ui.network.LibVlcDialogHost
 import app.nagmedar.ui.playback.ResumePromptHost
+import app.nagmedar.ui.player.equalizer.PlayerEqualizerController
+import app.nagmedar.ui.player.equalizer.PlayerEqualizerScreen
+import app.nagmedar.ui.player.equalizer.PlayerEqualizerTarget
+import app.nagmedar.ui.player.equalizer.VlcEqualizerStore
+import app.nagmedar.ui.player.equalizer.equalizerName
 import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.commandItems
 import app.nagmedar.ui.search.screenItems
@@ -68,19 +75,25 @@ import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 
-/** The app's own windows the video player opens over the film (S-1504, S-1007, S-305), and the equaliser. */
-enum class PlayerAppWindow { Guide, ShortcutCard, Palette, SleepTimer, Equalizer }
+/**
+ * The app's own windows the video player opens over the film (S-1504, S-1007, S-305), and the
+ * equaliser: VLC's, which libVLC plays through ([Equalizer]), or the music engine's DSP chain
+ * while the engine plays ([MusicEqualizer]).
+ */
+enum class PlayerAppWindow { Guide, ShortcutCard, Palette, SleepTimer, Equalizer, MusicEqualizer }
 
 /**
  * The app's shortcuts in the full-screen video player: the user guide (F1), the shortcut card
- * (Ctrl+/), the command palette (Ctrl+K), the sleep timer (Alt+S) and the equaliser (the app's
- * own, never VLC's dialog) open over the film, as they do over the library, so the film goes on
- * under them; Settings (Ctrl+,) opens in the
- * library's window, as the convert page does from the player. The keys are the shortcut table's
- * ([PlayerKeys]); the player's own keys stay its own. Compose state.
+ * (Ctrl+/), the command palette (Ctrl+K), the sleep timer (Alt+S) and the equaliser (Ctrl+Shift+E,
+ * in the app's design, never VLC's dialog) open over the film, as they do over the library, so the
+ * film goes on under them; Settings (Ctrl+,) opens in the library's window, as the convert page
+ * does from the player. The equaliser is what is heard: VLC's while libVLC plays (a film, the
+ * radio, a stream, while casting too), the DSP chain while the music engine plays
+ * ([musicEngine]). The keys are the shortcut table's ([PlayerKeys]); the player's own keys stay
+ * its own. Compose state.
  */
 @Stable
-class PlayerAppWindows {
+class PlayerAppWindows(private val musicEngine: () -> Boolean = { MusicEngineAccess.active }) {
     var open by mutableStateOf<PlayerAppWindow?>(null)
         private set
 
@@ -101,7 +114,7 @@ class PlayerAppWindows {
             ShortcutId.ShortcutList -> open = PlayerAppWindow.ShortcutCard
             ShortcutId.CommandPalette -> open = PlayerAppWindow.Palette
             ShortcutId.SleepTimer -> open = PlayerAppWindow.SleepTimer
-            ShortcutId.Equalizer -> open = PlayerAppWindow.Equalizer
+            ShortcutId.Equalizer -> open = if (musicEngine()) PlayerAppWindow.MusicEqualizer else PlayerAppWindow.Equalizer
             ShortcutId.Settings -> openInLibrary(activity, Destination.Settings)
             else -> return false
         }
@@ -143,11 +156,18 @@ private fun openInLibrary(activity: Activity, destination: Destination) {
 
 /**
  * The windows of [windows] over the player, and libVLC's questions and sign-ins (S-1301) while
- * the player is in front; [perform] runs what the palette chooses as the player's keys would.
- * In the player's dark theme, sized for touch or a pointer as the device has one.
+ * the player is in front; [perform] runs what the palette chooses as the player's keys would;
+ * [equalizer] is where VLC's equaliser window sends what it sets. In the player's dark theme,
+ * sized for touch or a pointer as the device has one.
  */
 @Composable
-fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: NagmedarPreferences, perform: (ShortcutId) -> Unit) {
+fun PlayerAppWindowsHost(
+    activity: Activity,
+    windows: PlayerAppWindows,
+    prefs: NagmedarPreferences,
+    equalizer: PlayerEqualizerTarget,
+    perform: (ShortcutId) -> Unit,
+) {
     val mode = if (hasPrecisePointer(activity)) InputMode.Pointer else InputMode.Touch
     NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
         LibVlcDialogHost()
@@ -184,7 +204,19 @@ fun PlayerAppWindowsHost(activity: Activity, windows: PlayerAppWindows, prefs: N
                 )
             }
             PlayerAppWindow.SleepTimer -> SleepTimerDialog(onDismiss = windows::close)
-            PlayerAppWindow.Equalizer -> PageWindow(windows, activity) { EqualizerScreen() }
+            PlayerAppWindow.Equalizer -> PageWindow(windows, activity) {
+                val context = LocalContext.current
+                val scope = rememberCoroutineScope()
+                val controller = remember(equalizer) {
+                    val res = context.resources
+                    PlayerEqualizerController(VlcEqualizerStore(context), equalizer, scope) { eq ->
+                        res.getString(R.string.nag_peq_copy_name, equalizerName(res, eq))
+                    }
+                }
+                LaunchedEffect(controller) { controller.load() }
+                PlayerEqualizerScreen(controller, equalizer.filmChoice)
+            }
+            PlayerAppWindow.MusicEqualizer -> PageWindow(windows, activity) { EqualizerScreen() }
             null -> Unit
         }
     }

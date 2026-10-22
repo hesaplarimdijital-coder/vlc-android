@@ -83,6 +83,8 @@ import app.nagmedar.ui.player.effects.DolbyVisionDecoding
 import app.nagmedar.ui.player.effects.LibVlcEffects
 import app.nagmedar.ui.player.effects.RoomEffectsStore
 import app.nagmedar.ui.player.effects.TextClock
+import app.nagmedar.ui.player.equalizer.PlayerEqualizerTarget
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
 import app.nagmedar.ui.player.info.ActivityInfoSource
 import app.nagmedar.ui.player.info.VideoOutputChoice
 import app.nagmedar.ui.player.info.FileFacts
@@ -401,6 +403,8 @@ class DesktopPlayerChrome : PlayerChrome {
         this.online = online
         val frame = ChromeFrame(activity, controls)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) frame.setOnDragListener { _, event -> onDrag(activity, subtitles, event) }
+        // VLC's equaliser window, on the film's effects
+        val equalizer = EffectsEqualizerTarget(effects)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
             setContent {
@@ -408,7 +412,7 @@ class DesktopPlayerChrome : PlayerChrome {
                     activity, controls, panel, frame, infoSource, info, live, snapshots, navigation, subtitles, dual, online,
                     ChromeExtras(osd, sheets, touchActions(activity), resume, { resume = null }, appWindows),
                 )
-                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences()) { id -> keys?.perform(id) }
+                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences(), equalizer) { id -> keys?.perform(id) }
             }
         }
         frame.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -776,6 +780,19 @@ private const val MAX_FAST_RATE = 8f
 private fun systemBrightness(activity: VideoPlayerActivity): Float = runCatching {
     android.provider.Settings.System.getInt(activity.contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS) / 255f
 }.getOrDefault(0.5f).coerceIn(0.01f, 1f)
+
+/**
+ * VLC's equaliser window on the playing film: what it sets is heard through the effects (their
+ * gain on top) while the film follows the player's setting; a film with its own equaliser from
+ * the effects tab keeps it until it is told to follow the player's again.
+ */
+private class EffectsEqualizerTarget(private val effects: EffectsController) : PlayerEqualizerTarget {
+    override val filmChoice: String? get() = effects.effects.equalizer
+
+    override fun followPlayer() = effects.update { it.copy(equalizer = null) }
+
+    override fun apply(equalizer: VlcEqualizer?) = effects.playersEqualizerChanged(equalizer)
+}
 
 /** What the controls' content shows beyond the desktop layout: the OSD, the sheets, the touch layout's actions, the resume question. */
 private class ChromeExtras(

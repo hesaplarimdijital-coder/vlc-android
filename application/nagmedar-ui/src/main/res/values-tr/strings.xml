@@ -1972,6 +1972,25 @@
     <string name="nag_eq_meter_clean">Kırpılma yok</string>
     <string name="nag_eq_meter_limiter">Sınırlayıcı %1$s</string>
     <string name="nag_eq_meter_reset">Göstergeyi sıfırla</string>
+    <!-- the player's equaliser: VLC's, which libVLC plays through -->
+    <string name="nag_peq_subtitle">VLC\'nin ekolayzeri: filmler, radyo, podcastler ve akışlar bununla çalar</string>
+    <string name="nag_peq_failed">VLC\'nin ekolayzerleri okunamadı.</string>
+    <string name="nag_peq_on">Ekolayzer açık</string>
+    <string name="nag_peq_off_note">Ekolayzer kapalı: ses olduğu gibi çalıyor.</string>
+    <string name="nag_peq_copy">Kopyasını oluştur</string>
+    <string name="nag_peq_copy_name">%1$s kopyası</string>
+    <string name="nag_peq_name">Adı</string>
+    <string name="nag_peq_name_taken">Bu ad başka bir ekolayzerin ya da boş: eski ad kalıyor.</string>
+    <string name="nag_peq_delete_own">Bu ekolayzeri sil</string>
+    <string name="nag_peq_delete_title">“%1$s” silinsin mi?</string>
+    <string name="nag_peq_delete_message">Ekolayzeriniz kalıcı olarak silinir. VLC\'nin ön ayarları kalır.</string>
+    <string name="nag_peq_delete">Sil</string>
+    <string name="nag_peq_bands">Ön kazanç ve bantlar</string>
+    <string name="nag_peq_preset_hint">VLC\'nin ön ayarları olduğu gibi kalır: birini değiştirmek için kopyasını oluşturun.</string>
+    <string name="nag_peq_own_hint">On bant, ±20 dB. Bir bandı 0 dB\'ye döndürmek için iki kez tıklayın ya da dokunun.</string>
+    <string name="nag_peq_film_title">Bu film</string>
+    <string name="nag_peq_film_own">Efektler sekmesindeki kendi ekolayzeriyle çalıyor: %1$s. Buradaki ayar, oynatıcının ayarını izleyen filmlerde duyulur.</string>
+    <string name="nag_peq_film_follow">Bu filmde oynatıcının ayarını kullan</string>
     <!-- S-910: sinyal yolu paneli -->
     <string name="nag_sp_title">Sinyal yolu</string>
     <string name="nag_sp_hint">Dosyadan çıkışa her aşama, biçimiyle.</string>

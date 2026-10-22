@@ -2,6 +2,7 @@ package app.nagmedar.ui.player.effects
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.data.MediaSettings
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.junit.Assert.assertEquals
@@ -34,6 +35,10 @@ internal class FakeEffectsTarget : PlayerEffectsTarget {
 
     override fun setEqualizer(choice: String?, gainDb: Float) {
         calls += "equalizer:$choice:${"%.1f".format(java.util.Locale.ROOT, gainDb)}"
+    }
+
+    override fun setPlayersEqualizer(own: VlcEqualizer?, gainDb: Float) {
+        calls += "players:${own?.name}:${"%.1f".format(java.util.Locale.ROOT, gainDb)}"
     }
 }
 
@@ -130,6 +135,19 @@ class EffectsModelTest {
         engine.apply(sampleEffects)
         assertTrue(native.calls.containsAll(listOf("crop:true", "hdr:passthrough:ewa_lanczos", "debanding:true", "night:true", "dialogue:3", "channels:stereo")))
         assertTrue("rock, at the film's level", "equalizer:rock:0.0" in target.calls)
+    }
+
+    @Test
+    fun thePlayersEqualizerWindowIsHeardByAFilmThatFollowsIt() {
+        val engine = EffectsEngine(target)
+        val own = VlcEqualizer(100, "Gece", VlcEqualizer.OWN, 6f, List(10) { 0f })
+        // the player's setting, the effects' gain on top
+        engine.playersEqualizerChanged(PlayerEffects(gainPercent = 200), own)
+        engine.playersEqualizerChanged(PlayerEffects(), null)
+        // a film with its own equaliser from the effects tab keeps it
+        engine.playersEqualizerChanged(PlayerEffects(equalizer = EqualizerPreset.Rock.key), own)
+        engine.playersEqualizerChanged(PlayerEffects(equalizer = PlayerEffects.EQUALIZER_OFF), own)
+        assertEquals(listOf("players:Gece:6.0", "players:null:0.0"), target.calls)
     }
 
     @Test

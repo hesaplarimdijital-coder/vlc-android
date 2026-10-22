@@ -31,6 +31,9 @@ import app.nagmedar.ui.player.OsdLevel
 import app.nagmedar.ui.player.PlayerOsd
 import app.nagmedar.ui.player.PlayerOsdHost
 import app.nagmedar.ui.player.ResumePrompt
+import app.nagmedar.ui.player.equalizer.PlayerEqualizerTarget
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
+import app.nagmedar.ui.player.equalizer.toLibVlc
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -72,6 +75,7 @@ class CastingPlayerChrome : PlayerChrome {
         }
         // the user's keys (S-402), before the first key arrives
         ShortcutRegistry.overrides = ShortcutOverrides.parse(Settings.getInstance(activity).getString(NagmedarPreferences.KEY_SHORTCUTS, null))
+        val equalizer = CastingEqualizerTarget(activity)
         val content = ComposeView(activity).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
             setContent {
@@ -86,7 +90,7 @@ class CastingPlayerChrome : PlayerChrome {
                         }
                     }
                 }
-                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences()) { id -> keys?.perform(id) }
+                PlayerAppWindowsHost(activity, appWindows, rememberNagmedarPreferences(), equalizer) { id -> keys?.perform(id) }
             }
         }
         root.addView(content, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -153,6 +157,17 @@ class CastingPlayerChrome : PlayerChrome {
 
 /** The resume question and where its answer goes. */
 private class CastResumeQuestion(val title: String, val answer: (resume: Boolean?, always: Boolean) -> Unit)
+
+/** VLC's equaliser window while casting: the player has no effects then, the setting goes to libVLC as it is. */
+private class CastingEqualizerTarget(private val activity: VideoPlayerActivity) : PlayerEqualizerTarget {
+    override val filmChoice: String? = null
+
+    override fun followPlayer() = Unit
+
+    override fun apply(equalizer: VlcEqualizer?) {
+        activity.service?.setEqualizer(equalizer?.toLibVlc())
+    }
+}
 
 /** The OSD's shortest line. */
 private const val MIN_SAID_MS = 600L

@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.nagmedar.data.NagmedarDatabase
+import app.nagmedar.ui.player.equalizer.VlcEqualizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -138,6 +139,9 @@ class EffectsController(
 
     /** "Make default": films that remember no effects start with these. */
     fun makeDefault() = store.saveDefaults(effects)
+
+    /** VLC's equaliser window changed the player's setting to [own] (null: off): heard at once by a film that follows it. */
+    fun playersEqualizerChanged(own: VlcEqualizer?) = engine.playersEqualizerChanged(effects, own)
 
     /** S-610: the film reopened in a new player ("Apply now"): its effects go to it again. */
     fun reapply() {
