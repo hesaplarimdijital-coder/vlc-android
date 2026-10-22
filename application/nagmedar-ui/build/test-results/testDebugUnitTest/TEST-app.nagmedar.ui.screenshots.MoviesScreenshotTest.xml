@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MoviesScreenshotTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:25.913Z" hostname="runnervm8k3b6" time="0.495">
+  <properties/>
+  <testcase name="tableDark" classname="app.nagmedar.ui.screenshots.MoviesScreenshotTest" time="0.109"/>
+  <testcase name="phoneGridDark" classname="app.nagmedar.ui.screenshots.MoviesScreenshotTest" time="0.082"/>
+  <testcase name="gridWithDetailsDark" classname="app.nagmedar.ui.screenshots.MoviesScreenshotTest" time="0.102"/>
+  <testcase name="gridWithDetailsLight" classname="app.nagmedar.ui.screenshots.MoviesScreenshotTest" time="0.101"/>
+  <testcase name="gridWithDetailsEnglish" classname="app.nagmedar.ui.screenshots.MoviesScreenshotTest" time="0.101"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

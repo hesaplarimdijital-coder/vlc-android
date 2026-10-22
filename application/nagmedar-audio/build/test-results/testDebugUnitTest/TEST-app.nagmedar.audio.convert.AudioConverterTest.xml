@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.convert.AudioConverterTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:32:30.434Z" hostname="runnervm8k3b6" time="0.221">
+  <properties/>
+  <testcase name="stoppedOrFailed" classname="app.nagmedar.audio.convert.AudioConverterTest" time="0.032"/>
+  <testcase name="aFileWritten" classname="app.nagmedar.audio.convert.AudioConverterTest" time="0.047"/>
+  <testcase name="tagLinesAsTheEngineReadsThem" classname="app.nagmedar.audio.convert.AudioConverterTest" time="0.06"/>
+  <testcase name="theCodecsFiles" classname="app.nagmedar.audio.convert.AudioConverterTest" time="0.079"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

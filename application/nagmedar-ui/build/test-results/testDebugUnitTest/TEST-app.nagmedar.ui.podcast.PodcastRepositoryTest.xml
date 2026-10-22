@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastRepositoryTest" tests="30" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:04.527Z" hostname="runnervm8k3b6" time="0.961">
+  <properties/>
+  <testcase name="theAddressAskedForStaysAnAliasOfTheOneItMovedTo" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.028"/>
+  <testcase name="anImportTellsWhatItDid" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.033"/>
+  <testcase name="anImportWithTheNetworkDownSaysSo" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.031"/>
+  <testcase name="anInvalidFeedSavesNothing" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.033"/>
+  <testcase name="whatIsNoAddressIsNotAsked" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.023"/>
+  <testcase name="refreshingKeepsTheOldAddressAsAnAlias" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.031"/>
+  <testcase name="offlineIsTheFailureWhenNothingAnswers" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.024"/>
+  <testcase name="refreshingFindsTheNewEpisodes" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.029"/>
+  <testcase name="refreshingAFeedThatFails" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.024"/>
+  <testcase name="theSearchResultFillsWhatTheFeedLeavesOut" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.031"/>
+  <testcase name="aFeedThatMovedForGoodIsStoredWhereItIs" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.03"/>
+  <testcase name="nothingNewFromTheServer" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.024"/>
+  <testcase name="refreshingKeepsTheListeningDone" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.028"/>
+  <testcase name="refreshingFollowsAFeedThatMoved" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.023"/>
+  <testcase name="aFeedWithNoTitleIsNamedByItsHost" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.022"/>
+  <testcase name="playedAndUnplayed" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.029"/>
+  <testcase name="theSameFeedUnderAnotherSpellingIsAlready" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.028"/>
+  <testcase name="aFileOfManyFeeds" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.122"/>
+  <testcase name="theTitleOfARefreshedFeedIsTheFeedsNow" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.032"/>
+  <testcase name="aFeedThatMovedOntoAnotherSubscriptionStaysWhereItIsWhateverTheSpelling" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.05"/>
+  <testcase name="aSubscriptionCancelledWhileTheFeedIsReadSavesNothing" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.026"/>
+  <testcase name="aFeedThatMovedOntoOneYouHaveIsRememberedUnderTheAddressAsked" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.027"/>
+  <testcase name="subscribingKeepsTheShowAndItsEpisodes" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.026"/>
+  <testcase name="aFeedThatMovedToOneYouHaveIsAlready" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.025"/>
+  <testcase name="exportingGivesAFileOtherAppsAndWeRead" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.033"/>
+  <testcase name="anImportDoesNotAskPodcastIndexForEveryFeed" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.046"/>
+  <testcase name="exportingNothingIsAnEmptyList" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.022"/>
+  <testcase name="unsubscribingCanBeTakenBackWithTheListeningDone" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.027"/>
+  <testcase name="withoutASchemeHttpsThenHttp" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.03"/>
+  <testcase name="anAddressTypedGetsItsPodcastIndexIdWhenKnown" classname="app.nagmedar.ui.podcast.PodcastRepositoryTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

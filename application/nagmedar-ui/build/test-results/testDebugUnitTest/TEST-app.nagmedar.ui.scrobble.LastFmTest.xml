@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.LastFmTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:58.225Z" hostname="runnervm8k3b6" time="0.148">
+  <properties/>
+  <testcase name="signInFailuresAreToldApart" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.035"/>
+  <testcase name="signingInSendsTheSignedMobileSessionCallAndKeepsTheSessionKey" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.018"/>
+  <testcase name="aSignatureIsTheMd5OfTheSortedNamesAndValuesAndTheSecret" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.016"/>
+  <testcase name="aBatchOfMoreThanFiftyIsNotSent" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.018"/>
+  <testcase name="aBatchIsOneIndexedSignedCall" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.017"/>
+  <testcase name="theAnswersToAScrobbleMeanWhatTheyShould" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.025"/>
+  <testcase name="nowPlayingIsSignedAndItsFailureIsNotWorthAWord" classname="app.nagmedar.ui.scrobble.LastFmTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

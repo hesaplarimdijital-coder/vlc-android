@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.latency.LatencyDspTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:32:31.103Z" hostname="runnervm8k3b6" time="9.743">
+  <properties/>
+  <testcase name="theDirectSoundWinsOverTheRoomsEchoes" classname="app.nagmedar.audio.latency.LatencyDspTest" time="2.502"/>
+  <testcase name="theSignalIsAChirpTrain" classname="app.nagmedar.audio.latency.LatencyDspTest" time="0.009"/>
+  <testcase name="aCleanDelayComesBackExactly" classname="app.nagmedar.audio.latency.LatencyDspTest" time="2.53"/>
+  <testcase name="silenceGivesNothing" classname="app.nagmedar.audio.latency.LatencyDspTest" time="1.227"/>
+  <testcase name="clippingDoesNotMoveIt" classname="app.nagmedar.audio.latency.LatencyDspTest" time="0.592"/>
+  <testcase name="aStrayDelayIsThrownOut" classname="app.nagmedar.audio.latency.LatencyDspTest" time="0.012"/>
+  <testcase name="aDriftingRecorderClockStaysWithinAMillisecond" classname="app.nagmedar.audio.latency.LatencyDspTest" time="1.247"/>
+  <testcase name="theSearchWindowIsBounded" classname="app.nagmedar.audio.latency.LatencyDspTest" time="0.962"/>
+  <testcase name="noiseOfTheSignalsOwnPowerDoesNotMoveIt" classname="app.nagmedar.audio.latency.LatencyDspTest" time="0.657"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

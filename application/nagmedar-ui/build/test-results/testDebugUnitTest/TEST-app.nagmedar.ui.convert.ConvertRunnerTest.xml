@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.convert.ConvertRunnerTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:36:30.501Z" hostname="runnervm8k3b6" time="0.02">
+  <properties/>
+  <testcase name="anEmptyBatteryStopsTheJob" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.005"/>
+  <testcase name="aFolderGoneFailsEveryFileAtOnce" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="anEngineThatThrowsFailsTheFileNotTheJob" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.004"/>
+  <testcase name="theSourceInThePlannedPlaceIsNeverTouched" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="filesThereAreLeftAloneOrReplaced" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="heatSlowsPausesAndStops" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="theFileUnderWayIsRecordedAndALeftoverRemoved" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="noEngineFailsEveryFile" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="aLowBatteryWaitsForTheCharger" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="everyFileMadeInOrder" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.002"/>
+  <testcase name="theRules" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="interruptedSaysNothingOfTheFileUnderWay" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.001"/>
+  <testcase name="aFailureLeavesTheFileThereAsItWas" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <testcase name="cancelledInAFile" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.002"/>
+  <testcase name="aFailedFileIsRemovedAndTheRestGoOn" classname="app.nagmedar.ui.convert.ConvertRunnerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

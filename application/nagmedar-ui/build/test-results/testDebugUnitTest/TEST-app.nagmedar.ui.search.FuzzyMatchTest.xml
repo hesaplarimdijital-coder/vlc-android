@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.FuzzyMatchTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:59.990Z" hostname="runnervm8k3b6" time="0.148">
+  <properties/>
+  <testcase name="charactersMustComeInOrder" classname="app.nagmedar.ui.search.FuzzyMatchTest" time="0.0"/>
+  <testcase name="matchedPositionsPointIntoTheText" classname="app.nagmedar.ui.search.FuzzyMatchTest" time="0.001"/>
+  <testcase name="tenThousandTitlesInAFewMilliseconds" classname="app.nagmedar.ui.search.FuzzyMatchTest" time="0.147"/>
+  <testcase name="turkishLettersFold" classname="app.nagmedar.ui.search.FuzzyMatchTest" time="0.0"/>
+  <testcase name="wordStartsAndRunsRankFirst" classname="app.nagmedar.ui.search.FuzzyMatchTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

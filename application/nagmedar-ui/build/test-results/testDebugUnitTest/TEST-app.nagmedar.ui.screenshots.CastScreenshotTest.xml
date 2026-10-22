@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.CastScreenshotTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:16.239Z" hostname="runnervm8k3b6" time="1.505">
+  <properties/>
+  <testcase name="noNetworkTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.129"/>
+  <testcase name="videoPhone" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.133"/>
+  <testcase name="phonePlayerEnglish" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.217"/>
+  <testcase name="emptyPhone" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.171"/>
+  <testcase name="miniPlayerTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.116"/>
+  <testcase name="videoTabletEnglish" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.094"/>
+  <testcase name="devicesPhoneEnglish" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.15"/>
+  <testcase name="devicesDex" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.141"/>
+  <testcase name="musicDex" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.144"/>
+  <testcase name="videoDex" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.105"/>
+  <testcase name="searchingTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.103"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.LrcLibTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:36:39.655Z" hostname="runnervm8k3b6" time="0.09">
+  <properties/>
+  <testcase name="aGarbledAnswerIsTheServers" classname="app.nagmedar.ui.lyrics.LrcLibTest" time="0.02"/>
+  <testcase name="retryAfter" classname="app.nagmedar.ui.lyrics.LrcLibTest" time="0.017"/>
+  <testcase name="theAddresses" classname="app.nagmedar.ui.lyrics.LrcLibTest" time="0.018"/>
+  <testcase name="theBestOfASearch" classname="app.nagmedar.ui.lyrics.LrcLibTest" time="0.017"/>
+  <testcase name="oneRecord" classname="app.nagmedar.ui.lyrics.LrcLibTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

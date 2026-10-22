@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.LyricsFinderTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:36:39.754Z" hostname="runnervm8k3b6" time="0.011">
+  <properties/>
+  <testcase name="theDevicesSyncedLyricsFirst" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.003"/>
+  <testcase name="plainLyricsAreAskedAgainAfterAMonth" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.001"/>
+  <testcase name="keptForOffline" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.001"/>
+  <testcase name="theNetworkOnlyWhenAllowedAndForATaggedTrack" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.0"/>
+  <testcase name="theUsersOwnFirst" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.0"/>
+  <testcase name="clearing" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.001"/>
+  <testcase name="lrclibsSyncedBeforeTheDevicesPlain" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.001"/>
+  <testcase name="instrumental" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.0"/>
+  <testcase name="aMissIsAskedAgainAfterAWeek" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.001"/>
+  <testcase name="busyOrOfflineIsNotAMiss" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.0"/>
+  <testcase name="theShiftIsKeptPerTrackAndSource" classname="app.nagmedar.ui.lyrics.LyricsFinderTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

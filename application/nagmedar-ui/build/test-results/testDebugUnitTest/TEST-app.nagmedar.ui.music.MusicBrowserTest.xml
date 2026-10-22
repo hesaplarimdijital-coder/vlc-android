@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.MusicBrowserTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:36:42.323Z" hostname="runnervm8k3b6" time="0.592">
+  <properties/>
+  <testcase name="formatsAndSorts" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.067"/>
+  <testcase name="aDesktopShowsTheGroupsBesideTheTableAndItsColumns" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.116"/>
+  <testcase name="theDepthFilter" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.117"/>
+  <testcase name="aTapPlaysTheAlbumFromThatTrack" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.116"/>
+  <testcase name="columnsAreKeptAsText" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.046"/>
+  <testcase name="aPhoneOpensAnAlbumAndComesBack" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

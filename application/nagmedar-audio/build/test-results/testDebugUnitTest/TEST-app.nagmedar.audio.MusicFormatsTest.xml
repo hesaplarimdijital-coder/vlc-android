@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.MusicFormatsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:32:28.741Z" hostname="runnervm8k3b6" time="0.58">
+  <properties/>
+  <testcase name="localMusicFilesAreTheEngines" classname="app.nagmedar.audio.MusicFormatsTest" time="0.129"/>
+  <testcase name="streamsVideosAndUnknownsStayWithLibVlc" classname="app.nagmedar.audio.MusicFormatsTest" time="0.104"/>
+  <testcase name="theExtension" classname="app.nagmedar.audio.MusicFormatsTest" time="0.118"/>
+  <testcase name="trackerModulesAreTheEngines" classname="app.nagmedar.audio.MusicFormatsTest" time="0.069"/>
+  <testcase name="theSourceInfo" classname="app.nagmedar.audio.MusicFormatsTest" time="0.059"/>
+  <testcase name="theOutputFormat" classname="app.nagmedar.audio.MusicFormatsTest" time="0.096"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

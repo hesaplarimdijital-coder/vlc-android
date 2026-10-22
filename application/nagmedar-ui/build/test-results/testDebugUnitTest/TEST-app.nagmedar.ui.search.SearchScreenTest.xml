@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.SearchScreenTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:38:00.206Z" hostname="runnervm8k3b6" time="0.328">
+  <properties/>
+  <testcase name="withoutAQueryTheSyntaxIsShown" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.036"/>
+  <testcase name="nothingFoundSaysSo" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.038"/>
+  <testcase name="episodesComeWithTheirShowInItsOrder" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.032"/>
+  <testcase name="aLinePlaysItsFilmFromItsTime" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.043"/>
+  <testcase name="chipsKeepOneKind" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.049"/>
+  <testcase name="networkSharesOnlyWhenAsked" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.042"/>
+  <testcase name="everyKindIsFoundTheTurkishWay" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.048"/>
+  <testcase name="inEnglishTheSyntaxAndTheTitlesAreEnglish" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.04"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

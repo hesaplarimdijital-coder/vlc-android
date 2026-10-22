@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:37:33.829Z" hostname="runnervm8k3b6" time="0.782">
+  <properties/>
+  <testcase name="dexEnglish" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.117"/>
+  <testcase name="jumpDex" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.128"/>
+  <testcase name="halfWindow" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.088"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.131"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.093"/>
+  <testcase name="jumpDexEnglish" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.128"/>
+  <testcase name="jumpPhone" classname="app.nagmedar.ui.screenshots.PlayerNavigationScreenshotTest" time="0.096"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.a11y.AccessibilityGateTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-22T19:36:14.947Z" hostname="runnervm8k3b6" time="1.58">
+  <properties/>
+  <testcase name="touchTargetsAndNamesRail" classname="app.nagmedar.ui.a11y.AccessibilityGateTest" time="0.533"/>
+  <testcase name="touchTargetsAndNamesCompact" classname="app.nagmedar.ui.a11y.AccessibilityGateTest" time="0.33"/>
+  <testcase name="pointerTargetsAndNames" classname="app.nagmedar.ui.a11y.AccessibilityGateTest" time="0.385"/>
+  <testcase name="tabMovesFocusThroughControls" classname="app.nagmedar.ui.a11y.AccessibilityGateTest" time="0.331"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
