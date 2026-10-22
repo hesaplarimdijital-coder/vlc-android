@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,8 @@ import java.text.DateFormat
 import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** What the Performance card shows: the start-ups and playbacks kept, the newest first. */
 @Immutable
@@ -61,17 +64,23 @@ data class PerfView(val startups: List<StartupRecord>, val playbacks: List<Playb
 @Composable
 fun PerformanceSection(section: @Composable (title: String, content: @Composable ColumnScope.() -> Unit) -> Unit) {
     val context = LocalContext.current
-    val store = remember(context) { PrefsPerfStore.get(context) }
-    var view by remember { mutableStateOf(PerfView.of(store)) }
+    // the records' file is read off the main thread: the card shows none until it is read
+    var view by remember { mutableStateOf(PerfView(emptyList(), emptyList())) }
+    var store by remember { mutableStateOf<PrefsPerfStore?>(null) }
+    LaunchedEffect(context) {
+        val opened = withContext(Dispatchers.IO) { PrefsPerfStore.get(context) }
+        view = withContext(Dispatchers.IO) { PerfView.of(opened) }
+        store = opened
+    }
     DisposableEffect(store) {
-        val stop = store.listen { view = PerfView.of(store) }
-        onDispose { stop() }
+        val stop = store?.let { opened -> opened.listen { view = PerfView.of(opened) } }
+        onDispose { stop?.invoke() }
     }
     var report by remember { mutableStateOf<String?>(null) }
     val res = resources()
     val locale = currentLocale()
     section(stringResource(R.string.nag_perf_title)) {
-        PerformanceCard(view, onReport = { report = perfReport(res, view, locale) }, onClear = store::clear)
+        PerformanceCard(view, onReport = { report = perfReport(res, view, locale) }, onClear = { store?.clear() })
     }
     report?.let { ReportDialog(stringResource(R.string.nag_perf_report_title), it) { report = null } }
 }
