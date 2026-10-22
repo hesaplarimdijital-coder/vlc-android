@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.data.MediaTechDao
 import app.nagmedar.data.MediaTechEntry
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.lab.MediaProbe
@@ -84,9 +85,10 @@ fun MediaWrapper.toVideoItem(sidecars: Set<String> = emptySet()) = VideoItem(
  * soon as it is saved. Without the native library nothing is probed and the screens fall back
  * to what the medialibrary knows (the resolution).
  */
-class TechRepository private constructor(private val context: Context) {
-
-    private val dao = NagmedarDatabase.get(context).mediaTech()
+class TechRepository internal constructor(
+    private val context: Context,
+    private val dao: MediaTechDao = NagmedarDatabase.get(context).mediaTech(),
+) {
     private val scope = CoroutineScope(SupervisorJob() + probeThread)
     private val queued: MutableSet<String> = Collections.newSetFromMap(ConcurrentHashMap())
 
@@ -100,10 +102,11 @@ class TechRepository private constructor(private val context: Context) {
         }
         .flowOn(Dispatchers.Default)
 
-    /** The current probe of one file ([key], a media URI) when it has one: the player asks it (S-606). */
-    suspend fun cached(key: String): MediaTech? = withContext(Dispatchers.IO) {
-        dao.get(key)?.takeIf { it.probeVersion == MediaProbe.VERSION }?.let { MediaProbe.parse(it.json) }
-    }
+    /**
+     * The current probe of one file ([key], a media URI) when it has one and the file is still the
+     * one probed (its size and modification time): the player asks it (S-606).
+     */
+    suspend fun cached(key: String): MediaTech? = withContext(Dispatchers.IO) { current(key, stamp(Uri.parse(key))) }
 
     /** Probes the [keys] (media URIs) that have no current result, in the background. */
     fun probeMissing(keys: List<String>) {
@@ -120,24 +123,35 @@ class TechRepository private constructor(private val context: Context) {
         }
     }
 
-    /** The current probe of one file, made now when there is none (S-507: before a film starts); null when it cannot be. */
+    /**
+     * The current probe of one file, made now when there is none or the file changed since it was
+     * probed (S-507: before a film starts; a film replaced in place has other tracks); null when it
+     * cannot be.
+     */
     suspend fun probeNow(key: String): MediaTech? = withContext(Dispatchers.IO) {
-        cached(key) ?: run {
-            if (NativeLab.available) probeIfStale(key)
-            cached(key)
+        val stamp = stamp(Uri.parse(key))
+        current(key, stamp) ?: run {
+            if (NativeLab.available && stamp != null) probe(key, stamp)
+            current(key, stamp)
         }
     }
 
     private fun probeIfStale(key: String) {
-        val uri = Uri.parse(key)
-        val (size, modified) = stamp(uri) ?: return
-        val cached = dao.get(key)
-        if (cached != null && cached.probeVersion == MediaProbe.VERSION && cached.fileSize == size && cached.modifiedAt == modified) return
-        val json = MediaProbe.probe(context, uri) ?: return
+        val stamp = stamp(Uri.parse(key)) ?: return
+        if (dao.get(key)?.describes(stamp) == true) return
+        probe(key, stamp)
+    }
+
+    private fun probe(key: String, stamp: Pair<Long, Long>) {
+        val json = MediaProbe.probe(context, Uri.parse(key)) ?: return
         // an unreadable file is not cached: it may be on a drive that comes back
         if (MediaProbe.parse(json) == null) return
-        dao.save(MediaTechEntry(key, size, modified, MediaProbe.VERSION, json, System.currentTimeMillis()))
+        dao.save(MediaTechEntry(key, stamp.first, stamp.second, MediaProbe.VERSION, json, System.currentTimeMillis()))
     }
+
+    /** [key]'s cached probe when it [describes] the file as [stamp] says it is now. */
+    private fun current(key: String, stamp: Pair<Long, Long>?): MediaTech? =
+        dao.get(key)?.takeIf { it.describes(stamp) }?.let { MediaProbe.parse(it.json) }
 
     /** Size and modification time, which say whether a cached result still describes the file. */
     private fun stamp(uri: Uri): Pair<Long, Long>? = runCatching {
@@ -148,6 +162,13 @@ class TechRepository private constructor(private val context: Context) {
             else -> null
         }
     }.getOrNull()
+
+    /**
+     * Whether this cached probe is the current probe's and of the file as it is: the same size and
+     * modification time ([stamp]; null when the file does not say now, which keeps what was probed).
+     */
+    private fun MediaTechEntry.describes(stamp: Pair<Long, Long>?): Boolean =
+        probeVersion == MediaProbe.VERSION && (stamp == null || (fileSize == stamp.first && modifiedAt == stamp.second))
 
     private fun column(uri: Uri, name: String): Long? = runCatching {
         context.contentResolver.query(uri, arrayOf(name), null, null, null)?.use { c ->
