@@ -67,6 +67,8 @@ FFMPEG_COMPONENTS=(
     --enable-decoder=pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be,pcm_s32le,pcm_f32le,pcm_bluray,pcm_dvd
     --enable-decoder=mpc7,mpc8,tta,wmav1,wmav2,wmapro,wmalossless,pcm_u8,pcm_s8,pcm_f64le,pcm_s24le_planar,pcm_s32le_planar
     --enable-decoder=dsd_lsbf,dsd_msbf,dsd_lsbf_planar,dsd_msbf_planar
+    # S-1207: the remux's compatibility tracks, E-AC-3 (AC-3 beside it) and LPCM in Matroska
+    --enable-encoder=eac3,ac3,pcm_s16le,pcm_s24le
 )
 
 # A release tarball (for sources not kept in git), checked against its SHA-256.

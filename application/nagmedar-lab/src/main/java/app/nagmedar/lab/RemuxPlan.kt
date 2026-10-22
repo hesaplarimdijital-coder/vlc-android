@@ -32,12 +32,73 @@ data class StreamRef(val type: StreamType, val ordinal: Int) {
 /** What becomes of the Dolby Vision metadata: kept as it is, or profile 7 converted to 8.1. */
 enum class DolbyVisionMode { Keep, ConvertToProfile81 }
 
+/** S-1207: the codecs a compatibility track is encoded into, by the engine's names (remux.h). */
+enum class EncodeCodec(val native: String, val label: String, val lossless: Boolean) {
+    /** E-AC-3 at 48 kHz, at most 5.1: what the TVs that play no TrueHD or DTS play. */
+    EAC3("eac3", "E-AC-3", false),
+    /** AC-3, at most 640 kbps: for a device older than E-AC-3. */
+    AC3("ac3", "AC-3", false),
+    /** LPCM in Matroska, 24 bits (16 for a 16-bit source), the source's rate, up to 7.1. */
+    LPCM("lpcm", "LPCM", true),
+    ;
+
+    companion object {
+        fun of(native: String): EncodeCodec? = entries.firstOrNull { it.native == native }
+    }
+}
+
+/**
+ * S-1207: how a compatibility track is made from its source: [codec], at [bitrateKbps] (E-AC-3
+ * and AC-3; null for the engine's own: 640 for 5.1, 256 for stereo), with at most [channels]
+ * (null keeps the source's as far as the codec goes: 7.1 becomes 5.1 in E-AC-3; 2 for a stereo
+ * downmix), and made the default audio track when [makeDefault] (every other audio track then
+ * loses the flag, so that the device starts with it).
+ */
+data class EncodeSpec(
+    val codec: EncodeCodec,
+    val bitrateKbps: Int? = null,
+    val channels: Int? = null,
+    val makeDefault: Boolean = false,
+) {
+    /** "E-AC-3 5.1", "LPCM 7.1": the track as the engine writes it from [source], for its title. */
+    fun describe(source: AudioTech): String = "${codec.label} ${channelsOf(source)}"
+
+    /** "5.1", "2.0": the channels the engine gives the track (remux.c target_layout). */
+    fun channelsOf(source: AudioTech): String {
+        val n = minOf(channels ?: source.channels, source.channels).coerceAtLeast(1)
+        if (codec == EncodeCodec.LPCM) {
+            // the WAV order Matroska's PCM means: FFmpeg's default layout of that many channels
+            return LPCM_LAYOUTS.getOrElse(minOf(n, 8) - 1) { "2.0" }
+        }
+        val e = minOf(n, 6)
+        if (e <= 2) return "$e.0"
+        val lfe = source.layout.contains(".1") || source.layout.contains("LFE", ignoreCase = true)
+        return when {
+            // the source's own layout, which E-AC-3 takes up to 5.1
+            e == source.channels && e < 6 -> if (lfe) "${e - 1}.1" else "$e.0"
+            // a downmix (or a six-channel layout E-AC-3 has not): 5.1, or 5.0 without an LFE to keep
+            lfe || e >= 6 -> "5.1"
+            else -> "5.0"
+        }
+    }
+
+    /** Whether the added track holds the source's samples as decoded: LPCM with every channel. */
+    val lossless: Boolean get() = codec.lossless && channels == null
+
+    private companion object {
+        val LPCM_LAYOUTS = listOf("1.0", "2.0", "2.1", "4.0", "5.0", "5.1", "6.1", "7.1")
+    }
+}
+
+/** What a planned stream is to the listener: the original copied untouched, or a track added beside it, lossy or not. */
+enum class StreamFidelity { Kept, AddedLossy, AddedLossless }
+
 /**
  * One stream of the output, in the order the plan lists them (S-1206). The engine copies the
  * source stream's packets untouched; the flags, language and title are the source's unless set
- * here. [encode] is reserved for the compatibility tracks of S-1207 (a codec the source stream is
- * encoded into, beside the original); this story's engine copies only and refuses a plan that
- * asks for more ([RemuxPlan.toNative]).
+ * here. With [encode] (S-1207) the entry is a compatibility track instead: the source audio
+ * stream decoded and encoded again, written where the entry stands (right after the original,
+ * which stays its own entry); its [isDefault] is [EncodeSpec.makeDefault]'s.
  */
 data class PlannedStream(
     val source: StreamRef,
@@ -51,9 +112,17 @@ data class PlannedStream(
     val title: String? = null,
     val isDefault: Boolean? = null,
     val forced: Boolean? = null,
-    val encode: String? = null,
+    val encode: EncodeSpec? = null,
 ) {
     val copied: Boolean get() = encode == null
+
+    /** The plan's lossless label: an original stays lossless, an added track is what its codec makes it. */
+    val fidelity: StreamFidelity
+        get() = when {
+            encode == null -> StreamFidelity.Kept
+            encode.lossless -> StreamFidelity.AddedLossless
+            else -> StreamFidelity.AddedLossy
+        }
 }
 
 /**
@@ -71,26 +140,61 @@ data class RemuxPlan(
 ) {
     val video: PlannedStream? get() = streams.firstOrNull { it.source.type == StreamType.Video }
 
-    /** Whether every stream is a copy: the video is then bit for bit the source's (its base layer, with the conversion). */
+    /** Whether every stream is a copy, no compatibility track added (the video is bit for bit the source's either way). */
     val copiesEverything: Boolean get() = streams.all { it.copied }
 
-    /** The plan as the engine reads it (remux.h); throws when a stream asks for more than a copy. */
+    /** The compatibility tracks the plan adds (S-1207). */
+    val added: List<PlannedStream> get() = streams.filter { !it.copied }
+
+    /** The plan as the engine reads it (remux.h): a stream line per copy, an encode line per added track. */
     fun toNative(): String {
-        require(copiesEverything) { "the engine copies streams only" }
+        // the first added track asked to be default is; every other audio track then is not
+        val defaultTrack = streams.firstOrNull { it.encode?.makeDefault == true }
         return buildString {
             append("dv\t").append(if (dolbyVision == DolbyVisionMode.ConvertToProfile81) "convert81" else "keep").append('\n')
             append("chapters\t").append(if (chapters) 1 else 0).append('\n')
             append("attachments\t").append(if (attachments) 1 else 0).append('\n')
             append("metadata\t").append(if (metadata) 1 else 0).append('\n')
             streams.forEach { s ->
-                append("stream\t").append(s.source)
-                s.isDefault?.let { append("\tdefault=").append(if (it) 1 else 0) }
+                val encode = s.encode
+                val isDefault = when {
+                    encode != null -> s === defaultTrack
+                    defaultTrack != null && s.source.type == StreamType.Audio -> false
+                    else -> s.isDefault
+                }
+                if (encode == null) {
+                    append("stream\t").append(s.source)
+                } else {
+                    append("encode\t").append(s.source).append('\t').append(encode.codec.native)
+                    encode.bitrateKbps?.let { append("\tbitrate=").append(it.coerceIn(32, 1024)) }
+                    encode.channels?.let { append("\tchannels=").append(it.coerceIn(1, 8)) }
+                }
+                isDefault?.let { append("\tdefault=").append(if (it) 1 else 0) }
                 s.forced?.let { append("\tforced=").append(if (it) 1 else 0) }
                 s.language?.let { append("\tlang=").append(it.clean()) }
                 s.title?.let { append("\ttitle=").append(it.clean()) }
                 append('\n')
             }
         }
+    }
+
+    /**
+     * The plan with [tracks] added (S-1207), each right after its original (after the last audio
+     * track when the plan leaves the original out), titled by [title] as the interface names it.
+     */
+    fun withCompatibilityTracks(tracks: List<CompatibilityTrack>, title: (CompatibilityTrack) -> String): RemuxPlan {
+        if (tracks.isEmpty()) return this
+        val out = streams.toMutableList()
+        tracks.forEach { t ->
+            val name = title(t)
+            val added = PlannedStream(t.source, t.spec.codec.native, label = name, title = name, encode = t.spec)
+            // after the original and the tracks already added beside it
+            var at = out.indexOfLast { it.source == t.source }
+            if (at < 0) at = out.indexOfLast { it.source.type == StreamType.Audio }
+            if (at < 0) at = out.indexOfLast { it.source.type == StreamType.Video }
+            out.add(at + 1, added)
+        }
+        return copy(streams = out)
     }
 
     fun toJson(): String = JSONObject().apply {
@@ -111,7 +215,17 @@ data class RemuxPlan(
                             s.title?.let { put("title", it) }
                             s.isDefault?.let { put("default", it) }
                             s.forced?.let { put("forced", it) }
-                            s.encode?.let { put("encode", it) }
+                            s.encode?.let { e ->
+                                put(
+                                    "encode",
+                                    JSONObject().apply {
+                                        put("codec", e.codec.native)
+                                        e.bitrateKbps?.let { put("bitrate_kbps", it) }
+                                        e.channels?.let { put("channels", it) }
+                                        put("default", e.makeDefault)
+                                    },
+                                )
+                            }
                         },
                     )
                 }
@@ -136,7 +250,14 @@ data class RemuxPlan(
                         title = if (s.has("title")) s.getString("title") else null,
                         isDefault = if (s.has("default")) s.getBoolean("default") else null,
                         forced = if (s.has("forced")) s.getBoolean("forced") else null,
-                        encode = if (s.has("encode")) s.getString("encode") else null,
+                        encode = s.optJSONObject("encode")?.let { e ->
+                            EncodeSpec(
+                                codec = EncodeCodec.of(e.getString("codec")) ?: error("bad codec"),
+                                bitrateKbps = if (e.has("bitrate_kbps")) e.getInt("bitrate_kbps") else null,
+                                channels = if (e.has("channels")) e.getInt("channels") else null,
+                                makeDefault = e.optBoolean("default"),
+                            )
+                        },
                     )
                 }
             }
@@ -182,8 +303,37 @@ object RemuxRefusal {
     const val OUTPUT_NOT_FILE = "output_not_file"
 }
 
-/** A stream's count in the engine's stats. */
-data class RemuxStreamResult(val source: StreamRef?, val sourceIndex: Int, val outputIndex: Int, val codec: String, val packets: Long, val bytes: Long)
+/**
+ * S-1207: an added track in the engine's stats: what it was made from and into, and its sanity
+ * check: [seconds] against its source's [sourceSeconds] (the engine fails a run beyond half a
+ * second), [startOffsetSeconds] from the source's first timestamp, the silence put into the
+ * source's gaps and the packets the decoder refused.
+ */
+data class EncodedTrackResult(
+    val sourceCodec: String,
+    val channels: Int,
+    val layout: String,
+    val sampleRate: Int,
+    val bitRate: Long,
+    val framesDecoded: Long,
+    val decodeErrors: Long,
+    val framesDropped: Long,
+    val paddedSeconds: Double,
+    val sourceSeconds: Double,
+    val seconds: Double,
+    val startOffsetSeconds: Double,
+)
+
+/** A stream's count in the engine's stats; [encoded] for an added track. */
+data class RemuxStreamResult(
+    val source: StreamRef?,
+    val sourceIndex: Int,
+    val outputIndex: Int,
+    val codec: String,
+    val packets: Long,
+    val bytes: Long,
+    val encoded: EncodedTrackResult? = null,
+)
 
 /** What the Dolby Vision conversion did, from the engine's stats. */
 data class DolbyVisionResult(
@@ -242,7 +392,27 @@ data class RemuxResult(
                 streams = o.optJSONArray("streams").let { a ->
                     if (a == null) emptyList() else (0 until a.length()).map { i ->
                         val s = a.getJSONObject(i)
-                        RemuxStreamResult(StreamRef.parse(s.optString("ref")), s.optInt("source_index"), s.optInt("output_index"), s.optString("codec"), s.optLong("packets"), s.optLong("bytes"))
+                        val e = s.optJSONObject("encoded")
+                        RemuxStreamResult(
+                            StreamRef.parse(s.optString("ref")), s.optInt("source_index"), s.optInt("output_index"), s.optString("codec"),
+                            s.optLong("packets"), s.optLong("bytes"),
+                            e?.let {
+                                EncodedTrackResult(
+                                    sourceCodec = it.optString("source_codec"),
+                                    channels = it.optInt("channels"),
+                                    layout = it.optString("layout"),
+                                    sampleRate = it.optInt("sample_rate"),
+                                    bitRate = it.optLong("bit_rate"),
+                                    framesDecoded = it.optLong("frames_decoded"),
+                                    decodeErrors = it.optLong("decode_errors"),
+                                    framesDropped = it.optLong("frames_dropped"),
+                                    paddedSeconds = it.optDouble("padded_seconds", 0.0),
+                                    sourceSeconds = it.optDouble("source_seconds", 0.0),
+                                    seconds = it.optDouble("seconds", 0.0),
+                                    startOffsetSeconds = it.optDouble("start_offset_seconds", 0.0),
+                                )
+                            },
+                        )
                     }
                 },
                 attachments = o.optInt("attachments"),

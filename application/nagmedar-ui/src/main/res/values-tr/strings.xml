@@ -1558,6 +1558,15 @@
     <string name="nag_tvlab_remux_plan_dv">Dolby Vision P7 → P8.1</string>
     <string name="nag_tvlab_remux_plan_chapters">bölümler</string>
     <string name="nag_tvlab_remux_plan_attachments">ekler</string>
+    <!-- S-1207: an audio track encoded again beside the original, for a TV that plays no TrueHD or DTS -->
+    <plurals name="nag_tvlab_remux_plan_compat">
+        <item quantity="one">%d uyumluluk izi</item>
+        <item quantity="other">%d uyumluluk izi</item>
+    </plurals>
+    <string name="nag_tvlab_remux_compat_title">Uyumluluk izi (%1$s)</string>
+    <string name="nag_tvlab_remux_fidelity_kept">Kayıpsız</string>
+    <string name="nag_tvlab_remux_fidelity_added_lossy">Kayıplı (eklenen iz)</string>
+    <string name="nag_tvlab_remux_fidelity_added_lossless">Kayıpsız (eklenen iz)</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performans</string>
     <string name="nag_perf_intro">Nağmedar\'ın bu cihazdaki ölçümleri: soğuk açılışın ilk kareye kadar süresi, her oynatmanın kayıp kareleri ve pil tüketimi. Pil, cihaz şarjda değilken beş dakikadan uzun oynatmalarda ölçülür. Son on açılış ve son on oynatma saklanır.</string>

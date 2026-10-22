@@ -207,11 +207,13 @@ fun stateTone(job: RemuxJobView): StateTone = when (job.state) {
     else -> StateTone.Neutral
 }
 
-/** "6 iz · Dolby Vision P7 → P8.1 · bölümler · ekler". */
+/** "6 iz · 1 uyumluluk izi · Dolby Vision P7 → P8.1 · bölümler · ekler". */
 fun planLine(res: Resources, job: RemuxJobView): String {
     val plan = job.plan ?: return ""
+    val added = plan.added.size
     return listOfNotNull(
         res.getQuantityString(R.plurals.nag_tvlab_remux_tracks, plan.streams.size, plan.streams.size),
+        res.getQuantityString(R.plurals.nag_tvlab_remux_plan_compat, added, added).takeIf { added > 0 },
         res.getString(R.string.nag_tvlab_remux_plan_dv).takeIf { job.convertsDolbyVision },
         res.getString(R.string.nag_tvlab_remux_plan_chapters).takeIf { plan.chapters },
         res.getString(R.string.nag_tvlab_remux_plan_attachments).takeIf { plan.attachments },

@@ -108,6 +108,7 @@ Sözlüğü testler denetler:
 | remux | remux | yeniden paketleme | re-mux | TV Lab'in kayıpsız dönüşümü: video akışına dokunmadan kapsayıcı ve izler yeni bir MKV'ye yazılır; işler “Remux sırası”nda bekler, iş “sırada”, “remux yapılıyor”, “doğrulanıyor”, “tamamlandı” |
 | Video bit bit aynı | Video bit for bit identical | | bit-identical, bit-exact video | Doğrulama rozeti (S-1209): çıktının videosu kaynağınkiyle paket paket karşılaştırıldı ve aynı çıktı; müzikteki “bit-perfect” çıkış için kalır |
 | doğrulama | verification | | | Remux çıktısının geri okunup karşılaştırılması; “Doğrulanıyor” |
+| uyumluluk izi | compatibility track | | | Remux'ta bir ses izinin yanına eklenen E-AC-3 ya da LPCM iz (S-1207), TrueHD ve DTS-HD çalmayan TV için: başlığı “Uyumluluk izi (E-AC-3 5.1)”; orijinal iz kayıpsız kalır, eklenen iz “Kayıplı (eklenen iz)” ya da “Kayıpsız (eklenen iz)” |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |

@@ -1586,6 +1586,15 @@
     <string name="nag_tvlab_remux_plan_dv">Dolby Vision P7 → P8.1</string>
     <string name="nag_tvlab_remux_plan_chapters">chapters</string>
     <string name="nag_tvlab_remux_plan_attachments">attachments</string>
+    <!-- S-1207: an audio track encoded again beside the original, for a TV that plays no TrueHD or DTS -->
+    <plurals name="nag_tvlab_remux_plan_compat">
+        <item quantity="one">%d compatibility track</item>
+        <item quantity="other">%d compatibility tracks</item>
+    </plurals>
+    <string name="nag_tvlab_remux_compat_title">Compatibility track (%1$s)</string>
+    <string name="nag_tvlab_remux_fidelity_kept">Lossless</string>
+    <string name="nag_tvlab_remux_fidelity_added_lossy">Lossy (added track)</string>
+    <string name="nag_tvlab_remux_fidelity_added_lossless">Lossless (added track)</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
     <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>

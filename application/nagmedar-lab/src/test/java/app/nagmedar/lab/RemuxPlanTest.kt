@@ -67,11 +67,10 @@ class RemuxPlanTest {
     }
 
     @Test
-    fun aPlanWithAnEncodedTrackIsNotForThisEngine() {
-        val plan = RemuxPlan(listOf(PlannedStream(StreamRef(StreamType.Video, 0), "hevc"), PlannedStream(StreamRef(StreamType.Audio, 0), "truehd", encode = "eac3")))
+    fun aPlanWithAnEncodedTrackWritesAnEncodeLine() {
+        val plan = RemuxPlan(listOf(PlannedStream(StreamRef(StreamType.Video, 0), "hevc"), PlannedStream(StreamRef(StreamType.Audio, 0), "truehd", encode = EncodeSpec(EncodeCodec.EAC3))))
         assertFalse(plan.copiesEverything)
-        val thrown = runCatching { plan.toNative() }.exceptionOrNull()
-        assertTrue(thrown is IllegalArgumentException)
+        assertTrue(plan.toNative().endsWith("encode\ta:0\teac3\tdefault=0\n"))
     }
 
     @Test
@@ -80,7 +79,7 @@ class RemuxPlanTest {
             streams = listOf(
                 PlannedStream(StreamRef(StreamType.Video, 0), "hevc", label = "HEVC Main 10 · 3840×2160"),
                 PlannedStream(StreamRef(StreamType.Audio, 1), "dts", label = "DTS-HD MA 5.1 · Türkçe", isDefault = true, language = "tur", title = ""),
-                PlannedStream(StreamRef(StreamType.Audio, 0), "truehd", forced = false, encode = "eac3"),
+                PlannedStream(StreamRef(StreamType.Audio, 0), "truehd", forced = false, encode = EncodeSpec(EncodeCodec.EAC3, 640, 6, makeDefault = true)),
             ),
             dolbyVision = DolbyVisionMode.ConvertToProfile81,
             chapters = false,

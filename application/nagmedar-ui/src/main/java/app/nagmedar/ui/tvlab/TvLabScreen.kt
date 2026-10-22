@@ -33,6 +33,7 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.tvlab.remux.RemuxJobView
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
+import app.nagmedar.ui.tvlab.remux.withCompatibilityTracks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -132,7 +133,9 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
         runCatching { context.contentResolver.takePersistableUriPermission(uri, grant) }
         val report = checkOf(view, names)
         val convert = report?.findings?.any { it.kind == FindingKind.DolbyVisionDualLayer } == true
+        // S-1207: beside every audio track the profile's device cannot play, a compatibility track
         val plan = RemuxPlan.default(tech, convert) { ref -> streamLabel(tech, ref, names) }
+            .withCompatibilityTracks(res, controller.profile, tech)
         scope.launch {
             val name = withContext(Dispatchers.IO) { context.displayName(uri) }
             val id = queue.enqueue(Uri.parse(file.uri), file.name, file.sizeBytes, uri, name, plan)

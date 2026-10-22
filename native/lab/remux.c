@@ -8,6 +8,10 @@
 // While the video stream is copied its content is hashed (SHA-256 over every NAL unit, or
 // over every packet for codecs without NAL units); the verification reads the output back and
 // hashes it the same way, so a remux that changed one video bit cannot pass.
+// S-1207: an encode line adds a compatibility track: the audio stream it names is decoded on the
+// way (its packets are still copied untouched when the plan copies it too), resampled and
+// downmixed with libswresample where the codec needs it, and encoded into E-AC-3, AC-3 or LPCM;
+// its timestamps count the samples from the source's first one, a gap becomes silence.
 #define _FILE_OFFSET_BITS 64
 #include "remux.h"
 #include "dvconvert.h"
@@ -16,14 +20,20 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
+#include <libavutil/audio_fifo.h>
 #include <libavutil/avstring.h>
+#include <libavutil/channel_layout.h>
 #include <libavutil/dovi_meta.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/mem.h>
+#include <libavutil/opt.h>
+#include <libavutil/samplefmt.h>
 #include <libavutil/sha.h>
 #include <libavutil/time.h>
+#include <libswresample/swresample.h>
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -124,6 +134,30 @@ static int plan_flag(const char *value, int *out)
     return -1;
 }
 
+/* A whole number from [min] to [max], or -1. */
+static int plan_number(const char *value, int min, int max)
+{
+    char *end = NULL;
+    long n = strtol(value, &end, 10);
+    return end != value && !*end && n >= min && n <= max ? (int)n : -1;
+}
+
+static const struct {
+    const char *name;
+    int encode;
+} ENCODE_NAMES[] = {
+    {"eac3", REMUX_ENCODE_EAC3}, {"ac3", REMUX_ENCODE_AC3}, {"lpcm", REMUX_ENCODE_LPCM},
+    {"pcm_s16le", REMUX_ENCODE_PCM_S16}, {"pcm_s24le", REMUX_ENCODE_PCM_S24},
+};
+
+static int encode_of(const char *name)
+{
+    for (size_t i = 0; i < sizeof(ENCODE_NAMES) / sizeof(ENCODE_NAMES[0]); i++)
+        if (!strcmp(name, ENCODE_NAMES[i].name))
+            return ENCODE_NAMES[i].encode;
+    return REMUX_ENCODE_NONE;
+}
+
 int remux_plan_parse(const char *text, RemuxPlan *plan, char *err, size_t err_size)
 {
     memset(plan, 0, sizeof(*plan));
@@ -168,7 +202,7 @@ int remux_plan_parse(const char *text, RemuxPlan *plan, char *err, size_t err_si
         } else if (!strcmp(key, "metadata")) {
             if (plan_flag(value, &plan->metadata) < 0)
                 goto bad;
-        } else if (!strcmp(key, "stream")) {
+        } else if (!strcmp(key, "stream") || !strcmp(key, "encode")) {
             if (plan->count >= REMUX_MAX_STREAMS) {
                 snprintf(err, err_size, "line %d: more than %d streams", line_no, REMUX_MAX_STREAMS);
                 return AVERROR_INVALIDDATA;
@@ -182,6 +216,12 @@ int remux_plan_parse(const char *text, RemuxPlan *plan, char *err, size_t err_si
                 if (*d < '0' || *d > '9')
                     goto bad;
             av_strlcpy(sp->ref, value, sizeof(sp->ref));
+            if (key[0] == 'e') {
+                /* S-1207: an audio stream encoded again, beside the original */
+                const char *codec = strtok_r(NULL, "\t", &save);
+                if (value[0] != 'a' || !codec || (sp->encode = encode_of(codec)) == REMUX_ENCODE_NONE)
+                    goto bad;
+            }
             char *field;
             while ((field = strtok_r(NULL, "\t", &save)) != NULL) {
                 char *eq = strchr(field, '=');
@@ -189,7 +229,13 @@ int remux_plan_parse(const char *text, RemuxPlan *plan, char *err, size_t err_si
                     goto bad;
                 *eq = 0;
                 const char *v = eq + 1;
-                if (!strcmp(field, "default")) {
+                if (sp->encode && !strcmp(field, "bitrate")) {
+                    if ((sp->bitrate_kbps = plan_number(v, 32, 6144)) < 0)
+                        goto bad;
+                } else if (sp->encode && !strcmp(field, "channels")) {
+                    if ((sp->channels = plan_number(v, 1, 8)) < 0)
+                        goto bad;
+                } else if (!strcmp(field, "default")) {
                     if (plan_flag(v, &sp->set_default) < 0)
                         goto bad;
                 } else if (!strcmp(field, "forced")) {
@@ -363,6 +409,577 @@ static int scope_for(const AVCodecParameters *par, int dv_convert)
     return REMUX_HASH_PACKETS;
 }
 
+static void fail(char *error, size_t size, const char *what, int err)
+{
+    char msg[AV_ERROR_MAX_STRING_SIZE] = {0};
+    av_strerror(err, msg, sizeof(msg));
+    snprintf(error, size, "%s: %s", what, msg);
+}
+
+/* ---- the compatibility tracks (S-1207) ---------------------------------------------------- */
+
+typedef struct AudioEncoder {
+    int src;                      /* the source stream */
+    int out;                      /* the output stream */
+    char *error;                  /* the run's error text */
+    size_t error_size;
+    RemuxStreamStats *ss;
+    AVCodecContext *dec, *enc;
+    SwrContext *swr;
+    AVChannelLayout in_layout;    /* the decoded frames swr is set up for */
+    int in_rate, in_format;
+    int out_rate;
+    AVAudioFifo *fifo;            /* converted samples waiting for a whole encoder frame */
+    AVFrame *decoded, *converted, *chunk, *silence;
+    int converted_capacity;
+    AVPacket *packet;
+    int chunk_size;               /* samples per encoded frame */
+    int fixed_size;               /* the encoder takes whole frames only (AC-3): the last one is padded */
+    int64_t origin;               /* the first sample's timestamp, in 1/out_rate; AV_NOPTS_VALUE before it */
+    int64_t emitted;              /* samples handed to the encoder */
+    int64_t base;                 /* where the current input rate began, in 1/out_rate */
+    int64_t fed;                  /* input samples fed since then */
+    int64_t padded;               /* silence put into gaps, in output samples */
+    int64_t packets_in;
+    int64_t src_first, src_end;   /* the source's packets, in its time base */
+    int64_t out_first, out_end;   /* the encoded packets, in 1/out_rate */
+} AudioEncoder;
+
+#define REMUX_MAX_GAP_SECONDS 600 /* a longer jump in the source's timestamps is not a gap to fill */
+
+static int is_ac3(int encode)
+{
+    return encode == REMUX_ENCODE_EAC3 || encode == REMUX_ENCODE_AC3;
+}
+
+static int has_lfe(const AVChannelLayout *layout)
+{
+    return av_channel_layout_index_from_channel(layout, AV_CHAN_LOW_FREQUENCY) >= 0;
+}
+
+static int codec_takes_layout(const AVCodec *codec, const AVChannelLayout *layout)
+{
+    const AVChannelLayout *layouts = NULL;
+    int count = 0;
+    if (avcodec_get_supported_config(NULL, codec, AV_CODEC_CONFIG_CHANNEL_LAYOUT, 0, (const void **)&layouts, &count) < 0 || !layouts)
+        return 0;
+    for (int i = 0; i < count; i++)
+        if (!av_channel_layout_compare(&layouts[i], layout))
+            return 1;
+    return 0;
+}
+
+/* The new stream's channels: E-AC-3 and AC-3 at most 5.1 (the source's own layout when the codec
+ * takes it), LPCM up to 7.1 in WAV order, which is what Matroska's PCM means; fewer when asked. */
+static void target_layout(const AVChannelLayout *src, const RemuxStreamPlan *sp, const AVCodec *codec, AVChannelLayout *dst)
+{
+    int n = src->nb_channels;
+    if (sp->channels > 0 && sp->channels < n)
+        n = sp->channels;
+    if (is_ac3(sp->encode)) {
+        if (n > 6)
+            n = 6;
+        if (n <= 2)
+            av_channel_layout_default(dst, n);
+        else if (n == src->nb_channels && codec_takes_layout(codec, src))
+            av_channel_layout_copy(dst, src);
+        else
+            *dst = has_lfe(src) || n >= 6 ? (AVChannelLayout)AV_CHANNEL_LAYOUT_5POINT1 : (AVChannelLayout)AV_CHANNEL_LAYOUT_5POINT0;
+        return;
+    }
+    av_channel_layout_default(dst, n > 8 ? 8 : n);
+}
+
+/* "5.1", "7.1", "2.0": the main channels and the LFE. */
+static void layout_short(const AVChannelLayout *layout, char *buf, size_t size)
+{
+    int lfe = has_lfe(layout);
+    snprintf(buf, size, "%d.%d", layout->nb_channels - lfe, lfe);
+}
+
+static const char *encode_label(int encode)
+{
+    switch (encode) {
+    case REMUX_ENCODE_EAC3: return "E-AC-3";
+    case REMUX_ENCODE_AC3: return "AC-3";
+    default: return "LPCM";
+    }
+}
+
+static int encoder_fail(AudioEncoder *e, const char *what, int err)
+{
+    char text[128];
+    snprintf(text, sizeof(text), "%s (%s)", what, e->ss->ref);
+    fail(e->error, e->error_size, text, err);
+    return err;
+}
+
+static void encoder_free(AudioEncoder **pe)
+{
+    AudioEncoder *e = *pe;
+    if (!e)
+        return;
+    avcodec_free_context(&e->dec);
+    avcodec_free_context(&e->enc);
+    swr_free(&e->swr);
+    av_channel_layout_uninit(&e->in_layout);
+    av_audio_fifo_free(e->fifo);
+    av_frame_free(&e->decoded);
+    av_frame_free(&e->converted);
+    av_frame_free(&e->chunk);
+    av_frame_free(&e->silence);
+    av_packet_free(&e->packet);
+    av_freep(pe);
+}
+
+/*
+ * The decoder of [ist], the encoder the plan line asks for and the output stream [ost] set up
+ * from it. TrueHD and DTS-HD are asked for their own downmix when fewer channels are wanted (the
+ * presentation the mastering made); AC-3 and E-AC-3 sources are decoded without their dynamic
+ * range compression, which the new stream would otherwise carry baked in.
+ */
+static int encoder_open(AudioEncoder **pe, AVFormatContext *oc, const AVStream *ist, AVStream *ost, int src,
+                        const RemuxStreamPlan *sp, RemuxStreamStats *ss, char *error, size_t error_size)
+{
+    const AVCodecParameters *par = ist->codecpar;
+    AudioEncoder *e = av_mallocz(sizeof(*e));
+    if (!e)
+        return AVERROR(ENOMEM);
+    *pe = e;
+    e->src = src;
+    e->out = ost->index;
+    e->error = error;
+    e->error_size = error_size;
+    e->ss = ss;
+    e->origin = e->src_first = e->src_end = e->out_first = e->out_end = AV_NOPTS_VALUE;
+    av_strlcpy(ss->source_codec, avcodec_get_name(par->codec_id), sizeof(ss->source_codec));
+    ss->encoded = 1;
+
+    AVChannelLayout source = {0}, target = {0};
+    int ret = 0;
+    if (par->ch_layout.nb_channels <= 0) {
+        snprintf(error, error_size, "the channels of %s are unknown", sp->ref);
+        return AVERROR_INVALIDDATA;
+    }
+    if (par->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC)
+        av_channel_layout_default(&source, par->ch_layout.nb_channels);
+    else if ((ret = av_channel_layout_copy(&source, &par->ch_layout)) < 0)
+        return ret;
+
+    const AVCodec *decoder = avcodec_find_decoder(par->codec_id);
+    enum AVCodecID encoder_id = sp->encode == REMUX_ENCODE_EAC3 ? AV_CODEC_ID_EAC3
+                              : sp->encode == REMUX_ENCODE_AC3  ? AV_CODEC_ID_AC3
+                              : sp->encode == REMUX_ENCODE_PCM_S16 ? AV_CODEC_ID_PCM_S16LE
+                              : sp->encode == REMUX_ENCODE_PCM_S24 ? AV_CODEC_ID_PCM_S24LE
+                              : par->bits_per_raw_sample > 0 && par->bits_per_raw_sample <= 16 ? AV_CODEC_ID_PCM_S16LE
+                              : AV_CODEC_ID_PCM_S24LE;
+    const AVCodec *encoder = avcodec_find_encoder(encoder_id);
+    if (!decoder || !encoder) {
+        snprintf(error, error_size, "no %s %s in this build", avcodec_get_name(decoder ? encoder_id : par->codec_id),
+                 decoder ? "encoder" : "decoder");
+        ret = AVERROR(ENOSYS);
+        goto end;
+    }
+    target_layout(&source, sp, encoder, &target);
+
+    if (!(e->dec = avcodec_alloc_context3(decoder)) || (ret = avcodec_parameters_to_context(e->dec, par)) < 0) {
+        ret = ret < 0 ? ret : AVERROR(ENOMEM);
+        goto end;
+    }
+    e->dec->pkt_timebase = ist->time_base;
+    if (target.nb_channels < source.nb_channels) {
+        int stereo = !av_channel_layout_compare(&target, &(AVChannelLayout)AV_CHANNEL_LAYOUT_STEREO);
+        int surround = !av_channel_layout_compare(&target, &(AVChannelLayout)AV_CHANNEL_LAYOUT_5POINT1) ||
+                       !av_channel_layout_compare(&target, &(AVChannelLayout)AV_CHANNEL_LAYOUT_5POINT0);
+        int embedded = par->codec_id == AV_CODEC_ID_TRUEHD || par->codec_id == AV_CODEC_ID_MLP || par->codec_id == AV_CODEC_ID_DTS;
+        int ac3 = par->codec_id == AV_CODEC_ID_AC3 || par->codec_id == AV_CODEC_ID_EAC3;
+        if ((embedded && (stereo || surround)) || (ac3 && stereo))
+            av_opt_set_chlayout(e->dec, "downmix", &target, AV_OPT_SEARCH_CHILDREN);
+    }
+    if (par->codec_id == AV_CODEC_ID_AC3 || par->codec_id == AV_CODEC_ID_EAC3)
+        av_opt_set_double(e->dec, "drc_scale", 0.0, AV_OPT_SEARCH_CHILDREN);
+    if ((ret = avcodec_open2(e->dec, decoder, NULL)) < 0) {
+        encoder_fail(e, "open the decoder", ret);
+        goto end;
+    }
+
+    if (!(e->enc = avcodec_alloc_context3(encoder))) {
+        ret = AVERROR(ENOMEM);
+        goto end;
+    }
+    const enum AVSampleFormat *formats = NULL;
+    int nformats = 0;
+    if (avcodec_get_supported_config(NULL, encoder, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0, (const void **)&formats, &nformats) < 0 ||
+        !formats || nformats < 1) {
+        ret = AVERROR_BUG;
+        goto end;
+    }
+    /* E-AC-3 and AC-3 are 48 kHz on every device; LPCM keeps the source's rate */
+    e->out_rate = is_ac3(sp->encode) || par->sample_rate <= 0 ? 48000 : par->sample_rate;
+    e->enc->sample_fmt = formats[0];
+    e->enc->sample_rate = e->out_rate;
+    e->enc->time_base = (AVRational){1, e->out_rate};
+    if ((ret = av_channel_layout_copy(&e->enc->ch_layout, &target)) < 0)
+        goto end;
+    if (is_ac3(sp->encode)) {
+        int n = target.nb_channels;
+        int kbps = sp->bitrate_kbps ? sp->bitrate_kbps : n >= 5 ? 640 : n >= 3 ? 448 : n == 2 ? 256 : 128;
+        /* AC-3's ceiling; E-AC-3's with frames of six blocks, the ones every decoder takes */
+        int ceiling = sp->encode == REMUX_ENCODE_AC3 ? 640 : 1024;
+        if (kbps > ceiling)
+            kbps = ceiling;
+        e->enc->bit_rate = (int64_t)kbps * 1000;
+    } else {
+        e->enc->bits_per_raw_sample = encoder_id == AV_CODEC_ID_PCM_S16LE ? 16 : 24;
+    }
+    if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+        e->enc->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    AVDictionary *options = NULL;
+    /* -31 dBFS: the level as decoded, the player turns nothing down */
+    if (is_ac3(sp->encode))
+        av_dict_set(&options, "dialnorm", "-31", 0);
+    ret = avcodec_open2(e->enc, encoder, &options);
+    av_dict_free(&options);
+    if (ret < 0) {
+        encoder_fail(e, "open the encoder", ret);
+        goto end;
+    }
+    e->fixed_size = !(encoder->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE) && e->enc->frame_size > 0;
+    e->chunk_size = e->enc->frame_size > 0 ? e->enc->frame_size : FFMAX(256, (int)av_rescale(1536, e->out_rate, 48000));
+    e->fifo = av_audio_fifo_alloc(e->enc->sample_fmt, target.nb_channels, 2 * e->chunk_size);
+    e->decoded = av_frame_alloc();
+    e->converted = av_frame_alloc();
+    e->chunk = av_frame_alloc();
+    e->silence = av_frame_alloc();
+    e->packet = av_packet_alloc();
+    if (!e->fifo || !e->decoded || !e->converted || !e->chunk || !e->silence || !e->packet) {
+        ret = AVERROR(ENOMEM);
+        goto end;
+    }
+    e->chunk->format = e->enc->sample_fmt;
+    e->chunk->sample_rate = e->out_rate;
+    e->chunk->nb_samples = e->chunk_size;
+    if ((ret = av_channel_layout_copy(&e->chunk->ch_layout, &target)) < 0 || (ret = av_frame_get_buffer(e->chunk, 0)) < 0)
+        goto end;
+
+    if ((ret = avcodec_parameters_from_context(ost->codecpar, e->enc)) < 0)
+        goto end;
+    ost->codecpar->codec_tag = 0;
+    /* no CodecDelay element: E-AC-3 in Matroska as mkvmerge writes it, which every TV reads; the
+     * encoder's priming is in the timestamps (encoder_drain) */
+    ost->codecpar->initial_padding = 0;
+    ost->time_base = e->enc->time_base;
+
+    av_strlcpy(ss->codec, avcodec_get_name(encoder_id), sizeof(ss->codec));
+    ss->channels = target.nb_channels;
+    av_channel_layout_describe(&target, ss->layout, sizeof(ss->layout));
+    ss->sample_rate = e->out_rate;
+    ss->bit_rate = e->enc->bit_rate > 0 ? e->enc->bit_rate
+                                        : (int64_t)e->out_rate * target.nb_channels * av_get_bits_per_sample(encoder_id);
+end:
+    av_channel_layout_uninit(&source);
+    av_channel_layout_uninit(&target);
+    return ret;
+}
+
+/* The default title of a new stream: "E-AC-3 5.1", "LPCM 7.1". */
+static void encoder_title(const AudioEncoder *e, int encode, char *buf, size_t size)
+{
+    char channels[16];
+    layout_short(&e->enc->ch_layout, channels, sizeof(channels));
+    snprintf(buf, size, "%s %s", encode_label(encode), channels);
+}
+
+/* The encoded packets written; the encoder's priming before a source that starts at zero is cut
+ * at zero, or Matroska would move every stream later by it. */
+static int encoder_drain(AudioEncoder *e, AVFormatContext *oc)
+{
+    for (;;) {
+        int ret = avcodec_receive_packet(e->enc, e->packet);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            return 0;
+        if (ret < 0)
+            return encoder_fail(e, "encode", ret);
+        AVPacket *p = e->packet;
+        if (p->pts != AV_NOPTS_VALUE && p->pts < 0 && e->origin >= 0)
+            p->pts = 0;
+        p->dts = p->pts;
+        if (p->pts != AV_NOPTS_VALUE) {
+            if (e->out_first == AV_NOPTS_VALUE || p->pts < e->out_first)
+                e->out_first = p->pts;
+            if (e->out_end == AV_NOPTS_VALUE || p->pts + p->duration > e->out_end)
+                e->out_end = p->pts + p->duration;
+        }
+        e->ss->packets++;
+        e->ss->bytes += p->size;
+        p->stream_index = e->out;
+        p->pos = -1;
+        av_packet_rescale_ts(p, e->enc->time_base, oc->streams[e->out]->time_base);
+        if ((ret = av_interleaved_write_frame(oc, p)) < 0)
+            return encoder_fail(e, "write", ret);
+    }
+}
+
+/* Whole encoder frames from the queue; with [final] the rest too (padded for AC-3), then the encoder's own. */
+static int encoder_pump(AudioEncoder *e, AVFormatContext *oc, int final)
+{
+    int ret, channels = e->enc->ch_layout.nb_channels;
+    while (av_audio_fifo_size(e->fifo) >= e->chunk_size || (final && av_audio_fifo_size(e->fifo) > 0)) {
+        int n = FFMIN(av_audio_fifo_size(e->fifo), e->chunk_size);
+        int size = e->fixed_size ? e->chunk_size : n;
+        e->chunk->nb_samples = e->chunk_size;
+        if ((ret = av_frame_make_writable(e->chunk)) < 0)
+            return ret;
+        if (av_audio_fifo_read(e->fifo, (void **)e->chunk->extended_data, n) < n)
+            return AVERROR_BUG;
+        if (n < size)
+            av_samples_set_silence(e->chunk->extended_data, n, size - n, channels, e->enc->sample_fmt);
+        e->chunk->nb_samples = size;
+        e->chunk->pts = e->origin + e->emitted;
+        e->emitted += size;
+        ret = avcodec_send_frame(e->enc, e->chunk);
+        e->chunk->nb_samples = e->chunk_size;
+        if (ret < 0)
+            return encoder_fail(e, "encode", ret);
+        if ((ret = encoder_drain(e, oc)) < 0)
+            return ret;
+    }
+    if (final) {
+        if ((ret = avcodec_send_frame(e->enc, NULL)) < 0 && ret != AVERROR_EOF)
+            return encoder_fail(e, "encode", ret);
+        return encoder_drain(e, oc);
+    }
+    return 0;
+}
+
+/* [count] input samples through the resampler into the queue; NULL and 0 drain the resampler. */
+static int encoder_convert(AudioEncoder *e, const uint8_t **in, int count)
+{
+    for (;;) {
+        int capacity = swr_get_out_samples(e->swr, count);
+        if (capacity < 0)
+            return capacity;
+        if (capacity == 0)
+            return 0;
+        if (capacity > e->converted_capacity) {
+            av_frame_unref(e->converted);
+            e->converted->format = e->enc->sample_fmt;
+            e->converted->sample_rate = e->out_rate;
+            e->converted->nb_samples = capacity;
+            int ret = av_channel_layout_copy(&e->converted->ch_layout, &e->enc->ch_layout);
+            if (ret < 0 || (ret = av_frame_get_buffer(e->converted, 0)) < 0) {
+                e->converted_capacity = 0;
+                return ret;
+            }
+            e->converted_capacity = capacity;
+        }
+        int got = swr_convert(e->swr, e->converted->extended_data, capacity, in, count);
+        if (got < 0)
+            return encoder_fail(e, "resample", got);
+        if (got > 0 && av_audio_fifo_write(e->fifo, (void **)e->converted->extended_data, got) < got)
+            return AVERROR(ENOMEM);
+        /* a drain goes on until the resampler is empty; input is taken whole in one call */
+        if (in || got == 0)
+            return 0;
+    }
+}
+
+/* Where the next input sample falls, in 1/out_rate. */
+static int64_t encoder_expected(const AudioEncoder *e)
+{
+    return e->base + (e->in_rate > 0 ? av_rescale(e->fed, e->out_rate, e->in_rate) : 0);
+}
+
+/* The resampler for the decoded frames' format, again when it changes (the rest of the old one kept). */
+static int encoder_resampler(AudioEncoder *e, const AVFrame *f)
+{
+    AVChannelLayout layout = {0};
+    int ret;
+    if (f->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC)
+        av_channel_layout_default(&layout, f->ch_layout.nb_channels);
+    else if ((ret = av_channel_layout_copy(&layout, &f->ch_layout)) < 0)
+        return ret;
+    if (e->swr && e->in_format == f->format && e->in_rate == f->sample_rate && !av_channel_layout_compare(&e->in_layout, &layout)) {
+        av_channel_layout_uninit(&layout);
+        return 0;
+    }
+    if (e->swr) {
+        if ((ret = encoder_convert(e, NULL, 0)) < 0) {
+            av_channel_layout_uninit(&layout);
+            return ret;
+        }
+        swr_free(&e->swr);
+    }
+    if (e->in_rate && e->in_rate != f->sample_rate) {
+        e->base = encoder_expected(e);
+        e->fed = 0;
+    }
+    e->in_rate = f->sample_rate;
+    e->in_format = f->format;
+    av_channel_layout_uninit(&e->in_layout);
+    e->in_layout = layout;
+    ret = swr_alloc_set_opts2(&e->swr, &e->enc->ch_layout, e->enc->sample_fmt, e->out_rate, &e->in_layout, f->format,
+                              f->sample_rate, 0, NULL);
+    if (ret < 0)
+        return encoder_fail(e, "resampler", ret);
+    /* a downmix scaled so that no sum clips (integer output is scaled anyway); the LFE kept */
+    if (e->in_layout.nb_channels > e->enc->ch_layout.nb_channels)
+        av_opt_set_double(e->swr, "rematrix_maxval", 1.0, 0);
+    if (e->enc->sample_fmt == AV_SAMPLE_FMT_S16)
+        av_opt_set_int(e->swr, "dither_method", SWR_DITHER_TRIANGULAR, 0);
+    if ((ret = swr_init(e->swr)) < 0)
+        return encoder_fail(e, "resampler", ret);
+    return 0;
+}
+
+/* [count] input samples of silence (a gap in the source), in slices through the resampler. */
+static int encoder_silence(AudioEncoder *e, AVFormatContext *oc, int64_t count)
+{
+    const int slice = 4096;
+    int ret;
+    if (!e->silence->nb_samples || e->silence->format != e->in_format ||
+        av_channel_layout_compare(&e->silence->ch_layout, &e->in_layout)) {
+        av_frame_unref(e->silence);
+        e->silence->format = e->in_format;
+        e->silence->nb_samples = slice;
+        if ((ret = av_channel_layout_copy(&e->silence->ch_layout, &e->in_layout)) < 0 || (ret = av_frame_get_buffer(e->silence, 0)) < 0)
+            return ret;
+        av_samples_set_silence(e->silence->extended_data, 0, slice, e->in_layout.nb_channels, e->in_format);
+    }
+    while (count > 0) {
+        int n = count > slice ? slice : (int)count;
+        if ((ret = encoder_convert(e, (const uint8_t **)e->silence->extended_data, n)) < 0)
+            return ret;
+        e->fed += n;
+        count -= n;
+        if ((ret = encoder_pump(e, oc, 0)) < 0)
+            return ret;
+    }
+    return 0;
+}
+
+/* One decoded frame placed on the new stream's time line: a gap before it filled with silence, a
+ * frame that goes back in time (beyond 20 ms) dropped. */
+static int encoder_frame(AudioEncoder *e, AVFormatContext *oc, AVFrame *f)
+{
+    int64_t ts = f->pts != AV_NOPTS_VALUE ? f->pts : f->best_effort_timestamp;
+    int64_t at = ts == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : av_rescale_q(ts, e->dec->pkt_timebase, (AVRational){1, e->out_rate});
+    int ret;
+    if (e->origin == AV_NOPTS_VALUE) {
+        if (at == AV_NOPTS_VALUE)
+            at = e->src_first == AV_NOPTS_VALUE ? 0 : av_rescale_q(e->src_first, e->dec->pkt_timebase, (AVRational){1, e->out_rate});
+        e->origin = e->base = at;
+    }
+    if ((ret = encoder_resampler(e, f)) < 0)
+        return ret;
+    if (at != AV_NOPTS_VALUE) {
+        int64_t gap = at - encoder_expected(e), tolerance = e->out_rate / 50;
+        if (gap > (int64_t)REMUX_MAX_GAP_SECONDS * e->out_rate) {
+            snprintf(e->error, e->error_size, "the timestamps of %s jump by %.0f s", e->ss->ref, (double)gap / e->out_rate);
+            return AVERROR_INVALIDDATA;
+        }
+        if (gap > tolerance) {
+            e->padded += gap;
+            if ((ret = encoder_silence(e, oc, av_rescale(gap, e->in_rate, e->out_rate))) < 0)
+                return ret;
+        } else if (gap < -tolerance) {
+            e->ss->frames_dropped++;
+            return 0;
+        }
+    }
+    if ((ret = encoder_convert(e, (const uint8_t **)f->extended_data, f->nb_samples)) < 0)
+        return ret;
+    e->fed += f->nb_samples;
+    return encoder_pump(e, oc, 0);
+}
+
+static int encoder_receive(AudioEncoder *e, AVFormatContext *oc)
+{
+    for (int errors = 0;;) {
+        int ret = avcodec_receive_frame(e->dec, e->decoded);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            return 0;
+        if (ret == AVERROR(ENOMEM))
+            return ret;
+        if (ret < 0) {
+            e->ss->decode_errors++;
+            if (++errors > 100)
+                return encoder_fail(e, "decode", ret);
+            continue;
+        }
+        e->ss->frames_decoded++;
+        ret = encoder_frame(e, oc, e->decoded);
+        av_frame_unref(e->decoded);
+        if (ret < 0)
+            return ret;
+    }
+}
+
+/* A packet of the source stream, before the copy (if any) takes it. */
+static int encoder_packet(AudioEncoder *e, AVFormatContext *oc, const AVPacket *pkt)
+{
+    e->packets_in++;
+    if (pkt->pts != AV_NOPTS_VALUE) {
+        if (e->src_first == AV_NOPTS_VALUE || pkt->pts < e->src_first)
+            e->src_first = pkt->pts;
+        if (e->src_end == AV_NOPTS_VALUE || pkt->pts + pkt->duration > e->src_end)
+            e->src_end = pkt->pts + pkt->duration;
+    }
+    int ret = avcodec_send_packet(e->dec, pkt);
+    if (ret == AVERROR(ENOMEM))
+        return ret;
+    if (ret < 0) /* a damaged packet: its time becomes silence when the next frame comes */
+        e->ss->decode_errors++;
+    return encoder_receive(e, oc);
+}
+
+static void encoder_stats(AudioEncoder *e)
+{
+    RemuxStreamStats *ss = e->ss;
+    AVRational src_tb = e->dec ? e->dec->pkt_timebase : (AVRational){1, 1};
+    if (e->src_first != AV_NOPTS_VALUE)
+        ss->source_seconds = (e->src_end - e->src_first) * av_q2d(src_tb);
+    if (e->out_first != AV_NOPTS_VALUE && e->out_rate > 0) {
+        ss->seconds = (double)(e->out_end - e->out_first) / e->out_rate;
+        if (e->src_first != AV_NOPTS_VALUE)
+            ss->start_offset_seconds = (double)e->out_first / e->out_rate - e->src_first * av_q2d(src_tb);
+    }
+    if (e->out_rate > 0)
+        ss->padded_seconds = (double)e->padded / e->out_rate;
+}
+
+/* The end of the source: the decoder, the resampler and the encoder emptied; then the new
+ * stream checked against its source: not empty, decodable, as long. */
+static int encoder_finish(AudioEncoder *e, AVFormatContext *oc)
+{
+    int ret = avcodec_send_packet(e->dec, NULL);
+    if (ret < 0 && ret != AVERROR_EOF)
+        return encoder_fail(e, "decode", ret);
+    if ((ret = encoder_receive(e, oc)) < 0)
+        return ret;
+    if (e->swr && (ret = encoder_convert(e, NULL, 0)) < 0)
+        return ret;
+    if ((ret = encoder_pump(e, oc, 1)) < 0)
+        return ret;
+    encoder_stats(e);
+    RemuxStreamStats *ss = e->ss;
+    if (ss->packets == 0 || ss->frames_decoded == 0) {
+        snprintf(e->error, e->error_size, "no audio decoded from %s for its compatibility track", ss->ref);
+        return AVERROR_INVALIDDATA;
+    }
+    if (ss->decode_errors * 20 > e->packets_in) {
+        snprintf(e->error, e->error_size, "%lld of %lld packets of %s could not be decoded", (long long)ss->decode_errors,
+                 (long long)e->packets_in, ss->ref);
+        return AVERROR_INVALIDDATA;
+    }
+    if (e->src_first != AV_NOPTS_VALUE && fabs(ss->seconds - ss->source_seconds) > 0.5) {
+        snprintf(e->error, e->error_size, "the compatibility track of %s lasts %.2f s, the source %.2f s", ss->ref, ss->seconds,
+                 ss->source_seconds);
+        return AVERROR_INVALIDDATA;
+    }
+    return 0;
+}
+
 /* ---- the remux ---------------------------------------------------------------------------- */
 
 /* Whether /proc/self/fd resolves both descriptors to one path (false when it resolves neither). */
@@ -376,13 +993,6 @@ static int same_path(int a, int b)
         return 0;
     path_a[na] = path_b[nb] = 0;
     return path_a[0] == '/' && strcmp(path_a, path_b) == 0;
-}
-
-static void fail(char *error, size_t size, const char *what, int err)
-{
-    char msg[AV_ERROR_MAX_STRING_SIZE] = {0};
-    av_strerror(err, msg, sizeof(msg));
-    snprintf(error, size, "%s: %s", what, msg);
 }
 
 /* The progress callback honoured: 0 to go on, AVERROR_EXIT to stop; waits as long as it asks. */
@@ -451,7 +1061,8 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
     AVFormatContext *ic = NULL, *oc = NULL;
     AVIOContext *in_io = NULL, *out_io = NULL;
     AVPacket *pkt = av_packet_alloc(), *outpkt = av_packet_alloc();
-    int *map = NULL, video = -1, ret;
+    int *map = NULL, video = -1, ret, encode_default = 0;
+    AudioEncoder *encoders[REMUX_MAX_STREAMS] = {0};
     DvcBuf buf = {0};
     DvcStats dv = {0};
     DvcRewriter rewriter = {.stats = &dv};
@@ -530,6 +1141,12 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
             snprintf(s->error, sizeof(s->error), "no stream %s in the source", plan->streams[n].ref);
             goto end;
         }
+        if (plan->streams[n].encode) {
+            /* an added stream: the source may also be copied, and encoded more than once */
+            if (plan->streams[n].set_default == 1)
+                encode_default = 1;
+            continue;
+        }
         if (map[src] >= 0) {
             ret = AVERROR(EINVAL);
             snprintf(s->error, sizeof(s->error), "stream %s planned twice", plan->streams[n].ref);
@@ -589,11 +1206,38 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
             ret = AVERROR(ENOMEM);
             goto end;
         }
+        RemuxStreamStats *ss = &s->stream[s->streams++];
+        av_strlcpy(ss->ref, sp->ref, sizeof(ss->ref));
+        ss->source_index = src;
+        ss->output_index = ost->index;
+        if (sp->encode) {
+            /* S-1207: the compatibility track, flagged and named as the plan says; of the source's
+             * tags only the language (its statistics would be wrong) */
+            if ((ret = encoder_open(&encoders[n], oc, ist, ost, src, sp, ss, s->error, sizeof(s->error))) < 0) {
+                if (!s->error[0])
+                    fail(s->error, sizeof(s->error), "compatibility track", ret);
+                goto end;
+            }
+            ost->disposition = (ist->disposition & ~(AV_DISPOSITION_DEFAULT | AV_DISPOSITION_FORCED)) |
+                               (sp->set_default == 1 ? AV_DISPOSITION_DEFAULT : 0) | (sp->set_forced == 1 ? AV_DISPOSITION_FORCED : 0);
+            const AVDictionaryEntry *lang = av_dict_get(ist->metadata, "language", NULL, 0);
+            if (sp->set_language)
+                av_dict_set(&ost->metadata, "language", sp->language[0] ? sp->language : NULL, 0);
+            else if (lang)
+                av_dict_set(&ost->metadata, "language", lang->value, 0);
+            char title[64];
+            encoder_title(encoders[n], sp->encode, title, sizeof(title));
+            av_dict_set(&ost->metadata, "title", sp->set_title ? (sp->title[0] ? sp->title : NULL) : title, 0);
+            continue;
+        }
         if ((ret = avcodec_parameters_copy(ost->codecpar, ist->codecpar)) < 0)
             goto end;
         ost->codecpar->codec_tag = 0;
         ost->time_base = ist->time_base;
         ost->disposition = ist->disposition;
+        /* a compatibility track made default takes the flag from the audio the plan leaves as it was */
+        if (sp->set_default < 0 && encode_default && ist->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+            ost->disposition &= ~AV_DISPOSITION_DEFAULT;
         if (sp->set_default >= 0)
             ost->disposition = (ost->disposition & ~AV_DISPOSITION_DEFAULT) | (sp->set_default ? AV_DISPOSITION_DEFAULT : 0);
         if (sp->set_forced >= 0)
@@ -625,10 +1269,6 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
             for (size_t k = 0; k < sizeof(stale) / sizeof(stale[0]); k++)
                 av_dict_set(&ost->metadata, stale[k], NULL, 0);
         }
-        RemuxStreamStats *ss = &s->stream[s->streams++];
-        av_strlcpy(ss->ref, sp->ref, sizeof(ss->ref));
-        ss->source_index = src;
-        ss->output_index = ost->index;
         av_strlcpy(ss->codec, avcodec_get_name(ist->codecpar->codec_id), sizeof(ss->codec));
     }
     if (plan->attachments) {
@@ -712,6 +1352,15 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
             fail(s->error, sizeof(s->error), "read", ret);
             goto end;
         }
+        /* the compatibility tracks decode the packet before the copy takes it */
+        for (int n = 0; n < plan->count; n++) {
+            if (encoders[n] && encoders[n]->src == pkt->stream_index && (ret = encoder_packet(encoders[n], oc, pkt)) < 0) {
+                if (!s->error[0])
+                    fail(s->error, sizeof(s->error), "compatibility track", ret);
+                av_packet_unref(pkt);
+                goto end;
+            }
+        }
         int out_index = map[pkt->stream_index];
         if (out_index < 0) {
             av_packet_unref(pkt);
@@ -781,6 +1430,13 @@ int remux_run(int input_fd, int output_fd, const RemuxPlan *plan, volatile int *
         snprintf(s->error, sizeof(s->error), "cancelled");
         goto end;
     }
+    for (int n = 0; n < plan->count; n++) {
+        if (encoders[n] && (ret = encoder_finish(encoders[n], oc)) < 0) {
+            if (!s->error[0])
+                fail(s->error, sizeof(s->error), "compatibility track", ret);
+            goto end;
+        }
+    }
     if ((ret = av_write_trailer(oc)) < 0) {
         fail(s->error, sizeof(s->error), "write trailer", ret);
         goto end;
@@ -811,6 +1467,12 @@ end:
     s->dv_el_nals_dropped = dv.el_nals_dropped;
     s->dv_el_bytes_dropped = dv.el_bytes_dropped;
     av_strlcpy(s->dv_first_rpu_error, dv.first_rpu_error, sizeof(s->dv_first_rpu_error));
+    for (int n = 0; n < REMUX_MAX_STREAMS; n++) {
+        if (encoders[n]) {
+            encoder_stats(encoders[n]);
+            encoder_free(&encoders[n]);
+        }
+    }
     avformat_free_context(oc);
     avformat_close_input(&ic);
     fd_io_close(&in_io);
@@ -987,7 +1649,7 @@ static void json_string(char *dst, size_t cap, const char *src)
 
 char *remux_stats_json(const RemuxStats *s)
 {
-    size_t cap = 4096 + (size_t)s->streams * 256;
+    size_t cap = 4096 + (size_t)s->streams * 768;
     char *json = malloc(cap);
     if (!json)
         return NULL;
@@ -1001,8 +1663,22 @@ char *remux_stats_json(const RemuxStats *s)
         const RemuxStreamStats *ss = &s->stream[i];
         char codec[80];
         json_string(codec, sizeof(codec), ss->codec);
-        o += (size_t)snprintf(json + o, cap - o, "%s{\"ref\":\"%s\",\"source_index\":%d,\"output_index\":%d,\"codec\":\"%s\",\"packets\":%lld,\"bytes\":%lld}",
+        o += (size_t)snprintf(json + o, cap - o, "%s{\"ref\":\"%s\",\"source_index\":%d,\"output_index\":%d,\"codec\":\"%s\",\"packets\":%lld,\"bytes\":%lld",
                               i ? "," : "", ss->ref, ss->source_index, ss->output_index, codec, (long long)ss->packets, (long long)ss->bytes);
+        if (ss->encoded && o < cap) {
+            char source_codec[80], layout[160];
+            json_string(source_codec, sizeof(source_codec), ss->source_codec);
+            json_string(layout, sizeof(layout), ss->layout);
+            o += (size_t)snprintf(json + o, cap - o,
+                                  ",\"encoded\":{\"source_codec\":\"%s\",\"channels\":%d,\"layout\":\"%s\",\"sample_rate\":%d,"
+                                  "\"bit_rate\":%lld,\"frames_decoded\":%lld,\"decode_errors\":%lld,\"frames_dropped\":%lld,"
+                                  "\"padded_seconds\":%.3f,\"source_seconds\":%.3f,\"seconds\":%.3f,\"start_offset_seconds\":%.3f}",
+                                  source_codec, ss->channels, layout, ss->sample_rate, (long long)ss->bit_rate,
+                                  (long long)ss->frames_decoded, (long long)ss->decode_errors, (long long)ss->frames_dropped,
+                                  ss->padded_seconds, ss->source_seconds, ss->seconds, ss->start_offset_seconds);
+        }
+        if (o < cap)
+            o += (size_t)snprintf(json + o, cap - o, "}");
     }
     if (o < cap)
         snprintf(json + o, cap - o,

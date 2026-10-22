@@ -1,5 +1,6 @@
 // S-1206: the lossless remux engine (libavformat demux -> Matroska mux, packets copied untouched,
-// Dolby Vision profile 7 -> 8.1 on request); S-1209: its verification (video packet hashes).
+// Dolby Vision profile 7 -> 8.1 on request); S-1209: its verification (video packet hashes);
+// S-1207: compatibility tracks (an audio stream decoded and encoded into E-AC-3 or LPCM beside it).
 #ifndef NAGMEDAR_REMUX_H
 #define NAGMEDAR_REMUX_H
 
@@ -19,14 +20,40 @@ extern "C" {
  *   attachments<TAB>0|1            (default 1) attachments (fonts, covers) copied after the streams
  *   metadata<TAB>0|1               (default 1) the file's tags copied
  *   stream<TAB>v:0<TAB>default=1<TAB>forced=0<TAB>lang=tur<TAB>title=Yorum
+ *   encode<TAB>a:0<TAB>eac3<TAB>bitrate=640<TAB>channels=6<TAB>default=1<TAB>lang=tur<TAB>title=...
  *
  * Streams are written in the order of their lines. A stream is named by its type and its
  * ordinal in the source: v:N the N-th video stream (cover pictures not counted), a:N the N-th
  * audio, s:N the N-th subtitle, as the media probe (S-802) lists them. Each key after the
  * name is optional and overrides the source's: default and forced flags (0/1), the language
  * (ISO 639-2) and the title (empty clears it). Without a stream line nothing is written.
+ *
+ * An encode line (S-1207) adds a stream: the audio stream it names decoded and encoded again,
+ * written where the line stands (the planner puts it right after the copied original, which
+ * stays untouched). Its codec is one of
+ *   eac3        E-AC-3 at 48 kHz, at most 5.1 (7.1 is downmixed with the LFE kept; TrueHD and
+ *               DTS-HD give their own 5.1 presentation when they carry one)
+ *   ac3         AC-3, the same at most 640 kbps
+ *   lpcm        PCM in Matroska (A_PCM/INT/LIT), 24 bits unless the source has 16 or fewer,
+ *               the source's rate and up to 7.1
+ *   pcm_s16le, pcm_s24le   LPCM of that depth
+ * bitrate (kbps, E-AC-3 up to 1024 and AC-3 up to 640; default 640 for 5.1, 448 for 4, 256
+ * for stereo, 128 for mono) and channels (1 to 8: 2 for a stereo downmix, 6 for 5.1) are
+ * optional. Without default= the new stream is not default and without forced= not forced;
+ * default=1 also clears the default flag of every copied audio stream whose line does not set
+ * it. The language is the source's unless lang= says; the title "E-AC-3 5.1" unless title= says.
+ * Its timestamps start where the source's do; a gap in the source becomes silence.
  */
 #define REMUX_MAX_STREAMS 64
+
+enum RemuxEncode {
+    REMUX_ENCODE_NONE = 0,  /* a copy */
+    REMUX_ENCODE_EAC3,
+    REMUX_ENCODE_AC3,
+    REMUX_ENCODE_LPCM,      /* 16 or 24 bits, as the source */
+    REMUX_ENCODE_PCM_S16,
+    REMUX_ENCODE_PCM_S24,
+};
 
 typedef struct RemuxStreamPlan {
     char ref[8];
@@ -36,6 +63,9 @@ typedef struct RemuxStreamPlan {
     char language[16];
     int set_title;
     char title[256];
+    int encode;       /* RemuxEncode: NONE copies the stream, anything else adds one encoded from it */
+    int bitrate_kbps; /* 0: the codec's default for the channels */
+    int channels;     /* 0: as the source, as far as the codec carries them */
 } RemuxStreamPlan;
 
 typedef struct RemuxPlan {
@@ -68,6 +98,20 @@ typedef struct RemuxStreamStats {
     char codec[32];
     int64_t packets;
     int64_t bytes;
+    /* S-1207: an added stream, encoded from the source stream [ref] */
+    int encoded;
+    char source_codec[32];
+    int channels;
+    char layout[64];            /* "5.1(side)" */
+    int sample_rate;
+    int64_t bit_rate;
+    int64_t frames_decoded;
+    int64_t decode_errors;      /* packets the decoder refused (their time becomes silence) */
+    int64_t frames_dropped;     /* decoded frames that went back in time */
+    double padded_seconds;      /* silence put into the source's gaps */
+    double source_seconds;      /* from the source stream's first timestamp to its end */
+    double seconds;             /* the same of the new stream */
+    double start_offset_seconds; /* the new stream's first timestamp less the source's */
 } RemuxStreamStats;
 
 /**
@@ -128,7 +172,9 @@ typedef int (*remux_progress_fn)(void *opaque, double done_seconds, double total
  * Every packet is written as read: timestamps, durations, key frames, side data; the first
  * planned video stream is hashed on the way (see [RemuxStats]). With dv convert81 the HEVC
  * stream's RPUs are converted to profile 8.1 and its enhancement layer dropped (dvconvert.c),
- * and the hash covers the base layer only. [cancel] is polled between packets.
+ * and the hash covers the base layer only. An encode line adds a stream decoded from its source
+ * and encoded (S-1207); the run fails when that stream came out empty or more than half a
+ * second shorter or longer than its source. [cancel] is polled between packets.
  * Returns 0 on success, a negative AVERROR otherwise (stats->error says why); the source is
  * only read.
  */

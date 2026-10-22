@@ -4,9 +4,6 @@ import android.net.Uri
 import app.nagmedar.data.RemuxJobError
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.lab.DolbyVisionMode
-import app.nagmedar.lab.PlannedStream
-import app.nagmedar.lab.StreamRef
-import app.nagmedar.lab.StreamType
 import app.nagmedar.ui.convert.ConvertPolicy
 import app.nagmedar.ui.convert.DeviceState
 import app.nagmedar.ui.convert.Heat
@@ -109,16 +106,9 @@ class RemuxRunnerTest {
     }
 
     @Test
-    fun withoutTheNativeToolsOrACopyOnlyPlanTheJobFailsAtOnce() {
+    fun withoutTheNativeToolsTheJobFailsAtOnce() {
         val (runner, active) = RemuxRunner(FakeRemuxEngine(available = false), dao, { condition }) to { null }
         assertEquals(RemuxJobError.NO_TOOLS, runner.run(queued(1), active).error)
-        val encoded = samplePlan.copy(streams = samplePlan.streams + PlannedStream(StreamRef(StreamType.Audio, 0), "truehd", encode = "eac3"))
-        val id = dao.insert(sampleJob(id = 2, plan = encoded))
-        val (second, active2) = runner()
-        assertTrue(second.run(dao.get(id)!!, active2).error!!.startsWith(RemuxJobError.ENGINE))
-        assertTrue(engine.calls.isEmpty())
-        // a failed job leaves no output, not even the empty document
-        assertEquals(1, engine.removed.size)
     }
 
     @Test

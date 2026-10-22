@@ -1,7 +1,7 @@
 # libnagmedar_lab.so: the native part of Settings > Lab (SP-02, SP-03, SP-05), the media probe
 # behind the library's technical badges (S-802), the TV Lab's bitrate analysis (S-1202), its
-# disk test (S-1204) and its remux engine with the verification (S-1206, S-1209), and the
-# subtitles from a film's speech (S-709).
+# disk test (S-1204) and its remux engine with the verification (S-1206, S-1209) and the
+# compatibility tracks (S-1207), and the subtitles from a film's speech (S-709).
 # Built by buildsystem/nagmedar-native/build.sh android, which provides the static
 # dependencies in DEPS_PREFIX (FFmpeg, libdovi, whisper.cpp) and the libusb sources.
 cmake_minimum_required(VERSION 3.22)

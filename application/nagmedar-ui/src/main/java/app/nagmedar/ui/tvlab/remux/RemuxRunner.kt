@@ -133,7 +133,6 @@ class RemuxRunner(
         current = current.copy(ownsOutput = true)
         if (!engine.available) return finish(current, RemuxJobState.FAILED, RemuxJobError.NO_TOOLS)
         val plan = RemuxPlan.parse(job.plan) ?: return finish(current, RemuxJobState.FAILED, RemuxJobError.ENGINE + "bad plan")
-        if (!plan.copiesEverything) return finish(current, RemuxJobState.FAILED, RemuxJobError.ENGINE + "the engine copies streams only")
         val steering = Steering(current, RemuxJobState.RUNNING, interruption)
         val result = try {
             engine.remux(Uri.parse(job.inputUri), output, plan, steering::step)

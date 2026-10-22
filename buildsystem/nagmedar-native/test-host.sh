@@ -14,6 +14,9 @@
 #     its base layer identical; a corrupted or truncated output fails the verification; B-frame
 #     H.264 and AV1 go through; the source is refused as output; a file over 4 GB goes through
 #     (when the disk has room for it).
+#   - S-1207: compatibility tracks: TrueHD into E-AC-3 made default, DTS into LPCM, a 96 kHz 7.1
+#     FLAC downmixed into E-AC-3 5.1 and kept whole in LPCM (its very samples), each beside an
+#     original copied packet for packet, starting with it and lasting as long within a frame.
 set -euo pipefail
 trap 'echo "test-host.sh: line $LINENO failed: $BASH_COMMAND"' ERR
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -518,6 +521,82 @@ if problems:
     print('::error title=S-1206 formats::' + '; '.join(problems))
     sys.exit(1)
 print(f"ok: B-frame H.264 kept (dts derived, and assumed without a VUI), AV1 {'kept' if av1 else 'skipped (no encoder)'}, the source and a taken file refused as output")
+PY
+
+echo "== S-1207: compatibility tracks"
+# the TrueHD commentary with an E-AC-3 track after it, made default; the DTS with LPCM beside it;
+# a 96 kHz 7.1 FLAC downmixed into E-AC-3 5.1 and kept whole in LPCM; every original copied untouched
+ffmpeg -v error -y -f lavfi -i "sine=f=330:d=2:sample_rate=96000" \
+    -af "pan=7.1|c0=c0|c1=0.9*c0|c2=0.8*c0|c3=0.7*c0|c4=0.6*c0|c5=0.5*c0|c6=0.4*c0|c7=0.3*c0" -c:a flac "$T/flac71.mka"
+mkvmerge -q -o "$T/compat-src.mkv" "$T/sdr.mkv" --language 0:tur "$T/flac71.mka"
+printf 'stream\tv:0\nstream\ta:2\nencode\ta:2\teac3\tdefault=1\ttitle=Uyumluluk izi (E-AC-3 5.1)\nstream\ta:1\nencode\ta:1\tlpcm\nstream\ta:4\nencode\ta:4\teac3\nencode\ta:4\tlpcm\nstream\ta:0\n' > "$T/plan-compat.txt"
+"$PREFIX/bin/remux" run "$T/compat-src.mkv" "$T/compat.mkv" "$T/plan-compat.txt" > "$T/remux-compat.json" 2> "$T/remux-compat.log" || {
+    echo "::error title=S-1207 compatibility tracks::$( { cat "$T/remux-compat.json"; tail -c 1500 "$T/remux-compat.log"; } | annotate)"; exit 1; }
+echo "stats: $(cat "$T/remux-compat.json")"
+chash=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['video_hash'])" "$T/remux-compat.json")
+"$PREFIX/bin/remux" verify "$T/compat.mkv" nal_units "$chash" 50 > "$T/verify-compat.json" 2> /dev/null
+ffprobe -v error -print_format json -show_streams "$T/compat.mkv" > "$T/probe-compat.json"
+ffprobe -v error -print_format json -show_streams "$T/compat-src.mkv" > "$T/probe-compat-src.json"
+# the copied originals packet by packet, and every audio stream's packet times
+for pair in "2:1" "1:3" "4:5" "0:8"; do
+    ffmpeg -v error -y -i "$T/compat-src.mkv" -map "0:a:${pair%%:*}" -c copy -f framemd5 "$T/src-a${pair%%:*}.md5"
+    ffmpeg -v error -y -i "$T/compat.mkv" -map "0:${pair##*:}" -c copy -f framemd5 "$T/out-${pair##*:}.md5"
+done
+ffprobe -v error -print_format json -show_entries packet=stream_index,pts_time,duration_time "$T/compat-src.mkv" > "$T/pkt-compat-src.json"
+ffprobe -v error -print_format json -show_entries packet=stream_index,pts_time,duration_time "$T/compat.mkv" > "$T/pkt-compat.json"
+# the LPCM of the FLAC decodes to the FLAC's very samples; every new stream decodes without an error
+ffmpeg -v error -i "$T/compat-src.mkv" -map 0:a:4 -f md5 - > "$T/md5-flac.txt"
+ffmpeg -v error -i "$T/compat.mkv" -map 0:7 -f md5 - > "$T/md5-lpcm.txt"
+for i in 2 4 6 7; do
+    ffmpeg -v error -xerror -i "$T/compat.mkv" -map "0:$i" -f null - 2> "$T/decode-$i.log" || { echo "::error title=S-1207 decode::stream $i: $(annotate < "$T/decode-$i.log")"; exit 1; }
+done
+python3 - "$T" <<'PY'
+import json, sys
+t = sys.argv[1]
+problems = []
+def check(ok, what):
+    if not ok:
+        problems.append(what)
+def load(name):
+    return json.load(open(f'{t}/{name}'))
+stats = load('remux-compat.json')
+check(not stats['error'] and stats['video_packets'] == 50, f"stats {stats['error']}")
+check(load('verify-compat.json')['ok'], 'the video changed')
+streams = load('probe-compat.json')['streams']
+codecs = [s['codec_name'] for s in streams]
+check(codecs == ['h264', 'truehd', 'eac3', 'dts', 'pcm_s24le', 'flac', 'eac3', 'pcm_s16le', 'eac3'], f'order {codecs}')
+check([s['disposition']['default'] for s in streams[1:]] == [0, 1, 0, 0, 0, 0, 0, 0], f"default {[s['disposition']['default'] for s in streams[1:]]}")
+compat = streams[2]
+check(compat['channels'] == 6 and compat['sample_rate'] == '48000' and compat['tags'].get('title') == 'Uyumluluk izi (E-AC-3 5.1)'
+      and compat['tags'].get('language') == 'eng' and compat['disposition']['comment'] == 1, f'compat {compat}')
+check(streams[4]['channels'] == 6 and streams[4]['tags'].get('title') == 'LPCM 5.1', f'lpcm of dts {streams[4]}')
+check(streams[6]['channels'] == 6 and streams[6]['channel_layout'] == '5.1(side)' and streams[6]['sample_rate'] == '48000'
+      and streams[6]['tags'].get('title') == 'E-AC-3 5.1' and streams[6]['tags'].get('language') == 'tur', f'downmix {streams[6]}')
+check(streams[7]['channels'] == 8 and streams[7]['sample_rate'] == '96000', f'lpcm 7.1 {streams[7]}')
+# the originals byte for byte, with their timestamps
+for src, out in ((2, 1), (1, 3), (4, 5), (0, 8)):
+    a = [l.split(',')[2:] for l in open(f'{t}/src-a{src}.md5') if not l.startswith('#')]
+    b = [l.split(',')[2:] for l in open(f'{t}/out-{out}.md5') if not l.startswith('#')]
+    check(a and a == b, f'a:{src} not copied untouched ({len(a)} vs {len(b)} packets)')
+check(open(f'{t}/md5-flac.txt').read() == open(f'{t}/md5-lpcm.txt').read(), 'the LPCM of the FLAC is not its samples')
+# each new stream starts with its source and lasts as long, within one frame
+def span(packets, index):
+    p = [x for x in packets if x['stream_index'] == index]
+    first = min(float(x['pts_time']) for x in p)
+    return first, max(float(x['pts_time']) + float(x.get('duration_time', 0)) for x in p) - first
+src_packets = load('pkt-compat-src.json')['packets']
+out_packets = load('pkt-compat.json')['packets']
+audio = [s['index'] for s in load('probe-compat-src.json')['streams'] if s['codec_type'] == 'audio']
+for out, source in ((2, 2), (4, 1), (6, 4), (7, 4)):
+    (s0, sd), (o0, od) = span(src_packets, audio[source]), span(out_packets, out)
+    # one frame of E-AC-3 (1536 samples at 48 kHz), and of the engine's LPCM blocks: 32 ms
+    check(abs(o0 - s0) <= 0.006 and abs(od - sd) <= 0.034, f'stream {out}: starts {o0} lasts {od}, its source a:{source} {s0} {sd}')
+encoded = [s for s in stats['streams'] if 'encoded' in s]
+check(len(encoded) == 4 and all(e['packets'] > 0 and e['encoded']['decode_errors'] == 0 for e in encoded), f'encoded {encoded}')
+if problems:
+    print('::error title=S-1207 compatibility tracks::' + '; '.join(problems))
+    sys.exit(1)
+print(f"ok: {len(encoded)} compatibility tracks beside their originals, copied untouched; the LPCM of the FLAC is its samples")
 PY
 
 echo "== S-1206: a file over 4 GB"
