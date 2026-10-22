@@ -8,14 +8,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.videolan.vlc.mediadb.models.Widget
-import org.videolan.vlc.widget.utils.WidgetType
-import org.videolan.vlc.widget.utils.WidgetUtils
 
 /**
  * S-1009: the covers the playback service shows outside the app (notification, Android Auto,
- * widgets) are the app's kept ones, found by album; and the widget's layout for a phone's and a
- * tablet's sizes.
+ * widgets) are the app's kept ones, found by album.
  */
 @RunWith(AndroidJUnit4::class)
 class CoverObserverTest {
@@ -43,21 +39,5 @@ class CoverObserverTest {
     @Test
     fun withoutTheServiceNothingIsTold() {
         assertNull(CoverObserver().coverFor(track.key))
-    }
-
-    private fun widget(width: Int, height: Int, type: Int = 0) =
-        Widget(1, width, height, 0, type, false, 0, 0, 10, 10, 100, true, true, true)
-
-    @Test
-    fun theWidgetsLayoutForPhonesAndTablets() {
-        // a phone: 4×1, 2×2, a narrow 2×1
-        assertEquals(WidgetType.MINI, WidgetUtils.getWidgetType(widget(320, 96)))
-        assertEquals(WidgetType.MICRO, WidgetUtils.getWidgetType(widget(170, 180)))
-        assertEquals(WidgetType.PILL, WidgetUtils.getWidgetType(widget(150, 60)))
-        // a tablet: 5×2 and 3×3
-        assertEquals(WidgetType.MACRO, WidgetUtils.getWidgetType(widget(560, 260)))
-        assertEquals(WidgetType.MACRO, WidgetUtils.getWidgetType(widget(330, 330)))
-        // the kind chosen in its settings, whatever the size
-        assertEquals(WidgetType.PILL, WidgetUtils.getWidgetType(widget(560, 260, type = 1)))
     }
 }

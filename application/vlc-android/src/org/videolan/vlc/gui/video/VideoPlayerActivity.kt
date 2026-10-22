@@ -880,7 +880,6 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
                         paramBuilder.setAspectRatio(Rational(width, height))
                     // Nağmedar (S-609): back, play or pause, forward in the small window
                     paramBuilder.setActions(chrome?.pictureInPictureActions(service?.isPlaying == true) ?: listOf())
-                    service?.updateWidgetState()
                     enterPictureInPictureMode(paramBuilder.build())
                 } catch (e: IllegalArgumentException) { // Fallback with default parameters
                     Log.w(TAG, e.message, e)

@@ -97,6 +97,19 @@
             android:name="app.nagmedar.ui.tvlab.remux.RemuxCancelReceiver"
             android:exported="false" />
 
+        <!-- Classic UI: Nağmedar's home screen widget, in place of VLC's three -->
+        <receiver
+            android:name="app.nagmedar.ui.widget.PlayerWidget"
+            android:exported="false"
+            android:label="@string/nag_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/nagmedar_widget_info" />
+        </receiver>
+
         <!-- S-307: the video player is a window of its own, beside the library's: a task of its own.
              Started again from any window it is the same player (singleTask), so one session plays. -->
         <activity

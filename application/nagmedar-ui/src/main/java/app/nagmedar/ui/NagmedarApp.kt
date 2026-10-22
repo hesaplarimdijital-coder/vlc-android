@@ -152,6 +152,7 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
+import app.nagmedar.ui.widget.PlayerWidgetMigration
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -296,6 +297,8 @@ private fun NagmedarMain(
         navigator.navigate(Destination.Search)
         ShellRequests.search = null
     }
+    // VLC's widgets are gone: once, a word on Nağmedar's
+    LaunchedEffect(Unit) { PlayerWidgetMigration.noticeIfNeeded(context) }
     // a new drive's notice and notification ask for the library's folders
     LaunchedEffect(ShellRequests.librarySources) {
         if (!ShellRequests.librarySources) return@LaunchedEffect

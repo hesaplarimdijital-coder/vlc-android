@@ -23,9 +23,7 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -46,7 +44,6 @@ import org.videolan.mobile.app.delegates.IIndexersDelegate
 import org.videolan.mobile.app.delegates.IMediaContentDelegate
 import org.videolan.mobile.app.delegates.IndexersDelegate
 import org.videolan.mobile.app.delegates.MediaContentDelegate
-import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.util.startRemoteAccess
@@ -64,7 +61,6 @@ import org.videolan.vlc.util.FontCache
 import org.videolan.vlc.util.NetworkConnectionManager
 import org.videolan.vlc.util.NewStorageHook
 import org.videolan.vlc.util.VersionMigration
-import org.videolan.vlc.widget.MiniPlayerAppWidgetProvider
 import java.io.File
 import java.io.IOException
 
@@ -164,9 +160,6 @@ class AppSetupDelegate : AppDelegate,
             // Scan the system fonts now, so that the first playback doesn't have to
             if (isMainProcess()) FontCache.prepare(this@backgroundInit)
         }
-        if (!AndroidDevices.isAndroidTv) sendBroadcast(Intent(MiniPlayerAppWidgetProvider.ACTION_WIDGET_INIT).apply {
-            component = ComponentName(appContextProvider.appContext, MiniPlayerAppWidgetProvider::class.java)
-        })
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             NetworkConnectionManager.start(AppContextProvider.appContext)
         }

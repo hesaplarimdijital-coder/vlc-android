@@ -202,6 +202,8 @@ Sözlüğü testler denetler:
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |
 | stereoya indirmek | mix down | | | Çok kanallı sesi (5.1, 7.1) ITU-R BS.775'in matrisiyle iki kanala karıştırmak; LFE katılmaz, taşmayacak biçimde küçültülür: “Stereoya indir”. Dönüştürücüde MP3 her zaman stereodur |
+| widget | widget | pencere öğesi, araç takımı | | Ana ekrandaki Nağmedar oynatıcısı (4×1, büyütülünce kapaklı 4×2); Türkçede de “widget”: “Nağmedar'ın widget'ı” |
+| kısa haber | notice | | toast, snackbar | Pencerenin altında birkaç saniye görünen söz: “Kopyalandı”, “Sıraya eklendi”, “Oynatma hazırlanıyor…”. Android'in bildirim çekmecesindekine “bildirim” denir |
 
 ## Özel adlar
 

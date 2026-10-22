@@ -1046,19 +1046,6 @@
             android:theme="@style/VLCTransparentTheme"
             android:label="" />
 
-        <activity
-                android:name=".widget.MiniPlayerConfigureActivity"
-                android:exported="true"
-                android:theme="@style/WidgetConfiguration"
-                android:launchMode="singleTop"
-                android:noHistory="true"
-                android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <service
                 android:name=".PlaybackService"
                 android:exported="true"
@@ -1071,55 +1058,6 @@
         <service
                 android:name=".MediaParsingService"
                 android:foregroundServiceType="dataSync" />
-        <receiver
-            android:name=".widget.VLCAppWidgetProviderWhite"
-            android:exported="false"
-            android:label="@string/widget_name_w">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="${applicationId}.widget.INIT"/>
-                <action android:name="${applicationId}.widget.UPDATE"/>
-                <action android:name="${applicationId}.widget.UPDATE_COVER"/>
-                <action android:name="${applicationId}.widget.UPDATE_POSITION"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_provider_w"/>
-        </receiver>
-        <receiver
-            android:name=".widget.VLCAppWidgetProviderBlack"
-            android:exported="false"
-            android:label="@string/widget_name_b">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="${applicationId}.widget.INIT"/>
-                <action android:name="${applicationId}.widget.UPDATE"/>
-                <action android:name="${applicationId}.widget.UPDATE_COVER"/>
-                <action android:name="${applicationId}.widget.UPDATE_POSITION"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_provider_b"/>
-        </receiver>
-
-        <receiver
-                android:name=".widget.MiniPlayerAppWidgetProvider"
-                android:exported="true"
-                android:label="@string/widget_name_mini_player">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="${applicationId}.widget.mini.INIT"/>
-                <action android:name="${applicationId}.widget.mini.UPDATE"/>
-                <action android:name="${applicationId}.widget.mini.UPDATE_COVER"/>
-                <action android:name="${applicationId}.widget.mini.UPDATE_POSITION"/>
-            </intent-filter>
-
-            <meta-data
-                    android:name="android.appwidget.provider"
-                    android:resource="@xml/widget_provider_mini"/>
-        </receiver>
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">

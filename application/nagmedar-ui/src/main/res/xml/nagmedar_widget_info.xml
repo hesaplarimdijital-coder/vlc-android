@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Classic UI: the one home screen widget, 4×1 (a row) and 4×2 (with the cover) as it is resized -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nag_widget_description"
+    android:initialKeyguardLayout="@layout/nagmedar_widget_bar"
+    android:initialLayout="@layout/nagmedar_widget_bar"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="40dp"
+    android:previewLayout="@layout/nagmedar_widget_cover"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen|keyguard" />

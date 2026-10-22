@@ -3468,4 +3468,12 @@
         <item quantity="one">%d soru yanıt bekliyor. Nağmedar\'da yanıtlamak için dokunun.</item>
         <item quantity="other">%d soru yanıt bekliyor. Nağmedar\'da yanıtlamak için dokunun.</item>
     </plurals>
+    <!-- Classic UI: the home screen widget -->
+    <string name="nag_widget_label">Nağmedar oynatıcısı</string>
+    <string name="nag_widget_description">Çalan, önceki, oynat ya da duraklat ve sonraki düğmeleriyle; büyütülünce kapağıyla.</string>
+    <string name="nag_widget_idle">Şu an hiçbir şey çalmıyor</string>
+    <string name="nag_widget_playing">Çalıyor</string>
+    <string name="nag_widget_paused">Duraklatıldı</string>
+    <string name="nag_widget_replaced">Nağmedar\'ın widget\'ı VLC\'ninkilerin yerini aldı. Ana ekranınızdaki kalktıysa Nağmedar\'ınkini yeniden ekleyin.</string>
+    <string name="nag_widget_add">Ana ekrana ekle</string>
 </resources>

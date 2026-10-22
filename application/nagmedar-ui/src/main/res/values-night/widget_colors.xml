@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Classic UI: the home screen widget's colours, the new interface's tokens (dark theme) -->
+<resources>
+    <color name="nagmedar_widget_surface">#F2171B20</color>
+    <color name="nagmedar_widget_border">#FF2A3038</color>
+    <color name="nagmedar_widget_text">#FFE6E9ED</color>
+    <color name="nagmedar_widget_text_secondary">#FFC3CAD3</color>
+    <color name="nagmedar_widget_accent">#FF8AB0FF</color>
+    <color name="nagmedar_widget_on_accent">#FF0E1420</color>
+    <color name="nagmedar_widget_cover">#FF262C34</color>
+</resources>

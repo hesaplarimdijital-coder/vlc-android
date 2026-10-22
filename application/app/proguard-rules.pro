@@ -136,6 +136,9 @@
 # Nağmedar (S-1104): the playback service finds the podcast episodes' observer by name
 -keep class app.nagmedar.ui.podcast.PodcastPlaybackObserver { <init>(); }
 
+# Nağmedar: the playback service finds the home screen widget's observer by name
+-keep class app.nagmedar.ui.widget.PlayerWidgetObserver { <init>(); }
+
 # Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }

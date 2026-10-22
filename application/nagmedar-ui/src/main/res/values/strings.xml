@@ -3497,4 +3497,12 @@
         <item quantity="one">%d question waits for an answer. Tap to answer it in Nağmedar.</item>
         <item quantity="other">%d questions wait for an answer. Tap to answer them in Nağmedar.</item>
     </plurals>
+    <!-- Classic UI: the home screen widget -->
+    <string name="nag_widget_label">Nağmedar player</string>
+    <string name="nag_widget_description">What plays, with previous, play or pause and next; taller, with its cover.</string>
+    <string name="nag_widget_idle">Nothing is playing</string>
+    <string name="nag_widget_playing">Playing</string>
+    <string name="nag_widget_paused">Paused</string>
+    <string name="nag_widget_replaced">Nağmedar\'s widget has taken the place of VLC\'s. If yours left the home screen, add Nağmedar\'s again.</string>
+    <string name="nag_widget_add">Add to home screen</string>
 </resources>
