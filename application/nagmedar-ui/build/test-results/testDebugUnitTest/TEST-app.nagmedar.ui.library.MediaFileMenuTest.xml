@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.MediaFileMenuTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:34:58.329Z" hostname="runnervm8k3b6" time="0.415">
+  <properties/>
+  <testcase name="anAlbumsMenuHasThemToo" classname="app.nagmedar.ui.library.MediaFileMenuTest" time="0.189"/>
+  <testcase name="aStreamHasNeither" classname="app.nagmedar.ui.library.MediaFileMenuTest" time="0.101"/>
+  <testcase name="aFilmsMenuSharesItAndShowsItInItsFolder" classname="app.nagmedar.ui.library.MediaFileMenuTest" time="0.125"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

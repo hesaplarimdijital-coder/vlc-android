@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:58.793Z" hostname="runnervm8k3b6" time="1.029">
+  <properties/>
+  <testcase name="nativeTablet" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.121"/>
+  <testcase name="dexEnglish" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.163"/>
+  <testcase name="nativeDex" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.187"/>
+  <testcase name="halfWindow" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.124"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.129"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.098"/>
+  <testcase name="thisBuildsPlayer" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.105"/>
+  <testcase name="nativePhone" classname="app.nagmedar.ui.screenshots.PlayerEffectsScreenshotTest" time="0.101"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

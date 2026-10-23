@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.TrackNamesTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:36.803Z" hostname="runnervm8k3b6" time="0.002">
+  <properties/>
+  <testcase name="aTitleWithoutAnArtistTakesTheStationInFront" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="aTrackWithoutATitleIsNamedByTheTime" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="aLongNameIsCutToTheByteLimitWithoutBreakingALetter" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.001"/>
+  <testcase name="spacesAreTidiedAndATrailingDotOrASpaceIsDropped" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="reservedDeviceNamesAreNotUsedAsTheyAre" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="theStationsFolderIsNamedLikeAFile" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="aTrackIsArtistDashTitle" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="charactersFileSystemsRefuseAreReplacedOrDropped" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="aNameTakenGetsANumberBeforeTheExtensionAndCaseDoesNotMatter" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.0"/>
+  <testcase name="turkishLettersAndEmojiStayAndAreComposed" classname="app.nagmedar.ui.radio.record.TrackNamesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

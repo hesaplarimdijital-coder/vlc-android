@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.effects.EffectsModelTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:14.063Z" hostname="runnervm8k3b6" time="0.241">
+  <properties/>
+  <testcase name="gainIsInDecibels" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.022"/>
+  <testcase name="aNewFilmGetsTheEffectsEqualiserBackOverThePlayersOwn" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.019"/>
+  <testcase name="theSameFilmGoingOnPlayingKeepsWhatWasChanged" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.021"/>
+  <testcase name="theColumnsReadBackWhatTheyWereGiven" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.027"/>
+  <testcase name="theEngineAppliesWhatChangedOnly" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.024"/>
+  <testcase name="quarterTurnsGoRound" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.021"/>
+  <testcase name="unknownOrBrokenValuesReadAsTheFilmsOwn" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.018"/>
+  <testcase name="thePlayersEqualizerWindowIsHeardByAFilmThatFollowsIt" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.026"/>
+  <testcase name="whatTheNativeSideLacksWaits" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.02"/>
+  <testcase name="whatLibVlcTakesAsItStartsIsLeftWhenThePlayerGoes" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.022"/>
+  <testcase name="aFilmRemembersItsEffectsWhenAskedAndTheDefaultsServeTheRest" classname="app.nagmedar.ui.player.effects.EffectsModelTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

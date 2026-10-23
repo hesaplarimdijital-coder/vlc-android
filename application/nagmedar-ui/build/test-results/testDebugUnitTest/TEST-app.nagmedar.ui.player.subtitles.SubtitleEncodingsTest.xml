@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:19.418Z" hostname="runnervm8k3b6" time="0.142">
+  <properties/>
+  <testcase name="aSubtitleKeptElsewhereCountsToo" classname="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" time="0.051"/>
+  <testcase name="theFilmsChoiceComesFirst" classname="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" time="0.028"/>
+  <testcase name="unicodeAndNoSubtitlesLeaveVlcsOwn" classname="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" time="0.025"/>
+  <testcase name="aTurkishSrtBesideTheFilmTellsVlcItsCharacterSet" classname="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" time="0.018"/>
+  <testcase name="aFileInAnotherCharacterSetIsReadIntoUtf8Once" classname="app.nagmedar.ui.player.subtitles.SubtitleEncodingsTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

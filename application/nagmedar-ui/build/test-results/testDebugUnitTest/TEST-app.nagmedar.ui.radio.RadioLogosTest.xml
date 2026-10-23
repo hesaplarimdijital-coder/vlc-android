@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioLogosTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:31.763Z" hostname="runnervm8k3b6" time="0.01">
+  <properties/>
+  <testcase name="aNetworkFailureDoesNotUndoARefusal" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.001"/>
+  <testcase name="aNetworkFailureIsForgottenAfterAWhile" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.0"/>
+  <testcase name="anEndlessBodyIsNotReadBeyondTheBound" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.009"/>
+  <testcase name="aBodyOneByteOverTheBoundIsRefused" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.0"/>
+  <testcase name="aRefusalIsForGood" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.0"/>
+  <testcase name="aSmallBodyIsReadWhole" classname="app.nagmedar.ui.radio.RadioLogosTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

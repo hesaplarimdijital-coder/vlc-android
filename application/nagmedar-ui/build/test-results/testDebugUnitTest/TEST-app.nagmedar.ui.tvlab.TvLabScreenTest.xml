@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.TvLabScreenTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:36:31.282Z" hostname="runnervm8k3b6" time="0.757">
+  <properties/>
+  <testcase name="theTargetIsChosenFromItsMenu" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.055"/>
+  <testcase name="aFilmStillBeingReadHasNoRemuxYet" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.073"/>
+  <testcase name="theResults" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.052"/>
+  <testcase name="anUnreadableFile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.04"/>
+  <testcase name="theReportSaysItAll" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.033"/>
+  <testcase name="onTheTabletTheSameFilmHasOneWarning" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.041"/>
+  <testcase name="aStoppedReadingStartsAgain" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.044"/>
+  <testcase name="theEmptyPageAsksForAFile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.039"/>
+  <testcase name="theRemuxQueue" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.057"/>
+  <testcase name="everyFindingHasItsWordsInEnglishToo" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.035"/>
+  <testcase name="aFilmThatNeedsReencodingHasNoRemux" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.04"/>
+  <testcase name="theEditorBuildsTheProfile" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.071"/>
+  <testcase name="theChartIsExported" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.062"/>
+  <testcase name="aBuildWithoutTheToolsSaysSo" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.039"/>
+  <testcase name="whileItRuns" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.043"/>
+  <testcase name="theEditorsChoices" classname="app.nagmedar.ui.tvlab.TvLabScreenTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastDirectoriesTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:27.892Z" hostname="runnervm8k3b6" time="0.253">
+  <properties/>
+  <testcase name="aThinAnswerIsFilledFromITunesWithoutDoubles" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.019"/>
+  <testcase name="podcastIndexByFeedUrl" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.018"/>
+  <testcase name="itunesFailingAfterPodcastIndexAnsweredCostsOnlyTheExtras" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.019"/>
+  <testcase name="podcastIndexSearch" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.018"/>
+  <testcase name="noDirectoryAnsweringIsAFailure" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.019"/>
+  <testcase name="podcastIndexFailingFallsBackToITunes" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.03"/>
+  <testcase name="podcastIndexFirstAndEnoughOfIt" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.018"/>
+  <testcase name="podcastIndexAnswersWithNothingOrNonsense" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.018"/>
+  <testcase name="theAuthorizationIsTheSha1OfKeySecretAndTime" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.019"/>
+  <testcase name="withoutKeysITunesAnswersAndTheSearchSaysSo" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.017"/>
+  <testcase name="itunesSearch" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.017"/>
+  <testcase name="podcastIndexFindingNothingAsksITunes" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.02"/>
+  <testcase name="sha1OfTheKnownString" classname="app.nagmedar.ui.podcast.PodcastDirectoriesTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

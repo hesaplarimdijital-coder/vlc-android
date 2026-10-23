@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.ShortcutBindingsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:34:57.385Z" hostname="runnervm8k3b6" time="0.209">
+  <properties/>
+  <testcase name="thePresetsHaveNoConflicts" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.024"/>
+  <testcase name="theUsersKeysAreTheTables" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.05"/>
+  <testcase name="theSystemsAndTheWindowsKeysAreKept" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.028"/>
+  <testcase name="overridesKeepTheirTextForm" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.028"/>
+  <testcase name="chordsAreReadLeniently" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.025"/>
+  <testcase name="theTableGoesOutAndComesBackAsAFile" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.027"/>
+  <testcase name="everyChordReadsBackFromItsText" classname="app.nagmedar.ui.input.ShortcutBindingsTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

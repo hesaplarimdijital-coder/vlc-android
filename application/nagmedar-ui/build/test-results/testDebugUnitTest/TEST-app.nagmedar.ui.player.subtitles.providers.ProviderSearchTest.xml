@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:21.903Z" hostname="runnervm8k3b6" time="0.164">
+  <properties/>
+  <testcase name="theFilesMatchesFirstThenLanguagesThenDownloadsThenRating" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.0"/>
+  <testcase name="aFailedProviderIsReportedAndTheOthersStay" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.002"/>
+  <testcase name="theOrderOfTheProvidersDecidesTheRest" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.001"/>
+  <testcase name="theFilesOwnMatchWinsTheMergeAndKeepsItsMark" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.0"/>
+  <testcase name="differentLanguagesOrReleasesAreNotDoubles" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.0"/>
+  <testcase name="aProviderThatCannotBeAskedIsNotAskedButIsReported" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.001"/>
+  <testcase name="oneProvidersOwnResultsAreNeverMerged" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.0"/>
+  <testcase name="theProvidersAreAskedAtTheSameTime" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.007"/>
+  <testcase name="failuresAreToldByKind" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.0"/>
+  <testcase name="whenAllFailTheFirstProblemIsTheSearchs" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.001"/>
+  <testcase name="aSlowProviderTimesOutAndTheOthersStay" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.151"/>
+  <testcase name="theSameFileFromTwoProvidersIsOneResult" classname="app.nagmedar.ui.player.subtitles.providers.ProviderSearchTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

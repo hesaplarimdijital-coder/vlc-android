@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.PlayerSheetsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:35:13.313Z" hostname="runnervm8k3b6" time="0.208">
+  <properties/>
+  <testcase name="openedByAFingerDownGoesToItsFirstItem" classname="app.nagmedar.ui.player.PlayerSheetsTest" time="0.074"/>
+  <testcase name="escapeClosesIt" classname="app.nagmedar.ui.player.PlayerSheetsTest" time="0.069"/>
+  <testcase name="openedByAKeyItsFirstItemHasTheKeyboard" classname="app.nagmedar.ui.player.PlayerSheetsTest" time="0.065"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
