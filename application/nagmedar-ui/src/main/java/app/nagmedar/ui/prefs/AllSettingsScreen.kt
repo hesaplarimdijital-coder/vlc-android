@@ -95,8 +95,9 @@ fun AllSettingsScreen(
         values.attach()
         onDispose { values.detach() }
     }
-    val pages by produceState<Map<String, PrefPage>?>(null, context) {
-        value = withContext(Dispatchers.Default) { PreferenceCatalog.load(context.resources) }
+    // read once in a language: opened again, the pages are there in the first frame
+    val pages by produceState(PreferenceCatalog.loaded(context.resources), context) {
+        if (value == null) value = withContext(Dispatchers.Default) { PreferenceCatalog.read(context.resources) }
     }
     val loaded = pages
     if (loaded == null) {

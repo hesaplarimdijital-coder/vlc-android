@@ -113,6 +113,21 @@ object PreferenceCatalog {
         "safe_mode",
     )
 
+    /** The pages last read, and the configuration (the language) they were read in. */
+    @Volatile
+    private var lastRead: Pair<String, Map<String, PrefPage>>? = null
+
+    /**
+     * The pages read before in [res]'s configuration, or null: "Tüm ayarlar" opened again shows them in its first
+     * frame instead of a loading state. A change of language reads them again.
+     */
+    fun loaded(res: Resources): Map<String, PrefPage>? = lastRead?.takeIf { it.first == languages(res) }?.second
+
+    /** [load], kept for [loaded]. */
+    fun read(res: Resources): Map<String, PrefPage> = load(res).also { lastRead = languages(res) to it }
+
+    private fun languages(res: Resources): String = ConfigurationCompat.getLocales(res.configuration).toLanguageTags()
+
     /**
      * Every page, read from the APK; the video and audio pages lead to their controls' pages, as the
      * player's panels did. A page that cannot be read is left out (the first page then is empty).

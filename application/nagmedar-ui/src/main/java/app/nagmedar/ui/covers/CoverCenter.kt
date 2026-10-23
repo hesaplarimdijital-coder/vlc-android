@@ -70,8 +70,14 @@ object CoverCenter {
     /** [track]'s cover decoded for [px] pixels; null when there is none. Reads files and the network. */
     suspend fun image(context: Context, track: CoverTrack, px: Int): ImageBitmap? {
         if (!active) return null
-        return withContext(Dispatchers.IO) { finder(context).find(track)?.let { CoverImages.load(it, px) } }
+        return withContext(Dispatchers.IO) { finder(context).find(track)?.let { CoverImages.load(it, px, shownAs = "${track.key}:$px") } }
     }
+
+    /**
+     * [track]'s cover for [px] pixels when it was shown a moment ago and is still decoded in memory; null otherwise.
+     * Read on the main thread, so a screen that comes back has its covers in its first frame.
+     */
+    fun shown(track: CoverTrack, px: Int): ImageBitmap? = if (active) CoverImages.shown("${track.key}:$px") else null
 
     private fun build(context: Context): CoverFinder = CoverFinder(
         store = CoverStore { File(context.filesDir, "covers") },
@@ -87,9 +93,16 @@ object CoverImages {
         override fun sizeOf(key: String, value: ImageBitmap): Int = value.width * value.height * 4
     }
 
-    /** [cover] decoded no smaller than [px] on its shorter side where it is that large; null when it does not decode. */
-    fun load(cover: Cover, px: Int): ImageBitmap? {
+    /** Which decoded image a view last showed for its name ([load]'s `shownAs`): the key into [cache]. */
+    private val shownKeys = LruCache<String, String>(MAX_SHOWN)
+
+    /**
+     * [cover] decoded no smaller than [px] on its shorter side where it is that large; null when it does not decode.
+     * [shownAs] names what a view shows it for (a track's album, a podcast), so [shown] finds it again at once.
+     */
+    fun load(cover: Cover, px: Int, shownAs: String? = null): ImageBitmap? {
         val key = "${cover.file.path}:${cover.version}:$px"
+        if (shownAs != null) shownKeys.put(shownAs, key)
         cache.get(key)?.let { return it }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(cover.file.path, bounds)
@@ -99,6 +112,9 @@ object CoverImages {
         return bitmap.asImageBitmap().also { cache.put(key, it) }
     }
 
+    /** What [load] last gave for [shownAs], when it is still in memory; nothing is read from the disk. */
+    fun shown(shownAs: String): ImageBitmap? = shownKeys.get(shownAs)?.let { cache.get(it) }
+
     /** The largest power of two that keeps the shorter side at [px] or more. */
     internal fun sampleSize(width: Int, height: Int, px: Int): Int {
         var sample = 1
@@ -107,6 +123,7 @@ object CoverImages {
     }
 
     private const val MAX_BYTES = 32 * 1024 * 1024
+    private const val MAX_SHOWN = 2048
 }
 
 /**
@@ -213,7 +230,8 @@ internal fun InputStream.readAtMost(limit: Int): ByteArray? {
 fun rememberCover(track: CoverTrack?, px: Int): ImageBitmap? {
     val context = LocalContext.current
     val changes by CoverCenter.changes.collectAsState()
-    val image by produceState<ImageBitmap?>(null, track, px, changes) {
+    // shown a moment ago: there at once, and read again behind it
+    val image by produceState(track?.let { CoverCenter.shown(it, px) }, track, px, changes) {
         value = track?.let { runCatching { CoverCenter.image(context, it, px) }.getOrNull() }
     }
     return image

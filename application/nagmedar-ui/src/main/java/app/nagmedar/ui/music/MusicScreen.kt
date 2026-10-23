@@ -84,6 +84,7 @@ import app.nagmedar.ui.library.MediaSharing
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
+import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.library.rememberScanState
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
@@ -103,6 +104,7 @@ import org.videolan.vlc.media.MediaUtils
 import org.videolan.tools.Notices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /**
  * S-803: where the music library is: the way in (tracks, artists, albums, genres, composers,
@@ -272,8 +274,13 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
     val library = remember(media, tech, locale) {
-        // S-808: a CUE sheet's track has its file's technical side
-        media?.let { list -> MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale) }
+        // S-808: a CUE sheet's track has its file's technical side; made again only for new tracks or a new probe,
+        // not in the first frame of a screen that comes back
+        media?.let { list ->
+            repository.lastRead.derived("music", Triple(list, tech, locale)) {
+                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale)
+            }
+        }
     }
     val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
     // S-808: the ratings and counts
@@ -331,7 +338,7 @@ fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<Med
     val context = LocalContext.current
     val access = LocalLibraryAccess.current
     // the music of the section's folders (Settings › Library)
-    val media by produceState<List<MediaWrapper>?>(null, scanning, access?.media, access?.folders, access?.scopes) {
+    val media by rememberRead<List<MediaWrapper>>(repository.lastRead, "music", scanning, access?.media, access?.folders, access?.scopes) {
         loadWhileScanning(scanning) { repository.tracks(LibrarySection.Music) }
     }
     LaunchedEffect(media) {
@@ -452,6 +459,98 @@ internal class ServiceMusicActions(
 // ------------------------------------------------------------------ the browser
 
 /**
+ * The groups the browser shows. Made at once when nothing is on screen yet or the view or the
+ * filter changed, so what was asked for shows; when only the library changed (the engine's probe
+ * added to it, a scan found more) the new grouping is made off the main thread while the last one
+ * stays, so the probe of a large library does not stall the window again and again.
+ */
+@Composable
+private fun rememberGroups(library: MusicLibrary, view: MusicView, filter: TechFilter): List<MusicGroup> {
+    val held = remember { HeldGroups() }
+    library.madeGroups(view, filter)?.let { return held.keep(view, filter, it) }
+    val last = held.groups
+    if (last == null || held.view != view || held.filter != filter) return held.keep(view, filter, library.groups(view, filter))
+    val made by produceState<List<MusicGroup>?>(null, library, view, filter) {
+        value = withContext(Dispatchers.Default) { library.groups(view, filter) }
+    }
+    return made?.let { held.keep(view, filter, it) } ?: last
+}
+
+/**
+ * A table's order: which group of which view under which filter (a group keeps its key when the filter takes tracks
+ * out of it, and "" is both the Tracks view's one group and another view's group without a name), how, in which
+ * language, with which statistics (compared as the same map).
+ */
+private class OrderKey(
+    val view: MusicView,
+    val filter: TechFilter,
+    val group: String,
+    val sort: MusicSort?,
+    val locale: Locale,
+    val stats: Map<String, TrackStats>,
+) {
+    override fun equals(other: Any?): Boolean =
+        other is OrderKey && other.view == view && other.filter == filter && other.group == group && other.sort == sort &&
+            other.locale == locale && other.stats === stats
+
+    override fun hashCode(): Int =
+        ((((view.hashCode() * 31 + filter.hashCode()) * 31 + group.hashCode()) * 31 + sort.hashCode()) * 31 + locale.hashCode()) * 31 +
+            System.identityHashCode(stats)
+}
+
+/**
+ * The open group's tracks in the table's order, as [rememberGroups] makes the groups: at once when nothing is on
+ * screen yet or another group or order was asked for, off the main thread when only the library changed.
+ */
+@Composable
+private fun rememberOrdered(
+    library: MusicLibrary,
+    view: MusicView,
+    filter: TechFilter,
+    open: MusicGroup?,
+    sort: MusicSort?,
+    locale: Locale,
+    stats: Map<String, TrackStats>,
+): List<Track> {
+    if (open == null) return emptyList()
+    val key = OrderKey(view, filter, open.key, sort, locale, stats)
+    val held = remember { HeldOrder() }
+    library.madeOrder(key)?.let { return held.keep(key, it) }
+    val last = held.tracks
+    if (last == null || held.key != key) return held.keep(key, library.ordered(key) { sortTracks(open.tracks, sort, locale, stats) })
+    val made by produceState<List<Track>?>(null, library, key) {
+        value = withContext(Dispatchers.Default) { library.ordered(key) { sortTracks(open.tracks, sort, locale, stats) } }
+    }
+    return made?.let { held.keep(key, it) } ?: last
+}
+
+/** The order on screen and what it is of; plain, as [HeldGroups]. */
+private class HeldOrder {
+    var key: OrderKey? = null
+    var tracks: List<Track>? = null
+
+    fun keep(key: OrderKey, tracks: List<Track>): List<Track> {
+        this.key = key
+        this.tracks = tracks
+        return tracks
+    }
+}
+
+/** The grouping on screen and what it is of; plain, so keeping it never recomposes anything. */
+private class HeldGroups {
+    var view: MusicView? = null
+    var filter: TechFilter? = null
+    var groups: List<MusicGroup>? = null
+
+    fun keep(view: MusicView, filter: TechFilter, groups: List<MusicGroup>): List<MusicGroup> {
+        this.view = view
+        this.filter = filter
+        this.groups = groups
+        return groups
+    }
+}
+
+/**
  * S-803 and S-1001: the music library below its header. The toolbar on top (the ways in, Play,
  * Shuffle, the columns and the filter); then, by the window's width: a phone shows the groups, then the tracks of the
  * one opened (Back returns); a tablet the groups beside the tracks; a desktop window the groups,
@@ -470,7 +569,7 @@ fun MusicBrowser(
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
-    val groups = remember(library, state.view, state.filter) { library.groups(state.view, state.filter) }
+    val groups = rememberGroups(library, state.view, state.filter)
     val grouped = state.view != MusicView.Tracks
     val wide = width >= WidthClass.Expanded
     // a wide window always shows a group; a narrow one shows the list until one is opened
@@ -480,7 +579,7 @@ fun MusicBrowser(
     val locale = LocalContext.current.resources.locale()
     val sort = effectiveSort(state)
     val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
-    val shown = remember(open, sort, locale, sortStats) { open?.let { sortTracks(it.tracks, sort, locale, sortStats) }.orEmpty() }
+    val shown = rememberOrdered(library, state.view, state.filter, open, sort, locale, sortStats)
     // a player's artist or album link: its group, wherever the library was
     val context = LocalContext.current
     val link = MusicLinks.pending
@@ -589,11 +688,12 @@ private fun groupLine(group: MusicGroup, view: MusicView): String {
 private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, actions: MusicActions, openKey: String?, modifier: Modifier) {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
+    val reduced = NagTheme.motion.reduced
     LaunchedEffect(state.reveal, groups) {
         val key = state.reveal ?: return@LaunchedEffect
         val index = groups.indexOfFirst { it.key == key }
         if (index >= 0) {
-            listState.animateScrollToItem(index)
+            if (reduced) listState.scrollToItem(index) else listState.animateScrollToItem(index)
             state.reveal = null
         }
     }

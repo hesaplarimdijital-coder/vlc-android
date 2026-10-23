@@ -2,6 +2,7 @@ package app.nagmedar.ui.playback
 
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -106,11 +107,15 @@ fun Artwork(
     val px = with(LocalDensity.current) { size.roundToPx() }
     // S-1006: a track's album cover (its tags', its folder's, Cover Art Archive's, or one chosen); else the medialibrary's
     val changes by CoverCenter.changes.collectAsState()
-    val bitmap by produceState<ImageBitmap?>(null, media?.id, media?.artworkMrl, px, changes) {
+    // shown a moment ago: there at once (a screen that comes back has its pictures in its first frame), and read again behind it
+    val shown = media?.let { item ->
+        (if (item.type == MediaWrapper.TYPE_AUDIO) CoverTrack.of(item)?.let { CoverCenter.shown(it, px) } else null) ?: ShownArtwork.get(item, px)
+    }
+    val bitmap by produceState(shown, media?.id, media?.artworkMrl, px, changes) {
         value = media?.let { item ->
             val track = if (item.type == MediaWrapper.TYPE_AUDIO) CoverTrack.of(item) else null
             track?.let { runCatching { CoverCenter.image(context, it, px) }.getOrNull() }
-                ?: ThumbnailsProvider.obtainBitmap(item, px)?.asImageBitmap()
+                ?: ThumbnailsProvider.obtainBitmap(item, px)?.asImageBitmap()?.also { ShownArtwork.put(item, px, it) }
         }
     }
     val shape = RoundedCornerShape(corner)
@@ -136,6 +141,23 @@ fun Artwork(
             )
         }
     }
+}
+
+/** The medialibrary's thumbnails last shown, by media and size, while there is room (a few megabytes). */
+private object ShownArtwork {
+    private val cache = object : LruCache<String, ImageBitmap>(MAX_BYTES) {
+        override fun sizeOf(key: String, value: ImageBitmap): Int = value.width * value.height * 4
+    }
+
+    private fun key(media: MediaWrapper, px: Int) = "${media.id}|${media.uri}|${media.artworkMrl}|$px"
+
+    fun get(media: MediaWrapper, px: Int): ImageBitmap? = cache.get(key(media, px))
+
+    fun put(media: MediaWrapper, px: Int, image: ImageBitmap) {
+        cache.put(key(media, px), image)
+    }
+
+    private const val MAX_BYTES = 12 * 1024 * 1024
 }
 
 /** What the player bars show (S-304): from the playback service, or made up in tests and previews. */
@@ -584,6 +606,7 @@ private fun FormatChip(text: String) {
         style = NagTheme.type.mono,
         color = colors.textSecondary,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .border(1.dp, colors.borderStrong, RoundedCornerShape(NagTheme.dimens.radiusSmall))
             .padding(horizontal = 8.dp, vertical = 3.dp),

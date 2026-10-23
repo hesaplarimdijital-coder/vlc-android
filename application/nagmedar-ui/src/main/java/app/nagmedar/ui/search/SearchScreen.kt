@@ -32,7 +32,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -78,6 +77,7 @@ import app.nagmedar.ui.library.buildVideoLibrary
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.library.rememberTech
 import app.nagmedar.ui.library.techSummary
 import app.nagmedar.ui.playback.Artwork
@@ -195,7 +195,7 @@ enum class SearchScope { All, Films, Episodes, Music, Subtitles }
 @Composable
 fun SearchScreen(repository: MediaRepository, query: String, onQueryChange: (String) -> Unit) {
     val context = LocalContext.current
-    val data by produceState<SearchData?>(null) {
+    val data by rememberRead<SearchData>(repository.lastRead, "search") {
         val videos = repository.videoItems()
         val tracks = repository.tracks().map { it.toTrackItem() }
         value = SearchData(videos, tracks)
@@ -406,7 +406,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, focus: F
         Icon(NagIcons.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
         Spacer(Modifier.width(10.dp))
         Box(Modifier.weight(1f)) {
-            if (query.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1)
+            if (query.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
@@ -473,6 +473,7 @@ private fun VideoHit(item: VideoItem, title: String, tech: MediaTech?, query: Se
                 style = NagTheme.type.labelSmall,
                 color = colors.textTertiary,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

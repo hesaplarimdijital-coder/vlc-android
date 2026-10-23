@@ -75,6 +75,9 @@ object FilmImages {
         }
     }
 
+    /** [path] at [size] for [px] pixels when it is decoded in memory already; null otherwise. Nothing is read. */
+    fun shown(path: String, size: FilmImageSize, px: Int): ImageBitmap? = fileName(path, size)?.let { memory.get("$it:$px") }
+
     /** What the images take on the disk, in bytes. */
     suspend fun diskBytes(context: Context): Long = withContext(Dispatchers.IO) {
         folder(context).listFiles()?.sumOf { it.length() } ?: 0L
@@ -157,7 +160,8 @@ object FilmImages {
 @Composable
 fun FilmImage(path: String?, size: FilmImageSize, px: Int, modifier: Modifier = Modifier, fallback: @Composable () -> Unit) {
     val context = LocalContext.current
-    val image by produceState<ImageBitmap?>(null, path, size, px) {
+    // decoded a moment ago: there at once, so a screen that comes back has its posters in its first frame
+    val image by produceState(if (path == null || !FilmInfoCenter.active) null else FilmImages.shown(path, size, px), path, size, px) {
         value = if (path == null || !FilmInfoCenter.active) null else runCatching { FilmImages.load(context, path, size, px) }.getOrNull()
     }
     Box(modifier) {

@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -87,7 +86,7 @@ fun VideosScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     val context = LocalContext.current
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
-    val clips by produceState<List<VideoClip>?>(null, scan.active, access?.media, access?.folders, access?.scopes) {
+    val clips by rememberRead<List<VideoClip>>(repository.lastRead, "videos", scan.active, access?.media, access?.folders, access?.scopes) {
         loadWhileScanning(scan.active) { repository.clips() }
     }
     val pointer = NagTheme.inputMode == InputMode.Pointer

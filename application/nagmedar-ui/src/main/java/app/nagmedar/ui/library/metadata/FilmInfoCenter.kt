@@ -11,14 +11,18 @@ import app.nagmedar.data.FilmKind
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.ui.BuildConfig as UiBuildConfig
 import app.nagmedar.ui.podcast.OkHttpFeedSource
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -188,10 +192,28 @@ object FilmInfoCenter {
 
     private fun dao(context: Context): FilmInfoDao = NagmedarDatabase.get(context).filmInfo()
 
-    /** Every film and series found, by [FilmQuery.key]. */
-    fun all(context: Context): Flow<Map<String, FilmInfo>> = dao(context).observeAll()
-        .map { rows -> rows.mapNotNull(FilmInfo::of).associateBy { it.queryKey } }
-        .flowOn(Dispatchers.Default)
+    /** [all] and the table it follows; another database (a test's) gets its own. */
+    @Volatile
+    private var shared: Pair<FilmInfoDao, StateFlow<Map<String, FilmInfo>>>? = null
+
+    /**
+     * Every film and series found, by [FilmQuery.key]: read once for every screen that shows them and kept, so a
+     * screen that comes back starts with what was read last instead of an empty map, and is told when it changes.
+     */
+    fun all(context: Context): StateFlow<Map<String, FilmInfo>> {
+        val dao = dao(context)
+        shared?.let { (table, flow) -> if (table === dao) return flow }
+        return synchronized(this) {
+            shared?.takeIf { it.first === dao }?.second ?: dao.observeAll()
+                .map { rows -> rows.mapNotNull(FilmInfo::of).associateBy { it.queryKey } }
+                .flowOn(Dispatchers.Default)
+                .stateIn(CoroutineScope(SupervisorJob() + Dispatchers.Default), SharingStarted.WhileSubscribed(KEPT_FOLLOWING_MS), emptyMap())
+                .also { shared = dao to it }
+        }
+    }
+
+    /** How long [all] goes on following the table once no screen shows it. */
+    private const val KEPT_FOLLOWING_MS = 60_000L
 
     /** A series' episodes as TMDB names them, by season and episode. */
     fun episodes(context: Context, showId: Long): Flow<Map<Pair<Int, Int>, EpisodeMeta>> = dao(context).observeEpisodes(showId)

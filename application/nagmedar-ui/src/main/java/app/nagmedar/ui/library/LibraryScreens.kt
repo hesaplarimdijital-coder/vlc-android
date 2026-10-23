@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -197,7 +196,7 @@ fun HomeScreen(repository: MediaRepository, onAddFolder: () -> Unit, onBrowse: (
     val scan = rememberScanState()
     val access = LocalLibraryAccess.current
     // what continues is everything; whether the library is empty follows the sections' folders
-    val home by produceState<HomeContent?>(null, scan.active, access?.media, access?.folders, access?.scopes) {
+    val home by rememberRead<HomeContent>(repository.lastRead, "home", scan.active, access?.media, access?.folders, access?.scopes) {
         loadWhileScanning(scan.active) {
             HomeContent(repository.recentVideos(), repository.recentAudio(), repository.libraryEmpty())
         }

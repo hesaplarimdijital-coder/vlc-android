@@ -18,6 +18,9 @@ import java.io.File
  */
 class MediaRepository(private val context: Context) {
 
+    /** What the screens last read from here, shown again at once when they come back (see [ScreenMemory]). */
+    val lastRead = ScreenMemory()
+
     suspend fun videos(): List<MediaWrapper> = context.getFromMl {
         getVideos(Medialibrary.SORT_ALPHA, false, Settings.includeMissing, false)?.toList().orEmpty()
     } + picked(MediaWrapper.TYPE_VIDEO)

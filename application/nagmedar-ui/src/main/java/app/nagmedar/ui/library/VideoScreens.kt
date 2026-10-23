@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -135,10 +134,10 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     // a film marked watched or unwatched is read again
     val marks by WatchMarks.changes.collectAsState()
     // the films of the section's folders (Settings › Library)
-    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders, access?.scopes, marks) {
+    val items by rememberRead<List<VideoItem>>(repository.lastRead, "movies", scan.active, access?.media, access?.folders, access?.scopes, marks) {
         loadWhileScanning(scan.active) { repository.videoItems(LibrarySection.Movies) }
     }
-    val library = remember(items) { items?.let { buildVideoLibrary(it, moviesOnly = true) } }
+    val library = remember(items) { items?.let { repository.lastRead.derived("movies", it) { list -> buildVideoLibrary(list, moviesOnly = true) } } }
     val tech by rememberTech(items)
     val queries = remember(library) { library?.movies?.mapNotNull { it.filmQuery() } }
     val info by rememberFilmInfo(queries)
@@ -513,10 +512,11 @@ fun SeriesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
     // an episode marked watched or unwatched is read again
     val marks by WatchMarks.changes.collectAsState()
     // the episodes of the section's folders (Settings › Library)
-    val items by produceState<List<VideoItem>?>(null, scan.active, access?.media, access?.folders, access?.scopes, marks) {
+    val items by rememberRead<List<VideoItem>>(repository.lastRead, "series", scan.active, access?.media, access?.folders, access?.scopes, marks) {
         loadWhileScanning(scan.active) { repository.videoItems(LibrarySection.Series) }
     }
-    val library = remember(items) { items?.let(::buildVideoLibrary) }
+    // the episodes' names are parsed once for a list: not again in the first frame of a screen that comes back
+    val library = remember(items) { items?.let { repository.lastRead.derived("series", it, ::buildVideoLibrary) } }
     val tech by rememberTech(items)
     val shows = library?.shows
     val queries = remember(shows) { shows?.map { it.filmQuery() } }
@@ -869,12 +869,14 @@ private fun ShowCard(show: Show, info: FilmInfo?, onClick: () -> Unit) {
             style = NagTheme.type.labelSmall,
             color = colors.textTertiary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Text(
             if (next != null) stringResource(R.string.nag_next_episode, next.code) else stringResource(R.string.nag_all_watched),
             style = NagTheme.type.labelSmall,
             color = colors.textSecondary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -1116,6 +1118,7 @@ private fun EpisodeRow(
                 style = NagTheme.type.labelSmall,
                 color = if (selected) colors.onSelection else colors.textTertiary,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             if (wide) {
                 meta?.overview?.let {
@@ -1138,6 +1141,7 @@ private fun NextTag() {
         style = NagTheme.type.caption,
         color = colors.accentText,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .border(1.dp, colors.accent, RoundedCornerShape(4.dp))
             .padding(horizontal = 6.dp, vertical = 1.dp),

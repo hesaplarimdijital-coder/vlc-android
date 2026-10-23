@@ -106,12 +106,13 @@ data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBa
  * folders' alike: artists by album artist, albums by artist and name, genres, composers, years
  * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem").
  */
-class MusicLibrary(val tracks: List<Track>, locale: Locale = Locale.getDefault()) {
+class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault()) {
 
-    private val collator: Collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
+    /** The reader's collator; one for each grouping or sort, as a collator is not for two threads at once. */
+    private fun collator(): Collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
 
     /** Titles in the reader's order; the untitled group last. */
-    private val byTitle = Comparator<MusicGroup> { a, b ->
+    private fun byTitle(collator: Collator) = Comparator<MusicGroup> { a, b ->
         when {
             a.title == null && b.title == null -> 0
             a.title == null -> 1
@@ -120,35 +121,75 @@ class MusicLibrary(val tracks: List<Track>, locale: Locale = Locale.getDefault()
         }
     }
 
+    /** The groupings made so far, by view and filter: made once for a library, by whichever thread asks first. */
+    private val made = HashMap<Pair<MusicView, TechFilter>, List<MusicGroup>>()
+
+    /** The tables' orders made so far (see [ordered]). */
+    private val orders = HashMap<Any, List<Track>>()
+
+    /**
+     * A table's order of this library's tracks, [compute]d once for [key] (the view, the filter, the group, the sort, the locale): a
+     * screen that comes back to the same library does not sort it again. Safe from any thread.
+     */
+    fun ordered(key: Any, compute: () -> List<Track>): List<Track> {
+        madeOrder(key)?.let { return it }
+        val order = compute()
+        return synchronized(this) {
+            orders[key] ?: order.also {
+                if (orders.size >= MAX_ORDERS) orders.clear()
+                orders[key] = it
+            }
+        }
+    }
+
+    /** The order made for [key] already, or null. */
+    fun madeOrder(key: Any): List<Track>? = synchronized(this) { orders[key] }
+
+    /** The grouping of [view] and [filter] when it has been made already; null when [groups] would make it now. */
+    fun madeGroups(view: MusicView, filter: TechFilter = TechFilter()): List<MusicGroup>? = synchronized(this) { made[view to filter] }
+
+    /**
+     * The groups of [view] with [filter], sorted with the reader's collator: a hundred milliseconds or so for a large
+     * library the first time, then kept. Safe from any thread; nothing is held while they are made.
+     */
     fun groups(view: MusicView, filter: TechFilter = TechFilter()): List<MusicGroup> {
+        madeGroups(view, filter)?.let { return it }
+        val grouping = group(view, filter, collator())
+        return synchronized(this) { made.getOrPut(view to filter) { grouping } }
+    }
+
+    private fun group(view: MusicView, filter: TechFilter, collator: Collator): List<MusicGroup> {
         val shown = if (filter.active) tracks.filter(filter::matches) else tracks
+        val byTitle = byTitle(collator)
         return when (view) {
-            MusicView.Tracks -> listOf(MusicGroup("", null, null, null, sortTracks(shown)))
-            MusicView.Artists -> group(shown, { it.filedArtist?.let { artistKey(it) } }, { it.filedArtist }).sortedWith(byTitle)
+            MusicView.Tracks -> listOf(MusicGroup("", null, null, null, sortedTracks(shown, collator)))
+            MusicView.Artists -> group(shown, collator, { it.filedArtist?.let { artistKey(it) } }, { it.filedArtist }).sortedWith(byTitle)
             MusicView.Albums -> shown.groupBy { albumKey(it.filedArtist, it.album) }
                 .map { (key, list) ->
                     val first = list.first()
-                    MusicGroup(key, first.album?.takeIf { it.isNotBlank() }, first.filedArtist, list.mapNotNull { it.year }.maxOrNull(), sortTracks(list))
+                    MusicGroup(key, first.album?.takeIf { it.isNotBlank() }, first.filedArtist, list.mapNotNull { it.year }.maxOrNull(), sortedTracks(list, collator))
                 }
                 .sortedWith(compareBy<MusicGroup, String?>(nullsLast(collator)) { it.artist }.then(compareBy(nullsLast()) { it.year }).then(byTitle))
-            MusicView.Genres -> group(shown, { it.genre?.takeIf(String::isNotBlank)?.let { fold(it) } }, { it.genre }).sortedWith(byTitle)
-            MusicView.Composers -> group(shown, { it.composer?.let { fold(it) } }, { it.composer }).sortedWith(byTitle)
+            MusicView.Genres -> group(shown, collator, { it.genre?.takeIf(String::isNotBlank)?.let { fold(it) } }, { it.genre }).sortedWith(byTitle)
+            MusicView.Composers -> group(shown, collator, { it.composer?.let { fold(it) } }, { it.composer }).sortedWith(byTitle)
             MusicView.Years -> shown.groupBy { it.year?.takeIf { y -> y > 0 } }
-                .map { (year, list) -> MusicGroup("year:${year ?: ""}", year?.toString(), null, year, sortTracks(list)) }
+                .map { (year, list) -> MusicGroup("year:${year ?: ""}", year?.toString(), null, year, sortedTracks(list, collator)) }
                 .sortedWith(compareByDescending<MusicGroup> { it.year ?: Int.MIN_VALUE })
-            MusicView.Folders -> group(shown, { it.folder.takeIf(String::isNotEmpty) }, { it.folder.takeIf(String::isNotEmpty) }).sortedWith(byTitle)
+            MusicView.Folders -> group(shown, collator, { it.folder.takeIf(String::isNotEmpty) }, { it.folder.takeIf(String::isNotEmpty) }).sortedWith(byTitle)
         }
     }
 
     /** Groups by [key] (case and accents folded), titled by the most common spelling of [title]. */
-    private fun group(tracks: List<Track>, key: (Track) -> String?, title: (Track) -> String?): List<MusicGroup> =
+    private fun group(tracks: List<Track>, collator: Collator, key: (Track) -> String?, title: (Track) -> String?): List<MusicGroup> =
         tracks.groupBy(key).map { (k, list) ->
             val spelling = list.mapNotNull(title).groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
-            MusicGroup("${k ?: ""}", if (k == null) null else spelling, null, null, sortTracks(list))
+            MusicGroup("${k ?: ""}", if (k == null) null else spelling, null, null, sortedTracks(list, collator))
         }
 
     /** Album, disc and track number, then title: as an album plays. */
-    fun sortTracks(list: List<Track>): List<Track> = list.sortedWith(
+    fun sortTracks(list: List<Track>): List<Track> = sortedTracks(list, collator())
+
+    private fun sortedTracks(list: List<Track>, collator: Collator): List<Track> = list.sortedWith(
         compareBy<Track, String?>(nullsLast(collator)) { it.album }
             .thenBy { it.discNumber }
             .thenBy { it.trackNumber }
@@ -156,6 +197,9 @@ class MusicLibrary(val tracks: List<Track>, locale: Locale = Locale.getDefault()
     )
 
     companion object {
+        /** The orders kept per library: the groups a session opens. */
+        private const val MAX_ORDERS = 24
+
         /** The key of the artists' group of [filedArtist] (an album artist, else the track's): case and spaces folded. */
         fun artistKey(filedArtist: String): String = fold(filedArtist)
 

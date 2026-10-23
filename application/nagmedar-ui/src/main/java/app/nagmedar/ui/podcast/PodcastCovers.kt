@@ -97,8 +97,13 @@ object PodcastCovers {
     /** The cover at [url] decoded for [px] pixels; null when there is none, or in tests and previews (nothing asks the network there). */
     suspend fun image(context: Context, url: String, px: Int): ImageBitmap? {
         if (!CoverCenter.active) return null
-        return withContext(Dispatchers.IO) { finder(context).find(url)?.let { CoverImages.load(it, px) } }
+        return withContext(Dispatchers.IO) { finder(context).find(url)?.let { CoverImages.load(it, px, shownAs = shownName(url, px)) } }
     }
+
+    /** The cover at [url] for [px] pixels when it was shown a moment ago and is still in memory; null otherwise. */
+    fun shown(url: String, px: Int): ImageBitmap? = if (CoverCenter.active) CoverImages.shown(shownName(url, px)) else null
+
+    private fun shownName(url: String, px: Int) = "podcast:$url:$px"
 
     private const val MAX_BYTES = 12 * 1024 * 1024
 }
@@ -107,7 +112,8 @@ object PodcastCovers {
 @Composable
 fun rememberPodcastCover(url: String?, px: Int): ImageBitmap? {
     val context = LocalContext.current
-    val image by produceState<ImageBitmap?>(null, url, px) {
+    // shown a moment ago: there at once, and read again behind it
+    val image by produceState(url?.let { PodcastCovers.shown(it, px) }, url, px) {
         value = url?.let { runCatching { PodcastCovers.image(context, it, px) }.getOrNull() }
     }
     return image

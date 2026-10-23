@@ -1,5 +1,6 @@
 package app.nagmedar.ui.library.metadata
 
+import android.util.LruCache
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -70,6 +71,7 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.durationWords
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.text.NumberFormat
@@ -78,8 +80,21 @@ import java.util.Locale
 // ---------------------------------------------------------------- what is looked up
 
 /** The film [item] is, from its file name (or its title when the name says nothing); null when nothing names it. */
-fun VideoItem.filmQuery(): FilmQuery? =
-    (FilmNameParser.parse(path.ifEmpty { title }) ?: FilmNameParser.parseName(title))?.let(FilmQuery::movie)
+fun VideoItem.filmQuery(): FilmQuery? {
+    val name = path.ifEmpty { title }
+    // a file's name is read once: a screen that comes back does not parse its films again in its first frame
+    val key = name + "\u0000" + title
+    ParsedNames.get(key)?.let { return it as? FilmQuery }
+    val query = (FilmNameParser.parse(name) ?: FilmNameParser.parseName(title))?.let(FilmQuery::movie)
+    ParsedNames.put(key, query ?: NotAFilm)
+    return query
+}
+
+/** What the names of the library's files read as, by name: a few thousand. */
+private object ParsedNames : LruCache<String, Any>(4096)
+
+/** A name that reads as no film, as [ParsedNames] keeps it. */
+private val NotAFilm = Any()
 
 /**
  * The film information key ([FilmQuery.key]) of each of [items], by the item's key: the names are read once for the
@@ -102,8 +117,8 @@ fun rememberFilmInfo(queries: List<FilmQuery>?): State<Map<String, FilmInfo>> {
     LaunchedEffect(queries, settings) {
         if (queries != null) runCatching { FilmInfoCenter.request(context, queries) }
     }
-    val flow = remember(context) { runCatching { FilmInfoCenter.all(context) }.getOrNull() ?: flowOf(emptyMap()) }
-    return flow.collectAsState(initial = emptyMap())
+    val flow = remember(context) { runCatching { FilmInfoCenter.all(context) }.getOrNull() ?: MutableStateFlow(emptyMap()) }
+    return flow.collectAsState()
 }
 
 /** A series' episodes as TMDB names them; empty until found. */
@@ -177,8 +192,9 @@ fun PosterCard(
     val shape = RoundedCornerShape(dimens.radiusCard)
     val posterShape = RoundedCornerShape(dimens.radiusControl)
     val lifted = state.hovered || state.focused
-    val scale by animateFloatAsState(if (lifted && !state.pressed) 1.03f else 1f, label = "poster-lift")
-    val elevation by animateDpAsState(if (lifted) 10.dp else 0.dp, label = "poster-shadow")
+    val motion = NagTheme.motion
+    val scale by animateFloatAsState(if (lifted && !state.pressed) 1.03f else 1f, motion.fastSpatial(), label = "poster-lift")
+    val elevation by animateDpAsState(if (lifted) 10.dp else 0.dp, motion.effects(), label = "poster-shadow")
     val px = with(LocalDensity.current) { 240.dp.roundToPx() }
     val stateText = when {
         unwatched > 0 -> pluralStringResource(R.plurals.nag_unwatched_episodes, unwatched, unwatched)
@@ -259,6 +275,7 @@ fun CountBadge(count: Int, modifier: Modifier = Modifier) {
         style = NagTheme.type.labelSmall,
         color = colors.onAccent,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .background(colors.accent, RoundedCornerShape(50))
             .padding(horizontal = 7.dp, vertical = 1.dp),

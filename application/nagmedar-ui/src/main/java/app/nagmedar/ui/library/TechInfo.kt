@@ -22,10 +22,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -92,8 +94,11 @@ class TechRepository internal constructor(
     private val scope = CoroutineScope(SupervisorJob() + probeThread)
     private val queued: MutableSet<String> = Collections.newSetFromMap(ConcurrentHashMap())
 
-    /** Every current probe by media URI. */
-    val all: Flow<Map<String, MediaTech>> = dao.all()
+    /**
+     * Every current probe by media URI, read and parsed once for every screen that shows them and kept: a screen
+     * that comes back starts with what was read last instead of an empty map, and is told when it changes.
+     */
+    val all: StateFlow<Map<String, MediaTech>> = dao.all()
         .map { rows ->
             rows.asSequence()
                 .filter { it.probeVersion == MediaProbe.VERSION }
@@ -101,6 +106,7 @@ class TechRepository internal constructor(
                 .toMap()
         }
         .flowOn(Dispatchers.Default)
+        .stateIn(CoroutineScope(SupervisorJob() + Dispatchers.Default), SharingStarted.WhileSubscribed(KEPT_FOLLOWING_MS), emptyMap())
 
     /**
      * The current probe of one file ([key], a media URI) when it has one and the file is still the
@@ -189,6 +195,9 @@ class TechRepository internal constructor(
         @Volatile
         private var instance: TechRepository? = null
 
+        /** How long [all] goes on following the database once no screen shows it. */
+        private const val KEPT_FOLLOWING_MS = 60_000L
+
         fun get(context: Context): TechRepository = instance ?: synchronized(this) {
             instance ?: TechRepository(context.applicationContext).also { instance = it }
         }
@@ -203,8 +212,8 @@ fun rememberTech(items: List<VideoItem>?): State<Map<String, MediaTech>> {
     LaunchedEffect(repository, items) {
         if (repository != null && items != null) repository.probeMissing(items.map { it.key })
     }
-    val flow = remember(repository) { repository?.all ?: flowOf(emptyMap()) }
-    return flow.collectAsState(initial = emptyMap())
+    val flow = remember(repository) { repository?.all ?: MutableStateFlow(emptyMap()) }
+    return flow.collectAsState()
 }
 
 /** The cached probe of one file ([key], a media URI), probing it when it has none; null meanwhile. */
@@ -215,7 +224,7 @@ fun rememberTechOf(key: String?): MediaTech? {
     LaunchedEffect(repository, key) {
         if (repository != null && key != null) repository.probeMissing(listOf(key))
     }
-    val flow = remember(repository) { repository?.all ?: flowOf(emptyMap()) }
-    val all by flow.collectAsState(initial = emptyMap())
+    val flow = remember(repository) { repository?.all ?: MutableStateFlow(emptyMap()) }
+    val all by flow.collectAsState()
     return key?.let { all[it] }
 }
