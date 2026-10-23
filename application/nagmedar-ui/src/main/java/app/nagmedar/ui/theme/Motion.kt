@@ -23,7 +23,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -32,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import kotlin.math.roundToInt
 
 /**
  * Nağmedar's motion language (S-203), on Android's own motion system (Material 3) as Desktop Kit
@@ -130,6 +133,43 @@ class NagMotion private constructor(val reduced: Boolean) {
         )
     }
 
+    /**
+     * A sheet over the whole window coming up from the bottom edge (the phone's player, "Sıradaki" on a phone): it
+     * slides up the whole way while it fades in, over [LONG].
+     */
+    fun sheetEnter(): EnterTransition = if (reduced) {
+        EnterTransition.None
+    } else {
+        slideInVertically(tween(LONG, easing = EmphasizedDecelerate)) { it } + fadeIn(tween(LONG, easing = EmphasizedDecelerate))
+    }
+
+    /** The sheet of [sheetEnter] going: down the whole way, quicker, over [SHEET_EXIT]. */
+    fun sheetExit(): ExitTransition = if (reduced) {
+        ExitTransition.None
+    } else {
+        slideOutVertically(tween(SHEET_EXIT, easing = EmphasizedAccelerate)) { it }
+    }
+
+    /**
+     * A page over the whole window opened from the one under it (the lyrics, the visualiser): it comes a tenth of the
+     * width ([DETAIL_SHIFT]) from the end while it fades in, as a list's detail does
+     * ([app.nagmedar.ui.shell.DetailMotion]); [rtl] mirrors the side.
+     */
+    fun detailEnter(rtl: Boolean = false): EnterTransition {
+        if (reduced) return EnterTransition.None
+        val direction = if (rtl) -1 else 1
+        return slideInHorizontally(tween(LONG, easing = EmphasizedDecelerate)) { (it * DETAIL_SHIFT).roundToInt() * direction } +
+            fadeIn(tween(MEDIUM, delayMillis = DETAIL_FADE_DELAY, easing = StandardDecelerate))
+    }
+
+    /** The page of [detailEnter] going back towards the end, gone in [COLOR]. */
+    fun detailExit(rtl: Boolean = false): ExitTransition {
+        if (reduced) return ExitTransition.None
+        val direction = if (rtl) -1 else 1
+        return slideOutHorizontally(tween(LONG - DETAIL_FADE_DELAY, easing = EmphasizedAccelerate)) { (it * DETAIL_SHIFT).roundToInt() * direction } +
+            fadeOut(tween(COLOR, easing = StandardAccelerate))
+    }
+
     override fun equals(other: Any?): Boolean = other is NagMotion && other.reduced == reduced
 
     override fun hashCode(): Int = reduced.hashCode()
@@ -148,6 +188,15 @@ class NagMotion private constructor(val reduced: Boolean) {
 
         /** Panels, the sidebar, a list's detail; the longest a transition takes. */
         const val LONG = 300
+
+        /** A sheet going down ([sheetExit]): a little longer than [MEDIUM], as it goes the whole height. */
+        const val SHEET_EXIT = MEDIUM + 50
+
+        /** How far a page over the window travels ([detailEnter]): a tenth of the width. */
+        const val DETAIL_SHIFT = 0.1f
+
+        /** A page over the window starts fading in this long after it starts moving. */
+        const val DETAIL_FADE_DELAY = 50
 
         /** Fade-through: the old screen fading. */
         const val FADE_OUT = 90

@@ -124,10 +124,13 @@ class PlayQueue : QueueActions {
     }
 }
 
-/** The service's queue, followed while composed. */
+/**
+ * The service's queue, followed while composed. It is read at once, so the first frame has the
+ * list: "Sıradaki" never shows itself empty while the queue is being read.
+ */
 @Composable
 fun rememberPlayQueue(): PlayQueue {
-    val queue = remember { PlayQueue() }
+    val queue = remember { PlayQueue().apply { load(PlaybackService.serviceFlow.value) } }
     LaunchedEffect(queue) {
         PlaybackService.serviceFlow.collectLatest { service ->
             queue.load(service)

@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.cast.CastPickerDialog
@@ -142,6 +148,7 @@ import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
+import app.nagmedar.ui.shell.DetailBackHandler
 import app.nagmedar.ui.shell.rememberCaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.DropOverlay
@@ -151,6 +158,7 @@ import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.rememberDetailMotion
 import app.nagmedar.ui.streams.StreamsCenter
 import app.nagmedar.ui.streams.StreamsScreen
 import app.nagmedar.ui.sleep.SleepTimerDialog
@@ -161,6 +169,7 @@ import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
 import app.nagmedar.ui.widget.PlayerWidgetMigration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -432,10 +441,17 @@ private fun NagmedarMain(
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
                     // S-1302: the device picker, from the cast buttons, Ctrl+Shift+C and the menus' "Play on …"
                     Casting.request?.let { request -> CastPickerDialog(request, Casting::closePicker) }
-                    if (phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar) {
+                    val motion = NagTheme.motion
+                    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+                    // the phone's player comes up from the mini player and goes down again; kept composed while it goes
+                    val phonePlayerShown = phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar
+                    AnimatedVisibility(phonePlayerShown, enter = motion.sheetEnter(), exit = motion.sheetExit()) {
+                        // the predictive Back gesture shrinks it as it does a detail; let go, it goes down from there
+                        val back = rememberDetailMotion(open = true)
                         PhonePlayerHost(
                             onClose = { phonePlayer = false },
                             onQueue = queuePanel::toggle,
+                            modifier = Modifier.graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } },
                             onFullScreenLyrics = { lyricsOpen = true },
                             onFullScreenVisualizer = { visualizerOpen = true },
                             // the equaliser's page is the shell's: the player closes for it
@@ -443,10 +459,15 @@ private fun NagmedarMain(
                                 phonePlayer = false
                                 navigator.navigate(Destination.Equalizer)
                             },
-                            fullWindow = playerOverWindow,
+                            // as while it shows, also while it goes down
+                            fullWindow = NavKind.forWidth(widthClass) != NavKind.Sidebar && caption == null,
                         )
+                        // after the player's own: this one goes first; the player's windows opened later go before it
+                        DetailBackHandler(enabled = phonePlayerShown, state = back, onBack = { phonePlayer = false })
                     }
-                    if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                    AnimatedVisibility(lyricsOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
+                        PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                    }
                     // a media's information, asked for from a menu without a details pane (music, search)
                     MediaInfoHost()
                     // remote access's addresses, how it works, and the one-time code a new browser asks for
@@ -457,17 +478,24 @@ private fun NagmedarMain(
                     WhisperHost(Modifier.align(Alignment.BottomEnd).padding(16.dp))
                     // S-1005: the lyrics editor, over the lyrics
                     if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false })
-                    if (visualizerOpen) PlayingVisualizerFullScreen(onClose = { visualizerOpen = false })
-                    // "Sıradaki" beside the screen, over it on a phone (S-310)
-                    if (queuePanel.open) {
+                    AnimatedVisibility(visualizerOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
+                        PlayingVisualizerFullScreen(onClose = { visualizerOpen = false })
+                    }
+                    // "Sıradaki" beside the screen, over it on a phone (S-310), where it comes up and goes down as a sheet
+                    val compactQueue = NavKind.forWidth(widthClass) == NavKind.BottomBar
+                    AnimatedVisibility(
+                        queuePanel.open,
+                        modifier = Modifier.align(Alignment.TopEnd),
+                        enter = if (compactQueue) motion.sheetEnter() else EnterTransition.None,
+                        exit = if (compactQueue) motion.sheetExit() else ExitTransition.None,
+                    ) {
                         val queue = rememberPlayQueue()
                         QueueSheet(
                             queue.entries,
                             queue.current,
                             queue,
-                            compact = NavKind.forWidth(widthClass) == NavKind.BottomBar,
+                            compact = compactQueue,
                             onClose = { queuePanel.close() },
-                            modifier = Modifier.align(Alignment.TopEnd),
                             undo = undo,
                         )
                     }
