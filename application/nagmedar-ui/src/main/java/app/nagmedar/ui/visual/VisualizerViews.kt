@@ -102,14 +102,23 @@ private fun DrawScope.drawSpectrum(
     if (width <= 0f || height <= 0f) return
     val floor = SpectrumBands.FLOOR_SHOWN
     fun y(db: Float) = height * (db.coerceIn(floor, 0f) / floor)
-    // the grid: every 12 dB
+    // the grid: every 12 dB; on a low pane only as many of its numbers as fit apart
     val dash = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))
-    for (db in 0 downTo floor.toInt() step 12) {
+    val grid = (0 downTo floor.toInt() step 12).toList()
+    val dbTexts = if (large) grid.map { measurer.measure(texts.db(it), label) } else emptyList()
+    val dbTops = dbTexts.mapIndexed { i, text -> (y(grid[i].toFloat()) - text.size.height / 2f).coerceIn(0f, height - text.size.height) }
+    val dbShown = if (large) {
+        val centres = dbTops.mapIndexed { i, top -> top + dbTexts[i].size.height / 2f }
+        ScaleMarks.spaced(centres, dbTexts.maxOf { it.size.height }.toFloat(), MARK_GAP.toPx()).toSet()
+    } else {
+        emptySet()
+    }
+    grid.forEachIndexed { i, db ->
         val gy = y(db.toFloat())
         drawLine(colors.border, Offset(leftPad, gy), Offset(size.width, gy), strokeWidth = 1.dp.toPx(), pathEffect = dash)
-        if (large) {
-            val text = measurer.measure(texts.db(db), label)
-            drawText(text, topLeft = Offset(leftPad - text.size.width - 6.dp.toPx(), (gy - text.size.height / 2f).coerceIn(0f, height - text.size.height)))
+        if (i in dbShown) {
+            val text = dbTexts[i]
+            drawText(text, topLeft = Offset(leftPad - text.size.width - 6.dp.toPx(), dbTops[i]))
         }
     }
     val count = spectrum.count
@@ -128,17 +137,46 @@ private fun DrawScope.drawSpectrum(
         }
     }
     if (large) {
-        // the frequencies under the bars, on the bands' log scale
+        // the frequencies under the bars, on the bands' log scale: on a narrow pane every n-th, so that none touch
         val span = ln(SpectrumBands.MAX_HZ / SpectrumBands.MIN_HZ)
-        for (hz in FREQUENCY_MARKS) {
+        val hzTexts = FREQUENCY_MARKS.map { measurer.measure(texts.hertz(it.toInt()), label) }
+        val hzLefts = FREQUENCY_MARKS.mapIndexed { i, hz ->
             val x = leftPad + width * (ln(hz / SpectrumBands.MIN_HZ) / span)
-            val text = measurer.measure(texts.hertz(hz.toInt()), label)
-            drawText(text, topLeft = Offset((x - text.size.width / 2f).coerceIn(leftPad, size.width - text.size.width), height + 4.dp.toPx()))
+            (x - hzTexts[i].size.width / 2f).coerceIn(leftPad, size.width - hzTexts[i].size.width)
+        }
+        val widest = hzTexts.maxOf { it.size.width }.toFloat()
+        for (i in ScaleMarks.spaced(hzLefts.mapIndexed { i, left -> left + hzTexts[i].size.width / 2f }, widest, MARK_GAP.toPx())) {
+            drawText(hzTexts[i], topLeft = Offset(hzLefts[i], height + 4.dp.toPx()))
         }
     }
 }
 
 private val FREQUENCY_MARKS = floatArrayOf(50f, 100f, 200f, 500f, 1000f, 2000f, 5000f, 10000f)
+
+/** The least room between two of a scale's numbers. */
+private val MARK_GAP = 6.dp
+
+/** Which of a scale's numbers are drawn where they would not all fit apart. */
+internal object ScaleMarks {
+    /**
+     * Of marks centred at [centres] (in order along the scale), each at most [extent] long, those drawn: every n-th
+     * for the least n that keeps [gap] between them, the first and the last always; the one before the last goes when
+     * it would touch the last; only the first when even those two would.
+     */
+    fun spaced(centres: List<Float>, extent: Float, gap: Float): List<Int> {
+        if (centres.size <= 1) return centres.indices.toList()
+        val need = extent + gap
+        val last = centres.lastIndex
+        fun apart(a: Int, b: Int) = abs(centres[b] - centres[a]) >= need
+        for (step in 1..last) {
+            val picked = (0..last step step).toMutableList()
+            if (picked.last() != last) picked += last
+            if (picked.size > 2 && !apart(picked[picked.size - 2], last)) picked.removeAt(picked.size - 2)
+            if (picked.zipWithNext().all { (a, b) -> apart(a, b) }) return picked
+        }
+        return listOf(0)
+    }
+}
 
 /** The meter's scale: −60 to 0 dBFS. */
 private const val METER_FLOOR = -60f

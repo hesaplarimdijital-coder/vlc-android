@@ -115,6 +115,12 @@ private fun VisualizerNotice(state: VisualizerState, onAllow: (() -> Unit)?, onR
             .widthIn(max = 420.dp)
             .background(colors.surfaceRaised.copy(alpha = 0.94f), shape)
             .border(1.dp, colors.border, shape)
+            // a touch on the notice is its own: it goes no further (the video player's gestures under it)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) awaitPointerEvent().changes.forEach { if (it.pressed || it.previousPressed) it.consume() }
+                }
+            }
             .padding(NagTheme.dimens.gapS)
             .semantics { liveRegion = LiveRegionMode.Polite },
         horizontalAlignment = Alignment.CenterHorizontally,

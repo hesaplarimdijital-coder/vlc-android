@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -152,6 +153,8 @@ internal fun TouchControls(
     modifier: Modifier = Modifier,
     /** Whether the screen can turn (a phone or a tablet, not a desktop window): the bar has the orientation then. */
     canRotate: Boolean = true,
+    /** Drawn under the controls but over the video's gestures, so that its buttons take a tap (the visualiser's notice). */
+    underControls: @Composable BoxScope.() -> Unit = {},
 ) {
     LaunchedEffect(visibility.moves, visibility.hiding, state.playing) {
         // paused, the controls stay, as VLC's do
@@ -192,6 +195,7 @@ internal fun TouchControls(
                 .pointerInput(Unit) { swipes { gestures.value } }
                 .testTag("player-gestures"),
         )
+        underControls()
         // locked, a tap brings the lock's button (drawn over every layout by the player), nothing else
         if (visibility.locked) return@Box
         AnimatedVisibility(visibility.visible, enter = fadeIn(NagTheme.motion.enter(NagMotion.COLOR)), exit = fadeOut(NagTheme.motion.exit(NagMotion.MEDIUM))) {

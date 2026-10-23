@@ -1,24 +1,29 @@
 package app.nagmedar.ui.player.panel
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,10 +35,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -145,9 +152,22 @@ fun PlayerPanel(
                 .padding(start = 12.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // more tabs than fit scroll sideways
-            Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                tabs.forEach { tab -> PanelTabButton(stringResource(tab.label), selected = tab == state.tab) { state.show(tab) } }
+            // the tabs' room around their words narrows so that all of them fit (a phone); more than fit even so scroll sideways
+            BoxWithConstraints(Modifier.weight(1f)) {
+                val labels = tabs.map { stringResource(it.label) }
+                val measurer = rememberTextMeasurer()
+                val style = NagTheme.type.label.copy(fontWeight = FontWeight.Medium)
+                val density = LocalDensity.current
+                val room = maxWidth
+                val padding = remember(labels, style, room, density) {
+                    with(density) {
+                        val words = labels.sumOf { measurer.measure(it, style, maxLines = 1).size.width }
+                        PanelTabs.padding(words.toFloat(), (room - TAB_GAP * (labels.size - 1)).toPx(), labels.size, TAB_PADDING.toPx(), TAB_PADDING_LEAST.toPx()).toDp()
+                    }
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(TAB_GAP)) {
+                    tabs.forEachIndexed { index, tab -> PanelTabButton(labels[index], selected = tab == state.tab, padding = padding) { state.show(tab) } }
+                }
             }
             NagIconButton(NagIcons.Close, stringResource(R.string.nag_panel_close), state::close, size = 32.dp, iconSize = 14.dp)
         }
@@ -157,20 +177,43 @@ fun PlayerPanel(
     }
 }
 
+/** The tabs' room: between them, and on each side of a tab's words as much as there is space for, down to the least. */
+private val TAB_GAP = 2.dp
+private val TAB_PADDING = 10.dp
+private val TAB_PADDING_LEAST = 4.dp
+
+/** How the panel's tabs fit their row. */
+internal object PanelTabs {
+    /**
+     * The room on each side of a tab's words: [full] when the [count] tabs' words ([words] wide together) fit the
+     * [available] width with it, less when that is what lets them fit, never under [least] (then the row scrolls).
+     */
+    fun padding(words: Float, available: Float, count: Int, full: Float, least: Float): Float {
+        if (count <= 0) return full
+        val fits = (available - words) / (count * 2)
+        return fits.coerceIn(least, full)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PanelTabButton(label: String, selected: Boolean, onSelect: () -> Unit) {
+private fun PanelTabButton(label: String, selected: Boolean, padding: Dp, onSelect: () -> Unit) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(6.dp)
+    // the chosen tab is brought into sight where the row scrolls
+    val sight = remember { BringIntoViewRequester() }
+    LaunchedEffect(selected) { if (selected) sight.bringIntoView() }
     Box(
         Modifier
+            .bringIntoViewRequester(sight)
             .heightIn(min = 30.dp)
             .background(if (selected) colors.surfaceRaised else stateBackground(state), shape)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interaction)
             .selectable(selected = selected, interactionSource = interaction, indication = null, role = Role.Tab, onClick = onSelect)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = padding),
         contentAlignment = Alignment.Center,
     ) {
         Text(

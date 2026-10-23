@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -92,6 +93,8 @@ fun DesktopControls(
     modifier: Modifier = Modifier,
     /** For tests and screenshots: the mouse over the timeline at 0..1. */
     timelineHover: Float? = null,
+    /** Drawn under the bars but inside their click's layer, so that its buttons take a click (the visualiser's notice). */
+    underControls: @Composable BoxScope.() -> Unit = {},
 ) {
     LaunchedEffect(visibility.moves, visibility.hiding) {
         if (!visibility.hiding) return@LaunchedEffect
@@ -109,6 +112,7 @@ fun DesktopControls(
                 detectTapGestures(onTap = { visibility.show() }, onDoubleTap = { if (latest.canFullscreen) actions.toggleFullscreen() })
             },
     ) {
+        underControls()
         AnimatedVisibility(
             visible = visibility.visible,
             enter = fadeIn(motion.enter(NagMotion.COLOR)),

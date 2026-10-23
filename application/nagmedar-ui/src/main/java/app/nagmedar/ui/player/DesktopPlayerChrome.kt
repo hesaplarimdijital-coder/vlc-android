@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentWithReceiverOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.os.ConfigurationCompat
@@ -998,24 +1001,29 @@ private fun PlayerChromeContent(
                     else -> 120.dp
                 }
                 SnapshotFlash(snapshots.state.flashes)
-                // S-611: the visualiser, under the controls: large over sound alone, small beside a picture
-                if (prefs.visualizer.video) {
-                    val nowPlaying = rememberNowPlaying()
-                    val audioOnly by produceState(false, uri) {
-                        while (true) {
-                            value = activity.service?.let { it.currentMediaWrapper != null && it.videoTracksCount == 0 } ?: false
-                            delay(1_000)
+                // S-611: the visualiser, under the controls: large over sound alone, small beside a picture; inside their
+                // layer of gestures, so its notice's buttons take a tap; the same one in the touch and the pointer layout
+                val visualizer = remember {
+                    movableContentWithReceiverOf<BoxScope, Dp> { room ->
+                        if (prefs.visualizer.video) {
+                            val nowPlaying = rememberNowPlaying()
+                            val audioOnly by produceState(false, uri) {
+                                while (true) {
+                                    value = activity.service?.let { it.currentMediaWrapper != null && it.videoTracksCount == 0 } ?: false
+                                    delay(1_000)
+                                }
+                            }
+                            PlayerVisualizer(
+                                settings = prefs.visualizer,
+                                audioOnly = audioOnly,
+                                playing = nowPlaying.playing,
+                                mediaKey = uri,
+                                onSettings = prefs::updateVisualizer,
+                                // beside a picture: above the control bar while it shows, clear of the cards on the left
+                                modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = room),
+                            )
                         }
                     }
-                    PlayerVisualizer(
-                        settings = prefs.visualizer,
-                        audioOnly = audioOnly,
-                        playing = nowPlaying.playing,
-                        mediaKey = uri,
-                        onSettings = prefs::updateVisualizer,
-                        // beside a picture: above the control bar while it shows, clear of the cards on the left
-                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = barRoom),
-                    )
                 }
                 val chromeState = state.copy(
                     effectsOpen = panel.open && panel.tab == PanelTab.Effects,
@@ -1024,9 +1032,9 @@ private fun PlayerChromeContent(
                     visualizer = prefs.visualizer.kind.takeIf { prefs.visualizer.video },
                 )
                 if (visibility.touch) {
-                    TouchControls(chromeState, source, extras.touch, visibility, extras.osd, previews, canRotate = source.fillsScreen())
+                    TouchControls(chromeState, source, extras.touch, visibility, extras.osd, previews, canRotate = source.fillsScreen(), underControls = { visualizer(this, barRoom) })
                 } else {
-                    DesktopControls(chromeState, source, visibility, previews)
+                    DesktopControls(chromeState, source, visibility, previews, underControls = { visualizer(this, barRoom) })
                 }
                 if (info.overlay) StatsOverlay(live.last, Modifier.align(Alignment.TopStart).padding(start = 16.dp, top = 64.dp))
                 // S-607: a recording's mark, under the title while it shows
