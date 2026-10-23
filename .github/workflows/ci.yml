@@ -395,7 +395,9 @@ jobs:
         run: |
           out="$RUNNER_TEMP/apk-branch"
           rm -rf "$out" && mkdir -p "$out"
-          apk=$(find application/app/build/outputs/apk -name '*.apk' | grep -i debug | head -1)
+          # no pipeline here: the job's shell has pipefail, and head closing grep's pipe fails the step
+          apk=$(find application/app/build/outputs/apk -ipath '*debug*' -iname '*arm64*.apk' -print -quit)
+          [ -n "$apk" ] || apk=$(find application/app/build/outputs/apk -ipath '*debug*' -name '*.apk' -print -quit)
           [ -n "$apk" ] || { echo "no debug APK under application/app/build/outputs/apk"; find application/app/build/outputs/apk -name '*.apk'; exit 1; }
           cp "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk"
           ls -la "$out"
