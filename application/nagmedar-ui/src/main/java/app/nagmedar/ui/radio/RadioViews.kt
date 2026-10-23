@@ -1,9 +1,12 @@
 package app.nagmedar.ui.radio
 
 import android.content.res.Resources
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,15 +32,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -49,6 +58,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntSize
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.IconMenuButton
@@ -64,6 +74,7 @@ import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.fadingEdges
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
@@ -219,21 +230,19 @@ private fun tabName(tab: RadioTab): Int = when (tab) {
     RadioTab.Recordings -> R.string.nag_radio_tab_recordings
 }
 
-/** The lists' tabs, scrolled sideways when they do not fit; a count shows where the list has stations. */
+/**
+ * The lists' tabs, scrolled sideways when they do not fit: the end that goes on fades out, and the
+ * chosen tab is scrolled into sight (on a phone İçe aktarılanlar and Kayıtlar are past the edge).
+ * A count shows where the list has stations.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect: (RadioTab) -> Unit, tabs: List<RadioTab> = RadioTab.entries) {
     val scroll = rememberScrollState()
-    val reduced = NagTheme.motion.reduced
-    // S-207: the last tab (Kayıtlar) is out of sight on a phone: asked for, the strip scrolls to it
-    LaunchedEffect(selected) {
-        if (selected == RadioTab.Recordings) {
-            snapshotFlow { scroll.maxValue }.first { it > 0 }
-            if (reduced) scroll.scrollTo(scroll.maxValue) else scroll.animateScrollTo(scroll.maxValue)
-        }
-    }
     Row(
         Modifier
             .fillMaxWidth()
+            .fadingEdges(scroll, 16.dp, NagTheme.colors.background)
             .horizontalScroll(scroll)
             .padding(horizontal = NagTheme.dimens.pagePadding - 8.dp, vertical = 2.dp)
             .testTag("radio-tabs"),
@@ -241,8 +250,20 @@ private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect:
         verticalAlignment = Alignment.CenterVertically,
     ) {
         tabs.forEach { tab ->
-            Box(Modifier.testTag("radio-tab-${tab.name.lowercase()}")) {
-                PlaylistTab(stringResource(tabName(tab)), counts[tab]?.takeIf { it > 0 }, selected = tab == selected, onClick = { onSelect(tab) })
+            key(tab) {
+                val sight = remember { BringIntoViewRequester() }
+                var size by remember { mutableStateOf(IntSize.Zero) }
+                if (tab == selected) {
+                    val margin = with(LocalDensity.current) { NagTheme.dimens.pagePadding.toPx() }
+                    LaunchedEffect(Unit) {
+                        // once the strip is laid out and wider than the window; with room beside it, not at the very edge
+                        snapshotFlow { scroll.maxValue }.first { it > 0 }
+                        sight.bringIntoView(Rect(-margin, 0f, size.width + margin, size.height.toFloat()))
+                    }
+                }
+                Box(Modifier.bringIntoViewRequester(sight).onSizeChanged { size = it }.testTag("radio-tab-${tab.name.lowercase()}")) {
+                    PlaylistTab(stringResource(tabName(tab)), counts[tab]?.takeIf { it > 0 }, selected = tab == selected, onClick = { onSelect(tab) })
+                }
             }
         }
     }

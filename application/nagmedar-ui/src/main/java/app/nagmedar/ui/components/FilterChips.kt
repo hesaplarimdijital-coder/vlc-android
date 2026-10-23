@@ -153,7 +153,7 @@ fun ChipRow(
  * Fades the start and end of a sideways-scrolling line into [color] while it can scroll that way.
  * Painting the surface's colour over the edge needs no offscreen layer.
  */
-private fun Modifier.fadingEdges(scroll: ScrollState, length: Dp, color: Color): Modifier = drawWithContent {
+internal fun Modifier.fadingEdges(scroll: ScrollState, length: Dp, color: Color): Modifier = drawWithContent {
     drawContent()
     val fade = length.toPx().coerceAtMost(size.width / 3f)
     if (scroll.value > 0) {
