@@ -76,7 +76,8 @@ class ShellNavigator(private val navController: NavHostController) {
  * windows, a menu bar with a collapsible sidebar on large and extra-large windows; the sidebar's
  * width is dragged and remembered (S-303). The
  * navigation graph lives in the content slot of [ShellLayout] and survives width changes;
- * [overlay] is drawn over the current screen (undo bars).
+ * [overlay] is drawn over the current screen (undo bars). [contentOnly]: the screen and its overlay
+ * take the whole window, the bars stand aside (S-1002: the phone's player).
  */
 @Composable
 fun NagmedarShell(
@@ -93,6 +94,7 @@ fun NagmedarShell(
     overlay: @Composable BoxScope.() -> Unit = {},
     /** The desktop window's caption bar the top bar goes up into (S-306); null for none. */
     caption: CaptionBar? = null,
+    contentOnly: Boolean = false,
 ) {
     val navigator = remember(navController) { ShellNavigator(navController) }
     val entry by navController.currentBackStackEntryAsState()
@@ -107,6 +109,7 @@ fun NagmedarShell(
     ShellLayout(
         navKind = navKind,
         modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
+        contentOnly = contentOnly,
         topBar = {
             if (navKind == NavKind.Sidebar) {
                 // the menus are a pointer's and a keyboard's (S-302); by touch the bar keeps the search

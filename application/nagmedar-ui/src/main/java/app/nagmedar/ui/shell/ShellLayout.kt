@@ -20,6 +20,9 @@ private const val SLOT_PLAYER = "player"
  * - BottomBar: top bar, content, player, bottom navigation (stacked).
  * - Rail: rail on the start edge; top bar, content and player stacked beside it.
  * - Sidebar: menu bar across the top, player across the bottom, sidebar and content between.
+ *
+ * [contentOnly]: the content takes the whole window and the chrome is not placed (S-1002: the phone's player over it);
+ * the chrome keeps its state for when it comes back.
  */
 @Composable
 fun ShellLayout(
@@ -29,6 +32,7 @@ fun ShellLayout(
     player: @Composable () -> Unit,
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    contentOnly: Boolean = false,
 ) {
     Layout(
         modifier = modifier,
@@ -46,6 +50,10 @@ fun ShellLayout(
         val playerM = measurables.first { it.layoutId == SLOT_PLAYER }
         val contentM = measurables.first { it.layoutId == SLOT_CONTENT }
 
+        if (contentOnly) {
+            val content = contentM.measure(Constraints.fixed(width, height))
+            return@Layout layout(width, height) { content.placeRelative(0, 0) }
+        }
         when (navKind) {
             NavKind.BottomBar -> {
                 val top = topM.measure(Constraints(minWidth = width, maxWidth = width, maxHeight = height))
