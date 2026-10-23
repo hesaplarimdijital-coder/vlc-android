@@ -1,7 +1,6 @@
 package app.nagmedar.ui.player.snapshot
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -43,6 +44,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.player.panel.TextAction
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 
@@ -125,7 +127,7 @@ private fun Saved(saved: SnapshotOutcome.Saved, onOpen: (SnapshotOutcome.Saved) 
         )
     }
     Column(Modifier.widthIn(min = 160.dp, max = 220.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.nag_snap_saved), style = NagTheme.type.label, color = colors.text, maxLines = 1)
+        Text(stringResource(R.string.nag_snap_saved), style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(
             saved.fileName,
             style = NagTheme.type.labelSmall,
@@ -172,6 +174,7 @@ private fun Badge(text: String) {
         style = NagTheme.type.labelSmall,
         color = NagTheme.colors.textSecondary,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .background(NagTheme.colors.surface, RoundedCornerShape(9.dp))
             .border(1.dp, NagTheme.colors.border, RoundedCornerShape(9.dp))
@@ -184,7 +187,7 @@ private fun Failed(failed: SnapshotOutcome.Failed, onChooseFolder: () -> Unit) {
     val colors = NagTheme.colors
     Icon(NagIcons.Warning, contentDescription = null, tint = colors.warning, modifier = Modifier.padding(top = 1.dp).size(18.dp))
     Column(Modifier.widthIn(min = 160.dp, max = 280.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.nag_snap_failed), style = NagTheme.type.label, color = colors.text, maxLines = 1)
+        Text(stringResource(R.string.nag_snap_failed), style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(
             stringResource(
                 when (failed.reason) {
@@ -208,18 +211,19 @@ private fun Failed(failed: SnapshotOutcome.Failed, onChooseFolder: () -> Unit) {
     }
 }
 
-/** A picture taken: the video flashes white a moment, as a camera does. */
+/** A picture taken: the video flashes white a moment, as a camera does; the flash is drawn in its layer, frame by frame. */
 @Composable
 fun SnapshotFlash(flashes: Int, modifier: Modifier = Modifier) {
-    val alpha = remember { Animatable(0f) }
+    val flash = remember { Animatable(0f) }
+    val motion = NagTheme.motion
     LaunchedEffect(flashes) {
         if (flashes == 0) return@LaunchedEffect
-        alpha.snapTo(FLASH_ALPHA)
-        alpha.animateTo(0f, tween(FLASH_MS))
+        flash.snapTo(FLASH_ALPHA)
+        flash.animateTo(0f, motion.enter(NagMotion.MEDIUM))
     }
-    if (alpha.value > 0f) Box(modifier.fillMaxSize().background(Color.White.copy(alpha = alpha.value)))
+    val flashing by remember { derivedStateOf { flash.value > 0f } }
+    if (flashing) Box(modifier.fillMaxSize().graphicsLayer { alpha = flash.value }.background(Color.White))
 }
 
 private const val SHOWN_MS = 6_000L
 private const val FLASH_ALPHA = 0.45f
-private const val FLASH_MS = 260

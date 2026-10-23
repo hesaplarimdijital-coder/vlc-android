@@ -1,5 +1,9 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -22,6 +26,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -30,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import kotlinx.coroutines.delay
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 
 /** How long the mouse rests on something before its tooltip shows (S-404); Off shows none. */
@@ -88,11 +94,7 @@ fun TooltipArea(
             },
     ) {
         content()
-        if (visible) {
-            Popup(popupPositionProvider = remember { BelowAnchorPositionProvider() }) {
-                TooltipBubble(text, shortcut)
-            }
-        }
+        if (visible) TooltipPopup(text, shortcut)
     }
 }
 
@@ -113,8 +115,20 @@ fun HoverTooltip(hovered: Boolean, text: String, shortcut: String? = null) {
             visible = false
         }
     }
-    if (visible) {
-        Popup(popupPositionProvider = remember { BelowAnchorPositionProvider() }) {
+    if (visible) TooltipPopup(text, shortcut)
+}
+
+/** The bubble under its element; it fades in growing a little, and goes at once (Desktop Kit 0.2.0). */
+@Composable
+private fun TooltipPopup(text: String, shortcut: String?) {
+    val motion = NagTheme.motion
+    Popup(popupPositionProvider = remember { BelowAnchorPositionProvider() }) {
+        val appear = remember { MutableTransitionState(false).apply { targetState = true } }
+        AnimatedVisibility(
+            visibleState = appear,
+            enter = fadeIn(motion.enter(NagMotion.SHORT)) + scaleIn(motion.enter(NagMotion.COLOR), initialScale = 0.94f),
+            label = "tooltip",
+        ) {
             TooltipBubble(text, shortcut)
         }
     }
@@ -134,7 +148,7 @@ internal fun TooltipBubble(text: String, shortcut: String?, modifier: Modifier =
         Text(text, style = NagTheme.type.labelSmall, color = colors.text, maxLines = 2)
         if (shortcut != null) {
             Spacer(Modifier.width(8.dp))
-            Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+            Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

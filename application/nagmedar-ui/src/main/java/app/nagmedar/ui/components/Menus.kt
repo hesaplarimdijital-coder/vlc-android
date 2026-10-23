@@ -1,6 +1,13 @@
 package app.nagmedar.ui.components
 
 import android.view.KeyEvent
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,11 +32,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +49,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.key.Key
@@ -47,6 +58,9 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -65,6 +79,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import app.nagmedar.ui.input.MenuBarKey
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 
 /** One line of a menu bar drop-down or a context menu. */
@@ -90,6 +105,10 @@ class MenuSpec(val title: String, val entries: () -> List<MenuEntry>)
  * Menu surface shared by the menu bar and context menus. It opens at [offset] from the
  * anchor's top-left corner and moves inside the window when it would overflow (flipping above
  * the anchor point near the bottom edge, like desktop menus).
+ *
+ * As Android's own pop-up menus (Desktop Kit 0.2.0) it grows in from its corner while fading in
+ * ([NagMotion.COLOR]) and fades out when closed ([NagMotion.SHORT]); while it fades it takes
+ * neither the focus nor a click. With "Remove animations" it simply appears and goes.
  */
 @Composable
 fun MenuPopup(
@@ -110,82 +129,114 @@ fun MenuPopup(
     /** The menu bar's: Alt alone or F10, which leave the bar. */
     onAlt: (() -> Unit)? = null,
 ) {
-    if (!visible || entries.isEmpty()) return
+    val open = visible && entries.isNotEmpty()
+    // the last entries stay on screen while the menu fades out; callers pass an empty list when closed
+    val held = remember { MenuEntriesHolder(entries) }
+    if (open) held.entries = entries
+    val transition = remember { MutableTransitionState(false) }
+    SideEffect { transition.targetState = open }
+    if (!open && !transition.currentState && !transition.targetState) return
+    val shownEntries = held.entries
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val motion = NagTheme.motion
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val ownKeys = onEscape != null
+    val latestOnDismiss by rememberUpdatedState(onDismiss)
+    val latestOpen by rememberUpdatedState(open)
+    // the corner it grows from: its start, at the top when it opens downwards
+    val origin = if (rtl) TransformOrigin(1f, 0f) else TransformOrigin(0f, 0f)
     Popup(
         popupPositionProvider = remember(offset) { ClampedOffsetPositionProvider(offset) },
-        onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true, dismissOnBackPress = !ownKeys),
+        // a menu fading out is gone already: what is outside it gets the click
+        onDismissRequest = { if (latestOpen) latestOnDismiss() },
+        properties = PopupProperties(focusable = open, dismissOnBackPress = open && !ownKeys, dismissOnClickOutside = open),
     ) {
         val menu = remember { FocusRequester() }
         val first = remember { FocusRequester() }
         val last = remember { FocusRequester() }
         val altKey = remember { MenuBarKey() }
         var menuFocused by remember { mutableStateOf(false) }
-        val firstEnabled = entries.indexOfFirst { it is MenuEntry.Item && it.enabled }
-        val lastEnabled = entries.indexOfLast { it is MenuEntry.Item && it.enabled }
-        Column(
-            modifier = Modifier
-                .widthIn(min = minWidth, max = 420.dp)
-                .width(IntrinsicSize.Max)
-                .shadow(12.dp, shape)
-                .background(colors.surfaceRaised, shape)
-                .border(1.dp, colors.borderStrong, shape)
-                .onPreviewKeyEvent { event ->
-                    val down = event.type == KeyEventType.KeyDown
-                    if (onAlt != null && altKey.onKey(event.nativeKeyEvent.keyCode, down)) {
-                        onAlt()
-                        return@onPreviewKeyEvent true
-                    }
-                    when (event.key) {
-                        // acted on when released, so the release does not reach the window below
-                        Key.Escape, Key.Back -> {
-                            if (!down) (if (event.key == Key.Escape) onEscape ?: onDismiss else onDismiss)()
-                            true
-                        }
-                        Key.DirectionLeft, Key.DirectionRight -> {
-                            val move = onMove ?: return@onPreviewKeyEvent false
-                            if (down) move(if ((event.key == Key.DirectionRight) != rtl) 1 else -1)
-                            true
-                        }
-                        // opened by the pointer, the menu has the focus: Down and Up go to its first or last item
-                        Key.DirectionDown, Key.DirectionUp -> {
-                            if (!menuFocused || firstEnabled < 0) return@onPreviewKeyEvent false
-                            if (down) (if (event.key == Key.DirectionDown) first else last).requestFocus()
-                            true
-                        }
-                        else -> false
-                    }
-                }
-                // the menu holds the focus whoever opened it, so its keys (Esc, Up, Down) reach it
-                .onFocusChanged { menuFocused = it.isFocused }
-                .focusRequester(menu)
-                .focusTarget()
-                .verticalScroll(rememberScrollState())
-                .padding(4.dp),
+        val firstEnabled = shownEntries.indexOfFirst { it is MenuEntry.Item && it.enabled }
+        val lastEnabled = shownEntries.indexOfLast { it is MenuEntry.Item && it.enabled }
+        AnimatedVisibility(
+            visibleState = transition,
+            enter = fadeIn(motion.enter(NagMotion.COLOR)) + scaleIn(motion.enter(NagMotion.COLOR), initialScale = 0.92f, transformOrigin = origin),
+            exit = fadeOut(motion.exit()) + scaleOut(motion.exit(), targetScale = 0.96f, transformOrigin = origin),
+            label = "menu",
         ) {
-            entries.forEachIndexed { index, entry ->
-                when (entry) {
-                    is MenuEntry.Item -> {
-                        val modifier = Modifier
-                            .then(if (index == firstEnabled) Modifier.focusRequester(first) else Modifier)
-                            .then(if (index == lastEnabled) Modifier.focusRequester(last) else Modifier)
-                        MenuItemRow(entry, modifier) {
-                            onDismiss()
-                            entry.onClick()
+            Column(
+                modifier = Modifier
+                    // a menu on its way out takes no click
+                    .then(if (open) Modifier else Modifier.pointerInput(Unit) { consumeEveryPointerEvent() })
+                    .widthIn(min = minWidth, max = 420.dp)
+                    .width(IntrinsicSize.Max)
+                    .shadow(12.dp, shape)
+                    .background(colors.surfaceRaised, shape)
+                    .border(1.dp, colors.borderStrong, shape)
+                    .onPreviewKeyEvent { event ->
+                        val down = event.type == KeyEventType.KeyDown
+                        if (onAlt != null && altKey.onKey(event.nativeKeyEvent.keyCode, down)) {
+                            onAlt()
+                            return@onPreviewKeyEvent true
+                        }
+                        when (event.key) {
+                            // acted on when released, so the release does not reach the window below
+                            Key.Escape, Key.Back -> {
+                                if (!down) (if (event.key == Key.Escape) onEscape ?: onDismiss else onDismiss)()
+                                true
+                            }
+                            Key.DirectionLeft, Key.DirectionRight -> {
+                                val move = onMove ?: return@onPreviewKeyEvent false
+                                if (down) move(if ((event.key == Key.DirectionRight) != rtl) 1 else -1)
+                                true
+                            }
+                            // opened by the pointer, the menu has the focus: Down and Up go to its first or last item
+                            Key.DirectionDown, Key.DirectionUp -> {
+                                if (!menuFocused || firstEnabled < 0) return@onPreviewKeyEvent false
+                                if (down) (if (event.key == Key.DirectionDown) first else last).requestFocus()
+                                true
+                            }
+                            else -> false
                         }
                     }
-                    MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
+                    // the menu holds the focus whoever opened it, so its keys (Esc, Up, Down) reach it
+                    .onFocusChanged { menuFocused = it.isFocused }
+                    .focusRequester(menu)
+                    .focusTarget()
+                    .verticalScroll(rememberScrollState())
+                    .padding(4.dp),
+            ) {
+                shownEntries.forEachIndexed { index, entry ->
+                    when (entry) {
+                        is MenuEntry.Item -> {
+                            val modifier = Modifier
+                                .then(if (index == firstEnabled) Modifier.focusRequester(first) else Modifier)
+                                .then(if (index == lastEnabled) Modifier.focusRequester(last) else Modifier)
+                            MenuItemRow(entry, modifier) {
+                                onDismiss()
+                                entry.onClick()
+                            }
+                        }
+                        MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
+                    }
                 }
             }
+            LaunchedEffect(Unit) {
+                if (focusFirst && firstEnabled >= 0) first.requestFocus() else menu.requestFocus()
+            }
         }
-        LaunchedEffect(Unit) {
-            if (focusFirst && firstEnabled >= 0) first.requestFocus() else menu.requestFocus()
-        }
+    }
+}
+
+/** The entries a menu shows, kept while it fades out; plain, so keeping them never redraws anything. */
+private class MenuEntriesHolder(var entries: List<MenuEntry>)
+
+/** Takes every pointer event before the children see it. */
+private suspend fun PointerInputScope.consumeEveryPointerEvent() {
+    awaitPointerEventScope {
+        while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
     }
 }
 
@@ -226,7 +277,7 @@ internal fun MenuItemRow(item: MenuEntry.Item, modifier: Modifier = Modifier, on
             modifier = Modifier.weight(1f))
         if (item.shortcut != null) {
             Spacer(Modifier.width(24.dp))
-            Text(item.shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+            Text(item.shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -344,6 +395,11 @@ fun RowScope.MenuBarMenus(menus: List<MenuSpec>, state: MenuBarState = rememberM
             state.leave()
         }
     }
+    // with the predictive Back gesture's routing (Android 14 and later) Back no longer passes the window's keys:
+    // a title that has the keyboard gives it back here; registered anew each time, so it comes before the screens'
+    key(state.hasKeyboard) {
+        BackHandler(enabled = state.hasKeyboard && state.open < 0) { state.leave() }
+    }
     menus.forEachIndexed { index, menu ->
         var titleHeight by remember { mutableIntStateOf(0) }
         Box(Modifier.onSizeChanged { titleHeight = it.height }) {
@@ -448,6 +504,6 @@ fun MenuTitle(
             .padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = NagTheme.type.body, color = if (lit) colors.text else colors.textSecondary, maxLines = 1)
+        Text(text, style = NagTheme.type.body, color = if (lit) colors.text else colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

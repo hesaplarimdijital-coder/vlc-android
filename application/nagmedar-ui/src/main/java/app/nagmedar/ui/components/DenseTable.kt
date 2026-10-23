@@ -194,7 +194,7 @@ private fun <T> RowScope.HeaderCell(column: TableColumn<T>, index: Int, sort: Ta
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (column.alignEnd) Spacer(Modifier.weight(1f))
-        Text(column.title, style = NagTheme.type.labelSmall, color = if (active) colors.text else colors.textTertiary, maxLines = 1)
+        Text(column.title, style = NagTheme.type.labelSmall, color = if (active) colors.text else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (active) {
             Spacer(Modifier.width(4.dp))
             Icon(if (sort?.ascending != false) NagIcons.ChevronUp else NagIcons.ChevronDown, contentDescription = null,

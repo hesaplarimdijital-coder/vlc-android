@@ -65,6 +65,7 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.player.panel.PanelTab
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -193,30 +194,30 @@ internal fun TouchControls(
         )
         // locked, a tap brings the lock's button (drawn over every layout by the player), nothing else
         if (visibility.locked) return@Box
-        AnimatedVisibility(visibility.visible, enter = fadeIn(NagTheme.motion.enter()), exit = fadeOut(NagTheme.motion.exit())) {
+        AnimatedVisibility(visibility.visible, enter = fadeIn(NagTheme.motion.enter(NagMotion.COLOR)), exit = fadeOut(NagTheme.motion.exit(NagMotion.MEDIUM))) {
             // the video dims under the controls, so white reads on any picture
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.32f)))
         }
         AnimatedVisibility(
             visibility.visible,
-            enter = fadeIn(NagTheme.motion.enter()),
-            exit = fadeOut(NagTheme.motion.exit()),
+            enter = fadeIn(NagTheme.motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(NagTheme.motion.exit(NagMotion.MEDIUM)),
             modifier = Modifier.align(Alignment.TopCenter),
         ) {
             TouchTopBar(state, actions, touch, Modifier.pokes(visibility))
         }
         AnimatedVisibility(
             visibility.visible,
-            enter = fadeIn(NagTheme.motion.enter()),
-            exit = fadeOut(NagTheme.motion.exit()),
+            enter = fadeIn(NagTheme.motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(NagTheme.motion.exit(NagMotion.MEDIUM)),
             modifier = Modifier.align(Alignment.Center),
         ) {
             TouchTransport(state, actions, Modifier.pokes(visibility))
         }
         AnimatedVisibility(
             visibility.visible,
-            enter = fadeIn(NagTheme.motion.enter()),
-            exit = fadeOut(NagTheme.motion.exit()),
+            enter = fadeIn(NagTheme.motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(NagTheme.motion.exit(NagMotion.MEDIUM)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             TouchBottomBar(state, actions, touch, previews, canRotate, Modifier.pokes(visibility))
@@ -321,9 +322,9 @@ private fun TouchBottomBar(
         val wide = maxWidth >= 600.dp
         Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 28.dp, bottom = 4.dp)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(playerClock(state.timeMs), style = NagTheme.type.mono, color = Color.White, maxLines = 1, modifier = Modifier.testTag("player-time"))
+                Text(playerClock(state.timeMs), style = NagTheme.type.mono, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("player-time"))
                 Spacer(Modifier.weight(1f))
-                Text(playerClock(state.lengthMs), style = NagTheme.type.mono, color = Color.White.copy(alpha = 0.8f), maxLines = 1)
+                Text(playerClock(state.lengthMs), style = NagTheme.type.mono, color = Color.White.copy(alpha = 0.8f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             PlayerTimeline(state, actions::seekTo, previews, touch = true)
             Row(
@@ -380,6 +381,7 @@ private fun SpeedButton(text: String, changed: Boolean, onClick: () -> Unit) {
             style = NagTheme.type.label,
             color = Color.White,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .border(1.dp, Color.White.copy(alpha = if (changed) 0.7f else 0.35f), RoundedCornerShape(6.dp))
                 .padding(horizontal = 8.dp, vertical = 4.dp),

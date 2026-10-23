@@ -2,6 +2,8 @@ package app.nagmedar.ui.components
 
 import android.os.SystemClock
 import android.view.ViewConfiguration
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -21,6 +23,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -44,6 +47,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.input.consumePointerUntilAllUp
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 
 /** Visual state of an interactive element: hover, press and keyboard focus. */
@@ -57,15 +61,44 @@ fun InteractionSource.collectState(): InteractionState {
     return InteractionState(hovered, pressed, focused)
 }
 
-/** Background for a desktop-style control: pressed > selected > hovered > [rest]. */
+/**
+ * Background for a desktop-style control: pressed > selected > hovered > [rest]. It eases from
+ * one state to the next over [app.nagmedar.ui.theme.NagMotion.COLOR] instead of jumping (Desktop
+ * Kit 0.2.0); with "Remove animations" it changes at once.
+ */
 @Composable
 fun stateBackground(state: InteractionState, selected: Boolean = false, rest: Color = Color.Transparent): Color {
     val colors = NagTheme.colors
-    return when {
+    val target = when {
         state.pressed -> colors.pressed
         selected -> colors.selection
         state.hovered -> colors.hover
+        // a clear rest fades the state's own tint out, not through black
+        rest.alpha == 0f -> colors.hover.copy(alpha = 0f)
         else -> rest
+    }
+    return animateStateColor(target, "stateBackground")
+}
+
+/** A control's [target] colour (its fill, text or icon) easing like [stateBackground]. */
+@Composable
+fun animateStateColor(target: Color, label: String = "stateColor"): Color =
+    animateColorAsState(target, NagTheme.motion.color(), label = label).value
+
+/**
+ * Touch feedback in place of a ripple: the element shrinks to [scale] while a finger holds it and
+ * springs back on release (Desktop Kit 0.2.0). By touch only: with a mouse nothing moves, as on a
+ * desktop. Drawn in the layer, so the press does not recompose what it scales.
+ */
+@Composable
+fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
+    val touch = NagTheme.inputMode == InputMode.Touch
+    val value = animateFloatAsState(if (pressed && touch) scale else 1f, NagTheme.motion.fastSpatial(), label = "pressScale")
+    // with a pointer nothing scales: no layer either
+    if (!touch) return this
+    return graphicsLayer {
+        scaleX = value.value
+        scaleY = value.value
     }
 }
 

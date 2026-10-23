@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ fun SwipeToRemove(
     var width by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val currentOnRemove by rememberUpdatedState(onRemove)
+    val motion by rememberUpdatedState(NagTheme.motion)
     // toward the start: left, or right in a right-to-left language
     val toStart = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f
     Box(
@@ -95,7 +97,7 @@ fun SwipeToRemove(
             ) {
                 Icon(NagIcons.Delete, contentDescription = null, tint = onDanger, modifier = Modifier.size(NagTheme.dimens.icon))
                 Spacer(Modifier.width(8.dp))
-                Text(label, style = NagTheme.type.label, color = onDanger, maxLines = 1)
+                Text(label, style = NagTheme.type.label, color = onDanger, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Box(
@@ -131,12 +133,13 @@ fun SwipeToRemove(
                         val far = abs(position) > width * REMOVE_AT
                         scope.launch {
                             if (completed && width > 0 && (far || speed > REMOVE_FLING)) {
-                                offset.animateTo(toStart * width)
+                                // it leaves on the emphasized accelerate curve
+                                offset.animateTo(toStart * width, motion.emphasizedExit())
                                 currentOnRemove()
                                 // a list that keeps the item (nothing was removed) shows it again
                                 offset.snapTo(0f)
                             } else {
-                                offset.animateTo(0f)
+                                offset.animateTo(0f, motion.spatial())
                             }
                         }
                     }

@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -77,6 +76,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.ignoreSecondaryButtons
 import app.nagmedar.ui.theme.NagTheme
 
@@ -229,7 +229,7 @@ fun PaletteSurface(
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(pluralStringResource(R.plurals.nag_palette_count, results.count, results.count), style = NagTheme.type.labelSmall,
-                    color = colors.textTertiary, maxLines = 1)
+                    color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.width(8.dp))
                 KeyCap("Esc")
             }
@@ -316,13 +316,14 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             .fillMaxWidth()
             .padding(horizontal = 6.dp)
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
-            .background(if (selected) colors.selection else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
+            .background(animateStateColor(if (selected) colors.selection else colors.selection.copy(alpha = 0f), "hitRow"), RoundedCornerShape(dimens.radiusControl))
             .hoverable(hover)
             .pointerHoverIcon(PointerIcon.Hand)
             // the field moves through the rows (↑↓); Tab changes the scope, so rows take no focus
             .focusProperties { canFocus = false }
             .ignoreSecondaryButtons()
-            .clickable(onClick = onClick)
+            // no ripple, as everywhere: the selection follows the pointer instead
+            .clickable(interactionSource = hover, indication = null, onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -401,6 +402,7 @@ private fun KeyCap(text: String) {
         style = NagTheme.type.mono,
         color = colors.textSecondary,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .background(colors.surface, RoundedCornerShape(4.dp))
             .border(1.dp, colors.borderStrong, RoundedCornerShape(4.dp))

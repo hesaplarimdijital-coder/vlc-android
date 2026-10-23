@@ -203,8 +203,8 @@ private fun OsdCard(item: OsdItem) {
             is OsdItem.Line -> Text(item.text, style = NagTheme.type.bodyStrong, color = Color.White, textAlign = TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
             is OsdItem.Seek -> {
                 val seconds = signed(item.totalMs / 1000, locale)
-                Text(stringResource(R.string.nag_osd_seek, seconds), style = NagTheme.type.title, color = Color.White, maxLines = 1)
-                Text(stringResource(R.string.nag_osd_time_of, playerClock(item.timeMs), playerClock(item.lengthMs)), style = NagTheme.type.mono, color = Color.White, maxLines = 1)
+                Text(stringResource(R.string.nag_osd_seek, seconds), style = NagTheme.type.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.nag_osd_time_of, playerClock(item.timeMs), playerClock(item.lengthMs)), style = NagTheme.type.mono, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             is OsdItem.Gauge -> GaugeRow(item)
         }
@@ -236,7 +236,7 @@ private fun GaugeRow(item: OsdItem.Gauge) {
             }
         }
         Spacer(Modifier.width(10.dp))
-        Text(percent, style = NagTheme.type.mono, color = Color.White, maxLines = 1, modifier = Modifier.widthIn(min = 40.dp))
+        Text(percent, style = NagTheme.type.mono, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(min = 40.dp))
     }
 }
 
@@ -268,6 +268,7 @@ private fun SeekRippleView(ripple: SeekRipple) {
                     style = NagTheme.type.bodyStrong,
                     color = Color.White,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
             }

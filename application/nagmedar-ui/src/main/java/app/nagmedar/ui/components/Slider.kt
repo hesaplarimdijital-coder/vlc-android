@@ -1,5 +1,7 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +34,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -210,7 +213,18 @@ fun NagSlider(
             },
         contentAlignment = Alignment.CenterStart,
     ) {
-        val trackHeight = if (emphasised) 5.dp else 3.dp
+        val motion = NagTheme.motion
+        val trackHeight by animateDpAsState(if (emphasised) 5.dp else 3.dp, motion.fastSpatial(), label = "trackHeight")
+        // the thumb springs in on hover, focus or touch and swells a little while dragged (Desktop Kit 0.2.0)
+        val thumbScale = animateFloatAsState(
+            when {
+                !emphasised || !enabled -> 0f
+                dragging -> 1.25f
+                else -> 1f
+            },
+            motion.fastSpatial(),
+            label = "thumbScale",
+        )
         val thumb = 12.dp
         Box(
             Modifier
@@ -242,11 +256,15 @@ fun NagSlider(
                 }
             }
         }
-        if (emphasised && enabled) {
+        if (thumbScale.value > 0.01f) {
             Box(
                 Modifier
                     .offset(x = maxWidth * shown - thumb / 2)
                     .size(thumb)
+                    .graphicsLayer {
+                        scaleX = thumbScale.value
+                        scaleY = thumbScale.value
+                    }
                     .background(colors.text, CircleShape),
             )
         }

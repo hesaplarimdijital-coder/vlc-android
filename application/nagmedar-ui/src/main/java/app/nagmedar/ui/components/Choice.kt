@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
@@ -72,6 +75,7 @@ fun <T> SegmentedChoice(
                     // by touch a 48 dp target either way (S-310)
                     .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
                     .widthIn(min = dimens.minTarget)
+                    .pressScale(state.pressed)
                     .focusRing(state, shape)
                     .background(stateBackground(state, isSelected), shape)
                     .pointerHoverIcon(PointerIcon.Hand)
@@ -81,7 +85,13 @@ fun <T> SegmentedChoice(
                     .padding(horizontal = dimens.gapM),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label, style = NagTheme.type.label, color = if (isSelected) colors.onSelection else colors.textSecondary, maxLines = 1)
+                Text(
+                    label,
+                    style = NagTheme.type.label,
+                    color = animateStateColor(if (isSelected) colors.onSelection else colors.textSecondary, "segmentLabel"),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
@@ -125,8 +135,9 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
 }
 
 /**
- * Label and control on one settings line. When the control leaves the label less than
- * [MinLabelWidth] (a phone), the control goes under its label instead of squeezing it.
+ * Label and control on one settings line. When the control leaves the label less room than the
+ * label needs, up to [MinLabelWidth] (a phone), the control goes under its label instead of
+ * squeezing it; a short label keeps a wide control beside it (Desktop Kit 0.2.0).
  */
 @Composable
 fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? = null, control: @Composable () -> Unit) {
@@ -146,7 +157,8 @@ fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? =
         val control = measurables[1].measure(loose)
         val gap = dimens.gapL.roundToPx()
         val room = if (constraints.hasBoundedWidth) constraints.maxWidth - control.width - gap else Constraints.Infinity
-        if (room >= MinLabelWidth.roundToPx()) {
+        val needed = minOf(measurables[0].maxIntrinsicWidth(Constraints.Infinity), MinLabelWidth.roundToPx())
+        if (room >= needed) {
             val label = measurables[0].measure(loose.copy(maxWidth = room))
             val width = if (constraints.hasBoundedWidth) constraints.maxWidth else label.width + gap + control.width
             val height = maxOf(label.height, control.height).coerceAtLeast(constraints.minHeight)
@@ -195,17 +207,18 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
             .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val thumbStart by animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(), label = "switchThumb")
         Box(
             Modifier
                 .size(width = 38.dp, height = 24.dp)
-                .background(if (checked) colors.accent else colors.borderStrong, RoundedCornerShape(12.dp)),
+                .background(animateStateColor(if (checked) colors.accent else colors.borderStrong, "switchTrack"), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.CenterStart,
         ) {
             Box(
                 Modifier
-                    .padding(start = if (checked) 18.dp else 4.dp)
+                    .padding(start = thumbStart)
                     .size(16.dp)
-                    .background(if (checked) colors.onAccent else colors.textSecondary, CircleShape),
+                    .background(animateStateColor(if (checked) colors.onAccent else colors.textSecondary, "switchThumbColor"), CircleShape),
             )
         }
         Spacer(Modifier.width(10.dp))
@@ -243,8 +256,8 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
         Box(
             Modifier
                 .size(16.dp)
-                .background(if (checked) colors.accent else Color.Transparent, box)
-                .border(1.5.dp, if (checked) colors.accent else colors.textTertiary, box),
+                .background(animateStateColor(if (checked) colors.accent else colors.accent.copy(alpha = 0f), "checkFill"), box)
+                .border(1.5.dp, animateStateColor(if (checked) colors.accent else colors.textTertiary, "checkBorder"), box),
             contentAlignment = Alignment.Center,
         ) {
             if (checked) Icon(NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(12.dp))

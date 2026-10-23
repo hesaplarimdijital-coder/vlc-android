@@ -191,11 +191,15 @@ private val TIME_WIDTH = 112.dp
 /** The list is kept showing the chosen line when keys or "next problem" move it. */
 @Composable
 private fun ScrollToFocus(listState: LazyListState, cues: List<TimedCue>, focus: Long?) {
+    val reduced = NagTheme.motion.reduced
     LaunchedEffect(focus) {
         val index = cues.indexOfFirst { it.id == focus }
         if (index < 0) return@LaunchedEffect
         val visible = listState.layoutInfo.visibleItemsInfo
-        if (visible.isEmpty() || index <= visible.first().index || index >= visible.last().index) listState.animateScrollToItem((index - 1).coerceAtLeast(0))
+        if (visible.isEmpty() || index <= visible.first().index || index >= visible.last().index) {
+            val target = (index - 1).coerceAtLeast(0)
+            if (reduced) listState.scrollToItem(target) else listState.animateScrollToItem(target)
+        }
     }
 }
 
@@ -275,10 +279,10 @@ private fun CueRow(
         if (wide) {
             Row(Modifier.width(NUMBER_WIDTH), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (playing) Icon(NagIcons.Play, contentDescription = null, tint = if (selected) colors.onSelection else colors.accentText, modifier = Modifier.size(10.dp))
-                Text(number.toString(), style = NagTheme.type.mono, color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1)
+                Text(number.toString(), style = NagTheme.type.mono, color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            Text(start, style = NagTheme.type.mono, color = timeColor, maxLines = 1, modifier = Modifier.width(TIME_WIDTH))
-            Text(end, style = NagTheme.type.mono, color = timeColor, maxLines = 1, modifier = Modifier.width(TIME_WIDTH))
+            Text(start, style = NagTheme.type.mono, color = timeColor, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(TIME_WIDTH))
+            Text(end, style = NagTheme.type.mono, color = timeColor, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(TIME_WIDTH))
             Text(oneLine(cue.text), style = NagTheme.type.label, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             IssueMark(issues, selected)
         } else {

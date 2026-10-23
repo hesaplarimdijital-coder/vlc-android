@@ -57,6 +57,7 @@ fun NagIconButton(
     Box(
         modifier = modifier
             .size(size)
+            .pressScale(state.pressed, 0.92f)
             .focusRing(state, shape)
             .background(stateBackground(state, selected), shape)
             .nagClickable(interaction, onClick, enabled = enabled, onClickLabel = contentDescription),
@@ -65,7 +66,7 @@ fun NagIconButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = if (enabled) tint else tint.copy(alpha = 0.4f),
+            tint = animateStateColor(if (enabled) tint else tint.copy(alpha = 0.4f), "iconTint"),
             modifier = Modifier.size(iconSize),
         )
         HoverTooltip(state.hovered && !state.pressed, contentDescription, keys)
@@ -91,14 +92,18 @@ fun NagPlayButton(
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val hit = dimens.minTarget.coerceAtLeast(36.dp)
-    val fill = when {
-        state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
-        state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
-        else -> colors.accent
-    }
+    val fill = animateStateColor(
+        when {
+            state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
+            state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
+            else -> colors.accent
+        },
+        "playFill",
+    )
     Box(
         modifier = modifier
             .size(hit)
+            .pressScale(state.pressed, 0.92f)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .nagClickable(interaction, onClick, enabled = enabled, onClickLabel = contentDescription),
         contentAlignment = Alignment.Center,
@@ -135,18 +140,24 @@ fun NagButton(
     val shape = RoundedCornerShape(dimens.radiusControl)
     val primaryFill = fill ?: colors.accent
     val primaryContent = onFill ?: colors.onAccent
-    val background = when {
-        // the fill moves toward its text colour: darker on the dark themes, lighter on the light one
-        primary && state.pressed -> lerp(primaryFill, primaryContent, 0.24f)
-        primary && state.hovered -> lerp(primaryFill, primaryContent, 0.12f)
-        primary -> primaryFill
-        else -> stateBackground(state, rest = colors.surfaceRaised)
-    }
+    val background = animateStateColor(
+        when {
+            // the fill moves toward its text colour: darker on the dark themes, lighter on the light one
+            primary && state.pressed -> lerp(primaryFill, primaryContent, 0.24f)
+            primary && state.hovered -> lerp(primaryFill, primaryContent, 0.12f)
+            primary -> primaryFill
+            state.pressed -> colors.pressed
+            state.hovered -> colors.hover
+            else -> colors.surfaceRaised
+        },
+        "buttonFill",
+    )
     val content = if (primary) primaryContent else colors.text
     Row(
         modifier = modifier
             // by touch a 48 dp target either way (S-310)
             .defaultMinSize(minWidth = dimens.minTarget, minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
+            .pressScale(state.pressed)
             .focusRing(state, shape)
             .background(background, shape)
             .then(if (primary) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))

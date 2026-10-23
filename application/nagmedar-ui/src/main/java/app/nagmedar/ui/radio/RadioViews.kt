@@ -223,11 +223,12 @@ private fun tabName(tab: RadioTab): Int = when (tab) {
 @Composable
 private fun RadioTabs(selected: RadioTab, counts: Map<RadioTab, Int?>, onSelect: (RadioTab) -> Unit, tabs: List<RadioTab> = RadioTab.entries) {
     val scroll = rememberScrollState()
+    val reduced = NagTheme.motion.reduced
     // S-207: the last tab (Kayıtlar) is out of sight on a phone: asked for, the strip scrolls to it
     LaunchedEffect(selected) {
         if (selected == RadioTab.Recordings) {
             snapshotFlow { scroll.maxValue }.first { it > 0 }
-            scroll.animateScrollTo(scroll.maxValue)
+            if (reduced) scroll.scrollTo(scroll.maxValue) else scroll.animateScrollTo(scroll.maxValue)
         }
     }
     Row(
@@ -388,7 +389,7 @@ private fun RadioSearchField(text: String, onChange: (String) -> Unit, onSearch:
         Icon(NagIcons.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
         Spacer(Modifier.width(10.dp))
         Box(Modifier.weight(1f)) {
-            if (text.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1)
+            if (text.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicTextField(
                 value = text,
                 onValueChange = onChange,
@@ -710,13 +711,14 @@ private fun StationRow(
                     Spacer(Modifier.width(12.dp))
                     Column(horizontalAlignment = Alignment.End) {
                         val tech = stationTech(station, LocalContext.current.resources)
-                        if (tech.isNotEmpty()) Text(tech, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+                        if (tech.isNotEmpty()) Text(tech, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (station.votes > 0) {
                             Text(
                                 pluralStringResource(R.plurals.nag_radio_votes, station.votes, numbers.format(station.votes)),
                                 style = NagTheme.type.labelSmall,
                                 color = colors.textTertiary,
                                 maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }

@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.max
@@ -361,7 +362,7 @@ fun SelectionBar(text: String, onClear: () -> Unit, clearLabel: String, modifier
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         NagIconButton(NagIcons.Close, clearLabel, onClear, tint = colors.onSelection)
-        Text(text, style = NagTheme.type.bodyStrong, color = colors.onSelection, maxLines = 1)
+        Text(text, style = NagTheme.type.bodyStrong, color = colors.onSelection, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
             Row(
                 Modifier.horizontalScroll(rememberScrollState()),

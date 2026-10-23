@@ -139,6 +139,7 @@ fun ToneBadge(text: String, tone: StateTone, modifier: Modifier = Modifier) {
         style = NagTheme.type.caption.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.04.em),
         color = c.content,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .background(c.container, RoundedCornerShape(5.dp))
             .padding(horizontal = 7.dp, vertical = 1.dp),
@@ -352,7 +353,7 @@ fun LoadingState(
                 Text(title, style = NagTheme.type.bodyStrong, color = colors.text, modifier = Modifier.weight(1f))
                 if (progressText != null) {
                     Spacer(Modifier.width(dimens.gapS))
-                    Text(progressText, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+                    Text(progressText, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             Spacer(Modifier.height(6.dp))
@@ -423,7 +424,7 @@ fun SuggestionChip(label: String, onClick: () -> Unit, modifier: Modifier = Modi
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = NagTheme.type.label, color = if (highlighted) colors.text else colors.textSecondary, maxLines = 1)
+        Text(label, style = NagTheme.type.label, color = if (highlighted) colors.text else colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -532,7 +533,7 @@ private fun ToneTextButton(action: StateAction, tone: StateTone, outlined: Boole
             .padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(action.label, style = NagTheme.type.label, color = c.content, maxLines = 1)
+        Text(action.label, style = NagTheme.type.label, color = c.content, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -655,6 +656,7 @@ fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, mod
                 style = NagTheme.type.mono,
                 color = mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.78f),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .border(1.dp, mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.3f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 5.dp, vertical = 1.dp),
@@ -684,6 +686,6 @@ private fun InverseTextButton(label: String, onClick: () -> Unit) {
             .padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = NagTheme.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.inverseAccent, maxLines = 1)
+        Text(label, style = NagTheme.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

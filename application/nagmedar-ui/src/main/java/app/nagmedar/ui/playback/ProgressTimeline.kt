@@ -42,8 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -84,16 +82,18 @@ import app.nagmedar.ui.components.HoverTooltip
 import app.nagmedar.ui.components.MarkReach
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SliderMark
+import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.nearest
 import app.nagmedar.ui.components.playingAt
+import app.nagmedar.ui.components.pressScale
+import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.theme.InputMode
-import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -179,9 +179,10 @@ fun ProgressTimeline(
         pointer -> 0.dp
         else -> if (bar) 5.dp else 6.dp
     }
-    val thumb by animateFloatAsState(with(density) { thumbTarget.toPx() }, motion.standard(NagMotion.SHORT), label = "thumb")
+    // the thumb and the track grow on the fast spring, as the kit's slider (Desktop Kit 0.2.0)
+    val thumb by animateFloatAsState(with(density) { thumbTarget.toPx() }, motion.fastSpatial(), label = "thumb")
     val trackTarget = if (active) 6.dp else if (bar) 3.dp else 4.dp
-    val track by animateFloatAsState(with(density) { trackTarget.toPx() }, motion.standard(NagMotion.SHORT), label = "track")
+    val track by animateFloatAsState(with(density) { trackTarget.toPx() }, motion.fastSpatial(), label = "track")
     val phone = style == TimelineStyle.Phone
     val waveHeight = when (style) {
         TimelineStyle.Panel -> 36.dp
@@ -357,29 +358,29 @@ fun ProgressTimeline(
     val remainingText = if (lengthMs > 0L) stringResource(R.string.nag_time_remaining, clock((lengthMs - elapsedMs).coerceAtLeast(0L))) else ""
     if (bar) {
         Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-            Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.widthIn(min = TIME_WIDTH))
+            Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.widthIn(min = TIME_WIDTH))
             Spacer(Modifier.width(dimens.gapS))
             timeline(Modifier.weight(1f))
             Spacer(Modifier.width(dimens.gapS))
-            Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1, modifier = Modifier.widthIn(min = TIME_WIDTH))
+            Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(min = TIME_WIDTH))
         }
     } else if (phone) {
         // the times over the target's lower part: a finger on them still seeks
         Box(modifier.fillMaxWidth()) {
             timeline(Modifier.fillMaxWidth())
             Row(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
-                Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1)
+                Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.weight(1f))
-                Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1)
+                Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     } else {
         Column(modifier.fillMaxWidth()) {
             timeline(Modifier.fillMaxWidth())
             Row(Modifier.fillMaxWidth().padding(top = 2.dp)) {
-                Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1)
+                Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.weight(1f))
-                Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1)
+                Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -638,10 +639,8 @@ fun TransportButton(
     shortcut: ShortcutId? = null,
 ) {
     val colors = NagTheme.colors
-    val motion = NagTheme.motion
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
-    val scale by animateFloatAsState(if (state.pressed) PRESSED_SCALE else 1f, motion.standard(NagMotion.SHORT), label = "press")
     val keys = shortcut?.let { ShortcutRegistry.chordLabel(it, LocalContext.current.resources) }
     val tint = when {
         selected -> colors.accentText
@@ -651,24 +650,15 @@ fun TransportButton(
     Box(
         modifier
             .size(size)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+            // a finger's press shrinks it; a mouse's does not (Desktop Kit 0.2.0)
+            .pressScale(state.pressed, PRESSED_SCALE)
             .focusRing(state, CircleShape)
-            .background(
-                when {
-                    state.pressed -> colors.pressed
-                    state.hovered -> colors.hover
-                    else -> Color.Transparent
-                },
-                CircleShape,
-            )
+            .background(stateBackground(state), CircleShape)
             .nagClickable(interaction, onClick, onClickLabel = contentDescription)
             .then(if (toggle) Modifier.semantics { this.selected = selected } else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(iconSize))
+        Icon(icon, contentDescription = contentDescription, tint = animateStateColor(tint, "transportIcon"), modifier = Modifier.size(iconSize))
         if (badge != null) {
             Text(
                 badge,
@@ -700,21 +690,20 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
     val motion = NagTheme.motion
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
-    val scale by animateFloatAsState(if (state.pressed) 0.92f else 1f, motion.standard(NagMotion.SHORT), label = "press")
     val label = stringResource(if (playing) R.string.nag_pause else R.string.nag_play)
     val keys = ShortcutRegistry.chordLabel(ShortcutId.PlayPause, LocalContext.current.resources)
-    val fill = when {
-        state.pressed -> lerp(colors.accent, colors.onAccent, 0.2f)
-        state.hovered -> lerp(colors.accent, colors.onAccent, 0.1f)
-        else -> colors.accent
-    }
+    val fill = animateStateColor(
+        when {
+            state.pressed -> lerp(colors.accent, colors.onAccent, 0.2f)
+            state.hovered -> lerp(colors.accent, colors.onAccent, 0.1f)
+            else -> colors.accent
+        },
+        "playPauseFill",
+    )
     Box(
         modifier
             .size(size)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+            .pressScale(state.pressed, 0.92f)
             .focusRing(state, CircleShape)
             .padding(2.dp)
             .background(fill, CircleShape)
@@ -722,7 +711,7 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
             .testTag("play-pause"),
         contentAlignment = Alignment.Center,
     ) {
-        Crossfade(playing, animationSpec = motion.standard(NagMotion.SHORT), label = "play-pause") { isPlaying ->
+        Crossfade(playing, animationSpec = motion.color(), label = "play-pause") { isPlaying ->
             Icon(
                 if (isPlaying) NagIcons.Pause else NagIcons.Play,
                 contentDescription = label,

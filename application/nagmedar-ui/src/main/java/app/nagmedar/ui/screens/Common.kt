@@ -23,9 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -38,6 +40,7 @@ import app.nagmedar.ui.theme.NagTheme
 /**
  * Title row of a screen. In the sidebar layout the menu bar carries no page title, so the
  * screen shows it here; on smaller windows the top bar already shows it and only [actions] remain.
+ * On a phone a header with neither a subtitle nor actions takes no room at all (Desktop Kit 0.1.3).
  */
 @Composable
 fun PageHeader(
@@ -47,15 +50,22 @@ fun PageHeader(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val dimens = NagTheme.dimens
-    val showTitle = LocalNavKind.current == NavKind.Sidebar
+    val navKind = LocalNavKind.current
+    val showTitle = navKind == NavKind.Sidebar
+    val vertical = if (navKind == NavKind.BottomBar && subtitle == null) {
+        Modifier.verticalPaddingUnlessEmpty(dimens.gapS)
+    } else {
+        Modifier.padding(top = if (showTitle) dimens.gapL else dimens.gapS, bottom = dimens.gapS)
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = dimens.pagePadding, end = dimens.pagePadding, top = if (showTitle) dimens.gapL else dimens.gapS, bottom = dimens.gapS),
+            .padding(start = dimens.pagePadding, end = dimens.pagePadding)
+            .then(vertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showTitle) {
-            Text(title, style = NagTheme.type.display, color = NagTheme.colors.text, maxLines = 1,
+            Text(title, style = NagTheme.type.display, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.semantics { heading() })
             if (subtitle != null) Spacer(Modifier.width(dimens.gapS))
         }
@@ -74,6 +84,18 @@ fun PageHeader(
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.gapXs), content = actions)
     }
+}
+
+/** [padding] above and below what is in it, and no room at all when it is empty (a phone's header without actions). */
+private fun Modifier.verticalPaddingUnlessEmpty(padding: Dp): Modifier = layout { measurable, constraints ->
+    val pad = padding.roundToPx()
+    val inner = constraints.copy(
+        minHeight = (constraints.minHeight - 2 * pad).coerceAtLeast(0),
+        maxHeight = if (constraints.hasBoundedHeight) (constraints.maxHeight - 2 * pad).coerceAtLeast(0) else constraints.maxHeight,
+    )
+    val placeable = measurable.measure(inner)
+    val height = if (placeable.height == 0) 0 else placeable.height + 2 * pad
+    layout(placeable.width, height.coerceIn(constraints.minHeight, constraints.maxHeight)) { placeable.placeRelative(0, pad) }
 }
 
 /** "More": every destination that the current navigation chrome does not show. */
@@ -108,7 +130,7 @@ private fun DestinationRow(destination: Destination, onClick: () -> Unit) {
         Icon(destination.icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(dimens.iconLarge))
         Spacer(Modifier.width(dimens.gapM))
         Column(Modifier.weight(1f)) {
-            Text(stringResource(destination.label), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1)
+            Text(stringResource(destination.label), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             destination.description?.let {
                 Text(stringResource(it), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1,
                     overflow = TextOverflow.Ellipsis)

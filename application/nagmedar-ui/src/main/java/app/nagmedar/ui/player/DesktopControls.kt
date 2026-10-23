@@ -2,7 +2,6 @@ package app.nagmedar.ui.player
 
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -71,6 +70,7 @@ import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
 import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.player.subtitles.shortLanguage
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.VisualizerKind
 import kotlinx.coroutines.delay
@@ -99,6 +99,8 @@ fun DesktopControls(
         visibility.hide()
     }
     val latest by rememberUpdatedState(state)
+    // the controls come quickly and go gently, as the video's picture is what stays
+    val motion = NagTheme.motion
     Box(
         modifier
             .fillMaxSize()
@@ -109,16 +111,16 @@ fun DesktopControls(
     ) {
         AnimatedVisibility(
             visible = visibility.visible,
-            enter = fadeIn(tween(120)),
-            exit = fadeOut(tween(220)),
+            enter = fadeIn(motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(motion.exit(NagMotion.MEDIUM)),
             modifier = Modifier.align(Alignment.TopCenter),
         ) {
             TitleBar(state, actions, visibility, Modifier.holdsChrome(visibility))
         }
         AnimatedVisibility(
             visible = visibility.visible,
-            enter = fadeIn(tween(120)),
-            exit = fadeOut(tween(220)),
+            enter = fadeIn(motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(motion.exit(NagMotion.MEDIUM)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             ControlBar(state, actions, visibility, previews, timelineHover, Modifier.holdsChrome(visibility))
@@ -227,6 +229,7 @@ private fun ControlBar(
                     style = NagTheme.type.mono,
                     color = Color.White,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("player-time"),
                 )
                 // S-1104: the chapter of a podcast episode that plays, and the buttons to move between them

@@ -118,7 +118,6 @@ import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
-import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.PlayingVisualizer
 import java.io.File
@@ -398,6 +397,7 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
     val next = stringResource(R.string.nag_next)
     val previous = stringResource(R.string.nag_previous)
     val close = stringResource(R.string.nag_player_close)
+    val settle = motion.spatial<Float>()
     BoxWithConstraints(
         modifier
             .semantics {
@@ -425,14 +425,15 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                                 horizontal && dx >= sideways -> latestActions.previous()
                                 !horizontal && dy >= down -> latestClose()
                             }
-                            swipe.animateTo(0f)
-                            drop.animateTo(0f)
+                            // back to rest on the spatial spring, both at once
+                            launch { swipe.animateTo(0f, settle) }
+                            drop.animateTo(0f, settle)
                         }
                     },
                     onDragCancel = {
                         scope.launch {
-                            swipe.animateTo(0f)
-                            drop.animateTo(0f)
+                            launch { swipe.animateTo(0f, settle) }
+                            drop.animateTo(0f, settle)
                         }
                     },
                 ) { change, amount ->
@@ -449,8 +450,8 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
         val side = minOf(maxWidth, maxHeight, ARTWORK_MAX)
         val widthPx = with(density) { maxWidth.toPx() }.coerceAtLeast(1f)
         // playing, the artwork comes forward; paused, it settles back a little
-        val scale by animateFloatAsState(if (parts.info.playing) 1f else PAUSED_SCALE, motion.standard(NagMotion.LONG), label = "artwork")
-        val lift by animateDpAsState(if (parts.info.playing) dimens.gapXl else dimens.gapXs, motion.standard(NagMotion.LONG), label = "lift")
+        val scale by animateFloatAsState(if (parts.info.playing) 1f else PAUSED_SCALE, motion.emphasized(), label = "artwork")
+        val lift by animateDpAsState(if (parts.info.playing) dimens.gapXl else dimens.gapXs, motion.emphasized(), label = "lift")
         Box(
             Modifier
                 .offset { IntOffset(swipe.value.roundToInt(), 0) }

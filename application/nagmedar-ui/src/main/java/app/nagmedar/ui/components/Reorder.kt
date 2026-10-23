@@ -2,7 +2,6 @@ package app.nagmedar.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
@@ -36,6 +35,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.math.max
 import kotlin.math.min
@@ -189,7 +189,8 @@ fun Modifier.reorderItem(state: ReorderState, key: Any, index: Int): Modifier = 
     val isDragged = state.dragged == key
     val aside by animateFloatAsState(
         targetValue = if (isDragged) 0f else state.displacement(index, key),
-        animationSpec = if (state.dragging) tween(durationMillis = 150) else snap(),
+        // the others make room on the fast spring while an item is dragged; after the drop they are there at once
+        animationSpec = if (state.dragging) NagTheme.motion.fastSpatial() else snap(),
         label = "reorder",
     )
     val pinnable = LocalPinnableContainer.current

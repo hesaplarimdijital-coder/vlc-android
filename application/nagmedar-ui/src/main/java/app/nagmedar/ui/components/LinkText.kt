@@ -83,7 +83,7 @@ fun ArtistAlbumLine(
         if (shownArtist != null) {
             LinkText(shownArtist, onArtist, style, color, Modifier.weight(shownArtist.length.coerceAtLeast(4).toFloat(), fill = false), clickLabel = artistLabel)
         }
-        if (shownArtist != null && shownAlbum != null) Text(" · ", style = style, color = color, maxLines = 1)
+        if (shownArtist != null && shownAlbum != null) Text(" · ", style = style, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (shownAlbum != null) {
             LinkText(shownAlbum, onAlbum, style, color, Modifier.weight(shownAlbum.length.coerceAtLeast(4).toFloat(), fill = false), clickLabel = albumLabel)
         }
