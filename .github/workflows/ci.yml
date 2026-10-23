@@ -399,12 +399,14 @@ jobs:
           apk=$(find application/app/build/outputs/apk -ipath '*debug*' -iname '*arm64*.apk' -print -quit)
           [ -n "$apk" ] || apk=$(find application/app/build/outputs/apk -ipath '*debug*' -name '*.apk' -print -quit)
           [ -n "$apk" ] || { echo "no debug APK under application/app/build/outputs/apk"; find application/app/build/outputs/apk -name '*.apk'; exit 1; }
-          cp "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk"
+          ls -la "$apk"
+          # GitHub refuses files over 100 MB: the APK goes up in 90 MB parts (cat them back together)
+          split -b 90m -d "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk.part"
           ls -la "$out"
-          printf 'Nagmedar debug APK of master %s (run %s), built %s\n' "${GITHUB_SHA::8}" "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$out/README.md"
+          printf 'Nagmedar debug APK of master %s (run %s), built %s\ncat nagmedar-debug-%s.apk.part* > nagmedar-debug-%s.apk\n' "${GITHUB_SHA::8}" "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%MZ)" "${GITHUB_SHA::8}" "${GITHUB_SHA::8}" > "$out/README.md"
           cd "$out"
           git init -q && git checkout -q --orphan ci/apk
-          git add -A && git commit -q -m "Debug APK of ${GITHUB_SHA::8}"
+          git add -A && git -c user.name=nagmedar-ci -c user.email=ci@nagmedar.invalid commit -q -m "Debug APK of ${GITHUB_SHA::8}"
           git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/ci/apk"
 
       # S-1404: run on a device with buildsystem/benchmark/run.sh --apks <this, unzipped>
