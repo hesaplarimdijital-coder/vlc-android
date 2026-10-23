@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -68,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.FilterChip
@@ -236,8 +235,8 @@ fun PaletteSurface(
             HorizontalRule()
             // what is searched
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                // a phone scrolls the chips sideways
-                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // one line that scrolls sideways where they do not fit, its ends fading into the palette
+                ChipRow(Modifier.weight(1f), wrap = false, fadeColor = colors.surfaceRaised) {
                     FilterChip(stringResource(R.string.nag_palette_all), results.scope == null, { scope = null })
                     PaletteKind.entries.forEach { kind ->
                         FilterChip(stringResource(kind.title), results.scope == kind, { on -> scope = if (on) kind else null })
