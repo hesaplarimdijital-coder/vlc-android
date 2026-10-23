@@ -1,5 +1,9 @@
 package app.nagmedar.ui.shell
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,9 +28,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -34,23 +48,29 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.HoverTooltip
+import app.nagmedar.ui.components.InteractionState
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.VerticalRule
+import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
@@ -104,30 +124,64 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .width(56.dp)
-                .height(30.dp)
-                .focusRing(state, pill)
-                .background(stateBackground(state, selected), pill),
-            contentAlignment = Alignment.Center,
-        ) {
+        NavIndicator(selected, state, pill, Modifier.width(56.dp).height(30.dp)) {
             Icon(
                 destination.icon,
                 contentDescription = null,
-                tint = if (selected) colors.onSelection else colors.textSecondary,
+                tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
                 modifier = Modifier.size(dimens.icon),
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
             text = stringResource(destination.shortLabel),
-            style = NagTheme.type.caption,
-            color = if (selected) colors.text else colors.textSecondary,
+            // the selected tab's label a shade heavier (Desktop Kit 0.2.0)
+            style = if (selected) NagTheme.type.caption.copy(fontWeight = FontWeight.Medium) else NagTheme.type.caption,
+            color = animateStateColor(if (selected) colors.text else colors.textSecondary, "navLabel"),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+/**
+ * The pill behind a navigation icon (Desktop Kit 0.2.0). Hover and press tint the whole pill; the
+ * selection pill grows out from the middle on a soft spring when the item is chosen and shrinks
+ * back when it is left, as in Android's navigation bar and rail. By touch a press also shrinks
+ * the icon slightly. The pill is drawn behind, so its spring does not recompose the item.
+ */
+@Composable
+private fun NavIndicator(selected: Boolean, state: InteractionState, shape: RoundedCornerShape, modifier: Modifier, content: @Composable () -> Unit) {
+    val colors = NagTheme.colors
+    val fraction = animateFloatAsState(if (selected) 1f else 0f, NagTheme.motion.spatial(), label = "navIndicator")
+    val feedback = animateStateColor(
+        when {
+            state.pressed -> colors.pressed
+            state.hovered && !selected -> colors.hover
+            else -> colors.pressed.copy(alpha = 0f)
+        },
+        "navFeedback",
+    )
+    val selection = colors.selection
+    Box(
+        modifier = modifier
+            .pressScale(state.pressed, 0.94f)
+            .focusRing(state, shape)
+            .drawBehind {
+                val f = fraction.value.coerceIn(0f, 1f)
+                if (f > 0.001f) {
+                    val width = size.width * (0.4f + 0.6f * f)
+                    drawRoundRect(
+                        color = selection.copy(alpha = selection.alpha * f),
+                        topLeft = Offset((size.width - width) / 2f, 0f),
+                        size = Size(width, size.height),
+                        cornerRadius = CornerRadius(size.height / 2f),
+                    )
+                }
+            }
+            .background(feedback, shape),
+        contentAlignment = Alignment.Center,
+    ) { content() }
 }
 
 // ---------------------------------------------------------------- medium/expanded: rail
@@ -181,22 +235,19 @@ private fun RailItem(destination: Destination, selected: Boolean, onClick: () ->
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .width(48.dp)
-                .height(28.dp)
-                .focusRing(state, pill)
-                .background(stateBackground(state, selected), pill),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(destination.icon, contentDescription = null, tint = if (selected) colors.onSelection else colors.textSecondary,
-                modifier = Modifier.size(dimens.icon))
+        NavIndicator(selected, state, pill, Modifier.width(48.dp).height(28.dp)) {
+            Icon(
+                destination.icon,
+                contentDescription = null,
+                tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
+                modifier = Modifier.size(dimens.icon),
+            )
         }
         Spacer(Modifier.height(2.dp))
         Text(
             text = stringResource(destination.shortLabel),
             style = NagTheme.type.caption,
-            color = if (selected) colors.text else colors.textSecondary,
+            color = animateStateColor(if (selected) colors.text else colors.textSecondary, "navLabel"),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -212,7 +263,9 @@ val SidebarWidthRange = 200f..360f
 
 /**
  * The sidebar of large windows. Expanded, its end edge can be dragged between 200 and 360 dp
- * when [width] is given; collapsed, it shows icons only.
+ * when [width] is given; collapsed, it shows icons only. Collapsing and expanding moves its edge
+ * over [NagMotion.LONG] on the emphasized curve, the icons keep their place and the labels show
+ * once there is room for them (Desktop Kit 0.2.0); a drag of the edge follows the pointer at once.
  */
 @Composable
 fun Sidebar(
@@ -225,6 +278,22 @@ fun Sidebar(
     width: PaneWidthState? = null,
 ) {
     val dimens = NagTheme.dimens
+    val motion = NagTheme.motion
+    val expandedWidth = width?.widthDp?.coerceIn(SidebarWidthRange)?.dp ?: dimens.sidebarWidth
+    val target = if (collapsed) dimens.sidebarCollapsedWidth else expandedWidth
+    val shown = remember { Animatable(target, Dp.VectorConverter) }
+    var lastCollapsed by remember { mutableStateOf(collapsed) }
+    LaunchedEffect(target) {
+        if (collapsed != lastCollapsed) {
+            lastCollapsed = collapsed
+            shown.animateTo(target, motion.emphasized())
+        } else {
+            // the edge dragged, or the density changed: no animation
+            shown.snapTo(target)
+        }
+    }
+    val span = (expandedWidth - dimens.sidebarCollapsedWidth).value
+    val open = if (span <= 0f) 1f else ((shown.value - dimens.sidebarCollapsedWidth).value / span).coerceIn(0f, 1f)
     Box(modifier.fillMaxHeight()) {
         SidebarColumn(
             current = current,
@@ -232,11 +301,8 @@ fun Sidebar(
             collapsed = collapsed,
             onToggleCollapsed = onToggleCollapsed,
             badges = badges,
-            width = when {
-                collapsed -> dimens.sidebarCollapsedWidth
-                width != null -> width.widthDp.coerceIn(SidebarWidthRange).dp
-                else -> dimens.sidebarWidth
-            },
+            width = shown.value,
+            open = open,
         )
         if (width != null && !collapsed) {
             // over the sidebar's padding and its edge, so the content does not move
@@ -254,6 +320,9 @@ fun Sidebar(
     }
 }
 
+/** Labels stay hidden in the first half of the opening, so they never show squeezed. */
+private fun labelAlpha(open: Float): Float = ((open - 0.5f) * 2f).coerceIn(0f, 1f)
+
 @Composable
 private fun SidebarColumn(
     current: Destination,
@@ -262,6 +331,7 @@ private fun SidebarColumn(
     onToggleCollapsed: () -> Unit,
     badges: NavBadges,
     width: Dp,
+    open: Float,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -271,6 +341,7 @@ private fun SidebarColumn(
             modifier = Modifier
                 .width(width)
                 .fillMaxHeight()
+                .clipToBounds()
                 .background(colors.chrome)
                 .semantics { paneTitle = label },
         ) {
@@ -278,7 +349,7 @@ private fun SidebarColumn(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = if (collapsed) 6.dp else dimens.gapS, vertical = dimens.gapS)
+                    .padding(horizontal = lerp(6.dp, dimens.gapS, open), vertical = dimens.gapS)
                     .selectableGroup(),
             ) {
                 NavSection.entries.filter { it != NavSection.Footer }.forEach { section ->
@@ -286,12 +357,15 @@ private fun SidebarColumn(
                     if (items.isEmpty()) return@forEach
                     val title = section.title
                     if (!collapsed && title != null) {
-                        SectionCaption(stringResource(title), Modifier.padding(start = 10.dp, top = dimens.gapM, bottom = 4.dp))
+                        SectionCaption(
+                            stringResource(title),
+                            Modifier.padding(start = 10.dp, top = dimens.gapM, bottom = 4.dp).alpha(labelAlpha(open)),
+                        )
                     } else {
                         Spacer(Modifier.height(dimens.gapS))
                     }
                     items.forEach { destination ->
-                        SidebarItem(destination, destination == current, collapsed, badges[destination]) { onSelect(destination) }
+                        SidebarItem(destination, destination == current, collapsed, badges[destination], open) { onSelect(destination) }
                     }
                 }
             }
@@ -302,7 +376,7 @@ private fun SidebarColumn(
             ) {
                 if (!collapsed) {
                     Box(Modifier.weight(1f)) {
-                        SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = false, badge = null) {
+                        SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = false, badge = null, open = open) {
                             onSelect(Destination.Settings)
                         }
                     }
@@ -316,7 +390,7 @@ private fun SidebarColumn(
             }
             if (collapsed) {
                 Box(Modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp)) {
-                    SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = true, badge = null) {
+                    SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = true, badge = null, open = open) {
                         onSelect(Destination.Settings)
                     }
                 }
@@ -326,14 +400,21 @@ private fun SidebarColumn(
     }
 }
 
+/**
+ * [open] runs from 0 (collapsed) to 1 (expanded) while the sidebar moves: a collapsed item's icon
+ * keeps its place and goes smoothly to where an expanded item has it.
+ */
 @Composable
-private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: Boolean, badge: String?, onClick: () -> Unit) {
+private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: Boolean, badge: String?, open: Float, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val label = stringResource(destination.label)
+    // a collapsed item centres its icon; the same start padding keeps it still while the sidebar opens
+    val collapsedStart = ((dimens.sidebarCollapsedWidth - 12.dp - dimens.icon) / 2).coerceAtLeast(0.dp)
+    val showLabel = !collapsed && open > 0.5f
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,30 +427,33 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
                 if (collapsed) contentDescription = label
             }
             .nagClickable(interaction, onClick, role = Role.Tab)
-            .padding(horizontal = if (collapsed) 0.dp else 10.dp),
+            .padding(start = lerp(collapsedStart, 10.dp, open), end = if (showLabel) 10.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = if (collapsed) Arrangement.Center else Arrangement.Start,
+        horizontalArrangement = Arrangement.Start,
     ) {
         Icon(
             destination.icon,
             contentDescription = null,
-            tint = if (selected) colors.accentText else colors.textSecondary,
+            tint = animateStateColor(if (selected) colors.accentText else colors.textSecondary, "sidebarIcon"),
             modifier = Modifier.size(dimens.icon),
         )
-        if (!collapsed) {
+        if (showLabel) {
             Spacer(Modifier.width(10.dp))
-            Text(
-                text = label,
-                style = if (selected) NagTheme.type.bodyStrong else NagTheme.type.body,
-                color = if (selected) colors.onSelection else colors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            if (badge != null) {
-                Text(badge, style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1)
+            Row(Modifier.weight(1f).alpha(labelAlpha(open)), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = label,
+                    style = if (selected) NagTheme.type.bodyStrong else NagTheme.type.body,
+                    color = animateStateColor(if (selected) colors.onSelection else colors.text, "sidebarLabel"),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                if (badge != null) {
+                    Text(badge, style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
             }
-        } else {
+        }
+        if (collapsed) {
             // only the icon shows: a resting mouse brings the name (S-404)
             HoverTooltip(state.hovered && !state.pressed, label, badge)
         }
@@ -381,17 +465,36 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
 /**
  * Compact and medium top bar: page title and search ([onSearch] null: none, on the search page
  * itself). In a desktop window's [caption] bar (S-306) it is the bar: the title moves the window,
- * the search button takes its clicks, the system's buttons keep their place.
+ * the search button takes its clicks, the system's buttons keep their place. [scrolled] (a phone's
+ * content has left its top): the bar takes the chrome colour and a thin rule shows under it, as
+ * Android's top app bar does (Desktop Kit 0.2.0); its height stays. The bar is at least its
+ * height, so larger text is not cut.
  */
 @Composable
-fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier, caption: CaptionBar? = null) {
+fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier, caption: CaptionBar? = null, scrolled: Boolean = false) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    Column(modifier.fillMaxWidth().background(colors.background)) {
+    val motion = NagTheme.motion
+    val background by animateColorAsState(if (scrolled) colors.chrome else colors.background, motion.standard(NagMotion.MEDIUM), label = "topBar")
+    val ruleAlpha = animateFloatAsState(if (scrolled) 1f else 0f, motion.standard(NagMotion.MEDIUM), label = "topBarRule")
+    val rule = colors.border
+    Column(
+        modifier
+            .fillMaxWidth()
+            .background(background)
+            // over the bottom edge, so the bar keeps its height with the rule or without it
+            .drawBehind {
+                val alpha = ruleAlpha.value
+                if (alpha > 0f) {
+                    val line = 1.dp.toPx()
+                    drawRect(rule.copy(alpha = rule.alpha * alpha), topLeft = Offset(0f, size.height - line), size = Size(size.width, line))
+                }
+            },
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
+                .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
                 .captionPadding(caption)
                 .padding(start = dimens.pagePadding, end = dimens.gapS),
             verticalAlignment = Alignment.CenterVertically,
@@ -421,14 +524,14 @@ fun MenuBarChrome(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(maxOf(dimens.menuBarHeight, caption?.height ?: 0.dp))
+                .heightIn(min = maxOf(dimens.menuBarHeight, caption?.height ?: 0.dp))
                 .captionPadding(caption)
                 .padding(start = 14.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BrandMark(Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.nagmedar_shell_title), style = NagTheme.type.bodyStrong, color = colors.text)
+            Text(stringResource(R.string.nagmedar_shell_title), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.width(14.dp))
             Row(Modifier.captionTarget(caption), verticalAlignment = Alignment.CenterVertically, content = menus)
             Spacer(Modifier.weight(1f))
@@ -448,9 +551,9 @@ fun SearchField(onClick: () -> Unit, shortcut: String?, modifier: Modifier = Mod
     val shape = RoundedCornerShape(7.dp)
     Row(
         modifier = modifier
-            .height(dimens.controlHeight.coerceAtLeast(dimens.minTarget))
+            .heightIn(min = dimens.controlHeight.coerceAtLeast(dimens.minTarget))
             .focusRing(state, shape)
-            .background(if (state.hovered) colors.hover else colors.surface, shape)
+            .background(stateBackground(state, rest = colors.surface), shape)
             .nagClickable(interaction, onClick, onClickLabel = stringResource(R.string.nag_search))
             .padding(start = 10.dp, end = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -472,7 +575,7 @@ fun KeyCap(text: String, modifier: Modifier = Modifier) {
             .background(colors.surfaceRaised, RoundedCornerShape(4.dp))
             .padding(horizontal = 6.dp, vertical = 1.dp),
     ) {
-        Text(text, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+        Text(text, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

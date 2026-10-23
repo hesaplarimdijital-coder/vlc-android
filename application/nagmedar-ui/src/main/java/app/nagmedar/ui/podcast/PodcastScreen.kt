@@ -87,6 +87,7 @@ import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.openLink
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.shell.ListDetailPanes
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -193,10 +194,24 @@ fun PodcastsContent(
             }
         },
         detailPane = { _, fullScreen ->
-            if (episodeOpen) {
-                EpisodeDetailPane(model, fullScreen, actions, listening)
+            val shownPage = page ?: retained
+            if (fullScreen) {
+                // a phone's window: the episode's page comes over the show's on the shared axis and Back
+                // (the predictive gesture) takes it away again (Desktop Kit 0.2.0)
+                val held = remember { EpisodeHold() }
+                model.episode?.let { held.ui = it }
+                DetailTransition(
+                    detail = model.episodeId,
+                    onBack = actions.onCloseEpisode,
+                    list = { shownPage?.let { PodcastPageView(it, fullScreen = true, actions = actions, downloads = model.downloads) } },
+                ) { _ ->
+                    // closing, the page that was open stays until it has gone
+                    EpisodeDetailPane(if (model.episodeId == null) model.copy(episode = held.ui) else model, fullScreen = true, actions, listening)
+                }
+            } else if (episodeOpen) {
+                EpisodeDetailPane(model, fullScreen = false, actions, listening)
             } else {
-                (page ?: retained)?.let { PodcastPageView(it, fullScreen, actions, model.downloads) }
+                shownPage?.let { PodcastPageView(it, fullScreen = false, actions = actions, downloads = model.downloads) }
             }
         },
         widthKey = if (episodeOpen) "podcast-episode" else "podcast-page",
@@ -207,6 +222,11 @@ fun PodcastsContent(
     model.add?.let { AddAddressDialog(it, actions.onAddSubmit, actions.onAddDismiss) }
     model.importing?.let { ImportDialog(it, actions.onImportDismiss) }
     model.showSettings?.let { ShowSettingsDialog(it, actions) }
+}
+
+/** The episode's page last shown on a phone, kept while it closes; plain, so keeping it never redraws anything. */
+private class EpisodeHold {
+    var ui: EpisodeDetailUi? = null
 }
 
 @Composable

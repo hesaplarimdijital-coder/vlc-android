@@ -13,10 +13,14 @@
 
     <application>
         <!-- New Compose interface (preview in MVP0). Handles window resizes itself so the
-             shell keeps its state when a DeX window is resized or moved between displays. -->
+             shell keeps its state when a DeX window is resized or moved between displays.
+             enableOnBackInvokedCallback: the predictive Back gesture (Android 14 and later) plays the
+             screens' and the details' transitions along with the finger (Desktop Kit 0.2.0); set on this
+             activity only, as the classic player still reads the Back key in two of its dialogs. -->
         <activity
             android:name="app.nagmedar.ui.NagmedarActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|keyboard|keyboardHidden|navigation|uiMode|fontScale"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:label="@string/nagmedar_shell_title"
             android:resizeableActivity="true"

@@ -1,7 +1,5 @@
 package app.nagmedar.ui.shell
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +29,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -111,7 +108,9 @@ private const val DIVIDER = "divider"
  * arrangement, so it keeps its scroll position and selection.
  *
  * [detail] null closes the details; [detailPane] gets the key and whether it fills the content
- * area. The pane slides in over [NagMotion.LONG] and keeps its content while it closes.
+ * area. Beside the list the pane slides in over [NagMotion.LONG] on the emphasized curve; over
+ * it, the details come and go on the shared axis of [DetailMotion] and Back is the predictive
+ * gesture (Desktop Kit 0.2.0). The pane keeps its content while it closes.
  */
 @Composable
 fun <K : Any> ListDetailPanes(
@@ -128,25 +127,26 @@ fun <K : Any> ListDetailPanes(
     val side = currentWidthClass() >= WidthClass.Expanded
     val motion = NagTheme.motion
     val width = rememberPaneWidth(widthKey, defaultDetailWidth)
-    val progress = remember { Animatable(if (detail != null) 1f else 0f) }
+    val state = rememberDetailMotion(detail != null)
+    val progress = state.progress
     var retained by remember { mutableStateOf(detail) }
+    // registered before the details' own handlers: those (a selection, an episode) go first
+    DetailBackHandler(enabled = detail != null && !side, state = state, onBack = onCloseDetail)
     LaunchedEffect(detail, side) {
         if (detail != null) {
             retained = detail
-            progress.animateTo(1f, if (side) motion.standard(NagMotion.LONG) else motion.enter())
+            if (side) progress.animateTo(1f, motion.emphasized()) else state.show(open = true, motion)
         } else {
-            progress.animateTo(0f, if (side) motion.standard() else motion.exit())
+            if (side) progress.animateTo(0f, motion.emphasizedExit()) else state.show(open = false, motion)
             retained = null
         }
     }
-    BackHandler(enabled = detail != null && !side, onBack = onCloseDetail)
     val shown = detail ?: retained
     val opening = detail != null
-    val listCovered by remember(side) { derivedStateOf { !side && progress.value >= 1f } }
-    val slidePx = with(LocalDensity.current) { NagMotion.STEP_SLIDE_DP.dp.toPx() }
-    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val listCovered by remember(side, state) { derivedStateOf { !side && state.covered } }
+    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val dividerLabel = stringResource(R.string.nag_pane_divider)
-    BoxWithConstraints(modifier.fillMaxSize().clipToBounds()) {
+    BoxWithConstraints(modifier.fillMaxSize().clipToBounds().then(if (side) Modifier else Modifier.detailShade(state))) {
         val handle = paneHandleWidth()
         val maxDetail = (maxWidth - minListWidth - handle).coerceAtLeast(minDetailWidth)
         val range = minDetailWidth.value..maxDetail.value
@@ -190,7 +190,6 @@ fun <K : Any> ListDetailPanes(
         ) { measurables, constraints ->
             val w = constraints.maxWidth
             val h = constraints.maxHeight
-            val p = progress.value
             val listM = measurables.first { it.layoutId == LIST }
             val detailM = measurables.firstOrNull { it.layoutId == DETAIL }
             val dividerM = measurables.firstOrNull { it.layoutId == DIVIDER }
@@ -202,24 +201,18 @@ fun <K : Any> ListDetailPanes(
                 val list = listM.measure(Constraints.fixed((w - reserved).coerceAtLeast(0), h))
                 val divider = dividerM?.measure(Constraints.fixed(handlePx, h))
                 val pane = detailM?.measure(Constraints.fixed(detailPx, h))
-                val edge = w - ((detailPx + handlePx) * p).roundToInt()
                 layout(w, h) {
+                    // read while placing: the slide moves the pane without measuring anything again
+                    val edge = w - ((detailPx + handlePx) * progress.value).roundToInt()
                     list.placeRelative(0, 0)
                     pane?.placeRelative(edge + handlePx, 0)
                     divider?.placeRelative(edge, 0)
                 }
             } else {
-                // once the details cover the area the list is neither drawn nor read out, but stays composed
-                val covered = detailM != null && p >= 1f
-                val list = if (covered) null else listM.measure(Constraints.fixed(w, h))
+                // once the details cover the area the list is neither measured, drawn nor read out, but stays composed
+                val list = if (detailM != null && listCovered) null else listM.measure(Constraints.fixed(w, h))
                 val pane = detailM?.measure(Constraints.fixed(w, h))
-                layout(w, h) {
-                    list?.placeRelative(0, 0)
-                    pane?.placeRelativeWithLayer(0, 0) {
-                        alpha = p
-                        translationX = (1f - p) * slidePx * (if (rtl) -1f else 1f)
-                    }
-                }
+                layout(w, h) { placeListAndDetail(state, list, pane, w, direction) }
             }
         }
     }

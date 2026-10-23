@@ -17,7 +17,9 @@ private const val SLOT_PLAYER = "player"
  * the same layout, so when the window is resized across width classes only the chrome around
  * it changes: the navigation back stack, scroll positions and text fields keep their state.
  *
- * - BottomBar: top bar, content, player, bottom navigation (stacked).
+ * - BottomBar: top bar, content, player, bottom navigation (stacked). [navigationOffset] pushes
+ *   the navigation that many pixels out of the window and the player down with it; the content
+ *   grows into the room (Desktop Kit 0.2.0: the bars make way while the content scrolls).
  * - Rail: rail on the start edge; top bar, content and player stacked beside it.
  * - Sidebar: menu bar across the top, player across the bottom, sidebar and content between.
  *
@@ -33,6 +35,7 @@ fun ShellLayout(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     contentOnly: Boolean = false,
+    navigationOffset: () -> Int = { 0 },
 ) {
     Layout(
         modifier = modifier,
@@ -59,13 +62,14 @@ fun ShellLayout(
                 val top = topM.measure(Constraints(minWidth = width, maxWidth = width, maxHeight = height))
                 val nav = navM.measure(Constraints(minWidth = width, maxWidth = width, maxHeight = height))
                 val player = playerM.measure(Constraints(minWidth = width, maxWidth = width, maxHeight = height))
-                val contentHeight = (height - top.height - nav.height - player.height).coerceAtLeast(0)
+                val hidden = navigationOffset().coerceIn(0, nav.height)
+                val contentHeight = (height - top.height - (nav.height - hidden) - player.height).coerceAtLeast(0)
                 val content = contentM.measure(Constraints.fixed(width, contentHeight))
                 layout(width, height) {
                     top.placeRelative(0, 0)
                     content.placeRelative(0, top.height)
                     player.placeRelative(0, top.height + contentHeight)
-                    nav.placeRelative(0, height - nav.height)
+                    nav.placeRelative(0, height - nav.height + hidden)
                 }
             }
 

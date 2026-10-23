@@ -1,0 +1,94 @@
+package app.nagmedar.ui.shell
+
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.unit.Velocity
+import app.nagmedar.ui.theme.NagMotion
+
+/**
+ * How a phone's chrome follows the content's scrolling (Desktop Kit 0.2.0), as Android's own apps do:
+ * - scrolling down slides the bottom navigation bar out of the window and the player strip above
+ *   it down to the edge, so the list gets the height; scrolling up brings them back. When the
+ *   finger lifts half way they settle fully shown or fully hidden ([settle]);
+ * - once the content has moved away from its top the top bar takes the chrome colour and a thin
+ *   rule shows under it ([scrolled]), so the title stays apart from what passes beneath it.
+ *
+ * The shell keeps one, turns it off on wider windows and while the keyboard is up, and resets it
+ * whenever the screen changes.
+ */
+@Stable
+class ShellScrollState {
+    /** Pixels of the bottom bar pushed out of the window: 0 shown, [maxOffsetPx] hidden. */
+    var offsetPx by mutableFloatStateOf(0f)
+        private set
+
+    /** The bottom bar's height: how far it can go. */
+    var maxOffsetPx by mutableFloatStateOf(0f)
+
+    /** The content has scrolled away from its top. */
+    var scrolled by mutableStateOf(false)
+        private set
+
+    /** False on tablet and DeX windows: nothing moves and the top bar stays flat. */
+    var enabled by mutableStateOf(true)
+
+    /** False keeps the bottom bar in place (the keyboard is up); the top bar still follows. */
+    var hideOnScroll by mutableStateOf(true)
+
+    /** How a bar left half way settles; the shell gives the theme's (snap with "Remove animations"). */
+    var settleSpec: AnimationSpec<Float> = tween(SETTLE_MS, easing = NagMotion.Emphasized)
+
+    val connection: NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            onScrolled(consumed.y, available.y)
+            return Offset.Zero
+        }
+
+        override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+            if (enabled && hideOnScroll) settle(settleSpec)
+            return Velocity.Zero
+        }
+    }
+
+    /** The content moved by [consumedY] px (negative: towards its end); [availableY] is what it could not take. */
+    fun onScrolled(consumedY: Float, availableY: Float) {
+        if (!enabled) return
+        if (consumedY < 0f) scrolled = true
+        // a pull downwards the content could not take: it is at its top
+        if (availableY > 0f) scrolled = false
+        if (hideOnScroll && consumedY != 0f) offsetPx = (offsetPx - consumedY).coerceIn(0f, maxOffsetPx)
+    }
+
+    /** Finishes a bar left half way: hidden past half its height, shown otherwise. */
+    suspend fun settle(spec: AnimationSpec<Float>) {
+        val target = settleTarget(offsetPx, maxOffsetPx) ?: return
+        animate(offsetPx, target, animationSpec = spec) { value, _ -> offsetPx = value }
+    }
+
+    /** A new screen starts with the bars shown and the top bar flat. */
+    fun reset() {
+        offsetPx = 0f
+        scrolled = false
+    }
+
+    companion object {
+        /** Where a bar left at [offset] of [max] settles; null when it is shown or hidden already. */
+        fun settleTarget(offset: Float, max: Float): Float? = when {
+            offset <= 0f || offset >= max -> null
+            offset > max / 2f -> max
+            else -> 0f
+        }
+
+        /** A bar settling from half way: a little quicker than the panels. */
+        const val SETTLE_MS = 250
+    }
+}

@@ -1,21 +1,35 @@
 package app.nagmedar.ui.shell
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,7 +37,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import kotlin.math.roundToInt
 
 /** Navigation chrome around the current screen; screens show their own title only in [NavKind.Sidebar]. */
 val LocalNavKind = compositionLocalOf { NavKind.Sidebar }
@@ -78,7 +94,14 @@ class ShellNavigator(private val navController: NavHostController) {
  * navigation graph lives in the content slot of [ShellLayout] and survives width changes;
  * [overlay] is drawn over the current screen (undo bars). [contentOnly]: the screen and its overlay
  * take the whole window, the bars stand aside (S-1002: the phone's player).
+ *
+ * As Desktop Kit 0.2.0 has it: screens change with Android's fade-through on phones and tablets
+ * and a still cross-fade on a desktop (Back plays the change along with the predictive gesture);
+ * on a phone the bottom bar and the player strip make way while the content scrolls down, the
+ * top bar takes the chrome colour once the content has left its top, and the bottom bar steps
+ * aside while the keyboard is up.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NagmedarShell(
     widthClass: WidthClass,
@@ -105,11 +128,36 @@ fun NagmedarShell(
     val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
     // The graph builder below must not capture changing values, or NavHost would rebuild the graph.
     val currentScreen by rememberUpdatedState(screen)
+    // read when a transition starts, so a new width class or motion setting applies to the next one
+    val currentKind by rememberUpdatedState(navKind)
+    val currentMotion by rememberUpdatedState(motion)
+    val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember {
+        { currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind)) }
+    }
+    val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember {
+        { currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar) }
+    }
+    // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
+    // keyboard must also take room, as isImeVisible reads true until the first insets arrive
+    val imeVisible = WindowInsets.isImeVisible
+    val ime = WindowInsets.ime
+    val density = LocalDensity.current
+    val imeTakesRoom by remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
+    val showBottomNav = !(imeVisible && imeTakesRoom)
+    val scroll = remember { ShellScrollState() }
+    SideEffect {
+        scroll.enabled = navKind == NavKind.BottomBar
+        scroll.hideOnScroll = showBottomNav
+        scroll.settleSpec = motion.emphasized(ShellScrollState.SETTLE_MS)
+    }
+    // every screen starts with the bars shown and a flat top bar
+    LaunchedEffect(current, navKind, showBottomNav, contentOnly) { scroll.reset() }
 
     ShellLayout(
         navKind = navKind,
         modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
         contentOnly = contentOnly,
+        navigationOffset = { if (navKind == NavKind.BottomBar) scroll.offsetPx.roundToInt() else 0 },
         topBar = {
             if (navKind == NavKind.Sidebar) {
                 // the menus are a pointer's and a keyboard's (S-302); by touch the bar keeps the search
@@ -119,12 +167,19 @@ fun NagmedarShell(
                     caption = caption,
                 )
             } else {
-                PageTopBar(title = stringResource(current.label), onSearch = onSearch.takeIf { current != Destination.Search }, caption = caption)
+                PageTopBar(
+                    title = stringResource(current.label),
+                    onSearch = onSearch.takeIf { current != Destination.Search },
+                    caption = caption,
+                    scrolled = navKind == NavKind.BottomBar && scroll.scrolled,
+                )
             }
         },
         navigation = {
             when (navKind) {
-                NavKind.BottomBar -> BottomNavBar(current, navigator::navigate)
+                NavKind.BottomBar -> if (showBottomNav) {
+                    BottomNavBar(current, navigator::navigate, Modifier.onSizeChanged { scroll.maxOffsetPx = it.height.toFloat() })
+                }
                 NavKind.Rail -> NavRail(current, navigator::navigate)
                 NavKind.Sidebar -> Sidebar(
                     current = current,
@@ -138,16 +193,16 @@ fun NagmedarShell(
         },
         player = { player(navKind) },
         content = {
-            Box(Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize().nestedScroll(scroll.connection)) {
                 CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass) {
                     NavHost(
                         navController = navController,
                         startDestination = Destination.Home.route,
                         modifier = Modifier.fillMaxSize(),
-                        enterTransition = { motion.screenEnter() },
-                        exitTransition = { motion.screenExit() },
-                        popEnterTransition = { motion.screenEnter() },
-                        popExitTransition = { motion.screenExit() },
+                        enterTransition = enter,
+                        exitTransition = exit,
+                        popEnterTransition = enter,
+                        popExitTransition = exit,
                     ) {
                         Destination.entries.forEach { destination ->
                             composable(destination.route) { currentScreen(destination, navigator) }
@@ -160,3 +215,6 @@ fun NagmedarShell(
         },
     )
 }
+
+/** Where a new screen grows from in the fade-through: a phone's, a tablet's (no movement on a desktop). */
+private fun screenScale(kind: NavKind): Float = if (kind == NavKind.BottomBar) NagMotion.PHONE_SCALE else NagMotion.TABLET_SCALE
