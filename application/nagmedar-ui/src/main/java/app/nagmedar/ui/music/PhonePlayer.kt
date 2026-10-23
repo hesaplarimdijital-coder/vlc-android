@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
@@ -51,12 +52,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -118,6 +122,7 @@ import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.PlayingVisualizer
 import java.io.File
@@ -125,6 +130,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -392,6 +398,12 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
     val scope = rememberCoroutineScope()
     val swipe = remember { Animatable(0f) }
     val drop = parts.drop
+    // a swipe that changed the track: the artwork as it was when let go stays there and fades over the next one, which
+    // is in its place at once, so the page never shows its background between them (the picture is kept while swiping)
+    val picture = rememberGraphicsLayer()
+    var handing by remember { mutableStateOf(false) }
+    val leaving = remember { Animatable(1f) }
+    var handover by remember { mutableStateOf<Job?>(null) }
     val latestActions by rememberUpdatedState(parts.actions)
     val latestClose by rememberUpdatedState(parts.onClose)
     val next = stringResource(R.string.nag_next)
@@ -416,18 +428,39 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                     onDragStart = {
                         dx = 0f
                         dy = 0f
+                        // a swipe again before the last one's picture has gone: it goes now
+                        if (handover?.isActive == true) {
+                            handover?.cancel()
+                            scope.launch { swipe.snapTo(0f) }
+                        }
                     },
                     onDragEnd = {
                         val horizontal = abs(dx) > abs(dy)
-                        scope.launch {
-                            when {
-                                horizontal && dx <= -sideways -> latestActions.next()
-                                horizontal && dx >= sideways -> latestActions.previous()
-                                !horizontal && dy >= down -> latestClose()
+                        val change: (() -> Unit)? = when {
+                            horizontal && dx <= -sideways -> latestActions::next
+                            horizontal && dx >= sideways -> latestActions::previous
+                            else -> null
+                        }
+                        if (change != null) {
+                            handover = scope.launch {
+                                handing = true
+                                leaving.snapTo(1f)
+                                change()
+                                launch { drop.animateTo(0f, settle) }
+                                try {
+                                    leaving.animateTo(0f, motion.exit(NagMotion.MEDIUM))
+                                } finally {
+                                    handing = false
+                                }
+                                swipe.snapTo(0f)
                             }
-                            // back to rest on the spatial spring, both at once
-                            launch { swipe.animateTo(0f, settle) }
-                            drop.animateTo(0f, settle)
+                        } else {
+                            scope.launch {
+                                if (!horizontal && dy >= down) latestClose()
+                                // back to rest on the spatial spring, both at once
+                                launch { swipe.animateTo(0f, settle) }
+                                drop.animateTo(0f, settle)
+                            }
                         }
                     },
                     onDragCancel = {
@@ -454,17 +487,39 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
         val lift by animateDpAsState(if (parts.info.playing) dimens.gapXl else dimens.gapXs, motion.emphasized(), label = "lift")
         Box(
             Modifier
-                .offset { IntOffset(swipe.value.roundToInt(), 0) }
+                .offset { IntOffset(if (handing) 0 else swipe.value.roundToInt(), 0) }
                 .graphicsLayer {
                     scaleX = scale
                     scaleY = scale
                     // swiped aside, it fades as it goes
-                    alpha = 1f - (abs(swipe.value) / widthPx).coerceIn(0f, 0.6f)
-                    rotationZ = swipe.value / widthPx * 4f
+                    alpha = if (handing) 1f else 1f - (abs(swipe.value) / widthPx).coerceIn(0f, SWIPE_FADE)
+                    rotationZ = if (handing) 0f else swipe.value / widthPx * 4f
                 }
                 .shadow(lift, RoundedCornerShape(dimens.radiusCard), clip = false)
+                .drawWithContent {
+                    if (!handing && swipe.value != 0f) {
+                        picture.record { this@drawWithContent.drawContent() }
+                        drawLayer(picture)
+                    } else {
+                        drawContent()
+                    }
+                }
                 .testTag("phone-artwork"),
         ) { parts.artwork(side) }
+        if (handing) {
+            Box(
+                Modifier
+                    .size(side)
+                    .offset { IntOffset(swipe.value.roundToInt(), 0) }
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = (1f - (abs(swipe.value) / widthPx).coerceIn(0f, SWIPE_FADE)) * leaving.value
+                        rotationZ = swipe.value / widthPx * 4f
+                    }
+                    .drawBehind { drawLayer(picture) },
+            )
+        }
     }
 }
 
@@ -473,16 +528,24 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
 private fun TitleRow(parts: PlayerParts) {
     val colors = NagTheme.colors
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                parts.info.title,
-                style = NagTheme.type.headline,
-                color = colors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.testTag("phone-title"),
-            )
-            PlayingArtistAlbum(parts.info, parts.links, NagTheme.type.body)
+        // another track's words cross-fade in, as its artwork does
+        Crossfade(
+            Triple(parts.info.title, parts.info.artist, parts.info.album),
+            Modifier.weight(1f),
+            animationSpec = NagTheme.motion.standard(NagMotion.MEDIUM),
+            label = "title",
+        ) { (title, artist, album) ->
+            Column {
+                Text(
+                    title,
+                    style = NagTheme.type.headline,
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("phone-title"),
+                )
+                PlayingArtistAlbum(parts.info.copy(artist = artist, album = album), parts.links, NagTheme.type.body)
+            }
         }
         parts.onAddToPlaylist?.let { add ->
             RoundIconButton(NagIcons.PlaylistAdd, stringResource(R.string.nag_pl_add), add, Modifier.testTag("phone-add-to-playlist"))
@@ -543,6 +606,9 @@ private fun BottomRow(format: String?, actions: PlayerBarActions, cast: Boolean,
 
 /** How small the artwork settles while paused. */
 private const val PAUSED_SCALE = 0.88f
+
+/** How far the artwork fades as it is swiped aside. */
+private const val SWIPE_FADE = 0.6f
 
 /** A sideways swipe this long changes the track. */
 private val SWIPE = 80.dp
@@ -642,7 +708,7 @@ fun PhonePlayerHost(
         repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
         // S-1006: the album's cover changed from its menu (a long press)
         artwork = { size ->
-            ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = NagTheme.dimens.radiusCard, video = false) }
+            ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = NagTheme.dimens.radiusCard, video = false, crossfade = true) }
         },
         onRate = key?.let { { rating = true } },
         lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },

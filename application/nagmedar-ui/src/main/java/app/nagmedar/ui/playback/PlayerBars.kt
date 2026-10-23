@@ -3,6 +3,7 @@ package app.nagmedar.ui.playback
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.LruCache
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -83,8 +86,10 @@ import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
@@ -92,7 +97,8 @@ import org.videolan.vlc.util.ThumbnailsProvider
 
 /**
  * Cover or video thumbnail of [media], loaded through the classic thumbnail cache. Without one, a
- * film or a note stands in, by [video].
+ * film or a note stands in, by [video]. With [crossfade] (the phone's player) another picture fades
+ * in over the one before, never through the tile's background; the same picture does not move.
  */
 @Composable
 fun Artwork(
@@ -101,6 +107,7 @@ fun Artwork(
     modifier: Modifier = Modifier,
     corner: Dp = 6.dp,
     video: Boolean = media?.type == MediaWrapper.TYPE_VIDEO,
+    crossfade: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val context = LocalContext.current
@@ -118,8 +125,31 @@ fun Artwork(
                 ?: ThumbnailsProvider.obtainBitmap(item, px)?.asImageBitmap()?.also { ShownArtwork.put(item, px, it) }
         }
     }
+    // with crossfade: the picture drawn, and the one before under it while the new one fades in
+    val motion = NagTheme.motion
+    var drawn by remember { mutableStateOf(bitmap) }
+    var under by remember { mutableStateOf<ImageBitmap?>(null) }
+    val coming = remember { Animatable(1f) }
+    if (crossfade) {
+        LaunchedEffect(bitmap) {
+            val before = drawn
+            if (before == null || bitmap == null || before === bitmap || motion.reduced) {
+                drawn = bitmap
+                return@LaunchedEffect
+            }
+            under = before
+            drawn = bitmap
+            coming.snapTo(0f)
+            try {
+                coming.animateTo(1f, motion.standard(NagMotion.MEDIUM))
+            } finally {
+                under = null
+            }
+        }
+    }
+    val picture = if (crossfade) drawn else bitmap
     val shape = RoundedCornerShape(corner)
-    val placeholder = bitmap == null
+    val placeholder = picture == null
     Box(
         modifier
             .size(size)
@@ -129,9 +159,16 @@ fun Artwork(
             .then(if (placeholder) Modifier.border(1.dp, colors.border, shape) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        val image = bitmap
+        val image = picture
         if (image != null) {
-            Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            val before = under.takeIf { crossfade }
+            if (before != null) Image(before, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            Image(
+                image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = if (before != null) Modifier.fillMaxSize().graphicsLayer { alpha = coming.value } else Modifier.fillMaxSize(),
+            )
         } else {
             Icon(
                 if (video) NagIcons.Movies else NagIcons.Music,
@@ -306,6 +343,8 @@ fun PlayerBar(
     onOpenAudio: (() -> Unit)? = null,
 ) {
     val media = nowPlaying.media ?: return
+    // the mini player shows a video only while it plays without its player (the desktop's transport bar as before)
+    if (navKind != NavKind.Sidebar && media.type == MediaWrapper.TYPE_VIDEO && !rememberVideoAway(media)) return
     val info = rememberPlayerBarInfo(media, nowPlaying.playing)
     val progress by rememberPlaybackProgress(nowPlaying)
     val context = LocalContext.current
@@ -321,6 +360,24 @@ fun PlayerBar(
         MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
     }
 }
+
+/**
+ * [PlaybackActions.videoAway] for [media], read again a few times a second: the player's coming and
+ * going and the background's switch are not observable.
+ */
+@Composable
+private fun rememberVideoAway(media: MediaWrapper): Boolean {
+    val away by produceState(PlaybackActions.videoAway(media), media) {
+        while (true) {
+            value = PlaybackActions.videoAway(media)
+            delay(VIDEO_AWAY_READING_MS)
+        }
+    }
+    return away
+}
+
+/** How often [rememberVideoAway] reads again. */
+private const val VIDEO_AWAY_READING_MS = 250L
 
 @Composable
 private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): PlayerBarInfo {

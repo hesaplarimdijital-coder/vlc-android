@@ -37,6 +37,15 @@ import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.media.Progress
 
+/**
+ * Whether the bars show a video that plays: always while it is cast; otherwise only while it plays
+ * in the background (its picture off) with the video player neither in front nor showing its
+ * picture. Opening the player (the media loaded, the player not yet in front) and closing it (the
+ * player gone, the media not yet stopped) are neither: the bar does not flash the film then.
+ */
+internal fun videoInBars(casting: Boolean, playerShown: Boolean, pictureOut: Boolean, background: Boolean): Boolean =
+    casting || (background && !playerShown && !pictureOut)
+
 /** What the existing PlaybackService is playing, observed from its LiveData. */
 @Immutable
 data class NowPlaying(val media: MediaWrapper?, val playing: Boolean) {
@@ -195,6 +204,21 @@ object PlaybackActions {
     fun playsVideo(): Boolean {
         val service = PlaybackService.instance ?: return false
         return service.currentMediaWrapper?.type == MediaWrapper.TYPE_VIDEO || service.isVideoPlaying
+    }
+
+    /**
+     * Whether [media], a video, plays without the video player, so the bars may show it: in the
+     * background (VLC's "play videos in the background", the picture switched off) or on a cast
+     * device. Not while the player is in front or being opened, nor while it closes.
+     */
+    fun videoAway(media: MediaWrapper): Boolean {
+        val service = PlaybackService.instance ?: return false
+        return videoInBars(
+            casting = PlaybackService.hasRenderer(),
+            playerShown = VideoPlayerActivity.shown,
+            pictureOut = service.isVideoPlaying,
+            background = media.hasFlag(MediaWrapper.MEDIA_FORCE_AUDIO) || service.playlistManager.videoBackground,
+        )
     }
 
     /**
