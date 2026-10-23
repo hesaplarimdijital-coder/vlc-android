@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,8 +35,8 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
 
@@ -85,12 +85,13 @@ fun <T> SegmentedChoice(
                     .padding(horizontal = dimens.gapM),
                 contentAlignment = Alignment.Center,
             ) {
+                // as the kit has it, no "…": a label too long for a narrow window keeps the words that fit ("USB" of
+                // "USB DAC" on a phone), which reads better in an option than a cut word
                 Text(
                     label,
                     style = NagTheme.type.label,
                     color = animateStateColor(if (isSelected) colors.onSelection else colors.textSecondary, "segmentLabel"),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -207,7 +208,8 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
             .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val thumbStart by animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(), label = "switchThumb")
+        // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
+        val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(), label = "switchThumb")
         Box(
             Modifier
                 .size(width = 38.dp, height = 24.dp)
@@ -216,7 +218,7 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
         ) {
             Box(
                 Modifier
-                    .padding(start = thumbStart)
+                    .offset { IntOffset(thumbStart.value.roundToPx(), 0) }
                     .size(16.dp)
                     .background(animateStateColor(if (checked) colors.onAccent else colors.textSecondary, "switchThumbColor"), CircleShape),
             )

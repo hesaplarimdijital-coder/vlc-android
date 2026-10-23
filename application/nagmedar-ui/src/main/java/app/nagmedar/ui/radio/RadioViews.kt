@@ -421,7 +421,8 @@ private fun FilterBar(search: RadioSearch) {
         if (value == null) res.getString(title) else res.getString(R.string.nag_radio_filter_value, res.getString(title), value)
     val countryName = filters.countryCode?.let { code -> RadioLabels.country(code, options.countries.firstOrNull { it.code == code }?.name, locale) }
     val languageName = filters.language?.let { name -> RadioLabels.language(name, options.languages.firstOrNull { it.name == name }?.code, locale) }
-    ChipRow(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 2.dp)) {
+    // menu buttons: on a tablet or DeX their wrapped lines need the space chips carry in themselves
+    ChipRow(Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 2.dp), lineSpacing = 8.dp) {
         MenuButton(
             label(R.string.nag_radio_filter_country, countryName),
             entries = {

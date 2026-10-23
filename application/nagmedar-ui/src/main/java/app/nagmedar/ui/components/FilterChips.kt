@@ -112,9 +112,9 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
 
 /**
  * Chips (or other small controls) in a row (Desktop Kit 0.2.0): on tablets and DeX ([wrap]) they
- * go on to as many lines as they need; on a phone they keep to one line that scrolls sideways, so
- * filters never take two or three lines of a small screen, and its ends fade into [fadeColor] (the
- * surface behind) while there is more to scroll to.
+ * go on to as many lines as they need, [lineSpacing] apart; on a phone they keep to one line that
+ * scrolls sideways, so filters never take two or three lines of a small screen, and its ends fade
+ * into [fadeColor] (the surface behind) while there is more to scroll to.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -123,15 +123,16 @@ fun ChipRow(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     wrap: Boolean = NagTheme.largeWindow,
     fadeColor: Color = NagTheme.colors.background,
+    // by touch a chip carries 6 dp above and below its pill in its 48 dp target already; controls drawn to
+    // their target's edge (menu buttons) want the 8 dp
+    lineSpacing: Dp = if (NagTheme.inputMode == InputMode.Touch) 0.dp else 8.dp,
     content: @Composable RowScope.() -> Unit,
 ) {
     if (wrap) {
-        val touch = NagTheme.inputMode == InputMode.Touch
         FlowRow(
             modifier = modifier.padding(contentPadding),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            // touch chips carry 6 dp above and below in their 48 dp target already
-            verticalArrangement = Arrangement.spacedBy(if (touch) 0.dp else 8.dp),
+            verticalArrangement = Arrangement.spacedBy(lineSpacing),
             content = { content() },
         )
     } else {
