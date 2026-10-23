@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.podcast.AddAddressSurface
 import app.nagmedar.ui.podcast.AddUi
+import app.nagmedar.ui.podcast.DownloadUi
 import app.nagmedar.ui.podcast.FeedFailure
 import app.nagmedar.ui.podcast.FeedUrl
 import app.nagmedar.ui.podcast.ImportFailure
@@ -21,6 +22,7 @@ import app.nagmedar.ui.podcast.ImportSummary
 import app.nagmedar.ui.podcast.ImportSurface
 import app.nagmedar.ui.podcast.ImportUi
 import app.nagmedar.ui.podcast.InvalidReason
+import app.nagmedar.ui.podcast.Listening
 import app.nagmedar.ui.podcast.PodcastActions
 import app.nagmedar.ui.podcast.PodcastSamples
 import app.nagmedar.ui.podcast.PodcastScreenModel
@@ -127,6 +129,31 @@ class PodcastScreenshotTest {
     fun pagePhone() = capture(
         "podcasts-page-phone-light", ThemeMode.Light, InputMode.Touch,
         shell(WidthClass.Compact, PodcastSamples.model(page = PodcastSamples.page)),
+    )
+
+    /** S-205 on a phone as narrow as the user's: play and download in one row, the timeline and its skips under them, the tabs. */
+    @Test @Config(qualifiers = "tr-w350dp-h760dp-xxhdpi")
+    fun episodePhone() = capture(
+        "podcasts-episode-phone-light", ThemeMode.Light, InputMode.Touch,
+        shell(
+            WidthClass.Compact,
+            PodcastSamples.model(page = PodcastSamples.page).copy(
+                episodeId = 10,
+                episode = PodcastSamples.episodePage(listening = Listening(positionMs = 6 * 60_000L, lengthMs = 62 * 60_000L + 3_000, playing = true)),
+            ),
+        ),
+    )
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
+    fun episodePhoneDarkEnglish() = capture(
+        "podcasts-episode-phone-dark-en", ThemeMode.Dark, InputMode.Touch,
+        shell(
+            WidthClass.Compact,
+            PodcastSamples.model(page = PodcastSamples.page).copy(
+                episodeId = 10,
+                episode = PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000), positionMs = 23 * 60_000L),
+            ),
+        ),
     )
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")

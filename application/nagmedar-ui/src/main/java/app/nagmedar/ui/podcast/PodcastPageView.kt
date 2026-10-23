@@ -48,17 +48,19 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.NagPlayButton
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
-import app.nagmedar.ui.components.NagPlayButton
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -128,11 +130,21 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
                 }
             }
         }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-            feed.link?.let { link -> NagButton(stringResource(R.string.nag_pod_web_page), { actions.onOpenLink(link) }, icon = NagIcons.Network) }
-            feed.fundingUrl?.let { url -> NagButton(stringResource(R.string.nag_pod_support), { actions.onOpenLink(url) }, icon = NagIcons.Star) }
-            NagButton(stringResource(R.string.nag_pod_show_settings), { actions.onShowSettings(feed.id) }, icon = NagIcons.Settings, modifier = Modifier.testTag("podcast-settings"))
-            NagButton(stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, modifier = Modifier.testTag("podcast-unsubscribe"))
+        if (currentWidthClass() == WidthClass.Compact) {
+            // a phone: small chips, as on an episode's page
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                feed.link?.let { link -> ActionChip(NagIcons.Network, stringResource(R.string.nag_pod_web_page), { actions.onOpenLink(link) }) }
+                feed.fundingUrl?.let { url -> ActionChip(NagIcons.Star, stringResource(R.string.nag_pod_support), { actions.onOpenLink(url) }) }
+                ActionChip(NagIcons.Settings, stringResource(R.string.nag_pod_show_settings), { actions.onShowSettings(feed.id) }, Modifier.testTag("podcast-settings"))
+                ActionChip(null, stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, Modifier.testTag("podcast-unsubscribe"))
+            }
+        } else {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                feed.link?.let { link -> NagButton(stringResource(R.string.nag_pod_web_page), { actions.onOpenLink(link) }, icon = NagIcons.Network) }
+                feed.fundingUrl?.let { url -> NagButton(stringResource(R.string.nag_pod_support), { actions.onOpenLink(url) }, icon = NagIcons.Star) }
+                NagButton(stringResource(R.string.nag_pod_show_settings), { actions.onShowSettings(feed.id) }, icon = NagIcons.Settings, modifier = Modifier.testTag("podcast-settings"))
+                NagButton(stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, modifier = Modifier.testTag("podcast-unsubscribe"))
+            }
         }
         feed.description?.let { description ->
             val interaction = remember { MutableInteractionSource() }

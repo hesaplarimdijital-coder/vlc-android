@@ -3,6 +3,7 @@ package app.nagmedar.ui.podcast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +12,11 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -28,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -40,8 +45,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.IconMenuButton
@@ -56,10 +63,19 @@ import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
+import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.sizeLabel
+import app.nagmedar.ui.playback.ProgressTimeline
+import app.nagmedar.ui.playback.TimelineStyle
+import app.nagmedar.ui.playback.rememberChapterMarks
+import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import java.text.DateFormat
@@ -102,12 +118,12 @@ private fun CloseButton(fullScreen: Boolean, onClick: () -> Unit) {
     )
 }
 
-/** One row of the page: a column no wider than [DetailMaxWidth] with the page's side padding. */
+/** One row of the page: a column no wider than [DetailMaxWidth] with the page's side padding; [tight], less room above and below (a phone's head of the page). */
 @Composable
-internal fun Frame(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun Frame(modifier: Modifier = Modifier, tight: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     val dimens = NagTheme.dimens
     Column(
-        modifier.fillMaxWidth().widthIn(max = DetailMaxWidth).padding(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+        modifier.fillMaxWidth().widthIn(max = DetailMaxWidth).padding(horizontal = dimens.pagePadding, vertical = if (tight) dimens.gapXs else dimens.gapS),
         content = content,
     )
 }
@@ -117,6 +133,8 @@ internal fun Frame(modifier: Modifier = Modifier, content: @Composable ColumnSco
  * delete, mark played, share; the download's state; while the player has the episode, its timeline with the chapters'
  * marks, skip buttons and chapter buttons; then three tabs: the show notes (sanitised, links open outside, pictures on
  * request), the chapters (a tap plays from there) and the transcript (searchable, followed while it plays, a tap seeks).
+ * A phone's page is tighter: play and download in one row, marking and sharing as small chips under them, the timeline
+ * with its skip buttons right after, the download's state under them; the tabs come up on the first screen.
  */
 @Composable
 internal fun EpisodeDetailView(ui: EpisodeDetailUi, fullScreen: Boolean, actions: PodcastActions, listening: () -> Listening? = { ui.listening }) {
@@ -131,17 +149,27 @@ internal fun EpisodeDetailView(ui: EpisodeDetailUi, fullScreen: Boolean, actions
     // the passage being said, while the transcript is on show, has times and is not narrowed by a search
     val cue = if (tab == DetailTab.Transcript && transcript != null && transcript.timed && now != null && query.isBlank()) transcript.indexAt(now.positionMs) else -1
     if (cue >= 0) FollowCue(list, leadingItems(ui, now != null) + cue)
+    // a phone: the tighter page (wide windows keep theirs)
+    val compact = currentWidthClass() == WidthClass.Compact
     LazyColumn(
         state = list,
         modifier = Modifier.fillMaxSize().background(NagTheme.colors.background).testTag("episode-detail"),
-        contentPadding = PaddingValues(bottom = dimens.gapL),
+        contentPadding = PaddingValues(bottom = if (compact) dimens.gapXl else dimens.gapL),
     ) {
-        item(key = "top") { Frame { TopBar(ui, fullScreen, actions) } }
-        item(key = "header") { Frame { Header(ui, now) } }
-        item(key = "actions") { Frame { Actions(ui, now, actions) } }
-        if (ui.download != DownloadUi.None) item(key = "download") { Frame { DownloadStatus(ui, actions) } }
-        if (ui.offline) item(key = "offline") { Frame { OfflineNotice(actions.onRetryExtras) } }
-        if (now != null) item(key = "timeline") { Frame { Timeline(ui, now, chapters, actions) } }
+        item(key = "top") { Frame(tight = compact) { TopBar(ui, fullScreen, actions) } }
+        item(key = "header") { Frame(tight = compact) { Header(ui, now, compact) } }
+        if (compact) {
+            // the controls together: play and download, marking and sharing, then the timeline and its skips
+            item(key = "actions") { Frame(tight = true) { CompactActions(ui, now, actions) } }
+            if (now != null) item(key = "timeline") { Frame(tight = true) { CompactTimeline(ui, now, chapters, actions) } }
+            if (ui.download != DownloadUi.None) item(key = "download") { Frame { DownloadStatus(ui, actions) } }
+            if (ui.offline) item(key = "offline") { Frame { OfflineNotice(actions.onRetryExtras) } }
+        } else {
+            item(key = "actions") { Frame { Actions(ui, now, actions) } }
+            if (ui.download != DownloadUi.None) item(key = "download") { Frame { DownloadStatus(ui, actions) } }
+            if (ui.offline) item(key = "offline") { Frame { OfflineNotice(actions.onRetryExtras) } }
+            if (now != null) item(key = "timeline") { Frame { Timeline(ui, now, chapters, actions) } }
+        }
         item(key = "tabs") { Frame { Tabs(tab, ui) { tab = it } } }
         when (tab) {
             DetailTab.Notes -> notesItems(ui, images, { images = it }, actions)
@@ -212,7 +240,7 @@ private fun TopBar(ui: EpisodeDetailUi, fullScreen: Boolean, actions: PodcastAct
 }
 
 @Composable
-private fun Header(ui: EpisodeDetailUi, now: Listening?) {
+private fun Header(ui: EpisodeDetailUi, now: Listening?, compact: Boolean = false) {
     val res = LocalContext.current.resources
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -235,8 +263,10 @@ private fun Header(ui: EpisodeDetailUi, now: Listening?) {
         CoverTile(cover, COVER, corner = dimens.radiusControl, placeholder = NagIcons.Podcasts)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(ui.feed.title, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-show"))
-            Text(episode.title, style = NagTheme.type.title, color = colors.text, maxLines = 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-title"))
-            if (meta.isNotEmpty()) Text(meta, style = NagTheme.type.labelSmall, color = colors.textSecondary, modifier = Modifier.testTag("episode-meta"))
+            Text(episode.title, style = NagTheme.type.title, color = colors.text, maxLines = if (compact) 3 else 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-title"))
+            if (meta.isNotEmpty()) {
+                Text(meta, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = if (compact) 2 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-meta"))
+            }
             val state = playState(ui, now)
             if (state != null) ToneBadge(state.first, state.second, Modifier.padding(top = 4.dp).testTag("episode-state"))
         }
@@ -257,25 +287,37 @@ private fun playState(ui: EpisodeDetailUi, now: Listening?): Pair<String, StateT
     }
 }
 
+/** The play button's word and icon: pause, continue, resume from where it was left, or play. */
+@Composable
+private fun playChoice(episode: PodcastEpisode, now: Listening?): Pair<String, ImageVector> = when {
+    now?.playing == true -> stringResource(R.string.nag_pod_ep_pause) to NagIcons.Pause
+    now != null -> stringResource(R.string.nag_pod_ep_continue) to NagIcons.Play
+    !episode.played && episode.positionMs >= PlaybackRules.RESUME_MIN_MS -> stringResource(R.string.nag_pod_ep_resume, formatDuration(episode.positionMs)) to NagIcons.Resume
+    else -> stringResource(R.string.nag_pod_play) to NagIcons.Play
+}
+
+/** The download button: download, try again, stop, or delete the file. */
+@Composable
+private fun DownloadButton(ui: EpisodeDetailUi, actions: PodcastActions, modifier: Modifier = Modifier) {
+    val episode = ui.episode
+    val tagged = modifier.testTag("episode-download")
+    when (ui.download) {
+        DownloadUi.None -> NagButton(stringResource(R.string.nag_pod_download), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = tagged)
+        DownloadUi.Failed -> NagButton(stringResource(R.string.nag_pod_download_retry), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = tagged)
+        DownloadUi.Queued, is DownloadUi.Running -> NagButton(stringResource(R.string.nag_pod_download_stop), { actions.onCancelDownload(episode.id) }, icon = NagIcons.Close, modifier = tagged)
+        is DownloadUi.Done -> NagButton(stringResource(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, modifier = tagged)
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Actions(ui: EpisodeDetailUi, now: Listening?, actions: PodcastActions) {
     val dimens = NagTheme.dimens
     val episode = ui.episode
-    val play = when {
-        now?.playing == true -> stringResource(R.string.nag_pod_ep_pause) to NagIcons.Pause
-        now != null -> stringResource(R.string.nag_pod_ep_continue) to NagIcons.Play
-        !episode.played && episode.positionMs >= PlaybackRules.RESUME_MIN_MS -> stringResource(R.string.nag_pod_ep_resume, formatDuration(episode.positionMs)) to NagIcons.Resume
-        else -> stringResource(R.string.nag_pod_play) to NagIcons.Play
-    }
+    val play = playChoice(episode, now)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
         NagButton(play.first, { actions.onTogglePlay(ui.feed, episode) }, icon = play.second, primary = true, modifier = Modifier.testTag("episode-play"))
-        when (ui.download) {
-            DownloadUi.None -> NagButton(stringResource(R.string.nag_pod_download), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = Modifier.testTag("episode-download"))
-            DownloadUi.Failed -> NagButton(stringResource(R.string.nag_pod_download_retry), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = Modifier.testTag("episode-download"))
-            DownloadUi.Queued, is DownloadUi.Running -> NagButton(stringResource(R.string.nag_pod_download_stop), { actions.onCancelDownload(episode.id) }, icon = NagIcons.Close, modifier = Modifier.testTag("episode-download"))
-            is DownloadUi.Done -> NagButton(stringResource(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, modifier = Modifier.testTag("episode-download"))
-        }
+        DownloadButton(ui, actions)
         NagButton(
             stringResource(if (episode.played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
             { actions.onSetPlayed(episode.id, !episode.played) },
@@ -283,6 +325,74 @@ private fun Actions(ui: EpisodeDetailUi, now: Listening?, actions: PodcastAction
             modifier = Modifier.testTag("episode-played"),
         )
         NagButton(stringResource(R.string.nag_pod_share), { actions.onShare(ui.feed, episode) }, modifier = Modifier.testTag("episode-share"))
+    }
+}
+
+/**
+ * A phone's: play (the room left) and download (its own width) side by side in one row, a downloaded file's delete
+ * button by its icon; marking played and sharing as small chips under them.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CompactActions(ui: EpisodeDetailUi, now: Listening?, actions: PodcastActions) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val episode = ui.episode
+    val play = playChoice(episode, now)
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+            NagButton(play.first, { actions.onTogglePlay(ui.feed, episode) }, icon = play.second, primary = true, modifier = Modifier.weight(1f).testTag("episode-play"))
+            if (ui.download is DownloadUi.Done) {
+                // downloaded (its card says so): the file's delete button by its icon, its words its name
+                NagIconButton(
+                    NagIcons.Delete,
+                    stringResource(R.string.nag_pod_download_delete),
+                    { actions.onDeleteDownload(episode.id) },
+                    modifier = Modifier.border(1.dp, colors.borderStrong, RoundedCornerShape(dimens.radiusControl)).testTag("episode-download"),
+                )
+            } else {
+                DownloadButton(ui, actions)
+            }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+            ActionChip(
+                NagIcons.Check,
+                stringResource(if (episode.played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
+                { actions.onSetPlayed(episode.id, !episode.played) },
+                Modifier.testTag("episode-played"),
+            )
+            ActionChip(NagIcons.Share, stringResource(R.string.nag_pod_share), { actions.onShare(ui.feed, episode) }, Modifier.testTag("episode-share"))
+        }
+    }
+}
+
+/** A small outlined action of a phone's podcast pages: an icon (if any) and its word in a pill, in a finger's target. */
+@Composable
+internal fun ActionChip(icon: ImageVector?, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val shape = RoundedCornerShape(dimens.radiusPill)
+    Box(
+        modifier
+            .heightIn(min = dimens.minTarget)
+            .nagClickable(interaction, onClick, role = Role.Button),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            Modifier
+                .height(dimens.controlHeight - dimens.gapS)
+                .focusRing(state, shape)
+                .background(stateBackground(state), shape)
+                .border(1.dp, colors.borderStrong, shape)
+                .padding(horizontal = dimens.gapM),
+            horizontalArrangement = Arrangement.spacedBy(dimens.gapXs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(dimens.icon))
+            Text(label, style = NagTheme.type.label, color = colors.text, maxLines = 1)
+        }
     }
 }
 
@@ -422,6 +532,53 @@ private fun Timeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter
                 { actions.onSkip(ui.skipForwardSeconds * 1000L) },
                 icon = NagIcons.Forward,
                 modifier = Modifier.testTag("episode-skip-forward"),
+            )
+        }
+    }
+}
+
+/**
+ * A phone's timeline: the players' slim one with its times (a drag seeks, the chapters' starts marked), the chapter
+ * playing, and right under them the skip back and forward buttons with the chapter buttons between.
+ */
+@Composable
+private fun CompactTimeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter>, actions: PodcastActions) {
+    val colors = NagTheme.colors
+    val length = now.lengthMs.takeIf { it > 0 } ?: ui.episode.durationMs
+    val current = Chapters.indexAt(chapters, now.positionMs)
+    val latest by rememberUpdatedState(now)
+    Column(Modifier.testTag("episode-timeline")) {
+        ProgressTimeline(
+            progress = { if (length > 0) (latest.positionMs.toFloat() / length).coerceIn(0f, 1f) else 0f },
+            lengthMs = length,
+            onSeek = { fraction -> if (length > 0) actions.onSeekTo((fraction * length).toLong()) },
+            modifier = Modifier.testTag("episode-seek"),
+            playing = now.playing,
+            marks = rememberChapterMarks(chapters, length),
+            style = TimelineStyle.Phone,
+        )
+        if (current != null) {
+            val title = chapters[current].title.ifBlank { stringResource(R.string.nag_pod_chapter_n, current + 1) }
+            Text(title, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-chapter-now"))
+        }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            ActionChip(
+                NagIcons.Resume,
+                stringResource(R.string.nag_pod_skip_back_label, ui.skipBackSeconds),
+                { actions.onSkip(-ui.skipBackSeconds * 1000L) },
+                Modifier.testTag("episode-skip-back"),
+            )
+            Spacer(Modifier.weight(1f))
+            if (chapters.isNotEmpty()) {
+                NagIconButton(NagIcons.Previous, stringResource(R.string.nag_pod_chapter_previous), { actions.onStepChapter(false) }, modifier = Modifier.testTag("episode-chapter-previous"))
+                NagIconButton(NagIcons.Next, stringResource(R.string.nag_pod_chapter_next), { actions.onStepChapter(true) }, modifier = Modifier.testTag("episode-chapter-next"))
+                Spacer(Modifier.weight(1f))
+            }
+            ActionChip(
+                NagIcons.Forward,
+                stringResource(R.string.nag_pod_skip_forward_label, ui.skipForwardSeconds),
+                { actions.onSkip(ui.skipForwardSeconds * 1000L) },
+                Modifier.testTag("episode-skip-forward"),
             )
         }
     }

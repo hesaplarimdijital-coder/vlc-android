@@ -57,6 +57,25 @@ internal object PodcastSamples {
         PodcastHit("https://nobet.example.org/rss", "Gece Nöbeti", null, episodeCount = 230, source = HitSource.ITunes),
     )
 
+    /** S-205: the newest episode's page: its notes and chapters, where it was left, its download, the player [listening] or not. */
+    fun episodePage(listening: Listening? = null, download: DownloadUi = DownloadUi.None, positionMs: Long = 0) = EpisodeDetailUi(
+        feed = gece,
+        episode = episodes[0].copy(positionMs = positionMs, season = 2, episodeNumber = 14),
+        notes = listOf(
+            NoteBlock.Paragraph(listOf(NoteRun("Üçüncü gecede Neva Kâr'ı dinliyor, Itrî'nin bestelerinin izini sürüyoruz."))),
+            NoteBlock.Heading(2, listOf(NoteRun("Bu bölümde"))),
+            NoteBlock.Item("•", 0, listOf(NoteRun("Neva makamı ve geçkileri"))),
+            NoteBlock.Item("•", 0, listOf(NoteRun("Konuğumuz: "), NoteRun("Ayşe Demir", bold = true))),
+            NoteBlock.Paragraph(listOf(NoteRun("Destek olmak için: "), NoteRun("gece.example.org/destek", link = "https://gece.example.org/destek"))),
+        ),
+        chapters = ExtraUi.Ready(
+            listOf(Chapter(0, "Giriş"), Chapter(4 * 60_000L, "Neva makamı"), Chapter(21 * 60_000L, "Konuk: Ayşe Demir"), Chapter(55 * 60_000L, "Kapanış")),
+        ),
+        transcript = ExtraUi.None,
+        download = download,
+        listening = listening,
+    )
+
     fun model(
         subscriptions: List<PodcastFeedSummary>? = summaries,
         query: String = "",
