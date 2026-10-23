@@ -47,11 +47,14 @@ import app.nagmedar.ui.theme.NagTheme
 class MotionToken(val name: String, val duration: String, val easing: Easing?, val curve: String, val use: String)
 
 val motionTokens = listOf(
-    MotionToken("Anında", "0 ms", null, "—", "Fareyle üzerine gelme, odak, basılı tutma ve seçim"),
-    MotionToken("Kısa", "${NagMotion.SHORT} ms", NagMotion.Exit, "çıkış · 0,3 0 1 1", "Ekrandan çıkan her şey: menü, ipucu, eski ekran, eski adım"),
-    MotionToken("Orta", "${NagMotion.MEDIUM} ms", NagMotion.Enter, "giriş · 0 0 0 1",
-        "Gelen ekran; ilk açılışta yeni adım ${NagMotion.STEP_SLIDE_DP} dp kayarak gelir"),
-    MotionToken("Uzun", "${NagMotion.LONG} ms", NagMotion.Standard, "standart · 0,2 0 0 1", "Ekranda kalıp yer ya da boyut değiştiren büyük yüzeyler"),
+    MotionToken("Renk", "${NagMotion.COLOR} ms", NagMotion.Standard, "standart · 0,2 0 0 1",
+        "Üzerine gelme, basma, seçim; dokunmatikte basılan denetim hafifçe küçülür"),
+    MotionToken("Kısa", "${NagMotion.SHORT} ms", NagMotion.StandardAccelerate, "hızlanan · 0,3 0 1 1", "Kapanan menü, beliren ipucu, çıkan öğe"),
+    MotionToken("Orta", "${NagMotion.MEDIUM} ms", NagMotion.StandardDecelerate, "yavaşlayan · 0 0 0 1",
+        "Belirip kaybolan katmanlar: oynatıcının denetimleri, bildirimler"),
+    MotionToken("Ekran", "${NagMotion.FADE_OUT} + ${NagMotion.FADE_IN} ms", NagMotion.EmphasizedDecelerate, "vurgulu · 0,05 0,7 0,1 1",
+        "Telefonda ve tablette solup büyüyerek; DeX'te ${NagMotion.CROSSFADE} ms çapraz geçiş"),
+    MotionToken("Uzun", "${NagMotion.LONG} ms", NagMotion.Emphasized, "vurgulu · 0,2 0 0 1", "Kenar çubuğu, ayrıntı ekranı, yan panel"),
     MotionToken("Döngü", "${NagMotion.SWEEP} – ${NagMotion.SHIMMER} ms", LinearEasing, "doğrusal",
         "Yalnızca süren iş: iskelet parıltısı, belirsiz ilerleme"),
 )
@@ -73,7 +76,7 @@ fun IconsMotionBoard(modifier: Modifier = Modifier) {
         Column {
             Text("İkonlar ve hareket", style = NagTheme.type.display, color = colors.text)
             Text(
-                "${NagIcons.all.size} ikon · 16 × 16 ızgara, 1,6 çizgi, yuvarlak uç · az ve hızlı hareket; animasyonlar kaldırılınca hiçbir şey kıpırdamaz",
+                "${NagIcons.all.size} ikon · 16 × 16 ızgara, 1,6 çizgi, yuvarlak uç · Android'in hareket dili; animasyonlar kaldırılınca hiçbir şey kıpırdamaz",
                 style = NagTheme.type.body,
                 color = colors.textSecondary,
             )

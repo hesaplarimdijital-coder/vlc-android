@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import app.nagmedar.lab.BitrateAnalysis
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.ui.R
@@ -317,6 +316,7 @@ internal fun CardTitle(text: String, modifier: Modifier = Modifier) {
         style = NagTheme.type.bodyStrong.copy(fontWeight = FontWeight.SemiBold),
         color = NagTheme.colors.text,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier.semantics { heading() },
     )
 }
@@ -350,7 +350,7 @@ private fun FileCard(view: TvLabView, actions: TvLabActions, narrow: Boolean, ca
             Icon(NagIcons.Movies, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(22.dp))
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text(file.name, style = NagTheme.type.mono.copy(fontSize = 13.sp), color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(file.name, style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(13f)), color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (detail.isNotEmpty()) Text(detail, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 2)
             }
             if (!narrow) {
@@ -471,7 +471,7 @@ private fun Figure(caption: String, value: String, detail: String, color: Color,
         )
         Text(
             value,
-            style = NagTheme.type.title.copy(fontSize = 17.sp, fontWeight = FontWeight.SemiBold, fontFamily = if (mono) PlexMono else NagTheme.type.title.fontFamily),
+            style = NagTheme.type.title.copy(fontSize = NagTheme.type.size(17f), fontWeight = FontWeight.SemiBold, fontFamily = if (mono) PlexMono else NagTheme.type.title.fontFamily),
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -578,7 +578,7 @@ private fun Streams(tech: MediaTech, locale: Locale, labelWidth: Dp) {
         rows.forEach { (label, value) ->
             Row(Modifier.fillMaxWidth().heightIn(min = 26.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
                 Text(label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, modifier = Modifier.width(labelWidth))
-                Text(value, style = NagTheme.type.mono.copy(fontSize = 12.sp), color = NagTheme.colors.text, modifier = Modifier.weight(1f))
+                Text(value, style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(12f)), color = NagTheme.colors.text, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -775,7 +775,7 @@ private fun DiskCard(view: TvLabView, actions: TvLabActions, locale: Locale) {
             disk != null -> {
                 Text(
                     megabytesLabel(res, disk.megabytesPerSecond, locale),
-                    style = NagTheme.type.title.copy(fontSize = 17.sp, fontWeight = FontWeight.SemiBold, fontFamily = PlexMono),
+                    style = NagTheme.type.title.copy(fontSize = NagTheme.type.size(17f), fontWeight = FontWeight.SemiBold, fontFamily = PlexMono),
                     color = colors.text,
                     modifier = Modifier.testTag("tvlab-disk-speed"),
                 )

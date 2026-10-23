@@ -58,7 +58,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.AlertBanner
 import app.nagmedar.ui.components.NagButton
@@ -262,7 +261,7 @@ private fun FlowTopBar(state: FirstRunState, onSkip: () -> Unit) {
             repeat(total) { index ->
                 val fill by animateColorAsState(
                     if (index < current) colors.accent else colors.borderStrong,
-                    animationSpec = NagTheme.motion.standard(),
+                    animationSpec = NagTheme.motion.color(),
                     label = "segment",
                 )
                 Box(
@@ -306,7 +305,7 @@ private fun StepHeader(step: FirstRunStep) {
                     FirstRunStep.Notifications -> R.string.nag_fr_notif_title
                 },
             ),
-            style = NagTheme.type.display.copy(fontSize = 25.sp, lineHeight = 30.sp),
+            style = NagTheme.type.display.copy(fontSize = NagTheme.type.size(25f), lineHeight = NagTheme.type.size(30f)),
             color = colors.text,
             modifier = Modifier.semantics { heading() },
         )

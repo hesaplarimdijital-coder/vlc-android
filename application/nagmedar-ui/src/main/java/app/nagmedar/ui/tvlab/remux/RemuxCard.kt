@@ -23,7 +23,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.data.RemuxJobError
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.ui.R
@@ -77,7 +76,7 @@ fun RemuxJobRow(job: RemuxJobView, onCancel: () -> Unit, onRemove: () -> Unit, m
             Column(Modifier.weight(1f)) {
                 Text(
                     job.outputName,
-                    style = NagTheme.type.mono.copy(fontSize = 13.sp),
+                    style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(13f)),
                     color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -175,7 +174,7 @@ private fun Verdict(job: RemuxJobView, locale: Locale) {
         )
         Text(
             "SHA-256 " + verification.hash,
-            style = NagTheme.type.mono.copy(fontSize = 11.sp),
+            style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(11f)),
             color = colors.textTertiary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

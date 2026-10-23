@@ -21,7 +21,10 @@ val PlexMono = FontFamily(
     Font(R.font.ibm_plex_mono_medium, FontWeight.Medium),
 )
 
-/** Text styles. Two sets: pointer (DeX, mouse) is denser, touch is larger. Nothing is below 11 sp. */
+/**
+ * Text styles. Two sets: pointer (DeX, mouse) is denser, touch is larger. Nothing is below 11 sp.
+ * On tablet and DeX windows the theme sets every style [step] sp larger ([grow], Desktop Kit 0.2.0).
+ */
 @Immutable
 data class NagType(
     val display: TextStyle,
@@ -33,7 +36,38 @@ data class NagType(
     val labelSmall: TextStyle,
     val caption: TextStyle,
     val mono: TextStyle,
+    /** The sp [grow] added to every style; [size] adds it to a size of the code's own. */
+    val step: Float = 0f,
 ) {
+    /**
+     * The same styles [by] sp larger (smaller when negative); line heights keep their ratio to the
+     * size. The theme uses it to set text one sp larger on tablet and DeX windows.
+     */
+    fun grow(by: Float): NagType {
+        if (by == 0f) return this
+        fun TextStyle.grown(): TextStyle {
+            val size = fontSize.value
+            val ratio = if (lineHeight.isSp && size > 0f) lineHeight.value / size else Float.NaN
+            val next = size + by
+            return copy(fontSize = next.sp, lineHeight = if (ratio.isNaN()) lineHeight else (next * ratio).sp)
+        }
+        return NagType(
+            display = display.grown(),
+            headline = headline.grown(),
+            title = title.grown(),
+            body = body.grown(),
+            bodyStrong = bodyStrong.grown(),
+            label = label.grown(),
+            labelSmall = labelSmall.grown(),
+            caption = caption.grown(),
+            mono = mono.grown(),
+            step = step + by,
+        )
+    }
+
+    /** [base] sp, a size a screen sets itself (a chart's label, the jump dialog's time), with the window's [step]. */
+    fun size(base: Float): TextUnit = (base + step).sp
+
     companion object {
         val Pointer = build(display = 22, headline = 18, title = 16, body = 13, label = 12.5f, labelSmall = 11.5f, caption = 11, mono = 11)
         val Touch = build(display = 26, headline = 20, title = 17, body = 15, label = 14, labelSmall = 13, caption = 12, mono = 12)

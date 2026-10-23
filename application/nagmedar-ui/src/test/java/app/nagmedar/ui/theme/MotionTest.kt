@@ -76,9 +76,17 @@ class MotionTest {
         assertTrue(reduced.enter<Float>() is SnapSpec<*>)
         assertTrue(reduced.exit<Float>() is SnapSpec<*>)
         assertTrue(reduced.standard<Float>() is SnapSpec<*>)
+        assertTrue(reduced.color<Float>() is SnapSpec<*>)
+        assertTrue(reduced.emphasized<Float>() is SnapSpec<*>)
+        assertTrue(reduced.emphasizedExit<Float>() is SnapSpec<*>)
+        assertTrue(reduced.spatial<Float>() is SnapSpec<*>)
+        assertTrue(reduced.fastSpatial<Float>() is SnapSpec<*>)
+        assertTrue(reduced.effects<Float>() is SnapSpec<*>)
         assertNull(reduced.loop(NagMotion.SWEEP))
-        assertEquals(EnterTransition.None, reduced.screenEnter())
-        assertEquals(ExitTransition.None, reduced.screenExit())
+        for (desktop in listOf(false, true)) {
+            assertEquals(EnterTransition.None, reduced.screenEnter(desktop))
+            assertEquals(ExitTransition.None, reduced.screenExit(desktop))
+        }
         val step = reduced.step(forward = true, slidePx = 24)
         assertEquals(EnterTransition.None, step.targetContentEnter)
         assertEquals(ExitTransition.None, step.initialContentExit)
@@ -90,11 +98,44 @@ class MotionTest {
         assertEquals(NagMotion.MEDIUM, (full.enter<Float>() as TweenSpec<Float>).durationMillis)
         assertEquals(NagMotion.SHORT, (full.exit<Float>() as TweenSpec<Float>).durationMillis)
         assertEquals(NagMotion.LONG, (full.standard<Float>(NagMotion.LONG) as TweenSpec<Float>).durationMillis)
+        assertEquals(NagMotion.LONG, (full.emphasized<Float>() as TweenSpec<Float>).durationMillis)
+        // Desktop Kit 0.2.0: hover, press and selection ease over 150 ms
+        assertEquals(150, (full.color<Float>() as TweenSpec<Float>).durationMillis)
         // leaving is quicker than arriving, so the new content is not kept waiting
         assertTrue(NagMotion.SHORT < NagMotion.MEDIUM && NagMotion.MEDIUM < NagMotion.LONG)
         assertNotNull(full.loop(NagMotion.SHIMMER))
-        assertNotEquals(EnterTransition.None, full.screenEnter())
+        assertNotEquals(EnterTransition.None, full.screenEnter(desktop = false, initialScale = NagMotion.PHONE_SCALE))
+        assertNotEquals(EnterTransition.None, full.screenEnter(desktop = true))
         assertNotEquals(EnterTransition.None, full.step(forward = false, slidePx = 24).targetContentEnter)
+    }
+
+    /** Desktop Kit 0.2.0: Android's fade-through takes 90 + 210 ms; nothing but the loops is longer than 300 ms. */
+    @Test
+    fun theTransitionsKeepToTheirTimes() {
+        assertEquals(90, NagMotion.FADE_OUT)
+        assertEquals(210, NagMotion.FADE_IN)
+        assertEquals(NagMotion.LONG, NagMotion.FADE_OUT + NagMotion.FADE_IN)
+        assertEquals(150, NagMotion.CROSSFADE)
+        for (duration in listOf(NagMotion.SHORT, NagMotion.COLOR, NagMotion.MEDIUM, NagMotion.LONG, NagMotion.CROSSFADE)) {
+            assertTrue("$duration ms", duration <= 300)
+        }
+        assertTrue(NagMotion.PHONE_SCALE < NagMotion.TABLET_SCALE && NagMotion.TABLET_SCALE < 1f)
+    }
+
+    /** The curves are Material 3's: arriving ones start fast, leaving ones end fast, all run from 0 to 1. */
+    @Test
+    fun theCurvesAreAndroids() {
+        val curves = listOf(
+            NagMotion.Emphasized, NagMotion.EmphasizedDecelerate, NagMotion.EmphasizedAccelerate,
+            NagMotion.Standard, NagMotion.StandardDecelerate, NagMotion.StandardAccelerate,
+        )
+        for (curve in curves) {
+            assertEquals(0f, curve.transform(0f), 0.001f)
+            assertEquals(1f, curve.transform(1f), 0.001f)
+        }
+        assertTrue(NagMotion.EmphasizedDecelerate.transform(0.2f) > 0.5f)
+        assertTrue(NagMotion.EmphasizedAccelerate.transform(0.5f) < 0.2f)
+        assertTrue(NagMotion.StandardDecelerate.transform(0.5f) > NagMotion.StandardAccelerate.transform(0.5f))
     }
 
     /** Two frames of a loading state 480 ms apart, with the frame clock driven by hand. */

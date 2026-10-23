@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
@@ -93,7 +92,7 @@ fun RemuxBatchPage(
                 CardTitle(stringResource(R.string.nag_tvlab_batch_source))
                 Text(
                     batch.source?.label ?: stringResource(R.string.nag_tvlab_batch_no_folder),
-                    style = NagTheme.type.mono.copy(fontSize = 13.sp),
+                    style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(13f)),
                     color = if (batch.source == null) colors.textTertiary else colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -126,7 +125,7 @@ fun RemuxBatchPage(
                 CardTitle(stringResource(R.string.nag_tvlab_batch_output))
                 Text(
                     batch.output?.label ?: stringResource(R.string.nag_tvlab_batch_no_folder),
-                    style = NagTheme.type.mono.copy(fontSize = 13.sp),
+                    style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(13f)),
                     color = if (batch.output == null) colors.textTertiary else colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

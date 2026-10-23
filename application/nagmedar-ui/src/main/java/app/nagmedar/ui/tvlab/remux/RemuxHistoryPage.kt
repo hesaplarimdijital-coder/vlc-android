@@ -36,7 +36,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.data.RemuxJobState
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuButton
@@ -149,7 +148,7 @@ private fun HistoryEntry(job: RemuxJobView, open: Boolean, onToggle: () -> Unit,
             Column(Modifier.weight(1f)) {
                 Text(
                     job.outputName,
-                    style = NagTheme.type.mono.copy(fontSize = 13.sp),
+                    style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(13f)),
                     color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -225,7 +224,7 @@ private fun Details(job: RemuxJobView) {
                 SelectionContainer {
                     Text(
                         "SHA-256 " + verification.hash,
-                        style = NagTheme.type.mono.copy(fontSize = 11.sp),
+                        style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(11f)),
                         color = colors.text,
                         modifier = Modifier.testTag("tvlab-history-hash"),
                     )
@@ -246,7 +245,7 @@ private fun Details(job: RemuxJobView) {
             Section(stringResource(R.string.nag_tvlab_history_events)) {
                 job.events.forEach { event ->
                     Row {
-                        Text(times.format(Date(event.at)), style = NagTheme.type.mono.copy(fontSize = 11.sp), color = colors.textTertiary, modifier = Modifier.width(76.dp))
+                        Text(times.format(Date(event.at)), style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(11f)), color = colors.textTertiary, modifier = Modifier.width(76.dp))
                         Text(RemuxReport.eventText(res, event), style = NagTheme.type.labelSmall, color = colors.textSecondary)
                     }
                 }
@@ -275,7 +274,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 private fun Fact(text: String, mono: Boolean = false) {
     Text(
         text,
-        style = if (mono) NagTheme.type.mono.copy(fontSize = 12.sp) else NagTheme.type.labelSmall,
+        style = if (mono) NagTheme.type.mono.copy(fontSize = NagTheme.type.size(12f)) else NagTheme.type.labelSmall,
         color = NagTheme.colors.textSecondary,
     )
 }

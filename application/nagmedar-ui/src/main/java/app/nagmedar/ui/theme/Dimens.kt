@@ -97,3 +97,16 @@ data class NagDimens(
         fun forMode(mode: InputMode) = if (mode == InputMode.Pointer) Pointer else Touch
     }
 }
+
+/**
+ * The sizes for a phone's window (Desktop Kit 0.2.0): a 64 dp bottom bar (the height of Android's
+ * own navigation bar) and 52 dp touch rows, so more of a small screen goes to what it shows.
+ * Targets stay at least 48 dp; pointer sizes are small already and stay as they are. The theme
+ * applies it to windows narrower than 600 dp; tablets and DeX keep [NagDimens.Touch] and
+ * [NagDimens.Pointer].
+ */
+fun NagDimens.forCompactWindow(): NagDimens =
+    if (minTarget < 48.dp) this else copy(
+        bottomBarHeight = bottomBarHeight.coerceAtMost(64.dp),
+        rowHeight = rowHeight.coerceAtMost(52.dp).coerceAtLeast(minTarget),
+    )

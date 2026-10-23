@@ -25,6 +25,9 @@ val LocalNagDimens = staticCompositionLocalOf { NagDimens.Pointer }
 val LocalInputMode = staticCompositionLocalOf { InputMode.Pointer }
 val LocalNagMotion = staticCompositionLocalOf { NagMotion.Full }
 
+/** The window is a tablet's or DeX's (600 dp and wider): larger text, chips that wrap. */
+val LocalLargeWindow = staticCompositionLocalOf { true }
+
 /** Token access for composables: `NagTheme.colors.text`, `NagTheme.dimens.rowHeight`, … */
 object NagTheme {
     val colors: NagColors
@@ -37,12 +40,21 @@ object NagTheme {
         @Composable @ReadOnlyComposable get() = LocalInputMode.current
     val motion: NagMotion
         @Composable @ReadOnlyComposable get() = LocalNagMotion.current
+
+    /** A tablet's or DeX's window (600 dp and wider), as the theme sized its text for. */
+    val largeWindow: Boolean
+        @Composable @ReadOnlyComposable get() = LocalLargeWindow.current
 }
 
 /**
  * Nağmedar theme: light, dark and OLED black palettes, four accents and the wallpaper's (S-204),
  * two densities and the motion tokens. Material 3 components read a matching colour scheme, so
  * they blend with the custom ones. [reduceMotion] null follows the system's "Remove animations".
+ *
+ * As Desktop Kit 0.2.0 has it, the window decides the last step: on tablet and DeX windows
+ * (600 dp and wider, the rail and sidebar layouts) every text style is [largeWindowTextStep] sp
+ * larger; on a phone's window the touch sizes are a little tighter ([compactSizes]: a 64 dp
+ * bottom bar, 52 dp rows, targets still 48 dp).
  */
 @Composable
 fun NagmedarTheme(
@@ -50,13 +62,18 @@ fun NagmedarTheme(
     accent: Accent = Accent.Blue,
     inputMode: InputMode = InputMode.Pointer,
     reduceMotion: Boolean? = null,
+    largeWindowTextStep: Float = LARGE_WINDOW_TEXT_STEP,
+    compactSizes: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
     val seed = if (accent == Accent.System) systemAccentSeed() else null
     val colors = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
-    val type = NagType.forMode(inputMode)
-    val dimens = NagDimens.forMode(inputMode)
+    val largeWindow = LocalConfiguration.current.screenWidthDp >= LARGE_WINDOW_DP
+    val type = remember(inputMode, largeWindow, largeWindowTextStep) {
+        NagType.forMode(inputMode).let { if (largeWindow) it.grow(largeWindowTextStep) else it }
+    }
+    val dimens = NagDimens.forMode(inputMode).let { if (compactSizes && !largeWindow) it.forCompactWindow() else it }
     val scheme = remember(colors) { colors.toMaterialScheme() }
     val selection = remember(colors) { TextSelectionColors(handleColor = colors.accent, backgroundColor = colors.accent.copy(alpha = 0.35f)) }
     val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
@@ -66,6 +83,7 @@ fun NagmedarTheme(
         LocalNagDimens provides dimens,
         LocalInputMode provides inputMode,
         LocalNagMotion provides motion,
+        LocalLargeWindow provides largeWindow,
     ) {
         MaterialTheme(colorScheme = scheme, typography = type.toMaterialTypography()) {
             CompositionLocalProvider(
@@ -136,6 +154,12 @@ private fun NagType.toMaterialTypography() = Typography(
     labelMedium = labelSmall,
     labelSmall = caption,
 )
+
+/** Windows this wide and wider are tablets' and DeX's (the shell's rail and sidebar layouts, WidthClass.Medium). */
+const val LARGE_WINDOW_DP = 600
+
+/** The sp every text style grows by on those windows. */
+const val LARGE_WINDOW_TEXT_STEP = 1f
 
 /**
  * S-204: the wallpaper's accent colour (Android 12+), the seed of [Accent.System]; null on older

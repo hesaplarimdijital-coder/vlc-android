@@ -75,7 +75,8 @@ val ChartLabelStyle = TextStyle(fontFamily = PlexMono, fontSize = 11.sp)
 @Composable
 fun BitrateChart(model: ChartModel, description: String, measurer: TextMeasurer, modifier: Modifier = Modifier) {
     val palette = chartPalette()
-    val style = ChartLabelStyle.copy(color = palette.label)
+    // a tablet's and DeX's numbers one sp larger, as all text there
+    val style = ChartLabelStyle.copy(color = palette.label, fontSize = NagTheme.type.size(ChartLabelStyle.fontSize.value))
     Canvas(modifier.testTag("tvlab-chart").semantics { contentDescription = description }) {
         drawBitrateChart(model, palette, measurer, style)
     }

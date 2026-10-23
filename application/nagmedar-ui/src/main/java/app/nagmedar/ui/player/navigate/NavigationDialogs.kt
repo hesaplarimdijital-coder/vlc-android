@@ -46,9 +46,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
@@ -108,7 +108,7 @@ fun JumpSurface(
                 value = value,
                 onValueChange = { value = it },
                 singleLine = true,
-                textStyle = NagTheme.type.mono.copy(fontSize = 22.sp, color = colors.text),
+                textStyle = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(22f), color = colors.text),
                 cursorBrush = SolidColor(colors.accent),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Go),
                 keyboardActions = KeyboardActions(onGo = { go() }),
@@ -134,7 +134,7 @@ fun JumpSurface(
                     },
             )
             if (lengthMs > 0) {
-                Text(stringResource(R.string.nag_jump_length, playerClock(lengthMs)), style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+                Text(stringResource(R.string.nag_jump_length, playerClock(lengthMs)), style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         // where it goes, or why it cannot

@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
@@ -174,7 +173,7 @@ private fun Centered(content: @Composable () -> Unit) {
 /** The lines' type: the pane's headline, larger over the whole window. */
 @Composable
 private fun lineStyle(large: Boolean): TextStyle =
-    if (large) NagTheme.type.display.copy(fontSize = 32.sp, lineHeight = 42.sp) else NagTheme.type.headline
+    if (large) NagTheme.type.display.copy(fontSize = NagTheme.type.size(32f), lineHeight = NagTheme.type.size(42f)) else NagTheme.type.headline
 
 @Composable
 private fun SyncedLines(lyrics: Lyrics, timeMs: () -> Long, onSeek: ((Long) -> Unit)?, large: Boolean) {
