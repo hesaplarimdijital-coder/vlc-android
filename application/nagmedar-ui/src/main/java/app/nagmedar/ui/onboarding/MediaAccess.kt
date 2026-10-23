@@ -37,10 +37,18 @@ object MediaAccess {
 
     /** Video or audio may be read: the media permissions (either of them), or all-files access. */
     fun hasMediaAccess(context: Context): Boolean = when {
-        Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager() -> true
+        isStorageManager() -> true
         Build.VERSION.SDK_INT >= 33 -> granted(context, Manifest.permission.READ_MEDIA_VIDEO) || granted(context, Manifest.permission.READ_MEDIA_AUDIO)
         else -> granted(context, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
+
+    /**
+     * All-files access as [Environment] says it. It asks the user's first shared-storage volume
+     * and throws where the system lists none (a unit test's sandbox, a storage service that is
+     * down): not given there.
+     */
+    private fun isStorageManager(): Boolean =
+        Build.VERSION.SDK_INT >= 30 && runCatching { Environment.isExternalStorageManager() }.getOrDefault(false)
 
     private fun granted(context: Context, permission: String): Boolean =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
@@ -50,7 +58,7 @@ object MediaAccess {
 
     /** All files: subtitles and lyrics next to the media, and everything on external drives. */
     fun hasAllFiles(context: Context): Boolean =
-        if (Build.VERSION.SDK_INT >= 30) Environment.isExternalStorageManager() else hasMediaAccess(context)
+        if (Build.VERSION.SDK_INT >= 30) isStorageManager() else hasMediaAccess(context)
 
     fun allFilesSettings(context: Context): Intent =
         Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}"))
