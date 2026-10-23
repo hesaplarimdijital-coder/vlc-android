@@ -1,0 +1,9 @@
+1816 s, 170 steps, pass phone-tr, 0 crashes
+163 phone-tr Settings scroll 3 ok
+164 phone-tr Settings scroll 4 ok
+165 phone-tr Settings scroll 5 ok
+166 phone-tr Settings scroll 6 ok
+167 phone-tr Settings scroll 7 ok
+168 phone-tr Settings scroll 8 ok
+169 phone-tr Settings scroll 9 ok
+170 phone-tr Settings scroll 10 ok

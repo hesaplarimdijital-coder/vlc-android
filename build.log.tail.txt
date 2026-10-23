@@ -1,0 +1,300 @@
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:107:34 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:110:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:111:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:112:26 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:113:28 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:116:38 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:117:36 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:118:38 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:121:34 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:122:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:123:34 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:126:35 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:127:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:128:33 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:129:35 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:131:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:162:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:164:49 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:165:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:169:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:171:49 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:172:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:175:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:177:49 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:178:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:181:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:183:49 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:184:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:195:57 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:199:67 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:203:63 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:207:64 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:228:42 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:230:46 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:232:46 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:237:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:275:93 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesSubtitles.kt:275:134 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:74:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:78:20 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:86:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:87:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:91:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:92:15 'fun onResume(): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:93:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:95:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:96:79 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:97:78 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:98:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:105:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:110:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:118:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:129:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:138:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:145:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:151:35 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:156:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:159:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:161:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:167:44 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:172:40 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:176:93 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:177:18 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesVideo.kt:45:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesVideo.kt:50:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:5:8 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:6:8 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:16:50 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:18:52 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:17 'static fun instantiate(p0: Context!, p1: String!, p2: Bundle?): Fragment!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:29 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:20:11 'fun setTargetFragment(p0: Fragment!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:18 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:45 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:79:49 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:89:61 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:100:65 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/viewmodel/MainTvModel.kt:143:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+
+> Task :application:television:compileDebugJavaWithJavac
+> Task :application:television:processDebugJavaRes
+> Task :application:television:bundleLibCompileToJarDebug
+> Task :application:app:dataBindingMergeDependencyArtifactsDebug
+> Task :application:television:bundleLibRuntimeToJarDebug
+> Task :application:app:dataBindingGenBaseClassesDebug
+
+> Task :application:nagmedar-ui:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/ShortcutBindings.kt:118:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:131:26 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:186:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/DisplayReport.kt:42:30 'val supportedHdrTypes: IntArray!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:35:34 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:77:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:78:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/library/TechLabels.kt:163:16 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/MusicTable.kt:30:41 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/network/ServerDialog.kt:60:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/onboarding/FirstRun.kt:77:25 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/DesktopPlayerChrome.kt:1450:21 'when' is exhaustive so 'else' is redundant here.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/PictureSizes.kt:41:9 'when' is exhaustive so 'else' is redundant here.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/PlayerSheetContents.kt:22:39 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/audio/AudioOutput.kt:19:45 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/audio/AudioOutput.kt:53:26 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/effects/PlayerEffects.kt:145:45 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/panel/PlayerPanel.kt:47:21 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/refresh/RefreshRate.kt:16:42 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/snapshot/ActivitySnapshots.kt:145:40 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitleEncoding.kt:15:81 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitleStyle.kt:41:62 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitleStyle.kt:54:59 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitleStyle.kt:67:39 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitleStyle.kt:119:44 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/SubtitlesPanel.kt:58:47 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/extract/ExtractViews.kt:121:17 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/whisper/WhisperModels.kt:15:77 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/whisper/WhisperModels.kt:15:104 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/subtitles/whisper/WhisperModels.kt:34:46 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/sync/PlayerSync.kt:25:62 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/sync/PlayerSync.kt:25:89 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/search/PaletteResults.kt:9:24 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:9:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:21:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/transcode/HlsStream.kt:34:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/transcode/TranscodeProfile.kt:63:25 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/transcode/TranscodeProfile.kt:100:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/transcode/TranscodeProfile.kt:157:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/transcode/TranscodeProfile.kt:251:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/visual/VisualizerSettings.kt:13:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+
+> Task :application:nagmedar-ui:compileDebugJavaWithJavac
+> Task :application:nagmedar-ui:processDebugJavaRes
+> Task :application:nagmedar-ui:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-ui:bundleLibCompileToJarDebug
+> Task :application:app:compileDebugKotlin
+> Task :application:app:compileDebugJavaWithJavac
+> Task :application:app:processDebugJavaRes
+> Task :application:app:mergeDebugJavaResource
+> Task :application:app:dexBuilderDebug
+> Task :application:app:mergeProjectDexDebug
+> Task :application:app:mergeLibDexDebug
+> Task :application:app:packageDebug
+> Task :application:app:createDebugApkListingFileRedirect
+> Task :application:app:assembleDebug
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 5m 26s
+349 actionable tasks: 349 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
