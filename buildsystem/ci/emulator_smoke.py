@@ -7,8 +7,9 @@ StrictMode violations). The walk, in passes (a size and a language each):
 
   tablet-en  first run (every step), then each top-level destination, Settings and its pages
   phone-en   the same on a phone-sized screen with media granted and test files scanned, the
-             first-run flow again, opening files for playback, the command palette (Ctrl+K),
-             the shortcut list, rotation, background and foreground
+             first-run flow again, opening files for playback (a video, a video stored turned
+             as a phone records in portrait, which must show upright, and a music file), the
+             command palette (Ctrl+K), the shortcut list, rotation, background and foreground
   phone-tr   every destination and Settings in Turkish
 
 Destinations are found by their labels: every nag_nav_* string of app/nagmedar-ui's
@@ -750,7 +751,7 @@ class Smoke:
             return
         for perm in PERMISSIONS_MEDIA:
             self.sh("pm grant %s %s" % (self.pkg, perm))
-        for f, dest in (("tone.mp3", "/sdcard/Music/"), ("smoke.mp4", "/sdcard/Movies/")):
+        for f, dest in (("tone.mp3", "/sdcard/Music/"), ("smoke.mp4", "/sdcard/Movies/"), ("rotated.mp4", "/sdcard/Movies/")):
             src = os.path.join(self.a.media, f)
             if os.path.exists(src):
                 self.sh("mkdir -p " + dest)
@@ -758,7 +759,11 @@ class Smoke:
                 self.sh("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://%s%s" % (dest, f))
 
     def playback(self):
-        for f, mime, title in (("/sdcard/Movies/smoke.mp4", "video/mp4", "video"), ("/sdcard/Music/tone.mp3", "audio/mpeg", "audio")):
+        # rotated.mp4 is stored as a phone records in portrait (landscape pictures, "rotate 90"):
+        # its shots must show it upright, "TOP" at the top, filling the width
+        for f, mime, title in (("/sdcard/Movies/smoke.mp4", "video/mp4", "video"),
+                               ("/sdcard/Movies/rotated.mp4", "video/mp4", "rotated video"),
+                               ("/sdcard/Music/tone.mp3", "audio/mpeg", "audio")):
             if self.over_time():
                 return
             if not self.sh("ls %s 2>/dev/null" % f):
@@ -962,7 +967,7 @@ def main():
     p.add_argument("--package", default="app.nagmedar.debug")
     p.add_argument("--out", default="emulator-out")
     p.add_argument("--res", default="application/nagmedar-ui/src/main/res")
-    p.add_argument("--media", default="", help="directory with tone.mp3 and smoke.mp4 to push to the device")
+    p.add_argument("--media", default="", help="directory with tone.mp3, smoke.mp4 and rotated.mp4 to push to the device")
     p.add_argument("--passes", default="tablet-en,phone-en,phone-tr")
     p.add_argument("--adb", default="adb")
     p.add_argument("--deadline-min", type=int, default=40, help="stop starting new work after this many minutes")

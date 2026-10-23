@@ -2,9 +2,9 @@
 #
 # Builds the debug APK for x86_64, boots an Android 15 emulator (KVM) and drives the real app with
 # buildsystem/ci/emulator_smoke.py: first run, every top-level destination and Settings on a tablet
-# and on a phone, Turkish, playback of a video and a music file, the command palette, rotation,
-# background / foreground. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
-# crash or ANR of the app fails the job.
+# and on a phone, Turkish, playback of a video, of a video stored turned (a phone's portrait
+# recording) and of a music file, the command palette, rotation, background / foreground. Each step
+# leaves a screenshot, the UI hierarchy and a logcat verdict; a crash or ANR of the app fails the job.
 #
 # The Nağmedar native libraries (engine, lab) exist for arm64 only, so on this x86_64 emulator they
 # are missing: the app has to say so and keep working, and that is part of what is checked.
@@ -108,7 +108,10 @@ jobs:
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
 
-      # a video and a music file for the library and for playback (video: H.264/AAC, music: MP3 with tags)
+      # videos and a music file for the library and for playback (video: H.264/AAC, music: MP3 with
+      # tags); rotated.mp4 is stored as a phone records in portrait: an upright 360x640 picture
+      # ("TOP" at its top) kept turned a quarter left as 640x360, with the track matrix that turns
+      # it back ("rotate 90"), and must show upright
       - name: Deneme ortamı
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
@@ -118,6 +121,12 @@ jobs:
             -metadata artist="Nagmedar QA" -metadata album="Smoke" "$RUNNER_TEMP/media/tone.mp3"
           ffmpeg -loglevel error -f lavfi -i "testsrc=duration=30:size=640x360:rate=24" -f lavfi -i "sine=frequency=330:duration=30" \
             -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$RUNNER_TEMP/media/smoke.mp4"
+          font=application/nagmedar-ui/src/main/res/font/ibm_plex_sans_semibold.ttf
+          ffmpeg -loglevel error -f lavfi -i "testsrc=duration=30:size=360x640:rate=24" -f lavfi -i "sine=frequency=550:duration=30" \
+            -vf "drawtext=fontfile=$font:text='TOP':fontsize=64:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=12:x=(w-text_w)/2:y=40,drawtext=fontfile=$font:text='portrait 9\:16':fontsize=28:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=8:x=(w-text_w)/2:y=h-90,transpose=2" \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$RUNNER_TEMP/rotated-stored.mp4"
+          ffmpeg -loglevel error -display_rotation -90 -i "$RUNNER_TEMP/rotated-stored.mp4" -c copy "$RUNNER_TEMP/media/rotated.mp4"
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height:stream_side_data=rotation -of compact "$RUNNER_TEMP/media/rotated.mp4"
           ls -l "$RUNNER_TEMP/media"
 
       - name: Emülatör ve yürüyüş

@@ -309,6 +309,100 @@
       }
     },
     {
+      "id": "rotated-90-1080p30",
+      "kind": "generated",
+      "step": "rotated",
+      "file": "video/rotated_90_h264.mp4",
+      "tests": "A phone's portrait recording: 1920 × 1080 pictures stored turned, whose track matrix turns them a quarter right (\"rotate 90\"). It must show upright, 9:16, \"TOP\" at the top, decoded by the hardware as well as in software.",
+      "stories": [
+        "E06"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "aac"
+          }
+        ],
+        "stream_side_data": [
+          {
+            "side_data_type": "Display Matrix",
+            "rotation": -90
+          }
+        ]
+      }
+    },
+    {
+      "id": "rotated-180-1080p30",
+      "kind": "generated",
+      "step": "rotated",
+      "file": "video/rotated_180_h264.mp4",
+      "tests": "A landscape recording made upside down: the pictures stored upside down, whose track matrix turns them a half turn. It must show upright, 16:9, \"TOP\" at the top.",
+      "stories": [
+        "E06"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080
+          }
+        ],
+        "stream_side_data": [
+          {
+            "side_data_type": "Display Matrix",
+            "rotation": -180
+          }
+        ]
+      }
+    },
+    {
+      "id": "rotated-270-1080p30",
+      "kind": "generated",
+      "step": "rotated",
+      "file": "video/rotated_270_h264.mp4",
+      "tests": "A portrait recording turned the other way: 1920 × 1080 pictures whose track matrix turns them a quarter left (\"rotate 270\"). It must show upright, 9:16, \"TOP\" at the top.",
+      "stories": [
+        "E06"
+      ],
+      "expect": {
+        "duration": [
+          9.9,
+          10.2
+        ],
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080
+          }
+        ],
+        "stream_side_data": [
+          {
+            "side_data_type": "Display Matrix",
+            "rotation": 90
+          }
+        ]
+      }
+    },
+    {
       "id": "subtitles-1080p24",
       "kind": "generated",
       "step": "subtitles",

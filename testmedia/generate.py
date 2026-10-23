@@ -347,6 +347,22 @@ class Builder:
                '-f', 'lavfi', '-i', "aevalsrc='0.4*sin(2*PI*440*t)|0.4*sin(2*PI*660*t)':s=48000",
                '-t', '10', '-pix_fmt', 'yuv420p10le', *venc, '-c:a', 'libopus', '-b:a', '128k', out)
 
+    def rotated(self):
+        """Phone recordings stored turned: an upright picture kept turned the other way, with the
+        track matrix that turns it back (what a phone writes as "rotate 90")."""
+        # the clockwise turn that shows it, the upright picture, how it is stored
+        for degrees, size, store in ((90, '1080x1920', 'transpose=2'), (180, '1920x1080', 'hflip,vflip'),
+                                     (270, '1080x1920', 'transpose=1')):
+            stored = self.tmp(f'rotated_{degrees}_stored.mp4')
+            label = ffmpeg_text(f'TOP · {degrees}°')
+            ffmpeg('-f', 'lavfi', '-i', f'testsrc2=size={size}:rate=30',
+                   '-f', 'lavfi', '-i', "aevalsrc='0.3*sin(2*PI*440*t)|0.3*sin(2*PI*440*t)':s=48000",
+                   '-t', '10', '-vf', f"drawtext=fontfile={FONT}:text='{label}':fontsize=96:fontcolor=white:box=1:"
+                                      f"boxcolor=black@0.6:boxborderw=24:x=(w-text_w)/2:y=80,{store}",
+                   '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', stored)
+            # -display_rotation turns counter-clockwise
+            ffmpeg('-display_rotation', str(-degrees), '-i', stored, '-c', 'copy', self.path(f'video/rotated_{degrees}_h264.mp4'))
+
     def subtitles(self):
         base = self.path('video/subtitles_1080p24_h264.mkv')
         av = self.tmp('subs_av.mkv')
@@ -658,7 +674,7 @@ STEPS = {
     'hdr10': Builder.hdr10, 'hdr10plus': Builder.hdr10plus, 'dv-p81': Builder.dolby_vision_p81,
     'dv-p5': Builder.dolby_vision_p5, 'dv-p7': Builder.dolby_vision_p7,
     'hlg': Builder.hlg, 'stress': Builder.stress, 'interlaced': Builder.interlaced, 'av1': Builder.av1,
-    'subtitles': Builder.subtitles, 'sync': Builder.sync, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
+    'rotated': Builder.rotated, 'subtitles': Builder.subtitles, 'sync': Builder.sync, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
     'surround': Builder.surround_codecs, 'dsd': Builder.dsd, 'lyrics': Builder.lyrics, 'gapless': Builder.gapless,
     'cue': Builder.cue, 'tracker': Builder.tracker_modules, 'podcast': Builder.podcast, 'radio': Builder.radio,
 }
