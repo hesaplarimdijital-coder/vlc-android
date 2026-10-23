@@ -294,7 +294,8 @@ object VLCOptions {
         return ret
     }
 
-    fun setMediaOptions(media: IMedia, context: Context, flags: Int, hasRenderer: Boolean) {
+    /** [turned]: Nağmedar, the film's picture is stored turned ([NagmedarVlcOptions.mediaOptions]). */
+    fun setMediaOptions(media: IMedia, context: Context, flags: Int, hasRenderer: Boolean, turned: Boolean = false) {
         val noHardwareAcceleration = flags and MediaWrapper.MEDIA_NO_HWACCEL != 0
         val noVideo = flags and MediaWrapper.MEDIA_VIDEO == 0
         val paused = flags and MediaWrapper.MEDIA_PAUSED != 0
@@ -317,8 +318,8 @@ object VLCOptions {
             }
         } /* else automatic: use default options */
 
-        // Nağmedar (S-610): the session's video effects that need the pictures in memory
-        if (!noHardwareAcceleration && hardwareAcceleration != HW_ACCELERATION_DISABLED) NagmedarVlcOptions.mediaOptions().forEach { media.addOption(it) }
+        // Nağmedar (S-610): the session's video effects that need the pictures in memory, and a picture stored turned
+        if (!noHardwareAcceleration && hardwareAcceleration != HW_ACCELERATION_DISABLED) NagmedarVlcOptions.mediaOptions(turned).forEach { media.addOption(it) }
         if (noVideo) media.addOption(":no-video")
         if (paused) media.addOption(":start-paused")
         if (!prefs.getBoolean(KEY_SUBTITLES_AUTOLOAD, true)) media.addOption(":sub-language=none")

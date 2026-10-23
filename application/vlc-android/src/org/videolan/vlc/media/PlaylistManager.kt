@@ -41,6 +41,7 @@ import org.videolan.resources.PLAYLIST_TYPE_AUDIO
 import org.videolan.resources.PLAYLIST_TYPE_VIDEO
 import org.videolan.resources.PLAY_FROM_SERVICE
 import org.videolan.resources.DecodingHook
+import org.videolan.resources.NagmedarVlcOptions
 import org.videolan.resources.NetworkMediaHook
 import org.videolan.resources.SubtitleEncodingHook
 import org.videolan.resources.VLCInstance
@@ -864,7 +865,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 ?.let { adviser -> runCatching { adviser.needsSoftwareDecoding(ctx, mw.uri) }.getOrDefault(false) } ?: false
             // S-1302: a track handed over while paused stays paused
             val resumePaused = if (resume?.paused == true) MediaWrapper.MEDIA_PAUSED else 0
-            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or resumePaused or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer())
+            // Nağmedar: a picture stored turned (a phone's portrait recording) shows upright through libVLC's OpenGL output alone
+            val turned = NagmedarVlcOptions.handsTurnedOver && !PlaybackService.hasRenderer() &&
+                (mw.type == MediaWrapper.TYPE_VIDEO || mw.hasFlag(MediaWrapper.MEDIA_VIDEO)) && StoredRotation.degrees(ctx, mw.uri) != 0
+            VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or resumePaused or (if (software) MediaWrapper.MEDIA_NO_HWACCEL else 0), PlaybackService.hasRenderer(), turned)
             // Nağmedar (S-1301): a saved network server's sign-in, as libVLC's options take it, never in the address
             NetworkMediaHook.options?.let { hook -> withContext(Dispatchers.IO) { runCatching { hook.optionsFor(uri) }.getOrDefault(emptyList()) } }
                 ?.forEach { media.addOption(it) }
