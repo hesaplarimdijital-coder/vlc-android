@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:40.101Z" hostname="runnervm8k3b6" time="0.001">
+  <properties/>
+  <testcase name="movedEarlierAndLaterButNotOffTheList" classname="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" time="0.001"/>
+  <testcase name="aProviderAddedLaterComesAfterTheOnesInTheOrderKept" classname="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" time="0.0"/>
+  <testcase name="turnedOnAndOff" classname="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" time="0.0"/>
+  <testcase name="theirOwnOrderAndTheirDefaults" classname="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" time="0.0"/>
+  <testcase name="theChoiceIsKept" classname="app.nagmedar.ui.player.subtitles.providers.ProviderRegistryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

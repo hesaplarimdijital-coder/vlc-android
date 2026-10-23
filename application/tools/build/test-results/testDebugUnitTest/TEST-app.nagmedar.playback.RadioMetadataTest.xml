@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.playback.RadioMetadataTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:53:21.213Z" hostname="runnervm8k3b6" time="0.069">
+  <properties/>
+  <testcase name="withoutAStationNameTheLinesAreEmpty" classname="app.nagmedar.playback.RadioMetadataTest" time="0.045"/>
+  <testcase name="theMetadataChangesWhenTheTitleDoes" classname="app.nagmedar.playback.RadioMetadataTest" time="0.001"/>
+  <testcase name="enAndEmDashesSplitToo" classname="app.nagmedar.playback.RadioMetadataTest" time="0.004"/>
+  <testcase name="onlyAStreamsWebLogoIsUsed" classname="app.nagmedar.playback.RadioMetadataTest" time="0.0"/>
+  <testcase name="nothingPlayingShowsTheStation" classname="app.nagmedar.playback.RadioMetadataTest" time="0.001"/>
+  <testcase name="aDashWithOneSideEmptyIsNotSplit" classname="app.nagmedar.playback.RadioMetadataTest" time="0.0"/>
+  <testcase name="aDashInsideAWordIsNoSeparator" classname="app.nagmedar.playback.RadioMetadataTest" time="0.0"/>
+  <testcase name="spacesQuotesAndControlCharactersAreCleaned" classname="app.nagmedar.playback.RadioMetadataTest" time="0.001"/>
+  <testcase name="theFirstDashSplits" classname="app.nagmedar.playback.RadioMetadataTest" time="0.0"/>
+  <testcase name="aTextWithoutAnArtistIsTheTitle" classname="app.nagmedar.playback.RadioMetadataTest" time="0.005"/>
+  <testcase name="theStationBeforeTheDashIsNoArtist" classname="app.nagmedar.playback.RadioMetadataTest" time="0.001"/>
+  <testcase name="anArtistAndATitleAreSplit" classname="app.nagmedar.playback.RadioMetadataTest" time="0.002"/>
+  <testcase name="aStreamShowsItsLogoWhetherOrNotItSendsATitle" classname="app.nagmedar.playback.RadioMetadataTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

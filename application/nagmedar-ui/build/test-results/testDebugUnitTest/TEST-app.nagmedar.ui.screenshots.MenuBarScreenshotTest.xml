@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MenuBarScreenshotTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:59:18.216Z" hostname="runnervm8k3b6" time="0.642">
+  <properties/>
+  <testcase name="largeByTouch" classname="app.nagmedar.ui.screenshots.MenuBarScreenshotTest" time="0.128"/>
+  <testcase name="altHighlightsATitle" classname="app.nagmedar.ui.screenshots.MenuBarScreenshotTest" time="0.121"/>
+  <testcase name="menusDark" classname="app.nagmedar.ui.screenshots.MenuBarScreenshotTest" time="0.197"/>
+  <testcase name="menusLight" classname="app.nagmedar.ui.screenshots.MenuBarScreenshotTest" time="0.196"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

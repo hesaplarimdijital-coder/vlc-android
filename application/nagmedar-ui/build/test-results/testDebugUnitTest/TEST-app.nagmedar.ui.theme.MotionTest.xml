@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.MotionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:59:59.002Z" hostname="runnervm8k3b6" time="0.238">
+  <properties/>
+  <testcase name="loopsStandStillWithAnimationsRemoved" classname="app.nagmedar.ui.theme.MotionTest" time="0.053"/>
+  <testcase name="followsRemoveAnimations" classname="app.nagmedar.ui.theme.MotionTest" time="0.043"/>
+  <testcase name="theAppMayReduceMotionItself" classname="app.nagmedar.ui.theme.MotionTest" time="0.034"/>
+  <testcase name="loopsMoveWithFullMotion" classname="app.nagmedar.ui.theme.MotionTest" time="0.044"/>
+  <testcase name="fullSpecsFollowTheTokens" classname="app.nagmedar.ui.theme.MotionTest" time="0.032"/>
+  <testcase name="reducedSpecsSnap" classname="app.nagmedar.ui.theme.MotionTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

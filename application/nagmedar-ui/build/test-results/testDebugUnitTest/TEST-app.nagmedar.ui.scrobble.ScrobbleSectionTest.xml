@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleSectionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:59:55.262Z" hostname="runnervm8k3b6" time="0.319">
+  <properties/>
+  <testcase name="aRefusedAccountSaysWhyItsQueueWaitsAndOffersASignInAgain" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.045"/>
+  <testcase name="nothingWaitingMeansNothingToSend" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.037"/>
+  <testcase name="listenBrainzSignsInWithAPastedTokenAndLinksToItsSettingsPage" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.049"/>
+  <testcase name="whatWentWrongIsSaidUnderTheForm" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.044"/>
+  <testcase name="aBuildWithoutLastFmKeysSaysSoAndCannotSignIn" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.036"/>
+  <testcase name="anAccountSignedInShowsItsNameTheQueueAndTheButtons" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.06"/>
+  <testcase name="lastFmSignsInWithANameAndAPasswordThatStaysUnreadable" classname="app.nagmedar.ui.scrobble.ScrobbleSectionTest" time="0.048"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

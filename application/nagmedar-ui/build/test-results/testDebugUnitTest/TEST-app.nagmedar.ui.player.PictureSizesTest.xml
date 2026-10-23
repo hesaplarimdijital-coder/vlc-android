@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.PictureSizesTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:30.831Z" hostname="runnervm8k3b6" time="0.076">
+  <properties/>
+  <testcase name="aRatioTakesTheLanguagesDecimalSeparator" classname="app.nagmedar.ui.player.PictureSizesTest" time="0.031"/>
+  <testcase name="thePictureSizesInEnglish" classname="app.nagmedar.ui.player.PictureSizesTest" time="0.026"/>
+  <testcase name="thePictureSizesInTurkish" classname="app.nagmedar.ui.player.PictureSizesTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

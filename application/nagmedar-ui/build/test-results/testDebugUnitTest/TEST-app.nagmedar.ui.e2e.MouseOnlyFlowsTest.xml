@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.e2e.MouseOnlyFlowsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:10.727Z" hostname="runnervm8k3b6" time="0.945">
+  <properties/>
+  <testcase name="theCommandPaletteByClicking" classname="app.nagmedar.ui.e2e.MouseOnlyFlowsTest" time="0.313"/>
+  <testcase name="theMenuBarsMenus" classname="app.nagmedar.ui.e2e.MouseOnlyFlowsTest" time="0.252"/>
+  <testcase name="theTvLabFromTheSidebar" classname="app.nagmedar.ui.e2e.MouseOnlyFlowsTest" time="0.379"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:39.160Z" hostname="runnervm8k3b6" time="0.939">
+  <properties/>
+  <testcase name="theQuotaIsToldAtOnceAndIsKeptWhenTheFileDoesNotArrive" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.026"/>
+  <testcase name="withoutAFingerprintOrAName" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.019"/>
+  <testcase name="theApiAsksForTheParametersAlphabetically" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.055"/>
+  <testcase name="aFileThatNeverArrivesEndsWithItsTimeoutAndTheCallIsCancelled" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.334"/>
+  <testcase name="aRefusedConnectionIsOffline" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.041"/>
+  <testcase name="theSeriesAndTheImdbNumberGoWithTheNameSearch" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.024"/>
+  <testcase name="failuresAreThrownForTheSearchToReport" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.02"/>
+  <testcase name="itsAnswersAreInTheCommonModel" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.019"/>
+  <testcase name="theFingerprintFirstThenTheNameAsBefore" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.027"/>
+  <testcase name="aDownloadIsItsBytesAndTheQuotaItReported" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.027"/>
+  <testcase name="whatItCanDoAndWhatItAsksFor" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.019"/>
+  <testcase name="aSearchThatNeverAnswersEndsWithItsTimeoutAndTheCallIsCancelled" classname="app.nagmedar.ui.player.subtitles.providers.OpenSubtitlesProviderTest" time="0.327"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

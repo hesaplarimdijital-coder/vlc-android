@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.record.RecordingFilesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:34.242Z" hostname="runnervm8k3b6" time="0.495">
+  <properties/>
+  <testcase name="leftoversOfBothPlacesAreFound" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.04"/>
+  <testcase name="aSecondOfTheSameNameIsNumbered" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.157"/>
+  <testcase name="onAndroid10ItIsMadeInTheAppsStorage" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.021"/>
+  <testcase name="aCopyCutShortIsDeletedBeforeItIsMadeAgain" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.074"/>
+  <testcase name="withAChosenFolderItIsMadeInTheAppsStorage" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.025"/>
+  <testcase name="whereAndHowByAndroidsVersion" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.029"/>
+  <testcase name="withoutAChosenFolderItIsMadeInDownload" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.022"/>
+  <testcase name="soundIsRenamedIntoMusicAndVideoIntoMovies" classname="app.nagmedar.ui.player.record.RecordingFilesTest" time="0.127"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

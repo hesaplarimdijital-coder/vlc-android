@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.LibraryScopesTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:15.567Z" hostname="runnervm8k3b6" time="0.008">
+  <properties/>
+  <testcase name="aFileOfASeriesFolderThatIsNoEpisodeIsAVideo" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.005"/>
+  <testcase name="aFolderLeftOutKeepsItsVideosOut" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.0"/>
+  <testcase name="aFileIsInBothSectionsThatChoseItsFolder" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.001"/>
+  <testcase name="noVideoIsLostWhenEverySectionHasFolders" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.0"/>
+  <testcase name="withoutFoldersEverySectionShowsWhatIsItsOwn" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.0"/>
+  <testcase name="onlyTheFoldersOfVideosLeaveFilmsAndSeries" classname="app.nagmedar.ui.library.LibraryScopesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

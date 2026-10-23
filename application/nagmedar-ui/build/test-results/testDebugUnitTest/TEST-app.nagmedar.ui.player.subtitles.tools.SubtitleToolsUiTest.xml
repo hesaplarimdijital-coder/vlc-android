@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:41.116Z" hostname="runnervm8k3b6" time="1.401">
+  <properties/>
+  <testcase name="theKeysWalkTheLines" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.193"/>
+  <testcase name="theFrameRateShowsTheTimesBeforeAndAfter" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.106"/>
+  <testcase name="aTimeThatIsNoTimeChangesNothing" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.099"/>
+  <testcase name="escapeClosesTheWindow" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.082"/>
+  <testcase name="theLinesWithAWrongTimeAreSaidSoAndSaveWaits" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.085"/>
+  <testcase name="escapeWithUnsavedEditsAsksFirstAndKeepsWorkingOnEscapeAgain" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.105"/>
+  <testcase name="mendingTheTimeLetsSaveThrough" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.114"/>
+  <testcase name="cleaningListsTheChangedLinesAndAppliesThem" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.084"/>
+  <testcase name="withoutAFilmThereAreNoButtonsForItsPosition" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.079"/>
+  <testcase name="closingWithoutSavingClosesAndSavingSavesFirst" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.108"/>
+  <testcase name="discardingFromTheQuestionClosesTheWindow" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.117"/>
+  <testcase name="theNewNamesBox" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.085"/>
+  <testcase name="withAFilmTheButtonsTakeItsPositionAndEnterSeeksToTheLine" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsUiTest" time="0.144"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

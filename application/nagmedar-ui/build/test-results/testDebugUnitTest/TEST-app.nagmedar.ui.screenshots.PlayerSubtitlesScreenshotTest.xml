@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:59:30.133Z" hostname="runnervm8k3b6" time="1.515">
+  <properties/>
+  <testcase name="dexEnglish" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.153"/>
+  <testcase name="onlineWithoutKey" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.132"/>
+  <testcase name="online" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.138"/>
+  <testcase name="encodingPhone" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.123"/>
+  <testcase name="encodingEnglish" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.135"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.161"/>
+  <testcase name="drop" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.153"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.111"/>
+  <testcase name="onlinePhone" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.124"/>
+  <testcase name="encoding" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.139"/>
+  <testcase name="onlineEnglish" classname="app.nagmedar.ui.screenshots.PlayerSubtitlesScreenshotTest" time="0.143"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.info.InfoTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:58:33.251Z" hostname="runnervm8k3b6" time="0.354">
+  <properties/>
+  <testcase name="theTabShowsTheFilmAndItsLastSecond" classname="app.nagmedar.ui.player.info.InfoTest" time="0.089"/>
+  <testcase name="theStatisticsKeepTheirLastMinute" classname="app.nagmedar.ui.player.info.InfoTest" time="0.054"/>
+  <testcase name="theOverlaySaysTheBitrateAndTheLostFrames" classname="app.nagmedar.ui.player.info.InfoTest" time="0.051"/>
+  <testcase name="theProbesStreamsWithTheirHdrMetadata" classname="app.nagmedar.ui.player.info.InfoTest" time="0.049"/>
+  <testcase name="theReportSaysWhatTheTabShows" classname="app.nagmedar.ui.player.info.InfoTest" time="0.053"/>
+  <testcase name="withoutAProbeLibVlcsTracks" classname="app.nagmedar.ui.player.info.InfoTest" time="0.057"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

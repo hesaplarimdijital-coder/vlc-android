@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screens.ShortcutEditorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-23T07:59:04.472Z" hostname="runnervm8k3b6" time="0.86">
+  <properties/>
+  <testcase name="conflictsInTheTableAreShown" classname="app.nagmedar.ui.screens.ShortcutEditorTest" time="0.124"/>
+  <testcase name="presetsAndTheResetCanBeTakenBack" classname="app.nagmedar.ui.screens.ShortcutEditorTest" time="0.215"/>
+  <testcase name="theWindowsKeysAreRefusedEscGivesUpBackspaceRemoves" classname="app.nagmedar.ui.screens.ShortcutEditorTest" time="0.177"/>
+  <testcase name="pressedKeysBecomeTheShortcut" classname="app.nagmedar.ui.screens.ShortcutEditorTest" time="0.193"/>
+  <testcase name="anotherShortcutsKeysAskFirst" classname="app.nagmedar.ui.screens.ShortcutEditorTest" time="0.151"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
