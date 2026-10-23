@@ -1,5 +1,6 @@
 package app.nagmedar.ui.player.navigate
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -20,11 +21,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -37,6 +40,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -52,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagIconButton
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.player.ChapterMark
 import app.nagmedar.ui.player.playerClock
@@ -226,20 +232,29 @@ fun RenameSurface(mark: BookmarkMark, onRename: (String) -> Unit, onDismiss: () 
     }
 }
 
-/** A dialog's window: the card in the middle, a tap beside it closes it. */
+/** A dialog's window: the card in the middle, a tap beside it closes it; its card's × closes it too ([LocalDialogDismiss]). */
 @Composable
 internal fun DialogFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) {
     Box(
         Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { onDismiss() } },
         contentAlignment = Alignment.Center,
-    ) { content() }
+    ) { CompositionLocalProvider(LocalDialogDismiss provides onDismiss, content = content) }
 }
 
-/** The card of the player's small dialogs: a title with Esc, then what it asks; [cardWidth] wide where the window has room. */
+/** How the [DialogFrame] around a [DialogCard] closes: its × on a device without a keyboard; null outside a frame. */
+internal val LocalDialogDismiss = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/**
+ * The card of the player's small dialogs: a title with Esc, then what it asks; [cardWidth] wide where the window has
+ * room. Esc is shown with a keyboard at hand; without one (a phone, a tablet by touch) a × closes the dialog instead.
+ */
 @Composable
 internal fun DialogCard(title: String, modifier: Modifier = Modifier, cardWidth: Dp = 380.dp, content: @Composable ColumnScope.() -> Unit) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(12.dp)
+    val configuration = LocalConfiguration.current
+    val keyboard = configuration.keyboard == Configuration.KEYBOARD_QWERTY && configuration.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
+    val dismiss = LocalDialogDismiss.current
     BoxWithConstraints(contentAlignment = Alignment.Center) {
         val width = if (maxWidth < cardWidth + 40.dp) maxWidth - 32.dp else cardWidth
         Column(
@@ -255,7 +270,10 @@ internal fun DialogCard(title: String, modifier: Modifier = Modifier, cardWidth:
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.weight(1f))
-                KeyCap(ESCAPE)
+                when {
+                    keyboard -> KeyCap(ESCAPE)
+                    dismiss != null -> NagIconButton(NagIcons.Close, stringResource(R.string.nag_player_window_close), dismiss, modifier = Modifier.testTag("dialog-close"))
+                }
             }
             content()
         }
