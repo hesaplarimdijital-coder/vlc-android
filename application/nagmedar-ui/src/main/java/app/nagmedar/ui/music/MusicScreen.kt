@@ -82,6 +82,8 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.rememberScanState
+import app.nagmedar.ui.playback.PlayFrom
+import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
@@ -202,6 +204,9 @@ fun rememberMusicBrowserState(): MusicBrowserState {
 interface MusicActions {
     fun play(tracks: List<Track>, index: Int)
 
+    /** [tracks] played as [from]'s (an album, an artist, a playlist), which the phone's player names; null: as [play]. */
+    fun play(tracks: List<Track>, index: Int, from: PlaySource?) = play(tracks, index)
+
     fun queue(tracks: List<Track>)
 
     /** S-806: right after what plays, the rest of the queue as it was. */
@@ -224,6 +229,26 @@ interface MusicActions {
 
     /** S-1010: [tracks] converted to another format, in a window; null where there is no converter. */
     val convert: ((List<Track>) -> Unit)? get() = null
+}
+
+/** These actions with their plays coming from [source] (a group of the music view, a playlist); themselves for none. */
+internal fun MusicActions.playingFrom(source: PlaySource?): MusicActions = if (source == null) this else SourcedMusicActions(this, source)
+
+/** [base] whose plays say they come from [source]; everything else is [base]'s. */
+private class SourcedMusicActions(private val base: MusicActions, private val source: PlaySource) : MusicActions by base {
+    override fun play(tracks: List<Track>, index: Int) = base.play(tracks, index, source)
+
+    override fun play(tracks: List<Track>, index: Int, from: PlaySource?) = base.play(tracks, index, from ?: source)
+}
+
+/** What the phone's player names for a group's tracks: an album or an artist by its name; none for the other views or a group without one. */
+internal fun groupSource(view: MusicView, group: MusicGroup?): PlaySource? {
+    val name = group?.title ?: return null
+    return when (view) {
+        MusicView.Albums -> PlaySource(PlayFrom.Album, name)
+        MusicView.Artists -> PlaySource(PlayFrom.Artist, name)
+        else -> null
+    }
 }
 
 // ------------------------------------------------------------------- the screen
@@ -369,9 +394,11 @@ internal class ServiceMusicActions(
 
     private fun media(tracks: List<Track>) = tracks.mapNotNull { lookup(it.uri) }
 
-    override fun play(tracks: List<Track>, index: Int) {
+    override fun play(tracks: List<Track>, index: Int) = play(tracks, index, null)
+
+    override fun play(tracks: List<Track>, index: Int, from: PlaySource?) {
         val list = media(tracks)
-        if (list.isNotEmpty()) PlaybackActions.playList(context, list, index.coerceIn(0, list.lastIndex))
+        if (list.isNotEmpty()) PlaybackActions.playList(context, list, index.coerceIn(0, list.lastIndex), from)
     }
 
     override fun queue(tracks: List<Track>) = PlaybackActions.appendList(context, media(tracks))
@@ -457,9 +484,11 @@ fun MusicBrowser(
         }
         state.show(asked.view, key, clearFilter = hidden)
     }
+    // the open group's tracks play from it: an album's or an artist's, as the phone's player names it
+    val openActions = remember(actions, state.view, open?.title) { actions.playingFrom(groupSource(state.view, open)) }
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
-        MusicToolbar(state, actions, shown, showColumns = width != WidthClass.Compact, probing = probing)
+        MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact, probing = probing)
         when {
             groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 NoResultsState(
@@ -474,7 +503,7 @@ fun MusicBrowser(
                     GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats) }
                 if (nowPlaying != null) {
                     VerticalRule()
                     Box(Modifier.width(300.dp).fillMaxHeight()) { nowPlaying() }
@@ -483,9 +512,9 @@ fun MusicBrowser(
             wide && grouped -> Row(Modifier.fillMaxSize()) {
                 GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, actions, showBack = false, stats) }
+                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats) }
             }
-            !grouped || open != null -> if (open != null) TrackPane(open, shown, state, actions, showBack = grouped, stats)
+            !grouped || open != null -> if (open != null) TrackPane(open, shown, state, openActions, showBack = grouped, stats)
             else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
         }
     }
@@ -556,7 +585,7 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened
             // the menu plays the group's tracks, as the table's rows do one track
-            ContextMenuArea(entries = { groupMenu(res, group, actions) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+            ContextMenuArea(entries = { groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
                 GroupRow(group, state.view, selected = group.key == openKey) { state.group = group.key }
             }
         }

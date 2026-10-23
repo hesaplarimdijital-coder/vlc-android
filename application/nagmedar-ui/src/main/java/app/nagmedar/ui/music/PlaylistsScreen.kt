@@ -86,6 +86,8 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.rememberScanState
+import app.nagmedar.ui.playback.PlayFrom
+import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -356,7 +358,8 @@ fun PlaylistsBrowser(
                 shownSmart,
                 smartTracks[shownSmart.id],
                 stats,
-                actions,
+                // a list's tracks play from it, as the phone's player names it
+                actions.playingFrom(PlaySource(PlayFrom.Playlist, shownSmart.name)),
                 onEdit = { editing = SmartEditing.Edit(shownSmart) },
                 menu = { smartMenuOf(shownSmart, { renaming = true }, queueEntries(smartTracks[shownSmart.id].orEmpty())) },
                 onBack = onBack,
@@ -367,7 +370,7 @@ fun PlaylistsBrowser(
             open != null -> PlaylistPane(
                 open,
                 state,
-                actions,
+                actions.playingFrom(PlaySource(PlayFrom.Playlist, open.name)),
                 undo,
                 menu = { playlistMenuOf(open, { renaming = true }, queueEntries(state.lines.map { it.track })) },
                 onBrowseMusic = onBrowseMusic,

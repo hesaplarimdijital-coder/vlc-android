@@ -9,6 +9,7 @@ import app.nagmedar.ui.library.MediaInfoRequests
 import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.network.NetworkDialogs
+import app.nagmedar.ui.playback.PlaySources
 import app.nagmedar.ui.playback.ResumePrompts
 import app.nagmedar.ui.player.effects.AdvancedVideoSession
 import app.nagmedar.ui.player.record.Recordings
@@ -51,6 +52,8 @@ object ProcessState {
             Recordings,
             MediaInfoRequests,
             MusicLinks,
+            // what the queue was started from: written by the music view, read by the phone's player
+            PlaySources,
             RemoteAccessPages,
             ShellRequests,
             // its prompt queue (a SnapshotStateList): the background init installs the object on an IO

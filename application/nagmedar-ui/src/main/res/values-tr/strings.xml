@@ -413,6 +413,11 @@
 
     <!-- Oynatıcı -->
     <string name="nag_now_playing">Şimdi çalıyor</string>
+    <!-- S-1002: telefon oynatıcısının üst satırı: çalanın nereden geldiği; adı altında -->
+    <string name="nag_player_from_album">Albümden çalınıyor</string>
+    <string name="nag_player_from_artist">Sanatçıdan çalınıyor</string>
+    <string name="nag_player_from_playlist">Çalma listesinden çalınıyor</string>
+    <string name="nag_player_from_queue">Sıradan çalınıyor</string>
     <string name="nag_nothing_playing">Çalan bir şey yok</string>
     <string name="nag_play">Oynat</string>
     <string name="nag_pause">Duraklat</string>

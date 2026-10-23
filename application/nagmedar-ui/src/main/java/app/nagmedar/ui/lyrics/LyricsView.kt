@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -443,6 +445,45 @@ fun PlayingLyricsFullScreen(onClose: () -> Unit, modifier: Modifier = Modifier) 
         onLookAgain = playing.onLookAgain,
         onEdit = { LyricsEditorRequest.open = true },
     )
+}
+
+/**
+ * S-1002: the playing track's line being sung, alone, as the phone's player shows it under the artwork; nothing while
+ * the track has no synced lyrics. [onClick] opens them.
+ */
+@Composable
+fun PlayingLyricLine(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val playing = rememberPlayingLyrics()
+    val lyrics = (playing.load as? LyricsLoad.Found)?.lyrics?.takeIf { it.synced } ?: return
+    LyricLine(lyrics, playing.timeMs, onClick, modifier)
+}
+
+/**
+ * S-1002: the line of synced [lyrics] sung at [timeMs] (the pause's note between lines, nothing before the first), on
+ * one line; the row keeps its height as the lines change. A tap ([onClick]) opens the lyrics.
+ */
+@Composable
+fun LyricLine(lyrics: Lyrics, timeMs: () -> Long, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    // the line changes a few times a minute: only then is it drawn again
+    val latestTime by rememberUpdatedState(timeMs)
+    val index by remember(lyrics) { derivedStateOf { lyrics.lineAt(latestTime()) } }
+    val text = lyrics.lines.getOrNull(index)?.text?.ifBlank { INTERLUDE }.orEmpty()
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val shape = RoundedCornerShape(dimens.radiusControl)
+    Box(
+        modifier
+            .heightIn(min = dimens.minTarget)
+            .focusRing(state, shape)
+            .background(stateBackground(state), shape)
+            .nagClickable(interaction, onClick, onClickLabel = stringResource(R.string.nag_sc_lyrics))
+            .testTag("lyric-line"),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(text, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
 }
 
 /** What the views of the playing track's lyrics are given. */

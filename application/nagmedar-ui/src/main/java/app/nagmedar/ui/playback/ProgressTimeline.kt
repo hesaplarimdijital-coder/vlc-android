@@ -106,7 +106,7 @@ enum class TimelineStyle {
     /** The desktop music view's now playing pane: a soft waveform, the times under it. */
     Panel,
 
-    /** The phone's player: a taller waveform for the thumb, the times under it. */
+    /** The phone's player: a slim track over a faint band of the waveform, the times close under it, in the thumb's reach. */
     Phone,
 
     /** The transport bar: a plain track between the elapsed and the remaining time. */
@@ -182,12 +182,16 @@ fun ProgressTimeline(
     val thumb by animateFloatAsState(with(density) { thumbTarget.toPx() }, motion.standard(NagMotion.SHORT), label = "thumb")
     val trackTarget = if (active) 6.dp else if (bar) 3.dp else 4.dp
     val track by animateFloatAsState(with(density) { trackTarget.toPx() }, motion.standard(NagMotion.SHORT), label = "track")
+    val phone = style == TimelineStyle.Phone
     val waveHeight = when (style) {
         TimelineStyle.Panel -> 36.dp
-        TimelineStyle.Phone -> 48.dp
+        TimelineStyle.Phone -> PHONE_WAVE
         TimelineStyle.Bar -> 0.dp
     }
-    val height = max(waveHeight.value, dimens.minTarget.coerceAtLeast(24.dp).value).dp
+    val timeStyle = (if (phone) NagTheme.type.labelSmall else NagTheme.type.caption).tabular()
+    // the phone's: the times inside the target, under the track and its band, however large the text is set
+    val content = if (phone) PHONE_TRACK + PHONE_WAVE / 2 + PHONE_GAP + with(density) { timeStyle.lineHeight.toDp() } else waveHeight
+    val height = max(content.value, dimens.minTarget.coerceAtLeast(24.dp).value).dp
     val barWidth = with(density) { 2.dp.toPx() }
     val barGap = with(density) { 2.dp.toPx() }
     val count = max(1, ((widthPx + barGap) / (barWidth + barGap)).toInt())
@@ -280,13 +284,13 @@ fun ProgressTimeline(
             ) {
                 val fraction = shown()
                 val w = size.width
-                val middle = size.height / 2
+                val middle = if (phone) PHONE_TRACK.toPx() else size.height / 2
                 val playedX = w * fraction
                 val hover = hoverAt?.takeIf { pointer && !dragging }
                 val hoverX = hover?.let { w * it }
                 // the waveform, soft, both ways from the track
                 if (levels != null) {
-                    val room = size.height - track
+                    val room = (if (phone) waveHeight.toPx() else size.height) - track
                     for (i in levels.indices) {
                         val x = i * (barWidth + barGap)
                         if (x > w) break
@@ -348,7 +352,6 @@ fun ProgressTimeline(
         }
     }
 
-    val timeStyle = (if (style == TimelineStyle.Phone) NagTheme.type.labelSmall else NagTheme.type.caption).tabular()
     val elapsedColor = if (dragging) colors.accentText else colors.textSecondary
     val elapsedText = clock(elapsedMs)
     val remainingText = if (lengthMs > 0L) stringResource(R.string.nag_time_remaining, clock((lengthMs - elapsedMs).coerceAtLeast(0L))) else ""
@@ -359,6 +362,16 @@ fun ProgressTimeline(
             timeline(Modifier.weight(1f))
             Spacer(Modifier.width(dimens.gapS))
             Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1, modifier = Modifier.widthIn(min = TIME_WIDTH))
+        }
+    } else if (phone) {
+        // the times over the target's lower part: a finger on them still seeks
+        Box(modifier.fillMaxWidth()) {
+            timeline(Modifier.fillMaxWidth())
+            Row(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
+                Text(elapsedText, style = timeStyle, color = elapsedColor, maxLines = 1)
+                Spacer(Modifier.weight(1f))
+                Text(remainingText, style = timeStyle, color = colors.textSecondary, maxLines = 1)
+            }
         }
     } else {
         Column(modifier.fillMaxWidth()) {
@@ -371,6 +384,11 @@ fun ProgressTimeline(
         }
     }
 }
+
+/** The phone's timeline: the band of the waveform, how far down its track runs, and the room between the band and the times. */
+private val PHONE_WAVE = 16.dp
+private val PHONE_TRACK = 14.dp
+private val PHONE_GAP = 6.dp
 
 /** Room for "1:02:03" beside the bar's track, so that it does not move as the figures change. */
 private val TIME_WIDTH = 44.dp
@@ -545,10 +563,11 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
 
 // --------------------------------------------------------------- the transport
 
-/** How large the transport is drawn: the bars', the desktop pane's, the phone's. */
+/** How large the transport is drawn: the bars', the desktop pane's, the phone's; [Narrow] the phone's on a narrow or a short window. */
 enum class TransportSize(val button: Dp, val icon: Dp, val play: Dp, val playIcon: Dp) {
     Bar(36.dp, 16.dp, 40.dp, 18.dp),
     Phone(56.dp, 24.dp, 76.dp, 32.dp),
+    Narrow(48.dp, 22.dp, 64.dp, 28.dp),
 }
 
 /**

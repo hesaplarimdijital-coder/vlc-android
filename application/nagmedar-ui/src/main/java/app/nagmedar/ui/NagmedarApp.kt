@@ -385,6 +385,8 @@ private fun NagmedarMain(
                 nowPlayingRequested = false
             }
         }
+        // S-1002: the phone's player has the whole window, the bars stand aside; a desktop window keeps its caption bar
+        val playerOverWindow = phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar && caption == null
         CompositionLocalProvider(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,
@@ -418,6 +420,7 @@ private fun NagmedarMain(
                 },
                 navController = navController,
                 caption = caption,
+                contentOnly = playerOverWindow,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -429,6 +432,12 @@ private fun NagmedarMain(
                             onQueue = queuePanel::toggle,
                             onFullScreenLyrics = { lyricsOpen = true },
                             onFullScreenVisualizer = { visualizerOpen = true },
+                            // the equaliser's page is the shell's: the player closes for it
+                            onEqualizer = {
+                                phonePlayer = false
+                                navigator.navigate(Destination.Equalizer)
+                            },
+                            fullWindow = playerOverWindow,
                         )
                     }
                     if (lyricsOpen) PlayingLyricsFullScreen(onClose = { lyricsOpen = false })

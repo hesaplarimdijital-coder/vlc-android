@@ -150,7 +150,11 @@ object PlaybackActions {
         context.startActivity(intent)
     }
 
-    fun playList(context: Context, list: List<MediaWrapper>, position: Int) = MediaUtils.openList(context, list, position)
+    /** Plays [list] from [position]; [from] is the album, artist or playlist it comes from, which the phone's player names. */
+    fun playList(context: Context, list: List<MediaWrapper>, position: Int, from: PlaySource? = null) {
+        PlaySources.start(from, list)
+        MediaUtils.openList(context, list, position)
+    }
 
     /** Adds [list] after what is playing (S-405: the selection bar's "Sıraya ekle"). */
     fun appendList(context: Context, list: List<MediaWrapper>) = MediaUtils.appendMedia(context, list)

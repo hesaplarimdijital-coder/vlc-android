@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -18,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.NoPlayerActions
 import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
+import app.nagmedar.ui.lyrics.LyricLine
 import app.nagmedar.ui.lyrics.LyricsLoad
 import app.nagmedar.ui.lyrics.LyricsPane
 import app.nagmedar.ui.lyrics.LyricsSamples
@@ -36,6 +38,8 @@ import app.nagmedar.ui.music.RatingSurface
 import app.nagmedar.ui.music.TechFilter
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.playback.PlayFrom
+import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.QueueEntry
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.Destination
@@ -204,19 +208,64 @@ class MusicScreenshotTest {
         }
     }
 
+    /**
+     * S-1002: the phone's player as the music apps lay it out: where it plays from, the artwork on a backdrop of its
+     * colour, the line sung, the title with its round "Listeye ekle…", the slim timeline, the controls, the output,
+     * sharing and the queue; [from], [tint] and the lyrics' line as given.
+     */
+    @Composable
+    private fun Player(
+        info: NowPlayingInfo = playing.copy(format = "FLAC 24/96 · AAudio · 48 kHz"),
+        tint: Color? = null,
+        from: PlaySource? = null,
+        lineAtMs: Long? = null,
+        shuffling: Boolean = false,
+        repeatOne: Boolean = false,
+    ) {
+        PhonePlayer(
+            info = info,
+            progress = { 0.42f },
+            waveform = MusicSamples.waveform,
+            actions = NoPlayerActions,
+            onClose = {},
+            shuffling = shuffling,
+            repeating = repeatOne,
+            repeatOne = repeatOne,
+            artwork = { size -> Artwork(null, size, corner = NagTheme.dimens.radiusCard, video = false) },
+            onRate = {},
+            tint = tint,
+            from = from,
+            lyricLine = if (lineAtMs == null) null else { modifier -> LyricLine(LyricsSamples.synced, { lineAtMs }, onClick = {}, modifier = modifier) },
+            onAddToPlaylist = {},
+            onShare = {},
+            onEqualizer = {},
+        )
+    }
+
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
-    fun phonePlayer() {
-        capture("music-player-phone-dark", ThemeMode.Dark, InputMode.Touch) {
-            PhonePlayer(
-                info = playing.copy(format = "FLAC 24/96 · AAudio · 48 kHz"),
-                progress = { 0.42f },
-                waveform = MusicSamples.waveform,
-                actions = NoPlayerActions,
-                onClose = {},
-                shuffling = true,
-                artwork = { size -> Artwork(null, size, corner = 12.dp, video = false) },
-                onRate = {},
-            )
-        }
+    fun phonePlayer() = capture("music-player-phone-dark", ThemeMode.Dark, InputMode.Touch) {
+        Player(tint = Color(0xFFC0392B), from = PlaySource(PlayFrom.Album, "Itrî'nin İzinde"), lineAtMs = 23_500L, shuffling = true)
+    }
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun phonePlayerLight() = capture("music-player-phone-light", ThemeMode.Light, InputMode.Touch) {
+        Player(tint = Color(0xFF2E86C1), from = PlaySource(PlayFrom.Playlist, "Gece yolculuğu"), lineAtMs = 18_000L, repeatOne = true)
+    }
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
+    fun phonePlayerOledEnglish() = capture("music-player-phone-oled-en", ThemeMode.Oled, InputMode.Touch) {
+        Player(tint = Color(0xFF27AE60), from = PlaySource(PlayFrom.Artist, "Kadri Erdem"))
+    }
+
+    /** As narrow as the user's phone: smaller gutters and controls, nothing wraps; without a source, "Şimdi çalıyor". */
+    @Test @Config(qualifiers = "tr-w350dp-h760dp-xxhdpi")
+    fun phonePlayerNarrow() = capture("music-player-phone-narrow-light", ThemeMode.Light, InputMode.Touch) {
+        Player(tint = Color(0xFFF1C40F), lineAtMs = 29_800L)
+    }
+
+    /** Held sideways: the artwork on the left, the rest beside it. */
+    @Test @Config(qualifiers = "tr-w891dp-h411dp-land-xhdpi")
+    fun phonePlayerSideways() = capture("music-player-phone-landscape-dark", ThemeMode.Dark, InputMode.Touch) {
+        Player(tint = Color(0xFF8E44AD), from = PlaySource(PlayFrom.Queue, ""), lineAtMs = 23_500L)
     }
 }

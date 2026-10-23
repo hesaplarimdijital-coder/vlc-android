@@ -413,6 +413,11 @@
 
     <!-- Player -->
     <string name="nag_now_playing">Now playing</string>
+    <!-- S-1002: the phone player's overline: where what plays comes from; the name under it -->
+    <string name="nag_player_from_album">Playing from album</string>
+    <string name="nag_player_from_artist">Playing from artist</string>
+    <string name="nag_player_from_playlist">Playing from playlist</string>
+    <string name="nag_player_from_queue">Playing from the queue</string>
     <string name="nag_nothing_playing">Nothing is playing</string>
     <string name="nag_play">Play</string>
     <string name="nag_pause">Pause</string>

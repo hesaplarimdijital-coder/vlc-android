@@ -36,6 +36,7 @@ Sözlüğü testler denetler:
 | içe aktarmak, dışa aktarmak | import, export | | | Dosyadan okumak, dosyaya yazmak: çalma listeleri (M3U, M3U8, PLS, XSPF), kısayollar, cihaz profilleri |
 | Sıradaki | Up next | kuyruk, oynatma sırası | play queue | Sıradaki parçaların paneli ve onu açan kısayol (Ctrl+L) |
 | sıra | queue | | | “Sıraya ekle”, “Sıradan kaldır”; “Add to queue”, “Remove from the queue” |
+| … çalınıyor | playing from … | kuyruktan | | Telefon oynatıcısının üst satırı, çalanın nereden geldiği, altında adı: “Albümden çalınıyor”, “Sanatçıdan çalınıyor”, “Çalma listesinden çalınıyor”; liste başladıktan sonra sıraya eklenen parça için “Sıradan çalınıyor” (“Playing from the queue”); bilinmiyorsa “Şimdi çalıyor” |
 | Hemen sonra oynat | Play next | sonra çal | | Seçileni çalanın hemen arkasına koyar; “Sıraya ekle” en sona |
 | oynat | play | | | “Çal” yalnızca müziğe özgü yerlerde: “Şimdi çalıyor”, “Son çalınan müzik”, “Test sesini çal” |
 | oynatıcı | player | | | |
