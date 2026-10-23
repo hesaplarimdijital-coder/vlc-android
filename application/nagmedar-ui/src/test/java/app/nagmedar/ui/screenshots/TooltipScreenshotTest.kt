@@ -51,7 +51,8 @@ class TooltipScreenshotTest {
     @Composable
     private fun Tipped(icon: ImageVector, name: String, shortcut: ShortcutId) {
         val keys = ShortcutRegistry.chordLabel(shortcut, LocalContext.current.resources)
-        Column(Modifier.width(180.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        // as wide as the longest name with its keys in a DeX window's text (one sp larger since Desktop Kit 0.2.0)
+        Column(Modifier.width(220.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             NagIconButton(icon, name, {}, shortcut = shortcut)
             TooltipBubble(name, keys, Modifier.padding(top = 6.dp))
         }

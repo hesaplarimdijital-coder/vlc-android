@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
@@ -63,7 +65,10 @@ class RemoteAccessScreenshotTest {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
-                Box(Modifier.fillMaxSize().background(NagTheme.colors.background).padding(top = 16.dp)) { RemoteAccessSection(settings) }
+                // as on the settings page, the section scrolls: a window shorter than it cuts it, never squeezes it
+                Box(Modifier.fillMaxSize().background(NagTheme.colors.background).verticalScroll(rememberScrollState()).padding(top = 16.dp)) {
+                    RemoteAccessSection(settings)
+                }
             }
         }
         compose.waitForIdle()
@@ -76,12 +81,12 @@ class RemoteAccessScreenshotTest {
     @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi")
     fun dex() = capture("settings-remote-access-dex-dark", ThemeMode.Dark, InputMode.Pointer, on = true)
 
-    @Test @Config(qualifiers = "tr-w800dp-h720dp-mdpi")
+    @Test @Config(qualifiers = "tr-w800dp-h800dp-mdpi")
     fun tablet() = capture("settings-remote-access-tablet-light", ThemeMode.Light, InputMode.Touch, on = false)
 
     @Test @Config(qualifiers = "tr-w390dp-h1000dp-hdpi")
     fun phone() = capture("settings-remote-access-phone-dark", ThemeMode.Dark, InputMode.Touch, on = true)
 
-    @Test @Config(qualifiers = "en-w800dp-h720dp-mdpi")
+    @Test @Config(qualifiers = "en-w800dp-h800dp-mdpi")
     fun tabletEnglish() = capture("settings-remote-access-tablet-light-en", ThemeMode.Light, InputMode.Touch, on = true)
 }
