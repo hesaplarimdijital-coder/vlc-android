@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.lab.RemuxPlanTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T15:42:37.172Z" hostname="runnervm8k3b6" time="0.042">
+  <properties/>
+  <testcase name="theEnginesStatsAreRead" classname="app.nagmedar.lab.RemuxPlanTest" time="0.009"/>
+  <testcase name="thePlanSurvivesItsJson" classname="app.nagmedar.lab.RemuxPlanTest" time="0.019"/>
+  <testcase name="aPlanWithAnEncodedTrackWritesAnEncodeLine" classname="app.nagmedar.lab.RemuxPlanTest" time="0.0"/>
+  <testcase name="theDefaultPlanKeepsEveryTrackInOrderAndConvertsProfile7WhenAsked" classname="app.nagmedar.lab.RemuxPlanTest" time="0.002"/>
+  <testcase name="theVerdictIsRead" classname="app.nagmedar.lab.RemuxPlanTest" time="0.001"/>
+  <testcase name="theEngineReadsTheTextAsRemuxHDescribesIt" classname="app.nagmedar.lab.RemuxPlanTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

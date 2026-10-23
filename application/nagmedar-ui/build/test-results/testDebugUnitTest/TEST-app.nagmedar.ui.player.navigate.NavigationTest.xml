@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.navigate.NavigationTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-23T15:46:59.625Z" hostname="runnervm8k3b6" time="0.008">
+  <properties/>
+  <testcase name="chaptersStepForwardAndBack" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="aFilmThatCannotKeepThemSaysSo" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="renamedAndRemovedInTheLibrary" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.002"/>
+  <testcase name="numbersWithUnits" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="bookmarksAreAddedOnceASecondInTimeOrder" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="clockTimes" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <testcase name="anotherFilmReadsItsOwn" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <testcase name="fromNowAndShares" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.0"/>
+  <testcase name="pastTheEndIsSaid" classname="app.nagmedar.ui.player.navigate.NavigationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Oct 23, 2026 3:46:59 PM com.google.common.util.concurrent.AggregateFuture log
+SEVERE: Got more than one input Future failure. Logging failures after the first
+java.io.IOException: Server returned HTTP response code: 429 for URL: https://repo1.maven.org/maven2/org/robolectric/android-all-instrumented/14-robolectric-10818077-i7/android-all-instrumented-14-robolectric-10818077-i7.pom
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:2059)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1644)
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
+	at org.robolectric.internal.dependency.MavenArtifactFetcher$FetchToFileTask.call(MavenArtifactFetcher.java:250)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleAsyncTask.runInterruptibly(TrustedListenableFutureTask.java:167)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleAsyncTask.runInterruptibly(TrustedListenableFutureTask.java:150)
+	at com.google.common.util.concurrent.InterruptibleTask.run(InterruptibleTask.java:76)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask.run(TrustedListenableFutureTask.java:82)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+
+]]></system-err>
+</testsuite>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.AccentTonesTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-23T15:47:29.396Z" hostname="runnervm8k3b6" time="0.016">
+  <properties/>
+  <testcase name="theSeedDecides" classname="app.nagmedar.ui.theme.AccentTonesTest" time="0.015"/>
+  <testcase name="withoutAWallpaperColourTheSystemAccentIsBlue" classname="app.nagmedar.ui.theme.AccentTonesTest" time="0.0"/>
+  <testcase name="fixedAccentsKeepTheirColours" classname="app.nagmedar.ui.theme.AccentTonesTest" time="0.0"/>
+  <testcase name="okLchRoundTrips" classname="app.nagmedar.ui.theme.AccentTonesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Oct 23, 2026 3:47:29 PM com.google.common.util.concurrent.AggregateFuture log
+SEVERE: Got more than one input Future failure. Logging failures after the first
+java.io.IOException: Server returned HTTP response code: 429 for URL: https://repo1.maven.org/maven2/org/robolectric/android-all-instrumented/14-robolectric-10818077-i7/android-all-instrumented-14-robolectric-10818077-i7.jar
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:2059)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1644)
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
+	at org.robolectric.internal.dependency.MavenArtifactFetcher$FetchToFileTask.call(MavenArtifactFetcher.java:250)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleAsyncTask.runInterruptibly(TrustedListenableFutureTask.java:167)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleAsyncTask.runInterruptibly(TrustedListenableFutureTask.java:150)
+	at com.google.common.util.concurrent.InterruptibleTask.run(InterruptibleTask.java:76)
+	at com.google.common.util.concurrent.TrustedListenableFutureTask.run(TrustedListenableFutureTask.java:82)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+
+]]></system-err>
+</testsuite>
