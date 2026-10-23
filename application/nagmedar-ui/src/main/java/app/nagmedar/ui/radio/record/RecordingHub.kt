@@ -96,8 +96,9 @@ class RecordingHub(
         synchronized(lock) { entries.values.toList() }.forEach { it.session.stop() }
     }
 
+    /** The list and its publication under one lock: two refreshes cannot leave an older snapshot as the last word. */
     private fun refresh() {
-        liveState.value = synchronized(lock) { entries.values.map { LiveRecording(it.session.request, it.session.state.value) } }
+        synchronized(lock) { liveState.value = entries.values.map { LiveRecording(it.session.request, it.session.state.value) } }
     }
 
     companion object {
