@@ -51,6 +51,8 @@ import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagTextField
+import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.components.StatusLine
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -413,11 +415,12 @@ private fun PermissionRow(title: String, description: String, granted: Boolean, 
         Column(Modifier.weight(1f)) {
             Text(title, style = NagTheme.type.bodyStrong, color = colors.text)
             Text(description, style = NagTheme.type.labelSmall, color = colors.textTertiary)
-            Text(
-                stringResource(if (granted) R.string.nag_prefs_granted else R.string.nag_prefs_not_granted),
-                style = NagTheme.type.labelSmall,
-                color = if (granted) colors.textSecondary else colors.text,
-            )
+            // a permission that is given has its check, as on the first run's cards
+            if (granted) {
+                StatusLine(stringResource(R.string.nag_prefs_granted), StateTone.Success)
+            } else {
+                Text(stringResource(R.string.nag_prefs_not_granted), style = NagTheme.type.labelSmall, color = colors.text)
+            }
         }
         Spacer(Modifier.width(NagTheme.dimens.gapS))
         NagButton(stringResource(if (granted) R.string.nag_prefs_change else R.string.nag_prefs_allow), onChange)

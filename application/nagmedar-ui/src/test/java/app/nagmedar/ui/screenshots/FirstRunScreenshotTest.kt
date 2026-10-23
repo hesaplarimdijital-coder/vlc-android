@@ -51,6 +51,19 @@ class FirstRunScreenshotTest {
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun access() = capture("first-run-1-access", FirstRunState().apply { mediaAccess = true })
 
+    /** Both permissions given: a check where each icon was, "Verildi" where each button was. */
+    @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
+    fun accessGranted() = capture("first-run-1-access-granted", FirstRunState().apply {
+        mediaAccess = true
+        allFiles = true
+    })
+
+    @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
+    fun accessGrantedLight() = capture("first-run-1-access-granted-light", FirstRunState().apply {
+        mediaAccess = true
+        allFiles = true
+    }, ThemeMode.Light)
+
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun accessRefused() = capture(
         "first-run-1-refused",
@@ -75,6 +88,9 @@ class FirstRunScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun notifications() = capture("first-run-4-notifications", FirstRunState(FirstRunStep.Notifications))
+
+    @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
+    fun notificationsGranted() = capture("first-run-4-notifications-granted", FirstRunState(FirstRunStep.Notifications).apply { notifications = true })
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun dexWindow() = capture("first-run-dex", FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, input = InputMode.Pointer)

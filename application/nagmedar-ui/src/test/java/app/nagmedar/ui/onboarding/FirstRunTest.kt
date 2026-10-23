@@ -1,5 +1,8 @@
 package app.nagmedar.ui.onboarding
 
+import android.Manifest
+import android.app.Application
+import android.content.Context
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -10,7 +13,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.library.LibraryAccess
 import app.nagmedar.ui.library.LibraryContent
 import app.nagmedar.ui.library.LocalLibraryAccess
@@ -25,6 +34,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -112,6 +122,82 @@ class FirstRunTest {
 
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.onAllNodesWithTextCount(text: String): Int =
         onAllNodes(androidx.compose.ui.test.hasText(text)).fetchSemanticsNodes().size
+
+    @Test
+    fun aGivenPermissionSaysSoWhereItsButtonWas() {
+        render(FirstRunState().apply { mediaAccess = true })
+        // media files: given, so "Verildi" instead of the button, the description as it was
+        compose.onNodeWithText("Verildi").assertExists()
+        compose.onNodeWithText("Video, müzik ve ses klasörleri").assertExists()
+        compose.onNodeWithText("İzin ver").assertDoesNotExist()
+        // all files: still asked for
+        compose.onNodeWithText("Ayarları aç").performClick()
+        assertEquals(listOf("allFiles"), calls)
+        compose.onNodeWithText("Devam").assertExists()
+    }
+
+    @Test
+    fun everyGivenPermissionOfTheStepIsMarked() {
+        render(FirstRunState().apply {
+            mediaAccess = true
+            allFiles = true
+        })
+        assertEquals(2, compose.onAllNodesWithTextCount("Verildi"))
+        compose.onNodeWithText("İzin ver").assertDoesNotExist()
+        compose.onNodeWithText("Ayarları aç").assertDoesNotExist()
+    }
+
+    @Test
+    fun theNotificationsStepSaysSoToo() {
+        render(FirstRunState(FirstRunStep.Notifications).apply { notifications = true })
+        compose.onNodeWithText("Verildi").assertExists()
+        compose.onNodeWithText("Oynatma, tarama ve indirmeler").assertExists()
+        compose.onNodeWithText("İzin ver").assertDoesNotExist()
+        compose.onNodeWithText("Başla").assertExists()
+    }
+
+    @Test
+    fun aPermissionNotGivenKeepsItsButton() {
+        render(FirstRunState(FirstRunStep.Notifications))
+        compose.onNodeWithText("Verildi").assertDoesNotExist()
+        compose.onNodeWithText("İzin ver").performClick()
+        assertEquals(listOf("notifications"), calls)
+    }
+
+    /** A lifecycle the test moves by hand: the window going away to a system prompt, and coming back. */
+    private class TestWindow : LifecycleOwner {
+        val registry = LifecycleRegistry.createUnsafe(this)
+        override val lifecycle: Lifecycle get() = registry
+    }
+
+    /** The host's wiring, with the real controller: a permission given while the window was away shows once it resumes. */
+    @Test
+    fun aPermissionGivenAwayFromTheWindowShowsWhenItComesBack() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        shadowOf(app).denyPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        val window = TestWindow().apply { registry.currentState = Lifecycle.State.RESUMED }
+        val prefs = NagmedarPreferences(app.getSharedPreferences("first-run-test", Context.MODE_PRIVATE))
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                CompositionLocalProvider(LocalLifecycleOwner provides window) {
+                    val state = rememberFirstRunState(rememberAccessController(prefs), FirstRunStep.Notifications)
+                    FirstRunFlow(state, emptyList(), emptyList(), actions)
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("İzin ver").assertExists()
+        compose.onNodeWithText("Verildi").assertDoesNotExist()
+
+        // the system's prompt takes the window away; notifications are allowed there
+        compose.runOnUiThread { window.registry.currentState = Lifecycle.State.STARTED }
+        shadowOf(app).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        compose.runOnUiThread { window.registry.currentState = Lifecycle.State.RESUMED }
+        compose.waitForIdle()
+
+        compose.onNodeWithText("Verildi").assertExists()
+        compose.onNodeWithText("İzin ver").assertDoesNotExist()
+    }
 
     @Test
     fun grantedAccessAndTheSourceCount() {

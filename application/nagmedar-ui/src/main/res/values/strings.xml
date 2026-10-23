@@ -361,6 +361,7 @@
     <string name="nag_fr_next_hint_sources">Next: an audio output test and notifications</string>
     <string name="nag_fr_later_hint">You can change these later in Settings.</string>
     <string name="nag_fr_granted">Allowed</string>
+    <string name="nag_fr_permission_given">Allowed</string>
     <string name="nag_fr_open_settings">Open settings</string>
     <string name="nag_fr_selected">Selected</string>
     <string name="nag_fr_not_selected">Not selected</string>

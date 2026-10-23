@@ -37,16 +37,10 @@ fun FirstRunHost(prefs: NagmedarPreferences, onDone: () -> Unit) {
     val access = rememberAccessController(prefs)
     // the step survives rotation and window resizes; the rest is cheap to ask again
     val savedStep = rememberSaveable { mutableIntStateOf(0) }
-    val state = remember { FirstRunState(FirstRunStep.entries[savedStep.intValue]) }
+    val state = rememberFirstRunState(access, FirstRunStep.entries[savedStep.intValue])
     // the drives' sizes are read off the main thread (StatFs); the removable ones show once read
     val drives by produceState(emptyList<StorageSource>()) { value = withContext(Dispatchers.IO) { storageSources(context) } }
     LaunchedEffect(state) { snapshotFlow { state.step.ordinal }.collect { savedStep.intValue = it } }
-    SideEffect {
-        state.mediaAccess = access.mediaAccess
-        state.allFiles = access.allFiles
-        state.notifications = access.notifications
-        state.accessDenied = access.denied
-    }
     FirstRunFlow(
         state = state,
         drives = drives,
@@ -73,6 +67,25 @@ fun FirstRunHost(prefs: NagmedarPreferences, onDone: () -> Unit) {
             },
         ),
     )
+}
+
+/**
+ * The flow's state, its permission fields kept at what [access] reads. The controller reads them
+ * again when a request is answered and whenever the window resumes (the system's prompt and the
+ * all-files page both take it away), so a permission given there shows on its card when the window
+ * is back. [start] is the step the flow opens on.
+ */
+@Composable
+internal fun rememberFirstRunState(access: AccessController, start: FirstRunStep = FirstRunStep.Access): FirstRunState {
+    // read here, in the composition: a read inside the side effect is not observed, so the host
+    // would not follow the controller and the cards kept asking after the permission was given
+    val mediaAccess = access.mediaAccess
+    val allFiles = access.allFiles
+    val notifications = access.notifications
+    val denied = access.denied
+    val state = remember { FirstRunState(start).also { it.setAccess(mediaAccess, allFiles, notifications, denied) } }
+    SideEffect { state.setAccess(mediaAccess, allFiles, notifications, denied) }
+    return state
 }
 
 /**

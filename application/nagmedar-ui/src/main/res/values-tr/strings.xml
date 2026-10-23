@@ -361,6 +361,7 @@
     <string name="nag_fr_next_hint_sources">Sonraki adım: ses çıkışı testi ve bildirim izni</string>
     <string name="nag_fr_later_hint">Bunları sonra Ayarlar\'dan değiştirebilirsiniz.</string>
     <string name="nag_fr_granted">İzin verildi</string>
+    <string name="nag_fr_permission_given">Verildi</string>
     <string name="nag_fr_open_settings">Ayarları aç</string>
     <string name="nag_fr_selected">Seçili</string>
     <string name="nag_fr_not_selected">Seçili değil</string>

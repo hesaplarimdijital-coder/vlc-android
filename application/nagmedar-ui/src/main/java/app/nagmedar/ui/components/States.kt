@@ -145,6 +145,17 @@ fun ToneBadge(text: String, tone: StateTone, modifier: Modifier = Modifier) {
     )
 }
 
+/** One quiet line of state under a title: a check (a warning sign for any tone but success) and [text] in the colour of [tone]. */
+@Composable
+fun StatusLine(text: String, tone: StateTone, modifier: Modifier = Modifier) {
+    val c = toneColors(tone)
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        Icon(if (tone == StateTone.Success) NagIcons.Check else NagIcons.Warning, contentDescription = null, tint = c.content,
+            modifier = Modifier.size(12.dp))
+        Text(text, style = NagTheme.type.labelSmall, color = c.content)
+    }
+}
+
 @Composable
 fun StateIconTile(icon: ImageVector, tone: StateTone, modifier: Modifier = Modifier, size: Dp = 40.dp) {
     val c = toneColors(tone)

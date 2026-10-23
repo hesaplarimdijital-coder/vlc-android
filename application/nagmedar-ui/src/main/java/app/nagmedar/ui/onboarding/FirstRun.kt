@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -45,11 +46,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -64,9 +67,12 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.components.StatusLine
+import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.successOnFill
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.shell.BrandMark
 import app.nagmedar.ui.theme.NagMotion
@@ -100,6 +106,14 @@ class FirstRunState(start: FirstRunStep = FirstRunStep.Access) {
     var notifications by mutableStateOf(false)
 
     val isLast: Boolean get() = step == FirstRunStep.entries.last()
+
+    /** The permission fields as the host last read them; the host reads them again whenever the window resumes. */
+    internal fun setAccess(mediaAccess: Boolean, allFiles: Boolean, notifications: Boolean, denied: Boolean) {
+        this.mediaAccess = mediaAccess
+        this.allFiles = allFiles
+        this.notifications = notifications
+        accessDenied = denied
+    }
 
     fun next() {
         step = FirstRunStep.entries.getOrElse(step.ordinal + 1) { step }
@@ -323,16 +337,16 @@ private fun AccessStep(state: FirstRunState, folders: List<Pair<String, String>>
             icon = NagIcons.Movies,
             title = stringResource(R.string.nag_fr_media_files),
             description = stringResource(R.string.nag_fr_media_files_desc),
-            status = if (state.mediaAccess) stringResource(R.string.nag_fr_granted) else null,
-            action = if (state.mediaAccess) null else StateAction(stringResource(R.string.nag_state_grant), actions.requestMediaAccess),
+            granted = state.mediaAccess,
+            action = StateAction(stringResource(R.string.nag_state_grant), actions.requestMediaAccess),
         )
         if (MediaAccess.canAskAllFiles) {
             OptionCard(
                 icon = NagIcons.Folder,
                 title = stringResource(R.string.nag_fr_all_files),
                 description = stringResource(R.string.nag_fr_all_files_desc),
-                status = if (state.allFiles) stringResource(R.string.nag_fr_granted) else null,
-                action = if (state.allFiles) null else StateAction(stringResource(R.string.nag_fr_open_settings), actions.requestAllFiles),
+                granted = state.allFiles,
+                action = StateAction(stringResource(R.string.nag_fr_open_settings), actions.requestAllFiles),
             )
         }
         if (state.accessDenied && !state.mediaAccess) {
@@ -467,8 +481,8 @@ private fun NotificationStep(state: FirstRunState, actions: FirstRunActions) {
             icon = NagIcons.Info,
             title = stringResource(R.string.nag_fr_notif_item),
             description = stringResource(R.string.nag_fr_notif_item_desc),
-            status = if (state.notifications) stringResource(R.string.nag_fr_granted) else null,
-            action = if (state.notifications) null else StateAction(stringResource(R.string.nag_state_grant), actions.requestNotifications),
+            granted = state.notifications,
+            action = StateAction(stringResource(R.string.nag_state_grant), actions.requestNotifications),
         )
     }
 }
@@ -534,7 +548,12 @@ private fun TextButton(label: String, onClick: () -> Unit, modifier: Modifier = 
     }
 }
 
-/** A line of the Access and Notifications steps: what it is, its state, and the button that changes it. */
+/**
+ * A line of the Access and Notifications steps: what it is, its state, and the button that changes it.
+ * When [granted] the line says so: a check on the success colour stands where its icon was and a
+ * success badge ("given") where its [action] was; the description stays as it is. A granted line
+ * reads out as one, and is read out again when it turns granted.
+ */
 @Composable
 private fun OptionCard(
     icon: ImageVector,
@@ -542,38 +561,44 @@ private fun OptionCard(
     description: String,
     status: String? = null,
     action: StateAction? = null,
+    granted: Boolean = false,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(14.dp)
+    val announced = if (granted) Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite } else Modifier
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 76.dp)
             .background(colors.surface, shape)
             .border(1.dp, colors.borderStrong, shape)
+            .then(announced)
             .padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(22.dp))
+        if (granted) GrantedMark() else Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(22.dp))
         Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = NagTheme.type.bodyStrong, color = colors.text)
             Text(description, style = NagTheme.type.labelSmall, color = colors.textSecondary)
             if (status != null) StatusLine(status, StateTone.Success)
         }
-        if (action != null) NagButton(action.label, action.onClick)
+        if (granted) {
+            ToneBadge(stringResource(R.string.nag_fr_permission_given), StateTone.Success)
+        } else if (action != null) {
+            NagButton(action.label, action.onClick)
+        }
         trailing?.invoke()
     }
 }
 
+/** A check on the success colour, the size of a card's icon: what a permission that is given shows in its place. */
 @Composable
-private fun StatusLine(text: String, tone: StateTone) {
-    val c = toneColors(tone)
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        Icon(if (tone == StateTone.Success) NagIcons.Check else NagIcons.Warning, contentDescription = null, tint = c.content,
-            modifier = Modifier.size(12.dp))
-        Text(text, style = NagTheme.type.labelSmall, color = c.content)
+private fun GrantedMark() {
+    val colors = NagTheme.colors
+    Box(Modifier.size(22.dp).background(colors.success, CircleShape), contentAlignment = Alignment.Center) {
+        Icon(NagIcons.Check, contentDescription = null, tint = successOnFill(colors), modifier = Modifier.size(15.dp))
     }
 }
 
