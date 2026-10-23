@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.perf.PerfRecordsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:53:03.987Z" hostname="runnervm8k3b6" time="0.174">
+  <properties/>
+  <testcase name="theLabelsInEnglish" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.06"/>
+  <testcase name="theTargets" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.017"/>
+  <testcase name="theLabelsInTurkish" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.021"/>
+  <testcase name="theNewestTenAreKeptFirst" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.042"/>
+  <testcase name="recordsComeBackAsTheyWent" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.016"/>
+  <testcase name="theLogsLines" classname="app.nagmedar.ui.perf.PerfRecordsTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

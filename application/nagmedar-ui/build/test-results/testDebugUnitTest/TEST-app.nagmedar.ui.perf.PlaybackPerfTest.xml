@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.perf.PlaybackPerfTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:53:04.163Z" hostname="runnervm8k3b6" time="0.003">
+  <properties/>
+  <testcase name="theNextFilmEndsTheOneBefore" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.002"/>
+  <testcase name="aShortPlaybackIsNoRecord" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.0"/>
+  <testcase name="pausedSecondsDoNotCount" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.0"/>
+  <testcase name="theBatteryUsedInAnHour" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.001"/>
+  <testcase name="theBatteryIsToldOffTheChargerAndInTime" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.0"/>
+  <testcase name="aPlaybacksRecord" classname="app.nagmedar.ui.perf.PlaybackPerfTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

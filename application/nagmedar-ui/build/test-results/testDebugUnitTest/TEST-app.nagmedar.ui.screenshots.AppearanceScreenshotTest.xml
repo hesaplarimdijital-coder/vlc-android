@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.AppearanceScreenshotTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:54:03.449Z" hostname="runnervm8k3b6" time="0.209">
+  <properties/>
+  <testcase name="phoneDarkWallpaper" classname="app.nagmedar.ui.screenshots.AppearanceScreenshotTest" time="0.07"/>
+  <testcase name="dexOledWallpaper" classname="app.nagmedar.ui.screenshots.AppearanceScreenshotTest" time="0.073"/>
+  <testcase name="tabletLight" classname="app.nagmedar.ui.screenshots.AppearanceScreenshotTest" time="0.066"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

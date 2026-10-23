@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:52:57.340Z" hostname="runnervm8k3b6" time="0.176">
+  <properties/>
+  <testcase name="syltHoldsOneEntryForEachLineWhenNoLineHasWords" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.026"/>
+  <testcase name="wordTimedLinesGetWordStampsAndReadBackTheSame" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.022"/>
+  <testcase name="whichFilesKeepTheirLyricsTheId3Way" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.02"/>
+  <testcase name="syltLeavesOutLinesNotTimed" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.022"/>
+  <testcase name="anLrcFileHasItsTagsOnTop" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.036"/>
+  <testcase name="lrclibGetsLineStampsWithoutWordStampsAndWithoutTags" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.017"/>
+  <testcase name="id3FormatsKeepPlainTextAndSyltOthersKeepTheLrc" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.016"/>
+  <testcase name="syltEndsEachLineInABreakWhenSomeLineHasWords" classname="app.nagmedar.ui.lyrics.editor.LrcDocumentTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

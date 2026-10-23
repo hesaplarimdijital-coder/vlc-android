@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcode.SoutChainTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:54:52.527Z" hostname="runnervm8k3b6" time="0.005">
+  <properties/>
+  <testcase name="aVideoProfileTranscodesBoth" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.004"/>
+  <testcase name="aBraceCannotBeInAPath" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <testcase name="pathsAreQuotedAndEscaped" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <testcase name="audioAloneLeavesTheVideoOut" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <testcase name="theHlsSessionWritesWhereTheServerLooks" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.001"/>
+  <testcase name="copyingIsARemux" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <testcase name="aNewLineCannotBeInAPath" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <testcase name="subtitlesBurnIntoTheEncodedPicture" classname="app.nagmedar.ui.transcode.SoutChainTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

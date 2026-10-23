@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioNowPlayingTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:53:24.626Z" hostname="runnervm8k3b6" time="0.167">
+  <properties/>
+  <testcase name="aPlaylistStationKeepsItsStripWhenLibvlcExpandsIt" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.016"/>
+  <testcase name="aStreamThatIsNoStreamIsNotTheStation" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.02"/>
+  <testcase name="anotherStationOfTheSameHostIsNotThisStation" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.014"/>
+  <testcase name="nothingStartedHereOrNothingPlayingIsNoStrip" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.019"/>
+  <testcase name="aNewTitleReplacesTheOld" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.022"/>
+  <testcase name="aStreamWithoutATitleShowsTheStationAsLive" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.023"/>
+  <testcase name="aLocalFilePlayedAfterAPlaylistStationHidesTheStrip" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.02"/>
+  <testcase name="theTitleTheStreamSendsIsSplitIntoArtistAndSong" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.016"/>
+  <testcase name="anotherMediaTakingOverEndsTheStrip" classname="app.nagmedar.ui.radio.RadioNowPlayingTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

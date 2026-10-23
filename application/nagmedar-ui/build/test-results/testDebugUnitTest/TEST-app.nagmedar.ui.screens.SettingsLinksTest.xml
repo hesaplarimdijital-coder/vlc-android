@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screens.SettingsLinksTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:54:01.385Z" hostname="runnervm8k3b6" time="0.055">
+  <properties/>
+  <testcase name="everyLinkReachesTheSectionWithItsKey" classname="app.nagmedar.ui.screens.SettingsLinksTest" time="0.02"/>
+  <testcase name="theEqualiserAndAboutArePagesOfTheirOwn" classname="app.nagmedar.ui.screens.SettingsLinksTest" time="0.021"/>
+  <testcase name="eachSectionHasItsOwnKeyAndPlace" classname="app.nagmedar.ui.screens.SettingsLinksTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

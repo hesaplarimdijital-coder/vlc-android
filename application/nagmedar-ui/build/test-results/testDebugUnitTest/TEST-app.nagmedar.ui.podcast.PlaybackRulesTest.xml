@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PlaybackRulesTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:53:19.844Z" hostname="runnervm8k3b6" time="0.0">
+  <properties/>
+  <testcase name="theLastFiveShareIsPlayed" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="aPlaceNearTheStartIsNoPlace" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="theOutroBeginsItsLengthBeforeTheEnd" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="theOutroIsPlayedToo" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="aPlaceBeforeTheIntroEndsGoesToTheIntrosEnd" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="anEpisodeLeftInItsLastStretchStartsAgain" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="speedsStayBetweenHalfAndThree" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="anEpisodeNeverPlayedStartsAfterTheIntro" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="aPlaceIsResumedAFewSecondsEarlier" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="aPlayedEpisodeStartsAgain" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <testcase name="anIntroLongerThanHalfTheEpisodeIsNotSkipped" classname="app.nagmedar.ui.podcast.PlaybackRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

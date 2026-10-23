@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.covers.CoverObserverTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:52:47.794Z" hostname="runnervm8k3b6" time="0.046">
+  <properties/>
+  <testcase name="theKeptCoverByAlbum" classname="app.nagmedar.ui.covers.CoverObserverTest" time="0.027"/>
+  <testcase name="withoutTheServiceNothingIsTold" classname="app.nagmedar.ui.covers.CoverObserverTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.PlayerBarsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-23T17:53:04.181Z" hostname="runnervm8k3b6" time="0.834">
+  <properties/>
+  <testcase name="aVideoSaysSo" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.074"/>
+  <testcase name="theTransportBarShufflesRepeatsAndSetsTheVolume" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.069"/>
+  <testcase name="aTapOpensThePlayerAndTheButtonsControlPlayback" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.056"/>
+  <testcase name="theKeyboardBringsOutTheControlsToo" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.064"/>
+  <testcase name="theBarIsOnEveryScreenOfAPhone" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.257"/>
+  <testcase name="hoveringTheMiniPlayerBringsOutItsControls" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.08"/>
+  <testcase name="theBarIsOnEveryScreenOfADesktop" classname="app.nagmedar.ui.playback.PlayerBarsTest" time="0.233"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
