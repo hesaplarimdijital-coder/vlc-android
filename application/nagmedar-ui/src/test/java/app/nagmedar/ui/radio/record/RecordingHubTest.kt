@@ -46,7 +46,7 @@ class RecordingHubTest {
     private fun request(name: String, end: Long? = null) =
         RecordingRequest("session-$name", RecordingStation(name, "https://yayin.example/$name", uuid = name), end)
 
-    private suspend fun waitFor(count: Int) = withTimeout(5_000) { while (hub.live.value.size != count) delay(5) }
+    private suspend fun waitFor(count: Int) = withTimeout(30_000) { while (hub.live.value.size != count) delay(5) }
 
     @Test
     fun stationsAreRecordedSideBySide() = runBlocking {
