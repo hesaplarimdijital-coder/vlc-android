@@ -386,6 +386,23 @@ jobs:
           path: application/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
 
+      # master's debug APK also on the ci/apk branch (one commit, replaced each time), where git
+      # reaches it when the artifact store cannot be: git show origin/ci/apk:README.md names the build
+      - name: APK'yı ci/apk dalına koy
+        if: matrix.variant == 'debug' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/apk-branch"
+          rm -rf "$out" && mkdir -p "$out"
+          apk=$(ls application/app/build/outputs/apk/debug/*.apk | head -1)
+          cp "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk"
+          printf 'Nagmedar debug APK of master %s (run %s), built %s\n' "${GITHUB_SHA::8}" "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$out/README.md"
+          cd "$out"
+          git init -q && git checkout -q --orphan ci/apk
+          git add -A && git commit -q -m "Debug APK of ${GITHUB_SHA::8}"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/ci/apk"
+
       # S-1404: run on a device with buildsystem/benchmark/run.sh --apks <this, unzipped>
       - name: Macrobenchmark APK'ları
         if: matrix.variant == 'release'
