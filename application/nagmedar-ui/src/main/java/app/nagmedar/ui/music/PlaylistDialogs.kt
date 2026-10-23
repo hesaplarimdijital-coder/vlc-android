@@ -204,6 +204,7 @@ private fun PlaylistChoice(playlist: PlaylistSummary, onClick: () -> Unit) {
             style = NagTheme.type.labelSmall,
             color = colors.textTertiary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

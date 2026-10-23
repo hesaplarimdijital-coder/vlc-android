@@ -391,7 +391,7 @@ internal fun ActionChip(icon: ImageVector?, label: String, onClick: () -> Unit, 
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (icon != null) Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(dimens.icon))
-            Text(label, style = NagTheme.type.label, color = colors.text, maxLines = 1)
+            Text(label, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

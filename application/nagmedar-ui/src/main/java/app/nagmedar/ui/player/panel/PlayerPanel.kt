@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
@@ -177,6 +178,7 @@ private fun PanelTabButton(label: String, selected: Boolean, onSelect: () -> Uni
             style = NagTheme.type.label.copy(fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal),
             color = if (selected) colors.text else colors.textSecondary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

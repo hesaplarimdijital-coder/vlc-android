@@ -162,7 +162,7 @@ private fun BookmarkRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            Text(playerClock(mark.timeMs), style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+            Text(playerClock(mark.timeMs), style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             NagIconButton(
                 NagIcons.MoreHorizontal,
                 stringResource(R.string.nag_bm_more, mark.name),
@@ -233,7 +233,7 @@ fun ChaptersSection(chapters: List<ChapterMark>, nowMs: Long, previews: FramePre
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-                Text(playerClock(chapter.startMs), style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+                Text(playerClock(chapter.startMs), style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

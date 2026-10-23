@@ -232,6 +232,7 @@ private fun ResultRow(subtitle: SubtitleResult, downloading: Boolean, enabled: B
             style = NagTheme.type.mono,
             color = if (subtitle.hashMatch) colors.success else colors.textSecondary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.width(36.dp),
         )
         Column(Modifier.weight(1f)) {
@@ -244,6 +245,7 @@ private fun ResultRow(subtitle: SubtitleResult, downloading: Boolean, enabled: B
                 style = NagTheme.type.label,
                 color = if (enabled || downloading) colors.accentText else colors.textTertiary,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             // which provider has it (S-707)
             Text(subtitle.sources, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 120.dp).testTag("online-source-${subtitle.key}"))

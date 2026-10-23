@@ -105,7 +105,7 @@ internal fun AddAddressSurface(add: AddUi, onSubmit: (String) -> Unit, onDismiss
             keyboardActions = KeyboardActions(onDone = { send() }),
             decorationBox = { field ->
                 Box {
-                    if (value.text.isEmpty()) Text(stringResource(R.string.nag_pod_add_example), style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1)
+                    if (value.text.isEmpty()) Text(stringResource(R.string.nag_pod_add_example), style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     field()
                 }
             },

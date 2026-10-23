@@ -244,6 +244,7 @@ fun TechBadge(text: String, modifier: Modifier = Modifier) {
         style = NagTheme.type.mono,
         color = BadgeText,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .background(BadgeGlass, RoundedCornerShape(4.dp))
             .border(1.dp, BadgeEdge, RoundedCornerShape(4.dp))

@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.lab.EncodeCodec
@@ -210,7 +209,7 @@ fun RemuxPlannerSurface(
                 .testTag("tvlab-planner"),
         ) {
             Text(stringResource(R.string.nag_tvlab_plan_title), style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
-            Text(fileName, style = NagTheme.type.mono.copy(fontSize = 12.sp), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(fileName, style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(12f)), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(stringResource(R.string.nag_tvlab_plan_note), style = NagTheme.type.labelSmall, color = colors.textTertiary)
             Spacer(Modifier.padding(top = dimens.gapS))
             HorizontalRule()

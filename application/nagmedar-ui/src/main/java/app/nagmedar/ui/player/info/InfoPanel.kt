@@ -163,7 +163,7 @@ private fun StreamLine(row: StreamRow) {
                 .padding(horizontal = 4.dp, vertical = 2.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(row.mark, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+            Text(row.mark, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Column(Modifier.weight(1f)) {
             Text(row.title, style = NagTheme.type.label, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -180,6 +180,7 @@ private fun StreamLine(row: StreamRow) {
                 style = NagTheme.type.labelSmall,
                 color = foreground,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.background(background, RoundedCornerShape(9.dp)).padding(horizontal = 7.dp, vertical = 1.dp),
             )
         }
@@ -199,7 +200,7 @@ private fun DecodingSection(rows: List<InfoRow>) {
                     .alpha(if (row.value != null) 1f else PanelDisabledAlpha),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(row.label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1, modifier = Modifier.width(96.dp))
+                Text(row.label, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(96.dp))
                 Text(row.value ?: "—", style = NagTheme.type.labelSmall, color = NagTheme.colors.text, modifier = Modifier.weight(1f))
             }
         }
@@ -253,6 +254,7 @@ private fun LiveSection(live: LiveStats) {
                     style = NagTheme.type.title.copy(fontFamily = PlexMono),
                     color = if (last == null) colors.textTertiary else if (audioLost == 0L) colors.success else colors.warning,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("info-audio-lost"),
                 )
                 PanelCaption(stringResource(R.string.nag_info_buffers_played, countLabel(last?.audioPlayed ?: 0, locale)))
@@ -265,6 +267,7 @@ private fun LiveSection(live: LiveStats) {
                     style = NagTheme.type.title.copy(fontFamily = PlexMono),
                     color = if (last == null) colors.textTertiary else if (lost == 0L) colors.success else colors.warning,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("info-lost"),
                 )
                 PanelCaption(stringResource(R.string.nag_info_frames_shown, countLabel(last?.displayed ?: 0, locale)))
@@ -377,8 +380,8 @@ fun StatsOverlay(stats: StatsSample?, modifier: Modifier = Modifier) {
 @Composable
 private fun OverlayLine(label: String, value: String, color: Color) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(label, style = NagTheme.type.mono, color = NagTheme.colors.textTertiary, maxLines = 1, modifier = Modifier.weight(1f))
-        Text(value, style = NagTheme.type.mono, color = color, maxLines = 1)
+        Text(label, style = NagTheme.type.mono, color = NagTheme.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(value, style = NagTheme.type.mono, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

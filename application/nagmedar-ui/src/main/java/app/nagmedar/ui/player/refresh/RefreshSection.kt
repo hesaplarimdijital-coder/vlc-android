@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagIcons
@@ -148,7 +149,7 @@ private fun approximately(value: Double, locale: Locale): String = decimal(value
 private fun FactRow(label: String, value: String?, mono: Boolean, tag: String) {
     val colors = NagTheme.colors
     Row(Modifier.fillMaxWidth().heightIn(min = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(label, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, modifier = Modifier.width(96.dp))
+        Text(label, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(96.dp))
         Text(
             value ?: "—",
             style = if (mono) NagTheme.type.labelSmall.copy(fontFamily = PlexMono) else NagTheme.type.labelSmall,
@@ -166,6 +167,7 @@ private fun ToneBadge(text: String, tone: Color) {
         style = NagTheme.type.labelSmall,
         color = tone,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .background(tone.copy(alpha = 0.14f), RoundedCornerShape(9.dp))
             .padding(horizontal = 7.dp, vertical = 1.dp)

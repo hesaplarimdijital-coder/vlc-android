@@ -264,10 +264,10 @@ private fun DownloadMark(download: DownloadUi) {
     val colors = NagTheme.colors
     when (download) {
         DownloadUi.None -> Unit
-        DownloadUi.Queued -> Text(stringResource(R.string.nag_pod_download_queued_short), style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, modifier = Modifier.testTag("podcast-download-mark"))
+        DownloadUi.Queued -> Text(stringResource(R.string.nag_pod_download_queued_short), style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("podcast-download-mark"))
         is DownloadUi.Running -> {
             val percent = download.progress?.fraction?.let { NumberFormat.getPercentInstance(LocalContext.current.resources.locale()).format(it.toDouble()) }
-            Text(percent ?: stringResource(R.string.nag_pod_download_starting), style = NagTheme.type.labelSmall, color = colors.accent, maxLines = 1, modifier = Modifier.testTag("podcast-download-mark"))
+            Text(percent ?: stringResource(R.string.nag_pod_download_starting), style = NagTheme.type.labelSmall, color = colors.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("podcast-download-mark"))
         }
         is DownloadUi.Done -> Icon(
             NagIcons.Downloads,

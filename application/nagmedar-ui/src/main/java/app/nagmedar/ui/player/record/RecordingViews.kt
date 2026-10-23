@@ -84,7 +84,7 @@ fun RecordingIndicator(status: RecordingStatus, onStop: () -> Unit, modifier: Mo
                 .background(if (recording) colors.danger else Color.White.copy(alpha = 0.5f), CircleShape)
                 .semantics { contentDescription = said },
         )
-        Text(text, style = NagTheme.type.mono, color = Color.White, maxLines = 1, modifier = Modifier.testTag("recording-text"))
+        Text(text, style = NagTheme.type.mono, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("recording-text"))
         if (recording) {
             NagIconButton(NagIcons.Stop, stringResource(R.string.nag_rec_stop), onStop, size = 28.dp, iconSize = 14.dp, tint = Color.White, shortcut = ShortcutId.Record)
         }
@@ -157,7 +157,7 @@ private fun Saved(saved: RecordingOutcome.Saved, onPlay: (RecordingOutcome.Saved
     val locale = currentLocale()
     Icon(NagIcons.Record, contentDescription = null, tint = colors.danger, modifier = Modifier.padding(top = 1.dp).size(18.dp))
     Column(Modifier.widthIn(min = 180.dp, max = 280.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.nag_rec_saved), style = NagTheme.type.label, color = colors.text, maxLines = 1)
+        Text(stringResource(R.string.nag_rec_saved), style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(
             saved.fileName,
             style = NagTheme.type.labelSmall,
@@ -189,7 +189,7 @@ private fun Failed(failed: RecordingOutcome.Failed, onChooseFolder: () -> Unit, 
     val colors = NagTheme.colors
     Icon(NagIcons.Warning, contentDescription = null, tint = colors.warning, modifier = Modifier.padding(top = 1.dp).size(18.dp))
     Column(Modifier.widthIn(min = 180.dp, max = 280.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.nag_rec_failed), style = NagTheme.type.label, color = colors.text, maxLines = 1)
+        Text(stringResource(R.string.nag_rec_failed), style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(stringResource(failureText(failed.reason)), style = NagTheme.type.labelSmall, color = colors.textSecondary, modifier = Modifier.testTag("recording-reason"))
         if (failed.canRetry) Text(stringResource(R.string.nag_rec_kept_in_app), style = NagTheme.type.labelSmall, color = colors.textTertiary)
         Row(Modifier.padding(top = 2.dp).offset(x = (-6).dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {

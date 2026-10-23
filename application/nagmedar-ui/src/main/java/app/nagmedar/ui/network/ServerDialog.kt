@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
@@ -453,7 +454,7 @@ internal fun FormField(
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
-            if (value.isEmpty() && hint.isNotEmpty()) Text(hint, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1)
+            if (value.isEmpty() && hint.isNotEmpty()) Text(hint, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicTextField(
                 value = value,
                 onValueChange = onValue,

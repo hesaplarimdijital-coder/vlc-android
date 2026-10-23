@@ -603,7 +603,7 @@ private fun EntryName(entry: DeviceEntry, selected: Boolean, detail: String?) {
                 overflow = TextOverflow.Ellipsis,
             )
             if (!detail.isNullOrEmpty()) {
-                Text(detail, style = NagTheme.type.labelSmall, color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1)
+                Text(detail, style = NagTheme.type.labelSmall, color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

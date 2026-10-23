@@ -51,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
@@ -373,9 +374,9 @@ private fun ChordButton(
         contentAlignment = Alignment.Center,
     ) {
         when {
-            recording -> Text(stringResource(R.string.nag_sc_press), style = NagTheme.type.labelSmall, color = colors.onSelection, maxLines = 1)
-            chord != null -> Text(chord.label(res), style = NagTheme.type.mono, color = colors.text, maxLines = 1)
-            else -> Text(stringResource(R.string.nag_sc_none), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+            recording -> Text(stringResource(R.string.nag_sc_press), style = NagTheme.type.labelSmall, color = colors.onSelection, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            chord != null -> Text(chord.label(res), style = NagTheme.type.mono, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            else -> Text(stringResource(R.string.nag_sc_none), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

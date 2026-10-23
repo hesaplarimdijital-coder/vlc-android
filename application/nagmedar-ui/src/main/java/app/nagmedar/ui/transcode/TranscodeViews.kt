@@ -442,6 +442,7 @@ private fun CardTitle(text: String, modifier: Modifier = Modifier) {
         style = NagTheme.type.bodyStrong.copy(fontWeight = FontWeight.SemiBold),
         color = NagTheme.colors.text,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier.semantics { heading() },
     )
 }

@@ -209,6 +209,7 @@ private fun SourceRow(section: LibrarySection, folder: SourceFolder, actions: So
                 style = NagTheme.type.caption,
                 color = colors.textSecondary,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .border(1.dp, colors.borderStrong, RoundedCornerShape(4.dp))
                     .background(colors.surfaceRaised, RoundedCornerShape(4.dp))

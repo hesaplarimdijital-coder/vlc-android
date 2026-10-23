@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -186,7 +187,7 @@ fun StationLogo(station: Station, size: Dp, modifier: Modifier = Modifier, corne
             Image(image, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
         } else {
             val fontSize: TextUnit = (size.value * 0.34f).coerceAtLeast(11f).sp
-            Text(monogram(station.name, currentLocale()), style = NagTheme.type.bodyStrong.copy(fontSize = fontSize), color = colors.textSecondary, maxLines = 1)
+            Text(monogram(station.name, currentLocale()), style = NagTheme.type.bodyStrong.copy(fontSize = fontSize), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

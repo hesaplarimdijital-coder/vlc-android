@@ -249,13 +249,13 @@ private fun CardRow(row: ShortcutCardRow) {
             Text(row.label, style = NagTheme.type.body, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
             val detail = listOfNotNull(note, changed.takeIf { row.changed }).joinToString(" · ")
             if (detail.isNotEmpty()) {
-                Text(detail, style = NagTheme.type.labelSmall, color = if (row.changed) colors.accentText else colors.textTertiary, maxLines = 1)
+                Text(detail, style = NagTheme.type.labelSmall, color = if (row.changed) colors.accentText else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (row.keys != null) {
             KeyCap(row.keys)
         } else {
-            Text(keys, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+            Text(keys, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
@@ -153,7 +154,7 @@ fun SleepTimerButton(
         NagIconButton(NagIcons.Sleep, stringResource(R.string.nag_sleep_title), { open = true }, selected = running != null, size = size)
         val remaining = left
         if (running != null && remaining != null && running?.waitingForTrackEnd == false) {
-            Text(formatDuration(remaining.coerceAtLeast(1_000)), style = NagTheme.type.mono, color = NagTheme.colors.textSecondary, maxLines = 1)
+            Text(formatDuration(remaining.coerceAtLeast(1_000)), style = NagTheme.type.mono, color = NagTheme.colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.width(4.dp))
         }
     }

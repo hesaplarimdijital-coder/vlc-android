@@ -73,6 +73,7 @@ internal fun SectionTitle(text: String, trailing: @Composable () -> Unit = {}) {
             style = NagTheme.type.caption.copy(letterSpacing = 0.08.em),
             color = NagTheme.colors.textTertiary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         trailing()
@@ -121,6 +122,7 @@ internal fun PanelBadge(text: String, modifier: Modifier = Modifier) {
         style = NagTheme.type.labelSmall,
         color = NagTheme.colors.textSecondary,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .background(NagTheme.colors.surfaceRaised, RoundedCornerShape(9.dp))
             .padding(horizontal = 8.dp, vertical = 1.dp),
@@ -146,7 +148,7 @@ internal fun PanelChip(text: String, selected: Boolean, enabled: Boolean, onSele
             .padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = NagTheme.type.labelSmall, color = if (selected) colors.text else colors.textSecondary, maxLines = 1)
+        Text(text, style = NagTheme.type.labelSmall, color = if (selected) colors.text else colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

@@ -64,8 +64,8 @@ fun SubtitleChooser(found: List<SubtitleCandidate>, onChoose: (SubtitleCandidate
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(NagIcons.Subtitle, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(16.dp))
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
-                Text(pluralStringResource(R.plurals.nag_sub_found, found.size, found.size), style = NagTheme.type.label, color = colors.text, maxLines = 1)
-                Text(stringResource(R.string.nag_sub_found_hint), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+                Text(pluralStringResource(R.plurals.nag_sub_found, found.size, found.size), style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.nag_sub_found_hint), style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             NagIconButton(NagIcons.Close, stringResource(R.string.nag_sub_dismiss), onDismiss, size = 24.dp, iconSize = 14.dp)
         }
@@ -100,7 +100,7 @@ private fun CandidateRow(candidate: SubtitleCandidate, onClick: () -> Unit) {
                 stringResource(R.string.nag_sub_forced).takeIf { candidate.forced },
                 stringResource(R.string.nag_sub_sdh).takeIf { candidate.sdh },
             )
-            if (tags.isNotEmpty()) Text(tags.joinToString(" · "), style = NagTheme.type.labelSmall, color = colors.accentText, maxLines = 1)
+            if (tags.isNotEmpty()) Text(tags.joinToString(" · "), style = NagTheme.type.labelSmall, color = colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(candidate.name, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }

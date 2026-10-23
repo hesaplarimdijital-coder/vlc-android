@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
@@ -165,6 +166,7 @@ internal fun DelaySection(
                 style = NagTheme.type.title.copy(fontFamily = PlexMono),
                 color = if (valueMs == 0L) colors.textSecondary else colors.text,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.testTag("$tag-value"),
             )
         }
@@ -208,7 +210,7 @@ private fun RowScope.StepButton(text: String, label: String, tag: String, enable
             .testTag("$tag-step"),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = if (numeric) NagTheme.type.mono else NagTheme.type.labelSmall, color = if (enabled) colors.text else colors.textTertiary, maxLines = 1)
+        Text(text, style = if (numeric) NagTheme.type.mono else NagTheme.type.labelSmall, color = if (enabled) colors.text else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -220,6 +222,7 @@ private fun KeyCap(text: String) {
         style = NagTheme.type.mono,
         color = NagTheme.colors.textSecondary,
         maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .border(1.dp, NagTheme.colors.borderStrong, RoundedCornerShape(4.dp))
             .padding(horizontal = 5.dp),
@@ -233,7 +236,7 @@ private fun RateSection(rate: SubtitleRate, supported: Boolean, onRate: (Subtitl
     val factor = decimal(rate.factor, 4, locale) + "×"
     PanelSection(spacing = 8.dp) {
         SectionTitle(stringResource(R.string.nag_sync_rate)) {
-            Text(factor, style = NagTheme.type.mono, color = NagTheme.colors.text, maxLines = 1, modifier = Modifier.testTag("sync-rate-value"))
+            Text(factor, style = NagTheme.type.mono, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("sync-rate-value"))
         }
         ChoiceRow(
             options = SubtitleRate.entries.map { it to stringResource(it.label) },

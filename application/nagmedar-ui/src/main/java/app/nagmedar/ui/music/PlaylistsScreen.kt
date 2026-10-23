@@ -547,7 +547,7 @@ internal fun PlaylistTab(name: String, count: Int?, selected: Boolean, icon: Ima
             )
             if (count != null) {
                 Spacer(Modifier.width(6.dp))
-                Text("$count", style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1)
+                Text("$count", style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Box(Modifier.fillMaxWidth().height(2.dp).background(if (selected) colors.accent else Color.Transparent))

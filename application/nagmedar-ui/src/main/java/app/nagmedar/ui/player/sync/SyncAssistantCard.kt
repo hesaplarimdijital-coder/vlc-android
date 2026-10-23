@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagIcons
@@ -113,11 +114,12 @@ fun SyncAssistantCard(
                     style = NagTheme.type.labelSmall,
                     color = colors.success,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f).testTag("assist-applied"),
                 )
                 TextAction(stringResource(R.string.nag_assist_undo), enabled = true, onClick = onUndo, modifier = Modifier.testTag("assist-undo"))
                 ShortcutRegistry.chordLabel(ShortcutId.SyncUndo, resources)?.let { keys ->
-                    Text(keys, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+                    Text(keys, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -161,8 +163,8 @@ private fun Step(text: String, done: Boolean, next: Boolean, enabled: Boolean, k
                 Box(Modifier.size(12.dp).border(1.5.dp, if (next) colors.accent else colors.textTertiary, CircleShape))
             }
         }
-        Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, modifier = Modifier.weight(1f))
-        if (keys != null) Text(keys, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+        Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (keys != null) Text(keys, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

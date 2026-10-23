@@ -340,7 +340,7 @@ fun ConvertStatusBar(status: ConvertStatus?, onCancel: (String) -> Unit, onDetai
                 when (status) {
                     is ConvertStatus.Running -> {
                         val p = status.progress
-                        Text(stringResource(R.string.nag_convert_running_title), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1)
+                        Text(stringResource(R.string.nag_convert_running_title), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         val line = when {
                             status.resumes -> stringResource(R.string.nag_convert_waiting_resume)
                             p == null -> stringResource(R.string.nag_convert_starting)
@@ -364,6 +364,7 @@ fun ConvertStatusBar(status: ConvertStatus?, onCancel: (String) -> Unit, onDetai
                             style = NagTheme.type.bodyStrong,
                             color = colors.text,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             countsLine(res, status.converted, status.skipped, status.failed),

@@ -416,6 +416,7 @@ internal fun LevelRow(
             style = NagTheme.type.mono,
             color = if (neutral) colors.textTertiary else colors.text,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.End,
             modifier = Modifier.width(46.dp),
         )
@@ -611,8 +612,8 @@ private fun WindowButton(icon: ImageVector, text: String, shortcut: ShortcutId, 
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(15.dp))
-        Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, modifier = Modifier.weight(1f))
-        if (keys != null) Text(keys, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1)
+        Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (keys != null) Text(keys, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

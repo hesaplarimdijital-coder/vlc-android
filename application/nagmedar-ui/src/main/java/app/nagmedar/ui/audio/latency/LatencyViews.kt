@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import androidx.core.content.ContextCompat
@@ -264,6 +265,7 @@ private fun ProfileRow(profile: LatencyProfile, active: Boolean, onDelay: (Int) 
                 style = NagTheme.type.mono,
                 color = if (profile.delayMs == 0) colors.textSecondary else colors.text,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.width(76.dp).testTag("latency-value"),
             )
         }
@@ -289,7 +291,7 @@ private fun StepButton(text: String, label: String, onClick: () -> Unit) {
             .testTag("latency-step"),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = NagTheme.type.mono, color = colors.text, maxLines = 1)
+        Text(text, style = NagTheme.type.mono, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

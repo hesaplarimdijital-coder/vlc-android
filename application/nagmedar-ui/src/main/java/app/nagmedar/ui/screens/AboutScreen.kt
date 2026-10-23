@@ -359,7 +359,7 @@ internal fun FilterField(
         Icon(NagIcons.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
         Spacer(Modifier.width(10.dp))
         Box(Modifier.weight(1f)) {
-            if (query.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1)
+            if (query.isEmpty()) Text(placeholder, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicTextField(
                 value = query,
                 onValueChange = onQuery,
@@ -449,6 +449,6 @@ private fun LicenseChip(name: String) {
             .border(1.dp, colors.borderStrong, RoundedCornerShape(50))
             .padding(horizontal = 8.dp, vertical = 2.dp),
     ) {
-        Text(name, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1)
+        Text(name, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -234,7 +235,7 @@ private fun BandColumn(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(width)) {
         Text(
             gainText(db.toDouble(), separator), style = NagTheme.type.caption, color = if (db == 0f) colors.textTertiary else colors.text,
-            maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true),
+            maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true),
         )
         GainSlider(
             value = db.toDouble(),
@@ -248,7 +249,7 @@ private fun BandColumn(
         )
         Text(
             caption, style = NagTheme.type.caption, color = colors.textTertiary,
-            maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true),
+            maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true),
         )
     }
 }

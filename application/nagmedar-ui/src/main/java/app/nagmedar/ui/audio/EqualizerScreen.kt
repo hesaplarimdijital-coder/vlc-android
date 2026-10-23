@@ -53,6 +53,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.DspMeter
@@ -463,7 +464,7 @@ private fun GraphicCard(state: EqualizerState, modifier: Modifier) {
                 DspSettings.graphicFrequencies.forEachIndexed { i, hz ->
                     val db = dsp.graphicDb.getOrElse(i) { 0.0 }
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(if (fits) share else least)) {
-                        Text(gainText(db, separator), style = NagTheme.type.caption, color = if (db == 0.0) colors.textTertiary else colors.text, maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
+                        Text(gainText(db, separator), style = NagTheme.type.caption, color = if (db == 0.0) colors.textTertiary else colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
                         GainSlider(
                             value = db,
                             onValueChange = { state.setGraphicBand(i, it) },
@@ -472,7 +473,7 @@ private fun GraphicCard(state: EqualizerState, modifier: Modifier) {
                             enabled = dsp.graphicEnabled,
                             modifier = Modifier.height(170.dp),
                         )
-                        Text(frequencyText(hz, locale, compact = true), style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
+                        Text(frequencyText(hz, locale, compact = true), style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
                     }
                 }
             }
