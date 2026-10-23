@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.tools.FrameRateConversionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:21.727Z" hostname="runnervm8k3b6" time="0.01">
+  <properties/>
+  <testcase name="theCuesAreScaledAndShifted" classname="app.nagmedar.ui.player.subtitles.tools.FrameRateConversionTest" time="0.0"/>
+  <testcase name="knownConversions" classname="app.nagmedar.ui.player.subtitles.tools.FrameRateConversionTest" time="0.0"/>
+  <testcase name="thereAndBackIsWithinAMillisecond" classname="app.nagmedar.ui.player.subtitles.tools.FrameRateConversionTest" time="0.009"/>
+  <testcase name="theRatesAreExact" classname="app.nagmedar.ui.player.subtitles.tools.FrameRateConversionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

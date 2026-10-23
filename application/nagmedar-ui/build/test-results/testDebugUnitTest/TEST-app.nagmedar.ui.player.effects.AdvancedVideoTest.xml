@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.effects.AdvancedVideoTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:12.935Z" hostname="runnervm8k3b6" time="0.005">
+  <properties/>
+  <testcase name="aTextIsSizedForThePlayingFilm" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.004"/>
+  <testcase name="aChangeWaitsForLibVlcToStartAgain" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="rangesAreKept" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="nothingSetIsNoOption" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="theAngleIsKeptWithinATurn" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="aLogoWithoutAPictureOrAPathVlcWouldSplitIsLeftOut" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="theTextIsEscapedForVlcsMarq" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="thePreviewDrawsTheEffectsOnceOnly" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.001"/>
+  <testcase name="anaglyphComesBeforeTheTurnAndRotateAfter" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="overlaysArePlacedAsVlcPlacesThem" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="theTextsOptions" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="theAnaglyphsChannelsFollowVlcsSchemes" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <testcase name="theLogoIsAPictureAtItsPlace" classname="app.nagmedar.ui.player.effects.AdvancedVideoTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

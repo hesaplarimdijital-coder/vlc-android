@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:19.056Z" hostname="runnervm8k3b6" time="0.639">
+  <properties/>
+  <testcase name="settingsTablet" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.073"/>
+  <testcase name="settingsPhone" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.086"/>
+  <testcase name="searchPhone" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.115"/>
+  <testcase name="settingsDex" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.067"/>
+  <testcase name="searchMerged" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.12"/>
+  <testcase name="searchPartialEnglish" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.121"/>
+  <testcase name="settingsEnglish" classname="app.nagmedar.ui.screenshots.SubtitleProvidersScreenshotTest" time="0.057"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

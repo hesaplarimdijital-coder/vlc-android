@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PanesScreenshotTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:57.434Z" hostname="runnervm8k3b6" time="0.515">
+  <properties/>
+  <testcase name="tablet" classname="app.nagmedar.ui.screenshots.PanesScreenshotTest" time="0.116"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.PanesScreenshotTest" time="0.148"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.PanesScreenshotTest" time="0.098"/>
+  <testcase name="monitor" classname="app.nagmedar.ui.screenshots.PanesScreenshotTest" time="0.153"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

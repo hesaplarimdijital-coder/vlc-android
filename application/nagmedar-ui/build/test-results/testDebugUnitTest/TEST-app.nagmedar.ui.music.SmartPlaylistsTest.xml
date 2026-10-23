@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.SmartPlaylistsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:05.556Z" hostname="runnervm8k3b6" time="0.418">
+  <properties/>
+  <testcase name="itsRulesChangedThenDeletedAndBroughtBack" classname="app.nagmedar.ui.music.SmartPlaylistsTest" time="0.255"/>
+  <testcase name="madeFromATemplateAndPlayed" classname="app.nagmedar.ui.music.SmartPlaylistsTest" time="0.163"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

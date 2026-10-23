@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.record.RecordingViewsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:16.069Z" hostname="runnervm8k3b6" time="0.453">
+  <properties/>
+  <testcase name="theChosenFolderIsRemembered" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.06"/>
+  <testcase name="aFullStorageOffersAnotherFolder" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.057"/>
+  <testcase name="whatCannotBeRecordedIsSaid" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.041"/>
+  <testcase name="theCopySaysHowFarWithoutAStopButton" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.064"/>
+  <testcase name="theCardPlaysAndOpensTheFolder" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.059"/>
+  <testcase name="theMarkSaysTheTimeAndSizeAndStops" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.059"/>
+  <testcase name="aFolderGoneAsksForAnotherAndTriesAgain" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.065"/>
+  <testcase name="theCamerasMenuRecordsWithShiftR" classname="app.nagmedar.ui.player.record.RecordingViewsTest" time="0.048"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

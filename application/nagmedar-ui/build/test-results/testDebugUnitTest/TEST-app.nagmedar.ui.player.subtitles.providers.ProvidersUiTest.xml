@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:21.119Z" hostname="runnervm8k3b6" time="0.599">
+  <properties/>
+  <testcase name="theChoiceIsKeptInThePreferences" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.051"/>
+  <testcase name="aProviderWithoutAKeyIsToldSo" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.066"/>
+  <testcase name="aProviderIsTurnedOnAndOff" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.049"/>
+  <testcase name="theFolderIsChosenAndForgotten" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.071"/>
+  <testcase name="aNewFolderReleasesTheOldOnesPermissionAndAFailedOneIsNotStored" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.044"/>
+  <testcase name="theTwoButtonsMoveAProviderAndTheEndsStopThem" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.049"/>
+  <testcase name="aFolderThatCouldNotBeKeptIsSaid" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.086"/>
+  <testcase name="oneProviderHasNoLineOfItsOwn" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.056"/>
+  <testcase name="theFolderIsKeptInThePreferences" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.063"/>
+  <testcase name="eachProviderHasALineWhenSeveralWereAsked" classname="app.nagmedar.ui.player.subtitles.providers.ProvidersUiTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

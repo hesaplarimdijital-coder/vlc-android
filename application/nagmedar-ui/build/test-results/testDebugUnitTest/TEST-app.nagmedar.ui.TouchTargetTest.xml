@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.TouchTargetTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:44:22.539Z" hostname="runnervm8k3b6" time="11.736">
+  <properties/>
+  <testcase name="phoneShell" classname="app.nagmedar.ui.TouchTargetTest" time="8.911"/>
+  <testcase name="filmsWithTheSelectionBar" classname="app.nagmedar.ui.TouchTargetTest" time="0.653"/>
+  <testcase name="upNext" classname="app.nagmedar.ui.TouchTargetTest" time="0.242"/>
+  <testcase name="shortcutEditor" classname="app.nagmedar.ui.TouchTargetTest" time="0.758"/>
+  <testcase name="tabletShell" classname="app.nagmedar.ui.TouchTargetTest" time="0.517"/>
+  <testcase name="settings" classname="app.nagmedar.ui.TouchTargetTest" time="0.649"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

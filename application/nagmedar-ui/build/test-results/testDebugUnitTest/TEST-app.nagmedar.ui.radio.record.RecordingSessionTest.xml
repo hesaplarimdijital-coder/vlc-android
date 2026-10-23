@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.RecordingSessionTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:38.913Z" hostname="runnervm8k3b6" time="0.367">
+  <properties/>
+  <testcase name="aPlaylistOfSegmentsIsNotRecorded" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.008"/>
+  <testcase name="roomRunningShortIsAWarningWhileItRecords" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.013"/>
+  <testcase name="orDeletesTheOldestWhenThatIsTheChoice" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.025"/>
+  <testcase name="aStreamWithoutTitlesIsRecordedWholeAndSaysItCannotSplit" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.015"/>
+  <testcase name="cancellingItFinishesTheFilesAndKeepsTheTracks" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.006"/>
+  <testcase name="aStreamThatNeverAnswersEndsTheRecordingAfterAFewTries" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.066"/>
+  <testcase name="theTitlesBecomeTracksInTheLibrary" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.011"/>
+  <testcase name="pruningThatFreesNothingStopsIt" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.006"/>
+  <testcase name="aDiskThatFillsUpEndsItAndKeepsWhatWasWritten" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.005"/>
+  <testcase name="somethingThatIsNotAudioIsNotRecorded" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.002"/>
+  <testcase name="aFolderThatCannotBeWrittenToEndsTheRecordingBeforeAnyFile" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.004"/>
+  <testcase name="theTotalLimitStopsItToo" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.004"/>
+  <testcase name="aRefusalSaysWhy" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.065"/>
+  <testcase name="theEndCanBeMovedLater" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.104"/>
+  <testcase name="theCurrentTrackIsInTheStateWhileItIsRecorded" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.007"/>
+  <testcase name="tooLittleRoomStopsItAtOnce" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.004"/>
+  <testcase name="aStreamThatDropsIsOpenedAgainAndTheTracksGoOnInNewFiles" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.01"/>
+  <testcase name="theRecordingStopsWhenItsTimeIsUp" classname="app.nagmedar.ui.radio.record.RecordingSessionTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

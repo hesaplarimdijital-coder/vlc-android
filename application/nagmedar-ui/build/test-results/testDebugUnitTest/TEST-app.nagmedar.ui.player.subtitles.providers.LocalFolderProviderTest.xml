@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:19.688Z" hostname="runnervm8k3b6" time="0.319">
+  <properties/>
+  <testcase name="onlySubtitleFilesAreResultsAndNothingIsFoundWithoutAName" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.004"/>
+  <testcase name="aWalkStopsAtItsFileLimit" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="aDownloadIsTheFilesBytes" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.002"/>
+  <testcase name="aWalkThatIsCancelledStopsAtOnceEvenWhileRowsBlock" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.304"/>
+  <testcase name="theClosestNameRanksFirst" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="aSeriesIsFoundByItsSeasonAndEpisode" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="withoutAFolderItCannotBeAskedAndSaysWhy" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="aWalkReadsTheFilesAndTheFoldersDownToItsDepth" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="theLanguageIsReadFromTheNameAndFiltersWhenAsked" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.002"/>
+  <testcase name="wordsAreFoldedAndCutAtTheYear" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="whatItCanDoAndWhatItAsksFor" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <testcase name="theFilmsNameFindsItsFilesWhateverTheAccents" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.0"/>
+  <testcase name="aFolderThatCannotBeReadIsSkippedAndTheRestKept" classname="app.nagmedar.ui.player.subtitles.providers.LocalFolderProviderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

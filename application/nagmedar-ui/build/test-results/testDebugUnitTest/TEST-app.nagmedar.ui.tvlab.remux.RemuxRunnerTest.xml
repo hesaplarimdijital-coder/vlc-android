@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" tests="28" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:31.203Z" hostname="runnervm8k3b6" time="0.465">
+  <properties/>
+  <testcase name="theViewReadsTheRow" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.021"/>
+  <testcase name="aQueueWaitingForItsNightRunStartsNothing" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.021"/>
+  <testcase name="aDrainedBatteryStopsTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="aQueuedDocumentFilledSinceIsLeftAsItIs" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="theEnginesRefusalIsNeverARemoval" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aVerificationOfNoPacketsIsNoVerification" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="drainRunsEveryWaitingJobInOrder" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="anOutputThatHoldsSomethingIsRefusedUntouched" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.02"/>
+  <testcase name="jobsLeftByADeadProcessAreQueuedAgain" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.026"/>
+  <testcase name="anOutputThatIsTheSourceIsRefused" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.02"/>
+  <testcase name="aJobRunsIsVerifiedAndEndsDoneWithItsHash" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="withoutTheNativeToolsTheJobFailsAtOnce" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aNightRunWaitsForTheChargerThenRunsTheQueue" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aCancelAskedWhileRunningEndsCancelledWithoutAnOutput" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <testcase name="filesThatDoNotOpenAreToldApart" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.016"/>
+  <testcase name="theWaitForTheChargerEndsWithAPauseAStopOrStartNow" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aNightRunWithNothingLeftToRunIsOver" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.023"/>
+  <testcase name="aHeldQueueHoldsTheRunningJobWhereItIs" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.017"/>
+  <testcase name="aLowBatteryPausesTheJobAndChargingResumesIt" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.018"/>
+  <testcase name="aMismatchFailsTheJobAndRemovesTheOutput" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <testcase name="heatSlowsThenPausesTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aPlanWithoutConversionIsVerifiedWithoutDolbyVision" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="aCancelDuringTheVerificationCountsToo" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <testcase name="aCancelBetweenTheRemuxAndTheVerificationIsNotLost" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <testcase name="aJobWaitingForTheAppIsMarkedSo" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <testcase name="aForegroundTimeoutIsRecordedForTheUser" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.015"/>
+  <testcase name="theEnginesErrorFailsTheJob" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.013"/>
+  <testcase name="aStoppedWorkerPutsTheJobBackInTheQueue" classname="app.nagmedar.ui.tvlab.remux.RemuxRunnerTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcode.TranscodeProfileTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:29.627Z" hostname="runnervm8k3b6" time="0.098">
+  <properties/>
+  <testcase name="aProfileComesBackFromJson" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.025"/>
+  <testcase name="aContainerTakesItsCodecs" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.018"/>
+  <testcase name="aProfileFitsAnotherContainer" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.014"/>
+  <testcase name="thePresetsAreValidButH265" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.014"/>
+  <testcase name="subtitlesNeedTheirPlace" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.014"/>
+  <testcase name="ratesChannelsAndNames" classname="app.nagmedar.ui.transcode.TranscodeProfileTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

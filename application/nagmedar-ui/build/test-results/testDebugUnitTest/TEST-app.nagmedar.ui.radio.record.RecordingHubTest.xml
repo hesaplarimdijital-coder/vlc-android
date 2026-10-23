@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.RecordingHubTest" tests="4" skipped="0" failures="1" errors="0" timestamp="2026-10-23T08:45:33.876Z" hostname="runnervm8k3b6" time="5.035">
+  <properties/>
+  <testcase name="theSameStationAskedAgainIsOneRecordingWithTheLaterEnd" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.011"/>
+  <testcase name="anEndedRecordingSaysWhy" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.012"/>
+  <testcase name="theFourthStationIsRefused" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="5.006">
+    <failure message="kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms" type="kotlinx.coroutines.TimeoutCancellationException">kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:46)
+	at app.nagmedar.ui.radio.record.RecordingHubTest$waitFor$2.invokeSuspend(RecordingHubTest.kt:49)
+	at app.nagmedar.ui.radio.record.RecordingHubTest$theFourthStationIsRefused$1.invokeSuspend(RecordingHubTest.kt:86)
+Caused by: kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 5000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:191)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:159)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:501)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:280)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:109)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+</failure>
+  </testcase>
+  <testcase name="stationsAreRecordedSideBySide" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
