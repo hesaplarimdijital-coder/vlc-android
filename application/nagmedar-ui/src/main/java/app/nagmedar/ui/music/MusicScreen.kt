@@ -369,7 +369,7 @@ fun MediaWrapper.toTrack(tech: TrackTech?): Track {
         albumArtist = albumArtistName,
         album = albumName,
         genre = genre,
-        year = releaseYear.takeIf { it > 0 },
+        year = releaseYearOf(releaseYear),
         trackNumber = trackNumber,
         discNumber = discNumber,
         durationMs = length,

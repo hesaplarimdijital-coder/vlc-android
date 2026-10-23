@@ -2,6 +2,8 @@ package app.nagmedar.ui.music
 
 import androidx.compose.runtime.Immutable
 import java.text.Collator
+import java.time.Instant
+import java.time.ZoneOffset
 import java.util.Locale
 
 /** S-803: a music file's technical side as the engine's probe read it. */
@@ -69,6 +71,16 @@ data class Track(
 
     /** S-808: what its rating and plays are kept by. */
     val statsKey: String get() = uri
+}
+
+/**
+ * A track's year from the medialibrary's release date: the medialibrary keeps a "date=2026" tag
+ * as seconds since 1970 (UTC), a CUE sheet's track carries the year itself; 0 or less is unknown.
+ */
+fun releaseYearOf(value: Int): Int? = when {
+    value <= 0 -> null
+    value <= 9999 -> value
+    else -> Instant.ofEpochSecond(value.toLong()).atZone(ZoneOffset.UTC).year
 }
 
 /** The ways through the library (S-803). */

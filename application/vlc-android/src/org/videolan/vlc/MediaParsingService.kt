@@ -185,8 +185,11 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
             lifecycleScope.launch {
                 if (!running) {
                     delay(1000L)
-                    if (!medialibrary.isWorking)
+                    if (!medialibrary.isWorking) {
                         exitCommand()
+                        // Nağmedar: the library's scan strip ends with the work, whatever still holds the service
+                        if (::notificationActor.isInitialized) notificationActor.trySend(Idle)
+                    }
                 }
             }
         })
@@ -202,6 +205,7 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 is Show -> showNotification(update.done, update.scheduled)
                 is Error -> discoveryError.value = DiscoveryError(update.entryPoint)
                 Hide -> hideNotification()
+                Idle -> showProgress(-1F, "")
             }
         }
     }
@@ -418,7 +422,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     private suspend fun showNotification(done:Int, scheduled: Int) {
         val currentTime = System.currentTimeMillis()
         lastNotificationTime = currentTime
-        val parsing = (done.toFloat() / scheduled.toFloat() * 100F)
+        // Nağmedar: no count yet (-1/-1 while discovering, 0/0) is no percentage
+        val parsing = if (scheduled > 0 && done >= 0) done.toFloat() / scheduled.toFloat() * 100F else 0F
         val discovery = withContext(Dispatchers.Default) {
             val progressText = when {
                 inDiscovery -> getString(R.string.ml_discovering) + " " + Uri.decode(currentDiscovery?.removeFileScheme())
@@ -471,6 +476,13 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
 
     override fun onDiscoveryCompleted() {
         inDiscovery = false
+        // Nağmedar: the progress leaves "discovering" at once: parsing (with its counts when there are any), or nothing
+        if (!::notificationActor.isInitialized) return
+        notificationActor.trySend(when {
+            lastScheduled > 0 && lastDone in 0 until lastScheduled -> Show(lastDone, lastScheduled)
+            medialibrary.isWorking -> Show(-1, -1)
+            else -> Idle
+        })
     }
 
     override fun onDiscoveryFailed(entryPoint: String) {
@@ -495,6 +507,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         if (BuildConfig.DEBUG) Log.v(TAG, "onReloadCompleted $entryPoint")
         if (entryPoint.isEmpty()) --reload
         if (reload <= 0) exitCommand()
+        // Nağmedar: nothing more to do: the library's scan strip goes
+        if (!medialibrary.isWorking && ::notificationActor.isInitialized) notificationActor.trySend(Idle)
     }
 
     private fun exitCommand() {
@@ -632,3 +646,5 @@ private sealed class Notification
 private class Show(val done:Int, val scheduled:Int) : Notification()
 private class Error(val entryPoint:String) : Notification()
 private object Hide : Notification()
+/** Nağmedar: the scan is over for the library's screens; the notification is left to [Hide]. */
+private object Idle : Notification()

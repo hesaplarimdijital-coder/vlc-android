@@ -36,6 +36,13 @@ class LibraryStatesTest {
     }
 
     @Test
+    fun anUnchangedProgressEndsOnlyWhenTheMedialibraryRests() {
+        assertFalse(ScanState.over(changedAt = 1_000, now = 1_000 + SCAN_STALE_MS - 1, working = false))
+        assertTrue(ScanState.over(changedAt = 1_000, now = 1_000 + SCAN_STALE_MS, working = false))
+        assertFalse(ScanState.over(changedAt = 1_000, now = 1_000 + 10 * SCAN_STALE_MS, working = true))
+    }
+
+    @Test
     fun digitGroups() {
         assertEquals("999", groupDigits(999))
         assertEquals("3 900", groupDigits(3900))

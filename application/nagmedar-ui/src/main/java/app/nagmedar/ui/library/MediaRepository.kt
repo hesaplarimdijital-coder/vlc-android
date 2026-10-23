@@ -122,7 +122,19 @@ class MediaRepository(private val context: Context) {
 
     suspend fun recentVideos(): List<MediaWrapper> = context.getFromMl { recentVideos?.toList().orEmpty() }
 
-    suspend fun recentAudio(): List<MediaWrapper> = context.getFromMl { recentAudio?.toList().orEmpty() }
+    /**
+     * The tracks played last, newest first: the medialibrary's history of local files, those of
+     * the Music section only (a podcast episode or a radio station is not a track of it). Not its
+     * getRecentAudio: that is every track by when it was added, and its native side reads two
+     * arguments the Java side never passes, so it came back empty at random.
+     */
+    suspend fun recentAudio(): List<MediaWrapper> {
+        val played = context.getFromMl { history(Medialibrary.HISTORY_TYPE_LOCAL)?.toList().orEmpty() }
+            .filter { it.type == MediaWrapper.TYPE_AUDIO }
+        if (played.isEmpty()) return emptyList()
+        val tracks = audio(LibrarySection.Music).mapNotNullTo(HashSet()) { it.id.takeIf { id -> id > 0 } }
+        return played.filter { it.id in tracks }.take(RECENT_AUDIO)
+    }
 
     suspend fun counts(): LibraryCounts {
         val indexed = context.getFromMl { LibraryCounts(videoCount, audioCount) }
@@ -145,6 +157,9 @@ class MediaRepository(private val context: Context) {
         return if (folders.isEmpty()) emptyList() else SafLibrary.media(context, folders, type).distinctBy { it.uri }
     }
 }
+
+/** How many tracks Home's recently played shelf shows at most. */
+private const val RECENT_AUDIO = 20
 
 data class LibraryCounts(val videos: Int, val tracks: Int)
 

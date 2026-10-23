@@ -96,4 +96,14 @@ class MusicLibraryTest {
         assertEquals(7, library.groups(MusicView.Tracks).single().tracks.size)
         assertEquals(listOf("Klasik"), library.groups(MusicView.Genres, TechFilter(rates = setOf(RateBand.R96))).map { it.title })
     }
+
+    @Test
+    fun releaseYearsFromTheMedialibrary() {
+        // "date=2026" as the medialibrary keeps it: 1 January 2026, 00:00 UTC in seconds
+        assertEquals(2026, releaseYearOf(1_767_225_600))
+        assertEquals(1999, releaseYearOf(1999))
+        assertEquals(9999, releaseYearOf(9999))
+        assertNull(releaseYearOf(0))
+        assertNull(releaseYearOf(-1))
+    }
 }

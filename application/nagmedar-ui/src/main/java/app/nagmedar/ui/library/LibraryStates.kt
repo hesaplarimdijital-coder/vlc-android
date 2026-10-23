@@ -1,5 +1,6 @@
 package app.nagmedar.ui.library
 
+import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,6 +35,8 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.theme.NagTheme
+import kotlinx.coroutines.delay
+import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.vlc.MediaParsingService
 import org.videolan.vlc.ScanProgress
 import kotlin.math.abs
@@ -65,6 +72,9 @@ data class ScanState(
     companion object {
         val Idle = ScanState()
 
+        /** A progress unchanged since [changedAt] is over at [now] once it is [SCAN_STALE_MS] old and the medialibrary is not [working]. */
+        fun over(changedAt: Long, now: Long, working: Boolean): Boolean = !working && now - changedAt >= SCAN_STALE_MS
+
         private val counts = Regex("""(\d+)\s*/\s*(\d+)""")
 
         /** From MediaParsingService's progress: parsing in percent and a text ending in "done/scheduled". */
@@ -82,10 +92,45 @@ data class ScanState(
     }
 }
 
+/**
+ * The medialibrary's scan for a library screen. A progress that has not changed for
+ * [SCAN_STALE_MS] while the medialibrary does no work is over, whatever the service last posted:
+ * the strip never stays for good.
+ */
 @Composable
 fun rememberScanState(): ScanState {
     val progress by MediaParsingService.progress.observeAsState()
-    return ScanState.from(progress)
+    val current = progress
+    val since = remember(current) { current?.let { ScanWatch.since(it, SystemClock.elapsedRealtime()) } ?: 0L }
+    var over by remember(current) { mutableStateOf(current != null && ScanState.over(since, SystemClock.elapsedRealtime(), Medialibrary.getInstance().isWorking)) }
+    LaunchedEffect(current) {
+        if (current == null) return@LaunchedEffect
+        while (!over) {
+            delay((since + SCAN_STALE_MS - SystemClock.elapsedRealtime()).coerceIn(SCAN_RECHECK_MS, SCAN_STALE_MS))
+            over = ScanState.over(since, SystemClock.elapsedRealtime(), Medialibrary.getInstance().isWorking)
+        }
+    }
+    return if (over) ScanState.Idle else ScanState.from(current)
+}
+
+/** How long an unchanged scan progress is shown while the medialibrary is idle. */
+internal const val SCAN_STALE_MS = 30_000L
+
+/** How often a stale progress is checked again while the medialibrary still works. */
+private const val SCAN_RECHECK_MS = 5_000L
+
+/** When the progress on screen was first seen, shared by the screens: switching pages does not restart the wait. */
+private object ScanWatch {
+    private var last: ScanProgress? = null
+    private var since = 0L
+
+    fun since(progress: ScanProgress, now: Long): Long {
+        if (progress != last) {
+            last = progress
+            since = now
+        }
+        return since
+    }
 }
 
 /** "3 900", "12 480": digits in threes with a no-break space, as in the mockups. */
