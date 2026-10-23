@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import app.nagmedar.ui.player.ChromeSurfaces
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -29,11 +30,13 @@ class PanelLayout(val dock: PanelDock, val columns: Int)
  * makes room for it with a margin, so the video and the classic overlay shrink next to it rather
  * than under it; the panel is its own view in the window's content, so a finger reaches it as a
  * mouse does. The window's size decides the side ([PanelDock.of]) and follows a resized window.
+ * While it shows it is one of the controls' [surfaces]: the wheel over it scrolls it.
  */
 internal class PanelHost(
     private val owner: LifecycleOwner,
     private val playerRoot: View,
     private val state: PanelState,
+    private val surfaces: ChromeSurfaces,
     private val content: @Composable (PanelLayout) -> Unit,
 ) {
     private var holder: PanelFrame? = null
@@ -56,6 +59,7 @@ internal class PanelHost(
         )
         window.addView(frame, FrameLayout.LayoutParams(0, 0))
         window.addOnLayoutChangeListener(resized)
+        surfaces.addView(frame)
         holder = frame
         following = owner.lifecycleScope.launch {
             snapshotFlow { state.shown }.collect { relayout() }
@@ -66,7 +70,10 @@ internal class PanelHost(
         following?.cancel()
         following = null
         (playerRoot.parent as? ViewGroup)?.removeOnLayoutChangeListener(resized)
-        holder?.let { (it.parent as? ViewGroup)?.removeView(it) }
+        holder?.let {
+            surfaces.removeView(it)
+            (it.parent as? ViewGroup)?.removeView(it)
+        }
         holder = null
         place(playerRoot, rightMargin = 0, bottomMargin = 0)
     }

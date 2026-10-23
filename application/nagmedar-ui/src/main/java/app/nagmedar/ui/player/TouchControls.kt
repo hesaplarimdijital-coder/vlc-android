@@ -227,8 +227,11 @@ internal fun TouchControls(
 /** The speed a long press plays at while it is held, unless the settings say another. */
 internal const val FAST_RATE = 2f
 
-/** A finger on a bar starts the hide timer again; the bar's buttons still get the touch. */
-private fun Modifier.pokes(visibility: ChromeVisibility): Modifier = pointerInput(visibility) {
+/**
+ * A finger on a bar starts the hide timer again; the bar's buttons still get the touch. A mouse's
+ * wheel over the bar is the bar's, not the volume's.
+ */
+private fun Modifier.pokes(visibility: ChromeVisibility): Modifier = chromeSurface(visibility.surfaces).pointerInput(visibility) {
     awaitPointerEventScope {
         while (true) {
             val event = awaitPointerEvent(PointerEventPass.Initial)

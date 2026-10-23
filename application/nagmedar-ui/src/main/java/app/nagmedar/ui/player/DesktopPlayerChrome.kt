@@ -421,12 +421,15 @@ class DesktopPlayerChrome : PlayerChrome {
         val video = activity.videoLayout?.let { root.indexOfChild(it) } ?: -1
         root.addView(frame, video + 1, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.frame = frame
-        panelHost = PanelHost(activity, root, panel) { layout ->
+        panelHost = PanelHost(activity, root, panel, controls.surfaces) { layout ->
             PanelContent(activity, controls, panel, effects, advanced, output, sync, PanelInfo(infoSource, info, live, refresh), navigation, refresh, PanelSubtitles(subtitles, dual, assistant, appearance, online, secondaryLayout), layout)
         }.also { it.attach() }
     }
 
     override fun show() = controls.show()
+
+    // the panel, a bar or a card under the pointer: the wheel scrolls it, the video keeps the volume
+    override fun isOverControls(x: Float, y: Float): Boolean = controls.surfaces.contains(x, y)
 
     override fun onMotion(event: MotionEvent) {
         if (PlayerChrome.isMouse(event)) {
@@ -1032,12 +1035,13 @@ private fun PlayerChromeContent(
                     RecordingIndicator(
                         recorder.status,
                         onStop = Recordings::stop,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(end = 16.dp, top = if (visibility.visible) 64.dp else 16.dp),
+                        modifier = Modifier.align(Alignment.TopEnd).padding(end = 16.dp, top = if (visibility.visible) 64.dp else 16.dp).chromeSurface(visibility.surfaces),
                     )
                 }
-                // above the control bar while it shows: the subtitles found beside the film (S-701), a screenshot's card
+                // above the control bar while it shows: the subtitles found beside the film (S-701), a screenshot's card;
+                // the wheel over a card is the card's
                 Column(
-                    Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = barRoom),
+                    Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = barRoom).chromeSurface(visibility.surfaces),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     SubtitleChooser(subtitles.found, onChoose = subtitles::choose, onDismiss = subtitles::dismiss)

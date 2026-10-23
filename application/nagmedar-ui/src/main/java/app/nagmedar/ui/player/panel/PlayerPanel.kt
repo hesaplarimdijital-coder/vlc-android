@@ -41,6 +41,7 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.player.keepsWheel
 import app.nagmedar.ui.theme.NagTheme
 
 /** The player panel's tabs, in the mockups' order; a tab shows once its story fills it (S-603: effects). */
@@ -105,7 +106,8 @@ class PanelState(tab: PanelTab = PanelTab.Effects, open: Boolean = false) {
 
 /**
  * The player's tool panel: its tabs along the top with a close button, the chosen tab's content
- * under them; a border on the side it docks to the video by.
+ * under them; a border on the side it docks to the video by. The wheel over it scrolls its tab,
+ * and goes no further.
  */
 @Composable
 fun PlayerPanel(
@@ -128,6 +130,7 @@ fun PlayerPanel(
                     drawLine(line, Offset(0f, stroke / 2), Offset(size.width, stroke / 2), stroke)
                 }
             }
+            .keepsWheel()
             .testTag("player-panel"),
     ) {
         Row(

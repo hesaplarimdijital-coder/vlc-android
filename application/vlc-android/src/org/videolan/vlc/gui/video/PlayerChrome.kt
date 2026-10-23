@@ -63,6 +63,14 @@ interface PlayerChrome {
     fun onMotion(event: MotionEvent)
 
     /**
+     * Nağmedar: whether the window's point ([x], [y], in pixels from its corner, as the window's
+     * events give it) is on the controls' own surfaces (their panel, a bar, a card) rather than on
+     * the video. The mouse's wheel there is theirs and scrolls them ([PlayerMouse]); over the
+     * video it sets the volume.
+     */
+    fun isOverControls(x: Float, y: Float): Boolean = false
+
+    /**
      * S-602: a key reached the player: the new interface's shortcut table (VLC's keys, or the
      * user's) answers it first. False leaves it to the classic keys.
      */

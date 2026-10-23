@@ -13,10 +13,13 @@ import androidx.compose.runtime.setValue
  * a finger or a pen brings their [touch] layout, which a tap shows and hides and which hides
  * [TOUCH_HIDE_AFTER_MS] after the last touch. The cursor hides with them; TalkBack keeps them
  * shown; the touch lock ([locked]) puts them and the gestures away; in picture in picture there
- * are none.
+ * are none. Where their bars, cards and panel are ([surfaces]) the wheel is theirs.
  */
 @Stable
 class ChromeVisibility(touch: Boolean = false) {
+    /** The bars, the cards and the panel in the window, as they are laid out. */
+    val surfaces = ChromeSurfaces()
+
     /** A finger or a pen touched the video last: the touch layout, its gestures and its larger targets. */
     var touch by mutableStateOf(touch)
         private set

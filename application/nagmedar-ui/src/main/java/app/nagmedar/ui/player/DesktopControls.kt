@@ -80,7 +80,8 @@ import kotlin.math.roundToInt
 /**
  * The desktop controls over the video (S-601): the title along the top and the control bar along
  * the bottom, shown while the mouse moves and hidden two seconds after it stops ([ChromeVisibility]).
- * A click on the video shows them; a double click fills the screen, as on desktops.
+ * A click on the video shows them; a double click fills the screen, as on desktops. The wheel sets
+ * the volume over the video, not over the bars ([ChromeSurfaces]); their slider takes it itself.
  */
 @Composable
 fun DesktopControls(
@@ -144,6 +145,8 @@ private fun TitleBar(state: PlayerChromeState, actions: PlayerChromeActions, vis
             .fillMaxWidth()
             .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.62f), Color.Transparent)))
             .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 24.dp)
+            // its controls, not the shade under them, keep the wheel from the volume
+            .chromeSurface(visibility.surfaces)
             .testTag("player-title"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -202,7 +205,8 @@ private fun ControlBar(
         val roomy = maxWidth >= 720.dp
         // picture in picture a little more again
         val roomier = maxWidth >= 780.dp
-        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 8.dp)) {
+        // the timeline and the controls keep the wheel from the volume; the shade above them is the video's
+        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 8.dp).chromeSurface(visibility.surfaces)) {
             PlayerTimeline(state, actions::seekTo, previews, initialHover = timelineHover)
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 44.dp),
