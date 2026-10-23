@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.IcyStreamTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:38.717Z" hostname="runnervm8k3b6" time="0.009">
+  <properties/>
+  <testcase name="withoutMetadataEverythingIsAudio" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.001"/>
+  <testcase name="aBlockThatIsNotClosedGivesWhatIsThere" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.001"/>
+  <testcase name="aLengthByteOf255IsNoMoreThan4080BytesWhateverTheServerMeans" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="theHeaderIsOnlyTakenWhenItIsAPositiveNumber" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="aMetaIntOfOneTakesBlocksBetweenEveryByte" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.001"/>
+  <testcase name="theLargestBlockAFieldCanAnnounceIsRead" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="theTitleIsTheValueOfStreamTitle" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.001"/>
+  <testcase name="blocksComeOutAtTheirBoundaries" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="utf8IsReadAsUtf8AndOlderTurkishAsWindows1254" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="randomReadSizesChangeNothing" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.003"/>
+  <testcase name="aQuoteInATitleDoesNotEndIt" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <testcase name="aBlockSplitOverReadsIsTheSameAsOneRead" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.002"/>
+  <testcase name="bytesThatAreNoTextDoNotBreakTheDecoding" classname="app.nagmedar.ui.radio.record.IcyStreamTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

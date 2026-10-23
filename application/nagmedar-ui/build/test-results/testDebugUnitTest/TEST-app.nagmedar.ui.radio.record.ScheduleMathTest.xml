@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.ScheduleMathTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:40.029Z" hostname="runnervm8k3b6" time="0.007">
+  <properties/>
+  <testcase name="aRunThatBeganAndIsNotOverIsRunning" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.002"/>
+  <testcase name="aRunPastMidnightIsStillRunningTheNextMorning" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="weeklyKeepsTheWeekdayItWasSetOn" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="aRunIsAsLongAsItsMinutesWhateverTheClocksDo" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.001"/>
+  <testcase name="theRunsInAStretchOfTimeAreListed" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="aScheduleRecordsFromItsStartForItsDuration" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="weeklyAndDailyOnDifferentDaysDoNotMeet" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="aOneOffInThePastOrSwitchedOffHasNoNext" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="theWallClockHoldsOverTheClocksGoingBack" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="aOneOffRunningIsFoundToo" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="thePeakIsTheMostThatRunAtOnce" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.001"/>
+  <testcase name="aTimeTheClocksJumpOverIsTheFirstMomentAfterTheJump" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="dailyIsTheNextTimeStrictlyAfterNow" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="overlappingSchedulesAreConflicts" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.001"/>
+  <testcase name="aTimeThatHappensTwiceRunsOnce" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <testcase name="theSameWallClockIsAnotherMomentInAnotherZone" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.001"/>
+  <testcase name="weekdaysSkipTheWeekend" classname="app.nagmedar.ui.radio.record.ScheduleMathTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

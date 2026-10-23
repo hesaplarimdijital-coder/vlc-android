@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastNetworkTest" tests="26" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:30.793Z" hostname="runnervm8k3b6" time="0.623">
+  <properties/>
+  <testcase name="relativeAddressesInAFeedAreReadAgainstWhereItWas" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.037"/>
+  <testcase name="podcastIndexKnowsAFeedByItsAddress" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.031"/>
+  <testcase name="itunesAddress" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.024"/>
+  <testcase name="aPermanentRedirectIsToldToTheCaller" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.023"/>
+  <testcase name="aRedirectLoopEnds" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.025"/>
+  <testcase name="aRedirectToAnotherKindOfAddressIsRefused" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.023"/>
+  <testcase name="podcastIndexIsAskedWithSignedHeaders" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <testcase name="aRefreshIsConditionalAndAnswered304" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="aMoveFromHttpsToHttpIsFollowedAndNotKept" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="itunesIsAskedForPodcasts" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <testcase name="theUserAgentNamesTheAppAndNoOne" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.027"/>
+  <testcase name="aPermanentRedirectAfterATemporaryOneIsNotTheFeedsAddress" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="podcastIndexAnswersThatAreNotHits" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.024"/>
+  <testcase name="statusesAndTheNetwork" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.024"/>
+  <testcase name="aWebPageIsNoFeed" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <testcase name="aMoveFromHttpToHttpsIsKept" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="aFeedSentGzippedWithoutSayingSo" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <testcase name="withoutKeysPodcastIndexIsNotAvailableAndNotAsked" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="aBodyThatBreaksIsAnOfflineDirectory" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.026"/>
+  <testcase name="aBodyThatBreaksIsOffline" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <testcase name="cancellingTheCoroutineCancelsTheCall" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.034"/>
+  <testcase name="anAddressThatIsNoAddress" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="aBusyDirectoryStaysBusyAndIsNotMadeOffline" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.023"/>
+  <testcase name="itunesRefusingAndFailing" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.023"/>
+  <testcase name="aTemporaryRedirectIsFollowedAndNotRemembered" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.021"/>
+  <testcase name="aFeedIsFetchedAndRead" classname="app.nagmedar.ui.podcast.PodcastNetworkTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

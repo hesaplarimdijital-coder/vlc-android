@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.TouchControlsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:15.939Z" hostname="runnervm8k3b6" time="0.194">
+  <properties/>
+  <testcase name="theLayoutGoingMidSwipeLeavesNoLineAndDoesNotSeek" classname="app.nagmedar.ui.player.TouchControlsTest" time="0.07"/>
+  <testcase name="theLayoutGoingMidPressEndsTheFastPlay" classname="app.nagmedar.ui.player.TouchControlsTest" time="0.065"/>
+  <testcase name="pictureInPictureEndsTheFastPlay" classname="app.nagmedar.ui.player.TouchControlsTest" time="0.059"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

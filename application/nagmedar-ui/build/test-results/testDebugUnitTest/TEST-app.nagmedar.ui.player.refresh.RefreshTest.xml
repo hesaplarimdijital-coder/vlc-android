@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.refresh.RefreshTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:19.447Z" hostname="runnervm8k3b6" time="0.005">
+  <properties/>
+  <testcase name="sixtyHertzShowsAFilmThreeAndTwo" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.001"/>
+  <testcase name="whetherTheScreenHasARateForTheFilm" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.002"/>
+  <testcase name="aRateJustOffTheFilmsDriftsSlowly" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.0"/>
+  <testcase name="aSlowerScreenLeavesFramesUnseen" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.0"/>
+  <testcase name="aWholeMultipleShowsEveryFrameAlike" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.0"/>
+  <testcase name="aFilmOnATabletsPanelRepeatsAFrameEveryEightSeconds" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.0"/>
+  <testcase name="theBestRateTakesTheFilmEvenlyAtItsLowest" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.001"/>
+  <testcase name="unknownRatesTellNothing" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.0"/>
+  <testcase name="theChoicesAreKeptByTheirKeys" classname="app.nagmedar.ui.player.refresh.RefreshTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

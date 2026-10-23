@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.snapshot.SnapshotCardTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:19.964Z" hostname="runnervm8k3b6" time="0.329">
+  <properties/>
+  <testcase name="theCardGoesAfterSixSeconds" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.06"/>
+  <testcase name="aFolderGoneIsChosenAgain" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.063"/>
+  <testcase name="aSavedScreenshotSaysWhereAndWhat" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.06"/>
+  <testcase name="otherFailuresSayWhy" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.048"/>
+  <testcase name="whileSavingItSaysSo" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.046"/>
+  <testcase name="closedByHand" classname="app.nagmedar.ui.player.snapshot.SnapshotCardTest" time="0.052"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

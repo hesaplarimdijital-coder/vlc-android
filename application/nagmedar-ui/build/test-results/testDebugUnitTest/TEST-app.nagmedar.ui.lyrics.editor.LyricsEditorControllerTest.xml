@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:03.992Z" hostname="runnervm8k3b6" time="0.372">
+  <properties/>
+  <testcase name="theOriginalsAreOfferedAfterSaving" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.04"/>
+  <testcase name="savingBesideTheFileWritesItAndCleansTheEditor" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.023"/>
+  <testcase name="spaceIsStillPlayAndPause" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.032"/>
+  <testcase name="withoutLyricsTheEditorStartsWithTheImport" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.024"/>
+  <testcase name="noStampIsMadeWhileAnotherTrackPlays" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.027"/>
+  <testcase name="lrclibNeedsEveryLineStampedAndTheTracksDetails" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.026"/>
+  <testcase name="lyricsTheTrackHasAreTheStart" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.021"/>
+  <testcase name="publishingCanBeCancelledWhileItSolves" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.049"/>
+  <testcase name="savingIntoTheTagsAndTheFolderAskedFor" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.023"/>
+  <testcase name="savingNeedsEveryLineStamped" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.023"/>
+  <testcase name="aClickGoesToTheLineAndItsTime" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.028"/>
+  <testcase name="theKeysStampAtThePlayersPosition" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.02"/>
+  <testcase name="publishingAsksFirstThenSolvesAndSends" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

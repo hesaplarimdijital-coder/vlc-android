@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.ChromeVisibilityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:13.661Z" hostname="runnervm8k3b6" time="0.002">
+  <properties/>
+  <testcase name="pictureInPictureHasNoControls" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.001"/>
+  <testcase name="theTimerRunsUnlessTheMouseRestsOnThemOrAMenuIsOpen" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <testcase name="theCursorHidesWithThem" classname="app.nagmedar.ui.player.ChromeVisibilityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

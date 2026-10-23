@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseMigrationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:41:18.931Z" hostname="runnervm8k3b6" time="22.109">
+  <properties/>
+  <testcase name="scheduleAndShowCrossFromFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="20.044"/>
+  <testcase name="aPullRequestBuildsDatabaseEndsAsTwenty" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="1.165"/>
+  <testcase name="remuxJobsKeepTheirOrderFromNineteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.206"/>
+  <testcase name="everyVersionMigratesToTheLatest" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.235"/>
+  <testcase name="radioRecordingsAppearInFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.164"/>
+  <testcase name="podcastRowsSurviveTheirNewColumns" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.148"/>
+  <testcase name="radioStationsKeepTheirRowsFromSeven" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.143"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

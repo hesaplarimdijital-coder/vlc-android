@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.effects.LibVlcEffectsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:17.102Z" hostname="runnervm8k3b6" time="0.158">
+  <properties/>
+  <testcase name="theSessionsEffectsJoinVlcsOptions" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.037"/>
+  <testcase name="theOutputChoiceIsVlcsOpenGlSetting" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.025"/>
+  <testcase name="theTurnBecomesVlcsTransform" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.021"/>
+  <testcase name="whatLibVlcTakesAsItStartsGoesIntoVlcsSettings" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.031"/>
+  <testcase name="vlcsOptionsReadTheSettingsBack" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.022"/>
+  <testcase name="theAudioFiltersChainUp" classname="app.nagmedar.ui.player.effects.LibVlcEffectsTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

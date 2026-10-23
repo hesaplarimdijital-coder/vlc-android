@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" tests="51" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:24.891Z" hostname="runnervm8k3b6" time="0.101">
+  <properties/>
+  <testcase name="closingWithUnsavedEditsAsksFirst" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.003"/>
+  <testcase name="theToolsWorkOneAfterAnother" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.003"/>
+  <testcase name="aFilmThatRefusesTheFileStillHasItSaved" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.003"/>
+  <testcase name="withoutAFilmThereIsNoPositionToTake" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theQuestionOfClosingCanBeAnsweredWithSave" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="aFileThatCannotBeReadIsSaidSo" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.0"/>
+  <testcase name="theLinePlayingIsFollowed" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aFileThatIsNoSubtitleIsSaidSo" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theSavedFileCanBeShownInTheFilm" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aSaveAsThatIsTheOriginalIsRefusedAndNothingIsWritten" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="removingALineChoosesTheOneAfterIt" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="aShiftIsLimited" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="closingLeavesNothing" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theRulesAreChosenOneByOne" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="aFileIsReadAndNamedForItsNewVersion" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aUtf8FileWithoutAMarkIsWrittenWithout" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="closingAfterSavingDoesNotAsk" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="anAssFileWithItsMarkComesBackByteForByte" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.0"/>
+  <testcase name="selectedLinesShiftTogetherAndNeverBeforeZero" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theEditorsShortcutsActAndOthersAreLeftAlone" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.006"/>
+  <testcase name="aFailedWriteIsSaid" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aUtf8FileWithItsMarkIsWrittenWithItsMark" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="aTurkishFileInWindows1254IsReadRightAndWrittenAsUtf8" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="anEditAfterSavingMakesTheFileUnsaved" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="typingInOneLineIsOneStepBack" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.003"/>
+  <testcase name="aPositionOutsideTheLineSplitsItInTheMiddle" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="anotherFileReplacesTheOneBeingWorkedOn" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="aClickSelectsAndControlAndShiftExtend" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="dismissingSaveAsSavesNothing" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aUtf16FileIsWrittenAsUtf8WithAMark" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="cleaningAppliedCanBeTakenBack" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theShortcutsDoNothingWithoutAFile" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.0"/>
+  <testcase name="theSavedFileStaysOutOfTheFilmWhenNotAskedFor" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theConversionIsAppliedAndTheShiftIsSpent" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.003"/>
+  <testcase name="theFilmsPositionBecomesAStartOrAnEnd" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="overlapsAndWrongTimesAreFoundAndStepped" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theFrameRateShowsTheFirstAndLastTimesBeforeAndAfter" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="aSaveAsThatTheSystemSaysIsNotNewIsRefused" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="cleaningShowsWhatChangesBeforeItIsApplied" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="newNamesFollowTheOriginals" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.0"/>
+  <testcase name="aLineIsSplitAtTheFilmsPositionAndMergedBack" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="theFormatOfASubtitleFileCanBeChosenAndTheByteOrderMarkAsked" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="whereTheAppMayNotWriteSaveAsIsAskedForAndThenWritten" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="typedTimesChangeOnlyWhatIsTyped" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="theStepsBackAreLimited" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.027"/>
+  <testcase name="wrongTimesBlockTheSaveUntilTheyAreMended" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theKeysStepFromLineToLineAndStopAtTheEnds" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="enterOnALineSeeksTheFilmToIt" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="editedTextWithABlankLineStillMakesOneCueInSrt" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <testcase name="theResultIsANewFileBesideTheOriginalAndTheOriginalIsNotTouched" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.002"/>
+  <testcase name="theNameCanBeEditedAndIsKeptClean" classname="app.nagmedar.ui.player.subtitles.tools.SubtitleToolsControllerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

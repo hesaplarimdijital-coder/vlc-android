@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.ShellScreenshotTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:47:20.117Z" hostname="runnervm8k3b6" time="1.479">
+  <properties/>
+  <testcase name="mediumDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.09"/>
+  <testcase name="compactDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.1"/>
+  <testcase name="expandedDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.09"/>
+  <testcase name="extraLargeDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.191"/>
+  <testcase name="extraLargeOled" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.142"/>
+  <testcase name="compactLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.092"/>
+  <testcase name="largeDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.105"/>
+  <testcase name="extraLargeLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.158"/>
+  <testcase name="mediumLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.113"/>
+  <testcase name="compactLightEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.094"/>
+  <testcase name="expandedLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.091"/>
+  <testcase name="largeDarkEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.107"/>
+  <testcase name="largeLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.106"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

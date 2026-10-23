@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.ShowNotesTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:46:33.262Z" hostname="runnervm8k3b6" time="0.038">
+  <properties/>
+  <testcase name="strayAngleBracketsAreText" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.003"/>
+  <testcase name="picturesNeedAnHttpAddress" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="relativeLinksAreMadeAbsoluteAgainstTheFeed" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="scriptsStylesAndFramesGoWithTheirContent" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="anUnclosedScriptDropsTheRest" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="entitiesAreDecodedOnceAndNeverRunAsMarkup" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="otherTagsGoButTheirTextStays" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="paragraphsAndBreaksAreKept" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.001"/>
+  <testcase name="deeplyNestedMarkupDoesNotBreak" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.028"/>
+  <testcase name="commentsAndDeclarationsAreDropped" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="theHtmlIsUsedWhenThereIsSomeElseThePlainText" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="onlyHttpAndMailtoLinksSurvive" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.001"/>
+  <testcase name="headingsListsAndQuotesAreKept" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.001"/>
+  <testcase name="preKeepsItsLines" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="atagThatNeverEndsIsText" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="aHugeNoteIsCut" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.003"/>
+  <testcase name="anAddressWrittenOutBecomesALink" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="aPlainNoteBecomesParagraphsWithLinks" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <testcase name="stylesAreKept" classname="app.nagmedar.ui.podcast.ShowNotesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

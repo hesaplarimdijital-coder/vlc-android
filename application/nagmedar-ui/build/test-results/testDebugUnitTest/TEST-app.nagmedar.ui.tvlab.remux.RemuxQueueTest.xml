@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:47:36.147Z" hostname="runnervm8k3b6" time="0.092">
+  <properties/>
+  <testcase name="aJobCancelledBeforeItRanTakesItsEmptyDocumentAlong" classname="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" time="0.025"/>
+  <testcase name="aCancelledWaitingJobKeepsAnOutputThatIsNotItsOwn" classname="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" time="0.017"/>
+  <testcase name="aJobTakenUpMeanwhileIsAskedToStop" classname="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" time="0.016"/>
+  <testcase name="theSourceOrATakenFileIsRefusedAsOutput" classname="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" time="0.017"/>
+  <testcase name="anOutputThatDoesNotOpenAtTheCancelGoesWhenTheJobIsForgotten" classname="app.nagmedar.ui.tvlab.remux.RemuxQueueTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

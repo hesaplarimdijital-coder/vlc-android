@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.backup.BackupSectionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:45:48.938Z" hostname="runnervm8k3b6" time="0.507">
+  <properties/>
+  <testcase name="nothingChosenIsNotRestored" classname="app.nagmedar.ui.backup.BackupSectionTest" time="0.145"/>
+  <testcase name="whatCameBackIsSaid" classname="app.nagmedar.ui.backup.BackupSectionTest" time="0.092"/>
+  <testcase name="theButtons" classname="app.nagmedar.ui.backup.BackupSectionTest" time="0.169"/>
+  <testcase name="thePartsAreChosen" classname="app.nagmedar.ui.backup.BackupSectionTest" time="0.1"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

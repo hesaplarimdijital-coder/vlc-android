@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleWorkerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T08:47:30.931Z" hostname="runnervm8k3b6" time="0.236">
+  <properties/>
+  <testcase name="sendNowStartsOverInsteadOfWaiting" classname="app.nagmedar.ui.scrobble.ScrobbleWorkerTest" time="0.173"/>
+  <testcase name="theJobRunsTheFlusherAndSucceedsWhenNothingIsLeftToDo" classname="app.nagmedar.ui.scrobble.ScrobbleWorkerTest" time="0.039"/>
+  <testcase name="aScrobbleQueuedWhileAJobWaitsDoesNotMakeAnother" classname="app.nagmedar.ui.scrobble.ScrobbleWorkerTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
