@@ -76,7 +76,9 @@ class EpisodeTracker {
         }
         if (this.context == null) this.context = context
         val episode = this.context ?: return out
-        if (lengthMs <= 0 || location == null) {
+        // nothing is decided before it plays at a time: a media being opened says 0 a moment (the one before it
+        // stopping resets the time), and a seek to the place it was opened at would only open the stream again
+        if (lengthMs <= 0 || location == null || (!applied && (!playing || timeMs <= 0))) {
             wasPlaying = playing
             return out
         }

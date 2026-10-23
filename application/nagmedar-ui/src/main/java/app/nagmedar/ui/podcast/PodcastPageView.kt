@@ -185,6 +185,8 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
     val shape = RoundedCornerShape(dimens.radiusControl)
     val played = episode.played
     val fresh = !played && episode.addedAt > feed.subscribedAt
+    // the episode page's rule: "Devam et · 0:43" where it was left, else "Oynat" (a row starts it, never pauses it)
+    val playWord = playLabel(res, PlaybackRules.playButton(episode.positionMs, played, now = null))
     val meta = listOfNotNull(
         episode.publishedAt.takeIf { it > 0 }?.let { dates.format(Date(it)) },
         episode.durationMs.takeIf { it > 0 }?.let { formatDuration(it) },
@@ -192,7 +194,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
     ContextMenuArea(
         entries = {
             listOf(
-                MenuEntry.Item(res.getString(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, icon = NagIcons.Play),
+                MenuEntry.Item(playWord, { actions.onPlay(feed, episode) }, icon = NagIcons.Play),
                 MenuEntry.Item(res.getString(R.string.nag_pod_open_episode), { actions.onOpenEpisode(episode.id) }, icon = NagIcons.Info),
                 downloadEntry(res, episode, download, actions),
                 MenuEntry.Item(
@@ -238,7 +240,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
             }
             if (fresh) ToneBadge(stringResource(R.string.nag_pod_new_badge), StateTone.Info, Modifier.testTag("podcast-episode-new"))
             DownloadMark(download)
-            NagPlayButton(stringResource(R.string.nag_pod_play), { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
+            NagPlayButton(playWord, { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
         }
     }
 }

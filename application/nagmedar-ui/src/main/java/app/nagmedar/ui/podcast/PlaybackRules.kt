@@ -72,5 +72,42 @@ object PlaybackRules {
         return if (outro > lengthMs / 2) null else lengthMs - outro
     }
 
+    /**
+     * Where an episode's page says it is: the player's place once it has the episode at a real place or plays it, else
+     * the saved one. A player that has the episode loaded but not started (its playlist brought back after a restart)
+     * says 0 until it plays, and one that is opening it ([starting]) says where it opens; the saved place is the truth
+     * then. A played episode starts again, so its saved place is none.
+     */
+    fun shownPositionMs(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false): Long {
+        val player = now?.positionMs ?: 0L
+        if (now != null && (player >= RESUME_MIN_MS || (now.playing && !starting))) return player
+        return if (!played && savedMs > player) savedMs else player
+    }
+
+    /**
+     * What an episode's play button offers, the one rule of its page and its rows: "Duraklat" while it plays or
+     * opens, "Devam et · m:ss" from a place worth resuming ([shownPositionMs]), else "Oynat".
+     */
+    fun playButton(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false): PlayButton {
+        if (starting) return PlayButton.Starting
+        if (now?.playing == true) return PlayButton.Pause
+        val at = shownPositionMs(savedMs, played, now)
+        return if (at >= RESUME_MIN_MS) PlayButton.Resume(at) else PlayButton.Play
+    }
+
     private const val SPEED_EPSILON = 0.001f
+}
+
+/** S-205: what an episode's play button offers ([PlaybackRules.playButton]). */
+sealed interface PlayButton {
+    /** From the start, or after the show's intro: nothing to resume, or the episode was played. */
+    data object Play : PlayButton
+
+    /** From where it was left, [positionMs]. */
+    data class Resume(val positionMs: Long) : PlayButton
+
+    data object Pause : PlayButton
+
+    /** Pressed, and the player is opening the episode: a pause button that waits, never back to resume meanwhile. */
+    data object Starting : PlayButton
 }

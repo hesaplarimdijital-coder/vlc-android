@@ -25,15 +25,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
@@ -60,7 +59,6 @@ private sealed interface TranscodeWindow {
 fun TranscodeScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val clipboard = LocalClipboardManager.current
     val store = remember(context) { TranscodeProfileStore.get(context) }
     val profiles by remember(store) { store.observe() }.collectAsState(TranscodeProfiles.presets)
     val jobs by remember(context) { TranscodeQueue.observe(context).map { rows -> rows.map(TranscodeJobView::of) } }.collectAsState(emptyList())
@@ -126,10 +124,7 @@ fun TranscodeScreen(modifier: Modifier = Modifier) {
         onEditProfile = { window = TranscodeWindow.Editor(it) },
         onDeleteProfile = { profile -> scope.launch { store.delete(profile.id) } },
         onStopStream = { HlsStream.stop(context) },
-        onCopy = { url ->
-            clipboard.setText(AnnotatedString(url))
-            Notices.show(context, R.string.nag_hls_copied)
-        },
+        onCopy = { url -> copyToClipboard(context, context.getString(R.string.nag_streams_address), url, R.string.nag_hls_copied) },
         onDismissFailure = HlsStream::dismiss,
         modifier = modifier,
     )
@@ -158,10 +153,7 @@ fun TranscodeScreen(modifier: Modifier = Modifier) {
             onPickMedia = { runCatching { pickMedia.launch(arrayOf("video/*", "audio/*")) } },
             onStart = { media?.let { HlsStream.start(context, it.uri, it.name, quality) } },
             onStop = { HlsStream.stop(context) },
-            onCopy = { url ->
-                clipboard.setText(AnnotatedString(url))
-                Notices.show(context, R.string.nag_hls_copied)
-            },
+            onCopy = { url -> copyToClipboard(context, context.getString(R.string.nag_streams_address), url, R.string.nag_hls_copied) },
             onDismiss = {
                 HlsStream.dismiss()
                 window = null

@@ -2702,7 +2702,6 @@
     <string name="nag_pod_ep_number">%d. bölüm</string>
     <string name="nag_pod_ep_left">%s kaldı</string>
     <string name="nag_pod_ep_pause">Duraklat</string>
-    <string name="nag_pod_ep_continue">Sürdür</string>
     <string name="nag_pod_ep_resume">Devam et · %s</string>
     <string name="nag_pod_ep_offline_text">Bölüm ancak indirildiyse oynatılır. Kısımları ve dökümü bağlandığınızda gelir.</string>
     <string name="nag_pod_dl_queued_title">İndirilmeyi bekliyor</string>

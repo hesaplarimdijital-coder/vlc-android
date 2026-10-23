@@ -49,7 +49,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -58,7 +57,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -78,6 +76,7 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
@@ -93,7 +92,6 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.AppScope
-import org.videolan.tools.Notices
 
 /** The OPML file's media type, as the apps that write it name it. */
 private const val OPML_MIME = "text/x-opml"
@@ -138,15 +136,11 @@ fun PodcastsScreen(undo: UndoBarState?) {
             PodcastCenter.opened()
         }
     }
-    val clipboard = LocalClipboardManager.current
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) controller.importFile(uri) }
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(OPML_MIME)) { uri -> if (uri != null) controller.export(uri) }
-    val actions = remember(controller, clipboard, importer, exporter) {
+    val actions = remember(controller, importer, exporter) {
         controller.actions(
-            onCopy = { text ->
-                clipboard.setText(AnnotatedString(text))
-                Notices.show(app, app.getString(R.string.nag_pod_copied))
-            },
+            onCopy = { text -> copyToClipboard(app, app.getString(R.string.nag_streams_address), text, R.string.nag_pod_copied) },
             onOpenLink = { url -> openLink(context, url) },
             onImport = { importer.launch(arrayOf("*/*")) },
             onExport = { exporter.launch(OPML_FILE) },

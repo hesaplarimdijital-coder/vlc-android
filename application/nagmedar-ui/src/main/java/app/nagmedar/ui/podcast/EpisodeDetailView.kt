@@ -1,5 +1,6 @@
 package app.nagmedar.ui.podcast
 
+import android.content.res.Resources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -46,9 +48,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.IconMenuButton
@@ -268,7 +270,15 @@ private fun Header(ui: EpisodeDetailUi, now: Listening?, compact: Boolean = fals
                 Text(meta, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = if (compact) 2 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("episode-meta"))
             }
             val state = playState(ui, now)
-            if (state != null) ToneBadge(state.first, state.second, Modifier.padding(top = 4.dp).testTag("episode-state"))
+            // the badge's place is kept while it has nothing to say yet (the player's length comes a moment after the
+            // page): what is under it does not move when it comes
+            Box(Modifier.padding(top = 4.dp)) {
+                if (state != null) {
+                    ToneBadge(state.first, state.second, Modifier.testTag("episode-state"))
+                } else {
+                    ToneBadge("", StateTone.Neutral, Modifier.alpha(0f).clearAndSetSemantics {})
+                }
+            }
         }
     }
 }
@@ -277,7 +287,7 @@ private fun Header(ui: EpisodeDetailUi, now: Listening?, compact: Boolean = fals
 @Composable
 private fun playState(ui: EpisodeDetailUi, now: Listening?): Pair<String, StateTone>? {
     val episode = ui.episode
-    val position = now?.positionMs ?: episode.positionMs
+    val position = PlaybackRules.shownPositionMs(episode.positionMs, episode.played, now, ui.starting)
     val length = now?.lengthMs?.takeIf { it > 0 } ?: episode.durationMs
     return when {
         episode.played -> stringResource(R.string.nag_pod_played) to StateTone.Success
@@ -287,13 +297,24 @@ private fun playState(ui: EpisodeDetailUi, now: Listening?): Pair<String, StateT
     }
 }
 
-/** The play button's word and icon: pause, continue, resume from where it was left, or play. */
+/** The play button's word, as [PlaybackRules.playButton] has it: "Oynat", "Devam et · 0:43" or "Duraklat". */
+internal fun playLabel(res: Resources, button: PlayButton): String = when (button) {
+    PlayButton.Play -> res.getString(R.string.nag_pod_play)
+    is PlayButton.Resume -> res.getString(R.string.nag_pod_ep_resume, formatDuration(button.positionMs))
+    PlayButton.Pause, PlayButton.Starting -> res.getString(R.string.nag_pod_ep_pause)
+}
+
+/** The play button's rule ([PlaybackRules.playButton]), word and icon; [PlayButton.Starting] waits, not pressable. */
 @Composable
-private fun playChoice(episode: PodcastEpisode, now: Listening?): Pair<String, ImageVector> = when {
-    now?.playing == true -> stringResource(R.string.nag_pod_ep_pause) to NagIcons.Pause
-    now != null -> stringResource(R.string.nag_pod_ep_continue) to NagIcons.Play
-    !episode.played && episode.positionMs >= PlaybackRules.RESUME_MIN_MS -> stringResource(R.string.nag_pod_ep_resume, formatDuration(episode.positionMs)) to NagIcons.Resume
-    else -> stringResource(R.string.nag_pod_play) to NagIcons.Play
+private fun playChoice(ui: EpisodeDetailUi, now: Listening?): Pair<PlayButton, Pair<String, ImageVector>> {
+    val episode = ui.episode
+    val button = PlaybackRules.playButton(episode.positionMs, episode.played, now, ui.starting)
+    val icon = when (button) {
+        PlayButton.Play -> NagIcons.Play
+        is PlayButton.Resume -> NagIcons.Resume
+        PlayButton.Pause, PlayButton.Starting -> NagIcons.Pause
+    }
+    return button to (playLabel(LocalContext.current.resources, button) to icon)
 }
 
 /** The download button: download, try again, stop, or delete the file. */
@@ -314,9 +335,9 @@ private fun DownloadButton(ui: EpisodeDetailUi, actions: PodcastActions, modifie
 private fun Actions(ui: EpisodeDetailUi, now: Listening?, actions: PodcastActions) {
     val dimens = NagTheme.dimens
     val episode = ui.episode
-    val play = playChoice(episode, now)
+    val (button, play) = playChoice(ui, now)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-        NagButton(play.first, { actions.onTogglePlay(ui.feed, episode) }, icon = play.second, primary = true, modifier = Modifier.testTag("episode-play"))
+        NagButton(play.first, { actions.onTogglePlay(ui.feed, episode) }, icon = play.second, primary = true, enabled = button != PlayButton.Starting, modifier = Modifier.testTag("episode-play"))
         DownloadButton(ui, actions)
         NagButton(
             stringResource(if (episode.played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
@@ -338,10 +359,17 @@ private fun CompactActions(ui: EpisodeDetailUi, now: Listening?, actions: Podcas
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val episode = ui.episode
-    val play = playChoice(episode, now)
+    val (button, play) = playChoice(ui, now)
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
-            NagButton(play.first, { actions.onTogglePlay(ui.feed, episode) }, icon = play.second, primary = true, modifier = Modifier.weight(1f).testTag("episode-play"))
+            NagButton(
+                play.first,
+                { actions.onTogglePlay(ui.feed, episode) },
+                icon = play.second,
+                primary = true,
+                enabled = button != PlayButton.Starting,
+                modifier = Modifier.weight(1f).testTag("episode-play"),
+            )
             if (ui.download is DownloadUi.Done) {
                 // downloaded (its card says so): the file's delete button by its icon, its words its name
                 NagIconButton(
@@ -496,8 +524,9 @@ private fun Timeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val length = now.lengthMs.takeIf { it > 0 } ?: ui.episode.durationMs
-    val fraction = if (length > 0) (now.positionMs.toFloat() / length).coerceIn(0f, 1f) else 0f
-    val current = Chapters.indexAt(chapters, now.positionMs)
+    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting)
+    val fraction = if (length > 0) (at.toFloat() / length).coerceIn(0f, 1f) else 0f
+    val current = Chapters.indexAt(chapters, at)
     Column(verticalArrangement = Arrangement.spacedBy(dimens.gapXs), modifier = Modifier.testTag("episode-timeline")) {
         Box(Modifier.fillMaxWidth()) {
             NagSlider(
@@ -510,7 +539,7 @@ private fun Timeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter
             if (length > 0 && chapters.size > 1) ChapterMarks(chapters, length, Modifier.matchParentSize())
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(clock(now.positionMs), style = NagTheme.type.mono, color = colors.textSecondary, modifier = Modifier.testTag("episode-position"))
+            Text(clock(at), style = NagTheme.type.mono, color = colors.textSecondary, modifier = Modifier.testTag("episode-position"))
             Box(Modifier.weight(1f))
             if (length > 0) Text(clock(length), style = NagTheme.type.mono, color = colors.textSecondary)
         }
@@ -545,11 +574,13 @@ private fun Timeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter
 private fun CompactTimeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter>, actions: PodcastActions) {
     val colors = NagTheme.colors
     val length = now.lengthMs.takeIf { it > 0 } ?: ui.episode.durationMs
-    val current = Chapters.indexAt(chapters, now.positionMs)
-    val latest by rememberUpdatedState(now)
+    // the saved place while the player has the episode but has not started it: the timeline starts there
+    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting)
+    val current = Chapters.indexAt(chapters, at)
+    val latest by rememberUpdatedState(at)
     Column(Modifier.testTag("episode-timeline")) {
         ProgressTimeline(
-            progress = { if (length > 0) (latest.positionMs.toFloat() / length).coerceIn(0f, 1f) else 0f },
+            progress = { if (length > 0) (latest.toFloat() / length).coerceIn(0f, 1f) else 0f },
             lengthMs = length,
             onSeek = { fraction -> if (length > 0) actions.onSeekTo((fraction * length).toLong()) },
             modifier = Modifier.testTag("episode-seek"),

@@ -1,6 +1,5 @@
 package app.nagmedar.ui.streams
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
@@ -60,6 +59,7 @@ import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -418,9 +418,7 @@ private fun removeStream(scope: CoroutineScope, history: StreamHistory, stream: 
 }
 
 private fun copyAddress(context: Context, address: String) {
-    val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
-    clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.nag_streams_address), address))
-    Notices.show(context, R.string.nag_streams_copied)
+    copyToClipboard(context, context.getString(R.string.nag_streams_address), address, R.string.nag_streams_copied)
 }
 
 /** The clipboard's text, read only when the person asks for it (the Paste button). */

@@ -101,6 +101,8 @@ data class EpisodeDetailUi(
     val transcript: ExtraUi<Transcript>,
     val download: DownloadUi,
     val listening: Listening? = null,
+    /** Its play button was pressed and the player is opening it: the button waits, as "Duraklat", until it plays. */
+    val starting: Boolean = false,
     /** The seconds the skip back and skip forward buttons go. */
     val skipBackSeconds: Int = 15,
     val skipForwardSeconds: Int = 30,

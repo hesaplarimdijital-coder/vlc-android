@@ -98,6 +98,10 @@ class PodcastController(
     private var settingsFeedId by mutableStateOf<Long?>(null)
     private var downloadProgress by mutableStateOf<Map<Long, DownloadProgress>>(emptyMap())
     private var listeningState by mutableStateOf<Listening?>(null)
+    private var startingId by mutableStateOf<Long?>(null)
+    private var startTarget = 0L
+    private var startLooks = 0
+    private var settledLooks = 0
     private var settingsNow by mutableStateOf(services.settings())
     private var episodeJob: Job? = null
     private var extrasJob: Job? = null
@@ -123,6 +127,7 @@ class PodcastController(
                     transcript = transcriptState,
                     download = DownloadUi.of(row, downloadProgress[row.id]),
                     listening = listeningState,
+                    starting = startingId == row.id,
                     skipBackSeconds = settingsNow.skipBackSeconds,
                     skipForwardSeconds = settingsNow.skipForwardSeconds,
                     offline = chapterState is ExtraUi.Offline || transcriptState is ExtraUi.Offline,
@@ -145,7 +150,9 @@ class PodcastController(
             // the place of the episode whose page is open: a look a few times a second, only while one is
             while (true) {
                 val row = episodeRow
-                listeningState = row?.let { services.control.listening(it) }
+                val now = row?.let { services.control.listening(it) }
+                listeningState = now
+                followStart(row, now)
                 delay(LISTENING_MS)
             }
         }
@@ -331,6 +338,8 @@ class PodcastController(
         episodeJob = scope.launch {
             var first = true
             repository.episode(episodeId).collect { row ->
+                // the player's place with the page's first frame, not a look later: the badge and the timeline come at once
+                if (first && row != null) listeningState = services.control.listening(row)
                 episodeRow = row
                 if (first && row != null) {
                     first = false
@@ -350,6 +359,7 @@ class PodcastController(
         openEpisodeId = null
         episodeRow = null
         listeningState = null
+        startingId = null
     }
 
     private fun loadExtras(row: PodcastEpisode) {
@@ -379,14 +389,52 @@ class PodcastController(
         episodeRow?.let(::loadExtras)
     }
 
-    /** Plays or pauses the episode the player has loaded, else starts [episode] where it was left. */
+    /**
+     * Pauses the episode playing, plays on the one the player has paused, else starts [episode] where it was left: also
+     * when the player has it loaded but not started at that place (its playlist brought back after a restart, at 0), so
+     * that it opens there instead of playing from the start and seeking. A press while it opens is no second start.
+     */
     fun togglePlay(feed: PodcastFeed, episode: PodcastEpisode) {
-        if (services.control.listening(episode) != null) services.control.togglePlay() else player.play(feed, episode)
+        if (startingId == episode.id) return
+        val now = services.control.listening(episode)
+        val from = PlaybackRules.startMs(episode.positionMs, episode.played, episode.durationMs, feed.skipIntroSeconds, feed.skipOutroSeconds)
+        when {
+            now?.playing == true -> services.control.togglePlay()
+            now != null && (now.positionMs >= PlaybackRules.RESUME_MIN_MS || from < PlaybackRules.RESUME_MIN_MS) -> {
+                starting(episode.id, now.positionMs)
+                services.control.togglePlay()
+            }
+            else -> {
+                starting(episode.id, from)
+                player.play(feed, episode)
+            }
+        }
+    }
+
+    /** [episodeId] is being opened at [targetMs]: its button waits ([followStart]). */
+    private fun starting(episodeId: Long, targetMs: Long) {
+        startingId = episodeId
+        startTarget = targetMs
+        startLooks = 0
+        settledLooks = 0
+    }
+
+    /**
+     * The one source of the button while an episode opens: it waits until the player plays it at the place it was
+     * opened at for two looks running (the stream's opening, the start, a seek do not flip it back), until it took
+     * too long (the stream failed: the button says what is so), or until the page went.
+     */
+    private fun followStart(row: PodcastEpisode?, now: Listening?) {
+        val id = startingId ?: return
+        val there = now != null && now.playing && now.lengthMs > 0 && now.positionMs + START_SLACK_MS >= startTarget
+        settledLooks = if (there) settledLooks + 1 else 0
+        if (row?.id != id || settledLooks >= SETTLED_LOOKS || ++startLooks >= START_LOOKS) startingId = null
     }
 
     /** From [ms]: a seek when the player has the episode, else the episode started there. */
     fun playAt(feed: PodcastFeed, episode: PodcastEpisode, ms: Long) {
         val now = services.control.listening(episode)
+        if (now == null || !now.playing) starting(episode.id, ms)
         if (now == null) {
             // the place is kept first: the playback observer reads it as the place to start from
             scope.launch {
@@ -597,6 +645,15 @@ class PodcastController(
 
     private companion object {
         const val LISTENING_MS = 400L
+
+        /** How far before the place it was opened at an episode may start (the start is set in whole seconds). */
+        const val START_SLACK_MS = 2_000L
+
+        /** Looks of it playing there before the button follows the player again. */
+        const val SETTLED_LOOKS = 2
+
+        /** The most looks the button waits for the player: 20 s, a slow stream's opening. */
+        const val START_LOOKS = 50
         val ADDRESS_PREFIXES = listOf("http://", "https://", "feed:", "itpc:", "pcast:", "podcast:")
     }
 }

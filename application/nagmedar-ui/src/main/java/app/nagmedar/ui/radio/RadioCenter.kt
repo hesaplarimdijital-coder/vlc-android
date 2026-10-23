@@ -10,10 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.playback.PlaybackActions
@@ -29,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.vlc.BuildConfig
 import java.io.ByteArrayOutputStream
-import org.videolan.tools.Notices
 
 /**
  * S-1105: the app's one radio: the directory client, the stations kept, the player and the
@@ -113,7 +111,6 @@ fun RadioScreen(
     undo: UndoBarState? = null,
 ) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val controller = remember(context) { RadioCenter.controller(context) }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -151,10 +148,7 @@ fun RadioScreen(
         recordingActions = actions,
         recordingsRequested = recordingsRequested,
         onRecordingsHandled = onRecordingsHandled,
-        onCopyAddress = { station ->
-            clipboard.setText(AnnotatedString(station.streamUrl))
-            Notices.show(context, R.string.nag_radio_copied)
-        },
+        onCopyAddress = { station -> copyToClipboard(context, station.name, station.streamUrl, R.string.nag_radio_copied) },
         onImport = { importer.launch(arrayOf("*/*")) },
         onTogglePlay = { PlaybackActions.togglePlayPause() },
         undo = undo,

@@ -1,7 +1,5 @@
 package app.nagmedar.ui.remoteaccess
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -49,6 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
@@ -61,7 +60,6 @@ import org.videolan.tools.KEY_ENABLE_REMOTE_ACCESS
 import org.videolan.tools.Settings
 import org.videolan.vlc.util.RemoteAccessUtils
 import org.videolan.vlc.util.UrlUtils
-import org.videolan.tools.Notices
 
 /** The remote access windows of the Nağmedar interface. */
 enum class RemoteAccessPage { Addresses, HowItWorks }
@@ -220,8 +218,7 @@ private fun QrCode(address: String) {
 private const val QR_PIXELS = 512
 
 private fun copy(context: Context, address: String) {
-    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.nag_ra_settings), address))
-    Notices.show(context, R.string.nag_ra_copied)
+    copyToClipboard(context, context.getString(R.string.nag_ra_settings), address, R.string.nag_ra_copied)
 }
 
 private fun share(context: Context, address: String) {
