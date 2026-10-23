@@ -395,8 +395,10 @@ jobs:
         run: |
           out="$RUNNER_TEMP/apk-branch"
           rm -rf "$out" && mkdir -p "$out"
-          apk=$(ls application/app/build/outputs/apk/debug/*.apk | head -1)
+          apk=$(find application/app/build/outputs/apk -name '*.apk' | grep -i debug | head -1)
+          [ -n "$apk" ] || { echo "no debug APK under application/app/build/outputs/apk"; find application/app/build/outputs/apk -name '*.apk'; exit 1; }
           cp "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk"
+          ls -la "$out"
           printf 'Nagmedar debug APK of master %s (run %s), built %s\n' "${GITHUB_SHA::8}" "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$out/README.md"
           cd "$out"
           git init -q && git checkout -q --orphan ci/apk
