@@ -5,11 +5,16 @@ import android.graphics.Canvas
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.library.LibraryScopes
+import app.nagmedar.ui.library.LibrarySection
+import app.nagmedar.ui.library.SourceActions
+import app.nagmedar.ui.library.SourceFolder
 import app.nagmedar.ui.onboarding.AudioRoute
 import app.nagmedar.ui.onboarding.FirstRunActions
 import app.nagmedar.ui.onboarding.FirstRunFlow
 import app.nagmedar.ui.onboarding.FirstRunState
 import app.nagmedar.ui.onboarding.FirstRunStep
+import app.nagmedar.ui.onboarding.SectionFolders
 import app.nagmedar.ui.onboarding.StorageSource
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -20,7 +25,10 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** S-309: the first-run steps on a phone (390 x 844, the mockup's size) and in a DeX window. */
+/**
+ * S-309: the first-run steps on a phone (390 x 844, the mockup's size) and in a DeX window; the
+ * permission cards as they look once given, and the Sources step with the folders of its sections.
+ */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class FirstRunScreenshotTest {
@@ -35,11 +43,30 @@ class FirstRunScreenshotTest {
         StorageSource("/storage/1A2B-3C4D", "SAMSUNG T7", removable = true, totalBytes = 2_000_000_000_000),
     )
 
+    /** Settings › Library's rows with nothing to pick: only what they show is of interest here. */
+    private val sourceActions = SourceActions(
+        suggestions = emptyList(),
+        storages = drives,
+        pick = {},
+        add = { _, _ -> },
+        toggleExclude = { _, _ -> },
+        remove = { _, _ -> },
+    )
+
+    /** Films on the device and on the drive, Series on the device, Videos none (all of the library), Music on the device. */
+    private val chosen = LibraryScopes.Empty
+        .plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller"))
+        .plus(LibrarySection.Movies, SourceFolder("/storage/1A2B-3C4D/Filmler"))
+        .plus(LibrarySection.Series, SourceFolder("/storage/emulated/0/TV/Diziler"))
+        .plus(LibrarySection.Music, SourceFolder("/storage/emulated/0/Music"))
+
     private fun capture(name: String, state: FirstRunState, theme: ThemeMode = ThemeMode.Dark, input: InputMode = InputMode.Touch,
-                        folders: List<Pair<String, String>> = emptyList()) {
+                        folders: List<Pair<String, String>> = emptyList(), scopes: LibraryScopes = LibraryScopes.Empty) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
-            NagmedarTheme(themeMode = theme, inputMode = input) { FirstRunFlow(state, drives, folders, actions) }
+            NagmedarTheme(themeMode = theme, inputMode = input) {
+                FirstRunFlow(state, drives, folders, actions) { SectionFolders(scopes, sourceActions) }
+            }
         }
         compose.waitForIdle()
         val window = compose.activity.window.decorView
@@ -76,6 +103,22 @@ class FirstRunScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun sourcesLight() = capture("first-run-2-sources-light", FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, ThemeMode.Light)
+
+    /** The whole Sources step, tall enough to show the sections' folders under the sources. */
+    @Test @Config(qualifiers = "tr-w390dp-h1500dp-hdpi")
+    fun sourcesWithSectionFolders() = capture(
+        "first-run-2-sources-folders",
+        FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true },
+        scopes = chosen,
+    )
+
+    @Test @Config(qualifiers = "en-w390dp-h1500dp-hdpi")
+    fun sourcesWithSectionFoldersEnglish() = capture(
+        "first-run-2-sources-folders-en",
+        FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true },
+        ThemeMode.Light,
+        scopes = chosen,
+    )
 
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun audio() = capture(

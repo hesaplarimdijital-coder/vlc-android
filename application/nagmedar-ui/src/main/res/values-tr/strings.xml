@@ -3616,7 +3616,7 @@
     <string name="nag_lib_folder_actions">%1$s için işlemler</string>
     <string name="nag_lib_done">Tamam</string>
     <string name="nag_fr_sources_sections">Bölüm başına klasörler</string>
-    <string name="nag_fr_sources_sections_desc">Filmler, Diziler, Videolar ve Müzik\'in hangi klasörleri göstereceğini sonra Ayarlar › Kütüphane\'den seçebilirsiniz.</string>
+    <string name="nag_fr_sources_sections_desc">İsterseniz Filmler, Diziler, Videolar ve Müzik için ayrı klasörler seçin; klasör seçilmeyen bölüm kütüphanenin tümünü gösterir. Klasörleri sonra Ayarlar › Kütüphane\'den değiştirebilirsiniz.</string>
     <plurals name="nag_lib_videos_count">
         <item quantity="one">%d video</item>
         <item quantity="other">%d video</item>

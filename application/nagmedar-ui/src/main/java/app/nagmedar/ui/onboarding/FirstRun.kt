@@ -158,7 +158,8 @@ class FirstRunActions(
 
 /**
  * The first-run flow: four steps under a progress line, each with "Atla". Full screen on a
- * phone; a centred column on tablets and DeX windows.
+ * phone; a centred column on tablets and DeX windows. [sections] is what the Sources step shows
+ * under its sources: the folders each section of the library shows (none of it is required).
  */
 @Composable
 fun FirstRunFlow(
@@ -167,6 +168,7 @@ fun FirstRunFlow(
     folders: List<Pair<String, String>>,
     actions: FirstRunActions,
     modifier: Modifier = Modifier,
+    sections: @Composable () -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val folderUris = remember(folders) { folders.map { it.first }.toSet() }
@@ -202,7 +204,7 @@ fun FirstRunFlow(
                     StepHeader(step)
                     when (step) {
                         FirstRunStep.Access -> AccessStep(state, folders, actions)
-                        FirstRunStep.Sources -> SourcesStep(state, drives, folders)
+                        FirstRunStep.Sources -> SourcesStep(state, drives, folders, sections)
                         FirstRunStep.Audio -> AudioStep(state, actions)
                         FirstRunStep.Notifications -> NotificationStep(state, actions)
                     }
@@ -388,7 +390,7 @@ private fun FolderList(folders: List<Pair<String, String>>, actions: FirstRunAct
 }
 
 @Composable
-private fun SourcesStep(state: FirstRunState, drives: List<StorageSource>, folders: List<Pair<String, String>>) {
+private fun SourcesStep(state: FirstRunState, drives: List<StorageSource>, folders: List<Pair<String, String>>, sections: @Composable () -> Unit) {
     val context = LocalContext.current
     StepItems {
         CheckCard(
@@ -432,12 +434,8 @@ private fun SourcesStep(state: FirstRunState, drives: List<StorageSource>, folde
             checked = state.onlineSources,
             onCheckedChange = { state.onlineSources = it },
         )
-        // each section's own folders are chosen later, in Settings › Library
-        OptionCard(
-            icon = NagIcons.Folder,
-            title = stringResource(R.string.nag_fr_sources_sections),
-            description = stringResource(R.string.nag_fr_sources_sections_desc),
-        )
+        // Films, Series, Videos and Music can each be given their own folders here; Settings › Library changes them later
+        sections()
     }
 }
 

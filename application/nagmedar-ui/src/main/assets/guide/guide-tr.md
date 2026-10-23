@@ -14,7 +14,7 @@ Nağmedar kütüphanesini bu cihazdaki ve bağlı disklerdeki videolardan ve mü
 
 ### İlk açılışta
 1. **Medya erişimi:** “Medya dosyaları” iznini verin ya da “Klasör seç” ile yalnızca göstermek istediğiniz klasörleri seçin.
-2. **Kaynaklar:** bu cihazdaki medya, harici disk, seçtiğiniz klasörler, ağ paylaşımları, podcast ve radyo. İstediklerinizi işaretleyin; her bölümün hangi klasörleri göstereceğini sonra Ayarlar › Kütüphane'den seçebilirsiniz.
+2. **Kaynaklar:** bu cihazdaki medya, harici disk, seçtiğiniz klasörler, ağ paylaşımları, podcast ve radyo. İstediklerinizi işaretleyin. Altında Filmler, Diziler, Videolar ve Müzik için ayrı klasörler de seçebilirsiniz; seçmezseniz bölüm kütüphanenin tümünü gösterir. Hepsini sonra Ayarlar › Kütüphane'den değiştirebilirsiniz.
 3. **Ses çıkışı:** “Test sesini çal” deyin, sonra “Duydum” ya da “Duymadım” seçin.
 4. **Bildirimler:** kilit ekranındaki oynatma denetimleri ve tarama, indirme ilerlemesi için izin verin.
 

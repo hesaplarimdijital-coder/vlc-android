@@ -14,7 +14,7 @@ Nağmedar builds its library from the videos and music on this device and on con
 
 ### The first time you open it
 1. **Media access:** grant the “Media files” permission, or use “Choose folder” to show only the folders you choose.
-2. **Sources:** media on this device, an external drive, the folders you chose, network shares, podcasts and radio. Tick the ones you want; later, in Settings › Library, you can choose which folders each section shows.
+2. **Sources:** media on this device, an external drive, the folders you chose, network shares, podcasts and radio. Tick the ones you want. Below them you can also choose separate folders for Films, Series, Videos and Music; a section with none shows all of the library. You can change all of it later in Settings › Library.
 3. **Audio output:** press “Play test sound”, then choose “I heard it” or “I didn't”.
 4. **Notifications:** allow them for the playback controls on the lock screen and for scan and download progress.
 

@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -22,9 +23,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.library.LibraryAccess
 import app.nagmedar.ui.library.LibraryContent
+import app.nagmedar.ui.library.LibraryScopes
+import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.ScanState
 import app.nagmedar.ui.library.SafLibrary
+import app.nagmedar.ui.library.SourceActions
+import app.nagmedar.ui.library.SourceFolder
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -41,7 +46,9 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
 /**
  * S-309: four steps, each skippable; refused media access leaves the app working with chosen
- * folders; the library asks for access when it may read nothing.
+ * folders; the library asks for access when it may read nothing; a permission that is given says
+ * so on its card, also when it was given while the window was away; the Sources step offers the
+ * folders of Films, Series, Videos and Music, and asks for none of them.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -197,6 +204,92 @@ class FirstRunTest {
 
         compose.onNodeWithText("Verildi").assertExists()
         compose.onNodeWithText("İzin ver").assertDoesNotExist()
+    }
+
+    private val device = StorageSource("/storage/emulated/0", "", removable = false, totalBytes = 0)
+
+    /** What the section rows ask of the app, written down: no picker, no preferences. */
+    private fun sourceActions() = SourceActions(
+        suggestions = emptyList(),
+        storages = listOf(device, drive),
+        pick = { calls += "pick:${it.key}" },
+        add = { section, folder -> calls += "add:${section.key}:${folder.location}" },
+        toggleExclude = { section, folder -> calls += "leaveOut:${section.key}:${folder.location}" },
+        remove = { section, folder -> calls += "take:${section.key}:${folder.location}" },
+    )
+
+    /** The Sources step the way the host builds it, over [scopes] as the library's store keeps them. */
+    private fun renderSources(scopes: LibraryScopes) {
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                FirstRunFlow(FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, listOf(device, drive), emptyList(), actions) {
+                    SectionFolders(scopes, sourceActions())
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    @Test
+    fun theSourcesStepOffersFoldersForEverySectionAndAsksForNone() {
+        renderSources(LibraryScopes.Empty)
+        compose.onNodeWithText("Bölüm başına klasörler").performScrollTo().assertExists()
+        listOf("Filmler", "Diziler", "Videolar", "Müzik").forEach { compose.onNodeWithText(it).performScrollTo().assertExists() }
+        // none chosen: every section shows all of the library
+        assertEquals(4, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        LibrarySection.entries.forEach { compose.onNodeWithTag("library-sources-add-${it.key}").performScrollTo().assertExists() }
+        // choosing is optional: the step goes on as it did
+        compose.onNodeWithText("Devam · 3 kaynak").performClick()
+        compose.onNodeWithText("Adım 3 / 4 · Ses çıkışı").assertExists()
+        assertEquals(listOf("sources"), calls)
+    }
+
+    @Test
+    fun aFolderChosenForASectionShowsInItsRow() {
+        renderSources(
+            LibraryScopes.Empty
+                .plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller"))
+                .plus(LibrarySection.Music, SourceFolder("/storage/1A2B-3C4D/Konserler")),
+        )
+        compose.onNodeWithText("Belgeseller").performScrollTo().assertExists()
+        compose.onNodeWithText("Bu cihaz › Movies › Belgeseller").assertExists()
+        compose.onNodeWithText("Konserler").performScrollTo().assertExists()
+        compose.onNodeWithText("SAMSUNG T7 › Konserler").assertExists()
+        // Films and Music show one folder each; Series and Videos still all of the library
+        assertEquals(2, compose.onAllNodesWithTextCount("1 klasör"))
+        assertEquals(2, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        compose.onNodeWithText("Devam · 3 kaynak").assertExists()
+    }
+
+    @Test
+    fun aFolderPickedLaterShowsInItsRowAtOnce() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val prefs = NagmedarPreferences(app.getSharedPreferences("first-run-sections", Context.MODE_PRIVATE))
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                FirstRunFlow(FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, listOf(device, drive), emptyList(), actions) {
+                    SectionFolders(prefs, sourceActions())
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Belgeseller").assertDoesNotExist()
+        assertEquals(4, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+
+        // the picker's answer goes to the library's own store, which the rows follow
+        compose.runOnUiThread {
+            prefs.updateLibrarySources(prefs.librarySources.plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller")))
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Belgeseller").performScrollTo().assertExists()
+        assertEquals(3, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        assertEquals(listOf(LibrarySection.Movies), LibrarySection.entries.filter { prefs.librarySources.constrained(it) })
+    }
+
+    @Test
+    fun theSectionRowsKeepTheTargetsBigAndNamed() {
+        renderSources(LibraryScopes.Empty.plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller")))
+        checkTargets()
     }
 
     @Test

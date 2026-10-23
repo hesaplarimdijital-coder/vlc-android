@@ -148,8 +148,12 @@ private fun addSource(context: Context, prefs: NagmedarPreferences, section: Lib
     if (!folder.exclude) AppScope.launch { runCatching { LibrarySources.ensureIndexed(context, folder.location) } }
 }
 
+/**
+ * One section's line (how many folders it shows, and the button that adds one) and a row for each
+ * of its folders. Settings › Library and the first run's Sources step both show it.
+ */
 @Composable
-private fun SectionSourcesEditor(section: LibrarySection, scopes: LibraryScopes, actions: SourceActions) {
+internal fun SectionSourcesEditor(section: LibrarySection, scopes: LibraryScopes, actions: SourceActions) {
     val folders = scopes.of(section)
     val shown = folders.count { !it.exclude }
     val thisDevice = stringResource(R.string.nag_nav_device)
