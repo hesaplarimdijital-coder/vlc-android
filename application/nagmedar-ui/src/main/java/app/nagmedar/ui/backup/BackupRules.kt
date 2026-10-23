@@ -63,9 +63,11 @@ object BackupSettings {
         PrefsOnlineQuotaStore.KEY,
         // this device's: the folder of the local subtitle provider (S-707)
         SubtitleFolderStore.KEY,
-        // this device's: the subtitles from speech's last job (S-709)
+        // this device's: the subtitles from speech's last job and what its GPU did (S-709)
         WhisperPrefs.KEY_SEEN,
         WhisperPrefs.KEY_TIMED_OUT,
+        WhisperPrefs.KEY_GPU_RUNNING,
+        WhisperPrefs.KEY_GPU_STOPPED,
         // this device's: the last translation and extraction Android's time limit ended
         TranslationJobs.KEY_TIMED_OUT,
         ExtractJobs.KEY_TIMED_OUT,

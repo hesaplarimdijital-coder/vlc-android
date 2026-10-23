@@ -51,6 +51,9 @@ Sözlüğü testler denetler:
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
 | altyazı üretmek | generate subtitles | | | Filmin konuşmasını bu cihazda Whisper ile yazıya döküp yeni bir SRT dosyası yapmak: “Altyazı üret…” (Alt+W); dosya `film.tr.whisper.srt` adıyla filmin yanına yazılır. Ayarlar'daki bölümü “Altyazı üretimi” |
 | model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince boyutu onaylanıp bir kez indirilir, Ayarlar › Altyazı'dan silinir |
+| hızlandırma | acceleration | | | Altyazı üretiminin nerede çalıştığı (Ayarlar › Altyazı): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz |
+| işlemci | CPU | | processor | Kısa yerlerde: “İşlemci · 4 çekirdek”, “İşlemci yükü”; İngilizcede “CPU · 4 cores”, “CPU load” |
+| gerçek zamanın N katı | N× real time | | | Bir işin hızı: oynatma süresinin işin süresine oranı; “gerçek zamanın 4,2 katı” bir saatlik filmi yaklaşık 14 dakikada bitirir |
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
 | çeviri, çevirmek | translation, translate | | | Altyazının cihazda, internete gönderilmeden bir dilden ötekine çevrilmesi (S-710): “Altyazıyı çevir…”, araçların “Çevir” sekmesi; Türkçe → İngilizce, İngilizce → Türkçe. Sonuç yeni bir dosyadır (`film.tr.srt`) |
 | çeviri modeli | translation model | | | Çevirinin bir yön için indirilen dosyaları (OPUS-MT); boyutu söylenip onayla indirilir, Ayarlar › Altyazı'dan silinir. Kısa yerlerde “model” |

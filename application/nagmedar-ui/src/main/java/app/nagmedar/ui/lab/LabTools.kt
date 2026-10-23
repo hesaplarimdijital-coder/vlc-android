@@ -91,6 +91,12 @@ object LabTools {
     private val dvContainer = LabOption("container", R.string.nag_lab_option_container, listOf(fixed("mkv", "MKV"), fixed("mp4", "MP4")))
     private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { fixed(it.name, it.label) })
     private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(minutes(1), minutes(10)))
+
+    /** S-709: the GPU through Vulkan where the device has one, or the processor alone: the same file both ways compares them. */
+    private val whisperAcceleration = LabOption(
+        "accel", R.string.nag_whisper_acceleration,
+        listOf(LabChoice("auto") { it.getString(R.string.nag_whisper_accel_auto) }, LabChoice("cpu") { it.getString(R.string.nag_whisper_accel_cpu) }),
+    )
     private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf(kiloHertz(96000), kiloHertz(44100), kiloHertz(192000)))
     private val usbBits = LabOption("bits", R.string.nag_lab_option_bits, listOf(fixed("24", "24 bit"), fixed("16", "16 bit"), fixed("32", "32 bit")))
     private val usbDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(seconds(10), minutes(10)))
@@ -127,9 +133,12 @@ object LabTools {
         },
         LabTool(
             "SP-05", R.string.nag_lab_whisper, R.string.nag_lab_whisper_desc, input = LabInput.Media,
-            options = listOf(whisperModel, whisperDuration), cancellable = true,
+            options = listOf(whisperModel, whisperDuration, whisperAcceleration), cancellable = true,
         ) { run ->
-            WhisperLab.run(run.activity, run.input!!, WhisperLab.Model.valueOf(run.option("model")), run.option("seconds").toDouble(), run.progress)
+            WhisperLab.run(
+                run.activity, run.input!!, WhisperLab.Model.valueOf(run.option("model")), run.option("seconds").toDouble(),
+                gpu = run.option("accel") == "auto", progress = run.progress,
+            )
         },
     )
 }

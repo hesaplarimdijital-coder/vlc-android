@@ -15,6 +15,7 @@ typedef struct Listener {
     jmethodID progress;
     jmethodID segment;
     jmethodID language;
+    jmethodID engine;
 } Listener;
 
 /* A Java string of UTF-8 [text]: NewStringUTF wants modified UTF-8, and speech may hold 4-byte characters. */
@@ -74,6 +75,19 @@ static void on_language(void *opaque, const char *code)
     clear_exception(l->env);
 }
 
+static void on_engine(void *opaque, int gpu, const char *device, int threads)
+{
+    Listener *l = opaque;
+    jstring s = java_string(l->env, device);
+    if (!s) {
+        clear_exception(l->env);
+        return;
+    }
+    (*l->env)->CallVoidMethod(l->env, l->target, l->engine, gpu ? JNI_TRUE : JNI_FALSE, s, (jint)threads);
+    (*l->env)->DeleteLocalRef(l->env, s);
+    clear_exception(l->env);
+}
+
 JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_cancelTranscription(JNIEnv *env, jclass cls)
 {
     (void)env;
@@ -83,7 +97,7 @@ JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_cancelTranscription(JNIEn
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_transcribe(JNIEnv *env, jclass cls, jstring model, jstring input,
                                                                       jint audio_track, jstring language, jboolean translate,
-                                                                      jint threads, jobject listener)
+                                                                      jint threads, jboolean gpu, jobject listener)
 {
     (void)cls;
     g_transcribe_cancel = 0;
@@ -94,17 +108,18 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_transcribe(JNIEnv *env
         (*env)->GetMethodID(env, c, "onProgress", "(DD)V"),
         (*env)->GetMethodID(env, c, "onSegment", "(JJLjava/lang/String;)V"),
         (*env)->GetMethodID(env, c, "onLanguage", "(Ljava/lang/String;)V"),
+        (*env)->GetMethodID(env, c, "onEngine", "(ZLjava/lang/String;I)V"),
     };
     (*env)->DeleteLocalRef(env, c);
-    if (!l.progress || !l.segment || !l.language) {
+    if (!l.progress || !l.segment || !l.language || !l.engine) {
         clear_exception(env);
         return (*env)->NewStringUTF(env, "{\"error\":\"listener\",\"detail\":\"\",\"language\":\"\",\"audio_seconds\":0,\"segments\":0}");
     }
     const char *m = (*env)->GetStringUTFChars(env, model, NULL);
     const char *in = (*env)->GetStringUTFChars(env, input, NULL);
     const char *lang = (*env)->GetStringUTFChars(env, language, NULL);
-    WsCallbacks callbacks = {&l, on_progress, on_segment, on_language};
-    char *json = whisper_subs_run(m, in, audio_track, lang, translate == JNI_TRUE, threads, &callbacks, &g_transcribe_cancel);
+    WsCallbacks callbacks = {&l, on_progress, on_segment, on_language, on_engine};
+    char *json = whisper_subs_run(m, in, audio_track, lang, translate == JNI_TRUE, threads, gpu == JNI_TRUE, &callbacks, &g_transcribe_cancel);
     (*env)->ReleaseStringUTFChars(env, model, m);
     (*env)->ReleaseStringUTFChars(env, input, in);
     (*env)->ReleaseStringUTFChars(env, language, lang);

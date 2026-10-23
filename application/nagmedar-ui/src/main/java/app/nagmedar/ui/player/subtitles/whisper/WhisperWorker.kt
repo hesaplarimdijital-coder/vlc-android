@@ -50,11 +50,14 @@ import kotlin.coroutines.resume
  * S-709: one job of the subtitles from speech. A foreground job (media processing on Android 15
  * and later, data sync before) with an ongoing notification: the model's download, then how much
  * of the film is transcribed and the time left, and Cancel. The model comes down once (resumed if
- * it was stopped), the film's audio is transcribed on the performance cores, and the lines are
- * written as a new SRT file beside the film, or in the app's folder where that cannot be written;
- * the film keeps it, so it is among its subtitles when it plays next. A notification says what
- * came of it. If Android stops the app, WorkManager starts the job again, from the beginning; if
- * Android's time limit for a foreground job ends it, it is stopped for good and says so.
+ * it was stopped), the film's audio is transcribed on the GPU through Vulkan where the device has
+ * one and Settings › Subtitles allows it, else on the processor's performance cores, and the lines
+ * are written as a new SRT file beside the film, or in the app's folder where that cannot be
+ * written; the film keeps it, so it is among its subtitles when it plays next. A notification says
+ * what came of it, what it ran on and how fast. If Android stops the app, WorkManager starts the
+ * job again, from the beginning; if Android's time limit for a foreground job ends it, it is
+ * stopped for good and says so. If the app stopped while the GPU worked (a driver can take it
+ * down), the jobs after it run on the processor until Settings tries the GPU again.
  */
 class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     private val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -62,6 +65,10 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     /** When the progress was last told: once a second at most (the system drops quicker notifications). */
     @Volatile
     private var toldAt = 0L
+
+    /** What the transcription runs on, once the model is loaded. */
+    @Volatile
+    private var engine: WhisperEngine? = null
 
     override suspend fun doWork(): Result {
         val request = WhisperRequest.parse(inputData.getString(WhisperJobs.KEY_REQUEST)) ?: return Result.failure()
@@ -77,7 +84,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         }
         return when (outcome) {
             is Outcome.Saved -> {
-                finished(request, outcome.saved)
+                finished(request, outcome.saved, outcome.engine)
                 Result.success(
                     workDataOf(
                         WhisperJobs.KEY_URI to outcome.saved.uri,
@@ -85,6 +92,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         WhisperJobs.KEY_BESIDE to outcome.saved.beside,
                         WhisperJobs.KEY_LINES to outcome.lines,
                         WhisperJobs.KEY_LANGUAGE to outcome.language,
+                        *(outcome.engine?.toData() ?: emptyArray()),
                     ),
                 )
             }
@@ -96,7 +104,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     }
 
     private sealed interface Outcome {
-        data class Saved(val saved: SavedSubtitle, val lines: Int, val language: String) : Outcome
+        data class Saved(val saved: SavedSubtitle, val lines: Int, val language: String, val engine: WhisperEngine?) : Outcome
 
         data class Failed(val reason: WhisperFailure, val detail: String = "") : Outcome
     }
@@ -116,6 +124,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val film = Uri.parse(request.film)
         val input = runCatching { app.contentResolver.openFileDescriptor(film, "r") }.getOrNull()
             ?: return Outcome.Failed(WhisperFailure.Input)
+        val prefs = WhisperPrefs(Settings.getInstance(app))
         tell(request, WhisperStage.Transcribing)
         val segments = Collections.synchronizedList(ArrayList<SpeechSegment>())
         var heard: String? = null
@@ -124,6 +133,8 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             override fun onProgress(doneSeconds: Double, totalSeconds: Double) {
                 val elapsed = (SystemClock.elapsedRealtime() - startedAt) / 1000.0
                 val eta = if (totalSeconds > 0 && doneSeconds >= ETA_AFTER_S) (elapsed * (totalSeconds - doneSeconds) / doneSeconds).toLong() else null
+                // the speed so far, once there is enough of the film to tell it by
+                if (doneSeconds >= ETA_AFTER_S && elapsed > 0) engine = engine?.copy(speed = doneSeconds / elapsed)
                 tell(request, WhisperStage.Transcribing, done = doneSeconds, total = totalSeconds, eta = eta)
             }
 
@@ -134,8 +145,15 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             override fun onLanguage(code: String) {
                 heard = code
             }
+
+            override fun onEngine(gpu: Boolean, device: String, threads: Int) {
+                // the processor runs: the GPU can no longer take the app down
+                if (!gpu) prefs.gpuRunning = null
+                engine = WhisperEngine(gpu, device, threads, engine?.speed, fellBack = askedGpu && !gpu)
+                tell(request, WhisperStage.Transcribing, force = true)
+            }
         }
-        val result = runCatching { JSONObject(transcribe(model.absolutePath, input, request, listener)) }.getOrNull()
+        val result = runCatching { JSONObject(transcribe(model.absolutePath, input, request, prefs, listener)) }.getOrNull()
             ?: return Outcome.Failed(WhisperFailure.Engine)
         when (val error = result.optString("error")) {
             "" -> Unit
@@ -162,15 +180,25 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         if (!saved.beside || film.scheme == ContentResolver.SCHEME_CONTENT) {
             SlaveRepository.getInstance(app).saveSlave(request.film, IMedia.Slave.Type.Subtitle, KEPT_PRIORITY, saved.uri)
         }
-        return Outcome.Saved(saved, cues.size, language)
+        // how fast it went, the model's load included: seconds of the film a second
+        val audio = result.optDouble("audio_seconds")
+        val took = result.optDouble("seconds").takeIf { it > 0 } ?: ((SystemClock.elapsedRealtime() - startedAt) / 1000.0)
+        val ran = engine?.copy(speed = if (audio > 0 && took > 0) audio / took else null)
+        return Outcome.Saved(saved, cues.size, language, ran)
     }
+
+    /** Whether the GPU was asked for this job's transcription (Settings › Subtitles allows it and it did not stop the app before). */
+    @Volatile
+    private var askedGpu = false
 
     /**
      * The native transcription on a thread of its own, which closes [input] when it is done; a
      * cancelled job stops it. One runs at a time: a job started right after one was cancelled
-     * waits for it to stop.
+     * waits for it to stop. On the GPU when Settings › Subtitles allows it, unless the app stopped
+     * while the GPU worked on a job before ([WhisperPrefs.gpuRunning] still there once that job
+     * is over): then on the processor until Settings tries the GPU again.
      */
-    private suspend fun transcribe(model: String, input: ParcelFileDescriptor, request: WhisperRequest, listener: NativeLab.Transcription): String =
+    private suspend fun transcribe(model: String, input: ParcelFileDescriptor, request: WhisperRequest, prefs: WhisperPrefs, listener: NativeLab.Transcription): String =
         suspendCancellableCoroutine { continuation ->
             val cancelled = AtomicBoolean(false)
             val watched = object : NativeLab.Transcription {
@@ -183,6 +211,8 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 override fun onSegment(startMs: Long, endMs: Long, text: String) = listener.onSegment(startMs, endMs, text)
 
                 override fun onLanguage(code: String) = listener.onLanguage(code)
+
+                override fun onEngine(gpu: Boolean, device: String, threads: Int) = listener.onEngine(gpu, device, threads)
             }
             continuation.invokeOnCancellation {
                 cancelled.set(true)
@@ -194,7 +224,19 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         if (cancelled.get()) {
                             CANCELLED_JSON
                         } else {
-                            NativeLab.transcribe(model, "/proc/self/fd/${input.fd}", request.audioTrack, request.language.code, request.translate, PerformanceCores.count(), watched)
+                            if (prefs.gpuRunning != null) {
+                                prefs.gpuStopped = true
+                                prefs.gpuRunning = null
+                            }
+                            val gpu = prefs.acceleration == WhisperAcceleration.Auto && !prefs.gpuStopped
+                            askedGpu = gpu
+                            if (gpu) prefs.gpuRunning = id.toString()
+                            try {
+                                // threads 0: the performance cores, as the native side counts them
+                                NativeLab.transcribe(model, "/proc/self/fd/${input.fd}", request.audioTrack, request.language.code, request.translate, 0, gpu, watched)
+                            } finally {
+                                if (gpu) prefs.gpuRunning = null
+                            }
                         }
                     }
                 } catch (e: Throwable) {
@@ -208,25 +250,48 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             }, THREAD).start()
         }
 
-    /** The job's progress for the windows and the notification; once a second at most, but every change of stage. */
-    private fun tell(request: WhisperRequest, stage: WhisperStage, done: Double = 0.0, total: Double = 0.0, bytes: Long = 0L, bytesTotal: Long = 0L, eta: Long? = null) {
+    /**
+     * The job's progress for the windows and the notification, with what it runs on; once a second
+     * at most, but every change of stage and of what it runs on ([force], keeping how far it is).
+     */
+    private fun tell(
+        request: WhisperRequest,
+        stage: WhisperStage,
+        done: Double = 0.0,
+        total: Double = 0.0,
+        bytes: Long = 0L,
+        bytesTotal: Long = 0L,
+        eta: Long? = null,
+        force: Boolean = false,
+    ) {
         val now = SystemClock.elapsedRealtime()
-        if (now - toldAt < TELL_EVERY_MS && stage == lastStage) return
+        if (now - toldAt < TELL_EVERY_MS && stage == lastStage && !force) return
         toldAt = now
         lastStage = stage
+        val last = lastTold
+        val running = if (force && last != null && last.stage == stage) {
+            last.copy(engine = engine)
+        } else {
+            WhisperStatus.Running(id.toString(), request, stage, done, total, bytes, bytesTotal, eta, engine = engine)
+        }
+        lastTold = running
         setProgressAsync(
             workDataOf(
-                WhisperJobs.KEY_STAGE to stage.key,
-                WhisperJobs.KEY_DONE to done,
-                WhisperJobs.KEY_TOTAL to total,
-                WhisperJobs.KEY_BYTES to bytes,
-                WhisperJobs.KEY_BYTES_TOTAL to bytesTotal,
-                WhisperJobs.KEY_ETA to (eta ?: -1L),
+                WhisperJobs.KEY_STAGE to running.stage.key,
+                WhisperJobs.KEY_DONE to running.doneSeconds,
+                WhisperJobs.KEY_TOTAL to running.totalSeconds,
+                WhisperJobs.KEY_BYTES to running.doneBytes,
+                WhisperJobs.KEY_BYTES_TOTAL to running.totalBytes,
+                WhisperJobs.KEY_ETA to (running.etaSeconds ?: -1L),
+                *(running.engine?.toData() ?: emptyArray()),
             ),
         )
-        val running = WhisperStatus.Running(id.toString(), request, stage, done, total, bytes, bytesTotal, eta)
         runCatching { manager.notify(NOTIFICATION_ID, notification(request, running)) }
     }
+
+    /** The progress told last, for a change of what it runs on between two of its steps. */
+    @Volatile
+    private var lastTold: WhisperStatus.Running? = null
 
     @Volatile
     private var lastStage: WhisperStage? = null
@@ -240,7 +305,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         else -> ForegroundInfo(NOTIFICATION_ID, notification)
     }
 
-    /** The ongoing notification: the film, the stage and how far it is, the time left, Cancel. */
+    /** The ongoing notification: the film, the stage and how far it is, the time left, what it runs on, Cancel. */
     private fun notification(request: WhisperRequest?, status: WhisperStatus.Running?): Notification {
         val context = applicationContext
         channel(context)
@@ -250,6 +315,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(context.getString(R.string.nag_whisper_running_title, request?.name.orEmpty()))
             .setContentText(text)
+            .setSubText(status?.engine?.let { engineLine(context, it) })
             .setContentIntent(openApp(context))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -260,12 +326,13 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             .build()
     }
 
-    /** The subtitles are there: their name and where; a tap opens the app. */
+    /** The subtitles are there: their name and where, what they were made on and how fast; a tap opens the app. */
     @SuppressLint("MissingPermission")
-    private fun finished(request: WhisperRequest, saved: SavedSubtitle) {
+    private fun finished(request: WhisperRequest, saved: SavedSubtitle, ran: WhisperEngine?) {
         val context = applicationContext
         val where = context.getString(if (saved.beside) R.string.nag_whisper_saved_beside else R.string.nag_whisper_saved_app, saved.name)
-        say(context, context.getString(R.string.nag_whisper_done_title, request.name), where)
+        val how = ran?.let { engineLine(context, it) }
+        say(context, context.getString(R.string.nag_whisper_done_title, request.name), where, how)
     }
 
     @SuppressLint("MissingPermission")
@@ -282,14 +349,15 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         say(context, context.getString(R.string.nag_whisper_failed_title, request.name), context.getString(failureText(WhisperFailure.Timeout)))
     }
 
+    /** An outcome's notification: [text], and [more] under it when it is opened. */
     @SuppressLint("MissingPermission")
-    private fun say(context: Context, title: String, text: String) {
+    private fun say(context: Context, title: String, text: String, more: String? = null) {
         channel(context)
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_nagmedar_mark_mono)
             .setContentTitle(title)
             .setContentText(text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(if (more == null) text else "$text\n$more"))
             .setContentIntent(openApp(context))
             .setAutoCancel(true)
             .build()
@@ -352,6 +420,27 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 }
             }
         }
+
+        /**
+         * "GPU · Vulkan · gerçek zamanın 4,2 katı", "İşlemci · 4 çekirdek (GPU kullanılamadı)":
+         * what a job runs on, and its speed as a multiple of real time once it can be told.
+         */
+        fun engineLine(context: Context, engine: WhisperEngine): String {
+            val res = context.resources
+            val locale = ConfigurationCompat.getLocales(res.configuration)[0] ?: Locale.getDefault()
+            val where = if (engine.gpu) {
+                context.getString(R.string.nag_whisper_engine_gpu)
+            } else {
+                res.getQuantityString(R.plurals.nag_whisper_engine_cpu, engine.threads, engine.threads)
+            }
+            val named = if (engine.fellBack) context.getString(R.string.nag_whisper_engine_fallback, where) else where
+            val speed = engine.speed ?: return named
+            val factor = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = if (speed < SPEED_DECIMALS_BELOW) 1 else 0 }.format(speed)
+            return context.getString(R.string.nag_whisper_engine_speed, named, factor)
+        }
+
+        /** A speed below ten is told with a decimal: "1,8", "12". */
+        private const val SPEED_DECIMALS_BELOW = 10.0
 
         /** "1 h 5 min", "12 min": a time left, a minute at least. */
         fun durationText(context: Context, seconds: Long): String {

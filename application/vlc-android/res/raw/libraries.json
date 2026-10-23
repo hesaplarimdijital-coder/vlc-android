@@ -346,6 +346,11 @@
       "license"  : "mit"
     },
     {
+      "title"    : "SPIRV-Headers",
+      "copyright": "Copyright © 2015-2026 The Khronos Group Inc.",
+      "license"  : "mit"
+    },
+    {
       "title"    : "SQLite",
       "copyright": "Richard Hipp et al.",
       "license"  : "publicdomain"
@@ -389,6 +394,11 @@
       "title"    : "VueUse",
       "copyright": "Copyright © 2019-present Anthony Fu",
       "license"  : "mit"
+    },
+    {
+      "title"    : "Vulkan-Headers (Vulkan-Hpp)",
+      "copyright": "Copyright © 2015-2026 The Khronos Group Inc.",
+      "license"  : "apache2.0"
     },
     {
       "title"    : "Whisper models (OpenAI)",

@@ -1,9 +1,11 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp, libusb; SP-02/03/05), the
-#            music engine (S-901, native/audio) and the subtitle translation (S-710,
-#            native/translate: CTranslate2, SentencePiece) for arm64. Cached until native/lab,
-#            native/audio, native/translate or buildsystem/nagmedar-native changes.
+# lab-native: the native lab library (FFmpeg, libdovi, whisper.cpp with ggml's Vulkan backend,
+#            libusb; SP-02/03/05, S-709), the music engine (S-901, native/audio) and the subtitle
+#            translation (S-710, native/translate: CTranslate2, SentencePiece) for arm64. Cached
+#            until native/lab, native/audio, native/translate or buildsystem/nagmedar-native
+#            changes; glslc, which build.sh builds for the runner to compile the Vulkan shaders,
+#            is kept until versions.env changes.
 # native-host: the host tests of the Dolby Vision converter, the media probe, the remux, the
 #            whisper pipeline and the engine's bit-exact decoding, on every run that runs the
 #            tests, whether lab-native's libraries came from the cache or not.
@@ -97,6 +99,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      # S-709: glslc for the Vulkan shaders (shaderc of the Vulkan SDK; Ubuntu's lacks the 8-bit
+      # integer dot product), built by build.sh into native/.work/tools on the first run
+      - name: Önbellek · glslc
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: native/.work/tools
+          key: glslc-${{ runner.os }}-${{ hashFiles('buildsystem/nagmedar-native/versions.env') }}
 
       - name: Araçlar
         if: steps.cache.outputs.cache-hit != 'true'

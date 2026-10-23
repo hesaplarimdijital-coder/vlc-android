@@ -40,8 +40,11 @@ object NativeLab {
     /** SP-03: remux [input] to [output] with the Dolby Vision RPU converted to profile 8.1. */
     @JvmStatic external fun dvConvert(input: String, output: String, maxSeconds: Double, mp4: Boolean, listener: Progress?): String
 
-    /** SP-05: transcribe the first audio track of [input] with the ggml model at [model]. */
-    @JvmStatic external fun whisper(model: String, input: String, language: String, maxSeconds: Double, threads: Int, listener: Progress?): String
+    /**
+     * SP-05: transcribe the first audio track of [input] with the ggml model at [model], on
+     * [threads] threads (0: the performance cores), on the GPU when [gpu] and the device has one.
+     */
+    @JvmStatic external fun whisper(model: String, input: String, language: String, maxSeconds: Double, threads: Int, gpu: Boolean, listener: Progress?): String
 
     /** S-709: what a transcription tells as it goes, on the thread that runs it. */
     interface Transcription {
@@ -53,16 +56,25 @@ object NativeLab {
 
         /** The language whisper heard ("tr"), when it was asked to find it. */
         fun onLanguage(code: String)
+
+        /**
+         * What it runs on: the GPU ([gpu], its name in [device]) or the processor, on [threads]
+         * threads; once the model is loaded, and again when the GPU stopped and the processor took over.
+         */
+        fun onEngine(gpu: Boolean, device: String, threads: Int)
     }
 
     /**
      * S-709: the speech of audio track [audioTrack] of [input] (the n-th audio track, 0 first; -1
      * for the best one) transcribed with the ggml model at [model], in [language] ("tr", "en",
-     * "auto"), into English when [translate], on [threads] threads; five minutes at a time, so a
-     * film of any length fits in memory. Blocking; [cancelTranscription] stops it. The result is
-     * a JSON object: "error" ("" when it went through), "detail", "language", "audio_seconds".
+     * "auto"), into English when [translate], on [threads] threads (0: the performance cores), on
+     * the GPU through Vulkan when [gpu] and the device has one (else, or when it stops, on the
+     * processor); five minutes at a time, so a film of any length fits in memory. Blocking;
+     * [cancelTranscription] stops it. The result is a JSON object: "error" ("" when it went
+     * through), "detail", "language", "audio_seconds", "seconds" (the time it took), "gpu",
+     * "device", "threads", "fallback" ("" or why the GPU asked for was not used).
      */
-    @JvmStatic external fun transcribe(model: String, input: String, audioTrack: Int, language: String, translate: Boolean, threads: Int, listener: Transcription): String
+    @JvmStatic external fun transcribe(model: String, input: String, audioTrack: Int, language: String, translate: Boolean, threads: Int, gpu: Boolean, listener: Transcription): String
 
     /** S-709: stops the running [transcribe] soon; the Lab's [cancel] does not. */
     @JvmStatic external fun cancelTranscription()

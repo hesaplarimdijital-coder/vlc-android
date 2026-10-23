@@ -132,25 +132,50 @@ object WhisperLab {
         file
     }
 
-    suspend fun run(context: Context, input: Uri, model: Model, maxSeconds: Double, progress: NativeLab.Progress): String =
+    /** [model] on [input]'s first [maxSeconds]: on the GPU when [gpu] asks for it and the device has one (S-709), else on the processor. */
+    suspend fun run(context: Context, input: Uri, model: Model, maxSeconds: Double, gpu: Boolean, progress: NativeLab.Progress): String =
         withContext(Dispatchers.IO) {
             if (!NativeLab.available) return@withContext NO_NATIVE
             val modelFile = ensureModel(context, model, progress)
             val name = context.displayName(input)
             val json = context.contentResolver.openFileDescriptor(input, "r").use { src ->
                 if (src == null) return@withContext "Dosya açılamadı."
-                NativeLab.whisper(modelFile.absolutePath, src.procPath(), "tr", maxSeconds, 0, progress)
+                NativeLab.whisper(modelFile.absolutePath, src.procPath(), "tr", maxSeconds, 0, gpu, progress)
             }
             report(JSONObject(json), name, model)
         }
 
+    /** "GPU · Vulkan (Mali-G925…), flash attention açık" or "İşlemci · 4 iş parçacığı", and why the GPU asked for was not used. */
+    private fun engine(r: JSONObject): String {
+        val where = if (r.optBoolean("gpu")) {
+            "GPU · Vulkan (${r.optString("device")})"
+        } else {
+            "İşlemci"
+        }
+        val attention = if (r.optBoolean("flash_attn")) "flash attention açık" else "flash attention kapalı"
+        val fallback = when (r.optString("fallback")) {
+            "" -> ""
+            "none" -> " — GPU yok ya da kullanılamıyor"
+            "busy" -> " — GPU'yu başka bir iş kullanıyordu"
+            "init" -> " — model GPU'ya yüklenemedi"
+            "failed" -> " — GPU iş sırasında durdu, işlemci devraldı"
+            else -> " — ${r.optString("fallback")}"
+        }
+        val detail = r.optString("fallback_detail").takeIf { it.isNotEmpty() }?.let { " ($it)" }.orEmpty()
+        return "$where · ${r.optInt("threads")} iş parçacığı, $attention$fallback$detail"
+    }
+
     fun report(r: JSONObject, name: String, model: Model): String = buildString {
         appendLine("Nağmedar whisper.cpp raporu (SP-05)")
         appendLine("Kaynak: $name")
-        appendLine("Model: ${model.label}, dil: ${r.optString("language")}, iş parçacığı: ${r.optInt("threads")}")
+        appendLine("Model: ${model.label}, dil: ${r.optString("language")}")
+        appendLine("Hızlandırma: ${engine(r)}")
         appendLine("Ses: ${sec(r.optDouble("audio_seconds"))}")
         appendLine("Çözme: ${sec(r.optDouble("decode_seconds"))}, model yükleme: ${sec(r.optDouble("load_seconds"))}")
         appendLine("Tanıma: ${sec(r.optDouble("inference_seconds"))} — gerçek zaman katsayısı ${String.format(Locale.ROOT, "%.2f", r.optDouble("real_time_factor"))} (1'in altı gerçek zamandan hızlı)")
+        val audio = r.optDouble("audio_seconds")
+        val inference = r.optDouble("inference_seconds")
+        if (audio > 0 && inference > 0) appendLine("Hız: gerçek zamanın ${String.format(Locale.ROOT, "%.1f", audio / inference)} katı")
         appendLine("Bölüt: ${r.optInt("segments")}")
         appendLine("Sistem: ${r.optString("system")}")
         r.optString("error").takeIf { it.isNotEmpty() }?.let { appendLine("Hata: $it") }

@@ -29,9 +29,11 @@ import org.videolan.tools.Settings
 
 /**
  * Settings › Subtitles (S-709): the subtitles from speech: the model a new job starts with
- * (small q5_1 unless changed) and the language; each model with what it takes on the device,
- * removed with Delete (not while a job runs). Models are downloaded only when a job needs one and
- * the user agreed to its size.
+ * (small q5_1 unless changed), the language and where it runs (the GPU where the device has one,
+ * or the processor alone); each model with what it takes on the device, removed with Delete (not
+ * while a job runs). Models are downloaded only when a job needs one and the user agreed to its
+ * size. When the app stopped while the GPU worked, jobs run on the processor until "Try the GPU
+ * again".
  */
 @Composable
 fun WhisperSettings() {
@@ -40,6 +42,7 @@ fun WhisperSettings() {
     val prefs = remember(app) { WhisperPrefs(Settings.getInstance(app)) }
     var model by remember { mutableStateOf(prefs.model) }
     var language by remember { mutableStateOf(prefs.language) }
+    var acceleration by remember { mutableStateOf(prefs.acceleration) }
     var refresh by remember { mutableIntStateOf(0) }
     val status by rememberWhisperStatus()
     val running = status is WhisperStatus.Running
@@ -50,6 +53,8 @@ fun WhisperSettings() {
     val ready by produceState(emptySet<WhisperModel>(), refresh, running) {
         value = withContext(Dispatchers.IO) { WhisperModel.entries.filter { WhisperModels.ready(app, it) }.toSet() }
     }
+    // the app stopped while the GPU worked: read again when a job ends and after "Try the GPU again"
+    val gpuStopped by produceState(false, refresh, running) { value = withContext(Dispatchers.IO) { prefs.gpuStopped } }
     val scope = rememberCoroutineScope()
     SettingsSection(stringResource(R.string.nag_whisper_settings)) {
         Text(stringResource(R.string.nag_whisper_settings_hint), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
@@ -73,6 +78,31 @@ fun WhisperSettings() {
                     prefs.language = it
                 },
             )
+        }
+        SettingRow(stringResource(R.string.nag_whisper_acceleration), subtitle = stringResource(acceleration.hint), modifier = Modifier.testTag("whisper-settings-acceleration")) {
+            SegmentedChoice(
+                options = WhisperAcceleration.entries.map { it to stringResource(it.label) },
+                selected = acceleration,
+                onSelect = {
+                    acceleration = it
+                    prefs.acceleration = it
+                },
+            )
+        }
+        if (gpuStopped && acceleration == WhisperAcceleration.Auto) {
+            SettingRow(stringResource(R.string.nag_whisper_gpu_stopped), subtitle = stringResource(R.string.nag_whisper_gpu_stopped_hint), modifier = Modifier.testTag("whisper-settings-gpu-stopped")) {
+                NagButton(
+                    stringResource(R.string.nag_whisper_gpu_retry),
+                    {
+                        scope.launch {
+                            withContext(Dispatchers.IO) { prefs.gpuStopped = false }
+                            refresh++
+                        }
+                    },
+                    enabled = !running,
+                    modifier = Modifier.testTag("whisper-gpu-retry"),
+                )
+            }
         }
         WhisperModel.entries.forEach { entry ->
             val bytes = disk[entry] ?: 0L

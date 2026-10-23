@@ -3225,6 +3225,21 @@
     <string name="nag_whisper_fail_empty">No speech was heard in the film.</string>
     <string name="nag_whisper_fail_output">The subtitle file could be written neither beside the film nor in the app\'s folder.</string>
     <string name="nag_whisper_fail_timeout">Android ended the job: a job in the background may run for six hours at most. Start it again; it begins from the start.</string>
+    <string name="nag_whisper_acceleration">Acceleration</string>
+    <string name="nag_whisper_accel_auto">Automatic (GPU if any)</string>
+    <string name="nag_whisper_accel_cpu">CPU only</string>
+    <string name="nag_whisper_accel_auto_hint">On the GPU through Vulkan where this device has one; on the CPU otherwise, or when the GPU stops.</string>
+    <string name="nag_whisper_accel_cpu_hint">On the CPU\'s performance cores; the GPU is not used.</string>
+    <string name="nag_whisper_gpu_stopped">The app stopped while the GPU worked</string>
+    <string name="nag_whisper_gpu_stopped_hint">Jobs run on the CPU until you try the GPU again.</string>
+    <string name="nag_whisper_gpu_retry">Try the GPU again</string>
+    <string name="nag_whisper_engine_gpu">GPU · Vulkan</string>
+    <plurals name="nag_whisper_engine_cpu">
+        <item quantity="one">CPU · %d core</item>
+        <item quantity="other">CPU · %d cores</item>
+    </plurals>
+    <string name="nag_whisper_engine_fallback">%1$s (the GPU could not be used)</string>
+    <string name="nag_whisper_engine_speed">%1$s · %2$s× real time</string>
     <!-- S-1008: scrobbling (Settings › Scrobble) -->
     <string name="nag_scrobble_title">Scrobbling</string>
     <string name="nag_scrobble_intro">Sends the music you play to Last.fm and ListenBrainz. A track counts once you have heard half of it or four minutes, whichever comes first; tracks under 30 s, videos, podcasts and streams are not sent. While you are offline, scrobbles wait on this device and are sent later.</string>

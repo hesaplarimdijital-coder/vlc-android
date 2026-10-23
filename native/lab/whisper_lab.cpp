@@ -3,8 +3,11 @@
 // The first audio track of a media file is decoded with libavcodec and resampled to
 // 16 kHz mono float, then transcribed. The report gives the time of every stage and
 // the real-time factor (inference time / audio time) next to the transcript as SRT,
-// so the decision note can weigh speed against accuracy per model.
+// so the decision note can weigh speed against accuracy per model. It runs where
+// whisper_engine.cpp puts it: on the GPU when asked and the device has one, else on the
+// processor's performance cores; the report says which.
 #include "whisper_lab.h"
+#include "whisper_engine.h"
 
 #include <whisper.h>
 
@@ -20,8 +23,8 @@ extern "C" {
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <string>
-#include <thread>
 #include <vector>
 
 namespace {
@@ -159,7 +162,7 @@ end:
 
 } // namespace
 
-extern "C" char *whisper_lab_run(const char *model, const char *input, const char *language, double max_seconds, int threads,
+extern "C" char *whisper_lab_run(const char *model, const char *input, const char *language, double max_seconds, int threads, int gpu,
                                  wl_progress_fn progress, void *opaque, volatile int *cancel)
 {
     Run run{progress, opaque, cancel};
@@ -172,15 +175,13 @@ extern "C" char *whisper_lab_run(const char *model, const char *input, const cha
     double load_seconds = 0, inference_seconds = 0;
     std::string srt, text;
     int segments = 0;
-    if (threads <= 0)
-        threads = (int)std::max(1u, std::min(8u, std::thread::hardware_concurrency()));
+    WhisperEngine engine;
+    engine.threads = whisper_engine_threads(threads);
 
     if (error.empty() && pcm.empty())
         error = "no audio decoded";
     if (error.empty()) {
-        whisper_context_params cparams = whisper_context_default_params();
-        cparams.use_gpu = false;
-        whisper_context *ctx = whisper_init_from_file_with_params(model, cparams);
+        whisper_context *ctx = whisper_engine_open(model, gpu != 0, engine);
         int64_t t2 = av_gettime_relative();
         load_seconds = (t2 - t1) / 1e6;
         if (!ctx) {
@@ -189,7 +190,7 @@ extern "C" char *whisper_lab_run(const char *model, const char *input, const cha
             whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
             params.language = language && *language ? language : "auto";
             params.translate = false;
-            params.n_threads = threads;
+            params.n_threads = engine.threads;
             params.print_progress = false;
             params.print_realtime = false;
             params.print_timestamps = false;
@@ -205,24 +206,43 @@ extern "C" char *whisper_lab_run(const char *model, const char *input, const cha
                 return r->cancel && *r->cancel;
             };
             params.abort_callback_user_data = &run;
-            int rc = whisper_full(ctx, params, pcm.data(), (int)pcm.size());
-            inference_seconds = (av_gettime_relative() - t2) / 1e6;
-            if (rc != 0) {
-                error = cancel && *cancel ? "cancelled" : "whisper_full failed (" + std::to_string(rc) + ")";
+            int rc = -1000;
+            std::string failure;
+            for (int attempt = 0; attempt < 2; attempt++) {
+                try {
+                    rc = whisper_full(ctx, params, pcm.data(), (int)pcm.size());
+                } catch (const std::exception &e) {
+                    rc = -1000;
+                    failure = e.what();
+                }
+                if (rc == 0 || !engine.gpu || (cancel && *cancel))
+                    break;
+                // the GPU stopped: the same audio again on the processor, timed from there
+                engine.detail = failure;
+                ctx = whisper_engine_fall_back(ctx, model, engine, "failed");
+                if (!ctx)
+                    break;
+                t2 = av_gettime_relative();
             }
-            segments = whisper_full_n_segments(ctx);
+            inference_seconds = (av_gettime_relative() - t2) / 1e6;
+            if (!ctx) {
+                error = "cannot load the model";
+            } else if (rc != 0) {
+                error = cancel && *cancel ? "cancelled" : "whisper_full failed (" + std::to_string(rc) + ")" + (failure.empty() ? "" : " " + failure);
+            }
+            segments = ctx ? whisper_full_n_segments(ctx) : 0;
             for (int i = 0; i < segments; i++) {
                 const char *seg = whisper_full_get_segment_text(ctx, i);
                 srt += std::to_string(i + 1) + "\n" + srt_time(whisper_full_get_segment_t0(ctx, i)) + " --> " +
                        srt_time(whisper_full_get_segment_t1(ctx, i)) + "\n" + (seg ? seg : "") + "\n\n";
                 text += seg ? seg : "";
             }
-            whisper_free(ctx);
+            whisper_engine_close(ctx, engine);
         }
     }
     double rtf = audio_seconds > 0 ? inference_seconds / audio_seconds : 0;
     std::string json = "{\"model\":\"" + json_escape(model) + "\",\"input\":\"" + json_escape(input) + "\",\"language\":\"" +
-                       json_escape(language ? language : "") + "\",\"threads\":" + std::to_string(threads) +
+                       json_escape(language ? language : "") + "\"," + whisper_engine_json(engine) +
                        ",\"audio_seconds\":" + std::to_string(audio_seconds) + ",\"decode_seconds\":" +
                        std::to_string((t1 - t0) / 1e6) + ",\"load_seconds\":" + std::to_string(load_seconds) +
                        ",\"inference_seconds\":" + std::to_string(inference_seconds) + ",\"real_time_factor\":" +

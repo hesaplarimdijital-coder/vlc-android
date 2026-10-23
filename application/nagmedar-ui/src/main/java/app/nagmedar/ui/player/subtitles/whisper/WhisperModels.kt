@@ -1,5 +1,6 @@
 package app.nagmedar.ui.player.subtitles.whisper
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
@@ -43,6 +44,21 @@ enum class WhisperLanguage(val code: String, @StringRes val label: Int) {
 }
 
 /**
+ * S-709: where whisper runs: on the GPU through Vulkan where the device has one, else on the
+ * processor ([Auto]); or on the processor alone ([CpuOnly]), which the same film both ways
+ * compares with.
+ */
+enum class WhisperAcceleration(val key: String, @StringRes val label: Int, @StringRes val hint: Int) {
+    Auto("auto", R.string.nag_whisper_accel_auto, R.string.nag_whisper_accel_auto_hint),
+    CpuOnly("cpu", R.string.nag_whisper_accel_cpu, R.string.nag_whisper_accel_cpu_hint),
+    ;
+
+    companion object {
+        fun of(key: String?): WhisperAcceleration = entries.firstOrNull { it.key == key } ?: Auto
+    }
+}
+
+/**
  * S-709: where the models are kept: the app's own storage that no backup takes and no other app
  * reads. A model is there whole and checked, or not at all; a download under way is its ".part"
  * beside it, with what Hugging Face said of the file (".part.json") so it goes on from there.
@@ -72,7 +88,7 @@ object WhisperModels {
     }
 }
 
-/** S-709: the subtitles from speech as Settings › Subtitles chooses them: the model and the language. */
+/** S-709: the subtitles from speech as Settings › Subtitles chooses them: the model, the language and where it runs. */
 class WhisperPrefs(private val prefs: SharedPreferences) {
     var model: WhisperModel
         get() = WhisperModel.of(prefs.getString(KEY_MODEL, null))
@@ -81,6 +97,30 @@ class WhisperPrefs(private val prefs: SharedPreferences) {
     var language: WhisperLanguage
         get() = WhisperLanguage.of(prefs.getString(KEY_LANGUAGE, null))
         set(value) = prefs.edit().putString(KEY_LANGUAGE, value.code).apply()
+
+    var acceleration: WhisperAcceleration
+        get() = WhisperAcceleration.of(prefs.getString(KEY_ACCELERATION, null))
+        set(value) = prefs.edit().putString(KEY_ACCELERATION, value.key).apply()
+
+    /**
+     * The job whose transcription is on the GPU right now: on the disk before the GPU is asked
+     * (commit, not apply: a driver that takes the app down leaves no time for a later write), and
+     * cleared when it answers. Still there when a job begins: the app stopped while the GPU worked.
+     */
+    @set:SuppressLint("ApplySharedPref")
+    var gpuRunning: String?
+        get() = prefs.getString(KEY_GPU_RUNNING, null)
+        set(value) {
+            prefs.edit().putString(KEY_GPU_RUNNING, value).commit()
+        }
+
+    /** The app stopped while the GPU worked: jobs run on the processor until Settings › Subtitles tries the GPU again. */
+    @set:SuppressLint("ApplySharedPref")
+    var gpuStopped: Boolean
+        get() = prefs.getBoolean(KEY_GPU_STOPPED, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_GPU_STOPPED, value).commit()
+        }
 
     /** The finished job whose outcome was put away: it is not shown again. */
     var seen: String?
@@ -95,34 +135,16 @@ class WhisperPrefs(private val prefs: SharedPreferences) {
     companion object {
         const val KEY_MODEL = "nagmedar_whisper_model"
         const val KEY_LANGUAGE = "nagmedar_whisper_language"
+        const val KEY_ACCELERATION = "nagmedar_whisper_acceleration"
+
+        /** This device's, as [KEY_SEEN]: what its GPU did last. */
+        const val KEY_GPU_RUNNING = "nagmedar_whisper_gpu_running"
+        const val KEY_GPU_STOPPED = "nagmedar_whisper_gpu_stopped"
 
         /** This device's, as [KEY_TIMED_OUT]: a backup leaves them out. */
         const val KEY_SEEN = "nagmedar_whisper_seen"
         const val KEY_TIMED_OUT = "nagmedar_whisper_timed_out"
     }
-}
-
-/**
- * S-709: how many threads whisper gets: the performance cores, those of the clusters faster than
- * the slowest one (four of the Dimensity 9400+'s eight: its Cortex-X925 and three X4). A device
- * whose cores all run alike gets half of them; never more than eight.
- */
-object PerformanceCores {
-    fun count(): Int {
-        val speeds = (0 until Runtime.getRuntime().availableProcessors()).mapNotNull { cpu ->
-            runCatching { File("/sys/devices/system/cpu/cpu$cpu/cpufreq/cpuinfo_max_freq").readText().trim().toLong() }.getOrNull()
-        }
-        return threadsFor(speeds, Runtime.getRuntime().availableProcessors())
-    }
-
-    /** The threads for cores of these top [speeds] (kHz), [cores] in all. */
-    fun threadsFor(speeds: List<Long>, cores: Int): Int {
-        val slowest = speeds.minOrNull()
-        val fast = if (slowest == null || speeds.all { it == slowest }) cores / 2 else speeds.count { it > slowest }
-        return fast.coerceIn(1, MAX_THREADS)
-    }
-
-    private const val MAX_THREADS = 8
 }
 
 /** Bytes as the decimal megabytes the models' sizes are told in, rounded. */

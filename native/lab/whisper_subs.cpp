@@ -5,7 +5,13 @@
 // film. The last line of a piece may be cut in the middle of a word, so it is not handed out:
 // the next piece starts where the line before it ended. Memory stays the same whatever the
 // film's length: a piece of audio (19 MB) and whisper's own buffers for it.
+//
+// It runs where whisper_engine.cpp puts it: on the GPU when the job asks for it and the device
+// has one, else on the processor's performance cores. When the GPU stops in the middle (an error
+// of its driver, its memory full), the piece is transcribed again on the processor, and the rest
+// of the film with it.
 #include "whisper_subs.h"
+#include "whisper_engine.h"
 
 #include <whisper.h>
 
@@ -17,12 +23,13 @@ extern "C" {
 }
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <string>
-#include <thread>
 #include <vector>
 
 namespace {
@@ -246,6 +253,26 @@ bool decode_more(Source &s, std::vector<float> &pcm, size_t want, volatile int *
     return true;
 }
 
+/** [engine] told to the callbacks. */
+void tell_engine(const WsCallbacks *cb, const WhisperEngine &engine)
+{
+    if (cb && cb->engine)
+        cb->engine(cb->opaque, engine.gpu ? 1 : 0, engine.device.c_str(), engine.threads);
+}
+
+/** whisper_full on [pcm]; its return code, or -1000 with the exception's words in [failure] (the GPU's backend throws). */
+int transcribe(whisper_context *ctx, const whisper_full_params &p, const std::vector<float> &pcm, std::string &failure)
+{
+    try {
+        return whisper_full(ctx, p, pcm.data(), static_cast<int>(pcm.size()));
+    } catch (const std::exception &e) {
+        failure = e.what();
+    } catch (...) {
+        failure = "unknown exception";
+    }
+    return -1000;
+}
+
 /** What whisper's callbacks need: where the piece is in the film, and the cancel flag. */
 struct Run {
     const WsCallbacks *cb;
@@ -258,26 +285,27 @@ struct Run {
 } // namespace
 
 extern "C" char *whisper_subs_run(const char *model, const char *input, int audio_track, const char *language, int translate, int threads,
-                                  const WsCallbacks *cb, volatile int *cancel)
+                                  int gpu, const WsCallbacks *cb, volatile int *cancel)
 {
+    auto started = std::chrono::steady_clock::now();
     std::string code, detail;
     std::string lang = language && *language ? language : "auto";
     double audio_seconds = 0;
     int segments = 0;
     Source s;
     whisper_context *ctx = nullptr;
+    WhisperEngine engine;
+    engine.threads = whisper_engine_threads(threads);
     if (open_source(s, input, audio_track, code, detail)) {
-        whisper_context_params cparams = whisper_context_default_params();
-        cparams.use_gpu = false;
-        ctx = whisper_init_from_file_with_params(model, cparams);
+        ctx = whisper_engine_open(model, gpu != 0, engine);
         if (!ctx) {
             code = "model";
             detail = "the model cannot be read";
+        } else {
+            tell_engine(cb, engine);
         }
     }
     if (code.empty()) {
-        if (threads <= 0)
-            threads = static_cast<int>(std::max(1u, std::min(4u, std::thread::hardware_concurrency())));
         Run run{cb, cancel, 0, 0, s.total};
         bool detect = lang == "auto";
         std::vector<float> pcm;
@@ -300,7 +328,7 @@ extern "C" char *whisper_subs_run(const char *model, const char *input, int audi
             whisper_full_params p = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
             p.language = lang.c_str();
             p.translate = translate != 0;
-            p.n_threads = threads;
+            p.n_threads = engine.threads;
             p.print_progress = false;
             p.print_realtime = false;
             p.print_timestamps = false;
@@ -324,14 +352,27 @@ extern "C" char *whisper_subs_run(const char *model, const char *input, int audi
             p.abort_callback_user_data = &run;
             if (cb && cb->progress)
                 cb->progress(cb->opaque, run.before, s.total);
-            int rc = whisper_full(ctx, p, pcm.data(), static_cast<int>(pcm.size()));
+            std::string failure;
+            int rc = transcribe(ctx, p, pcm, failure);
             if (cancel && *cancel) {
                 code = "cancelled";
                 break;
             }
+            if (rc != 0 && engine.gpu) {
+                // the GPU stopped: the processor takes this piece again, and the rest of the film
+                engine.detail = failure;
+                ctx = whisper_engine_fall_back(ctx, model, engine, "failed");
+                if (!ctx) {
+                    code = "model";
+                    detail = "the model cannot be read";
+                    break;
+                }
+                tell_engine(cb, engine);
+                continue;
+            }
             if (rc != 0) {
                 code = "whisper";
-                detail = "whisper_full: " + std::to_string(rc);
+                detail = "whisper_full: " + std::to_string(rc) + (failure.empty() ? "" : " " + failure);
                 break;
             }
             int n = whisper_full_n_segments(ctx);
@@ -374,11 +415,12 @@ extern "C" char *whisper_subs_run(const char *model, const char *input, int audi
                 break;
         }
     }
-    if (ctx)
-        whisper_free(ctx);
+    whisper_engine_close(ctx, engine);
+    double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
     std::string json = "{\"error\":\"" + json_escape(code) + "\",\"detail\":\"" + json_escape(detail) + "\",\"language\":\"" +
                        json_escape(lang) + "\",\"audio_seconds\":" + std::to_string(audio_seconds) +
-                       ",\"segments\":" + std::to_string(segments) + "}";
+                       ",\"segments\":" + std::to_string(segments) + ",\"seconds\":" + std::to_string(seconds) + "," +
+                       whisper_engine_json(engine) + "}";
     char *out = static_cast<char *>(malloc(json.size() + 1));
     if (out)
         memcpy(out, json.c_str(), json.size() + 1);

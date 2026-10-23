@@ -11,11 +11,12 @@ typedef void (*wl_progress_fn)(void *opaque, double fraction, const char *stage)
 
 /**
  * Decodes up to [max_seconds] (0 = all) of the first audio track of [input], transcribes it with
- * the ggml model at [model] in [language] ("tr", "en" … or "auto") on [threads] threads (0 = up to
- * 8 cores) and returns a JSON report with timings, the real-time factor, the text and an SRT.
- * The caller frees the string.
+ * the ggml model at [model] in [language] ("tr", "en" … or "auto") on [threads] threads (0 = the
+ * performance cores), on the GPU when [gpu] and the device has one, and returns a JSON report
+ * with timings, the real-time factor, what it ran on, the text and an SRT. The caller frees the
+ * string.
  */
-char *whisper_lab_run(const char *model, const char *input, const char *language, double max_seconds, int threads,
+char *whisper_lab_run(const char *model, const char *input, const char *language, double max_seconds, int threads, int gpu,
                       wl_progress_fn progress, void *opaque, volatile int *cancel);
 
 #ifdef __cplusplus

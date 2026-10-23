@@ -154,7 +154,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_dvConvert(JNIEnv *env,
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, jclass cls, jstring model, jstring input,
                                                                    jstring language, jdouble max_seconds, jint threads,
-                                                                   jobject listener)
+                                                                   jboolean gpu, jobject listener)
 {
     (void)cls;
     g_cancel = 0;
@@ -162,7 +162,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, j
     const char *in = (*env)->GetStringUTFChars(env, input, NULL);
     const char *lang = (*env)->GetStringUTFChars(env, language, NULL);
     Callback cb = callback(env, listener);
-    jstring result = take(env, whisper_lab_run(m, in, lang, max_seconds, threads, whisper_progress, &cb, &g_cancel));
+    jstring result = take(env, whisper_lab_run(m, in, lang, max_seconds, threads, gpu == JNI_TRUE, whisper_progress, &cb, &g_cancel));
     (*env)->ReleaseStringUTFChars(env, model, m);
     (*env)->ReleaseStringUTFChars(env, input, in);
     (*env)->ReleaseStringUTFChars(env, language, lang);

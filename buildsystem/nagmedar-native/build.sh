@@ -5,7 +5,8 @@
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
 #                              dvconvert, remux, mediaprobe, subextract and nagaudio commands (host tests in CI: test-host.sh);
 #                              remux, bitrate and dvconvert also with AddressSanitizer (*-asan) where cc has it
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp, libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
+#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp (with ggml's Vulkan backend: glslc is built for this
+#                              machine first), libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
 #                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
 #                              SentencePiece, libnagmedar_translate.so into application/nagmedar-translate
@@ -172,6 +173,45 @@ build_whisper() { # extra cmake args...
     cmake --install "$dir" > /dev/null
 }
 
+# S-709: the headers ggml's Vulkan backend is compiled with, Vulkan-Hpp and SPIR-V's, into $PREFIX/vulkan
+build_vulkan_headers() {
+    fetch vulkan-headers "$VULKAN_HEADERS_URL" "$VULKAN_HEADERS_REF"
+    fetch spirv-headers "$SPIRV_HEADERS_URL" "$SPIRV_HEADERS_REF"
+    if [ -f "$PREFIX/vulkan/share/cmake/SPIRV-Headers/SPIRV-HeadersConfig.cmake" ]; then return; fi
+    log "Vulkan and SPIR-V headers $VULKAN_HEADERS_REF"
+    mkdir -p "$WORK/build-host"
+    local src
+    for src in vulkan-headers spirv-headers; do
+        local dir="$WORK/build-host/$src"
+        cmake -S "$WORK/src/$src" -B "$dir" -DCMAKE_INSTALL_PREFIX="$PREFIX/vulkan" -DVULKAN_HEADERS_ENABLE_MODULE=OFF \
+            -DVULKAN_HEADERS_ENABLE_TESTS=OFF -DSPIRV_HEADERS_ENABLE_TESTS=OFF > "$dir.configure.log" 2>&1 ||
+            fail_log "$src configure" "$dir.configure.log"
+        cmake --install "$dir" > /dev/null
+    done
+}
+
+# S-709: glslc for this machine, which makes ggml's Vulkan shaders SPIR-V while whisper.cpp builds
+# (only the build uses it). Kept in $WORK/tools, which CI keeps between runs.
+build_glslc() {
+    GLSLC="$WORK/tools/glslc"
+    if [ -x "$GLSLC" ]; then return; fi
+    fetch shaderc "$SHADERC_URL" "$SHADERC_REF"
+    fetch glslang "$GLSLANG_URL" "$GLSLANG_REF"
+    fetch spirv-tools "$SPIRV_TOOLS_URL" "$SPIRV_TOOLS_REF"
+    fetch spirv-headers "$SPIRV_HEADERS_URL" "$SPIRV_HEADERS_REF"
+    log "glslc from shaderc $SHADERC_REF (host)"
+    local dir="$WORK/build-host/shaderc"
+    mkdir -p "$WORK/build-host" "$WORK/tools"
+    cmake -S "$WORK/src/shaderc" -B "$dir" -DCMAKE_BUILD_TYPE=Release \
+        -DSHADERC_GLSLANG_DIR="$WORK/src/glslang" -DSHADERC_SPIRV_TOOLS_DIR="$WORK/src/spirv-tools" \
+        -DSHADERC_SPIRV_HEADERS_DIR="$WORK/src/spirv-headers" -DSHADERC_SKIP_TESTS=ON -DSHADERC_SKIP_EXAMPLES=ON \
+        -DSHADERC_SKIP_COPYRIGHT_CHECK=ON -DSHADERC_ENABLE_HLSL=OFF -DSHADERC_ENABLE_WERROR_COMPILE=OFF \
+        -DSPIRV_SKIP_EXECUTABLES=ON -DSPIRV_WERROR=OFF -DENABLE_GLSLANG_BINARIES=OFF -DENABLE_OPT=ON \
+        > "$dir.configure.log" 2>&1 || fail_log "shaderc configure (host)" "$dir.configure.log"
+    cmake --build "$dir" -j"$JOBS" --target glslc_exe > "$dir.build.log" 2>&1 || fail_log "glslc (host)" "$dir.build.log"
+    cp "$dir/glslc/glslc" "$GLSLC"
+}
+
 build_lab() { # extra cmake args...
     fetch libusb "$LIBUSB_URL" "$LIBUSB_REF"
     log "libnagmedar_lab ($TARGET)"
@@ -303,9 +343,17 @@ android() {
     rustup target add aarch64-linux-android > /dev/null
     CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$cc" AR_aarch64_linux_android="$tc/bin/llvm-ar" \
         CC_aarch64_linux_android="$cc" build_dovi aarch64-linux-android
-    # ARMv8.2 dot product and FP16: every big core since 2018, the Dimensity 9400+ included
-    build_whisper "${ndk_cmake[@]}" -DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16
-    build_lab "${ndk_cmake[@]}"
+    # ARMv8.2 dot product and FP16: every big core since 2018, the Dimensity 9400+ included.
+    # S-709: and the GPU through ggml's Vulkan backend. Vulkan_LIBRARY only satisfies CMake: the
+    # library opens the system's loader at run time (native/lab/vulkan_loader.c) and loads on a
+    # device without Vulkan; vulkan-shaders-gen is built for this machine by ggml itself.
+    build_vulkan_headers
+    build_glslc
+    build_whisper "${ndk_cmake[@]}" -DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16 \
+        -DGGML_VULKAN=ON -DVulkan_INCLUDE_DIR="$PREFIX/vulkan/include" -DVulkan_GLSLC_EXECUTABLE="$GLSLC" \
+        -DVulkan_LIBRARY="$tc/sysroot/usr/lib/aarch64-linux-android/$ANDROID_API/libvulkan.so" \
+        -DSPIRV-Headers_DIR="$PREFIX/vulkan/share/cmake/SPIRV-Headers"
+    build_lab "${ndk_cmake[@]}" -DNAGMEDAR_VULKAN=ON -DVULKAN_INCLUDE_DIR="$PREFIX/vulkan/include"
     local out="$ROOT/application/nagmedar-lab/src/main/jniLibs/arm64-v8a"
     mkdir -p "$out"
     cp "$WORK/build-android/lab/libnagmedar_lab.so" "$out/"

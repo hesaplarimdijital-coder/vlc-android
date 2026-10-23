@@ -116,6 +116,38 @@ enum class WhisperStage(val key: String) {
     }
 }
 
+/**
+ * S-709: what a job runs on: the GPU through Vulkan ([gpu], its name in [device]) or the
+ * processor's [threads] cores, and how fast: [speed] seconds of the film a second, null until it
+ * can be told. [fellBack]: the GPU was asked for and the processor ran.
+ */
+@Immutable
+data class WhisperEngine(val gpu: Boolean, val device: String = "", val threads: Int = 0, val speed: Double? = null, val fellBack: Boolean = false) {
+    /** The engine as a job's progress or result carries it. */
+    fun toData(): Array<Pair<String, Any?>> = arrayOf(
+        WhisperJobs.KEY_GPU to gpu,
+        WhisperJobs.KEY_DEVICE to device,
+        WhisperJobs.KEY_THREADS to threads,
+        WhisperJobs.KEY_SPEED to (speed ?: -1.0),
+        WhisperJobs.KEY_FALLBACK to fellBack,
+    )
+
+    companion object {
+        /** The engine in a job's progress or result; null before the model was loaded. */
+        fun of(data: Data): WhisperEngine? {
+            val threads = data.getInt(WhisperJobs.KEY_THREADS, 0)
+            if (threads <= 0) return null
+            return WhisperEngine(
+                gpu = data.getBoolean(WhisperJobs.KEY_GPU, false),
+                device = data.getString(WhisperJobs.KEY_DEVICE).orEmpty(),
+                threads = threads,
+                speed = data.getDouble(WhisperJobs.KEY_SPEED, -1.0).takeIf { it > 0 },
+                fellBack = data.getBoolean(WhisperJobs.KEY_FALLBACK, false),
+            )
+        }
+    }
+}
+
 /** S-709: the job as the windows show it: under way, done, failed or cancelled. */
 @Immutable
 sealed interface WhisperStatus {
@@ -124,8 +156,8 @@ sealed interface WhisperStatus {
 
     /**
      * Under way: the model's bytes ([doneBytes] of [totalBytes]) or the film's seconds
-     * ([doneSeconds] of [totalSeconds]), the time left when it can be told. [restarted]: Android
-     * stopped the app and the job began again from the start.
+     * ([doneSeconds] of [totalSeconds]), the time left when it can be told, what it runs on once
+     * the model is loaded. [restarted]: Android stopped the app and the job began again from the start.
      */
     data class Running(
         override val id: String,
@@ -137,6 +169,7 @@ sealed interface WhisperStatus {
         val totalBytes: Long = 0L,
         val etaSeconds: Long? = null,
         val restarted: Boolean = false,
+        val engine: WhisperEngine? = null,
     ) : WhisperStatus {
         /** How far, 0..1; null when it cannot be told. */
         val fraction: Float?
@@ -147,7 +180,15 @@ sealed interface WhisperStatus {
             }
     }
 
-    data class Done(override val id: String, override val request: WhisperRequest?, val saved: SavedSubtitle, val lines: Int, val language: String) : WhisperStatus
+    /** Done: the file, its lines and language, and what it ran on and how fast. */
+    data class Done(
+        override val id: String,
+        override val request: WhisperRequest?,
+        val saved: SavedSubtitle,
+        val lines: Int,
+        val language: String,
+        val engine: WhisperEngine? = null,
+    ) : WhisperStatus
 
     data class Failed(override val id: String, override val request: WhisperRequest?, val reason: WhisperFailure, val detail: String = "") : WhisperStatus
 
@@ -175,6 +216,11 @@ object WhisperJobs {
     internal const val KEY_LANGUAGE = "language"
     internal const val KEY_REASON = "reason"
     internal const val KEY_DETAIL = "detail"
+    internal const val KEY_GPU = "gpu"
+    internal const val KEY_DEVICE = "device"
+    internal const val KEY_THREADS = "threads"
+    internal const val KEY_SPEED = "speed"
+    internal const val KEY_FALLBACK = "fallback"
     private const val TAG_REQUEST = "whisper-request:"
 
     /** Starts a job for [request]; one under way stays and this one is not started. */
@@ -230,6 +276,7 @@ object WhisperJobs {
                 totalBytes = progress.getLong(KEY_BYTES_TOTAL, 0L),
                 etaSeconds = progress.getLong(KEY_ETA, -1L).takeIf { it >= 0 },
                 restarted = attempts > 0,
+                engine = WhisperEngine.of(progress),
             )
             WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> WhisperStatus.Running(id, request, WhisperStage.Waiting, restarted = attempts > 0)
             WorkInfo.State.SUCCEEDED -> WhisperStatus.Done(
@@ -238,6 +285,7 @@ object WhisperJobs {
                 saved = SavedSubtitle(output.getString(KEY_URI).orEmpty(), output.getString(KEY_NAME).orEmpty(), output.getBoolean(KEY_BESIDE, false)),
                 lines = output.getInt(KEY_LINES, 0),
                 language = output.getString(KEY_LANGUAGE).orEmpty(),
+                engine = WhisperEngine.of(output),
             )
             WorkInfo.State.FAILED -> WhisperStatus.Failed(id, request, WhisperFailure.of(output.getString(KEY_REASON)), output.getString(KEY_DETAIL).orEmpty())
             WorkInfo.State.CANCELLED -> if (id == timedOut) WhisperStatus.Failed(id, request, WhisperFailure.Timeout) else WhisperStatus.Cancelled(id, request)

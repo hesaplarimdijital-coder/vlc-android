@@ -57,7 +57,8 @@ class AboutScreenTest {
 
     @Test
     fun theListIsS005s() {
-        assertEquals(85, libraries.size)
+        // 85, and the Vulkan and SPIR-V headers whisper's GPU backend is built with (S-709)
+        assertEquals(87, libraries.size)
         val byTitle = libraries.associateBy { it.title }
         // the lab's and the music engine's native additions are there, with their licences
         assertEquals("mit", byTitle.getValue("dovi_tool").license?.id)

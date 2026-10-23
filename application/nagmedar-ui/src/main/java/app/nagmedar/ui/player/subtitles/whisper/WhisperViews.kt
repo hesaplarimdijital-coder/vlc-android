@@ -178,7 +178,7 @@ private fun Choices(controller: WhisperController, state: WhisperDialogState, on
     LaunchedEffect(reading) { if (!reading) runCatching { start.requestFocus() } }
 }
 
-/** The job under way: its film, the stage and how far, the time left; a word when it began again; Stop and Close. */
+/** The job under way: its film, the stage and how far, the time left, what it runs on and how fast; a word when it began again; Stop and Close. */
 @Composable
 private fun RunningJob(status: WhisperStatus.Running, onStop: () -> Unit, onClose: () -> Unit) {
     val context = LocalContext.current
@@ -188,6 +188,7 @@ private fun RunningJob(status: WhisperStatus.Running, onStop: () -> Unit, onClos
         Text(status.request?.name.orEmpty(), style = NagTheme.type.label, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
         NagProgressBar(status.fraction, line)
         Text(line, style = NagTheme.type.labelSmall, color = colors.textSecondary)
+        status.engine?.let { Text(WhisperWorker.engineLine(context, it), style = NagTheme.type.labelSmall, color = colors.textSecondary, modifier = Modifier.testTag("whisper-engine")) }
         PanelCaption(stringResource(if (status.restarted) R.string.nag_whisper_restarted_note else R.string.nag_whisper_running_note))
     }
     val close = remember { FocusRequester() }
@@ -226,15 +227,17 @@ private fun Outcome(status: WhisperStatus, onLoad: ((SavedSubtitle) -> Unit)?, o
     }
 }
 
-/** "Subtitles ready · 1.204 lines", the file and where it is; or the failure. */
+/** "Subtitles ready · 1.204 lines", the file and where it is, what made it and how fast; or the failure. */
 @Composable
 private fun OutcomeLines(status: WhisperStatus, savedAs: Boolean?) {
+    val context = LocalContext.current
     val colors = NagTheme.colors
     when (status) {
         is WhisperStatus.Done -> {
             Text(pluralStringResource(R.plurals.nag_whisper_ready, status.lines, status.lines), style = NagTheme.type.label, color = colors.text)
             val where = if (status.saved.beside) R.string.nag_whisper_saved_beside else R.string.nag_whisper_saved_app
             Text(stringResource(where, status.saved.name), style = NagTheme.type.labelSmall, color = colors.textSecondary)
+            status.engine?.let { Text(WhisperWorker.engineLine(context, it), style = NagTheme.type.labelSmall, color = colors.textSecondary, modifier = Modifier.testTag("whisper-outcome-engine")) }
             if (!status.saved.beside) PanelCaption(stringResource(R.string.nag_whisper_save_as_hint))
             when (savedAs) {
                 true -> PanelCaption(stringResource(R.string.nag_whisper_saved_copy))
