@@ -51,6 +51,7 @@ import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
+import app.nagmedar.ui.device.DeviceRequests
 import app.nagmedar.ui.device.DeviceScreen
 import app.nagmedar.ui.downloads.DownloadsScreen
 import app.nagmedar.ui.guide.GuideScreen
@@ -329,6 +330,11 @@ private fun NagmedarMain(
         if (!ShellRequests.librarySources) return@LaunchedEffect
         addFolder()
         ShellRequests.librarySources = false
+    }
+    // a media's "Dosyada göster": This device opens at its folder (and takes the request)
+    val deviceReveal = DeviceRequests.reveal
+    LaunchedEffect(deviceReveal) {
+        if (deviceReveal != null) navigator.navigate(Destination.Device)
     }
     LaunchedEffect(requestedDestination) {
         if (requestedDestination == NAGMEDAR_DESTINATION_NOW_PLAYING) {

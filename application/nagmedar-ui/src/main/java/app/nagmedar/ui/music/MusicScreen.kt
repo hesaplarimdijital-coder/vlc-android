@@ -71,13 +71,16 @@ import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.covers.rememberCoverMenu
+import app.nagmedar.ui.device.FileReveal
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.library.LibraryContent
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
+import app.nagmedar.ui.library.MediaFile
 import app.nagmedar.ui.library.MediaRepository
+import app.nagmedar.ui.library.MediaSharing
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
@@ -229,6 +232,12 @@ interface MusicActions {
 
     /** S-1010: [tracks] converted to another format, in a window; null where there is no converter. */
     val convert: ((List<Track>) -> Unit)? get() = null
+
+    /** [tracks]' files to another app, with the system's share sheet; null where they cannot be. */
+    val share: ((List<Track>) -> Unit)? get() = null
+
+    /** [track]'s file in its folder ("Dosyada göster"); null where it cannot be. */
+    val reveal: ((Track) -> Unit)? get() = null
 }
 
 /** These actions with their plays coming from [source] (a group of the music view, a playlist); themselves for none. */
@@ -389,6 +398,13 @@ internal class ServiceMusicActions(
     override val askRating: ((List<Track>) -> Unit)? get() = onAskRating
 
     override val convert: ((List<Track>) -> Unit)? get() = onConvert
+
+    override val share: (List<Track>) -> Unit get() = { tracks -> MediaSharing.share(context, tracks.map { fileOf(it) }) }
+
+    override val reveal: (Track) -> Unit get() = { track -> FileReveal.show(context, fileOf(track).uri) }
+
+    /** A track's file: a CUE sheet's track is its whole file. */
+    private fun fileOf(track: Track) = MediaFile(CueUri.file(Uri.parse(track.uri)), video = false, name = track.title)
 
     override fun rate(tracks: List<Track>, rating: Int) = tracks.forEach { TrackStatsIndex.rate(context, it.statsKey, rating) }
 
@@ -592,14 +608,25 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
     }
 }
 
-/** An album's, an artist's or a folder's menu (right click, long press): play, queue, convert. */
-private fun groupMenu(res: android.content.res.Resources, group: MusicGroup, actions: MusicActions): List<MenuEntry> = listOfNotNull(
-    MenuEntry.Item(res.getString(R.string.nag_play), { actions.play(group.tracks, 0) }, icon = NagIcons.Play),
-    MenuEntry.Item(res.getString(R.string.nag_play_next), { actions.playNext(group.tracks) }, icon = NagIcons.Next),
-    MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { actions.queue(group.tracks) }, icon = NagIcons.PlaylistAdd),
-    actions.addToPlaylist?.let { add -> MenuEntry.Item(res.getString(R.string.nag_pl_add), { add(group.tracks) }, icon = NagIcons.PlaylistAdd) },
-    actions.convert?.let { convert -> MenuEntry.Item(res.getString(R.string.nag_convert), { convert(group.tracks) }, icon = NagIcons.Convert) },
-)
+/**
+ * An album's, an artist's or a folder's menu (right click, long press): play, queue, convert; its
+ * tracks' files shared together, the first one shown in its folder.
+ */
+private fun groupMenu(res: android.content.res.Resources, group: MusicGroup, actions: MusicActions): List<MenuEntry> {
+    val share = actions.share
+    val reveal = actions.reveal
+    val first = group.tracks.firstOrNull()
+    return listOfNotNull(
+        MenuEntry.Item(res.getString(R.string.nag_play), { actions.play(group.tracks, 0) }, icon = NagIcons.Play),
+        MenuEntry.Item(res.getString(R.string.nag_play_next), { actions.playNext(group.tracks) }, icon = NagIcons.Next),
+        MenuEntry.Item(res.getString(R.string.nag_add_to_queue), { actions.queue(group.tracks) }, icon = NagIcons.PlaylistAdd),
+        actions.addToPlaylist?.let { add -> MenuEntry.Item(res.getString(R.string.nag_pl_add), { add(group.tracks) }, icon = NagIcons.PlaylistAdd) },
+        actions.convert?.let { convert -> MenuEntry.Item(res.getString(R.string.nag_convert), { convert(group.tracks) }, icon = NagIcons.Convert) },
+        if (first != null && (share != null || reveal != null)) MenuEntry.Separator else null,
+        if (first != null) share?.let { MenuEntry.Item(res.getString(R.string.nag_media_share), { it(group.tracks) }, icon = NagIcons.Share) } else null,
+        if (first != null) reveal?.let { MenuEntry.Item(res.getString(R.string.nag_media_reveal), { it(first) }, icon = NagIcons.Folder) } else null,
+    )
+}
 
 @Composable
 private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOpen: () -> Unit) {
@@ -691,6 +718,7 @@ private fun TrackPane(group: MusicGroup, shown: List<Track>, state: MusicBrowser
                 actions.addToPlaylist?.let { add -> NagButton(stringResource(R.string.nag_pl_add), { add(chosen) }) }
                 actions.askRating?.let { ask -> NagButton(stringResource(R.string.nag_rate), { ask(chosen) }) }
                 actions.convert?.let { convert -> NagButton(stringResource(R.string.nag_convert), { convert(chosen) }) }
+                actions.share?.let { share -> NagButton(stringResource(R.string.nag_media_share), { share(chosen) }) }
             }
         }
         HorizontalRule()

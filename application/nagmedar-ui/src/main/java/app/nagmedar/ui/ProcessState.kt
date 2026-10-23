@@ -3,6 +3,7 @@ package app.nagmedar.ui
 import androidx.compose.runtime.snapshots.Snapshot
 import app.nagmedar.ui.audio.AbTest
 import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.device.DeviceRequests
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.MediaInfoRequests
@@ -54,6 +55,8 @@ object ProcessState {
             MusicLinks,
             // what the queue was started from: written by the music view, read by the phone's player
             PlaySources,
+            // a media's "Dosyada göster", set from a menu's coroutine, read by the shell and the browser
+            DeviceRequests,
             RemoteAccessPages,
             ShellRequests,
             // its prompt queue (a SnapshotStateList): the background init installs the object on an IO

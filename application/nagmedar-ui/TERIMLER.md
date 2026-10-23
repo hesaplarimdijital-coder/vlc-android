@@ -63,6 +63,8 @@ Sözlüğü testler denetler:
 | gömülü altyazı | embedded subtitles | dahili altyazı | built-in subtitles | Filmin dosyasının içindeki altyazı izleri (MKV, MP4, TS, AVI); “Gömülü altyazıyı dosyaya çıkar…” metin olanları filmin yanına yeni bir dosya olarak yazar, resim olanlar (PGS, VobSub, DVB) OCR gerektirdiği için çıkarılmaz |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |
+| paylaşmak | share | | | Bir medyanın dosyasını sistemin paylaşma sayfasıyla başka bir uygulamaya vermek: öğe menüsünde ve seçim çubuğunda “Paylaş…”; seçilenler birlikte gider |
+| dosyada göstermek | show in folder | | | Bir medyanın dosyasını klasöründe, seçili olarak açmak: menüde “Dosyada göster”; Kaynaklar › Bu cihaz'da, oranın açamadığı bir klasördeyse sistemin dosyalar uygulamasında |
 | cihaz | device | aygıt | | |
 | harici disk | external drive | harici sürücü | external disk | |
 | Videolar | Videos | | | Kütüphanenin bölümü: bu cihazla çekilen videolar (kamera, ekran kaydı, mesajlaşma uygulamaları), film ya da dizi bölümü olmayanlar. Tekili “video”: “12 video”, “3 video seçili” |

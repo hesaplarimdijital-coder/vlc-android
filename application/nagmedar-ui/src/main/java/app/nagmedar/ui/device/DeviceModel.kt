@@ -47,6 +47,10 @@ class DeviceBrowserModel(private val source: DeviceSource, private val scope: Co
     var sort by mutableStateOf(DeviceSort())
     var showHidden by mutableStateOf(false)
 
+    /** "Dosyada göster": the file of the open folder to select and bring into sight; null once it is, or another folder opens. */
+    var pointed by mutableStateOf<DeviceLocation?>(null)
+        private set
+
     private var job: Job? = null
 
     /** The open folder; null while the places show. */
@@ -79,10 +83,19 @@ class DeviceBrowserModel(private val source: DeviceSource, private val scope: Co
         job?.cancel()
         trail = emptyList()
         listing = FolderListing.Loading
+        pointed = null
     }
 
     fun refresh() {
-        if (trail.isEmpty()) loadRoots() else show(trail)
+        if (trail.isEmpty()) loadRoots() else show(trail, pointed)
+    }
+
+    /** A library menu's "Dosyada göster": [request]'s folder opens, its file pointed at. */
+    fun reveal(request: DeviceReveal) = show(request.trail, request.file)
+
+    /** The file pointed at is selected and in sight: a new order or a refresh leaves the list where it is. */
+    fun pointedShown() {
+        pointed = null
     }
 
     /** The open folder's entries as shown: hidden ones only when asked for, folders first, then by [sort]. */
@@ -105,10 +118,11 @@ class DeviceBrowserModel(private val source: DeviceSource, private val scope: Co
     suspend fun playableIn(folder: DeviceEntry): List<DeviceEntry> =
         source.list(folder.location)?.let(::visible).orEmpty().filter { it.kind.playable }
 
-    private fun show(path: List<DeviceCrumb>) {
+    private fun show(path: List<DeviceCrumb>, pointAt: DeviceLocation? = null) {
         val target = path.lastOrNull() ?: return
         job?.cancel()
         trail = path
+        pointed = pointAt
         listing = FolderListing.Loading
         job = scope.launch {
             val entries = source.list(target.location)

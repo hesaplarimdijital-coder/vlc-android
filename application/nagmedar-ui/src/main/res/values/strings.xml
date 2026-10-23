@@ -3932,4 +3932,16 @@
         <item quantity="one">Looking up %d…</item>
         <item quantity="other">Looking up %d…</item>
     </plurals>
+    <!-- the library's menus: a media's file to another app, or in its folder -->
+    <string name="nag_media_share">Share…</string>
+    <string name="nag_media_share_title">Share “%1$s”</string>
+    <plurals name="nag_media_share_many">
+        <item quantity="one">Share %d file</item>
+        <item quantity="other">Share %d files</item>
+    </plurals>
+    <string name="nag_media_share_missing">The file cannot be found to share</string>
+    <string name="nag_media_share_no_app">No app here can share it</string>
+    <string name="nag_media_reveal">Show in folder</string>
+    <string name="nag_media_reveal_nowhere">This file\'s folder cannot be shown</string>
+    <string name="nag_media_reveal_no_app">No app here opens folders</string>
 </resources>

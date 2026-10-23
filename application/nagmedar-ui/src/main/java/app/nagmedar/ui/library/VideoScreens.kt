@@ -222,6 +222,7 @@ fun MoviesScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     selection = selection,
                     onPlayAll = { films -> PlaybackActions.playList(context, films.mapNotNull { it.media }, 0) },
                     onQueueAll = { films -> PlaybackActions.appendList(context, films.mapNotNull { it.media }) },
+                    onShareAll = { films -> MediaSharing.share(context, films.mapNotNull { it.media }.map { MediaFile.of(it) }) },
                     info = info,
                 )
             }
@@ -338,6 +339,8 @@ fun MoviesLibrary(
     selection: MultiSelection? = null,
     onPlayAll: (List<VideoItem>) -> Unit = {},
     onQueueAll: (List<VideoItem>) -> Unit = {},
+    /** The selected films' files to another app, with the system's share sheet. */
+    onShareAll: (List<VideoItem>) -> Unit = {},
     /** Film information by [FilmQuery.key]: posters, the hero, years and ratings. */
     info: Map<String, FilmInfo> = emptyMap(),
 ) {
@@ -368,6 +371,7 @@ fun MoviesLibrary(
                 ) {
                     NagButton(stringResource(R.string.nag_selection_play), { onPlayAll(chosen) }, primary = true)
                     NagButton(stringResource(R.string.nag_add_to_queue), { onQueueAll(chosen) })
+                    NagButton(stringResource(R.string.nag_media_share), { onShareAll(chosen) })
                     val toWatched = chosen.any { it.watchState != WatchState.Watched }
                     NagButton(stringResource(if (toWatched) R.string.nag_mark_watched else R.string.nag_mark_unwatched), { WatchMarks.mark(chosen, toWatched) })
                 }

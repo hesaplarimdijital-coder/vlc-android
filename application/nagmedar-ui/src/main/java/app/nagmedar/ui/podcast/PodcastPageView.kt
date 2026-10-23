@@ -1,5 +1,6 @@
 package app.nagmedar.ui.podcast
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,8 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.library.MediaFile
+import app.nagmedar.ui.library.fileMenuEntries
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -173,7 +176,8 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
 
 @Composable
 private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFormat, actions: PodcastActions, download: DownloadUi, selected: Boolean) {
-    val res = LocalContext.current.resources
+    val context = LocalContext.current
+    val res = context.resources
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -197,7 +201,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
                     icon = NagIcons.Check,
                 ),
                 MenuEntry.Item(res.getString(R.string.nag_pod_copy_episode_address), { actions.onCopy(episode.audioUrl) }),
-            )
+            ) + downloadedFileEntries(context, episode, download)
         },
         accessibilityLabel = res.getString(R.string.nag_pod_actions),
         modifier = Modifier.fillMaxWidth().padding(horizontal = dimens.gapS),
@@ -244,6 +248,14 @@ private fun downloadEntry(res: android.content.res.Resources, episode: PodcastEp
     DownloadUi.None, DownloadUi.Failed -> MenuEntry.Item(res.getString(R.string.nag_pod_download), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads)
     DownloadUi.Queued, is DownloadUi.Running -> MenuEntry.Item(res.getString(R.string.nag_pod_download_stop), { actions.onCancelDownload(episode.id) }, icon = NagIcons.Close)
     is DownloadUi.Done -> MenuEntry.Item(res.getString(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, destructive = true)
+}
+
+/** A downloaded episode's file: shared ("Paylaş…") or shown in its folder ("Dosyada göster"); nothing before it is down. */
+private fun downloadedFileEntries(context: Context, episode: PodcastEpisode, download: DownloadUi): List<MenuEntry> {
+    val location = episode.downloadPath?.takeIf { download is DownloadUi.Done } ?: return emptyList()
+    val file = MediaFile(DownloadFiles.uriOf(location), video = DownloadFiles.mimeOf(episode).startsWith("video/"), name = episode.title)
+    val entries = fileMenuEntries(context, file)
+    return if (entries.isEmpty()) entries else listOf(MenuEntry.Separator) + entries
 }
 
 /** What a row says of its episode's download: nothing before it, a few words while it waits or runs, a mark once it is on the device or failed. */

@@ -122,6 +122,7 @@ import org.videolan.tools.Notices
  * "Play on …" opens the device picker for it (S-1302).
  * [info] shows the details beside the list (videos, S-802); without it the information window opens.
  * [select] starts selecting by touch (S-310): the menu's "Seç".
+ * A file of this device is shared ("Paylaş…") or shown in its folder ("Dosyada göster").
  */
 fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (() -> Unit)? = null, select: (() -> Unit)? = null): List<MenuEntry> {
     val res = context.resources
@@ -143,6 +144,8 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
             shortcut = ShortcutRegistry.chordLabel(ShortcutId.MediaInfo, res),
             icon = NagIcons.Info,
         ),
+        // the file itself: to another app, or where it is
+        *fileMenuEntries(context, MediaFile.of(media)).toTypedArray(),
         // S-1201: the film checked against the target device
         if (media.type == MediaWrapper.TYPE_VIDEO) MenuEntry.Item(res.getString(R.string.nag_tvlab_analyse), { openInTvLab(context, media.uri) }, icon = NagIcons.TvLab) else null,
         // S-708: the film's subtitle files cleaned, converted and edited into new files

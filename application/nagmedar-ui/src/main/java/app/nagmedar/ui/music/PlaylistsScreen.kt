@@ -620,6 +620,7 @@ private fun PlaylistPane(
             ) {
                 NagButton(stringResource(R.string.nag_selection_play), { actions.play(chosen.map { it.track }, 0) }, primary = true)
                 if (!compact) NagButton(stringResource(R.string.nag_play_next), { actions.playNext(chosen.map { it.track }) })
+                actions.share?.let { share -> NagButton(stringResource(R.string.nag_media_share), { share(chosen.map { it.track }) }) }
                 NagButton(stringResource(R.string.nag_pl_remove), { remove(chosen.map { it.key }.toSet()) })
             }
         }

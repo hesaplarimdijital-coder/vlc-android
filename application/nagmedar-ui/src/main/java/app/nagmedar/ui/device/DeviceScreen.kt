@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -108,7 +109,8 @@ private const val KEY_SORT = "nagmedar_device_sort"
  * a double click opens, Backspace goes up, F5 reads it again, the Menu key opens a row's menu).
  * A file plays or joins the queue; a folder plays, joins the queue or becomes a section's source folder.
  * On a wide window the places stay beside the folder; on a phone the folder covers them, Back
- * going up.
+ * going up. A library menu's "Dosyada göster" ([DeviceRequests]) opens a file's folder with the
+ * file selected in sight.
  */
 @Composable
 fun DeviceScreen(prefs: NagmedarPreferences) {
@@ -130,6 +132,13 @@ fun DeviceScreen(prefs: NagmedarPreferences) {
         onPauseOrDispose {}
     }
     LaunchedEffect(access?.folders, access?.media) { model.refresh() }
+    // "Dosyada göster" from a library menu: the file's folder, the file selected in it
+    val reveal = DeviceRequests.reveal
+    LaunchedEffect(reveal) {
+        if (reveal == null) return@LaunchedEffect
+        model.reveal(reveal)
+        DeviceRequests.taken(reveal)
+    }
     val wide = currentWidthClass() >= WidthClass.Expanded
     BrowserCommands(onUp = model::up, onRefresh = {
         model.refresh()
@@ -486,6 +495,16 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val compact = currentWidthClass() == WidthClass.Compact
     var selected by remember(model.current) { mutableStateOf<DeviceLocation?>(null) }
+    val listState = rememberLazyListState()
+    // the file a library menu asked to show: selected, and scrolled into sight
+    LaunchedEffect(model.pointed, entries) {
+        val pointed = model.pointed ?: return@LaunchedEffect
+        val index = entries.indexOfFirst { it.location == pointed }
+        if (index < 0) return@LaunchedEffect
+        selected = pointed
+        listState.scrollToItem(index)
+        model.pointedShown()
+    }
     val dates = remember(locale) { DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale) }
     val name = TableColumn<DeviceEntry>(
         title = stringResource(R.string.nag_net_column_name),
@@ -516,6 +535,7 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
         columns = if (compact) listOf(name) else listOf(name, size, modified),
         rows = entries,
         key = { it.location },
+        state = listState,
         selectedKey = selected,
         sort = if (compact) null else TableSort(sortColumn, model.sort.ascending),
         onSortChange = if (compact) {

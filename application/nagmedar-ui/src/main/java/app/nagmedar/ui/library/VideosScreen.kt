@@ -139,6 +139,7 @@ fun VideosScreen(repository: MediaRepository, onAddFolder: () -> Unit) {
                     },
                     onPlayAll = { list -> PlaybackActions.playList(context, list.mapNotNull { it.media }, 0) },
                     onQueueAll = { list -> PlaybackActions.appendList(context, list.mapNotNull { it.media }) },
+                    onShareAll = { list -> MediaSharing.share(context, list.mapNotNull { it.media }.map { MediaFile.of(it) }) },
                 )
             }
         }
@@ -182,6 +183,7 @@ private fun ClipsContent(
     menu: (VideoItem, play: () -> Unit, info: () -> Unit) -> List<MenuEntry>,
     onPlayAll: (List<VideoItem>) -> Unit,
     onQueueAll: (List<VideoItem>) -> Unit,
+    onShareAll: (List<VideoItem>) -> Unit,
 ) {
     val dimens = NagTheme.dimens
     val pointer = NagTheme.inputMode == InputMode.Pointer
@@ -215,6 +217,7 @@ private fun ClipsContent(
             ) {
                 NagButton(stringResource(R.string.nag_selection_play), { onPlayAll(chosen) }, primary = true)
                 NagButton(stringResource(R.string.nag_add_to_queue), { onQueueAll(chosen) })
+                NagButton(stringResource(R.string.nag_media_share), { onShareAll(chosen) })
             }
         }
         LazyVerticalGrid(

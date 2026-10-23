@@ -3905,4 +3905,16 @@
         <item quantity="one">%d tanesi aranıyor…</item>
         <item quantity="other">%d tanesi aranıyor…</item>
     </plurals>
+    <!-- the library's menus: a media's file to another app, or in its folder -->
+    <string name="nag_media_share">Paylaş…</string>
+    <string name="nag_media_share_title">“%1$s” paylaşılsın</string>
+    <plurals name="nag_media_share_many">
+        <item quantity="one">%d dosya paylaşılsın</item>
+        <item quantity="other">%d dosya paylaşılsın</item>
+    </plurals>
+    <string name="nag_media_share_missing">Paylaşılacak dosya bulunamadı</string>
+    <string name="nag_media_share_no_app">Bu cihazda paylaşacak bir uygulama yok</string>
+    <string name="nag_media_reveal">Dosyada göster</string>
+    <string name="nag_media_reveal_nowhere">Bu dosyanın klasörü gösterilemiyor</string>
+    <string name="nag_media_reveal_no_app">Bu cihazda klasörleri açan bir uygulama yok</string>
 </resources>
