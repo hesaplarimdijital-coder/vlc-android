@@ -240,7 +240,9 @@ build_translate() { # extra cmake args...
     log "libnagmedar_translate ($TARGET)"
     local dir="$WORK/build-$TARGET/translate"
     mkdir -p "$WORK/build-$TARGET"
-    cmake -S "$ROOT/native/translate" -B "$dir" -DCMAKE_BUILD_TYPE=Release \
+    # CMake 4 (the runners' since late October 2026) refuses projects below 3.5: CTranslate2's
+    # cpuinfo and clog still say 3.1
+    cmake -S "$ROOT/native/translate" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCT2_SOURCE="$WORK/src/ctranslate2" -DSPM_SOURCE="$WORK/src/sentencepiece" \
         -DCT2_VERSION="${CT2_REF#v}" -DSPM_VERSION="${SPM_REF#v}" \
         "$@" > "$dir.configure.log" 2>&1 || fail_log "translate configure ($TARGET)" "$dir.configure.log"
