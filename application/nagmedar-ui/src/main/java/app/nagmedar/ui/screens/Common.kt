@@ -34,7 +34,10 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalNavKind
+import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.LocalShellTopPadding
 import app.nagmedar.ui.shell.NavKind
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -102,7 +105,11 @@ private fun Modifier.verticalPaddingUnlessEmpty(padding: Dp): Modifier = layout 
 @Composable
 fun MoreScreen(destinations: List<Destination>, onSelect: (Destination) -> Unit) {
     val dimens = NagTheme.dimens
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = dimens.gapS)) {
+    // the list scrolls under the phone's bars (Desktop Kit 1.0)
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = LocalShellTopPadding.current + androidx.compose.foundation.layout.PaddingValues(vertical = dimens.gapS) + LocalShellBottomPadding.current,
+    ) {
         items(destinations, key = { it.route }) { destination ->
             DestinationRow(destination) { onSelect(destination) }
         }

@@ -152,6 +152,7 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
+import app.nagmedar.ui.shell.UnderShellBars
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.rememberDetailMotion
 import app.nagmedar.ui.streams.StreamsCenter
@@ -493,80 +494,84 @@ private fun NagmedarMain(
                     if (dropTargets.incoming && dropTargets.hovered == null) DropOverlay()
                 },
                 screen = { destination, shellNavigator ->
-                    when (destination) {
-                        // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
-                        Destination.Music -> MusicScreen(
-                            repository,
-                            onAddFolder = { sourcesFor = LibrarySection.Music },
-                            nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }, onFullScreenVisualizer = { visualizerOpen = true }) },
-                        )
-                        // S-804: the medialibrary's playlists, a tab each
-                        Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
-                        // S-1105: the radio directory's search
-                        Destination.Radio -> RadioScreen(
-                            searchRequested = radioSearchRequested,
-                            onSearchHandled = { radioSearchRequested = false },
-                            recordingsRequested = radioRecordingsRequested,
-                            onRecordingsHandled = { radioRecordingsRequested = false },
-                            undo = undo,
-                        )
-                        // S-1101, S-1102: subscriptions, the search of Podcast Index and iTunes, OPML
-                        Destination.Podcasts -> PodcastsScreen(undo = undo)
-                        Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
-                        Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
-                        Destination.TvLab -> TvLabScreen(tvLab)
-                        // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
-                        Destination.Network -> NetworkScreen(undo)
-                        Destination.Settings -> SettingsScreen(
-                            prefs = prefs,
-                            onOpenAllSettings = { shellNavigator.navigate(Destination.AllSettings) },
-                            onOpenAbout = { shellNavigator.navigate(Destination.About) },
-                            onShowFirstRun = { prefs.updateFirstRunDone(false) },
-                            listState = settingsList,
-                            undo = undo,
-                            onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
-                            onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
-                            onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
-                        )
-                        // VLC's preference pages, drawn as Nağmedar's
-                        Destination.AllSettings -> AllSettingsScreen(
-                            onLink = { link ->
-                                when (link) {
-                                    NagmedarLink.Equalizer -> shellNavigator.navigate(Destination.Equalizer)
-                                    NagmedarLink.About -> shellNavigator.navigate(Destination.About)
-                                    // Library, Appearance, Remote access, Backup: that section of Settings
-                                    else -> link.settingsItem?.let(openSettingsAt)
-                                }
-                            },
-                            onClose = { if (!shellNavigator.back()) shellNavigator.navigate(Destination.Settings) },
-                            requestedKey = ShellRequests.preference,
-                            onRequestHandled = { ShellRequests.preference = null },
-                        )
-                        // S-906, with S-910's signal path and S-912's A/B test beside the chain
-                        Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
-                        // S-1504: the guide and the card of keys, each leading to the other
-                        Destination.Guide -> GuideScreen(onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) })
-                        Destination.ShortcutCard -> ShortcutCardScreen(
-                            onEdit = actions::editShortcuts,
-                            onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
-                        )
-                        Destination.More -> MoreScreen(
-                            destinations = Destination.overflow(
-                                when (NavKind.forWidth(widthClass)) {
-                                    NavKind.BottomBar -> Destination.bottomBar
-                                    NavKind.Rail -> Destination.rail + Destination.railFooter
-                                    NavKind.Sidebar -> Destination.sidebar
+                    val page: @Composable () -> Unit = {
+                        when (destination) {
+                            // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
+                            Destination.Music -> MusicScreen(
+                                repository,
+                                onAddFolder = { sourcesFor = LibrarySection.Music },
+                                nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }, onFullScreenVisualizer = { visualizerOpen = true }) },
+                            )
+                            // S-804: the medialibrary's playlists, a tab each
+                            Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
+                            // S-1105: the radio directory's search
+                            Destination.Radio -> RadioScreen(
+                                searchRequested = radioSearchRequested,
+                                onSearchHandled = { radioSearchRequested = false },
+                                recordingsRequested = radioRecordingsRequested,
+                                onRecordingsHandled = { radioRecordingsRequested = false },
+                                undo = undo,
+                            )
+                            // S-1101, S-1102: subscriptions, the search of Podcast Index and iTunes, OPML
+                            Destination.Podcasts -> PodcastsScreen(undo = undo)
+                            Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
+                            Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
+                            Destination.TvLab -> TvLabScreen(tvLab)
+                            // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
+                            Destination.Network -> NetworkScreen(undo)
+                            Destination.Settings -> SettingsScreen(
+                                prefs = prefs,
+                                onOpenAllSettings = { shellNavigator.navigate(Destination.AllSettings) },
+                                onOpenAbout = { shellNavigator.navigate(Destination.About) },
+                                onShowFirstRun = { prefs.updateFirstRunDone(false) },
+                                listState = settingsList,
+                                undo = undo,
+                                onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
+                                onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
+                                onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
+                            )
+                            // VLC's preference pages, drawn as Nağmedar's
+                            Destination.AllSettings -> AllSettingsScreen(
+                                onLink = { link ->
+                                    when (link) {
+                                        NagmedarLink.Equalizer -> shellNavigator.navigate(Destination.Equalizer)
+                                        NagmedarLink.About -> shellNavigator.navigate(Destination.About)
+                                        // Library, Appearance, Remote access, Backup: that section of Settings
+                                        else -> link.settingsItem?.let(openSettingsAt)
+                                    }
                                 },
-                            ),
-                            onSelect = shellNavigator::navigate,
-                        )
-                        // the network streams opened by their address, and those played before
-                        Destination.Streams -> StreamsScreen(undo)
-                        // this device's storage, its drives and the picked folders, browsed
-                        Destination.Device -> DeviceScreen(prefs)
-                        // the podcast episodes and the subtitle tools' models downloaded, coming down or failed
-                        Destination.Downloads -> DownloadsScreen()
+                                onClose = { if (!shellNavigator.back()) shellNavigator.navigate(Destination.Settings) },
+                                requestedKey = ShellRequests.preference,
+                                onRequestHandled = { ShellRequests.preference = null },
+                            )
+                            // S-906, with S-910's signal path and S-912's A/B test beside the chain
+                            Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
+                            // S-1504: the guide and the card of keys, each leading to the other
+                            Destination.Guide -> GuideScreen(onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) })
+                            Destination.ShortcutCard -> ShortcutCardScreen(
+                                onEdit = actions::editShortcuts,
+                                onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
+                            )
+                            Destination.More -> MoreScreen(
+                                destinations = Destination.overflow(
+                                    when (NavKind.forWidth(widthClass)) {
+                                        NavKind.BottomBar -> Destination.bottomBar
+                                        NavKind.Rail -> Destination.rail + Destination.railFooter
+                                        NavKind.Sidebar -> Destination.sidebar
+                                    },
+                                ),
+                                onSelect = shellNavigator::navigate,
+                            )
+                            // the network streams opened by their address, and those played before
+                            Destination.Streams -> StreamsScreen(undo)
+                            // this device's storage, its drives and the picked folders, browsed
+                            Destination.Device -> DeviceScreen(prefs)
+                            // the podcast episodes and the subtitle tools' models downloaded, coming down or failed
+                            Destination.Downloads -> DownloadsScreen()
+                        }
                     }
+                    // Desktop Kit 1.0: on a phone these pages lie under the bars, their lists scrolling beneath the glass
+                    if (destination in UnderBars) UnderShellBars(listOnTop = destination in ListOnTop, content = page) else page()
                 },
             )
         }
@@ -609,6 +614,15 @@ private fun NagmedarMain(
         )
     }
 }
+
+/** The pages laid out under a phone's bars (Desktop Kit 1.0); the others are kept clear of them by the shell. */
+private val UnderBars = setOf(
+    Destination.Music, Destination.Podcasts, Destination.Radio, Destination.Playlists, Destination.Device, Destination.Network,
+    Destination.Streams, Destination.Downloads, Destination.Settings, Destination.Search, Destination.More,
+)
+
+/** Of [UnderBars], the pages that are one list from the top: they scroll beneath the top bar too. */
+private val ListOnTop = setOf(Destination.Settings, Destination.Search, Destination.More)
 
 /** A web page in the browser (S-209: the source code, the licences); nothing when there is none. */
 fun openLink(context: Context, url: String) {

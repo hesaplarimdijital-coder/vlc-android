@@ -103,6 +103,43 @@ fun rememberShellContentPadding(): PaddingValues {
     return LocalShellContentPadding.current
 }
 
+/**
+ * The bottom of the shell's padding, for the lists (and the states in the lists' place) of a
+ * screen in [UnderShellBars]: `contentPadding = PaddingValues(…) + LocalShellBottomPadding.current`.
+ * Zero elsewhere, so a list outside such a screen is never padded twice.
+ */
+val LocalShellBottomPadding = staticCompositionLocalOf<PaddingValues> { PaddingValues(0.dp) }
+
+/**
+ * The top of the shell's padding, for the list of a screen in [UnderShellBars] with `listOnTop`:
+ * the list that is the screen's first thing scrolls beneath the top bar as well. Zero elsewhere.
+ */
+val LocalShellTopPadding = staticCompositionLocalOf<PaddingValues> { PaddingValues(0.dp) }
+
+/**
+ * A whole screen laid out under the phone's bars (Desktop Kit 1.0): it asks for the shell's
+ * padding ([rememberShellContentPadding]), keeps its top (the header, the toolbar) below the top
+ * bar and hands the bottom to its lists through [LocalShellBottomPadding], so they scroll
+ * beneath the bottom bar and the player strip and their last rows rest clear of them. A screen
+ * that is one list from the top ([listOnTop]: Settings, Search, More) gets the top through
+ * [LocalShellTopPadding] too and scrolls beneath the top bar's glass. On tablet and DeX the
+ * padding is zero and nothing changes.
+ */
+@Composable
+fun UnderShellBars(listOnTop: Boolean = false, content: @Composable () -> Unit) {
+    val padding = rememberShellContentPadding()
+    val top = remember(padding) { padding.topOnly() }
+    val bottom = remember(padding) { padding.bottomOnly() }
+    val none = remember { PaddingValues(0.dp) }
+    Box(Modifier.fillMaxSize().then(if (listOnTop) Modifier else Modifier.padding(top)), propagateMinConstraints = true) {
+        CompositionLocalProvider(
+            LocalShellBottomPadding provides bottom,
+            LocalShellTopPadding provides if (listOnTop) top else none,
+            content = content,
+        )
+    }
+}
+
 /** [rememberShellContentPadding] as padding: for a screen that does not scroll. */
 @Composable
 fun Modifier.shellContentPadding(): Modifier = padding(rememberShellContentPadding())

@@ -208,7 +208,7 @@ fun ArtworkAccent(seed: Color?, content: @Composable () -> Unit) {
     val tones by produceState<AccentTones?>(null, seed) {
         value = seed?.let { color -> withContext(Dispatchers.Default) { AccentTones.fromSeed(color) } }
     }
-    val target = remember(base, tones) { if (tones == null) base else base.withAccent(tones) }
+    val target = remember(base, tones) { tones?.let(base::withAccent) ?: base }
     val colors = animatePalette(target, if (NagTheme.motion.reduced) 0 else NagMotion.COLOR_CHANGE)
     CompositionLocalProvider(LocalNagColors provides colors, content = content)
 }

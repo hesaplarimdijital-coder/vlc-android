@@ -91,8 +91,10 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.flow.drop
@@ -315,7 +317,7 @@ private fun ServerPane(
     val found = model.discovery.unsaved(saved)
     val openUrl = model.folder?.server?.url
     val menuLabel = stringResource(R.string.nag_more_actions)
-    LazyColumn(modifier.testTag("network-servers"), contentPadding = PaddingValues(vertical = dimens.gapS)) {
+    LazyColumn(modifier.testTag("network-servers"), contentPadding = PaddingValues(vertical = dimens.gapS) + LocalShellBottomPadding.current) {
         when (lan) {
             LanState.Disabled -> item(key = "disabled") {
                 PaneNotice(
@@ -556,7 +558,7 @@ private fun FolderPane(
 
 @Composable
 private fun Centered(content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center) { content() }
+    Box(Modifier.fillMaxSize().padding(LocalShellBottomPadding.current).verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center) { content() }
 }
 
 /** Where the folder is (each folder on the way a button back to it) and what is done with all it holds. */
@@ -747,6 +749,7 @@ private fun EntryTable(view: FolderView, model: NetworkModel, actions: NetworkAc
         rowMenu = { entry, _ -> entryMenu(res, entry, view, model, actions) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
         modifier = Modifier.testTag("network-table"),
+        contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
     )
 }
 

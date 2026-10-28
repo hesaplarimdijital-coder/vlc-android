@@ -34,6 +34,7 @@ import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.Medialibrary
@@ -173,8 +174,10 @@ fun LibraryContent(
     content: @Composable () -> Unit,
 ) {
     val access = LocalLibraryAccess.current
+    // the states rest clear of the phone's bars, where the screen lies under them (Desktop Kit 1.0)
+    val states = Modifier.padding(LocalShellBottomPadding.current)
     when {
-        empty && access != null && !access.media && access.folders.isEmpty() -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        empty && access != null && !access.media && access.folders.isEmpty() -> Box(modifier.fillMaxSize().then(states), contentAlignment = Alignment.Center) {
             StatePanel(
                 tone = StateTone.Info,
                 icon = NagIcons.Shield,
@@ -184,7 +187,7 @@ fun LibraryContent(
                 secondary = StateAction(stringResource(R.string.nag_state_folder_only), access.pickFolder),
             )
         }
-        loading || (empty && scan.active) -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        loading || (empty && scan.active) -> Box(modifier.fillMaxSize().then(states), contentAlignment = Alignment.Center) {
             LoadingState(
                 title = scanTitle(scan),
                 progress = scan.fraction,
@@ -192,7 +195,7 @@ fun LibraryContent(
                 detail = if (scan.active) stringResource(R.string.nag_state_scan_detail) else null,
             )
         }
-        empty -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        empty -> Box(modifier.fillMaxSize().then(states), contentAlignment = Alignment.Center) {
             StatePanel(
                 tone = StateTone.Neutral,
                 icon = NagIcons.FolderAdd,

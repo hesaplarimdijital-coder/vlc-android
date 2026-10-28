@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -89,8 +90,10 @@ import app.nagmedar.ui.library.rememberScanState
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
@@ -726,5 +729,7 @@ private fun PlaylistTable(
                 }
                 .then(actions.rowModifier(line.track) { listOf(line.track) })
         },
+        // the last rows rest clear of the phone's bars (Desktop Kit 1.0)
+        contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
     )
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -69,8 +70,10 @@ import app.nagmedar.ui.music.PlaylistSummary
 import app.nagmedar.ui.components.DialogCard
 import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.CoroutineScope
@@ -373,6 +376,7 @@ private fun StreamTable(streams: List<SavedStream>, actions: StreamRowActions) {
             rowMenu = { stream, _ -> streamMenu(res, stream, actions) },
             rowMenuLabel = stringResource(R.string.nag_more_actions),
             modifier = Modifier.testTag("streams-table"),
+            contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
         )
     }
 }

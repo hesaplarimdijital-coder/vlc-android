@@ -96,8 +96,10 @@ import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
@@ -650,7 +652,10 @@ fun MusicBrowser(
         MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact, probing = probing)
         when {
             // nothing played yet (no filter hiding what was)
-            state.view == MusicView.Recent && open?.tracks.isNullOrEmpty() && !state.filter.active -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            state.view == MusicView.Recent && open?.tracks.isNullOrEmpty() && !state.filter.active -> Box(
+                Modifier.fillMaxSize().padding(LocalShellBottomPadding.current),
+                contentAlignment = Alignment.Center,
+            ) {
                 StatePanel(
                     tone = StateTone.Neutral,
                     icon = NagIcons.Play,
@@ -658,7 +663,10 @@ fun MusicBrowser(
                     description = stringResource(R.string.nag_music_recent_none_desc),
                 )
             }
-            groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(
+                Modifier.fillMaxSize().padding(LocalShellBottomPadding.current),
+                contentAlignment = Alignment.Center,
+            ) {
                 NoResultsState(
                     title = stringResource(R.string.nag_music_no_match),
                     // the files still being read may yet fit
@@ -751,7 +759,7 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
             state.reveal = null
         }
     }
-    LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp)) {
+    LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp) + LocalShellBottomPadding.current) {
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened
             // the menu plays the group's tracks, as the table's rows do one track
@@ -906,6 +914,8 @@ private fun TrackPane(group: MusicGroup, shown: List<Track>, state: MusicBrowser
             },
             headerMenu = if (compact) null else ({ columnMenu(state, labels) }),
             headerMenuLabel = columnsLabel,
+            // the last rows rest clear of the phone's bars (Desktop Kit 1.0)
+            contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
         )
     }
 }
