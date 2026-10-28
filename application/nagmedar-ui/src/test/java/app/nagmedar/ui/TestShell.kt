@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuBarMenus
@@ -70,6 +71,10 @@ fun TestShell(
     /** What the bars show (S-1302: casting). */
     playerInfo: PlayerBarInfo = samplePlayerInfo,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
+    /** Another player in the bars' place (Desktop Kit 1.0: the phone's expandable player); null: the sample bars. */
+    player: (@Composable (NavKind) -> Unit)? = null,
+    /** The phone's "⋯" sheet's own entries. */
+    moreActions: List<ActionGroup> = emptyList(),
 ) {
     val navController = rememberNavController()
     LaunchedEffect(startDestination) {
@@ -91,11 +96,12 @@ fun TestShell(
             val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
             if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
-        player = { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
+        player = player ?: { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
         overlay = overlay,
         caption = caption,
         screen = screen,
+        moreActions = moreActions,
     )
 }
 

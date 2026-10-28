@@ -14,6 +14,7 @@ private const val SLOT_TOP = "top"
 private const val SLOT_NAV = "nav"
 private const val SLOT_CONTENT = "content"
 private const val SLOT_PLAYER = "player"
+private const val SLOT_PLAYER_LAYER = "playerLayer"
 private const val SLOT_SCREEN_OVERLAY = "screenOverlay"
 private const val SLOT_OVERLAY = "overlay"
 
@@ -33,9 +34,10 @@ private const val SLOT_OVERLAY = "overlay"
  *
  * With [floatingPlayer] (Rail and Sidebar) the player is not stacked under the content but floats
  * over its bottom edge, [floatingMargin] from the edges and at most [floatingMaxWidth] wide.
- * [screenOverlay] lies over the content where the bars leave it ([screenOverlayTop] and
- * [screenOverlayBottom] pixels in from the edges, read while measuring): undo bars and notices.
- * [overlay] covers the whole window above everything else (the expanded player, the sheets).
+ * [playerLayer] covers the whole window over the chrome (the phone's expanded player); [screenOverlay]
+ * lies over that where the bars leave the content ([screenOverlayTop] and [screenOverlayBottom]
+ * pixels in from the edges, read while measuring): the lyrics, "Sıradaki", undo bars and notices.
+ * [overlay] covers the whole window above everything else (the sheets).
  *
  * [contentOnly]: the content and the overlays take the whole window and the chrome is not placed
  * (S-1002: the player over a tablet's window); the chrome keeps its state for when it comes back.
@@ -50,6 +52,7 @@ fun ShellLayout(
     modifier: Modifier = Modifier,
     contentOnly: Boolean = false,
     navigationOffset: () -> Int = { 0 },
+    playerLayer: @Composable () -> Unit = {},
     screenOverlay: @Composable () -> Unit = {},
     screenOverlayTop: () -> Int = { 0 },
     screenOverlayBottom: () -> Int = { 0 },
@@ -75,6 +78,7 @@ fun ShellLayout(
                     .layoutId(SLOT_PLAYER)
                     .graphicsLayer { translationY = if (slides) navigationOffset().toFloat() else 0f },
             ) { player() }
+            Box(Modifier.layoutId(SLOT_PLAYER_LAYER)) { playerLayer() }
             Box(Modifier.layoutId(SLOT_SCREEN_OVERLAY)) { screenOverlay() }
             Box(Modifier.layoutId(SLOT_OVERLAY)) { overlay() }
         },
@@ -87,6 +91,7 @@ fun ShellLayout(
         val contentM = measurables.first { it.layoutId == SLOT_CONTENT }
         val screenOverlayM = measurables.first { it.layoutId == SLOT_SCREEN_OVERLAY }
         val overlay = measurables.first { it.layoutId == SLOT_OVERLAY }.measure(Constraints.fixed(width, height))
+        val playerLayer = measurables.first { it.layoutId == SLOT_PLAYER_LAYER }.measure(Constraints.fixed(width, height))
         val margin = floatingMargin.roundToPx()
 
         if (contentOnly) {
@@ -94,6 +99,7 @@ fun ShellLayout(
             val over = screenOverlayM.measure(Constraints.fixed(width, height))
             return@Layout layout(width, height) {
                 content.placeRelative(0, 0)
+                playerLayer.placeRelative(0, 0)
                 over.placeRelative(0, 0)
                 overlay.placeRelative(0, 0)
             }
@@ -113,6 +119,7 @@ fun ShellLayout(
                     top.placeRelative(0, 0)
                     player.placeRelative(0, height - nav.height - player.height)
                     nav.placeRelative(0, height - nav.height)
+                    playerLayer.placeRelative(0, 0)
                     over.placeRelative(0, overTop)
                     overlay.placeRelative(0, 0)
                 }
@@ -133,6 +140,7 @@ fun ShellLayout(
                         nav.placeRelative(0, 0)
                         top.placeRelative(nav.width, 0)
                         player.placeRelative(nav.width + (rest - playerWidth) / 2, height - margin - player.height)
+                        playerLayer.placeRelative(0, 0)
                         over.placeRelative(nav.width, top.height)
                         overlay.placeRelative(0, 0)
                     }
@@ -146,6 +154,7 @@ fun ShellLayout(
                         nav.placeRelative(0, 0)
                         top.placeRelative(nav.width, 0)
                         player.placeRelative(nav.width, height - player.height)
+                        playerLayer.placeRelative(0, 0)
                         over.placeRelative(nav.width, top.height)
                         overlay.placeRelative(0, 0)
                     }
@@ -167,6 +176,7 @@ fun ShellLayout(
                         top.placeRelative(0, 0)
                         nav.placeRelative(0, top.height)
                         player.placeRelative(nav.width + (contentWidth - playerWidth) / 2, height - margin - player.height)
+                        playerLayer.placeRelative(0, 0)
                         over.placeRelative(nav.width, top.height)
                         overlay.placeRelative(0, 0)
                     }
@@ -182,6 +192,7 @@ fun ShellLayout(
                         top.placeRelative(0, 0)
                         nav.placeRelative(0, top.height)
                         player.placeRelative(0, height - player.height)
+                        playerLayer.placeRelative(0, 0)
                         over.placeRelative(nav.width, top.height)
                         overlay.placeRelative(0, 0)
                     }

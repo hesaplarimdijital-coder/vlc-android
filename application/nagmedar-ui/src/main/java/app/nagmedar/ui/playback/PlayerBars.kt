@@ -65,6 +65,8 @@ import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.cast.rememberCastDevice
 import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.ArtistAlbumLine
+import app.nagmedar.ui.components.ExpandablePlayer
+import app.nagmedar.ui.components.ExpandablePlayerState
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -335,7 +337,13 @@ class ServicePlayerBarActions(
     }
 }
 
-/** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
+/**
+ * The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player
+ * otherwise. On a phone, given [phonePlayer] and its [fullPlayer], the mini player grows into the
+ * full player when dragged up or tapped (Desktop Kit 1.0's ExpandablePlayer) while music plays, and
+ * a sideways swipe on it skips to the previous or next track; a station's or an episode's opens its
+ * page as before ([onOpenAudio]) and does not skip (the transport has no seek steps for them).
+ */
 @Composable
 fun PlayerBar(
     navKind: NavKind,
@@ -346,6 +354,8 @@ fun PlayerBar(
     onQueue: () -> Unit = {},
     /** Music opened from the bar (S-1002); null: the classic audio player. */
     onOpenAudio: (() -> Unit)? = null,
+    phonePlayer: ExpandablePlayerState? = null,
+    fullPlayer: (@Composable () -> Unit)? = null,
 ) {
     val media = nowPlaying.media ?: return
     // the mini player shows a video only while it plays without its player (the desktop's transport bar as before)
@@ -360,11 +370,20 @@ fun PlayerBar(
     }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
     // Desktop Kit 1.0: while music plays the bar takes its artwork's accent, cross-fading from one track to the next
-    ArtworkAccent(rememberArtworkColor(media.takeIf { it.type == MediaWrapper.TYPE_AUDIO })) {
-        if (navKind == NavKind.Sidebar) {
-            TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
-        } else {
-            MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
+    val music = media.type == MediaWrapper.TYPE_AUDIO
+    ArtworkAccent(rememberArtworkColor(media.takeIf { music })) {
+        when {
+            navKind == NavKind.Sidebar -> TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
+            navKind == NavKind.BottomBar && phonePlayer != null && fullPlayer != null -> ExpandablePlayer(
+                state = phonePlayer,
+                mini = { MiniPlayer(info, { progress }, actions, artwork, floating = true, queueOpen = queueOpen) },
+                full = fullPlayer,
+                modifier = modifier,
+                expandable = music,
+                onPrevious = if (music) actions::previous else null,
+                onNext = if (music) actions::next else null,
+            )
+            else -> MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
         }
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.LayoutDirection
@@ -45,16 +47,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.cast.CastPickerDialog
 import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
+import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NoticeHost
+import app.nagmedar.ui.components.PlayerValue
 import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.LocalTooltipDelay
 import app.nagmedar.ui.components.ScreenCommands
 import app.nagmedar.ui.components.TrackClickModifiers
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.rememberExpandablePlayerState
 import app.nagmedar.ui.components.rememberMenuBarState
 import app.nagmedar.ui.components.rememberUndoBarState
 import app.nagmedar.ui.device.DeviceRequests
@@ -164,6 +171,7 @@ import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
 import app.nagmedar.ui.widget.PlayerWidgetMigration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import org.videolan.medialibrary.MLServiceLocator
@@ -239,8 +247,11 @@ private fun NagmedarMain(
     val screenCommands = remember { ScreenCommands() }
     val dropTargets = remember { DropTargets() }
     val queuePanel = rememberQueuePanelState()
-    // S-1002: the phone's music player, over the shell
+    // S-1002: the music player over a tablet's window (the rail's layout)
     var phonePlayer by rememberSaveable { mutableStateOf(false) }
+    // Desktop Kit 1.0: on a phone the mini player grows into it
+    val expandingPlayer = rememberExpandablePlayerState()
+    val scope = rememberCoroutineScope()
     // S-1007: the sleep timer's window, from the menu bar and the palette
     var sleepTimerOpen by rememberSaveable { mutableStateOf(false) }
     // S-1004: the lyrics over the whole window (Ctrl+Shift+L, the panes' full-screen button)
@@ -362,22 +373,40 @@ private fun NagmedarMain(
         val openNowPlaying: (NavKind) -> Unit = { navKind ->
             val page = PlaybackActions.nowPlayingDestination()
             if (page == Destination.Music) {
-                // on a desktop window the music view with its now playing pane, else the phone's player
-                if (navKind == NavKind.Sidebar) {
-                    navigator.navigate(Destination.Music)
-                } else {
-                    phonePlayer = true
+                // on a desktop window the music view with its now playing pane, on a phone the mini player grown, else the player over the window
+                when (navKind) {
+                    NavKind.Sidebar -> navigator.navigate(Destination.Music)
+                    NavKind.BottomBar -> scope.launch { expandingPlayer.expand() }
+                    NavKind.Rail -> phonePlayer = true
                 }
             } else if (page != null) {
                 navigator.navigate(page)
             }
         }
+        val closePlayer: () -> Unit = {
+            phonePlayer = false
+            scope.launch { expandingPlayer.collapse() }
+        }
         // a player's artist or album link: the music view takes it (the phone's player closes for it)
         val musicLink = MusicLinks.pending
         LaunchedEffect(musicLink) {
             if (musicLink == null) return@LaunchedEffect
-            phonePlayer = false
+            closePlayer()
             navigator.navigate(Destination.Music)
+        }
+        // turned sideways (a phone's window becomes a rail's) or back: the open player stays open in the other form
+        val navKindNow = NavKind.forWidth(widthClass)
+        LaunchedEffect(navKindNow) {
+            when {
+                navKindNow != NavKind.BottomBar && expandingPlayer.currentValue == PlayerValue.Expanded -> {
+                    expandingPlayer.snapTo(PlayerValue.Collapsed)
+                    if (navKindNow == NavKind.Rail) phonePlayer = true
+                }
+                navKindNow == NavKind.BottomBar && phonePlayer -> {
+                    phonePlayer = false
+                    expandingPlayer.snapTo(PlayerValue.Expanded)
+                }
+            }
         }
         LaunchedEffect(nowPlayingRequested) {
             if (nowPlayingRequested) {
@@ -385,8 +414,8 @@ private fun NagmedarMain(
                 nowPlayingRequested = false
             }
         }
-        // S-1002: the phone's player has the whole window, the bars stand aside; a desktop window keeps its caption bar
-        val playerOverWindow = phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar && caption == null
+        // S-1002: a tablet's player has the whole window, the bars stand aside; a desktop window keeps its caption bar
+        val playerOverWindow = phonePlayer && navKindNow == NavKind.Rail && caption == null
         CompositionLocalProvider(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,
@@ -416,11 +445,38 @@ private fun NagmedarMain(
                         onQueue = queuePanel::toggle,
                         // what is not a video opens here: music in the music view (the phone's player), radio, podcasts, streams on their pages
                         onOpenAudio = { openNowPlaying(navKind) },
+                        // Desktop Kit 1.0: on a phone the mini player grows into the player itself
+                        phonePlayer = expandingPlayer,
+                        fullPlayer = {
+                            PhonePlayerHost(
+                                onClose = closePlayer,
+                                onQueue = queuePanel::toggle,
+                                onFullScreenLyrics = { lyricsOpen = true },
+                                onFullScreenVisualizer = { visualizerOpen = true },
+                                // the equaliser's page is the shell's: the player goes down for it
+                                onEqualizer = {
+                                    closePlayer()
+                                    navigator.navigate(Destination.Equalizer)
+                                },
+                                fullWindow = caption == null,
+                            )
+                        },
                     )
                 },
                 navController = navController,
                 caption = caption,
                 contentOnly = playerOverWindow,
+                // the phone's "⋯" sheet: after the pages, what playback has of its own (Desktop Kit 1.0)
+                moreActions = listOf(
+                    ActionGroup(
+                        stringResource(R.string.nag_menu_playback),
+                        listOf(
+                            MenuEntry.Item(stringResource(R.string.nag_sc_equalizer), { navigator.navigate(Destination.Equalizer) }, icon = NagIcons.Equalizer),
+                            MenuEntry.Item(stringResource(R.string.nag_sc_sleep_timer), { sleepTimerOpen = true }, icon = NagIcons.Sleep),
+                            MenuEntry.Item(stringResource(R.string.nag_queue_title), queuePanel::toggle, icon = NagIcons.Queue),
+                        ),
+                    ),
+                ),
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -428,8 +484,8 @@ private fun NagmedarMain(
                     Casting.request?.let { request -> CastPickerDialog(request, Casting::closePicker) }
                     val motion = NagTheme.motion
                     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-                    // the phone's player comes up from the mini player and goes down again; kept composed while it goes
-                    val phonePlayerShown = phonePlayer && NavKind.forWidth(widthClass) != NavKind.Sidebar
+                    // a tablet's player comes up from the mini player and goes down again; kept composed while it goes
+                    val phonePlayerShown = phonePlayer && navKindNow == NavKind.Rail
                     AnimatedVisibility(phonePlayerShown, enter = motion.sheetEnter(), exit = motion.sheetExit()) {
                         // the predictive Back gesture shrinks it as it does a detail; let go, it goes down from there
                         val back = rememberDetailMotion(open = true)
@@ -445,7 +501,7 @@ private fun NagmedarMain(
                                 navigator.navigate(Destination.Equalizer)
                             },
                             // as while it shows, also while it goes down
-                            fullWindow = NavKind.forWidth(widthClass) != NavKind.Sidebar && caption == null,
+                            fullWindow = caption == null,
                         )
                         // after the player's own: this one goes first; the player's windows opened later go before it
                         DetailBackHandler(enabled = phonePlayerShown, state = back, onBack = { phonePlayer = false })
