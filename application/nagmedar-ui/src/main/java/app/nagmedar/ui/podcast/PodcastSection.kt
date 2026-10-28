@@ -40,16 +40,16 @@ import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.toneColors
+import app.nagmedar.ui.library.pickedFolderLabel
 import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.playback.PlaybackRules
-import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 /** S-1103: what the downloads take: how many episodes, how many bytes, and what the storage rules would do about it now. */
 @Immutable
@@ -198,7 +198,7 @@ internal fun PodcastSectionContent(
                 modifier = Modifier.testTag("podcast-settings-played"),
             )
         }
-        val label = snapshotFolderLabel(settings.downloadFolder.ifEmpty { null }, stringResource(R.string.nag_pod_settings_folder_default))
+        val label = pickedFolderLabel(settings.downloadFolder.ifEmpty { null }, stringResource(R.string.nag_pod_settings_folder_default))
         SettingRow(stringResource(R.string.nag_pod_settings_folder), subtitle = label) {
             Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
                 if (settings.downloadFolder.isNotEmpty()) NagButton(stringResource(R.string.nag_snap_default_folder), onDefaultFolder, modifier = Modifier.testTag("podcast-settings-folder-default"))

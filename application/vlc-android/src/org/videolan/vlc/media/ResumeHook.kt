@@ -33,8 +33,9 @@ fun interface VolumeRestorer {
 /**
  * libVLC ends a stream, or fails on it, when its connection drops (the network lost, Wi-Fi handed over to mobile data)
  * as it does at the media's real end. The guard, kept by the new interface's podcast observer, tells one from the other
- * for the media it knows: when it [takesOver], the playlist neither takes the media as ended nor goes on, and the guard
- * opens it again where it was ([PlaylistManager.reopenCurrent]). Called on the main thread; never blocks.
+ * for the media it knows (podcast episodes, live streams such as radio): when it [takesOver], the playlist neither takes
+ * the media as ended nor goes on, and the guard opens it again where it was ([PlaylistManager.reopenCurrent]). A stream
+ * that stalls it stops itself ([PlaylistManager.dropStalled]). Called on the main thread; never blocks.
  */
 interface DropoutGuard {
     /** libVLC ended ([error] false) or failed on the media at [location], last at [timeMs] of [lengthMs] (0: unknown). */

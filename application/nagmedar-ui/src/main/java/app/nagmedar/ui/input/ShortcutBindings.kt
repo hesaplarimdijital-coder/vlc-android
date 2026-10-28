@@ -139,7 +139,6 @@ enum class ShortcutPreset(@StringRes val label: Int) {
 
 /** mpv's default keys (input.conf) where mpv differs from VLC; the rest stay as they are. */
 private val mpvKeys: Map<ShortcutId, KeyChord?> = mapOf(
-    ShortcutId.MediaInfo to KeyChord(Key.I),
     ShortcutId.Stop to KeyChord(Key.Q),
     ShortcutId.Previous to KeyChord(Key.Comma, shift = true),
     ShortcutId.Next to KeyChord(Key.Period, shift = true),
@@ -147,25 +146,10 @@ private val mpvKeys: Map<ShortcutId, KeyChord?> = mapOf(
     ShortcutId.JumpForward to KeyChord(Key.DirectionRight),
     ShortcutId.JumpBackLong to KeyChord(Key.DirectionDown),
     ShortcutId.JumpForwardLong to KeyChord(Key.DirectionUp),
-    ShortcutId.NextFrame to KeyChord(Key.Period),
-    ShortcutId.PreviousFrame to KeyChord(Key.Comma),
     ShortcutId.NormalSpeed to KeyChord(Key.Backspace),
     ShortcutId.Repeat to KeyChord(Key.L, shift = true),
     ShortcutId.VolumeUp to KeyChord(Key.Zero),
     ShortcutId.VolumeDown to KeyChord(Key.Nine),
-    ShortcutId.AudioDelayDown to KeyChord(Key.Minus, ctrl = true),
-    ShortcutId.AudioDelayUp to KeyChord(Key.Equals, ctrl = true),
-    ShortcutId.NextAudioTrack to KeyChord(Key.Three, shift = true),
-    ShortcutId.Snapshot to KeyChord(Key.S),
-    ShortcutId.NextSubtitle to KeyChord(Key.J),
-    ShortcutId.SubtitleDelayDown to KeyChord(Key.Z),
-    ShortcutId.SubtitleDelayUp to KeyChord(Key.Z, shift = true),
-    // mpv shows the time with O and has no zoom of its own on a key: Z is the subtitles' there
-    ShortcutId.ShowTime to KeyChord(Key.O),
-    // mpv's chapters are PgUp and PgDn
-    ShortcutId.NextChapter to KeyChord(Key.PageUp),
-    ShortcutId.PreviousChapter to KeyChord(Key.PageDown),
-    ShortcutId.Zoom to null,
     // Backspace is mpv's normal speed: a folder up is Alt+↑, as in a file manager
     ShortcutId.FolderUp to KeyChord(Key.DirectionUp, alt = true),
 )

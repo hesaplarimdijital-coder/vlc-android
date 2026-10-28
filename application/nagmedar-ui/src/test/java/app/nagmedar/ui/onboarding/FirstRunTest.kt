@@ -135,7 +135,7 @@ class FirstRunTest {
         render(FirstRunState().apply { mediaAccess = true })
         // media files: given, so "Verildi" instead of the button, the description as it was
         compose.onNodeWithText("Verildi").assertExists()
-        compose.onNodeWithText("Video, müzik ve ses klasörleri").assertExists()
+        compose.onNodeWithText("Müzik ve ses klasörleri").assertExists()
         compose.onNodeWithText("İzin ver").assertDoesNotExist()
         // all files: still asked for
         compose.onNodeWithText("Ayarları aç").performClick()
@@ -233,10 +233,10 @@ class FirstRunTest {
     @Test
     fun theSourcesStepOffersFoldersForEverySectionAndAsksForNone() {
         renderSources(LibraryScopes.Empty)
-        compose.onNodeWithText("Bölüm başına klasörler").performScrollTo().assertExists()
-        listOf("Filmler", "Diziler", "Videolar", "Müzik").forEach { compose.onNodeWithText(it).performScrollTo().assertExists() }
-        // none chosen: every section shows all of the library
-        assertEquals(4, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        compose.onNodeWithText("Müziğin klasörleri").performScrollTo().assertExists()
+        compose.onNodeWithText("Müzik").performScrollTo().assertExists()
+        // none chosen: the music shows all of the library
+        assertEquals(1, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
         LibrarySection.entries.forEach { compose.onNodeWithTag("library-sources-add-${it.key}").performScrollTo().assertExists() }
         // choosing is optional: the step goes on as it did
         compose.onNodeWithText("Devam · 3 kaynak").performClick()
@@ -248,16 +248,16 @@ class FirstRunTest {
     fun aFolderChosenForASectionShowsInItsRow() {
         renderSources(
             LibraryScopes.Empty
-                .plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller"))
+                .plus(LibrarySection.Music, SourceFolder("/storage/emulated/0/Music/Plaklar"))
                 .plus(LibrarySection.Music, SourceFolder("/storage/1A2B-3C4D/Konserler")),
         )
-        compose.onNodeWithText("Belgeseller").performScrollTo().assertExists()
-        compose.onNodeWithText("Bu cihaz › Movies › Belgeseller").assertExists()
+        compose.onNodeWithText("Plaklar").performScrollTo().assertExists()
+        compose.onNodeWithText("Bu cihaz › Music › Plaklar").assertExists()
         compose.onNodeWithText("Konserler").performScrollTo().assertExists()
         compose.onNodeWithText("SAMSUNG T7 › Konserler").assertExists()
-        // Films and Music show one folder each; Series and Videos still all of the library
-        assertEquals(2, compose.onAllNodesWithTextCount("1 klasör"))
-        assertEquals(2, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        // the music shows its two folders, no more all of the library
+        assertEquals(1, compose.onAllNodesWithTextCount("2 klasör"))
+        assertEquals(0, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
         compose.onNodeWithText("Devam · 3 kaynak").assertExists()
     }
 
@@ -273,22 +273,22 @@ class FirstRunTest {
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithText("Belgeseller").assertDoesNotExist()
-        assertEquals(4, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        compose.onNodeWithText("Plaklar").assertDoesNotExist()
+        assertEquals(1, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
 
         // the picker's answer goes to the library's own store, which the rows follow
         compose.runOnUiThread {
-            prefs.updateLibrarySources(prefs.librarySources.plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller")))
+            prefs.updateLibrarySources(prefs.librarySources.plus(LibrarySection.Music, SourceFolder("/storage/emulated/0/Music/Plaklar")))
         }
         compose.waitForIdle()
-        compose.onNodeWithText("Belgeseller").performScrollTo().assertExists()
-        assertEquals(3, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
-        assertEquals(listOf(LibrarySection.Movies), LibrarySection.entries.filter { prefs.librarySources.constrained(it) })
+        compose.onNodeWithText("Plaklar").performScrollTo().assertExists()
+        assertEquals(0, compose.onAllNodesWithTextCount("Kütüphanenin tümü"))
+        assertEquals(listOf(LibrarySection.Music), LibrarySection.entries.filter { prefs.librarySources.constrained(it) })
     }
 
     @Test
     fun theSectionRowsKeepTheTargetsBigAndNamed() {
-        renderSources(LibraryScopes.Empty.plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller")))
+        renderSources(LibraryScopes.Empty.plus(LibrarySection.Music, SourceFolder("/storage/emulated/0/Music/Plaklar")))
         checkTargets()
     }
 

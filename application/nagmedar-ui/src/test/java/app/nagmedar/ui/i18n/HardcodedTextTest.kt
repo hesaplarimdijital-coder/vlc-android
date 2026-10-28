@@ -16,8 +16,6 @@ class HardcodedTextTest {
     /** Sources whose Turkish literals are not texts of the interface, and why. */
     private val turkishAllowed = mapOf(
         "app/nagmedar/ui/lab/AudioReport.kt" to "the lab's SP-01 report: a diagnostic, in Turkish only",
-        "app/nagmedar/ui/library/VideoLibrary.kt" to "patterns reading Turkish file names: 1. Sezon 2. Bölüm, türkçe",
-        "app/nagmedar/ui/player/subtitles/SubtitleMatch.kt" to "languages as Turkish file names write them: Film.Türkçe.srt",
     )
 
     private val roots = listOf("src/main/java", "../nagmedar-session/src/main/java", "../nagmedar-data/src/main/java")

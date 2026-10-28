@@ -36,7 +36,7 @@ class DropScreenshotTest {
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = Destination.Movies)
+                    TestShell(widthClass, startDestination = Destination.Music)
                     DropOverlay()
                 }
             }

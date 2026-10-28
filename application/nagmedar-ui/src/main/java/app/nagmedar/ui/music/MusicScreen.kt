@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,6 +61,8 @@ import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.SelectionBar
 import app.nagmedar.ui.components.SelectionCommands
 import app.nagmedar.ui.components.StateAction
+import app.nagmedar.ui.components.StatePanel
+import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.collectState
@@ -81,6 +85,8 @@ import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaFile
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MediaSharing
+import app.nagmedar.ui.library.ShelfTitle
+import app.nagmedar.ui.library.TrackCard
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
@@ -270,15 +276,21 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
     val context = LocalContext.current
     val scan = rememberScanState()
     val media = rememberMusicMedia(repository, scan.active)
+    // 1.0: the tracks played last (the playback history, newest first): the shelf on a phone, the Recent view on a wide window
+    val access = LocalLibraryAccess.current
+    val recent by rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", scan.active, access?.media, access?.folders, access?.scopes) {
+        loadWhileScanning(scan.active) { repository.recentAudio() }
+    }
+    val recentKeys = remember(recent) { recent.orEmpty().mapNotNull { it.uri?.toString() } }
     val tech by TrackTechIndex.tech.collectAsState()
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
-    val library = remember(media, tech, locale) {
+    val library = remember(media, tech, locale, recentKeys) {
         // S-808: a CUE sheet's track has its file's technical side; made again only for new tracks or a new probe,
         // not in the first frame of a screen that comes back
         media?.let { list ->
-            repository.lastRead.derived("music", Triple(list, tech, locale)) {
-                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale)
+            repository.lastRead.derived("music", listOf(list, tech, locale, recentKeys)) {
+                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale, recentKeys)
             }
         }
     }
@@ -320,12 +332,40 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, nowPlaying
             emptyDescription = stringResource(R.string.nag_state_no_music_desc),
             onAddFolder = onAddFolder,
         ) {
-            if (library != null) MusicBrowser(library, state, actions, probing = probing, nowPlaying = nowPlaying, stats = stats)
+            if (library != null) {
+                Column(Modifier.fillMaxSize()) {
+                    // on a phone the shelf of the tracks played last, above the library's top level
+                    val shelf = recent.orEmpty()
+                    if (currentWidthClass() == WidthClass.Compact && state.group == null && shelf.isNotEmpty()) RecentShelf(shelf)
+                    MusicBrowser(library, state, actions, Modifier.weight(1f), probing = probing, nowPlaying = nowPlaying, stats = stats)
+                }
+            }
         }
     }
     adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
     rating?.let { tracks ->
         RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+    }
+}
+
+/** 1.0: the tracks played last, newest first, as the Home page's shelf had them: a tap plays them from there. */
+@Composable
+private fun RecentShelf(tracks: List<MediaWrapper>) {
+    val context = LocalContext.current
+    val dimens = NagTheme.dimens
+    Column(Modifier.fillMaxWidth().testTag("recent-shelf")) {
+        ShelfTitle(stringResource(R.string.nag_music_recent_shelf))
+        LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
+            itemsIndexed(tracks, key = { _, m -> m.id }) { index, media ->
+                val play: () -> Unit = { PlaybackActions.playList(context, tracks, index) }
+                ContextMenuArea(
+                    entries = { mediaMenu(context, media, play) },
+                    accessibilityLabel = stringResource(R.string.nag_more_actions),
+                ) {
+                    TrackCard(media, Modifier.width(150.dp), onClick = play)
+                }
+            }
+        }
     }
 }
 
@@ -570,7 +610,11 @@ fun MusicBrowser(
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
     val groups = rememberGroups(library, state.view, state.filter)
-    val grouped = state.view != MusicView.Tracks
+    val grouped = state.view.grouped
+    // the recently played are the shelf on a phone, not a view
+    LaunchedEffect(width, state.view) {
+        if (width == WidthClass.Compact && state.view == MusicView.Recent) state.open(MusicView.Tracks)
+    }
     val wide = width >= WidthClass.Expanded
     // a wide window always shows a group; a narrow one shows the list until one is opened
     val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide }
@@ -605,6 +649,15 @@ fun MusicBrowser(
     Column(modifier.fillMaxSize().testTag("music")) {
         MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact, probing = probing)
         when {
+            // nothing played yet (no filter hiding what was)
+            state.view == MusicView.Recent && open?.tracks.isNullOrEmpty() && !state.filter.active -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                StatePanel(
+                    tone = StateTone.Neutral,
+                    icon = NagIcons.Play,
+                    title = stringResource(R.string.nag_music_recent_none_title),
+                    description = stringResource(R.string.nag_music_recent_none_desc),
+                )
+            }
             groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 NoResultsState(
                     title = stringResource(R.string.nag_music_no_match),
@@ -656,6 +709,7 @@ internal fun viewLabel(view: MusicView): Int = when (view) {
     MusicView.Composers -> R.string.nag_music_view_composers
     MusicView.Years -> R.string.nag_music_view_years
     MusicView.Folders -> R.string.nag_music_view_folders
+    MusicView.Recent -> R.string.nag_music_view_recent
 }
 
 /** A group's name, or what stands for it when the tag is missing. */
@@ -667,7 +721,7 @@ private fun groupTitle(group: MusicGroup, view: MusicView): String = group.title
         MusicView.Genres -> R.string.nag_music_unknown_genre
         MusicView.Composers -> R.string.nag_music_unknown_composer
         MusicView.Years -> R.string.nag_music_unknown_year
-        MusicView.Folders, MusicView.Tracks -> R.string.nag_music_unknown_folder
+        MusicView.Folders, MusicView.Tracks, MusicView.Recent -> R.string.nag_music_unknown_folder
     },
 )
 
@@ -784,7 +838,7 @@ private fun TrackPane(group: MusicGroup, shown: List<Track>, state: MusicBrowser
     BackHandler(enabled = selection.selecting) { selection.clear() }
     Column(Modifier.fillMaxSize()) {
         // a group's name and line; the way back on a phone; an album's cover; the group's conversion
-        if (state.view != MusicView.Tracks) {
+        if (state.view.grouped) {
             Row(
                 Modifier
                     .fillMaxWidth()

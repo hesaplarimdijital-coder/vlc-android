@@ -8,9 +8,6 @@ import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.convert.ConvertStore
 import app.nagmedar.ui.library.LibrarySources
-import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
-import app.nagmedar.ui.player.snapshot.SnapshotSettings
-import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +19,7 @@ import java.util.Locale
 
 /**
  * What in the app keeps a folder the system's picker gave (its tree, or files inside it), and whether it writes
- * there. One folder can serve several at once (a library section, the recordings, the screenshots, the converter,
+ * there. One folder can serve several at once (a library section, the recordings, the converter,
  * a podcast's downloads…), so none of them lets go of its permission while another still needs it ([FolderGrants]).
  */
 enum class GrantHolder(val writes: Boolean) {
@@ -32,20 +29,11 @@ enum class GrantHolder(val writes: Boolean) {
     /** S-309: the folders picked without media access. */
     PickedFolders(false),
 
-    /** S-707: the local subtitle provider's folder. */
-    SubtitleFolder(false),
-
     /** The converter's folder. */
     Converter(true),
 
     /** The converter's jobs not finished yet, which write into their folder. */
     ConvertJobs(true),
-
-    /** S-607: the player's recordings. */
-    VideoRecordings(true),
-
-    /** S-606: the player's screenshots. */
-    Screenshots(true),
 
     /** S-1107: the radio's recordings. */
     RadioRecordings(true),
@@ -93,10 +81,7 @@ object FolderGrants {
     fun preferenceUses(prefs: SharedPreferences): Map<GrantHolder, Set<String>> = mapOf(
         GrantHolder.LibrarySections to LibrarySources.trees(prefs),
         GrantHolder.PickedFolders to prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty(),
-        GrantHolder.SubtitleFolder to setOfNotNull(prefs.getString(SubtitleFolderStore.KEY, null)),
         GrantHolder.Converter to setOfNotNull(prefs.getString(ConvertOptions.KEY_FOLDER, null)),
-        GrantHolder.VideoRecordings to setOfNotNull(prefs.getString(KEY_RECORDING_FOLDER, null)),
-        GrantHolder.Screenshots to setOfNotNull(prefs.getString(SnapshotSettings.KEY_FOLDER, null)),
         GrantHolder.RadioRecordings to setOfNotNull(prefs.getString(RecordingPrefs.KEY_FOLDER, null)),
         GrantHolder.PodcastDownloads to setOfNotNull(prefs.getString(PodcastSettingsStore.KEY_FOLDER, null)),
     ).plus(noted.associateWith { prefs.getStringSet(keptKey(it), null).orEmpty() })

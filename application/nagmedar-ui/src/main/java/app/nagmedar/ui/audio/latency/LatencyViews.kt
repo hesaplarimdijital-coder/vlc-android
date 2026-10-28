@@ -60,9 +60,9 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
-import app.nagmedar.ui.player.panel.signed
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
+import app.nagmedar.ui.components.signed
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.flow.Flow

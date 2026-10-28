@@ -53,10 +53,8 @@ class ShortcutRegistryTest {
     fun vlcDefaults() {
         assertEquals(KeyChord(Key.Spacebar), ShortcutRegistry[ShortcutId.PlayPause].chord)
         assertEquals(KeyChord(Key.M), ShortcutRegistry[ShortcutId.Mute].chord)
-        assertEquals(KeyChord(Key.G), ShortcutRegistry[ShortcutId.SubtitleDelayDown].chord)
-        assertEquals(KeyChord(Key.H), ShortcutRegistry[ShortcutId.SubtitleDelayUp].chord)
-        assertEquals(KeyChord(Key.J), ShortcutRegistry[ShortcutId.AudioDelayDown].chord)
-        assertEquals(KeyChord(Key.K), ShortcutRegistry[ShortcutId.AudioDelayUp].chord)
+        assertEquals(KeyChord(Key.N), ShortcutRegistry[ShortcutId.Next].chord)
+        assertEquals(KeyChord(Key.P), ShortcutRegistry[ShortcutId.Previous].chord)
     }
 
     @Test
@@ -67,17 +65,15 @@ class ShortcutRegistryTest {
         assertEquals(ShortcutId.Undo, ShortcutRegistry.match(ctrlZ)?.id)
         val space = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_SPACE))
         assertEquals(ShortcutId.PlayPause, ShortcutRegistry.match(space)?.id)
-        // G is a player shortcut: not matched in the global scope
+        // G is no shortcut any more (the video player's subtitles took it)
         val g = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_G))
         assertNull(ShortcutRegistry.match(g))
-        assertEquals(ShortcutId.SubtitleDelayDown, ShortcutRegistry.match(g, setOf(ShortcutScope.Global, ShortcutScope.Player))?.id)
     }
 
     @Test
     fun theEditorsKeysAnswerOnlyInTheEditorsScope() {
         val enter = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_ENTER))
         assertNull(ShortcutRegistry.match(enter))
-        assertNull(ShortcutRegistry.match(enter, setOf(ShortcutScope.Global, ShortcutScope.Player)))
         assertEquals(ShortcutId.LrcStamp, ShortcutRegistry.match(enter, setOf(ShortcutScope.Editor))?.id)
         val backspace = KeyEvent(AndroidKeyEvent(AndroidKeyEvent.ACTION_DOWN, AndroidKeyEvent.KEYCODE_DEL))
         assertEquals(ShortcutId.LrcUnstamp, ShortcutRegistry.match(backspace, setOf(ShortcutScope.Editor))?.id)
@@ -89,8 +85,7 @@ class ShortcutRegistryTest {
     fun theEditorScopeOverlapsOnlyItself() {
         assertTrue(ShortcutScope.Editor.overlaps(ShortcutScope.Editor))
         assertTrue(!ShortcutScope.Editor.overlaps(ShortcutScope.Global))
-        assertTrue(!ShortcutScope.Player.overlaps(ShortcutScope.Editor))
-        assertTrue(ShortcutScope.Global.overlaps(ShortcutScope.Player))
+        assertTrue(ShortcutScope.Global.overlaps(ShortcutScope.Global))
         val lrc = ShortcutId.entries.filter { it.name.startsWith("Lrc") }.map { ShortcutRegistry[it] }
         assertTrue(lrc.isNotEmpty() && lrc.all { it.scope == ShortcutScope.Editor && it.chord != null })
     }

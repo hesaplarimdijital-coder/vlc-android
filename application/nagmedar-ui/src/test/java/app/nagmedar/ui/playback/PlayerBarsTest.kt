@@ -200,7 +200,7 @@ class PlayerBarsTest {
     fun theBarIsOnEveryScreenOfADesktop() = everyScreen(WidthClass.Large, InputMode.Pointer, "transport-bar")
 
     private fun everyScreen(widthClass: WidthClass, input: InputMode, tag: String) {
-        var start by mutableStateOf(Destination.Home)
+        var start by mutableStateOf(Destination.Music)
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 TestShell(widthClass, startDestination = start, screen = { destination, _ -> Text(destination.name) })

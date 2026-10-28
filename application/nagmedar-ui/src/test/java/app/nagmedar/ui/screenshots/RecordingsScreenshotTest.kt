@@ -224,7 +224,7 @@ class RecordingsScreenshotTest {
             TestShell(width, startDestination = Destination.Radio) { _, _ ->
                 Recordings(scene, expandAll = false) { controller, stations ->
                     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).padding(8.dp)) {
-                        app.nagmedar.ui.player.navigate.DialogFrame({}) { ScheduleSurface(controller, draft, stations, zone) }
+                        app.nagmedar.ui.components.DialogFrame({}) { ScheduleSurface(controller, draft, stations, zone) }
                     }
                 }
             }

@@ -58,8 +58,8 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.onboarding.MediaAccess
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_INTERVAL
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_RESET_INTERACTION

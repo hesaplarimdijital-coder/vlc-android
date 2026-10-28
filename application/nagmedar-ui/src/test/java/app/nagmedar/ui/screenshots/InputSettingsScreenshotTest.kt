@@ -24,9 +24,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
 
-/** S-404, S-408: Settings > Giriş with the tooltip delay and the mouse in the player; in DeX, on a tablet and a phone. */
+/** S-404: Settings > Giriş with the density and the tooltip delay; in DeX, on a tablet and a phone. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class InputSettingsScreenshotTest {
@@ -38,8 +37,6 @@ class InputSettingsScreenshotTest {
         val prefs = NagmedarPreferences(compose.activity.getSharedPreferences("input-shot-$name", Context.MODE_PRIVATE))
         if (changed) {
             prefs.updateTooltipDelay(TooltipDelay.Short)
-            prefs.updateWheelSeeks(true)
-            prefs.updateMiddleClick(NAGMEDAR_MIDDLE_MUTE)
         }
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {

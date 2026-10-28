@@ -1,5 +1,4 @@
 package app.nagmedar.ui.player.equalizer
-
 import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,9 +52,7 @@ import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.gainText
-import app.nagmedar.ui.player.effects.EqualizerPreset
-import app.nagmedar.ui.player.effects.PlayerEffects
-import app.nagmedar.ui.player.panel.DropButton
+import app.nagmedar.ui.components.DropButton
 import app.nagmedar.ui.prefs.ConfirmDialog
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
@@ -98,7 +95,7 @@ internal fun equalizerName(resources: Resources, equalizer: VlcEqualizer): Strin
 /** The film plays with its own equaliser from the effects tab: what it is, and the way back to the player's. */
 @Composable
 private fun FilmOwnCard(choice: String, onFollow: () -> Unit) {
-    val name = if (choice == PlayerEffects.EQUALIZER_OFF) {
+    val name = if (choice == EQUALIZER_OFF) {
         stringResource(R.string.nag_fx_off)
     } else {
         EqualizerPreset.of(choice)?.let { stringResource(it.label) } ?: choice

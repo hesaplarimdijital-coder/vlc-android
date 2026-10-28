@@ -66,14 +66,14 @@ class MediaFileMenuTest {
 
     private val application: Application = ApplicationProvider.getApplicationContext()
 
-    /** A film of a folder picked with the system picker, as the library lists it. */
-    private val film = media(
-        "content://com.android.externalstorage.documents/tree/primary%3AFilmler/document/primary%3AFilmler%2FKuzey%20I%C5%9F%C4%B1%C4%9F%C4%B1.mkv",
-        "Kuzey Işığı",
+    /** A track of a folder picked with the system picker, as the library lists it. */
+    private val track = media(
+        "content://com.android.externalstorage.documents/tree/primary%3AMuzik/document/primary%3AMuzik%2FGece%20Yolcusu.mp3",
+        "Gece Yolcusu",
     )
 
     private fun media(uri: String, title: String): MediaWrapper = MLServiceLocator.getAbstractMediaWrapper(Uri.parse(uri)).apply {
-        type = MediaWrapper.TYPE_VIDEO
+        type = MediaWrapper.TYPE_AUDIO
         this.title = title
     }
 
@@ -95,8 +95,8 @@ class MediaFileMenuTest {
     private fun entry(label: String) = compose.onNode(hasText(label) and hasClickAction())
 
     @Test
-    fun aFilmsMenuSharesItAndShowsItInItsFolder() {
-        menu { context -> mediaMenu(context, film, play = {}) }
+    fun aTracksMenuSharesItAndShowsItInItsFolder() {
+        menu { context -> mediaMenu(context, track, play = {}) }
         entry("Dosyada göster").assertIsEnabled()
         entry("Paylaş…").assertIsEnabled().performClick()
         // the files are looked at off the main thread; the sheet opens back on it, whose looper the
@@ -107,11 +107,11 @@ class MediaFileMenuTest {
         }
         val chooser = shadowOf(application).nextStartedActivity
         assertEquals(Intent.ACTION_CHOOSER, chooser.action)
-        assertEquals("“Kuzey Işığı” paylaşılsın", chooser.getCharSequenceExtra(Intent.EXTRA_TITLE).toString())
+        assertEquals("“Gece Yolcusu” paylaşılsın", chooser.getCharSequenceExtra(Intent.EXTRA_TITLE).toString())
         val send = chooser.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)!!
         assertEquals(Intent.ACTION_SEND, send.action)
-        assertEquals(film.uri, send.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
-        assertTrue(send.type.orEmpty(), send.type.orEmpty().startsWith("video/"))
+        assertEquals(track.uri, send.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
+        assertTrue(send.type.orEmpty(), send.type.orEmpty().startsWith("audio/"))
         assertNotEquals(0, send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 

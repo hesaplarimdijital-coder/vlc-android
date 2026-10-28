@@ -335,7 +335,7 @@ private fun StepItems(content: @Composable ColumnScope.() -> Unit) {
 private fun AccessStep(state: FirstRunState, folders: List<Pair<String, String>>, actions: FirstRunActions) {
     StepItems {
         OptionCard(
-            icon = NagIcons.Movies,
+            icon = NagIcons.Music,
             title = stringResource(R.string.nag_fr_media_files),
             description = stringResource(R.string.nag_fr_media_files_desc),
             granted = state.mediaAccess,
@@ -433,7 +433,7 @@ private fun SourcesStep(state: FirstRunState, drives: List<StorageSource>, folde
             checked = state.onlineSources,
             onCheckedChange = { state.onlineSources = it },
         )
-        // Films, Series, Videos and Music can each be given their own folders here; Settings › Library changes them later
+        // the music can be given its own folders here; Settings › Library changes them later
         sections()
     }
 }

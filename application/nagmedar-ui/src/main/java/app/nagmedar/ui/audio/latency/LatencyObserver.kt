@@ -15,7 +15,7 @@ import app.nagmedar.audio.latency.OutputDeviceKey
 import app.nagmedar.audio.latency.OutputOrder
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
-import app.nagmedar.ui.player.panel.signed
+import app.nagmedar.ui.components.signed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

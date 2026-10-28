@@ -39,7 +39,7 @@ class ShellScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, start: Destination = Destination.Movies) {
+    private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, start: Destination = Destination.Music) {
         // the test activity's theme has an action bar; the app's theme has none
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
@@ -87,7 +87,7 @@ class ShellScreenshotTest {
     fun extraLargeLight() = capture("xlarge-light", WidthClass.ExtraLarge, ThemeMode.Light, InputMode.Pointer)
 
     @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi")
-    fun extraLargeOled() = capture("xlarge-oled-home", WidthClass.ExtraLarge, ThemeMode.Oled, InputMode.Pointer, Destination.Home)
+    fun extraLargeOled() = capture("xlarge-oled-podcasts", WidthClass.ExtraLarge, ThemeMode.Oled, InputMode.Pointer, Destination.Podcasts)
 
     /** S-1501: the shell in English, in a DeX window and on a phone. */
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")

@@ -39,8 +39,8 @@ import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
 /**
- * A film's menu in the library, as right click on DeX, a long press or the Menu key opens it:
- * "Paylaş…" and "Dosyada göster" beside the media information, then the film's tools.
+ * A track's menu in the library, as right click on DeX, a long press or the Menu key opens it:
+ * "Paylaş…" and "Dosyada göster" beside the media information, then the track's tools.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -53,7 +53,7 @@ class MediaMenuScreenshotTest {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = InputMode.Pointer) {
-                Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { FilmMenu() }
+                Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { TrackMenu() }
             }
         }
         compose.waitForIdle()
@@ -63,16 +63,16 @@ class MediaMenuScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    /** The menu of a film on the device's storage, drawn open where the pop-up would be. */
+    /** The menu of a track on the device's storage, drawn open where the pop-up would be. */
     @Composable
-    private fun FilmMenu() {
+    private fun TrackMenu() {
         val context = LocalContext.current
         val entries = remember(context) {
-            val film = MLServiceLocator.getAbstractMediaWrapper(Uri.parse("file:///storage/emulated/0/Movies/Kuzey%20I%C5%9F%C4%B1%C4%9F%C4%B1.mkv")).apply {
-                type = MediaWrapper.TYPE_VIDEO
-                title = "Kuzey Işığı"
+            val track = MLServiceLocator.getAbstractMediaWrapper(Uri.parse("file:///storage/emulated/0/Music/Gece%20Yolcusu.mp3")).apply {
+                type = MediaWrapper.TYPE_AUDIO
+                title = "Gece Yolcusu"
             }
-            mediaMenu(context, film, play = {})
+            mediaMenu(context, track, play = {})
         }
         val colors = NagTheme.colors
         val shape = RoundedCornerShape(10.dp)
@@ -97,8 +97,8 @@ class MediaMenuScreenshotTest {
     }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun filmMenuDex() = capture("media-menu-dex-dark", ThemeMode.Dark)
+    fun trackMenuDex() = capture("media-menu-dex-dark", ThemeMode.Dark)
 
     @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
-    fun filmMenuTabletEnglish() = capture("media-menu-tablet-light-en", ThemeMode.Light)
+    fun trackMenuTabletEnglish() = capture("media-menu-tablet-light-en", ThemeMode.Light)
 }

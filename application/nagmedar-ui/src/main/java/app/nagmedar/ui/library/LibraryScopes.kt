@@ -1,25 +1,16 @@
 package app.nagmedar.ui.library
 
 import androidx.compose.runtime.Immutable
-import java.util.Calendar
 import java.util.Locale
 
 /*
  * The library's sections and the folders each one shows (Settings › Library). Plain data and
- * rules, so they can be tested without Android: where a file is, which section takes it, and
- * which videos are camera clips rather than films.
+ * rules, so they can be tested without Android: where a file is and which section takes it.
  */
 
-/** The parts of the library that can be given their own folders. */
+/** The parts of the library that can be given their own folders: since 1.0 the music alone. */
 enum class LibrarySection(val key: String) {
-    Movies("movies"),
-    Series("series"),
-    Videos("videos"),
     Music("music"),
-    ;
-
-    /** The sections that share the videos; music has its own files. */
-    val video: Boolean get() = this != Music
 }
 
 /**
@@ -127,118 +118,16 @@ class ScopeRules(val scopes: LibraryScopes, locate: (String) -> String?) {
 
     /**
      * Whether [section]'s folders let it show the file at [location]: under one of its folders when
-     * it has some; else anywhere but its excluded folders and, for Films and Series, the folders
-     * chosen for Videos (a file there is a video of the phone, no film or episode). A file of no
-     * known place (null) only by sections without folders. Videos also shows what Films and Series
-     * do not ([splitVideos]).
+     * it has some, else anywhere but its excluded folders. A file of no known place (null) only by
+     * sections without folders.
      */
     fun inScope(section: LibrarySection, location: String?): Boolean {
         if (location == null) return !constrained(section)
         if (excluded(section, location)) return false
-        if (constrained(section)) return claims(section, location)
-        return when (section) {
-            LibrarySection.Movies, LibrarySection.Series -> !claims(LibrarySection.Videos, location)
-            LibrarySection.Videos, LibrarySection.Music -> true
-        }
+        return !constrained(section) || claims(section, location)
     }
 
     private companion object {
         const val UNKNOWN = "\u0000"
     }
-}
-
-/** The videos as the library's sections show them: films, series episodes and the other videos (camera clips, recordings). */
-class VideoSplit(val films: List<VideoItem>, val episodes: List<VideoItem>, val clips: List<VideoItem>) {
-    fun of(section: LibrarySection): List<VideoItem> = when (section) {
-        LibrarySection.Movies -> films
-        LibrarySection.Series -> episodes
-        LibrarySection.Videos -> clips
-        LibrarySection.Music -> emptyList()
-    }
-
-    /** How many shows the episodes make. */
-    val showCount: Int get() = episodes.mapNotNull { EpisodeParser.parse(it.path)?.let { info -> EpisodeParser.showKey(info.show) } }.distinct().size
-}
-
-/**
- * Which section shows each video. Films and Series take their own folders, or without folders
- * the library but the folders chosen for Videos. Series shows the episodes (by their names) in its
- * scope; Films the other videos in its scope, and without folders of its own neither the camera
- * clips ([CameraClips]) nor what a Series folder holds (a file there that is not named like an
- * episode is no film). Videos shows its folders and every video neither of them shows, so that no
- * video is lost; only a folder left out keeps one out. A file can be in two sections when both
- * chose its folder.
- */
-fun splitVideos(items: List<VideoItem>, rules: ScopeRules, locate: (VideoItem) -> String?): VideoSplit {
-    val episodes = ArrayList<VideoItem>()
-    val films = ArrayList<VideoItem>()
-    val clips = ArrayList<VideoItem>()
-    val moviesConstrained = rules.constrained(LibrarySection.Movies)
-    for (item in items) {
-        val location = locate(item)
-        val episode = EpisodeParser.parse(item.path) != null
-        val inSeries = episode && rules.inScope(LibrarySection.Series, location)
-        val inSeriesFolder = location != null && rules.claims(LibrarySection.Series, location)
-        val inFilms = !inSeries && rules.inScope(LibrarySection.Movies, location) &&
-            (moviesConstrained || (!episode && !inSeriesFolder && !CameraClips.isClip(location ?: item.path.lowercase(Locale.ROOT))))
-        val inVideos = !rules.leavesOut(LibrarySection.Videos, location) &&
-            ((location != null && rules.claims(LibrarySection.Videos, location)) || (!inSeries && !inFilms))
-        if (inSeries) episodes += item
-        if (inFilms) films += item
-        if (inVideos) clips += item
-    }
-    return VideoSplit(films, episodes, clips)
-}
-
-/** Videos made with the device rather than collected: the camera's, screen recordings, messengers' (a guess from where they are and their names). */
-object CameraClips {
-    /** Folders whose videos are recordings wherever they are. */
-    private val folders = setOf(
-        "dcim", "camera", "screenrecords", "screenrecorder", "screen recordings", "screenrecordings", "screencasts",
-        "whatsapp video", "whatsapp animated gifs", "telegram video", "signal", "instagram", "snapchat", "tiktok",
-    )
-
-    /** "VID_20240101_123456", "PXL_20240101_…", "VID-20240101-WA0001", "20240101_123456", "Screen_Recording_20240101…". */
-    private val names = Regex("""^(?:vid|pxl|mvimg|img|video|mov|screen[ _-]?recording|screenrecord|screenrecorder|record|rec|trim|signal)[ _-]?\d{8}|^\d{8}[ _-]\d{6}""")
-
-    /** [location] (lower case) is a camera clip or a recording. */
-    fun isClip(location: String): Boolean {
-        val parts = location.split('/').filter { it.isNotEmpty() }
-        if (parts.dropLast(1).any { it in folders }) return true
-        return names.containsMatchIn(parts.lastOrNull().orEmpty())
-    }
-}
-
-/** When a clip was taken, from its name ("VID_20240101_123456.mp4") when it carries the date. */
-object ClipDates {
-    private val stamp = Regex("""(?:^|\D)(20\d{2}|19\d{2})(\d{2})(\d{2})(?:[ _-]?(\d{2})(\d{2})(\d{2}))?(?!\d)""")
-
-    /** Milliseconds since the epoch in this device's time zone, or null when the name has no valid date. */
-    fun fromName(name: String): Long? {
-        val m = stamp.find(name) ?: return null
-        val (y, mo, d) = Triple(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt())
-        val h = m.groupValues[4].toIntOrNull() ?: 0
-        val mi = m.groupValues[5].toIntOrNull() ?: 0
-        val s = m.groupValues[6].toIntOrNull() ?: 0
-        if (mo !in 1..12 || d !in 1..31 || h > 23 || mi > 59 || s > 59) return null
-        return Calendar.getInstance().apply {
-            clear()
-            isLenient = false
-            set(y, mo - 1, d, h, mi, s)
-        }.let { runCatching { it.timeInMillis }.getOrNull() }
-    }
-}
-
-/** A video of the Videos page: the item, when it was taken (or last changed) and its size. */
-@Immutable
-data class VideoClip(val item: VideoItem, val takenAt: Long, val sizeBytes: Long)
-
-/** How the Videos page is ordered ("Sırala: …"). */
-enum class ClipOrder { Date, Name, Size, Duration }
-
-fun List<VideoClip>.ordered(order: ClipOrder): List<VideoClip> = when (order) {
-    ClipOrder.Date -> sortedByDescending { it.takenAt }
-    ClipOrder.Name -> sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.item.title })
-    ClipOrder.Size -> sortedByDescending { it.sizeBytes }
-    ClipOrder.Duration -> sortedByDescending { it.item.durationMs }
 }

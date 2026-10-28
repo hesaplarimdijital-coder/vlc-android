@@ -12,23 +12,14 @@ android {
 
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        // S-706: Nağmedar's own OpenSubtitles.com API key, from the build's environment (a CI secret)
-        // or a Gradle property; without one the subtitles' search says so
-        buildConfigField 'String', 'OPENSUBTITLES_API_KEY', "\"${openSubtitlesKey(project)}\""
-        // S-1101: Nağmedar's own Podcast Index key and secret, the same way; without them the podcast
-        // search asks iTunes alone and says so
+        // S-1101: Nağmedar's own Podcast Index key and secret, from the build's environment (CI secrets)
+        // or Gradle properties; without them the podcast search asks iTunes alone and says so
         buildConfigField 'String', 'PODCASTINDEX_KEY', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_KEY', 'nagmedar_podcastindex_key')}\""
         buildConfigField 'String', 'PODCASTINDEX_SECRET', "\"${podcastIndexValue(project, 'NAGMEDAR_PODCASTINDEX_SECRET', 'nagmedar_podcastindex_secret')}\""
         // S-1008: Nağmedar's own Last.fm API key and shared secret, from the build's environment (CI secrets)
         // or Gradle properties; without them Last.fm stays off and Settings says so
         buildConfigField 'String', 'LASTFM_API_KEY', "\"${secretValue('NAGMEDAR_LASTFM_API_KEY', 'nagmedar_lastfm_api_key', project)}\""
         buildConfigField 'String', 'LASTFM_SECRET', "\"${secretValue('NAGMEDAR_LASTFM_SECRET', 'nagmedar_lastfm_secret', project)}\""
-        // Film information: Nağmedar's own TMDB key (a v3 API key, or a v4 read access token, which has dots)
-        // and OMDb key, from the build's environment (CI secrets) or Gradle properties; without the TMDB key
-        // no film information is looked up, without the OMDb key the IMDb and Rotten Tomatoes ratings stay
-        // out, and Settings › Film information says so
-        buildConfigField 'String', 'TMDB_API_KEY', "\"${podcastIndexValue(project, 'NAGMEDAR_TMDB_API_KEY', 'nagmedar_tmdb_api_key')}\""
-        buildConfigField 'String', 'OMDB_API_KEY', "\"${secretValue('NAGMEDAR_OMDB_API_KEY', 'nagmedar_omdb_api_key', project)}\""
     }
 
     buildTypes {
@@ -93,12 +84,6 @@ dependencies {
     testImplementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     testImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
-}
-
-static def openSubtitlesKey(project) {
-    def key = System.getenv('NAGMEDAR_OPENSUBTITLES_API_KEY') ?: project.findProperty('nagmedar_opensubtitles_api_key') ?: ''
-    // only a key's characters: nothing that would break the generated Java string
-    return key.toString().replaceAll('[^A-Za-z0-9_-]', '')
 }
 
 static def podcastIndexValue(project, envName, propertyName) {

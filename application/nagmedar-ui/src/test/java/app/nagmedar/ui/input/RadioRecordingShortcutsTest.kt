@@ -25,9 +25,4 @@ class RadioRecordingShortcutsTest {
         assertEquals(listOf(ShortcutId.RadioRecord, ShortcutId.RadioRecordings), taken.map { it.id })
         assertTrue(ShortcutRegistry.conflicts().isEmpty())
     }
-
-    @Test
-    fun theVideoRecorderKeepsItsOwnKey() {
-        assertEquals(KeyChord(Key.R, shift = true), ShortcutRegistry[ShortcutId.Record].chord)
-    }
 }

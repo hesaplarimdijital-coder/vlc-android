@@ -210,7 +210,7 @@ object ServiceEpisodeControl : EpisodeControl {
 
 /**
  * [EpisodePlayer] through the existing playback service: the downloaded file (S-1103) or the enclosure's address as a stream, a
- * video enclosure in the video player, started at the place the listener left (S-1104). Starting playback needs an
+ * video enclosure heard as sound alone, started at the place the listener left (S-1104). Starting playback needs an
  * Activity, which is only weakly held: the controller (and the app-scope work that captures it) outlives the screen and
  * must not keep the Activity alive. Episodes are played from the screen, so it is there when it is used.
  */
@@ -225,15 +225,16 @@ class ServiceEpisodePlayer(activity: Context) : EpisodePlayer {
         val context = activity.get() ?: return
         val uri = playableUri(episode)
         val media = MLServiceLocator.getAbstractMediaWrapper(uri)
-        val video = episode.mimeType?.startsWith("video/") == true
-        media.setType(if (video) MediaWrapper.TYPE_VIDEO else MediaWrapper.TYPE_AUDIO)
+        // a video enclosure is heard as the others are: Nağmedar plays sound alone
+        media.setType(MediaWrapper.TYPE_AUDIO)
+        if (episode.mimeType?.startsWith("video/") == true) media.addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
         media.setTitle(episode.title)
         media.setDisplayTitle(episode.title)
         media.setArtist(feed.title)
         (episode.imageUrl ?: feed.imageUrl)?.let(media::setArtworkURL)
         val start = from ?: PlaybackRules.startMs(episode.positionMs, episode.played, episode.durationMs, feed.skipIntroSeconds, feed.skipOutroSeconds)
         if (start > 0) media.time = start
-        if (video) PlaybackActions.playVideo(context, media) else PlaybackActions.playList(context, listOf(media), 0)
+        PlaybackActions.playList(context, listOf(media), 0)
     }
 
     private fun playableUri(episode: PodcastEpisode): Uri {

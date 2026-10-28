@@ -84,7 +84,16 @@ fun releaseYearOf(value: Int): Int? = when {
 }
 
 /** The ways through the library (S-803). */
-enum class MusicView { Tracks, Artists, Albums, Genres, Composers, Years, Folders }
+enum class MusicView {
+    Tracks, Artists, Albums, Genres, Composers, Years, Folders,
+
+    /** 1.0: the tracks played last, newest first ("Son çalınanlar"); a phone has them as the shelf above the library instead. */
+    Recent,
+    ;
+
+    /** Whether the view lists groups to open; the tracks and the recently played are one list. */
+    val grouped: Boolean get() = this != Tracks && this != Recent
+}
 
 /**
  * One artist, album, genre, composer, year or folder, with its tracks in album order. [key] is
@@ -116,9 +125,10 @@ data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBa
 /**
  * S-803: the library's groupings over one list of tracks, the medialibrary's and the picked
  * folders' alike: artists by album artist, albums by artist and name, genres, composers, years
- * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem").
+ * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem");
+ * and [recent], the uris of the tracks played last (newest first), as the Recent view's one list.
  */
-class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault()) {
+class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault(), private val recent: List<String> = emptyList()) {
 
     /** The reader's collator; one for each grouping or sort, as a collator is not for two threads at once. */
     private fun collator(): Collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
@@ -188,6 +198,11 @@ class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.
                 .map { (year, list) -> MusicGroup("year:${year ?: ""}", year?.toString(), null, year, sortedTracks(list, collator)) }
                 .sortedWith(compareByDescending<MusicGroup> { it.year ?: Int.MIN_VALUE })
             MusicView.Folders -> group(shown, collator, { it.folder.takeIf(String::isNotEmpty) }, { it.folder.takeIf(String::isNotEmpty) }).sortedWith(byTitle)
+            // as they were played, the latest first: the playback history's order, not the album's
+            MusicView.Recent -> {
+                val byUri = shown.associateBy { it.uri }
+                listOf(MusicGroup(RECENT_KEY, null, null, null, recent.mapNotNull { byUri[it] }))
+            }
         }
     }
 
@@ -209,6 +224,9 @@ class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.
     )
 
     companion object {
+        /** The Recent view's one group. */
+        const val RECENT_KEY = "recent"
+
         /** The orders kept per library: the groups a session opens. */
         private const val MAX_ORDERS = 24
 

@@ -10,9 +10,8 @@ import app.nagmedar.data.LyricsEntry
 import app.nagmedar.data.LyricsKey
 import app.nagmedar.data.LyricsSource
 import app.nagmedar.data.NagmedarDatabase
-import app.nagmedar.ui.player.subtitles.detectEncoding
-import app.nagmedar.ui.player.subtitles.displayName
-import app.nagmedar.ui.player.subtitles.siblingFiles
+import app.nagmedar.ui.library.displayName
+import app.nagmedar.ui.library.siblingFiles
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

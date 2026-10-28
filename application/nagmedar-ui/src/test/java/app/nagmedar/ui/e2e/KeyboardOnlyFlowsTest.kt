@@ -102,11 +102,11 @@ class KeyboardOnlyFlowsTest {
     fun theMenuBarFromAlt() {
         // Alt alone: the menu bar has the keyboard on its first title
         keys { pressKey(Key.AltLeft) }
-        // to Araçlar, the sixth; Down opens it on its first item
-        repeat(5) { keys { pressKey(Key.DirectionRight) } }
+        // to Araçlar, the fourth; Down opens it on its first item
+        repeat(3) { keys { pressKey(Key.DirectionRight) } }
         keys { pressKey(Key.DirectionDown) }
         assertTrue(focused().toString(), focused().contains("Ayarlar"))
-        // Senkron is the player's: Down skips it to the radio directory's search
+        // Down: the radio directory's search
         keys { pressKey(Key.DirectionDown) }
         assertTrue(focused().toString(), focused().contains("Radyo rehberinde ara"))
         keys { pressKey(Key.Enter) }
@@ -118,10 +118,10 @@ class KeyboardOnlyFlowsTest {
         keys { withKeyDown(Key.CtrlLeft) { pressKey(Key.Comma) } }
         assertEquals(Destination.Settings, window.destination)
         keys { pressKey(Key.Escape) }
-        assertEquals(Destination.Home, window.destination)
+        assertEquals(Destination.Music, window.destination)
         // on the first screen Esc stays
         keys { pressKey(Key.Escape) }
-        assertEquals(Destination.Home, window.destination)
+        assertEquals(Destination.Music, window.destination)
     }
 
     @Test

@@ -28,8 +28,8 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch

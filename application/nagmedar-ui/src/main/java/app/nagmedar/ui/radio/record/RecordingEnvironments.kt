@@ -2,7 +2,7 @@ package app.nagmedar.ui.radio.record
 
 import android.content.Context
 import android.net.Uri
-import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.library.pickedFolderLabel
 import app.nagmedar.ui.sleep.Alarms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,7 @@ internal class AndroidRecordingEnvironment(private val context: Context) : Recor
 
     override fun folder(): FolderState {
         val tree = RadioRecordings.settings(context).folder ?: return FolderState.Default
-        val label = snapshotFolderLabel(tree, tree)
+        val label = pickedFolderLabel(tree, tree)
         val uri = Uri.parse(tree)
         val held = context.contentResolver.persistedUriPermissions.any { it.uri == uri && it.isWritePermission }
         return when {

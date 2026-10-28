@@ -132,20 +132,18 @@ enum class ShortcutGroup(@StringRes val title: Int) {
     Media(R.string.nag_menu_media),
     Playback(R.string.nag_menu_playback),
     Audio(R.string.nag_menu_audio),
-    Video(R.string.nag_menu_video),
-    Subtitle(R.string.nag_menu_subtitle),
     Tools(R.string.nag_menu_tools),
     View(R.string.nag_menu_view),
     Help(R.string.nag_menu_help),
 }
 
 /**
- * Where a shortcut works: everywhere in the app, only while the player is in front, or (S-1005)
- * only while the lyrics editor is open, whose keys come first: a chord of the editor may be one of
- * a global shortcut too, it wins inside the editor.
+ * Where a shortcut works: everywhere in the app, or (S-1005) only while the lyrics editor is open,
+ * whose keys come first: a chord of the editor may be one of a global shortcut too, it wins inside
+ * the editor.
  */
 enum class ShortcutScope {
-    Global, Player, Editor,
+    Global, Editor,
     ;
 
     /** Whether a shortcut of this scope and one of [other] can both be waiting for the same key. */
@@ -156,21 +154,15 @@ enum class ShortcutScope {
 }
 
 enum class ShortcutId {
-    OpenFile, OpenNetwork, OpenInNewWindow, MediaInfo, Undo, SelectAll,
+    OpenFile, OpenNetwork, OpenInNewWindow, Undo, SelectAll,
     PlayPause, Stop, Previous, Next, JumpBackShort, JumpForwardShort, JumpBack, JumpForward,
-    JumpBackLong, JumpForwardLong, NextFrame, PreviousFrame, Slower, Faster, NormalSpeed, Repeat, Shuffle,
-    ShowTime, JumpToTime, NextChapter, PreviousChapter, AddBookmark, Bookmarks, SleepTimer, Record,
-    VolumeUp, VolumeDown, Mute, AudioDelayDown, AudioDelayUp, NextAudioTrack, Equalizer, AbSwitch,
-    Fullscreen, Snapshot, Effects, AspectRatio, Crop, Zoom,
-    NextSubtitle, SubtitleDelayDown, SubtitleDelayUp, AddSubtitleFile, SecondarySubtitles,
-    SyncMarkAudio, SyncMarkSubtitle, SyncApply, SyncUndo,
-    SubtitleTools, CueSave, CueSplit, CueMerge, CueSetStart, CueSetEnd, CueNext, CuePrevious,
-    GenerateSubtitles,
-    Settings, Synchronization, CommandPalette, ToggleSidebar, PlayQueue,
+    JumpBackLong, JumpForwardLong, Slower, Faster, NormalSpeed, Repeat, Shuffle,
+    SleepTimer,
+    VolumeUp, VolumeDown, Mute, Equalizer, AbSwitch,
+    Settings, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList, UserGuide,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
-    ConvertSave, StreamHls,
     RadioSearch, RadioRecord, RadioRecordings,
     FolderUp, Refresh,
     PodcastSearch,
@@ -204,13 +196,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.OpenFile, ShortcutGroup.Media, R.string.nag_sc_open_file, KeyChord(Key.O, ctrl = true)),
         Shortcut(ShortcutId.OpenNetwork, ShortcutGroup.Media, R.string.nag_sc_open_network, KeyChord(Key.N, ctrl = true)),
         Shortcut(ShortcutId.OpenInNewWindow, ShortcutGroup.Media, R.string.nag_sc_new_window, KeyChord(Key.N, ctrl = true, shift = true)),
-        // S-605: the video player's Info tab
-        Shortcut(ShortcutId.MediaInfo, ShortcutGroup.Media, R.string.nag_sc_media_info, KeyChord(Key.I, ctrl = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Undo, ShortcutGroup.Media, R.string.nag_sc_undo, KeyChord(Key.Z, ctrl = true), textFirst = true),
         Shortcut(ShortcutId.SelectAll, ShortcutGroup.Media, R.string.nag_sc_select_all, KeyChord(Key.A, ctrl = true), textFirst = true),
-        // S-1303: VLC desktop's Media › Convert/Save and Stream
-        Shortcut(ShortcutId.ConvertSave, ShortcutGroup.Media, R.string.nag_sc_convert, KeyChord(Key.R, ctrl = true)),
-        Shortcut(ShortcutId.StreamHls, ShortcutGroup.Media, R.string.nag_sc_stream, KeyChord(Key.H, ctrl = true, shift = true)),
         // Playback
         Shortcut(ShortcutId.PlayPause, ShortcutGroup.Playback, R.string.nag_sc_play_pause, KeyChord(Key.Spacebar)),
         Shortcut(ShortcutId.Stop, ShortcutGroup.Playback, R.string.nag_sc_stop, KeyChord(Key.S)),
@@ -222,42 +209,27 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.JumpForward, ShortcutGroup.Playback, R.string.nag_sc_forward_10s, KeyChord(Key.DirectionRight, alt = true)),
         Shortcut(ShortcutId.JumpBackLong, ShortcutGroup.Playback, R.string.nag_sc_back_1m, KeyChord(Key.DirectionLeft, ctrl = true)),
         Shortcut(ShortcutId.JumpForwardLong, ShortcutGroup.Playback, R.string.nag_sc_forward_1m, KeyChord(Key.DirectionRight, ctrl = true)),
-        Shortcut(ShortcutId.NextFrame, ShortcutGroup.Playback, R.string.nag_sc_next_frame, KeyChord(Key.E), ShortcutScope.Player),
-        Shortcut(ShortcutId.PreviousFrame, ShortcutGroup.Playback, R.string.nag_sc_previous_frame, KeyChord(Key.E, shift = true), ShortcutScope.Player),
         Shortcut(ShortcutId.Slower, ShortcutGroup.Playback, R.string.nag_sc_slower, KeyChord(Key.LeftBracket)),
         Shortcut(ShortcutId.Faster, ShortcutGroup.Playback, R.string.nag_sc_faster, KeyChord(Key.RightBracket)),
         Shortcut(ShortcutId.NormalSpeed, ShortcutGroup.Playback, R.string.nag_sc_normal_speed, KeyChord(Key.Equals)),
         Shortcut(ShortcutId.Repeat, ShortcutGroup.Playback, R.string.nag_repeat, KeyChord(Key.L)),
         Shortcut(ShortcutId.Shuffle, ShortcutGroup.Playback, R.string.nag_shuffle, KeyChord(Key.R)),
-        // S-602: the rest of VLC's player keys
-        Shortcut(ShortcutId.ShowTime, ShortcutGroup.Playback, R.string.nag_sc_show_time, KeyChord(Key.T), ShortcutScope.Player),
-        Shortcut(ShortcutId.JumpToTime, ShortcutGroup.Playback, R.string.nag_sc_jump_to_time, KeyChord(Key.T, ctrl = true), ShortcutScope.Player),
-        // S-608: chapters as VLC desktop steps through them, and bookmarks
-        Shortcut(ShortcutId.NextChapter, ShortcutGroup.Playback, R.string.nag_sc_next_chapter, KeyChord(Key.N, shift = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.PreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_previous_chapter, KeyChord(Key.P, shift = true), ShortcutScope.Player),
         // S-1104: the chapters of a podcast episode (ID3 or Podcasting 2.0) are not libVLC's, so they have keys of their own, from anywhere
         Shortcut(ShortcutId.PodcastNextChapter, ShortcutGroup.Playback, R.string.nag_sc_podcast_next_chapter, KeyChord(Key.DirectionRight, ctrl = true, alt = true)),
         Shortcut(ShortcutId.PodcastPreviousChapter, ShortcutGroup.Playback, R.string.nag_sc_podcast_previous_chapter, KeyChord(Key.DirectionLeft, ctrl = true, alt = true)),
-        Shortcut(ShortcutId.AddBookmark, ShortcutGroup.Playback, R.string.nag_sc_add_bookmark, KeyChord(Key.D, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.Bookmarks, ShortcutGroup.Playback, R.string.nag_sc_bookmarks, KeyChord(Key.B, ctrl = true, shift = true), ShortcutScope.Player),
         // S-1007: the sleep timer's window (S for sleep; VLC has none)
         Shortcut(ShortcutId.SleepTimer, ShortcutGroup.Playback, R.string.nag_sc_sleep_timer, KeyChord(Key.S, alt = true)),
-        // S-607: what plays recorded, as VLC desktop's Playback › Record
-        Shortcut(ShortcutId.Record, ShortcutGroup.Playback, R.string.nag_sc_record, KeyChord(Key.R, shift = true), ShortcutScope.Player),
         // S-1302: the device picker, as VLC desktop's Playback › Renderer; C for cast
         Shortcut(ShortcutId.Cast, ShortcutGroup.Playback, R.string.nag_sc_cast, KeyChord(Key.C, ctrl = true, shift = true)),
         // Audio
         Shortcut(ShortcutId.VolumeUp, ShortcutGroup.Audio, R.string.nag_sc_volume_up, KeyChord(Key.DirectionUp, ctrl = true)),
         Shortcut(ShortcutId.VolumeDown, ShortcutGroup.Audio, R.string.nag_sc_volume_down, KeyChord(Key.DirectionDown, ctrl = true)),
         Shortcut(ShortcutId.Mute, ShortcutGroup.Audio, R.string.nag_sc_mute, KeyChord(Key.M)),
-        Shortcut(ShortcutId.AudioDelayDown, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_down, KeyChord(Key.J), ShortcutScope.Player),
-        Shortcut(ShortcutId.AudioDelayUp, ShortcutGroup.Audio, R.string.nag_sc_audio_delay_up, KeyChord(Key.K), ShortcutScope.Player),
-        Shortcut(ShortcutId.NextAudioTrack, ShortcutGroup.Audio, R.string.nag_sc_next_audio_track, KeyChord(Key.B), ShortcutScope.Player),
-        // S-603: the equaliser: libVLC's window in the video player, the music engine's page in the library (S-906)
+        // S-906: the music engine's equaliser
         Shortcut(ShortcutId.Equalizer, ShortcutGroup.Audio, R.string.nag_sc_equalizer, KeyChord(Key.E, ctrl = true, shift = true)),
         // S-912: the A/B listening test's side (A, B; X in the blind test), wherever the music is chosen
         Shortcut(ShortcutId.AbSwitch, ShortcutGroup.Audio, R.string.nag_sc_ab_switch, KeyChord(Key.B, alt = true)),
-        // S-1004: the lyrics' delay in tenths of a second, as G and H move the subtitles' in the player
+        // S-1004: the lyrics' delay in tenths of a second
         Shortcut(ShortcutId.LyricsEarlier, ShortcutGroup.Audio, R.string.nag_sc_lyrics_earlier, KeyChord(Key.G, alt = true)),
         Shortcut(ShortcutId.LyricsLater, ShortcutGroup.Audio, R.string.nag_sc_lyrics_later, KeyChord(Key.H, alt = true)),
         // S-1005: the lyrics editor's keys, while it is open: Enter stamps the line (the next word in word mode), Space stays play/pause
@@ -268,41 +240,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.LrcNudgeEarlier, ShortcutGroup.Audio, R.string.nag_sc_lrc_nudge_earlier, KeyChord(Key.Comma), ShortcutScope.Editor),
         Shortcut(ShortcutId.LrcNudgeLater, ShortcutGroup.Audio, R.string.nag_sc_lrc_nudge_later, KeyChord(Key.Period), ShortcutScope.Editor),
         Shortcut(ShortcutId.LrcWordMode, ShortcutGroup.Audio, R.string.nag_sc_lrc_word_mode, KeyChord(Key.W), ShortcutScope.Editor),
-        // Video
-        Shortcut(ShortcutId.Fullscreen, ShortcutGroup.Video, R.string.nag_sc_fullscreen, KeyChord(Key.F), ShortcutScope.Player),
-        Shortcut(ShortcutId.Snapshot, ShortcutGroup.Video, R.string.nag_sc_snapshot, KeyChord(Key.S, shift = true), ShortcutScope.Player),
-        // S-603: the video player's effects panel
-        Shortcut(ShortcutId.Effects, ShortcutGroup.Video, R.string.nag_sc_effects, KeyChord(Key.E, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.AspectRatio, ShortcutGroup.Video, R.string.nag_sc_aspect_ratio, KeyChord(Key.A), ShortcutScope.Player),
-        Shortcut(ShortcutId.Crop, ShortcutGroup.Video, R.string.nag_sc_crop, KeyChord(Key.C), ShortcutScope.Player),
-        Shortcut(ShortcutId.Zoom, ShortcutGroup.Video, R.string.nag_sc_zoom, KeyChord(Key.Z), ShortcutScope.Player),
-        // Subtitle
-        Shortcut(ShortcutId.NextSubtitle, ShortcutGroup.Subtitle, R.string.nag_sc_next_subtitle, KeyChord(Key.V), ShortcutScope.Player),
-        Shortcut(ShortcutId.SubtitleDelayDown, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_delay_down, KeyChord(Key.G), ShortcutScope.Player),
-        Shortcut(ShortcutId.SubtitleDelayUp, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_delay_up, KeyChord(Key.H), ShortcutScope.Player),
-        Shortcut(ShortcutId.AddSubtitleFile, ShortcutGroup.Subtitle, R.string.nag_sc_add_subtitle, KeyChord(Key.A, ctrl = true, shift = true), ShortcutScope.Player),
-        // S-703: the secondary track on and off, as VLC 4's own key for it
-        Shortcut(ShortcutId.SecondarySubtitles, ShortcutGroup.Subtitle, R.string.nag_sc_secondary_subtitles, KeyChord(Key.V, alt = true), ShortcutScope.Player),
-        // S-704: the sync assistant, as VLC desktop's: the sound, the subtitle, their difference; and back
-        Shortcut(ShortcutId.SyncMarkAudio, ShortcutGroup.Subtitle, R.string.nag_sc_sync_mark_audio, KeyChord(Key.H, shift = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.SyncMarkSubtitle, ShortcutGroup.Subtitle, R.string.nag_sc_sync_mark_subtitle, KeyChord(Key.J, shift = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.SyncApply, ShortcutGroup.Subtitle, R.string.nag_sc_sync_apply, KeyChord(Key.K, shift = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.SyncUndo, ShortcutGroup.Subtitle, R.string.nag_sc_sync_undo, KeyChord(Key.K, ctrl = true, shift = true), ShortcutScope.Player),
-        // S-708: the subtitle tools, and the line timing editor's keys while it is open
-        Shortcut(ShortcutId.SubtitleTools, ShortcutGroup.Subtitle, R.string.nag_sc_subtitle_tools, KeyChord(Key.E, alt = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueSave, ShortcutGroup.Subtitle, R.string.nag_sc_cue_save, KeyChord(Key.S, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueSplit, ShortcutGroup.Subtitle, R.string.nag_sc_cue_split, KeyChord(Key.S, ctrl = true, alt = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueMerge, ShortcutGroup.Subtitle, R.string.nag_sc_cue_merge, KeyChord(Key.M, ctrl = true, alt = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueSetStart, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_start, KeyChord(Key.LeftBracket, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueSetEnd, ShortcutGroup.Subtitle, R.string.nag_sc_cue_set_end, KeyChord(Key.RightBracket, ctrl = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CueNext, ShortcutGroup.Subtitle, R.string.nag_sc_cue_next, KeyChord(Key.PageDown, alt = true), ShortcutScope.Player),
-        Shortcut(ShortcutId.CuePrevious, ShortcutGroup.Subtitle, R.string.nag_sc_cue_previous, KeyChord(Key.PageUp, alt = true), ShortcutScope.Player),
-        // S-709: subtitles from the film's speech, with whisper on the device
-        Shortcut(ShortcutId.GenerateSubtitles, ShortcutGroup.Subtitle, R.string.nag_sc_generate_subtitles, KeyChord(Key.W, alt = true), ShortcutScope.Player),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
-        // S-604: the player panel's sync tab, as VLC's Tools › Track Synchronization
-        Shortcut(ShortcutId.Synchronization, ShortcutGroup.Tools, R.string.nag_sc_sync, KeyChord(Key.S, ctrl = true, shift = true), ShortcutScope.Player),
         // S-1105: the radio directory's search, from anywhere
         Shortcut(ShortcutId.RadioSearch, ShortcutGroup.Tools, R.string.nag_sc_radio_search, KeyChord(Key.R, ctrl = true, shift = true)),
         // S-1107: the station on the air recorded (again: stopped), and the radio recordings

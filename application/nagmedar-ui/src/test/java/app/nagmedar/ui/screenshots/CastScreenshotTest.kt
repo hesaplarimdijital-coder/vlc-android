@@ -21,9 +21,6 @@ import app.nagmedar.ui.cast.CastDevice
 import app.nagmedar.ui.cast.CastNotice
 import app.nagmedar.ui.cast.CastPickerSurface
 import app.nagmedar.ui.cast.CastPickerView
-import app.nagmedar.ui.cast.CastingActions
-import app.nagmedar.ui.cast.CastingScreen
-import app.nagmedar.ui.cast.CastingScreenState
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.music.NowPlayingInfo
 import app.nagmedar.ui.music.NowPlayingPanel
@@ -47,9 +44,8 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * S-1302, for approval: the device picker searching, with the devices found (the one cast to
  * marked, what is not cast as it is said), as a sheet on a phone in English, nothing found and no
- * local network; and casting: the video player as the remote on DeX, a tablet in English and a
- * phone, the music view and the transport bar on DeX, the mini player on a tablet and the phone's
- * music player in English.
+ * local network; and casting: the music view and the transport bar on DeX, the mini player on a
+ * tablet and the phone's music player in English.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -109,49 +105,6 @@ class CastScreenshotTest {
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun noNetworkTablet() = capture("cast-picker-nolan-tablet-light", ThemeMode.Light, InputMode.Touch) {
         Picker(WidthClass.Expanded, CastPickerView.NoNetwork)
-    }
-
-    private object NoCastingActions : CastingActions {
-        override fun togglePlayPause() = Unit
-
-        override fun previous() = Unit
-
-        override fun next() = Unit
-
-        override fun seekTo(ms: Long) = Unit
-
-        override fun seekBy(deltaMs: Int) = Unit
-
-        override fun choose() = Unit
-
-        override fun stopCasting() = Unit
-
-        override fun close() = Unit
-    }
-
-    private fun film(device: CastDevice) = CastingScreenState(
-        device = device,
-        title = "Kuzey Işığı",
-        playing = true,
-        timeMs = 2_765_000,
-        lengthMs = 7_920_000,
-        hasPrevious = true,
-        hasNext = true,
-    )
-
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun videoDex() = capture("casting-video-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
-        CastingScreen(film(salon), NoCastingActions, timelineHover = 0.6f)
-    }
-
-    @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
-    fun videoTabletEnglish() = capture("casting-video-tablet-dark-en", ThemeMode.Dark, InputMode.Touch) {
-        CastingScreen(film(kitchen).copy(playing = false), NoCastingActions)
-    }
-
-    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
-    fun videoPhone() = capture("casting-video-phone-dark", ThemeMode.Dark, InputMode.Touch) {
-        CastingScreen(film(salon), NoCastingActions)
     }
 
     private val track = NowPlayingInfo(

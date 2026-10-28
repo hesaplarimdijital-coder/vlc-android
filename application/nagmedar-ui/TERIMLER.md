@@ -19,10 +19,7 @@ Sözlüğü testler denetler:
 | Türkçe | English | Kullanmayın | Avoid | Not |
 |---|---|---|---|---|
 | kütüphane | library | kitaplık, arşiv | collection | Medya kütüphanesi de yazılım kütüphanesi de (Hakkında) aynı sözcük |
-| film | film | | movie | İngilizcede “Films”, “a film's menu” |
-| dizi | series | | TV show | Tekili ve çoğulu aynı: “1 series”, “4 series” |
 | bölüm | episode | | | Adlardan tanınır: S01E02, 1x02, “1. Sezon 2. Bölüm” |
-| bölüm (filmde) | chapter | | | Bir filmin bölümleri de “bölüm”; yer ayırır: zaman çizelgesinde “Bölüm 14 — Şafak” |
 | sezon | season | | | |
 | parça | track | şarkı | song | Müzikte tek öğe; arama kutusunda da “parça” |
 | söz | lyrics | | | “Söz ve LRC”, “kapak, söz, altyazı” |
@@ -43,10 +40,7 @@ Sözlüğü testler denetler:
 | A-B tekrarı | A-B loop | | A-B repeat | A noktası, B noktası; düğmesi sırayla A’yı, B’yi koyar, sonra kapatır |
 | tam ekran | fullscreen | | | “Tam ekrandan çık” / “Exit fullscreen” |
 | altyazı | subtitle | alt yazı | caption | Tek sözcük |
-| kodlama | encoding | karakter seti, kod sayfası | charset | “Altyazı kodlaması”: Otomatik, UTF-8, Türkçe · Windows-1254; film başına hatırlanır |
-| altyazı satırı | subtitle line | | | Altyazı dosyasının bir zaman aralığında gösterilen metni; “Satırlar” sekmesi, “Satırı böl”. İngilizce “cue” yazılmaz (CUE sayfasıyla karışır) |
-| altyazı sağlayıcısı | subtitle provider | | | Altyazının aranacağı yer: OpenSubtitles, Yerel klasör. Ayarlar › Altyazı'da açılıp kapatılır ve sıralanır; açık olanların hepsinde aynı anda aranır ve sonuçlar tek listede birleşir |
-| işitme engelliler için altyazı | subtitles for the hard of hearing | sağır altyazısı | deaf subtitles | Kısaca SDH: ses betimlemeleri, konuşmacı etiketleri, müzik işaretleri içerir; “Altyazı araçları › Temizle” bunları kaldırır |
+| kodlama | encoding | karakter seti, kod sayfası | charset | Bir metin dosyasının (söz dosyası) karakter seti: UTF-8, Türkçe · Windows-1254 |
 | kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
 | altyazı üretmek | generate subtitles | | | Filmin konuşmasını bu cihazda Whisper ile yazıya döküp yeni bir SRT dosyası yapmak: “Altyazı üret…” (Alt+W); dosya `film.tr.whisper.srt` adıyla filmin yanına yazılır. Ayarlar'daki bölümü “Altyazı üretimi” |
@@ -55,23 +49,16 @@ Sözlüğü testler denetler:
 | işlemci | CPU | | processor | Kısa yerlerde: “İşlemci · 4 çekirdek”, “İşlemci yükü”; İngilizcede “CPU · 4 cores”, “CPU load” |
 | gerçek zamanın N katı | N× real time | | | Bir işin hızı: oynatma süresinin işin süresine oranı; “gerçek zamanın 4,2 katı” bir saatlik filmi yaklaşık 14 dakikada bitirir |
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
-| çeviri, çevirmek | translation, translate | | | Altyazının cihazda, internete gönderilmeden bir dilden ötekine çevrilmesi (S-710): “Altyazıyı çevir…”, araçların “Çevir” sekmesi; Türkçe → İngilizce, İngilizce → Türkçe. Sonuç yeni bir dosyadır (`film.tr.srt`) |
-| çeviri modeli | translation model | | | Çevirinin bir yön için indirilen dosyaları (OPUS-MT); boyutu söylenip onayla indirilir, Ayarlar › Altyazı'dan silinir. Kısa yerlerde “model” |
-| ekranı kilitlemek | lock the screen | | | Video oynatıcıda dokunuşları ve hareketleri kapatır, ekranın yönünü tutar: “Ekranı kilitle”; ekrana dokununca çıkan düğme “Kilidi aç” |
-| parlaklık | brightness | | | Video oynatıcıda sol yarıda yukarı-aşağı kaydırma; yalnız oynatıcının penceresini aydınlatır, sistemin ayarı değişmez |
 | ekran yönü | screen orientation | | | Otomatik, Yatay, Dikey, Ters yatay |
-| görüntü boyutu | picture size | | | Filmin ekrana yerleşmesi: Sığdır, Ekranı doldur (kırp), Uzat, Özgün boyut ya da oran (16:9, 2,35:1); oranın ondalığı dile göre: Türkçede virgül (2,35:1), İngilizcede nokta (2.35:1) |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
 | altyazı izi | subtitle track | altyazı parçası | | Videonun içindeki bir altyazı akışı (dili, adı, biçimi); müzikteki “parça”dan ayrı |
-| gömülü altyazı | embedded subtitles | dahili altyazı | built-in subtitles | Filmin dosyasının içindeki altyazı izleri (MKV, MP4, TS, AVI); “Gömülü altyazıyı dosyaya çıkar…” metin olanları filmin yanına yeni bir dosya olarak yazar, resim olanlar (PGS, VobSub, DVB) OCR gerektirdiği için çıkarılmaz |
 | ses düzeyi | volume | ses seviyesi, ses yüksekliği | | Düğmede “Sesi kapat” / “Sesi aç”; kısayolda “Sessiz”. Algılanan ses (loudness) başka bir şeydir: gürlük |
 | klasör | folder | dizin | | İnternet radyolarının listesi “radyo rehberi” (radio directory) |
 | paylaşmak | share | | | Bir medyanın dosyasını sistemin paylaşma sayfasıyla başka bir uygulamaya vermek: öğe menüsünde ve seçim çubuğunda “Paylaş…”; seçilenler birlikte gider |
 | dosyada göstermek | show in folder | | | Bir medyanın dosyasını klasöründe, seçili olarak açmak: menüde “Dosyada göster”; Kaynaklar › Bu cihaz'da, oranın açamadığı bir klasördeyse sistemin dosyalar uygulamasında |
 | cihaz | device | aygıt | | |
 | harici disk | external drive | harici sürücü | external disk | |
-| Videolar | Videos | | | Kütüphanenin bölümü: bu cihazla çekilen videolar (kamera, ekran kaydı, mesajlaşma uygulamaları), film ya da dizi bölümü olmayanlar. Tekili “video”: “12 video”, “3 video seçili” |
-| kaynak klasör | source folder | | | Bir bölümün (Filmler, Diziler, Videolar, Müzik) gösterdiği klasör; Ayarlar › Kütüphane'den ya da bölümün “Klasör ekle” düğmesinden seçilir, alt klasörleri de kapsar. Hiç seçilmezse bölüm kütüphanede ona uyan her şeyi gösterir: “Kaynak klasörler: Filmler”, “Kütüphanenin tümü” |
+| kaynak klasör | source folder | | | Müziğin gösterdiği klasör; Ayarlar › Kütüphane'den ya da “Klasör ekle” düğmesinden seçilir, alt klasörleri de kapsar. Hiç seçilmezse kütüphanedeki bütün müzik görünür: “Kütüphanenin tümü” |
 | hariç tutmak | leave out | | | Bir bölümün klasörlerinden birini göstermemek: menüde “Hariç tut”, klasörün rozeti “Hariç” |
 | ağ paylaşımı | network share | | | SMB, DLNA, WebDAV |
 | uzaktan erişim | remote access | uzak erişim | | Ayarlar › Uzaktan erişim: bu ağdaki bir tarayıcıdan kütüphaneye bakmak, oynatmayı denetlemek, dosya göndermek; web sayfası bu cihazdaki sunucudan gelir, “VLC for Android” tabanlı olduğu Hakkında'da yazar |
@@ -84,7 +71,7 @@ Sözlüğü testler denetler:
 | parola | password | | passcode | Hiçbir adreste, kayıtta ya da günlükte açık yazılmaz |
 | sertifika | certificate | | | Sunucunun güvenlik sertifikası (HTTPS, WebDAV); libVLC tanımadığı ya da değişen sertifikayı sorar: “Sertifikayı göster”, “24 saat kabul et”, “Kalıcı olarak kabul et”, “Vazgeç” |
 | bağlantı noktası | port | | | Sunucu adresinin sayısı (1–65535); boşsa protokolün kendi noktası (SMB 445, FTP 21…) |
-| yayınlamak | cast | yansıtma | renderer | Videoyu ya da müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) göndermek; gönderen libVLC'dir. “Yayınla…” (Ctrl+Shift+C), “Salon TV cihazına yayınlanıyor”, “Yayını durdur”; listede “Bu cihaz” yayını bitirir. VLC'nin klasik ayarı kendi adıyla anılır: “Kablosuz aktarım” |
+| yayınlamak | cast | yansıtma | renderer | Müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) göndermek; gönderen libVLC'dir. “Yayınla…” (Ctrl+Shift+C), “Salon TV cihazına yayınlanıyor”, “Yayını durdur”; listede “Bu cihaz” yayını bitirir. VLC'nin klasik ayarı kendi adıyla anılır: “Kablosuz aktarım” |
 | kısayol | shortcut | | hotkey, key binding | |
 | kısayol kartı | shortcut card | kısayol listesi, kopya kâğıdı | cheat sheet | Bütün kısayolların menülerin sırasıyla, şu anki tuşlarıyla salt okunur listesi (Ctrl+/, Yardım menüsü, Ayarlar › Yardım); aranır, düz metin olarak paylaşılır. Tuşları değiştiren “Klavye kısayolları” düzenleyicisi (Ayarlar) ayrıdır; karttaki “Kısayolları düzenle…” oraya götürür |
 | Tüm ayarlar | All settings | | | VLC'nin ayar sayfaları (Arayüz, Video, Altyazılar, Ses, Gelişmiş…) Nağmedar'ın tasarımında: Ayarlar › Hakkında'daki düğme, komut paleti. Sayfaların ve ayarların adları VLC'nin kendi çevirileridir; Nağmedar'ın bölümlerinde olanlar “Ayarlar › … bölümünde” diye oraya götürür. Yol “Ayarlar › Tüm ayarlar › Video › Oynatıcı denetimleri” biçiminde yazılır |
@@ -98,11 +85,6 @@ Sözlüğü testler denetler:
 | seç, seçili | choose, select, selected | seçildi | pick | İngilizcede seçenek, dosya, klasör ve tuş için “Choose”; seçim kipine girmek ve “Select all” için “Select” |
 | kaldır | remove | | | Listeden, sıradan, seçimden çıkarır; dosya silinmez. Dosya gerçekten silinecekse “sil” / “delete” |
 | vazgeç | cancel | | | İletişim kutularında; süren bir işi (indirme) durdurmak için “İptal” |
-| izlendi, izlenmedi | watched, unwatched | | | Sonuna kadar izlenen “izlendi”; yarıda bırakılan “%40 izlendi” (yarıda); hiç açılmayan “izlenmedi”. Menüde “İzlendi olarak işaretle”, “İzlenmedi olarak işaretle”; sezonda “Sezon 1 · 3/10” |
-| afiş | poster | | | Filmin ya da dizinin 2:3 görseli (TMDB'den); “Afiş görünümü”. Albümün görseli “kapak”tır |
-| geniş görsel | backdrop | | | Filmin yatay görseli: Afiş görünümünün üstündeki tanıtım alanında ve ayrıntılarda |
-| film bilgileri | film information | | | Afiş, özet, yıl, türler, oyuncular, puanlar; TMDB'den ve OMDb'den, dosya adındaki (o bir şey söylemiyorsa klasörün adındaki) ad ve yılla aranır. Ayarlar'daki bölümü “Film bilgileri”; “Bilgileri yenile”, “Yanlış film mi? Ara…” |
-| görünüm | view | | | Bir bölümün gösterilişi: Izgara, Afiş, Liste, Klasörler; bölüm başına hatırlanır |
 | İzlemeye devam et | Continue watching | | | Raf başlığı; düğmede “Devam et” (Resume) |
 | kaldığı yer | stopped at | | | |
 | lisans | licence | | license | İngilizcede isim İngiliz yazımıyla; özel adlar olduğu gibi (aşağıda) |
@@ -119,13 +101,12 @@ Sözlüğü testler denetler:
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |
-| yenileme hızı | refresh rate | tazeleme hızı | | Ekranın hızı, Hz ile: “120 Hz”; “Yenileme hızı eşleme” ekranı filmin kare hızına geçirir: her zaman, kesintisizse ya da hiç |
+| yenileme hızı | refresh rate | tazeleme hızı | | Ekranın hızı, Hz ile: “120 Hz” |
 | vurgu rengi | accent colour | | | |
 | ön ayar | preset | | | “VLC”, “mpv” |
 | efekt | effect | | | “Efektler ve filtreler” (Ctrl+E); oynatıcı panelinin sekmesi “Efektler” |
-| anaglif 3B | anaglyph 3D | | | Yan yana 3B filmin iki yarısı renkli gözlük için birleştirilir (Efektler › Gelişmiş video); gözlükler: kırmızı–camgöbeği, kırmızı–yeşil, kırmızı–mavi, macenta–camgöbeği, trioskopik |
 | ekolayzer | equaliser | eşitleyici | equalizer | VLC'nin ön ayarları kendi adlarıyla: “Düz”, “Güçlü bas”, “Büyük salon” |
-| oynatıcının ekolayzeri | the player's equaliser | | | VLC'nin ekolayzeri: filmler, radyo, podcastler ve akışlar bununla çalar (Ctrl+Shift+E oynatıcıda); açık ya da kapalı, VLC'nin ön ayarlarından biri ya da kullanıcının kendisininki (bir ön ayarın “Rock kopyası” gibi kopyası). Efektler sekmesindeki “Oynatıcının ayarı” budur. Müzik motorununki DSP zinciridir |
+| oynatıcının ekolayzeri | the player's equaliser | | | VLC'nin ekolayzeri: radyo, podcastler ve akışlar bununla çalar; açık ya da kapalı, VLC'nin ön ayarlarından biri ya da kullanıcının kendisininki (bir ön ayarın “Rock kopyası” gibi kopyası). Müzik motorununki DSP zinciridir |
 | müzik motoru | music engine | ses motoru | audio engine | Nağmedar Ses Motoru'nun ayarlardaki adı; yerel müzik dosyalarını çalar, libVLC'ye dönülebilir |
 | boşluksuz | gapless | | | Bir albümün parçaları arada boşluk ya da tık olmadan birbirini izler; “kesintisiz” ekranın yenileme hızı geçişi için kalır |
 | çapraz geçiş | crossfade | | cross-fade | Sonraki parça çalanın sonunun üstüne girer; süresi saniyeyle, eğrisi “Eşit güç” ya da “Doğrusal” |
@@ -153,30 +134,20 @@ Sözlüğü testler denetler:
 | spektrum | spectrum | tayf | | Görselleştiricinin frekans çubukları, 25 Hz–20 kHz |
 | VU metre | VU meter | ses ölçer | level meter | Sol ve sağ kanalın RMS'i ve tepesi, dBFS ile; tepede kırpılma işareti |
 | osiloskop | oscilloscope | | | Dalganın kendisi, yükselen sıfır geçişinden |
-| profil (dönüştürme) | profile | | | Kapsayıcı, video ve ses kodlayıcısı, bit hızı, en büyük yükseklik, altyazı; hazır olanlar “Ön ayar” (preset), kullanıcınınkiler adıyla saklanır |
-| kodlayıcı | encoder | | | Dönüştürmede yazan taraf (x264, VP8, LAME, Opus, FLAC…); “libVLC'nin bu derlemesinde bunun kodlayıcısı yok (H.265)” |
-| iş, İşler | job, Jobs | | | Video dönüştürmeleri tek sırada, birer birer çalışan işler; Dönüştür › İşler |
-| ağda yayın, ağda yayınlamak | stream on the network | | | Medyanın HLS olarak yerel ağdan (Wi-Fi, Ethernet) sunulması: adres ve QR kodu, “Yayında”, “Yayını durdur” (Ctrl+Shift+H) |
+| kodlayıcı | encoder | | | Dönüştürmede yazan taraf (Opus, LAME, AAC) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | filtre, Filtrele | filter | süzgeç | | Müzik kütüphanesinin araç çubuğundaki düğme ve açtığı panel; başlıklar altında (Bit derinliği, Örnekleme hızı) seçilir, düğmede açık filtre bir noktayla görünür |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |
 | bant giderme | debanding | | | |
-| senkron | sync | eşzamanlama | synchronization | Oynatıcı panelinin sekmesi “Senkron”: ses ve altyazı gecikmesi, altyazı hızı |
 | gecikme | delay | | | “Pozitif: ses daha geç gelir”; adımlar 10 ve 50 ms. Sözlerde 0,1 sn adımla (Alt+G, Alt+H), parça başına saklanır |
-| kontur | outline | | | Altyazı harflerinin çevresindeki çizgi: yok, 2, 4 ya da 6 px |
-| tırnaklı, tırnaksız | serif, sans serif | | | Altyazı yazı tipleri; “Eş aralıklı” (monospace), “Dar” (condensed) |
-| parmak izi | fingerprint | | hash | Dosyanın OpenSubtitles'taki kimliği: boyutu ve ilk ve son 64 KB'si; “bu dosyaya uygun” altyazılar onunla bulunur |
-| kota | quota | | | OpenSubtitles'ın günlük indirme hakkı: “OpenSubtitles kotası: 4/5” |
-| ekran görüntüsü | screenshot | anlık görüntü | snapshot | Oynatıcıda Shift+S; dosya filmin adı ve zamanıyla: “Kuzey Işığı 01-12-33.png” |
 | kayıt, kayda almak | recording, record | | | Oynayanın akışı geldiği gibi yazılır (Shift+R, VLC'nin Playback › Record'u); “Kayda al”, “Kaydı durdur”, Ayarlar › Kayıt. “Kaydetmek” yalnızca dosyanın yazılması için: “Kaydediliyor… %45” |
 | radyo kaydı, parça kesme | radio recording, track splitting | | | Radyonun akışı ayrı bir bağlantıyla alınır, ICY parça adı değişince kare sınırında kesilir (Alt+R, Alt+Shift+R sekmeyi açar); kesim örnek hassasiyetinde değildir, bunu arayüz söyler |
 | eksik parça | partial track | | | Başı ya da sonu kesilmiş ya da en kısa süreden kısa parça; “Eksik” rozeti, “Yalnızca tam parçaları tut” |
 | zamanlanmış kayıt | scheduled recording | | | Radyo, saat, süre ya da bitiş ve tekrar: bir kez, her gün, hafta içi, haftalık |
 | çalışma (zamanlamanın) | run | | | Zamanlanmış kaydın bir günkü penceresi; sonucu “Son çalışma: kaydedildi / durduruldu / kesildi / kaçırıldı” diye zamanlama satırında yazar. Kesildi: cihaz ya da uygulama yeniden başlayınca yarıda kalan; kaçırıldı: zamanı kimse kayıt yapmadan geçen |
 | HLS akışı | HLS stream | | | Parça parça (.m3u8 çalma listesiyle) gelen radyo akışı; kayıtta oturum başına tek dosya olur, şifreliyse kayda alınmaz |
-| yer imi | bookmark | | | Filmin bir anı, adıyla; medya kütüphanesinde saklanır (Ctrl+D ekler) |
 | zamana atla | jump to time | | | Ctrl+T; “1:12:33”, “72:33”, “45 sn”, “+30”, “%50” yazılır |
 | resim içinde resim | picture in picture | | | Küçük pencerede: 10 sn geri, oynat ya da duraklat, 10 sn ileri |
 | ipucu | tooltip | | | |
@@ -186,7 +157,7 @@ Sözlüğü testler denetler:
 | kural | rule | ölçüt | criterion | Akıllı listenin bir satırı: alan, işleç, değer (“Puan en az 4”, “Eklenme en çok 30 gün önce”) |
 | CUE sayfası | CUE sheet | cue dosyası | cue file | Tek dosyalık albümün parça listesi (album.cue): parçaları kütüphanede ayrı ayrı görünür, örnek doğruluğunda çalınır; her parça dosyasının adresi ve sayfadaki numarasıyla bilinir (“…/album.flac#cue=3”) |
 | tracker modülü | tracker module | mod dosyası, tracker şarkısı | mod file | MOD, XM, S3M, IT, MPTM… libopenmpt'nin çaldığı modül biçimleri; motor çalarken sentezler, kütüphane türünü (XM, IT…) format olarak gösterir |
-| puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi”. Filmlerde IMDb ve TMDB puanı ondalıklı (7,8), Rotten Tomatoes puanı yüzde (%87) |
+| puan | rating | derecelendirme, skor | score | 1–5 yıldız; “Puan ver…”, “Puanı kaldır”, “Puan verilmedi” |
 | çalınma, atlama | play count, skip | | | Bir parça yarısı ya da dört dakikası dinlenince çalınmış, ondan önce başka parçaya geçilince atlanmış sayılır; “Son çalınma” |
 | scrobble | scrobbling, scrobble | | | Çalınan müziğin Last.fm ve ListenBrainz'e gönderilen kaydı (Ayarlar › Scrobble): 30 sn'den uzun bir parçanın yarısı ya da dört dakikası dinlenince sayılır; video, podcast ve akış gönderilmez. Çevrimdışıyken cihazda bekler: “3 scrobble gönderilmeyi bekliyor”. Türkçede olduğu gibi yazılır, ek kesmeyle: “scrobble'lar” |
 | belirteç | token | token, jeton | | ListenBrainz'in kullanıcıya verdiği anahtar: ayarlar sayfasından kopyalanıp yapıştırılır, cihazda şifrelenerek saklanır; “Belirteci denetle”. Last.fm'de saklanan ise “oturum anahtarı”dır, parola saklanmaz |
@@ -201,7 +172,7 @@ Sözlüğü testler denetler:
 | podcast, abonelik | podcast, subscription | | | “Podcastler” ekranı; Türkçede de “podcast”, çoğulu “podcastler”. “Abone ol” / “Subscribe”, eklenince “Abone” / “Subscribed”, “Abonelikten çık” / “Unsubscribe”. Bölümü “bölüm” (episode) |
 | yayın, RSS adresi | feed, RSS address | besleme | | Bir podcast'in RSS ya da Atom dosyası ve adresi: “RSS adresiyle ekle…”, “Bu adres bir podcast yayını değil” |
 | yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
-| dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu (videoda izlendi / izlenmedi): “Dinlendi olarak işaretle” |
+| dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |
 | döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
@@ -209,9 +180,8 @@ Sözlüğü testler denetler:
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |
 | giriş, kapanış | intro, outro | | | Bir podcast bölümünün başında ve sonunda atlanan saniyeler: “Girişi atla”, “Kapanışı atla” |
-| bağlantı kopması | dropout | | | Akışla çalan bir bölümün bağlantısı sonundan önce gidince (ağ kaybı, Wi-Fi'den mobil veriye geçiş) bölüm bitmiş sayılmaz, kaldığı yerden yeniden açılır; olmazsa “Bağlantı koptu, bölüm sürdürülemedi.” |
+| bağlantı kopması | dropout | | | Akışla çalan bir bölümün bağlantısı sonundan önce gidince (ağ kaybı, Wi-Fi'den mobil veriye geçiş) bölüm bitmiş sayılmaz, kaldığı yerden yeniden açılır; olmazsa “Bağlantı koptu, bölüm sürdürülemedi.” Radyoda ve canlı akışta aynı adrese yeniden bağlanılır; olmazsa “Yayın koptu, yeniden bağlanılamadı.” Açık kalıp veri getirmeyen bağlantı da kopmuş sayılır |
 | dönüştürmek | convert | | transcode | Bir müzik dosyasını başka bir biçimde (Opus, MP3, AAC) yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz: “Dönüştür…”, “Dönüştürme bitti” |
-| dönüştürmek | convert | | transcode | Bir dosyayı başka bir biçimde yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz. Müzikte “Dönüştür…” (Opus, MP3, AAC): “Dönüştürme bitti”; videoda “Dönüştür / Kaydet…” (Ctrl+R): bir profille, libVLC'yle |
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |
 | stereoya indirmek | mix down | | | Çok kanallı sesi (5.1, 7.1) ITU-R BS.775'in matrisiyle iki kanala karıştırmak; LFE katılmaz, taşmayacak biçimde küçültülür: “Stereoya indir”. Dönüştürücüde MP3 her zaman stereodur |
@@ -227,15 +197,11 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 - AutoEq
 - EBU R128
 - GNU General Public License
-- IMDb
 - Last.fm
 - ListenBrainz
 - LRCLIB
-- OMDb
 - ReplayGain
-- Rotten Tomatoes
 - SIL Open Font License
-- TMDB
 - VLC for Android
 
 ## Yazım kuralları
@@ -257,7 +223,7 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 11. Menü yolu “›” ile yazılır: “Ayarlar › Ses”.
 12. Süre kısaltmaları: Türkçede sn, dk, sa; İngilizcede s, min, h.
 13. Çeviri metni kodda büyütülüp küçültülmez. Bir başlık büyük harfle gösterilecekse arayüzün
-    diliyle büyütülür (`uppercase(currentLocale())`: “FİLMLER”, “FILMS”); kodlar ve kısaltmalar
+    diliyle büyütülür (`uppercase(currentLocale())`: “MÜZİK”, “MUSIC”); kodlar ve kısaltmalar
     `Locale.ROOT` ile (“QAI”, “HEVC”). (test)
 14. Arama Türkçe harfleri eşler: “isik” “Işık”ı, “kamu mali” “Kamu malı”nı bulur
     (`foldForSearch`).

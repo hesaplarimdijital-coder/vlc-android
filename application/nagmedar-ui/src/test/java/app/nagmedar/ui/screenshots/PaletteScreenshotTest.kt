@@ -52,9 +52,9 @@ class PaletteScreenshotTest {
     private fun items(): List<PaletteItem> {
         val res = LocalContext.current.resources
         return commandItems(res, { ShortcutRegistry[it].scope == ShortcutScope.Global && it !in later }, {}) + screenItems(res) {} + listOf(
-            PaletteItem("media:kuzey", PaletteKind.Media, "Kuzey Işığı", "Video · 2:18:10", icon = NagIcons.Movies) {},
+            PaletteItem("media:kuzey", PaletteKind.Media, "Kuzeyden Esen", "Parça · Ada Karan", icon = NagIcons.Music) {},
             PaletteItem("media:sabaha", PaletteKind.Media, "Sabaha Kadar", "Parça · Ada Karan", icon = NagIcons.Music) {},
-            PaletteItem("media:acik", PaletteKind.Media, "Açık Deniz", "Video · 1:44:00", icon = NagIcons.Movies) {},
+            PaletteItem("media:acik", PaletteKind.Media, "Açık Deniz", "Parça · Deniz Aral", icon = NagIcons.Music) {},
         )
     }
 
@@ -63,7 +63,7 @@ class PaletteScreenshotTest {
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = Destination.Movies)
+                    TestShell(widthClass, startDestination = Destination.Music)
                     // the dialog's dim, drawn here: the window holds only the activity
                     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
                     PaletteSurface(items(), recent, onRun = {}, onDismiss = {}, initialQuery = query)

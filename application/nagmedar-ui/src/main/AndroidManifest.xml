@@ -39,12 +39,6 @@
                 android:value="true" />
         </activity>
 
-        <!-- S-607: the app kept in the foreground while a recording is copied into its folder -->
-        <service
-            android:name="app.nagmedar.ui.player.record.RecordingKeeper"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
         <!-- S-1010: WorkManager's foreground service with the types the converter's workers ask for -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
@@ -86,16 +80,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- S-1303: the video conversions' notification Cancel -->
-        <receiver
-            android:name="app.nagmedar.ui.transcode.TranscodeCancelReceiver"
-            android:exported="false" />
-        <!-- S-1303: the HLS stream on the local network: the encoding and its server kept running
-             with a notification (media processing on Android 15 and later, data sync before) -->
-        <service
-            android:name="app.nagmedar.ui.transcode.HlsService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync|mediaProcessing" />
 
         <!-- Classic UI: Nağmedar's home screen widget, in place of VLC's three -->
         <receiver

@@ -5,24 +5,32 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.SystemClock
 import app.nagmedar.ui.R
 import app.nagmedar.ui.playback.DropoutVerdict
+import app.nagmedar.ui.playback.StreamCounters
 import app.nagmedar.ui.playback.StreamDropout
+import app.nagmedar.ui.playback.StreamStall
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.videolan.tools.AppScope
+import org.videolan.tools.KEY_NETWORK_CACHING_VALUE
 import org.videolan.tools.Notices
+import org.videolan.tools.Settings
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.DropoutGuard
 
 /**
  * A streamed podcast episode libVLC ends or fails on before its end, its connection dropped ([StreamDropout]): opened
  * again where it was after a pause, once there is a network again; stopped, its place kept, with a notice when that does
- * not help. The playlist's [DropoutGuard] while the service lives, set by [PodcastPlaybackObserver], which tells it what
- * plays at each look ([look]) and starts its [EpisodeTracker] again on each opening ([reopened]). All on the main thread.
+ * not help. A live stream (a radio station, a stream with no length) that drops is connected to again the same way, and
+ * given up with a notice of its own. A network stream that plays with nothing coming ([StreamStall]) has dropped too:
+ * libVLC is stopped on it and it is opened again. The playlist's [DropoutGuard] while the service lives, set by
+ * [PodcastPlaybackObserver], which tells it what plays at each look ([look]) and starts its [EpisodeTracker] again on
+ * each opening ([reopened]). All on the main thread.
  */
 internal class DropoutRecovery(
     private val service: PlaybackService,
@@ -38,6 +46,7 @@ internal class DropoutRecovery(
     private var opened = false
     private var playedSinceReopen = false
     private var job: Job? = null
+    private var stall = StreamStall(StreamStall.MIN_STALL_MS)
 
     @Volatile
     private var waiting = false
@@ -48,16 +57,30 @@ internal class DropoutRecovery(
      * One look of the observer: [location] is loaded, the episode [context] (null for another media), at [timeMs] of
      * [lengthMs]. After a dropout libVLC's state is the dropped stream's (it still says it plays, at the place it
      * stopped), so until the stream opened again plays a second past the place it was opened at, the looks are not taken.
+     * A network stream whose time stands still while it plays is a stall ([StreamStall], [stalled]); [nowMs] is a
+     * monotonic clock.
      */
-    fun look(location: String?, context: EpisodeContext?, timeMs: Long, lengthMs: Long, playing: Boolean) {
+    fun look(location: String?, context: EpisodeContext?, timeMs: Long, lengthMs: Long, playing: Boolean, nowMs: Long = SystemClock.elapsedRealtime()) {
         if (location != this.location) {
             reset()
             this.location = location
             seenMs = 0L
             seenLengthMs = 0L
+            stall = StreamStall(StreamStall.limitMs(networkCachingMs()))
         }
         episode = context
-        if (context == null || !playing || timeMs <= 0L) return
+        if (location != null && streamed(location)) {
+            // waiting to be opened again, libVLC's state is the dropped stream's: no stall to see
+            val watched = playing && !(reopenedAtMs >= 0L && !opened)
+            val liveNow = context == null && lengthMs <= 0L && seenLengthMs <= 0L
+            if (stall.look(timeMs, watched, nowMs, if (watched) counters() else null, liveNow)) {
+                stalled(location, timeMs, lengthMs)
+                return
+            }
+        } else if (context == null) {
+            return
+        }
+        if (!playing || timeMs <= 0L) return
         if (reopenedAtMs >= 0L && (!opened || timeMs < reopenedAtMs + PLAYS_AGAIN_MS)) return
         seenMs = timeMs
         if (lengthMs > 0L) seenLengthMs = lengthMs
@@ -65,18 +88,20 @@ internal class DropoutRecovery(
         // it plays again: the service's notification follows the player again
         waiting = false
         playedSinceReopen = true
-        if (timeMs >= reopenedAtMs + StreamDropout.RECOVERED_MS) forget()
+        if (timeMs >= reopenedAtMs + StreamDropout.RECOVERED_MS) {
+            // a live stream keeps where it ended: one that ends there again is a file with no length that ended
+            val lastEnd = droppedAtMs
+            forget()
+            if (live()) droppedAtMs = lastEnd
+        }
     }
 
     override fun takesOver(location: String, timeMs: Long, lengthMs: Long, error: Boolean): Boolean {
-        val episode = episode ?: return false
         if (location != this.location) return false
+        if (episode == null && !streamed(location)) return false
         // an opening again is waited for: libVLC's stop after its error, or another word of the same dropout
         if (reopenedAtMs >= 0L && !opened) return true
-        val position = maxOf(seenMs, timeMs)
-        val duration = lengthMs.takeIf { it > 0L } ?: seenLengthMs.takeIf { it > 0L } ?: episode.durationMs
-        val verdict = StreamDropout.verdict(streamed(location), position, duration, retries, error, droppedAtMs, playedSinceReopen)
-        return when (verdict) {
+        return when (val verdict = verdict(location, timeMs, lengthMs, error)) {
             DropoutVerdict.End -> {
                 reset()
                 false
@@ -86,11 +111,44 @@ internal class DropoutRecovery(
                 true
             }
             is DropoutVerdict.Reopen -> {
-                reopen(location, maxOf(position, droppedAtMs), verdict)
+                reopen(location, dropPlace(timeMs), verdict)
                 true
             }
         }
     }
+
+    /**
+     * libVLC plays the stream with nothing coming: a dropout like an error. It is stopped on it (its stop comes as an
+     * end, which the opening again takes over) and opened again; at its end, or not libVLC's, it is left as it is.
+     */
+    private fun stalled(location: String, timeMs: Long, lengthMs: Long) {
+        when (val verdict = verdict(location, timeMs, lengthMs, error = true)) {
+            DropoutVerdict.End -> Unit
+            DropoutVerdict.GiveUp -> giveUp()
+            is DropoutVerdict.Reopen -> if (service.playlistManager.dropStalled()) reopen(location, dropPlace(timeMs), verdict)
+        }
+    }
+
+    /** What [StreamDropout] says of an end, an error or a stall of the stream at [location], last at [timeMs] of [lengthMs]. */
+    private fun verdict(location: String, timeMs: Long, lengthMs: Long, error: Boolean): DropoutVerdict {
+        val episode = episode
+        val duration = lengthMs.takeIf { it > 0L } ?: seenLengthMs.takeIf { it > 0L } ?: episode?.durationMs ?: 0L
+        return StreamDropout.verdict(
+            streamed(location), maxOf(seenMs, timeMs), duration, retries, error, droppedAtMs, playedSinceReopen, episode = episode != null,
+        )
+    }
+
+    /** The place of a dropout at [timeMs]: an episode's furthest; a live stream's in this connection. */
+    private fun dropPlace(timeMs: Long): Long = if (episode != null) maxOf(seenMs, timeMs, droppedAtMs) else maxOf(seenMs, timeMs)
+
+    /** A stream that is not an episode and has shown no length: a radio station, a live stream. */
+    private fun live(): Boolean = episode == null && seenLengthMs <= 0L
+
+    /** What libVLC counts of the stream it plays (bytes read, audio played); null when it is not libVLC's or it counts nothing. */
+    private fun counters(): StreamCounters? = runCatching { service.playlistManager.currentStats() }.getOrNull()
+        ?.let { StreamCounters(it.readBytes, it.demuxReadBytes, it.playedAbuffers) }
+
+    private fun networkCachingMs(): Int = runCatching { Settings.getInstance(service).getInt(KEY_NETWORK_CACHING_VALUE, 0) }.getOrDefault(0)
 
     override fun stopped() = reset()
 
@@ -109,6 +167,8 @@ internal class DropoutRecovery(
         opened = false
         playedSinceReopen = false
         waiting = true
+        // a live stream's time starts again at 0 on the new connection
+        if (episode == null) seenMs = 0L
         job = AppScope.launch {
             delay(verdict.delayMs)
             if (!awaitNetwork(service, StreamDropout.OFFLINE_WAIT_MS)) {
@@ -126,11 +186,12 @@ internal class DropoutRecovery(
         }
     }
 
-    /** Stopped where it got to (the tracker keeps the place), and said. */
+    /** Stopped where it got to (the tracker keeps an episode's place), and said. */
     private fun giveUp() {
+        val notice = if (episode != null) R.string.nag_pod_dropout_gave_up else R.string.nag_live_dropout_gave_up
         reset()
         service.stop()
-        Notices.show(service, R.string.nag_pod_dropout_gave_up, long = true)
+        Notices.show(service, notice, long = true)
     }
 
     private fun reset() {

@@ -49,8 +49,8 @@ import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SuggestionChip
 import app.nagmedar.ui.components.tabMovesFocus
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.theme.NagTheme
 

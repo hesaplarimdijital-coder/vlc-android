@@ -31,8 +31,8 @@ class ShellNavigatorTest {
             val controller = rememberNavController()
             navController = controller
             navigator = ShellNavigator(controller)
-            NavHost(controller, startDestination = Destination.Home.route) {
-                listOf(Destination.Home, Destination.Movies, Destination.Music).forEach { destination ->
+            NavHost(controller, startDestination = Destination.Music.route) {
+                listOf(Destination.Music, Destination.Podcasts, Destination.Radio).forEach { destination ->
                     composable(destination.route) { Text(destination.name) }
                 }
             }
@@ -45,12 +45,12 @@ class ShellNavigatorTest {
     @Test
     fun backThenForwardReturns() {
         shell()
-        compose.runOnIdle { navigator.navigate(Destination.Movies) }
-        on(Destination.Movies)
+        compose.runOnIdle { navigator.navigate(Destination.Podcasts) }
+        on(Destination.Podcasts)
         compose.runOnIdle { assertTrue(navigator.back()) }
-        on(Destination.Home)
+        on(Destination.Music)
         compose.runOnIdle { assertTrue(navigator.forward()) }
-        on(Destination.Movies)
+        on(Destination.Podcasts)
         // nowhere further
         compose.runOnIdle { assertFalse(navigator.forward()) }
     }
@@ -58,19 +58,19 @@ class ShellNavigatorTest {
     @Test
     fun goingElsewhereForgetsForward() {
         shell()
-        compose.runOnIdle { navigator.navigate(Destination.Movies) }
+        compose.runOnIdle { navigator.navigate(Destination.Podcasts) }
         compose.runOnIdle { navigator.back() }
-        compose.runOnIdle { navigator.navigate(Destination.Music) }
+        compose.runOnIdle { navigator.navigate(Destination.Radio) }
         compose.runOnIdle { assertFalse(navigator.forward()) }
-        on(Destination.Music)
+        on(Destination.Radio)
         // a back the system made is remembered too
         compose.runOnIdle {
             val from = navigator.currentRoute
             navController.popBackStack()
             navigator.wentBack(from)
         }
-        on(Destination.Home)
-        compose.runOnIdle { assertTrue(navigator.forward()) }
         on(Destination.Music)
+        compose.runOnIdle { assertTrue(navigator.forward()) }
+        on(Destination.Radio)
     }
 }

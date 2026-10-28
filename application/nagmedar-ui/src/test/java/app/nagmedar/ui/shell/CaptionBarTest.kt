@@ -61,7 +61,7 @@ class CaptionBarTest {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 view = LocalView.current
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = Destination.Movies, caption = caption)
+                    TestShell(widthClass, startDestination = Destination.Music, caption = caption)
                     // where the system draws its buttons, for the eye
                     SystemButtons(Modifier.align(Alignment.TopEnd))
                 }
@@ -95,7 +95,7 @@ class CaptionBarTest {
         assertTrue("clear of the buttons: ${search.right}", search.right <= window - 144f)
         assertTrue(excluded(search.center.x, search.center.y))
         // the top bar's title, above the page's own
-        val title = compose.onAllNodesWithText("Filmler").fetchSemanticsNodes().minBy { it.boundsInRoot.top }.boundsInRoot
+        val title = compose.onAllNodesWithText("Müzik").fetchSemanticsNodes().minBy { it.boundsInRoot.top }.boundsInRoot
         assertFalse(excluded(title.center.x, title.center.y))
     }
 

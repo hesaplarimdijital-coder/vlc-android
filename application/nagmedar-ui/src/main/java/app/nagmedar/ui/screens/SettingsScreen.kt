@@ -1,8 +1,5 @@
 package app.nagmedar.ui.screens
 
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -46,26 +43,16 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SettingRow
-import app.nagmedar.ui.player.subtitles.providers.SubtitleProvidersSettings
 import app.nagmedar.ui.prefs.NagmedarLink
-import app.nagmedar.ui.player.subtitles.whisper.WhisperSettings
 import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.covers.CoversSection
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.library.LibrarySourcesSection
-import app.nagmedar.ui.library.metadata.FilmInfoSection
 import app.nagmedar.ui.lyrics.LyricsSection
 import app.nagmedar.ui.perf.PerformanceSection
-import app.nagmedar.ui.player.record.RecordingSection
 import app.nagmedar.ui.radio.record.RadioRecordingSection
-import app.nagmedar.ui.player.snapshot.HdrSnapshot
-import app.nagmedar.ui.player.snapshot.SnapshotFormat
-import app.nagmedar.ui.player.snapshot.defaultSnapshotFolder
-import app.nagmedar.ui.player.snapshot.forgetSnapshotFolder
-import app.nagmedar.ui.player.snapshot.keepSnapshotFolder
-import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
 import app.nagmedar.ui.podcast.PodcastSection
 import app.nagmedar.ui.remoteaccess.RemoteAccessSection
 import app.nagmedar.ui.scrobble.ScrobbleSection
@@ -77,17 +64,15 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.VisualizerSection
 import app.nagmedar.ui.theme.systemAccentSeed
+import app.nagmedar.ui.transcribe.WhisperSettings
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
-import org.videolan.tools.NAGMEDAR_MIDDLE_MUTE
-import org.videolan.tools.NAGMEDAR_MIDDLE_NONE
-import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 
 /**
  * The sections of [SettingsScreen], in the order its list shows them: the list is made of these, each
- * under its [key], so a link to one (the shortcut card's "Edit shortcuts…", the home page's "Klasör
- * ekle", "All settings"' lines) scrolls to [index], wherever sections are added or moved.
+ * under its [key], so a link to one (the shortcut card's "Edit shortcuts…", "Klasör ekle", "All
+ * settings"' lines) scrolls to [index], wherever sections are added or moved.
  */
 enum class SettingsItem(val key: String) {
     Header("header"),
@@ -96,10 +81,6 @@ enum class SettingsItem(val key: String) {
     Input("input"),
     Shortcuts("shortcuts"),
     Library("library"),
-    FilmInfo("film_info"),
-    Snapshot("snapshot"),
-    Recording("recording"),
-    SubtitleProviders("subtitle_providers"),
     Whisper("whisper"),
     Music("music"),
     Latency("latency"),
@@ -167,14 +148,7 @@ fun SettingsScreen(
                 SettingsItem.Shortcuts -> ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo)
                 // the folders each section of the library shows
                 SettingsItem.Library -> LibrarySourcesSection(prefs)
-                // films and series: posters, overviews and ratings from TMDB and OMDb
-                SettingsItem.FilmInfo -> FilmInfoSection()
-                SettingsItem.Snapshot -> SnapshotSection(prefs)
-                // S-607: what Shift+R records, and where
-                SettingsItem.Recording -> RecordingSection(prefs)
-                // S-707: where subtitles come from
-                SettingsItem.SubtitleProviders -> SubtitleProvidersSettings()
-                // S-709: the subtitles from speech: the model, the language, the models on the device
+                // S-709: transcription from speech: the model, the language, the models on the device
                 SettingsItem.Whisper -> WhisperSettings()
                 // S-901: the engine behind the local music library
                 SettingsItem.Music -> MusicSection(onOpenEqualizer = onOpenEqualizer)
@@ -235,10 +209,7 @@ internal fun HelpSection(onOpenGuide: (() -> Unit)?, onOpenShortcutCard: (() -> 
     }
 }
 
-/**
- * Input (S-201, S-404, S-408, S-409): density, the tooltip delay, the player's window on desktops,
- * and what the mouse does in the player.
- */
+/** Input (S-201, S-404): density and the tooltip delay. */
 @Composable
 internal fun InputSection(prefs: NagmedarPreferences) {
     SettingsSection(stringResource(R.string.nag_settings_input)) {
@@ -264,33 +235,6 @@ internal fun InputSection(prefs: NagmedarPreferences) {
                 ),
                 selected = prefs.tooltipDelay,
                 onSelect = prefs::updateTooltipDelay,
-            )
-        }
-        // S-409: the player's window on desktops
-        SettingRow(stringResource(R.string.nag_settings_player_fullscreen), subtitle = stringResource(R.string.nag_settings_player_fullscreen_hint)) {
-            SegmentedChoice(
-                options = listOf(true to stringResource(R.string.nag_choice_yes), false to stringResource(R.string.nag_choice_no)),
-                selected = prefs.playerFullscreen,
-                onSelect = prefs::updatePlayerFullscreen,
-            )
-        }
-        // S-408: the mouse in the video player
-        SettingRow(stringResource(R.string.nag_settings_wheel), subtitle = stringResource(R.string.nag_settings_wheel_hint)) {
-            SegmentedChoice(
-                options = listOf(false to stringResource(R.string.nag_wheel_volume), true to stringResource(R.string.nag_wheel_seek)),
-                selected = prefs.wheelSeeks,
-                onSelect = prefs::updateWheelSeeks,
-            )
-        }
-        SettingRow(stringResource(R.string.nag_settings_middle_click), subtitle = stringResource(R.string.nag_settings_middle_click_hint)) {
-            SegmentedChoice(
-                options = listOf(
-                    NAGMEDAR_MIDDLE_PLAY_PAUSE to stringResource(R.string.nag_middle_play_pause),
-                    NAGMEDAR_MIDDLE_MUTE to stringResource(R.string.nag_middle_mute),
-                    NAGMEDAR_MIDDLE_NONE to stringResource(R.string.nag_middle_none),
-                ),
-                selected = prefs.middleClick,
-                onSelect = prefs::updateMiddleClick,
             )
         }
     }
@@ -333,62 +277,6 @@ internal fun AppearanceSection(prefs: NagmedarPreferences) {
                 selected = if (wallpaper == null && prefs.accent == Accent.System) Accent.Blue else prefs.accent,
                 onSelect = prefs::updateAccent,
             )
-        }
-    }
-}
-
-/**
- * Screenshots (S-606): their format, whether the subtitles go in, what HDR films' pictures
- * become, and their folder, Pictures/Nağmedar unless one is chosen. The player's screenshot
- * button has the same choices in its menu.
- */
-@Composable
-internal fun SnapshotSection(prefs: NagmedarPreferences) {
-    val context = LocalContext.current
-    val settings = prefs.snapshot
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        if (uri != null) keepSnapshotFolder(context, prefs, uri)
-    }
-    SettingsSection(stringResource(R.string.nag_snap_settings)) {
-        // WebP is lossless from Android 10
-        val lossless = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-        SettingRow(stringResource(R.string.nag_snap_format), subtitle = stringResource(if (lossless) R.string.nag_snap_format_hint else R.string.nag_snap_format_hint_old)) {
-            SegmentedChoice(
-                options = SnapshotFormat.entries.map { it to it.label },
-                selected = settings.format,
-                onSelect = { prefs.updateSnapshot(settings.copy(format = it)) },
-            )
-        }
-        SettingRow(stringResource(R.string.nag_snap_subtitles), subtitle = stringResource(R.string.nag_snap_subtitles_hint)) {
-            SegmentedChoice(
-                options = listOf(true to stringResource(R.string.nag_snap_with), false to stringResource(R.string.nag_snap_without)),
-                selected = settings.subtitles,
-                onSelect = { prefs.updateSnapshot(settings.copy(subtitles = it)) },
-            )
-        }
-        // HDR is kept from Android 14, which copies a picture with its PQ or HLG coding
-        val keepHdr = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-        SettingRow(
-            stringResource(R.string.nag_snap_hdr),
-            subtitle = stringResource(if (keepHdr) R.string.nag_snap_hdr_hint else R.string.nag_snap_hdr_unavailable),
-        ) {
-            if (keepHdr) {
-                SegmentedChoice(
-                    options = listOf(
-                        HdrSnapshot.ToneMap to stringResource(R.string.nag_snap_tone_map),
-                        HdrSnapshot.Keep to stringResource(R.string.nag_snap_keep_hdr),
-                    ),
-                    selected = settings.hdr,
-                    onSelect = { prefs.updateSnapshot(settings.copy(hdr = it)) },
-                )
-            }
-        }
-        val folder = snapshotFolderLabel(settings.folder, defaultSnapshotFolder(stringResource(R.string.nagmedar_shell_title)))
-        SettingRow(stringResource(R.string.nag_snap_folder), subtitle = folder) {
-            Row(horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
-                if (settings.folder != null) NagButton(stringResource(R.string.nag_snap_default_folder), { forgetSnapshotFolder(context, prefs) })
-                NagButton(stringResource(R.string.nag_snap_change_folder), { runCatching { picker.launch(null) } })
-            }
         }
     }
 }

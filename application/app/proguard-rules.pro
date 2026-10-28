@@ -112,20 +112,11 @@
 
 -keep class com.google.android.material.** { *; }
 
-# Nağmedar (S-601): the video player finds the new interface's desktop controls by name
--keep class app.nagmedar.ui.player.DesktopPlayerChrome { <init>(); }
-
-# Nağmedar (S-1302): and its casting controls while a renderer plays the film
--keep class app.nagmedar.ui.cast.CastingPlayerChrome { <init>(); }
-
 # Nağmedar (S-808): the playback service finds the play statistics' recorder by name
 -keep class app.nagmedar.ui.stats.PlayStatsRecorder { <init>(); }
 
 # Nağmedar (S-1009): the playback service finds the album covers' observer by name
 -keep class app.nagmedar.ui.covers.CoverObserver { <init>(); }
-
-# Nağmedar (S-607): the playback service finds the recordings' observer by name
--keep class app.nagmedar.ui.player.record.RecordingObserver { <init>(); }
 
 # Nağmedar (S-613): the playback service finds the latency profiles' observer by name
 -keep class app.nagmedar.ui.audio.latency.LatencyObserver { <init>(); }

@@ -25,7 +25,7 @@ import app.nagmedar.audio.SignalPath
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
-import app.nagmedar.ui.player.panel.signed
+import app.nagmedar.ui.components.signed
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import java.util.Locale

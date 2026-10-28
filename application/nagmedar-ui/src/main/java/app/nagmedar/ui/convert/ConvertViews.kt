@@ -57,9 +57,9 @@ import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.music.Track
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
-import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
+import app.nagmedar.ui.library.pickedFolderLabel
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -235,7 +235,7 @@ fun ConvertSurface(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     val none = stringResource(R.string.nag_convert_folder_none)
                     Text(
-                        if (options.folder.isEmpty()) none else snapshotFolderLabel(options.folder, none),
+                        if (options.folder.isEmpty()) none else pickedFolderLabel(options.folder, none),
                         style = NagTheme.type.body,
                         color = if (options.folder.isEmpty()) colors.textSecondary else colors.text,
                         maxLines = 2,

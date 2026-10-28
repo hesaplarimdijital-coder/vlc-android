@@ -22,10 +22,8 @@ import app.nagmedar.audio.MusicFormats
 import app.nagmedar.ui.theme.NagTheme
 
 /*
- * Drag and drop (S-406): files dropped on the window from another app or window are played,
- * subtitles dropped while a video plays are loaded at once, a subtitle dropped on a film goes
- * with it, media dropped on the player bar join the queue. Films and tracks are dragged out as
- * files.
+ * Drag and drop (S-406): media dropped on the window from another app or window are played (a
+ * video is heard), media dropped on the player bar join the queue. Tracks are dragged out as files.
  */
 
 /** What a dropped file is, by its name or the type its sender gave. */
@@ -60,36 +58,25 @@ fun dropKind(name: String?, mime: String?): DropKind {
 data class DroppedFile(val uri: String, val name: String? = null, val mime: String? = null) {
     val kind: DropKind = dropKind(name ?: uri, mime)
 
+    /** A track, a playlist, or a video (heard: Nağmedar plays sound alone). */
     val playable: Boolean get() = kind == DropKind.Video || kind == DropKind.Audio || kind == DropKind.Playlist
 }
 
 /** What a drop on the window does. */
 sealed interface DropPlan {
-    /** Subtitles for the video playing: loaded at once and kept with it. */
-    data class LoadSubtitles(val uris: List<String>) : DropPlan
-
-    /** Media and playlists, played in the order dropped; subtitles dropped with them are left out. */
+    /** Media and playlists, played in the order dropped; anything else dropped with them is left out. */
     data class Play(val uris: List<String>) : DropPlan
-
-    /** Subtitles with no video to go with them. */
-    data object SubtitlesNeedAVideo : DropPlan
 
     /** Nothing that plays. */
     data object Nothing : DropPlan
 }
 
-fun planDrop(files: List<DroppedFile>, videoPlaying: Boolean): DropPlan {
+fun planDrop(files: List<DroppedFile>): DropPlan {
     val media = files.filter { it.playable }.map { it.uri }
-    val subtitles = files.filter { it.kind == DropKind.Subtitle }.map { it.uri }
-    return when {
-        media.isNotEmpty() -> DropPlan.Play(media)
-        subtitles.isNotEmpty() && videoPlaying -> DropPlan.LoadSubtitles(subtitles)
-        subtitles.isNotEmpty() -> DropPlan.SubtitlesNeedAVideo
-        else -> DropPlan.Nothing
-    }
+    return if (media.isNotEmpty()) DropPlan.Play(media) else DropPlan.Nothing
 }
 
-/** A place in the window that takes dropped files: a film, the player bar. */
+/** A place in the window that takes dropped files: the player bar. */
 class DropTarget internal constructor() {
     /** Whether files of these types are this target's (types only: names come with the drop). */
     internal var accepts: (mimeTypes: List<String>) -> Boolean = { false }
@@ -165,9 +152,6 @@ fun Modifier.dropTarget(
     onGloballyPositioned { target.bounds = it.boundsInWindow() }.then(ring)
 }
 
-/** Types that may be a subtitle: senders call .srt files many things. */
-fun mayBeSubtitle(types: List<String>): Boolean = types.any { it in subtitleTypes || it.startsWith("text/") || it == "application/octet-stream" }
-
 /** Types that may be a video, a track or a playlist. */
 fun mayBePlayable(types: List<String>): Boolean = types.any {
     it.startsWith("video/") || it.startsWith("audio/") || it in playlistTypes || it == "application/octet-stream" || it == "application/x-matroska"
@@ -182,5 +166,5 @@ const val NAGMEDAR_DRAG = "nagmedar-drag"
 
 /** Types of files a drag may carry that the window can do something with. */
 fun isMediaOrSubtitleType(mime: String): Boolean = mime.startsWith("video/") || mime.startsWith("audio/") ||
-    mime in subtitleTypes || mime in playlistTypes || mime == "application/octet-stream" || mime.startsWith("text/") ||
+    mime in playlistTypes || mime == "application/octet-stream" || mime.startsWith("text/") ||
     mime == "application/x-matroska"

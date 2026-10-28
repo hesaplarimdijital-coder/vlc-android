@@ -21,7 +21,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
-import app.nagmedar.ui.player.snapshot.snapshotFolderLabel
+import app.nagmedar.ui.library.pickedFolderLabel
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 
@@ -42,7 +42,7 @@ internal fun RadioRecordingSection(prefs: NagmedarPreferences) {
     fun change(edit: (RecordingSettings) -> RecordingSettings) = prefs.updateRadioRecording(edit(prefs.radioRecording))
     SettingsSection(stringResource(R.string.nag_nav_radio)) {
         Text(stringResource(R.string.nag_radio_rec_settings_hint), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary)
-        val label = snapshotFolderLabel(settings.folder, stringResource(R.string.nag_radio_rec_folder_default))
+        val label = pickedFolderLabel(settings.folder, stringResource(R.string.nag_radio_rec_folder_default))
         SettingRow(stringResource(R.string.nag_radio_rec_folder), subtitle = label) {
             Row(horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
                 if (settings.folder != null) NagButton(stringResource(R.string.nag_snap_default_folder), { forgetRadioRecordingFolder(context, prefs) }, modifier = Modifier.testTag("radio-rec-folder-default"))

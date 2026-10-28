@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,8 +25,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.SettingRow
@@ -44,21 +41,21 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** What the Performance card shows: the start-ups and playbacks kept, the newest first. */
+/** What the Performance card shows: the start-ups kept, the newest first. */
 @Immutable
-data class PerfView(val startups: List<StartupRecord>, val playbacks: List<PlaybackRecord>) {
-    val empty: Boolean get() = startups.isEmpty() && playbacks.isEmpty()
+data class PerfView(val startups: List<StartupRecord>) {
+    val empty: Boolean get() = startups.isEmpty()
 
     /** The middle start-up of those kept; null before the first. */
     val medianStartupMs: Long? get() = startups.map { it.ms }.sorted().let { if (it.isEmpty()) null else it[(it.size - 1) / 2] }
 
     companion object {
-        fun of(store: PerfStore) = PerfView(store.startups(), store.playbacks())
+        fun of(store: PerfStore) = PerfView(store.startups())
     }
 }
 
 /**
- * Settings › Performance (S-1404): the cold start-ups and the playbacks this device measured,
+ * Settings › Performance (S-1404): the cold start-ups this device measured,
  * against Nağmedar's targets; a report of them to copy or share; the records deleted. [section]
  * is the settings card it sits in.
  */
@@ -66,7 +63,7 @@ data class PerfView(val startups: List<StartupRecord>, val playbacks: List<Playb
 fun PerformanceSection(section: @Composable (title: String, content: @Composable ColumnScope.() -> Unit) -> Unit) {
     val context = LocalContext.current
     // the records' file is read off the main thread: the card shows none until it is read
-    var view by remember { mutableStateOf(PerfView(emptyList(), emptyList())) }
+    var view by remember { mutableStateOf(PerfView(emptyList())) }
     var store by remember { mutableStateOf<PrefsPerfStore?>(null) }
     LaunchedEffect(context) {
         val opened = withContext(Dispatchers.IO) { PrefsPerfStore.get(context) }
@@ -125,51 +122,10 @@ fun PerformanceCard(view: PerfView, onReport: () -> Unit, onClear: () -> Unit) {
             }
         }
         Spacer(Modifier.height(dimens.gapS))
-        Text(stringResource(R.string.nag_perf_playbacks), style = NagTheme.type.bodyStrong, color = colors.text)
-        Text(
-            stringResource(R.string.nag_perf_playbacks_target, perfPercent(PerfTargets.DROPPED_PERCENT, locale)),
-            style = NagTheme.type.labelSmall,
-            color = colors.textTertiary,
-        )
-        if (view.playbacks.isEmpty()) {
-            Text(
-                stringResource(R.string.nag_perf_playbacks_none),
-                style = NagTheme.type.body,
-                color = colors.textSecondary,
-                modifier = Modifier.padding(vertical = dimens.gapS),
-            )
-        } else {
-            Column(Modifier.fillMaxWidth().padding(vertical = dimens.gapXs)) {
-                view.playbacks.take(SHOWN).forEach { PlaybackRow(res, it, locale) }
-            }
-        }
-        Spacer(Modifier.height(dimens.gapS))
         Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapS)) {
             NagButton(stringResource(R.string.nag_perf_report), onReport, enabled = !view.empty)
             NagButton(stringResource(R.string.nag_perf_clear), onClear, enabled = !view.empty)
         }
-    }
-}
-
-/** The playbacks the card lists; the report has every one kept. */
-private const val SHOWN = 5
-
-@Composable
-private fun PlaybackRow(res: Resources, record: PlaybackRecord, locale: Locale) {
-    val colors = NagTheme.colors
-    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapS)) {
-            Text(
-                record.name,
-                style = NagTheme.type.body,
-                color = colors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            ToneBadge(droppedLabel(res, record, locale), if (PerfTargets.playbackOk(record)) StateTone.Success else StateTone.Warning)
-        }
-        Text(playbackDetails(res, record, locale), style = NagTheme.type.labelSmall, color = colors.textTertiary)
     }
 }
 
@@ -182,34 +138,8 @@ fun secondsLabel(res: Resources, ms: Long, locale: Locale, digits: Int = 2): Str
     return res.getString(R.string.nag_perf_seconds, number)
 }
 
-/** "%0,02", "0.02%": a percentage; a small one with a third decimal, so that it does not read as none. */
-fun perfPercent(percent: Double, locale: Locale): String = NumberFormat.getPercentInstance(locale).apply {
-    minimumFractionDigits = 0
-    maximumFractionDigits = if (percent > 0 && percent < 0.01) 3 else if (percent < 10) 2 else 1
-}.format(percent / 100.0)
-
-/** "%0,02 kayıp", "Kayıp yok". */
-fun droppedLabel(res: Resources, record: PlaybackRecord, locale: Locale): String =
-    if (record.dropped == 0L) res.getString(R.string.nag_perf_none_dropped) else res.getString(R.string.nag_perf_dropped, perfPercent(record.droppedPercent, locale))
-
-/** "3840×2160 · HDR10 · 1 sa 52 dk · pil saatte %9,8". */
-fun playbackDetails(res: Resources, record: PlaybackRecord, locale: Locale): String = listOfNotNull(
-    if (record.width > 0 && record.height > 0) "${record.width}×${record.height}" else null,
-    record.range.ifEmpty { null },
-    playedLabel(res, record.seconds),
-    record.batteryPerHour?.let { res.getString(R.string.nag_perf_battery, NumberFormat.getPercentInstance(locale).apply { maximumFractionDigits = 1 }.format(it / 100.0)) }
-        ?: res.getString(R.string.nag_perf_battery_none),
-).joinToString(" · ")
-
-/** "10 sn", "42 dk", "1 sa 52 dk". */
-fun playedLabel(res: Resources, seconds: Int): String = when {
-    seconds < 60 -> res.getString(R.string.nag_duration_seconds, seconds)
-    seconds < 3600 -> res.getString(R.string.nag_duration_minutes, seconds / 60)
-    else -> res.getString(R.string.nag_duration_hours_minutes, seconds / 3600, seconds / 60 % 60)
-}
-
 /**
- * The report: the device and the build, then every start-up and playback kept with its time; to
+ * The report: the device and the build, then every start-up kept with its time; to
  * copy into an issue or send on.
  */
 fun perfReport(res: Resources, view: PerfView, locale: Locale): String = buildString {
@@ -221,13 +151,4 @@ fun perfReport(res: Resources, view: PerfView, locale: Locale): String = buildSt
     appendLine(res.getString(R.string.nag_perf_report_startups, secondsLabel(res, PerfTargets.STARTUP_MS, locale, 0)))
     if (view.startups.isEmpty()) appendLine("  " + res.getString(R.string.nag_perf_startup_none))
     view.startups.forEach { appendLine("  ${time.format(Date(it.atMs))} · ${secondsLabel(res, it.ms, locale)}") }
-    appendLine()
-    appendLine(res.getString(R.string.nag_perf_report_playbacks, perfPercent(PerfTargets.DROPPED_PERCENT, locale)))
-    if (view.playbacks.isEmpty()) appendLine("  " + res.getString(R.string.nag_perf_playbacks_none))
-    view.playbacks.forEach {
-        val frames = NumberFormat.getIntegerInstance(locale)
-        appendLine("  ${time.format(Date(it.atMs))} · ${it.name}")
-        appendLine("    " + playbackDetails(res, it, locale))
-        appendLine("    " + res.getString(R.string.nag_perf_frames, frames.format(it.shown), frames.format(it.dropped)) + " · " + droppedLabel(res, it, locale))
-    }
 }.trimEnd()
