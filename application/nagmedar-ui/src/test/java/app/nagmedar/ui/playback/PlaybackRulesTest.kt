@@ -1,4 +1,4 @@
-package app.nagmedar.ui.podcast
+package app.nagmedar.ui.playback
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

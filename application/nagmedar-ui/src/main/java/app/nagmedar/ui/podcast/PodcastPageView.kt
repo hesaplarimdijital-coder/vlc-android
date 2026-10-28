@@ -62,6 +62,7 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.MediaFile
 import app.nagmedar.ui.library.fileMenuEntries
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
@@ -186,7 +187,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
     val played = episode.played
     val fresh = !played && episode.addedAt > feed.subscribedAt
     // the episode page's rule: "Devam et · 0:43" where it was left, else "Oynat" (a row starts it, never pauses it)
-    val playWord = playLabel(res, PlaybackRules.playButton(episode.positionMs, played, now = null))
+    val playWord = playLabel(res, PlaybackRules.playButton(episode.positionMs, played, now = null, durationMs = episode.durationMs))
     val meta = listOfNotNull(
         episode.publishedAt.takeIf { it > 0 }?.let { dates.format(Date(it)) },
         episode.durationMs.takeIf { it > 0 }?.let { formatDuration(it) },

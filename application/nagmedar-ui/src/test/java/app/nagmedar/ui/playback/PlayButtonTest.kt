@@ -1,5 +1,6 @@
-package app.nagmedar.ui.podcast
+package app.nagmedar.ui.playback
 
+import app.nagmedar.ui.podcast.Listening
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -51,6 +52,20 @@ class PlayButtonTest {
         assertEquals(PlayButton.Play, button(2_200_000, played = true))
         assertEquals(PlayButton.Play, button(2_200_000, played = true, now = Listening(0, length, playing = false)))
         assertEquals(PlayButton.Resume(120_000), button(2_200_000, played = true, now = Listening(120_000, length, playing = false)))
+    }
+
+    @Test
+    fun aPlaceInTheLastSecondsPlaysAgain() {
+        assertEquals(PlayButton.Play, PlaybackRules.playButton(length - 3_000, played = false, now = null, durationMs = length))
+        assertEquals(PlayButton.Play, PlaybackRules.playButton(length - 5_000, played = false, now = null, durationMs = length))
+        assertEquals(PlayButton.Play, PlaybackRules.playButton(length - 3_000, played = false, now = Listening(0, length, playing = false), durationMs = length))
+        assertEquals(PlayButton.Resume(length - 6_000), PlaybackRules.playButton(length - 6_000, played = false, now = null, durationMs = length))
+        // without a known length the place is resumed as it is
+        assertEquals(PlayButton.Resume(length - 3_000), button(length - 3_000))
+        assertEquals(0L, PlaybackRules.shownPositionMs(length - 2_000, played = false, now = null, durationMs = length))
+        assertEquals(length - 6_000, PlaybackRules.shownPositionMs(length - 6_000, played = false, now = null, durationMs = length))
+        // the player in the episode: its place, wherever that is
+        assertEquals(PlayButton.Resume(length - 3_000), PlaybackRules.playButton(43_000, played = false, now = Listening(length - 3_000, length, playing = false), durationMs = length))
     }
 
     @Test

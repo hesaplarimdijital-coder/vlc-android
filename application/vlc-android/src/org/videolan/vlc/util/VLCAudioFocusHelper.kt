@@ -110,6 +110,9 @@ class VLCAudioFocusHelper(private val service: PlaybackService) {
                 when (focusChange) {
                     AudioManager.AUDIOFOCUS_LOSS -> {
                         if (BuildConfig.DEBUG) Log.i(TAG, "AUDIOFOCUS_LOSS")
+                        // Nağmedar: a resume still waiting after a short loss never comes after this one, nor does a later gain
+                        handler.removeCallbacks(delayedPodcastRunnable)
+                        lossTransient = false
                         // Pause playback
                         changeAudioFocus(false)
                         service.pause()
@@ -143,20 +146,24 @@ class VLCAudioFocusHelper(private val service: PlaybackService) {
                             lossTransientVolume = -1
                         }
 
-                        if (lossTransient && wasPlaying) {
-                            if (podcastPlaying) {
-                                // If the interruption was short just restart playback
-                                val deltaTime = System.currentTimeMillis() - lossTime
-                                if (deltaTime > 1_000L) schedulePlayback(2_000L) else resumePlayback()
-                            } else if (service.settings.getBoolean(RESUME_PLAYBACK, true)) {
-                                resumePlayback()
-                            }
+                        if (lossTransient && wasPlaying && podcastPlaying) {
+                            // If the interruption was short just restart playback
+                            val deltaTime = System.currentTimeMillis() - lossTime
+                            if (deltaTime > 1_000L) schedulePlayback(2_000L) else resumePlayback()
+                        } else if (lossTransient && wasPlaying && service.settings.getBoolean(RESUME_PLAYBACK, true)) {
+                            resumePlayback()
+                        } else {
+                            // Nağmedar: nothing to play on (it was not playing, or resuming is off): the loss is over all the same,
+                            // or the next one would not pause and the service would stay in the foreground paused
+                            lossTransient = false
                         }
                     }
                 }
             }
 
             private fun pausePlayback() {
+                // Nağmedar: a new loss while a podcast's resume waits: it stays paused until the next gain
+                handler.removeCallbacks(delayedPodcastRunnable)
                 if (lossTransient) return
                 lossTransient = true
                 wasPlaying = service.isPlaying

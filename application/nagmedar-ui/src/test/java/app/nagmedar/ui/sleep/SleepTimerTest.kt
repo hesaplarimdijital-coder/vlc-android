@@ -13,6 +13,10 @@ class SleepTimerTest {
 
     private class Player : SleepTarget {
         override var playing = true
+
+        /** Paused (or being opened again) with the item still loaded. */
+        var paused = false
+        override val loaded: Boolean get() = playing || paused
         private var level = 100
         override val volume: Int get() = level
         var stops = 0
@@ -107,6 +111,20 @@ class SleepTimerTest {
         assertEquals(10, player.volume)
         timer.cancel()
         assertEquals(100, player.volume)
+    }
+
+    @Test
+    fun aPauseWhileTheTrackEndIsAwaitedKeepsTheTimer() {
+        timer.startAtTrackEnd()
+        player.playing = false
+        player.paused = true
+        assertTrue(timer.tick())
+        assertTrue(timer.state.value!!.waitingForTrackEnd)
+        assertTrue(player.stopAfterTrack)
+        // the service stopped after the track
+        player.paused = false
+        assertFalse(timer.tick())
+        assertNull(timer.state.value)
     }
 
     @Test

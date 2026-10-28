@@ -16,6 +16,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.playback.PlaybackRules
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,9 +100,7 @@ class PodcastController(
     private var downloadProgress by mutableStateOf<Map<Long, DownloadProgress>>(emptyMap())
     private var listeningState by mutableStateOf<Listening?>(null)
     private var startingId by mutableStateOf<Long?>(null)
-    private var startTarget = 0L
-    private var startLooks = 0
-    private var settledLooks = 0
+    private val startWait = StartWait()
     private var settingsNow by mutableStateOf(services.settings())
     private var episodeJob: Job? = null
     private var extrasJob: Job? = null
@@ -359,6 +358,7 @@ class PodcastController(
         openEpisodeId = null
         episodeRow = null
         listeningState = null
+        startWait.clear()
         startingId = null
     }
 
@@ -401,40 +401,36 @@ class PodcastController(
         when {
             now?.playing == true -> services.control.togglePlay()
             now != null && (now.positionMs >= PlaybackRules.RESUME_MIN_MS || from < PlaybackRules.RESUME_MIN_MS) -> {
-                starting(episode.id, now.positionMs)
+                starting(episode, now.positionMs)
                 services.control.togglePlay()
             }
             else -> {
-                starting(episode.id, from)
+                starting(episode, from)
                 player.play(feed, episode)
             }
         }
     }
 
-    /** [episodeId] is being opened at [targetMs]: its button waits ([followStart]). */
-    private fun starting(episodeId: Long, targetMs: Long) {
-        startingId = episodeId
-        startTarget = targetMs
-        startLooks = 0
-        settledLooks = 0
+    /** [episode] is being opened at [targetMs]: its button waits ([followStart]). */
+    private fun starting(episode: PodcastEpisode, targetMs: Long) {
+        startWait.start(episode.id, targetMs, services.control.haltStamp(episode))
+        startingId = episode.id
     }
 
     /**
-     * The one source of the button while an episode opens: it waits until the player plays it at the place it was
-     * opened at for two looks running (the stream's opening, the start, a seek do not flip it back), until it took
-     * too long (the stream failed: the button says what is so), or until the page went.
+     * The one source of the button while an episode opens ([StartWait]): it waits until the player plays it at the place
+     * it was opened at for two looks running, until it took too long (the stream failed: the button says what is so),
+     * until the page went, or not at all once the player ended, failed on or stopped the episode.
      */
     private fun followStart(row: PodcastEpisode?, now: Listening?) {
-        val id = startingId ?: return
-        val there = now != null && now.playing && now.lengthMs > 0 && now.positionMs + START_SLACK_MS >= startTarget
-        settledLooks = if (there) settledLooks + 1 else 0
-        if (row?.id != id || settledLooks >= SETTLED_LOOKS || ++startLooks >= START_LOOKS) startingId = null
+        if (startWait.episodeId == null) return
+        startingId = startWait.look(row?.id, now, row?.let(services.control::haltStamp) ?: 0)
     }
 
     /** From [ms]: a seek when the player has the episode, else the episode started there. */
     fun playAt(feed: PodcastFeed, episode: PodcastEpisode, ms: Long) {
         val now = services.control.listening(episode)
-        if (now == null || !now.playing) starting(episode.id, ms)
+        if (now == null || !now.playing) starting(episode, ms)
         if (now == null) {
             // the place is kept first: the playback observer reads it as the place to start from
             scope.launch {
@@ -645,15 +641,6 @@ class PodcastController(
 
     private companion object {
         const val LISTENING_MS = 400L
-
-        /** How far before the place it was opened at an episode may start (the start is set in whole seconds). */
-        const val START_SLACK_MS = 2_000L
-
-        /** Looks of it playing there before the button follows the player again. */
-        const val SETTLED_LOOKS = 2
-
-        /** The most looks the button waits for the player: 20 s, a slow stream's opening. */
-        const val START_LOOKS = 50
         val ADDRESS_PREFIXES = listOf("http://", "https://", "feed:", "itpc:", "pcast:", "podcast:")
     }
 }

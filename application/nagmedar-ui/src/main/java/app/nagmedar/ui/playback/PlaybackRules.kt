@@ -1,5 +1,6 @@
-package app.nagmedar.ui.podcast
+package app.nagmedar.ui.playback
 
+import app.nagmedar.ui.podcast.Listening
 import kotlin.math.abs
 
 /**
@@ -22,6 +23,12 @@ object PlaybackRules {
 
     /** Resuming goes back this far: the sentence the listener left in the middle of. */
     const val REWIND_MS = 3_000L
+
+    /**
+     * A saved place this near the end is no place to resume from either: the episode plays again ("Oynat"), not its
+     * last seconds. Also how near its end a stream may stop and still have ended ([StreamDropout]).
+     */
+    const val RESUME_END_THRESHOLD_MS = 5_000L
 
     /** The speeds the buttons go through. */
     val SPEEDS: List<Float> = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f)
@@ -76,24 +83,31 @@ object PlaybackRules {
      * Where an episode's page says it is: the player's place once it has the episode at a real place or plays it, else
      * the saved one. A player that has the episode loaded but not started (its playlist brought back after a restart)
      * says 0 until it plays, and one that is opening it ([starting]) says where it opens; the saved place is the truth
-     * then. A played episode starts again, so its saved place is none.
+     * then. A played episode starts again, so its saved place is none, nor is one in the last
+     * [RESUME_END_THRESHOLD_MS] of its [durationMs] (0 when unknown).
      */
-    fun shownPositionMs(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false): Long {
+    fun shownPositionMs(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false, durationMs: Long = 0L): Long {
         val player = now?.positionMs ?: 0L
         if (now != null && (player >= RESUME_MIN_MS || (now.playing && !starting))) return player
-        return if (!played && savedMs > player) savedMs else player
+        if (!played && savedMs > player) return if (atTheEnd(savedMs, durationMs)) 0L else savedMs
+        return player
     }
 
     /**
      * What an episode's play button offers, the one rule of its page and its rows: "Duraklat" while it plays or
-     * opens, "Devam et · m:ss" from a place worth resuming ([shownPositionMs]), else "Oynat".
+     * opens, "Devam et · m:ss" from a place worth resuming ([shownPositionMs]), else "Oynat": also for a place saved in
+     * the last [RESUME_END_THRESHOLD_MS] of its [durationMs].
      */
-    fun playButton(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false): PlayButton {
+    fun playButton(savedMs: Long, played: Boolean, now: Listening?, starting: Boolean = false, durationMs: Long = 0L): PlayButton {
         if (starting) return PlayButton.Starting
         if (now?.playing == true) return PlayButton.Pause
-        val at = shownPositionMs(savedMs, played, now)
+        val at = shownPositionMs(savedMs, played, now, durationMs = durationMs)
         return if (at >= RESUME_MIN_MS) PlayButton.Resume(at) else PlayButton.Play
     }
+
+    /** Whether [positionMs] is in the last [RESUME_END_THRESHOLD_MS] of a [durationMs] that is known. */
+    private fun atTheEnd(positionMs: Long, durationMs: Long): Boolean =
+        durationMs > 0L && durationMs - positionMs <= RESUME_END_THRESHOLD_MS
 
     private const val SPEED_EPSILON = 0.001f
 }

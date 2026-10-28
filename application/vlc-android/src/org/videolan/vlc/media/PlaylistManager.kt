@@ -477,10 +477,23 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     fun play() {
+        // Nağmedar: a stream that dropped and waits to be opened again opens playing, where it was (libVLC would start
+        // it from where it was first opened)
+        if (waitingForReopen()) {
+            dropoutPaused = false
+            setDropoutState(PlaybackStateCompat.STATE_PLAYING)
+            return
+        }
         if (hasMedia()) engine.play()
     }
 
     fun pause() {
+        // Nağmedar: paused while it waits (by the listener, or by a short loss of the audio focus): it opens paused
+        if (waitingForReopen()) {
+            dropoutPaused = true
+            setDropoutState(PlaybackStateCompat.STATE_PAUSED)
+            return
+        }
         if (engine.pause()) {
             savePosition()
             launch {
@@ -518,6 +531,10 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     fun stop(systemExit: Boolean = false, video: Boolean = false) {
+        // Nağmedar: the item stopped is said, and a stream waiting to be opened again after a dropout is left
+        runCatching { getCurrentMedia()?.location }.getOrNull()?.let(ResumeHook::halted)
+        ResumeHook.dropout?.stopped()
+        dropoutPaused = false
         clearABRepeat()
         ResumeHook.volume?.restore()
         if (stopAfter != -1) Settings.getInstance(AppContextProvider.appContext).putSingle(AUDIO_STOP_AFTER, stopAfter)
@@ -1524,6 +1541,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 MediaPlayer.Event.Playing -> enginePlaying.value = true
                 MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped -> enginePlaying.value = engine.isPlaying()
             }
+            // Nağmedar: a stream that dropped before its end is opened again where it was, not taken as ended
+            if ((event.type == MediaPlayer.Event.EndReached || event.type == MediaPlayer.Event.EncounteredError) &&
+                droppedStream(error = event.type == MediaPlayer.Event.EncounteredError)) return
             when (event.type) {
                 MediaPlayer.Event.Playing -> {
                     val mw = withContext(Dispatchers.IO) {
@@ -1622,6 +1642,52 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             }
             service.onMediaPlayerEvent(event)
         }
+    }
+
+    /**
+     * Nağmedar: libVLC ended or failed on the current item: said ([ResumeHook.halted]); true when the guard of
+     * streams that drop ([ResumeHook.dropout]) takes it over, to open the item again where it was.
+     */
+    private fun droppedStream(error: Boolean): Boolean {
+        val location = runCatching { getCurrentMedia()?.location }.getOrNull() ?: return false
+        ResumeHook.halted(location)
+        if (engine !== player) return false
+        val guard = ResumeHook.dropout ?: return false
+        return runCatching { guard.takesOver(location, player.getCurrentTime(), player.getLength(), error) }.getOrDefault(false)
+    }
+
+    /**
+     * Nağmedar: the current item opened again at [positionMs], the queue as it is, to the millisecond as a handover
+     * (S-1302) is: a stream that dropped goes on where it was ([DropoutGuard]). Its place is [positionMs] from now on,
+     * not the dropped stream's. False with nothing to open; true, and nothing done, when libVLC plays it again already
+     * (the listener pressed play meanwhile).
+     */
+    @MainThread
+    fun reopenCurrent(positionMs: Long): Boolean {
+        val media = getCurrentMedia() ?: return false
+        if (engine !== player) return false
+        if (!player.mediaplayer.isReleased && player.mediaplayer.isPlaying) return true
+        val at = positionMs.coerceAtLeast(0L)
+        player.updateProgress(newTime = at)
+        castResume = CastResume(currentIndex, media.uri, at, paused = dropoutPaused)
+        dropoutPaused = false
+        launch { playIndex(currentIndex) }
+        return true
+    }
+
+    /** Nağmedar: paused while a stream that dropped waited to be opened again ([pause]): it opens paused. */
+    private var dropoutPaused = false
+
+    /** Nağmedar: whether libVLC's stream dropped and waits to be opened again ([DropoutGuard.recovering]): nothing plays. */
+    private fun waitingForReopen(): Boolean =
+        ResumeHook.dropout?.recovering == true && engine === player && !player.mediaplayer.isReleased && !player.mediaplayer.isPlaying
+
+    /** Nağmedar: the buttons, the notification and the session say [state] while the stream waits to be opened again. */
+    private fun setDropoutState(state: Int) {
+        PlayerController.playbackState = state
+        enginePlaying.value = state == PlaybackStateCompat.STATE_PLAYING
+        service.executeUpdate(true)
+        service.showNotification()
     }
 
     /**

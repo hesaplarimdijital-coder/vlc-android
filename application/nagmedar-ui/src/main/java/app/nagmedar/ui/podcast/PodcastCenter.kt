@@ -8,6 +8,7 @@ import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.BuildConfig as UiBuildConfig
 import app.nagmedar.ui.playback.PlaybackActions
+import app.nagmedar.ui.playback.PlaybackRules
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.AppScope
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig as VlcBuildConfig
+import org.videolan.vlc.media.ResumeHook
 import java.lang.ref.WeakReference
 import java.util.Locale
 
@@ -172,6 +174,9 @@ interface EpisodeControl {
     fun togglePlay()
 
     fun seekTo(ms: Long)
+
+    /** A number that grows each time the player ends, fails on or is stopped on [episode]; 0 before the first. */
+    fun haltStamp(episode: PodcastEpisode): Int = 0
 }
 
 /** No player: the pages of tests and previews. */
@@ -196,6 +201,11 @@ object ServiceEpisodeControl : EpisodeControl {
     override fun togglePlay() = PlaybackActions.togglePlayPause()
 
     override fun seekTo(ms: Long) = PlaybackActions.seekToMs(ms)
+
+    override fun haltStamp(episode: PodcastEpisode): Int {
+        val downloaded = episode.downloadPath?.let(DownloadFiles::locationOf)
+        return maxOf(ResumeHook.haltStamp(episode.audioUrl), downloaded?.let(ResumeHook::haltStamp) ?: 0)
+    }
 }
 
 /**

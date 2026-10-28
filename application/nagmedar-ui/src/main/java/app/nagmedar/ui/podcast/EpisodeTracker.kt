@@ -1,5 +1,7 @@
 package app.nagmedar.ui.podcast
 
+import app.nagmedar.ui.playback.PlaybackRules
+
 /** S-1104: what the show of the playing episode asks of its playback. */
 data class EpisodeContext(
     val episodeId: Long,
@@ -52,6 +54,7 @@ class EpisodeTracker {
     private var wasPlaying = false
     private var markedPlayed = false
     private var finished = false
+    private var reopening = false
 
     /**
      * One look. [location] is what the service plays (null for nothing); [context] the episode that is, once
@@ -73,9 +76,11 @@ class EpisodeTracker {
             wasPlaying = false
             markedPlayed = false
             finished = false
+            reopening = false
         }
         if (this.context == null) this.context = context
         val episode = this.context ?: return out
+        if (reopening) return reopenedLook(timeMs, lengthMs, playing, rate, nowMs, out)
         // nothing is decided before it plays at a time: a media being opened says 0 a moment (the one before it
         // stopping resets the time), and a seek to the place it was opened at would only open the stream again
         if (lengthMs <= 0 || location == null || (!applied && (!playing || timeMs <= 0))) {
@@ -125,6 +130,31 @@ class EpisodeTracker {
             lastSavedAt = nowMs
         }
         wasPlaying = playing
+        return out
+    }
+
+    /**
+     * The episode is opened again where its stream dropped ([DropoutRecovery]): until it plays there nothing is saved
+     * (the place it reached stays the one to keep), and its show's speed is set again once it does, the player having
+     * opened it at normal speed.
+     */
+    fun reopened(nowMs: Long) {
+        if (context == null || !applied) return
+        reopening = true
+        startedAt = nowMs
+        reapplied = 0
+    }
+
+    private fun reopenedLook(timeMs: Long, lengthMs: Long, playing: Boolean, rate: Float, nowMs: Long, out: MutableList<TrackerCommand>): List<TrackerCommand> {
+        if (lengthMs <= 0 || !playing || timeMs <= 0) return out
+        reopening = false
+        startedAt = nowMs
+        lastSavedAt = nowMs
+        if (!PlaybackRules.sameSpeed(rate, desiredRate)) out += TrackerCommand.SetRate(desiredRate)
+        lastRate = desiredRate
+        wasPlaying = true
+        lastTime = timeMs
+        lastLength = lengthMs
         return out
     }
 

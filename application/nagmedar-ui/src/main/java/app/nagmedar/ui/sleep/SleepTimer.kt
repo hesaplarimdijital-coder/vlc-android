@@ -15,6 +15,9 @@ import org.videolan.vlc.PlaybackService
 interface SleepTarget {
     val playing: Boolean
 
+    /** Whether an item is loaded, playing or not: paused, or being opened again after its stream dropped. */
+    val loaded: Boolean get() = playing
+
     /** 0–200, as the service's own volume goes. */
     val volume: Int
 
@@ -124,8 +127,8 @@ class SleepTimer(
         val current = running.value ?: return false
         val player = target()
         if (current.waitingForTrackEnd) {
-            // the service stopped after the track, or someone stopped it
-            if (player == null || !player.playing) {
+            // the service stopped after the track, or someone stopped it; a pause keeps the stop after the track, and the timer
+            if (player == null || !player.loaded) {
                 finish(player)
                 return false
             }
@@ -188,6 +191,8 @@ object Sleep {
 
 private class ServiceSleepTarget(private val service: PlaybackService) : SleepTarget {
     override val playing: Boolean get() = service.isPlaying
+
+    override val loaded: Boolean get() = service.playlistManager.hasCurrentMedia()
 
     override val volume: Int get() = service.volume
 

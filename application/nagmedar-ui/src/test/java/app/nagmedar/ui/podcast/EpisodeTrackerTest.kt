@@ -193,4 +193,30 @@ class EpisodeTrackerTest {
         assertTrue(look(episode(speed = 2f, intro = 30), time = 0, lengthMs = 0).isEmpty())
         assertEquals(listOf(TrackerCommand.SetRate(2f), TrackerCommand.SeekTo(30_000)), look(episode(speed = 2f, intro = 30), time = 100))
     }
+
+    @Test
+    fun anEpisodeOpenedAgainAfterADropoutKeepsItsPlaceUntilItPlays() {
+        look(episode(speed = 1.5f), time = 100)
+        look(time = 300_000, rate = 1.5f)
+        // the stream dropped: libVLC stopped where it was, the place is kept as when it pauses
+        assertEquals(listOf(TrackerCommand.SavePosition(7, 300_000, false)), look(time = 300_000, playing = false, rate = 1.5f))
+        tracker.reopened(now)
+        // opening again: the player says 0, then plays at normal speed; nothing is saved, the speed is no listener's
+        assertTrue(look(time = 0, playing = false, afterMs = 6_000).isEmpty())
+        assertTrue(look(time = 0, playing = true, lengthMs = 0, afterMs = 6_000).isEmpty())
+        assertEquals(listOf(TrackerCommand.SetRate(1.5f)), look(time = 297_000, rate = 1f, afterMs = 6_000))
+        assertTrue(look(time = 298_000, rate = 1.5f).isEmpty())
+        // the service goes meanwhile: the place it played to
+        assertEquals(listOf(TrackerCommand.SavePosition(7, 298_000, false)), tracker.end())
+    }
+
+    @Test
+    fun theServiceGoingWhileItIsOpenedAgainKeepsThePlaceItReached() {
+        look(episode(), time = 100)
+        look(time = 120_000)
+        look(time = 120_000, playing = false)
+        tracker.reopened(now)
+        look(time = 0, playing = false)
+        assertEquals(listOf(TrackerCommand.SavePosition(7, 120_000, false)), tracker.end())
+    }
 }

@@ -26,6 +26,7 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.player.navigate.DialogCard
 import app.nagmedar.ui.player.navigate.DialogFrame
 import app.nagmedar.ui.theme.NagTheme

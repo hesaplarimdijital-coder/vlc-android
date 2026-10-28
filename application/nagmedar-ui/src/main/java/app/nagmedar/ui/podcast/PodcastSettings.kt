@@ -2,6 +2,7 @@ package app.nagmedar.ui.podcast
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.Immutable
+import app.nagmedar.ui.playback.PlaybackRules
 
 /**
  * S-1103, S-1104: Settings › Podcasts, the choices that are for all shows: how often feeds are read and on what

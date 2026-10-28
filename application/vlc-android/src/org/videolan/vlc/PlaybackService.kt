@@ -196,6 +196,7 @@ import org.videolan.vlc.util.Permissions
 import org.videolan.vlc.util.PlaybackAction
 import org.videolan.vlc.util.RendererLiveData
 import org.videolan.vlc.util.SchedulerCallback
+import org.videolan.vlc.util.StreamWifiLock
 import org.videolan.vlc.util.TextUtils
 import org.videolan.vlc.util.ThumbnailsProvider
 import org.videolan.vlc.util.Util
@@ -239,6 +240,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     var detectHeadset = true
     var headsetInserted = false
     private lateinit var wakeLock: PowerManager.WakeLock
+    // Nağmedar: the Wi-Fi kept awake while a stream plays, or waits to be opened again after a dropout
+    private val wifiLock by lazy(LazyThreadSafetyMode.NONE) { StreamWifiLock(applicationContext) }
     private val audioFocusHelper by lazy { VLCAudioFocusHelper(this) }
     private lateinit var browserCallback: MediaBrowserCallback
     var sleepTimerJob: Job? = null
@@ -337,6 +340,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 lastTime = getTime()
                 audioFocusHelper.changeAudioFocus(true)
                 if (!wakeLock.isHeld) wakeLock.acquire()
+                updateWifiLock()
                 showNotification()
                 nbErrors = 0
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -350,8 +354,13 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 executeUpdate(true)
                 showNotification()
                 if (wakeLock.isHeld) wakeLock.release()
+                updateWifiLock()
             }
-            MediaPlayer.Event.EncounteredError -> executeUpdate()
+            MediaPlayer.Event.EncounteredError -> {
+                executeUpdate()
+                updateWifiLock()
+            }
+            MediaPlayer.Event.Stopped -> updateWifiLock()
             MediaPlayer.Event.LengthChanged -> {
                 lastChaptersCount = getChapters(-1)?.size ?: 0
                 if (lastLength == 0L) {
@@ -377,6 +386,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             MediaPlayer.Event.EndReached -> {
                 mediaEndReached = true
                 playQueueFinished = !playlistManager.hasNext() || playlistManager.stopAfter == currentMediaPosition
+                updateWifiLock()
             }
         }
         cbActor.trySend(CbMediaPlayerEvent(event))
@@ -999,6 +1009,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         if (!systemExit) hideNotification(isForeground)
         removePopup()
         if (wakeLock.isHeld) wakeLock.release()
+        wifiLock.hold(false)
         audioFocusHelper.changeAudioFocus(false)
         // We must publish state before resetting mCurrentIndex
         publishState()
@@ -1006,6 +1017,11 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     }
 
     private fun canSwitchToVideo() = playlistManager.player.canSwitchToVideo()
+
+    /** Nağmedar: the Wi-Fi lock held while a network stream plays or waits to be opened again, never for local media. */
+    private fun updateWifiLock() {
+        wifiLock.hold((isPlaying || ResumeHook.dropout?.recovering == true) && isSchemeStreaming(currentMediaLocation))
+    }
 
     fun onMediaEvent(event: IMedia.Event) = cbActor.trySend(CbMediaEvent(event))
 
@@ -1034,6 +1050,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val coverOnLockscreen = settings.getBoolean(LOCKSCREEN_COVER, true)
             val seekInCompactView = settings.getBoolean(SHOW_SEEK_IN_COMPACT_NOTIFICATION, false)
             val playing = isPlaying
+            // Nağmedar: a stream waiting to be opened again after a dropout keeps the service in the foreground
+            val recovering = ResumeHook.dropout?.recovering == true
             val sessionToken = media3?.compatToken ?: mediaSession.sessionToken
             val ctx = this@PlaybackService
             val metaData = mediaSession.controller.metadata
@@ -1059,7 +1077,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                             sessionToken, sessionPendingIntent,
                             castingTo = castingTo)
                     if (isPlayingPopup) return@launch
-                    if (!VlcMigrationHelper.isLolliPopOrLater || playing || audioFocusHelper.lossTransient) {
+                    if (!VlcMigrationHelper.isLolliPopOrLater || playing || recovering || audioFocusHelper.lossTransient) {
                         if (!isForeground) {
                             ctx.launchForeground(Intent(ctx, PlaybackService::class.java)) {
                                 if (startForegroundCompat(NotificationIds.PLAYBACK, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)) {

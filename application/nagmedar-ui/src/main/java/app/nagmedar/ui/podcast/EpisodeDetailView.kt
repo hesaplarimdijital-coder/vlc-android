@@ -73,6 +73,8 @@ import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.sizeLabel
+import app.nagmedar.ui.playback.PlayButton
+import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.TimelineStyle
 import app.nagmedar.ui.playback.rememberChapterMarks
@@ -287,7 +289,7 @@ private fun Header(ui: EpisodeDetailUi, now: Listening?, compact: Boolean = fals
 @Composable
 private fun playState(ui: EpisodeDetailUi, now: Listening?): Pair<String, StateTone>? {
     val episode = ui.episode
-    val position = PlaybackRules.shownPositionMs(episode.positionMs, episode.played, now, ui.starting)
+    val position = PlaybackRules.shownPositionMs(episode.positionMs, episode.played, now, ui.starting, episode.durationMs)
     val length = now?.lengthMs?.takeIf { it > 0 } ?: episode.durationMs
     return when {
         episode.played -> stringResource(R.string.nag_pod_played) to StateTone.Success
@@ -308,7 +310,7 @@ internal fun playLabel(res: Resources, button: PlayButton): String = when (butto
 @Composable
 private fun playChoice(ui: EpisodeDetailUi, now: Listening?): Pair<PlayButton, Pair<String, ImageVector>> {
     val episode = ui.episode
-    val button = PlaybackRules.playButton(episode.positionMs, episode.played, now, ui.starting)
+    val button = PlaybackRules.playButton(episode.positionMs, episode.played, now, ui.starting, episode.durationMs)
     val icon = when (button) {
         PlayButton.Play -> NagIcons.Play
         is PlayButton.Resume -> NagIcons.Resume
@@ -524,7 +526,7 @@ private fun Timeline(ui: EpisodeDetailUi, now: Listening, chapters: List<Chapter
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val length = now.lengthMs.takeIf { it > 0 } ?: ui.episode.durationMs
-    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting)
+    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting, ui.episode.durationMs)
     val fraction = if (length > 0) (at.toFloat() / length).coerceIn(0f, 1f) else 0f
     val current = Chapters.indexAt(chapters, at)
     Column(verticalArrangement = Arrangement.spacedBy(dimens.gapXs), modifier = Modifier.testTag("episode-timeline")) {
@@ -575,7 +577,7 @@ private fun CompactTimeline(ui: EpisodeDetailUi, now: Listening, chapters: List<
     val colors = NagTheme.colors
     val length = now.lengthMs.takeIf { it > 0 } ?: ui.episode.durationMs
     // the saved place while the player has the episode but has not started it: the timeline starts there
-    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting)
+    val at = PlaybackRules.shownPositionMs(ui.episode.positionMs, ui.episode.played, now, ui.starting, ui.episode.durationMs)
     val current = Chapters.indexAt(chapters, at)
     val latest by rememberUpdatedState(at)
     Column(Modifier.testTag("episode-timeline")) {

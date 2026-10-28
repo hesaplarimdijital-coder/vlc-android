@@ -30,12 +30,49 @@ fun interface VolumeRestorer {
     fun engineVolume(volume: Int): Int = volume
 }
 
+/**
+ * libVLC ends a stream, or fails on it, when its connection drops (the network lost, Wi-Fi handed over to mobile data)
+ * as it does at the media's real end. The guard, kept by the new interface's podcast observer, tells one from the other
+ * for the media it knows: when it [takesOver], the playlist neither takes the media as ended nor goes on, and the guard
+ * opens it again where it was ([PlaylistManager.reopenCurrent]). Called on the main thread; never blocks.
+ */
+interface DropoutGuard {
+    /** libVLC ended ([error] false) or failed on the media at [location], last at [timeMs] of [lengthMs] (0: unknown). */
+    fun takesOver(location: String, timeMs: Long, lengthMs: Long, error: Boolean): Boolean
+
+    /** The playlist stops: a media waiting to be opened again is left. */
+    fun stopped()
+
+    /** Whether a media is waiting to be opened again: the service stays in the foreground, the Wi-Fi awake. */
+    val recovering: Boolean
+}
+
 object ResumeHook {
     @Volatile
     var owner: ResumeOwner? = null
 
     @Volatile
     var volume: VolumeRestorer? = null
+
+    @Volatile
+    var dropout: DropoutGuard? = null
+
+    private val halts = LinkedHashMap<String, Int>()
+    private var haltCount = 0
+
+    /** libVLC's playback of the media at [location] ended, failed or was stopped. */
+    @Synchronized
+    fun halted(location: String) {
+        halts.remove(location)
+        halts[location] = ++haltCount
+        if (halts.size > KEPT_HALTS) halts.remove(halts.keys.first())
+    }
+
+    /** A number that grows each time the media at [location] halts ([halted]); 0 before the first. */
+    @Synchronized
+    fun haltStamp(location: String): Int = halts[location] ?: 0
+
+    private const val KEPT_HALTS = 8
 
     private val changing = AtomicInteger()
 

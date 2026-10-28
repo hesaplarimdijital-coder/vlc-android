@@ -24,13 +24,15 @@ import org.videolan.vlc.media.ResumeOwner
  * episode (by its address, the enclosure's or the downloaded file's), the show's speed is set, the intro skipped, the
  * place kept every few seconds and when it pauses or stops, the episode marked played at its end, and the next one started
  * when the show's outro begins, and the show's volume boost applied for as long as its episode plays. The rules are
- * [EpisodeTracker]'s; this looks, asks Room, and does what it says.
+ * [EpisodeTracker]'s; this looks, asks Room, and does what it says. A stream that drops before its end is opened again
+ * where it was ([DropoutRecovery]).
  * A look a second while it plays, every few seconds while it does not.
  */
 class PodcastPlaybackObserver : PlaybackObserver {
     private var job: Job? = null
     private var dao: PodcastDao? = null
     private val tracker = EpisodeTracker()
+    private var recovery: DropoutRecovery? = null
     private val booster = VolumeBooster<PlaybackEngine>({ it.getVolume() }, { engine, volume -> engine.setVolume(volume) })
 
     override fun attach(service: PlaybackService) {
@@ -49,6 +51,9 @@ class PodcastPlaybackObserver : PlaybackObserver {
 
             override fun engineVolume(volume: Int): Int = booster.listenerSets(volume)
         }
+        // a stream that drops before its end is no end: opened again where it was
+        val recovery = DropoutRecovery(service) { tracker.reopened(System.currentTimeMillis()) }.also { this.recovery = it }
+        ResumeHook.dropout = recovery
         job?.cancel()
         job = AppScope.launch {
             var asked: String? = null
@@ -67,9 +72,10 @@ class PodcastPlaybackObserver : PlaybackObserver {
                     // the show's settings may have changed meanwhile (its boost, its skips): they apply to this episode too
                     context = withContext(Dispatchers.IO) { contextOf(dao, location) }
                 }
-                val commands = tracker.sample(
-                    location, context, service.getTime(), service.length, playing, service.rate, System.currentTimeMillis(),
-                )
+                val time = service.getTime()
+                val length = service.length
+                recovery.look(location, context, time, length, playing)
+                val commands = tracker.sample(location, context, time, length, playing, service.rate, System.currentTimeMillis())
                 apply(service, dao, commands)
                 // while another media is being started the volume is the listener's; the boost waits for the episode
                 if (!ResumeHook.switching) {
@@ -84,6 +90,9 @@ class PodcastPlaybackObserver : PlaybackObserver {
         job = null
         ResumeHook.owner = null
         ResumeHook.volume = null
+        ResumeHook.dropout = null
+        recovery?.end()
+        recovery = null
         runCatching { booster.end() }
         // the place of what was playing is kept as the service goes
         val saves = tracker.end().filterIsInstance<TrackerCommand.SavePosition>()
