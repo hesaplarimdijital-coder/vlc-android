@@ -52,6 +52,13 @@ data class PodcastFeed(
     @ColumnInfo(name = "skip_outro_s", defaultValue = "0") val skipOutroSeconds: Int = 0,
     /** Version 16: the volume boost of the show's episodes: 0 off, 1 light, 2 strong. */
     @ColumnInfo(name = "volume_boost", defaultValue = "0") val volumeBoost: Int = 0,
+    /** Version 21: the language the feed says the show is in (its `language`, as "tr" or "en-us"); null when it says none. */
+    val language: String? = null,
+    /**
+     * Version 21: the language Whisper hears the show's episodes in when it writes their transcripts: a code ("tr",
+     * "en"), "auto" for Whisper's own guess, null for the feed's [language] (Whisper's guess when it has none).
+     */
+    @ColumnInfo(name = "transcript_language") val transcriptLanguage: String? = null,
 )
 
 object DownloadState {
@@ -104,6 +111,11 @@ data class PodcastEpisode(
     @ColumnInfo(name = "played_at", defaultValue = "0") val playedAt: Long = 0,
     /** S-1103: the show notes as the feed wrote them (HTML, cut at 64 KB), drawn by the episode's page after sanitising; null when the feed gave none. */
     @ColumnInfo(name = "notes_html") val notesHtml: String? = null,
+    /**
+     * Version 21: the Whisper model the app wrote the episode's own transcript with ("small"), kept in the app's storage
+     * beside the podcasts' data; null while it has none.
+     */
+    @ColumnInfo(name = "whisper_model") val whisperModel: String? = null,
 )
 
 /**

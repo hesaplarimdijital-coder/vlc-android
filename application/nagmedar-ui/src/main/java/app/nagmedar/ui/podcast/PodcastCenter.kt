@@ -130,12 +130,13 @@ object PodcastCenter {
     /** S-1104: the chapters and transcripts of episodes, kept in the app's cache. */
     fun extras(context: Context): EpisodeExtras {
         val app = context.applicationContext
-        return EpisodeExtras(OkHttpExtraSource(app, userAgent()), { java.io.File(app.cacheDir, "podcast") })
+        return EpisodeExtras(OkHttpExtraSource(app, userAgent()), { java.io.File(app.cacheDir, "podcast") }, own = { EpisodeTranscripts.read(app, it) })
     }
 
     /**
      * S-1103: the refresh job as the subscriptions and Settings › Podcasts ask for it: scheduled while there is a show to
-     * read, not at all without. Cheap and safe to call again and again; the work is off the main thread.
+     * read, not at all without; and the transcripts' Whisper jobs that wait taken up again. Cheap and safe to call again
+     * and again; the work is off the main thread.
      */
     fun schedule(context: Context, scope: CoroutineScope = AppScope) {
         val app = context.applicationContext
@@ -143,6 +144,8 @@ object PodcastCenter {
             runCatching {
                 if (NagmedarDatabase.get(app).podcasts().feedList().isEmpty()) RefreshSchedule.cancel(app) else RefreshSchedule.apply(app, settingsStore(app).read())
             }
+            // the transcripts' jobs waiting are taken up again
+            runCatching { WhisperTranscriber.resume(app) }
         }
     }
 

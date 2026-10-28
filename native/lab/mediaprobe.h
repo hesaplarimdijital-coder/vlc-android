@@ -1,4 +1,4 @@
-// S-802: what a media file holds, for the library's technical badges (and later the TV analysis).
+// S-802: what a media file holds, for the library's technical badges.
 #ifndef NAGMEDAR_MEDIAPROBE_H
 #define NAGMEDAR_MEDIAPROBE_H
 

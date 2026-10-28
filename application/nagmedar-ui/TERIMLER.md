@@ -43,9 +43,9 @@ Sözlüğü testler denetler:
 | kodlama | encoding | karakter seti, kod sayfası | charset | Bir metin dosyasının (söz dosyası) karakter seti: UTF-8, Türkçe · Windows-1254 |
 | kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
-| altyazı üretmek | generate subtitles | | | Filmin konuşmasını bu cihazda Whisper ile yazıya döküp yeni bir SRT dosyası yapmak: “Altyazı üret…” (Alt+W); dosya `film.tr.whisper.srt` adıyla filmin yanına yazılır. Ayarlar'daki bölümü “Altyazı üretimi” |
-| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince boyutu onaylanıp bir kez indirilir, Ayarlar › Altyazı'dan silinir |
-| hızlandırma | acceleration | | | Altyazı üretiminin nerede çalıştığı (Ayarlar › Altyazı): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz |
+| döküm oluşturmak | create a transcript | altyazı üretmek | generate subtitles | Bir podcast bölümünün konuşmasını bu cihazda Whisper ile yazıya dökmek: “Whisper ile döküm oluştur”, dökümü olanda “Whisper ile yeniden oluştur”; iş “sırada”, “oluşturuluyor”, bitince “Döküm hazır”. Döküm uygulamanın deposunda WebVTT olarak durur, altında “Whisper ile oluşturuldu · small”. Ayarlar'daki yeri “Ayarlar › Podcastler › Döküm (Whisper)” |
+| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince, boyutu bölümün sayfasında görüldükten sonra bir kez indirilir, Ayarlar › Podcastler › Döküm (Whisper)'dan silinir |
+| hızlandırma | acceleration | | | Dökümün nerede oluşturulduğu (Ayarlar › Podcastler › Döküm (Whisper)): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz. İşin bildiriminde “GPU (Vulkan)” ya da “İşlemci · 4 çekirdek” |
 | işlemci | CPU | | processor | Kısa yerlerde: “İşlemci · 4 çekirdek”, “İşlemci yükü”; İngilizcede “CPU · 4 cores”, “CPU load” |
 | gerçek zamanın N katı | N× real time | | | Bir işin hızı: oynatma süresinin işin süresine oranı; “gerçek zamanın 4,2 katı” bir saatlik filmi yaklaşık 14 dakikada bitirir |
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
@@ -96,19 +96,8 @@ Sözlüğü testler denetler:
 | özgür yazılım | free software | açık kaynak | open source | |
 | katkıcı | contributor | | | |
 | kapsayıcı | container | | | MKV, MP4 |
-| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, Mbps ile; TV Lab'de “1 sn tepe”, “5 sn ortalama” |
-| eşik | threshold | | | Bir cihaz profilinin kaldırdığı en yüksek 1 sn bit hızı: “Profil eşiği” |
-| cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
-| bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
-| remux | remux | yeniden paketleme | re-mux | TV Lab'in kayıpsız dönüşümü: video akışına dokunmadan kapsayıcı ve izler yeni bir MKV'ye yazılır; işler “Remux sırası”nda bekler, iş “sırada”, “remux yapılıyor”, “doğrulanıyor”, “tamamlandı” |
-| Video bit bit aynı | Video bit for bit identical | | bit-identical, bit-exact video | Doğrulama rozeti (S-1209): çıktının videosu kaynağınkiyle paket paket karşılaştırıldı ve aynı çıktı; müzikteki “bit-perfect” çıkış için kalır |
-| doğrulama | verification | | | Remux çıktısının geri okunup karşılaştırılması; “Doğrulanıyor” |
-| uyumluluk izi | compatibility track | | | Remux'ta bir ses izinin yanına eklenen E-AC-3 ya da LPCM iz (S-1207), TrueHD ve DTS-HD çalmayan TV için: başlığı “Uyumluluk izi (E-AC-3 5.1)”; orijinal iz kayıpsız kalır, eklenen iz “Kayıplı (eklenen iz)” ya da “Kayıpsız (eklenen iz)” |
-| kayıpsız, kayıplı | lossless, lossy | | | Remux planındaki her adımın rozeti (S-1205): “Kayıpsız”, “Kayıpsız (üst veri değişir)” (izin işaretleri, dili, başlığı ya da sırası değişir; paketleri aynı kalır), “Kayıplı” (atılan iz, bölüm, ek; FEL'li dönüşüm); “Lossless (tags change)” |
-| remux planı | remux plan | | | Sıraya almadan önce bir filmin remux'u: izler, işaretler, Dolby Vision, çıktı; “Sıraya al…” |
-| toplu işlem | batch | | | TV Lab'in bir klasördeki filmleri birlikte analiz edip sıraya alan sayfası (S-1210); “varsayılan plan”, filmin “kendi planı” |
-| gece çalıştırmak | run at night | | | Remux sırasının seçilen saatte (istenirse yalnızca şarjdayken) başlaması: “Gece çalıştır…”; o saate dek sıra bekler. Sıra bütün olarak “duraklatılır” ve “sürdürülür” |
-| geçmiş (TV Lab) | history | | | Biten remux işleri ve doğrulama raporları (S-208): “Yeniden çalıştır…”, “Rapor”, “Geçmişten sil” (hiçbir dosyayı silmez) |
+| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, kbps ya da Mbps ile: “320 kbps” |
+| kayıpsız, kayıplı | lossless, lossy | | | Bir biçimin ya da dönüştürmenin niteliği: FLAC kayıpsız, Opus ve MP3 kayıplı |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |
@@ -186,7 +175,7 @@ Sözlüğü testler denetler:
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |
-| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
+| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara”. Yayın vermiyorsa Whisper bu cihazda oluşturur (“döküm oluşturmak”); programın “Döküm dili” Whisper'ın duyacağı dildir (“Yayındaki: Türkçe”, “Otomatik”) |
 | indirmek, indirme | download | | | Podcast bölümünü cihaza almak: “İndir”, “İndirileni sil”; süren indirmeyi durdurmak “İptal” |
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |

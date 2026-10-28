@@ -30,6 +30,7 @@ import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.transcribe.WhisperLanguage
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -39,8 +40,9 @@ internal fun speedLabel(speed: Float, locale: Locale): String =
 
 /**
  * S-1103, S-1104: one podcast's own settings in a small window: the speed its episodes play at, the seconds skipped at the
- * start (an intro) and before the end (an outro), the volume boost of quiet recordings, whether new episodes are told in a notification, and the automatic
- * download of the newest and how many of its episodes are kept. Each choice is kept as it is made.
+ * start (an intro) and before the end (an outro), the volume boost of quiet recordings, the language Whisper hears its episodes
+ * in, whether new episodes are told in a notification, and the automatic download of the newest and how many of its episodes
+ * are kept. Each choice is kept as it is made.
  */
 @Composable
 fun ShowSettingsDialog(feed: PodcastFeed, actions: PodcastActions) {
@@ -87,6 +89,17 @@ internal fun ShowSettingsSurface(feed: PodcastFeed, actions: PodcastActions) {
                         }
                     },
                     modifier = Modifier.testTag("podcast-set-boost"),
+                )
+            }
+            SettingRow(stringResource(R.string.nag_pod_set_language), subtitle = stringResource(R.string.nag_pod_set_language_hint)) {
+                MenuButton(
+                    languageLabel(res, feed.transcriptLanguage, feed.language, locale),
+                    entries = {
+                        LANGUAGES.map { code ->
+                            MenuEntry.Item(languageLabel(res, code, feed.language, locale), { actions.onSetTranscriptLanguage(feed.id, code) }, checked = code == feed.transcriptLanguage)
+                        }
+                    },
+                    modifier = Modifier.testTag("podcast-set-language"),
                 )
             }
             SettingRow(stringResource(R.string.nag_pod_set_notify), subtitle = stringResource(R.string.nag_pod_set_notify_hint)) {
@@ -165,6 +178,22 @@ private fun boostLabel(res: android.content.res.Resources, boost: Int): String =
 
 private fun secondsLabel(res: android.content.res.Resources, seconds: Int): String =
     if (seconds == 0) res.getString(R.string.nag_pod_set_none) else res.getString(R.string.nag_pod_set_seconds, seconds)
+
+/**
+ * The language Whisper hears the show in, as its menu says it: the feed's ("Yayındaki: Türkçe", or automatic when the
+ * feed gives none), Whisper's own guess, or one said.
+ */
+private fun languageLabel(res: android.content.res.Resources, code: String?, feed: String?, locale: Locale): String {
+    if (code == null) {
+        val heard = feed?.let(TranscriptLanguage::whisperCode) ?: return res.getString(R.string.nag_pod_set_language_feed_none)
+        return res.getString(R.string.nag_pod_set_language_feed, Locale.forLanguageTag(heard).getDisplayLanguage(locale))
+    }
+    val said = WhisperLanguage.entries.firstOrNull { it.code == code } ?: return Locale.forLanguageTag(code).getDisplayLanguage(locale)
+    return res.getString(said.label)
+}
+
+/** The choices of the show's transcript language: the feed's (null), Whisper's guess, Turkish, English. */
+private val LANGUAGES: List<String?> = listOf(null) + WhisperLanguage.entries.map { it.code }
 
 private val AUTO_COUNTS = listOf(1, 2, 3, 5, 10)
 private val KEEP_COUNTS = listOf(0, 3, 5, 10, 20, 50)

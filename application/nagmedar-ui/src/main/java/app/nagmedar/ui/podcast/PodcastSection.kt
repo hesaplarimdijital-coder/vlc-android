@@ -46,6 +46,7 @@ import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.transcribe.WhisperSettingsRows
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,8 +64,9 @@ suspend fun PodcastCenter.storageUsage(context: Context): StorageUsage = withCon
 
 /**
  * S-1103, S-1104: Settings › Podcasts: how often and on what network the feeds are read, the notification of new
- * episodes, the storage the downloads may take (a limit, played episodes deleted after some days, a folder), and the
- * seconds the skip buttons go. The choices are kept as they are made; the refresh job is set again when they change
+ * episodes, the storage the downloads may take (a limit, played episodes deleted after some days, a folder), the
+ * seconds the skip buttons go, and the transcripts Whisper makes on the device: new downloads by themselves or not, the
+ * model and where it runs. The choices are kept as they are made; the refresh job is set again when they change
  * it. The screenshot tests give [settings], [usage] and [notificationsBlocked]; the app reads them.
  */
 @Composable
@@ -121,6 +123,7 @@ internal fun PodcastSection(
                 held = runCatching { PodcastCenter.storageUsage(context) }.getOrNull()
             }
         },
+        transcripts = { WhisperSettingsRows() },
     )
 }
 
@@ -134,6 +137,8 @@ internal fun PodcastSectionContent(
     onPickFolder: () -> Unit,
     onDefaultFolder: () -> Unit,
     onClean: () -> Unit,
+    /** The model and its acceleration ([WhisperSettingsRows]), under the transcripts' caption; nothing in the screenshots. */
+    transcripts: @Composable () -> Unit = {},
 ) {
     val res = LocalContext.current.resources
     val locale = res.locale()
@@ -231,6 +236,19 @@ internal fun PodcastSectionContent(
                 modifier = Modifier.testTag("podcast-settings-skip-forward"),
             )
         }
+
+        Spacer(Modifier.height(dimens.gapM))
+        SectionCaption(stringResource(R.string.nag_pod_settings_transcripts))
+        Text(stringResource(R.string.nag_pod_settings_transcripts_hint), style = NagTheme.type.labelSmall, color = colors.textSecondary)
+        SettingRow(stringResource(R.string.nag_pod_settings_auto_transcribe), subtitle = stringResource(R.string.nag_pod_settings_auto_transcribe_hint)) {
+            NagSwitch(
+                checked = settings.autoTranscribe,
+                onCheckedChange = { onChange(settings.copy(autoTranscribe = it)) },
+                label = stringResource(if (settings.autoTranscribe) R.string.nag_pod_set_on else R.string.nag_pod_set_off),
+                modifier = Modifier.testTag("podcast-settings-auto-transcribe"),
+            )
+        }
+        transcripts()
     }
 }
 

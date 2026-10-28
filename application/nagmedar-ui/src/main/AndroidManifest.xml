@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
-    <!-- S-1010, S-1206: the converter and the remux queue run as foreground jobs: media processing on Android 15 and later, data sync before -->
+    <!-- S-1010: the converter runs as a foreground job: media processing on Android 15 and later, data sync before -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
@@ -39,7 +39,7 @@
                 android:value="true" />
         </activity>
 
-        <!-- S-1010, S-1206: WorkManager's foreground service with the types the converter's and the remux queue's workers ask for -->
+        <!-- S-1010: WorkManager's foreground service with the types the converter's workers ask for -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync|mediaProcessing"
@@ -51,6 +51,10 @@
         <!-- S-1103: the podcast download notification's Cancel -->
         <receiver
             android:name="app.nagmedar.ui.podcast.DownloadCancelReceiver"
+            android:exported="false" />
+        <!-- Whisper: the podcast transcript job notification's Cancel -->
+        <receiver
+            android:name="app.nagmedar.ui.transcribe.WhisperCancelReceiver"
             android:exported="false" />
         <!-- S-1107: radio recording: the app kept in the foreground while stations are recorded (their
              notification has the time, the size, the track and a stop action), and the alarms of the
@@ -80,14 +84,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- S-1206: the remux notification's Cancel -->
-        <receiver
-            android:name="app.nagmedar.ui.tvlab.remux.RemuxCancelReceiver"
-            android:exported="false" />
-        <!-- S-1210: the remux queue's night run (set again after a restart by AlarmRescheduler) -->
-        <receiver
-            android:name="app.nagmedar.ui.tvlab.remux.RemuxNightReceiver"
-            android:exported="false" />
 
         <!-- Classic UI: Nağmedar's home screen widget, in place of VLC's three -->
         <receiver

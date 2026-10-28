@@ -52,9 +52,6 @@ object NotificationIds {
     const val PODCAST_NEWS_SUMMARY = 1105
     const val PODCAST_TIME_LIMIT = 1107
 
-    /** S-1206: the TV Lab's remux queue under way. */
-    const val REMUX = 1206
-
     /** S-1301: libVLC asks something (a sign-in, a certificate) while no window is in front. */
     const val PROMPT = 1301
 
@@ -65,8 +62,6 @@ object NotificationIds {
     /** S-709: what came of the transcription from speech. */
     const val WHISPER_DONE = 7090
 
-    /** S-1206: Android's time limit stopped the remux queue. */
-    const val REMUX_TIME_LIMIT = 12061
 
     /** S-1103: a show's news, one per show (its feed's id). */
     @JvmField
@@ -107,12 +102,13 @@ class IdRange(val first: Int, val size: Int) {
 
 /**
  * 1.0: the notification channels of the video features 0.5 had (the player's recordings, the
- * subtitles' extraction and translation, the conversions and the HLS stream). Android keeps a
+ * subtitles' extraction and translation, the conversions and the HLS stream) and of TV Lab's
+ * remux queue. Android keeps a
  * channel until the app deletes it: [delete] takes them out of the system's settings (a no-op
  * once they are gone). A binder call each: off the main thread.
  */
 object RemovedChannels {
-    internal val ids = listOf("nagmedar_recordings", "nagmedar_subtitle_extract", "nagmedar_translate", "nagmedar_hls", "nagmedar_transcode")
+    internal val ids = listOf("nagmedar_recordings", "nagmedar_subtitle_extract", "nagmedar_translate", "nagmedar_hls", "nagmedar_transcode", "nagmedar_remux")
 
     fun delete(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return

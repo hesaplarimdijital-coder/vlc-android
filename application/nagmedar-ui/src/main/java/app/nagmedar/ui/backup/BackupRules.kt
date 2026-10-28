@@ -9,7 +9,6 @@ import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
 import app.nagmedar.ui.transcribe.WhisperPrefs
-import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION
@@ -49,7 +48,6 @@ object BackupSettings {
     private val LEFT_OUT = setOf(
         // their own parts
         NagmedarPreferences.KEY_SHORTCUTS,
-        FileProfileStore.KEY_SELECTED,
         // this device's: folder permissions, the window on this screen, a picked converter's or podcast download folder
         NAGMEDAR_SAF_FOLDERS,
         NAGMEDAR_WINDOW_BOUNDS,
@@ -58,7 +56,7 @@ object BackupSettings {
         RecordingPrefs.KEY_FOLDER,
         // this device's: the folders each section of the library shows (paths and picked trees)
         *LibrarySources.keys.toTypedArray(),
-        // this device's: the picked folders the TV Lab's batch and the lyrics editor were given
+        // this device's: the picked folders the lyrics editor was given
         *FolderGrants.keptKeys.toTypedArray(),
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
@@ -68,9 +66,9 @@ object BackupSettings {
         KEY_OPEN_SUBTITLES_LIMIT,
         // what the video features of 0.5 left in an updated device's preferences: its folders, a quota, its jobs
         *REMOVED_FEATURES,
-        // this device's: the transcription's last job and what its GPU did (S-709)
-        WhisperPrefs.KEY_SEEN,
-        WhisperPrefs.KEY_TIMED_OUT,
+        // this device's: the transcripts' jobs waiting and what its GPU did (S-709), the old keys of 0.5's subtitles
+        WhisperPrefs.KEY_QUEUE,
+        *WhisperPrefs.REMOVED_KEYS,
         WhisperPrefs.KEY_GPU_RUNNING,
         WhisperPrefs.KEY_GPU_STOPPED,
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches

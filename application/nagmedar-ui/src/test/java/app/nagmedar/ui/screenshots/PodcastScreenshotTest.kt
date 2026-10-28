@@ -9,12 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.podcast.AddAddressSurface
 import app.nagmedar.ui.podcast.AddUi
 import app.nagmedar.ui.podcast.DownloadUi
+import app.nagmedar.ui.podcast.EpisodeDetailUi
+import app.nagmedar.ui.podcast.ExtraUi
 import app.nagmedar.ui.podcast.FeedFailure
 import app.nagmedar.ui.podcast.FeedUrl
 import app.nagmedar.ui.podcast.ImportFailure
@@ -31,12 +39,14 @@ import app.nagmedar.ui.podcast.SearchFailure
 import app.nagmedar.ui.podcast.SearchNotice
 import app.nagmedar.ui.podcast.SearchUi
 import app.nagmedar.ui.podcast.SubscribeUi
+import app.nagmedar.ui.podcast.TranscribeUi
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import app.nagmedar.ui.transcribe.WhisperModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +57,8 @@ import org.robolectric.annotation.GraphicsMode
  * S-1101, S-1102, for approval: the subscriptions as covers (DeX, tablet) and as a list (phone), the
  * search results with every state of the Subscribe button and the notice that iTunes answered alone,
  * the podcast page with its episodes, the empty, offline and no-result screens, "RSS adresiyle ekle"
- * with the reason a feed was refused, and the OPML import's summary.
+ * with the reason a feed was refused, and the OPML import's summary; Whisper's transcript of an episode offered, under
+ * way, and made.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -56,13 +67,18 @@ class PodcastScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun capture(name: String, theme: ThemeMode, input: InputMode, content: @Composable () -> Unit) {
+    private fun capture(name: String, theme: ThemeMode, input: InputMode, content: @Composable () -> Unit) = capture(name, theme, input, {}, content)
+
+    /** [content] drawn, [before] done on it (a tab chosen, a scroll), then the picture taken. */
+    private fun capture(name: String, theme: ThemeMode, input: InputMode, before: () -> Unit, content: @Composable () -> Unit) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { content() }
             }
         }
+        compose.waitForIdle()
+        before()
         compose.waitForIdle()
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
@@ -152,6 +168,58 @@ class PodcastScreenshotTest {
             PodcastSamples.model(page = PodcastSamples.page).copy(
                 episodeId = 10,
                 episode = PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000), positionMs = 23 * 60_000L),
+            ),
+        ),
+    )
+
+    /** The episode's "Döküm" tab ([tab], the tab's word in the language of the run), scrolled to [tag]. */
+    private fun transcriptTab(tab: String, tag: String): () -> Unit = {
+        compose.onNode(hasText(tab) and hasClickAction()).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("episode-detail").performScrollToNode(hasTestTag(tag))
+    }
+
+    private fun episodeModel(ui: EpisodeDetailUi) = PodcastSamples.model(page = PodcastSamples.page).copy(episodeId = 10, episode = ui)
+
+    /** Whisper on a phone: no transcript from the feed, the button, the model downloaded first, the audio into the cache. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun transcribeOfferPhone() = capture(
+        "podcasts-transcribe-offer-phone-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-none"),
+        shell(WidthClass.Compact, episodeModel(PodcastSamples.episodePage().copy(transcribe = TranscribeUi.Idle(WhisperModel.Small, downloadMb = 181)))),
+    )
+
+    /** Whisper's job under way beside the episodes: how far, the time left, the GPU and its speed, Cancel. */
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun transcribeRunningTablet() = capture(
+        "podcasts-transcribe-running-tablet-dark", ThemeMode.Dark, InputMode.Touch, transcriptTab("Döküm", "episode-transcribe-running"),
+        shell(
+            WidthClass.Expanded,
+            episodeModel(PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000)).copy(transcribe = TranscribeUi.Running(PodcastSamples.transcribing))),
+        ),
+    )
+
+    /** The transcript Whisper made, followed while the episode plays, marked as Whisper's (English, phone). */
+    @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
+    fun transcribeDonePhoneEnglish() = capture(
+        "podcasts-transcribe-done-phone-dark-en", ThemeMode.Dark, InputMode.Touch, transcriptTab("Transcript", "episode-transcript-whisper"),
+        shell(
+            WidthClass.Compact,
+            episodeModel(
+                PodcastSamples.episodePage(listening = Listening(positionMs = 17_000, lengthMs = 62 * 60_000L + 3_000, playing = true))
+                    .copy(transcript = ExtraUi.Ready(PodcastSamples.whisperTranscript), transcribe = TranscribeUi.Idle()),
+            ),
+        ),
+    )
+
+    /** The transcript Whisper made, beside the episodes, while it is made again with another model (waiting for the charger). */
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun transcribeDoneTablet() = capture(
+        "podcasts-transcribe-done-tablet-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-whisper"),
+        shell(
+            WidthClass.Expanded,
+            episodeModel(
+                PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000))
+                    .copy(transcript = ExtraUi.Ready(PodcastSamples.whisperTranscript), transcribe = TranscribeUi.Queued(auto = true)),
             ),
         ),
     )

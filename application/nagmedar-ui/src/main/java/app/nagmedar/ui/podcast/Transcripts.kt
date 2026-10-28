@@ -12,9 +12,12 @@ data class TranscriptCue(val startMs: Long, val endMs: Long, val speaker: String
     val timed: Boolean get() = startMs >= 0
 }
 
-/** S-1104: an episode's transcript: its passages in order; [timed] when they carry times (WebVTT, SubRip, JSON), else they only read. */
+/**
+ * S-1104: an episode's transcript: its passages in order; [timed] when they carry times (WebVTT, SubRip, JSON), else they
+ * only read. [whisperModel]: the app wrote it with that Whisper model ([EpisodeTranscripts]); null for the feed's.
+ */
 @Immutable
-data class Transcript(val cues: List<TranscriptCue>, val timed: Boolean) {
+data class Transcript(val cues: List<TranscriptCue>, val timed: Boolean, val whisperModel: String? = null) {
     /** The passage being said at [ms]: its index, or -1 before the first or in a transcript with no times. */
     fun indexAt(ms: Long): Int {
         if (!timed) return -1

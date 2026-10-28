@@ -16,7 +16,6 @@ class HardcodedTextTest {
     /** Sources whose Turkish literals are not texts of the interface, and why. */
     private val turkishAllowed = mapOf(
         "app/nagmedar/ui/lab/AudioReport.kt" to "the lab's SP-01 report: a diagnostic, in Turkish only",
-        "app/nagmedar/ui/lab/DisplayReport.kt" to "the lab's SP-04 report: a diagnostic, in Turkish only",
     )
 
     private val roots = listOf("src/main/java", "../nagmedar-session/src/main/java", "../nagmedar-data/src/main/java")

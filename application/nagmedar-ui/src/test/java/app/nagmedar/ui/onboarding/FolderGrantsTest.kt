@@ -36,7 +36,6 @@ class FolderGrantsTest {
             .putString(ConvertOptions.KEY_FOLDER, tree("Donusturulen"))
             .putString(RecordingPrefs.KEY_FOLDER, tree("Radyo"))
             .putString(PodcastSettingsStore.KEY_FOLDER, tree("Podcast"))
-            .putStringSet(FolderGrants.keptKey(GrantHolder.TvLab), setOf(tree("Toplu")))
             .putStringSet(FolderGrants.keptKey(GrantHolder.Lyrics), setOf(tree("Sozler")))
             .commit()
         val uses = FolderGrants.preferenceUses(prefs)
@@ -46,7 +45,6 @@ class FolderGrantsTest {
             GrantHolder.Converter to "Donusturulen",
             GrantHolder.RadioRecordings to "Radyo",
             GrantHolder.PodcastDownloads to "Podcast",
-            GrantHolder.TvLab to "Toplu",
             GrantHolder.Lyrics to "Sozler",
         )
         assertEquals(expected.mapValues { setOf(tree(it.value)) }, uses)
@@ -82,8 +80,8 @@ class FolderGrantsTest {
         val episode = "$folder/document/primary%3APodcast%2Fbolum-12.mp3"
         // the episodes downloaded there before the folder changed: their folder keeps its permission
         assertEquals(0, FolderGrants.releasable(folder, both, mapOf(GrantHolder.PodcastDownloads to setOf(episode))))
-        // the TV Lab's remux job reads a film of a batch folder
-        assertEquals(0, FolderGrants.releasable(tree("Toplu"), read, mapOf(GrantHolder.TvLab to setOf("${tree("Toplu")}/document/primary%3AToplu%2Ffilm.mkv"))))
+        // a radio recording kept in a folder of its own
+        assertEquals(0, FolderGrants.releasable(tree("Kayit"), read, mapOf(GrantHolder.RadioRecordings to setOf("${tree("Kayit")}/document/primary%3AKayit%2Fyayin.mp3"))))
         // another folder that only starts with the same name is not inside it
         assertEquals(both, FolderGrants.releasable(tree("Pod"), both, mapOf(GrantHolder.PodcastDownloads to setOf(episode))))
     }

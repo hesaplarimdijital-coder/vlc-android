@@ -2,7 +2,8 @@ package app.nagmedar.lab
 
 /**
  * libnagmedar_lab.so: FFmpeg, libdovi, whisper.cpp and libusb, linked privately so they never
- * meet libvlc's own copies: the Lab tools and the library's media probe (S-802). Every call is
+ * meet libvlc's own copies: the Lab tools, the library's media probe (S-802), the subtitles from
+ * speech (S-709) and the extraction of embedded subtitles. Every call is
  * blocking and runs on a background thread; [cancel] stops the running Lab tool. Results are
  * JSON objects (see native/lab).
  */
@@ -10,16 +11,6 @@ object NativeLab {
 
     fun interface Progress {
         fun onProgress(fraction: Double, message: String)
-    }
-
-    /**
-     * S-1206: a remux's progress, a few times a second: media seconds done of [totalSeconds] (0
-     * when unknown) and bytes written. The answer steers the engine: 0 goes on, a negative number
-     * stops it, a positive one is how many milliseconds to wait before asking again (the queue
-     * pauses on a low battery or a hot device).
-     */
-    fun interface RemuxProgress {
-        fun onProgress(doneSeconds: Double, totalSeconds: Double, bytesOut: Long): Int
     }
 
     private val load = lazy { runCatching { System.loadLibrary("nagmedar_lab") }.isSuccess }
@@ -36,9 +27,6 @@ object NativeLab {
     @JvmStatic external fun version(): String
 
     @JvmStatic external fun cancel()
-
-    /** SP-03: remux [input] to [output] with the Dolby Vision RPU converted to profile 8.1. */
-    @JvmStatic external fun dvConvert(input: String, output: String, maxSeconds: Double, mp4: Boolean, listener: Progress?): String
 
     /**
      * SP-05: transcribe the first audio track of [input] with the ggml model at [model], on
@@ -106,40 +94,4 @@ object NativeLab {
 
     /** S-802: streams, HDR and Dolby Vision of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
     @JvmStatic external fun probe(input: String): String
-
-    /**
-     * S-1202: the bitrate of [input] second by second, from its packets, the first [maxSeconds]
-     * of it (0 for all); see [BitrateAnalysis]. Reads the whole file: slow on a big one, with
-     * [listener] told how far it is; [cancel] stops it.
-     */
-    @JvmStatic external fun bitrate(input: String, maxSeconds: Double, listener: Progress?): String
-
-    /**
-     * S-1204: how fast the drive behind [fd] reads, sequentially from [offset], at most
-     * [maxBytes] or [maxSeconds]; see [DiskSpeed]. [fd] stays open; [cancel] stops it.
-     */
-    @JvmStatic external fun diskSpeed(fd: Int, offset: Long, maxBytes: Long, maxSeconds: Double, listener: Progress?): String
-
-    /**
-     * S-1206: remuxes the file behind [inputFd] into Matroska on [outputFd] (truncated first) as
-     * [plan] says (the text of [RemuxPlan.toNative] as UTF-8 bytes: a title may hold any
-     * character); the stats as JSON, see [RemuxResult]. Refused when both descriptors are the
-     * same file, before anything is written.
-     * Every packet is copied as read, the video stream hashed on the way; with the Dolby Vision
-     * conversion on, the RPUs become profile 8.1 and the enhancement layer is dropped. Long:
-     * minutes for a UHD film; [listener] is asked how to go on. [remuxCancel] stops it; the
-     * Lab's [cancel] does not.
-     */
-    @JvmStatic external fun remux(inputFd: Int, outputFd: Int, plan: ByteArray, listener: RemuxProgress?): String
-
-    /**
-     * S-1209: reads the output behind [outputFd] back and hashes its video stream in [scope]
-     * (the remux's hash_scope), against [expectedHash] and [expectedPackets]; with [dvProfile]
-     * 8 its Dolby Vision record and every RPU must be profile 8.1. The verdict as JSON, see
-     * [RemuxVerification].
-     */
-    @JvmStatic external fun remuxVerify(outputFd: Int, scope: String, expectedHash: String, expectedPackets: Long, dvProfile: Int, listener: RemuxProgress?): String
-
-    /** Stops the running remux or verification. */
-    @JvmStatic external fun remuxCancel()
 }
