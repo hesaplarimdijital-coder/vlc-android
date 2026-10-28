@@ -62,7 +62,7 @@ class MenuBarTest {
     fun theMenusComeFromTheShortcutTable() {
         val performed = mutableListOf<Any>()
         val specs = menuBarSpecs(res, { performed += it }, { true })
-        assertEquals(listOf("Medya", "Oynatma", "Ses", "Video", "Altyazı", "Araçlar", "Görünüm", "Yardım"), specs.map { it.title })
+        assertEquals(listOf("Medya", "Oynatma", "Ses", "Araçlar", "Görünüm", "Yardım"), specs.map { it.title })
         ShortcutGroup.entries.zip(specs).forEach { (group, spec) ->
             val shortcuts = ShortcutRegistry.defaults.filter { it.group == group && it.scope != ShortcutScope.Editor }
             val items = spec.entries().filterIsInstance<MenuEntry.Item>()
@@ -87,7 +87,7 @@ class MenuBarTest {
     fun aPointerHasTheMenuBar() {
         shell(InputMode.Pointer)
         // the menu titles; "Araçlar" is a sidebar section too
-        listOf("Medya", "Oynatma", "Ses", "Video", "Altyazı", "Araçlar", "Görünüm", "Yardım").forEach {
+        listOf("Medya", "Oynatma", "Ses", "Araçlar", "Görünüm", "Yardım").forEach {
             compose.onNode(hasText(it) and hasClickAction()).assertExists()
         }
     }

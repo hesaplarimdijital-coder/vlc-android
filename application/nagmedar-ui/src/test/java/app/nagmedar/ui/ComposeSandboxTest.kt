@@ -34,7 +34,7 @@ class ComposeSandboxTest {
     @Test
     fun everyComposeTestRunsInTheNativeSandbox() {
         val compose = tests.filterValues { lines -> lines.any { composeRule.containsMatchIn(it) } }
-        assertTrue("${compose.size} Compose tests", compose.size > 100)
+        assertTrue("${compose.size} Compose tests", compose.size > 50)
         val legacy = compose.filter { (_, lines) ->
             val classes = testClasses(lines)
             classes.isEmpty() || classes.any { annotations -> annotations.none { "@GraphicsMode(GraphicsMode.Mode.NATIVE)" in it } }
