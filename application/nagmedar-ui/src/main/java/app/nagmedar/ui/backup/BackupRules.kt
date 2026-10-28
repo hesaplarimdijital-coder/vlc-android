@@ -68,9 +68,9 @@ object BackupSettings {
         KEY_OPEN_SUBTITLES_LIMIT,
         // what the video features of 0.5 left in an updated device's preferences: its folders, a quota, its jobs
         *REMOVED_FEATURES,
-        // this device's: the transcription's last job and what its GPU did (S-709)
-        WhisperPrefs.KEY_SEEN,
-        WhisperPrefs.KEY_TIMED_OUT,
+        // this device's: the transcripts' jobs waiting and what its GPU did (S-709), the old keys of 0.5's subtitles
+        WhisperPrefs.KEY_QUEUE,
+        *WhisperPrefs.REMOVED_KEYS,
         WhisperPrefs.KEY_GPU_RUNNING,
         WhisperPrefs.KEY_GPU_STOPPED,
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches

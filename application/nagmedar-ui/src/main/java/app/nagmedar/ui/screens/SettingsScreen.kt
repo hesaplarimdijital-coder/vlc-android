@@ -64,7 +64,6 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.VisualizerSection
 import app.nagmedar.ui.theme.systemAccentSeed
-import app.nagmedar.ui.transcribe.WhisperSettings
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
@@ -81,7 +80,6 @@ enum class SettingsItem(val key: String) {
     Input("input"),
     Shortcuts("shortcuts"),
     Library("library"),
-    Whisper("whisper"),
     Music("music"),
     Latency("latency"),
     Scrobble("scrobble"),
@@ -148,8 +146,6 @@ fun SettingsScreen(
                 SettingsItem.Shortcuts -> ShortcutEditor(prefs.shortcutOverrides, prefs::updateShortcutOverrides, undo)
                 // the folders each section of the library shows
                 SettingsItem.Library -> LibrarySourcesSection(prefs)
-                // S-709: transcription from speech: the model, the language, the models on the device
-                SettingsItem.Whisper -> WhisperSettings()
                 // S-901: the engine behind the local music library
                 SettingsItem.Music -> MusicSection(onOpenEqualizer = onOpenEqualizer)
                 // S-613: what each output device plays late, and the measurement with the microphone
@@ -166,7 +162,7 @@ fun SettingsScreen(
                 SettingsItem.Lyrics -> LyricsSection()
                 // S-1006: where album covers come from
                 SettingsItem.Covers -> CoversSection()
-                // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
+                // S-1103, S-1104: refreshing the podcasts, their downloads, the skip buttons and Whisper's transcripts
                 SettingsItem.Podcasts -> PodcastSection()
                 // S-1304: the web page that browses and plays from another device
                 SettingsItem.RemoteAccess -> RemoteAccessSection()

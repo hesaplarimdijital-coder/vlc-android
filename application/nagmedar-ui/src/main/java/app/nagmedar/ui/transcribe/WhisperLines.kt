@@ -1,28 +1,26 @@
 package app.nagmedar.ui.transcribe
 
-import java.util.Locale
-
-/** S-709: one line of speech as whisper heard it, its times in milliseconds of the film. */
+/** S-709: one line of speech as whisper heard it, its times in milliseconds of the audio. */
 data class SpeechSegment(val startMs: Long, val endMs: Long, val text: String)
 
 /**
- * S-709: whisper's lines as a subtitle file's: whisper's own notes ("[BLANK_AUDIO]") and lines
- * with no word left out, a line it repeats over and over (whisper does, on music) kept twice at
- * most; each line on the screen long enough to be read and gone before the next one; at most two
- * rows of about 42 characters, a longer line shared out over several, their time by their
- * length. The file is SRT in UTF-8.
+ * S-709: whisper's lines as a transcript's passages: whisper's own notes ("[BLANK_AUDIO]") and
+ * lines with no word left out, a line it repeats over and over (whisper does, on music) kept twice
+ * at most; each passage long enough to be followed and over before the next one; at most two rows
+ * of about 42 characters, a longer line shared out over several, their time by their length. The
+ * file is WebVTT in UTF-8.
  */
 object WhisperLines {
-    /** A row of a subtitle, characters. */
+    /** A row of a passage, characters. */
     const val ROW = 42
 
-    /** Rows of one subtitle line. */
+    /** Rows of one passage. */
     const val ROWS = 2
 
     /** The least time a line shows, when the next one leaves it the room. */
     const val MIN_MS = 700L
 
-    /** The most: speech heard over a long stretch of music does not stay on the screen through it. */
+    /** The most: speech heard over a long stretch of music is not followed through it. */
     const val MAX_MS = 10_000L
 
     /** Shorter than this, a line is not worth showing. */
@@ -31,7 +29,7 @@ object WhisperLines {
     /** How often the same words may follow each other. */
     private const val REPEATS = 2
 
-    /** The subtitle lines of [segments], in order. */
+    /** The passages of [segments], in order. */
     fun cues(segments: List<SpeechSegment>): List<TimedCue> {
         val spoken = mutableListOf<SpeechSegment>()
         var repeated = 0
@@ -58,19 +56,18 @@ object WhisperLines {
         return cues
     }
 
-    /** [cues] as an SRT file in UTF-8, without a byte order mark. */
-    fun srt(cues: List<TimedCue>): ByteArray = SubtitleDocument(SubtitleFormat.Srt, cues).toBytes(withBom = false)
-
     /**
-     * "Kuzey Işığı.tr.whisper.srt": the film's name, the language heard, and where the lines come
-     * from, so that the film finds the file beside itself (S-701) and nobody takes it for a
-     * subtitle someone made; without a language "Kuzey Işığı.whisper.srt".
+     * [cues] as a WebVTT file in UTF-8 without a byte order mark, [note] (what made it) in a NOTE block after its
+     * header, which the transcript readers ([app.nagmedar.ui.podcast.Transcripts]) pass over. WebVTT allows no "-->"
+     * in a cue's text nor in a note: whisper's are written "->".
      */
-    fun fileName(film: String, language: String?): String {
-        val base = film.substringBeforeLast('.').ifEmpty { film }
-        val code = language?.lowercase(Locale.ROOT)?.takeIf { it.matches(LANGUAGE) && it != WhisperLanguage.Auto.code }
-        return listOfNotNull(base, code, SOURCE, SubtitleFormat.Srt.extension).joinToString(".")
+    fun vtt(cues: List<TimedCue>, note: String): ByteArray {
+        val said = note.replace(SPACES, " ").replace(ARROW, "->").trim()
+        val head = if (said.isEmpty()) "WEBVTT\n\n" else "WEBVTT\n\nNOTE $said\n\n"
+        return SubtitleDocument(SubtitleFormat.Vtt, cues.map { it.copy(text = it.text.replace(ARROW, "->")) }, head = head).toBytes(withBom = false)
     }
+
+    private const val ARROW = "-->"
 
     /** The words of a line, one space apart; null for whisper's notes and lines without a word. */
     internal fun clean(text: String): String? {
@@ -139,12 +136,10 @@ object WhisperLines {
         return listOf(text.substring(0, at), text.substring(at + 1))
     }
 
-    private const val SOURCE = "whisper"
     private const val PAUSE_BONUS = 6
     private val PAUSES = setOf(',', '.', ';', ':', '?', '!', '…')
     private val SPACES = Regex("\\s+")
 
     /** whisper.cpp's notes of what is not speech: "[BLANK_AUDIO]", "[Music]". */
     private val NOTE = Regex("""^\[[^\]]*]$""")
-    private val LANGUAGE = Regex("[a-z]{2,3}")
 }

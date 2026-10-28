@@ -18,6 +18,8 @@ data class ParsedFeed(
     /** Podcasting 2.0's `podcast:funding`: its address and its words. */
     val fundingUrl: String? = null,
     val fundingMessage: String? = null,
+    /** The show's language as a tag ("tr", "en-us"): RSS's `language` (iTunes reads the same), Dublin Core's, Atom's `xml:lang`. */
+    val language: String? = null,
     /** Newest first. */
     val episodes: List<ParsedEpisode>,
     /** Items left out: no enclosure, an enclosure that is no address, or a guid already listed. */

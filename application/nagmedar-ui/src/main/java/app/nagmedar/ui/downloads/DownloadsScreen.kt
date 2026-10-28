@@ -111,7 +111,7 @@ fun DownloadsScreen() {
     val whisperJob by rememberWhisperStatus()
     var refresh by remember { mutableIntStateOf(0) }
     // the models' files, read again when a job starts or ends and after a removal
-    val running = whisperJob is WhisperStatus.Running
+    val running = whisperJob != null
     val whisperFiles by produceState(emptyList<WhisperFile>(), refresh, running) {
         value = withContext(Dispatchers.IO) {
             WhisperModel.entries.map { WhisperFile(it, WhisperModels.ready(app, it), WhisperModels.bytesOnDisk(app, it)) }.filter { it.bytesOnDisk > 0 }
@@ -121,7 +121,7 @@ fun DownloadsScreen() {
     val manager = remember(app) { runCatching { PodcastCenter.downloads(app) }.getOrNull() }
     val player = remember(context) { ServiceEpisodePlayer(context) }
     val byFeed = remember(feeds) { feeds.associateBy { it.id } }
-    val downloading = whisperJob.takeIf { (it as? WhisperStatus.Running)?.stage == WhisperStage.Downloading } as? WhisperStatus.Running
+    val downloading = whisperJob?.takeIf { it.stage == WhisperStage.Downloading }
     val list = episodes
     Column(Modifier.fillMaxSize()) {
         val total = (list?.size ?: 0) + whisperFiles.size + (if (downloading != null && whisperFiles.none { it.model == downloading.request?.model }) 1 else 0)
