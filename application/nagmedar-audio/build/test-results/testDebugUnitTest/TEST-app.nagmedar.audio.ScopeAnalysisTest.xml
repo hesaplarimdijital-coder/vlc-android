@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.ScopeAnalysisTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-28T23:14:08.550Z" hostname="runnervmnwato" time="0.057">
+  <properties/>
+  <testcase name="silenceIsTheFloor" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.014"/>
+  <testcase name="theFftFollowsTheRate" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.001"/>
+  <testcase name="aSineIsItsBinAtItsLevel" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.012"/>
+  <testcase name="theWaveStartsOnARisingZeroCrossing" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.008"/>
+  <testcase name="eachChannelHasItsLevels" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.008"/>
+  <testcase name="theNativeLayoutComesBack" classname="app.nagmedar.audio.ScopeAnalysisTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
