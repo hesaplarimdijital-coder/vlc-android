@@ -545,7 +545,6 @@
     <string name="store_password">Salvar senha</string>
     <string name="add_to_playlist">Adicionar à lista de reprodução</string>
     <string name="popup_playback_title">Reproduzir vídeo em uma janela pop-up</string>
-    <string name="download_subtitles">Baixar legenda</string>
     <string name="browse_folder">Procurar pasta</string>
     <string name="listen">Ouvir</string>
     <string name="videos_all">Todos os vídeos</string>

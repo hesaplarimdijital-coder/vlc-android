@@ -623,7 +623,6 @@
     <string name="store_password">Pea salasõna meeles</string>
     <string name="add_to_playlist">Lisa esitusloendisse</string>
     <string name="popup_playback_title">Esita videot hüpikaknas</string>
-    <string name="download_subtitles">Laadi subtiitrid alla</string>
     <string name="open_subtitles_vip">Sa oled teenuse OpenSubtitlesi VIP-kasutaja</string>
     <string name="browse_folder">Sirvi kausta</string>
     <string name="listen">Kuula</string>

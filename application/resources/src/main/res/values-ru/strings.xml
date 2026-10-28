@@ -452,7 +452,6 @@
     <string name="store_password">Запомнить пароль</string>
     <string name="add_to_playlist">Добавить в плейлист</string>
     <string name="popup_playback_title">Воспроизводить видео во всплывающем окне</string>
-    <string name="download_subtitles">Загрузить субтитры</string>
     <string name="browse_folder">Просмотр папки</string>
     <string name="listen">Прослушать</string>
     <string name="videos_all">Все видео</string>

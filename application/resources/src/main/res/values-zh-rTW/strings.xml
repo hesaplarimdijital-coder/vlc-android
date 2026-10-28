@@ -602,7 +602,6 @@
     <string name="store_password">記住密碼</string>
     <string name="add_to_playlist">加入至播放清單</string>
     <string name="popup_playback_title">在彈出式視窗中撥放影片</string>
-    <string name="download_subtitles">下載字幕</string>
     <string name="open_subtitles_vip">您是 VIP OpenSubtitles 使用者</string>
     <string name="browse_folder">瀏覽資料夾</string>
     <string name="listen">聽</string>

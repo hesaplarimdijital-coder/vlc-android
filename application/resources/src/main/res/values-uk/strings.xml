@@ -594,7 +594,6 @@
     <string name="store_password">Запам\'ятати пароль</string>
     <string name="add_to_playlist">Додати до списку відтворення</string>
     <string name="popup_playback_title">Відтворювати відео у спливному вікні</string>
-    <string name="download_subtitles">Завантажити субтитри</string>
     <string name="open_subtitles_vip">Ви - VIP користувач OpenSubtitles</string>
     <string name="browse_folder">Огляд теки</string>
     <string name="listen">Прослухайте</string>

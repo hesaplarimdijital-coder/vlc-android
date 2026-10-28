@@ -164,15 +164,14 @@ object PreferenceParser {
     }
 
     /**
-     * Get all changed control prefs
+     * Get all changed audio control prefs
      *
      * @param context the context to be used to retrieve the preferences
-     * @param forVideo if true, returns the video controls else the audio controls
      * @param showTitle whether to show the title of the preference or not
      * @return a list of changed settings in the form a of pair of the key and the value
      */
-    private fun getAllChangedControlPrefs(context: Context, forVideo: Boolean = false, showTitle: Boolean = false): ArrayList<Pair<String, Any>> {
-        val allPrefs = parseControlPreferences(context, forVideo = forVideo)
+    private fun getAllChangedControlPrefs(context: Context, showTitle: Boolean = false): ArrayList<Pair<String, Any>> {
+        val allPrefs = parsePreferences(context, R.xml.preferences_audio_controls)
         val allSettings = Settings.getInstance(context).all
         val changedSettings = ArrayList<Pair<String, Any>>()
         allPrefs.forEach { pref ->
@@ -210,15 +209,8 @@ object PreferenceParser {
     fun getChangedPrefsString(context: Context) = buildString {
         append("\r\nMain settings:\r\n")
         getAllChangedPrefs(context, parseUIPrefs = false, showTitle = true).forEach { append("* ${it.first} -> ${it.second}\r\n") }
-        val videoControls = buildString {
-            getAllChangedControlPrefs(context, forVideo = true, showTitle = true).forEach { append("* ${it.first} -> ${it.second}\r\n") }
-        }
-        if (videoControls.isNotBlank()) {
-            append("\r\nVideo controls:\r\n")
-            append(videoControls)
-        }
         val audioControls = buildString {
-            getAllChangedControlPrefs(context, forVideo = false, showTitle = true).forEach { append("* ${it.first} -> ${it.second}\r\n") }
+            getAllChangedControlPrefs(context, showTitle = true).forEach { append("* ${it.first} -> ${it.second}\r\n") }
         }
         if (audioControls.isNotBlank()) {
             append("\r\nAudio controls:\r\n")

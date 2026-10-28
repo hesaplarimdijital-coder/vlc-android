@@ -480,7 +480,6 @@
     <string name="store_password">Husk passord</string>
     <string name="add_to_playlist">Legg til i spilleliste</string>
     <string name="popup_playback_title">Spill av video i oppsprettsvindu</string>
-    <string name="download_subtitles">Last ned undertekster</string>
     <string name="browse_folder">Utforsk mappe</string>
     <string name="listen">Lytt</string>
     <string name="episodes">episoder</string>

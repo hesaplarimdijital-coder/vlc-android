@@ -391,7 +391,6 @@
     <string name="store_password">पासवर्ड सम्झिनुहोस्</string>
     <string name="add_to_playlist">वाद्यसूचीमा थप्नुहोस्</string>
     <string name="popup_playback_title">पप-अप सञ्झ्यालमा भिडियो प्ले गर्नुहोस्</string>
-    <string name="download_subtitles">उपशीर्षकहरू डाउनलोड</string>
     <string name="browse_folder">फोल्डर अन्वेषण गर्नुहोस्</string>
     <string name="listen">सुन्नुहोस्</string>
     <string name="videos_all">सबै भिडियोहरू</string>

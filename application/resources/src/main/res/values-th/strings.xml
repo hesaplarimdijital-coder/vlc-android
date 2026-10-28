@@ -349,7 +349,6 @@
     <string name="store_password">จดจำรหัสผ่าน</string>
     <string name="add_to_playlist">เพิ่มลงในเพลย์ลิสต์</string>
     <string name="popup_playback_title">เล่นวิดีโอในหน้าต่างป๊อปอัพ</string>
-    <string name="download_subtitles">ดาวน์โหลดคำบรรยาย</string>
     <string name="browse_folder">เรียกดูโฟลเดอร์</string>
     <string name="listen">ฟัง</string>
     <string name="videos_all">วิดีโอทั้งหมด</string>

@@ -610,7 +610,6 @@
     <string name="store_password">パスワードを保存</string>
     <string name="add_to_playlist">プレイリストに追加</string>
     <string name="popup_playback_title">ポップアップウィンドウでビデオを再生</string>
-    <string name="download_subtitles">字幕をダウンロード</string>
     <string name="open_subtitles_vip">あなたは OpenSubtitles のVIPユーザーです</string>
     <string name="browse_folder">フォルダーの参照</string>
     <string name="listen">聞く</string>

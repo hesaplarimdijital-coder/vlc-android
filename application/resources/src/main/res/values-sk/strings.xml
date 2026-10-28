@@ -643,7 +643,6 @@
     <string name="store_password">Zapamätať si heslo</string>
     <string name="add_to_playlist">Pridať do playlistu</string>
     <string name="popup_playback_title">Prehrať video vo vyskakovacom okne</string>
-    <string name="download_subtitles">Stiahnuť titulky</string>
     <string name="open_subtitles_vip">Ste VIP používateľ portálu OpenSubtitles</string>
     <string name="browse_folder">Prehľadávať priečinok</string>
     <string name="listen">Vypočuť</string>

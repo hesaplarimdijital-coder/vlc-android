@@ -104,11 +104,6 @@ const val ACTION_DISABLE_SERVER = "action_disable_server"
 const val ACTION_RESTART_SERVER = "action_restart_server"
 const val ACTION_CONTENT_INDEXING = "action_content_indexing"
 
-// VideoPlayerActivity
-@JvmField val PLAY_FROM_VIDEOGRID = "gui.video.PLAY_FROM_VIDEOGRID".buildPkgString()
-@JvmField val PLAY_FROM_SERVICE = "gui.video.PLAY_FROM_SERVICE".buildPkgString()
-@JvmField val EXIT_PLAYER = "gui.video.EXIT_PLAYER".buildPkgString()
-
 // MRLPanelFragment
 const val KEY_MRL = "mrl"
 

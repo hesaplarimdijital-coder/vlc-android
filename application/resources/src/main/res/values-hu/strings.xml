@@ -621,7 +621,6 @@
     <string name="store_password">Jelszó megjegyzése</string>
     <string name="add_to_playlist">Hozzáadás a lejátszólistához</string>
     <string name="popup_playback_title">Videó lejátszása egy felugró ablakban</string>
-    <string name="download_subtitles">Feliratok letöltése</string>
     <string name="open_subtitles_vip">Ön VIP OpenSubtitles felhasználó</string>
     <string name="browse_folder">Mappa tallózása</string>
     <string name="listen">Hallgatás</string>

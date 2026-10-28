@@ -614,7 +614,6 @@
     <string name="store_password">Αποθήκευση συνθηματικού</string>
     <string name="add_to_playlist">Προσθήκη στη λίστα αναπαραγωγής</string>
     <string name="popup_playback_title">Αναπαραγωγή βίντεο σε αναδυόμενο παράθυρο</string>
-    <string name="download_subtitles">Λήψη υπότιτλων</string>
     <string name="open_subtitles_vip">Είσαστε χρήστης VIP του OpenSubtitles</string>
     <string name="browse_folder">Περιήγηση σε φάκελο</string>
     <string name="listen">Ακρόαση</string>

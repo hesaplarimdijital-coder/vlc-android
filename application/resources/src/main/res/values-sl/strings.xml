@@ -635,7 +635,6 @@
     <string name="store_password">Zapomni si geslo</string>
     <string name="add_to_playlist">Dodaj na seznam predvajanja</string>
     <string name="popup_playback_title">Predvajaj posnetek v pojavnem oknu</string>
-    <string name="download_subtitles">Prenesi podnapise</string>
     <string name="open_subtitles_vip">Ste VIP OpenSubtitles uporabnik</string>
     <string name="browse_folder">Prebrskaj mapo</string>
     <string name="listen">Poslušaj</string>

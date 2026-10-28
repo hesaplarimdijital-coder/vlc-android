@@ -621,7 +621,6 @@
     <string name="store_password">Parola anımsansın</string>
     <string name="add_to_playlist">Listeye ekle</string>
     <string name="popup_playback_title">Görüntü açılan pencerede oynatılsın</string>
-    <string name="download_subtitles">Alt yazıları indir</string>
     <string name="open_subtitles_vip">Bir VIP OpenSubtitles kullanıcısısınız</string>
     <string name="browse_folder">Klasöre göz at</string>
     <string name="listen">Dinle</string>

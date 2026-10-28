@@ -377,7 +377,6 @@
     <string name="store_password">Recordar contraseña</string>
     <string name="add_to_playlist">Añadir a lista de reproducción</string>
     <string name="popup_playback_title">Reproducir el vídeo en una ventana emergente</string>
-    <string name="download_subtitles">Descargar subtítulos</string>
     <string name="browse_folder">Explorar carpeta</string>
     <string name="listen">Escuchar</string>
     <string name="videos_all">Todos los vídeos</string>

@@ -650,7 +650,7 @@ class NagmedarDatabaseMigrationTest {
             .allowMainThreadQueries()
             .build()
         try {
-            assertEquals(1, room.trackStats().get("file:///neva.flac")!!.playCount)
+            assertEquals(2, room.trackStats().get("file:///neva.flac")!!.playCount)
             assertEquals(listOf("En sevilenler"), room.smartPlaylists().all().map { it.name })
             assertEquals(listOf("Radyo"), runBlocking { room.radio().favorites().first() }.map { it.name })
             val db = room.openHelper.readableDatabase

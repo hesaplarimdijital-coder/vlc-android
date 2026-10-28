@@ -611,7 +611,6 @@
     <string name="store_password">Wachtwoord onthouden</string>
     <string name="add_to_playlist">Toevoegen aan afspeellijst</string>
     <string name="popup_playback_title">Video afspelen in een popup-venster</string>
-    <string name="download_subtitles">Ondertitels downloaden</string>
     <string name="open_subtitles_vip">U bent een VIP OpenSubtitles-gebruiker</string>
     <string name="browse_folder">Bladeren in map</string>
     <string name="listen">Luisteren</string>

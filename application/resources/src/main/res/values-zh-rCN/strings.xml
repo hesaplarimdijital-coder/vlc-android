@@ -606,7 +606,6 @@
     <string name="store_password">记住密码</string>
     <string name="add_to_playlist">添加到播放列表</string>
     <string name="popup_playback_title">在浮层播放视频</string>
-    <string name="download_subtitles">下载字幕</string>
     <string name="open_subtitles_vip">您是 OpenSubtitles 的 VIP 用户</string>
     <string name="browse_folder">浏览文件夹</string>
     <string name="listen">收听</string>

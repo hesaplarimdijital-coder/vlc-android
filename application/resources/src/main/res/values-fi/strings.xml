@@ -638,7 +638,6 @@ Voit toistaa vain suoratoistoa tai verkkomediaa</string>
     <string name="store_password">Muista salasana</string>
     <string name="add_to_playlist">Lisää soittolistaan</string>
     <string name="popup_playback_title">Toista video ilmoitusikkunasta</string>
-    <string name="download_subtitles">Lataa tekstitys</string>
     <string name="open_subtitles_vip">Olet VIP OpenSubtitles asiakas</string>
     <string name="browse_folder">Selaa kansiota</string>
     <string name="listen">Kuuntele</string>

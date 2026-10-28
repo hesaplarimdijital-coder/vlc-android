@@ -180,7 +180,6 @@
     <!-- Plugins -->
     <string name="plugins">Plugins</string>
     <string name="network_shared_folders">Carpetes compartíes</string>
-    <string name="download_subtitles">Baxar sotítulos</string>
     <string name="videos_all">Tolos vídeos</string>
     <string name="clear_playback_history">Llimpiar l\'historial de reproducciones</string>
     <string name="ml_scanning">Escanéu de ficheros</string>

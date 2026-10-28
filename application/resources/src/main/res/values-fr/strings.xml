@@ -632,7 +632,6 @@
     <string name="store_password">Enregistrer le mot de passe</string>
     <string name="add_to_playlist">Ajouter à une liste de lecture</string>
     <string name="popup_playback_title">Lire la vidéo dans une fenêtre popup</string>
-    <string name="download_subtitles">Télécharger des sous-titres</string>
     <string name="open_subtitles_vip">Vous êtes un utilisateur VIP d’OpenSubtitles</string>
     <string name="browse_folder">Ouvrir le dossier</string>
     <string name="listen">Écouter</string>

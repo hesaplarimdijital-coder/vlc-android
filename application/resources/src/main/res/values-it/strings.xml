@@ -632,7 +632,6 @@
     <string name="store_password">Ricorda la password</string>
     <string name="add_to_playlist">Aggiungi alla scaletta</string>
     <string name="popup_playback_title">Riproduci video in una finestra a comparsa</string>
-    <string name="download_subtitles">Scarica sottotitoli</string>
     <string name="open_subtitles_vip">Sei un utente VIP di OpenSubtitles</string>
     <string name="browse_folder">Sfoglia cartella</string>
     <string name="listen">Ascolta</string>

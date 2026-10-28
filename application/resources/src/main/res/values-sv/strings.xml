@@ -621,7 +621,6 @@
     <string name="store_password">Kom ihåg lösenord</string>
     <string name="add_to_playlist">Lägg till i spellista</string>
     <string name="popup_playback_title">Spela video i ett popup-fönster</string>
-    <string name="download_subtitles">Ladda ned undertexter</string>
     <string name="open_subtitles_vip">Du är en VIP-användare på OpenSubtitles</string>
     <string name="browse_folder">Bläddra mapp</string>
     <string name="listen">Lyssna</string>

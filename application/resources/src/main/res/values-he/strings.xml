@@ -637,7 +637,6 @@
     <string name="store_password">שמירת הססמה</string>
     <string name="add_to_playlist">להוסיף לרשימת הנגינה</string>
     <string name="popup_playback_title">נגינת סרטונים במצב חלונית</string>
-    <string name="download_subtitles">הורדת כתוביות</string>
     <string name="open_subtitles_vip">יש לך מינוי אח״מים (VIP) ל־OpenSubtitles</string>
     <string name="browse_folder">עיון בתיקייה</string>
     <string name="listen">האזנה</string>

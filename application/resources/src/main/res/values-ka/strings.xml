@@ -621,7 +621,6 @@
     <string name="store_password">პაროლის დამახსოვრება</string>
     <string name="add_to_playlist">დასაკრავ სიაში დამატება</string>
     <string name="popup_playback_title">ვიდეოს გაშვება ამომხტარ ფანჯარაში</string>
-    <string name="download_subtitles">ქვეწარწერების ჩამოტვირთვა</string>
     <string name="open_subtitles_vip">თქვენ OpenSubtitles-ის რჩეული მომხმარებელი ხართ</string>
     <string name="browse_folder">საქაღალდის ამორჩევა</string>
     <string name="listen">მოსმენა</string>

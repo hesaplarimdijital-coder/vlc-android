@@ -621,7 +621,6 @@
     <string name="store_password">Husk adgangskode</string>
     <string name="add_to_playlist">Tilføj til playliste</string>
     <string name="popup_playback_title">Afspil video i et pop op-vindue</string>
-    <string name="download_subtitles">Download undertekster</string>
     <string name="open_subtitles_vip">Du er en VIP OpenSubtitles-bruger</string>
     <string name="browse_folder">Gennemsé mappe</string>
     <string name="listen">Lyt</string>

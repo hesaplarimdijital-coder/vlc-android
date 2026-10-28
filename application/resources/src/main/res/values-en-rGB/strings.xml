@@ -621,7 +621,6 @@
     <string name="store_password">Remember password</string>
     <string name="add_to_playlist">Add to playlist</string>
     <string name="popup_playback_title">Play video in a Pop-Up window</string>
-    <string name="download_subtitles">Download subtitles</string>
     <string name="open_subtitles_vip">You are a VIP OpenSubtitles user</string>
     <string name="browse_folder">Browse folder</string>
     <string name="listen">Listen</string>
