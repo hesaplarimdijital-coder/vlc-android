@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleControllerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:42.560Z" hostname="runnervmr9t6g" time="0.11">
+  <properties/>
+  <testcase name="aSignInWhoseSecretCannotBeKeptIsSaidSo" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.024"/>
+  <testcase name="aHoldShowsOnTheRowAndEndsWithANewSignIn" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.014"/>
+  <testcase name="theRowsSayWhatEachServiceIs" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.015"/>
+  <testcase name="signingInKeepsTheAccountSwitchesItOnAndSendsTheQueue" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.012"/>
+  <testcase name="forgettingTheAccountDropsItsQueueOnly" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.012"/>
+  <testcase name="theQueueSizeFollowsTheStoreAndSendNowAsksForTheJobAtOnce" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.011"/>
+  <testcase name="theSwitchTurnsScrobblingOnAndOff" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.011"/>
+  <testcase name="aRefusedSignInSaysWhyAndKeepsNothing" classname="app.nagmedar.ui.scrobble.ScrobbleControllerTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

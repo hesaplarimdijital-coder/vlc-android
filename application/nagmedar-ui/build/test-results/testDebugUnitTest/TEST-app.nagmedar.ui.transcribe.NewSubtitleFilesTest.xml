@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:45.964Z" hostname="runnervmr9t6g" time="0.028">
+  <properties/>
+  <testcase name="aNameWithoutAnExtensionIsNumbered" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.001"/>
+  <testcase name="aFreeNameIsTaken" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.0"/>
+  <testcase name="aTakenNameIsNumberedAndTheOldFileStaysAsItWas" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.001"/>
+  <testcase name="theNameOfTheOriginalIsNeverWrittenInto" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.0"/>
+  <testcase name="aLargeFileIsCopiedIntoItsNewFileAsItIsRead" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.023"/>
+  <testcase name="aFileThatCannotBeWrittenIsNotLeftBehind" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.001"/>
+  <testcase name="whenEveryNameIsTakenNothingIsReturnedAndNothingIsWritten" classname="app.nagmedar.ui.transcribe.NewSubtitleFilesTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

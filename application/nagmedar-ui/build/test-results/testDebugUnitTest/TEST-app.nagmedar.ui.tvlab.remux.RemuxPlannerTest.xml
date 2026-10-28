@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:46.856Z" hostname="runnervmr9t6g" time="0.009">
+  <properties/>
+  <testcase name="aDefaultTheUserChoseIsKept" classname="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" time="0.006"/>
+  <testcase name="undoingTheCompatibilityTracksGivesTheDefaultBack" classname="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" time="0.002"/>
+  <testcase name="theBatchsSwitchGivesTheDefaultBackToo" classname="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" time="0.001"/>
+  <testcase name="theDeviceStartsWithTheTrackBesideTheDefault" classname="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" time="0.0"/>
+  <testcase name="removingTheDefaultAddedTrackOrItsFlagGivesTheDefaultBack" classname="app.nagmedar.ui.tvlab.remux.RemuxPlannerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

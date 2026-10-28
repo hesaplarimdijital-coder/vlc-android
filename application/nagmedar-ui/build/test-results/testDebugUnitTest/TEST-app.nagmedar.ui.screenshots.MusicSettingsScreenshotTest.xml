@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MusicSettingsScreenshotTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:27.765Z" hostname="runnervmr9t6g" time="0.281">
+  <properties/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.MusicSettingsScreenshotTest" time="0.111"/>
+  <testcase name="withoutTheEngine" classname="app.nagmedar.ui.screenshots.MusicSettingsScreenshotTest" time="0.042"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.MusicSettingsScreenshotTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

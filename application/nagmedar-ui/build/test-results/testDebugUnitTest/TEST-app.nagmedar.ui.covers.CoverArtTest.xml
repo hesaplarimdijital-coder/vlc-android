@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.covers.CoverArtTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:01:54.440Z" hostname="runnervmr9t6g" time="0.075">
+  <properties/>
+  <testcase name="decodedNoSmallerThanAsked" classname="app.nagmedar.ui.covers.CoverArtTest" time="0.016"/>
+  <testcase name="theFolderCover" classname="app.nagmedar.ui.covers.CoverArtTest" time="0.013"/>
+  <testcase name="theAddresses" classname="app.nagmedar.ui.covers.CoverArtTest" time="0.031"/>
+  <testcase name="theReleaseGroupFound" classname="app.nagmedar.ui.covers.CoverArtTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

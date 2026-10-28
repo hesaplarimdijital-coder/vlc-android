@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.TranscriptsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:11.060Z" hostname="runnervmr9t6g" time="0.12">
+  <properties/>
+  <testcase name="subRipReadsItsCues" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.013"/>
+  <testcase name="plainTextInBracketsIsNotMistakenForJson" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.012"/>
+  <testcase name="webVttReadsItsCuesSpeakersAndTimes" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.01"/>
+  <testcase name="htmlAndPlainTextAreUntimed" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.011"/>
+  <testcase name="aFileThatStartsWithWebVttIsOneWhateverItWasCalled" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.01"/>
+  <testcase name="nothingReadableIsNull" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.012"/>
+  <testcase name="searchingFindsWordsAndSpeakersIgnoringCase" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.011"/>
+  <testcase name="aByteOrderMarkAndWindowsLineEndsRead" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.01"/>
+  <testcase name="cuesOutOfOrderAreSorted" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.01"/>
+  <testcase name="theCueBeingSaidAtATimeIsTheLastThatStarted" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.01"/>
+  <testcase name="podcastingJsonReadsSegments" classname="app.nagmedar.ui.podcast.TranscriptsTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

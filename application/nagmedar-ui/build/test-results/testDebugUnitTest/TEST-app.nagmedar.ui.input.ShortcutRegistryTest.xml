@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.ShortcutRegistryTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:01:58.722Z" hostname="runnervmr9t6g" time="0.138">
+  <properties/>
+  <testcase name="everyIdHasExactlyOneShortcut" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.014"/>
+  <testcase name="eventsMatchShortcuts" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.014"/>
+  <testcase name="conflictsAreDetected" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.012"/>
+  <testcase name="systemShortcutListCoversEveryShortcut" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.013"/>
+  <testcase name="labels" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.012"/>
+  <testcase name="theEditorScopeOverlapsOnlyItself" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.012"/>
+  <testcase name="theEditorsKeysAnswerOnlyInTheEditorsScope" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.012"/>
+  <testcase name="anEditorKeyAndAPlayerKeyOnOneChordAreNotAConflictButTwoEditorKeysAre" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.013"/>
+  <testcase name="everyMenuGroupHasEntries" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.013"/>
+  <testcase name="vlcDefaults" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.011"/>
+  <testcase name="noChordIsBoundTwice" classname="app.nagmedar.ui.input.ShortcutRegistryTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

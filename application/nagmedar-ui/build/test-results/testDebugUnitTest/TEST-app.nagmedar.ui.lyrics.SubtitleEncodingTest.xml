@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.SubtitleEncodingTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:01:59.981Z" hostname="runnervmr9t6g" time="0.046">
+  <properties/>
+  <testcase name="turkishInUtf8WithAndWithoutItsMark" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.005"/>
+  <testcase name="turkishInWindows1254" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.003"/>
+  <testcase name="otherLanguagesAndUnicodeWithItsMark" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.035"/>
+  <testcase name="turkishInIso88599" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.0"/>
+  <testcase name="theSaidLinesWithTheirLettersFirst" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.002"/>
+  <testcase name="aHeadCutInsideALetterIsStillUtf8" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.0"/>
+  <testcase name="picturesAreNotReadAgain" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.0"/>
+  <testcase name="theChoicesAreKeptByTheirKeys" classname="app.nagmedar.ui.lyrics.SubtitleEncodingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioListsTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:11.676Z" hostname="runnervmr9t6g" time="0.194">
+  <properties/>
+  <testcase name="aDatabaseThatFailsIsSaidAndDoesNotCrash" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.02"/>
+  <testcase name="skippedEntriesAreCounted" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.015"/>
+  <testcase name="aFavouriteIsKeptAndTheStarGoesBothWays" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.011"/>
+  <testcase name="takingAStationOutOfFavouritesIsUnstarringIt" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.011"/>
+  <testcase name="forgettingARecentStationKeepsItsStar" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.01"/>
+  <testcase name="whatPlaysIsShownInTheController" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.011"/>
+  <testcase name="takingAStationOutOfRecentForgetsItAndUndoBringsItBack" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.011"/>
+  <testcase name="aFileWithSomeStationsKnownCountsTheNewAndThePresent" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.01"/>
+  <testcase name="anImportedStationIsRemovedAndPutBack" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.01"/>
+  <testcase name="theListsStartUnknownThenEmptyAndTheSearchIsShown" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.01"/>
+  <testcase name="aFileThatIsNoGoodSaysWhyAndKeepsTheTab" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.017"/>
+  <testcase name="theSameFileAgainAddsNothing" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.011"/>
+  <testcase name="theListStaysWhenTheMarksCannotBeRead" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.015"/>
+  <testcase name="aStationPlayedIsRecentWithTheLatestFirst" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.015"/>
+  <testcase name="aFileOfStationsIsImportedAndShown" classname="app.nagmedar.ui.radio.RadioListsTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

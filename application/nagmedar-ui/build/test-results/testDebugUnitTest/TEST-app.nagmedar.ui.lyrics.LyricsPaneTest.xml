@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.LyricsPaneTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:01:59.631Z" hostname="runnervmr9t6g" time="0.235">
+  <properties/>
+  <testcase name="plainLyricsAndNone" classname="app.nagmedar.ui.lyrics.LyricsPaneTest" time="0.082"/>
+  <testcase name="theLineSungIsLitAsTheSongGoes" classname="app.nagmedar.ui.lyrics.LyricsPaneTest" time="0.076"/>
+  <testcase name="theDelayInTenths" classname="app.nagmedar.ui.lyrics.LyricsPaneTest" time="0.077"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.FeedTextTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:07.813Z" hostname="runnervmr9t6g" time="0.244">
+  <properties/>
+  <testcase name="noSchemeTriesHttpsThenHttp" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.001"/>
+  <testcase name="anAddressTypedOrPasted" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="entitiesAreDecodedOnce" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.001"/>
+  <testcase name="twoSpellingsOfOneFeed" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="feedSchemesAreHttps" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="nothingLeftIsNull" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="whatIsNoAddress" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="aLineIsOneLine" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="scriptsStylesAndCommentsAreDropped" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="markupThatIsAllOpenersIsReadInLinearTime" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.242"/>
+  <testcase name="aLongTextIsCut" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="anUnclosedScriptOrCommentIsLeftAlone" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="htmlAsText" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <testcase name="resolvingAgainstTheFeedsAddress" classname="app.nagmedar.ui.podcast.FeedTextTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.QueuePanelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-28T21:02:06.188Z" hostname="runnervmr9t6g" time="0.318">
+  <properties/>
+  <testcase name="clearTakesWhatComesNextAndEscCloses" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.049"/>
+  <testcase name="withAPointerTheKeysAndTheMenuDoIt" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.064"/>
+  <testcase name="theHandleMovesARow" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.045"/>
+  <testcase name="whatPlaysAndWhatComesNext" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.037"/>
+  <testcase name="aSwipeRemovesAndTheUndoBarBringsItBack" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.079"/>
+  <testcase name="screenReadersMoveAndRemove" classname="app.nagmedar.ui.playback.QueuePanelTest" time="0.044"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
