@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import app.nagmedar.audio.FileTags
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
-import app.nagmedar.ui.player.subtitles.siblingFiles
+import app.nagmedar.ui.library.siblingFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

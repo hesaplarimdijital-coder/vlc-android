@@ -8,7 +8,6 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
-import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
@@ -38,8 +37,6 @@ private fun groupIcon(group: ShortcutGroup): ImageVector = when (group) {
     ShortcutGroup.Media -> NagIcons.Folder
     ShortcutGroup.Playback -> NagIcons.Play
     ShortcutGroup.Audio -> NagIcons.Volume
-    ShortcutGroup.Video -> NagIcons.Movies
-    ShortcutGroup.Subtitle -> NagIcons.Subtitle
     ShortcutGroup.Tools -> NagIcons.TvLab
     ShortcutGroup.View -> NagIcons.Grid
     ShortcutGroup.Help -> NagIcons.Keyboard
@@ -93,19 +90,14 @@ fun settingItems(res: Resources, prefs: NagmedarPreferences, wallpaperAccent: Bo
     return themes + accents + densities
 }
 
-/** The library's videos and tracks: a video's length, a track's artist. */
+/** The library's tracks, with their artist. */
 fun mediaItems(res: Resources, media: List<MediaWrapper>, play: (MediaWrapper) -> Unit): List<PaletteItem> = media.map { item ->
-    val video = item.type == MediaWrapper.TYPE_VIDEO
     PaletteItem(
         id = "media:${item.uri}",
         kind = PaletteKind.Media,
         label = item.title ?: item.uri?.lastPathSegment.orEmpty(),
-        detail = if (video) {
-            listOf(res.getString(R.string.nag_palette_film), formatDuration(item.length)).joinToString(" · ")
-        } else {
-            listOfNotNull(res.getString(R.string.nag_palette_track), item.artistName?.takeIf { it.isNotBlank() }).joinToString(" · ")
-        },
-        icon = if (video) NagIcons.Movies else NagIcons.Music,
+        detail = listOfNotNull(res.getString(R.string.nag_palette_track), item.artistName?.takeIf { it.isNotBlank() }).joinToString(" · "),
+        icon = NagIcons.Music,
         run = { play(item) },
     )
 }

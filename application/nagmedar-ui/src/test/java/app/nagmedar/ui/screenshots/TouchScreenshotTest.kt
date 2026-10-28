@@ -16,11 +16,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
-import app.nagmedar.ui.components.MultiSelection
-import app.nagmedar.ui.library.MovieOrder
-import app.nagmedar.ui.library.MovieSamples
-import app.nagmedar.ui.library.MoviesLibrary
-import app.nagmedar.ui.library.MoviesView
 import app.nagmedar.ui.playback.FakeQueue
 import app.nagmedar.ui.playback.QueueSheet
 import app.nagmedar.ui.shell.Destination
@@ -36,8 +31,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * S-310: "Sıradaki" beside the films on a tablet by touch with a row half swiped, beside them in
- * DeX, over the screen on a phone; films selected by touch on a tablet, marked, with the bar.
+ * S-310: "Sıradaki" beside the music on a tablet by touch with a row half swiped, beside it in
+ * DeX, over the screen on a phone.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -65,7 +60,7 @@ class TouchScreenshotTest {
     @Composable
     private fun QueueShell(widthClass: WidthClass, compact: Boolean) {
         val queue = remember { FakeQueue(FakeQueue.sample, current = 0) }
-        TestShell(widthClass, startDestination = Destination.Movies, queueOpen = true, overlay = {
+        TestShell(widthClass, startDestination = Destination.Music, queueOpen = true, overlay = {
             QueueSheet(queue.entries, queue.current, queue, compact = compact, onClose = {}, modifier = Modifier.align(Alignment.TopEnd))
         })
     }
@@ -88,34 +83,6 @@ class TouchScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun queuePhone() = capture("queue-phone-light", ThemeMode.Light, InputMode.Touch) { QueueShell(WidthClass.Compact, compact = true) }
-
-    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun filmsSelectedByTouch() {
-        val selection = MultiSelection().apply {
-            startSelecting(MovieSamples.demirVadi.key)
-            toggle(MovieSamples.maviKanal.key)
-        }
-        capture("films-touch-selection-tablet-light", ThemeMode.Light, InputMode.Touch) {
-            MoviesLibrary(
-                library = MovieSamples.library,
-                tech = MovieSamples.tech,
-                view = MoviesView.Grid,
-                filters = emptySet(),
-                onFiltersChange = {},
-                order = MovieOrder.Added,
-                folder = null,
-                onOpenFolder = {},
-                sort = null,
-                onSortChange = {},
-                selected = null,
-                onSelect = {},
-                onShowDetails = {},
-                onPlay = {},
-                menu = { _, _, _ -> emptyList() },
-                selection = selection,
-            )
-        }
-    }
 
     /** S-1501: Sıradaki in English (Up next). */
     @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")

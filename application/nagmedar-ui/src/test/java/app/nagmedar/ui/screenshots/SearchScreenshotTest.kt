@@ -11,7 +11,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SampleScreen
 import app.nagmedar.ui.TestShell
-import app.nagmedar.ui.library.MovieSamples
 import app.nagmedar.ui.search.SearchClock
 import app.nagmedar.ui.search.SearchContent
 import app.nagmedar.ui.search.SearchSamples
@@ -29,9 +28,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * S-311: the search page in the shell: "kuzey" in a DeX window finds a film, the episodes of a
- * show, a track and a line of a subtitle; on a tablet and a phone the same, the chips scrolling
- * sideways on the phone.
+ * S-311: the search page in the shell: "ada" in a DeX window finds the artist's tracks; on a
+ * tablet and a phone the same.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -60,13 +58,9 @@ class SearchScreenshotTest {
                         if (destination == Destination.Search) {
                             SearchContent(
                                 data = SearchSamples.data,
-                                loading = false,
-                                tech = MovieSamples.tech,
                                 query = query,
                                 onQueryChange = {},
-                                onPlayVideo = {},
                                 onPlayTrack = { _, _ -> },
-                                onPlayCue = { _, _ -> },
                             )
                         } else {
                             SampleScreen(destination)
@@ -83,20 +77,20 @@ class SearchScreenshotTest {
     }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun dex() = capture("search-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "kuzey")
+    fun dex() = capture("search-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "ada")
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun tablet() = capture("search-tablet-dark", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "kuzey")
+    fun tablet() = capture("search-tablet-dark", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "ada")
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun phone() = capture("search-phone-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, "kuzey")
+    fun phone() = capture("search-phone-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, "ada")
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun syntax() = capture("search-empty-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
 
-    /** S-1501: in English, the results (English capitals: FILMS) and the syntax. */
+    /** S-1501: in English, the results (English capitals: MUSIC) and the syntax. */
     @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
-    fun tabletEnglish() = capture("search-tablet-dark-en", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "kuzey")
+    fun tabletEnglish() = capture("search-tablet-dark-en", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "ada")
 
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun syntaxEnglish() = capture("search-empty-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")

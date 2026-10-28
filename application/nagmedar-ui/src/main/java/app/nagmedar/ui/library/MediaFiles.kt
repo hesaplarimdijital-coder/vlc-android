@@ -6,10 +6,13 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.Immutable
 import androidx.core.content.FileProvider
+import app.nagmedar.audio.FolderFiles
 import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
@@ -143,4 +146,31 @@ object MediaSharing {
 
     private const val ANY = "*/*"
     private const val TAG = "Nagmedar/MediaSharing"
+}
+
+/** A document's or a file's name as the file manager shows it. */
+internal fun displayName(resolver: ContentResolver, uri: Uri): String? {
+    if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+        runCatching {
+            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0)?.let { return it }
+            }
+        }
+    }
+    return uri.lastPathSegment?.substringAfterLast('/')
+}
+
+/** The files beside a media file, their names and where they are ([FolderFiles]: a folder, or a picked tree). */
+internal fun siblingFiles(context: Context, media: Uri): List<Pair<String, String>> = FolderFiles.siblings(context, media)
+
+/**
+ * A folder the system's picker gave, as Settings shows it: [default] when none was chosen, else
+ * the chosen folder's path on its drive ("Music/Podcasts", "Recordings"); a drive's root is its
+ * own name.
+ */
+fun pickedFolderLabel(folder: String?, default: String): String {
+    folder ?: return default
+    val id = runCatching { DocumentsContract.getTreeDocumentId(Uri.parse(folder)) }.getOrNull() ?: return folder
+    val path = id.substringAfter(':', "").trim('/')
+    return path.ifEmpty { id.substringBefore(':') }
 }

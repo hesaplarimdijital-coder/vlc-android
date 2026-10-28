@@ -66,6 +66,8 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.SegmentedChoice
+import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.NagTheme
 
 /** The window width from which the ways in are chips side by side; narrower, a menu button. */
@@ -89,7 +91,9 @@ internal fun MusicToolbar(
     modifier: Modifier = Modifier,
 ) {
     val dimens = NagTheme.dimens
-    val views = MusicView.entries.map { it to stringResource(viewLabel(it)) }
+    // the recently played: a view on a wide window, the shelf above the library on a phone
+    val phone = currentWidthClass() == WidthClass.Compact
+    val views = MusicView.entries.filter { !phone || it != MusicView.Recent }.map { it to stringResource(viewLabel(it)) }
     val playLabel = stringResource(R.string.nag_play)
     val shuffleLabel = stringResource(R.string.nag_shuffle)
     val columnsLabel = stringResource(R.string.nag_music_columns)
@@ -103,7 +107,7 @@ internal fun MusicToolbar(
                 SegmentedChoice(views, state.view, state::open)
             } else {
                 MenuButton(
-                    views.first { it.first == state.view }.second,
+                    (views.firstOrNull { it.first == state.view } ?: views.first()).second,
                     { views.map { (view, label) -> MenuEntry.Item(label, { state.open(view) }, checked = view == state.view) } },
                     modifier = Modifier.testTag("music-views"),
                 )

@@ -8,11 +8,11 @@ import org.junit.Test
 class LibrarySearchTest {
 
     private val items = listOf(
-        Searchable("a", SearchKind.Film, "Kuzey Işığı", "Bilim Kurgu"),
+        Searchable("a", SearchKind.Music, "Kuzey Işığı", "Bilim Kurgu"),
         Searchable("b", SearchKind.Music, "Sabaha Kadar", "Ada Karan Gece Mavisi"),
         Searchable("c", SearchKind.Music, "Kuzeyden Esen", "Ada Karan"),
-        Searchable("d", SearchKind.Film, "Güney Kuzey", "Dram"),
-        Searchable("e", SearchKind.Film, "Kuzey Işığı Fragman", ""),
+        Searchable("d", SearchKind.Music, "Güney Kuzey", "Dram"),
+        Searchable("e", SearchKind.Music, "Kuzey Işığı Fragman", ""),
     )
 
     private fun find(query: String) = items.search(SearchQuery.parse(query)).map { it.value }
@@ -23,7 +23,7 @@ class LibrarySearchTest {
         assertEquals(listOf("kuzey"), query.words)
         assertEquals(listOf("isik yili"), query.phrases)
         assertEquals(listOf("fragman"), query.excluded)
-        assertEquals(setOf(SearchKind.Film, SearchKind.Music), query.kinds)
+        assertEquals(setOf(SearchKind.Music), query.kinds)
         assertTrue(SearchQuery.parse("   ").isEmpty)
     }
 
@@ -44,7 +44,7 @@ class LibrarySearchTest {
         assertEquals(setOf("b", "c"), find("ada").toSet())
         assertEquals(listOf("c"), find("kuzey ada"))
         assertEquals(listOf("a", "c", "d"), find("kuzey -fragman"))
-        assertEquals(listOf("c"), find("kuzey tür:müzik"))
+        assertEquals(listOf("a", "c", "e", "d"), find("kuzey tür:müzik"))
         assertEquals(listOf("a", "e"), find("\"kuzey isigi\""))
         assertEquals(emptyList<String>(), find("\"isigi kuzey\""))
     }

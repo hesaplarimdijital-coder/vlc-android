@@ -3,16 +3,13 @@ package app.nagmedar.ui.search
 /*
  * The search page's engine (S-311): every word of the query must appear in a title, an artist,
  * an album or a folder, folded the Turkish way ("isik" finds "Işık"); "tam ifade" must appear as
- * it is, -kelime must not, and tür:film / tür:dizi / tür:müzik / tür:altyazı keep one kind.
+ * it is, -kelime must not, and tür:müzik keeps one kind.
  * Texts are folded once, so 10 000 tracks are searched in a few milliseconds.
  */
 
 /** What a hit is: the groups of the page. */
 enum class SearchKind(vararg val words: String) {
-    Film("film", "filmler", "films", "movie", "movies", "video"),
-    Episode("dizi", "diziler", "bolum", "bolumler", "episode", "episodes", "series"),
     Music("muzik", "parca", "parcalar", "sarki", "music", "track", "tracks", "song", "songs"),
-    Subtitle("altyazi", "altyazilar", "subtitle", "subtitles"),
 }
 
 /** A query taken apart; every part is folded with [foldForSearch]. */

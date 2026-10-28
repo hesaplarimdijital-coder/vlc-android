@@ -250,7 +250,7 @@ private class DeviceActions(
         showSources(section)
     }
 
-    /** "Kütüphaneye ekle: Filmler" and the others, a section each. */
+    /** "Kütüphaneye ekle: Müzik", a section each. */
     fun libraryEntries(location: DeviceLocation): List<MenuEntry> = LibrarySection.entries.map { section ->
         MenuEntry.Item(res.getString(R.string.nag_device_add_to_section, res.getString(sectionName(section))), { addToLibrary(location, section) }, icon = NagIcons.FolderAdd)
     }
@@ -258,7 +258,11 @@ private class DeviceActions(
     private fun mediaOf(entry: DeviceEntry): MediaWrapper = MLServiceLocator.getAbstractMediaWrapper(Uri.parse(entry.location.uri)).apply {
         title = entry.name.substringBeforeLast('.', entry.name)
         when (entry.kind) {
-            EntryKind.Video -> type = MediaWrapper.TYPE_VIDEO
+            // a video is heard: Nağmedar plays sound alone
+            EntryKind.Video -> {
+                type = MediaWrapper.TYPE_AUDIO
+                addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
+            }
             EntryKind.Audio -> type = MediaWrapper.TYPE_AUDIO
             EntryKind.Playlist -> type = MediaWrapper.TYPE_PLAYLIST
             else -> Unit
@@ -267,9 +271,6 @@ private class DeviceActions(
 }
 
 private fun sectionName(section: LibrarySection): Int = when (section) {
-    LibrarySection.Movies -> R.string.nag_nav_movies
-    LibrarySection.Series -> R.string.nag_nav_series
-    LibrarySection.Videos -> R.string.nag_nav_videos
     LibrarySection.Music -> R.string.nag_nav_music
 }
 

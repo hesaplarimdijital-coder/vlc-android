@@ -7,60 +7,24 @@ import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.paneTitle
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.ui.R
-import app.nagmedar.ui.components.NagButton
-import app.nagmedar.ui.components.NagIconButton
-import app.nagmedar.ui.components.NagIcons
-import app.nagmedar.ui.components.NagProgressBar
-import app.nagmedar.ui.library.metadata.EpisodeMeta
-import app.nagmedar.ui.library.metadata.FilmImage
-import app.nagmedar.ui.library.metadata.FilmImageSize
-import app.nagmedar.ui.library.metadata.FilmInfo
-import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
 import java.io.File
 import java.util.Locale
-
-/** Whether a probe result can still come: a probe is queued or running for the item. */
-enum class TechState { Ready, Probing, Unavailable }
 
 /** "2 sa 18 dk", "48 dk". */
 @Composable
@@ -118,123 +82,6 @@ private fun volumeName(context: Context, key: String): String? = runCatching {
 @Composable
 @ReadOnlyComposable
 fun currentLocale(): Locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
-
-/**
- * The details of a video (S-802): artwork, title, where it was left, play, and the technical
- * facts from the probe. [state] says what to show while there is no probe yet. Beside a list it
- * is a pane with a close button; [fullScreen] (compact and medium windows, S-303) it covers the
- * content area, goes back to the list and keeps a readable width.
- */
-@Composable
-fun MediaDetailsPanel(
-    item: VideoItem,
-    tech: MediaTech?,
-    state: TechState,
-    onPlay: () -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier,
-    fullScreen: Boolean = false,
-    /** Film information: the film's or the series' backdrop and title. */
-    info: FilmInfo? = null,
-    /** Film information: an episode's still and title. */
-    episode: EpisodeMeta? = null,
-    /** Film information below the play button: overview, ratings, cast, refresh and search. */
-    about: (@Composable () -> Unit)? = null,
-) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
-    val title = stringResource(R.string.nag_details_title)
-    val picture = episode?.stillPath ?: info?.backdropPath
-    val pictureSize = if (episode?.stillPath != null) FilmImageSize.Still else FilmImageSize.Backdrop
-    val px = with(LocalDensity.current) { 560.dp.roundToPx() }
-    Column(
-        modifier
-            .fillMaxHeight()
-            .background(if (fullScreen) colors.background else colors.chrome)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = if (fullScreen) dimens.pagePadding else 20.dp, vertical = 16.dp)
-            .wrapContentWidth(Alignment.CenterHorizontally)
-            .widthIn(max = 560.dp)
-            .semantics { paneTitle = title }
-            .testTag("details"),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (fullScreen) {
-                NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_details_back), onClose)
-                Spacer(Modifier.width(4.dp))
-                SectionLabel(title, Modifier.weight(1f))
-            } else {
-                SectionLabel(title, Modifier.weight(1f))
-                NagIconButton(NagIcons.Close, stringResource(R.string.nag_details_close), onClose)
-            }
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(dimens.radiusControl))) {
-                FilmImage(picture, pictureSize, px, Modifier.fillMaxSize()) {
-                    Artwork(item.media, size = 320.dp, modifier = Modifier.fillMaxSize(), corner = 0.dp, video = true)
-                }
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(episode?.title ?: info?.title ?: item.title, style = NagTheme.type.headline, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.semantics { heading() })
-            val summary = listOfNotNull(
-                item.durationMs.takeIf { it > 0 }?.let { durationWords(it) },
-                tech?.let(::techSummary)?.takeIf { it.isNotEmpty() },
-            ).joinToString(" · ")
-            if (summary.isNotEmpty()) Text(summary, style = NagTheme.type.body, color = colors.textSecondary)
-            if (item.progress > 0f) {
-                Spacer(Modifier.height(4.dp))
-                Row {
-                    Text(stringResource(R.string.nag_details_resume_at), style = NagTheme.type.labelSmall, color = colors.textSecondary,
-                        modifier = Modifier.weight(1f))
-                    Text(formatDuration(item.resumeMs), style = NagTheme.type.mono, color = colors.textSecondary)
-                }
-                NagProgressBar(item.progress, label = stringResource(R.string.nag_details_resume_at))
-            }
-            Spacer(Modifier.height(6.dp))
-            NagButton(
-                stringResource(if (item.progress > 0f) R.string.nag_details_resume else R.string.nag_play),
-                onPlay,
-                icon = NagIcons.Play,
-                primary = true,
-            )
-        }
-        if (about != null) about()
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SectionLabel(stringResource(R.string.nag_tech_title))
-            when {
-                tech != null -> techRows(tech, item.key).forEach { row -> TechLine(row) }
-                state == TechState.Probing -> Text(stringResource(R.string.nag_tech_probing), style = NagTheme.type.labelSmall, color = colors.textSecondary)
-                else -> {
-                    // what the medialibrary knows, and why there is no more
-                    resolutionOf(item.width, item.height)?.let { TechLine(TechRow(stringResource(R.string.nag_tech_video), "${item.width}×${item.height}")) }
-                    Text(stringResource(R.string.nag_tech_unavailable), style = NagTheme.type.labelSmall, color = colors.textTertiary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text.uppercase(currentLocale()),
-        style = NagTheme.type.caption,
-        color = NagTheme.colors.textTertiary,
-        modifier = modifier.semantics { heading() },
-    )
-}
-
-/** "Video   HEVC Main 10 · 3840×2160": read as one line by screen readers. */
-@Composable
-private fun TechLine(row: TechRow) {
-    val colors = NagTheme.colors
-    Row(Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = "${row.label}: ${row.value}" }) {
-        Text(row.label, style = NagTheme.type.labelSmall, color = colors.textTertiary, modifier = Modifier.width(72.dp))
-        Text(row.value, style = NagTheme.type.mono, color = colors.text, modifier = Modifier.weight(1f))
-    }
-}
 
 /** The badge in a card's corner: light text on a dark glass, readable on any artwork. */
 @Composable

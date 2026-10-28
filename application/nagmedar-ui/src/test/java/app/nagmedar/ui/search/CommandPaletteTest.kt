@@ -53,10 +53,10 @@ class CommandPaletteTest {
 
     private fun items(): List<PaletteItem> {
         val res = compose.activity.resources
-        return commandItems(res, { it != ShortcutId.MediaInfo }, { ran += "command:${it.name}" }) +
+        return commandItems(res, { it != ShortcutId.AbSwitch }, { ran += "command:${it.name}" }) +
             screenItems(res) { ran += "screen:${it.route}" } +
             listOf(
-                PaletteItem("media:kuzey", PaletteKind.Media, "Kuzey Işığı", "Video · 2:18:10", icon = NagIcons.Movies) { ran += "media:kuzey" },
+                PaletteItem("media:kuzey", PaletteKind.Media, "Kuzey Işığı", "Parça · Deniz Aral", icon = NagIcons.Music) { ran += "media:kuzey" },
                 PaletteItem("media:sabaha", PaletteKind.Media, "Sabaha Kadar", "Parça · Ada Karan", icon = NagIcons.Music) { ran += "media:sabaha" },
             )
     }

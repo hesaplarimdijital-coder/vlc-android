@@ -32,11 +32,15 @@ class ServiceNetworkActions(context: Context) : NetworkActions {
     override fun addToLibrary(url: String) = MedialibraryUtils.addDir(url, app)
 
     companion object {
-        /** [entry] as the playback service takes it: its address, its name, video or audio by its kind. */
+        /** [entry] as the playback service takes it: its address, its name, audio (a video heard) or a playlist by its kind. */
         fun mediaOf(entry: NetworkEntry): MediaWrapper = MLServiceLocator.getAbstractMediaWrapper(Uri.parse(entry.url)).apply {
             title = entry.name
             when (entry.kind) {
-                EntryKind.Video -> type = MediaWrapper.TYPE_VIDEO
+                // a video is heard: Nağmedar plays sound alone
+            EntryKind.Video -> {
+                type = MediaWrapper.TYPE_AUDIO
+                addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
+            }
                 EntryKind.Audio -> type = MediaWrapper.TYPE_AUDIO
                 EntryKind.Playlist -> type = MediaWrapper.TYPE_PLAYLIST
                 else -> Unit

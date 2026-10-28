@@ -98,7 +98,7 @@ object LibrarySources {
 
     /**
      * Folders offered for one tap: each storage (this device's, the SD cards and USB drives) and
-     * the folders at its top, the media ones first ("Movies", "DCIM", "Download"…). Read on the IO
+     * the folders at its top, the media ones first ("Music", "Podcasts", "Download"…). Read on the IO
      * dispatcher; without media access there are none (the picker is the way then).
      */
     suspend fun suggestions(context: Context): List<SuggestedFolder> = withContext(Dispatchers.IO) {
@@ -115,10 +115,7 @@ object LibrarySources {
 
     private val hidden = setOf("Android", "LOST.DIR", "System Volume Information")
 
-    private val mediaNames = listOf(
-        "movies", "films", "filmler", "film", "tv shows", "series", "diziler", "dizi", "video", "videos", "videolar",
-        "dcim", "download", "downloads", "music", "muzik", "recordings", "podcasts",
-    )
+    private val mediaNames = listOf("music", "muzik", "podcasts", "recordings", "download", "downloads")
 
     private fun priority(name: String): Int = mediaNames.indexOf(name.lowercase(Locale.ROOT)).let { if (it < 0) mediaNames.size else it }
 

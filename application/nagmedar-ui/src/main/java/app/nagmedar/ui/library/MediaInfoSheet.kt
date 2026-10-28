@@ -31,8 +31,8 @@ import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.lab.rememberLabAvailable
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper

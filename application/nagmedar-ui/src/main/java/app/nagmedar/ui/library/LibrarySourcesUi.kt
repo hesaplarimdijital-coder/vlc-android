@@ -47,8 +47,8 @@ import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.onboarding.StorageSource
 import app.nagmedar.ui.onboarding.folderName
 import app.nagmedar.ui.onboarding.storageSources
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
@@ -60,14 +60,11 @@ import org.videolan.tools.AppScope
 @Composable
 internal fun sectionLabel(section: LibrarySection): String = stringResource(
     when (section) {
-        LibrarySection.Movies -> R.string.nag_nav_movies
-        LibrarySection.Series -> R.string.nag_nav_series
-        LibrarySection.Videos -> R.string.nag_nav_videos
         LibrarySection.Music -> R.string.nag_nav_music
     },
 )
 
-/** Settings › Library: the folders of Films, Series, Videos and Music, each with its own list. */
+/** Settings › Library: the folders of each section (since 1.0 the music's), each with its own list. */
 @Composable
 fun LibrarySourcesSection(prefs: NagmedarPreferences) {
     val sources = rememberSourceActions(prefs)
