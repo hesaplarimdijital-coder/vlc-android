@@ -62,8 +62,8 @@ import app.nagmedar.ui.components.reorderItem
 import app.nagmedar.ui.components.reorderList
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.sleep.Alarm
 import app.nagmedar.ui.sleep.Alarms
 import app.nagmedar.ui.sleep.TimePart

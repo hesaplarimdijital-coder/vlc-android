@@ -1,5 +1,9 @@
 package app.nagmedar.ui.notify
 
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
+
 /**
  * Every notification id the app posts, in one place: the fixed ones, and the ranges of those made
  * one per item (a show's news, a job's outcome, a drive) by [IdRange.idOf]. No fixed id is in a
@@ -33,7 +37,7 @@ object NotificationIds {
 
     // ------------------------------------------------------------ Nağmedar
 
-    /** S-709: the subtitles made from speech: the job under way. */
+    /** S-709: the transcription from speech: the job under way. */
     const val WHISPER = 709
 
     /** The widget's tap: not a notification, the request code of the PendingIntent that opens the window. */
@@ -54,36 +58,15 @@ object NotificationIds {
     /** S-1301: libVLC asks something (a sign-in, a certificate) while no window is in front. */
     const val PROMPT = 1301
 
-    /** S-1303: the HLS stream on the air. */
-    const val HLS = 1303
-
-    /** S-607: a recording's copy into its folder (the foreground service's), the copy saved, Android's time limit. */
-    const val RECORDING_COPY = 6070
-    const val RECORDING_SAVED = 6071
-    const val RECORDING_TIME_LIMIT = 6072
-
     /** S-1107: the radio recordings under way (the foreground service's), and how one ended: one per station, its tag. */
     const val RADIO_RECORDING = 6110
     const val RADIO_RECORDING_ALERT = 6111
 
-    /** S-709: what came of the subtitles made from speech. */
+    /** S-709: what came of the transcription from speech. */
     const val WHISPER_DONE = 7090
-
-    /** S-710: a translation model's download, a subtitle file's translation, and Android's time limit for each. */
-    const val MODEL_DOWNLOAD = 7101
-    const val TRANSLATE = 7102
-    const val MODEL_TIME_LIMIT = 7103
-    const val TRANSLATE_TIME_LIMIT = 7104
-
-    /** The embedded subtitles extracted into a file: the job under way, and what came of it. */
-    const val EXTRACT = 7110
-    const val EXTRACT_DONE = 7111
 
     /** S-1206: Android's time limit stopped the remux queue. */
     const val REMUX_TIME_LIMIT = 12061
-
-    /** S-1303: the conversions' queue under way. */
-    const val TRANSCODE = 13030
 
     /** S-1103: a show's news, one per show (its feed's id). */
     @JvmField
@@ -92,10 +75,6 @@ object NotificationIds {
     /** S-1010: what came of a conversion (done, stopped, waiting), one per job. */
     @JvmField
     val CONVERT_DONE = IdRange(200_000, 100_000)
-
-    /** S-710: what came of a subtitle file's translation, one per job. */
-    @JvmField
-    val TRANSLATE_DONE = IdRange(300_000, 100_000)
 
     /** A drive the medialibrary had not seen, connected while no window is in front: one per drive. */
     @JvmField
@@ -124,4 +103,20 @@ class IdRange(val first: Int, val size: Int) {
     fun idOf(key: Int): Int = idOf(key.toLong())
 
     override fun toString(): String = "$first…$last"
+}
+
+/**
+ * 1.0: the notification channels of the video features 0.5 had (the player's recordings, the
+ * subtitles' extraction and translation, the conversions and the HLS stream). Android keeps a
+ * channel until the app deletes it: [delete] takes them out of the system's settings (a no-op
+ * once they are gone). A binder call each: off the main thread.
+ */
+object RemovedChannels {
+    internal val ids = listOf("nagmedar_recordings", "nagmedar_subtitle_extract", "nagmedar_translate", "nagmedar_hls", "nagmedar_transcode")
+
+    fun delete(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        ids.forEach { id -> runCatching { manager.deleteNotificationChannel(id) } }
+    }
 }

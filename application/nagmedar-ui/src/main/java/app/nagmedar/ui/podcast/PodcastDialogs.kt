@@ -57,8 +57,8 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 

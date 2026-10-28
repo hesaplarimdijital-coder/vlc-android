@@ -34,8 +34,8 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.library.formatDuration
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import java.text.NumberFormat

@@ -12,13 +12,9 @@ import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.network.NetworkDialogs
 import app.nagmedar.ui.playback.PlaySources
 import app.nagmedar.ui.playback.ResumePrompts
-import app.nagmedar.ui.player.effects.AdvancedVideoSession
-import app.nagmedar.ui.player.record.Recordings
-import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsLauncher
-import app.nagmedar.ui.player.subtitles.whisper.WhisperLauncher
 import app.nagmedar.ui.remoteaccess.RemoteAccessPages
 import app.nagmedar.ui.shell.ShellRequests
-import app.nagmedar.ui.transcode.TranscodeRequests
+import app.nagmedar.ui.transcribe.WhisperLauncher
 
 /**
  * The process-wide holders of Compose state: objects that live as long as the app and that any
@@ -46,11 +42,7 @@ object ProcessState {
             LyricsEditorRequest,
             AbTest,
             ResumePrompts,
-            TranscodeRequests,
-            AdvancedVideoSession,
             WhisperLauncher,
-            SubtitleToolsLauncher,
-            Recordings,
             MediaInfoRequests,
             MusicLinks,
             // what the queue was started from: written by the music view, read by the phone's player

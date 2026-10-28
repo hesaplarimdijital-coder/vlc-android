@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import androidx.compose.ui.input.InputMode as ComposeInputMode
 
-/** S-407: the focus ring from the keyboard: on a row of the films in DeX, on the rail of a tablet, on the bottom bar of a phone. */
+/** S-407: the focus ring from the keyboard: on a row of the tracks in DeX, on the rail of a tablet, on the bottom bar of a phone. */
 @OptIn(ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -47,7 +47,7 @@ class KeyboardScreenshotTest {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 inputModes = LocalInputModeManager.current
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = Destination.Movies)
+                    TestShell(widthClass, startDestination = Destination.Music)
                 }
             }
         }
@@ -63,7 +63,7 @@ class KeyboardScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun dex() = capture("keyboard-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer) {
-        compose.onNode(hasText("Sessiz Liman") and hasClickAction())
+        compose.onNode(hasText("Gece Yolcusu") and hasClickAction())
     }
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")

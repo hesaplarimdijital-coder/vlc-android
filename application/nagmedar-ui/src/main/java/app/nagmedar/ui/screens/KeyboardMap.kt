@@ -66,7 +66,6 @@ import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.Shortcut
 import app.nagmedar.ui.input.ShortcutRegistry
-import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.reservedReason
 import app.nagmedar.ui.input.usKeyName
 import app.nagmedar.ui.theme.InputMode
@@ -220,13 +219,8 @@ fun KeyboardMap(table: List<Shortcut>, modifier: Modifier = Modifier) {
         val chord = mods.chord(key)
         val name = chord.label(res)
         val on = byChord[chord].orEmpty()
-        fun title(shortcut: Shortcut) = res.getString(shortcut.label).let { label ->
-            when (shortcut.scope) {
-                ShortcutScope.Player -> res.getString(R.string.nag_kb_in_player, label)
-                // the editor's labels say so themselves ("Söz düzenleyici: …")
-                ShortcutScope.Editor, ShortcutScope.Global -> label
-            }
-        }
+        // the editor's labels say so themselves ("Söz düzenleyici: …")
+        fun title(shortcut: Shortcut) = res.getString(shortcut.label)
         val reserved = reservedReason(chord)
         return when {
             ShortcutRegistry.clash(on) -> res.getString(R.string.nag_kb_conflict, name, on.joinToString(", ") { title(it) })

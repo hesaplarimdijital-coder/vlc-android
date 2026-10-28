@@ -77,7 +77,7 @@ class ShortcutBindingsTest {
         assertEquals(ShortcutPreset.Vlc, ShortcutPreset.of(emptyMap()))
         val mpv = ShortcutPreset.Mpv.overrides
         assertEquals(KeyChord(Key.Q), mpv[ShortcutId.Stop])
-        assertEquals(KeyChord(Key.J), mpv[ShortcutId.NextSubtitle])
+        assertEquals(KeyChord(Key.Backspace), mpv[ShortcutId.NormalSpeed])
         assertEquals(ShortcutPreset.Mpv, ShortcutPreset.of(mpv))
         assertNull(ShortcutPreset.of(mapOf(ShortcutId.Stop to null)))
         ShortcutPreset.entries.forEach { preset ->

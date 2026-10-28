@@ -78,8 +78,8 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.gainText
-import app.nagmedar.ui.player.effects.EqualizerPreset
-import app.nagmedar.ui.player.panel.DropButton
+import app.nagmedar.ui.player.equalizer.EqualizerPreset
+import app.nagmedar.ui.components.DropButton
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay

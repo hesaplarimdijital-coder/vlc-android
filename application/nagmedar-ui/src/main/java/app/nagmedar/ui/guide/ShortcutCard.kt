@@ -121,7 +121,6 @@ object ShortcutCard {
     /** Where a shortcut works when that is not everywhere; null for the global ones. */
     fun scopeNote(res: Resources, scope: ShortcutScope): String? = when (scope) {
         ShortcutScope.Global -> null
-        ShortcutScope.Player -> res.getString(R.string.nag_card_scope_player)
         ShortcutScope.Editor -> res.getString(R.string.nag_card_scope_editor)
     }
 }

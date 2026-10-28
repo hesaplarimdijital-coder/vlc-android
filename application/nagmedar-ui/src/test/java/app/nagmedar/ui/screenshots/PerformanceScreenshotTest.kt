@@ -28,9 +28,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * S-1404: Settings › Performance with what a Tab S11 Ultra measured (seven start-ups, four
- * playbacks, one of them dropping frames) in DeX, on a tablet in English and on a phone; and
- * before anything was measured.
+ * S-1404: Settings › Performance with what a Tab S11 Ultra measured (seven start-ups) in DeX,
+ * on a tablet in English and on a phone; and before anything was measured.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -65,5 +64,5 @@ class PerformanceScreenshotTest {
     fun phone() = capture("settings-performance-phone-dark", ThemeMode.Dark, InputMode.Touch, samplePerfView())
 
     @Test @Config(qualifiers = "tr-w1280dp-h480dp-mdpi")
-    fun empty() = capture("settings-performance-empty-dex-light", ThemeMode.Light, InputMode.Pointer, PerfView(emptyList(), emptyList()))
+    fun empty() = capture("settings-performance-empty-dex-light", ThemeMode.Light, InputMode.Pointer, PerfView(emptyList()))
 }

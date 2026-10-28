@@ -288,7 +288,6 @@ private fun ShortcutRow(
             Column(Modifier.weight(1f).padding(end = 8.dp)) {
                 Text(label, style = NagTheme.type.body, color = colors.text)
                 val notes = listOfNotNull(
-                    stringResource(R.string.nag_shortcuts_player_only).takeIf { shortcut.scope == ShortcutScope.Player },
                     stringResource(R.string.nag_shortcuts_editor_only).takeIf { shortcut.scope == ShortcutScope.Editor },
                     stringResource(R.string.nag_sc_default, default?.label(res) ?: stringResource(R.string.nag_sc_none)).takeIf { changed },
                 )

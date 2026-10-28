@@ -91,8 +91,8 @@ import app.nagmedar.ui.lyrics.LyricsLoad
 import app.nagmedar.ui.lyrics.LyricsOrigin
 import app.nagmedar.ui.lyrics.LyricsPane
 import app.nagmedar.ui.lyrics.delayNumber
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.onboarding.GrantHolder

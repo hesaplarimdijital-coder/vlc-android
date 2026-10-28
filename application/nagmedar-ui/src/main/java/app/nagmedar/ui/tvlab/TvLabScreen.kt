@@ -28,11 +28,9 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.lab.CreateFile
 import app.nagmedar.ui.lab.ReportDialog
-import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.onboarding.GrantHolder
-import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.tvlab.remux.BatchFolder
 import app.nagmedar.ui.tvlab.remux.BatchItem
@@ -100,10 +98,8 @@ fun TvLabScreen(controller: TvLabController, modifier: Modifier = Modifier) {
     var tab by rememberSaveable { mutableStateOf(TvLabTab.Analysis) }
     val control by remember(context) { RemuxQueueControl.get(context).state }.collectAsState()
     val batch = remember(context) { RemuxBatchSession.get(context) }
-    val prefs = rememberNagmedarPreferences()
-    val libraryFolders = remember(prefs.librarySources) {
-        LibrarySection.entries.filter { it.video }.flatMap { prefs.librarySources.of(it) }.filter { !it.exclude }.map { it.location }.distinct().map(BatchFolder::of)
-    }
+    // 1.0: the library has no video sections whose folders the batch could offer
+    val libraryFolders = emptyList<BatchFolder>()
     var batchEditing by remember { mutableStateOf<Pair<BatchItem, String>?>(null) }
     // the night run's "starts at" said against a clock that moves on
     val now by produceState(System.currentTimeMillis()) {

@@ -66,8 +66,8 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.music.AddToPlaylistDialog
 import app.nagmedar.ui.music.MediaLibraryPlaylists
 import app.nagmedar.ui.music.PlaylistSummary
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass

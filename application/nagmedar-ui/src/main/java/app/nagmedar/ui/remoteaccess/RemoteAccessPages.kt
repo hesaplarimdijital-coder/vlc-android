@@ -49,8 +49,8 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.library.currentLocale
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
