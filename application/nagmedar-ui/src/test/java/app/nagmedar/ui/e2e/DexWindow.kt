@@ -53,30 +53,18 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.tvlab.FakeTvLabEngine
-import app.nagmedar.ui.tvlab.MemoryProfileStore
-import app.nagmedar.ui.tvlab.TvLabController
-import app.nagmedar.ui.tvlab.TvLabScreen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 /**
  * S-1403: a DeX window as NagmedarActivity and NagmedarMain build it: the real shell with its menu
  * bar and command palette, the window's keys (WindowKeys, before the views and after them) and the
- * app's actions (AppActions), and the TV Lab over a stand-in native lab. The library's screens are
- * the samples (the medialibrary is native). The system's file pickers answer at once: a file to
- * open is [picked], a place to save [saved].
+ * app's actions (AppActions). The library's screens are the samples (the medialibrary is native).
+ * The system's file pickers answer at once: a file to open is [picked], a place to save [saved].
  */
 class DexWindow {
-    val store = MemoryProfileStore()
-    val engine = FakeTvLabEngine()
-    // the profiles' files and the film's provider read at once too: the flows check what a save chose
-    val lab = TvLabController(engine, store, CoroutineScope(Dispatchers.Unconfined), Dispatchers.Unconfined)
-
     var picked: Uri? = null
     var saved: Uri? = null
 
-    /** The pickers asked for, by their contract's name: "OpenDocument", "CreateFile". */
+    /** The pickers asked for, by their contract's name: "OpenDocument", "CreateDocument". */
     val asked = mutableListOf<String>()
 
     lateinit var actions: AppActions
@@ -136,7 +124,7 @@ class DexWindow {
                     menus = { MenuBarMenus(menuSpecs(context, appActions), menuBar) },
                     player = { kind -> SamplePlayerBar(kind) },
                     navController = nav,
-                    screen = { destination, _ -> if (destination == Destination.TvLab) TvLabScreen(lab) else SampleScreen(destination) },
+                    screen = { destination, _ -> SampleScreen(destination) },
                 )
             }
             if (paletteOpen) {

@@ -384,7 +384,7 @@ char *media_probe(const char *input, volatile int *cancel)
     AVFormatContext *ic = NULL;
     AVDictionary *opts = NULL;
     int ret;
-    /* enough for the stream info of a remux, without reading whole minutes of it */
+    /* enough for the stream info of a Blu-ray copy, without reading whole minutes of it */
     av_dict_set(&opts, "probesize", "20000000", 0);
     av_dict_set(&opts, "analyzeduration", "10000000", 0);
     ret = avformat_open_input(&ic, input, NULL, &opts);

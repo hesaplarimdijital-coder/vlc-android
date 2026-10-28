@@ -597,7 +597,7 @@ class Smoke:
             more = self.find(nodes, more_label)
             w, h = self.screen_size(nodes)
             if w > 1500 and side_scrolls < 3 and any(l not in visited for l in labels):
-                # a tablet's sidebar is a list that scrolls: more destinations below TV Lab
+                # a tablet's sidebar is a list that scrolls: more destinations below the library's
                 side_scrolls += 1
                 self.sh("input swipe %d %d %d %d 350" % (w // 10, int(h * 0.75), w // 10, int(h * 0.30)))
                 nodes = self.nodes(self.settle(0.6))

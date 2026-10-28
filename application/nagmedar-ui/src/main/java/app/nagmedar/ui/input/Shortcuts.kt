@@ -159,7 +159,7 @@ enum class ShortcutId {
     JumpBackLong, JumpForwardLong, Slower, Faster, NormalSpeed, Repeat, Shuffle,
     SleepTimer,
     VolumeUp, VolumeDown, Mute, Equalizer, AbSwitch,
-    Settings, TvLab, CommandPalette, ToggleSidebar, PlayQueue,
+    Settings, CommandPalette, ToggleSidebar, PlayQueue,
     ShortcutList, UserGuide,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
@@ -242,8 +242,6 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.LrcWordMode, ShortcutGroup.Audio, R.string.nag_sc_lrc_word_mode, KeyChord(Key.W), ShortcutScope.Editor),
         // Tools
         Shortcut(ShortcutId.Settings, ShortcutGroup.Tools, R.string.nag_nav_settings, KeyChord(Key.Comma, ctrl = true)),
-        // S-1201: the TV Lab, from anywhere
-        Shortcut(ShortcutId.TvLab, ShortcutGroup.Tools, R.string.nag_nav_tv_lab, KeyChord(Key.T, ctrl = true, shift = true)),
         // S-1105: the radio directory's search, from anywhere
         Shortcut(ShortcutId.RadioSearch, ShortcutGroup.Tools, R.string.nag_sc_radio_search, KeyChord(Key.R, ctrl = true, shift = true)),
         // S-1107: the station on the air recorded (again: stopped), and the radio recordings

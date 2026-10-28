@@ -8,8 +8,8 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkInfo
 
 /**
- * The foreground of a long job's worker (S-1010's converter, S-1303's conversions, S-1206's
- * remux): media processing on Android 15 and later, data sync before. WorkManager's
+ * The foreground of a long job's worker (S-1010's converter, S-1303's conversions): media
+ * processing on Android 15 and later, data sync before. WorkManager's
  * SystemForegroundService declares both in the manifest.
  */
 fun jobForegroundInfo(id: Int, notification: Notification): ForegroundInfo = when {
