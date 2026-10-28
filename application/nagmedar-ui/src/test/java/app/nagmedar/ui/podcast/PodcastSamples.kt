@@ -3,6 +3,11 @@ package app.nagmedar.ui.podcast
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.data.PodcastFeedSummary
+import app.nagmedar.ui.transcribe.WhisperEngine
+import app.nagmedar.ui.transcribe.WhisperModel
+import app.nagmedar.ui.transcribe.WhisperRequest
+import app.nagmedar.ui.transcribe.WhisperStage
+import app.nagmedar.ui.transcribe.WhisperStatus
 
 /** S-1101: shows and episodes for screenshots and screen tests; no network, no database. */
 internal object PodcastSamples {
@@ -74,6 +79,32 @@ internal object PodcastSamples {
         transcript = ExtraUi.None,
         download = download,
         listening = listening,
+    )
+
+    /** Whisper's transcript of the newest episode, as the app wrote it with the small model. */
+    val whisperTranscript = Transcript(
+        listOf(
+            TranscriptCue(0, 4_200, null, "Merhaba, Gece Yayını'nın üçüncü gecesine hoş geldiniz."),
+            TranscriptCue(4_200, 9_800, null, "Bu akşam Neva Kâr'ı dinliyor, Itrî'nin bestelerinin izini sürüyoruz."),
+            TranscriptCue(9_800, 15_000, null, "Konuğumuz Ayşe Demir; hoş geldiniz."),
+            TranscriptCue(15_000, 21_500, null, "Hoş bulduk, davetiniz için çok teşekkür ederim."),
+            TranscriptCue(21_500, 28_000, null, "Neva makamıyla başlayalım: geçkileri nelerdir, nasıl duyulur?"),
+            TranscriptCue(28_000, 36_400, null, "Neva, dügâh perdesinde başlar, neva perdesinde güçlü yapar ve sık sık bayatiye geçer."),
+            TranscriptCue(36_400, 42_000, null, "Itrî'nin Neva Kâr'ı bunun en güzel örneklerinden biri."),
+        ),
+        timed = true,
+        whisperModel = WhisperModel.Small.key,
+    )
+
+    /** Whisper's job on the newest episode under way: half of it heard, on the GPU at 4,2× real time. */
+    val transcribing = WhisperStatus.Running(
+        id = "whisper-1",
+        request = WhisperRequest(10, episodes[0].title),
+        stage = WhisperStage.Transcribing,
+        doneSeconds = 1_860.0,
+        totalSeconds = 3_723.0,
+        etaSeconds = 440,
+        engine = WhisperEngine(gpu = true, device = "Mali-G925", threads = 4, speed = 4.2),
     )
 
     fun model(

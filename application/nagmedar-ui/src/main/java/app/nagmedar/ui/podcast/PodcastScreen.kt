@@ -125,6 +125,7 @@ fun PodcastsScreen(undo: UndoBarState?) {
                 progress = PodcastCenter.tracker.progress,
                 settings = { PodcastCenter.settingsStore(app).read() },
                 onSubscribed = { PodcastCenter.schedule(app) },
+                transcriber = WhisperTranscriber(app),
             ),
         )
     }

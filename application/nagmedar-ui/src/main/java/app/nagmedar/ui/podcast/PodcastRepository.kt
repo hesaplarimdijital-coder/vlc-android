@@ -153,6 +153,7 @@ class PodcastRepository(
             fundingUrl = parsed.fundingUrl,
             fundingMessage = parsed.fundingMessage,
             aliasKeys = alias,
+            language = parsed.language,
         )
         // a subscription cancelled while the feed was being read saves nothing
         currentCoroutineContext().ensureActive()
@@ -225,6 +226,9 @@ class PodcastRepository(
 
     /** S-1104: [feedId]'s volume boost ([VolumeBoost]): off, light or strong. */
     suspend fun setVolumeBoost(feedId: Long, boost: Int) = withContext(io) { dao.setVolumeBoost(feedId, VolumeBoost.clamp(boost)) }
+
+    /** The language Whisper hears the show in: a code, "auto", or null for the feed's ([TranscriptLanguage]). */
+    suspend fun setTranscriptLanguage(feedId: Long, language: String?) = withContext(io) { dao.setTranscriptLanguage(feedId, language) }
 
     /**
      * S-1102: subscribes to each of [feeds], [PARALLEL] at a time; [progress] hears how many are done of how many.
@@ -315,6 +319,7 @@ class PodcastRepository(
                     podcastGuid = parsed.podcastGuid ?: base.podcastGuid,
                     fundingUrl = parsed.fundingUrl ?: base.fundingUrl,
                     fundingMessage = parsed.fundingMessage ?: base.fundingMessage,
+                    language = parsed.language ?: base.language,
                 ),
                 parsed.episodes.map { it.toEntity(base.id, at) },
             )

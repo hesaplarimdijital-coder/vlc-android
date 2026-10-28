@@ -43,7 +43,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 20
+        const val VERSION = 21
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -264,6 +264,17 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 20 → 21 (podcast transcripts by Whisper): the show's language from its feed and for Whisper, the episode's own transcript. */
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) = transcripts(db)
+        }
+
+        private fun transcripts(db: SupportSQLiteDatabase) {
+            db.addColumn("podcast_feed", "language", "TEXT")
+            db.addColumn("podcast_feed", "transcript_language", "TEXT")
+            db.addColumn("podcast_episode", "whisper_model", "TEXT")
+        }
+
         private fun remuxQueue(db: SupportSQLiteDatabase) {
             db.execSQL(
                 "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -330,7 +341,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
         val MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
             MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20,
+            MIGRATION_19_20, MIGRATION_20_21,
         )
 
         @Volatile

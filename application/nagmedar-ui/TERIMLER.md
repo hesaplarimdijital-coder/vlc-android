@@ -43,9 +43,9 @@ Sözlüğü testler denetler:
 | kodlama | encoding | karakter seti, kod sayfası | charset | Bir metin dosyasının (söz dosyası) karakter seti: UTF-8, Türkçe · Windows-1254 |
 | kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
-| altyazı üretmek | generate subtitles | | | Filmin konuşmasını bu cihazda Whisper ile yazıya döküp yeni bir SRT dosyası yapmak: “Altyazı üret…” (Alt+W); dosya `film.tr.whisper.srt` adıyla filmin yanına yazılır. Ayarlar'daki bölümü “Altyazı üretimi” |
-| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince boyutu onaylanıp bir kez indirilir, Ayarlar › Altyazı'dan silinir |
-| hızlandırma | acceleration | | | Altyazı üretiminin nerede çalıştığı (Ayarlar › Altyazı): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz |
+| döküm oluşturmak | create a transcript | altyazı üretmek | generate subtitles | Bir podcast bölümünün konuşmasını bu cihazda Whisper ile yazıya dökmek: “Whisper ile döküm oluştur”, dökümü olanda “Whisper ile yeniden oluştur”; iş “sırada”, “oluşturuluyor”, bitince “Döküm hazır”. Döküm uygulamanın deposunda WebVTT olarak durur, altında “Whisper ile oluşturuldu · small”. Ayarlar'daki yeri “Ayarlar › Podcastler › Döküm (Whisper)” |
+| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince, boyutu bölümün sayfasında görüldükten sonra bir kez indirilir, Ayarlar › Podcastler › Döküm (Whisper)'dan silinir |
+| hızlandırma | acceleration | | | Dökümün nerede oluşturulduğu (Ayarlar › Podcastler › Döküm (Whisper)): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz. İşin bildiriminde “GPU (Vulkan)” ya da “İşlemci · 4 çekirdek” |
 | işlemci | CPU | | processor | Kısa yerlerde: “İşlemci · 4 çekirdek”, “İşlemci yükü”; İngilizcede “CPU · 4 cores”, “CPU load” |
 | gerçek zamanın N katı | N× real time | | | Bir işin hızı: oynatma süresinin işin süresine oranı; “gerçek zamanın 4,2 katı” bir saatlik filmi yaklaşık 14 dakikada bitirir |
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
@@ -175,7 +175,7 @@ Sözlüğü testler denetler:
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |
-| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
+| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara”. Yayın vermiyorsa Whisper bu cihazda oluşturur (“döküm oluşturmak”); programın “Döküm dili” Whisper'ın duyacağı dildir (“Yayındaki: Türkçe”, “Otomatik”) |
 | indirmek, indirme | download | | | Podcast bölümünü cihaza almak: “İndir”, “İndirileni sil”; süren indirmeyi durdurmak “İptal” |
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |

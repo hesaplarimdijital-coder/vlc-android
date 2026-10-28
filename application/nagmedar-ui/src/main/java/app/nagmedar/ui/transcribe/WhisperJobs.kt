@@ -1,62 +1,66 @@
 package app.nagmedar.ui.transcribe
 
 import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import app.nagmedar.data.DownloadState
+import app.nagmedar.data.NagmedarDatabase
+import app.nagmedar.ui.podcast.PodcastCenter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
-import org.videolan.tools.Settings
+import org.videolan.tools.AppScope
 
 /**
- * S-709: what is asked of a job: the film (its URI and file name), its audio track (the n-th of
- * the file's audio tracks, 0 first; -1 for the one FFmpeg finds best) and what it is called, the
- * language heard, whether into English, and the model.
+ * What is asked of a Whisper job: the transcript of the podcast episode [episodeId] ([name] its title, for the
+ * notification) with [model]; [auto] when the automatic transcription of new downloads asked for it. The language is
+ * the show's, read when the job starts ([app.nagmedar.ui.podcast.TranscriptLanguage]).
  */
 @Immutable
 data class WhisperRequest(
-    val film: String,
+    val episodeId: Long,
     val name: String,
-    val audioTrack: Int = -1,
-    val audioLabel: String? = null,
-    val language: WhisperLanguage = WhisperLanguage.Auto,
-    val translate: Boolean = false,
     val model: WhisperModel = WhisperModel.Default,
+    val auto: Boolean = false,
 ) {
     fun toJson(): String = JSONObject()
-        .put("film", film)
+        .put("episode", episodeId)
         .put("name", name)
-        .put("audio", audioTrack)
-        .put("audio_label", audioLabel ?: "")
-        .put("language", language.code)
-        .put("translate", translate)
         .put("model", model.key)
+        .put("auto", auto)
         .toString()
 
     companion object {
         fun parse(json: String?): WhisperRequest? = runCatching {
             val o = JSONObject(json ?: return null)
             WhisperRequest(
-                film = o.getString("film"),
-                name = o.getString("name"),
-                audioTrack = o.optInt("audio", -1),
-                audioLabel = o.optString("audio_label").ifEmpty { null },
-                language = WhisperLanguage.of(o.optString("language")),
-                translate = o.optBoolean("translate"),
+                episodeId = o.getLong("episode"),
+                name = o.optString("name"),
                 model = WhisperModel.of(o.optString("model")),
+                auto = o.optBoolean("auto"),
             )
         }.getOrNull()
     }
 }
 
-/** S-709: why a job gave no subtitles. */
+/** Why a job gave no transcript. */
 enum class WhisperFailure(val key: String) {
     /** This build has no native lab library. */
     NoNative("no-native"),
@@ -70,16 +74,16 @@ enum class WhisperFailure(val key: String) {
     /** What came down is not the model (its size or SHA-256 differ). */
     Checksum("checksum"),
 
-    /** The device has no room for the model, or could not write it. */
+    /** The device has no room for the model or the episode's audio, or could not write it. */
     Storage("storage"),
 
-    /** The film could not be opened: gone, or no longer ours to read. */
+    /** The episode is gone, or its downloaded file could not be opened. */
     Input("input"),
 
-    /** The film has no audio track, or not the one asked for. */
-    NoAudio("no-audio"),
+    /** The episode's audio could not be downloaded for the job. */
+    Fetch("fetch"),
 
-    /** The audio track's format cannot be decoded. */
+    /** The episode's audio cannot be decoded. */
     Decoder("decoder"),
 
     /** The model on the device cannot be read: it is removed, to be downloaded again. */
@@ -91,7 +95,7 @@ enum class WhisperFailure(val key: String) {
     /** No speech was heard. */
     Empty("empty"),
 
-    /** The new file could be written neither beside the film nor in the app's folder. */
+    /** The transcript could not be written in the app's storage. */
     Output("output"),
 
     /** Android's time limit for a job in the background ended it. */
@@ -103,10 +107,11 @@ enum class WhisperFailure(val key: String) {
     }
 }
 
-/** What a job is doing. */
+/** What a job is doing: waiting, downloading the model, downloading the episode's audio, transcribing. */
 enum class WhisperStage(val key: String) {
     Waiting("waiting"),
     Downloading("downloading"),
+    Fetching("fetching"),
     Transcribing("transcribing"),
     ;
 
@@ -116,13 +121,13 @@ enum class WhisperStage(val key: String) {
 }
 
 /**
- * S-709: what a job runs on: the GPU through Vulkan ([gpu], its name in [device]) or the
- * processor's [threads] cores, and how fast: [speed] seconds of the film a second, null until it
- * can be told. [fellBack]: the GPU was asked for and the processor ran.
+ * What a job runs on: the GPU through Vulkan ([gpu], its name in [device]) or the processor's [threads] cores, and how
+ * fast: [speed] seconds of the audio a second, null until it can be told. [fellBack]: the GPU was asked for and the
+ * processor ran.
  */
 @Immutable
 data class WhisperEngine(val gpu: Boolean, val device: String = "", val threads: Int = 0, val speed: Double? = null, val fellBack: Boolean = false) {
-    /** The engine as a job's progress or result carries it. */
+    /** The engine as a job's progress carries it. */
     fun toData(): Array<Pair<String, Any?>> = arrayOf(
         WhisperJobs.KEY_GPU to gpu,
         WhisperJobs.KEY_DEVICE to device,
@@ -132,7 +137,7 @@ data class WhisperEngine(val gpu: Boolean, val device: String = "", val threads:
     )
 
     companion object {
-        /** The engine in a job's progress or result; null before the model was loaded. */
+        /** The engine in a job's progress; null before the model was loaded. */
         fun of(data: Data): WhisperEngine? {
             val threads = data.getInt(WhisperJobs.KEY_THREADS, 0)
             if (threads <= 0) return null
@@ -147,16 +152,16 @@ data class WhisperEngine(val gpu: Boolean, val device: String = "", val threads:
     }
 }
 
-/** S-709: the job as the windows show it: under way, done, failed or cancelled. */
+/** The job under way, as the pages show it. */
 @Immutable
 sealed interface WhisperStatus {
     val id: String
     val request: WhisperRequest?
 
     /**
-     * Under way: the model's bytes ([doneBytes] of [totalBytes]) or the film's seconds
-     * ([doneSeconds] of [totalSeconds]), the time left when it can be told, what it runs on once
-     * the model is loaded. [restarted]: Android stopped the app and the job began again from the start.
+     * Under way on [episodeId]: the model's or the audio's bytes ([doneBytes] of [totalBytes]) or the audio's seconds
+     * ([doneSeconds] of [totalSeconds]), the time left when it can be told, what it runs on once the model is loaded.
+     * [restarted]: Android stopped the app and the job began again from the start.
      */
     data class Running(
         override val id: String,
@@ -169,124 +174,163 @@ sealed interface WhisperStatus {
         val etaSeconds: Long? = null,
         val restarted: Boolean = false,
         val engine: WhisperEngine? = null,
+        val episodeId: Long = request?.episodeId ?: -1L,
     ) : WhisperStatus {
         /** How far, 0..1; null when it cannot be told. */
         val fraction: Float?
             get() = when (stage) {
-                WhisperStage.Downloading -> if (totalBytes > 0) (doneBytes.toDouble() / totalBytes).toFloat().coerceIn(0f, 1f) else null
+                WhisperStage.Downloading, WhisperStage.Fetching -> if (totalBytes > 0) (doneBytes.toDouble() / totalBytes).toFloat().coerceIn(0f, 1f) else null
                 WhisperStage.Transcribing -> if (totalSeconds > 0) (doneSeconds / totalSeconds).toFloat().coerceIn(0f, 1f) else null
                 WhisperStage.Waiting -> null
             }
     }
-
-    /** Done: the file, its lines and language, and what it ran on and how fast. */
-    data class Done(
-        override val id: String,
-        override val request: WhisperRequest?,
-        val saved: SavedSubtitle,
-        val lines: Int,
-        val language: String,
-        val engine: WhisperEngine? = null,
-    ) : WhisperStatus
-
-    data class Failed(override val id: String, override val request: WhisperRequest?, val reason: WhisperFailure, val detail: String = "") : WhisperStatus
-
-    data class Cancelled(override val id: String, override val request: WhisperRequest?) : WhisperStatus
 }
 
 /**
- * S-709: the subtitles from speech, one job at a time: a WorkManager job of its own name, which
- * is not started while one is under way ([ExistingWorkPolicy.KEEP]). The request rides in the
- * job's tag, so a job WorkManager starts again after the app was stopped knows what it is for.
+ * The podcast transcripts' Whisper jobs, one at a time: the requests wait in [WhisperQueueStore], and one WorkManager
+ * job of its own name ([WORK]) takes the first, transcribes it and leaves the next to a job after it. A job is started
+ * with what its request needs ([JobNeeds]); one that finds the first request needing more starts the one that waits for
+ * it and ends. Cancelling a job takes its request out of the queue, and the next one starts.
  */
 object WhisperJobs {
     const val WORK = "nagmedar-whisper"
-    internal const val KEY_REQUEST = "request"
+    internal const val KEY_EPISODE = "episode"
     internal const val KEY_STAGE = "stage"
     internal const val KEY_DONE = "done"
     internal const val KEY_TOTAL = "total"
     internal const val KEY_BYTES = "bytes"
     internal const val KEY_BYTES_TOTAL = "bytes_total"
     internal const val KEY_ETA = "eta"
-    internal const val KEY_URI = "uri"
-    internal const val KEY_NAME = "name"
-    internal const val KEY_BESIDE = "beside"
-    internal const val KEY_LINES = "lines"
-    internal const val KEY_LANGUAGE = "language"
-    internal const val KEY_REASON = "reason"
-    internal const val KEY_DETAIL = "detail"
     internal const val KEY_GPU = "gpu"
     internal const val KEY_DEVICE = "device"
     internal const val KEY_THREADS = "threads"
     internal const val KEY_SPEED = "speed"
     internal const val KEY_FALLBACK = "fallback"
-    private const val TAG_REQUEST = "whisper-request:"
+    internal const val KEY_NETWORK = "needs_network"
+    internal const val KEY_CHARGING = "needs_charging"
+    internal const val KEY_IDLE = "needs_idle"
 
-    /** Starts a job for [request]; one under way stays and this one is not started. */
-    fun start(context: Context, request: WhisperRequest) {
+    /** One start at a time in the process: two at once would each think there is no job. */
+    private val starts = Mutex()
+
+    /** [request] queued: it starts when the one under way is done (at once when there is none), when the device allows it. */
+    fun request(context: Context, request: WhisperRequest) {
         val app = context.applicationContext
-        val work = OneTimeWorkRequestBuilder<WhisperWorker>()
-            .setInputData(workDataOf(KEY_REQUEST to request.toJson()))
-            .addTag(WORK)
-            .addTag(TAG_REQUEST + request.toJson())
-            .build()
-        WorkManager.getInstance(app).enqueueUniqueWork(WORK, ExistingWorkPolicy.KEEP, work)
+        WhisperQueueStore.update(app) { it.add(request) }
+        kick(app)
     }
 
-    /** The job under way stopped: the file under way is not written. */
+    /** The job of [episodeId] taken out of the queue: stopped when it is under way, and the next one started. */
+    fun cancel(context: Context, episodeId: Long) {
+        val app = context.applicationContext
+        var first = false
+        WhisperQueueStore.update(app) { queue ->
+            first = queue.head?.episodeId == episodeId || queue.running == episodeId
+            queue.remove(episodeId)
+        }
+        if (!first) return
+        runCatching { WorkManager.getInstance(app).cancelUniqueWork(WORK) }
+        kick(app)
+    }
+
+    /** The job under way stopped (the Downloads page's model row). */
     fun cancel(context: Context) {
-        WorkManager.getInstance(context.applicationContext).cancelUniqueWork(WORK)
+        val queue = WhisperQueueStore.state(context).value
+        (queue.running ?: queue.head?.episodeId)?.let { cancel(context, it) }
     }
 
-    /** The outcome put away in this process: every window hides it at once. */
-    private val dismissed = MutableStateFlow<String?>(null)
+    /** The queue taken up again (the app starts, the settings change): a job for its first request when none waits or runs. */
+    fun resume(context: Context) = kick(context.applicationContext)
 
-    /** A finished job's outcome put away: it is not shown again. */
-    fun dismiss(context: Context, id: String) {
-        WhisperPrefs(Settings.getInstance(context.applicationContext)).seen = id
-        dismissed.value = id
+    /** The requests waiting and the failures, as every page follows them. */
+    fun queue(context: Context) = WhisperQueueStore.state(context.applicationContext)
+
+    /** A job for the queue's first request, off the main thread (WorkManager's answers and the disk are read). */
+    internal fun kick(app: Context) {
+        AppScope.launch(Dispatchers.IO) { runCatching { start(app, after = false) } }
     }
 
-    /** The job under way, else the last one finished whose outcome was not put away; null when there is neither. */
-    fun observe(context: Context): Flow<WhisperStatus?> {
+    /**
+     * Starts the job the queue's first request needs: in place of one that waits, after the one under way (its next),
+     * or, from the job under way ([after]), after itself. A job under way with nothing after it starts none.
+     */
+    internal suspend fun start(app: Context, after: Boolean, needs: JobNeeds? = null) {
+        starts.withLock {
+            val queue = WhisperQueueStore.state(app).value
+            val manager = WorkManager.getInstance(app)
+            val running = after || manager.getWorkInfosForUniqueWork(WORK).get().any { it.state == WorkInfo.State.RUNNING }
+            val first = (if (running) queue.next else queue.head) ?: return
+            // one asked for while a job runs starts after it with no needs: it looks at what its request needs when it starts
+            val wanted = needs ?: if (running) JobNeeds() else needsOf(app, first)
+            val work = OneTimeWorkRequestBuilder<WhisperWorker>()
+                .setConstraints(constraints(wanted))
+                .setInputData(workDataOf(KEY_NETWORK to wanted.network.ordinal, KEY_CHARGING to wanted.charging, KEY_IDLE to wanted.idle))
+                .addTag(WORK)
+                .build()
+            manager.enqueueUniqueWork(WORK, if (running) ExistingWorkPolicy.APPEND_OR_REPLACE else ExistingWorkPolicy.REPLACE, work)
+        }
+    }
+
+    /** What [request] needs now: the model and the episode's file as they are on the device, Settings › Podcasts' Wi-Fi rule. Reads the disk. */
+    internal fun needsOf(app: Context, request: WhisperRequest): JobNeeds {
+        // an episode gone needs nothing: its job fails at once
+        val episode = runCatching { NagmedarDatabase.get(app).podcasts().episode(request.episodeId) }.getOrNull() ?: return JobNeeds()
+        val downloaded = episode.downloadState == DownloadState.DONE && episode.downloadPath != null
+        val wifiOnly = PodcastCenter.settingsStore(app).read().refreshUnmeteredOnly
+        return JobNeeds.of(request, WhisperModels.ready(app, request.model), downloaded, wifiOnly)
+    }
+
+    /** What a job was started with. */
+    internal fun needsIn(data: Data) = JobNeeds(
+        network = NetworkNeed.entries.getOrElse(data.getInt(KEY_NETWORK, 0)) { NetworkNeed.None },
+        charging = data.getBoolean(KEY_CHARGING, false),
+        idle = data.getBoolean(KEY_IDLE, false),
+    )
+
+    private fun constraints(needs: JobNeeds): Constraints = Constraints.Builder()
+        .setRequiredNetworkType(
+            when (needs.network) {
+                NetworkNeed.None -> NetworkType.NOT_REQUIRED
+                NetworkNeed.Any -> NetworkType.CONNECTED
+                NetworkNeed.Unmetered -> NetworkType.UNMETERED
+            },
+        )
+        .setRequiresCharging(needs.charging)
+        .setRequiresDeviceIdle(needs.idle)
+        .build()
+
+    /** The job under way, with the episode it is on; null when none runs. */
+    fun observe(context: Context): Flow<WhisperStatus.Running?> {
         val app = context.applicationContext
-        val prefs = WhisperPrefs(Settings.getInstance(app))
         // WorkManager starts with the app; a preview or a test without it shows no job
         val work = runCatching { WorkManager.getInstance(app) }.getOrNull() ?: return flowOf(null)
-        return combine(work.getWorkInfosForUniqueWorkFlow(WORK), dismissed) { infos, put ->
-            val info = infos.firstOrNull { !it.state.isFinished } ?: infos.lastOrNull() ?: return@combine null
-            val request = info.tags.firstOrNull { it.startsWith(TAG_REQUEST) }?.removePrefix(TAG_REQUEST)?.let(WhisperRequest::parse)
-            val status = status(info.id.toString(), info.state, info.progress, info.outputData, request, info.runAttemptCount, prefs.timedOut)
-            val seen = put ?: prefs.seen
-            status.takeIf { !info.state.isFinished || it.id != seen }
+        return combine(work.getWorkInfosForUniqueWorkFlow(WORK), WhisperQueueStore.state(app)) { infos, queue ->
+            val info = infos.firstOrNull { it.state == WorkInfo.State.RUNNING } ?: return@combine null
+            val episode = info.progress.getLong(KEY_EPISODE, -1L).takeIf { it >= 0 } ?: return@combine null
+            status(info.id.toString(), info.progress, queue.requests.firstOrNull { it.episodeId == episode }, episode, info.runAttemptCount)
         }
     }
 
-    /** A job's status from what WorkManager tells of it; [timedOut] is the job Android's time limit ended. */
-    internal fun status(id: String, state: WorkInfo.State, progress: Data, output: Data, request: WhisperRequest?, attempts: Int, timedOut: String?): WhisperStatus =
-        when (state) {
-            WorkInfo.State.RUNNING -> WhisperStatus.Running(
-                id = id,
-                request = request,
-                stage = WhisperStage.of(progress.getString(KEY_STAGE)),
-                doneSeconds = progress.getDouble(KEY_DONE, 0.0),
-                totalSeconds = progress.getDouble(KEY_TOTAL, 0.0),
-                doneBytes = progress.getLong(KEY_BYTES, 0L),
-                totalBytes = progress.getLong(KEY_BYTES_TOTAL, 0L),
-                etaSeconds = progress.getLong(KEY_ETA, -1L).takeIf { it >= 0 },
-                restarted = attempts > 0,
-                engine = WhisperEngine.of(progress),
-            )
-            WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> WhisperStatus.Running(id, request, WhisperStage.Waiting, restarted = attempts > 0)
-            WorkInfo.State.SUCCEEDED -> WhisperStatus.Done(
-                id = id,
-                request = request,
-                saved = SavedSubtitle(output.getString(KEY_URI).orEmpty(), output.getString(KEY_NAME).orEmpty(), output.getBoolean(KEY_BESIDE, false)),
-                lines = output.getInt(KEY_LINES, 0),
-                language = output.getString(KEY_LANGUAGE).orEmpty(),
-                engine = WhisperEngine.of(output),
-            )
-            WorkInfo.State.FAILED -> WhisperStatus.Failed(id, request, WhisperFailure.of(output.getString(KEY_REASON)), output.getString(KEY_DETAIL).orEmpty())
-            WorkInfo.State.CANCELLED -> if (id == timedOut) WhisperStatus.Failed(id, request, WhisperFailure.Timeout) else WhisperStatus.Cancelled(id, request)
-        }
+    /** A running job's status from its progress. */
+    internal fun status(id: String, progress: Data, request: WhisperRequest?, episodeId: Long, attempts: Int) = WhisperStatus.Running(
+        id = id,
+        request = request,
+        stage = WhisperStage.of(progress.getString(KEY_STAGE)),
+        doneSeconds = progress.getDouble(KEY_DONE, 0.0),
+        totalSeconds = progress.getDouble(KEY_TOTAL, 0.0),
+        doneBytes = progress.getLong(KEY_BYTES, 0L),
+        totalBytes = progress.getLong(KEY_BYTES_TOTAL, 0L),
+        etaSeconds = progress.getLong(KEY_ETA, -1L).takeIf { it >= 0 },
+        restarted = attempts > 0,
+        engine = WhisperEngine.of(progress),
+        episodeId = episodeId,
+    )
+}
+
+/** The job under way, as every page shows it. */
+@Composable
+fun rememberWhisperStatus(): State<WhisperStatus.Running?> {
+    val context = LocalContext.current
+    val flow = remember(context) { WhisperJobs.observe(context) }
+    return flow.collectAsState(null)
 }

@@ -109,6 +109,33 @@ class NagmedarDatabaseTest {
         assertNull(podcasts.feed(999))
     }
 
+    /** Version 21: a refresh keeps the language chosen for Whisper and the episode's own transcript; a gone episode changes nothing. */
+    @Test
+    fun anEpisodesOwnTranscriptAndTheShowsLanguageOutliveARefresh() {
+        val podcasts = db.podcasts()
+        val id = podcasts.subscribeWith(
+            PodcastFeed(feedUrl = "https://example.org/a.xml", title = "Gece Yayını", language = "tr"),
+            listOf(PodcastEpisode(feedId = 0, guid = "a", title = "Bölüm 1", audioUrl = "https://example.org/1.mp3")),
+        )
+        val episode = podcasts.episodeList(id).single()
+        podcasts.setTranscriptLanguage(id, "en")
+        assertEquals(1, podcasts.setWhisperModel(episode.id, "small"))
+        assertEquals(0, podcasts.setWhisperModel(999, "small"))
+        // the feed is read again: its language may change, the choice for Whisper and the transcript stay
+        podcasts.refreshFeed(
+            podcasts.feed(id)!!.copy(language = "tr-tr", transcriptLanguage = null),
+            listOf(PodcastEpisode(feedId = 0, guid = "a", title = "Bölüm 1", audioUrl = "https://example.org/1.mp3")),
+        )
+        podcasts.feed(id)!!.let {
+            assertEquals("tr-tr", it.language)
+            assertEquals("en", it.transcriptLanguage)
+        }
+        assertEquals("small", podcasts.episode(episode.id)!!.whisperModel)
+        assertEquals(listOf(episode.id), podcasts.whisperEpisodes())
+        podcasts.setWhisperModel(episode.id, null)
+        assertTrue(podcasts.whisperEpisodes().isEmpty())
+    }
+
     @Test
     fun radioStationsAreSavedOncePerDirectoryEntry() {
         val radio = db.radio()
@@ -856,6 +883,32 @@ class NagmedarDatabaseMigrationTest {
         }
         helper.runMigrationsAndValidate(name, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
             assertEquals(listOf(3L to 2L, 7L to 1L), positions(db))
+        }
+    }
+
+    /** 20 → 21 (podcast transcripts by Whisper): a show and its episode keep their rows; the new columns start empty. */
+    @Test
+    fun podcastsGetTheirTranscriptColumnsInTwentyOne() {
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        assumeTrue("schema 21 not exported yet", schemaExported(21))
+        helper.createDatabase(TEST_DB, 20).use { db ->
+            feed(db)
+            db.execSQL(
+                "INSERT INTO podcast_episode (feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, download_state) " +
+                    "VALUES (1, 'ep-1', 'Bölüm 1', 'https://example.org/1.mp3', 60000, 9, 1500, 1, 0)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 21, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT title, language, transcript_language FROM podcast_feed WHERE id = 1").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Nağmedar Podcast", c.getString(0))
+                assertTrue(c.isNull(1) && c.isNull(2))
+            }
+            db.query("SELECT position_ms, whisper_model FROM podcast_episode WHERE guid = 'ep-1'").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(1500L, c.getLong(0))
+                assertTrue(c.isNull(1))
+            }
         }
     }
 
