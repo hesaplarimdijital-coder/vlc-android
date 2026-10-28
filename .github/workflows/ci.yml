@@ -378,49 +378,6 @@ jobs:
             **/build/outputs/roborazzi/
           if-no-files-found: ignore
 
-      - name: APK
-        if: matrix.variant == 'debug'
-        uses: actions/upload-artifact@v4
-        with:
-          name: nagmedar-debug-apk
-          path: application/app/build/outputs/apk/**/*.apk
-          if-no-files-found: error
-
-      # master's debug APK also on the ci/apk branch (one commit, replaced each time), where git
-      # reaches it when the artifact store cannot be: git show origin/ci/apk:README.md names the build
-      - name: APK'yı ci/apk dalına koy
-        if: matrix.variant == 'debug' && github.event_name == 'push' && github.ref == 'refs/heads/master'
-        env:
-          TOKEN: ${{ github.token }}
-        run: |
-          out="$RUNNER_TEMP/apk-branch"
-          rm -rf "$out" && mkdir -p "$out"
-          # no pipeline here: the job's shell has pipefail, and head closing grep's pipe fails the step
-          apk=$(find application/app/build/outputs/apk -ipath '*debug*' -iname '*arm64*.apk' -print -quit)
-          [ -n "$apk" ] || apk=$(find application/app/build/outputs/apk -ipath '*debug*' -name '*.apk' -print -quit)
-          [ -n "$apk" ] || { echo "no debug APK under application/app/build/outputs/apk"; find application/app/build/outputs/apk -name '*.apk'; exit 1; }
-          ls -la "$apk"
-          # GitHub refuses files over 100 MB: the APK goes up in 90 MB parts (cat them back together)
-          split -b 90m -d "$apk" "$out/nagmedar-debug-${GITHUB_SHA::8}.apk.part"
-          ls -la "$out"
-          printf 'Nagmedar debug APK of master %s (run %s), built %s\ncat nagmedar-debug-%s.apk.part* > nagmedar-debug-%s.apk\n' "${GITHUB_SHA::8}" "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%MZ)" "${GITHUB_SHA::8}" "${GITHUB_SHA::8}" > "$out/README.md"
-          cd "$out"
-          git init -q && git checkout -q --orphan ci/apk
-          git add -A && git -c user.name=nagmedar-ci -c user.email=ci@nagmedar.invalid commit -q -m "Debug APK of ${GITHUB_SHA::8}"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/ci/apk"
-
-      # S-1404: run on a device with buildsystem/benchmark/run.sh --apks <this, unzipped>
-      - name: Macrobenchmark APK'ları
-        if: matrix.variant == 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: nagmedar-benchmark
-          path: |
-            application/app/build/outputs/apk/benchmark/*.apk
-            application/benchmark/build/outputs/apk/benchmark/*.apk
-            buildsystem/benchmark/
-          if-no-files-found: error
-
   # S-1503: the signed APKs go only into a draft GitHub release, which those who can push to the
   # repository alone see; never published from here, never an artifact (the repository is public)
   release:

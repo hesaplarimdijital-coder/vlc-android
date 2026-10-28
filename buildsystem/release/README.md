@@ -37,7 +37,7 @@ Aynı sürüm yeniden derlenirse taslağın notları ve APK'ları yenilenir. Yay
 | Derleme | Uygulama kimliği | İmza | Nereden |
 | --- | --- | --- | --- |
 | İmzalı sürüm | `app.nagmedar` | sizin anahtarınız | taslak GitHub sürümü |
-| Debug | `app.nagmedar.debug` | depodaki ortak debug anahtarı | CI'ın `nagmedar-debug-apk` artefaktı |
-| Benchmark | `app.nagmedar.benchmark` | ortak debug anahtarı | CI'ın `nagmedar-benchmark` artefaktı ([ölçümler](../benchmark/README.md)) |
+| Debug | `app.nagmedar.debug` | depodaki ortak debug anahtarı | yalnız yerel derleme (CI 1.0'dan beri APK yayımlamaz: depo herkese açık, APK'da API anahtarları var) |
+| Benchmark | `app.nagmedar.benchmark` | ortak debug anahtarı | yalnız yerel derleme ([ölçümler](../benchmark/README.md)) |
 
 Üçü ayrı uygulamadır; kütüphaneleri ve ayarları birbirinden ayrıdır.

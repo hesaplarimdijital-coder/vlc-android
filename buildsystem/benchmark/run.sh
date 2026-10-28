@@ -4,7 +4,7 @@
 #   buildsystem/benchmark/run.sh [-s SERIAL] [--apks DIR] [--video PATH]... [--seconds N]
 #                                [--only StartupBenchmark|ScrollBenchmark|PlaybackTest]
 #
-# DIR is CI's "nagmedar-benchmark" artifact, unzipped: the app's benchmark APK
+# DIR holds the locally built benchmark APKs: the app's benchmark APK
 # (app.nagmedar.benchmark, beside the installed app) and the tests' APK. Without it, Gradle's
 # outputs of :application:app:assembleBenchmark and :application:benchmark:assembleBenchmark.
 # PATH is a film on the device to play (as many as wanted, without spaces in the path); without
@@ -46,7 +46,7 @@ SEARCH=${APKS:-$ROOT/application}
 APP_APK=$(find "$SEARCH" -name 'Nagmedar-*-benchmark-*.apk' 2>/dev/null | head -n 1)
 TEST_APK=$(find "$SEARCH" -name 'benchmark-benchmark.apk' 2>/dev/null | head -n 1)
 if [ -z "$APP_APK" ] || [ -z "$TEST_APK" ]; then
-    echo "APK'lar bulunamadı: --apks ile CI'ın nagmedar-benchmark artefaktını verin ya da" >&2
+    echo "APK'lar bulunamadı: --apks ile yerelde derlenen benchmark APK'larının klasörünü verin ya da" >&2
     echo "./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark derleyin." >&2
     exit 2
 fi

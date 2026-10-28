@@ -17,7 +17,7 @@
 
 Gerekenler: Android SDK platform-tools (`adb`), Python 3, USB hata ayıklaması açık ve kilidi açık bir cihaz, pil %25'in üstünde.
 
-1. GitHub Actions → CI → son başarılı çalışmanın **nagmedar-benchmark** artefaktını indirip açın (uygulamanın benchmark APK'sı, testlerin APK'sı ve bu klasör).
+1. APK'ları yerelde derleyin (CI 1.0'dan beri APK yayımlamaz): `./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark`, sonra ikisini bir klasöre koyun.
 2. Oynatma testi için **nagmedar-test-media** artefaktını (S-1401) cihazda bir klasöre açın; betik `hdr10_2160p23976_hevc10_eac3.mkv` ve `stress_2160p23976_hevc10_100mbps.mkv` dosyalarını kendisi bulur.
 3. Çalıştırın:
 
