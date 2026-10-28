@@ -2,6 +2,12 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.0 — Nağmedar 1.0 (hazırlanıyor)
+
+- Nağmedar artık yalnız ses oynatıcısı: müzik, podcast ve radyo. Filmler, Diziler ve Videolar sayfaları, film bilgileri (TMDB, OMDb), video oynatıcının Nağmedar denetimleri ve paneli (efektler, görüntü boyutu, ekran görüntüsü, video kaydı, bilgi, yer imleri, zamana atlama, senkron, yenileme hızı eşleme), altyazı araçları (çevrimiçi arama ve OpenSubtitles, kodlama, gömülü altyazıyı çıkarma, temizleme, kare hızı, satırlar, çeviri, çift altyazı), video dönüştürme ve ağda yayın (HLS, Dönüştür sayfası) kaldırıldı; menülerdeki, komut paletindeki, kısayol tablosundaki (Video ve Altyazı menüleri, oynatıcının tuşları, Ctrl+R, Ctrl+Shift+H), aramadaki, rehberdeki ve ayarlardaki (oynatıcının tam ekranı, fare tekerleği, orta tık, ekran görüntüleri, kayıt klasörü, altyazı sağlayıcıları, film bilgileri) karşılıklarıyla birlikte. Bir videoyu oynatmak isteyen yer (bir dosyayı pencereye bırakmak, Bu cihaz'da, Ağ'da ya da video bölümlü bir podcast'te) onun yalnızca sesini çalar. Kaldırılan özelliklerin bildirim kanalları sistem ayarlarından da silinir; yedekler onların cihazda kalan ayarlarını taşımaz. Müzik dönüştürücü, ekolayzerler, yayınlama (Chromecast, DLNA) ve Whisper'ın modelleri ve ayarları (Ayarlar › Altyazı üretimi, Araçlar › İndirmeler) olduğu gibi kalır. Arama yalnız parçalarda arar; Ayarlar › Performans yalnız açılışları ölçer.
+- Ana sayfa kalktı: uygulama Müzik ile açılır. “Son çalınan müzik” rafı (Müzik bölümünden en son çalınan parçalar, en yenisi başta, en fazla 20) telefonda Müzik sayfasının üstüne taşındı; geniş pencerede (tablet, DeX) Müzik'in araç çubuğunda “Son çalınanlar” görünümüdür, sıralanabilir ve filtrelenebilir. Ayarlar › Kütüphane ve ilk açılışın Kaynaklar adımı yalnız müziğin klasörlerini sorar.
+- Telefonda alt çubuk Müzik · Podcast · Radyo · ⋯; ⋯ (Daha fazla) öteki ekranları listeler: çalma listeleri, bu cihaz, ağ, akışlar, indirmeler, ayarlar. Tablette ray ve DeX'te kenar çubuğu aynı sayfaları Ana sayfa, Filmler, Diziler ve Videolar olmadan gösterir.
+
 ## 0.5.0 — MVP5 (hazırlanıyor)
 
 ### Görünüm ve hareket (Desktop Kit 0.2.0)

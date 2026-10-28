@@ -8,9 +8,6 @@
     <string name="nag_section_sources">Sources</string>
     <string name="nag_section_tools">Tools</string>
     <string name="nag_section_playlists">Playlists</string>
-    <string name="nag_nav_home">Home</string>
-    <string name="nag_nav_movies">Films</string>
-    <string name="nag_nav_series">Series</string>
     <string name="nag_nav_music">Music</string>
     <string name="nag_nav_podcasts">Podcasts</string>
     <string name="nag_nav_podcasts_short">Podcast</string>
@@ -19,7 +16,6 @@
     <string name="nag_nav_network">Network</string>
     <string name="nag_nav_streams">Streams</string>
     <string name="nag_nav_tv_lab">TV Lab</string>
-    <string name="nag_nav_convert">Convert</string>
     <string name="nag_nav_downloads">Downloads</string>
     <string name="nag_nav_playlists">Playlists</string>
     <string name="nag_nav_settings">Settings</string>
@@ -36,8 +32,6 @@
     <string name="nag_menu_media">Media</string>
     <string name="nag_menu_playback">Playback</string>
     <string name="nag_menu_audio">Audio</string>
-    <string name="nag_menu_video">Video</string>
-    <string name="nag_menu_subtitle">Subtitle</string>
     <string name="nag_menu_tools">Tools</string>
     <string name="nag_menu_view">View</string>
     <string name="nag_menu_help">Help</string>
@@ -299,23 +293,15 @@
     </plurals>
 
     <!-- Placeholders -->
-    <string name="nag_coming_movies">Films with posters, technical details and TV compatibility.</string>
     <string name="nag_coming_podcasts">Subscriptions, new episodes and downloads.</string>
     <string name="nag_podcasts_description">Subscriptions and new episodes.</string>
     <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
     <string name="nag_coming_streams">Network streams and saved addresses.</string>
     <string name="nag_coming_tv_lab">Analyse files for your TV and remux them without quality loss.</string>
-    <string name="nag_coming_convert">Conversion profiles, jobs and streaming on the network (HLS).</string>
-    <string name="nag_coming_downloads">Podcast episodes, subtitles and other downloads.</string>
+    <string name="nag_coming_downloads">Podcast episodes, models and other downloads.</string>
 
     <!-- Library -->
-    <string name="nag_continue_watching">Continue watching</string>
-    <string name="nag_home_recent_music">Recently played music</string>
-    <string name="nag_home_nothing_title">Nothing played yet</string>
-    <string name="nag_home_nothing_desc">What you watch and listen to appears here, to carry on where you left off.</string>
-    <string name="nag_home_browse_movies">Browse films</string>
-    <string name="nag_home_browse_music">Browse music</string>
     <plurals name="nag_tracks_count">
         <item quantity="one">%d track</item>
         <item quantity="other">%d tracks</item>
@@ -324,20 +310,15 @@
     <string name="nag_unknown_artist">Unknown artist</string>
     <string name="nag_column_title">Title</string>
     <string name="nag_column_duration">Duration</string>
-    <string name="nag_column_resolution">Resolution</string>
     <string name="nag_column_artist">Artist</string>
     <string name="nag_column_album">Album</string>
 
     <!-- States (S-308) -->
-    <string name="nag_state_empty_title">No folders yet</string>
-    <string name="nag_state_empty_desc">Choose your film and music folders, or scan a connected drive.</string>
     <string name="nag_state_add_folder">Add folder</string>
     <string name="nag_state_scan_drive">Scan %1$s</string>
     <string name="nag_state_scanning">Scanning the library</string>
     <string name="nag_state_discovering">Looking for media folders</string>
     <string name="nag_state_scan_detail">Keeps going in the background · what is found plays right away</string>
-    <string name="nag_state_no_videos_title">No videos yet</string>
-    <string name="nag_state_no_videos_desc">Videos in your library folders appear here as they are scanned.</string>
     <string name="nag_state_no_music_title">No music yet</string>
     <string name="nag_state_no_music_desc">Music in your library folders appears here as it is scanned.</string>
     <string name="nag_state_permission_title">Access to media files</string>
@@ -357,7 +338,7 @@
         <item quantity="other">Continue · %1$d sources</item>
     </plurals>
     <string name="nag_fr_finish">Start</string>
-    <string name="nag_fr_privacy">Scanning happens on this device. No account, ads or tracking; the network is only used for covers, lyrics, subtitles, podcasts and radio.</string>
+    <string name="nag_fr_privacy">Scanning happens on this device. No account, ads or tracking; the network is only used for covers, lyrics, podcasts and radio.</string>
     <string name="nag_fr_next_hint_sources">Next: an audio output test and notifications</string>
     <string name="nag_fr_later_hint">You can change these later in Settings.</string>
     <string name="nag_fr_granted">Allowed</string>
@@ -366,12 +347,12 @@
     <string name="nag_fr_selected">Selected</string>
     <string name="nag_fr_not_selected">Not selected</string>
     <string name="nag_fr_access_label">Media access</string>
-    <string name="nag_fr_access_title">Let\'s find your videos and music</string>
+    <string name="nag_fr_access_title">Let\'s find your music</string>
     <string name="nag_fr_access_desc">Nağmedar builds its library from the media files on this device and on connected drives. Nothing is uploaded.</string>
     <string name="nag_fr_media_files">Media files</string>
-    <string name="nag_fr_media_files_desc">Video, music and audio folders</string>
+    <string name="nag_fr_media_files_desc">Music and audio folders</string>
     <string name="nag_fr_all_files">All files</string>
-    <string name="nag_fr_all_files_desc">Subtitles and lyrics next to your media, and everything on external drives</string>
+    <string name="nag_fr_all_files_desc">Lyrics next to your music, and everything on external drives</string>
     <string name="nag_fr_denied_title">Media access was not allowed</string>
     <string name="nag_fr_denied_desc">Nağmedar keeps working with the folders you choose; you can allow access later in Settings.</string>
     <string name="nag_fr_pick_folder">Choose folder</string>
@@ -454,19 +435,7 @@
     <string name="nag_tooltips_short">Short</string>
     <string name="nag_tooltips_normal">Normal</string>
     <string name="nag_tooltips_long">Long</string>
-    <!-- Mouse (S-408) -->
-    <string name="nag_settings_wheel">Mouse wheel (in the player)</string>
-    <string name="nag_settings_wheel_hint">With Ctrl the wheel does the other</string>
-    <string name="nag_wheel_volume">Volume</string>
-    <string name="nag_wheel_seek">Seeking</string>
-    <string name="nag_settings_middle_click">Middle click (in the player)</string>
-    <string name="nag_settings_middle_click_hint">In the library a middle click queues the film or the track; the back and forward buttons move between screens</string>
-    <string name="nag_middle_play_pause">Play / pause</string>
-    <string name="nag_middle_mute">Mute</string>
-    <string name="nag_middle_none">Nothing</string>
     <!-- Window (S-409) -->
-    <string name="nag_settings_player_fullscreen">Player opens full screen</string>
-    <string name="nag_settings_player_fullscreen_hint">A video opened from a desktop window (DeX) fills the screen; Android 14 and later. Nağmedar\'s window opens where and as large as you left it.</string>
     <string name="nag_choice_yes">Yes</string>
     <string name="nag_choice_no">No</string>
     <string name="nag_density_touch">Touch</string>
@@ -475,7 +444,7 @@
     <!-- All settings: VLC's preference pages drawn by Nağmedar -->
     <string name="nag_prefs_title">All settings</string>
     <string name="nag_prefs_search">Search settings</string>
-    <string name="nag_prefs_search_hint">Hardware acceleration, subtitle size, network caching…</string>
+    <string name="nag_prefs_search_hint">Audio output, network caching, equaliser…</string>
     <string name="nag_prefs_no_results">No setting has “%1$s”</string>
     <string name="nag_prefs_path">%1$s › %2$s</string>
     <string name="nag_prefs_loading">Reading the settings…</string>
@@ -517,10 +486,6 @@
     <string name="nag_sc_undo">Undo</string>
     <!-- Multiple selection (S-405) -->
     <string name="nag_sc_select_all">Select all</string>
-    <plurals name="nag_selected_films">
-        <item quantity="one">%d film selected</item>
-        <item quantity="other">%d films selected</item>
-    </plurals>
     <plurals name="nag_selected_tracks">
         <item quantity="one">%d track selected</item>
         <item quantity="other">%d tracks selected</item>
@@ -529,26 +494,16 @@
     <string name="nag_selection_clear">Clear the selection</string>
     <!-- Drag and drop (S-406) -->
     <string name="nag_drop_here">Drop to play</string>
-    <string name="nag_drop_hint">Videos and music play; subtitles join the video playing. A subtitle dropped on a film stays with it, what is dropped on the player bar joins the queue.</string>
+    <string name="nag_drop_hint">Tracks and playlists play (a video is heard, sound alone); what is dropped on the player bar joins the queue.</string>
     <plurals name="nag_drop_playing">
         <item quantity="one">Playing %d file</item>
         <item quantity="other">Playing %d files</item>
-    </plurals>
-    <plurals name="nag_drop_subtitles_loaded">
-        <item quantity="one">%d subtitle loaded</item>
-        <item quantity="other">%d subtitles loaded</item>
     </plurals>
     <plurals name="nag_drop_queued">
         <item quantity="one">%d file added to the queue</item>
         <item quantity="other">%d files added to the queue</item>
     </plurals>
-    <string name="nag_drop_subtitle_needs_video">Drop subtitles on a playing video or on a film</string>
     <string name="nag_drop_nothing">Nothing to play in what was dropped</string>
-    <string name="nag_drop_subtitle_for">Subtitle kept with “%s”</string>
-    <plurals name="nag_drag_films">
-        <item quantity="one">%d film</item>
-        <item quantity="other">%d films</item>
-    </plurals>
     <plurals name="nag_drag_tracks">
         <item quantity="one">%d track</item>
         <item quantity="other">%d tracks</item>
@@ -563,42 +518,18 @@
     <string name="nag_sc_forward_10s">Jump forward 10 s</string>
     <string name="nag_sc_back_1m">Jump back 1 min</string>
     <string name="nag_sc_forward_1m">Jump forward 1 min</string>
-    <string name="nag_sc_next_frame">Next frame</string>
-    <string name="nag_sc_previous_frame">Previous frame</string>
     <string name="nag_sc_slower">Slower</string>
     <string name="nag_sc_faster">Faster</string>
     <string name="nag_sc_normal_speed">Normal speed</string>
     <string name="nag_sc_volume_up">Volume up</string>
     <string name="nag_sc_volume_down">Volume down</string>
     <string name="nag_sc_mute">Mute</string>
-    <string name="nag_sc_audio_delay_down">Audio delay −50 ms</string>
-    <string name="nag_sc_audio_delay_up">Audio delay +50 ms</string>
-    <string name="nag_sc_next_audio_track">Next audio track</string>
-    <string name="nag_sc_fullscreen">Fullscreen</string>
-    <string name="nag_sc_snapshot">Take a screenshot</string>
-    <string name="nag_sc_effects">Effects and filters</string>
     <string name="nag_sc_equalizer">Equaliser…</string>
     <string name="nag_sc_ab_switch">A/B test: switch what plays</string>
-    <string name="nag_sc_sync">Audio and subtitle sync</string>
-    <string name="nag_sc_next_subtitle">Next subtitle track</string>
-    <string name="nag_sc_subtitle_delay_down">Subtitle delay −50 ms</string>
-    <string name="nag_sc_subtitle_delay_up">Subtitle delay +50 ms</string>
-    <string name="nag_sc_add_subtitle">Add subtitle file…</string>
-    <string name="nag_sc_secondary_subtitles">Secondary subtitles on or off</string>
-    <string name="nag_sc_sync_mark_audio">Sync: mark the sound</string>
-    <string name="nag_sc_sync_mark_subtitle">Sync: mark the subtitle</string>
-    <string name="nag_sc_sync_apply">Sync: apply the difference</string>
-    <string name="nag_sc_sync_undo">Sync: undo</string>
     <string name="nag_sc_toggle_sidebar">Show or hide the sidebar</string>
-    <string name="nag_sc_show_time">Show the time</string>
-    <string name="nag_sc_jump_to_time">Jump to time…</string>
-    <string name="nag_sc_aspect_ratio">Aspect ratio</string>
-    <string name="nag_sc_crop">Crop to fill</string>
-    <string name="nag_sc_zoom">Zoom</string>
     <string name="nag_sc_play_queue">Up next</string>
     <string name="nag_sc_shortcut_list">Shortcut card</string>
     <string name="nag_settings_shortcuts">Keyboard shortcuts</string>
-    <string name="nag_shortcuts_player_only">In the player</string>
     <!-- Shortcut editor (S-402) -->
     <string name="nag_sc_preset">Preset</string>
     <string name="nag_sc_preset_vlc">VLC</string>
@@ -651,7 +582,6 @@
     <string name="nag_kb_choose">Click or press a key</string>
     <string name="nag_kb_free">%1$s · free</string>
     <string name="nag_kb_one">%1$s · %2$s</string>
-    <string name="nag_kb_in_player">%1$s (in the player)</string>
     <string name="nag_kb_conflict">%1$s · conflict: %2$s</string>
     <string name="nag_kb_nothing">%1$s · cannot be a shortcut with this layout</string>
     <string name="nag_kb_legend_bound">Shortcut</string>
@@ -667,7 +597,7 @@
     <string name="nag_queue_move_down">Move down</string>
     <string name="nag_queue_handle">%s: drag to move</string>
     <string name="nag_queue_empty_title">Nothing else is queued</string>
-    <string name="nag_queue_empty_desc">Choose “Add to queue” in a film\'s or a track\'s menu.</string>
+    <string name="nag_queue_empty_desc">Choose “Add to queue” in a track\'s or an episode\'s menu.</string>
     <string name="nag_queue_hint_touch">Swipe left: remove · Drag the handle: reorder · Long press: menu</string>
     <string name="nag_queue_removed">“%s” removed from the queue</string>
     <plurals name="nag_queue_cleared">
@@ -686,7 +616,7 @@
     <!-- About and licences (S-209) -->
     <string name="nag_about_open">About and licences</string>
     <string name="nag_about_versions">Version %1$s · libVLC %2$s · medialibrary %3$s</string>
-    <string name="nag_about_tagline">A free media player built on VideoLAN\'s VLC for Android: it plays every file and stream, as easily on a desktop as by touch.</string>
+    <string name="nag_about_tagline">A free audio player built on VideoLAN\'s VLC for Android: music, podcasts and radio, as easily on a desktop as by touch.</string>
     <string name="nag_about_free_title">Free software</string>
     <string name="nag_about_free_text">Nağmedar is distributed under the GNU General Public License, version 2 or (at your option) any later version: you may get its source code, study it, change it and share it. It comes with no warranty.</string>
     <string name="nag_about_source">Source code</string>
@@ -753,7 +683,7 @@
     <string name="nag_lab_usb_tone_desc">Plays a 1 kHz tone straight to the DAC with libusb, around the Android mixer. Android\'s own USB output pauses meanwhile.</string>
     <string name="nag_lab_dv_convert">Dolby Vision P7 → P8.1</string>
     <string name="nag_lab_dv_convert_desc">Choose a remux, then where to save the result: the base layer is copied as is, the enhancement layer dropped, the RPU converted.</string>
-    <string name="nag_lab_whisper">Subtitles from speech (whisper)</string>
+    <string name="nag_lab_whisper">Transcription from speech (whisper)</string>
     <string name="nag_lab_whisper_desc">Transcribes the start of a file in Turkish on this device and reports the speed. The model is downloaded once.</string>
     <string name="nag_lab_run">Run</string>
     <string name="nag_lab_running">Running…</string>
@@ -762,19 +692,12 @@
     <string name="nag_lab_close">Close</string>
 
     <!-- S-802: technical details -->
-    <string name="nag_column_video">Video</string>
-    <string name="nag_column_audio">Audio</string>
     <string name="nag_duration_hours">%1$d h</string>
     <string name="nag_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="nag_duration_minutes">%1$d min</string>
     <string name="nag_duration_seconds">%1$d s</string>
-    <string name="nag_details_title">Details</string>
-    <string name="nag_details_close">Close the details</string>
-    <string name="nag_details_back">Back to the list</string>
     <string name="nag_pane_divider">Width of the details pane</string>
     <string name="nag_sidebar_divider">Width of the sidebar</string>
-    <string name="nag_details_resume_at">Stopped at</string>
-    <string name="nag_details_resume">Resume</string>
     <string name="nag_tech_title">Technical</string>
     <string name="nag_tech_video">Video</string>
     <string name="nag_tech_frame_rate">Frame rate</string>
@@ -789,54 +712,13 @@
     <string name="nag_tech_probing">Reading the file… the details appear in a moment.</string>
     <string name="nag_tech_unavailable">This build cannot read the technical details (the media probe library is missing).</string>
 
-    <!-- S-801: video library -->
-    <string name="nag_view_folders">Folders</string>
+    <!-- S-801: the lists' order and views -->
     <string name="nag_sort_by">Sort: %1$s</string>
-    <string name="nag_order_added">Date added</string>
-    <string name="nag_order_title">Title</string>
-    <string name="nag_order_duration">Duration</string>
-    <string name="nag_order_resolution">Resolution</string>
     <string name="nag_filter_all">All</string>
-    <string name="nag_filter_uhd">4K</string>
-    <string name="nag_filter_hdr">HDR</string>
-    <string name="nag_filter_dv">Dolby Vision</string>
-    <string name="nag_filter_atmos">Atmos</string>
-    <string name="nag_filter_turkish_subtitles">Turkish subtitles</string>
-    <string name="nag_filter_unwatched">Unwatched</string>
-    <string name="nag_no_matching_films">No films match these filters</string>
     <string name="nag_clear_filters">Clear the filters</string>
-    <string name="nag_folders_back">Back to the folders</string>
-    <string name="nag_series_all">All series</string>
-    <string name="nag_next_episode">Up next: %1$s</string>
-    <string name="nag_episode_number">Episode %1$d</string>
-    <string name="nag_next_tag">Up next</string>
-    <string name="nag_all_watched">All watched</string>
-    <string name="nag_series_back">Back to the series</string>
-    <string name="nag_watched_count">%1$d of %2$d watched</string>
-    <string name="nag_continue_episode">Continue · %1$s</string>
-    <string name="nag_season_label">Season %1$d</string>
-    <string name="nag_watched">Watched</string>
-    <string name="nag_no_series_title">No series yet</string>
-    <string name="nag_no_series_desc">Episodes are recognised by names like S01E02, 1x02 or “Season 1 Episode 2”, or by Season folders.</string>
-    <plurals name="nag_films_count">
-        <item quantity="one">%d film</item>
-        <item quantity="other">%d films</item>
-    </plurals>
     <plurals name="nag_folders_count">
         <item quantity="one">%d folder</item>
         <item quantity="other">%d folders</item>
-    </plurals>
-    <plurals name="nag_series_count">
-        <item quantity="one">%d series</item>
-        <item quantity="other">%d series</item>
-    </plurals>
-    <plurals name="nag_episodes_count">
-        <item quantity="one">%d episode</item>
-        <item quantity="other">%d episodes</item>
-    </plurals>
-    <plurals name="nag_seasons_count">
-        <item quantity="one">%d season</item>
-        <item quantity="other">%d seasons</item>
     </plurals>
     <!-- Command palette (S-305) -->
     <string name="nag_palette_commands">Commands</string>
@@ -853,20 +735,18 @@
     <string name="nag_palette_hint_all">all results</string>
     <string name="nag_palette_shortcut">Shortcut</string>
     <string name="nag_palette_setting">%1$s: %2$s</string>
-    <string name="nag_palette_film">Video</string>
     <string name="nag_palette_track">Track</string>
     <plurals name="nag_palette_count">
         <item quantity="one">%d result</item>
         <item quantity="other">%d results</item>
     </plurals>
     <!-- Search page (S-311) -->
-    <string name="nag_search_placeholder">Search films, series, tracks or lines</string>
+    <string name="nag_search_placeholder">Search tracks, artists or albums</string>
     <string name="nag_search_clear">Clear the search</string>
     <plurals name="nag_search_count">
         <item quantity="one">%2$d result for “%1$s”</item>
         <item quantity="other">%2$d results for “%1$s”</item>
     </plurals>
-    <string name="nag_search_where">library and subtitles</string>
     <string name="nag_search_where_library">library</string>
     <string name="nag_search_millis">%d ms</string>
     <string name="nag_search_network">Network too</string>
@@ -876,179 +756,33 @@
         <item quantity="other">%d more files on network shares</item>
     </plurals>
     <string name="nag_search_nothing">Nothing found for “%s”</string>
-    <string name="nag_search_films">Films</string>
-    <string name="nag_search_episodes">Series</string>
     <string name="nag_search_music">Music</string>
-    <string name="nag_search_said">What is said</string>
-    <string name="nag_search_subtitles">Subtitles</string>
     <string name="nag_search_syntax">Search syntax</string>
-    <string name="nag_search_syntax_kind">one kind (film, series, music, subtitle)</string>
     <string name="nag_search_syntax_phrase">exact phrase</string>
     <string name="nag_search_syntax_exclude">leave out</string>
     <string name="nag_search_syntax_letters">Turkish letters match: “ışık” = “isik”</string>
-    <string name="nag_search_syntax_kind_example">type:film north</string>
-    <string name="nag_search_syntax_phrase_example">\"northern lights\"</string>
-    <string name="nag_search_syntax_exclude_example">-trailer</string>
+    <string name="nag_search_syntax_phrase_example">\"night blue\"</string>
+    <string name="nag_search_syntax_exclude_example">-live</string>
 
-    <!-- S-601: the desktop controls over the video -->
+    <!-- S-601: the players' controls -->
     <string name="nag_player_close">Close the player</string>
-    <string name="nag_player_position">Playback position</string>
-    <string name="nag_player_chapter">Chapter %1$d</string>
-    <string name="nag_player_chapter_named">Chapter %1$d — %2$s</string>
-    <string name="nag_player_exit_fullscreen">Exit fullscreen</string>
-    <string name="nag_player_speed">Speed</string>
-    <string name="nag_player_audio_track">Audio track</string>
-    <string name="nag_player_no_audio">No audio track</string>
-    <string name="nag_player_subtitles">Subtitles</string>
-    <string name="nag_player_subtitles_off">Off</string>
-    <string name="nag_player_ab_set_a">A-B loop: set point A</string>
-    <string name="nag_player_ab_set_b">A-B loop: set point B</string>
-    <string name="nag_player_ab_off">Turn the A-B loop off</string>
-    <string name="nag_player_repeat_none">Repeat off</string>
     <string name="nag_player_repeat_all">Repeat all</string>
     <string name="nag_player_repeat_one">Repeat this one</string>
-    <string name="nag_player_audio_track_now">Audio track: %1$s</string>
-    <string name="nag_player_subtitles_now">Subtitles: %1$s</string>
 
-    <!-- S-603: the player's panel and its effects -->
-    <string name="nag_panel_subtitles">Subtitles</string>
-    <string name="nag_panel_sync">Sync</string>
-    <string name="nag_panel_effects">Effects</string>
-    <string name="nag_panel_info">Info</string>
-    <string name="nag_panel_close">Close the panel</string>
-    <string name="nag_fx_picture">Picture</string>
-    <string name="nag_fx_reset">Reset</string>
-    <string name="nag_fx_brightness">Brightness</string>
-    <string name="nag_fx_contrast">Contrast</string>
-    <string name="nag_fx_saturation">Saturation</string>
-    <string name="nag_fx_hue">Hue</string>
-    <string name="nag_fx_gamma">Gamma</string>
-    <string name="nag_fx_value_degrees">%1$s°</string>
-    <string name="nag_fx_advanced">Advanced video</string>
-    <string name="nag_fx_preview_frame">Preview on a still frame of the screen, drawn as the player will draw it.</string>
-    <string name="nag_fx_preview_raw">Preview on a frame read from the file, before any effect, drawn as the player will draw it.</string>
-    <string name="nag_fx_preview_sample">Preview on a sample picture: no frame without effects could be taken from this film.</string>
-    <string name="nag_fx_preview_refresh">New frame</string>
-    <string name="nag_fx_cost_light">Light</string>
-    <string name="nag_fx_cost_cpu">CPU load: high</string>
-    <string name="nag_fx_cpu_warning">Turning by an angle and 3D work on the CPU: the hardware decoder hands its frames over, HDR no longer reaches the screen as HDR, and a 4K film may drop frames and use more battery.</string>
-    <string name="nag_fx_gl_note">The mirror and quarter turns use the OpenGL output: HDR is tone mapped.</string>
-    <string name="nag_fx_logo">Logo</string>
-    <string name="nag_fx_logo_none">No picture chosen</string>
-    <string name="nag_fx_logo_pick">Choose a picture…</string>
-    <string name="nag_fx_logo_failed">This picture can\'t be read.</string>
-    <string name="nag_fx_position">Position</string>
-    <string name="nag_fx_opacity">Opacity</string>
-    <string name="nag_fx_text">Text</string>
-    <string name="nag_fx_text_hint">Text over the video, with a clock if you like</string>
-    <string name="nag_fx_text_placeholder">Type the text…</string>
-    <string name="nag_fx_text_size">Size</string>
-    <string name="nag_fx_text_small">Small</string>
-    <string name="nag_fx_text_medium">Medium</string>
-    <string name="nag_fx_text_large">Large</string>
-    <string name="nag_fx_colour">Colour</string>
-    <string name="nag_fx_colour_white">White</string>
-    <string name="nag_fx_colour_yellow">Yellow</string>
-    <string name="nag_fx_colour_cyan">Cyan</string>
-    <string name="nag_fx_colour_green">Green</string>
-    <string name="nag_fx_colour_red">Red</string>
-    <string name="nag_fx_colour_black">Black</string>
-    <string name="nag_fx_clock">Clock</string>
-    <string name="nag_fx_clock_none">None</string>
-    <string name="nag_fx_clock_time">Time</string>
-    <string name="nag_fx_clock_date_time">Date and time</string>
-    <string name="nag_fx_pos_top_left">Top left</string>
-    <string name="nag_fx_pos_top">Top</string>
-    <string name="nag_fx_pos_top_right">Top right</string>
-    <string name="nag_fx_pos_left">Left</string>
-    <string name="nag_fx_pos_center">Centre</string>
-    <string name="nag_fx_pos_right">Right</string>
-    <string name="nag_fx_pos_bottom_left">Bottom left</string>
-    <string name="nag_fx_pos_bottom">Bottom</string>
-    <string name="nag_fx_pos_bottom_right">Bottom right</string>
-    <string name="nag_fx_angle">Angle</string>
-    <string name="nag_fx_3d">Anaglyph 3D</string>
-    <string name="nag_fx_3d_hint">A side-by-side 3D film, for coloured glasses</string>
-    <string name="nag_fx_3d_scheme">Glasses</string>
-    <string name="nag_fx_3d_red_cyan">Red–cyan</string>
-    <string name="nag_fx_3d_red_green">Red–green</string>
-    <string name="nag_fx_3d_red_blue">Red–blue</string>
-    <string name="nag_fx_3d_magenta_cyan">Magenta–cyan</string>
-    <string name="nag_fx_3d_trioscopic">Trioscopic (green–magenta)</string>
-    <string name="nag_fx_session">These apply to every film until the app closes.</string>
-    <string name="nag_fx_advanced_waiting">Waiting for the player to start again: the next film, or Apply now, which reopens this one where it is.</string>
-    <string name="nag_fx_apply_now">Apply now</string>
-    <string name="nag_fx_applying">Reopening…</string>
-    <string name="nag_fx_apply_recording">Stop the recording to apply now.</string>
-    <string name="nag_fx_value_db">%1$s dB</string>
-    <string name="nag_fx_shape">Aspect ratio and crop</string>
+    <!-- S-508: libVLC's audio output -->
     <string name="nag_fx_auto">Auto</string>
     <string name="nag_fx_off">Off</string>
-    <string name="nag_fx_aspect_fill">Fill</string>
-    <string name="nag_fx_auto_crop">Detect black bars</string>
-    <string name="nag_fx_auto_crop_hint">Crops the black bars above and below the picture</string>
-    <string name="nag_fx_rotate_left">Rotate 90° left</string>
-    <string name="nag_fx_rotate_right">Rotate 90° right</string>
-    <string name="nag_fx_flip_horizontal">Flip horizontally</string>
-    <string name="nag_fx_flip_vertical">Flip vertically</string>
-    <string name="nag_fx_rotated">Rotated by %1$d°</string>
-    <string name="nag_fx_hdr_section">HDR and scaling</string>
-    <string name="nag_fx_gpu_load">GPU load: %1$s</string>
-    <string name="nag_fx_gpu_low">low</string>
-    <string name="nag_fx_gpu_medium">medium</string>
-    <string name="nag_fx_gpu_high">high</string>
-    <string name="nag_fx_hdr_output">HDR output</string>
-    <string name="nag_fx_hdr_passthrough">Pass to the screen</string>
-    <string name="nag_fx_hdr_tonemap">Tone-map to SDR</string>
-    <string name="nag_fx_tone_mapping">Tone mapping</string>
-    <string name="nag_fx_tone_unused">Not used when passed through</string>
-    <string name="nag_fx_tone_bt2390" translatable="false">BT.2390</string>
-    <string name="nag_fx_tone_hable" translatable="false">Hable</string>
-    <string name="nag_fx_tone_reinhard" translatable="false">Reinhard</string>
-    <string name="nag_fx_tone_mobius" translatable="false">Möbius</string>
-    <string name="nag_fx_scaler">Scaler</string>
-    <string name="nag_fx_scaler_bilinear">Bilinear</string>
-    <string name="nag_fx_scaler_spline36" translatable="false">Spline36</string>
-    <string name="nag_fx_scaler_ewa_lanczos" translatable="false">EWA Lanczos</string>
-    <string name="nag_fx_deinterlace">Deinterlacing</string>
-    <string name="nag_fx_deinterlace_blend">Blend</string>
-    <string name="nag_fx_deinterlace_bob" translatable="false">Bob</string>
-    <string name="nag_fx_deinterlace_yadif" translatable="false">Yadif</string>
-    <string name="nag_fx_deinterlace_yadif2x" translatable="false">Yadif (2×)</string>
-    <string name="nag_fx_debanding">Debanding</string>
-    <string name="nag_fx_audio">Audio</string>
-    <string name="nag_fx_night_mode">Night mode</string>
-    <string name="nag_fx_night_mode_hint">Softens explosions, keeps the dialogue</string>
-    <string name="nag_fx_dialogue">Dialogue</string>
-    <string name="nag_fx_gain">Boost</string>
-    <string name="nag_fx_channels">Channel layout</string>
-    <string name="nag_fx_channels_stereo">Stereo</string>
-    <string name="nag_fx_channels_binaural">Headphones (binaural)</string>
-    <string name="nag_fx_channels_51" translatable="false">5.1</string>
-    <string name="nag_fx_channels_71" translatable="false">7.1</string>
-    <!-- S-505, S-506: what libVLC takes as it starts again -->
-    <string name="nag_fx_deferred">The HDR output, tone mapping, scaler and rotation are taken when the player opens again.</string>
-    <string name="nag_fx_waiting">The change here waits for the player to open again.</string>
     <!-- S-508: the audio output -->
-    <string name="nag_out_title">Output</string>
     <string name="nag_out_stereo">Stereo PCM</string>
     <string name="nag_out_multichannel">Multichannel PCM</string>
     <string name="nag_out_passthrough">Bitstream (passthrough)</string>
     <string name="nag_out_forced">Bitstream, forced codecs</string>
-    <string name="nag_out_refused">The player\'s output cannot send a bitstream: choose AudioTrack in Settings › All settings › Advanced › Audio output.</string>
-    <string name="nag_out_no_bitstream">Nothing plugged in says it takes a bitstream; the sound goes as PCM.</string>
-    <string name="nag_out_pcm_only">PCM</string>
     <string name="nag_out_sink_hdmi" translatable="false">HDMI</string>
     <string name="nag_out_sink_usb" translatable="false">USB</string>
     <string name="nag_out_sink_bluetooth" translatable="false">Bluetooth</string>
     <string name="nag_out_sink_headphones">Headphones</string>
     <string name="nag_out_sink_speaker">Speaker</string>
     <string name="nag_out_sink_other">Other output</string>
-    <string name="nag_fx_equalizer">Equaliser</string>
-    <string name="nag_fx_equalizer_players">The player\'s setting</string>
-    <string name="nag_fx_remember">Save for this file</string>
-    <string name="nag_fx_make_default">Make default</string>
-    <string name="nag_fx_made_default">Made default</string>
     <string name="nag_panel_pending">The faded settings come with the next version of the playback engine.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Flat</string>
@@ -1070,151 +804,9 @@
     <string name="nag_eq_soft_rock">Soft rock</string>
     <string name="nag_eq_techno">Techno</string>
 
-    <!-- S-604: the sync tab of the player's panel -->
-    <string name="nag_sync_audio_delay">Audio delay</string>
-    <string name="nag_sync_subtitle_delay">Subtitle delay</string>
-    <string name="nag_sync_this_file">this file</string>
+    <!-- delays, in milliseconds -->
     <string name="nag_sync_ms" translatable="false">%1$s ms</string>
-    <string name="nag_sync_audio_hint">Positive: the sound comes later</string>
-    <string name="nag_sync_subtitle_hint">Positive: the subtitles come later</string>
-    <string name="nag_sync_keys_step" translatable="false">±50 ms</string>
-    <string name="nag_sync_step">%1$s: %2$s ms</string>
-    <string name="nag_sync_reset">%1$s: reset</string>
-    <string name="nag_sync_rate">Subtitle speed</string>
-    <string name="nag_sync_rate_same">1.000×</string>
-    <string name="nag_sync_rate_film_to_pal">23.976→25</string>
-    <string name="nag_sync_rate_pal_to_film">25→23.976</string>
-    <string name="nag_sync_rate_same_hint">The subtitles keep their own timing.</string>
-    <string name="nag_sync_rate_film_to_pal_hint">Use it when cinema (23.976 fps) subtitles fall further behind a PAL (25 fps) video; duration factor %1$s.</string>
-    <string name="nag_sync_rate_pal_to_film_hint">Use it when PAL (25 fps) subtitles run further ahead; duration factor %1$s.</string>
-    <string name="nag_sync_remember">Remember for this file</string>
-    <string name="nag_sync_reset_all">Reset all delays</string>
-    <!-- S-703: the subtitles' tab: primary and secondary tracks -->
-    <string name="nag_subs_tracks">Tracks</string>
-    <string name="nag_subs_primary">Primary</string>
-    <string name="nag_subs_secondary">Secondary</string>
-    <string name="nag_subs_none">None</string>
-    <string name="nag_subs_secondary_switch">Secondary subtitles</string>
-    <string name="nag_subs_forced">Always show forced subtitles</string>
-    <string name="nag_subs_found_note">%1$s · matched from the folder</string>
-    <string name="nag_subs_added_note">%1$s · added</string>
-    <string name="nag_subs_secondary_title">Secondary subtitles</string>
-    <string name="nag_subs_position">Position</string>
-    <string name="nag_subs_top">At the top</string>
-    <string name="nag_subs_above">Above the primary</string>
-    <string name="nag_subs_keys">turns the secondary subtitles on or off</string>
-    <string name="nag_subs_position_waiting">The place reaches the subtitles when the player opens again.</string>
-    <string name="nag_subs_secondary_on">Secondary subtitles: %1$s</string>
-    <string name="nag_subs_secondary_off">Secondary subtitles off</string>
-    <string name="nag_subs_secondary_missing">No other track for secondary subtitles</string>
-    <string name="nag_subs_delay">Delay</string>
-    <!-- S-704: the sync assistant -->
-    <string name="nag_assist_title">Sync assistant</string>
-    <string name="nag_assist_hint">Mark the sound when you hear a line and the subtitle when you see it on screen, then apply the difference.</string>
-    <string name="nag_assist_mark_audio">Mark the sound</string>
-    <string name="nag_assist_audio_marked">Sound marked · %1$s</string>
-    <string name="nag_assist_mark_subtitle">Mark the subtitle</string>
-    <string name="nag_assist_subtitle_marked">Subtitle marked · %1$s</string>
-    <string name="nag_assist_apply">Apply the difference</string>
-    <string name="nag_assist_apply_difference">Apply the difference · %1$s</string>
-    <string name="nag_assist_applied">Difference applied · %1$s</string>
-    <string name="nag_assist_undo">Undo</string>
-    <string name="nag_assist_osd_audio_difference">Sound marked · difference %1$s</string>
-    <string name="nag_assist_osd_subtitle_difference">Subtitle marked · difference %1$s</string>
-    <string name="nag_assist_osd_applied">Subtitle delay %1$s · remembered for this file</string>
-    <string name="nag_assist_osd_need_marks">Mark the sound and the subtitle first</string>
-    <string name="nag_assist_osd_undone">Sync undone · subtitle delay %1$s</string>
-    <string name="nag_assist_osd_cleared">Sync marks cleared</string>
-    <string name="nag_assist_osd_nothing">No sync to undo</string>
-    <string name="nag_assist_osd_no_subtitles">No subtitles are showing</string>
-    <!-- S-705: the subtitles' look -->
-    <string name="nag_style_title">Appearance</string>
-    <string name="nag_style_preview">Preview of the subtitles\' look</string>
-    <string name="nag_style_sample">When the lights go out, the stars show the way.</string>
-    <string name="nag_style_preset">Preset</string>
-    <string name="nag_style_preset_vlc" translatable="false">VLC</string>
-    <string name="nag_style_preset_thin">Thin</string>
-    <string name="nag_style_preset_yellow">Yellow</string>
-    <string name="nag_style_preset_boxed">Boxed</string>
-    <string name="nag_style_font">Font</string>
-    <string name="nag_style_font_sans">Sans serif</string>
-    <string name="nag_style_font_serif">Serif</string>
-    <string name="nag_style_font_mono">Monospace</string>
-    <string name="nag_style_font_condensed">Condensed</string>
-    <string name="nag_style_weight_regular">Regular</string>
-    <string name="nag_style_weight_bold">Bold</string>
-    <string name="nag_style_size">Size</string>
-    <string name="nag_style_outline">Outline</string>
-    <string name="nag_style_px" translatable="false">%1$s px</string>
-    <string name="nag_style_shadow">Shadow</string>
-    <string name="nag_style_background">Background</string>
-    <string name="nag_style_colour">Colour</string>
-    <string name="nag_style_white">White</string>
-    <string name="nag_style_yellow">Yellow</string>
-    <string name="nag_style_cyan">Cyan</string>
-    <string name="nag_style_grey">Grey</string>
-    <string name="nag_style_raise">Height</string>
-    <string name="nag_style_black_bars">Show in the black bar</string>
-    <string name="nag_style_ass">ASS styles</string>
-    <string name="nag_style_ass_file">The file\'s</string>
-    <string name="nag_style_ass_ours">This look</string>
-    <string name="nag_style_waiting">The new look reaches the subtitles when the player opens again.</string>
-    <!-- S-706: subtitles from OpenSubtitles.com -->
-    <string name="nag_online_search">Search for subtitles</string>
-    <string name="nag_online_title">Search for subtitles</string>
-    <string name="nag_online_search_short">Search</string>
-    <string name="nag_online_name">Film name</string>
-    <string name="nag_online_by_hash">The file\'s fingerprint first</string>
-    <string name="nag_online_searching">Searching…</string>
-    <string name="nag_online_none">No subtitles found; change the name and search again.</string>
-    <string name="nag_online_hash_match">fits this file</string>
-    <plurals name="nag_online_downloads">
-        <item quantity="one">%1$s download</item>
-        <item quantity="other">%1$s downloads</item>
-    </plurals>
-    <string name="nag_online_fps" translatable="false">%1$s fps</string>
-    <string name="nag_online_hearing_impaired">for the hard of hearing</string>
-    <string name="nag_online_machine">machine translated</string>
-    <string name="nag_online_download">Download</string>
-    <string name="nag_online_downloading">Downloading…</string>
-    <string name="nag_online_quota">OpenSubtitles quota: %1$d/%2$d</string>
-    <string name="nag_online_close">Close</string>
-    <string name="nag_online_no_key">This build has no OpenSubtitles key</string>
-    <string name="nag_online_offline">OpenSubtitles could not be reached; check the connection.</string>
-    <string name="nag_online_quota_over">Today\'s downloads are used up.</string>
-    <string name="nag_online_quota_over_at">Today\'s downloads are used up; they come back at %1$s.</string>
-    <string name="nag_online_server">OpenSubtitles is not answering now; try again a little later.</string>
-    <string name="nag_online_unsaved">The subtitles could not be saved.</string>
-    <string name="nag_online_note">%1$s · from a subtitle provider</string>
-    <string name="nag_online_saved_beside">%1$s downloaded and saved beside the film</string>
-    <string name="nag_online_saved_app">%1$s downloaded and saved in the app\'s folder</string>
-    <!-- S-701: subtitle files added with the picker, dropped on the video, found in its folder -->
-    <string name="nag_sub_added">Subtitles added: %1$s</string>
-    <string name="nag_sub_added_from_folder">Subtitles from the folder: %1$s</string>
-    <string name="nag_sub_not_subtitle">Not a subtitle file: %1$s</string>
-    <string name="nag_sub_failed">The subtitles did not open: %1$s</string>
-    <plurals name="nag_sub_found">
-        <item quantity="one">%d subtitle file in the folder</item>
-        <item quantity="other">%d subtitle files in the folder</item>
-    </plurals>
-    <string name="nag_sub_found_hint">Which one shows?</string>
-    <string name="nag_sub_dismiss">Close</string>
-    <string name="nag_sub_forced">forced</string>
-    <string name="nag_sub_sdh">for the hard of hearing</string>
-    <string name="nag_sub_language_unknown">Unknown language</string>
-    <string name="nag_sub_drop_here">Drop the subtitles</string>
-    <string name="nag_sub_drop_hint">They load at once and stay with this film; a video dropped here plays instead.</string>
-    <!-- S-702: the subtitles' character set, detected or chosen for the film -->
-    <string name="nag_enc_title">Subtitle encoding</string>
-    <string name="nag_enc_menu">Subtitle encoding…</string>
-    <string name="nag_enc_automatic">Automatic (%1$s detected)</string>
-    <string name="nag_enc_preview">Preview</string>
-    <string name="nag_enc_no_lines">No lines to read in this file.</string>
-    <string name="nag_enc_kept">Remembered for this film.</string>
-    <string name="nag_enc_apply">Apply</string>
-    <string name="nag_enc_none">This film has no subtitle files</string>
-    <string name="nag_enc_applied">Subtitles read as %1$s</string>
-    <string name="nag_enc_applied_auto">Subtitles read in their own encoding</string>
+    <!-- S-702: a text file's character set (the lyrics' files) -->
     <string name="nag_enc_utf8">UTF-8 (Unicode)</string>
     <string name="nag_enc_tr_windows">Turkish · Windows-1254</string>
     <string name="nag_enc_tr_iso">Turkish · ISO-8859-9</string>
@@ -1224,188 +816,13 @@
     <string name="nag_enc_greek">Greek · Windows-1253</string>
     <string name="nag_enc_arabic">Arabic · Windows-1256</string>
     <string name="nag_enc_utf16">UTF-16 (Unicode)</string>
-    <!-- S-612: refresh rate matching, in the sync tab; the frames' cadence in the Info tab too -->
-    <string name="nag_refresh_title">Refresh rate matching</string>
-    <string name="nag_refresh_exact">whole multiple</string>
-    <string name="nag_refresh_not_exact">not a whole multiple</string>
-    <string name="nag_refresh_content">Content</string>
-    <string name="nag_refresh_screen">Screen</string>
-    <string name="nag_refresh_repeats">Repeated frames</string>
-    <string name="nag_refresh_drops">Dropped frames</string>
-    <string name="nag_refresh_phone">phone screen</string>
-    <string name="nag_refresh_tablet">tablet panel</string>
-    <string name="nag_refresh_none">none · every frame stays as long</string>
-    <string name="nag_refresh_every_seconds">once every ≈ %1$s s</string>
-    <string name="nag_refresh_every_minutes">once every ≈ %1$s min</string>
-    <string name="nag_refresh_per_second">≈ %1$s a second</string>
-    <string name="nag_refresh_subtle">hard to notice</string>
-    <string name="nag_refresh_visible">noticeable in pans</string>
-    <string name="nag_refresh_stutter">pans stutter</string>
-    <string name="nag_refresh_choppy">motion looks choppy</string>
-    <string name="nag_refresh_always">Always</string>
-    <string name="nag_refresh_seamless">If seamless</string>
-    <string name="nag_refresh_off">Off</string>
-    <string name="nag_refresh_always_hint">With a TV over HDMI the screen switches to %1$s Hz; it may go black for ~1 s as it does.</string>
-    <string name="nag_refresh_always_hint_any">With a TV over HDMI the screen switches to the film\'s rate; it may go black for ~1 s as it does.</string>
-    <string name="nag_refresh_seamless_hint">The screen follows the film only when it can switch without going black; a TV mostly stays as it is.</string>
-    <string name="nag_refresh_off_hint">The screen keeps its own rate.</string>
-    <string name="nag_refresh_no_multiple">None of this screen\'s rates is a whole multiple of the film\'s: %1$s.</string>
-    <string name="nag_refresh_system_never">Android\'s own setting keeps the screen from following content.</string>
-    <string name="nag_refresh_system_seamless">Android\'s own setting allows only seamless switches.</string>
 
-    <!-- S-605: the Info tab of the player's panel and the statistics over the video -->
-    <string name="nag_info_no_media">Nothing is playing</string>
-    <string name="nag_info_streams">Streams</string>
-    <string name="nag_info_mark_video" translatable="false">V</string>
-    <string name="nag_info_mark_audio" translatable="false">A%1$d</string>
-    <string name="nag_info_mark_subtitles" translatable="false">S</string>
-    <string name="nag_info_khz">%1$s kHz</string>
-    <string name="nag_info_bits">%1$d bit</string>
-    <plurals name="nag_info_channels">
-        <item quantity="one">%d channel</item>
-        <item quantity="other">%d channels</item>
-    </plurals>
-    <plurals name="nag_info_subtitle_tracks">
-        <item quantity="one">Subtitles · %d track</item>
-        <item quantity="other">Subtitles · %d tracks</item>
-    </plurals>
-    <string name="nag_info_tag_hardware">hardware</string>
-    <string name="nag_info_tag_software">software</string>
-    <string name="nag_info_tag_playing">playing</string>
-    <string name="nag_info_decoding">Decoding and output</string>
-    <string name="nag_info_video_decoder">Video decoder</string>
-    <string name="nag_info_audio_output">Audio output</string>
-    <string name="nag_info_video_output">Video output</string>
-    <string name="nag_info_audio_decoder">Audio decoder</string>
-    <string name="nag_info_decoder_auto">Automatic · MediaCodec (hardware) first</string>
-    <string name="nag_info_decoder_hardware">MediaCodec · hardware</string>
-    <string name="nag_info_decoder_hardware_direct">MediaCodec · hardware · direct rendering</string>
-    <string name="nag_info_decoder_software">FFmpeg · software</string>
-    <string name="nag_info_decoder_fallback">FFmpeg · software (hardware failed on this file)</string>
-    <string name="nag_info_decoder_dolby_vision">FFmpeg · software (Dolby Vision profile 5, coloured by libplacebo)</string>
-    <string name="nag_info_live">Live</string>
-    <string name="nag_info_every_second">every second</string>
-    <string name="nag_info_input_bitrate">Input bitrate</string>
-    <string name="nag_info_graph_start">−60 s</string>
-    <string name="nag_info_graph_now">now</string>
-    <string name="nag_info_frames">Frames</string>
-    <string name="nag_info_frames_lost">%1$s dropped</string>
-    <string name="nag_info_frames_shown">%1$s shown</string>
-    <string name="nag_info_buffer">Audio buffers</string>
-    <string name="nag_info_buffers_played">%1$s played</string>
-    <string name="nag_info_demux">Demux: %1$s · %2$s corrupted · %3$s gaps</string>
-    <string name="nag_info_output_auto">VLC\'s choice: Android\'s own, HDR passed to the screen</string>
-    <string name="nag_info_output_android">Android (ASurfaceControl), HDR passed to the screen</string>
-    <string name="nag_info_output_opengl">OpenGL ES with libplacebo: tone mapping, scaling</string>
-    <string name="nag_info_pending">The faded lines fill in with the next version of the playback engine.</string>
-    <string name="nag_info_overlay">Show over the video</string>
-    <string name="nag_info_overlay_bitrate">Bitrate</string>
-    <string name="nag_info_overlay_lost">Dropped frames</string>
-    <string name="nag_info_copy_report">Copy the report</string>
-    <string name="nag_info_copied">Copied</string>
-    <string name="nag_info_report_bitrate">Input bitrate: %1$s</string>
-    <string name="nag_info_report_frames">Frames: %1$s dropped of %2$s shown</string>
-    <string name="nag_info_report_audio">Audio buffers: %1$s lost of %2$s played</string>
-    <!-- S-606: screenshots -->
-    <string name="nag_snap_options">Screenshot options</string>
-    <string name="nag_snap_saved">Screenshot saved</string>
-    <string name="nag_snap_saving">Saving the screenshot…</string>
-    <string name="nag_snap_failed">Couldn\'t take the screenshot</string>
-    <string name="nag_snap_dismiss">Close</string>
-    <string name="nag_snap_open">Open</string>
-    <string name="nag_snap_share">Share</string>
+    <!-- a folder to choose -->
     <string name="nag_snap_choose_folder">Choose a folder…</string>
-    <string name="nag_snap_tone_mapped">HDR → SDR</string>
-    <string name="nag_snap_hdr_kept">HDR kept</string>
-    <string name="nag_snap_with_subtitles">with subtitles</string>
-    <string name="nag_snap_no_video">No video is showing.</string>
-    <string name="nag_snap_capture_failed">The system couldn\'t copy the picture.</string>
-    <string name="nag_snap_folder_failed">The chosen folder can\'t be written to; choose it again.</string>
-    <string name="nag_snap_write_failed">The file couldn\'t be written; the drive may be full or removed.</string>
-    <string name="nag_snap_unsupported">Screenshots need Android 7 or later.</string>
-    <string name="nag_snap_settings">Screenshots</string>
-    <string name="nag_snap_format">Format</string>
-    <string name="nag_snap_format_hint">Both are lossless; WebP is smaller.</string>
-    <string name="nag_snap_format_hint_old">PNG is lossless; WebP is smaller.</string>
-    <string name="nag_snap_subtitles">Subtitles</string>
-    <string name="nag_snap_subtitles_hint">The subtitles on the screen go into the picture.</string>
-    <string name="nag_snap_with">With subtitles</string>
-    <string name="nag_snap_without">Without subtitles</string>
-    <string name="nag_snap_hdr">HDR films</string>
-    <string name="nag_snap_hdr_hint">Kept HDR becomes a 16-bit PNG (BT.2020, PQ or HLG); not every viewer shows it.</string>
-    <string name="nag_snap_hdr_unavailable">HDR pictures are converted to SDR; keeping HDR needs Android 14.</string>
-    <string name="nag_snap_tone_map">Convert to SDR</string>
-    <string name="nag_snap_keep_hdr">Keep HDR</string>
-    <string name="nag_snap_folder">Folder</string>
     <string name="nag_snap_change_folder">Change…</string>
     <string name="nag_snap_default_folder">Back to the default</string>
-    <string name="nag_snap_menu_tone_map">Convert HDR to SDR</string>
-    <string name="nag_snap_menu_keep_hdr">Keep HDR (16-bit PNG)</string>
-    <string name="nag_snap_menu_folder">Folder: %1$s</string>
-    <string name="nag_snap_menu_change_folder">Change the folder…</string>
-    <string name="nag_snap_menu_default_folder">Back to the default folder</string>
-    <string name="nag_sc_record">Record</string>
-    <string name="nag_rec_start">Record</string>
-    <string name="nag_rec_stop">Stop recording</string>
-    <string name="nag_rec_started">Recording started</string>
-    <string name="nag_rec_starting">Starting…</string>
-    <string name="nag_rec_recording">Recording, %1$s</string>
-    <string name="nag_rec_saving">Saving… %1$s</string>
-    <string name="nag_rec_saved">Recording saved</string>
-    <string name="nag_rec_saved_in">Recording saved in %1$s</string>
-    <string name="nag_rec_failed">Couldn\'t record</string>
-    <string name="nag_rec_failed_because">Couldn\'t record: %1$s</string>
-    <string name="nag_rec_not_supported">This can\'t be recorded: the music engine plays it, or VLC can\'t record this kind of media.</string>
-    <string name="nag_rec_no_space">The storage is full.</string>
-    <string name="nag_rec_folder_failed">The chosen folder can\'t be written to; choose it again.</string>
-    <string name="nag_rec_write_failed">The recording couldn\'t be copied; the drive may be full or removed.</string>
-    <string name="nag_rec_empty">Nothing was recorded.</string>
-    <string name="nag_rec_kept_in_app">The recording waits in the app\'s own storage.</string>
-    <string name="nag_rec_retry">Try again</string>
-    <string name="nag_rec_play">Play</string>
-    <string name="nag_rec_open_folder">Open folder</string>
-    <string name="nag_rec_stopped_for_space">Stopped: the storage was nearly full.</string>
-    <string name="nag_rec_no_folder_app">No app opens folders; the recording is in %1$s.</string>
-    <string name="nag_rec_notice_saving">Saving the recording…</string>
-    <string name="nag_rec_notice_saved">Saved in %1$s · tap to play</string>
-    <string name="nag_rec_channel">Recordings</string>
-    <string name="nag_rec_settings">Recording</string>
-    <string name="nag_rec_settings_hint">Shift+R records what plays as it comes: best for streams, radio and TV; a file is recorded from where it is.</string>
-    <string name="nag_rec_default_folder">%1$s for videos, %2$s for sound</string>
     <!-- S-608: jump to time, chapters, bookmarks -->
-    <string name="nag_sc_next_chapter">Next chapter</string>
-    <string name="nag_sc_previous_chapter">Previous chapter</string>
-    <string name="nag_sc_add_bookmark">Add a bookmark</string>
-    <string name="nag_sc_bookmarks">Bookmarks</string>
-    <string name="nag_panel_bookmarks">Bookmarks</string>
-    <string name="nag_bm_title">Bookmarks · %1$d</string>
-    <string name="nag_bm_empty">No bookmarks yet.</string>
-    <string name="nag_bm_empty_keys">No bookmarks yet. %1$s marks the moment playing.</string>
-    <string name="nag_bm_refused">This film can\'t keep bookmarks: the media library isn\'t ready.</string>
-    <string name="nag_bm_kept">Bookmarks are kept in the media library, with the film.</string>
-    <string name="nag_bm_add">Add a bookmark</string>
-    <string name="nag_bm_rename">Rename…</string>
-    <string name="nag_bm_remove">Remove</string>
-    <string name="nag_bm_go">Go to %1$s</string>
-    <string name="nag_bm_more">More for %1$s</string>
-    <string name="nag_bm_default_name">Bookmark %1$d</string>
-    <string name="nag_bm_added">Bookmark added: %1$s · %2$s</string>
-    <string name="nag_bm_rename_title">Name the bookmark</string>
-    <string name="nag_bm_name">Bookmark name</string>
     <string name="nag_bm_save">Save</string>
-    <string name="nag_chapters_title">Chapters · %1$d</string>
-    <string name="nag_chapters_keys">skip</string>
-    <string name="nag_chapters_row">%1$d · %2$s</string>
-    <string name="nag_jump_title">Jump to time</string>
-    <string name="nag_jump_field">Time</string>
-    <string name="nag_jump_length">/ %1$s</string>
-    <string name="nag_jump_to">→ %1$s</string>
-    <string name="nag_jump_past_end">The film lasts %1$s.</string>
-    <string name="nag_jump_unreadable">No time can be read: type 1:12:33, 72:33 or +30, for example.</string>
-    <string name="nag_jump_hint" formatted="false">1:12:33 · 72:33 · 45 s · +30 · −2 min · 50%</string>
-    <string name="nag_jump_go">Go</string>
-    <!-- S-609: picture in picture -->
-    <string name="nag_player_pip">Picture in picture</string>
     <!-- S-1201 … S-1204: TV Lab -->
     <string name="nag_tvlab_subtitle">File analysis for the device you play on</string>
     <string name="nag_tvlab_target">Target</string>
@@ -1582,7 +999,6 @@
     <string name="nag_tvlab_not_a_profile">This file is not a device profile.</string>
     <string name="nag_tvlab_profile_imported">%1$s imported.</string>
     <string name="nag_tvlab_profile_exported">Profile saved.</string>
-    <string name="nag_tvlab_analyse">Analyse in TV Lab</string>
     <!-- S-1206, S-1209: the remux queue and its verification -->
     <string name="nag_tvlab_remux">Remux</string>
     <string name="nag_tvlab_remux_file">%1$s.remux.mkv</string>
@@ -1841,7 +1257,7 @@
     <string name="nag_tvlab_history_added_padded">%1$s s of silence for the source\'s gaps</string>
     <!-- S-1404: Settings › Performance, what this device measured of Nağmedar -->
     <string name="nag_perf_title">Performance</string>
-    <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame, and each playback\'s dropped frames and battery use. The battery is measured off the charger, in playbacks over five minutes. The last ten start-ups and playbacks are kept.</string>
+    <string name="nag_perf_intro">Nağmedar\'s measurements on this device: how long a cold start-up takes to its first frame. The last ten start-ups are kept.</string>
     <string name="nag_perf_startup">Start-up</string>
     <string name="nag_perf_startup_last">The last cold start-up · target ≤ %1$s</string>
     <string name="nag_perf_startup_median">Median of the last %1$d cold start-ups · target ≤ %2$s</string>
@@ -1849,20 +1265,11 @@
     <string name="nag_perf_seconds">%1$s s</string>
     <string name="nag_perf_on_target">On target</string>
     <string name="nag_perf_slow">Slow</string>
-    <string name="nag_perf_playbacks">Playbacks</string>
-    <string name="nag_perf_playbacks_target">Target: dropped frames ≤ %1$s</string>
-    <string name="nag_perf_playbacks_none">No playbacks yet: play a film and close it, and its summary comes here.</string>
-    <string name="nag_perf_dropped">%1$s dropped</string>
-    <string name="nag_perf_none_dropped">None dropped</string>
-    <string name="nag_perf_battery">battery %1$s an hour</string>
-    <string name="nag_perf_battery_none">battery not measured</string>
-    <string name="nag_perf_frames">%1$s frames, %2$s dropped</string>
     <string name="nag_perf_report">Report</string>
     <string name="nag_perf_clear">Delete measurements</string>
     <string name="nag_perf_report_title">Nağmedar performance report</string>
     <string name="nag_perf_report_device">Device: %1$s · Android %2$s</string>
     <string name="nag_perf_report_startups">Cold start-ups, to the first frame (target ≤ %1$s):</string>
-    <string name="nag_perf_report_playbacks">Playbacks (target: dropped frames ≤ %1$s):</string>
     <!-- S-901: Settings › Music, the engine behind the local music library -->
     <string name="nag_settings_music">Music</string>
     <string name="nag_settings_music_engine">Music engine</string>
@@ -2006,7 +1413,7 @@
     <string name="nag_eq_meter_limiter">Limiter %1$s</string>
     <string name="nag_eq_meter_reset">Reset the meter</string>
     <!-- the player's equaliser: VLC's, which libVLC plays through -->
-    <string name="nag_peq_subtitle">VLC\'s equaliser: films, radio, podcasts and streams play through it</string>
+    <string name="nag_peq_subtitle">VLC\'s equaliser: radio, podcasts and streams play through it</string>
     <string name="nag_peq_failed">VLC\'s equalisers could not be read.</string>
     <string name="nag_peq_on">Equaliser on</string>
     <string name="nag_peq_off_note">The equaliser is off: the sound plays as it is.</string>
@@ -2109,6 +1516,11 @@
     <string name="nag_music_view_composers">Composers</string>
     <string name="nag_music_view_years">Years</string>
     <string name="nag_music_view_folders">Folders</string>
+    <!-- 1.0: the tracks played last: a view of Music on a wide window, the shelf above it on a phone -->
+    <string name="nag_music_view_recent">Recently played</string>
+    <string name="nag_music_recent_shelf">Recently played music</string>
+    <string name="nag_music_recent_none_title">No track played yet</string>
+    <string name="nag_music_recent_none_desc">The tracks you listen to come here, the latest first.</string>
     <string name="nag_music_unknown_album">Unknown album</string>
     <string name="nag_music_unknown_genre">No genre</string>
     <string name="nag_music_unknown_composer">No composer</string>
@@ -2426,7 +1838,7 @@
 
     <!-- S-613: latency profiles and the measurement with the microphone -->
     <string name="nag_latency_settings">Latency profiles</string>
-    <string name="nag_latency_hint">Every output plays a little late: Bluetooth headphones, an AV receiver, a USB DAC. A device\'s profile keeps how late, in milliseconds; while it is the output, a video\'s audio delay and the lyrics\' and waveform\'s clock take it into account. Set it by hand or measure it with the microphone.</string>
+    <string name="nag_latency_hint">Every output plays a little late: Bluetooth headphones, an AV receiver, a USB DAC. A device\'s profile keeps how late, in milliseconds; while it is the output, the lyrics\' and waveform\'s clock take it into account. Set it by hand or measure it with the microphone.</string>
     <string name="nag_latency_measure">Measure the output</string>
     <string name="nag_latency_measure_button">Measure…</string>
     <string name="nag_latency_now">Now: %1$s · %2$s</string>
@@ -2591,7 +2003,7 @@
     <string name="nag_cert_unknown">You tried to reach %1$s. Its security certificate is unknown: no trusted certificate authority vouches for it.\nThis can be an attempt to break into your connection or your privacy, or a server set up wrongly.\n\nIf in doubt, cancel.</string>
     <string name="nag_cert_changed">You tried to reach %1$s. Its security certificate changed since the last visit, and no trusted certificate authority vouches for it.\nThis can be an attempt to break into your connection or your privacy, or a server set up wrongly.\n\nIf in doubt, cancel.</string>
     <string name="nag_cert_presented">The certificate %1$s presents:\n%2$s\n\nIf in doubt, cancel.</string>
-    <!-- the guide, the shortcut card over the video player -->
+    <!-- a window's close button -->
     <string name="nag_player_window_close">Close</string>
     <!-- S-1101, S-1102: podcasts -->
     <string name="nag_pod_actions">Podcast actions</string>
@@ -2973,8 +2385,6 @@
     <string name="nag_cast_notice_engine">While casting, libVLC sends the file: the music engine\'s DSP chain, ReplayGain and crossfade do not apply.</string>
     <string name="nag_cast_casting_to">Casting to %s</string>
     <string name="nag_cast_stop">Stop casting</string>
-    <string name="nag_cast_volume_note">Set the volume on the TV or with its remote.</string>
-    <string name="nag_cast_remote_hint">The picture plays on %s; this screen is its remote.</string>
     <string name="nag_cast_menu_cast">Cast to %s</string>
     <string name="nag_cast_menu_here">Play here</string>
     <string name="nag_cast_close">Close</string>
@@ -3003,157 +2413,8 @@
     <string name="nag_ra_security_hint">The connection is always encrypted (HTTPS) with a certificate this device made for itself, so a browser warns once: check the address, then continue. Every new browser needs a one-time code that this device shows in a notification and that stops working after 60 s. Wrong codes are slowed down. Nothing here turns these off.</string>
     <string name="nag_ra_addresses">Addresses and connections…</string>
     <string name="nag_ra_how">How it works…</string>
-    <!-- S-708 · Subtitle tools -->
-    <string name="nag_sc_subtitle_tools">Subtitle tools…</string>
-    <string name="nag_sc_cue_save">Subtitle tools: save the new file</string>
-    <string name="nag_sc_cue_split">Subtitle tools: split the line</string>
-    <string name="nag_sc_cue_merge">Subtitle tools: merge the lines</string>
-    <string name="nag_sc_cue_set_start">Subtitle tools: start the line here</string>
-    <string name="nag_sc_cue_set_end">Subtitle tools: end the line here</string>
-    <string name="nag_sc_cue_next">Subtitle tools: next line</string>
-    <string name="nag_sc_cue_previous">Subtitle tools: previous line</string>
-    <string name="nag_subtools_menu">Subtitle tools…</string>
-    <string name="nag_subtools_title">Subtitle tools</string>
-    <string name="nag_subtools_section_hint">Clean subtitles made for the hard of hearing, change their frame rate and edit the lines\' times. The result is a new file; the original is not touched.</string>
-    <string name="nag_subtools_edited_word">edited</string>
-    <string name="nag_subtools_loading">Reading the file…</string>
-    <string name="nag_subtools_unreadable">The file could not be read</string>
-    <string name="nag_subtools_unsupported">This is not an SRT, WebVTT or ASS/SSA file the tools can edit</string>
-    <string name="nag_subtools_none">This film has no subtitle file the tools can edit. Open one.</string>
-    <string name="nag_subtools_open_file">Open file…</string>
-    <string name="nag_subtools_info">%1$s · %2$s · %3$s</string>
-    <plurals name="nag_subtools_lines">
-        <item quantity="one">%1$s line</item>
-        <item quantity="other">%1$s lines</item>
-    </plurals>
-    <string name="nag_subtools_tab_clean">Clean</string>
-    <string name="nag_subtools_tab_rate">Frame rate</string>
-    <string name="nag_subtools_tab_lines">Lines</string>
-    <string name="nag_subtools_apply">Apply</string>
-    <string name="nag_unit_ms" translatable="false">ms</string>
-    <string name="nag_sdh_hint">Takes out what is written for the hard of hearing: sound descriptions, speaker labels, marks of music. Look at the changes below, then apply.</string>
-    <string name="nag_sdh_brackets">Sound descriptions in [brackets]</string>
-    <string name="nag_sdh_parentheses">Sound descriptions in (parentheses)</string>
-    <string name="nag_sdh_speakers">Speaker labels in capitals (JOHN:)</string>
-    <string name="nag_sdh_named">Speaker names in any case (John:); may catch “Note:”</string>
-    <string name="nag_sdh_music">Lines of music (♪ … ♪)</string>
-    <string name="nag_sdh_font">Colour tags (&lt;font&gt;)</string>
-    <string name="nag_sdh_summary">%1$s lines → %2$s lines</string>
-    <string name="nag_sdh_counts">%1$s removed, %2$s changed</string>
-    <string name="nag_sdh_more">And %1$s more changed lines</string>
-    <string name="nag_sdh_nothing">Nothing to clean with these rules</string>
-    <string name="nag_sdh_removed">(line removed)</string>
-    <string name="nag_rate_hint">Subtitles made for a film at another frame rate drift out of step as it goes on. Choose the rate they were made for and the film\'s own.</string>
-    <string name="nag_rate_from">Subtitles made for (frames per second)</string>
-    <string name="nag_rate_to">The film\'s frame rate (frames per second)</string>
-    <string name="nag_rate_shift">Shift all lines</string>
-    <string name="nag_rate_shift_zero">Reset</string>
-    <string name="nag_rate_seconds">%1$s s</string>
-    <string name="nag_rate_first">First line starts</string>
-    <string name="nag_rate_last">Last line ends</string>
-    <string name="nag_rate_factor">Times are multiplied by %1$s</string>
-    <string name="nag_rate_same">Same rate and no shift: nothing to do</string>
-    <plurals name="nag_rate_dropped">
-        <item quantity="one">%d line would fall before the start of the film and is dropped</item>
-        <item quantity="other">%d lines would fall before the start of the film and are dropped</item>
-    </plurals>
-    <string name="nag_cue_start">Start</string>
-    <string name="nag_cue_end">End</string>
-    <string name="nag_cue_text">Text</string>
-    <string name="nag_cue_none">No lines</string>
-    <string name="nag_cue_playing">On screen now</string>
-    <string name="nag_cue_row">Line %1$d, %2$s to %3$s: %4$s</string>
-    <string name="nag_cue_issue_end">Ends before it starts</string>
-    <string name="nag_cue_issue_negative">Starts before zero</string>
-    <string name="nag_cue_issue_overlap">Overlaps the next line</string>
-    <string name="nag_cue_issue_empty">No text</string>
-    <plurals name="nag_cue_errors">
-        <item quantity="one">%d line with a wrong time</item>
-        <item quantity="other">%d lines with a wrong time</item>
-    </plurals>
-    <plurals name="nag_cue_overlaps">
-        <item quantity="one">%d overlap</item>
-        <item quantity="other">%d overlaps</item>
-    </plurals>
-    <plurals name="nag_cue_empties">
-        <item quantity="one">%d empty line</item>
-        <item quantity="other">%d empty lines</item>
-    </plurals>
-    <string name="nag_cue_valid">The times are in order</string>
-    <string name="nag_cue_next_issue">Next problem</string>
-    <string name="nag_cue_undo">Undo</string>
-    <string name="nag_cue_revert">Undo all</string>
-    <string name="nag_cue_set_start">Start here</string>
-    <string name="nag_cue_set_end">End here</string>
-    <string name="nag_cue_split">Split</string>
-    <string name="nag_cue_merge">Merge</string>
-    <string name="nag_cue_remove">Remove</string>
-    <string name="nag_cue_shift">Shift chosen:</string>
-    <string name="nag_cue_hint_player">The film is at hand: “Start here” and “End here” take its position, and moving to a line takes the film there.</string>
-    <string name="nag_save_name">New file name</string>
-    <string name="nag_save_button">Save as new file</string>
-    <string name="nag_save_saving">Saving…</string>
-    <string name="nag_save_bom">Write a byte order mark (BOM)</string>
-    <string name="nag_save_load">Show it in the film</string>
-    <string name="nag_save_blocked">Fix the lines with a wrong time before saving</string>
-    <string name="nag_save_original_kept">The original is not changed; the result is a new file</string>
-    <string name="nag_save_failed">The file could not be written</string>
-    <string name="nag_save_saved_beside">Saved as %1$s beside the original</string>
-    <string name="nag_save_saved_elsewhere">Saved as %1$s</string>
-    <string name="nag_save_loaded">showing in the film</string>
-    <string name="nag_save_same_file">That file is not a new one; choose a new name. No file was changed</string>
-    <string name="nag_subtools_ask_title">Close without saving?</string>
-    <string name="nag_subtools_ask">The changes have not been saved. They are lost if you close now.</string>
-    <string name="nag_subtools_ask_save">Save</string>
-    <string name="nag_subtools_ask_discard">Close without saving</string>
-    <string name="nag_subtools_ask_keep">Cancel</string>
-    <string name="nag_subtools_note">%1$s · from the subtitle tools</string>
 
-    <!-- S-707 · Subtitle providers -->
-    <string name="nag_online_timeout">A provider did not answer in time; search again.</string>
-    <string name="nag_online_no_folder">No subtitle folder is chosen; choose one in Settings › Subtitles.</string>
-    <string name="nag_online_no_provider">No subtitle provider is turned on; turn one on in Settings › Subtitles.</string>
-    <string name="nag_online_report_problem">%1$s: %2$s</string>
-    <plurals name="nag_online_report_found">
-        <item quantity="one">%1$s · %2$d result</item>
-        <item quantity="other">%1$s · %2$d results</item>
-    </plurals>
-    <string name="nag_online_r_no_key">no key in this build</string>
-    <string name="nag_online_r_no_folder">no folder chosen</string>
-    <string name="nag_online_r_offline">could not be reached</string>
-    <string name="nag_online_r_quota">today\'s downloads are used up</string>
-    <string name="nag_online_r_timeout">did not answer in time</string>
-    <string name="nag_online_r_server">not answering now</string>
-    <string name="nag_prov_settings">Subtitles</string>
-    <string name="nag_prov_hint">Subtitles are searched in every provider that is on, at the same time, and the results are merged into one list. Where two providers have the same file, the one higher up is kept.</string>
-    <string name="nag_prov_local_name">Local folder</string>
-    <string name="nag_prov_on">On</string>
-    <string name="nag_prov_off">Off</string>
-    <string name="nag_prov_up">Up</string>
-    <string name="nag_prov_down">Down</string>
-    <string name="nag_prov_searches_by">Searches by %1$s</string>
-    <string name="nag_prov_by_hash">fingerprint</string>
-    <string name="nag_prov_by_imdb">IMDb number</string>
-    <string name="nag_prov_by_name">name</string>
-    <string name="nag_prov_by_episode">season and episode</string>
-    <string name="nag_prov_by_language">language</string>
-    <plurals name="nag_prov_limit">
-        <item quantity="one">%d download a day</item>
-        <item quantity="other">%d downloads a day</item>
-    </plurals>
-    <string name="nag_prov_needs_key">needs the app\'s key</string>
-    <string name="nag_prov_needs_login">needs an account</string>
-    <string name="nag_prov_no_network">no network, no key</string>
-    <string name="nag_prov_no_key">This build has no OpenSubtitles key; this provider cannot be searched.</string>
-    <string name="nag_prov_folder">Subtitle folder</string>
-    <string name="nag_prov_folder_none">No folder chosen</string>
-    <string name="nag_prov_folder_choose">Choose folder…</string>
-    <string name="nag_prov_folder_forget">Forget the folder</string>
-    <string name="nag_prov_folder_failed">The folder could not be kept; choose it again</string>
-
-    <!-- S-709: subtitles from a film's speech, made on the device with Whisper -->
-    <string name="nag_sc_generate_subtitles">Generate subtitles…</string>
-    <string name="nag_whisper_menu">Generate subtitles…</string>
+    <!-- S-709: transcription from speech, made on the device with Whisper -->
     <string name="nag_whisper_title">Generate subtitles</string>
     <string name="nag_whisper_audio">Audio track</string>
     <string name="nag_whisper_language">Language</string>
@@ -3203,8 +2464,6 @@
     </plurals>
     <string name="nag_whisper_failed">No subtitles were made</string>
     <string name="nag_whisper_cancelled">The job was cancelled</string>
-    <string name="nag_whisper_note">%1$s · made from the film\'s speech</string>
-    <string name="nag_whisper_section_hint">Subtitles from the film\'s speech, made on this device with Whisper. The result is a new SRT file.</string>
     <string name="nag_whisper_settings">Subtitle generation</string>
     <string name="nag_whisper_settings_hint">Subtitles from a film\'s speech, made on this device with whisper.cpp: nothing of the film leaves it. A model is downloaded from Hugging Face when a job first needs it, once you agree to its size.</string>
     <string name="nag_whisper_model_ready">On this device · %1$d MB</string>
@@ -3242,7 +2501,7 @@
     <string name="nag_whisper_engine_speed">%1$s · %2$s× real time</string>
     <!-- S-1008: scrobbling (Settings › Scrobble) -->
     <string name="nag_scrobble_title">Scrobbling</string>
-    <string name="nag_scrobble_intro">Sends the music you play to Last.fm and ListenBrainz. A track counts once you have heard half of it or four minutes, whichever comes first; tracks under 30 s, videos, podcasts and streams are not sent. While you are offline, scrobbles wait on this device and are sent later.</string>
+    <string name="nag_scrobble_intro">Sends the music you play to Last.fm and ListenBrainz. A track counts once you have heard half of it or four minutes, whichever comes first; tracks under 30 s, podcasts and streams are not sent. While you are offline, scrobbles wait on this device and are sent later.</string>
     <string name="nag_scrobble_lastfm">Last.fm</string>
     <string name="nag_scrobble_listenbrainz">ListenBrainz</string>
     <string name="nag_scrobble_signed_in">Signed in as %1$s</string>
@@ -3363,96 +2622,7 @@
     <string name="nag_sc_lrc_nudge_later">Lyrics editor: last stamp 0.1 s later</string>
     <string name="nag_sc_lrc_word_mode">Lyrics editor: line or word stamps</string>
     <string name="nag_shortcuts_editor_only">In the lyrics editor</string>
-    <!-- S-710 · Offline subtitle translation -->
-    <string name="nag_translate_tab">Translate</string>
-    <string name="nag_translate_menu">Translate subtitles…</string>
-    <string name="nag_translate_hint">The file is translated on this device, without the internet. The translation is a new SRT file beside the original, at the same times, and shows with the original as the secondary subtitles; the original is not touched.</string>
-    <string name="nag_translate_files_only">Subtitle files only: subtitles inside the video cannot be translated.</string>
-    <string name="nag_translate_direction">Direction</string>
-    <string name="nag_translate_tr_en">Turkish → English</string>
-    <string name="nag_translate_en_tr">English → Turkish</string>
-    <string name="nag_translate_model">Model: %1$s · %2$s · %3$s</string>
-    <string name="nag_translate_model_missing">This direction\'s model is not on this device yet. It is downloaded once (%1$s) into the app\'s own storage and can be deleted in Settings › Subtitles.</string>
-    <string name="nag_translate_download">Download (%1$s)</string>
-    <string name="nag_translate_downloading">Downloading the model: %1$s of %2$s</string>
-    <string name="nag_translate_waiting">Waiting for a connection: %1$s of %2$s here</string>
-    <string name="nag_translate_cancel_download">Stop the download</string>
-    <string name="nag_translate_model_ready">The model is on this device</string>
-    <string name="nag_translate_no_network">No internet connection: the model cannot be downloaded now. Connect and try again.</string>
-    <string name="nag_translate_corrupt">The download came in damaged and was removed. Try again.</string>
-    <string name="nag_translate_no_space">Not enough free space for the model.</string>
-    <string name="nag_translate_download_failed">The model could not be downloaded. Try again.</string>
-    <string name="nag_translate_start">Translate</string>
-    <string name="nag_translate_starting">Starting the translation…</string>
-    <string name="nag_translate_progress">Translating: %1$s of %2$s lines</string>
-    <string name="nag_translate_progress_label">Translation progress</string>
-    <string name="nag_translate_download_label">Model download progress</string>
-    <string name="nag_translate_progress_note">%1$d of %2$d · %3$s</string>
-    <string name="nag_translate_cancel">Cancel</string>
-    <string name="nag_translate_output">New file: %1$s</string>
-    <string name="nag_translate_done_beside">Saved as %1$s beside the original.</string>
-    <string name="nag_translate_done_app">Saved as %1$s in the app\'s subtitle folder: the original\'s folder cannot be written to.</string>
-    <string name="nag_translate_shown">It shows with the original as the secondary subtitles.</string>
-    <string name="nag_translate_not_shown">It could not be shown in the film; add it from the subtitles menu.</string>
-    <string name="nag_translate_swap">Swap the two subtitles</string>
-    <string name="nag_translate_nothing">There is no text to translate in this file.</string>
-    <string name="nag_translate_cancelled">The translation was cancelled; no file was written.</string>
-    <string name="nag_translate_failed">The translation failed.</string>
-    <string name="nag_translate_write_failed">The translation could not be written to a new file.</string>
-    <string name="nag_translate_unsupported">This file\'s format cannot be translated.</string>
-    <string name="nag_translate_no_model">The model is not on this device; download it first.</string>
-    <string name="nag_translate_no_engine">This build has no translation engine.</string>
-    <string name="nag_translate_busy">Another translation is under way; wait for it to finish.</string>
-    <string name="nag_translate_credit">Models: OPUS-MT, University of Helsinki (%1$s), converted for CTranslate2.</string>
-    <string name="nag_translate_channel">Subtitle translation</string>
-    <string name="nag_translate_running_title">Translating subtitles: %1$s</string>
-    <string name="nag_translate_downloading_title">Downloading the translation model: %1$s</string>
-    <string name="nag_translate_download_progress">%1$d of %2$d MB</string>
-    <string name="nag_translate_done_title">Subtitles translated</string>
-    <string name="nag_translate_failed_title">The subtitles were not translated</string>
-    <string name="nag_translate_settings_hint">Models of the offline subtitle translation, kept in the app\'s own storage.</string>
-    <string name="nag_translate_status_ready">On this device · %1$s</string>
-    <string name="nag_translate_status_missing">Not downloaded · %1$s</string>
-    <string name="nag_translate_delete">Delete</string>
-    <string name="nag_translate_settings_download">Download</string>
-    <string name="nag_translate_timeout">Android ended the translation: a job in the background may run for six hours at most. Start it again; it begins from the start.</string>
     <!-- the embedded subtitles written into files -->
-    <string name="nag_extract_menu">Extract embedded subtitles…</string>
-    <string name="nag_extract_section">Embedded subtitles</string>
-    <string name="nag_extract_hint">Subtitles inside the film\'s file. Choose one: it is written into a new file beside the film, and the tools go on with it. The film is not changed.</string>
-    <string name="nag_extract_choose">Choose one of the film\'s embedded subtitles above, or a subtitle file.</string>
-    <string name="nag_extract_loading">Reading the film\'s subtitle tracks…</string>
-    <string name="nag_extract_none">This film has no embedded subtitles.</string>
-    <string name="nag_extract_no_native">This build cannot extract embedded subtitles.</string>
-    <string name="nag_extract_untagged">Language not tagged</string>
-    <string name="nag_extract_forced">forced</string>
-    <string name="nag_extract_picture">picture</string>
-    <string name="nag_extract_waiting">Getting ready to read the film…</string>
-    <string name="nag_extract_running">Extracting %1$s: %2$s</string>
-    <string name="nag_extract_running_other">Another film\'s subtitles are being extracted: %1$s</string>
-    <string name="nag_extract_cancel">Cancel</string>
-    <string name="nag_extract_done_beside">Written beside the film: %1$s</string>
-    <string name="nag_extract_done_app">The film\'s folder cannot be written; written in the app\'s folder: %1$s</string>
-    <string name="nag_extract_partial">The film\'s file ends early: the lines up to there were written.</string>
-    <string name="nag_extract_save_elsewhere">Save elsewhere…</string>
-    <string name="nag_extract_saved_elsewhere">Saved as %1$s</string>
-    <string name="nag_extract_cancelled">The extraction was cancelled; no file was written.</string>
-    <string name="nag_extract_busy">Another extraction is running. Try again when it ends.</string>
-    <string name="nag_extract_fail_native">This build cannot extract embedded subtitles.</string>
-    <string name="nag_extract_fail_input">The film could not be read.</string>
-    <string name="nag_extract_fail_no_track">The film no longer has this subtitle track.</string>
-    <string name="nag_extract_fail_picture">These subtitles (%1$s) are pictures: turning them into text (OCR) is not available, so they cannot be written into a text file.</string>
-    <string name="nag_extract_fail_unsupported">Subtitles in this format (%1$s) cannot be written into a file.</string>
-    <string name="nag_extract_fail_empty">This subtitle track has no lines.</string>
-    <string name="nag_extract_fail_too_large">This subtitle track is too large for a subtitle file.</string>
-    <string name="nag_extract_fail_output">The new file could be written neither beside the film nor in the app\'s folder.</string>
-    <string name="nag_extract_fail_engine">The extraction failed.</string>
-    <string name="nag_extract_fail_timeout">Android ended the extraction: a job in the background may run for six hours at most. Start it again; it begins from the start.</string>
-    <string name="nag_extract_channel">Subtitle extraction</string>
-    <string name="nag_extract_starting">Starting…</string>
-    <string name="nag_extract_running_title">Extracting subtitles · %1$s</string>
-    <string name="nag_extract_done_title">Subtitles extracted · %1$s</string>
-    <string name="nag_extract_failed_title">Subtitles not extracted · %1$s</string>
     <string name="nag_vis_title">Visualiser</string>
     <string name="nag_vis_spectrum">Spectrum</string>
     <string name="nag_vis_vu">VU meter</string>
@@ -3470,11 +2640,9 @@
     <string name="nag_vis_cost">≈ %1$s of the battery an hour at %2$d fps</string>
     <string name="nag_vis_on">On</string>
     <string name="nag_vis_off">Off</string>
-    <string name="nag_vis_settings_hint">A spectrum, a VU meter or an oscilloscope of what plays. Music the music engine plays is read from its output; other sound (video, radio, podcasts) through Android\'s visualiser.</string>
+    <string name="nag_vis_settings_hint">A spectrum, a VU meter or an oscilloscope of what plays. Music the music engine plays is read from its output; other sound (radio, podcasts) through Android\'s visualiser.</string>
     <string name="nag_vis_music">With music</string>
     <string name="nag_vis_music_hint">In the now playing pane and the phone\'s player</string>
-    <string name="nag_vis_video">In the video player</string>
-    <string name="nag_vis_video_hint">Large over sound alone, small beside a video\'s picture</string>
     <string name="nag_vis_kind">Kind</string>
     <string name="nag_vis_projectm">projectM is not in this build</string>
     <string name="nag_vis_fps">Frame rate cap</string>
@@ -3485,56 +2653,6 @@
     <string name="nag_vis_keep_running">Keep running</string>
     <string name="nag_vis_battery_warning">A visualiser keeps the screen drawing and costs battery. It stops when the screen goes off, when its pane is hidden or closed, and when nothing plays.</string>
     <string name="nag_sc_visualizer">Full-screen visualiser</string>
-    <string name="nag_vis_menu">Visualiser</string>
-    <string name="nag_conv_subs_none">None</string>
-    <string name="nag_conv_subs_keep">Keep as tracks</string>
-    <string name="nag_conv_subs_burn">Burn into the picture</string>
-    <string name="nag_conv_problem_name">Give the profile a name</string>
-    <string name="nag_conv_problem_name_taken">A profile with this name already exists</string>
-    <string name="nag_conv_problem_empty">Keep the video, the audio or both</string>
-    <string name="nag_conv_problem_video_container">This container cannot hold this video codec</string>
-    <string name="nag_conv_problem_audio_container">This container cannot hold this audio codec</string>
-    <string name="nag_conv_problem_encoder">This build of libVLC has no encoder for it (H.265)</string>
-    <string name="nag_conv_problem_video_bitrate">Video bitrate: 200–80000 kbps</string>
-    <string name="nag_conv_problem_audio_bitrate">Audio bitrate: 32–512 kbps</string>
-    <string name="nag_conv_problem_channels">The codec cannot carry that many channels</string>
-    <string name="nag_conv_problem_burn">To burn the subtitles in, the video must be encoded</string>
-    <string name="nag_conv_problem_keep">Only MKV keeps subtitle tracks</string>
-    <string name="nag_conv_preset_h264_1080">H.264 + AAC · MP4 · 1080p</string>
-    <string name="nag_conv_preset_h264_720">H.264 + AAC · MP4 · 720p</string>
-    <string name="nag_conv_preset_h265">H.265 + AAC · MKV · 1080p</string>
-    <string name="nag_conv_preset_vp8">VP8 + Vorbis · MKV · 720p</string>
-    <string name="nag_conv_preset_copy">Copy into MKV (no encoding)</string>
-    <string name="nag_conv_preset_mp3">MP3 · 320 kbps</string>
-    <string name="nag_conv_preset_opus">Opus · 160 kbps</string>
-    <string name="nag_conv_preset_flac">FLAC (lossless)</string>
-    <string name="nag_conv_preset_aac">AAC · M4A · 256 kbps</string>
-    <string name="nag_hls_quality_1080">1080p · 6 Mbps</string>
-    <string name="nag_hls_quality_720">720p · 3 Mbps</string>
-    <string name="nag_hls_quality_480">480p · 1.2 Mbps</string>
-    <string name="nag_hls_quality_audio">Sound only · AAC 160 kbps</string>
-    <string name="nag_hls_no_lan">The device is on no local network. Connect to Wi-Fi or Ethernet to stream.</string>
-    <string name="nag_hls_engine">libVLC could not encode the media for the stream.</string>
-    <string name="nag_hls_server">The stream\'s server could not start.</string>
-    <string name="nag_hls_title">Stream on the network (HLS)</string>
-    <string name="nag_hls_starting">Preparing the first segments…</string>
-    <string name="nag_hls_stop">Stop the stream</string>
-    <string name="nag_hls_live_notice">On the air: %1$s</string>
-    <string name="nag_conv_running">Converting · %1$s</string>
-    <string name="nag_conv_running_badge">Converting</string>
-    <string name="nag_conv_e_encoder">This build of libVLC cannot encode this profile.</string>
-    <string name="nag_conv_e_empty">libVLC wrote nothing: the media may have no stream this profile keeps.</string>
-    <string name="nag_conv_e_encode">libVLC could not convert the media with this profile.</string>
-    <string name="nag_conv_sum_video_copy">video as it is</string>
-    <string name="nag_conv_sum_audio_copy">audio as it is</string>
-    <string name="nag_conv_sum_kbps">%1$s %2$d kbps</string>
-    <string name="nag_conv_sum_height">≤ %1$dp</string>
-    <string name="nag_conv_sum_lossless">%1$s lossless</string>
-    <string name="nag_conv_sum_subs_keep">subtitles kept</string>
-    <string name="nag_conv_sum_subs_burn">subtitles burnt in</string>
-    <string name="nag_jobs_title">Jobs</string>
-    <string name="nag_jobs_note">Conversions wait in one queue and run one at a time, in the background with a notification. The source is only read.</string>
-    <string name="nag_hls_time_limit">Android\'s time limit for this kind of work was reached and the stream stopped. Start it again to go on.</string>
     <string name="nag_jobs_from">from %1$s</string>
     <string name="nag_jobs_queued">Waiting</string>
     <string name="nag_jobs_queued_text">Starts when the job before it is done.</string>
@@ -3546,78 +2664,12 @@
     <string name="nag_jobs_cancelled">Cancelled</string>
     <string name="nag_jobs_progress_detail">%1$s / %2$s · %3$s written</string>
     <string name="nag_jobs_restarted">Started again from the beginning after an interruption (attempt %1$d).</string>
-    <string name="nag_jobs_timeout">Stopped by Android\'s time limit for background work. It starts again from the beginning when Nağmedar is opened.</string>
     <!-- Android 15's daily time limit for foreground work -->
     <string name="nag_time_limit_title">Android\'s time limit reached</string>
     <string name="nag_time_limit_podcast">Android limits how long work may run in the background each day. The downloads are paused and go on later from where they stopped.</string>
-    <string name="nag_time_limit_model">Android limits how long work may run in the background each day. The model\'s download goes on from where it stopped later.</string>
-    <string name="nag_time_limit_recording">Android limits how long work may run in the background each day. Keep Nağmedar open until the recording is copied; if the copy is cut short, it is made again when playback next starts.</string>
-    <string name="nag_jobs_e_cancelled">Stopped; the unfinished file was removed.</string>
     <string name="nag_jobs_e_open_input">The source could not be opened.</string>
-    <string name="nag_jobs_e_open_output">The new file could not be written.</string>
-    <string name="nag_jobs_e_battery">Stopped: the battery ran down. Plug in and convert it again.</string>
-    <string name="nag_jobs_e_thermal">Stopped: the device got too hot. Let it cool and convert it again.</string>
-    <string name="nag_jobs_e_engine">The conversion failed: %1$s</string>
-    <string name="nag_jobs_same_file">The new file cannot be the source itself; choose another name.</string>
-    <string name="nag_jobs_not_empty">The chosen file already holds something; choose a new file name. It was left as it was.</string>
     <string name="nag_jobs_cancel">Cancel</string>
     <string name="nag_jobs_remove">Remove</string>
-    <string name="nag_jobs_channel">Video conversions</string>
-    <string name="nag_jobs_starting">Starting…</string>
-    <string name="nag_jobs_empty">No jobs yet.</string>
-    <string name="nag_conv_profiles">Profiles</string>
-    <string name="nag_conv_profile_new">New profile…</string>
-    <string name="nag_conv_profile_edit">Edit the profile</string>
-    <string name="nag_conv_profile_delete">Delete the profile</string>
-    <string name="nag_conv_preset">Preset</string>
-    <string name="nag_hls_ended_badge">Read to the end</string>
-    <string name="nag_hls_live_badge">On the air</string>
-    <string name="nag_hls_starting_badge">Starting</string>
-    <string name="nag_hls_idle">Streams a media on the local network as HLS, for a television, a computer or a phone on the same Wi-Fi. It goes on in the background until you stop it.</string>
-    <string name="nag_hls_start_menu">Stream on the network (HLS)…</string>
-    <string name="nag_hls_how">Open the address in VLC or a browser on a device of the same network, or scan the code.</string>
-    <string name="nag_hls_ended">The media was read to its end; its segments are served until you stop the stream.</string>
-    <string name="nag_hls_copy">Copy the address</string>
-    <string name="nag_hls_again">Try again</string>
-    <string name="nag_hls_dismiss">Close</string>
-    <string name="nag_hls_qr">QR code of %1$s</string>
-    <string name="nag_conv_title">Convert / Save</string>
-    <string name="nag_conv_media">Media</string>
-    <string name="nag_conv_media_none">None chosen yet</string>
-    <string name="nag_conv_media_pick">Choose a file…</string>
-    <string name="nag_conv_profile">Profile</string>
-    <string name="nag_conv_where">You choose where the new file goes next; the source stays as it is.</string>
-    <string name="nag_conv_start">Save and start…</string>
-    <string name="nag_conv_none">None</string>
-    <string name="nag_conv_copy">Copy</string>
-    <string name="nag_conv_as_source">As the source</string>
-    <string name="nag_conv_profile_name">Name</string>
-    <string name="nag_conv_container">Container</string>
-    <string name="nag_conv_video">Video</string>
-    <string name="nag_conv_bitrate">Bitrate</string>
-    <string name="nag_conv_height">Largest height</string>
-    <string name="nag_conv_fps">Frame rate</string>
-    <string name="nag_conv_audio">Audio</string>
-    <string name="nag_conv_channels">Channels</string>
-    <string name="nag_conv_rate">Sample rate</string>
-    <string name="nag_conv_subtitles">Subtitles</string>
-    <string name="nag_conv_profile_save">Save the profile</string>
-    <string name="nag_conv_mono">Mono</string>
-    <string name="nag_conv_stereo">Stereo</string>
-    <string name="nag_hls_quality">Quality</string>
-    <string name="nag_hls_close">Close</string>
-    <string name="nag_hls_start">Start the stream</string>
-    <string name="nag_conv_queued">Queued: see Convert › Jobs</string>
-    <string name="nag_hls_copied">Address copied</string>
-    <string name="nag_conv_menu">Convert / Save…</string>
-    <string name="nag_conv_profile_untitled">My profile</string>
-    <string name="nag_sc_convert">Convert / Save</string>
-    <string name="nag_sc_stream">Stream on the network</string>
-    <string name="nag_player_menu">Player menu</string>
-    <plurals name="nag_conv_sum_channels">
-        <item quantity="one">%d channel</item>
-        <item quantity="other">%d channels</item>
-    </plurals>
 
     <!-- S-1504: the user guide and the shortcut card -->
     <string name="nag_guide_title">User guide</string>
@@ -3640,7 +2692,6 @@
     <string name="nag_card_none_found_hint">Try another word or key.</string>
     <string name="nag_card_unassigned">Not assigned</string>
     <string name="nag_card_changed">changed</string>
-    <string name="nag_card_scope_player">in the player</string>
     <string name="nag_card_scope_editor">in the lyrics editor</string>
     <string name="nag_card_text_title">%1$s · %2$s</string>
     <plurals name="nag_card_count">
@@ -3648,13 +2699,8 @@
         <item quantity="other">%d shortcuts</item>
     </plurals>
     <!-- Library: each section's folders and the Videos page -->
-    <string name="nag_nav_videos">Videos</string>
-    <string name="nag_lib_no_clips_desc">Videos you recorded with this device, the camera\'s and screen recordings, appear here. You can choose their folders in Settings › Library.</string>
-    <string name="nag_order_date">Date</string>
-    <string name="nag_order_size">Size</string>
-    <string name="nag_lib_sources">Source folders</string>
     <string name="nag_lib_sources_for">Source folders: %1$s</string>
-    <string name="nag_lib_sources_hint">Choose the folders each section shows; subfolders are included. A section without folders shows everything the library has for it; Films and Series then leave out the folders chosen for Videos. Videos also shows every video that Films and Series do not, such as a file in a Series folder that is not named like an episode.</string>
+    <string name="nag_lib_sources_hint">Choose the folders the music shows; subfolders are included. With none, it shows all the music the library has.</string>
     <string name="nag_lib_sources_all">All of the library</string>
     <string name="nag_lib_choose_folder">Choose a folder…</string>
     <string name="nag_lib_storage_all">All of %1$s</string>
@@ -3662,20 +2708,8 @@
     <string name="nag_lib_exclude">Leave out</string>
     <string name="nag_lib_folder_actions">Actions for %1$s</string>
     <string name="nag_lib_done">Done</string>
-    <string name="nag_fr_sources_sections">Folders for each section</string>
-    <string name="nag_fr_sources_sections_desc">If you like, choose separate folders for Films, Series, Videos and Music; a section with none shows all of the library. You can change them later under Settings › Library.</string>
-    <plurals name="nag_lib_videos_count">
-        <item quantity="one">%d video</item>
-        <item quantity="other">%d videos</item>
-    </plurals>
-    <plurals name="nag_lib_selected_videos">
-        <item quantity="one">%d video selected</item>
-        <item quantity="other">%d videos selected</item>
-    </plurals>
-    <plurals name="nag_lib_drag_videos">
-        <item quantity="one">%d video</item>
-        <item quantity="other">%d videos</item>
-    </plurals>
+    <string name="nag_fr_sources_sections">The music\'s folders</string>
+    <string name="nag_fr_sources_sections_desc">If you like, choose the folders the music shows; with none it shows all of the library. You can change them later under Settings › Library.</string>
     <!-- Sources › Streams: open a network stream, the streams played before -->
     <plurals name="nag_streams_count">
         <item quantity="one">%d stream</item>
@@ -3736,7 +2770,7 @@
         <item quantity="other">%d downloads</item>
     </plurals>
     <string name="nag_downloads_empty_title">Nothing downloaded</string>
-    <string name="nag_downloads_empty_desc">Podcast episodes you download, and the models of the subtitle tools, show here.</string>
+    <string name="nag_downloads_empty_desc">Podcast episodes you download, and the Whisper models, show here.</string>
     <string name="nag_downloads_episodes">Podcast episodes</string>
     <string name="nag_downloads_models">Models</string>
     <string name="nag_downloads_progress">%1$s of %2$s · %3$s</string>
@@ -3745,14 +2779,11 @@
     <string name="nag_downloads_done">Downloaded · %1$s</string>
     <string name="nag_downloads_failed">The download failed</string>
     <string name="nag_downloads_partial">Half way · %1$s</string>
-    <string name="nag_downloads_waiting_network">Waiting for a network</string>
     <string name="nag_downloads_delete">Delete</string>
     <string name="nag_downloads_retry">Try again</string>
-    <string name="nag_downloads_resume">Go on</string>
     <string name="nag_downloads_dismiss">Take off the list</string>
     <string name="nag_downloads_stop_job">Stop the job</string>
-    <string name="nag_downloads_whisper_model">Subtitle generation model</string>
-    <string name="nag_downloads_translation_model">Translation model · %1$s</string>
+    <string name="nag_downloads_whisper_model">Speech recognition model</string>
     <string name="nag_downloads_delete_title">Delete the downloaded file?</string>
     <string name="nag_downloads_delete_episode">The episode stays in its show\'s list and can be downloaded again.</string>
     <string name="nag_downloads_delete_model">The model is downloaded again when a job needs it.</string>
@@ -3807,39 +2838,11 @@
     <string name="nag_ra_code_title">One-time code</string>
     <string name="nag_ra_code_hint">A browser asks to connect. Type this code on its page; it is valid for 60 s.</string>
     <string name="nag_ra_code_not_me">It is not me</string>
-    <string name="nag_snap_permission">Saving to the default folder needs the storage permission. Give it when asked, or choose a folder in Settings › Screenshots.</string>
-    <!-- the video player's touch controls, OSD and resume question (classic overlay replaced) -->
-    <string name="nag_player_lock">Lock the screen</string>
-    <string name="nag_player_unlock">Unlock</string>
-    <string name="nag_player_locked_hint">Tap the lock to unlock the screen</string>
-    <string name="nag_osd_locked">Screen locked</string>
-    <string name="nag_osd_unlocked">Screen unlocked</string>
-    <string name="nag_player_picture">Picture size</string>
-    <string name="nag_player_orientation">Screen orientation</string>
-    <string name="nag_orientation_auto">Automatic</string>
-    <string name="nag_orientation_landscape">Landscape</string>
-    <string name="nag_orientation_portrait">Portrait</string>
-    <string name="nag_orientation_reverse">Landscape, upside down</string>
-    <string name="nag_player_chapters">Chapters</string>
-    <string name="nag_player_audio_only">Audio only</string>
+    <!-- the players' share and the resume question -->
     <string name="nag_player_share">Share…</string>
     <string name="nag_player_share_title">Share “%1$s”</string>
     <string name="nag_player_share_missing">The file cannot be found to share</string>
-    <string name="nag_player_loading">Loading</string>
-    <string name="nag_scale_fit">Fit</string>
-    <string name="nag_scale_fill">Fill the screen (crop)</string>
-    <string name="nag_scale_stretch">Stretch</string>
-    <string name="nag_scale_original">Original size</string>
-    <string name="nag_osd_seek">%1$s s</string>
-    <string name="nag_osd_time_of">%1$s / %2$s</string>
-    <string name="nag_osd_brightness">Brightness</string>
-    <string name="nag_osd_percent">%1$d%%</string>
-    <string name="nag_osd_fast">%1$s while held</string>
-    <string name="nag_osd_audio_delay">Audio delay: %1$s ms</string>
-    <string name="nag_osd_subtitle_delay">Subtitle delay: %1$s ms</string>
-    <string name="nag_osd_pip_off">Picture in picture is turned off for this app in Android’s settings</string>
     <string name="nag_resume_title">Resume where you stopped?</string>
-    <string name="nag_resume_always">Do the same for every video</string>
     <string name="nag_resume_start_over">Start over</string>
     <string name="nag_resume_continue">Resume</string>
     <!-- Classic UI: VLC's Resume playback: Ask, for what is not a video -->
@@ -3866,87 +2869,6 @@
     <string name="nag_widget_paused">Paused</string>
     <string name="nag_widget_replaced">Nağmedar\'s widget has taken the place of VLC\'s. If yours left the home screen, add Nağmedar\'s again.</string>
     <string name="nag_widget_add">Add to home screen</string>
-    <!-- Films and series: film information, poster and list views, watched episodes -->
-    <string name="nag_view_poster">Poster view</string>
-    <string name="nag_view_menu">View: %1$s</string>
-    <string name="nag_column_imdb">IMDb</string>
-    <string name="nag_column_rt">RT</string>
-    <string name="nag_column_seasons">Seasons</string>
-    <string name="nag_column_episodes">Episodes</string>
-    <string name="nag_column_watched">Watched</string>
-    <string name="nag_film_imdb">IMDb %1$s</string>
-    <string name="nag_film_rt">Rotten Tomatoes %1$s</string>
-    <string name="nag_film_rt_short">RT %1$s</string>
-    <string name="nag_film_tmdb">TMDB %1$s</string>
-    <string name="nag_film_percent">%1$d%%</string>
-    <string name="nag_film_cast">Cast</string>
-    <string name="nag_film_refresh">Refresh information</string>
-    <string name="nag_film_fix">Wrong film? Search…</string>
-    <string name="nag_series_fix">Wrong series? Search…</string>
-    <string name="nag_film_search_title">Find the film</string>
-    <string name="nag_series_search_title">Find the series</string>
-    <string name="nag_film_search_hint">Choose the right one: its poster, overview and ratings are kept for this title, and a refresh keeps it.</string>
-    <string name="nag_film_search_field">Title</string>
-    <string name="nag_film_search_button">Search</string>
-    <string name="nag_film_searching">Searching TMDB…</string>
-    <string name="nag_film_search_none">TMDB found nothing for this title.</string>
-    <string name="nag_film_chosen">Kept: %1$s</string>
-    <string name="nag_film_no_info">No film information yet</string>
-    <string name="nag_film_no_info_desc">It is looked up on TMDB from the file name; if nothing is found, search for it yourself.</string>
-    <string name="nag_film_attribution">Information: TMDB · Ratings: OMDb</string>
-    <string name="nag_film_attribution_tmdb">Information: TMDB</string>
-    <string name="nag_film_outcome_done">Information refreshed</string>
-    <string name="nag_film_outcome_not_found">TMDB found nothing for it</string>
-    <string name="nag_film_outcome_off">Film information is off (Settings › Film information)</string>
-    <string name="nag_film_outcome_no_key">This build has no TMDB key: film information is off.</string>
-    <string name="nag_film_outcome_offline">No internet connection</string>
-    <string name="nag_film_outcome_refused">TMDB refused this build\'s key</string>
-    <string name="nag_film_outcome_limited">Too many requests: try again a little later</string>
-    <string name="nag_film_outcome_failed">TMDB did not answer</string>
-    <string name="nag_episode_aired">First shown on %1$s</string>
-    <string name="nag_film_settings">Film information</string>
-    <string name="nag_film_settings_on">Look up films and series</string>
-    <string name="nag_film_settings_on_hint">Posters, overviews, cast and ratings from TMDB and OMDb. Only what names a film or series is sent: a title and a year, read from the file name or, when that says nothing (such as video.mp4), from its folder\'s name; never the files or their full paths.</string>
-    <string name="nag_film_settings_wifi">Only on Wi-Fi</string>
-    <string name="nag_film_settings_wifi_hint">On a metered connection nothing is looked up in the background and no image is fetched; what is kept still shows. A refresh or search you ask for goes ahead on any connection and may use mobile data.</string>
-    <string name="nag_film_settings_language">Language of the overviews</string>
-    <string name="nag_film_settings_language_hint">Titles, overviews and genres; where TMDB has no Turkish overview, the English one.</string>
-    <string name="nag_film_lang_tr">Türkçe</string>
-    <string name="nag_film_lang_en">English</string>
-    <string name="nag_film_settings_kept">Kept</string>
-    <string name="nag_film_kept_none">Nothing yet</string>
-    <string name="nag_film_settings_clear">Clear cache</string>
-    <string name="nag_film_key_missing">This build has no TMDB key (NAGMEDAR_TMDB_API_KEY): film information is off.</string>
-    <string name="nag_film_omdb_missing">This build has no OMDb key (NAGMEDAR_OMDB_API_KEY): IMDb and Rotten Tomatoes ratings are not shown.</string>
-    <string name="nag_film_state_wifi">Waiting for Wi-Fi</string>
-    <string name="nag_film_state_offline">Offline: the rest is looked up when the library is opened with a connection</string>
-    <string name="nag_film_state_refused">TMDB refused this build\'s key: lookups stopped</string>
-    <string name="nag_film_state_limited">TMDB asked to slow down: the rest is looked up later</string>
-    <string name="nag_film_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
-    <string name="nag_film_omdb_notice">IMDb and Rotten Tomatoes ratings come from the OMDb API (omdbapi.com), asked by IMDb id only.</string>
-    <string name="nag_mark_watched">Mark as watched</string>
-    <string name="nag_mark_unwatched">Mark as unwatched</string>
-    <string name="nag_mark_all_watched">Mark all as watched</string>
-    <string name="nag_mark_all_unwatched">Mark all as unwatched</string>
-    <string name="nag_mark_season_watched">Mark season %1$d as watched</string>
-    <string name="nag_mark_season_unwatched">Mark season %1$d as unwatched</string>
-    <string name="nag_partly_watched">%1$d%% watched</string>
-    <string name="nag_season_progress">Season %1$d · %2$d/%3$d</string>
-    <string name="nag_season_actions">Season %1$d actions</string>
-    <string name="nag_series_actions">Series actions</string>
-    <string name="nag_series_open">Open</string>
-    <plurals name="nag_unwatched_episodes">
-        <item quantity="one">%d unwatched episode</item>
-        <item quantity="other">%d unwatched episodes</item>
-    </plurals>
-    <plurals name="nag_film_kept_count">
-        <item quantity="one">%d film or series</item>
-        <item quantity="other">%d films and series</item>
-    </plurals>
-    <plurals name="nag_film_state_working">
-        <item quantity="one">Looking up %d…</item>
-        <item quantity="other">Looking up %d…</item>
-    </plurals>
     <!-- the library's menus: a media's file to another app, or in its folder -->
     <string name="nag_media_share">Share…</string>
     <string name="nag_media_share_title">Share “%1$s”</string>
