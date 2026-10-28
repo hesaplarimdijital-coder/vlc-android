@@ -55,6 +55,8 @@ class EpisodeServices(
     val settings: () -> PodcastSettings = { PodcastSettings() },
     /** Heard when the subscriptions change from none to some or back: the refresh job is scheduled or cancelled. */
     val onSubscribed: (Boolean) -> Unit = {},
+    /** Whisper's transcripts; none in the tests of other things. */
+    val transcriber: EpisodeTranscriber? = null,
 )
 
 /**
@@ -102,6 +104,7 @@ class PodcastController(
     private var startingId by mutableStateOf<Long?>(null)
     private val startWait = StartWait()
     private var settingsNow by mutableStateOf(services.settings())
+    private var transcribing by mutableStateOf<TranscribeState?>(null)
     private var episodeJob: Job? = null
     private var extrasJob: Job? = null
 
@@ -130,6 +133,7 @@ class PodcastController(
                     skipBackSeconds = settingsNow.skipBackSeconds,
                     skipForwardSeconds = settingsNow.skipForwardSeconds,
                     offline = chapterState is ExtraUi.Offline || transcriptState is ExtraUi.Offline,
+                    transcribe = TranscribeUi.of(row.id, transcribing),
                 )
             } else {
                 null
@@ -145,6 +149,17 @@ class PodcastController(
     suspend fun follow() = coroutineScope {
         launch { imports.state.collect { importing = it } }
         launch { services.progress.collect { downloadProgress = it } }
+        services.transcriber?.let { transcriber ->
+            launch {
+                transcriber.state().collect { next ->
+                    val was = transcribing?.running?.episodeId
+                    transcribing = next
+                    // the open episode's job is over: its transcript (made again with the same model too) is read again
+                    val row = episodeRow
+                    if (was != null && was != next.running?.episodeId && row != null && row.id == was) loadTranscript(row)
+                }
+            }
+        }
         launch {
             // the place of the episode whose page is open: a look a few times a second, only while one is
             while (true) {
@@ -328,6 +343,7 @@ class PodcastController(
         if (openEpisodeId == episodeId) return
         episodeJob?.cancel()
         extrasJob?.cancel()
+        transcriptJob?.cancel()
         openEpisodeId = episodeId
         episodeRow = null
         notes = emptyList()
@@ -339,12 +355,16 @@ class PodcastController(
             repository.episode(episodeId).collect { row ->
                 // the player's place with the page's first frame, not a look later: the badge and the timeline come at once
                 if (first && row != null) listeningState = services.control.listening(row)
+                val before = episodeRow
                 episodeRow = row
                 if (first && row != null) {
                     first = false
                     val base = subscriptions?.firstOrNull { it.feed.id == row.feedId }?.feed?.let { it.link ?: it.feedUrl }
                     notes = withContext(Dispatchers.Default) { ShowNotes.of(row.notesHtml, row.description, base) }
                     loadExtras(row)
+                } else if (row != null && before != null && row.whisperModel != before.whisperModel) {
+                    // Whisper wrote the episode's transcript, or it was removed: the tab reads it again
+                    loadTranscript(row)
                 }
             }
         }
@@ -353,8 +373,10 @@ class PodcastController(
     fun closeEpisode() {
         episodeJob?.cancel()
         extrasJob?.cancel()
+        transcriptJob?.cancel()
         episodeJob = null
         extrasJob = null
+        transcriptJob = null
         openEpisodeId = null
         episodeRow = null
         listeningState = null
@@ -376,6 +398,14 @@ class PodcastController(
             launch { chapters = extras.chapters(row).toUi() }
             launch { transcript = extras.transcript(row).toUi() }
         }
+    }
+
+    private var transcriptJob: Job? = null
+
+    private fun loadTranscript(row: PodcastEpisode) {
+        val extras = services.extras ?: return
+        transcriptJob?.cancel()
+        transcriptJob = scope.launch { transcript = extras.transcript(row).toUi() }
     }
 
     private fun <T> ExtraLoad<T>.toUi(): ExtraUi<T> = when (this) {
@@ -515,6 +545,27 @@ class PodcastController(
         background.launch { repository.setVolumeBoost(feedId, boost) }
     }
 
+    fun setTranscriptLanguage(feedId: Long, language: String?) {
+        background.launch { repository.setTranscriptLanguage(feedId, language) }
+    }
+
+    // ------------------------------------------------------------ Whisper's transcripts
+
+    /** The episode's transcript asked of Whisper: queued, it starts when the job before it is done. */
+    fun transcribe(episode: PodcastEpisode) {
+        services.transcriber?.request(episode)
+    }
+
+    fun cancelTranscribe(episodeId: Long) {
+        services.transcriber?.cancel(episodeId)
+    }
+
+    /** The episode's own transcript removed: the feed's comes back, if it has one. */
+    fun deleteTranscript(episodeId: Long) {
+        val transcriber = services.transcriber ?: return
+        background.launch { transcriber.delete(episodeId) }
+    }
+
     fun play(feed: PodcastFeed, episode: PodcastEpisode) = player.play(feed, episode)
 
     fun setPlayed(episodeId: Long, played: Boolean) {
@@ -637,6 +688,10 @@ class PodcastController(
         onSetKeepLatest = ::setKeepLatest,
         onSetPlayback = ::setPlayback,
         onSetVolumeBoost = ::setVolumeBoost,
+        onTranscribe = ::transcribe,
+        onCancelTranscribe = ::cancelTranscribe,
+        onDeleteTranscript = ::deleteTranscript,
+        onSetTranscriptLanguage = ::setTranscriptLanguage,
     )
 
     private companion object {

@@ -8,7 +8,7 @@ import app.nagmedar.ui.R
 import java.io.File
 
 /**
- * S-709: the whisper.cpp models the subtitles from speech can use, the three SP-05 measures, from
+ * S-709: the whisper.cpp models the transcripts can be made with, the three SP-05 measures, from
  * the whisper.cpp repository on Hugging Face. Until SP-05's decision small q5_1 is the default,
  * the balance of Turkish accuracy and speed for a Dimensity 9400+; base is quicker and rougher,
  * large-v3-turbo the most accurate and the slowest.
@@ -31,7 +31,7 @@ enum class WhisperModel(val key: String, val file: String, val sizeMb: Int, @Str
     }
 }
 
-/** The languages a film's speech is heard in: found by whisper, or said. */
+/** The languages a show's speech can be said to be in for its transcripts (ShowSettingsDialog): found by whisper, or said. */
 enum class WhisperLanguage(val code: String, @StringRes val label: Int) {
     Auto("auto", R.string.nag_whisper_lang_auto),
     Turkish("tr", R.string.nag_whisper_lang_tr),
@@ -45,7 +45,7 @@ enum class WhisperLanguage(val code: String, @StringRes val label: Int) {
 
 /**
  * S-709: where whisper runs: on the GPU through Vulkan where the device has one, else on the
- * processor ([Auto]); or on the processor alone ([CpuOnly]), which the same film both ways
+ * processor ([Auto]); or on the processor alone ([CpuOnly]), which the same episode both ways
  * compares with.
  */
 enum class WhisperAcceleration(val key: String, @StringRes val label: Int, @StringRes val hint: Int) {
@@ -88,15 +88,14 @@ object WhisperModels {
     }
 }
 
-/** S-709: the subtitles from speech as Settings › Subtitles chooses them: the model, the language and where it runs. */
+/**
+ * S-709: the transcription from speech as Settings › Podcasts › Transcripts (Whisper) chooses it: the model and where it
+ * runs; and this device's: what its GPU did last, and the jobs waiting ([WhisperQueueStore]).
+ */
 class WhisperPrefs(private val prefs: SharedPreferences) {
     var model: WhisperModel
         get() = WhisperModel.of(prefs.getString(KEY_MODEL, null))
         set(value) = prefs.edit().putString(KEY_MODEL, value.key).apply()
-
-    var language: WhisperLanguage
-        get() = WhisperLanguage.of(prefs.getString(KEY_LANGUAGE, null))
-        set(value) = prefs.edit().putString(KEY_LANGUAGE, value.code).apply()
 
     var acceleration: WhisperAcceleration
         get() = WhisperAcceleration.of(prefs.getString(KEY_ACCELERATION, null))
@@ -114,7 +113,7 @@ class WhisperPrefs(private val prefs: SharedPreferences) {
             prefs.edit().putString(KEY_GPU_RUNNING, value).commit()
         }
 
-    /** The app stopped while the GPU worked: jobs run on the processor until Settings › Subtitles tries the GPU again. */
+    /** The app stopped while the GPU worked: jobs run on the processor until Settings tries the GPU again. */
     @set:SuppressLint("ApplySharedPref")
     var gpuStopped: Boolean
         get() = prefs.getBoolean(KEY_GPU_STOPPED, false)
@@ -122,28 +121,24 @@ class WhisperPrefs(private val prefs: SharedPreferences) {
             prefs.edit().putBoolean(KEY_GPU_STOPPED, value).commit()
         }
 
-    /** The finished job whose outcome was put away: it is not shown again. */
-    var seen: String?
-        get() = prefs.getString(KEY_SEEN, null)
-        set(value) = prefs.edit().putString(KEY_SEEN, value).apply()
-
-    /** The job Android's time limit for a job in the background ended (WorkManager tells it only as cancelled). */
-    var timedOut: String?
-        get() = prefs.getString(KEY_TIMED_OUT, null)
-        set(value) = prefs.edit().putString(KEY_TIMED_OUT, value).apply()
+    /** The jobs waiting and the last failures, as [WhisperQueue.toJson] writes them. */
+    var queue: String?
+        get() = prefs.getString(KEY_QUEUE, null)
+        set(value) = prefs.edit().putString(KEY_QUEUE, value).apply()
 
     companion object {
         const val KEY_MODEL = "nagmedar_whisper_model"
-        const val KEY_LANGUAGE = "nagmedar_whisper_language"
         const val KEY_ACCELERATION = "nagmedar_whisper_acceleration"
 
-        /** This device's, as [KEY_SEEN]: what its GPU did last. */
+        /** This device's, as [KEY_QUEUE]: what its GPU did last. */
         const val KEY_GPU_RUNNING = "nagmedar_whisper_gpu_running"
         const val KEY_GPU_STOPPED = "nagmedar_whisper_gpu_stopped"
 
-        /** This device's, as [KEY_TIMED_OUT]: a backup leaves them out. */
-        const val KEY_SEEN = "nagmedar_whisper_seen"
-        const val KEY_TIMED_OUT = "nagmedar_whisper_timed_out"
+        /** This device's: the jobs waiting, which a backup leaves out (their episodes' ids are this device's). */
+        const val KEY_QUEUE = "nagmedar_whisper_queue"
+
+        /** 1.0: the keys of the subtitles from speech of 0.5 (their language, the last job's outcome), which a backup leaves out. */
+        val REMOVED_KEYS = arrayOf("nagmedar_whisper_language", "nagmedar_whisper_seen", "nagmedar_whisper_timed_out")
     }
 }
 

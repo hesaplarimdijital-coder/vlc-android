@@ -38,7 +38,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 21
+        const val VERSION = 22
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -259,8 +259,19 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /** 20 → 21 (podcast transcripts by Whisper): the show's language from its feed and for Whisper, the episode's own transcript. */
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) = transcripts(db)
+        }
+
+        private fun transcripts(db: SupportSQLiteDatabase) {
+            db.addColumn("podcast_feed", "language", "TEXT")
+            db.addColumn("podcast_feed", "transcript_language", "TEXT")
+            db.addColumn("podcast_episode", "whisper_model", "TEXT")
+        }
+
         /**
-         * 20 → 21 (Nağmedar 1.0, pure audio): the tables only the removed features used go, with their rows: the
+         * 21 → 22 (Nağmedar 1.0, pure audio): the tables only the removed features used go, with their rows: the
          * video player's settings per file (media_settings), the video conversions (transcode_profile, transcode_job),
          * the TV Lab's remux queue (remux_job) and the film information (film_info, film_episode). IF EXISTS: a
          * database a pull request's build left without one of them (see 15 → 16 …) migrates all the same. The music,
@@ -270,7 +281,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
          * addresses are written to [grants] (one a line), for the app to let go of what nothing else holds
          * (app.nagmedar.ui.work.RetiredWork). That note is a courtesy: when it cannot be made, the tables go all the same.
          */
-        private class Migration20To21(private val grants: (() -> File)?) : Migration(20, 21) {
+        private class Migration21To22(private val grants: (() -> File)?) : Migration(21, 22) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 grants?.let { file -> runCatching { noteGrants(db, file()) } }
                 RETIRED_TABLES.forEach { db.execSQL("DROP TABLE IF EXISTS `$it`") }
@@ -292,10 +303,10 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
-        /** The tables 20 → 21 drops. */
+        /** The tables 21 → 22 drops. */
         val RETIRED_TABLES = listOf("media_settings", "transcode_profile", "transcode_job", "remux_job", "film_info", "film_episode")
 
-        /** Where 20 → 21 notes the files whose permissions the dropped jobs held (see [Migration20To21]). */
+        /** Where 21 → 22 notes the files whose permissions the dropped jobs held (see [Migration21To22]). */
         fun retiredGrants(context: Context): File = File(context.noBackupFilesDir, RETIRED_GRANTS)
 
         private const val RETIRED_GRANTS = "nagmedar_retired_grants"
@@ -362,11 +373,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
             return !there
         }
 
-        /** Schema migrations, oldest first; 20 → 21 notes the dropped jobs' files in [grants] when it is given. */
+        /** Schema migrations, oldest first; 21 → 22 notes the dropped jobs' files in [grants] when it is given. */
         fun migrations(grants: (() -> File)? = null): Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
             MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20, Migration20To21(grants),
+            MIGRATION_19_20, MIGRATION_20_21, Migration21To22(grants),
         )
 
         /** Schema migrations, oldest first. */

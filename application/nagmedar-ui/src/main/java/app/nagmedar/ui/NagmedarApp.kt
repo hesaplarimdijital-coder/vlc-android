@@ -117,7 +117,6 @@ import app.nagmedar.ui.audio.EqualizerScreen
 import app.nagmedar.ui.audio.EqualizerSide
 import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.screens.AboutScreen
-import app.nagmedar.ui.transcribe.WhisperHost
 import app.nagmedar.ui.screens.SettingsScreen
 import app.nagmedar.ui.prefs.AllSettingsScreen
 import app.nagmedar.ui.prefs.NagmedarLink
@@ -448,8 +447,6 @@ private fun NagmedarMain(
                     MediaInfoHost()
                     // remote access's addresses, how it works, and the one-time code a new browser asks for
                     RemoteAccessHost()
-                    // S-709: a transcription from speech, its window and what came of the job
-                    WhisperHost(Modifier.align(Alignment.BottomEnd).padding(16.dp))
                     // S-1005: the lyrics editor, over the lyrics
                     if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false })
                     AnimatedVisibility(visualizerOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {

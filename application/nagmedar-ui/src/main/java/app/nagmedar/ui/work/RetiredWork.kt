@@ -19,7 +19,7 @@ import java.io.File
  * [TV_LAB_WORK] and set its night run as an alarm to its receiver; no code is behind either any
  * more, so the worker would fail and the alarm reach nothing (its notification channel goes with
  * [app.nagmedar.ui.notify.RemovedChannels]).
- * The database's 20 → 21 drops the tables only the removed features used (the remux queue among
+ * The database's 21 → 22 drops the tables only the removed features used (the remux queue among
  * them) and notes the files the jobs held a permission to ([NagmedarDatabase.retiredGrants]):
  * those permissions go here, as far as nothing else in the app keeps them ([FolderGrants]), with
  * what TV Lab kept under files/tvlab (its profiles, the charts it shared, its bitrate cache).
@@ -79,7 +79,7 @@ object RetiredWork {
     }
 
     /**
-     * After 20 → 21: the database is opened first (which migrates it, whoever asked first), then the permissions it
+     * After 21 → 22: the database is opened first (which migrates it, whoever asked first), then the permissions it
      * noted go and the note with them. A database that cannot be opened now is tried again at the next start.
      */
     private fun tables(app: Context, prefs: SharedPreferences) {

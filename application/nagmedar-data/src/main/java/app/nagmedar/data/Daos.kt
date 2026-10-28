@@ -156,6 +156,18 @@ abstract class PodcastDao {
     @Query("UPDATE podcast_feed SET volume_boost = :boost WHERE id = :feedId")
     abstract fun setVolumeBoost(feedId: Long, boost: Int)
 
+    /** Version 21: the language Whisper hears the show in ([PodcastFeed.transcriptLanguage]). */
+    @Query("UPDATE podcast_feed SET transcript_language = :language WHERE id = :feedId")
+    abstract fun setTranscriptLanguage(feedId: Long, language: String?)
+
+    /** Version 21: the episode's own transcript, written with [model]; null when it has none any more. The rows changed (0: the episode is gone). */
+    @Query("UPDATE podcast_episode SET whisper_model = :model WHERE id = :episodeId")
+    abstract fun setWhisperModel(episodeId: Long, model: String?): Int
+
+    /** Version 21: the episodes that have a transcript of their own, by id. */
+    @Query("SELECT id FROM podcast_episode WHERE whisper_model IS NOT NULL")
+    abstract fun whisperEpisodes(): List<Long>
+
     /** S-1101: a new subscription with the episodes its first fetch read; the feed's id. */
     @Transaction
     open fun subscribeWith(feed: PodcastFeed, episodes: List<PodcastEpisode>): Long {
@@ -178,7 +190,7 @@ abstract class PodcastDao {
                 feed.copy(
                     autoDownload = now.autoDownload, notify = now.notify, autoDownloadCount = now.autoDownloadCount,
                     keepLatest = now.keepLatest, speed = now.speed, skipIntroSeconds = now.skipIntroSeconds, skipOutroSeconds = now.skipOutroSeconds,
-                    volumeBoost = now.volumeBoost,
+                    volumeBoost = now.volumeBoost, transcriptLanguage = now.transcriptLanguage,
                 )
             },
         )
