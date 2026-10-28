@@ -1342,7 +1342,6 @@
     <string name="nag_backup_part_smart_lists">Akıllı listeler</string>
     <string name="nag_backup_part_stats">Puanlar ve çalınmalar</string>
     <string name="nag_backup_part_lyrics">Sözleriniz ve gecikmeler</string>
-    <string name="nag_backup_part_file_settings">Dosya ayarları</string>
     <string name="nag_backup_part_covers">Seçtiğiniz kapaklar</string>
     <plurals name="nag_backup_settings_count">
         <item quantity="one">%d ayar</item>
@@ -1355,10 +1354,6 @@
     <plurals name="nag_backup_lists_count">
         <item quantity="one">%d liste</item>
         <item quantity="other">%d liste</item>
-    </plurals>
-    <plurals name="nag_backup_files_count">
-        <item quantity="one">%d dosya</item>
-        <item quantity="other">%d dosya</item>
     </plurals>
     <string name="nag_backup_done_title">Geri yüklendi</string>
     <plurals name="nag_backup_missing">

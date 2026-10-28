@@ -1348,7 +1348,6 @@
     <string name="nag_backup_part_smart_lists">Smart lists</string>
     <string name="nag_backup_part_stats">Ratings and play counts</string>
     <string name="nag_backup_part_lyrics">Your lyrics and delays</string>
-    <string name="nag_backup_part_file_settings">Per-file settings</string>
     <string name="nag_backup_part_covers">Covers you chose</string>
     <plurals name="nag_backup_settings_count">
         <item quantity="one">%d setting</item>
@@ -1361,10 +1360,6 @@
     <plurals name="nag_backup_lists_count">
         <item quantity="one">%d list</item>
         <item quantity="other">%d lists</item>
-    </plurals>
-    <plurals name="nag_backup_files_count">
-        <item quantity="one">%d file</item>
-        <item quantity="other">%d files</item>
     </plurals>
     <string name="nag_backup_done_title">Restored</string>
     <plurals name="nag_backup_missing">

@@ -5,10 +5,13 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.work.WorkManager
+import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.ui.onboarding.FolderGrants
 import org.videolan.tools.Settings
+import java.io.File
 
 /**
  * Nağmedar 1.0: what a removed feature left behind on an upgraded install, taken away once, at
@@ -16,13 +19,19 @@ import org.videolan.tools.Settings
  * [TV_LAB_WORK] and set its night run as an alarm to its receiver; no code is behind either any
  * more, so the worker would fail and the alarm reach nothing (its notification channel goes with
  * [app.nagmedar.ui.notify.RemovedChannels]).
- * Its Room tables (with the remux jobs' file permissions) and the profiles saved under
- * files/tvlab stay until the story that drops every unused table. Off the main thread: it reads
- * preferences and WorkManager's database.
+ * The database's 20 → 21 drops the tables only the removed features used (the remux queue among
+ * them) and notes the files the jobs held a permission to ([NagmedarDatabase.retiredGrants]):
+ * those permissions go here, as far as nothing else in the app keeps them ([FolderGrants]), with
+ * what TV Lab kept under files/tvlab (its profiles, the charts it shared, its bitrate cache).
+ * Off the main thread: it reads preferences, the databases and the disk.
  */
 object RetiredWork {
     private const val FILE = "nagmedar_retired"
     private const val TV_LAB_DONE = "tv_lab"
+    private const val TABLES_DONE = "video_tables"
+
+    /** What TV Lab kept in the app's files: its profiles, the charts it shared, its bitrate cache. */
+    private const val TV_LAB_FILES = "tvlab"
 
     /** The TV Lab's remux queue worker (RemuxWorker.NAME before 1.0). */
     private const val TV_LAB_WORK = "nagmedar-remux"
@@ -44,7 +53,11 @@ object RetiredWork {
     fun onProcessStart(context: Context) {
         val app = context.applicationContext
         val prefs = app.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-        if (prefs.getBoolean(TV_LAB_DONE, false)) return
+        if (!prefs.getBoolean(TV_LAB_DONE, false)) tvLab(app, prefs)
+        if (!prefs.getBoolean(TABLES_DONE, false)) tables(app, prefs)
+    }
+
+    private fun tvLab(app: Context, prefs: SharedPreferences) {
         runCatching { WorkManager.getInstance(app).cancelUniqueWork(TV_LAB_WORK) }
         runCatching {
             val intent = Intent(TV_LAB_ACTION).setComponent(ComponentName(app, TV_LAB_RECEIVER))
@@ -63,5 +76,22 @@ object RetiredWork {
             runCatching { app.deleteSharedPreferences(TV_LAB_PREFS) }
         }
         prefs.edit().putBoolean(TV_LAB_DONE, true).apply()
+    }
+
+    /**
+     * After 20 → 21: the database is opened first (which migrates it, whoever asked first), then the permissions it
+     * noted go and the note with them. A database that cannot be opened now is tried again at the next start.
+     */
+    private fun tables(app: Context, prefs: SharedPreferences) {
+        if (runCatching { NagmedarDatabase.get(app).openHelper.writableDatabase }.isFailure) return
+        runCatching {
+            val note = NagmedarDatabase.retiredGrants(app)
+            if (note.exists()) {
+                note.readLines().filter { it.isNotBlank() }.forEach { FolderGrants.release(app, it) }
+                note.delete()
+            }
+        }
+        runCatching { File(app.filesDir, TV_LAB_FILES).deleteRecursively() }
+        prefs.edit().putBoolean(TABLES_DONE, true).apply()
     }
 }

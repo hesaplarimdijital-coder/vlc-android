@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import java.io.File
 
 /**
  * Nağmedar's Room database (S-809), separate from VLC's media database so upstream migrations
@@ -15,10 +16,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  */
 @Database(
     entities = [
-        PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaSettings::class, MediaTechEntry::class,
+        PodcastFeed::class, PodcastEpisode::class, RadioStation::class, LyricsEntry::class, MediaTechEntry::class,
         AudioTechEntry::class, TrackStatsEntry::class, SmartPlaylistEntry::class, LatencyProfileEntry::class,
-        NetworkServerEntry::class, ScrobbleEntry::class, TranscodeProfileEntry::class, TranscodeJobEntry::class,
-        RadioRecording::class, RadioScheduleEntry::class, RemuxJobEntry::class, RadioScheduleRun::class, FilmInfoEntry::class, FilmEpisodeEntry::class,
+        NetworkServerEntry::class, ScrobbleEntry::class, RadioRecording::class, RadioScheduleEntry::class, RadioScheduleRun::class,
     ],
     version = NagmedarDatabase.VERSION,
     exportSchema = true,
@@ -27,7 +27,6 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun podcasts(): PodcastDao
     abstract fun radio(): RadioDao
     abstract fun lyrics(): LyricsDao
-    abstract fun mediaSettings(): MediaSettingsDao
     abstract fun mediaTech(): MediaTechDao
     abstract fun audioTech(): AudioTechDao
     abstract fun trackStats(): TrackStatsDao
@@ -35,15 +34,11 @@ abstract class NagmedarDatabase : RoomDatabase() {
     abstract fun latencyProfiles(): LatencyProfileDao
     abstract fun networkServers(): NetworkServerDao
     abstract fun scrobbles(): ScrobbleDao
-    abstract fun transcodeProfiles(): TranscodeProfileDao
-    abstract fun transcodeJobs(): TranscodeJobDao
     abstract fun radioRecordings(): RadioRecordingDao
-    abstract fun remuxJobs(): RemuxJobDao
-    abstract fun filmInfo(): FilmInfoDao
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 20
+        const val VERSION = 21
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -264,6 +259,47 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * 20 → 21 (Nağmedar 1.0, pure audio): the tables only the removed features used go, with their rows: the
+         * video player's settings per file (media_settings), the video conversions (transcode_profile, transcode_job),
+         * the TV Lab's remux queue (remux_job) and the film information (film_info, film_episode). IF EXISTS: a
+         * database a pull request's build left without one of them (see 15 → 16 …) migrates all the same. The music,
+         * podcast, radio, lyrics, statistics and other tables stay as they are.
+         *
+         * The files the jobs read and wrote kept the system's permission for their worker; before the jobs go, their
+         * addresses are written to [grants] (one a line), for the app to let go of what nothing else holds
+         * (app.nagmedar.ui.work.RetiredWork). That note is a courtesy: when it cannot be made, the tables go all the same.
+         */
+        private class Migration20To21(private val grants: (() -> File)?) : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                grants?.let { file -> runCatching { noteGrants(db, file()) } }
+                RETIRED_TABLES.forEach { db.execSQL("DROP TABLE IF EXISTS `$it`") }
+            }
+
+            private fun noteGrants(db: SupportSQLiteDatabase, file: File) {
+                val uris = sortedSetOf<String>()
+                for (table in listOf("remux_job", "transcode_job")) {
+                    val there = db.query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", arrayOf(table)).use { it.moveToFirst() }
+                    if (!there) continue
+                    db.query("SELECT input_uri, output_uri FROM `$table`").use { c ->
+                        while (c.moveToNext()) for (i in 0..1) c.getString(i)?.takeIf { it.isNotBlank() }?.let(uris::add)
+                    }
+                }
+                if (uris.isEmpty()) return
+                // added to a note an earlier, unfinished try left
+                val earlier = if (file.exists()) file.readLines().filter { it.isNotBlank() } else emptyList()
+                file.writeText((earlier + uris).distinct().joinToString("\n", postfix = "\n"))
+            }
+        }
+
+        /** The tables 20 → 21 drops. */
+        val RETIRED_TABLES = listOf("media_settings", "transcode_profile", "transcode_job", "remux_job", "film_info", "film_episode")
+
+        /** Where 20 → 21 notes the files whose permissions the dropped jobs held (see [Migration20To21]). */
+        fun retiredGrants(context: Context): File = File(context.noBackupFilesDir, RETIRED_GRANTS)
+
+        private const val RETIRED_GRANTS = "nagmedar_retired_grants"
+
         private fun remuxQueue(db: SupportSQLiteDatabase) {
             db.execSQL(
                 "CREATE TABLE IF NOT EXISTS `remux_job` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -326,19 +362,22 @@ abstract class NagmedarDatabase : RoomDatabase() {
             return !there
         }
 
-        /** Schema migrations, oldest first. */
-        val MIGRATIONS: Array<Migration> = arrayOf(
+        /** Schema migrations, oldest first; 20 → 21 notes the dropped jobs' files in [grants] when it is given. */
+        fun migrations(grants: (() -> File)? = null): Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
             MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20,
+            MIGRATION_19_20, Migration20To21(grants),
         )
+
+        /** Schema migrations, oldest first. */
+        val MIGRATIONS: Array<Migration> = migrations()
 
         @Volatile
         private var instance: NagmedarDatabase? = null
 
         fun get(context: Context): NagmedarDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, NagmedarDatabase::class.java, NAME)
-                .addMigrations(*MIGRATIONS)
+                .addMigrations(*migrations { retiredGrants(context.applicationContext) })
                 .build()
                 .also { instance = it }
         }

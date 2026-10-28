@@ -2,7 +2,6 @@ package app.nagmedar.ui.backup
 
 import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.LyricsEntry
-import app.nagmedar.data.MediaSettings
 import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.covers.CoverStore
@@ -23,7 +22,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 /** S-1502: the parts of a backup, in the order they are shown; each is restored on its own. */
-enum class BackupPart { Settings, Shortcuts, Playlists, SmartLists, Stats, Lyrics, FileSettings, Covers, Latency, RadioSchedules }
+enum class BackupPart { Settings, Shortcuts, Playlists, SmartLists, Stats, Lyrics, Covers, Latency, RadioSchedules }
 
 /** A preference as kept: a Boolean, Int, Long, Float, String or a set of strings. */
 data class SettingValue(val key: String, val value: Any)
@@ -54,7 +53,6 @@ data class Backup(
     val stats: List<TrackStatsEntry>? = null,
     /** The lyrics written by the user and those given a delay (S-1003, S-1004); downloaded ones come again by themselves. */
     val lyrics: List<LyricsEntry>? = null,
-    val fileSettings: List<MediaSettings>? = null,
     val covers: List<BackupCover>? = null,
     /** S-613: the output devices' latency profiles. */
     val latency: List<LatencyProfileEntry>? = null,
@@ -64,7 +62,7 @@ data class Backup(
      */
     val radioSchedules: List<RecordingSchedule>? = null,
 ) {
-    /** How many things [part] holds: settings, shortcuts changed, lists, tracks, files, covers. */
+    /** How many things [part] holds: settings, shortcuts changed, lists, tracks, covers. */
     fun count(part: BackupPart): Int = when (part) {
         BackupPart.Settings -> settings?.size ?: 0
         BackupPart.Shortcuts -> shortcuts?.size ?: 0
@@ -72,7 +70,6 @@ data class Backup(
         BackupPart.SmartLists -> smartLists?.size ?: 0
         BackupPart.Stats -> stats?.size ?: 0
         BackupPart.Lyrics -> lyrics?.size ?: 0
-        BackupPart.FileSettings -> fileSettings?.size ?: 0
         BackupPart.Covers -> covers?.size ?: 0
         BackupPart.Latency -> latency?.size ?: 0
         BackupPart.RadioSchedules -> radioSchedules?.size ?: 0
@@ -93,7 +90,6 @@ data class Backup(
         smartLists = smartLists.takeIf { BackupPart.SmartLists in parts },
         stats = stats.takeIf { BackupPart.Stats in parts },
         lyrics = lyrics.takeIf { BackupPart.Lyrics in parts },
-        fileSettings = fileSettings.takeIf { BackupPart.FileSettings in parts },
         covers = covers.takeIf { BackupPart.Covers in parts },
         latency = latency.takeIf { BackupPart.Latency in parts },
         radioSchedules = radioSchedules.takeIf { BackupPart.RadioSchedules in parts },
@@ -211,7 +207,6 @@ object BackupCodec {
         backup.smartLists?.let { lists -> o.put("smart_lists", JSONArray().apply { lists.forEach { put(smartList(it)) } }) }
         backup.stats?.let { rows -> o.put("stats", JSONArray().apply { rows.forEach { put(stats(it)) } }) }
         backup.lyrics?.let { rows -> o.put("lyrics", JSONArray().apply { rows.forEach { put(lyrics(it)) } }) }
-        backup.fileSettings?.let { rows -> o.put("file_settings", JSONArray().apply { rows.forEach { put(fileSettings(it)) } }) }
         backup.covers?.let { covers -> o.put("covers", JSONArray().apply { covers.forEach { put(it.name) } }) }
         backup.latency?.let { rows -> o.put("latency_profiles", JSONArray().apply { rows.forEach { put(latency(it)) } }) }
         backup.radioSchedules?.let { rows -> o.put("radio_schedules", JSONArray().apply { rows.forEach { put(radioSchedule(it)) } }) }
@@ -239,7 +234,6 @@ object BackupCodec {
             smartLists = o.optJSONArray("smart_lists")?.objects()?.mapNotNull(::smartList),
             stats = o.optJSONArray("stats")?.objects()?.mapNotNull(::stats),
             lyrics = o.optJSONArray("lyrics")?.objects()?.mapNotNull(::lyrics),
-            fileSettings = o.optJSONArray("file_settings")?.objects()?.mapNotNull(::fileSettings),
             covers = o.optJSONArray("covers")?.let { names ->
                 (0 until names.length()).mapNotNull { i ->
                     val name = names.optString(i)
@@ -373,42 +367,6 @@ object BackupCodec {
         )
     }
 
-    private fun fileSettings(row: MediaSettings): JSONObject = JSONObject()
-        .put("uri", row.mediaUri)
-        .put("audio_delay_ms", row.audioDelayMs)
-        .put("subtitle_delay_ms", row.subtitleDelayMs)
-        .put("audio_track", row.audioTrack)
-        .put("subtitle_track", row.subtitleTrack)
-        .put("secondary_subtitle_track", row.secondarySubtitleTrack)
-        .put("subtitle_encoding", row.subtitleEncoding)
-        .put("aspect_ratio", row.aspectRatio)
-        .put("playback_rate", row.playbackRate?.toDouble())
-        .put("deinterlace", row.deinterlace)
-        .put("equalizer_preset", row.equalizerPreset)
-        .put("effects", row.effects)
-        .put("subtitle_rate", row.subtitleRate)
-        .put("updated_at", row.updatedAt)
-
-    private fun fileSettings(o: JSONObject): MediaSettings? {
-        val uri = o.optString("uri").takeIf { it.isNotEmpty() } ?: return null
-        return MediaSettings(
-            mediaUri = uri,
-            audioDelayMs = o.optLongOrNull("audio_delay_ms"),
-            subtitleDelayMs = o.optLongOrNull("subtitle_delay_ms"),
-            audioTrack = o.optStringOrNull("audio_track"),
-            subtitleTrack = o.optStringOrNull("subtitle_track"),
-            secondarySubtitleTrack = o.optStringOrNull("secondary_subtitle_track"),
-            subtitleEncoding = o.optStringOrNull("subtitle_encoding"),
-            aspectRatio = o.optStringOrNull("aspect_ratio"),
-            playbackRate = o.optDouble("playback_rate").takeIf { !it.isNaN() }?.toFloat(),
-            deinterlace = o.optStringOrNull("deinterlace"),
-            equalizerPreset = o.optStringOrNull("equalizer_preset"),
-            updatedAt = o.optLong("updated_at", 0L),
-            effects = o.optStringOrNull("effects"),
-            subtitleRate = o.optStringOrNull("subtitle_rate"),
-        )
-    }
-
     /** S-613: a device's latency profile, without its address (a Bluetooth address names a pairing; the profile is found by type and name). */
     private fun latency(row: LatencyProfileEntry): JSONObject = JSONObject()
         .put("device_type", row.deviceType)
@@ -475,8 +433,6 @@ object BackupCodec {
     private fun JSONArray.objects(): List<JSONObject> = (0 until length()).mapNotNull { optJSONObject(it) }
 
     private fun JSONObject.optStringOrNull(name: String): String? = if (isNull(name)) null else optString(name)
-
-    private fun JSONObject.optLongOrNull(name: String): Long? = if (isNull(name)) null else optLong(name, 0L)
 
     private fun JSONObject.optIntOrNull(name: String): Int? = if (isNull(name)) null else optInt(name, 0)
 }

@@ -14,7 +14,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.data.LyricsEntry
-import app.nagmedar.data.MediaSettings
 import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.backup.Backup
@@ -72,7 +71,6 @@ class BackupScreenshotTest {
         smartLists = List(3) { SmartPlaylistEntry(name = "Akıllı ${it + 1}", rules = "") },
         stats = List(1204) { TrackStatsEntry("file:///m/$it.flac", rating = it % 6) },
         lyrics = List(12) { LyricsEntry("t$it", "user", synced = true, text = "") },
-        fileSettings = List(87) { MediaSettings("file:///v/$it.mkv") },
         covers = List(4) { BackupCover("%040x.user".format(it), ByteArray(0)) },
     )
 
