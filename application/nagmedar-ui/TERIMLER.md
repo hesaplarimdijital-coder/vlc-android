@@ -114,19 +114,8 @@ Sözlüğü testler denetler:
 | özgür yazılım | free software | açık kaynak | open source | |
 | katkıcı | contributor | | | |
 | kapsayıcı | container | | | MKV, MP4 |
-| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, Mbps ile; TV Lab'de “1 sn tepe”, “5 sn ortalama” |
-| eşik | threshold | | | Bir cihaz profilinin kaldırdığı en yüksek 1 sn bit hızı: “Profil eşiği” |
-| cihaz profili | device profile | | | TV Lab'in hedefi: açtığı kapsayıcılar, codec'ler, HDR, eşik; JSON dosyası olarak paylaşılır |
-| bulgu | finding | | | TV Lab'de kritik, uyarı ya da uygun |
-| remux | remux | yeniden paketleme | re-mux | TV Lab'in kayıpsız dönüşümü: video akışına dokunmadan kapsayıcı ve izler yeni bir MKV'ye yazılır; işler “Remux sırası”nda bekler, iş “sırada”, “remux yapılıyor”, “doğrulanıyor”, “tamamlandı” |
-| Video bit bit aynı | Video bit for bit identical | | bit-identical, bit-exact video | Doğrulama rozeti (S-1209): çıktının videosu kaynağınkiyle paket paket karşılaştırıldı ve aynı çıktı; müzikteki “bit-perfect” çıkış için kalır |
-| doğrulama | verification | | | Remux çıktısının geri okunup karşılaştırılması; “Doğrulanıyor” |
-| uyumluluk izi | compatibility track | | | Remux'ta bir ses izinin yanına eklenen E-AC-3 ya da LPCM iz (S-1207), TrueHD ve DTS-HD çalmayan TV için: başlığı “Uyumluluk izi (E-AC-3 5.1)”; orijinal iz kayıpsız kalır, eklenen iz “Kayıplı (eklenen iz)” ya da “Kayıpsız (eklenen iz)” |
-| kayıpsız, kayıplı | lossless, lossy | | | Remux planındaki her adımın rozeti (S-1205): “Kayıpsız”, “Kayıpsız (üst veri değişir)” (izin işaretleri, dili, başlığı ya da sırası değişir; paketleri aynı kalır), “Kayıplı” (atılan iz, bölüm, ek; FEL'li dönüşüm); “Lossless (tags change)” |
-| remux planı | remux plan | | | Sıraya almadan önce bir filmin remux'u: izler, işaretler, Dolby Vision, çıktı; “Sıraya al…” |
-| toplu işlem | batch | | | TV Lab'in bir klasördeki filmleri birlikte analiz edip sıraya alan sayfası (S-1210); “varsayılan plan”, filmin “kendi planı” |
-| gece çalıştırmak | run at night | | | Remux sırasının seçilen saatte (istenirse yalnızca şarjdayken) başlaması: “Gece çalıştır…”; o saate dek sıra bekler. Sıra bütün olarak “duraklatılır” ve “sürdürülür” |
-| geçmiş (TV Lab) | history | | | Biten remux işleri ve doğrulama raporları (S-208): “Yeniden çalıştır…”, “Rapor”, “Geçmişten sil” (hiçbir dosyayı silmez) |
+| bit hızı | bitrate | bit oranı | bit rate | Saniyedeki bit, kbps ya da Mbps ile: “320 kbps” |
+| kayıpsız, kayıplı | lossless, lossy | | | Bir biçimin ya da dönüştürmenin niteliği: FLAC kayıpsız, Opus ve MP3 kayıplı |
 | kare hızı | frame rate | | | |
 | kayıp kare | dropped frames | | lost frames | Oynatıcının gösteremediği kareler: Bilgi sekmesinde ve Ayarlar › Performans'ta; hedef ≤ %0,1 |
 | açılış | start-up | | startup | Uygulamanın açılıp ilk karesini çizmesi; soğuk açılış uygulama kapalıyken olur. Ayarlar'daki “Başlangıç” ise ne açılacağını seçer |

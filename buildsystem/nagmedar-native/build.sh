@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-02 USB audio, SP-03 Dolby Vision conversion, SP-05 whisper),
+# Native part of Settings > Lab (SP-02 USB audio, SP-05 whisper) with the media probe (S-802),
 # the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
 #
 #   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
-#                              dvconvert, remux, mediaprobe, subextract and nagaudio commands (host tests in CI: test-host.sh);
-#                              remux, bitrate and dvconvert also with AddressSanitizer (*-asan) where cc has it
+#                              mediaprobe, subextract, whisper_lab_cli and nagaudio commands (host tests in CI: test-host.sh)
 #   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp (with ggml's Vulkan backend: glslc is built for this
 #                              machine first), libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
@@ -62,17 +61,16 @@ FFMPEG_COMPONENTS=(
     --enable-demuxer=avi,mpegps
     # the embedded subtitles written out as files: an AVI's GAB2 subtitles are SRT or SSA files inside it
     --enable-demuxer=srt,ass
-    --enable-muxer=matroska,mp4,mov,null
+    --enable-muxer=null
     # S-1010: the converter's Ogg Opus and M4A files, and FFmpeg's own AAC encoder (libopus and LAME are the engine's)
     --enable-muxer=ogg,ipod --enable-encoder=aac
     --enable-parser=hevc,h264,aac,ac3,mpegaudio,flac,opus,vorbis,dca,mlp
-    --enable-bsf=hevc_mp4toannexb,extract_extradata
+    # avformat_find_stream_info takes the extradata of streams without it (MPEG-TS) through it: the media probe
+    --enable-bsf=extract_extradata
     --enable-decoder=aac,aac_latm,ac3,eac3,mp3,mp3float,mp2,flac,opus,vorbis,dca,truehd,mlp,alac,ape,wavpack
     --enable-decoder=pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be,pcm_s32le,pcm_f32le,pcm_bluray,pcm_dvd
     --enable-decoder=mpc7,mpc8,tta,wmav1,wmav2,wmapro,wmalossless,pcm_u8,pcm_s8,pcm_f64le,pcm_s24le_planar,pcm_s32le_planar
     --enable-decoder=dsd_lsbf,dsd_msbf,dsd_lsbf_planar,dsd_msbf_planar
-    # S-1207: the remux's compatibility tracks, E-AC-3 (AC-3 beside it) and LPCM in Matroska
-    --enable-encoder=eac3,ac3,pcm_s16le,pcm_s24le
 )
 
 # A release tarball (for sources not kept in git), checked against its SHA-256.
@@ -285,49 +283,16 @@ host() {
     build_audio
     cp "$WORK/build-host/audio/nagaudio" "$PREFIX/bin/"
     cp "$WORK/build-host/lab/whisper_lab_cli" "$PREFIX/bin/"
-    log "dvconvert (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/dvconvert" -I"$PREFIX/include" \
-        "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
-        > "$WORK/dvconvert.log" 2>&1 || fail_log "dvconvert (host)" "$WORK/dvconvert.log"
-    log "remux (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/remux" -I"$PREFIX/include" \
-        "$ROOT/native/lab/remux.c" "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/remux_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
-        > "$WORK/remux.log" 2>&1 || fail_log "remux (host)" "$WORK/remux.log"
     log "mediaprobe (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/mediaprobe" -I"$PREFIX/include" \
         "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
         > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
-    log "bitrate (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/bitrate" -I"$PREFIX/include" \
-        "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
-        > "$WORK/bitrate.log" 2>&1 || fail_log "bitrate (host)" "$WORK/bitrate.log"
-    log "disktest (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/disktest" "$ROOT/native/lab/disktest.c" "$ROOT/native/lab/disktest_cli.c" \
-        > "$WORK/disktest.log" 2>&1 || fail_log "disktest (host)" "$WORK/disktest.log"
     log "subextract (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/subextract" -I"$PREFIX/include" \
         "$ROOT/native/lab/subtitle_extract.c" "$ROOT/native/lab/subtitle_extract_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
         > "$WORK/subextract.log" 2>&1 || fail_log "subextract (host)" "$WORK/subextract.log"
-    # the remux, the bitrate analysis and the converter again under AddressSanitizer and UBSan, where the
-    # compiler has them: test-host.sh runs the files that once made them read past their tables with these
-    if echo 'int main(void) { return 0; }' | "${CC:-cc}" -x c -fsanitize=address,undefined -o "$WORK/sanitizer-check" - > /dev/null 2>&1; then
-        local san=(-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all -Wall -I"$PREFIX/include")
-        local libs=(-L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl)
-        log "remux, bitrate and dvconvert with AddressSanitizer (host)"
-        { "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/remux-asan" "$ROOT/native/lab/remux.c" "$ROOT/native/lab/dvconvert.c" \
-              "$ROOT/native/lab/remux_cli.c" "${libs[@]}" &&
-          "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/bitrate-asan" "$ROOT/native/lab/bitrate.c" "$ROOT/native/lab/bitrate_cli.c" "${libs[@]}" &&
-          "${CC:-cc}" "${san[@]}" -o "$PREFIX/bin/dvconvert-asan" "$ROOT/native/lab/dvconvert.c" "$ROOT/native/lab/dvconvert_cli.c" "${libs[@]}"
-        } > "$WORK/sanitizers.log" 2>&1 || fail_log "sanitizer builds (host)" "$WORK/sanitizers.log"
-    else
-        log "no AddressSanitizer in ${CC:-cc}: the host tests run the plain commands"
-        rm -f "$PREFIX/bin/remux-asan" "$PREFIX/bin/bitrate-asan" "$PREFIX/bin/dvconvert-asan"
-    fi
 }
 
 android() {

@@ -22,7 +22,7 @@ object NagIcons {
     val ExternalDrive: ImageVector by lazy { icon("ExternalDrive", stroke("M3.2,9H12.8A1.2,1.2 0 0 1 14,10.2V12.3A1.2,1.2 0 0 1 12.8,13.5H3.2A1.2,1.2 0 0 1 2,12.3V10.2A1.2,1.2 0 0 1 3.2,9Z"), stroke("M3.5 9 5 3.5h6L12.5 9")) }
     val Network: ImageVector by lazy { icon("Network", stroke("M6.8,2H9.2A0.8,0.8 0 0 1 10,2.8V4.7A0.8,0.8 0 0 1 9.2,5.5H6.8A0.8,0.8 0 0 1 6,4.7V2.8A0.8,0.8 0 0 1 6.8,2Z"), stroke("M2.8,10.5H5.2A0.8,0.8 0 0 1 6,11.3V13.2A0.8,0.8 0 0 1 5.2,14H2.8A0.8,0.8 0 0 1 2,13.2V11.3A0.8,0.8 0 0 1 2.8,10.5Z"), stroke("M10.8,10.5H13.2A0.8,0.8 0 0 1 14,11.3V13.2A0.8,0.8 0 0 1 13.2,14H10.8A0.8,0.8 0 0 1 10,13.2V11.3A0.8,0.8 0 0 1 10.8,10.5Z"), stroke("M8 5.5V8M4 10.5V8h8v2.5")) }
     val Streams: ImageVector by lazy { icon("Streams", stroke("M6.5 9.5 9.5 6.5M7 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7l-1.2 1.2M9 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2")) }
-    val TvLab: ImageVector by lazy { icon("TvLab", stroke("M6 2.5h4M6.8 2.5v4L3 13a1 1 0 0 0 .9 1.5h8.2A1 1 0 0 0 13 13L9.2 6.5v-4M4.6 10.5h6.8")) }
+    val Lab: ImageVector by lazy { icon("Lab", stroke("M6 2.5h4M6.8 2.5v4L3 13a1 1 0 0 0 .9 1.5h8.2A1 1 0 0 0 13 13L9.2 6.5v-4M4.6 10.5h6.8")) }
     val Convert: ImageVector by lazy { icon("Convert", stroke("M3 5.5h9l-2.5-2.5M13 10.5H4l2.5 2.5")) }
     val Downloads: ImageVector by lazy { icon("Downloads", stroke("M8 2.5v8M4.8 7.5 8 10.7l3.2-3.2M3 13.5h10")) }
     val Settings: ImageVector by lazy { icon("Settings", stroke("M5.8,8a2.2,2.2 0 1 0 4.4,0a2.2,2.2 0 1 0 -4.4,0Z"), stroke("M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2")) }
@@ -109,7 +109,7 @@ object NagIcons {
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
         Home, Movies, Series, Videos, Music, Podcasts, Radio, Device,
-        ExternalDrive, Network, Streams, TvLab, Convert, Downloads, Settings, Plus,
+        ExternalDrive, Network, Streams, Lab, Convert, Downloads, Settings, Plus,
         Grid, ListView, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Check, Play,
         Resume, Forward, OpenWindow, Subtitle, Info, PlaylistAdd, Folder, Delete,
         Close, MoreHorizontal, MoreVertical, Shuffle, Previous, Next, Pause, Repeat,

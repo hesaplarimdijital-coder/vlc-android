@@ -135,7 +135,7 @@ ext {
     navigationComposeVersion = '2.8.4'
     lifecycleComposeVersion = '2.8.7'
     nagmedarRobolectricVersion = '4.14.1'
-    // S-1010: the converter's jobs, S-1206: the remux queue (application/nagmedar-ui)
+    // S-1010: the converter's jobs (application/nagmedar-ui)
     workManagerVersion = '2.10.5'
     // S-1404: the macrobenchmarks (application/benchmark)
     macrobenchmarkVersion = '1.3.4'

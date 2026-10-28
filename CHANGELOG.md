@@ -2,6 +2,10 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. Her MVP bir sürümdür: MVP1 0.1.0, MVP2 0.2.0 ve sonrası aynı sırayla. İmzalı APK'lar şimdilik yalnızca depo sahibinin gördüğü **taslak** GitHub sürümlerinde yer alır; herkese açık yayın ve F-Droid derlemesi sonraya bırakıldı (S-1503, 12 Ekim 2026 kararı). Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.0 — Nağmedar 1.0 (hazırlanıyor)
+
+- TV Lab kaldırıldı (Nağmedar 1.0 yalnızca müzik, podcast ve radyo çalar): analiz, cihaz profilleri, remux planı, sırası, toplu işlemi, gece çalıştırması ve geçmişi; kenar çubuğundaki, raydaki, komut paletindeki ve Araçlar menüsündeki yeri, Ctrl+Shift+T kısayolu, filmin menüsündeki “TV Lab'de analiz et” ve kılavuzdaki bölümü de. Ayarlar › Laboratuvar'dan Dolby Vision P7 → P8.1 dönüştürme, ekran raporu ve TV'de 23,976 Hz denemesi çıktı; ses raporu, bit-perfect denemesi, USB DAC araçları ve whisper kalır. Yerel kitaplıktan remux motoru, Dolby Vision dönüştürücüsü, bit hızı çözümlemesi ve disk testi çıktı (libdovi medya incelemesi için kalır). Güncellenen kurulumda ilk açılışta TV Lab'den kalan remux işi, gece çalıştırma alarmı, bildirim kanalı ve toplu işlem klasörlerinin izinleri bir kez temizlenir; yedekler cihaz profillerini artık yazmaz, eski bir yedekteki profiller yok sayılır. TV Lab'li son sürüm `archive/0.5-video` dalındadır.
+
 ## 0.5.0 — MVP5 (hazırlanıyor)
 
 ### Görünüm ve hareket (Desktop Kit 0.2.0)

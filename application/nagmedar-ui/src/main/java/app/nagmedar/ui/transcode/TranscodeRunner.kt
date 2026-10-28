@@ -66,7 +66,7 @@ class DeviceTranscodeFiles(context: Context) : TranscodeFiles {
         false
     }
 
-    /** The documents' rule, shared with the remux (S-1206). */
+    /** The documents' rule ([JobOutputs]). */
     private val outputs = JobOutputs(context)
 
     override fun removeOutput(output: Uri) {

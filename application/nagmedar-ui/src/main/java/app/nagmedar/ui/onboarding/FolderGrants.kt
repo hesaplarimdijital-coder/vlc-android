@@ -53,9 +53,6 @@ enum class GrantHolder(val writes: Boolean) {
     /** S-1103: the podcasts' download folder, and the episodes downloaded into a picked one (the cleaner deletes them). */
     PodcastDownloads(true),
 
-    /** S-1206, S-1210: the TV Lab's batch folders, and its remux jobs' films and new files. */
-    TvLab(true),
-
     /** S-1005: the folders the lyrics editor was given to write .lrc files into. */
     Lyrics(true),
 }
@@ -72,7 +69,7 @@ object FolderGrants {
     private const val KEPT_PREFIX = "nagmedar_kept_trees_"
 
     /** The holders that keep no setting of their folders: the folders they were given are noted under these keys. */
-    private val noted = listOf(GrantHolder.TvLab, GrantHolder.Lyrics)
+    private val noted = listOf(GrantHolder.Lyrics)
 
     fun keptKey(holder: GrantHolder): String = KEPT_PREFIX + holder.name.lowercase(Locale.ROOT)
 
@@ -106,21 +103,19 @@ object FolderGrants {
         .mapValues { (_, uris) -> uris.filter { it.isNotBlank() }.toSet() }
 
     /**
-     * What every holder keeps now: [preferenceUses], the converter's unfinished jobs, the podcast episodes downloaded
-     * into a picked folder and the TV Lab's remux jobs (the history's too: a job can be run again). Off the main thread.
+     * What every holder keeps now: [preferenceUses], the converter's unfinished jobs and the podcast episodes downloaded
+     * into a picked folder. Off the main thread.
      */
     fun uses(context: Context): Map<GrantHolder, Set<String>> {
         val stored = preferenceUses(Settings.getInstance(context))
         val db = NagmedarDatabase.get(context)
-        val remuxed = db.remuxJobs().all().flatMap { listOf(it.inputUri, it.outputUri) }
         return stored + mapOf(
             GrantHolder.ConvertJobs to ConvertStore(context).activeFolders(),
             GrantHolder.PodcastDownloads to stored.getValue(GrantHolder.PodcastDownloads) + db.podcasts().downloadedDocuments(),
-            GrantHolder.TvLab to stored.getValue(GrantHolder.TvLab) + remuxed,
         )
     }
 
-    /** [uri] was given to [holder], which keeps no setting of it (the TV Lab's batch, the lyrics editor): the others leave it. */
+    /** [uri] was given to [holder], which keeps no setting of it (the lyrics editor): the others leave it. */
     fun note(context: Context, holder: GrantHolder, uri: String) {
         if (holder !in noted) return
         val prefs = Settings.getInstance(context)

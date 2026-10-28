@@ -48,9 +48,6 @@ object NotificationIds {
     const val PODCAST_NEWS_SUMMARY = 1105
     const val PODCAST_TIME_LIMIT = 1107
 
-    /** S-1206: the TV Lab's remux queue under way. */
-    const val REMUX = 1206
-
     /** S-1301: libVLC asks something (a sign-in, a certificate) while no window is in front. */
     const val PROMPT = 1301
 
@@ -78,9 +75,6 @@ object NotificationIds {
     /** The embedded subtitles extracted into a file: the job under way, and what came of it. */
     const val EXTRACT = 7110
     const val EXTRACT_DONE = 7111
-
-    /** S-1206: Android's time limit stopped the remux queue. */
-    const val REMUX_TIME_LIMIT = 12061
 
     /** S-1303: the conversions' queue under way. */
     const val TRANSCODE = 13030

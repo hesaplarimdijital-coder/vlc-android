@@ -33,7 +33,6 @@ enum class Destination(
     Device("device", R.string.nag_nav_device, NavSection.Sources, R.string.nag_coming_device),
     Network("network", R.string.nag_nav_network, NavSection.Sources),
     Streams("streams", R.string.nag_nav_streams, NavSection.Sources, R.string.nag_coming_streams),
-    TvLab("tvlab", R.string.nag_nav_tv_lab, NavSection.Tools, R.string.nag_coming_tv_lab),
     Convert("convert", R.string.nag_nav_convert, NavSection.Tools, R.string.nag_coming_convert),
     Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),
@@ -70,7 +69,6 @@ enum class Destination(
             Device -> NagIcons.Device
             Network -> NagIcons.Network
             Streams -> NagIcons.Streams
-            TvLab -> NagIcons.TvLab
             Convert -> NagIcons.Convert
             Downloads -> NagIcons.Downloads
             Settings -> NagIcons.Settings
@@ -96,7 +94,7 @@ enum class Destination(
 
     companion object {
         val bottomBar = listOf(Home, Movies, Music, Podcasts, More)
-        val rail = listOf(Home, Movies, Series, Videos, Music, Podcasts, Radio, TvLab)
+        val rail = listOf(Home, Movies, Series, Videos, Music, Podcasts, Radio)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
         val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard, AllSettings)

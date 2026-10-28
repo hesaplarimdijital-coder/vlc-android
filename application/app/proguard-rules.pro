@@ -143,9 +143,6 @@
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }
 
-# Nağmedar (S-1206): libnagmedar_lab.so asks the remux's listener how to go on by its method's name
--keep interface app.nagmedar.lab.NativeLab$RemuxProgress { *; }
--keepclassmembers class * implements app.nagmedar.lab.NativeLab$RemuxProgress { *; }
 # Nağmedar: libnagmedar_lab.so calls the embedded subtitles' extraction listener by its method's name
 -keep interface app.nagmedar.lab.NativeLab$SubtitleExtraction { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$SubtitleExtraction { *; }

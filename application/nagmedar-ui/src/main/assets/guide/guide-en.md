@@ -281,33 +281,6 @@ Send video or music to a Chromecast or a DLNA device (a TV, a receiver, a speake
 
 > If the device does not show in the list, check that both are on the same Wi-Fi (not a guest network), the TV is on and DLNA or media sharing is on, the Chromecast is awake, and the router has multicast (mDNS, UPnP) on and client isolation off. A VPN on this device can hide the local network.
 
-## TV Lab {tvlab}
-
-TV Lab analyses a film for the device you will play it on (a TV such as the LG OLED B4, or the Tab S11 Ultra) and, if needed, writes a new MKV with a lossless remux. The source file is only read. Where: Tools › TV Lab, {key:TvLab}, or “Analyse in TV Lab” in a film's menu in the library.
-
-### Analysis
-1. Choose the device profile under “Target”, then press “Choose file”.
-2. TV Lab reads the film's streams and its HDR and Dolby Vision, and measures its bitrate second by second and the reading speed of its drive; “Result” says whether the film plays as it is.
-3. **Findings** gives each problem as critical, warning or fine, with why and the fix: dual-layer Dolby Vision, a default audio track the TV does not play, a bitrate over the threshold and so on.
-4. The bitrate chart (1 s peak, 5 s average, the profile threshold) is saved as PNG or CSV with “Export”, the analysis as text with “Report”.
-
-A device profile holds the containers, codecs, HDR and Dolby Vision profiles, audio and subtitle formats the device takes and the highest bitrate it copes with (the threshold). Change or add profiles with “Edit profile”, “New profile…” and “Import profile…”; profiles are exported as JSON files and are part of a backup.
-
-### The remux plan
-1. After an analysis, “Remux” opens the plan. The video is always copied bit for bit. Keep or drop each audio and subtitle track; change its default and forced flags, its language and title; put the tracks in order by dragging them or with Alt+↑ and Alt+↓.
-2. The device profile's suggestions are in the plan from the start, each with “Apply” or “Undo”: converting Dolby Vision profile 7 to 8.1 when the TV plays single-layer Dolby Vision only (the base layer stays bit for bit, the enhancement layer is dropped), a track the TV plays instead of a default track it does not, and dropping the subtitles it does not show.
-3. **Compatibility track:** an E-AC-3 5.1 track goes beside a TrueHD or DTS-HD track the TV does not play, and the original track stays lossless. With “Extra audio track” you can add one beside another track too, and choose its codec (E-AC-3, AC-3, LPCM), its bitrate, a mix-down to stereo and whether the device starts with it.
-4. Every step says what it keeps: “Lossless”, “Lossless (tags change)” or “Lossy”. Check the summary and press “Queue…”: the system's file chooser asks where, and a new, empty file is made there (film.remux.mkv). No file is written over.
-
-### Queue, batch and history
-- **Queue:** jobs run one at a time, with progress and Cancel in the notification. Put waiting jobs in order by dragging them or with Alt+↑ and Alt+↓. “Pause the queue” holds the running job where it is, “Resume” goes on.
-- **Run at night…:** the queue waits until the time you choose (02:00 by default) and, if you like, starts only while the device charges; it stays set when the device restarts.
-- **Batch:** choose a folder (“Choose a folder…” or one of the library's folders); its films are analysed and each gets the default plan. “Edit the plan…” gives a film its own plan. Press “Choose the output folder…” and queue the films: each goes into a new file named “name.remux.mkv”; where a file of that name is already there, the film is skipped and the file left alone.
-- **Verification:** when a remux ends, the output is read back and every packet of its video is compared with the source by SHA-256 (with the Dolby Vision conversion, the base layer and each frame's RPU). A job that matches gets the “Video bit for bit identical” badge; one that does not fails, and its output is removed.
-- **History:** every job that ended stays here with its state, how long it took, its speed and its verification report. “Run again…” writes the same plan into a new file, “Open the output” opens the film; the report is shared or saved as text or JSON. “Forget” deletes no file.
-
-> A remux pauses when the battery is low (under 15% off the charger) or the device gets very hot, and slows down while it is warm. TV Lab's tools run on arm64 phones and tablets.
-
 ## Remote access from a browser {remote-access}
 
 Look at your library, control playback and send files from the browser of a computer or phone on this network. The page comes from the server on this device; it does not pass through the internet.
@@ -352,19 +325,19 @@ Nağmedar is based on VLC for Android, but VLC's classic screens no longer open:
 
 ## Long jobs and Android's time limit {jobs}
 
-Conversions, remuxes, generating, translating and extracting subtitles, downloads and recordings run in the background; follow them in their notification and stop them there. Conversions and remuxes wait while the battery is low or the device is hot.
+Conversions, generating, translating and extracting subtitles, downloads and recordings run in the background; follow them in their notification and stop them there. Conversions wait while the battery is low or the device is hot.
 
 Android 15 and later give work in the background a time limit of six hours a day. When it is reached, Nağmedar says so in a notification and the job goes on like this:
 - **Podcast downloads** and **a translation model's download** go on later from where they stopped.
 - **Music conversion** waits, then goes on from where it was.
-- **Video conversion** and **remux** go back to the queue and start again from the beginning when Nağmedar is opened.
+- **Video conversion** goes back to the queue and start again from the beginning when Nağmedar is opened.
 - **Generating subtitles**, **translating** and **extracting embedded subtitles** stop; started again, they begin from the start.
 - **Radio recording** stops; the tracks so far are saved.
 - **Copying a recording of the video player** to its folder goes on; keep Nağmedar open until it ends.
 - **Streaming on the network (HLS)** stops; start it again to go on.
 - **The library scan** takes its notification away and goes on.
 
-> Follow downloads in Tools › Downloads, remux jobs in TV Lab's Queue tab and video conversions on the Convert page.
+> Follow downloads in Tools › Downloads and video conversions on the Convert page.
 
 ## Backup and restore {backup}
 
@@ -372,7 +345,7 @@ Write your settings, lists and ratings to one ZIP file; bring them back on anoth
 
 ### Making a backup
 1. Press “Back up…” and choose the file's place in the system's file chooser (nagmedar-backup-<date>.zip).
-2. The file holds settings, shortcuts, TV Lab device profiles, playlists, smart lists, ratings and play counts, your own lyrics and lyrics delays, per-file settings, the covers you chose by hand, latency profiles and scheduled radio recordings.
+2. The file holds settings, shortcuts, playlists, smart lists, ratings and play counts, your own lyrics and lyrics delays, per-file settings, the covers you chose by hand, latency profiles and scheduled radio recordings.
 
 ### Restoring
 1. Press “Restore…” and choose the backup file. When it was made and by which version, and its parts with their counts, are shown.
