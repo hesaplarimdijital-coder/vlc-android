@@ -1,16 +1,15 @@
 # libnagmedar_lab.so: the native part of Settings > Lab (SP-02 USB audio, SP-05 whisper), the
-# media probe behind the library's technical badges (S-802, libdovi reads the first Dolby Vision
-# RPU), the subtitles from a film's speech (S-709, on the GPU through ggml's Vulkan backend where
-# the device has one) and the extraction of a film's embedded text subtitles into files.
+# media probe behind the library's technical facts (S-802) and the subtitles from speech (S-709,
+# on the GPU through ggml's Vulkan backend where the device has one).
 # Built by buildsystem/nagmedar-native/build.sh android, which provides the static
-# dependencies in DEPS_PREFIX (FFmpeg, libdovi, whisper.cpp) and the libusb sources.
+# dependencies in DEPS_PREFIX (FFmpeg, whisper.cpp) and the libusb sources.
 cmake_minimum_required(VERSION 3.22)
 project(nagmedar_lab C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg, libdovi and whisper.cpp")
+set(DEPS_PREFIX "" CACHE PATH "prefix with FFmpeg and whisper.cpp")
 set(LIBUSB_SOURCE "" CACHE PATH "libusb source tree")
 # S-709: whisper.cpp built with ggml's Vulkan backend (the Android build). The system's Vulkan
 # loader is opened at run time (vulkan_loader.c): the library loads on devices without it. The
@@ -35,7 +34,7 @@ target_include_directories(usb PUBLIC ${USB} PRIVATE ${LIBUSB_SOURCE}/android ${
 target_compile_options(usb PRIVATE -fvisibility=hidden -pthread -w)
 
 add_library(nagmedar_lab SHARED lab_jni.c mediaprobe.c usb_audio.c whisper_lab.cpp
-    whisper_subs.cpp whisper_subs_jni.c subtitle_extract.c subtitle_extract_jni.c ${WHISPER_SOURCES})
+    whisper_subs.cpp whisper_subs_jni.c ${WHISPER_SOURCES})
 target_include_directories(nagmedar_lab PRIVATE ${DEPS_PREFIX}/include)
 target_compile_options(nagmedar_lab PRIVATE -fvisibility=hidden -O2 -Wall)
 if(NAGMEDAR_VULKAN)
@@ -50,7 +49,6 @@ target_link_libraries(nagmedar_lab PRIVATE
     ${DEPS_PREFIX}/lib/libavcodec.a
     ${DEPS_PREFIX}/lib/libswresample.a
     ${DEPS_PREFIX}/lib/libavutil.a
-    ${DEPS_PREFIX}/lib/libdovi.a
     dl m)
 if(ANDROID)
     target_link_libraries(nagmedar_lab PRIVATE log android)

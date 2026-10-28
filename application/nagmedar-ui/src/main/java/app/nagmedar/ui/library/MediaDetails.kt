@@ -5,24 +5,15 @@ import android.net.Uri
 import android.os.Build
 import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import app.nagmedar.lab.MediaTech
 import app.nagmedar.ui.R
-import app.nagmedar.ui.theme.NagTheme
 import java.io.File
 import java.util.Locale
 
@@ -46,11 +37,6 @@ fun techRows(tech: MediaTech, key: String): List<TechRow> {
     val locale = currentLocale()
     val commentary = stringResource(R.string.nag_tech_commentary)
     val rows = mutableListOf<TechRow>()
-    tech.video?.let { video ->
-        rows += TechRow(stringResource(R.string.nag_tech_video), videoLine(video))
-        if (video.fps > 0) rows += TechRow(stringResource(R.string.nag_tech_frame_rate), frameRateLabel(video.fps, locale))
-        rows += TechRow(stringResource(R.string.nag_tech_range), rangeLine(video, locale))
-    }
     tech.audio.forEachIndexed { index, track ->
         rows += TechRow(stringResource(R.string.nag_tech_audio, index + 1), audioLine(track, locale, commentary))
     }
@@ -82,23 +68,3 @@ private fun volumeName(context: Context, key: String): String? = runCatching {
 @Composable
 @ReadOnlyComposable
 fun currentLocale(): Locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
-
-/** The badge in a card's corner: light text on a dark glass, readable on any artwork. */
-@Composable
-fun TechBadge(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text,
-        style = NagTheme.type.mono,
-        color = BadgeText,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier
-            .background(BadgeGlass, RoundedCornerShape(4.dp))
-            .border(1.dp, BadgeEdge, RoundedCornerShape(4.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    )
-}
-
-internal val BadgeGlass = androidx.compose.ui.graphics.Color(0xE6090B0E)
-internal val BadgeEdge = androidx.compose.ui.graphics.Color(0x1FFFFFFF)
-internal val BadgeText = androidx.compose.ui.graphics.Color(0xFFE6E9ED)

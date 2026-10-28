@@ -1,9 +1,9 @@
 package app.nagmedar.lab
 
 /**
- * libnagmedar_lab.so: FFmpeg, libdovi, whisper.cpp and libusb, linked privately so they never
- * meet libvlc's own copies: the Lab tools, the library's media probe (S-802), the subtitles from
- * speech (S-709) and the extraction of embedded subtitles. Every call is
+ * libnagmedar_lab.so: FFmpeg, whisper.cpp and libusb, linked privately so they never
+ * meet libvlc's own copies: the Lab tools, the library's media probe (S-802) and the subtitles
+ * from speech (S-709). Every call is
  * blocking and runs on a background thread; [cancel] stops the running Lab tool. Results are
  * JSON objects (see native/lab).
  */
@@ -67,31 +67,12 @@ object NativeLab {
     /** S-709: stops the running [transcribe] soon; the Lab's [cancel] does not. */
     @JvmStatic external fun cancelTranscription()
 
-    /** How far an extraction is: [fraction] of the film read, 0..1; on the thread that runs it. */
-    fun interface SubtitleExtraction {
-        fun onProgress(fraction: Double)
-    }
-
-    /**
-     * Subtitle track [track] of [input] (the n-th subtitle track, 0 first, as [MediaProbe] lists
-     * them; a path or /proc/self/fd/N) written into the new file [output]: SRT, or ASS/SSA kept
-     * with its header and styles. The film is read once, start to end, with only the lines in
-     * memory; picture subtitles are refused. Blocking; [cancelSubtitleExtraction] stops it. The
-     * result is a JSON object: "error" ("" when it went through, "open", "no_stream", "image",
-     * "unsupported", "empty", "too_large", "write", "cancelled"), "detail", "codec", "format"
-     * ("srt", "ass", "ssa"), "events" and "partial" (the file ended early).
-     */
-    @JvmStatic external fun extractSubtitle(input: String, track: Int, output: String, listener: SubtitleExtraction): String
-
-    /** Stops the running [extractSubtitle] soon; the Lab's [cancel] and [cancelTranscription] do not. */
-    @JvmStatic external fun cancelSubtitleExtraction()
-
     /** SP-02: formats, clock and rates of the USB audio device behind [fd]. */
     @JvmStatic external fun usbDescribe(fd: Int): String
 
     /** SP-02: a -6 dBFS sine straight to the USB DAC behind [fd]. */
     @JvmStatic external fun usbTone(fd: Int, rate: Int, bits: Int, seconds: Double, frequency: Double, listener: Progress?): String
 
-    /** S-802: streams, HDR and Dolby Vision of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
+    /** S-802: the audio and subtitle streams of [input] (a path or /proc/self/fd/N); see [MediaProbe]. */
     @JvmStatic external fun probe(input: String): String
 }

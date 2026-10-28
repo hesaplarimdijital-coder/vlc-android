@@ -13,7 +13,6 @@
 #include "usb_audio.h"
 #include "whisper_lab.h"
 
-#define LIBDOVI_VERSION "dovi_tool 2.3.4"
 #define WHISPER_LABEL "whisper.cpp 1.9.5"
 
 static volatile int g_cancel;
@@ -95,7 +94,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_version(JNIEnv *env, j
     (void)cls;
     const struct libusb_version *usb = libusb_get_version();
     char text[256];
-    snprintf(text, sizeof(text), "FFmpeg %s · %s · %s · libusb %u.%u.%u", FFMPEG_VERSION, LIBDOVI_VERSION, WHISPER_LABEL,
+    snprintf(text, sizeof(text), "FFmpeg %s · %s · libusb %u.%u.%u", FFMPEG_VERSION, WHISPER_LABEL,
              usb->major, usb->minor, usb->micro);
     return utf8(env, text);
 }

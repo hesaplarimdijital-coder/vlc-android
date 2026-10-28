@@ -1,12 +1,11 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg, libdovi for the media probe, whisper.cpp with ggml's
-#            Vulkan backend, libusb; SP-02/05, S-709, S-802), the music engine (S-901, native/audio) and the subtitle
-#            translation (S-710, native/translate: CTranslate2, SentencePiece) for arm64. Cached
-#            until native/lab, native/audio, native/translate or buildsystem/nagmedar-native
+# lab-native: the native lab library (FFmpeg for the media probe, whisper.cpp with ggml's
+#            Vulkan backend, libusb; SP-02/05, S-709, S-802) and the music engine (S-901, native/audio)
+#            for arm64. Cached until native/lab, native/audio or buildsystem/nagmedar-native
 #            changes; glslc, which build.sh builds for the runner to compile the Vulkan shaders,
 #            is kept until versions.env changes.
-# native-host: the host tests of the media probe, the embedded subtitles' extraction, the
+# native-host: the host tests of the media probe, the
 #            whisper pipeline and the engine's bit-exact decoding, on every run that runs the
 #            tests, whether lab-native's libraries came from the cache or not.
 # app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
@@ -91,8 +90,7 @@ jobs:
           path: |
             application/nagmedar-lab/src/main/jniLibs
             application/nagmedar-audio/src/main/jniLibs
-            application/nagmedar-translate/src/main/jniLibs
-          key: lab-native-${{ hashFiles('native/lab/**', 'native/audio/**', 'native/translate/**', 'buildsystem/nagmedar-native/**') }}
+          key: lab-native-${{ hashFiles('native/lab/**', 'native/audio/**', 'buildsystem/nagmedar-native/**') }}
 
       - uses: actions/setup-java@v5
         if: steps.cache.outputs.cache-hit != 'true'
@@ -111,17 +109,11 @@ jobs:
 
       - name: Araçlar
         if: steps.cache.outputs.cache-hit != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq mkvtoolnix ffmpeg nasm
           # S-1003: the lyrics tests write SYLT frames with it
           pip install --quiet --break-system-packages mutagen
-          mkdir -p "$RUNNER_TEMP/bin"
-          gh release download 2.3.4 --repo quietvoid/dovi_tool \
-            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Android NDK
         if: steps.cache.outputs.cache-hit != 'true'
@@ -142,12 +134,11 @@ jobs:
           path: |
             application/nagmedar-lab/src/main/jniLibs
             application/nagmedar-audio/src/main/jniLibs
-            application/nagmedar-translate/src/main/jniLibs
           if-no-files-found: error
 
   # The native host tests, whenever the tests run: the arm64 libraries above come from their cache
   # when native/ did not change, a test result never does. A job of its own, so that the app's
-  # jobs do not wait for it; the host build (FFmpeg, libdovi, TagLib, …) is made again each time.
+  # jobs do not wait for it; the host build (FFmpeg, TagLib, …) is made again each time.
   native-host:
     name: Laboratuvar native · host testleri
     runs-on: ubuntu-latest
@@ -166,19 +157,13 @@ jobs:
 
       - name: Araçlar
         if: env.NAGMEDAR_RUN_TESTS == '1'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq mkvtoolnix ffmpeg nasm
           # S-1003: the lyrics tests write SYLT frames with it
           pip install --quiet --break-system-packages mutagen
-          mkdir -p "$RUNNER_TEMP/bin"
-          gh release download 2.3.4 --repo quietvoid/dovi_tool \
-            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
-      # S-802, SP-05, the embedded subtitles (test-host.sh) and the music engine's (test-audio.sh)
+      # S-802, SP-05 (test-host.sh) and the music engine's (test-audio.sh)
       - name: Host derlemesi ve testleri (S-802, SP-05)
         if: env.NAGMEDAR_RUN_TESTS == '1'
         env:

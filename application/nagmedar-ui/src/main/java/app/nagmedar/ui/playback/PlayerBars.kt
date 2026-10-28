@@ -79,7 +79,6 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.library.audioFormatLabel
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
-import app.nagmedar.ui.library.techBadge
 import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.podcast.Chapter
 import app.nagmedar.ui.podcast.ChapterSteps
@@ -373,7 +372,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         isVideo = video,
         playing = playing,
         lengthMs = media.length,
-        format = tech?.let { if (video) techBadge(it, media.width, media.height) else it.mainAudio()?.let(::audioFormatLabel) },
+        format = tech?.mainAudio()?.let(::audioFormatLabel),
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
         // the listener's own volume: a podcast show's boost (S-1104) plays over it and is never kept as theirs

@@ -639,7 +639,6 @@
     <string name="nag_about_no_text">Public domain: no licence text.</string>
     <string name="nag_about_full_license">The full licence</string>
     <string name="nag_about_copyright">Copyleft © 1996–2026 by VideoLAN and the VLC authors\nNağmedar changes © 2026 the Nağmedar contributors</string>
-    <string name="nag_license_bsd2">2-clause BSD</string>
     <string name="nag_license_bsd3">3-clause BSD</string>
     <string name="nag_license_gsm">GSM permissive</string>
     <string name="nag_license_old_mit">Old MIT</string>
@@ -689,9 +688,6 @@
     <string name="nag_pane_divider">Width of the details pane</string>
     <string name="nag_sidebar_divider">Width of the sidebar</string>
     <string name="nag_tech_title">Technical</string>
-    <string name="nag_tech_video">Video</string>
-    <string name="nag_tech_frame_rate">Frame rate</string>
-    <string name="nag_tech_range">HDR</string>
     <string name="nag_tech_audio">Audio %1$d</string>
     <string name="nag_tech_subtitles">Subtitles</string>
     <string name="nag_tech_bitrate">Bitrate</string>

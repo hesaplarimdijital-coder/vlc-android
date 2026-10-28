@@ -133,7 +133,3 @@
 # Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }
-
-# Nağmedar: libnagmedar_lab.so calls the embedded subtitles' extraction listener by its method's name
--keep interface app.nagmedar.lab.NativeLab$SubtitleExtraction { *; }
--keepclassmembers class * implements app.nagmedar.lab.NativeLab$SubtitleExtraction { *; }

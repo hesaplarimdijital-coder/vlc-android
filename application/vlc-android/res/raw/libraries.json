@@ -1,11 +1,6 @@
 {
   "libraries": [
     {
-      "title"    : "Abseil (SentencePiece's subset)",
-      "copyright": "Copyright © 2017 The Abseil Authors",
-      "license"  : "apache2.0"
-    },
-    {
       "title"    : "Android Open Source Project",
       "copyright": "Copyright © 2008 The Android Open Source Project",
       "license"  : "apache2.0"
@@ -29,26 +24,6 @@
       "title"    : "Color Picker",
       "copyright": "Copyright © 2016 Jared Rummler",
       "license"  : "apache2.0"
-    },
-    {
-      "title"    : "cpuinfo",
-      "copyright": "Copyright © 2017-2018 Facebook Inc., © 2012-2017 Georgia Institute of Technology, © 2019 Google LLC",
-      "license"  : "bsd2"
-    },
-    {
-      "title"    : "CTranslate2",
-      "copyright": "Copyright © 2018- SYSTRAN, © 2019- The OpenNMT Authors",
-      "license"  : "mit"
-    },
-    {
-      "title"    : "darts-clone",
-      "copyright": "Copyright © 2008-2011 Susumu Yata",
-      "license"  : "bsd2"
-    },
-    {
-      "title"    : "dovi_tool",
-      "copyright": "Copyright © 2021-2026 quietvoid",
-      "license"  : "mit"
     },
     {
       "title"    : "FFmpeg",
@@ -291,16 +266,6 @@
       "license"  : "isc"
     },
     {
-      "title"    : "OPUS-MT tc-big en-tr (translation model, downloaded on request)",
-      "copyright": "Copyright © 2022 Helsinki-NLP, University of Helsinki (Jörg Tiedemann et al.)",
-      "license"  : "ccby4"
-    },
-    {
-      "title"    : "OPUS-MT tr-en (translation model, downloaded on request)",
-      "copyright": "Copyright © 2020 Helsinki-NLP, University of Helsinki (Jörg Tiedemann et al.)",
-      "license"  : "apache2.0"
-    },
-    {
       "title"    : "Opus",
       "copyright": "Copyright © 2001-2015 Xiph.org Foundation, Microsoft",
       "license"  : "xiph"
@@ -309,11 +274,6 @@
       "title"    : "ORC",
       "copyright": "Copyright © 2002-2009 David A. Schleef",
       "license"  : "isc"
-    },
-    {
-      "title"    : "Protocol Buffers (lite, in SentencePiece)",
-      "copyright": "Copyright © 2008 Google Inc.",
-      "license"  : "bsd3"
     },
     {
       "title"    : "RemoteAccess",
@@ -329,21 +289,6 @@
       "title"    : "Speex, Speexdsp",
       "copyright": "Copyright © 1992-2008 Xiph.org Foundation, Jean-Marc Valin, Analog Devices Inc, Commonwealth Scientific and Industrial Research Organisation, David Rowe, Jutta Degener, Carsten Bormann",
       "license"  : "bsd3"
-    },
-    {
-      "title"    : "Ruy",
-      "copyright": "Copyright © 2019 Google LLC",
-      "license"  : "apache2.0"
-    },
-    {
-      "title"    : "SentencePiece",
-      "copyright": "Copyright © 2016 Google Inc.",
-      "license"  : "apache2.0"
-    },
-    {
-      "title"    : "spdlog",
-      "copyright": "Copyright © 2016 Gabi Melman",
-      "license"  : "mit"
     },
     {
       "title"    : "SPIRV-Headers",
@@ -444,12 +389,6 @@
       "link": "https://apache.org/licenses/LICENSE-2.0"
     },
     {
-      "id": "bsd2",
-      "name": "2-clause BSD license",
-      "description": "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.",
-      "link": "https://opensource.org/licenses/BSD-2-Clause"
-    },
-    {
       "id": "bsd3",
       "name": "3-clause BSD license",
       "description": "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: \n\n1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. \n\n2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. \n\n3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. \n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.",
@@ -490,12 +429,6 @@
       "name": "Old MIT license",
       "description": "For full copyright notices consult the individual files in the package.\n\nPermission is hereby granted, without written agreement and without license or royalty fees, to use, copy, modify, and distribute this software and its documentation for any purpose, provided that the above copyright notice and the following two paragraphs appear in all copies of this software.\n\nIN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nTHE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS ON AN \"AS IS\" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.",
       "link": ""
-    },
-    {
-      "id": "ccby4",
-      "name": "Creative Commons Attribution 4.0",
-      "description": "You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material) for any purpose, even commercially, under the following terms: Attribution: you must give appropriate credit, provide a link to the license, and indicate if changes were made. No additional restrictions: you may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.\n\nThe model is converted to the CTranslate2 format; it is not changed otherwise. The full legal code is at the link below.",
-      "link": "https://creativecommons.org/licenses/by/4.0/legalcode"
     },
     {
       "id": "mit",

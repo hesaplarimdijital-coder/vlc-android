@@ -639,7 +639,6 @@
     <string name="nag_about_no_text">Kamu malı: lisans metni yok.</string>
     <string name="nag_about_full_license">Lisansın tamamı</string>
     <string name="nag_about_copyright">Copyleft © 1996–2026 VideoLAN ve VLC yazarları\nNağmedar değişiklikleri © 2026 Nağmedar katkıcıları</string>
-    <string name="nag_license_bsd2">2 maddeli BSD</string>
     <string name="nag_license_bsd3">3 maddeli BSD</string>
     <string name="nag_license_gsm">GSM izin verici</string>
     <string name="nag_license_old_mit">Eski MIT</string>
@@ -689,9 +688,6 @@
     <string name="nag_pane_divider">Ayrıntılar bölmesinin genişliği</string>
     <string name="nag_sidebar_divider">Kenar çubuğunun genişliği</string>
     <string name="nag_tech_title">Teknik</string>
-    <string name="nag_tech_video">Video</string>
-    <string name="nag_tech_frame_rate">Kare hızı</string>
-    <string name="nag_tech_range">HDR</string>
     <string name="nag_tech_audio">Ses %1$d</string>
     <string name="nag_tech_subtitles">Altyazı</string>
     <string name="nag_tech_bitrate">Bit hızı</string>
