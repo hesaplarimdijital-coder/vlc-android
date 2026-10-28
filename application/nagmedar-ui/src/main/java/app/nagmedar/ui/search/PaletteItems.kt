@@ -37,7 +37,7 @@ private fun groupIcon(group: ShortcutGroup): ImageVector = when (group) {
     ShortcutGroup.Media -> NagIcons.Folder
     ShortcutGroup.Playback -> NagIcons.Play
     ShortcutGroup.Audio -> NagIcons.Volume
-    ShortcutGroup.Tools -> NagIcons.TvLab
+    ShortcutGroup.Tools -> NagIcons.Lab
     ShortcutGroup.View -> NagIcons.Grid
     ShortcutGroup.Help -> NagIcons.Keyboard
 }

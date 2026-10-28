@@ -10,7 +10,6 @@ import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.music.PlaylistEntry
-import org.json.JSONObject
 import app.nagmedar.ui.radio.record.RecordingSchedule
 import app.nagmedar.ui.radio.record.RecordingStation
 import app.nagmedar.ui.radio.record.Repeat
@@ -57,8 +56,6 @@ class BackupCodecTest {
         ),
         equalizers = """{"equalizers":[],"currentEqualizerName":"Flat","defaultStates":[]}""",
         shortcuts = mapOf("Stop" to "Q", "Mute" to ""),
-        profiles = listOf("""{"schema":1,"id":"sony-bravia-8","name":"Sony Bravia 8"}"""),
-        selectedProfile = "sony-bravia-8",
         playlists = listOf(
             BackupPlaylist(
                 "Yol",
@@ -113,9 +110,7 @@ class BackupCodecTest {
     @Test
     fun aBackupGoesOutAndComesBack() {
         val back = read(bytes(full))
-        assertEquals(full.copy(profiles = null, covers = null), back.copy(profiles = null, covers = null))
-        // a profile comes back as its JSON
-        assertEquals("sony-bravia-8", JSONObject(back.profiles!!.single()).getString("id"))
+        assertEquals(full.copy(covers = null), back.copy(covers = null))
         assertEquals(coverName, back.covers!!.single().name)
         assertArrayEquals(png, back.covers!!.single().bytes)
         assertEquals(BackupPart.entries, back.parts)
@@ -169,9 +164,8 @@ class BackupCodecTest {
     fun onlyTheChosenParts() {
         val some = full.only(setOf(BackupPart.Playlists, BackupPart.Settings))
         assertEquals(listOf(BackupPart.Settings, BackupPart.Playlists), some.parts)
-        // the classic equalisers go with the settings, the chosen profile with the profiles
+        // the classic equalisers go with the settings
         assertEquals(full.equalizers, some.equalizers)
-        assertNull(some.selectedProfile)
         assertNull(some.shortcuts)
         assertNull(some.covers)
     }
@@ -196,7 +190,6 @@ class BackupCodecTest {
             "nagmedar_sources" to setOf("a", "b"),
             // their own parts
             NagmedarPreferences.KEY_SHORTCUTS to "Stop=Q",
-            "nagmedar_tvlab_profile" to "lg-oled-b4-usb",
             // this device's
             NAGMEDAR_SAF_FOLDERS to setOf("content://tree/x"),
             NAGMEDAR_WINDOW_BOUNDS to "0,0,800,600",

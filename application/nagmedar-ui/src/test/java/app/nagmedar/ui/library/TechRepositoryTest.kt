@@ -21,7 +21,7 @@ import java.io.File
 /**
  * S-802: a cached probe describes the file as it was probed; a file replaced in place (another
  * size or modification time) is not answered with it: its tracks may be others (the embedded
- * subtitles' extraction, the TV Lab and the Dolby Vision decoding ask by index).
+ * subtitles' extraction and the Dolby Vision decoding ask by index).
  */
 @RunWith(AndroidJUnit4::class)
 class TechRepositoryTest {

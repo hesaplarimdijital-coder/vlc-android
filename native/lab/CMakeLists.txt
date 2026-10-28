@@ -1,9 +1,7 @@
-# libnagmedar_lab.so: the native part of Settings > Lab (SP-02, SP-03, SP-05), the media probe
-# behind the library's technical badges (S-802), the TV Lab's bitrate analysis (S-1202), its
-# disk test (S-1204) and its remux engine with the verification (S-1206, S-1209) and the
-# compatibility tracks (S-1207), the subtitles from a film's speech (S-709, on the GPU through
-# ggml's Vulkan backend where the device has one) and the extraction of a film's embedded text
-# subtitles into files.
+# libnagmedar_lab.so: the native part of Settings > Lab (SP-02 USB audio, SP-05 whisper), the
+# media probe behind the library's technical badges (S-802, libdovi reads the first Dolby Vision
+# RPU), the subtitles from a film's speech (S-709, on the GPU through ggml's Vulkan backend where
+# the device has one) and the extraction of a film's embedded text subtitles into files.
 # Built by buildsystem/nagmedar-native/build.sh android, which provides the static
 # dependencies in DEPS_PREFIX (FFmpeg, libdovi, whisper.cpp) and the libusb sources.
 cmake_minimum_required(VERSION 3.22)
@@ -36,7 +34,7 @@ add_library(usb STATIC
 target_include_directories(usb PUBLIC ${USB} PRIVATE ${LIBUSB_SOURCE}/android ${USB}/os)
 target_compile_options(usb PRIVATE -fvisibility=hidden -pthread -w)
 
-add_library(nagmedar_lab SHARED lab_jni.c bitrate.c disktest.c dvconvert.c mediaprobe.c remux.c usb_audio.c whisper_lab.cpp
+add_library(nagmedar_lab SHARED lab_jni.c mediaprobe.c usb_audio.c whisper_lab.cpp
     whisper_subs.cpp whisper_subs_jni.c subtitle_extract.c subtitle_extract_jni.c ${WHISPER_SOURCES})
 target_include_directories(nagmedar_lab PRIVATE ${DEPS_PREFIX}/include)
 target_compile_options(nagmedar_lab PRIVATE -fvisibility=hidden -O2 -Wall)

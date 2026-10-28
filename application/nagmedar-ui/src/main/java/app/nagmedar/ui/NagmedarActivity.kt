@@ -40,7 +40,6 @@ import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.remoteaccess.RemoteAccessPage
 import app.nagmedar.ui.remoteaccess.RemoteAccessPages
 import app.nagmedar.ui.shell.ShellRequests
-import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
@@ -176,8 +175,6 @@ class NagmedarActivity : ComponentActivity() {
         super.onStart()
         PhysicalKeys.forget()
         getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
-        // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
-        lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
         // S-1005: a tag write a dead process left half done: the file back from its copy, the copy gone
         lifecycleScope.launch(Dispatchers.IO) { recoverTagWrites() }
     }

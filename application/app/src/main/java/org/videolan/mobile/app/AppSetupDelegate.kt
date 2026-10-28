@@ -38,6 +38,7 @@ import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.network.NetworkDialogs
 import app.nagmedar.ui.radio.record.RecordingAlarms
+import app.nagmedar.ui.work.RetiredWork
 import org.videolan.libvlc.Dialog
 import org.videolan.libvlc.FactoryManager
 import org.videolan.libvlc.LibVLCFactory
@@ -177,6 +178,8 @@ class AppSetupDelegate : AppDelegate,
             } catch (e: Exception) {
                 Log.w(TAG, "the scheduled recordings could not be looked over", e)
             }
+            // Nağmedar 1.0: the removed TV Lab's queued work, night alarm and queue state, once
+            RetiredWork.onProcessStart(this@backgroundInit)
         }
         launch(Dispatchers.IO) innerLaunch@ {
             if (!VLCInstance.testCompatibleCPU(AppContextProvider.appContext)) return@innerLaunch

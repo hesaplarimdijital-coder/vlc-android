@@ -7,7 +7,7 @@ import android.provider.DocumentsContract
 import java.io.File
 import java.io.FileNotFoundException
 
-/** What a long job's output holds before the job writes into it (S-1303, S-1206). */
+/** What a long job's output holds before the job writes into it (S-1303). */
 enum class OutputState {
     /** Nothing: the new document the system's picker made, or one a job emptied. */
     Empty,
@@ -23,7 +23,7 @@ enum class OutputState {
 }
 
 /**
- * The documents long jobs write (S-1303's video conversions, S-1206's remux), by one rule: a
+ * The documents long jobs write (S-1303's video conversions), by one rule: a
  * job writes only into an output it found [OutputState.Empty], and removes or empties only an
  * output that is its own (the callers keep that ownership). A file:// output is a plain file.
  * Blocking: a worker's or IO's thread.
