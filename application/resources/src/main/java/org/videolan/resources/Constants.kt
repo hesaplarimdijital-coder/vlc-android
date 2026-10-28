@@ -32,7 +32,6 @@ const val EXTRA_REMOVE_DEVICE = "extra_remove_device"
 const val EXTRA_PLAY_ONLY = "extra_play_only"
 
 //UI Navigation
-const val ID_VIDEO = "video"
 const val ID_VIDEO_FOLDERS = "video_folders"
 const val ID_AUDIO = "audio"
 const val ID_PLAYLISTS = "playlists"
@@ -51,7 +50,6 @@ const val ACTIVITY_RESULT_SECONDARY = 3
 val ACTION_REMOTE_GENERIC = "remote.".buildPkgString()
 @JvmField val EXTRA_SEARCH_BUNDLE = "${ACTION_REMOTE_GENERIC}extra_search_bundle"
 @JvmField val ACTION_PLAY_FROM_SEARCH = "${ACTION_REMOTE_GENERIC}play_from_search"
-@JvmField val ACTION_REMOTE_SWITCH_VIDEO = "${ACTION_REMOTE_GENERIC}SwitchToVideo"
 @JvmField val ACTION_REMOTE_LAST_PLAYLIST = "${ACTION_REMOTE_GENERIC}LastPlaylist"
 @JvmField val ACTION_REMOTE_FORWARD = "${ACTION_REMOTE_GENERIC}Forward"
 @JvmField val ACTION_REMOTE_STOP = "${ACTION_REMOTE_GENERIC}Stop"
@@ -72,7 +70,6 @@ val ACTION_REMOTE_GENERIC = "remote.".buildPkgString()
 @JvmField val EXTRA_RELATIVE_MEDIA_ID = "EXTRA_RELATIVE_MEDIA_ID".buildPkgString()
 const val PLAYLIST_TYPE_AUDIO = 0
 const val PLAYLIST_TYPE_VIDEO = 1
-const val PLAYLIST_TYPE_ALL = 2
 const val MEDIALIBRARY_PAGE_SIZE = 500
 const val QUICK_SEARCH_BOX_APP_PKG = "com.google.android.googlequicksearchbox"
 const val ANDROID_AUTO_APP_PKG = "com.google.android.projection.gearhead"
@@ -111,13 +108,6 @@ const val ACTION_CONTENT_INDEXING = "action_content_indexing"
 @JvmField val PLAY_FROM_VIDEOGRID = "gui.video.PLAY_FROM_VIDEOGRID".buildPkgString()
 @JvmField val PLAY_FROM_SERVICE = "gui.video.PLAY_FROM_SERVICE".buildPkgString()
 @JvmField val EXIT_PLAYER = "gui.video.EXIT_PLAYER".buildPkgString()
-const val PLAY_EXTRA_ITEM_LOCATION = "item_location"
-const val PLAY_EXTRA_SUBTITLES_LOCATION = "subtitles_location"
-const val PLAY_EXTRA_ITEM_TITLE = "title"
-const val PLAY_EXTRA_FROM_START = "from_start"
-const val PLAY_EXTRA_START_TIME = "position"
-const val PLAY_EXTRA_OPENED_POSITION = "opened_position"
-const val PLAY_DISABLE_HARDWARE = "disable_hardware"
 
 // MRLPanelFragment
 const val KEY_MRL = "mrl"
@@ -164,15 +154,10 @@ const val CATEGORY_NOW_PLAYING_PIP_PAUSED = 29L
 const val CATEGORY = "category"
 const val DRAWABLE = "drawable"
 const val ITEM = "item"
-const val KEY_GROUP = "key_group"
 const val KEY_FOLDER = "key_folder"
-const val KEY_GROUPING = "key_grouping"
 const val KEY_ANIMATED = "key_animated"
 const val FAVORITE_TITLE = "favorite_title"
 
-const val GROUP_VIDEOS_NONE = "-1"
-const val GROUP_VIDEOS_FOLDER = "0"
-const val GROUP_VIDEOS_NAME = "6"
 
 // Items updates
 const val UPDATE_SELECTION = 0
@@ -181,7 +166,6 @@ const val UPDATE_TIME = 2
 const val UPDATE_SEEN = 3
 const val UPDATE_DESCRIPTION = 4
 const val UPDATE_PAYLOAD = 5
-const val UPDATE_VIDEO_GROUP = 6
 const val UPDATE_REORDER = 7
 const val UPDATE_FAVORITE_STATE = 8
 
@@ -229,7 +213,6 @@ const val TV_CONFIRMATION_ACTIVITY = "org.videolan.television.ui.dialogs.Confirm
 const val TV_PREFERENCE_ACTIVITY = "org.videolan.television.ui.preferences.PreferencesActivity"
 const val MOBILE_MAIN_ACTIVITY = "org.videolan.vlc.gui.MainActivity"
 const val MOVIEPEDIA_ACTIVITY = "org.videolan.moviepedia.ui.MoviepediaActivity"
-const val TV_AUDIOPLAYER_ACTIVITY = "org.videolan.television.ui.audioplayer.AudioPlayerActivity"
 const val MEDIAPARSING_SERVICE = "org.videolan.vlc.MediaParsingService"
 const val TV_ONBOARDING_ACTIVITY = "org.videolan.television.ui.OnboardingActivity"
 const val REMOTE_ACCESS_SERVICE = "org.videolan.vlc.remoteaccessserver.RemoteAccessService"

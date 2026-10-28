@@ -89,7 +89,6 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
-import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
@@ -342,9 +341,8 @@ fun PlayerBar(
     /** Music opened from the bar (S-1002); null: the classic audio player. */
     onOpenAudio: (() -> Unit)? = null,
 ) {
+    // Nağmedar 1.0 plays everything as audio: the bars show whatever plays
     val media = nowPlaying.media ?: return
-    // the mini player shows a video only while it plays without its player (the desktop's transport bar as before)
-    if (navKind != NavKind.Sidebar && media.type == MediaWrapper.TYPE_VIDEO && !rememberVideoAway(media)) return
     val info = rememberPlayerBarInfo(media, nowPlaying.playing)
     val progress by rememberPlaybackProgress(nowPlaying)
     val context = LocalContext.current
@@ -360,24 +358,6 @@ fun PlayerBar(
         MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
     }
 }
-
-/**
- * [PlaybackActions.videoAway] for [media], read again a few times a second: the player's coming and
- * going and the background's switch are not observable.
- */
-@Composable
-private fun rememberVideoAway(media: MediaWrapper): Boolean {
-    val away by produceState(PlaybackActions.videoAway(media), media) {
-        while (true) {
-            value = PlaybackActions.videoAway(media)
-            delay(VIDEO_AWAY_READING_MS)
-        }
-    }
-    return away
-}
-
-/** How often [rememberVideoAway] reads again. */
-private const val VIDEO_AWAY_READING_MS = 250L
 
 @Composable
 private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): PlayerBarInfo {

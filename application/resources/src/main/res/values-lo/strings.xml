@@ -27,11 +27,6 @@
     <string name="Medialibrary_progress">ການປັບປຸງຄວາມຄືບໜ້າການສະແກນຫ້ອງສະໝຸດສື່</string>
     <string name="play_from_start">ຫຼິ້ນຈາກຈຸດເລີ່ມຕົ້ນ</string>
     <string name="play_as_audio">ຫຼິ້ນໃນຮູບແບບສຽງ</string>
-    <string name="play_as_video">ຫຼິ້ນໃນຮູບແບບວິດີໂອ</string>
-    <string name="video_app_switch_title">ໂໝດພື້ນຫຼັງ/PiP</string>
-    <string name="video_app_switch_summary">ເລືອກຄຸນລັກສະນະ VLC ໃນເວລາທີ່ທ່ານປ່ຽນໄປໃຊ້ແອັບພລິເຄຊັນອື່ນຈາກການຫຼິ້ນວິດີໂອ</string>
-    <string name="play_pip_title">ຫຼິ້ນວິດີໂອໃນໂໝດ Picture-in-picture</string>
-    <string name="play_as_audio_background">ຫຼິ້ນວິດີໂອໃນພື້ນຫຼັງ</string>
     <string name="insert_next">ໃສ່ຕໍ່ໄປ</string>
     <string name="play_all">ຫລີ້ນທັງຫມົດ</string>
     <string name="append_all">ເພີ່ມທັງໝົດ</string>
@@ -93,10 +88,6 @@
     <string name="firstsong">ເພງທຳອິດຂອງລາຍການເພງ</string>
     <string name="lastsong">ເພງສຸດທ້າຍຂອງລາຍການເພງ</string>
 
-    <string name="surface_best_fit">ພໍດີທີ່ສຸດ</string>
-    <string name="surface_fit_screen">ພໍດີໜ້າຈໍ</string>
-    <string name="surface_fill">ເຕັມຈໍ</string>
-    <string name="surface_original">ເຄິ່ງກາງ</string>
     <string name="unseekable_stream">ສະຕຣີມທີ່ຄົ້ນຫາບໍ່ໄດ້</string>
     <string name="refresh">ຟື້ນຟູ</string>
     <string name="track_audio">ແທຣັກສຽງ</string>
@@ -104,11 +95,7 @@
     <string name="track_text">ແທຣັກຄຳບັນຍາຍ</string>
     <string name="track_unknown">ແທຣັກທີ່ບໍ່ຮູ້ຈັກ</string>
     <string name="volume">ລະດັບສຽງ</string>
-    <string name="sound_on">ເປີດສຽງ</string>
-    <string name="sound_off">ປິດສຽງ</string>
-    <string name="brightness">ຄວາມສະຫວ່າງ</string>
     <string name="advanced">ຕົວເລືອກຂັ້ນສູງ</string>
-    <string name="audio_boost_warning">ເລື່ອນຂຶ້ນອີກເທື່ອໜຶ່ງເພື່ອປັບໃຫ້ເກີນ 100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="other">%1$d ຊ່ອງ\n</item>
@@ -118,7 +105,6 @@
     <string name="sleep_title">ຕັ້ງເວລາປິດເຄື່ອງ</string>
     <string name="sleep_in">ປິດເຄື່ອງໃນ</string>
     <string name="jump_to_time">ຂ້າມໄປເວລາ</string>
-    <string name="subtitle_select">ເລືອກໄຟລ໌ຄຳບັນຍາຍ</string>
     <string name="server_add_title">ເພີ່ມເຊີບເວີໃໝ່ເຂົ້າໃນລາຍການທີ່ມັກ</string>
     <string name="server_username_hint">ຊື່ຜູ້ໃຊ້</string>
     <string name="server_port">ພອດ:</string>
@@ -159,19 +145,11 @@
     <!-- Preferences -->
     <string name="preferences">ການຕັ້ັ້ງຄ່າ</string>
     <string name="directories_summary">ເລືອກໄດເຣັກທໍຣີທີ່ຈະລວມເຂົ້າໃນຫ້ອງສະໝຸດສື່</string>
-    <string name="hardware_acceleration_disabled">ປິດໃຊ້ງານແລ້ວ</string>
     <string name="automatic">ອັດຕະໂນມັດ</string>
     <string name="extra_prefs_category">ການຕັ້ງຄ່າພິເສດ</string>
 
     <string name="interface_prefs_screen">ອິນເຕີເຟດ</string>
-    <string name="enable_volume_gesture_title">ທ່າທາງລະດັບສຽງ</string>
     <string name="browser_show_hidden_files_title">ສະແດງໄຟລ໌ທີ່ເຊື່ອງ</string>
-    <string name="subtitles_prefs_category">ຄຳບັນຍາຍ</string>
-    <string name="subtitles_size_title">ຂະໜາດຄຳບັນຍາຍ</string>
-    <string name="subtitles_size_small">ນ້ອຍ</string>
-    <string name="subtitles_size_normal">ທຳມະດາ</string>
-    <string name="subtitles_size_big">ໃຫຍ່</string>
-    <string name="subtitles_size_huge">ມະຫຶມາ</string>
     <string name="network_browsing">ເຄືອຂ່າຍທ້ອງຖິ່ນ</string>
     <string name="allow_storage_access_title">ອະນຸຍາດໃຫ້ VLC ເຂົ້າເຖິິງໄຟລ໌ວິດີໂອແລະສຽງ</string>
     <string name="next">ຕໍ່ໄປ</string>

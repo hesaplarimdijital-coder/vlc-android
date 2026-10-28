@@ -21,17 +21,13 @@
 package org.videolan.vlc.util
 
 import android.app.Activity
-import android.app.ActivityOptions
 import android.app.Service
 import android.content.Context
-import android.os.Build
-import android.os.Bundle
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.VLCInstance
 import org.videolan.tools.CloseableUtils
 import org.videolan.tools.runBackground
 import org.videolan.tools.runOnMainThread
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -72,17 +68,10 @@ object Util {
                 runOnMainThread(Runnable {
                     when (ctx) {
                         is Service -> ctx.stopSelf()
-                        is VideoPlayerActivity -> ctx.exit(Activity.RESULT_CANCELED)
                         is Activity -> ctx.finish()
                     }
                 })
         })
     }
-
-    fun getFullScreenBundle() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        val options = ActivityOptions.makeBasic()
-        options.setLaunchBounds(null)
-        options.toBundle()
-    } else Bundle()
 
 }

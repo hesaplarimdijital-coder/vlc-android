@@ -42,7 +42,6 @@ import org.videolan.vlc.gui.dialogs.SavePlaylistDialog
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.addToPlaylist
 import org.videolan.vlc.gui.helpers.UiTools.createShortcut
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.ContextOption
 import org.videolan.vlc.util.ContextOption.*
@@ -108,8 +107,7 @@ class StreamsFragmentDelegate : IStreamsFragmentDelegate, CtxActionReceiver {
 
     override fun playMedia(mw: MediaWrapper) {
         mw.type = MediaWrapper.TYPE_STREAM
-        if (mw.uri.scheme?.startsWith("rtsp") == true) VideoPlayerActivity.start(fragment.requireContext(), mw.uri)
-        else MediaUtils.openMedia(fragment.activity, mw)
+        MediaUtils.openMedia(fragment.activity, mw)
         fragment.activity?.invalidateOptionsMenu()
         keyboardListener.hideKeyboard()
     }

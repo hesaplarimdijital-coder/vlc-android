@@ -47,12 +47,6 @@
     <string name="Medialibrary_progress">Posodobitev knjižnice predstavnih vsebin</string>
     <string name="play_from_start">Predvajaj od začetka</string>
     <string name="play_as_audio">Predvajaj kot zvok</string>
-    <string name="play_as_video">Predvajaj kot video</string>
-    <string name="return_to_video">Dolg pritisk na naslovnico obnovi video</string>
-    <string name="video_app_switch_title">V ozadju/slika v sliki</string>
-    <string name="video_app_switch_summary">Določite obnašanje VLC med preklopom na drugo aplikacijo, ko se predvaja video.</string>
-    <string name="play_pip_title">Predvajaj video v načinu slika-v-sliki</string>
-    <string name="play_as_audio_background">Predvajaj video posnetke v ozadju</string>
     <string name="append">Dodaj v čakalno vrsto</string>
     <string name="insert_next">Vstavi naslednjega</string>
     <string name="play_all">Predvajaj vse</string>
@@ -73,7 +67,6 @@
     <string name="eq_cannot_overwrite">Na morem prepisati privzetega izravnalnika</string>
     <string name="equalizer_name">Ime izravnalnika</string>
     <string name="equalizer_deleted">Izravnalnik je bil izbrisan</string>
-    <string name="equalizer_leave_warning">Zapustil boste predvajalnik videa</string>
     <string name="invalid_equalizer_file">Neveljavna datoteka izravnalnika</string>
     <string name="confirm_delete_eq">Ali res želite izbrisati to predlogo?
 </string>
@@ -202,11 +195,6 @@
     <string name="firstsong">Prva skladba s seznama predvajanja</string>
     <string name="lastsong">Zadnja skladba s seznama predvajanja</string>
 
-    <string name="surface_best_fit">Najboljše prileganje</string>
-    <string name="surface_fit_screen">Prilagojeno zaslonu</string>
-    <string name="surface_fill">Zapolnjen zaslon</string>
-    <string name="surface_original">Sredinska postavitev</string>
-    <string name="resize_tip">Dolg pritisk za več možnosti</string>
     <string name="unseekable_stream">Pretoka ni mogoče preskakovati</string>
     <string name="refresh">Osveži</string>
     <string name="track_audio">Zvočni posnetek</string>
@@ -217,12 +205,7 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Jezik: %1$s\n</string>
     <string name="volume">Glasnost</string>
-    <string name="system_volume_disabled">%s\nNi dostopa do sistemske glasnosti</string>
-    <string name="sound_on">Zvok je vključen</string>
-    <string name="sound_off">Zvok je izključen</string>
-    <string name="brightness">Svetlost</string>
     <string name="advanced">napredne možnosti</string>
-    <string name="audio_boost_warning">Potegnite znova za vrednosti nad 100 %.</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanal\n</item>
@@ -252,7 +235,6 @@
     <string name="sleep_title">Časovnik mirovanja</string>
     <string name="sleep_in">Obmiruj čez</string>
     <string name="jump_to_time">Skoči na čas</string>
-    <string name="subtitle_select">Izbor datoteke s podnapisi</string>
     <string name="wait_before_sleep">Počakajte, da se trenutna vsebina konča</string>
     <string name="reset_on_interaction">Ponastavi ob interakciji</string>
     <string name="default_sleep_timer_summary">%1$s, čakanje na konec vsebine: %2$s, ponastavitev ob interakciji: %3$s</string>
@@ -279,8 +261,6 @@
 
     <string name="playback_history_title">Zgodovina predvajanja</string>
     <string name="playback_history_summary">Shrani vse predvajane vsebine v razdelek Zgodovina</string>
-    <string name="video_resume_playback_title">Zgodovina čakalne vrste videa</string>
-    <string name="video_resume_playback_summary">Dovoli shranjevanje čakalne vrste predvajanja videa za kasnejše nadaljevanje</string>
     <string name="audio_resume_playback_title">Zgodovina čakalne vrste zvoka</string>
     <string name="audio_resume_playback_warning">Izklop zgodovine čakalne vrste lahko povzroči težave v obnašanju programau.\nPo izklopu morda ne bo mogoče nadaljevati predvajanja z:\n\n\t- bluetooth naprave\n\t- gradnika\n\t- obvestila vsebine</string>
     <string name="playback_history_warning">Izklop zgodovine predvajanja bo skril zgodovino, napredek po vsebinah in vidne oznake. Aplikacija bo še vedno beležila vašo dejavnost, ki bo obnovljena če ponovno vključite zgodovino.\nČe želite popolnoma prenehati beležiti vašo dejavnost, uporabite način inkognito.\nLahko tudi pobrišete zgodovino na prikazu zgodovine ali v naprednih nastavitvah.</string>
@@ -289,32 +269,18 @@
     <string name="play_button">Gumb Predvajaj</string>
 
     <!-- Tips -->
-    <string name="tips_title">Namigi za video predvajalnik:</string>
     <string name="seek">Preskakovanje</string>
     <string name="subtitles">Podnapisi</string>
-    <string name="tips_player_controls">Nadzor predvajalnika</string>
-    <string name="tips_player_controls_description">Tapnite na kontrole predvajalnika, da ugotovite, čemu so namenjene</string>
-    <string name="tips_audio_sub">Zvočne steze in podnapisi</string>
-    <string name="tips_play_description">Tapnite za predvajanje videa</string>
     <string name="lock">Zakleni</string>
     <string name="tap">Tapnite za prikaz</string>
     <string name="tap_to_remove">Tapnite za odstranitev</string>
     <string name="tap_to_rearrange">Tapnite za preureditev</string>
     <string name="tap_to_previous_next">Tapnite za prejšnje/naslednje</string>
-    <string name="lock_orientation">Orientacija</string>
-    <string name="lock_orientation_description">Tapnite za zaklep/odklep orientacije</string>
     <string name="aspect_ratio">Razmerje slike</string>
-    <string name="aspect_ratio_description">Tapnite za spremembo razmerja slike</string>
-    <string name="advanced_options">Napredne možnosti</string>
-    <string name="advanced_options_description">Kot so hitrost predvajanja, načina ponavljanja, ...</string>
-    <string name="tips_swipe">Potegnite gor ali dol</string>
     <string name="tips_swipe_horizontal">Potegnite levo ali desno</string>
     <string name="tips_playlist">Seznam predvajanja</string>
     <string name="tips_hold_seek">Za preskakovanje pritisnite in zadržite</string>
     <string name="tips_long_drop">Dolgo držite in izpustite</string>
-    <string name="pause_description">Dvojni tap za premor</string>
-    <string name="seek_tap">+/- 10 sekund</string>
-    <string name="seek_tap_description">Dvojni tap za 10 sekund naprej ali nazaj</string>
     <string name="close">Zaprri</string>
 
     <string name="playlist_tips">Namigi za seznam predvajanja</string>
@@ -356,27 +322,13 @@
     <string name="ban_folder">Prepovej mapo</string>
     <string name="ban_folder_explanation">Prepoved te mape onemogoči prikaz njenih vsebin v video ali zvočnem razdelku aplikacije, še vedno pa bo do njih mogoče dostopati preko brskalnika.\nZa preklic prepovedi pojdite v nastavitve, %s in dolgo držite to mapo.</string>
 
-    <string name="hardware_acceleration">Strojno pospeševanje</string>
-    <string name="hardware_acceleration_summary">Onemogočeno: boljša stabilnost\nOdkodiranje: lahko izboljša zmogljivost\nPolno: Lahko še bolj izboljša zmogljivost</string>
-    <string name="hardware_acceleration_disabled">Onemogočeno</string>
-    <string name="hardware_acceleration_decoding">Pospeševanje odkodiranja</string>
-    <string name="hardware_acceleration_full">Polno pospeševanje</string>
     <string name="dev_hardware_decoder">Napredni strojni odkodirnik</string>
     <string name="dev_hardware_decoder_summary">Vsili strojni odkodirnik, priporočeno le za napredne uporabnike</string>
     <string name="automatic">Samodejno</string>
     <string name="screen_orientation">Usmerjenost zaslona videa</string>
-    <string name="screen_orientation_sensor">Samodejno (tipalo)</string>
-    <string name="screen_orientation_portrait">Pokončna postavitev</string>
-    <string name="screen_orientation_portrait_reverse">Obrnjena pokončna nastavitev</string>
-    <string name="screen_orientation_landscape">Ležeča postavitev</string>
-    <string name="screen_orientation_landscape_reverse">Obrnjeno ležeče</string>
-    <string name="screen_orientation_landscape_sensor">Ležeče (senzor)</string>
-    <string name="screen_orientation_last_locked">Zadnja zaklenjena orientacija</string>
     <string name="enable_black_theme">Črna tema</string>
     <string name="dark_theme">Temna tema</string>
     <string name="theme_auto">Samodejna tema</string>
-    <string name="subtitle_text_encoding">Kodiranje besedila podnapisov</string>
-    <string name="subtitle_preferred_language">Prednostni jezik podnapisov</string>
     <string name="daynight_title">Dnevno/Nočni način</string>
     <string name="daynight_follow_system_title">Način sledenja sistemu</string>
     <string name="no_track_preference">Ni prednostnega jezika</string>
@@ -385,35 +337,15 @@
     <string name="extra_prefs_category">Dodatne nastavitve</string>
 
     <string name="interface_prefs_screen">Vmesnik</string>
-    <string name="interface_secondary_display_category_title">Pomožni zaslon</string>
-    <string name="interface_secondary_display_category_summary">Nastavitve ob priključenem drugem zaslonu (HDMI/Chromecast)</string>
     <string name="enable_clone_mode">Prednost ima kloniranje</string>
-    <string name="enable_clone_mode_summary">Podvoji zaslona naprave brez upravljanja na daljavo</string>
 
     <string name="video_prefs_category">Video</string>
-    <string name="video_min_group_length_title">Združuj posnetke v skupine</string>
     <string name="video_min_group_length_disable">Ne združuj videov</string>
     <string name="video_min_group_length_folder">Združi po mapi</string>
     <string name="video_min_group_length_name">Združi po imenu</string>
-    <string name="video_transition_title">Prehodi med videi</string>
-    <string name="video_transition_summary">Prikaži naslov novega videa ob prehodu</string>
     <string name="media_seen">Pokaži oznako že videne vsebine</string>
-    <string name="media_seen_summary">Označi posnetek kot že ogledan, kadar je predvajan do konca posnetka.</string>
-    <string name="force_play_all_summary">Program predvaja vse posnetke, začne s tistim, ki je prvi izbran</string>
     <string name="force_play_all_audio_summary">Predvajaj ves zvok, začenši s tistim, na katerega ste kliknili</string>
-    <string name="force_play_all_title">Predvajaj po seznamu</string>
     <string name="force_play_all_audio_title">Način seznama predvajanja zvoka</string>
-    <string name="save_brightness_summary">Ohrani nivo svetlosti med vsebinami</string>
-    <string name="save_brightness_title">Shrani nivo svetosti</string>
-    <string name="save_audiodelay_summary">Program shrani zamik zvoka za vsak video posnetek</string>
-    <string name="save_audiodelay_title">Shrani zamik zvoka</string>
-    <string name="video_show_orientation_button">Prikaz gumba za orientacijo</string>
-    <string name="enable_brightness_gesture_title">Kretnja za svetlost</string>
-    <string name="enable_brightness_gesture_summary">Nastavljanje svetlosti predvajanega videa s pomočjo kretenj</string>
-    <string name="enable_volume_gesture_title">Kretnja za glasnost</string>
-    <string name="enable_volume_gesture_summary">Nastavljanje glasnosti predvajanega videa s pomočjo kretenj</string>
-    <string name="enable_seek_buttons">Gumba za preskakovanje</string>
-    <string name="enable_seek_buttons_summary">Prikaz gumbov za hitro previjanje naprej in nazaj v vmesniku za video</string>
     <string name="enable_android_auto_speed_buttons">Samodejna hitrost predvajanja za Android</string>
     <string name="enable_android_auto_speed_buttons_summary">Prikaz nadzora hitrosti v prekrivnem meniju</string>
     <string name="enable_android_auto_seek_buttons">Androidni gumbi za samodejno preskakovanje</string>
@@ -423,23 +355,8 @@
     <string name="track">Skladba</string>
     <string name="genre">Zvrst</string>
     <string name="playlist">Seznam predvajanja</string>
-    <string name="enable_double_tap_seek_title">Dvojni tap za preskakovanje</string>
-    <string name="enable_double_tap_seek_summary">Dvojni tap na rob zaslona za 10 sekundni preskok</string>
-    <string name="enable_double_tap_play_title">Dvojni tap za predvajanje/premor</string>
-    <string name="enable_double_tap_play_summary">Dvojni tap na sredino zaslona za predvajanje ali premor</string>
-    <string name="enable_swipe_seek_title">Podrsaj za preskakovanje</string>
-    <string name="enable_swipe_seek_summary">Podrsajte s prstom preko zaslona za iskanje</string>
-    <string name="enable_scale_gesture_title">Zumiranje z dvema prstoma</string>
-    <string name="enable_scale_gesture_summary">Prilbližaj ali oddalji z dvema prstoma</string>
-    <string name="popup_keepscreen_title">Ohrani okno predvajalnika v pojavnem načinu</string>
-    <string name="popup_keepscreen_summary">Ohrani okno predvajalnika v pojavnem načinu odprto tudi, če je predvajanje v premoru.</string>
     <string name="browser_show_hidden_files_title">Pokaži skrite datoteke</string>
     <string name="albums_show_track_numbers">Prikaži številko vsebine</string>
-    <string name="enable_video_screenshot">Zajemi zaslon</string>
-    <string name="enable_tap_and_hold_fastplay_title">Vklopi hitro predvajanje</string>
-    <string name="enable_tap_and_hold_fastplay_summary">Tapnite in držite za povečevanje hitrosti predvajanja</string>
-    <string name="fastplay_speed_title">Hitrost predvajanja</string>
-    <string name="fastplay_title">Pospešeno za %sx</string>
     <string name="fastplay_subtitle">Spustite za zaustavitev</string>
     <string name="show_bookmark_buttons">Prikaži gumbe zaznamkov</string>
     <string name="show_bookmark_buttons_summary">Prikaže gumbe za premikanje po zaznamkih</string>
@@ -448,36 +365,13 @@
     <string name="show_chapter_buttons">Prikaži gumbe poglavji</string>
     <string name="show_chapter_buttons_summary">Prikaže gumbe za premikanje po poglavjih</string>
 
-    <string name="subtitles_prefs_category">Podnapisi</string>
-    <string name="subtitles_size_title">Velikost podnapisov</string>
-    <string name="subtitles_presets_title">Predloge podnapisov</string>
-    <string name="subtitles_size_small">Majhna</string>
-    <string name="subtitles_size_normal">Običajna</string>
-    <string name="subtitles_size_big">Velika</string>
-    <string name="subtitles_size_huge">Ogromna</string>
-    <string name="subtitles_font_style">Slog pisave podnapisov</string>
-    <string name="subtitles_color_title">Barva podnapisov</string>
-    <string name="subtitles_opacity">Prekrivnost</string>
     <string name="subtitles_color">Barva</string>
-    <string name="subtitles_size">Velikost</string>
-    <string name="subtitles_background_color_title">Ozadje podnapisov</string>
-    <string name="subtitles_background_title">Izriši ozadje podnapisov</string>
-    <string name="subtitles_outline_title">Oris podnapisov</string>
-    <string name="subtitles_shadow_title">Senca podnapisov</string>
     <string name="subtitles_decoration_title">Okraski podnapisov</string>
     <string name="subtitle_decoration_none">Brez</string>
     <string name="subtitle_decoration_shadow">Senca</string>
     <string name="subtitle_decoration_outline">Oris</string>
-    <string name="subtitles_bold_title">Izriši poudarjene podnapise</string>
-    <string name="subtitles_autoload_title">Samodejno naloži podnapise</string>
     <string name="previous_color">Prejšnja barva</string>
     <string name="new_color">Nova barva</string>
-    <string name="subtitles_preset_default">Privzeto</string>
-    <string name="subtitles_preset_default_large">Veliko besedilo</string>
-    <string name="subtitles_preset_default_largest">Največje besedilo in kontrast</string>
-    <string name="subtitles_preset_white_background">Z ozadjem</string>
-    <string name="subtitles_yellow">Rumena</string>
-    <string name="subtitles_yellow_background">Rumena z ozadjem</string>
 
     <string name="audio_prefs_category">Zvok</string>
     <string name="lockscreen_cover_title">Naslovnico vsebine na zaklenjenem zaslonu</string>
@@ -490,8 +384,6 @@
     <string name="list_title_ellipsize_right">Desno</string>
     <string name="list_title_ellipsize_middle">Sredina</string>
     <string name="list_title_ellipsize_marquee">Označi</string>
-    <string name="audio_boost_title">Povečaj glasnost čez omejitev</string>
-    <string name="audio_boost_summary">Dovoli glasnost do 200 %.</string>
     <string name="headset_prefs_category">Slušalke</string>
     <string name="enable_headset_detection">Zaznaj slušalke</string>
     <string name="enable_headset_detection_summary">Program zazna priklop in odklop slušalk.</string>
@@ -557,7 +449,6 @@
     <string name="tv_folders_first_summary">V brskalniku najprej prikaže mape, nato datoeke</string>
     <string name="tv_show_hidden_files">Prikaži skrite datoteke</string>
     <string name="tv_show_hidden_files_summary">V datotečnem brskalniku prikaži skrite datoteke</string>
-    <string name="ab_repeat_fastseek_warning">Vklopljeno je hitro preskakovanje, kar lahko povzroči težave z natančnostjo.</string>
 
     <string name="extensions_prefs_category">Razširitve</string>
     <string name="extensions_empty">Ni najdenih programskih razširitev</string>
@@ -570,13 +461,6 @@
 
     <string name="performance_prefs_category">Možnosti delovanja</string>
     <string name="deblocking">Nastavitve filtra za odstranjevanje kock</string>
-    <string name="deblocking_summary">Zamenjava filtra za odpravljanje blokov lahko izboljša kakovost videa (zgolj za napredne uporabnike)</string>
-    <string name="deblocking_always">Polno odstranjevanje kock (najpočasnejše)</string>
-    <string name="deblocking_nonref">Srednje odstranjevanje kock</string>
-    <string name="deblocking_nonkey">Nizko odstranjevanje kock</string>
-    <string name="deblocking_all">Brez odstranjevanja kock (najhitrejše)</string>
-    <string name="enable_frame_skip">Preskoči sličico</string>
-    <string name="enable_frame_skip_summary">Hitrejše razkodiranje lahko zmanjša kakovost videa</string>
     <string name="enable_time_stretching_audio">Časovno raztegovanje zvoka</string>
     <string name="enable_time_stretching_audio_summary">Pohitri ali upočasni zvok brez spremembe višine (zahteva zmogljivo napravo)</string>
 
@@ -626,8 +510,6 @@
     <string name="http_user_agent">HTTP uporabniški agent</string>
     <string name="custom_libvlc_options">Prilagojene možnosti za libVLC</string>
     <string name="custom_libvlc_options_invalid">Neveljavne možnosti za libVLC!</string>
-    <string name="dav1d_thread_number">Dav1d številka niti</string>
-    <string name="dav1d_thread_number_invalid">Napačna številka niti! (>=1)</string>
     <string name="browser_quick_play">Meni brskalnika za hitro predvajanje</string>
     <string name="browser_quick_play_summary">V meni brskalnik s predmeti doda hitro predvajanje. To bo hitreje naložilo vsebino, lahko pa manjkajo nekateri metapodatki.</string>
     <string name="browser_quick_play_default">Hitro predvajanje kot privzeto dejanje</string>
@@ -640,21 +522,15 @@
     <string name="send_log">Pošlji dnevnik</string>
     <string name="sending_log">Poteka pošiljanje dnevnika …</string>
 
-    <string name="delete_sub_title">Izbriši podnapis</string>
-    <string name="delete_sub_message">Želite izbrisati ta podnapis?</string>
-    <string name="download_subtitle_title">Prenesi podnapis</string>
 
     <string name="no_result">Ni najdenih zadetkov</string>
     <string name="no_internet_connection">Preverite internetno povezavo</string>
     <string name="retry">Ponovno poskusi</string>
-    <string name="open_subs_download_error">OpenSubtitles trenutno ni na voljo. Poskusite kasneje</string>
     <string name="network_browsing">Krajevno omrežje</string>
     <string name="browsing">Brskanje</string>
 
     <string name="file_size">Velikost datoteke</string>
 
-    <string name="audio_delay">Zamik zvoka</string>
-    <string name="spu_delay">Zamik podnapisov</string>
     <string name="network_shares_discovery">Iskanje omrežnih mest v skupni rabi</string>
     <string name="network_empty">Mapa je prazna.</string>
     <string name="network_connection_needed">Ni povezave s krajevnim omrežjem.</string>
@@ -671,7 +547,6 @@
     <string name="current_chapter">Poglavje: %s</string>
     <string name="confirm_resume">Ali želite nadaljevati pri nazadnje ustavljenem mestu?</string>
     <string name="apply_playqueue">Potrditev za celotno čakalno vrsto</string>
-    <string name="confirm_resume_title">Nadaljuj predvajanje videa</string>
     <string name="confirm_resume_audio_title">Nadaljuj predvajanje zvoka</string>
     <string name="tv_ui_title">Vmesnik Android TV</string>
     <string name="tv_ui_summary">Spremeni vmesnik na temo Android TV</string>
@@ -703,7 +578,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">Več dejanj</string>
-    <string name="back_quit_lock">Ponovno pritisnite gumb za nazaj za končanje videa</string>
     <string name="stream_deleted">Pretok je izbrisan</string>
     <string name="no_subs_found">V tej mapi ni datotek s podnapisi</string>
     <string name="music_now_playing">Trenutno se predvaja</string>
@@ -755,36 +629,16 @@
     <string name="download_on_device">Prenos</string>
     <string name="extension_empty">Ni predmetov za prikaz. Med nastavitvami razširitev jih je mogoče dodati.</string>
 
-    <string name="opengl_title">Uporaba OpenGL ES2</string>
-    <string name="opengl_summary">Privzeta je uporaba OpenGL ES2 za programsko in strojno razkodiranje, ko je to potrebno (360° videi)</string>
-    <string name="opengl_automatic">Samodejno</string>
-    <string name="opengl_on">Vsili zagon</string>
-    <string name="opengl_off">Vsili izklop</string>
     <string name="network_favorites">Priljubljena omrežja</string>
     <string name="network_shared_folders">Mape v souporabi</string>
     <string name="encryption_warning">Nameščena različica sistema Android ne podpira ustreznega šifriranja, zato bodo gesla shranjena na sicer zasebnem mestu, vendar nešifrirana.</string>
     <string name="store_password">Zapomni si geslo</string>
     <string name="add_to_playlist">Dodaj na seznam predvajanja</string>
     <string name="popup_playback_title">Predvajaj posnetek v pojavnem oknu</string>
-    <string name="popup_playback">Predvajanje v pojavnem oknu</string>
-    <string name="popup_expand">Razširi video</string>
     <string name="download_subtitles">Prenesi podnapise</string>
-    <string name="powered_opensubtitles">Podprto z OpenSubtitles</string>
-    <string name="open_subtitles_not_logged_in">Niste prijavljeni v OpenSubtitles\nPrijava omogoča več prenosov.</string>
-    <string name="open_subtitles_logged_in">Prijavljen kot %1$s</string>
-    <string name="open_subtitles_limits">Na voljo je še %1$s od %2$s prenosov. Omejitev bo ponastavljena %3$s</string>
     <string name="open_subtitles_vip">Ste VIP OpenSubtitles uporabnik</string>
-    <string name="open_subtitles_register">Registracija</string>
-    <string name="open_subtitles_log_out">Odjava</string>
-    <string name="open_subtitles_username">Uporabniško ime</string>
-    <string name="open_subtitles_password">Geslo</string>
-    <string name="open_subtitles_is_vip">VIP račun</string>
-    <string name="open_subtitles_is_not_vip">Standardni račun</string>
-    <string name="login_error">Napačni podatki</string>
-    <string name="unknown_error">Nepričakovana napaka</string>
     <string name="browse_folder">Prebrskaj mapo</string>
     <string name="listen">Poslušaj</string>
-    <string name="apply_to_bt">Uporabi za bluetooth napravo</string>
     <string name="episodes">epizode</string>
     <string name="movies">filmi</string>
     <string name="videos">videi</string>
@@ -845,7 +699,6 @@
     <string name="playback_forward">Naprej</string>
     <string name="ml_wizard_scan_checkbox">Poišči predstavne vsebine na napravi</string>
     <string name="ml_wizard_description">Izberite ali bo VLC pregledal podatkovne nosilce vaše naprave, da uredi knjižnico predstavnih vsebin, ali ga boste  uporabljali zgolj kot preprost predvajalnik z vgrajenim brskalnikom.</string>
-    <string name="tv_my_new_videos">Moji novi posnetki</string>
     <string name="cast_option_title">Predvajaj vsebine na drugem zaslonu</string>
     <string name="otg_device_title">Naprava OTG</string>
     <string name="browser">Brskalnik</string>
@@ -865,15 +718,7 @@
     <string name="rename">Preimenuj</string>
     <string name="rename_media">Preimenuj %1$s</string>
     <string name="manual_search">Ročno iskanje</string>
-    <string name="subtitle_search_name_hint">Ime</string>
-    <string name="subtitle_query_edit">Uredi iskalno poizvedbo za podnapise</string>
-    <string name="subtitle_search_episode_hint">Epizoda</string>
-    <string name="subtitle_search_season_hint">Sezona</string>
-    <string name="subtitles_download_failed">Prenos ni uspel</string>
     <string name="language_to_download">Jezik</string>
-    <string name="delete_the_selected">Izbriši izbrano</string>
-    <string name="download_the_selected">Prenesi izbrano</string>
-    <string name="no_sub_history">Za to vsebino ni podnapisov</string>
     <string name="next">Naslednje</string>
     <string name="skip">Preskoči</string>
     <string name="next_step">Naslednje</string>
@@ -881,14 +726,8 @@
     <string name="ctx_player_video_track">Izberi video stezo</string>
     <string name="ctx_player_audio_track">Zvočna vsebina</string>
     <string name="ctx_player_subs_track">Steza s podnapisi</string>
-    <string name="ctx_pip_title">Prikazni predvajalnik</string>
     <string name="device_dialog_title">Vstavljena je zunanja naprava</string>
     <string name="device_dialog_message">Na svojo TV napravo ste priključili podatkovni nosilec. Ali ga želite odpreti z VLC?</string>
-    <string name="videos_folders_title">Videi po mapah</string>
-    <string name="videos_groups_title">Video skupine</string>
-    <string name="video_save_clone_mode">Samodejni vklop načina podvojitve?</string>
-    <string name="video_remote_enable">Preklopi na daljinsko upravljanje</string>
-    <string name="video_remote_disable">Podvoji zaslon</string>
     <string name="removed_from_playlist_anonymous">Predmet(i) so bili odstranjeni s seznama predvajanja</string>
     <string name="welcome_title">Dobrodošli v VLC!</string>
     <string name="welcome_subtitle">Brezplačen, odprtokodni večpredstavni predvajalnik</string>
@@ -896,7 +735,6 @@
     <string name="permission_video">VLC potrebuje dovoljenje za dostop do video vsebin na vaši napravi</string>
     <string name="permission_audio">VLC potrebuje dovoljenje za dostop do zvočnih vsebin na vaši napravi</string>
     <string name="medialibrary_scan_explanation">VLC lahko sam pregleda vaše naprave, da uredi zbirko predstavnih vsebin.</string>
-    <string name="player_title_fd_warning">Brez dovoljenja za shrambo VLC ne more dostopati do naslova vsebine, niti shranjevati napredka</string>
     <string name="onboarding_theme_title">Počutite se kot doma</string>
     <string name="done">Končano</string>
     <string name="onboarding_scan_title">Samodejno odkrivanje predstavnih vsebin</string>
@@ -914,14 +752,9 @@
     <string name="create">Ustvari</string>
     <string name="resume_card_message">Nadaljujem s predvajanjem %1$s?</string>
     <string name="misc">Različno</string>
-    <string name="popup_force_legacy_title">Uporabi prilagojen prikaz slike v sliki</string>
-    <string name="popup_force_legacy_summary">Uporabi prilagojen prikaz slike v sliki s spremenljivo velikostjo</string>
-    <string name="restore_background_video_title">Obnovi video iz ozadja</string>
-    <string name="restore_background_video_summary">Obnovi video iz ozadja ob ponovnem odpiranju VLC za Android</string>
     <string name="device_default">Privzeto za napravo</string>
     <string name="track_number">%d vsebin</string>
     <string name="jump_to">Skoči na</string>
-    <string name="show_video_thumbnails_summary">V seznamu prikaži sličice</string>
     <string name="show_video_thumbnails">Sličice videa</string>
     <string name="eq_snap_bands">Poveži zasedbe</string>
     <string name="enable_equalizer">Omogoči</string>
@@ -1006,27 +839,14 @@
     <string name="clear">Počisti</string>
     <string name="abrepeat_add_first_marker">Določi začetno točko</string>
     <string name="abrepeat_add_second_marker">Določi končno točko</string>
-    <string name="demux_bitrate">Bitna hitrost demuksanja</string>
-    <string name="input_bitrate">Vhodna bitna hitrost</string>
-    <string name="video_information">Podatki o videu</string>
 
     <string name="channels">Kanali</string>
     <string name="resolution">Ločljivost</string>
-    <string name="resolution_value">%1$d×%2$d</string>
-    <string name="framerate">Hitrost</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Jezik</string>
-    <string name="track_samplerate">Frekvenca vzorčenja</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">Bitna hitrost</string>
     <string name="codec">Kodek</string>
     <string name="text">Besedilo</string>
     <string name="unknown">Neznano</string>
-    <string name="audio_delay_start">Slišan zvok</string>
-    <string name="subtitle_delay_first">Slišan glas</string>
-    <string name="audio_delay_end">Opažen zvok</string>
-    <string name="subtitle_delay_end">Videno besedilo</string>
     <string name="track_index">Vsebina: %s</string>
     <string name="audio_queue_progress">Predvajano: %s</string>
     <string name="audio_queue_progress_remaining">Preostanek: %s</string>
@@ -1045,19 +865,12 @@
     <string name="rename_group">Preimenuj video skupino</string>
     <string name="ungroup">Razdruži</string>
     <string name="group_similar">Samodejno ponovno združi</string>
-    <string name="no_group_found">Ni najdenih video skupin</string>
     <string name="no_favorite">Ni priljubljenih</string>
     <string name="empty_directory">Prazno</string>
-    <string name="no_track">Ni vsebin</string>
 
     <string name="swipe_unlock">Podrsaj za odklep</string>
     <string name="swipe_unlock_no_touch">Dolg pritisk za odklepanje</string>
-    <string name="sub_result_by_name">Rezultati za %s</string>
-    <string name="sub_result_by_name_season">Sezona %s</string>
-    <string name="sub_result_by_name_episode">Epizoda %s</string>
-    <string name="sub_result_by_name_hearing_impaired">Le slušno omerjeni</string>
 
-    <string name="sub_result_by_file">Rezultati za datoteko</string>
     <string name="donate">Pomgajte VLC</string>
     <string name="donate_desc">Podprite prostovoljce, ki ustvarjajo VLC</string>
     <string name="donate_subscribtion">Želim, da je to mesečno sponzorstvo</string>
@@ -1076,33 +889,19 @@
     <string name="mark_as_not_played">Označi kot nepredvajano</string>
     <string name="mark_all_as_played">Označi vse kot predvajano</string>
     <string name="mark_all_as_not_played">Označi vse kot nepredvajene</string>
-    <string name="new_group">Nova skupina</string>
-    <string name="new_group_desc">Ustvari novo skupino</string>
 
-    <string name="air_action_rewind">Nazaj za 10 s</string>
-    <string name="air_action_forward">Preskoči naprej 10 s</string>
-    <string name="air_action_play_pause">Premor/nadaljuj s predvajanjem</string>
-    <string name="air_action_volume_up">Glasneje</string>
-    <string name="air_action_volume_down">Tišje</string>
-    <string name="air_action_next">Naslednji predmet predvajanja</string>
-    <string name="air_action_previous">Prejšnji predmet predvajanja</string>
     <string name="allow_otg">Dovoli OTG dostop</string>
     <string name="allow_otg_description">Izberite OTG pogon, da dovolite dostop VLCju.</string>
-    <string name="timeout_infinite">Neskončno</string>
     <string name="video_hud_timeout">Čas preden se nadzorne tipke predvajanja skrijejo</string>
-    <string name="video_hud_timeout_summary">%ss</string>
     <string name="remove_from_history">Odstrani iz zgodovine</string>
     <string name="prefersmbv1">Prednost za SMB 1</string>
     <string name="prefersmbv1_summary">Izklopite to možnost, če imate težave z brskanjem po SMB strežniku</string>
-    <string name="apply_to_all">Uporabi za vse videe</string>
     <string name="audio_delay_global">Zamik zvoka je nastavljen na %s ms za vse videe</string>
-    <string name="audio_delay_bt">Zamik zvoka je nastavljen na %s ms za bluetooth napravo</string>
     <string name="go_to_folder">Brskaj po nadrejenem</string>
     <string name="go_to_album">Pojdi na album</string>
     <string name="go_to_artist">Pojdi na izvajalca</string>
     <string name="go_to_album_artist">Pojdi na izvajalca albua</string>
     <string name="create_shortcut">Ustvari bližnjico za zaganjalnik</string>
-    <string name="no_sub_renderer">Ob predvajanju na oddaljeno napravo podnapisi še niso podprti</string>
     <string name="enqueuing">Nalaganje vsebin</string>
     <string name="soundfont">MIDI SoundFont</string>
     <string name="soundfont_summary">Za predvajanje midi zvočnih vsebin izberite datoteko SoundFont</string>
@@ -1132,12 +931,6 @@
     <string name="lock_with_pin_short">PIN zaklep</string>
     <string name="restrict_settings">Omejitev dostopa do nastavitev</string>
     <string name="search_prefs">Nastavitve iskanja</string>
-    <string name="video_match_frame_rate_title">Prilagodi hitrost sličic prikaza</string>
-    <string name="video_match_frame_rate_summary">Prilagodi hitrost sličic prikaza hitrosti sličic vsebine. Npr. 24p film bi se moral predvajati s hitrostjo 24p</string>
-    <string name="preferred_resolution">Prednostna ločljivost videa</string>
-    <string name="preferred_resolution_summary">Največja kakovost pretoka, če je ta na voljo, bo: %s</string>
-    <string name="pref_resolution_best_available">Najboljša razpoložljiva</string>
-    <string name="pref_resolution_very_low">Zelo nizka ločljivost (240p)</string>
     <string name="stop_unpaubale">Tea vsebina ne omogoča premora. Jo namesto tega ustavim?</string>
     <string name="delete_forever">Izbriši za stalno</string>
     <string name="add_to_existing_playlist">Dodaj v obstoječ seznam predvajanja</string>
@@ -1175,8 +968,6 @@
     <string name="add_all_button">Dodaj vse</string>
     <string name="add_new_only_button">Dodaj le nove</string>
     <string name="discovery_failed">Odkrivanje ni uspelo za: %s</string>
-    <string name="lock_use_sensor_title">Zakleni s senzorjem</string>
-    <string name="lock_use_sensor_summary">Kadar je oprientacija zaklenjena, uporabi senzor, kar omogoča obratno orientacijo</string>
     <string name="start">Zaženi</string>
     <string name="notification_permission">Dovoljenje za obveščanje</string>
     <string name="notification_permission_explanation">VLC potrebuje dovoljenje za pošiljanje obvestil.\nAplikacija vas bo obvestila le ob pregledovanju vsebin ali ob uporabi slike v sliki.\nZavrnitev dovoljenja ne bo preprečila delovanja VLC, bodo pa obvestila ostala skrita.</string>
@@ -1194,9 +985,6 @@
     <string name="control_setting">Nastavitve nadzora</string>
     <string name="controls_setting">Nastavitve nadzora</string> <!-- Unused -->
     <string name="gestures">Kretnje</string>
-    <string name="player_controls">Nadzor predvajalnika</string>
-    <string name="video_double_tap_jump_delay">Zakasnitev za dvojni tap</string>
-    <string name="video_key_jump_delay">Zakasnitev časa za navigacijske tipke</string>
     <string name="banned">Prepovedana mapa (dolgi tap za spremembo)</string>
     <string name="banned_tv">Prepovedana mapa</string>
     <string name="banned_parent">Starševska prepoved mape</string>
@@ -1214,17 +1002,11 @@
     </plurals>
     <string name="official_website">Uradna spletna stran</string>
     <string name="view_online">Prikaži na spletu</string>
-    <string name="player_under_notch">Prikaži video pod zarezo</string>
     <string name="notch">Zareza</string>
-    <string name="always_fast_seek">Vedno uporabi hitro preskakovanje</string>
-    <string name="always_fast_seek_summary">Preskakovanje je hitrejše, a je lahko manj natančno</string>
     <string name="touch_only">Zmožnost, ki deluje zgolj na dotik</string>
     <string name="touch_only_description">Preklop na mobilni vmesnik je mogoč le z zaslonom na dotik ali miško.\nPovlecite spodaj, da potrdite, da je preklop varen.</string>
     <string name="no_web_browser">Noben spletni brskalnik ni nameščen</string>
     <string name="no_web_browser_message">To lahko skenirate s svojim pametnim telefonom.\nURL je %s</string>
-    <string name="no_video">Video ni na voljo</string>
-    <string name="fold_optimized">Optimizirano za vaš zložljivi zaslon</string>
-    <string name="fold_optimize">Optimiziraj za zložljivi zaslon</string>
     <string name="foldable">Zložljivi zaslon</string>
     <string name="undo">Razveljavi</string>
     <string name="add_server_favorite">Dodaj priljubljen strežnik</string>
@@ -1254,14 +1036,10 @@
     <string name="seek_forward_content_description">Preskoči %s sekund naprej</string>
     <string name="open_vlc">Odpri VLC</string>
     <string name="playing">Predvajanje</string>
-    <string name="disable_track">Onemogoči skladbo</string>
     <string name="ascending">Naraščajoče</string>
     <string name="descending">Padajoče</string>
-    <string name="screenshot_error">Napaka pri zajemanju zaslona</string>
     <string name="disabled">Onemogočeno</string>
     <string name="enable_screenshot_gesture">Tapnite s tremi prsti</string>
-    <string name="enable_screenshot_button">Prikaži gumb za zajem zaslona</string>
-    <string name="enable_screenshot_button_and_gesture">Gumb in kretnja</string>
 
 
 
@@ -1289,18 +1067,9 @@
     <string name="talkback_enter_screen">Pojdi na %s</string>
     <string name="talkback_file_size">Velikost daoteke: %s</string>
     <string name="talkback_open_in_browser">Odpri v spletnem brskalniku</string>
-    <string name="talkback_video_player">Video predvajalnik. Tapnite za prikaz kontrol. Tapnite na gumb za nazaj, da jih skrijete</string>
-    <string name="talkback_video_tracks">Video steze</string>
-    <string name="talkback_audio_tracks">Zvočne steze</string>
-    <string name="talkback_subtitle_tracks">Steze s podnapisi</string>
-    <string name="talkback_subtitle_dowload_item">Jezik: %1$s. %2$s. Ime: %3$s</string>
     <string name="selected">Izbrano</string>
-    <string name="talkback_increase_delay">Povečaj zamik</string>
-    <string name="talkback_decrease_delay">Zmanjšaj zamik</string>
     <string name="talkback_increase_speed">Povečaj hitrost</string>
     <string name="talkback_decrease_speed">Zmanjšaj hitrost</string>
-    <string name="talkback_subtitle_history">Zgodovina podnapisov</string>
-    <string name="talkback_language_selection">%s izbranih jezikov</string>
     <string name="talkback_audio_player_opened">Zvočni predvajalnik je odprt</string>
     <string name="talkback_audio_player_collapsed">Zvočni predvajalnik je zložen</string>
     <string name="talkback_audio_player_closed">Zvočni predvajalnik je zaprt</string>
@@ -1308,7 +1077,6 @@
     <string name="talkback_out_of">%1$s od skupno%2$s</string>
     <string name="talkback_track_index">Vsebina %1$s od skupno %2$s</string>
     <string name="downloaded">Preneseno</string>
-    <string name="not_downloaded">Ni preneseno</string>
     <string name="downloading">Prenos poteka</string>
     <string name="talkback_action_rewind">Nazaj za %s sekund</string>
     <string name="talkback_action_forward">Preskoči naprej %s sekund</string>

@@ -24,7 +24,6 @@
     <string name="play">प्ले करा</string>
     <string name="play_from_start">सुरुवातीपासून प्ले करा</string>
     <string name="play_as_audio">ध्वनी स्वरुपात प्ले करा</string>
-    <string name="play_as_video">चित्रफीत स्वरुपात प्ले करा</string>
     <string name="play_all">सर्व प्ले करा</string>
     <string name="append_all">सर्व जोडा</string>
     <string name="delete">काढून टाका</string>
@@ -74,9 +73,6 @@
     <string name="cover_art">कव्हर आर्ट</string>
     <string name="previous">मागील</string>
     <string name="stop">थांबा</string>
-    <string name="surface_best_fit">योग्य फिट</string>
-    <string name="surface_fill">भरा</string>
-    <string name="surface_original">मध्य</string>
     <string name="unseekable_stream">सीक करता न येणारी स्ट्रीम</string>
     <string name="refresh">ताजे करा</string>
     <string name="track_audio">ध्वनी ट्रॅक</string>
@@ -85,9 +81,6 @@
     <string name="track_codec_info">कोडेक: %1$s\n</string>
     <string name="track_language_info">भाषा: %1$s\n</string>
     <string name="volume">आवाज तीव्रता</string>
-    <string name="sound_on">आवाज चालू</string>
-    <string name="sound_off">आवाज बंद</string>
-    <string name="brightness">तेजस्वीपणा</string>
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 चॅनेल</item>
         <item quantity="other">%1$d चॅनेल\n</item>
@@ -101,7 +94,6 @@
     <string name="sleep_title">स्लीप टाइमर</string>
     <string name="sleep_in">स्लीप मध्ये</string>
     <string name="jump_to_time">वेळेवर उडी घ्या</string>
-    <string name="subtitle_select">उपशीर्षक फाईल निवडा</string>
     <string name="encountered_error_title">प्लेबॅक मध्ये त्रुटी</string>
     <string name="encountered_error_message">या मीडिया बरोबर VLC ला एक त्रुटी आली आहे.\nकृपया मीडिया लायब्ररी ताजी करून पुन्हा प्रयत्न करा.</string>
     <string name="invalid_location">%1$s हे स्थान प्ले केले जाऊ शकत नाही.</string>
@@ -127,29 +119,16 @@
     <string name="add_custom_path">सानुकूल मार्ग प्रविष्ट करा</string>
     <string name="add_custom_path_description">स्कॅन करण्यासाठी अधिक सानुकूल निर्देशिका प्रविष्ट करा:</string>
     <string name="remove_custom_path">सानुकूल मार्ग काढून टाका</string>
-    <string name="hardware_acceleration">हार्डवेअर अॅक्सलरेशन</string>
-    <string name="hardware_acceleration_disabled">निष्क्रिय करा</string>
-    <string name="hardware_acceleration_decoding">डिकोडिंग अॅक्सलरेशन</string>
-    <string name="hardware_acceleration_full">पूर्ण अॅक्सलरेशन</string>
     <string name="automatic">स्वयंचलित</string>
     <string name="screen_orientation">चित्रफीत पडद्याची अभिमुखता</string>
-    <string name="screen_orientation_sensor">स्वयंचलित (सेन्सर)</string>
-    <string name="screen_orientation_portrait">पोर्ट्रेट</string>
-    <string name="screen_orientation_landscape">लॅन्डस्केप</string>
-    <string name="subtitle_text_encoding">उपशीर्षक मजकूर एनकोडिंग</string>
     <string name="extra_prefs_category">अतिरिक्त सेटिंग्ज</string>
 
     <string name="interface_prefs_screen">इंटरफेस</string>
     <string name="enable_clone_mode">क्लोनला प्राधान्य</string>
-    <string name="enable_brightness_gesture_summary">चित्रफीत प्लेबॅकच्या वेळी जेस्चरने तेजस्वीपणा नियंत्रित करा</string>
     <string name="enable_headset_detection">हेडसेट शोधा</string>
     <string name="aout">ध्वनी आउटपुट</string>
     <string name="performance_prefs_category">कार्यप्रदर्शन</string>
     <string name="deblocking">डीब्लॉकिंग फिल्टर सेटींग्स</string>
-    <string name="deblocking_always">पूर्ण डीब्लॉकिंग (सर्वात मंद)</string>
-    <string name="deblocking_nonref">मध्यम डीब्लॉकिंग</string>
-    <string name="deblocking_nonkey">कमी डीब्लॉकिंग</string>
-    <string name="deblocking_all">डीब्लॉकिंग नाही (सर्वात जलद)</string>
     <string name="enable_time_stretching_audio">टाईम-स्ट्रेचिंग ध्वनी</string>
     <string name="advanced_prefs_category">प्रगत</string>
     <string name="auto_rescan_summary">application सुरु झाल्यावर नविन किंवा नष्ट कॆलॆल्या मीडियाचा स्वयंचलीत शॊध घ्या</string>

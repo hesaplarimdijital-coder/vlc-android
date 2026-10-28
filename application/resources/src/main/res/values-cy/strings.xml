@@ -33,11 +33,6 @@
     <string name="Medialibrary_progress">Diweddariadau cynydd sganio\'r llyfrgell cyfryngau</string>
     <string name="play_from_start">Chwarae o\'r dechrau</string>
     <string name="play_as_audio">Chwarae fel sain</string>
-    <string name="play_as_video">Chwarae fel fideo</string>
-    <string name="video_app_switch_title">Modd cefndir/PIP</string>
-    <string name="video_app_switch_summary">Dewisa beth mae VLC i\'w wneud pan wyt ti\'n newid i ap arall tra\'n chwarae fideo.</string>
-    <string name="play_pip_title">Chwarae fideos mewn modd Llun-o-fewn-llun</string>
-    <string name="play_as_audio_background">Chwarae fideos yn y cefndir</string>
     <string name="insert_next">Mewnosod y nesaf</string>
     <string name="play_all">Chwarae pob un</string>
     <string name="append_all">Atodi\'r cwbl</string>
@@ -138,10 +133,6 @@
     <string name="firstsong">Trac cyntaf y rhestr chwarae</string>
     <string name="lastsong">Trac olaf y rhestr chwarae</string>
 
-    <string name="surface_best_fit">Ffit orau</string>
-    <string name="surface_fit_screen">Ffitio i\'r sgrîn</string>
-    <string name="surface_fill">Llenwi\'r sgrin</string>
-    <string name="surface_original">Canoli</string>
     <string name="unseekable_stream">Ffrwd heb bosib dewis man chwarae</string>
     <string name="refresh">Ail-lwytho</string>
     <string name="track_audio">Trac sain</string>
@@ -152,11 +143,7 @@
     <string name="track_codec_info">Codec: %1$s\n</string>
     <string name="track_language_info">Iaith: %1$s\n</string>
     <string name="volume">Sain</string>
-    <string name="sound_on">Sain Ar</string>
-    <string name="sound_off">Sain i Ffwrdd</string>
-    <string name="brightness">Disgleirdeb</string>
     <string name="advanced">dewisiadau uwch</string>
-    <string name="audio_boost_warning">Llusga fyny eto i fynd dros 100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 sianel\n</item>
@@ -174,7 +161,6 @@
     <string name="sleep_title">Amserydd cysgu</string>
     <string name="sleep_in">Mynd i gysgu mewn</string>
     <string name="jump_to_time">Neidio i amser</string>
-    <string name="subtitle_select">Dewis ffeil isdeitlau</string>
     <string name="server_add_title">Ychwanegu gweinydd newydd i\'r ffefrynnau</string>
     <string name="server_domain_hint">Cyfeiriad gweinydd (IP neu enw parth)</string>
     <string name="server_share_hint">Enw rhwydwaith rhannu (neu gyfeiriad IP)</string>
@@ -230,65 +216,24 @@
     <string name="add_custom_path">Ychwanegu lleoliad penodol</string>
     <string name="add_custom_path_description">Rhowch gyfeiriadur ychwanegol i\'w sganio:</string>
     <string name="remove_custom_path">Tynnu llwybr penodol</string>
-    <string name="hardware_acceleration">Cyflymiad Caledwedd</string>
-    <string name="hardware_acceleration_summary">Analluogwyd: gwell sefydlogrwydd\nDatgodio: gwell perfformiad o bosib\nLlawn: perfformiad gwell fyth o bosib</string>
-    <string name="hardware_acceleration_disabled">Analluogwyd</string>
-    <string name="hardware_acceleration_decoding">Cyflymiad datgodio</string>
-    <string name="hardware_acceleration_full">Cyflymiad llawn</string>
     <string name="dev_hardware_decoder">Uwch ddatgodiwr caledwedd</string>
     <string name="dev_hardware_decoder_summary">Gorfodi datgodiwr caledwedd - defnyddwyr uwch yn unig</string>
     <string name="automatic">Awtomatig</string>
     <string name="screen_orientation">Gorweddiad sgrin fideo</string>
-    <string name="screen_orientation_sensor">Awtomatig (synhwyro)</string>
-    <string name="screen_orientation_portrait">Darlun</string>
-    <string name="screen_orientation_landscape">Tirlun</string>
     <string name="enable_black_theme">Thema ddu</string>
-    <string name="subtitle_text_encoding">Amgodiad testun isdeitlau</string>
     <string name="daynight_title">Modd DyddNos</string>
     <string name="daynight_follow_system_title">Dilyn modd y system</string>
     <string name="extra_prefs_category">Gosodiadau ychwanegol</string>
 
     <string name="interface_prefs_screen">Rhyngwyneb</string>
-    <string name="interface_secondary_display_category_title">Ail ddangosydd</string>
-    <string name="interface_secondary_display_category_summary">Gosodiadau pan mae ail ddangosyddion wedi\'u cysylltu (HDMI/Chromecast).</string>
     <string name="enable_clone_mode">Ffafrio clôn</string>
-    <string name="enable_clone_mode_summary">Clonio sgrîn y ddyfais heb remote control.</string>
 
     <string name="video_prefs_category">Fideo</string>
-    <string name="video_min_group_length_title">Grwpio fideos</string>
     <string name="video_min_group_length_disable">Peidio â grwpio fideos</string>
     <string name="video_min_group_length_folder">Grwpio fesul ffolder</string>
     <string name="video_min_group_length_name">Grwpio yn ôl enw</string>
-    <string name="video_transition_title">Trawsnewidiad fideos</string>
-    <string name="video_transition_summary">Dangos teitl y fideo newydd wrth drawsnewid</string>
     <string name="media_seen">Dangos nod bod y fideo wedi\'i gwylio</string>
-    <string name="media_seen_summary">Nodi fideo fel wedi ei gwylio pan fyddet wedi ei chwarae i\'r diwedd.</string>
-    <string name="force_play_all_summary">Chwarae pob fideo, gan ddechrau gyda\'r un a gliciwyd.</string>
-    <string name="force_play_all_title">Modd rhestr chwarae fideos</string>
-    <string name="save_brightness_summary">Cadw\'r lefel disgleirdeb o un cyfrwng i\'r nesaf</string>
-    <string name="save_brightness_title">Cadw lefel disgleirdeb</string>
-    <string name="save_audiodelay_summary">Cadw\'r oediad sain unigryw ar gyfer pob fideo</string>
-    <string name="save_audiodelay_title">Cadw oediad sain</string>
-    <string name="enable_brightness_gesture_title">Cyffyrddiad disgleirdeb</string>
-    <string name="enable_brightness_gesture_summary">Rheoli disgleirdeb gan gyffwrdd y sgrin wrth chwarae fideo</string>
-    <string name="enable_volume_gesture_title">Cyffyrddiad sain</string>
-    <string name="enable_volume_gesture_summary">Rheoli\'r sain gan gyffwrdd y sgrîn wrth chwarae fideo</string>
-    <string name="enable_seek_buttons">Botymau chwilio</string>
-    <string name="enable_double_tap_seek_title">Tap dwbl i chwilio</string>
-    <string name="enable_double_tap_seek_summary">Mae tap dwbl ar ymylon y sgrin yn chwilio fesul 10 eiliad</string>
-    <string name="popup_keepscreen_title">Cadw\'r sgrin YMLAEN mewn modd Ffenestr Llaim</string>
-    <string name="popup_keepscreen_summary">Cadw\'r sgrin YMLAEN tro bod ffenestr llaim yn ymddangos, hyd yn oed os yw\'r fideo wedi ei oedi.</string>
     <string name="browser_show_hidden_files_title">Dangos ffeiliau cudd</string>
-    <string name="subtitles_prefs_category">Isdeitlau</string>
-    <string name="subtitles_size_title">Maint isdeitlau</string>
-    <string name="subtitles_size_small">Bach</string>
-    <string name="subtitles_size_normal">Arferol</string>
-    <string name="subtitles_size_big">Mawr</string>
-    <string name="subtitles_size_huge">Anferth</string>
-    <string name="subtitles_color_title">Lliw isdeitlau</string>
-    <string name="subtitles_background_title">Cefndir isdeitlau</string>
-    <string name="subtitles_bold_title">Isdeitlau trwm</string>
-    <string name="subtitles_autoload_title">Llwytho isdeitlau yn awtomatig</string>
     <string name="audio_prefs_category">Sain</string>
     <string name="lockscreen_cover_title">Clawr y cyfrwng ar y sgrîn cloi</string>
     <string name="lockscreen_cover_summary">Pan ar gael, gosod clawr yr albwm, llyfr, ayyb, fel delwedd sgrin cloi dy ddyfais.</string>
@@ -298,8 +243,6 @@
     <string name="list_title_ellipsize_right">De</string>
     <string name="list_title_ellipsize_middle">Canol</string>
     <string name="list_title_ellipsize_marquee">Pabell fawr</string>
-    <string name="audio_boost_title">Hwb-sain</string>
-    <string name="audio_boost_summary">Caniatáu uchder sain hyd at 200%</string>
     <string name="headset_prefs_category">Clustffonau</string>
     <string name="enable_headset_detection">Canfod clustffonau</string>
     <string name="enable_headset_detection_summary">Synhwyro cysylltu a datgysylltu clustffonau</string>
@@ -332,13 +275,6 @@
 
     <string name="performance_prefs_category">Perfformiad</string>
     <string name="deblocking">Gosodiadau\'r hidlydd dadflocio</string>
-    <string name="deblocking_summary">Gall newid gosodiadau\'r hidlydd dadflocio wella ansawdd fideo (defnyddwyr uwch yn unig)</string>
-    <string name="deblocking_always">Dadflocio llawn (arafaf)</string>
-    <string name="deblocking_nonref">Dadflocio cymedrol</string>
-    <string name="deblocking_nonkey">Dadflocio isel</string>
-    <string name="deblocking_all">Dim dadflocio (cyflymaf)</string>
-    <string name="enable_frame_skip">Neidio fframiau</string>
-    <string name="enable_frame_skip_summary">Datgodio cyflymach ond posib na fydd ansawdd fideo gystal.</string>
     <string name="enable_time_stretching_audio">Gallu ymestyn sain dros amser</string>
     <string name="enable_time_stretching_audio_summary">Cyflymu neu arafu sain heb newid y traw (pitch). Mae angen dyfais gyflym.</string>
 
@@ -382,9 +318,6 @@
     <string name="send_log">Anfon y log</string>
     <string name="sending_log">Yn anfon y log…</string>
 
-    <string name="delete_sub_title">Dileu isdeitlau</string>
-    <string name="delete_sub_message">Wyt ti am ddileu yr isdeitlau hyn?</string>
-    <string name="download_subtitle_title">Lawrlwytho Isdeitlau</string>
 
     <string name="no_result">Ni chanfuwyd unrhyw beth</string>
     <string name="no_internet_connection">Gwiria dy gysylltiad rhyngrwyd</string>
@@ -393,8 +326,6 @@
 
     <string name="file_size">Maint ffeil</string>
 
-    <string name="audio_delay">Oediad sain</string>
-    <string name="spu_delay">Oediad isdeitlau</string>
     <string name="network_shares_discovery">Yn edrych am gynnwys wedi\'i rannu ar y rhwydwaith</string>
     <string name="network_empty">Mae\'r cyfeiriadur hwn yn wag.</string>
     <string name="network_connection_needed">Dim cysylltiad i\'r rhwydwaith lleol</string>
@@ -405,7 +336,6 @@
     <string name="playlist_name_hint">Enw\'r rhestr chwarae</string>
     <string name="go_to_chapter">Mynd at bennod…</string>
     <string name="confirm_resume">Parhau o\'r man diwethaf?</string>
-    <string name="confirm_resume_title">Parhau fideos wedi\'i chwarae</string>
     <string name="tv_ui_title">Rhyngwyneb teledu Android</string>
     <string name="tv_ui_summary">Newid rhyngwyneb i thema deledu addasedig</string>
     <string name="medialibrary">Llyfrgell cyfryngau</string>
@@ -413,7 +343,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">Rhagor o Weithredoedd</string>
-    <string name="back_quit_lock">Pwysa Nôl eto i adael y fideo</string>
     <string name="stream_deleted">Dileuwyd y ffrwd</string>
     <string name="no_subs_found">Nid oes isdeitlau yn y cyfeiriadur hwn</string>
     <string name="music_now_playing">Yn Chwarae Nawr</string>
@@ -441,19 +370,12 @@
     <string name="download_on_device">Lawrlwytho</string>
     <string name="extension_empty">Dim eitemau i\'w dangos. Dos yn ôl i osodiadau estyniadau i gael rhai.</string>
 
-    <string name="opengl_title">Defnydd ES2 OpenGL</string>
-    <string name="opengl_summary">Yn rhagosodedig, defnyddir OpenGL ES2 ar gyfer dadgodio meddalwedd a dadgodio caledwedd pan fo angen (fideos 360°)</string>
-    <string name="opengl_automatic">Awtomatig</string>
-    <string name="opengl_on">Gorfodi Ymlaen</string>
-    <string name="opengl_off">Gorfodi i Ffwrdd</string>
     <string name="network_favorites">Ffefrynnau rhwydwaith</string>
     <string name="network_shared_folders">Ffolderi wedi eu rhannu</string>
     <string name="encryption_warning">Rhybudd - Nid yw\'n bosib amgryptio ar y fersiwn hwn o Android. Caiff y cyfrinair ei gadw mewn man preifat ond heb ei amgryptio.</string>
     <string name="store_password">Cofio\'r cyfrinair</string>
     <string name="add_to_playlist">Ychwanegu i\'r rhestr chwarae</string>
     <string name="popup_playback_title">Chwarae\'r fideo mewn ffenestr naid</string>
-    <string name="popup_playback">Yn chwarae mewn ffenestr naid</string>
-    <string name="popup_expand">Ymestyn y fideo</string>
     <string name="download_subtitles">Lawrlwytho isdeitlau</string>
     <string name="browse_folder">Pori\'r ffolder</string>
     <string name="listen">Gwrando</string>
@@ -511,7 +433,6 @@
     <string name="playback_forward">Ymlaen yn gyflym</string>
     <string name="ml_wizard_scan_checkbox">Sganio\'r ddyfais am gynnwys cyfryngau</string>
     <string name="ml_wizard_description">Dewis a all VLC sganio storfa dy ddyfais i drefnu dy lyfrgell cyfryngau neu dim ond i\'w defnyddio fel chwaraeydd syml gyda phorwr integredig.</string>
-    <string name="tv_my_new_videos">Fy fideos newydd</string>
     <string name="otg_device_title">Dyfais OTG</string>
     <string name="browser">Porwr</string>
     <string name="ab_repeat">Ailadrodd A-B</string>
@@ -524,25 +445,14 @@
     <string name="rename">Ailenwi</string>
     <string name="rename_media">Ailenwi %1$s</string>
     <string name="manual_search">Chwiliad â llaw</string>
-    <string name="subtitle_search_name_hint">Enw</string>
-    <string name="subtitle_search_episode_hint">Pennod</string>
-    <string name="subtitle_search_season_hint">Cyfres</string>
     <string name="language_to_download">Iaith</string>
-    <string name="delete_the_selected">Dileu\'r dewis</string>
-    <string name="download_the_selected">Lawrlwytho\'r dewis</string>
     <string name="next">Nesaf</string>
     <string name="download">Lawrlwytho</string>
     <string name="ctx_player_video_track">Dewisa trac fideo</string>
     <string name="ctx_player_audio_track">Trac sain</string>
     <string name="ctx_player_subs_track">Trac isdeitlau</string>
-    <string name="ctx_pip_title">Chwaraeydd naid</string>
     <string name="device_dialog_title">Gosodwyd dyfais allanol</string>
     <string name="device_dialog_message">Rwyt newydd gysylltu dyfais storfa newydd i dy flwch teledu. Wyt ti am ei agor gyda VLC?</string>
-    <string name="videos_folders_title">Fideos fesul ffolder</string>
-    <string name="videos_groups_title">Grwpiau fideos</string>
-    <string name="video_save_clone_mode">Actifadu modd clôn yn awtomatig?</string>
-    <string name="video_remote_enable">Newid i fodd rheoli o bell</string>
-    <string name="video_remote_disable">Dyblygu\'r sgrin</string>
     <string name="removed_from_playlist_anonymous">Tynnwyd yr eitem(au) o\'r rhestr chwarae</string>
     <string name="welcome_title">Croeso i VLC!</string>
     <string name="welcome_subtitle">Y chwaraeydd aml-gyfrwng cod agored ac am ddim</string>
@@ -561,12 +471,9 @@
     <string name="add_to_new_playlist">Ychwanegu at restr chwarae newydd</string>
     <string name="resume_card_message">Parhau i chwarae %1$s?</string>
     <string name="misc">Amrywiol</string>
-    <string name="popup_force_legacy_title">Defnyddio chwaraeydd Llun-o-fewn-Llun dy hun</string>
-    <string name="popup_force_legacy_summary">Defnyddio chwaraeydd Llun-o-fewn-Llun dy hun gyda maint addasedig</string>
     <string name="device_default">Rhagosodiad y ddyfais</string>
     <string name="track_number">%d trac</string>
     <string name="jump_to">Neidio i</string>
-    <string name="show_video_thumbnails_summary">Dangos man-luniau fideos mewn rhestrau</string>
     <string name="show_video_thumbnails">Man-luniau fideos</string>
     <string name="eq_snap_bands">Snapio bandiau</string>
     <string name="enable_equalizer">Galluogi</string>
@@ -640,27 +547,14 @@
     <string name="playback_multiple_errors">Ni ellir chwarae cyfryngau aml-gyfrwng</string>
     <string name="abrepeat_add_first_marker">Gosod pwynt dechrau</string>
     <string name="abrepeat_add_second_marker">Gosod pwynt gorffen</string>
-    <string name="demux_bitrate">Didradd datblecsu</string>
-    <string name="input_bitrate">Didradd mewnbwn</string>
-    <string name="video_information">Gwybodaeth fideo</string>
 
     <string name="channels">Sianeli</string>
     <string name="resolution">Cydraniad</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate">Cyflymdra fframiau</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/e</string>
     <string name="language">Iaith</string>
-    <string name="track_samplerate">Cyfradd sampl</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">Didradd</string>
     <string name="codec">Codec</string>
     <string name="text">Testun</string>
     <string name="unknown">Anhysbys</string>
-    <string name="audio_delay_start">Sain wedi\'i chlywed</string>
-    <string name="subtitle_delay_first">Llais wedi\'i glywed</string>
-    <string name="audio_delay_end">Sain wedi\'i adnabod</string>
-    <string name="subtitle_delay_end">Testun wedi\'i weld</string>
     <string name="track_index">Trac: %s</string>
     <string name="audio_queue_progress">Cynnydd: %s</string>
     <string name="sortby_track">Trac</string>
@@ -679,14 +573,9 @@
     <string name="group_similar">Ail-grwpio yn awtomatig</string>
     <string name="no_favorite">Dim ffefrynnau</string>
     <string name="empty_directory">Gwag</string>
-    <string name="no_track">Dim trac</string>
 
     <string name="swipe_unlock">Llusga i ddatgloi</string>
     <string name="swipe_unlock_no_touch">Dalia\'n hir i ddatgloi</string>
-    <string name="sub_result_by_name">Canlyniadau ar gyfer %s</string>
-    <string name="sub_result_by_name_season">Cyfres %s</string>
-    <string name="sub_result_by_name_episode">Pennod %s</string>
-    <string name="sub_result_by_file">Canlyniadau ar gyfer dy ffeil</string>
     <string name="donate">Helpu VLC</string>
     <string name="donate_desc">Cefnogi\'r gwirfoddolwyr sy\'n adeiladu VLC</string>
     <string name="donate_subscribtion">Hoffwn i hyn fod yn danysgrifiad misol</string>
@@ -703,25 +592,13 @@
 
     <string name="mark_as_played">Nodi fel wedi\'i chwarae</string>
     <string name="mark_all_as_played">Nodi pob un fel wedi\'i chwarae</string>
-    <string name="new_group">Grŵp newydd</string>
-    <string name="new_group_desc">Creu grŵp newydd</string>
 
-    <string name="air_action_rewind">Nôl 10 eil</string>
-    <string name="air_action_forward">Ymlaen 10 eil</string>
-    <string name="air_action_play_pause">Oedi/Chwarae</string>
-    <string name="air_action_volume_up">Sain i fyny</string>
-    <string name="air_action_volume_down">Sain i lawr</string>
-    <string name="air_action_next">Eitem nesaf</string>
-    <string name="air_action_previous">Eitem blaenorol</string>
     <string name="allow_otg">Caniatáu mynediad OTG</string>
     <string name="allow_otg_description">Dewisa dy yriant OTG i ganiatáu mynediad at VLC.</string>
-    <string name="timeout_infinite">Anfeidrol</string>
     <string name="video_hud_timeout">Oediad cyn cuddio botymau</string>
     <string name="remove_from_history">Tynnu o\'r hanes</string>
     <string name="prefersmbv1">Ffafrio SMB 1</string>
     <string name="prefersmbv1_summary">Dad-ddewisa hyn os wyt yn cael anawsterau pori dy weinydd SMB</string>
-    <string name="apply_to_all">Rhoi i bob fideo</string>
     <string name="audio_delay_global">Oediad sain wedi\'i osod i %s me i bob fideo</string>
     <string name="go_to_folder">Pori\'r rhiant</string>
-    <string name="no_sub_renderer">Dyw isdeitlau ddim eto ar gael wrth fwrw</string>
     </resources>

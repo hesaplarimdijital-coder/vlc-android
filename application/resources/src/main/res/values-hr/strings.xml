@@ -35,11 +35,6 @@
     <string name="Medialibrary_progress">Napredak nadopuna pretraživanja medijske zbirke</string>
     <string name="play_from_start">Reproduciraj od početka</string>
     <string name="play_as_audio">Reproduciraj zvučni zapis</string>
-    <string name="play_as_video">Reproduciraj video zapis</string>
-    <string name="video_app_switch_title">Pozadinski/Slika-u-Slici (PIP) način rada</string>
-    <string name="video_app_switch_summary">Odaberite VLC ponašanje kada prebacite na drugu aplikaciju sa video repodukcije</string>
-    <string name="play_pip_title">Reproduciraj video snimke u Slika-u-slici načinu rada</string>
-    <string name="play_as_audio_background">Reproduciraj video snimke u pozadini</string>
     <string name="insert_next">Umetni sljedeće</string>
     <string name="play_all">Reproduciraj sve</string>
     <string name="append_all">Dodaj sve</string>
@@ -133,10 +128,6 @@
     <string name="firstsong">Prva pjesma na popisu izvođenja</string>
     <string name="lastsong">Posljednja pjesma na popisu izvođenja</string>
 
-    <string name="surface_best_fit">Najbolji prikaz</string>
-    <string name="surface_fit_screen">Prilagodi po zaslonu</string>
-    <string name="surface_fill">Ispuni</string>
-    <string name="surface_original">Sredina</string>
     <string name="unseekable_stream">Nepremotavajuće strujanje</string>
     <string name="refresh">Osvježi</string>
     <string name="track_audio">Zvučni zapis</string>
@@ -147,11 +138,7 @@
     <string name="track_codec_info">Kôdek: %1$s\n</string>
     <string name="track_language_info">Jezik: %1$s\n</string>
     <string name="volume">Glasnoća</string>
-    <string name="sound_on">Zvuk uključen</string>
-    <string name="sound_off">Zvuk isključen</string>
-    <string name="brightness">Svjetlina</string>
     <string name="advanced">napredne mogućnosti</string>
-    <string name="audio_boost_warning">Kliznite gore ponovno za iznad 100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanal\n</item>
@@ -167,7 +154,6 @@
     <string name="sleep_title">Zadano vrijeme spavanja</string>
     <string name="sleep_in">Spavaj</string>
     <string name="jump_to_time">Premotaj na vrijeme</string>
-    <string name="subtitle_select">Odaberi datoteku podnaslova</string>
     <string name="server_add_title">Dodaj novi poslužitelj u omiljene</string>
     <string name="server_domain_hint">Adresa poslužitelja (naziv domene ili IP adresa)</string>
     <string name="server_share_hint">Naziv mrežnog dijeljenja (ili IP adresa)</string>
@@ -224,64 +210,23 @@
     <string name="add_custom_path">Dodaj prilagođenu putanju</string>
     <string name="add_custom_path_description">Upišite dodatni direktorij pretraživanja:</string>
     <string name="remove_custom_path">Ukloni prilagođenu putanju</string>
-    <string name="hardware_acceleration">Hardversko ubrzanje</string>
-    <string name="hardware_acceleration_summary">Onemogućeno: bolja stabilnost.\nDekôdirano: može poboljšati performanse.\nPotpuno: može poboljšati performanse još jače.</string>
-    <string name="hardware_acceleration_disabled">Onemogući</string>
-    <string name="hardware_acceleration_decoding">Dekôdirano ubrzanje</string>
-    <string name="hardware_acceleration_full">Potpuno ubrzanje</string>
     <string name="dev_hardware_decoder">Napredno hardversko dekôdiranje</string>
     <string name="dev_hardware_decoder_summary">Prisili hardversko dekôdiranje, samo za napredne korisnike</string>
     <string name="automatic">Automatsko</string>
     <string name="screen_orientation">Zakretanje zaslona</string>
-    <string name="screen_orientation_sensor">Automatsko (senzor)</string>
-    <string name="screen_orientation_portrait">Uspravno</string>
-    <string name="screen_orientation_landscape">Položeno</string>
     <string name="enable_black_theme">Tamna tema</string>
-    <string name="subtitle_text_encoding">Kôdiranje teksta podnaslova</string>
     <string name="daynight_title">Dnevno-noćni način rada</string>
     <string name="extra_prefs_category">Dodatne postavke</string>
 
     <string name="interface_prefs_screen">Sučelje</string>
-    <string name="interface_secondary_display_category_title">Pomoćni zaslon</string>
-    <string name="interface_secondary_display_category_summary">Postavke kada su povezani pomoćni zasloni (HDMI/Chromecast)</string>
     <string name="enable_clone_mode">Preferiraj klonirano</string>
-    <string name="enable_clone_mode_summary">Kloniraj zaslon uređaja bez kontrola daljinskog upravljanja.</string>
 
     <string name="video_prefs_category">Video</string>
-    <string name="video_min_group_length_title">Grupiraj video snimke</string>
     <string name="video_min_group_length_disable">Ne grupiraj video snimke</string>
     <string name="video_min_group_length_folder">Grupiraj po mapama</string>
     <string name="video_min_group_length_name">Grupiraj po imenu</string>
-    <string name="video_transition_title">Prijelazi videa</string>
-    <string name="video_transition_summary">Pokaži naslov videa na prijelazu</string>
     <string name="media_seen">Prikaži oznaku odgledane video snimke</string>
-    <string name="media_seen_summary">Označi video snimke kao odgledane kada reprodukcija stigne do kraja</string>
-    <string name="force_play_all_summary">Reproduciraj sve video snimke, počevši od one na koju ste kliknuli</string>
-    <string name="force_play_all_title">Način rada video popisa izvođenja</string>
-    <string name="save_brightness_summary">Zadrži razinu svjetline između medija</string>
-    <string name="save_brightness_title">Spremi razinu svjetline</string>
-    <string name="save_audiodelay_summary">Spremi pojedino kašnjenje zvuka za svaku video snimku</string>
-    <string name="save_audiodelay_title">Spremi kašnjenje zvuka</string>
-    <string name="enable_brightness_gesture_title">Pokreti svjetline</string>
-    <string name="enable_brightness_gesture_summary">Upravljanje svjetlinom s pokretom tijekom reprodukcije video snimki</string>
-    <string name="enable_volume_gesture_title">Pokreti glasnoće zvuka</string>
-    <string name="enable_volume_gesture_summary">Upravljanje glasnoćom zvuka s pokretom tijekom reprodukcije video snimki</string>
-    <string name="enable_seek_buttons">Tipke premotavanja</string>
-    <string name="enable_double_tap_seek_title">Dvostruko dotakni za premotavanje</string>
-    <string name="enable_double_tap_seek_summary">Dvostruko dotaknite na rubove zaslona za premotavanje od 10 sekundi</string>
-    <string name="popup_keepscreen_title">Drži zaslon uključenim u skočnom načinu rada</string>
-    <string name="popup_keepscreen_summary">Uvijek drži zaslon uključenim kada se skočni prozor pojavi, čak iako je video reprodukcija pauzirana.</string>
     <string name="browser_show_hidden_files_title">Prikaži skrivene datoteke</string>
-    <string name="subtitles_prefs_category">Podnaslovi</string>
-    <string name="subtitles_size_title">Veličina podnaslova</string>
-    <string name="subtitles_size_small">Mala</string>
-    <string name="subtitles_size_normal">Normalna</string>
-    <string name="subtitles_size_big">Velika</string>
-    <string name="subtitles_size_huge">Vrlo velika</string>
-    <string name="subtitles_color_title">Boja podnaslova</string>
-    <string name="subtitles_background_title">Pozadina podnaslova</string>
-    <string name="subtitles_bold_title">Podebljani podnaslovi</string>
-    <string name="subtitles_autoload_title">Automatski učitaj podnaslove</string>
     <string name="audio_prefs_category">Zvuk</string>
     <string name="lockscreen_cover_title">Omot medija na zaključanom zaslonu</string>
     <string name="lockscreen_cover_summary">Kada je dostupno, postavi trenutni omot albuma kao pozadinu zaključanog zaslona</string>
@@ -290,8 +235,6 @@
     <string name="list_title_ellipsize_right">Desno</string>
     <string name="list_title_ellipsize_middle">Srednje</string>
     <string name="list_title_ellipsize_marquee">Pomični tekst</string>
-    <string name="audio_boost_title">Zvučno pojačanje</string>
-    <string name="audio_boost_summary">Omogući glasnoću zvuka do 200%</string>
     <string name="headset_prefs_category">Slušalice</string>
     <string name="enable_headset_detection">Otkrij slušalice</string>
     <string name="enable_headset_detection_summary">Otkrij spajanje i uklanjanje slušalica</string>
@@ -323,13 +266,6 @@
 
     <string name="performance_prefs_category">Pefomanse</string>
     <string name="deblocking">Postavke filtra deblokiranja</string>
-    <string name="deblocking_summary">Promijenite postavke filtra deblokiranja. Može poboljšati video kvalitetu. (Samo za napredne korisnike)</string>
-    <string name="deblocking_always">Potpuno deblokiranje (najsporije)</string>
-    <string name="deblocking_nonref">Srednje deblokiranje</string>
-    <string name="deblocking_nonkey">Slabije deblokiranje</string>
-    <string name="deblocking_all">Bez deblokiranja (najbrže)</string>
-    <string name="enable_frame_skip">Preskok sličice</string>
-    <string name="enable_frame_skip_summary">Ubrzava dekôdiranje ali smanjuje kvalitetu video snimke.</string>
     <string name="enable_time_stretching_audio">Vremensko rastezanje zvuka</string>
     <string name="enable_time_stretching_audio_summary">Ubrzavanje i usporavanje zvuka bez promjene tona (zahtijeva brzi uređaj)</string>
 
@@ -374,9 +310,6 @@
     <string name="send_log">Pošalji zapis</string>
     <string name="sending_log">Slanje zapisa…</string>
 
-    <string name="delete_sub_title">Obriši podnaslov</string>
-    <string name="delete_sub_message">Želite li obrisati ovaj podnaslov?</string>
-    <string name="download_subtitle_title">Preuzmi podnaslov</string>
 
     <string name="no_result">Rezultati nisu pronađeni</string>
     <string name="no_internet_connection">Provjerite inernetsku vezu</string>
@@ -387,8 +320,6 @@
 
     <string name="file_size">Veličina datoteke</string>
 
-    <string name="audio_delay">Kašnjenje zvuka</string>
-    <string name="spu_delay">Kašnjenje podnaslova</string>
     <string name="network_shares_discovery">Pretraživanje mrežnih dijeljenja…</string>
     <string name="network_empty">Direktorij je prazan.</string>
     <string name="network_connection_needed">Nema povezivanjiva s lokalnom mrežom.</string>
@@ -406,7 +337,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">Više radnji</string>
-    <string name="back_quit_lock">Pritisnite tipku povratka za zatvaranje video snimke</string>
     <string name="stream_deleted">Strujanje obrisano</string>
     <string name="no_subs_found">Nema podnaslova u ovom direktoriju</string>
     <string name="music_now_playing">Trenutno se reporducira</string>
@@ -430,19 +360,12 @@
     <string name="download_on_device">Preuzimanje</string>
     <string name="extension_empty">Nema stavke za prikaz, idite u svoje postavke proširenja za prikaz stavke.</string>
 
-    <string name="opengl_title">OpenGL ES2 upotreba</string>
-    <string name="opengl_summary">Po zadanome, OpenGL ES2 se koristi za softversko i hardversko dekôdiranje, prema potrebi (360° video snimke).</string>
-    <string name="opengl_automatic">Automatski</string>
-    <string name="opengl_on">Uključi prisilno</string>
-    <string name="opengl_off">Isključi prisilno</string>
     <string name="network_favorites">Omiljeno na mreži</string>
     <string name="network_shared_folders">Dijeljene mape</string>
     <string name="encryption_warning">Upozorenje, šifriranje nije dostupno za ovu inačicu Androida, lozinka će biti spremljena u privatnom prostoru ali neće biti šifrirana</string>
     <string name="store_password">Zapamti lozinku</string>
     <string name="add_to_playlist">Dodaj na popis izvođenja</string>
     <string name="popup_playback_title">Reproduciraj video snimke u skočnom prozoru</string>
-    <string name="popup_playback">Reproduciraj u skočnom prozoru</string>
-    <string name="popup_expand">Raširi video</string>
     <string name="download_subtitles">Preuzmi podnaslov</string>
     <string name="browse_folder">Pregledaj mapu</string>
     <string name="listen">Osluškuj</string>
@@ -492,7 +415,6 @@
     <string name="audio_digital_output_disabled">Digitalni izlaz zvuka onemogućen</string>
     <string name="audio_digital_title">Digitalni izlaz zvuka (propuštanje)</string>
     <string name="audio_resume_card_title">Prikaži zadnji savjet popisa izvođenja</string>
-    <string name="tv_my_new_videos">Moji novi video zapisi</string>
     <string name="browser">Preglednik</string>
     <string name="ab_repeat">A-B ponavljanje</string>
     <string name="ab_repeat_reset">Resetiraj A-B ponavljanje</string>
@@ -506,21 +428,13 @@
     <string name="rename">Preimenuj</string>
     <string name="rename_media">Preimenuj%1$s</string>
     <string name="manual_search">Ručna pretraga</string>
-    <string name="subtitle_search_name_hint">Naziv</string>
-    <string name="subtitle_search_episode_hint">Epizoda</string>
-    <string name="subtitle_search_season_hint">Sezona</string>
     <string name="language_to_download">Jezik</string>
-    <string name="delete_the_selected">Obriši označeno</string>
-    <string name="download_the_selected">Preuzmi označeno</string>
     <string name="next">Sljedeće</string>
     <string name="download">Preuzmi</string>
     <string name="ctx_player_video_track">Označi video zapis</string>
     <string name="ctx_player_audio_track">Zvučni zapis</string>
     <string name="ctx_player_subs_track">Zapis podnaslova</string>
     <string name="device_dialog_title">Vanjski uređaj umetnut</string>
-    <string name="videos_folders_title">Videozapisi po mapama</string>
-    <string name="videos_groups_title">Grupe videozapisa</string>
-    <string name="video_remote_disable">Udvostruči zaslon</string>
     <string name="removed_from_playlist_anonymous">Stavka(e) uklonjena/e/ s popisa izvođenja</string>
     <string name="welcome_title">Dobrodošli u VLC!</string>
     <string name="welcome_subtitle">Besplatan izvođač medija otvorenog koda</string>
@@ -532,12 +446,9 @@
     <string name="add_to_new_playlist">Dodaj na novi popis izvođenja</string>
     <string name="resume_card_message">Nastavi reprodukciju%1$s?</string>
     <string name="misc">Razno</string>
-    <string name="popup_force_legacy_title">Koristi prilagođen skočni prozor „slika u slici”</string>
-    <string name="popup_force_legacy_summary">Koristi prilagođen skočni prozor „slika u slici” čija se veličina može promijeniti</string>
     <string name="device_default">Standardna postavka uređaja</string>
     <string name="track_number">%d zapisa</string>
     <string name="jump_to">Skoči na</string>
-    <string name="show_video_thumbnails_summary">Prikaži sličice videa u popisima</string>
     <string name="show_video_thumbnails">Sličice videa</string>
     <string name="enable_equalizer">Aktiviraj</string>
     <string name="presets">Postavljeno</string>
@@ -576,17 +487,10 @@
     <string name="next_episode">Sljedeća epizoda</string>
     <string name="recently_played">Nedavno reproducirano</string>
     <string name="recently_added">Nedavno dodano</string>
-    <string name="video_information">Informacija o videu</string>
 
     <string name="channels">Kanali</string>
     <string name="resolution">Razlučivost</string>
-    <string name="resolution_value">%1$d×%2$d</string>
-    <string name="framerate">Broj kadrova u sekundi</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Jezik</string>
-    <string name="track_samplerate">Frekvencija</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">Broj bitova u sekundi</string>
     <string name="codec">Kodek</string>
     <string name="text">Tekst</string>
@@ -605,29 +509,15 @@
     <string name="rename_group">Preimenuj grupu videa</string>
     <string name="ungroup">Rastavi grupu</string>
     <string name="group_similar">Pregrupiraj automaski</string>
-    <string name="no_group_found">Nije pronađena nijedna grupa videa</string>
     <string name="no_favorite">Nema favorita</string>
     <string name="empty_directory">Prazno</string>
     <string name="swipe_unlock">Povuci prstom za otključavanje</string>
     <string name="swipe_unlock_no_touch">Pritisni dugo za otključavanje</string>
-    <string name="sub_result_by_name">Rezultati za %s</string>
-    <string name="sub_result_by_name_season">Sezona %s</string>
-    <string name="sub_result_by_name_episode">Epizoda %s</string>
 
-    <string name="sub_result_by_file">Rezultati za tvoju datoteku</string>
     <string name="donate">Pomogni VLC-u</string>
     <string name="donate_desc">Podrži volontere koji grade VLC</string>
     <string name="tip_jar">Pomogni VLC-u</string>
     <string name="thank_you">Hvala</string>
-    <string name="air_action_rewind">Premotaj 10 s natrag</string>
-    <string name="air_action_forward">Premotaj 10 s naprijed</string>
-    <string name="air_action_play_pause">Zaustavi/Nastavi reprodukciju</string>
-    <string name="air_action_volume_up">Glasnije</string>
-    <string name="air_action_volume_down">Tiše</string>
-    <string name="air_action_next">Sljedeće u reprodukciji</string>
-    <string name="air_action_previous">Prethodno u reprodukciji</string>
-    <string name="timeout_infinite">Beskonačno</string>
-    <string name="video_hud_timeout_summary">%ss</string>
     <string name="remove_from_history">Ukloni iz povijesti</string>
     <string name="start_vlc">Pokreni VLC</string>
     <string name="jump_delay_summary">%s s</string>
@@ -647,10 +537,8 @@
     <string name="open_vlc">Otvori VLC</string>
     <string name="ascending">Uzlazno</string>
     <string name="descending">Silazno</string>
-    <string name="screenshot_error">Greška tijekom snimanja snimke ekrana</string>
     <string name="disabled">Deaktivirano</string>
     <string name="enable_screenshot_gesture">Dodirni s tri prsta</string>
-    <string name="enable_screenshot_button">Prikaži gumb za snimku ekrana</string>
     <string name="talkback_genre">Žanr: %s</string>
     <string name="talkback_folder">Mapa: %s</string>
     <string name="talkback_file">Datoteka: %s</string>
@@ -667,7 +555,6 @@
     <string name="talkback_increase_speed">Povećaj brzinu</string>
     <string name="talkback_decrease_speed">Smanji brzinu</string>
     <string name="downloaded">Preuzeto</string>
-    <string name="not_downloaded">Nije preuzeto</string>
     <string name="downloading">Preuzimanje</string>
     <string name="talkback_action_rewind">Premotaj %s s natrag</string>
     <string name="talkback_action_forward">Premotaj %s s naprijed</string>

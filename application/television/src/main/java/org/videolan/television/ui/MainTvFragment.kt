@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.interfaces.IMedia
-import org.videolan.libvlc.util.AndroidUtil
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.DummyItem
@@ -54,8 +53,6 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.resources.CATEGORY
 import org.videolan.resources.CATEGORY_NOW_PLAYING
 import org.videolan.resources.CATEGORY_NOW_PLAYING_PAUSED
-import org.videolan.resources.CATEGORY_NOW_PLAYING_PIP
-import org.videolan.resources.CATEGORY_NOW_PLAYING_PIP_PAUSED
 import org.videolan.resources.HEADER_CATEGORIES
 import org.videolan.resources.HEADER_HISTORY
 import org.videolan.resources.HEADER_MISC
@@ -84,11 +81,9 @@ import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
-import org.videolan.vlc.RecommendationsService
 import org.videolan.vlc.StartActivity
 import org.videolan.vlc.gui.helpers.UiTools.showDonations
 import org.videolan.vlc.gui.helpers.hf.PinCodeDelegate
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.reloadLibrary
 import org.videolan.vlc.util.Permissions
 
@@ -375,11 +370,6 @@ class MainTvFragment : BrowseSupportFragment(), OnItemViewSelectedListener, OnIt
         model.refresh()
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (AndroidDevices.isAndroidTv && !AndroidUtil.isOOrLater) requireActivity().startService(Intent(requireActivity(), RecommendationsService::class.java))
-    }
-
     override fun onClick(v: View?) = requireActivity().startActivity(Intent(requireContext(), SearchActivity::class.java))
 
     fun showDetails(): Boolean {
@@ -425,8 +415,6 @@ class MainTvFragment : BrowseSupportFragment(), OnItemViewSelectedListener, OnIt
             HEADER_NOW_PLAYING -> {
                 if ((item as DummyItem).id == CATEGORY_NOW_PLAYING || item.id == CATEGORY_NOW_PLAYING_PAUSED) { //NOW PLAYING CARD
                     activity.startActivity(Intent(activity, AudioPlayerActivity::class.java))
-                } else if (item.id == CATEGORY_NOW_PLAYING_PIP || item.id == CATEGORY_NOW_PLAYING_PIP_PAUSED) { //NOW PLAYING CARD in PiP Mode
-                    activity.startActivity(Intent(activity, VideoPlayerActivity::class.java))
                 }
             }
             else -> {

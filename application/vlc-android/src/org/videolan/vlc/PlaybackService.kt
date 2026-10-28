@@ -92,7 +92,6 @@ import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.RendererItem
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.interfaces.IMediaFactory
-import org.videolan.libvlc.interfaces.IVLCVout
 import org.videolan.libvlc.util.AndroidUtil
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -106,7 +105,6 @@ import org.videolan.resources.ACTION_REMOTE_PLAYPAUSE
 import org.videolan.resources.ACTION_REMOTE_SEEK_BACKWARD
 import org.videolan.resources.ACTION_REMOTE_SEEK_FORWARD
 import org.videolan.resources.ACTION_REMOTE_STOP
-import org.videolan.resources.ACTION_REMOTE_SWITCH_VIDEO
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.CUSTOM_ACTION
@@ -122,7 +120,6 @@ import org.videolan.resources.EXTRA_SEARCH_BUNDLE
 import org.videolan.resources.EXTRA_SEEK_DELAY
 import org.videolan.resources.PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT
 import org.videolan.resources.PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV
-import org.videolan.resources.PLAYLIST_TYPE_ALL
 import org.videolan.resources.PLAYLIST_TYPE_AUDIO
 import org.videolan.resources.QUICK_SEARCH_BOX_APP_PKG
 import org.videolan.resources.NotificationIds
@@ -150,18 +147,15 @@ import org.videolan.tools.BitmapCache
 import org.videolan.tools.DrawableCache
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SEEK_BUTTONS
 import org.videolan.tools.ENABLE_ANDROID_AUTO_SPEED_BUTTONS
-import org.videolan.tools.KEY_ALWAYS_FAST_SEEK
 import org.videolan.tools.KEY_ANDROID_AUTO_QUEUE_FORMAT_VAL
 import org.videolan.tools.KEY_ANDROID_AUTO_QUEUE_INFO_POS_VAL
 import org.videolan.tools.KEY_ANDROID_AUTO_SUBTITLE_SCALE_VAL
 import org.videolan.tools.KEY_ANDROID_AUTO_TITLE_SCALE_VAL
 import org.videolan.tools.KEY_AUDIO_TASK_REMOVED
-import org.videolan.tools.KEY_CURRENT_MEDIA_IS_AUDIO
 import org.videolan.tools.KEY_ENABLE_HEADSET_DETECTION
 import org.videolan.tools.KEY_ENABLE_PLAY_ON_HEADSET_INSERTION
 import org.videolan.tools.KEY_METERED_CONNECTION
 import org.videolan.tools.KEY_PLAYBACK_SPEED_AUDIO_GLOBAL
-import org.videolan.tools.KEY_VIDEO_APP_SWITCH
 import org.videolan.tools.LOCKSCREEN_COVER
 import org.videolan.tools.POSITION_IN_AUDIO_LIST
 import org.videolan.tools.POSITION_IN_SONG
@@ -172,14 +166,11 @@ import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.getResourceUri
 import org.videolan.tools.markBidi
 import org.videolan.tools.readableSize
-import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.dialogs.adapters.VlcTrack
 import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.NotificationHelper
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
-import org.videolan.vlc.gui.video.PopupManager
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.CoverHook
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.media.MediaUtils
@@ -251,8 +242,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private var mediaEndReached = false
     var playQueueFinished = false
 
-    var isInPiPMode: MutableLiveData<Boolean> = MutableLiveData(false)
-
     // Playback management
     internal lateinit var mediaSession: MediaSessionCompat
 
@@ -274,8 +263,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     var lastErrorTime = 0L
     var nbErrors = 0
-
-    private var popupManager: PopupManager? = null
 
     private val mediaFactory = FactoryManager.getFactory(IMediaFactory.factoryId) as IMediaFactory
     private lateinit var carConnection: CarConnection
@@ -378,10 +365,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 }
                 lastChapter = curChapter
             }
-            MediaPlayer.Event.ESAdded -> if (event.esChangedType == IMedia.Track.Type.Video && (playlistManager.videoBackground || !playlistManager.switchToVideo())) {
-                /* CbAction notification content intent: resume video or resume audio activity */
-                updateMetadata()
-            }
             MediaPlayer.Event.MediaChanged -> if (BuildConfig.DEBUG) Log.d(TAG, "onEvent: MediaChanged")
             MediaPlayer.Event.EndReached -> {
                 mediaEndReached = true
@@ -394,21 +377,9 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     val sessionPendingIntent: PendingIntent
         get() {
-            return when {
-                playlistManager.player.isVideoPlaying() -> {//PIP
-                    val notificationIntent = Intent(this, VideoPlayerActivity::class.java).apply { putExtra(VideoPlayerActivity.FROM_EXTERNAL, true) }
-                    PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                }
-                playlistManager.videoBackground || canSwitchToVideo() && !currentMediaHasFlag(MediaWrapper.MEDIA_FORCE_AUDIO) -> {//resume video playback
-                    /* Resume VideoPlayerActivity from ACTION_REMOTE_SWITCH_VIDEO intent */
-                    val notificationIntent = Intent(ACTION_REMOTE_SWITCH_VIDEO)
-                    PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                }
-                else -> { /* the Nağmedar window, on the page of what plays */
-                    val notificationIntent = Intent(this, StartActivity::class.java).setAction(NAGMEDAR_ACTION_NOW_PLAYING)
-                    PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                }
-            }
+            // the Nağmedar window, on the page of what plays
+            val notificationIntent = Intent(this, StartActivity::class.java).setAction(NAGMEDAR_ACTION_NOW_PLAYING)
+            return PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
     @Volatile
@@ -469,10 +440,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             playlistManager.setRepeatType(if (repeatType == PlaybackStateCompat.REPEAT_MODE_GROUP) PlaybackStateCompat.REPEAT_MODE_ALL else repeatType)
             publishState()
         }
-
-    val isVideoPlaying: Boolean
-        @MainThread
-        get() = playlistManager.player.isVideoPlaying()
 
     val album: String?
         @MainThread
@@ -615,13 +582,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         @MainThread
         get() = playlistManager.engine.getLength()
 
-    val lastStats: IMedia.Stats?
-        get() = playlistManager.player.previousMediaStats
-
-    val isPlayingPopup: Boolean
-        @MainThread
-        get() = popupManager != null
-
     val mediaListSize: Int
         get() = playlistManager.getMediaListSize()
 
@@ -680,10 +640,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         @MainThread
         get() = playlistManager.engine.getVolume()
 
-    val audioTracksCount: Int
-        @MainThread
-        get() = playlistManager.player.getAudioTracksCount()
-
     val audioTracks: Array<out VlcTrack>?
         @MainThread
         get() = playlistManager.player.getAudioTracks()
@@ -692,41 +648,9 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         @MainThread
         get() = playlistManager.player.getAudioTrack()
 
-    val videoTracksCount: Int
-        @MainThread
-        get() = if (hasMedia()) playlistManager.player.getVideoTracksCount() else 0
-
-    val videoTracks: Array<out VlcTrack>?
-        @MainThread
-        get() = playlistManager.player.getVideoTracks()
-
-    val currentVideoTrack: VlcTrack?
-        @MainThread
-        get() = playlistManager.player.getCurrentVideoTrack()
-
-    val videoTrack: String
-        @MainThread
-        get() = playlistManager.player.getVideoTrack()
-
-    val spuTracks: Array<out VlcTrack>?
-        @MainThread
-        get() = playlistManager.player.getSpuTracks()
-
-    val spuTrack: String
-        @MainThread
-        get() = playlistManager.player.getSpuTrack()
-
-    val spuTracksCount: Int
-        @MainThread
-        get() = playlistManager.player.getSpuTracksCount()
-
     val audioDelay: Long
         @MainThread
         get() = playlistManager.player.getAudioDelay()
-
-    val spuDelay: Long
-        @MainThread
-        get() = playlistManager.player.getSpuDelay()
 
     interface Callback {
         fun update()
@@ -882,13 +806,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                             .playFromSearch(it.getString(SearchManager.QUERY), it)
                 }
             }
-            ACTION_REMOTE_SWITCH_VIDEO -> {
-                removePopup()
-                if (hasMedia()) {
-                    currentMediaWrapper!!.removeFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
-                    playlistManager.switchToVideo()
-                }
-            }
         }
         return START_NOT_STICKY
     }
@@ -921,11 +838,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         return if (SERVICE_INTERFACE == intent.action) super.onBind(intent) else binder
     }
 
-    val vout: IVLCVout?
-        get() {
-            return playlistManager.player.getVout()
-        }
-
     @TargetApi(Build.VERSION_CODES.O)
     private fun forceForeground(launchedInForeground: Boolean = false) {
         if (!AndroidUtil.isOOrLater || isForeground) return
@@ -955,8 +867,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         val intent = Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
         intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, sessionId)
         intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, packageName)
-        if (isVideoPlaying) intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MOVIE)
-        else intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+        intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
         sendBroadcast(intent)
     }
 
@@ -970,17 +881,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         sendBroadcast(intent)
     }
 
-    fun setBenchmark() {
-        playlistManager.isBenchmark = true
-    }
-
-    fun setHardware() {
-        playlistManager.isHardware = true
-    }
-
     fun setTime(time: Long, fast: Boolean = false) {
-        val shouldFast = fast || (!playlistManager.isBenchmark && settings.getBoolean(KEY_ALWAYS_FAST_SEEK, false))
-        playlistManager.engine.setTime(time, shouldFast)
+        playlistManager.engine.setTime(time, fast)
         publishState(time)
     }
 
@@ -1007,7 +909,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     fun onPlaybackStopped(systemExit: Boolean) {
         if (!systemExit) hideNotification(isForeground)
-        removePopup()
         if (wakeLock.isHeld) wakeLock.release()
         wifiLock.hold(false)
         audioFocusHelper.changeAudioFocus(false)
@@ -1015,8 +916,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         publishState()
         executeUpdate()
     }
-
-    private fun canSwitchToVideo() = playlistManager.player.canSwitchToVideo()
 
     /** Nağmedar: the Wi-Fi lock held while a network stream plays or waits to be opened again, never for local media. */
     private fun updateWifiLock() {
@@ -1041,10 +940,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private fun showNotificationInternal() {
         if (!AndroidDevices.isAndroidTv && Settings.showTvUi) return
-        if (isPlayingPopup || !hasRenderer() && isVideoPlaying) {
-            hideNotificationInternal(true)
-            return
-        }
         val mw = playlistManager.getCurrentMedia()
         if (mw != null) {
             val coverOnLockscreen = settings.getBoolean(LOCKSCREEN_COVER, true)
@@ -1059,7 +954,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val castingTo = renderer.value?.displayName?.let { getString(R.string.nagmedar_casting_to, it) }
             lifecycleScope.launch(Dispatchers.Default) {
                 delay(100)
-                if (isPlayingPopup || !notificationShowing) return@launch
+                if (!notificationShowing) return@launch
                 try {
                     val title = if (metaData == null) mw.title else metaData.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
                     val artist = if (metaData == null) mw.artistName else metaData.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
@@ -1076,7 +971,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                             isSeekable, speed, isPodcastMode, seekInCompactView, enabledActions,
                             sessionToken, sessionPendingIntent,
                             castingTo = castingTo)
-                    if (isPlayingPopup) return@launch
                     if (!VlcMigrationHelper.isLolliPopOrLater || playing || recovering || audioFocusHelper.lossTransient) {
                         if (!isForeground) {
                             ctx.launchForeground(Intent(ctx, PlaybackService::class.java)) {
@@ -1110,18 +1004,13 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private lateinit var notification: Notification
 
-    private fun currentMediaHasFlag(flag: Int): Boolean {
-        val mw = playlistManager.getCurrentMedia()
-        return mw != null && mw.hasFlag(flag)
-    }
-
     private fun hideNotification(remove: Boolean): Boolean {
         notificationShowing = false
         return if (::cbActor.isInitialized) cbActor.trySend(HideNotification(remove)).isSuccess else false
     }
 
     private fun hideNotificationInternal(remove: Boolean) {
-        if (!isPlayingPopup && isForeground) {
+        if (isForeground) {
             ServiceCompat.stopForeground(this@PlaybackService, if (remove) ServiceCompat.STOP_FOREGROUND_REMOVE else ServiceCompat.STOP_FOREGROUND_DETACH)
             isForeground = false
         }
@@ -1143,8 +1032,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     @MainThread
     @JvmOverloads
-    fun stop(systemExit: Boolean = false, video: Boolean = false) {
-        playlistManager.stop(systemExit, video)
+    fun stop(systemExit: Boolean = false) {
+        playlistManager.stop(systemExit)
     }
 
     private fun initMediaSession() {
@@ -1437,7 +1326,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private fun broadcastMetadata() {
         val media = playlistManager.getCurrentMedia()
-        if (isVideoPlaying) return
         if (lifecycleScope.isActive) lifecycleScope.launch(Dispatchers.Default) {
             sendBroadcast(Intent("com.android.music.metachanged")
                     .putExtra("track", media?.nowPlaying ?: media?.title)
@@ -1453,20 +1341,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     }
 
     private fun loadLastAudioPlaylist() {
-        if (!AndroidDevices.isAndroidTv) {
-            // If playback in background is enabled it should load the last media of any type
-            // not only audio
-            // If playback in background isn't enabled, then only audio should be played whether the
-            // last media played is audio or not
-            val videoPlaybackInBackground = settings.getString(KEY_VIDEO_APP_SWITCH, "0") == "1"
-            val lastMediaPlayedIsAudio = settings.getBoolean(KEY_CURRENT_MEDIA_IS_AUDIO, false)
-
-            val playlistType = if (lastMediaPlayedIsAudio || !videoPlaybackInBackground)
-                PLAYLIST_TYPE_AUDIO
-            else
-                PLAYLIST_TYPE_ALL
-            loadLastPlaylist(playlistType)
-        }
+        if (!AndroidDevices.isAndroidTv) loadLastPlaylist(PLAYLIST_TYPE_AUDIO)
     }
 
     fun loadLastPlaylist(type: Int) {
@@ -1499,21 +1374,9 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private fun restartPlaylistManager() = playlistManager.restart()
 
-    /**
-     * Nağmedar (S-607): records what plays into [directory], or stops ([directory] null). False when
-     * libVLC is not what plays: the music engine has no recording.
-     */
-    @MainThread
-    fun record(directory: String?): Boolean = playlistManager.engine === playlistManager.player && playlistManager.player.record(directory)
-
-    /** Nağmedar (S-607): whether what plays can be recorded: libVLC plays it. */
-    val canRecord: Boolean
-        get() = hasMedia() && playlistManager.engine === playlistManager.player
     fun restartMediaPlayer() = playlistManager.player.restart()
 
     fun saveMediaMeta() = playlistManager.saveMediaMeta()
-
-    fun isValidIndex(positionInPlaylist: Int) = playlistManager.isValidPosition(positionInPlaylist)
 
     /**
      * Loads a selection of files (a non-user-supplied collection of media)
@@ -1695,60 +1558,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         }
     }
 
-    @MainThread
-    fun flush() {
-        /* HACK: flush when activating a video track. This will force an
-         * I-Frame to be displayed right away. */
-        if (isSeekable) {
-            val time = getTime()
-            if (time > 0)
-                seek(time)
-        }
-    }
-
-    /**
-     * Use this function to show an URI in the audio interface WITHOUT
-     * interrupting the stream.
-     *
-     * Mainly used by VideoPlayerActivity in response to loss of video track.
-     */
-
-    @MainThread
-    fun showWithoutParse(index: Int, forPopup: Boolean = false) {
-        playlistManager.setVideoTrackEnabled(false)
-        val media = playlistManager.getMedia(index) ?: return
-        // Show an URI without interrupting/losing the current stream
-        if (BuildConfig.DEBUG) Log.v(TAG, "Showing index " + index + " with playing URI " + media.uri)
-        playlistManager.currentIndex = index
-        notifyTrackChanged()
-        PlaylistManager.showAudioPlayer.value = !isVideoPlaying && !forPopup
-        showNotification()
-    }
-
-    fun setVideoTrackEnabled(enabled: Boolean) = playlistManager.setVideoTrackEnabled(enabled)
-
-    fun switchToVideo() = playlistManager.switchToVideo()
-
-    @MainThread
-    fun switchToPopup(index: Int) {
-        playlistManager.saveMediaMeta()
-        showWithoutParse(index, true)
-        showPopup()
-    }
-
-    @MainThread
-    fun removePopup() {
-        popupManager?.removePopup()
-        popupManager = null
-    }
-
-    @MainThread
-    private fun showPopup() {
-        if (popupManager == null) popupManager = PopupManager(this)
-        popupManager!!.showPopup()
-        hideNotification(true)
-    }
-
     /**
      * Append to the current existing playlist
      */
@@ -1831,9 +1640,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     }
 
     @MainThread
-    fun navigate(where: Int) = playlistManager.player.navigate(where)
-
-    @MainThread
     fun getChapters(title: Int) = playlistManager.player.getChapters(title)
 
     @MainThread
@@ -1887,46 +1693,16 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     }
 
     @MainThread
-    fun updateViewpoint(yaw: Float, pitch: Float, roll: Float, fov: Float, absolute: Boolean): Boolean {
-        return playlistManager.player.updateViewpoint(yaw, pitch, roll, fov, absolute)
-    }
-
-    @MainThread
-    fun saveStartTime(time: Long) {
-        playlistManager.savedTime = time
-    }
-
-    @MainThread
     private fun setPosition(pos: Float) = playlistManager.player.setPosition(pos)
 
     @MainThread
     fun setAudioTrack(index: String) = playlistManager.player.setAudioTrack(index)
 
     @MainThread
-    fun unselectTrackType(trackType: VideoTracksDialog.TrackType) {
-        playlistManager.player.unselectTrackType(trackType)
-    }
-
-    @MainThread
     fun setAudioDigitalOutputEnabled(enabled: Boolean) = playlistManager.player.setAudioDigitalOutputEnabled(enabled)
 
     @MainThread
-    fun setVideoTrack(index: String) = playlistManager.player.setVideoTrack(index)
-
-    @MainThread
-    fun addSubtitleTrack(path: String, select: Boolean) = playlistManager.player.addSubtitleTrack(path, select)
-
-    @MainThread
-    fun addSubtitleTrack(uri: Uri, select: Boolean) = playlistManager.player.addSubtitleTrack(uri, select)
-
-    @MainThread
-    fun setSpuTrack(index: String) = playlistManager.setSpuTrack(index)
-
-    @MainThread
     fun setAudioDelay(delay: Long) = playlistManager.setAudioDelay(delay)
-
-    @MainThread
-    fun setSpuDelay(delay: Long) = playlistManager.setSpuDelay(delay)
 
     @MainThread
     fun hasRenderer() = playlistManager.player.hasRenderer
@@ -1934,7 +1710,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     @MainThread
     fun setRenderer(item: RendererItem?) {
         val wasOnRenderer = hasRenderer()
-        // Nağmedar (S-1302): a film cast until now comes back to the video player (the playlist manager's)
         playlistManager.setRenderer(item)
         if (!wasOnRenderer && item != null) audioFocusHelper.changeAudioFocus(false)
         else if (wasOnRenderer && item == null && isPlaying) audioFocusHelper.changeAudioFocus(true)
@@ -1946,12 +1721,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     @MainThread
     fun setEqualizer(equalizer: MediaPlayer.Equalizer?) = playlistManager.player.setEqualizer(equalizer)
-
-    @MainThread
-    fun setVideoScale(scale: Float) = playlistManager.player.setVideoScale(scale)
-
-    @MainThread
-    fun setVideoAspectRatio(aspect: String?) = playlistManager.player.setVideoAspectRatio(aspect)
 
     override fun onTaskTriggered(id: String, data:Bundle) {
         when (id) {

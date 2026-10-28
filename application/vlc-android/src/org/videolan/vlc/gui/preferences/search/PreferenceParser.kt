@@ -126,34 +126,9 @@ object PreferenceParser {
      */
     fun parsePreferences(context: Context, parseUIPrefs: Boolean = false): ArrayList<PreferenceItem> {
         val result = ArrayList<PreferenceItem>()
-        arrayListOf(R.xml.preferences, R.xml.preferences_adv, R.xml.preferences_audio, R.xml.preferences_parental_control, R.xml.preferences_casting, R.xml.preferences_subtitles, R.xml.preferences_ui, R.xml.preferences_video, R.xml.preferences_remote_access, R.xml.preferences_android_auto)
+        arrayListOf(R.xml.preferences, R.xml.preferences_adv, R.xml.preferences_audio, R.xml.preferences_parental_control, R.xml.preferences_casting, R.xml.preferences_ui, R.xml.preferences_remote_access, R.xml.preferences_android_auto)
             .apply {
-                if (parseUIPrefs) {
-                    this.add(R.xml.preferences_video_controls)
-                    this.add(R.xml.preferences_audio_controls)
-                }
-            }
-        .forEach {
-            result.addAll(parsePreferences(context, it))
-        }
-        return result
-    }
-
-    /**
-     * Parses all the preferences available in the app.
-     * @param context the context to be used to retrieve the preferences
-     * @param forVideo if true, parses the video controls else the audio controls
-     *
-     * @return a list of [PreferenceItem]
-     */
-    fun parseControlPreferences(context: Context, forVideo: Boolean): ArrayList<PreferenceItem> {
-        val result = ArrayList<PreferenceItem>()
-        arrayListOf<Int>()
-            .apply {
-                if (forVideo)
-                    this.add(R.xml.preferences_video_controls)
-                else
-                    this.add(R.xml.preferences_audio_controls)
+                if (parseUIPrefs) this.add(R.xml.preferences_audio_controls)
             }
         .forEach {
             result.addAll(parsePreferences(context, it))

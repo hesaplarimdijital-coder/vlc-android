@@ -21,14 +21,11 @@
 package org.videolan.vlc.gui.audio
 
 import android.Manifest
-import android.annotation.TargetApi
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.os.Vibrator
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.Editable
@@ -58,7 +55,6 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
@@ -83,8 +79,6 @@ import org.videolan.tools.KEY_AUDIO_SHOW_BOOkMARK_BUTTONS
 import org.videolan.tools.KEY_PLAYBACK_SPEED_AUDIO_GLOBAL
 import org.videolan.tools.KEY_SHOW_TRACK_INFO
 import org.videolan.tools.PREF_PLAYLIST_TIPS_SHOWN
-import org.videolan.tools.PREF_RESTORE_VIDEO_TIPS_SHOWN
-import org.videolan.tools.RESTORE_BACKGROUND_VIDEO
 import org.videolan.tools.SHOW_REMAINING_TIME
 import org.videolan.tools.Settings
 import org.videolan.tools.copy
@@ -98,7 +92,6 @@ import org.videolan.tools.setGone
 import org.videolan.tools.setVisible
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
-import org.videolan.vlc.VlcMigrationHelper
 import org.videolan.vlc.databinding.AudioPlayerBinding
 import org.videolan.vlc.gui.AudioPlayerContainerActivity
 import org.videolan.vlc.gui.HeaderMediaListActivity
@@ -122,12 +115,10 @@ import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.addToPlaylist
 import org.videolan.vlc.gui.helpers.UiTools.isTablet
 import org.videolan.vlc.gui.helpers.UiTools.showPinIfNeeded
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.gui.view.AudioMediaSwitcher
 import org.videolan.vlc.gui.view.AudioMediaSwitcher.AudioMediaSwitcherListener
 import org.videolan.vlc.manageAbRepeatStep
 import org.videolan.vlc.media.PlaylistManager
-import org.videolan.vlc.media.PlaylistManager.Companion.hasMedia
 import org.videolan.vlc.util.ContextOption
 import org.videolan.vlc.util.ContextOption.CTX_ADD_TO_PLAYLIST
 import org.videolan.vlc.util.ContextOption.CTX_FAV_ADD
@@ -182,13 +173,6 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
     private var isDragging = false
     private var currentChapters: Pair<MediaWrapper,  List<MediaPlayer.Chapter>?>? = null
     private lateinit var callback: SwipeDragItemTouchHelperCallback
-
-    private val isInteractive: Boolean
-        @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
-        get() {
-            val pm = requireContext().getSystemService<PowerManager>()!!
-            return if (VlcMigrationHelper.isLolliPopOrLater) pm.isInteractive else pm.isScreenOn
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -404,17 +388,6 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
     override fun onResume() {
         onStateChanged(playerState)
         showRemainingTime = Settings.getInstance(requireContext()).getBoolean(SHOW_REMAINING_TIME, false)
-        val restoreVideoTipCount = settings.getInt(PREF_RESTORE_VIDEO_TIPS_SHOWN, 0)
-        val forceRestoreVideo = settings.getBoolean(RESTORE_BACKGROUND_VIDEO, false)
-        playlistModel.service?.let {
-            if (!it.isVideoPlaying && it.videoTracksCount > 0)
-                if ( !forceRestoreVideo && restoreVideoTipCount < 4) {
-                    UiTools.snacker(requireActivity(), R.string.return_to_video)
-                    settings.putSingle(PREF_RESTORE_VIDEO_TIPS_SHOWN, restoreVideoTipCount + 1)
-                } else if (forceRestoreVideo && !PlaylistManager.playingAsAudio && isInteractive) {
-                    onResumeToVideoClick()
-                }
-        }
         super.onResume()
     }
 
@@ -494,7 +467,6 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
     override fun getLifeCycle() = this.lifecycle
 
     private suspend fun doUpdate() {
-        if (isVisible && playlistModel.switchToVideo()) return
         updatePlayPause()
         updateShuffleMode()
         updateRepeatMode()
@@ -812,17 +784,6 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
         updateShuffleMode()
     }
 
-    fun onResumeToVideoClick() {
-        playlistModel.currentMediaWrapper?.let {
-            if (PlaybackService.hasRenderer()) VideoPlayerActivity.startOpened(requireActivity(),
-                    it.uri, playlistModel.currentMediaPosition)
-            else if (hasMedia()) {
-                it.removeFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
-                lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { playlistModel.switchToVideo() }
-            }
-        }
-    }
-
     fun showAdvancedOptions(@Suppress("UNUSED_PARAMETER") v: View?) {
         if (!isVisible) return
         if (!this::optionsDelegate.isInitialized) {
@@ -1036,11 +997,8 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
         override fun onTouchLongClick() {
             val trackInfo = playlistModel.title ?: return
 
-            if (playlistModel.videoTrackCount > 0) onResumeToVideoClick()
-            else {
-                requireActivity().copy("VLC - song name", trackInfo)
-                UiTools.snacker(requireActivity(), R.string.track_info_copied_to_clipboard)
-            }
+            requireActivity().copy("VLC - song name", trackInfo)
+            UiTools.snacker(requireActivity(), R.string.track_info_copied_to_clipboard)
         }
 
         override fun onTouchDown() {}

@@ -45,12 +45,6 @@
     <string name="Medialibrary_progress">Oppdateringar for skanningsprosess av mediebibliotek</string>
     <string name="play_from_start">Spel frå start</string>
     <string name="play_as_audio">Spel av som lyd</string>
-    <string name="play_as_video">Spel av som video</string>
-    <string name="return_to_video">Langtrykk på omslaget for å tilbakestilla videoen</string>
-    <string name="video_app_switch_title">Bakgrunn/BiB-modus</string>
-    <string name="video_app_switch_summary">Vel VLC-oppførsel når du byter frå videoavspeling til ein annan app.</string>
-    <string name="play_pip_title">Spelar videoar i bilde-i-bilde modus</string>
-    <string name="play_as_audio_background">Spelar videoar i bakgrunnen</string>
     <string name="append">Legg til i spelekø</string>
     <string name="insert_next">Set inn neste</string>
     <string name="play_all">Spel alle</string>
@@ -178,11 +172,6 @@
     <string name="firstsong">Fyrste song i spelelista</string>
     <string name="lastsong">Siste song i spelelista</string>
 
-    <string name="surface_best_fit">Beste tilpassing</string>
-    <string name="surface_fit_screen">Tilpass skjermen</string>
-    <string name="surface_fill">Fyll</string>
-    <string name="surface_original">Midtstill</string>
-    <string name="resize_tip">Langtrykk for fleire val</string>
     <string name="unseekable_stream">Ikkje-søkbar straum</string>
     <string name="refresh">Oppdater</string>
     <string name="track_audio">Lydspor</string>
@@ -193,12 +182,7 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Språk: %1$s\n</string>
     <string name="volume">Lydstyrke</string>
-    <string name="system_volume_disabled">%s\nIngen tilgang til systemvolum</string>
-    <string name="sound_on">Lyd på</string>
-    <string name="sound_off">Lyd av</string>
-    <string name="brightness">Lysstyrke</string>
     <string name="advanced">avanserte innstillingar</string>
-    <string name="audio_boost_warning">Sveip opp igen for å gå over 100 %</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanal\n</item>
@@ -218,7 +202,6 @@
     <string name="sleep_title">Søvntidsur</string>
     <string name="sleep_in">Sovne inn</string>
     <string name="jump_to_time">Hopp til tid</string>
-    <string name="subtitle_select">Vel undertekstfil</string>
     <string name="wait_before_sleep">Vent på at gjeldande mediaelement skal fullføra fyrst</string>
     <string name="reset_on_interaction">Tilbakestill ved samhandling</string>
     <string name="default_sleep_timer_summary">%1$s, vent på at media skal slutta: %2$s, tilbakestill ved samhandling: %3$s</string>
@@ -248,34 +231,21 @@
 
     <string name="playback_history_title">Avspelingshistorikk</string>
     <string name="playback_history_summary">Lagre alle medium som vert spelt av i Historikk-delen</string>
-    <string name="video_resume_playback_title">Køhistorikk for videoavspeling</string>
     <string name="play_button">Avspelingsknapp</string>
 
     <!-- Tips -->
-    <string name="tips_title">Videospelar- tips</string>
     <string name="seek">Søk</string>
     <string name="subtitles">Undertekstar</string>
-    <string name="tips_player_controls">Spelarkontrollar</string>
-    <string name="tips_audio_sub">Lydspor og undertekstar</string>
-    <string name="tips_play_description">Trykk for å spela av video</string>
     <string name="lock">Lås</string>
     <string name="tap">Trykk for å visa</string>
     <string name="tap_to_remove">Trykk for å fjerna</string>
     <string name="tap_to_rearrange">Trykk for å ordna på nytt</string>
     <string name="tap_to_previous_next">Trykk for å gå til førre/neste</string>
-    <string name="lock_orientation">Skjermretning</string>
-    <string name="lock_orientation_description">Trykk for å låsa/låsa opp skjermretning</string>
     <string name="aspect_ratio">Høgde/Breidde-forhold</string>
-    <string name="aspect_ratio_description">Trykk for å endra høgde/breidde-forholdet</string>
-    <string name="advanced_options">Avanserte innstillingar</string>
-    <string name="tips_swipe">Sveip opp eller ned</string>
     <string name="tips_swipe_horizontal">Sveip til venstre eller høgre</string>
     <string name="tips_playlist">Speleliste</string>
     <string name="tips_hold_seek">Hald for å søkje</string>
     <string name="tips_long_drop">Langtrykk og slepp</string>
-    <string name="pause_description">Dobbeltrykk for pause</string>
-    <string name="seek_tap">+/- 10 sek.</string>
-    <string name="seek_tap_description">Dobbeltrykk for å gå 10 sek. framover eller bakover</string>
     <string name="close">Lat att</string>
 
     <string name="playlist_tips">Spelelistetips</string>
@@ -309,82 +279,35 @@
     <string name="directories_summary">Vel mapper å inkludera i mediebiblioteket.</string>
     <string name="add_custom_path">Legg til ein eigendefinert sti</string>
     <string name="add_custom_path_description">Legg til ei ekstra eigendefinert mappe å skanna:</string>
-    <string name="hardware_acceleration_disabled">Deaktivert</string>
-    <string name="hardware_acceleration_full">Full akselerasjon</string>
     <string name="dev_hardware_decoder">Avansert maskinvaredekodar</string>
     <string name="automatic">Automatisk</string>
-    <string name="screen_orientation_sensor">Automatisk (sensor)</string>
-    <string name="screen_orientation_portrait">Portrett</string>
-    <string name="screen_orientation_landscape">Landskap</string>
     <string name="enable_black_theme">Svart tema</string>
     <string name="dark_theme">Mørkt tema</string>
     <string name="theme_auto">Automatisk tema</string>
-    <string name="subtitle_text_encoding">Koding for undertekstar</string>
-    <string name="subtitle_preferred_language">Føretrekt undertekstspråk</string>
     <string name="daynight_title">DagNatt-modus</string>
     <string name="daynight_follow_system_title">Følg systemmodus</string>
     <string name="extra_prefs_category">Ekstra innstillingar</string>
 
     <string name="interface_prefs_screen">Grensesnitt</string>
-    <string name="interface_secondary_display_category_title">Sekundærskjerm</string>
-    <string name="interface_secondary_display_category_summary">Innstillingar når sekundære skjermar er kopla til (HDMI/Chromecast)</string>
     <string name="video_prefs_category">Video</string>
-    <string name="video_min_group_length_title">Grupper videoar</string>
     <string name="video_min_group_length_disable">Ikkje grupper videoar</string>
     <string name="video_min_group_length_folder">Grupper etter mappe</string>
     <string name="video_min_group_length_name">Grupper etter namn</string>
-    <string name="video_transition_title">Overgang mellom videoar</string>
-    <string name="video_transition_summary">Vis ny videotittel ved overgang</string>
-    <string name="force_play_all_summary">Spel alle videoar, og start med den du trykte på</string>
-    <string name="force_play_all_title">Videospeleliste-modus</string>
-    <string name="save_audiodelay_title">Lagre lydforseinking</string>
-    <string name="enable_brightness_gesture_title">Lysstyrkerørsle</string>
-    <string name="enable_brightness_gesture_summary">Kontroller lysstyrken med ei rørsle under videoavspeling</string>
-    <string name="enable_volume_gesture_title">Lydstyrkerørsle</string>
-    <string name="enable_volume_gesture_summary">Kontroller lydstyrke med ei rørsle under videoavspeling</string>
     <string name="artist">Artist</string>
     <string name="album">Album</string>
     <string name="track">Spor</string>
     <string name="genre">Sjanger</string>
     <string name="playlist">Speleliste</string>
-    <string name="enable_double_tap_seek_title">Dobbelttrykk for å søkje</string>
-    <string name="enable_double_tap_play_title">Dobbelttrykk for å spela av/pause</string>
-    <string name="enable_double_tap_play_summary">Dobbelttrykk på midten av skjermen for å spela av eller setja på pause</string>
-    <string name="enable_swipe_seek_title">Sveip for å søkja</string>
-    <string name="enable_scale_gesture_title">Zoom med to fingrar</string>
-    <string name="enable_scale_gesture_summary">Zoom inn og ut med to fingrar</string>
     <string name="browser_show_hidden_files_title">Vis skjulte filer</string>
     <string name="albums_show_track_numbers">Vis spornummer</string>
-    <string name="enable_video_screenshot">Ta eit skjermbilde</string>
     <string name="show_chapter_buttons">Vis kapittelknappar</string>
-    <string name="subtitles_prefs_category">Undertekstar</string>
-    <string name="subtitles_size_title">Storleik på undertekstar</string>
-    <string name="subtitles_size_small">Liten</string>
-    <string name="subtitles_size_normal">Normal</string>
-    <string name="subtitles_size_big">Stor</string>
-    <string name="subtitles_size_huge">Ovstor</string>
-    <string name="subtitles_color_title">Undertekstfarge</string>
-    <string name="subtitles_opacity">Ugjennomskinlegheit</string>
     <string name="subtitles_color">Farge</string>
-    <string name="subtitles_size">Storleik</string>
-    <string name="subtitles_background_color_title">Undertekstbakgrunn</string>
-    <string name="subtitles_background_title">Undertekstbakgrunn</string>
-    <string name="subtitles_outline_title">Undertekstomriss</string>
-    <string name="subtitles_shadow_title">Undertekstskugge</string>
     <string name="subtitles_decoration_title">Undertekstdekorasjon</string>
     <string name="subtitle_decoration_none">Ingen</string>
     <string name="subtitle_decoration_shadow">Skugge</string>
     <string name="subtitle_decoration_outline">Omriss</string>
-    <string name="subtitles_bold_title">Halvfeite undertekstar</string>
-    <string name="subtitles_autoload_title">Last inn undertekst automatisk</string>
     <string name="previous_color">Førre farge</string>
     <string name="new_color">Ny farge</string>
-    <string name="subtitles_preset_default">Standard</string>
-    <string name="subtitles_preset_default_large">Stor tekst</string>
-    <string name="subtitles_preset_default_largest">Størst tekst og kontrast</string>
-    <string name="subtitles_preset_white_background">Kvit bakgrunn</string>
-    <string name="subtitles_yellow">Gul</string>
-    <string name="subtitles_yellow_background">Gul med bakgrunn</string>
 
     <string name="audio_prefs_category">Lyd</string>
     <string name="lockscreen_cover_title">Albumomslag på låseskjerm</string>
@@ -393,7 +316,6 @@
     <string name="list_title_ellipsize_right">Høgre</string>
     <string name="list_title_ellipsize_middle">Midten</string>
     <string name="list_title_ellipsize_marquee">Rulletekst</string>
-    <string name="audio_boost_summary">Tillat lydstyrke opptil 200%</string>
     <string name="headset_prefs_category">Øyretelefonar</string>
     <string name="enable_headset_detection">Oppdag øyretelefonar</string>
     <string name="enable_headset_detection_summary">Oppdag tilkopling og fråkopling av øyretelefonar</string>
@@ -440,7 +362,6 @@
 
     <string name="performance_prefs_category">Yting</string>
     <string name="deblocking">Innstillingar for avblokkeringsfilteret</string>
-    <string name="deblocking_summary">Endrar innstillingane for avblokkeringsfiltret som kan forbetra videokvaliteten (berre avanserte brukarar)</string>
     <string name="advanced_prefs_category">Avansert</string>
     <string name="clear_app_data">Slett appdata</string>
     <string name="clear_history">Tøm historikk</string>
@@ -456,9 +377,6 @@
     <string name="send_log">Send loggen</string>
     <string name="sending_log">Sender loggen…</string>
 
-    <string name="delete_sub_title">Slett undertekst</string>
-    <string name="delete_sub_message">Vil du slette denne underteksten?</string>
-    <string name="download_subtitle_title">Last ned undertekstar</string>
 
     <string name="no_result">Fann ingen resultat</string>
     <string name="no_internet_connection">Sjekk internettsambandet ditt</string>
@@ -468,8 +386,6 @@
 
     <string name="file_size">Filstorleik</string>
 
-    <string name="audio_delay">Lydforseinking</string>
-    <string name="spu_delay">Undertekstforseinking</string>
     <string name="network_shares_discovery">Ser etter nettverksdelingar</string>
     <string name="network_empty">Denne mappa er tom.</string>
     <string name="network_connection_needed">Inga tilkopling til lokalt nettverk.</string>
@@ -480,7 +396,6 @@
     <string name="go_to_chapter">Gå til kapittel…</string>
     <string name="current_chapter">Kapittel: %s</string>
     <string name="confirm_resume">Fortsetje der du slapp?</string>
-    <string name="confirm_resume_title">Fortset avspelte videoar</string>
     <string name="tv_ui_title">Grensesnitt for Android TV</string>
     <string name="medialibrary">Mediebibliotek</string>
     <!--What's new-->
@@ -514,24 +429,12 @@
     <string name="download_on_device">Last ned</string>
     <string name="extension_empty">Ingen element å visa, gå til utvidingsinnstillingane for å finna nokre.</string>
 
-    <string name="opengl_title">OpenGL ES2-bruk</string>
-    <string name="opengl_automatic">Automatisk</string>
-    <string name="opengl_on">Tving på</string>
-    <string name="opengl_off">Tving av</string>
     <string name="network_favorites">Nettverksfavorittar</string>
     <string name="network_shared_folders">Delte mapper</string>
     <string name="store_password">Hugs passord</string>
     <string name="add_to_playlist">Legg til i speleliste</string>
     <string name="download_subtitles">Last ned undertekstar</string>
-    <string name="powered_opensubtitles">Driven av OpenSubtitles</string>
-    <string name="open_subtitles_log_out">Logg ut</string>
-    <string name="open_subtitles_username">Brukarnamn</string>
-    <string name="open_subtitles_password">Passord</string>
-    <string name="open_subtitles_is_vip">VIP-konto</string>
-    <string name="open_subtitles_is_not_vip">Standardkonto</string>
-    <string name="unknown_error">Uventa feil</string>
     <string name="browse_folder">Bla i mappe</string>
-    <string name="apply_to_bt">Bruk på bluetooth-eining</string>
     <string name="episodes">episodar</string>
     <string name="movies">filmar</string>
     <string name="videos">videoar</string>
@@ -577,13 +480,7 @@
     <string name="ml_wizard_scan_checkbox">Skann etter medieinnhald på eininga</string>
     <string name="otg_device_title">OTG-eining</string>
     <string name="browser">Nettlesar</string>
-    <string name="subtitle_search_name_hint">Namn</string>
-    <string name="subtitle_search_episode_hint">Episode</string>
-    <string name="subtitle_search_season_hint">Sesong</string>
-    <string name="subtitles_download_failed">Mislukka nedlasting</string>
     <string name="language_to_download">Språk</string>
-    <string name="delete_the_selected">Slett val</string>
-    <string name="download_the_selected">Last ned merkte</string>
     <string name="next">Neste</string>
     <string name="skip">Hopp over</string>
     <string name="next_step">Neste</string>
@@ -591,11 +488,7 @@
     <string name="ctx_player_video_track">Vel videospor</string>
     <string name="ctx_player_audio_track">Lydspor</string>
     <string name="ctx_player_subs_track">Undertekstspor</string>
-    <string name="ctx_pip_title">Sprettopp-spelar</string>
     <string name="device_dialog_title">Ekstern eining kopla til</string>
-    <string name="videos_folders_title">Vidoar etter mapper</string>
-    <string name="videos_groups_title">Videogrupper</string>
-    <string name="video_remote_disable">Dupliser skjerm</string>
     <string name="removed_from_playlist_anonymous">Objekt fjerna frå speleliste</string>
     <string name="welcome_title">Velkomen til VLC!</string>
     <string name="done">Ferdig</string>
@@ -607,7 +500,6 @@
     <string name="resume_card_message">Fortsetja avspeling av %1$s?</string>
     <string name="misc">Ymse</string>
     <string name="device_default">Einingsstandard</string>
-    <string name="show_video_thumbnails_summary">Vis videominiatyrbilde i lister</string>
     <string name="show_video_thumbnails">Videominiatyrbilde</string>
     <string name="enable_equalizer">Slå på</string>
     <string name="preamp">Forforsterkar</string>
@@ -642,13 +534,9 @@
     <string name="recently_added">Nyleg lagt til</string>
     <string name="clear_media_db_message">Du vil mista framstega dine, bokmerka og spelelister du har laga men du vil behalda innstillingane dine for VLC for Android.</string>
     <string name="clear_app_data_message">Du vil mista framstega dine, bokmerke, spelelister og alle VLC-innstillingane</string>
-    <string name="video_information">Videoinformasjon</string>
 
     <string name="channels">Kanalar</string>
     <string name="resolution">Oppløysing</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Språk</string>
     <string name="codec">Kodek</string>
     <string name="text">Tekst</string>
@@ -666,20 +554,12 @@
     <string name="add_to_group">Legg til i videogruppe</string>
     <string name="remove_from_group">Fjern frå videogruppe</string>
     <string name="rename_group">Byt namn på videogruppe</string>
-    <string name="no_group_found">Fann inga videogruppe</string>
     <string name="no_favorite">Ingen favoritt</string>
     <string name="empty_directory">Tom</string>
-    <string name="no_track">Ingen spor</string>
 
     <string name="swipe_unlock">Sveip for å låsa opp</string>
     <string name="swipe_unlock_no_touch">Langtrykk for å låsa opp</string>
-    <string name="sub_result_by_name">Resultat for %s</string>
-    <string name="sub_result_by_name_season">Sesong %s</string>
-    <string name="sub_result_by_name_episode">Episode %s</string>
     <string name="donate">Hjelp VLC</string>
-    <string name="air_action_rewind">Spol tilbake 10 sek.</string>
-    <string name="air_action_forward">Søk framover 10 sek.</string>
-    <string name="air_action_play_pause">Pause/Fortset avspeling</string>
     <string name="allow_otg">Tillat OTG-tilgang</string>
     <string name="allow_otg_description">Vel OTG-eining for å tillate tilgang til VLC.</string>
     <string name="go_to_folder">Bla gjennom overordna mappe</string>
@@ -712,10 +592,8 @@
     <string name="control_setting">Kontrollinnstillingar</string>
     <string name="controls_setting">Kontrollinnstillingar</string> <!-- Unused -->
     <string name="gestures">Rørsler</string>
-    <string name="player_controls">Spelarkontrollar</string>
     <string name="official_website">Offisiell nettstad</string>
     <string name="no_web_browser">Ingen nettlesar er installert</string>
-    <string name="no_video">Ingen video tilgjengeleg</string>
     <string name="custom">Tilpassa</string>
     <string name="widget_type_normal">Normal</string>
     <string name="widget_type_large">Stor</string>
@@ -726,7 +604,6 @@
     <string name="open_vlc">Opne VLC</string>
     <string name="playing">Spelar</string>
     <string name="disabled">Deaktivert</string>
-    <string name="enable_screenshot_button_and_gesture">Knapp og rørsle</string>
 
 
 
@@ -751,22 +628,12 @@
     <string name="talkback_enter_screen">Naviger til %s</string>
     <string name="talkback_file_size">Filstorleik: %s</string>
     <string name="talkback_open_in_browser">Opne i nettlesar</string>
-    <string name="talkback_video_player">Video-spelar. Trykk for å visa kontrollar. Trykk på tilbake-knappen for å gøyma dei</string>
-    <string name="talkback_video_tracks">Videospor</string>
-    <string name="talkback_audio_tracks">Lydspor</string>
-    <string name="talkback_subtitle_tracks">Undertekstspor</string>
-    <string name="talkback_subtitle_dowload_item">Språk: %1$s. %2$s. Namn: %3$s</string>
     <string name="selected">Vald</string>
-    <string name="talkback_increase_delay">Auk forseinking</string>
-    <string name="talkback_decrease_delay">Reduser forseinkinga</string>
     <string name="talkback_increase_speed">Auk fart</string>
     <string name="talkback_decrease_speed">Reduser fart</string>
-    <string name="talkback_subtitle_history">Undertekst-historikk</string>
-    <string name="talkback_language_selection">%s valde språk</string>
     <string name="talkback_audio_player_opened">Lydspelar opna</string>
     <string name="talkback_audio_player">Lydspelar. Spelar no: %s</string>
     <string name="downloaded">Nedlasta</string>
-    <string name="not_downloaded">Ikkje nedlasta</string>
     <string name="downloading">Lastar ned</string>
     <string name="talkback_action_rewind">Gå tilbake %s sekund</string>
     <string name="talkback_action_forward">Søk framover %s sekund</string>

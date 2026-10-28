@@ -71,7 +71,6 @@ import org.videolan.vlc.gui.dialogs.ConfirmDeleteDialog
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.addToPlaylist
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.repository.BrowserFavRepository
 import org.videolan.vlc.util.FileUtils
@@ -88,7 +87,6 @@ private const val ID_LISTEN = 3
 private const val ID_FAVORITE_ADD = 4
 private const val ID_FAVORITE_DELETE = 5
 private const val ID_BROWSE = 6
-private const val ID_DL_SUBS = 7
 private const val ID_PLAY_FROM_START = 8
 private const val ID_PLAYLIST = 9
 private const val ID_GET_INFO = 10
@@ -406,10 +404,9 @@ class MediaItemDetailsFragment : DetailsSupportFragment(), CoroutineScope by Mai
                     Toast.makeText(activity, R.string.favorite_removed, Toast.LENGTH_SHORT).show()
                 }
                 ID_BROWSE -> TvUtil.openMedia(activity, viewModel.media)
-                ID_DL_SUBS -> MediaUtils.getSubs(requireActivity(), viewModel.media)
                 ID_PLAY_FROM_START -> {
                     viewModel.mediaStarted = false
-                    VideoPlayerActivity.start(requireActivity(), viewModel.media.uri, true)
+                    MediaUtils.openMedia(activity, viewModel.media.apply { addFlags(MediaWrapper.MEDIA_FROM_START) })
                     activity.finish()
                 }
                 ID_GET_INFO -> startActivity(Intent(requireActivity(), MediaScrapingTvActivity::class.java).apply { putExtra(MediaScrapingTvActivity.MEDIA, viewModel.media) })
@@ -473,8 +470,6 @@ class MediaItemDetailsFragment : DetailsSupportFragment(), CoroutineScope by Mai
                 if (viewModel.media.uri.retrieveParent() != null) actionsAdapter.set(ID_NAVIGATE_PARENT, Action(ID_NAVIGATE_PARENT.toLong(), res.getString(R.string.go_to_folder)))
                 actionsAdapter.set(ID_PLAY, Action(ID_PLAY.toLong(), res.getString(R.string.play)))
                 actionsAdapter.set(ID_PLAY_FROM_START, Action(ID_PLAY_FROM_START.toLong(), res.getString(R.string.play_from_start)))
-                if (FileUtils.canWrite(viewModel.media.uri))
-                    actionsAdapter.set(ID_DL_SUBS, Action(ID_DL_SUBS.toLong(), res.getString(R.string.download_subtitles)))
                 actionsAdapter.set(ID_PLAYLIST, Action(ID_PLAYLIST.toLong(), res.getString(R.string.add_to_playlist)))
                 //todo reenable entry point when ready
                 if (BuildConfig.DEBUG) actionsAdapter.set(ID_GET_INFO, Action(ID_GET_INFO.toLong(), res.getString(R.string.find_metadata)))

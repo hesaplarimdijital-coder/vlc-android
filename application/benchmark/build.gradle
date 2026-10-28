@@ -4,10 +4,9 @@ plugins {
 }
 
 /*
- * S-1404: Nağmedar's macrobenchmarks: the cold and warm start-up, the Settings and Films lists
- * scrolled (frame times), and the test set's 4K HDR10 samples played (dropped frames, from the
- * app's NagmedarPerf log line). They run on a device against the app's benchmark build
- * (buildsystem/benchmark/run.sh checks them against thresholds.json); CI builds them.
+ * S-1404: Nağmedar's macrobenchmarks: the cold and warm start-up, the Settings and Music lists
+ * scrolled (frame times), and a track of the Music played. They run on a device against the app's
+ * benchmark build (buildsystem/benchmark/run.sh checks them against thresholds.json); CI builds them.
  */
 android {
     namespace = 'app.nagmedar.macrobenchmark'

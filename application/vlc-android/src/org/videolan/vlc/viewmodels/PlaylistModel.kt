@@ -30,13 +30,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.Tools
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.Settings
@@ -44,7 +42,6 @@ import org.videolan.tools.livedata.LiveDataset
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
 import org.videolan.vlc.gui.helpers.UiTools
-import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.util.EmptyPBSCallback
 import org.videolan.vlc.util.LocaleUtil
 import org.videolan.vlc.util.PlaylistFilterDelegate
@@ -263,25 +260,6 @@ class PlaylistModel : ViewModel(), PlaybackService.Callback by EmptyPBSCallback 
     }
 
     fun load(medialist: List<MediaWrapper>, position: Int) = service?.load(medialist, position)
-
-    suspend fun switchToVideo() : Boolean {
-        service?.apply {
-            if (PlaylistManager.hasMedia() && !isVideoPlaying && !hasRenderer()) {
-                currentMediaWrapper?.run {
-                    if (!hasFlag(MediaWrapper.MEDIA_FORCE_AUDIO) && canSwitchToVideo()) {
-                        switchToVideo()
-                        return true
-                    }
-                }
-            }
-        }
-        return false
-    }
-
-    private suspend fun canSwitchToVideo() = withContext(Dispatchers.IO) { service?.playlistManager?.player?.canSwitchToVideo() == true }
-
-    val videoTrackCount
-        get() = service?.videoTracksCount ?: 0
 
 
     private fun onServiceChanged(service: PlaybackService?) {

@@ -30,11 +30,6 @@
     <string name="Medialibrary_progress">Progres përditësimi skanim librari media</string>
     <string name="play_from_start">Luaj nga fillimi</string>
     <string name="play_as_audio">Luaj si audio</string>
-    <string name="play_as_video">Luaj si video</string>
-    <string name="video_app_switch_title">Mënyrë Background/PiP</string>
-    <string name="video_app_switch_summary">Zgjidh sjelljen e VLC kur kaloni në programe të tjera nga rishikimet e videos</string>
-    <string name="play_pip_title">Luaj videos në mënyrë Fotografi-në-fotografi</string>
-    <string name="play_as_audio_background">Luaj videos në sfond</string>
     <string name="insert_next">Vendos tjetër</string>
     <string name="play_all">Luaj t\'gjithë</string>
     <string name="append_all">Shto t\'gjithë</string>
@@ -105,10 +100,6 @@
     <string name="firstsong">Këngë e parë në listë</string>
     <string name="lastsong">Kënga e fundit në listë</string>
 
-    <string name="surface_best_fit">Përshtatja optimale</string>
-    <string name="surface_fit_screen">Përshtat ekranin</string>
-    <string name="surface_fill">Mbush</string>
-    <string name="surface_original">Qëndër</string>
     <string name="unseekable_stream">Transmetim pakërkueshëm </string>
     <string name="refresh">Rifresko</string>
     <string name="track_audio">Këndë audio</string>
@@ -119,11 +110,7 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Gjuha: %1$s\n</string>
     <string name="volume">Volumi</string>
-    <string name="sound_on">Zëri ndezur</string>
-    <string name="sound_off">Zëri fikur</string>
-    <string name="brightness">Bardhësia</string>
     <string name="advanced">alternativa avancuara</string>
-    <string name="audio_boost_warning">Rrëshqisni lart për të shkuar përtej 100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanall\n</item>
@@ -138,7 +125,6 @@
     <string name="sleep_title">Kohëmatës fjetje</string>
     <string name="sleep_in">Fle në</string>
     <string name="jump_to_time">Kërce në Orën</string>
-    <string name="subtitle_select">Përzgjedh skedarin titrave</string>
     <string name="server_add_title">Shto një server të ri në të preferuarat</string>
     <string name="server_domain_hint">Server adresë (domain name ose IP)</string>
     <string name="server_share_hint">Emri shpërndarjes të rrjetit (ose IP address)</string>
@@ -192,38 +178,18 @@
     <string name="add_custom_path">Shto rrugën e personalizuar</string>
     <string name="add_custom_path_description">Futni dosjen shtesë të personalize për të skanuar:</string>
     <string name="remove_custom_path">Hiq rrugën e personalizuar</string>
-    <string name="hardware_acceleration">Hardware Acceleration</string>
-    <string name="hardware_acceleration_disabled">Gjymtuar</string>
-    <string name="hardware_acceleration_decoding">Përshpejtimi dekodimit</string>
-    <string name="hardware_acceleration_full">Përshpejtim i plotë</string>
     <string name="dev_hardware_decoder">Dekoder avancuar i pajisjeve</string>
     <string name="dev_hardware_decoder_summary">Sforco dekodimin e pajisjes, vetëm për përdoruesit e avancuar</string>
     <string name="automatic">Automatikisht</string>
-    <string name="screen_orientation_sensor">Automatik (sensor)</string>
-    <string name="screen_orientation_portrait">Portret</string>
-    <string name="screen_orientation_landscape">Peizazh</string>
     <string name="enable_black_theme">Temë zezë</string>
-    <string name="subtitle_text_encoding">Deshifrim teksti titra</string>
     <string name="daynight_title">Mënyrë DitëNatë</string>
     <string name="daynight_follow_system_title">Ndiqni mënyrën e sistemit</string>
     <string name="extra_prefs_category">Cilësime shtresë</string>
 
     <string name="interface_prefs_screen">Ndërfaqja</string>
-    <string name="interface_secondary_display_category_title">Ekrani dytësor</string>
     <string name="enable_clone_mode">Preferoni klonim</string>
     <string name="video_prefs_category">Video</string>
-    <string name="video_min_group_length_title">Grup videos</string>
     <string name="video_min_group_length_folder">Grupo nga dosja</string>
-    <string name="subtitles_prefs_category">Titra</string>
-    <string name="subtitles_size_title">Përmasa Titrave</string>
-    <string name="subtitles_size_small">Vogël</string>
-    <string name="subtitles_size_normal">Normale</string>
-    <string name="subtitles_size_big">Madhe</string>
-    <string name="subtitles_size_huge">Stërmadhe</string>
-    <string name="subtitles_color_title">Ngjyra Titrave</string>
-    <string name="subtitles_background_title">Sfondi Titrave</string>
-    <string name="subtitles_bold_title">Titra trashë</string>
-    <string name="subtitles_autoload_title">Ngarko automatikisht titra</string>
     <string name="audio_prefs_category">Audio</string>
     <string name="performance_prefs_category">Performanca</string>
     <string name="debug_logs">Log-et e Debug</string>

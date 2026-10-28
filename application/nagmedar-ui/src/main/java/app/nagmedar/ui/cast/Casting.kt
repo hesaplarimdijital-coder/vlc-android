@@ -105,8 +105,6 @@ object Casting : RemoteRenderers {
     fun play(context: Context, device: CastDevice?, payload: CastPayload) {
         if (payload.media.isEmpty()) return
         if (device == null) {
-            // something else plays here: the film cast until now is not brought back to the video player
-            PlaybackService.instance?.playlistManager?.castEndsForNewPlayback()
             stop()
         } else if (!cast(device)) {
             return

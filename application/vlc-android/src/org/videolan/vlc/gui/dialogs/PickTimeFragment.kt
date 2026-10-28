@@ -60,8 +60,6 @@ abstract class PickTimeFragment : PlaybackBottomSheetDialogFragment(), View.OnCl
         return true
     }
 
-    override fun allowRemote() = true
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = DialogTimePickerBinding.inflate(inflater, container, false)

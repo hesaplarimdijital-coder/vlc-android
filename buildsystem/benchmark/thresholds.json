@@ -1,5 +1,5 @@
 {
-  "description": "S-1404: what Nağmedar's macrobenchmarks are held to. 'test' is ClassName.method of application/benchmark; 'stat' is median (start-up) or a percentile (frames); a benchmark not 'required' may be skipped (the Films need films on the device, the Music music).",
+  "description": "S-1404: what Nağmedar's macrobenchmarks are held to. 'test' is ClassName.method of application/benchmark; 'stat' is median (start-up) or a percentile (frames); a benchmark not 'required' may be skipped (the Music needs music on the device).",
   "benchmarks": [
     {
       "test": "StartupBenchmark.cold",
@@ -34,22 +34,6 @@
       "why": "Bir kareye CPU'da en çok 16 ms (60 Hz'in payı)"
     },
     {
-      "test": "ScrollBenchmark.films",
-      "metric": "frameOverrunMs",
-      "stat": "P90",
-      "max": 0,
-      "required": false,
-      "why": "Filmler kaydırılırken on kareden dokuzu zamanında"
-    },
-    {
-      "test": "ScrollBenchmark.films",
-      "metric": "frameDurationCpuMs",
-      "stat": "P95",
-      "max": 16,
-      "required": false,
-      "why": "Bir kareye CPU'da en çok 16 ms (60 Hz'in payı)"
-    },
-    {
       "test": "ScrollBenchmark.music",
       "metric": "frameOverrunMs",
       "stat": "P90",
@@ -65,13 +49,5 @@
       "required": false,
       "why": "Bir kareye CPU'da en çok 16 ms (60 Hz'in payı)"
     }
-  ],
-  "playback": {
-    "dropped_pct_max": 0.1,
-    "why": "Oynatmada bin karede en çok bir kayıp kare",
-    "files": [
-      "hdr10_2160p23976_hevc10_eac3.mkv",
-      "stress_2160p23976_hevc10_100mbps.mkv"
-    ]
-  }
+  ]
 }

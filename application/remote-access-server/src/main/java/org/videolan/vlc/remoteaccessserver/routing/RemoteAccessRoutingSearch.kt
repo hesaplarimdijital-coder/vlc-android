@@ -66,8 +66,8 @@ fun Route.searchRouting(appContext: Context, settings: SharedPreferences) {
                         ?: listOf(),
                     result.playlists?.filterNotNull()?.map { it.toPlayQueueItem(appContext) }
                         ?: listOf(),
-                    result.videos?.filterNotNull()?.map { it.toPlayQueueItem() }
-                        ?: listOf(),
+                    // no films: the web page plays sound only
+                    listOf(),
                     result.tracks?.filterNotNull()?.map { it.toPlayQueueItem() }
                         ?: listOf(),
                 )

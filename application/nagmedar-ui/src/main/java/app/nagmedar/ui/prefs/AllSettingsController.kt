@@ -22,8 +22,6 @@ import org.videolan.resources.VLCOptions
 import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.AppScope
 import org.videolan.tools.BitmapCache
-import org.videolan.tools.DAV1D_THREAD_NUMBER
-import org.videolan.tools.FASTPLAY_SPEED
 import org.videolan.tools.KEY_AOUT
 import org.videolan.tools.KEY_AUDIO_DIGITAL_OUTPUT
 import org.videolan.tools.KEY_AUDIO_JUMP_DELAY
@@ -48,8 +46,6 @@ import org.videolan.tools.KEY_CURRENT_AUDIO_RESUME_TITLE
 import org.videolan.tools.KEY_CURRENT_MEDIA
 import org.videolan.tools.KEY_CURRENT_MEDIA_RESUME
 import org.videolan.tools.KEY_CUSTOM_LIBVLC_OPTIONS
-import org.videolan.tools.KEY_DEBLOCKING
-import org.videolan.tools.KEY_ENABLE_FRAME_SKIP
 import org.videolan.tools.KEY_ENABLE_HEADSET_DETECTION
 import org.videolan.tools.KEY_ENABLE_TIME_STRETCHING_AUDIO
 import org.videolan.tools.KEY_ENABLE_VERBOSE_MODE
@@ -58,41 +54,19 @@ import org.videolan.tools.KEY_INCOGNITO
 import org.videolan.tools.KEY_MEDIA_LAST_PLAYLIST
 import org.videolan.tools.KEY_MEDIA_LAST_PLAYLIST_RESUME
 import org.videolan.tools.KEY_NETWORK_CACHING_VALUE
-import org.videolan.tools.KEY_OPENGL
 import org.videolan.tools.KEY_PLAYBACK_SPEED_AUDIO_GLOBAL
-import org.videolan.tools.KEY_PREFERRED_RESOLUTION
 import org.videolan.tools.KEY_PREFER_SMBV1
 import org.videolan.tools.KEY_QUICK_PLAY
 import org.videolan.tools.KEY_QUICK_PLAY_DEFAULT
 import org.videolan.tools.KEY_RESTRICT_SETTINGS
 import org.videolan.tools.KEY_SAFE_MODE_PIN
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_BOLD
-import org.videolan.tools.KEY_SUBTITLES_COLOR
-import org.videolan.tools.KEY_SUBTITLES_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_SIZE
-import org.videolan.tools.KEY_SUBTITLES_SHADOW
-import org.videolan.tools.KEY_SUBTITLES_SHADOW_COLOR
-import org.videolan.tools.KEY_SUBTITLES_SHADOW_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_SIZE
-import org.videolan.tools.KEY_SUBTITLE_TEXT_ENCODING
-import org.videolan.tools.KEY_VIDEO_DOUBLE_TAP_JUMP_DELAY
-import org.videolan.tools.KEY_VIDEO_JUMP_DELAY
-import org.videolan.tools.KEY_VIDEO_LONG_JUMP_DELAY
 import org.videolan.tools.Notices
 import org.videolan.tools.PLAYBACK_HISTORY
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_INTERVAL
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_RESET_INTERACTION
 import org.videolan.tools.SLEEP_TIMER_DEFAULT_WAIT
 import org.videolan.tools.Settings
-import org.videolan.tools.VIDEO_HUD_TIMEOUT
 import org.videolan.tools.VIDEO_RESUME_PLAYBACK
-import org.videolan.tools.coerceInOrDefault
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.gui.helpers.MedialibraryUtils
 import org.videolan.vlc.gui.helpers.restartMediaPlayer
@@ -159,9 +133,6 @@ class AllSettingsController(
     /** Set by [click] for a file the system's picker is to ask for; the screen launches it and clears it. */
     var fileRequest by mutableStateOf<PrefFile?>(null)
 
-    /** The subtitles' look changed: libVLC starts again when their page is left (PreferencesSubtitles). */
-    private var subtitlesChanged = false
-
     val pinSet: Boolean get() = !values.string(KEY_SAFE_MODE_PIN, "").isNullOrBlank()
 
     /** Settings are behind the PIN (parental control's "Restrict settings"). */
@@ -199,10 +170,6 @@ class AllSettingsController(
 
     fun choose(item: PrefItem, value: String) {
         val key = item.key ?: return
-        if (key == "subtitles_presets") {
-            applySubtitlePreset(value)
-            return
-        }
         if (!item.persistent) return
         values.putString(key, value)
         changed(key)
@@ -310,14 +277,6 @@ class AllSettingsController(
         }
     }
 
-    /** A page was left: the subtitles' look applies from the next start of libVLC, as in PreferencesSubtitles.onStop. */
-    fun left(pageId: String) {
-        if (pageId == PreferenceCatalog.SUBTITLES && subtitlesChanged) {
-            subtitlesChanged = false
-            restartLibVlc(player = true)
-        }
-    }
-
     /** The default sleep timer: [minutes] null turns it off. */
     fun setSleepDefault(minutes: Int?, wait: Boolean, reset: Boolean) {
         values.prefs.edit().apply {
@@ -350,20 +309,9 @@ class AllSettingsController(
                 values.putBoolean(AUDIO_RESUME_PLAYBACK, true)
                 values.putBoolean(VIDEO_RESUME_PLAYBACK, true)
             }
-            VIDEO_RESUME_PLAYBACK -> values.remove(KEY_MEDIA_LAST_PLAYLIST, KEY_MEDIA_LAST_PLAYLIST_RESUME, KEY_CURRENT_MEDIA_RESUME, KEY_CURRENT_MEDIA)
             // PreferencesUi
             KEY_INCLUDE_MISSING -> Settings.includeMissing = values.bool(key, true)
             KEY_INCOGNITO -> Settings.incognitoMode = values.bool(key, false)
-            // PreferencesVideo
-            KEY_PREFERRED_RESOLUTION -> restartLibVlc(player = true)
-            // PreferencesVideoControls
-            VIDEO_HUD_TIMEOUT -> Settings.videoHudDelay = values.int(key, 4).coerceInOrDefault(1, 15, -1)
-            KEY_VIDEO_JUMP_DELAY -> Settings.videoJumpDelay = values.int(key, 10)
-            KEY_VIDEO_LONG_JUMP_DELAY -> Settings.videoLongJumpDelay = values.int(key, 20)
-            KEY_VIDEO_DOUBLE_TAP_JUMP_DELAY -> Settings.videoDoubleTapJumpDelay = values.int(key, 10)
-            FASTPLAY_SPEED -> Settings.fastplaySpeed = values.int(key, 20) / 10f
-            // PreferencesSubtitles
-            in subtitleLook -> subtitlesChanged = true
             // PreferencesAudio
             KEY_ENABLE_HEADSET_DETECTION -> {
                 val event = PlaybackService.headSetDetection
@@ -413,14 +361,7 @@ class AllSettingsController(
                 }
                 restartMediaPlayer()
             }
-            DAV1D_THREAD_NUMBER -> {
-                val threads = values.string(key, "").orEmpty()
-                if (threads.isNotEmpty() && (threads.toIntOrNull() ?: 0) < 1) {
-                    notice(R.string.dav1d_thread_number_invalid, error = true)
-                    values.putString(key, "")
-                }
-            }
-            KEY_OPENGL, KEY_DEBLOCKING, KEY_ENABLE_FRAME_SKIP, KEY_ENABLE_TIME_STRETCHING_AUDIO, KEY_ENABLE_VERBOSE_MODE -> restartLibVlc(player = true)
+            KEY_ENABLE_TIME_STRETCHING_AUDIO, KEY_ENABLE_VERBOSE_MODE -> restartLibVlc(player = true)
             KEY_PREFER_SMBV1 -> {
                 restartLibVlc(player = false)
                 dialog = PrefDialog.Restart
@@ -434,47 +375,6 @@ class AllSettingsController(
         }
         if (key in audioControls) Settings.onAudioControlsChanged()
         if (key in androidAuto) PlaybackService.updateState()
-    }
-
-    /** VLC's subtitle presets (PreferencesSubtitles): every look back to its default, then the preset's changes. */
-    private fun applySubtitlePreset(preset: String) {
-        values.prefs.edit().apply {
-            putString(KEY_SUBTITLES_SIZE, "16")
-            putBoolean(KEY_SUBTITLES_BOLD, false)
-            putInt(KEY_SUBTITLES_COLOR, WHITE)
-            putInt(KEY_SUBTITLES_COLOR_OPACITY, 255)
-            putBoolean(KEY_SUBTITLES_BACKGROUND, false)
-            putInt(KEY_SUBTITLES_BACKGROUND_COLOR, BLACK)
-            putInt(KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, 255)
-            putBoolean(KEY_SUBTITLES_SHADOW, true)
-            putInt(KEY_SUBTITLES_SHADOW_COLOR, BLACK)
-            putInt(KEY_SUBTITLES_SHADOW_COLOR_OPACITY, 128)
-            putBoolean(KEY_SUBTITLES_OUTLINE, true)
-            putInt(KEY_SUBTITLES_OUTLINE_COLOR, BLACK)
-            putInt(KEY_SUBTITLES_OUTLINE_COLOR_OPACITY, 255)
-            when (preset) {
-                "1" -> putString(KEY_SUBTITLES_SIZE, "13")
-                "2" -> {
-                    putString(KEY_SUBTITLES_SIZE, "10")
-                    putBoolean(KEY_SUBTITLES_BACKGROUND, true)
-                    putBoolean(KEY_SUBTITLES_SHADOW, false)
-                    putBoolean(KEY_SUBTITLES_OUTLINE, false)
-                }
-                "3" -> {
-                    putBoolean(KEY_SUBTITLES_BACKGROUND, true)
-                    putInt(KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, 128)
-                    putBoolean(KEY_SUBTITLES_SHADOW, false)
-                }
-                "4" -> putInt(KEY_SUBTITLES_COLOR, YELLOW)
-                "5" -> {
-                    putInt(KEY_SUBTITLES_COLOR, YELLOW)
-                    putBoolean(KEY_SUBTITLES_BACKGROUND, true)
-                    putInt(KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, 128)
-                    putBoolean(KEY_SUBTITLES_SHADOW, false)
-                }
-            }
-        }.apply()
-        subtitlesChanged = true
     }
 
     /** A short notice in the window's notice area (an invalid value put right, a database saved). */
@@ -553,17 +453,6 @@ class AllSettingsController(
         const val AUTO_QUEUE_POSITION = "android_auto_queue_info_pos"
         const val AUTO_QUEUE_FORMAT = "android_auto_queue_format"
         const val DATABASES_ZIP = "vlc_database.zip"
-        const val WHITE = 0xFFFFFFFF.toInt()
-        const val BLACK = 0xFF000000.toInt()
-        const val YELLOW = 0xFFFFFF00.toInt()
-
-        val subtitleLook = setOf(
-            KEY_SUBTITLES_SIZE, KEY_SUBTITLES_BOLD, KEY_SUBTITLE_TEXT_ENCODING, KEY_SUBTITLES_COLOR, KEY_SUBTITLES_COLOR_OPACITY,
-            KEY_SUBTITLES_BACKGROUND_COLOR, KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, KEY_SUBTITLES_BACKGROUND, KEY_SUBTITLES_OUTLINE,
-            KEY_SUBTITLES_OUTLINE_SIZE, KEY_SUBTITLES_OUTLINE_COLOR, KEY_SUBTITLES_OUTLINE_COLOR_OPACITY, KEY_SUBTITLES_SHADOW,
-            KEY_SUBTITLES_SHADOW_COLOR, KEY_SUBTITLES_SHADOW_COLOR_OPACITY,
-        )
-
         val audioControls = setOf(
             KEY_AUDIO_JUMP_DELAY, KEY_AUDIO_LONG_JUMP_DELAY, "audio_force_shuffle", "blurred_cover_background", KEY_AUDIO_SHOW_TRACK_NUMBERS,
             KEY_AUDIO_SHOW_CHAPTER_BUTTONS, KEY_AUDIO_SHOW_BOOkMARK_BUTTONS, KEY_AUDIO_SHOW_BOOKMARK_MARKERS,

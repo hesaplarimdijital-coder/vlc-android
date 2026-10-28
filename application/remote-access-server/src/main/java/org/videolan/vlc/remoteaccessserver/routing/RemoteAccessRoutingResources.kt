@@ -40,7 +40,6 @@ import io.ktor.server.response.respondFile
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import org.videolan.medialibrary.interfaces.media.Folder
 import org.videolan.resources.util.getFromMl
 import org.videolan.tools.HttpImageLoader
 import org.videolan.vlc.ArtworkProvider
@@ -86,18 +85,6 @@ fun Route.resourceRouting(appContext: Context, settings: SharedPreferences) {
                 "playlist" -> {
                     val playlist = appContext.getFromMl { getPlaylist(id.toLong(), false, false) }
                     val dst = MediaZipUtils.generatePlaylistZip(playlist, RemoteAccessServer.getInstance(appContext).downloadFolder)
-                    call.respondText(dst)
-                    return@get
-                }
-                "video-group" -> {
-                    val videoGroup = appContext.getFromMl { getVideoGroup(id.toLong()) }
-                    val dst = MediaZipUtils.generateVideoGroupZip(videoGroup, RemoteAccessServer.getInstance(appContext).downloadFolder)
-                    call.respondText(dst)
-                    return@get
-                }
-                "video-folder" -> {
-                    val videoFolder = appContext.getFromMl { getFolder(Folder.TYPE_FOLDER_VIDEO, id.toLong()) }
-                    val dst = MediaZipUtils.generateVideoGroupZip(videoFolder, RemoteAccessServer.getInstance(appContext).downloadFolder)
                     call.respondText(dst)
                     return@get
                 }
@@ -194,18 +181,6 @@ fun Route.resourceRouting(appContext: Context, settings: SharedPreferences) {
                     call.respondText("")
                     return@get
                 }
-                "video-group" -> {
-                    val videoGroup = appContext.getFromMl { getVideoGroup(id.toLong()) }
-                    videoGroup.isFavorite = favorite
-                    call.respondText("")
-                    return@get
-                }
-                "video-folder" -> {
-                    val videoFolder = appContext.getFromMl { getFolder(Folder.TYPE_FOLDER_VIDEO, id.toLong()) }
-                    videoFolder.isFavorite = favorite
-                    call.respondText("")
-                    return@get
-                }
                 else -> {
                     //simple media. It's a direct download
                     appContext.getFromMl { getMedia(id.toLong()) }?.let { media ->
@@ -240,42 +215,6 @@ fun Route.resourceRouting(appContext: Context, settings: SharedPreferences) {
             val size = if (isBig) 256 else 54
             BitmapUtil.encodeImage(BitmapUtil.vectorToBitmap(appContext, if (isBig) R.drawable.ic_folder_big else  R.drawable.ic_folder,
                 size, size), true)?.let {
-                call.respondBytes(ContentType.Image.PNG) { it }
-                return@get
-            }
-        }
-        if (call.request.queryParameters["type"]?.startsWith("video-group") == true) {
-            call.request.queryParameters["id"]?.let { id ->
-                val group = appContext.getFromMl {
-                    getVideoGroup(id.toLong())
-                }
-                val bmp = ThumbnailsProvider.getVideoGroupThumbnail(group, 512)
-                if (bmp != null) {
-                    BitmapUtil.encodeImage(bmp, true)?.let {
-                        call.respondBytes(ContentType.Image.PNG) { it }
-                        return@get
-                    }
-                }
-            }
-            BitmapUtil.encodeImage(BitmapUtil.vectorToBitmap(appContext,  if (isBig) R.drawable.ic_folder_big else  R.drawable.ic_folder, 256, 256), true)?.let {
-                call.respondBytes(ContentType.Image.PNG) { it }
-                return@get
-            }
-        }
-        if (type?.startsWith("video-folder") == true) {
-            call.request.queryParameters["id"]?.let { id ->
-                val folder = appContext.getFromMl {
-                    getFolder(Folder.TYPE_FOLDER_VIDEO, id.toLong())
-                }
-                val bmp = ThumbnailsProvider.getFolderThumbnail(folder, 512)
-                if (bmp != null) {
-                    BitmapUtil.encodeImage(bmp, true)?.let {
-                        call.respondBytes(ContentType.Image.PNG) { it }
-                        return@get
-                    }
-                }
-            }
-            BitmapUtil.encodeImage(BitmapUtil.vectorToBitmap(appContext,  if (type?.endsWith("_big") == true) R.drawable.ic_folder_big else  R.drawable.ic_folder, 256, 256), true)?.let {
                 call.respondBytes(ContentType.Image.PNG) { it }
                 return@get
             }

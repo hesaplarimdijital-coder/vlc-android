@@ -61,7 +61,6 @@ import org.videolan.vlc.R
 import org.videolan.vlc.databinding.DialogEqualizerBinding
 import org.videolan.vlc.gui.EqualizerSettingsActivity
 import org.videolan.vlc.gui.helpers.UiTools
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.gui.view.EqualizerBar
 import org.videolan.vlc.interfaces.OnEqualizerBarChangeListener
 import org.videolan.vlc.mediadb.models.EqualizerBand
@@ -183,12 +182,7 @@ class EqualizerFragmentDialog : VLCBottomSheetDialogFragment(), Slider.OnChangeL
         }
 
         binding.equalizerSettings.setOnClickListener {
-            if (requireActivity() is VideoPlayerActivity)
-                UiTools.showSnackOrDialog(requireActivity(), R.string.equalizer,getString(R.string.equalizer_leave_warning), binding.contextMenuItemSnackbarHost) {
-                    startActivity(Intent(requireActivity(), EqualizerSettingsActivity::class.java))
-                }
-            else
-                startActivity(Intent(requireActivity(), EqualizerSettingsActivity::class.java))
+            startActivity(Intent(requireActivity(), EqualizerSettingsActivity::class.java))
         }
 
         binding.equalizerAdd.setOnClickListener {

@@ -17,8 +17,6 @@
     <string name="play">Reproducir</string>
     <string name="playback">Reproducción</string>
     <string name="play_as_audio">Reproducir como audiu</string>
-    <string name="video_app_switch_title">Mou en segundu planu / Picture-in-Picture</string>
-    <string name="video_app_switch_summary">Esbilla\'l comportamientu pa cuando cambies a otra aplicación dende la reproducción de vídeos</string>
     <string name="resume_playback_short_title">Siguir cola reproducción</string>
     <string name="delete">Desaniciar</string>
     <string name="set_song">Afitar como timbre</string>
@@ -80,9 +78,7 @@
     <string name="track_codec_info">Códec: %1$s\n</string>
     <string name="track_language_info">Llingua: %1$s\n</string>
     <string name="volume">Volume</string>
-    <string name="brightness">Brilléu</string>
     <string name="advanced">opciones avanzaes</string>
-    <string name="audio_boost_warning">Volvi eslizar pa perpasar el 100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 canal\n</item>
@@ -114,34 +110,16 @@
     <string name="preferences">Axustes</string>
     <string name="directories_summary">Esbilla de direutorios a incluyir na biblioteca de medios</string>
     <string name="add_custom_path">Amestar un camín personalizáu</string>
-    <string name="hardware_acceleration">Aceleración per hardware</string>
-    <string name="hardware_acceleration_full">Aceleración completa</string>
     <string name="dev_hardware_decoder">Descodificador avanzáu per hardware</string>
-    <string name="screen_orientation_sensor">Automática (sensor)</string>
-    <string name="screen_orientation_portrait">Vertical</string>
-    <string name="screen_orientation_landscape">Horizonal</string>
     <string name="enable_black_theme">Estilu escuru</string>
-    <string name="subtitle_text_encoding">Codificación</string>
     <string name="daynight_follow_system_title">Siguir el mou del sistema</string>
     <string name="extra_prefs_category">Axustes adicionales</string>
 
     <string name="interface_prefs_screen">Interfaz</string>
-    <string name="interface_secondary_display_category_title">Pantalla secundaria</string>
     <string name="video_prefs_category">Videu</string>
-    <string name="video_min_group_length_title">Agrupamientu de vídeos</string>
     <string name="video_min_group_length_disable">Nun lo facer</string>
     <string name="video_min_group_length_folder">Agrupalos pola carpeta</string>
     <string name="browser_show_hidden_files_title">Amosar ficheros anubríos</string>
-    <string name="subtitles_prefs_category">Sotítulos</string>
-    <string name="subtitles_size_title">Tamañu</string>
-    <string name="subtitles_size_small">Pequeñu</string>
-    <string name="subtitles_size_normal">Normal</string>
-    <string name="subtitles_size_big">Grande</string>
-    <string name="subtitles_size_huge">Escomanáu</string>
-    <string name="subtitles_color_title">Color</string>
-    <string name="subtitles_background_title">Fondu</string>
-    <string name="subtitles_bold_title">En negrina</string>
-    <string name="subtitles_autoload_title">Carga automática</string>
     <string name="audio_prefs_category">Audiu</string>
     <string name="headset_prefs_category">Auriculares</string>
     <string name="aout_summary">Camuda\'l métodu qu\'usa VLC pa la salida del audiu</string>
@@ -155,7 +133,6 @@
     <string name="android_auto">Android Auto</string>
 
     <string name="performance_prefs_category">Rindimientu</string>
-    <string name="enable_frame_skip">Saltu de cuadros</string>
     <string name="set_locale">Afitar una locale</string>
     <string name="quit">Colar y reaniciar l\'aplicación</string>
     <string name="restart_message">Los cambeos van facer efeutu namás que se reanicie l\'aplicación.\n\n¿Reaniciar agora?</string>
@@ -176,7 +153,6 @@
     <string name="serious_crash">Desafortunadamente, asocedió un fallu grabe y VLC tuvo de zarrase.</string>
     <string name="sending_log">Unviando\'l rexistru...</string>
 
-    <string name="delete_sub_message">¿Quies desaniciar esti sotítulu?</string>
     <string name="no_result">Nun s\'alcontraron resultaos</string>
     <string name="network_browsing">Rede llocal</string>
     <string name="browsing">Restolar</string>
@@ -203,10 +179,6 @@
     <string name="exit_app_msg">¿De xuru que quies colar de VLC?</string>
     <!-- Plugins -->
     <string name="plugins">Plugins</string>
-    <string name="opengl_title">Usu d\'OpenGL ES2</string>
-    <string name="opengl_automatic">Automáticu</string>
-    <string name="opengl_on">Forciar l\'activación</string>
-    <string name="opengl_off">Forciar la desactivación</string>
     <string name="network_shared_folders">Carpetes compartíes</string>
     <string name="download_subtitles">Baxar sotítulos</string>
     <string name="videos_all">Tolos vídeos</string>
@@ -227,7 +199,6 @@
     <string name="browser_quick_access">Accesu rápidu</string>
     <string name="browser_storages">Almacenamientos</string>
     <string name="audio_digital_failed">Fallu al camudar l\'estáu de la salida d\'audiu dixital</string>
-    <string name="tv_my_new_videos">Vídeos nuevos de mio</string>
     <string name="otg_device_title">Preséu OTG</string>
     <string name="browser">Restolador</string>
     <string name="stop_after_this">Parar dempués d\'esta pista</string>
@@ -235,12 +206,8 @@
     <string name="time_category_current_year">Esti añu</string>
     <string name="time_category_last_year">L\'últimu añu</string>
     <string name="manual_search">Busca manual</string>
-    <string name="subtitle_search_name_hint">Nome</string>
-    <string name="subtitle_search_episode_hint">Episodiu</string>
-    <string name="subtitle_search_season_hint">Temporada</string>
     <string name="language_to_download">Llingua</string>
     <string name="ctx_player_audio_track">Pista d\'audiu</string>
-    <string name="ctx_pip_title">Ventanu emerxente</string>
     <string name="welcome_title">¡Afáyate en VLC!</string>
     <string name="welcome_subtitle">El reproductor multimedia de códigu abiertu</string>
     <string name="permission_media">VLC precisa\'l to permisu p\'acceder a los ficheros del preséu</string>
@@ -277,15 +244,10 @@
     <string name="next_episode">Episodiu siguiente</string>
     <string name="recently_played">Reprodúxose apocayá</string>
     <string name="recently_added">Amestóse apocayá</string>
-    <string name="video_information">Información</string>
 
     <string name="channels">Canales</string>
     <string name="resolution">Resolución</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Llingua</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="codec">Códec</string>
     <string name="track_index">Pista: %s</string>
     <string name="audio_queue_progress">Progresu: %s</string>
@@ -295,5 +257,4 @@
     <string name="more">Más</string>
     <string name="new_stream">Fluxu nuevu</string>
     <string name="thank_you">Gracies</string>
-    <string name="new_group">Grupu nuevu</string>
     </resources>

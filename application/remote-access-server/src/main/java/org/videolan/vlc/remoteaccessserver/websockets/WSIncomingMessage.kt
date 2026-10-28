@@ -58,11 +58,8 @@ enum class IncomingMessageType(private val type: String, val controlRequired: Bo
     DELETE_MEDIA("delete-media"),
     MOVE_MEDIA_BOTTOM("move-media-bottom"),
     MOVE_MEDIA_TOP("move-media-top"),
-    REMOTE("remote" ),
     SET_BROWSER_AUDIO("set-browser-audio"),
-    SET_AUDIO_TRACK("set-audio-track"),
-    SET_SUBTITLE_TRACK("set-subtitle-track"),
-    PICK_SUBTITLE("pick-subtitle");
+    SET_AUDIO_TRACK("set-audio-track");
 
     override fun toString(): String = type
 

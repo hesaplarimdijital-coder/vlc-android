@@ -4,8 +4,7 @@
     check.py RESULTS_DIR [--thresholds thresholds.json]
 
 RESULTS_DIR is what run.sh gathered: the macrobenchmarks' *benchmarkData.json (anywhere under
-it), perf.log (the app's NagmedarPerf lines: one a playback) and instrument.txt (the run's own
-output, for its failed tests). Prints a table and writes it to RESULTS_DIR/summary.md; exits 1
+it) and instrument.txt (the run's own output, for its failed tests: PlaybackTest's among them). Prints a table and writes it to RESULTS_DIR/summary.md; exits 1
 when a threshold is passed or a required benchmark is missing, 0 otherwise.
 """
 
@@ -31,21 +30,6 @@ def benchmarks(results: pathlib.Path) -> dict:
                     values[metric] = stats
             found[name] = values
     return found
-
-
-def playbacks(results: pathlib.Path) -> list:
-    """The NagmedarPerf playback lines, as dicts of their fields."""
-    log = results / "perf.log"
-    if not log.exists():
-        return []
-    lines = []
-    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
-        if "playback file=" not in line:
-            continue
-        fields = dict(re.findall(r'(\w+)=("[^"]*"|\S+)', line.split("playback ", 1)[1]))
-        fields["file"] = fields.get("file", "").strip('"')
-        lines.append(fields)
-    return lines
 
 
 def failed_tests(results: pathlib.Path) -> list:
@@ -86,18 +70,6 @@ def check(results: pathlib.Path, thresholds: dict) -> tuple:
         passed = value <= rule["max"]
         ok = ok and passed
         rows.append((label, number(value), f'≤ {number(rule["max"])}', "geçti" if passed else "KALDI", rule["why"]))
-    play = thresholds["playback"]
-    seen = playbacks(results)
-    for name in play["files"]:
-        lines = [p for p in seen if p["file"] == name]
-        label = f"Oynatma · {name} · kayıp kare %"
-        if not lines:
-            rows.append((label, "yok", f'≤ {number(play["dropped_pct_max"])}', "atlandı", play["why"]))
-            continue
-        worst = max(float(p.get("dropped_pct", "100")) for p in lines)
-        passed = worst <= play["dropped_pct_max"]
-        ok = ok and passed
-        rows.append((label, f"{worst:.3f}", f'≤ {number(play["dropped_pct_max"])}', "geçti" if passed else "KALDI", play["why"]))
     for test in failed_tests(results):
         ok = False
         rows.append((test, "—", "—", "HATA", "Test başarısız (instrument.txt)"))

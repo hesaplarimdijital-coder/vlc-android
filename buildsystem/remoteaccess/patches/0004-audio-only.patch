@@ -1,0 +1,66 @@
+diff --git a/src/components/AppHeader.vue b/src/components/AppHeader.vue
+index b08727d..8954d23 100644
+--- a/src/components/AppHeader.vue
++++ b/src/components/AppHeader.vue
+@@ -1,7 +1,7 @@
+ <template>
+   <nav class="navbar navbar-light navbar-expand-md shadow-sm sticky-top align-items-center container-fluid main-navbar">
+     <div class="flex1-collapsible">
+-      <RouterLink :to="{ name: 'VideoList' }">
++      <RouterLink :to="{ name: 'AudioArtists' }">
+         <img id="logo" :src="(`./logo.svg`)" :alt="$t('APP_NAME')" width="48" height="48" v-on:click="iconClick()"
+           v-bind:class="this.clicked > 2 && this.clicked % 2 == 1 ? 'animate' : ''">
+       </RouterLink>
+@@ -14,12 +14,6 @@
+ 
+       <ul class="dropdown-menu dropdown-menu-start main-menu">
+         <li class="dropdown-item">
+-          <RouterLink :to="{ name: 'VideoList' }">
+-            <div class="nav-button d-flex btn  btn-lg medium">
+-              <img class="nav-button" v-bind:src="$getAppAsset($getIcons().videoIcon)">
+-              <p class="collapsed-menu-text" v-t="'VIDEO'"></p>
+-            </div>
+-          </RouterLink>
+           <RouterLink :to="{ name: 'AudioArtists' }">
+             <div class="nav-button d-flex btn  btn-lg medium">
+               <img v-bind:src="$getAppAsset($getIcons().audioIcon)">
+@@ -93,12 +87,6 @@
+       </ul>
+     </div>
+     <div class="d-flex justify-content-center nav-collapsible">
+-      <RouterLink :to="{ name: 'VideoList' }">
+-        <button class="btn btn-lg nav-button medium">
+-          <img v-bind:src="$getAppAsset($getIcons().videoIcon)">
+-          <p v-t="'VIDEO'"></p>
+-        </button>
+-      </RouterLink>
+       <RouterLink :to="{ name: 'AudioArtists' }">
+         <button class="btn btn-lg nav-button medium">
+           <img v-bind:src="$getAppAsset($getIcons().audioIcon)">
+diff --git a/src/routes.js b/src/routes.js
+index b48f4c1..cb62871 100644
+--- a/src/routes.js
++++ b/src/routes.js
+@@ -1,4 +1,3 @@
+-import VideoList from './pages/VideoList'
+ import PlaylistList from './pages/PlaylistList'
+ import MoreAll from './pages/MoreAll'
+ import AudioArtists from './pages/AudioArtists'
+@@ -17,15 +16,8 @@ import MLBrowsingDetails from './pages/MLBrowsingDetails'
+ import { vlcIcons } from './plugins/icons.js'
+ 
+ const routes = [
+-  { path: '/', redirect: '/videos', name: 'Home' },
+-  {
+-    path: '/videos', name: 'Video',
+-    children: [
+-      { path: '', component: VideoList, name: 'VideoList', meta: { showDisplayBar: true, showResume: true, showGrouping: true } },
+-      { path: 'group/:groupId', component: VideoList, name: 'VideoGroupList', meta: { showDisplayBar: true, showFAB: true, playAllType: "video-group", icon: vlcIcons.videoIcon } },
+-      { path: 'folder/:folderId', component: VideoList, name: 'VideoFolderList', meta: { showDisplayBar: true, showFAB: true, playAllType: "video-folder", icon: vlcIcons.folderIcon } },
+-    ]
+-  },
++  // Nağmedar plays sound only: the page opens on the music, and has no video pages
++  { path: '/', redirect: '/audio', name: 'Home' },
+   {
+     path: '/audio', redirect: '/audio/artists', name: 'AudioArtists',
+     children: [

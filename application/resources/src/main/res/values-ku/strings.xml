@@ -31,11 +31,6 @@
     <string name="Medialibrary_progress">Hildemandinên pêşveçûna pişkînîna medyagehê</string>
     <string name="play_from_start">Ji destpêkê lêde</string>
     <string name="play_as_audio">Wekî deng lêde</string>
-    <string name="play_as_video">Wekî vîdyo lêde</string>
-    <string name="video_app_switch_title">Moda Pip/Paşxanê</string>
-    <string name="video_app_switch_summary">Dema ku tu ji lêdana vîdyoyê derbasî sepaneke din bû, bila VLC çi bike</string>
-    <string name="play_pip_title">Bila vîdyoyan di moda ditbarî de bi dîtbarî lêde</string>
-    <string name="play_as_audio_background">Bila vîdyo di paşxanê de bên lêdan</string>
     <string name="insert_next">Ya din tevlî bike</string>
     <string name="play_all">Gişî lêde</string>
     <string name="append_all">Gişî tevlî bike</string>
@@ -124,10 +119,6 @@
     <string name="firstsong">Strana yekem a lîsteya lêdanê</string>
     <string name="lastsong">Strana dawî ya lîsteya lêdanê</string>
 
-    <string name="surface_best_fit">Herî guncav</string>
-    <string name="surface_fit_screen">Li gorî ekranê</string>
-    <string name="surface_fill">Dagire</string>
-    <string name="surface_original">Navend bike</string>
     <string name="unseekable_stream">Herika lê nayê gerîn</string>
     <string name="refresh">Nû bike</string>
     <string name="track_audio">Tomara dengî</string>
@@ -138,11 +129,7 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Ziman: %1$s\n</string>
     <string name="volume">Piledeng</string>
-    <string name="sound_on">Deng Vekirî</string>
-    <string name="sound_off">Deng Girtî</string>
-    <string name="brightness">Ronahî</string>
     <string name="advanced">vebijarkên pêşketî</string>
-    <string name="audio_boost_warning">Dîsa bişemitîne da ku ji 100% derbas bibe</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">kanalek\n</item>
@@ -157,7 +144,6 @@
     <string name="sleep_title">Demjimêrê xewê</string>
     <string name="sleep_in">Di xew de</string>
     <string name="jump_to_time">Pêşve bibe</string>
-    <string name="subtitle_select">Dosyeya jêrnivîsê hilbijêre</string>
     <string name="server_add_title">Servereke nû tevlî favoriyan bike</string>
     <string name="server_domain_hint">Navnîşana serverê (navê domainê an jî IP)</string>
     <string name="server_share_hint">Navê parvekirina torê (an jî navnîşana IP\'ê)</string>
@@ -211,33 +197,16 @@
     <string name="preferences">Sazkarî</string>
     <string name="add_custom_path">Peldanka taybet tevlî bike</string>
     <string name="remove_custom_path">Peldanka taybet jê bibe</string>
-    <string name="hardware_acceleration_disabled">Neçalak</string>
-    <string name="hardware_acceleration_decoding">Lezandina kodvekirinê</string>
     <string name="automatic">Otomatîk</string>
-    <string name="screen_orientation_sensor">Otomatîk (sensor)</string>
     <string name="enable_black_theme">Rûkara reş</string>
     <string name="daynight_title">Moda Şevê/Rojê</string>
     <string name="extra_prefs_category">Sazkariyên din</string>
 
     <string name="interface_prefs_screen">Navrû</string>
-    <string name="interface_secondary_display_category_title">Ekrana duyem</string>
     <string name="video_prefs_category">Vîdyo</string>
-    <string name="video_min_group_length_title">Vîdyoyan bike kom</string>
     <string name="video_min_group_length_disable">Vîdyoyan neke kom</string>
     <string name="video_min_group_length_folder">Li gorî peldankê bike kom</string>
     <string name="video_min_group_length_name">Li gorî nav bike kom</string>
-    <string name="video_transition_title">Veguhertina vîdyoyan</string>
-    <string name="save_brightness_title">Asta ronahiyê tomar bike</string>
-    <string name="subtitles_prefs_category">Jêrnivîs</string>
-    <string name="subtitles_size_title">Mezinahiya jêrnivîsê</string>
-    <string name="subtitles_size_small">Biçûk</string>
-    <string name="subtitles_size_normal">Normal</string>
-    <string name="subtitles_size_big">Mezin</string>
-    <string name="subtitles_size_huge">Pir mezin</string>
-    <string name="subtitles_color_title">Rengê jêrnivîsê</string>
-    <string name="subtitles_background_title">Paşxana jêrnivîsê</string>
-    <string name="subtitles_bold_title">Jêrnivîsên tarî</string>
-    <string name="subtitles_autoload_title">Jêrnivîsan bixweber tevlî bike</string>
     <string name="audio_prefs_category">Deng</string>
     <string name="lockscreen_cover_title">Berga medyayê li ser ekrana kilîdê</string>
     <string name="list_title_ellipsize_default">Jixweber</string>
@@ -245,8 +214,6 @@
     <string name="list_title_ellipsize_right">Li rastê</string>
     <string name="list_title_ellipsize_middle">Li navînê</string>
     <string name="list_title_ellipsize_marquee">Marka</string>
-    <string name="audio_boost_title">Bihêzkirina-dengî</string>
-    <string name="audio_boost_summary">Bila deng %200 zêde bibe</string>
     <string name="headset_prefs_category">Berguhk</string>
     <string name="casting_category">Veguheztin</string>
     <string name="casting_switch_title">Veguheztina bêqebloyî</string>
@@ -286,9 +253,6 @@
     <string name="send_log">Tomargehê bişîne</string>
     <string name="sending_log">Tomargeh tê şandin...</string>
 
-    <string name="delete_sub_title">Jêrnivîsê jê bibe</string>
-    <string name="delete_sub_message">Bila ev jêrnivîs bê jêbirin?</string>
-    <string name="download_subtitle_title">Jêrnivîsê daxîne</string>
 
     <string name="no_result">Ti encam nehat dîtin</string>
     <string name="no_internet_connection">Înterneta xwe kontrol bike</string>
@@ -297,8 +261,6 @@
     <string name="network_browsing">Tora Xwecihî</string>
     <string name="file_size">Mezinahiya dosyeyê</string>
 
-    <string name="audio_delay">Derengmayina dengî</string>
-    <string name="spu_delay">Derengmayîna jêrnivîsê</string>
     <string name="network_empty">Ev peldank vala ye.</string>
     <string name="network_connection_needed">Înterneta xwecihî tune ye.</string>
     <string name="search_hint">Li medyayan bigere</string>
@@ -308,7 +270,6 @@
     <string name="playlist_name_hint">Navê lîsteya lêdanê</string>
     <string name="go_to_chapter">Here beşê...</string>
     <string name="confirm_resume">Bila ji ciyê berê ve were domandin?</string>
-    <string name="confirm_resume_title">Vîdyoyên di lêdanê de bidomîne</string>
     <string name="tv_ui_title">Navrûya Android TV\'yê</string>
     <string name="medialibrary">Medyageh</string>
     <string name="medialibrary_directories">Peldankên medyagehê</string>
@@ -324,13 +285,9 @@
     <!-- Plugins -->
     <string name="plugins">Pêvek</string>
     <string name="download_on_device">Daxîne</string>
-    <string name="opengl_automatic">Otomatîk</string>
-    <string name="opengl_on">Bi zorê veke</string>
-    <string name="opengl_off">Bi zorê bigire</string>
     <string name="network_shared_folders">Peldankên parvekirî</string>
     <string name="store_password">Pêborînê bi bîr bixe</string>
     <string name="add_to_playlist">Tevlî lîsteya lêdanê bike</string>
-    <string name="popup_expand">Vîdyoyê fireh bike</string>
     <string name="download_subtitles">Jêrnivîsan daxîne</string>
     <string name="browse_folder">Peldankê bibîne</string>
     <string name="listen">Guhdarî bike</string>
@@ -380,12 +337,7 @@
     <string name="rename">Dîsa bi nav bike</string>
     <string name="rename_media">%1$s\'ê dîsa bi nav bike</string>
     <string name="manual_search">Lêgerîna manûel</string>
-    <string name="subtitle_search_name_hint">Nav</string>
-    <string name="subtitle_search_episode_hint">Beş</string>
-    <string name="subtitle_search_season_hint">Sezon</string>
     <string name="language_to_download">Ziman</string>
-    <string name="delete_the_selected">Bijartinê jê bibe</string>
-    <string name="download_the_selected">Bijartinê daxîne</string>
     <string name="next">Pêşve</string>
     <string name="download">Daxîne</string>
     <string name="ctx_player_video_track">Tomara vîdyoyê hilbijêre</string>
@@ -416,13 +368,9 @@
     <string name="start_over">Ji serî ve dest pê bike</string>
     <string name="next_episode">Beşa din</string>
     <string name="open_network_settings">Sazkariyên torê veke?</string>
-    <string name="video_information">Agahiyên vîdyoyê</string>
 
     <string name="channels">Kanal</string>
     <string name="resolution">Averûtî</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Ziman</string>
     <string name="text">Nivîs</string>
     <string name="unknown">Nayê zanîn</string>
@@ -443,16 +391,7 @@
     <string name="group_similar">Bixweber bike kom</string>
     <string name="no_favorite">Favorî tune</string>
     <string name="empty_directory">Vala</string>
-    <string name="air_action_rewind">10 saniye paşve bibe</string>
-    <string name="air_action_forward">10 saniye pêşve bibe</string>
-    <string name="air_action_play_pause">Lêdanê Bisekinîne/Bidomîne</string>
-    <string name="air_action_volume_up">Deng bilind bike</string>
-    <string name="air_action_volume_down">Deng kêm bike</string>
-    <string name="air_action_next">Di lîsteya lêdanê de hêmana din</string>
-    <string name="air_action_previous">Di lîsteya lêdanê de hêmana berî vê</string>
-    <string name="timeout_infinite">Bêdawî</string>
     <string name="video_hud_timeout">Lêdera vîdyo derengmayîna maskekirin kontrol dike</string>
     <string name="remove_from_history">Ji raboriyê rake</string>
     <string name="prefersmbv1_summary">Heke hûn di lêgerîna pêşkêşkera SMB-ya xwe de zehmetiyê dikişînin vê mîhengê vebijêre</string>
-    <string name="apply_to_all">Li hemû vîdyoyan bisepîne</string>
     </resources>

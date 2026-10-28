@@ -33,11 +33,6 @@
     <string name="Medialibrary_progress">ᱢᱮᱰᱤᱭᱟ ᱚᱱᱟᱜ ᱥᱠᱮᱱᱤᱝ ᱠᱟᱹᱢᱤ ᱦᱟᱹᱞᱤᱭᱟᱠᱠᱚ</string>
     <string name="play_from_start">ᱮᱛᱦᱚᱵᱽ ᱠᱷᱚᱱ ᱯᱞᱮ</string>
     <string name="play_as_audio">ᱥᱟᱲᱮ ᱞᱮᱠᱷᱟ ᱯᱞᱮ</string>
-    <string name="play_as_video">ᱣᱤᱰᱤᱭᱚ ᱞᱮᱠᱷᱟ ᱯᱮᱞ</string>
-    <string name="video_app_switch_title">ᱵᱮᱠᱜᱨᱟᱩᱸᱰ/PiP ᱢᱳᱰ</string>
-    <string name="video_app_switch_summary">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱵᱮᱠ ᱠᱷᱚᱱ ᱚᱞᱜᱟ ᱮᱯᱞᱤᱠᱮᱥᱚᱱ ᱛᱮ ᱪᱟᱞᱟᱜ ᱡᱷᱚᱜ VLC ᱵᱮᱵᱷᱟᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ</string>
-    <string name="play_pip_title">ᱪᱤᱛᱟᱹᱨᱼᱟᱨᱼᱪᱤᱛᱟᱹ ᱢᱳᱰ ᱨᱮ ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮ ᱢᱮ</string>
-    <string name="play_as_audio_background">ᱵᱮᱠᱜᱽᱨᱟᱩᱱᱰ ᱨᱮ ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮ ᱢᱮ</string>
     <string name="insert_next">ᱤᱱᱟᱹ ᱛᱟᱭᱚᱢ ᱛᱚᱵᱮᱫᱽ ᱢᱮ</string>
     <string name="play_all">ᱡᱷᱚᱛᱚ ᱯᱞᱮ ᱢᱮ</string>
     <string name="append_all">ᱡᱷᱚᱛᱚ ᱟᱯᱮᱱᱰ ᱢᱮ</string>
@@ -143,10 +138,6 @@
     <string name="firstsong">ᱯᱞᱮᱞᱤᱥᱴ ᱨᱮᱭᱟᱜ ᱢᱟᱲᱟᱝ ᱥᱮᱨᱮᱧ</string>
     <string name="lastsong">ᱯᱞᱮᱞᱤᱥᱴ ᱨᱮᱭᱟᱜ ᱢᱩᱪᱟᱹᱫ ᱥᱮᱨᱮᱧ</string>
 
-    <string name="surface_best_fit">ᱵᱮᱥ ᱛᱮ ᱯᱷᱤᱴ</string>
-    <string name="surface_fit_screen">ᱯᱷᱤᱴ ᱥᱠᱨᱤᱻᱱ</string>
-    <string name="surface_fill">ᱯᱩᱨᱟᱹᱣ</string>
-    <string name="surface_original">ᱛᱟᱞᱟ ᱨᱮ</string>
     <string name="unseekable_stream">ᱟᱹᱱᱥᱤᱠᱮᱵᱟᱹᱞ ᱥᱴᱨᱤᱢ</string>
     <string name="refresh">ᱱᱟᱶᱟ ᱟᱹᱨᱩ</string>
     <string name="track_audio">ᱚᱰᱤᱭᱚ ᱴᱨᱮᱠ</string>
@@ -157,11 +148,7 @@
     <string name="track_codec_info">ᱠᱳᱰᱮᱠᱺ %1$s\n</string>
     <string name="track_language_info">ᱯᱟᱹᱨᱥᱤ: %1$s\n</string>
     <string name="volume">ᱣᱚᱞᱭᱩᱢ</string>
-    <string name="sound_on">ᱥᱟᱲᱮ ᱮᱢ ᱪᱷᱚ</string>
-    <string name="sound_off">ᱥᱟᱲᱮ ᱵᱚᱸᱫ</string>
-    <string name="brightness">ᱪᱚᱠᱢᱚᱠ</string>
     <string name="advanced">ᱮᱰᱵᱷᱟᱱᱥ ᱚᱯᱥᱚᱱᱠᱚ</string>
-    <string name="audio_boost_warning">᱑᱐᱐% ᱠᱷᱟᱱ ᱦᱟᱱᱛᱮ ᱪᱟᱞᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱛᱟᱱ ᱥᱮᱱ ᱫᱩᱦᱲᱟᱹ ᱨᱟᱠᱟᱵᱽ ᱢᱮ</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">᱑ ᱪᱟᱱᱱᱮᱞ\n</item>
@@ -178,7 +165,6 @@
     <string name="sleep_title">ᱜᱤᱛᱤᱡᱽ ᱴᱟᱭᱢᱟᱹᱨ</string>
     <string name="sleep_in">ᱨᱮ ᱜᱤᱛᱤᱡᱽ</string>
     <string name="jump_to_time">ᱚᱠᱛᱚ ᱛᱮ ᱫᱚᱱ ᱢᱮ</string>
-    <string name="subtitle_select">ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ ᱨᱮᱫᱽ ᱪᱚᱭᱚᱱ ᱢᱮ</string>
     <string name="server_add_title">ᱱᱟᱶᱟ ᱥᱟᱹᱨᱣᱟᱹᱨ ᱠᱚ ᱠᱩᱥᱤᱠᱚ ᱥᱮᱫᱽ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="server_domain_hint">ᱥᱟᱹᱨᱣᱟᱹᱨ ᱴᱷᱤᱠᱬᱟᱹ (ᱰᱚᱢᱮᱱ ᱧᱩᱛᱩᱢ ᱟᱨ ᱵᱟᱝ IP)</string>
     <string name="server_share_hint">ᱱᱮᱴᱣᱟᱨᱠ ᱦᱟᱹᱴᱤᱧ ᱧᱩᱛᱩᱢ (ᱟᱨ ᱵᱟᱝ IP ᱴᱷᱤᱠᱬᱟᱹ)</string>
@@ -211,23 +197,14 @@
     <string name="play_button">ᱯᱞᱮ ᱵᱩᱛᱟᱹᱢ</string>
 
     <!-- Tips -->
-    <string name="tips_title">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱭᱟᱹᱨ ᱴᱤᱯᱥ</string>
     <string name="seek">ᱥᱤᱻᱠ</string>
     <string name="subtitles">ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ</string>
-    <string name="tips_player_controls">ᱯᱞᱮᱭᱟᱹᱨ ᱠᱚᱵᱡᱟ ᱠᱚ</string>
-    <string name="tips_player_controls_description">ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱠᱚ ᱵᱟᱲᱟᱭ ᱪᱷᱚ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱛᱟᱨ ᱨᱮ ᱯᱞᱮᱭᱚᱨ ᱠᱚᱵᱡᱟ ᱨᱮ ᱚᱛᱟᱭ ᱢᱮ</string>
-    <string name="tips_audio_sub">ᱥᱟᱰᱮ ᱴᱨᱟᱠ ᱠᱚ ᱟᱨ ᱥᱟᱹᱵᱴᱟᱭᱴᱚᱞ ᱠᱚ</string>
-    <string name="tips_play_description">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮ ᱞᱟᱹᱜᱤᱫ ᱚᱛᱟᱭ ᱢᱮ</string>
     <string name="lock">ᱠᱩᱞᱩᱯ ᱢᱮ</string>
     <string name="tap">ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱴᱤᱯᱟᱹᱣ ᱢᱮ</string>
     <string name="tap_to_remove">ᱚᱪᱚᱜᱽ ᱞᱟᱹᱜᱤᱫ ᱴᱤᱯᱟᱹᱣ ᱢᱮ</string>
     <string name="tap_to_rearrange">ᱫᱩᱦᱲᱟᱹ ᱥᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱴᱤᱯᱟᱹᱣ ᱢᱮ</string>
     <string name="tap_to_previous_next">ᱢᱟᱲᱟᱝ/ᱞᱟᱦᱟ ᱥᱮᱫ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱴᱤᱯᱟᱹᱣ ᱢᱮ</string>
-    <string name="lock_orientation">ᱡᱷᱟᱞᱠᱟᱣᱟᱜ ᱡᱤᱱᱤᱥ</string>
-    <string name="lock_orientation_description">ᱠᱩᱞᱩᱯ/ᱠᱷᱩᱞᱟᱹ ᱡᱷᱟᱞᱠᱟᱣᱟᱜ ᱡᱤᱱᱤᱥ ᱞᱟᱹᱜᱤᱫ ᱚᱛᱟᱭ ᱢᱮ</string>
     <string name="aspect_ratio">ᱵᱟᱵᱚᱛ ᱩᱱᱩᱯᱟᱛ</string>
-    <string name="aspect_ratio_description">ᱣᱤᱰᱤᱰᱤᱭᱚ ᱵᱟᱵᱚᱛ ᱩᱱᱩᱯᱟᱛ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱛᱟᱭ ᱢᱮ</string>
-    <string name="advanced_options">ᱞᱟᱦᱟᱣᱟᱜ ᱟᱯᱱᱟᱨ ᱢᱚᱱᱮ ᱛᱮᱭᱟᱜ ᱠᱚ</string>
     <string name="close">ᱵᱚᱸᱫ</string>
 
     <string name="playlist_tips">ᱯᱞᱮᱞᱤᱥᱴ ᱴᱤᱯᱠᱚ</string>
@@ -254,67 +231,24 @@
     <string name="add_custom_path">ᱠᱚᱥᱴᱚᱢ ᱡᱟᱭᱜᱟ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="add_custom_path_description">ᱥᱠᱟᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱹᱲᱛᱤᱭᱟᱜ ᱠᱚᱥᱴᱚᱢ ᱰᱟᱭᱨᱮᱠᱴᱚᱨᱭ ᱟᱫᱮᱨ ᱢᱮ:</string>
     <string name="remove_custom_path">ᱠᱚᱥᱴᱚᱢ ᱡᱟᱭᱜᱟ ᱚᱪᱚᱜᱽ ᱢᱮ</string>
-    <string name="hardware_acceleration">ᱦᱟᱰᱣᱮᱨ ᱮᱠᱥᱟᱹᱞᱟᱹᱨᱮᱥᱚᱱ</string>
-    <string name="hardware_acceleration_summary">ᱵᱚᱸᱫ: ᱵᱮᱥ ᱥᱴᱮᱵᱟᱹᱞᱤᱴᱭ\nᱰᱤᱠᱳᱰᱤᱝ: ᱠᱟᱹᱢᱤᱠᱚ ᱵᱮᱥ ᱠᱚᱨᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟᱭ\nᱯᱩᱨᱟ: ᱠᱟᱹᱢᱤᱠᱚ ᱵᱮᱥ ᱪᱚᱨᱚᱠ ᱞᱟᱦᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟᱭ</string>
-    <string name="hardware_acceleration_disabled">ᱵᱚᱸᱫ</string>
-    <string name="hardware_acceleration_decoding">ᱮᱠᱥᱟᱹᱞᱮᱨᱚᱱ ᱰᱤᱠᱳᱰᱤᱝ</string>
-    <string name="hardware_acceleration_full">ᱯᱩᱨᱟᱹ ᱮᱠᱥᱟᱹᱞᱟᱨᱮᱥᱚᱱ</string>
     <string name="dev_hardware_decoder">ᱮᱰᱵᱷᱟᱸᱰ ᱦᱟᱰᱣᱮᱨ ᱰᱤᱠᱳᱰᱟᱹᱨ</string>
     <string name="dev_hardware_decoder_summary">ᱦᱟᱰᱣᱮᱨ ᱰᱤᱠᱳᱰᱟᱹᱨ ᱡᱩᱨ ᱮᱢ ᱪᱷᱚ, ᱮᱰᱵᱷᱟᱸᱰ ᱵᱮᱵᱷᱟᱨᱤᱭᱟᱹ ᱠᱟᱹᱜᱤᱫᱽ ᱜᱮ</string>
     <string name="automatic">ᱟᱡᱽᱛᱮ</string>
     <string name="screen_orientation">ᱣᱤᱰᱤᱭᱚ ᱥᱠᱨᱤᱤᱱ ᱚᱨᱤᱭᱮᱱᱴᱮᱥᱚᱱ</string>
-    <string name="screen_orientation_sensor">ᱟᱡᱽ ᱛᱮ‌ (ᱥᱮᱱᱥᱚᱨ)</string>
-    <string name="screen_orientation_portrait">ᱯᱚᱴᱨᱮᱴ</string>
-    <string name="screen_orientation_landscape">ᱞᱮᱱᱰᱥᱠᱮᱯ</string>
-    <string name="screen_orientation_landscape_reverse">ᱞᱮᱱᱰᱥᱠᱮᱯ ᱩᱞᱴᱟᱹ ᱯᱟᱦᱴᱟ</string>
-    <string name="screen_orientation_last_locked">ᱢᱟᱲᱟᱝ ᱠᱩᱞᱩᱯ ᱠᱟᱱ ᱚᱨᱤᱮᱱᱴᱮᱥᱚᱱ</string>
     <string name="enable_black_theme">ᱦᱮᱸᱫᱮ ᱩᱭᱦᱟᱹᱨ</string>
-    <string name="subtitle_text_encoding">ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ ᱚᱞ ᱮᱱᱠᱳᱰᱤᱝ</string>
     <string name="daynight_title">ᱫᱤᱱᱧᱤᱸᱫᱟᱹ ᱢᱳᱰ</string>
     <string name="daynight_follow_system_title">ᱥᱭᱥᱴᱟᱹᱢ ᱢᱳᱰ ᱯᱟᱹᱧᱡᱟ</string>
     <string name="extra_prefs_category">ᱟᱨᱦᱚᱸ ᱥᱟᱡᱟᱣᱠᱚ</string>
 
     <string name="interface_prefs_screen">ᱤᱱᱴᱚᱨᱯᱷᱮᱥ</string>
-    <string name="interface_secondary_display_category_title">ᱥᱮᱠᱮᱱᱰᱚᱨᱭ ᱰᱤᱥᱯᱞᱮ</string>
-    <string name="interface_secondary_display_category_summary">ᱥᱮᱠᱮᱱᱰᱚᱨᱭ ᱰᱤᱥᱯᱞᱮ ᱡᱩᱲᱟᱹᱣ ‌ᱡᱷᱚᱜ ᱥᱟᱡᱟᱣᱠᱚ (HDMI/Chromecast)</string>
     <string name="enable_clone_mode">ᱯᱨᱤᱯᱷᱟᱹᱨ ᱠᱞᱚᱱ</string>
-    <string name="enable_clone_mode_summary">ᱵᱤᱱᱟᱹ ᱨᱤᱢᱚᱴ ᱠᱟᱹᱱᱴᱨᱚᱞ ᱛᱮ ᱥᱟᱫᱷᱚᱱ ᱥᱠᱨᱤᱻᱱ ᱠᱞᱳᱱ ᱢᱮ</string>
 
     <string name="video_prefs_category">ᱣᱤᱰᱤᱭᱚ</string>
-    <string name="video_min_group_length_title">ᱣᱤᱰᱤᱭᱟ ᱠᱚ ᱫᱳᱞ‌ ᱢᱮ</string>
     <string name="video_min_group_length_disable">ᱣᱤᱰᱤᱭᱟ ᱠᱚ ᱟᱞᱚ ᱫᱳᱞ ᱟ</string>
     <string name="video_min_group_length_folder">ᱯᱚᱴᱚᱢ ᱛᱮ ᱫᱠᱞ ᱯᱮ</string>
     <string name="video_min_group_length_name">ᱧᱩᱛᱩᱢ ᱛᱮ ᱫᱳᱞ ᱢᱮ</string>
-    <string name="video_transition_title">ᱣᱤᱰᱤᱭᱚ ᱴᱨᱟᱱᱡᱤᱥᱚᱱ</string>
-    <string name="video_transition_summary">ᱴᱨᱟᱱᱡᱤᱥᱚᱱ ᱨᱮ ᱱᱟᱶᱟ ᱣᱤᱰᱤᱭᱚ ᱴᱟᱭᱴᱟᱹᱞ ᱫᱮᱠᱷᱟᱣ ᱢᱮ</string>
     <string name="media_seen">ᱥᱠᱨᱤᱻᱱ ᱣᱤᱰᱤᱭᱚ ᱢᱮᱠᱟᱹᱨ ᱫᱮᱠᱷᱟᱣᱢᱮ</string>
-    <string name="media_seen_summary">ᱢᱩᱪᱟᱹᱫ ᱦᱟᱹᱵᱤᱡ ᱯᱞᱮ ᱦᱟᱹᱵᱤᱡ ᱣᱤᱰᱤᱭᱚ ᱧᱮᱞ ᱞᱮᱠᱷᱟ ᱢᱟᱨᱠ ᱠᱟᱜ ᱢᱮ</string>
-    <string name="force_play_all_summary">ᱡᱷᱚᱛᱟ ᱣᱤᱰᱤᱭᱚᱠᱚ ᱯᱞᱮ ᱢᱮ, ᱚᱠᱟ ᱠᱷᱚᱱ ᱚᱛᱟ ᱟᱠᱟᱫᱟᱢ ᱚᱱᱟ ᱠᱷᱚᱱ ᱮᱛᱦᱚᱵᱚᱜᱼᱟ</string>
-    <string name="force_play_all_title">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱞᱤᱥᱴ ᱢᱳᱰ</string>
-    <string name="save_brightness_summary">ᱢᱮᱰᱤᱭᱟ ᱵᱷᱤᱛᱨᱤ ᱨᱮ ᱵᱨᱟᱭᱤᱴᱱᱮᱥ ᱞᱮᱣᱮᱞ ᱫᱚᱦᱚᱭ ᱢᱮ</string>
-    <string name="save_brightness_title">ᱵᱨᱟᱭᱤᱴᱱᱮᱥ ᱞᱮᱣᱮᱞ ᱥᱟᱺᱪᱟᱣ ᱢᱮ</string>
-    <string name="save_audiodelay_summary">ᱡᱷᱚᱛᱚ ᱣᱤᱰᱤᱭᱚ ᱞᱟᱹᱜᱤᱫ ᱟᱲᱤᱭᱚ ᱰᱤᱞᱮ ᱥᱟᱺᱪᱟᱣ ᱢᱮ</string>
-    <string name="save_audiodelay_title">ᱟᱲᱤᱭᱚ ᱰᱤᱞᱮ ᱥᱟᱺᱪᱟᱣ ᱢᱮ</string>
-    <string name="enable_brightness_gesture_title">ᱡᱷᱟᱞᱠᱟᱣ ᱜᱮᱥᱪᱚᱨ</string>
-    <string name="enable_brightness_gesture_summary">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱵᱮᱠ ᱡᱷᱚᱜ ᱜᱮᱥᱪᱚᱨ ᱛᱮ ᱡᱷᱟᱞᱠᱟᱣ ᱠᱚᱱᱴᱨᱚᱞ</string>
-    <string name="enable_volume_gesture_title">ᱣᱚᱞᱭᱩᱢ ᱜᱮᱥᱪᱚᱨ</string>
-    <string name="enable_volume_gesture_summary">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱵᱮᱠ ᱡᱷᱚᱜ ᱜᱮᱥᱪᱚᱨ ᱛᱮ ᱣᱚᱞᱭᱩᱢ ᱠᱚᱱᱴᱨᱚᱞ ᱢᱮ</string>
-    <string name="enable_seek_buttons">ᱥᱤᱻᱠ ᱵᱩᱛᱟᱹᱢ</string>
-    <string name="enable_double_tap_seek_title">ᱥᱤᱻᱠ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱨ ᱡᱮᱠᱷᱟ ᱚᱛᱟᱭ ᱢᱮ</string>
-    <string name="enable_double_tap_seek_summary">᱑᱐ ᱴᱤᱡᱽ ᱞᱟᱹᱤᱫᱽ ᱮᱤᱻᱠ ᱞᱟᱹᱜᱤᱫ ᱥᱠᱨᱤᱻᱱ ᱠᱩᱱᱟᱹ ᱨᱮ ᱵᱟᱨ ᱡᱮᱠᱷᱟ ᱚᱛᱟᱭ ᱢᱮ</string>
-    <string name="popup_keepscreen_title">ᱯᱳᱯᱼᱟᱹᱯ ᱢᱳᱰ ᱨᱮ ᱥᱠᱨᱤᱻᱱ ᱢᱳᱰ ᱮᱢ ᱢᱮ</string>
-    <string name="popup_keepscreen_summary">ᱣᱤᱰᱤᱭᱚ ᱠᱚ ᱯᱚᱡᱽ ᱛᱟᱦᱮᱸ ᱠᱟᱛᱮ ᱨᱮ ᱦᱚᱸ, ᱯᱳᱯᱼᱟᱹᱯ ᱫᱮᱠᱷᱟᱣ ᱠᱟᱛᱮ ᱨᱮ ᱦᱚᱸ ᱥᱠᱨᱤᱻᱱ ᱫᱮᱠᱷᱟᱣ ᱪᱷᱚᱭ ᱢᱮ</string>
     <string name="browser_show_hidden_files_title">ᱩᱠᱩ ᱨᱮᱫᱽ ᱠᱚ ᱫᱮᱠᱷᱟᱣ ᱢᱮ</string>
-    <string name="subtitles_prefs_category">ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ ᱠᱚ</string>
-    <string name="subtitles_size_title">ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ ᱢᱟᱯ</string>
-    <string name="subtitles_size_small">ᱦᱚᱯᱚᱱ</string>
-    <string name="subtitles_size_normal">ᱥᱟᱫᱷᱟᱨᱚᱬ</string>
-    <string name="subtitles_size_big">ᱞᱟᱹᱴᱷᱩ</string>
-    <string name="subtitles_size_huge">ᱢᱟᱨᱟᱝ</string>
-    <string name="subtitles_color_title">ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹ ᱨᱚᱝ</string>
-    <string name="subtitles_background_title">ᱥᱟᱹᱴᱟᱭᱴᱟᱹᱞ ᱵᱮᱠᱜᱨᱟᱩᱸᱰ</string>
-    <string name="subtitles_bold_title">ᱵᱚᱞᱼᱰ ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ</string>
-    <string name="subtitles_autoload_title">ᱟᱡᱽ ᱛᱮ ᱞᱳᱰ ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹ</string>
     <string name="audio_prefs_category">ᱚᱰᱤᱭᱚ</string>
     <string name="lockscreen_cover_title">ᱞᱩᱞᱩᱯᱥᱠᱨᱤᱻᱱ ᱨᱮ ᱢᱮᱰᱤᱭᱟ ᱠᱳᱵᱷᱟᱹᱨ</string>
     <string name="lockscreen_cover_summary">ᱚᱠᱟ ᱡᱷᱚᱜ ᱧᱟᱢᱚᱜᱼᱟ, ᱱᱤᱛᱚᱜᱼᱟᱜ ᱢᱮᱰᱤᱭᱟ ᱠᱚᱵᱷᱟᱹᱨ ᱟᱨᱴ ᱫᱚ ᱠᱩᱞᱩᱯᱥᱠᱨᱤᱻᱱ ᱣᱟᱞᱯᱮᱯᱟᱹᱨ ᱨᱮ ᱥᱮᱴ ᱢᱮ</string>
@@ -324,8 +258,6 @@
     <string name="list_title_ellipsize_right">ᱡᱚᱡᱚᱢ</string>
     <string name="list_title_ellipsize_middle">ᱛᱟᱞᱟ</string>
     <string name="list_title_ellipsize_marquee">ᱢᱟᱨᱠᱭᱩ</string>
-    <string name="audio_boost_title">ᱥᱟᱲᱮᱼᱵᱩᱻᱥᱴ</string>
-    <string name="audio_boost_summary">᱒᱐᱐% ᱦᱟᱹᱵᱤᱡ ᱮᱢ ᱪᱷᱚᱭ ᱢᱮ</string>
     <string name="headset_prefs_category">ᱦᱮᱰᱥᱮᱴ</string>
     <string name="enable_headset_detection">ᱰᱮᱰᱥᱮᱴ ᱪᱤᱱᱦᱟᱹᱣ ᱢᱮ</string>
     <string name="enable_headset_detection_summary">ᱦᱮᱰᱥᱮᱴ ᱠᱷᱟᱹᱲ ᱟᱨ ᱚᱰᱚᱠ ᱠᱤᱱ ᱪᱤᱱᱦᱟᱹᱣ ᱢᱮ</string>
@@ -359,13 +291,6 @@
 
     <string name="performance_prefs_category">ᱠᱟᱹᱢᱤᱦᱚᱨᱟ</string>
     <string name="deblocking">ᱰᱤᱵᱞᱚᱠᱤᱝ ᱯᱷᱤᱞᱴᱚᱨ ᱥᱟᱡᱟᱣᱠᱚ</string>
-    <string name="deblocking_summary">ᱰᱤᱵᱞᱚᱠᱤᱝ ᱯᱷᱤᱞᱴᱚᱨ ᱥᱟᱡᱟᱣ ᱵᱚᱫᱚᱞ ᱞᱮᱠᱷᱟᱱ ᱣᱤᱰᱤᱭᱚ ᱠᱣᱟᱞᱤᱴᱭ ᱴᱷᱤᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟᱭ (ᱠᱷᱟᱹᱞᱤ ᱮᱰᱵᱷᱟᱱᱥ ᱵᱮᱵᱷᱟᱨᱤᱭᱟᱹ ᱜᱮ)</string>
-    <string name="deblocking_always">ᱯᱩᱨᱟᱹ ᱰᱤᱵᱞᱚᱠᱤᱝ (ᱵᱟᱹᱭ ᱵᱟᱹᱭ)</string>
-    <string name="deblocking_nonref">ᱢᱮᱰᱤᱭᱟᱹᱢ ᱰᱤᱵᱞᱚᱠᱤᱝ</string>
-    <string name="deblocking_nonkey">ᱠᱚᱢ ᱰᱤᱵᱞᱚᱠᱤᱝ</string>
-    <string name="deblocking_all">ᱰᱤᱵᱞᱚᱠᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ (ᱞᱚᱜᱚᱱ)</string>
-    <string name="enable_frame_skip">ᱯᱷᱨᱮᱢ ᱥᱠᱤᱯ</string>
-    <string name="enable_frame_skip_summary">ᱰᱤᱠᱳᱰᱤᱝ ᱞᱚᱜᱚᱱ ᱪᱷᱚᱭᱟ ᱦᱮᱞᱮ ᱣᱤᱰᱤᱭᱚ ᱠᱣᱟᱞᱤᱴᱭ ᱠᱚᱢᱚᱜᱼᱟ</string>
     <string name="enable_time_stretching_audio">ᱚᱠᱛᱚᱼᱡᱷᱟᱹᱞ ᱥᱟᱧᱮ</string>
     <string name="enable_time_stretching_audio_summary">ᱵᱤᱱᱟᱹ ᱯᱤᱪ ᱵᱚᱫᱚᱞ ᱠᱟᱛᱮ ᱥᱟᱲᱮ ᱠᱚ ᱞᱚᱜᱚᱱ ᱟᱨ ᱵᱟᱝ ᱵᱟᱹᱭ ᱪᱷᱚᱭ ᱢᱮ (ᱞᱚᱜᱚᱱ ᱥᱟᱫᱷᱚ ᱫᱚᱨᱠᱟᱨ)</string>
 
@@ -410,9 +335,6 @@
     <string name="send_log">ᱞᱚᱜᱽ ᱠᱩᱞ ᱢᱮ</string>
     <string name="sending_log">ᱞᱚᱜ ᱠᱩᱞ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…</string>
 
-    <string name="delete_sub_title">ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ ᱢᱮᱴᱟᱣ ᱢᱮ</string>
-    <string name="delete_sub_message">ᱪᱮᱫ ᱟᱢ ᱱᱚᱶᱟ ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ ᱢᱮᱴᱟᱣ ᱥᱟᱱᱟᱢ ᱠᱟᱱᱟ?</string>
-    <string name="download_subtitle_title">ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ ᱰᱟᱩᱱᱞᱚᱰ ᱢᱮ</string>
 
     <string name="no_result">ᱚᱠᱟ ᱰᱤᱜᱞᱟᱹᱨ ᱵᱟᱭ ᱧᱟᱢ ᱞᱮᱱᱟ</string>
     <string name="no_internet_connection">ᱟᱢᱟᱜ ᱤᱱᱴᱚᱨᱱᱮᱴ ᱡᱩᱲᱟᱹᱣ ᱧᱮᱞ ᱛᱟᱢ</string>
@@ -421,8 +343,6 @@
 
     <string name="file_size">ᱨᱮᱫ ᱢᱟᱯ</string>
 
-    <string name="audio_delay">ᱥᱟᱲᱮ ᱜᱷᱟᱹᱬᱤᱡ</string>
-    <string name="spu_delay">ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ ᱜᱷᱟᱹᱬᱤᱡ</string>
     <string name="network_shares_discovery">ᱱᱮᱴᱣᱟᱨᱠ ᱦᱟᱹᱴᱤᱧᱠᱚ ᱧᱮᱞᱚᱜ ᱠᱟᱱᱟ</string>
     <string name="network_empty">ᱱᱚᱶᱟ ᱰᱟᱭᱨᱮᱠᱴᱚᱨᱭ ᱫᱚ ᱠᱷᱟᱹᱞᱤ ᱜᱮᱭᱟ ᱾</string>
     <string name="network_connection_needed">ᱞᱳᱠᱟᱞ ᱱᱮᱴᱣᱟᱨᱠ ᱥᱟᱶ ᱡᱚᱯᱨᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ᱾</string>
@@ -433,7 +353,6 @@
     <string name="playlist_name_hint">ᱯᱞᱮᱞᱤᱥᱴ ᱧᱩᱛᱩᱢ</string>
     <string name="go_to_chapter">ᱪᱟᱯᱴᱟᱹᱨ ᱛᱮ ᱪᱟᱞᱟᱜ ᱢᱮ…</string>
     <string name="confirm_resume">ᱢᱟᱲᱟᱝ ᱡᱟᱭᱜᱟ ᱠᱷᱚᱱ ᱞᱟᱦᱟᱭ ᱢᱮ?</string>
-    <string name="confirm_resume_title">ᱯᱮᱞ ᱟᱠᱟᱱᱟ ᱣᱤᱰᱤᱭᱚ ᱠᱚ ᱞᱟᱦᱟᱭ ᱢᱮ</string>
     <string name="tv_ui_title">Android TV ᱤᱱᱴᱚᱨᱯᱷᱮᱥ</string>
     <string name="tv_ui_summary">UI ᱫᱚ TV ᱟᱱᱠᱩᱞ ᱛᱷᱤᱢ ᱛᱮ ᱵᱚᱫᱚᱞ ᱢᱮ</string>
     <string name="medialibrary">ᱢᱤᱰᱤᱭᱟ ᱚᱲᱟᱜ</string>
@@ -441,7 +360,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">ᱟᱨᱦᱚᱸ ᱠᱟᱹᱢᱤ ᱠᱚ</string>
-    <string name="back_quit_lock">ᱵᱷᱤᱰᱤᱭᱳ ᱛᱷᱤᱨ ᱞᱟᱹᱜᱤᱫ ᱫᱚᱦᱲᱟ ᱫᱟᱵᱟᱣ ᱢᱮ</string>
     <string name="stream_deleted">ᱥᱴᱨᱤᱢ ᱚᱪᱚᱫ ᱦᱩᱭ ᱮᱱᱟ</string>
     <string name="no_subs_found">ᱱᱚᱶᱟ ᱰᱟᱭᱨᱮᱠᱴᱚᱨᱤ ᱨᱮ ᱥᱟᱵᱽᱴᱟᱭᱴᱚᱞ ᱵᱟᱹᱱᱩᱜ-ᱟ</string>
     <string name="music_now_playing">ᱱᱤᱛᱚᱜ ᱯᱞᱮᱜ ᱠᱟᱱᱟ</string>
@@ -469,19 +387,12 @@
     <string name="download_on_device">ᱰᱟᱩᱱᱞᱳᱰ</string>
     <string name="extension_empty">ᱩᱫᱩᱜ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱟᱭᱴᱮᱢ ᱦᱚᱸ ᱵᱟᱹᱱᱩᱜᱼᱟ, ᱡᱟᱦᱟᱱᱟᱜ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱮᱠᱥᱴᱮᱱᱥᱟᱱ ᱥᱟᱡᱟᱣ ᱨᱮ ᱪᱟᱞᱟᱜ ᱢᱮ᱾</string>
 
-    <string name="opengl_title">OpenGL ES2 ᱵᱮᱵᱷᱟᱨ</string>
-    <string name="opengl_summary">ᱰᱤᱯᱷᱚᱞᱴ ᱞᱮᱠᱟᱛᱮ, ᱥᱚᱯᱷᱣᱮᱨ ᱰᱤᱠᱳᱰᱤᱝ ᱟᱨ ᱦᱟᱨᱰᱣᱮᱨ ᱰᱤᱠᱳᱰᱤᱝ ᱞᱟᱹᱜᱤᱫ OpenGL ES2 ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱩᱜᱼᱟ ᱡᱚᱠᱷᱚᱱ ᱞᱟᱹᱠᱛᱤᱭᱟ (᱓᱖᱐° ᱣᱤᱰᱤᱭᱚ ᱠᱚ)</string>
-    <string name="opengl_automatic">ᱟᱡᱽᱛᱮ</string>
-    <string name="opengl_on">ᱡᱩᱨ ᱮᱢ</string>
-    <string name="opengl_off">ᱡᱩᱨ ᱵᱟᱹᱰ</string>
     <string name="network_favorites">ᱱᱮᱴᱣᱟᱨᱠ ᱠᱩᱥᱤᱠᱚ</string>
     <string name="network_shared_folders">ᱦᱟᱹᱴᱤᱧ ᱦᱩᱭᱠᱟᱱ ᱯᱚᱴᱚᱢ ᱠᱚ</string>
     <string name="encryption_warning">ᱥᱚᱱᱛᱚᱨ, ᱮᱱᱠᱨᱤᱯᱥᱟᱱ ᱱᱚᱶᱟ ᱮᱱᱰᱨᱚᱭᱮᱰ ᱵᱷᱟᱨᱥᱟᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱹᱱᱩᱜᱼᱟ, ᱫᱟᱱᱟᱝ ᱥᱟᱵᱟᱫ ᱫᱚ ᱢᱤᱫ ᱟᱯᱱᱟᱨ ᱡᱟᱭᱜᱟ ᱨᱮ ᱫᱚᱦᱚᱜᱼᱟ ᱛᱚᱵᱮ ᱮᱱᱠᱨᱤᱯᱴ ᱵᱟᱝ ᱦᱩᱭᱩᱜᱼᱟ</string>
     <string name="store_password">ᱫᱟᱱᱟᱝ ᱥᱟᱵᱟᱫ ᱢᱚᱱᱮ ᱫᱚᱦᱚᱭ ᱢᱮ</string>
     <string name="add_to_playlist">ᱯᱞᱮᱞᱤᱥᱴ ᱛᱮ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="popup_playback_title">ᱯᱚᱯᱟᱯ ᱣᱤᱱᱰᱳ ᱨᱮ ᱣᱤᱰᱤᱭᱚ ᱪᱟᱞᱟᱣ ᱢᱮ</string>
-    <string name="popup_playback">ᱯᱚᱯᱟᱯ ᱣᱤᱱᱰᱳ ᱨᱮ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ</string>
-    <string name="popup_expand">ᱣᱤᱲᱤᱭᱚ ᱚᱥᱟᱨ ᱢᱮ</string>
     <string name="download_subtitles">ᱪᱟᱸᱜᱟ ᱧᱩᱛᱩᱢ ᱠᱚ ᱰᱟᱩᱱᱞᱳᱰ ᱢᱮ</string>
     <string name="browse_folder">ᱯᱚᱴᱚᱢ ᱵᱨᱟᱩᱡ ᱢᱮ</string>
     <string name="listen">ᱟᱧᱡᱚᱢ ᱢᱮ</string>
@@ -528,7 +439,6 @@
     <string name="playback_rewind">ᱨᱤᱣᱟᱭᱤᱱᱰ</string>
     <string name="playback_forward">ᱞᱟᱜᱮ ᱞᱟᱦᱟᱜ</string>
     <string name="ml_wizard_scan_checkbox">ᱢᱤᱰᱤᱭᱟ ᱠᱚᱱᱴᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱰᱤᱵᱷᱟᱭᱤᱥ ᱥᱠᱮᱭᱱ ᱢᱮ</string>
-    <string name="tv_my_new_videos">ᱤᱧᱭᱟᱜ ᱱᱟᱶᱟ ᱣᱤᱰᱤᱭᱚ ᱠᱚ</string>
     <string name="otg_device_title">OTG ᱥᱟᱫᱷᱚᱱ</string>
     <string name="browser">ᱵᱨᱟᱩᱡᱟᱹᱨ</string>
     <string name="ab_repeat">ᱟ-ᱵ ᱫᱚᱦᱲᱟ</string>
@@ -541,22 +451,13 @@
     <string name="rename">ᱫᱚᱦᱲᱟ ᱧᱩᱛᱩᱢ</string>
     <string name="rename_media">%1$s ᱫᱚᱦᱲᱟ ᱧᱩᱛᱩᱢ ᱢᱮ</string>
     <string name="manual_search">ᱢᱮᱱᱩᱭᱮᱞ ᱥᱮᱸᱫᱽᱨᱟ</string>
-    <string name="subtitle_search_name_hint">ᱧᱩᱛᱩᱢ</string>
-    <string name="subtitle_search_episode_hint">ᱮᱯᱤᱥᱚᱰ</string>
-    <string name="subtitle_search_season_hint">ᱥᱤᱡᱚᱱ</string>
     <string name="language_to_download">ᱯᱟᱹᱨᱥᱤ</string>
-    <string name="delete_the_selected">ᱥᱮᱞᱮᱫᱟᱜ ᱚᱪᱚᱫ</string>
-    <string name="download_the_selected">ᱥᱮᱞᱮᱫᱟᱜ ᱰᱟᱣᱩᱱᱞᱚᱰ</string>
     <string name="next">ᱤᱱᱟ ᱛᱟᱭᱚᱢ</string>
     <string name="download">ᱰᱟᱩᱱᱞᱳᱰ</string>
     <string name="ctx_player_video_track">ᱣᱤᱰᱤᱭᱚ ᱴᱨᱮᱠ ᱵᱟᱪᱷᱟᱣ ᱢᱮ</string>
     <string name="ctx_player_audio_track">ᱚᱰᱤᱭᱚ ᱴᱨᱮᱠ</string>
     <string name="ctx_player_subs_track">ᱥᱟᱹᱵᱽᱴᱟᱭᱴᱟᱹᱞ ᱴᱨᱟᱠ</string>
-    <string name="ctx_pip_title">ᱯᱚᱯ-ᱚᱯ ᱯᱞᱮᱭᱟᱨ</string>
     <string name="device_dialog_title">ᱵᱟᱦᱨᱮᱭᱟᱜ ᱰᱤᱵᱷᱟᱭᱤᱥ ᱟᱫᱮᱨ ᱦᱩᱭ ᱮᱱᱟ</string>
-    <string name="videos_folders_title">ᱣᱤᱰᱤᱭᱚ ᱠᱚ ᱯᱚᱴᱚᱢ ᱫᱟᱨᱟᱭ ᱛᱮ</string>
-    <string name="videos_groups_title">ᱣᱤᱰᱤᱭᱚ ᱜᱟᱫᱮᱞ ᱠᱚ</string>
-    <string name="video_remote_disable">ᱰᱟᱯᱞᱤᱠᱮᱴ ᱥᱠᱨᱤᱱ</string>
     <string name="welcome_title">VLC ᱨᱮ ᱥᱟᱹᱜᱩᱱ ᱫᱟᱨᱟᱢ!</string>
     <string name="onboarding_theme_title">ᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱚᱲᱟᱜ ᱵᱮᱱᱟᱣ ᱢᱮ</string>
     <string name="done">ᱦᱩᱭᱮᱱᱟ</string>
@@ -618,27 +519,14 @@
     <string name="clear">ᱯᱷᱟᱨᱪᱟ</string>
     <string name="abrepeat_add_first_marker">ᱮᱦᱚᱵ ᱴᱩᱲᱟᱹᱜᱽ ᱥᱮᱴ ᱢᱮ</string>
     <string name="abrepeat_add_second_marker">ᱢᱩᱪᱟᱹᱫ ᱴᱩᱲᱟᱹᱜᱽ ᱥᱮᱴ ᱢᱮ</string>
-    <string name="demux_bitrate">ᱰᱮᱢᱟᱹᱠᱥ ᱵᱤᱴᱨᱮᱴ</string>
-    <string name="input_bitrate">ᱤᱱᱯᱩᱴ ᱵᱤᱴᱨᱮᱴ</string>
-    <string name="video_information">ᱣᱤᱰᱤᱭᱚ ᱵᱤᱵᱨᱚᱬ</string>
 
     <string name="channels">ᱪᱟᱱᱮᱞᱠᱚ</string>
     <string name="resolution">ᱱᱤᱥᱴᱟᱹ</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate">ᱯᱷᱨᱮᱢᱫᱚᱨ</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">ᱯᱟᱹᱨᱥᱤ</string>
-    <string name="track_samplerate">ᱥᱮᱢᱯᱟᱹᱞ ᱫᱚᱨ</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">ᱵᱽᱤᱴᱫᱚᱨ</string>
     <string name="codec">ᱠᱳᱰᱮᱠ</string>
     <string name="text">ᱚᱱᱚᱞ</string>
     <string name="unknown">ᱵᱟᱝ ᱵᱟᱲᱟᱭ</string>
-    <string name="audio_delay_start">ᱥᱟᱲᱮ ᱟᱸᱡᱚᱢ ᱮᱱᱟ</string>
-    <string name="subtitle_delay_first">ᱥᱟᱲᱮ ᱟᱸᱡᱚᱢ ᱮᱱᱟ</string>
-    <string name="audio_delay_end">ᱥᱟᱲᱮ ᱪᱤᱱᱦᱟᱹᱯ ᱮᱱᱟ</string>
-    <string name="subtitle_delay_end">ᱚᱞ ᱧᱮᱞ ᱮᱱᱟ</string>
     <string name="track_index">ᱯᱟᱸᱡᱟ: %s</string>
     <string name="audio_queue_progress">ᱞᱟᱦᱟ: %s</string>
     <string name="audio_queue_progress_finished">ᱪᱟᱵᱟᱜ ᱚᱠᱛᱚ:%s</string>
@@ -652,10 +540,8 @@
     <string name="add_to_group">ᱣᱤᱰᱤᱭᱚ ᱫᱳᱞ ᱨᱮ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="ungroup">ᱵᱟᱝᱫᱳᱞ ᱢᱮ</string>
     <string name="empty_directory">ᱠᱷᱟᱹᱞᱤ</string>
-    <string name="no_track">ᱴᱨᱮᱠ ᱵᱟᱹᱱᱩᱜ-ᱟ</string>
 
     <string name="swipe_unlock">ᱟᱱᱞᱚᱠ ᱞᱟᱹᱜᱤᱫᱛᱮ ᱥᱣᱟᱤᱯ ᱢᱮ</string>
-    <string name="sub_result_by_name_episode">ᱮᱯᱤᱥᱚᱰ %s</string>
     <string name="donate">VLC ᱜᱚᱲᱚᱟᱭ ᱢᱮ</string>
     <string name="tip_jar">VLC ᱜᱚᱲᱚ ᱞᱮᱢ</string>
     <string name="thank_you">ᱟᱢ ᱥᱟᱨᱦᱟᱣ</string>
@@ -664,25 +550,15 @@
 
     <string name="mark_as_played">ᱯᱞᱮ ᱟᱠᱟᱱ ᱞᱮᱠᱷᱟ ᱪᱤᱱᱦᱟᱹ ᱟᱜᱽ ᱢᱮ</string>
     <string name="mark_all_as_played">ᱡᱷᱚᱛᱚ ᱯᱞᱮ ᱟᱠᱟᱱ ᱞᱮᱠᱷᱟ ᱪᱤᱱᱦᱟᱹ ᱟᱜ ᱢᱮ</string>
-    <string name="new_group">ᱱᱟᱶᱟ ᱫᱳᱞ</string>
-    <string name="new_group_desc">ᱱᱟᱶᱟ ᱫᱳᱞ ᱛᱮᱭᱟᱨ ᱢᱮ</string>
 
-    <string name="air_action_volume_up">ᱣᱚᱞᱭᱩᱢ ᱪᱮᱛᱟᱱ</string>
-    <string name="air_action_volume_down">ᱣᱚᱞᱭᱩᱢ ᱞᱟᱛᱟᱨ</string>
-    <string name="air_action_next">ᱯᱞᱮᱵᱮᱠ ᱨᱮᱭᱟᱜ ᱤᱱᱟᱹ ᱛᱟᱭᱚᱱ ᱡᱤᱱᱤᱥ</string>
-    <string name="air_action_previous">ᱯᱞᱮᱵᱮᱠ ᱨᱮᱭᱟᱜ ᱢᱟᱲᱟᱝ ᱟᱭᱴᱟᱹᱢ</string>
     <string name="allow_otg">OTG ᱟᱫᱮᱨ ᱪᱷᱚᱭ ᱢᱮ</string>
     <string name="allow_otg_description">VLC ᱛᱮ ᱟᱫᱮᱨ ᱪᱷᱚ ᱞᱟᱹᱜᱤᱫ ᱫᱚᱭᱟᱠᱟᱛᱮ OTG ᱰᱨᱟᱭᱤᱵᱷ ᱪᱚᱭᱚᱱ ᱢᱮ ᱾</string>
-    <string name="timeout_infinite">ᱚᱦᱤᱥᱟᱹᱵᱽ</string>
     <string name="video_hud_timeout">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱭᱟᱹᱨ ᱠᱟᱹᱱᱴᱨᱚᱞ ᱜᱷᱟᱲᱤᱡᱽ ᱩᱠᱩ</string>
-    <string name="video_hud_timeout_summary">%ss</string>
     <string name="remove_from_history">ᱦᱤᱛᱟᱹᱞ ᱠᱷᱚᱱ ᱚᱪᱚᱜ ᱢᱮ</string>
     <string name="prefersmbv1">SMB ᱑ ᱠᱩᱥᱤᱭᱟᱜ ᱢᱮ</string>
     <string name="prefersmbv1_summary">SMB ᱥᱟᱹᱨᱣᱟᱹᱨ ᱵᱨᱟᱩᱡᱽ ᱡᱷᱚᱜ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱦᱩᱭᱩᱜ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱥᱟᱡᱟᱣ ᱠᱚ ᱟᱹᱱᱪᱮᱠ ᱢᱮ</string>
-    <string name="apply_to_all">ᱡᱷᱚᱛᱚ ᱣᱤᱰᱤᱭᱚ ᱨᱮ ᱮᱢ ᱪᱷᱚ</string>
     <string name="audio_delay_global">ᱡᱷᱚᱛᱚ ᱣᱤᱰᱤᱭᱚᱠᱚ ᱞᱟᱹᱫᱜᱤᱹᱫ %s ms ᱜᱷᱟᱹᱲᱤᱡ ᱥᱟᱰᱮ ᱮᱱᱟ </string>
     <string name="go_to_folder">ᱯᱮᱨᱮᱸᱴ ᱵᱨᱟᱩᱡᱽ </string>
-    <string name="no_sub_renderer">ᱠᱟᱥᱴᱤᱝ ᱡᱷᱚᱜ ᱥᱟᱹᱵᱴᱟᱭᱴᱟᱹᱞ ᱠᱚ ᱵᱟᱭ ᱥᱟᱹᱯᱚᱴᱟᱭ</string>
     <string name="soundfont">MIDI ᱥᱟᱲᱮᱯᱷᱚᱸᱴ</string>
     <string name="soundfont_summary">midi ᱥᱟᱲᱮ ᱴᱨᱟᱠ ᱠᱚ ᱯᱞᱮ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱲᱮᱯᱷᱚᱸᱴ ᱨᱮᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ</string>
     <string name="search_prefs">ᱥᱮᱸᱫᱽᱨᱟᱣᱟ ᱥᱟᱡᱟᱣᱠᱚ</string>

@@ -456,7 +456,6 @@
     <string name="nag_prefs_not_set">Not set</string>
     <string name="nag_prefs_in_settings">In Settings › %1$s</string>
     <string name="nag_prefs_opens_page">Opens the %1$s page</string>
-    <string name="nag_prefs_speed">%1$s×</string>
     <string name="nag_prefs_turn_off">Turn off</string>
     <string name="nag_prefs_file_failed">The file could not be read.</string>
     <string name="nag_prefs_database_saved">The database was saved.</string>
@@ -770,19 +769,8 @@
     <string name="nag_player_repeat_one">Repeat this one</string>
 
     <!-- S-508: libVLC's audio output -->
-    <string name="nag_fx_auto">Auto</string>
     <string name="nag_fx_off">Off</string>
     <!-- S-508: the audio output -->
-    <string name="nag_out_stereo">Stereo PCM</string>
-    <string name="nag_out_multichannel">Multichannel PCM</string>
-    <string name="nag_out_passthrough">Bitstream (passthrough)</string>
-    <string name="nag_out_forced">Bitstream, forced codecs</string>
-    <string name="nag_out_sink_hdmi" translatable="false">HDMI</string>
-    <string name="nag_out_sink_usb" translatable="false">USB</string>
-    <string name="nag_out_sink_bluetooth" translatable="false">Bluetooth</string>
-    <string name="nag_out_sink_headphones">Headphones</string>
-    <string name="nag_out_sink_speaker">Speaker</string>
-    <string name="nag_out_sink_other">Other output</string>
     <string name="nag_panel_pending">The faded settings come with the next version of the playback engine.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Flat</string>

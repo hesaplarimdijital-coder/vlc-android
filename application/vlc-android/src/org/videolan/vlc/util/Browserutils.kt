@@ -59,8 +59,6 @@ fun Uri.isSD() = this.path != null && this.path?.startsWith("/storage") == true 
 fun String?.isSchemeSMB() = this == "smb"
 fun String?.isSchemeFD() = this == "fd"
 
-fun String.isMissing() = this == "missing://"
-
 fun convertFavorites(browserFavs: List<BrowserFav>?) = browserFavs?.filter {
     it.uri.scheme != "file" || File(it.uri.path).exists()
 }?.map { (uri, _, title, iconUrl) ->

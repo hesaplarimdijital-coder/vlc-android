@@ -71,22 +71,6 @@ object LocaleUtil {
     }
 
     /**
-     * Get an ISO-639-1 locale string from a Track language sent by libvlc
-     * @param from the track language string from libvlc
-     *
-     * @return an ISO-639-1 locale string. Returns null if nothing is found
-     */
-    fun getLocaleFromVLC(from: String): String? {
-        vlcLocaleList.forEach {
-            if (it.language == from) return it.values[0]
-            it.values.forEach { sub ->
-                if (sub == from) return it.values[0]
-            }
-        }
-        return null
-    }
-
-    /**
      * Get a translated language name from a [VLCLocale]
      * @param entry: the [VLCLocale] to get the language from
      *
@@ -116,11 +100,6 @@ object LocaleUtil {
 
         jsonAdapter.fromJson(jsonData)!!
 
-    }
-
-    fun String.localeEquivalent():Array<String> = when (this.lowercase()) {
-        "in" -> arrayOf("in", "id")
-        else -> arrayOf(this)
     }
 
     fun isRtl() = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())== View.LAYOUT_DIRECTION_RTL

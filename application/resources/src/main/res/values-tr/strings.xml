@@ -47,12 +47,6 @@
     <string name="logs_warning">Oynattığınız ortam dosyaları ile ilgili bilgiler içerebilir. Bu bilgiler geliştiricilerle paylaşılacak.</string>
     <string name="play_from_start">Baştan oynat</string>
     <string name="play_as_audio">Ses olarak oynat</string>
-    <string name="play_as_video">Görüntü olarak oynat</string>
-    <string name="return_to_video">Görüntüyü geri yüklemek için kapak üzerine uzun dokunun</string>
-    <string name="video_app_switch_title">Arka plan/PiP kipi</string>
-    <string name="video_app_switch_summary">Görüntü oynatılırken başka bir uygulamaya geçildiğinde Nağmedar tarafından yapılacak işlemi seçin</string>
-    <string name="play_pip_title">Görüntüler resim içinde resim kipinde oynatılsın</string>
-    <string name="play_as_audio_background">Görüntüler arka planda oynatılsın</string>
     <string name="append">Oynatma kuyruğuna ekle</string>
     <string name="insert_next">Sonrakini ekle</string>
     <string name="play_all">Tümünü oynat</string>
@@ -73,7 +67,6 @@
     <string name="eq_cannot_overwrite">Varsayılan dengeleyici üzerine yazılamaz</string>
     <string name="equalizer_name">Dengeleyici adı</string>
     <string name="equalizer_deleted">Dengeleyici silindi</string>
-    <string name="equalizer_leave_warning">Görüntü oynatıcıdan çıkacaksınız</string>
     <string name="invalid_equalizer_file">Dengeleyici dosyası geçersiz</string>
     <string name="confirm_delete_eq">Bu hazır ayarı silmek istediğinize emin misiniz?</string>
     <string name="confirm_delete_vlc_eq">Bu hazır ayarı gizlemek istediğinize emin misiniz?\nDengeleyici ayarlarından geri yükleyebilirsiniz.</string>
@@ -182,11 +175,6 @@
     <string name="firstsong">Listenin ilk parçası</string>
     <string name="lastsong">Listenin son parçası</string>
 
-    <string name="surface_best_fit">En uygun</string>
-    <string name="surface_fit_screen">Ekrana sığdır</string>
-    <string name="surface_fill">Doldur</string>
-    <string name="surface_original">Ortala</string>
-    <string name="resize_tip">Diğer seçenekler için uzun basın</string>
     <string name="unseekable_stream">Atlama yapılamayan akış</string>
     <string name="refresh">Yenile</string>
     <string name="track_audio">Ses kaydı</string>
@@ -197,12 +185,7 @@
     <string name="track_codec_info">Kodlayıcı/Çözücü: %1$s\n</string>
     <string name="track_language_info">Dil: %1$s\n</string>
     <string name="volume">Ses düzeyi</string>
-    <string name="system_volume_disabled">%s\nSistem birimine erişim izni yok</string>
-    <string name="sound_on">Ses açık</string>
-    <string name="sound_off">Ses kapalı</string>
-    <string name="brightness">Parlaklık</string>
     <string name="advanced">gelişmiş ayarlar</string>
-    <string name="audio_boost_warning">%100 üzerine çıkmak için yeniden yukarı kaydırın</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanal\n</item>
@@ -230,7 +213,6 @@
     <string name="sleep_title">Uyku zamanlayıcı</string>
     <string name="sleep_in">Uykuya dalma süresi</string>
     <string name="jump_to_time">Sıçranacak zaman</string>
-    <string name="subtitle_select">Alt yazı dosyasını seçin</string>
     <string name="wait_before_sleep">Önce geçerli ortam ögesinin sona ermesi beklensin</string>
     <string name="reset_on_interaction">Herhangi bir etkileşimde sıfırlansın</string>
     <string name="default_sleep_timer_summary">%1$s, ortam sonunda bekleme: %2$s, etkileşimde sıfırlama: %3$s</string>
@@ -264,8 +246,6 @@
 
     <string name="playback_history_title">Oynatma geçmişi</string>
     <string name="playback_history_summary">Oynatılan tüm ortamlar geçmiş bölümüne kaydedilir</string>
-    <string name="video_resume_playback_title">Görüntü oynatma kuyruğu geçmişi</string>
-    <string name="video_resume_playback_summary">Görüntü oynatma kuyruğu daha sonra sürdürülmek üzere kaydedilebilir</string>
     <string name="audio_resume_playback_title">Ses oynatma kuyruğu geçmişi</string>
     <string name="audio_resume_playback_warning">Ses oynatma kuyruğu geçmişi kapatılırsa bazı davranış sorunları ortaya çıkabilir.\nKapatıldığında şunlardan biriyle oynatmayı sürdüremeyebilirsiniz:\n\n- Bluetooth aygıtları\n\t- Ekran bileşeni (widget)\n\t- Ortam bildirimi</string>
     <string name="playback_history_warning">Oynatma geçmişini kapatmak geçmişi, ortam ilerlemesini ve görülen işaretleri gizler. Uygulama, etkinliğinizi kaydetmeyi sürdürür ve geçmiş yeniden açılırsa geri yüklenir.\nEtkinliğinizin kaydedilmesini tümüyle durdurmak istiyorsanız, bunun yerine gizli kipi kullanın.\nGeçmişinizi geçmiş bölümünden veya gelişmiş ayarlardan da temizleyebilirsiniz.</string>
@@ -274,32 +254,18 @@
     <string name="play_button">Oynatma düğmesi</string>
 
     <!-- Tips -->
-    <string name="tips_title">Görüntü oynatıcı ipuçları</string>
     <string name="seek">Atla</string>
     <string name="subtitles">Alt yazılar</string>
-    <string name="tips_player_controls">Oynatıcı denetimleri</string>
-    <string name="tips_player_controls_description">Oynatıcı denetimlerin işlevlerini öğrenmek için üzerlerine dokunun</string>
-    <string name="tips_audio_sub">Ses kayıtları ve alt yazılar</string>
-    <string name="tips_play_description">Görüntüyü oynatmak için dokunun</string>
     <string name="lock">Kilitle</string>
     <string name="tap">Görüntülemek için dokunun</string>
     <string name="tap_to_remove">Silmek için dokunun</string>
     <string name="tap_to_rearrange">Düzenlemek için dokunun</string>
     <string name="tap_to_previous_next">Önceki/sonraki için dokunun</string>
-    <string name="lock_orientation">Doğrultu</string>
-    <string name="lock_orientation_description">Doğrultuyu kilitlemek/açmak için dokunun</string>
     <string name="aspect_ratio">En boy oranı</string>
-    <string name="aspect_ratio_description">Görüntünün en boy oranını değiştirmek için dokunun</string>
-    <string name="advanced_options">Gelişmiş ayarlar</string>
-    <string name="advanced_options_description">Oynatma hızı, yineleme kipi, vb …</string>
-    <string name="tips_swipe">Aşağı ya da yukarı kaydırın</string>
     <string name="tips_swipe_horizontal">Sola ya da sağa kaydırın</string>
     <string name="tips_playlist">Liste</string>
     <string name="tips_hold_seek">Atlamak için basılı tut</string>
     <string name="tips_long_drop">Uzun basın ve bırakın</string>
-    <string name="pause_description">Duraklatmak için çift dokunun</string>
-    <string name="seek_tap">+/- 10 saniye</string>
-    <string name="seek_tap_description">10 saniye ileri ya da geri atlamak için çift dokunun</string>
     <string name="close">Kapat</string>
 
     <string name="playlist_tips">Liste ipuçları</string>
@@ -341,27 +307,13 @@
     <string name="ban_folder">Klasörü yasakla</string>
     <string name="ban_folder_explanation">Bu klasörü yasaklamak, tarayıcıdan yine de erişilebilir olsa da, uygulamanın video veya ses bölümünde ortamlarını göremeyeceğiniz anlamına gelir.\nYasağı kaldırmak için ayarlar bölümünde, %s ve bu klasöre uzun dokunun.</string>
 
-    <string name="hardware_acceleration">Donanım hızlandırması</string>
-    <string name="hardware_acceleration_summary">Kapalı: Daha iyi kararlılık\nKod çözme: Başarımı artırabilir\nTam: Başarımı daha çok artırabilir</string>
-    <string name="hardware_acceleration_disabled">Kapalı</string>
-    <string name="hardware_acceleration_decoding">Kod çözme hızlandırması</string>
-    <string name="hardware_acceleration_full">Tam hızlandırma</string>
     <string name="dev_hardware_decoder">Gelişmiş donanımsal kod çözücü</string>
     <string name="dev_hardware_decoder_summary">Donanımsal kod çözücünün kullanılması dayatılır, yalnızca deneyimli kullanıcılar için</string>
     <string name="automatic">Otomatik</string>
     <string name="screen_orientation">Görüntü ekranı doğrultusu</string>
-    <string name="screen_orientation_sensor">Otomatik (algılayıcı)</string>
-    <string name="screen_orientation_portrait">Dikey</string>
-    <string name="screen_orientation_portrait_reverse">Dikey ters</string>
-    <string name="screen_orientation_landscape">Yatay</string>
-    <string name="screen_orientation_landscape_reverse">Yatay ters çevrilmiş</string>
-    <string name="screen_orientation_landscape_sensor">Yatay (almaç)</string>
-    <string name="screen_orientation_last_locked">Son kilitlenmiş doğrultu</string>
     <string name="enable_black_theme">Siyah tema</string>
     <string name="dark_theme">Koyu tema</string>
     <string name="theme_auto">Otomatik tema</string>
-    <string name="subtitle_text_encoding">Alt yazı metin kodlaması</string>
-    <string name="subtitle_preferred_language">Yeğlenen alt yazı dili</string>
     <string name="daynight_title">Gündüz/gece kipi</string>
     <string name="daynight_follow_system_title">Sistem kipi izlensin</string>
     <string name="no_track_preference">Herhangi bir dil ayarlanmamış</string>
@@ -370,35 +322,15 @@
     <string name="extra_prefs_category">Ek ayarlar</string>
 
     <string name="interface_prefs_screen">Arayüz</string>
-    <string name="interface_secondary_display_category_title">İkinci ekran</string>
-    <string name="interface_secondary_display_category_summary">İkincil ekran bağlandığında kullanılacak ayarlar (HDMI/Chromecast)</string>
     <string name="enable_clone_mode">Yineleme yeğlensin</string>
-    <string name="enable_clone_mode_summary">İkinci bir ekran bağlandığında aygıt ekranı uzaktan kumanda kullanılmadan ikinci ekrana yinelenir</string>
 
     <string name="video_prefs_category">Görüntü</string>
-    <string name="video_min_group_length_title">Görüntüler gruplansın</string>
     <string name="video_min_group_length_disable">Görüntüler gruplanmasın</string>
     <string name="video_min_group_length_folder">Klasöre göre grupla</string>
     <string name="video_min_group_length_name">Ada göre grupla</string>
-    <string name="video_transition_title">Görüntü geçişi</string>
-    <string name="video_transition_summary">Geçişte yeni görüntü başlığı görüntülensin</string>
     <string name="media_seen">Görüntü görüldü imi görüntülensin</string>
-    <string name="media_seen_summary">Sonuna dek oynatılmış görüntüleri görüldü olarak imler</string>
-    <string name="force_play_all_summary">Tıkladığınızdan başlayarak tüm görüntüleri oynatır</string>
     <string name="force_play_all_audio_summary">Tıkladığınızdan başlayarak tüm sesleri oynatır</string>
-    <string name="force_play_all_title">Görüntü listesi kipi</string>
     <string name="force_play_all_audio_title">Ses listesi kipi</string>
-    <string name="save_brightness_summary">Ortamlar arasında parlaklık düzeyi korunsun</string>
-    <string name="save_brightness_title">Parlaklık düzeyi kaydedilsin</string>
-    <string name="save_audiodelay_summary">Her görüntü için ayrı ses gecikmesi kaydedilsin</string>
-    <string name="save_audiodelay_title">Ses gecikmesi kaydedilsin</string>
-    <string name="video_show_orientation_button">Doğrultu düğmesi görüntülensin</string>
-    <string name="enable_brightness_gesture_title">Parlaklık el hareketi</string>
-    <string name="enable_brightness_gesture_summary">Görüntü oynatılırken parlaklık el hareketi ile ayarlanabilir</string>
-    <string name="enable_volume_gesture_title">Ses el hareketi</string>
-    <string name="enable_volume_gesture_summary">Görüntü oynatılırken el hareketi ile ses ayarlanabilsin</string>
-    <string name="enable_seek_buttons">Atlama düğmeleri</string>
-    <string name="enable_seek_buttons_summary">Görüntü arayüzünde ileri ve geri atlama düğmeleri görüntülensin</string>
     <string name="enable_android_auto_speed_buttons">Android Auto oynatma hızı</string>
     <string name="enable_android_auto_speed_buttons_summary">Üste açılan menüde hız denetimini görüntüler</string>
     <string name="enable_android_auto_seek_buttons">Android Auto atlama düğmeleri</string>
@@ -408,23 +340,8 @@
     <string name="track">Kayıt</string>
     <string name="genre">Tür</string>
     <string name="playlist">Oynatma listesi</string>
-    <string name="enable_double_tap_seek_title">Aramak için çift dokunun</string>
-    <string name="enable_double_tap_seek_summary">10 saniye ileri ya da geri atlamak için ekran kenarlarına çift dokunun</string>
-    <string name="enable_double_tap_play_title">Oynatmak/duraklatmak için çift dokunun</string>
-    <string name="enable_double_tap_play_summary">Oynatmak/duraklatmak için çift dokunun</string>
-    <string name="enable_swipe_seek_title">Atlamak için kaydırın</string>
-    <string name="enable_swipe_seek_summary">Atlamak için parmağınızı ekran boyunca kaydırın</string>
-    <string name="enable_scale_gesture_title">İki parmakla yakınlaştırma</string>
-    <string name="enable_scale_gesture_summary">İki parmakla büyültme ve küçültme</string>
-    <string name="popup_keepscreen_title">Açılan pencere kipinde ekran açık kalsın</string>
-    <string name="popup_keepscreen_summary">Açılan pencere görüntülenirken görüntü duraklatılmış olsa bile ekran açık kalır.</string>
     <string name="browser_show_hidden_files_title">Gizli dosyalar görüntülensin</string>
     <string name="albums_show_track_numbers">Kayıt numaraları görüntülensin</string>
-    <string name="enable_video_screenshot">Ekran görüntüsü al</string>
-    <string name="enable_tap_and_hold_fastplay_title">Hızlı oynatma kullanılsın</string>
-    <string name="enable_tap_and_hold_fastplay_summary">Oynatma hızını artırmak için dokunup tutun</string>
-    <string name="fastplay_speed_title">Hızlı oynatma hızı</string>
-    <string name="fastplay_title">%sx hızda oynatılıyor</string>
     <string name="fastplay_subtitle">Durmak için bırakın</string>
     <string name="show_bookmark_buttons">Yer imi düğmeleri görüntülensin</string>
     <string name="show_bookmark_buttons_summary">Yer imleri arasında gezinme düğmelerini görüntüler</string>
@@ -433,39 +350,13 @@
     <string name="show_chapter_buttons">Bölüm düğmeleri görüntülensin</string>
     <string name="show_chapter_buttons_summary">Bölümler arasında gezinme düğmelerini görüntüler</string>
 
-    <string name="subtitles_prefs_category">Alt yazılar</string>
-    <string name="subtitles_size_title">Alt yazı boyutu</string>
-    <string name="subtitles_presets_title">Alt yazı hazır ayarları</string>
-    <string name="subtitles_size_nano">Nano</string>
-    <string name="subtitles_size_micro">Mikro</string>
-    <string name="subtitles_size_smallest">En küçük</string>
-    <string name="subtitles_size_small">Küçük</string>
-    <string name="subtitles_size_normal">Normal</string>
-    <string name="subtitles_size_big">Büyük</string>
-    <string name="subtitles_size_huge">Çok büyük</string>
-    <string name="subtitles_font_style">Alt yazı tipi</string>
-    <string name="subtitles_color_title">Alt yazı rengi</string>
-    <string name="subtitles_opacity">Saydamlık</string>
     <string name="subtitles_color">Renk</string>
-    <string name="subtitles_size">Boyut</string>
-    <string name="subtitles_background_color_title">Alt yazı arka planı</string>
-    <string name="subtitles_background_title">Alt yazı arka planı değiştirilsin</string>
-    <string name="subtitles_outline_title">Alt yazı çerçevesi</string>
-    <string name="subtitles_shadow_title">Alt yazı gölgesi</string>
     <string name="subtitles_decoration_title">Alt yazı süsü</string>
     <string name="subtitle_decoration_none">Yok</string>
     <string name="subtitle_decoration_shadow">Gölge</string>
     <string name="subtitle_decoration_outline">Çerçeve</string>
-    <string name="subtitles_bold_title">Koyu alt yazılar</string>
-    <string name="subtitles_autoload_title">Alt yazılar otomatik yüklensin</string>
     <string name="previous_color">Önceki renk</string>
     <string name="new_color">Yeni renk</string>
-    <string name="subtitles_preset_default">Varsayılan</string>
-    <string name="subtitles_preset_default_large">Büyük metin</string>
-    <string name="subtitles_preset_default_largest">En büyük metin ve karşıtlık</string>
-    <string name="subtitles_preset_white_background">Arka plan ile</string>
-    <string name="subtitles_yellow">Sarı</string>
-    <string name="subtitles_yellow_background">Arka plan ile sarı</string>
 
     <string name="audio_prefs_category">Ses</string>
     <string name="lockscreen_cover_title">Kilit ekranında ortam görseli</string>
@@ -478,8 +369,6 @@
     <string name="list_title_ellipsize_right">Sağda</string>
     <string name="list_title_ellipsize_middle">Ortada</string>
     <string name="list_title_ellipsize_marquee">Kayar</string>
-    <string name="audio_boost_title">Ses güçlendirmesi</string>
-    <string name="audio_boost_summary">Ses %200 oranında artırılabilsin</string>
     <string name="headset_prefs_category">Kulaklık</string>
     <string name="enable_headset_detection">Kulaklık algılansın</string>
     <string name="enable_headset_detection_summary">Kulaklığın takıldığını ve çıkarıldığını algılar</string>
@@ -545,7 +434,6 @@
     <string name="tv_folders_first_summary">Dosya gezgininde önce klasörler sonra dosyalar görüntülensin</string>
     <string name="tv_show_hidden_files">Gizli dosyalar görüntülensin</string>
     <string name="tv_show_hidden_files_summary">Dosya gezgininde gizli dosyalar görüntülensin</string>
-    <string name="ab_repeat_fastseek_warning">Hızlı atlama açık. Hassasiyet sorunlarına yol açabilir</string>
 
     <string name="extensions_prefs_category">Uzantılar</string>
     <string name="extensions_empty">Herhangi bir uzantı bulunamadı</string>
@@ -558,13 +446,6 @@
 
     <string name="performance_prefs_category">Başarım</string>
     <string name="deblocking">Bloklanma engelleme süzgeci ayarları</string>
-    <string name="deblocking_summary">Bloklanma engellemesi süzgecini değiştirmek görüntü kalitesini iyileştirebilir (yalnızca deneyimli kullanıcılar)</string>
-    <string name="deblocking_always">Tam bloklanma engellemesi (en yavaş)</string>
-    <string name="deblocking_nonref">Orta bloklanma engellemesi</string>
-    <string name="deblocking_nonkey">Düşük bloklanma engellemesi</string>
-    <string name="deblocking_all">Bloklanma engellenmesin (en hızlı)</string>
-    <string name="enable_frame_skip">Kare atlama</string>
-    <string name="enable_frame_skip_summary">Kod çözmeyi hızlandırır ancak görüntü kalitesini düşürür</string>
     <string name="enable_time_stretching_audio">Zamana yaymalı ses</string>
     <string name="enable_time_stretching_audio_summary">Tonu değiştirmeden sesi hızlandırır ya da yavaşlatır (hızlı bir aygıt gerekir)</string>
 
@@ -614,8 +495,6 @@
     <string name="http_user_agent">HTTP kullanıcı uygulaması</string>
     <string name="custom_libvlc_options">Özel libVLC ayarları</string>
     <string name="custom_libvlc_options_invalid">libVLC ayarları geçersiz!</string>
-    <string name="dav1d_thread_number">İşlem numarası geçersiz</string>
-    <string name="dav1d_thread_number_invalid">İşlem numarası geçersiz! (>=1)</string>
     <string name="browser_quick_play">Tarayıcı hızlı oynat menüsü</string>
     <string name="browser_quick_play_summary">Tarayıcı ögeleri menüsüne hızlı oynatma seçeneğini ekler. Ortamınızı daha hızlı yükler ancak bazı üst veriler eksik olabilir</string>
     <string name="browser_quick_play_default">Varsayılan olarak hızlı oynatılsın</string>
@@ -628,23 +507,16 @@
     <string name="send_log">Günlüğü gönder</string>
     <string name="sending_log">Günlük gönderiliyor…</string>
 
-    <string name="delete_sub_title">Alt yazıyı sil</string>
-    <string name="delete_sub_message">Bu alt yazı silinsin mi?</string>
-    <string name="download_subtitle_title">Alt yazıyı indir</string>
 
     <string name="no_result">Herhangi bir sonuç bulunamadı</string>
     <string name="no_internet_connection">İnternet bağlantınızı denetleyin</string>
     <string name="retry">Yeniden dene</string>
-    <string name="open_subs_download_error">OpenSubtitles şu anda kullanılamıyor. Lütfen bir süre sonra yeniden deneyin</string>
-    <string name="open_subs_download_link_error">OpenSubtitles ile ilgili bir sorun çıktı. Lütfen bir süre sonra yeniden deneyin</string>
 
     <string name="network_browsing">Yerel ağ</string>
     <string name="browsing">Göz at</string>
 
     <string name="file_size">Dosya boyutu</string>
 
-    <string name="audio_delay">Ses gecikmesi</string>
-    <string name="spu_delay">Alt yazı gecikmesi</string>
     <string name="network_shares_discovery">Ağ paylaşımları aranıyor</string>
     <string name="network_empty">Bu klasör boş.</string>
     <string name="network_connection_needed">Yerel ağ bağlantısı yok.</string>
@@ -661,7 +533,6 @@
     <string name="current_chapter">Bölüm: %s</string>
     <string name="confirm_resume">Oynatma kalınan konumdan sürdürülsün mü?</string>
     <string name="apply_playqueue">Oynatma kuyruğunun tümüne uygula</string>
-    <string name="confirm_resume_title">Oynatılan görüntüler sürdürülsün</string>
     <string name="confirm_resume_audio_title">Oynatılan sesi sürdür</string>
     <string name="tv_ui_title">Android TV arayüzü</string>
     <string name="tv_ui_summary">Kullanıcı arayüzünü TV uyumlu temaya dönüştürür</string>
@@ -693,7 +564,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">Diğer işlemler</string>
-    <string name="back_quit_lock">Görüntüden çıkmak için yeniden geriye basın</string>
     <string name="stream_deleted">Akış silindi</string>
     <string name="no_subs_found">Bu klasörde herhangi bir alt yazı yok</string>
     <string name="music_now_playing">Şimdi oynatılan</string>
@@ -745,37 +615,16 @@
     <string name="download_on_device">İndir</string>
     <string name="extension_empty">Görüntülenecek bir öge yok. Almak için uzantı ayarlarına bakın.</string>
 
-    <string name="opengl_title">OpenGL ES2 kullanımı</string>
-    <string name="opengl_summary">Varsayılan olarak, gerek duyulduğunda (360° görüntülerde) yazılımsal ve donanımsal kod çözme için OpenGL ES2 kullanılır</string>
-    <string name="opengl_automatic">Otomatik</string>
-    <string name="opengl_on">Zorla aç</string>
-    <string name="opengl_off">Zorla kapat</string>
     <string name="network_favorites">Ağ sık kullanılanları</string>
     <string name="network_shared_folders">Paylaşılmış klasörler</string>
     <string name="encryption_warning">Uyarı: Bu android sürümünde şifreleme kullanılamaz, parolalar özel bir alanda olmasına rağmen şifrelenmemiş olarak kaydedilir</string>
     <string name="store_password">Parola anımsansın</string>
     <string name="add_to_playlist">Listeye ekle</string>
     <string name="popup_playback_title">Görüntü açılan pencerede oynatılsın</string>
-    <string name="popup_playback">Açılan pencerede oynatılıyor</string>
-    <string name="popup_expand">Görüntüyü genişlet</string>
     <string name="download_subtitles">Alt yazıları indir</string>
-    <string name="powered_opensubtitles">OpenSubtitles tarafından sunuluyor</string>
-    <string name="open_subtitles_not_logged_in">OpenSubtitles oturumu açmamışsınız\n.Oturum açarsanız daha fazla indirmeye erişebileceksiniz</string>
-    <string name="open_subtitles_logged_in">%1$s olarak oturum açıldı</string>
-    <string name="open_subtitles_limits">
-%1$s / %2$s indirme hakkınız kaldı. Sınırlamanız %3$s zamanında sıfırlanacak.</string>
     <string name="open_subtitles_vip">Bir VIP OpenSubtitles kullanıcısısınız</string>
-    <string name="open_subtitles_register">Hesap aç</string>
-    <string name="open_subtitles_log_out">Oturumu kapat</string>
-    <string name="open_subtitles_username">Kullanıcı adı</string>
-    <string name="open_subtitles_password">Parola</string>
-    <string name="open_subtitles_is_vip">VIP hesabı</string>
-    <string name="open_subtitles_is_not_vip">Standard hesap</string>
-    <string name="login_error">Kimlik doğrulama bilgileri geçersiz</string>
-    <string name="unknown_error">Beklenmeyen sorun</string>
     <string name="browse_folder">Klasöre göz at</string>
     <string name="listen">Dinle</string>
-    <string name="apply_to_bt">Bluetooth aygıtlara uygulanır</string>
     <string name="episodes">bölüm</string>
     <string name="movies">film</string>
     <string name="videos">görüntü</string>
@@ -836,7 +685,6 @@
     <string name="playback_forward">İleri atla</string>
     <string name="ml_wizard_scan_checkbox">Aygıttaki ortamlar taransın</string>
     <string name="ml_wizard_description">Açıldığında, Nağmedar ortam kitaplığını düzenlemek için aygıtın depolama birimini tarar. Kapatıldığında bütünleşik tarayıcı ile basit oynatıcı görüntülenir.</string>
-    <string name="tv_my_new_videos">Yeni görüntülerim</string>
     <string name="cast_option_title">Ortamı başka bir ekrana gönder</string>
     <string name="otg_device_title">Dokun yedekle aygıtı</string>
     <string name="browser">Tarayıcı</string>
@@ -856,15 +704,7 @@
     <string name="rename">Yeniden adlandır</string>
     <string name="rename_media">%1$s yeniden adlandır</string>
     <string name="manual_search">El ile arama</string>
-    <string name="subtitle_search_name_hint">Ad</string>
-    <string name="subtitle_query_edit">Alt yazı arama sorgusunu düzenle</string>
-    <string name="subtitle_search_episode_hint">Bölüm</string>
-    <string name="subtitle_search_season_hint">Sezon</string>
-    <string name="subtitles_download_failed">İndirilemedi</string>
     <string name="language_to_download">Dil</string>
-    <string name="delete_the_selected">Seçimi sil</string>
-    <string name="download_the_selected">Seçimi indir</string>
-    <string name="no_sub_history">Bu ortam için bir alt yazı bulunamadı</string>
     <string name="next">Sonraki</string>
     <string name="skip">Atla</string>
     <string name="next_step">Sonraki</string>
@@ -872,14 +712,8 @@
     <string name="ctx_player_video_track">Görüntü kaydını seçin</string>
     <string name="ctx_player_audio_track">Ses kaydı</string>
     <string name="ctx_player_subs_track">Alt yazı kaydı</string>
-    <string name="ctx_pip_title">Açılan pencerede oynatıcı</string>
     <string name="device_dialog_title">Dış aygıt takıldı</string>
     <string name="device_dialog_message">TV kutunuza yeni bir depolama aygıtı bağladınız. Bu aygıtın Nağmedar ile açılmasını ister misiniz?</string>
-    <string name="videos_folders_title">Klasörlere göre görüntüler</string>
-    <string name="videos_groups_title">Görüntü grupları</string>
-    <string name="video_save_clone_mode">Kopya kipi otomatik olarak açılsın mı?</string>
-    <string name="video_remote_enable">Uzaktan kumanda kipine geç</string>
-    <string name="video_remote_disable">Ekranı yansıt</string>
     <string name="removed_from_playlist_anonymous">Öge(ler) listeden çıkarıldı</string>
     <string name="welcome_title">Nağmedar\'a hoş geldiniz!</string>
     <string name="welcome_subtitle">Özgür ve açık kaynaklı çoklu ortam oynatıcısı</string>
@@ -887,7 +721,6 @@
     <string name="permission_video">Nağmedar, aygıtınızdaki görüntü ortamlarına erişmek için izninizi istiyor</string>
     <string name="permission_audio">Nağmedar, aygıtınızdaki ses ortamlarına erişmek için izninizi istiyor</string>
     <string name="medialibrary_scan_explanation">Nağmedar, ortam derlemenizi düzenlemek için aygıtınızı otomatik olarak tarayabilir.</string>
-    <string name="player_title_fd_warning">Depolama alanı izni olmadan Nağmedar, ortamın adını alamaz veya ilerlemeyi kaydedemez</string>
     <string name="onboarding_theme_title">Kendinizi evinizde hissedin</string>
     <string name="done">Bitti</string>
     <string name="onboarding_scan_title">Ortamları otomatik tarayın</string>
@@ -905,14 +738,9 @@
     <string name="create">Ekle</string>
     <string name="resume_card_message">%1$s oynatımı sürdürülsün mü?</string>
     <string name="misc">Çeşitli</string>
-    <string name="popup_force_legacy_title">Görüntü içinde görüntü penceresi kullanılsın</string>
-    <string name="popup_force_legacy_summary">Boyutu ayarlanabilir görüntü içinde görüntü penceresi kullanılsın</string>
-    <string name="restore_background_video_title">Görüntü arka planda geri yüklensin</string>
-    <string name="restore_background_video_summary">Nağmedar uygulaması yeniden açıldığında görüntüyü arka plandan geri yükler</string>
     <string name="device_default">Aygıt varsayılanı</string>
     <string name="track_number">%d kayıt</string>
     <string name="jump_to">Şuraya atla</string>
-    <string name="show_video_thumbnails_summary">Listelerde görüntü küçük görsellerini görüntüler</string>
     <string name="show_video_thumbnails">Görüntü küçük görselleri</string>
     <string name="eq_snap_bands">Bantlar ayrılsın</string>
     <string name="enable_equalizer">Aç</string>
@@ -993,27 +821,14 @@
     <string name="clear">Temizle</string>
     <string name="abrepeat_add_first_marker">Başlangıç noktasını ayarla</string>
     <string name="abrepeat_add_second_marker">Bitiş noktasını ayarla</string>
-    <string name="demux_bitrate">Tekleme bit hızı</string>
-    <string name="input_bitrate">Giriş bit hızı</string>
-    <string name="video_information">Görüntü bilgileri</string>
 
     <string name="channels">Kanallar</string>
     <string name="resolution">Çözünürlük</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate">Kare hızı</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">Dil</string>
-    <string name="track_samplerate">Örnekleme hızı</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">Bit hızı</string>
     <string name="codec">Kodlayıcı/çözücü</string>
     <string name="text">Metin</string>
     <string name="unknown">Bilinmiyor</string>
-    <string name="audio_delay_start">Ses duyuldu</string>
-    <string name="subtitle_delay_first">Konuşma duyuldu</string>
-    <string name="audio_delay_end">Ses belirlendi</string>
-    <string name="subtitle_delay_end">Metin görüldü</string>
     <string name="track_index">Kayıt: %s</string>
     <string name="audio_queue_progress">İlerleme: %s</string>
     <string name="audio_queue_progress_remaining">Kalan: %s</string>
@@ -1032,19 +847,12 @@
     <string name="rename_group">Görüntü grubunu yeniden adlandır</string>
     <string name="ungroup">Grubu çöz</string>
     <string name="group_similar">Otomatik olarak yeniden grupla</string>
-    <string name="no_group_found">Herhangi bir görüntü grubu bulunamadı</string>
     <string name="no_favorite">Sık kullanılan yok</string>
     <string name="empty_directory">Boş</string>
-    <string name="no_track">Herhangi bir kayıt yok</string>
 
     <string name="swipe_unlock">Kilidi açmak için kaydırın</string>
     <string name="swipe_unlock_no_touch">Kilidi açmak için uzun dokunun</string>
-    <string name="sub_result_by_name">%s için sonuçlar</string>
-    <string name="sub_result_by_name_season">%s. sezon</string>
-    <string name="sub_result_by_name_episode">%s. bölüm</string>
-    <string name="sub_result_by_name_hearing_impaired">Yalnızca işitme engelli</string>
 
-    <string name="sub_result_by_file">Dosyanızın sonuçları</string>
     <string name="donate">VLC projesine destek olun</string>
     <string name="donate_desc">VLC geliştiricisi gönüllüleri destekleyin</string>
     <string name="donate_subscribtion">Aylık destek olmak istiyorum</string>
@@ -1063,33 +871,19 @@
     <string name="mark_as_not_played">Oynatılmamış olarak imle</string>
     <string name="mark_all_as_played">Tümünü oynatılmış olarak imle</string>
     <string name="mark_all_as_not_played">Tümünü oynatılmamış olarak işaretle</string>
-    <string name="new_group">Yeni grup</string>
-    <string name="new_group_desc">Yeni grup ekle</string>
 
-    <string name="air_action_rewind">10 saniye geri atla</string>
-    <string name="air_action_forward">10 saniye ileri atla</string>
-    <string name="air_action_play_pause">Oynatmayı duraklat/sürdür</string>
-    <string name="air_action_volume_up">Sesi aç</string>
-    <string name="air_action_volume_down">Sesi kıs</string>
-    <string name="air_action_next">Listede sonraki öge</string>
-    <string name="air_action_previous">Listede önceki öge</string>
     <string name="allow_otg">Dokun yedekle erişimine izin ver</string>
     <string name="allow_otg_description">Nağmedar tarafından erişilmesini istediğiniz dokun yedekle sürücüsünü seçin.</string>
-    <string name="timeout_infinite">Sonsuz</string>
     <string name="video_hud_timeout">Görüntü oynatıcı denetimlerini gizleme gecikmesi</string>
-    <string name="video_hud_timeout_summary">%ss</string>
     <string name="remove_from_history">Geçmişten kaldır</string>
     <string name="prefersmbv1">SMB 1 yeğlensin</string>
     <string name="prefersmbv1_summary">SMB sunucunuza erişmekte sorun yaşıyorsanız bu seçeneği kapatın</string>
-    <string name="apply_to_all">Tüm görüntülere uygula</string>
     <string name="audio_delay_global">Tüm görüntüler için ses gecikmesi %s ms olarak ayarlandı</string>
-    <string name="audio_delay_bt">Bluetooth aygıtı için ses gecikmesi %s ms olarak ayarlandı</string>
     <string name="go_to_folder">Üst ögeye göz at</string>
     <string name="go_to_album">Albüme git</string>
     <string name="go_to_artist">Sanatçıya git</string>
     <string name="go_to_album_artist">Albüm sanatçısına git</string>
     <string name="create_shortcut">Başlatıcı kısayolu oluştur</string>
-    <string name="no_sub_renderer">Henüz yayın sırasında alt yazı desteği sunulmuyor</string>
     <string name="enqueuing">Ortamınız yükleniyor</string>
     <string name="soundfont">MIDI SoundFont</string>
     <string name="soundfont_summary">MIDI ses izlerinin oynatılması için bir SoundFont dosyası seçin</string>
@@ -1119,12 +913,6 @@
     <string name="lock_with_pin_short">PIN kilidi</string>
     <string name="restrict_settings">Ayarlara erişimi engelle</string>
     <string name="search_prefs">Arama ayarları</string>
-    <string name="video_match_frame_rate_title">Ekran kare hızı ortama uysun</string>
-    <string name="video_match_frame_rate_summary">Ekran kare hızını ortamın kare hızına uydurur. Örneğin 24p olan bir film 24p olarak oynatılmalıdır.</string>
-    <string name="preferred_resolution">Yeğlenen görüntü çözünürlüğü</string>
-    <string name="preferred_resolution_summary">Akışlar için en yüksek görüntü çözünürlüğü, uygulanabildiğinde: %s</string>
-    <string name="pref_resolution_best_available">Olabilecek en iyisi</string>
-    <string name="pref_resolution_very_low">Çok düşük çözünürlük (240p)</string>
     <string name="stop_unpaubale">Bu ortam duraklatılamaz. Onun yerine durdurmak ister misiniz?</string>
     <string name="delete_forever">Kalıcı olarak sil</string>
     <string name="add_to_existing_playlist">Var olan listeye ekle</string>
@@ -1162,8 +950,6 @@
     <string name="add_all_button">Tümünü ekle</string>
     <string name="add_new_only_button">Yalnızca yeniler eklensin</string>
     <string name="discovery_failed">Şu keşfedilemedi: %s</string>
-    <string name="lock_use_sensor_title">Algılayıcı ile kilitlensin</string>
-    <string name="lock_use_sensor_summary">Doğrultu kilitlendiğinde, ters doğrultu için algılayıcı kullanılır</string>
     <string name="start">Başlat</string>
     <string name="notification_permission">Bildirim izni</string>
     <string name="notification_permission_explanation">Nağmedar uygulamasının bildirim gönderebilmesi için izin vermeniz gerekiyor.\nUygulama, yalnızca ortamınızı tararken veya özel görüntüde görüntü içinde görüntü kullanırken sizi bilgilendirir.\nBu izni reddetmek Nağmedar uygulamasının çalışmasını engellemez, ancak bildirimler gizlenir.</string>
@@ -1181,9 +967,6 @@
     <string name="control_setting">Denetim ayarları</string>
     <string name="controls_setting">Denetim ayarları</string> <!-- Unused -->
     <string name="gestures">El hareketleri</string>
-    <string name="player_controls">Oynatıcı denetimleri</string>
-    <string name="video_double_tap_jump_delay">Çift dokunma zaman gecikmesi</string>
-    <string name="video_key_jump_delay">Gezinme tuşları zaman gecikmesi</string>
     <string name="banned">Yasaklanmış klasör (uzun dokun değiştir)</string>
     <string name="banned_tv">Yasaklanmış klasör</string>
     <string name="banned_parent">Üst klasörce yasaklanmış</string>
@@ -1197,17 +980,11 @@
     </plurals>
     <string name="official_website">Resmi site</string>
     <string name="view_online">Çevrim içi görüntüle</string>
-    <string name="player_under_notch">Görüntü çentik altında görüntülensin</string>
     <string name="notch">Çentik</string>
-    <string name="always_fast_seek">Her zaman hızlı atlama kullanılsın</string>
-    <string name="always_fast_seek_summary">Hızlı atlama daha hızlıdır ancak duyarlılığı daha düşüktür</string>
     <string name="touch_only">Yalnızca dokunma özelliği</string>
     <string name="touch_only_description">Mobil arayüze geçiş yalnızca dokunmatik bir ekran veya fare ile yapılabilir.\nBu özelliğe geçmenin güvenli olduğunu doğrulamak için lütfen aşağıya kaydırın.</string>
     <string name="no_web_browser">Herhangi bir tarayıcı kurulmamış</string>
     <string name="no_web_browser_message">Bunu akıllı telefonunuz ile tarayabilirsiniz.\nAdres: %s</string>
-    <string name="no_video">Kullanılabilecek bir görüntü yok</string>
-    <string name="fold_optimized">Katlanan ekranınız için ayarlanmış</string>
-    <string name="fold_optimize">Katlanan ekran için ayarla</string>
     <string name="foldable">Katlanan ekran</string>
     <string name="undo">Geri al</string>
     <string name="add_server_favorite">Sık kullanılanlara sunucu ekle</string>
@@ -1237,14 +1014,10 @@
     <string name="seek_forward_content_description">İleriye %s saniye atla</string>
     <string name="open_vlc">Nağmedar\'ı aç</string>
     <string name="playing">Oynatılıyor</string>
-    <string name="disable_track">Kaydı kapat</string>
     <string name="ascending">Artan</string>
     <string name="descending">Azalan</string>
-    <string name="screenshot_error">Ekran görüntüsü alınırken sorun çıktı</string>
     <string name="disabled">Kapalı</string>
     <string name="enable_screenshot_gesture">3 parmakla dokunma</string>
-    <string name="enable_screenshot_button">Ekran görüntüsü düğmesi görüntülensin</string>
-    <string name="enable_screenshot_button_and_gesture">Düğme ve el hareketi</string>
 
 
 
@@ -1272,18 +1045,9 @@
     <string name="talkback_enter_screen">%s git</string>
     <string name="talkback_file_size">Dosya boyutu: %s</string>
     <string name="talkback_open_in_browser">Tarayıcıda aç</string>
-    <string name="talkback_video_player">Görüntü oynatıcı. Denetimleri görüntülemek için dokunun. Gizlemek için geri düğmesine dokunun</string>
-    <string name="talkback_video_tracks">Görüntü kayıtları</string>
-    <string name="talkback_audio_tracks">Ses kayıtları</string>
-    <string name="talkback_subtitle_tracks">Alt yazı kayıtları</string>
-    <string name="talkback_subtitle_dowload_item">Dil: %1$s. %2$s. Ad: %3$s</string>
     <string name="selected">Seçilmiş</string>
-    <string name="talkback_increase_delay">Gecikmeyi artır</string>
-    <string name="talkback_decrease_delay">Gecikmeyi azalt</string>
     <string name="talkback_increase_speed">Hızlandır</string>
     <string name="talkback_decrease_speed">Yavaşlat</string>
-    <string name="talkback_subtitle_history">Alt yazı geçmişi</string>
-    <string name="talkback_language_selection">%s dil seçilmiş</string>
     <string name="talkback_audio_player_opened">Ses oynatıcı açıldı</string>
     <string name="talkback_audio_player_collapsed">Ses oynatıcı daraltıldı</string>
     <string name="talkback_audio_player_closed">Ses oynatıcı kapatıldı</string>
@@ -1291,7 +1055,6 @@
     <string name="talkback_out_of">%1$s / %2$s</string>
     <string name="talkback_track_index">%1$s / %2$s. kayıt</string>
     <string name="downloaded">İndirildi</string>
-    <string name="not_downloaded">İndirilmedi</string>
     <string name="downloading">İndiriliyor</string>
     <string name="talkback_action_rewind">%s saniye geri atla</string>
     <string name="talkback_action_forward">%s saniye ileri atla</string>
@@ -1429,18 +1192,11 @@
     <string name="feedback_email_warning_try_anyway">Yine de dene</string>
     <string name="nagmedar_new_interface">Nağmedar arayüzü</string>
     <string name="nagmedar_new_interface_short">Nağmedar</string>
-    <string name="nagmedar_player_subtitle_loaded">Altyazı yüklendi</string>
     <string name="nagmedar_new_interface_summary">Kenar çubuğu, menüler ve klavye kısayollarıyla masaüstü sınıfı arayüz; uygulama simgesi bunu açar</string>
     <!-- Nağmedar: the share sheet's label, the launcher shortcut of Sources › This device -->
     <string name="nagmedar_play_with">Nağmedar ile oynat</string>
     <string name="nagmedar_shortcut_device">Bu cihaz</string>
     <!-- Nağmedar (S-609): the small window's buttons and menu -->
-    <string name="nagmedar_popup_back">10 sn geri</string>
-    <string name="nagmedar_popup_forward">10 sn ileri</string>
-    <string name="nagmedar_popup_play">Oynat</string>
-    <string name="nagmedar_popup_pause">Duraklat</string>
-    <string name="nagmedar_popup_fullscreen">Tam oynatıcıya dön</string>
-    <string name="nagmedar_popup_close">Kapat</string>
     <!-- Nağmedar (S-1302): Chromecast ya da DLNA cihazına yayınlamak -->
     <string name="nagmedar_casting_to">%s cihazına yayınlanıyor</string>
     <string name="nagmedar_cast_tracker_here">Tracker modülleri yalnızca bu cihazda çalar: bu parça burada sürüyor, sonrakiler yayınlanacak.</string>
