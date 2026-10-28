@@ -84,8 +84,10 @@ fun dismissStyleFor(configuration: Configuration): DismissStyle =
 @Composable
 fun DialogDismissButton(modifier: Modifier = Modifier) {
     val dismiss = LocalDialogDismiss.current
+    // the keyboard at hand where the card is drawn decides, as since PR #65 (a frame's window may say otherwise)
+    val keyboard = dismissStyleFor(LocalConfiguration.current) == DismissStyle.EscKey
     when {
-        (dismiss?.style ?: dismissStyleFor(LocalConfiguration.current)) == DismissStyle.EscKey -> KeyCap(ESCAPE, modifier)
+        keyboard || dismiss?.style == DismissStyle.EscKey -> KeyCap(ESCAPE, modifier)
         dismiss != null -> NagIconButton(
             NagIcons.Close,
             stringResource(R.string.nag_player_window_close),
