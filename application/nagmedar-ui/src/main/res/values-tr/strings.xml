@@ -2183,7 +2183,7 @@
     <string name="nag_pod_whisper_again">Whisper ile yeniden oluştur</string>
     <string name="nag_pod_whisper_cancel">Döküm işini iptal et</string>
     <string name="nag_pod_whisper_delete">Whisper dökümünü sil</string>
-    <string name="nag_pod_whisper_model_download">Önce %1$s modeli indirilir: Hugging Face\'ten bir kez %2$d MB.</string>
+    <string name="nag_pod_whisper_model_download">%2$d MB\'lık %1$s modeli önce bir kez Hugging Face\'ten indirilir.</string>
     <string name="nag_pod_whisper_model_ready">%1$s modeliyle, bu cihazda.</string>
     <string name="nag_pod_whisper_fetch_note">Bölüm indirilmediği için sesi iş için önbelleğe indirilir, iş bitince silinir.</string>
     <string name="nag_pod_whisper_failed">Son deneme: %1$s</string>

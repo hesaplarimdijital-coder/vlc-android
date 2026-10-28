@@ -2192,7 +2192,7 @@
     <string name="nag_pod_whisper_again">Create again with Whisper</string>
     <string name="nag_pod_whisper_cancel">Cancel the transcript job</string>
     <string name="nag_pod_whisper_delete">Delete Whisper\'s transcript</string>
-    <string name="nag_pod_whisper_model_download">The %1$s model is downloaded first: %2$d MB from Hugging Face, once.</string>
+    <string name="nag_pod_whisper_model_download">The %1$s model (%2$d MB) is downloaded first, once, from Hugging Face.</string>
     <string name="nag_pod_whisper_model_ready">With the %1$s model, on this device.</string>
     <string name="nag_pod_whisper_fetch_note">The episode is not downloaded: its audio is downloaded into the cache for the job and deleted after it.</string>
     <string name="nag_pod_whisper_failed">Last try: %1$s</string>

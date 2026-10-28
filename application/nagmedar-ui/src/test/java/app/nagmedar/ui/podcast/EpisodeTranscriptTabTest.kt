@@ -60,7 +60,7 @@ class EpisodeTranscriptTabTest {
     @Test
     fun noTranscriptOffersWhisperWithTheModelsSize() {
         show(PodcastSamples.episodePage().copy(transcribe = TranscribeUi.Idle(WhisperModel.Small, downloadMb = 181)), "episode-transcript-none")
-        compose.onNodeWithTag("episode-transcribe-model", useUnmergedTree = true).assertTextEquals("Önce small modeli indirilir: Hugging Face'ten bir kez 181 MB.")
+        compose.onNodeWithTag("episode-transcribe-model", useUnmergedTree = true).assertTextEquals("181 MB'lık small modeli önce bir kez Hugging Face'ten indirilir.")
         // not downloaded: its audio comes into the cache for the job
         compose.onNodeWithText("Bölüm indirilmediği için", substring = true, useUnmergedTree = true).assertExists()
         compose.onNodeWithText("Whisper ile döküm oluştur").performClick()
