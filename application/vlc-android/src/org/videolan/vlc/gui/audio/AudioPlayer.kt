@@ -42,8 +42,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.Guideline
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asFlow
@@ -1075,4 +1078,14 @@ class AudioPlayer : Fragment(), PlaylistAdapter.IPlayer, TextWatcher, IAudioPlay
             playlistModel.filter(null)
         }
     }
+}
+
+/** The A-B repeat marks' guidelines in audio_player.xml (it lived with the removed video player). */
+@BindingAdapter("constraintPercent")
+fun setConstraintPercent(view: Guideline, percent: Float) {
+    val constraintLayout = view.parent as ConstraintLayout
+    val constraintSet = ConstraintSet()
+    constraintSet.clone(constraintLayout)
+    constraintSet.setGuidelinePercent(view.id, percent)
+    constraintSet.applyTo(constraintLayout)
 }
