@@ -14,12 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -31,7 +33,6 @@ import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.lab.ReportDialog
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.tvlab.resources
 import org.videolan.vlc.BuildConfig
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -80,6 +81,14 @@ fun PerformanceSection(section: @Composable (title: String, content: @Composable
         PerformanceCard(view, onReport = { report = perfReport(res, view, locale) }, onClear = { store?.clear() })
     }
     report?.let { ReportDialog(stringResource(R.string.nag_perf_report_title), it) { report = null } }
+}
+
+/** The resources in the interface's language; read in composition, a change of language recomposes. */
+@Composable
+@ReadOnlyComposable
+private fun resources(): Resources {
+    LocalConfiguration.current
+    return LocalContext.current.resources
 }
 
 /** The card's content for [view]. */

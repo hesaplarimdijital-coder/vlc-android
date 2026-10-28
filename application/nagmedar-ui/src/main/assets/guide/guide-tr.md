@@ -174,33 +174,6 @@ Müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hopar
 
 > Cihaz listede görünmüyorsa denetleyin: ikisi de aynı Wi-Fi'de olsun (misafir ağında değil), TV açık ve DLNA ya da medya paylaşımı açık olsun, Chromecast uyanık olsun, modemde multicast (mDNS, UPnP) açık ve istemci yalıtımı kapalı olsun. Bu cihazdaki bir VPN yerel ağı gizleyebilir.
 
-## TV Lab {tvlab}
-
-TV Lab bir filmi oynatacağınız cihaza (LG OLED B4 gibi bir TV ya da Tab S11 Ultra) göre analiz eder; gerekirse kayıpsız bir remux'la yeni bir MKV yazar. Kaynak dosya yalnızca okunur. Nerede: Araçlar › TV Lab, {key:TvLab} ya da kütüphanede filmin menüsündeki “TV Lab'de analiz et”.
-
-### Analiz
-1. “Hedef”ten cihaz profilini seçin, sonra “Dosya seçin” deyin.
-2. TV Lab filmin akışlarını, HDR ve Dolby Vision bilgisini okur, saniye saniye bit hızını ve bulunduğu diskin okuma hızını ölçer; “Sonuç” filmin olduğu gibi oynayıp oynamayacağını söyler.
-3. **Bulgular** her sorunu kritik, uyarı ya da uygun diye, nedeni ve çözümüyle yazar: çift katmanlı Dolby Vision, TV'nin çalmadığı varsayılan ses izi, eşiği aşan bit hızı gibi.
-4. Bit hızı grafiği (1 sn tepe, 5 sn ortalama, profil eşiği) “Dışa aktar” ile PNG ya da CSV olarak, analiz “Rapor” ile metin olarak alınır.
-
-Cihaz profili, cihazın açtığı kapsayıcıları, codec'leri, HDR ve Dolby Vision profillerini, ses ve altyazı biçimlerini ve kaldırdığı en yüksek bit hızını (eşik) tutar. “Profili düzenle”, “Yeni profil…” ve “Profil içe aktar…” ile değiştirin ya da ekleyin; profiller JSON dosyası olarak dışa aktarılır ve yedeğe girer.
-
-### Remux planı
-1. Analizden sonra “Remux” planı açar. Video her zaman bit bit kopyalanır. Her ses ve altyazı izini koruyun ya da atın; varsayılan ve zorunlu işaretlerini, dilini ve başlığını değiştirin; izleri sürükleyerek ya da Alt+↑ ve Alt+↓ ile sıralayın.
-2. Cihaz profilinin önerileri plana önceden girer, her biri “Uygula” ya da “Geri al” ile: TV yalnızca tek katmanlı Dolby Vision oynatıyorsa profil 7 → 8.1 dönüşümü (temel katman bit bit kalır, iyileştirme katmanı atılır), TV'nin çalmadığı varsayılan iz yerine çaldığı bir iz, göstermediği altyazıları çıkarmak.
-3. **Uyumluluk izi:** TV'nin çalmadığı TrueHD ya da DTS-HD izinin yanına bir E-AC-3 5.1 izi eklenir, orijinal iz kayıpsız kalır. “Ek ses izi” ile başka bir izin yanına da ekleyebilir; kodlamasını (E-AC-3, AC-3, LPCM), bit hızını, stereoya indirmeyi ve cihazın onunla başlayıp başlamayacağını seçebilirsiniz.
-4. Her adım neyi koruduğunu yazar: “Kayıpsız”, “Kayıpsız (üst veri değişir)” ya da “Kayıplı”. Özeti denetleyip “Sıraya al…” deyin: sistemin dosya seçicisi çıktının yerini sorar, orada yeni, boş bir dosya açılır (film.remux.mkv). Hiçbir dosyanın üstüne yazılmaz.
-
-### Sıra, toplu işlem ve geçmiş
-- **Sıra:** işler birer birer çalışır; bildirimde ilerleme ve İptal vardır. Bekleyen işleri sürükleyerek ya da Alt+↑ ve Alt+↓ ile sıralayın. “Sırayı duraklat” çalışan işi olduğu yerde bekletir, “Sürdür” devam ettirir.
-- **Gece çalıştır…:** sıra seçtiğiniz saate kadar (varsayılanı 02:00) bekler, isterseniz yalnızca cihaz şarjdayken başlar; cihaz yeniden başlasa da kurulu kalır.
-- **Toplu işlem:** bir klasör seçin (“Klasör seç…” ya da kütüphanenin klasörlerinden biri); içindeki filmler analiz edilir ve her biri varsayılan planı alır. “Planı düzenle…” bir filme kendi planını verir. “Çıktı klasörünü seç…” deyip filmleri sıraya alın: her biri “ad.remux.mkv” adlı yeni bir dosyaya yazılır; o adda dosya varsa film atlanır, dosyaya dokunulmaz.
-- **Doğrulama:** remux bitince çıktı geri okunur ve videonun her paketi kaynakla SHA-256 ile karşılaştırılır (Dolby Vision dönüşümünde temel katman ve her karenin RPU'su). Eşleşen iş “Video bit bit aynı” rozetini alır; eşleşmezse iş başarısız olur ve çıktı silinir.
-- **Geçmiş:** biten her iş durumu, süresi, hızı ve doğrulama raporuyla burada kalır. “Yeniden çalıştır…” aynı planı yeni bir dosyaya yazar, “Çıktıyı aç” filmi açar; rapor metin ya da JSON olarak paylaşılır ya da kaydedilir. “Geçmişten sil” hiçbir dosyayı silmez.
-
-> Remux pil zayıfken (şarjda değilken %15'in altında) ya da cihaz çok ısınınca duraklar, ılıkken yavaşlar. TV Lab'in araçları arm64 telefon ve tabletlerde çalışır.
-
 ## Tarayıcıdan uzaktan erişim {remote-access}
 
 Bu ağdaki bir bilgisayarın ya da telefonun tarayıcısından kütüphanenize bakın, oynatmayı denetleyin, dosya gönderin. Sayfa bu cihazdaki sunucudan gelir; internetten geçmez.
@@ -244,16 +217,15 @@ Nağmedar VLC for Android'e dayanır, ama VLC'nin klasik ekranları artık açı
 
 ## Uzun işler ve Android'in süre sınırı {jobs}
 
-Dönüştürme, remux, indirmeler ve kayıtlar arka planda sürer; ilerlemelerini bildirimde izler, oradan durdurabilirsiniz. Dönüştürme ve remux pil zayıfken ya da cihaz ısınınca bekler.
+Dönüştürme, indirmeler ve kayıtlar arka planda sürer; ilerlemelerini bildirimde izler, oradan durdurabilirsiniz. Dönüştürme pil zayıfken ya da cihaz ısınınca bekler.
 
 Android 15 ve sonrası, arka planda süren işlere günde altı saatlik bir süre sınırı koyar. Sınır dolunca Nağmedar bunu bildirimde söyler ve iş şöyle sürer:
 - **Podcast indirmeleri** sonra kaldıkları yerden sürer.
 - **Müzik dönüştürme** bekler, sonra kaldığı yerden sürer.
-- **Remux** sıraya döner; Nağmedar açılınca baştan başlar.
 - **Radyo kaydı** durur; o ana kadarki parçalar kaydedilmiştir.
 - **Kütüphane taraması** bildirimini kaldırıp sürer.
 
-> İndirmeleri Araçlar › İndirmeler'de, remux işlerini TV Lab'in Sıra sekmesinde izleyebilirsiniz.
+> İndirmeleri Araçlar › İndirmeler'de izleyebilirsiniz.
 
 ## Yedekleme ve geri yükleme {backup}
 
@@ -261,7 +233,7 @@ Ayarlarınızı, listelerinizi ve puanlarınızı tek bir ZIP dosyasına yazın;
 
 ### Yedek almak
 1. “Yedekle…” deyin ve sistemin seçicisinde dosyanın yerini seçin (nagmedar-yedek-<tarih>.zip).
-2. Dosyada ayarlar, kısayollar, TV Lab cihaz profilleri, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz ve söz gecikmeleri, dosya ayarları, elle seçtiğiniz kapaklar, gecikme profilleri ve zamanlanmış radyo kayıtları bulunur.
+2. Dosyada ayarlar, kısayollar, çalma listeleri, akıllı listeler, puanlar ve çalınmalar, kendi sözleriniz ve söz gecikmeleri, dosya ayarları, elle seçtiğiniz kapaklar, gecikme profilleri ve zamanlanmış radyo kayıtları bulunur.
 
 ### Geri yüklemek
 1. “Geri yükle…” deyin ve yedek dosyasını seçin. Ne zaman ve hangi sürümle alındığı, bölümleri sayılarıyla görünür.
