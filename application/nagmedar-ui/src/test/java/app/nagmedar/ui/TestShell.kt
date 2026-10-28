@@ -67,11 +67,11 @@ fun TestShell(
     caption: CaptionBar? = null,
     /** What the bars show (S-1302: casting). */
     playerInfo: PlayerBarInfo = samplePlayerInfo,
-    screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
     /** Another player in the bars' place (Desktop Kit 1.0: the phone's expandable player); null: the sample bars. */
     player: (@Composable (NavKind) -> Unit)? = null,
     /** The phone's "⋯" sheet's own entries. */
     moreActions: List<ActionGroup> = emptyList(),
+    screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
     LaunchedEffect(startDestination) {
