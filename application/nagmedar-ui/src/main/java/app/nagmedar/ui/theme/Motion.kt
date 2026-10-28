@@ -1,7 +1,10 @@
 package app.nagmedar.ui.theme
 
+import android.animation.ValueAnimator
 import android.content.ContentResolver
+import android.content.Context
 import android.database.ContentObserver
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -15,6 +18,7 @@ import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -29,11 +33,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.ui.shell.WidthClass
 import kotlin.math.roundToInt
 
 /**
@@ -56,6 +62,11 @@ import kotlin.math.roundToInt
  * Nothing takes longer than [LONG] but the loops. Compose scales every duration by the system's
  * animator scale; with "Remove animations" (scale 0) the [reduced] specs snap, the transitions
  * are none and [loop] is null, so the caller draws a still frame.
+ *
+ * Desktop Kit 1.0 adds two tiers ([MotionTier], [LocalMotionTier]): on a phone what moves in space
+ * or follows a finger runs on interruptible springs that take over a fling's speed ([gesture]:
+ * the screens' scale-in, a list's detail, the bars' settle, the sheets, the player); tablet and
+ * DeX windows keep the timed curves above unchanged; fades and colours stay short tweens everywhere.
  */
 @Immutable
 class NagMotion private constructor(val reduced: Boolean) {
@@ -102,16 +113,19 @@ class NagMotion private constructor(val reduced: Boolean) {
      * in over [FADE_IN] once the old one has faded ([FADE_OUT]), growing from [initialScale]
      * ([PHONE_SCALE], [TABLET_SCALE]). On a [desktop] (the sidebar layout): a still [CROSSFADE].
      */
-    fun screenEnter(desktop: Boolean = false, initialScale: Float = TABLET_SCALE): EnterTransition = when {
-        reduced -> EnterTransition.None
+    fun screenEnter(desktop: Boolean = false, initialScale: Float = TABLET_SCALE, tier: MotionTier = MotionTier.Timed): EnterTransition = when {
+        reduced || tier == MotionTier.Reduced -> EnterTransition.None
         desktop -> fadeIn(tween(CROSSFADE, easing = Standard))
+        // a phone (Desktop Kit 1.0): the scale-in is the gesture spring, the fade stays timed
+        tier == MotionTier.Gesture -> fadeIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate)) +
+            scaleIn(gesture(), initialScale = initialScale)
         else -> fadeIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate)) +
             scaleIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate), initialScale = initialScale)
     }
 
     /** The screen [screenEnter] replaces: gone in [FADE_OUT], or cross-faded on a [desktop]. */
-    fun screenExit(desktop: Boolean = false): ExitTransition = when {
-        reduced -> ExitTransition.None
+    fun screenExit(desktop: Boolean = false, tier: MotionTier = MotionTier.Timed): ExitTransition = when {
+        reduced || tier == MotionTier.Reduced -> ExitTransition.None
         desktop -> fadeOut(tween(CROSSFADE, easing = Standard))
         else -> fadeOut(tween(FADE_OUT, easing = EmphasizedAccelerate))
     }
@@ -237,6 +251,61 @@ class NagMotion private constructor(val reduced: Boolean) {
         val Reduced = NagMotion(reduced = true)
 
         fun of(reduced: Boolean): NagMotion = if (reduced) Reduced else Full
+
+        /** Accent and theme colour changes: an accent taken from the artwork cross-fades in this time (Desktop Kit 1.0). */
+        const val COLOR_CHANGE = COLOR
+
+        /**
+         * The phone's spring for everything a finger moves or flings (Desktop Kit 1.0): bars, sheets,
+         * the player, a screen's scale. No bounce, medium-low stiffness, so a new touch can catch it
+         * anywhere and a fling hands over its speed.
+         */
+        fun <T> gesture(): SpringSpec<T> = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+
+        /** The tier of a window: springs on a phone, the timed curves from tablet width up, nothing with [reduced] motion. */
+        fun tier(widthClass: WidthClass, reduced: Boolean = false): MotionTier = when {
+            reduced -> MotionTier.Reduced
+            widthClass == WidthClass.Compact -> MotionTier.Gesture
+            else -> MotionTier.Timed
+        }
+
+        /**
+         * A spatial animation (position, size, scale) for [tier]: the [gesture] spring on a phone,
+         * [timed] (the 0.2.0 curve) on wider windows, a jump to the end with reduced motion.
+         */
+        fun <T> spatial(tier: MotionTier, timed: FiniteAnimationSpec<T>): FiniteAnimationSpec<T> = when (tier) {
+            MotionTier.Gesture -> gesture()
+            MotionTier.Timed -> timed
+            MotionTier.Reduced -> snap()
+        }
+
+        /** A fade or a colour change: [spec] in both tiers, a jump with reduced motion. */
+        fun <T> fade(tier: MotionTier, spec: FiniteAnimationSpec<T>): FiniteAnimationSpec<T> =
+            if (tier == MotionTier.Reduced) snap() else spec
+    }
+}
+
+/** How the interface moves in a window (Desktop Kit 1.0); see [NagMotion.tier]. */
+enum class MotionTier {
+    /** Phone: interruptible, velocity-aware springs for spatial and finger-driven motion. */
+    Gesture,
+
+    /** Tablet and DeX: the timed Material curves (90 ms fade-out, 210 ms scale-in, 150 ms cross-fade, 300 ms panels). */
+    Timed,
+
+    /** "Remove animations" or an animator duration scale of 0: everything jumps to its end. */
+    Reduced,
+}
+
+/** The motion tier of the window: the theme's by its width, the shell's by its width class. */
+val LocalMotionTier = compositionLocalOf { MotionTier.Timed }
+
+/** The system's animation switches, readable outside Compose (View code, animators). */
+object SystemMotion {
+    /** "Remove animations" is on, or the animator duration scale is 0. */
+    fun reduced(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !ValueAnimator.areAnimatorsEnabled()) return true
+        return animationsRemoved(context.contentResolver)
     }
 }
 

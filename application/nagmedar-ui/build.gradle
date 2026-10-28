@@ -70,6 +70,9 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     implementation "androidx.activity:activity-compose:$rootProject.ext.activityComposeVersion"
     implementation "androidx.navigation:navigation-compose:$rootProject.ext.navigationComposeVersion"
+    // Desktop Kit 1.0: the frosted glass of the phone's bars, sheets and menus (theme/Glass.kt)
+    implementation "dev.chrisbanes.haze:haze:$rootProject.ext.hazeVersion"
+    implementation "dev.chrisbanes.haze:haze-materials:$rootProject.ext.hazeVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"

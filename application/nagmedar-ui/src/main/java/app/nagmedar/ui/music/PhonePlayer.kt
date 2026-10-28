@@ -122,6 +122,7 @@ import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
+import app.nagmedar.ui.theme.ArtworkAccent
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.PlayingVisualizer
@@ -686,53 +687,57 @@ fun PhonePlayerHost(
     val from = remember(started, media, queue.entries) {
         PlaySources.playingFrom(started, PlaySources.locationOf(media), queue.entries.mapNotNull { entry -> entry.media?.let(PlaySources::locationOf) })
     }
-    PhonePlayer(
-        info = NowPlayingInfo(
-            title = media.nowPlaying ?: media.title ?: "",
-            artist = media.artistName,
-            album = media.albumName,
-            format = path?.let { formatLine(it) },
-            lengthMs = media.length,
-            playing = nowPlaying.playing,
-            rating = key?.let { stats[it]?.rating ?: 0 },
-            chapters = rememberPlayingChapters(),
-            rate = playbackRate(),
-        ),
-        progress = { progress },
-        waveform = waveform,
-        actions = actions,
-        onClose = onClose,
-        modifier = modifier,
-        shuffling = shuffling,
-        repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
-        repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
-        // S-1006: the album's cover changed from its menu (a long press)
-        artwork = { size ->
-            ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = NagTheme.dimens.radiusCard, video = false, crossfade = true) }
-        },
-        onRate = key?.let { { rating = true } },
-        lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
-        lyricsShown = lyricsShown,
-        onLyricsShown = { lyricsShown = it },
-        canCast = rememberCastingEnabled(),
-        casting = rememberCastDevice(),
-        onStopCasting = Casting::stop,
-        // S-611: on and off here as in Settings › Visualiser
-        visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
-        visualizerShown = prefs.visualizer.music,
-        onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
-        // the music view opens the artist's or the album's tracks; the player closes for it
-        onOpenArtist = artistLink?.let { link -> { MusicLinks.open(link) } },
-        onOpenAlbum = albumLink?.let { link -> { MusicLinks.open(link) } },
-        tint = rememberArtworkColor(media),
-        from = from,
-        // the line sung opens the lyrics over the window, or in the artwork's place
-        lyricLine = { lineModifier -> PlayingLyricLine(onClick = { onFullScreenLyrics?.invoke() ?: run { lyricsShown = true } }, modifier = lineModifier) },
-        onAddToPlaylist = { adding = true },
-        onShare = { share(context, scope, media) },
-        onEqualizer = onEqualizer,
-        edgeToEdge = fullWindow,
-    )
+    val tint = rememberArtworkColor(media)
+    // Desktop Kit 1.0: the player takes the artwork's accent too, cross-fading from one track to the next
+    ArtworkAccent(tint) {
+        PhonePlayer(
+            info = NowPlayingInfo(
+                title = media.nowPlaying ?: media.title ?: "",
+                artist = media.artistName,
+                album = media.albumName,
+                format = path?.let { formatLine(it) },
+                lengthMs = media.length,
+                playing = nowPlaying.playing,
+                rating = key?.let { stats[it]?.rating ?: 0 },
+                chapters = rememberPlayingChapters(),
+                rate = playbackRate(),
+            ),
+            progress = { progress },
+            waveform = waveform,
+            actions = actions,
+            onClose = onClose,
+            modifier = modifier,
+            shuffling = shuffling,
+            repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
+            repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
+            // S-1006: the album's cover changed from its menu (a long press)
+            artwork = { size ->
+                ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = NagTheme.dimens.radiusCard, video = false, crossfade = true) }
+            },
+            onRate = key?.let { { rating = true } },
+            lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
+            lyricsShown = lyricsShown,
+            onLyricsShown = { lyricsShown = it },
+            canCast = rememberCastingEnabled(),
+            casting = rememberCastDevice(),
+            onStopCasting = Casting::stop,
+            // S-611: on and off here as in Settings › Visualiser
+            visualizer = { visualizerModifier -> PlayingVisualizer(visualizerModifier, onFullScreen = onFullScreenVisualizer) },
+            visualizerShown = prefs.visualizer.music,
+            onVisualizerShown = { prefs.updateVisualizer(prefs.visualizer.copy(music = it)) },
+            // the music view opens the artist's or the album's tracks; the player closes for it
+            onOpenArtist = artistLink?.let { link -> { MusicLinks.open(link) } },
+            onOpenAlbum = albumLink?.let { link -> { MusicLinks.open(link) } },
+            tint = tint,
+            from = from,
+            // the line sung opens the lyrics over the window, or in the artwork's place
+            lyricLine = { lineModifier -> PlayingLyricLine(onClick = { onFullScreenLyrics?.invoke() ?: run { lyricsShown = true } }, modifier = lineModifier) },
+            onAddToPlaylist = { adding = true },
+            onShare = { share(context, scope, media) },
+            onEqualizer = onEqualizer,
+            edgeToEdge = fullWindow,
+        )
+    }
     if (adding) AddToPlaylistHost(listOf(track), scope) { adding = false }
     if (rating && key != null) RatingDialog(listOf(track), stats, onRate = { stars -> TrackStatsIndex.rate(context, key, stars) }, onDismiss = { rating = false })
 }

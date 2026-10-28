@@ -12,18 +12,22 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 
 /**
  * How a phone's chrome follows the content's scrolling (Desktop Kit 0.2.0), as Android's own apps do:
  * - scrolling down slides the bottom navigation bar out of the window and the player strip above
  *   it down to the edge, so the list gets the height; scrolling up brings them back. When the
- *   finger lifts half way they settle fully shown or fully hidden ([settle]);
+ *   finger lifts half way they settle fully shown or fully hidden ([settle]), on a phone on a
+ *   spring that takes over the fling's speed (Desktop Kit 1.0);
  * - once the content has moved away from its top the top bar takes the chrome colour and a thin
  *   rule shows under it ([scrolled]), so the title stays apart from what passes beneath it.
  *
- * The shell keeps one, turns it off on wider windows and while the keyboard is up, and resets it
- * whenever the screen changes.
+ * [offsetPx] is only read while drawing (a layer translation) and by the screens that leave their
+ * padding to the shell, so a scrolled pixel neither measures nor recomposes a screen that lies
+ * under the bars. The shell keeps one, turns it off on wider windows and while the keyboard is
+ * up, and resets it whenever the screen changes.
  */
 @Stable
 class ShellScrollState {
@@ -44,8 +48,8 @@ class ShellScrollState {
     /** False keeps the bottom bar in place (the keyboard is up); the top bar still follows. */
     var hideOnScroll by mutableStateOf(true)
 
-    /** How a bar left half way settles; the shell gives the theme's (snap with "Remove animations"). */
-    var settleSpec: AnimationSpec<Float> = tween(SETTLE_MS, easing = NagMotion.Emphasized)
+    /** How a bar left half way settles: the gesture spring on a phone, nothing with reduced motion. */
+    var tier: MotionTier = MotionTier.Gesture
 
     val connection: NestedScrollConnection = object : NestedScrollConnection {
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
@@ -54,7 +58,8 @@ class ShellScrollState {
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            if (enabled && hideOnScroll) settle(settleSpec)
+            // the bars move against the content; what the list could not use (it hit an end) carries on into them
+            if (enabled && hideOnScroll) settle(-available.y)
             return Velocity.Zero
         }
     }
@@ -68,10 +73,25 @@ class ShellScrollState {
         if (hideOnScroll && consumedY != 0f) offsetPx = (offsetPx - consumedY).coerceIn(0f, maxOffsetPx)
     }
 
-    /** Finishes a bar left half way: hidden past half its height, shown otherwise. */
-    suspend fun settle(spec: AnimationSpec<Float>) {
-        val target = settleTarget(offsetPx, maxOffsetPx) ?: return
-        animate(offsetPx, target, animationSpec = spec) { value, _ -> offsetPx = value }
+    /**
+     * Finishes a bar left half way: hidden past half its height, shown otherwise. [velocity] (px/s,
+     * positive downwards) starts the phone's spring at the speed the content was moving.
+     */
+    suspend fun settle(velocity: Float = 0f) {
+        val start = offsetPx
+        val target = settleTarget(start, maxOffsetPx) ?: return
+        when (tier) {
+            MotionTier.Reduced -> offsetPx = target
+            MotionTier.Gesture -> animate(start, target, initialVelocity = velocity, animationSpec = NagMotion.gesture()) { value, _ ->
+                offsetPx = value.coerceIn(0f, maxOffsetPx)
+            }
+            MotionTier.Timed -> animate(start, target, animationSpec = timedSettle) { value, _ -> offsetPx = value }
+        }
+    }
+
+    /** Brings the bottom chrome back at once (an expanding player starts from it). */
+    fun showBars() {
+        offsetPx = 0f
     }
 
     /** A new screen starts with the bars shown and the top bar flat. */
@@ -88,7 +108,9 @@ class ShellScrollState {
             else -> 0f
         }
 
-        /** A bar settling from half way: a little quicker than the panels. */
+        /** A bar settling from half way on the timed curves: a little quicker than the panels. */
         const val SETTLE_MS = 250
+
+        private val timedSettle: AnimationSpec<Float> = tween(SETTLE_MS, easing = NagMotion.Emphasized)
     }
 }
