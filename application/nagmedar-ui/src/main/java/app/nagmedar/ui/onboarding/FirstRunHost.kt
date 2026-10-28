@@ -66,7 +66,7 @@ fun FirstRunHost(prefs: NagmedarPreferences, onDone: () -> Unit) {
                 onDone()
             },
         ),
-        // the folders of Films, Series, Videos and Music: Settings › Library's own rows, picker and store
+        // the music's folders: Settings › Library's own rows, picker and store
         sections = { SectionFolders(prefs) },
     )
 }

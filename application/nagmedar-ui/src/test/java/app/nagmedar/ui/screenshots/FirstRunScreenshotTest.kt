@@ -53,12 +53,10 @@ class FirstRunScreenshotTest {
         remove = { _, _ -> },
     )
 
-    /** Films on the device and on the drive, Series on the device, Videos none (all of the library), Music on the device. */
+    /** The music on the device and on the drive. */
     private val chosen = LibraryScopes.Empty
-        .plus(LibrarySection.Movies, SourceFolder("/storage/emulated/0/Movies/Belgeseller"))
-        .plus(LibrarySection.Movies, SourceFolder("/storage/1A2B-3C4D/Filmler"))
-        .plus(LibrarySection.Series, SourceFolder("/storage/emulated/0/TV/Diziler"))
         .plus(LibrarySection.Music, SourceFolder("/storage/emulated/0/Music"))
+        .plus(LibrarySection.Music, SourceFolder("/storage/1A2B-3C4D/Konserler"))
 
     private fun capture(name: String, state: FirstRunState, theme: ThemeMode = ThemeMode.Dark, input: InputMode = InputMode.Touch,
                         folders: List<Pair<String, String>> = emptyList(), scopes: LibraryScopes = LibraryScopes.Empty) {

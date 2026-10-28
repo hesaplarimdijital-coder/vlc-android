@@ -29,17 +29,11 @@ import app.nagmedar.ui.music.NowPlayingPanel
 import app.nagmedar.ui.music.PhonePlayer
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.QueueEntry
-import app.nagmedar.ui.player.ChromeVisibility
-import app.nagmedar.ui.player.DesktopControls
-import app.nagmedar.ui.player.FakePlayerActions
-import app.nagmedar.ui.player.FakePreviews
-import app.nagmedar.ui.player.samplePlayerState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.ScopeProblem
-import app.nagmedar.ui.visual.PlayerVisualizerLayout
 import app.nagmedar.ui.visual.VisualizerFps
 import app.nagmedar.ui.visual.VisualizerFullScreen
 import app.nagmedar.ui.visual.VisualizerKind
@@ -182,45 +176,6 @@ class VisualizerScreenshotTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
     fun vuPhone() = fullScreen("visualizer-full-phone-light-vu", ThemeMode.Light, InputMode.Touch, VisualizerKind.Vu, "≈ 15 fps'de saatte pilin %0,3 kadarı")
-
-    /** The video player: over sound alone the visualiser fills the middle; beside a picture it is small, above the controls. */
-    private fun player(name: String, audioOnly: Boolean, kind: VisualizerKind, input: InputMode = InputMode.Pointer, problem: ScopeProblem? = null) {
-        val state = still().apply { this.problem = problem }
-        val visibility = ChromeVisibility().apply {
-            onMouseMoved()
-            overBars = true
-        }
-        compose.runOnUiThread { compose.activity.actionBar?.hide() }
-        compose.setContent {
-            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
-                Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-                    if (!audioOnly) SampleVideo(Modifier.fillMaxWidth().aspectRatio(16 / 9f))
-                    PlayerVisualizerLayout(
-                        kind = kind,
-                        state = state,
-                        audioOnly = audioOnly,
-                        modifier = if (audioOnly) Modifier else Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 120.dp),
-                        onAllow = {},
-                    )
-                    DesktopControls(samplePlayerState.copy(title = "TRT Radyo 1 · canlı", visualizer = kind), FakePlayerActions(), visibility, FakePreviews())
-                }
-            }
-        }
-        compose.waitForIdle()
-        val window = compose.activity.window.decorView
-        val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
-        compose.runOnIdle { window.draw(Canvas(bitmap)) }
-        ShellScreenshotTest.save(name, bitmap)
-    }
-
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun playerSoundAlone() = player("visualizer-player-dex-sound", audioOnly = true, kind = VisualizerKind.Spectrum)
-
-    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun playerBesideVideo() = player("visualizer-player-tablet-video", audioOnly = false, kind = VisualizerKind.Vu, input = InputMode.Touch)
-
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
-    fun playerPermission() = player("visualizer-player-dex-permission", audioOnly = false, kind = VisualizerKind.Scope, problem = ScopeProblem.NeedsPermission)
 
     private fun settings(name: String, theme: ThemeMode, input: InputMode, changed: Boolean) {
         val prefs = NagmedarPreferences(compose.activity.getSharedPreferences("visualizer-shot-$name", Context.MODE_PRIVATE))

@@ -1,6 +1,5 @@
 package app.nagmedar.ui.downloads
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,14 +43,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import app.nagmedar.data.DownloadState
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
-import app.nagmedar.translate.TranslationModel
-import app.nagmedar.translate.TranslationModels
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
@@ -62,36 +57,25 @@ import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.sizeLabel
-import app.nagmedar.ui.player.navigate.DialogCard
-import app.nagmedar.ui.player.navigate.DialogFrame
-import app.nagmedar.ui.player.subtitles.translate.TranslationJobs
-import app.nagmedar.ui.player.subtitles.translate.directionLabel
-import app.nagmedar.ui.player.subtitles.translate.problem
-import app.nagmedar.ui.player.subtitles.translate.problemText
-import app.nagmedar.ui.player.subtitles.whisper.WhisperJobs
-import app.nagmedar.ui.player.subtitles.whisper.WhisperModel
-import app.nagmedar.ui.player.subtitles.whisper.WhisperModels
-import app.nagmedar.ui.player.subtitles.whisper.WhisperStage
-import app.nagmedar.ui.player.subtitles.whisper.WhisperStatus
-import app.nagmedar.ui.player.subtitles.whisper.rememberWhisperStatus
+import app.nagmedar.ui.components.DialogCard
+import app.nagmedar.ui.components.DialogFrame
+import app.nagmedar.ui.transcribe.WhisperJobs
+import app.nagmedar.ui.transcribe.WhisperModel
+import app.nagmedar.ui.transcribe.WhisperModels
+import app.nagmedar.ui.transcribe.WhisperStage
+import app.nagmedar.ui.transcribe.WhisperStatus
+import app.nagmedar.ui.transcribe.rememberWhisperStatus
 import app.nagmedar.ui.podcast.DownloadProgress
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.ServiceEpisodePlayer
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
-
-/** A translation model's download as WorkManager tells it, and what the model has on the device. */
-@Immutable
-data class ModelDownload(val model: TranslationModel, val work: WorkInfo?, val ready: Boolean, val bytesOnDisk: Long)
 
 /** A whisper model on the device, whole or half way. */
 @Immutable
@@ -106,14 +90,12 @@ private sealed interface Removal {
     }
 
     data class Whisper(val file: WhisperFile, override val name: String) : Removal
-
-    data class Translation(val download: ModelDownload, override val name: String) : Removal
 }
 
 /**
  * Tools › Downloads: what the app downloads, in one place. The podcast episodes being downloaded
- * (with their progress), waiting, done and failed; the whisper models of the subtitles from speech
- * and the translation models, whole, half way or coming down. A download under way is cancelled,
+ * (with their progress), waiting, done and failed; the whisper models of the transcription from
+ * speech, whole, half way or coming down. A download under way is cancelled,
  * a failed one tried again, a finished episode played; a downloaded file is deleted only after
  * its confirmation (an episode stays in its show's list). Nothing here downloads by itself.
  */
@@ -127,20 +109,12 @@ fun DownloadsScreen() {
     val feeds by remember(dao) { dao?.feeds() ?: flowOf(emptyList()) }.collectAsState(initial = emptyList())
     val progress by PodcastCenter.tracker.progress.collectAsState()
     val whisperJob by rememberWhisperStatus()
-    val translationWork by remember(app) { translationWork(app) }.collectAsState(initial = emptyMap())
     var refresh by remember { mutableIntStateOf(0) }
     // the models' files, read again when a job starts or ends and after a removal
     val running = whisperJob is WhisperStatus.Running
     val whisperFiles by produceState(emptyList<WhisperFile>(), refresh, running) {
         value = withContext(Dispatchers.IO) {
             WhisperModel.entries.map { WhisperFile(it, WhisperModels.ready(app, it), WhisperModels.bytesOnDisk(app, it)) }.filter { it.bytesOnDisk > 0 }
-        }
-    }
-    val models by produceState(emptyList<ModelDownload>(), refresh, translationWork) {
-        value = withContext(Dispatchers.IO) {
-            val store = TranslationJobs.store(app)
-            TranslationModels.all.map { ModelDownload(it, translationWork[it.id], store.isReady(it), store.used(it)) }
-                .filter { it.bytesOnDisk > 0 || (it.work != null && it.work.state != WorkInfo.State.CANCELLED && it.work.state != WorkInfo.State.SUCCEEDED) }
         }
     }
     var removing by remember { mutableStateOf<Removal?>(null) }
@@ -150,7 +124,7 @@ fun DownloadsScreen() {
     val downloading = whisperJob.takeIf { (it as? WhisperStatus.Running)?.stage == WhisperStage.Downloading } as? WhisperStatus.Running
     val list = episodes
     Column(Modifier.fillMaxSize()) {
-        val total = (list?.size ?: 0) + whisperFiles.size + models.size + (if (downloading != null && whisperFiles.none { it.model == downloading.request?.model }) 1 else 0)
+        val total = (list?.size ?: 0) + whisperFiles.size + (if (downloading != null && whisperFiles.none { it.model == downloading.request?.model }) 1 else 0)
         PageHeader(title = stringResource(R.string.nag_nav_downloads), subtitle = list?.let { pluralStringResource(R.plurals.nag_downloads_count, total, total) })
         HorizontalRule()
         if (list == null) return@Column
@@ -183,7 +157,7 @@ fun DownloadsScreen() {
                     )
                 }
             }
-            if (downloading != null || whisperFiles.isNotEmpty() || models.isNotEmpty()) {
+            if (downloading != null || whisperFiles.isNotEmpty()) {
                 item(key = "models") { Caption(stringResource(R.string.nag_downloads_models)) }
             }
             if (downloading != null && whisperFiles.none { it.model == downloading.request?.model }) {
@@ -197,15 +171,6 @@ fun DownloadsScreen() {
                 val name = stringResource(file.model.label)
                 WhisperRow(file, job, onCancel = { WhisperJobs.cancel(app) }, onRemove = { removing = Removal.Whisper(file, name) }, removable = !running)
             }
-            items(models, key = { "translation-${it.model.id}" }) { download ->
-                val name = directionLabel(context, download.model.direction)
-                TranslationRow(
-                    download = download,
-                    onCancel = { TranslationJobs.cancelDownload(app, download.model) },
-                    onRetry = { TranslationJobs.download(app, download.model) },
-                    onRemove = { removing = Removal.Translation(download, name) },
-                )
-            }
         }
     }
     removing?.let { removal ->
@@ -216,7 +181,6 @@ fun DownloadsScreen() {
                     when (removal) {
                         is Removal.Episode -> manager?.delete(removal.episode.id)
                         is Removal.Whisper -> withContext(Dispatchers.IO) { WhisperModels.delete(app, removal.file.model) }
-                        is Removal.Translation -> withContext(Dispatchers.IO) { TranslationJobs.store(app).delete(removal.download.model) }
                     }
                     refresh++
                 }
@@ -224,15 +188,6 @@ fun DownloadsScreen() {
             onDismiss = { removing = null },
         )
     }
-}
-
-/** Each translation model's download work, by model id: the latest WorkManager knows of. */
-private fun translationWork(context: Context): Flow<Map<String, WorkInfo?>> {
-    val work = runCatching { WorkManager.getInstance(context) }.getOrNull() ?: return emptyFlow()
-    val flows = TranslationModels.all.map { model ->
-        work.getWorkInfosForUniqueWorkFlow(TranslationJobs.modelWork(model))
-    }
-    return combine(flows) { infos -> TranslationModels.all.mapIndexed { index, model -> model.id to infos[index].lastOrNull() }.toMap() }
 }
 
 @Composable
@@ -355,41 +310,6 @@ private fun WhisperRow(file: WhisperFile, job: WhisperStatus.Running?, onCancel:
             NagButton(stringResource(R.string.nag_downloads_stop_job), onCancel, icon = NagIcons.Close)
         } else {
             NagButton(stringResource(R.string.nag_downloads_delete), onRemove, icon = NagIcons.Delete, enabled = removable)
-        }
-    }
-}
-
-@Composable
-private fun TranslationRow(download: ModelDownload, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit) {
-    val locale = currentLocale()
-    val model = download.model
-    val work = download.work
-    val active = work != null && !work.state.isFinished
-    val done = work?.progress?.getLong(TranslationJobs.KEY_DONE, -1L)?.takeIf { it >= 0 } ?: download.bytesOnDisk
-    val failed = work?.state == WorkInfo.State.FAILED && !download.ready
-    val status = when {
-        work?.state == WorkInfo.State.RUNNING -> stringResource(R.string.nag_downloads_running, progressLine(done, model.size))
-        active -> stringResource(R.string.nag_downloads_waiting_network)
-        download.ready -> stringResource(R.string.nag_downloads_done, sizeLabel(download.bytesOnDisk, locale))
-        failed -> stringResource(problemText(work!!.outputData.problem()))
-        else -> stringResource(R.string.nag_downloads_partial, progressLine(download.bytesOnDisk, model.size))
-    }
-    DownloadRow(
-        icon = NagIcons.Subtitle,
-        title = directionLabel(LocalContext.current, model.direction),
-        detail = stringResource(R.string.nag_downloads_translation_model, model.name),
-        status = status,
-        progress = if (model.size > 0) (done.toFloat() / model.size).coerceIn(0f, 1f) else null,
-        showProgress = active,
-        failed = failed,
-    ) {
-        when {
-            active -> NagButton(stringResource(R.string.nag_sc_cancel), onCancel, icon = NagIcons.Close)
-            download.ready -> NagButton(stringResource(R.string.nag_downloads_delete), onRemove, icon = NagIcons.Delete)
-            else -> {
-                NagButton(stringResource(if (failed) R.string.nag_downloads_retry else R.string.nag_downloads_resume), onRetry, icon = NagIcons.Repeat, primary = true)
-                NagButton(stringResource(R.string.nag_downloads_delete), onRemove, icon = NagIcons.Delete)
-            }
         }
     }
 }

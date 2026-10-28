@@ -6,9 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LibrarySources
-import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
-import app.nagmedar.ui.player.snapshot.SnapshotSettings
-import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import org.junit.Assert.assertEquals
@@ -34,12 +31,9 @@ class FolderGrantsTest {
     fun everyHolderOfTheSettingsIsRead() {
         val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("folder-grants-test", Context.MODE_PRIVATE)
         prefs.edit().clear()
-            .putString(LibrarySources.key(LibrarySection.Movies), "+" + tree("Filmler"))
+            .putString(LibrarySources.key(LibrarySection.Music), "+" + tree("Muzik"))
             .putStringSet(NAGMEDAR_SAF_FOLDERS, setOf(tree("Secilen")))
-            .putString(SubtitleFolderStore.KEY, tree("Altyazilar"))
             .putString(ConvertOptions.KEY_FOLDER, tree("Donusturulen"))
-            .putString(KEY_RECORDING_FOLDER, tree("Kayitlar"))
-            .putString(SnapshotSettings.KEY_FOLDER, tree("Ekran"))
             .putString(RecordingPrefs.KEY_FOLDER, tree("Radyo"))
             .putString(PodcastSettingsStore.KEY_FOLDER, tree("Podcast"))
             .putStringSet(FolderGrants.keptKey(GrantHolder.TvLab), setOf(tree("Toplu")))
@@ -47,12 +41,9 @@ class FolderGrantsTest {
             .commit()
         val uses = FolderGrants.preferenceUses(prefs)
         val expected = mapOf(
-            GrantHolder.LibrarySections to "Filmler",
+            GrantHolder.LibrarySections to "Muzik",
             GrantHolder.PickedFolders to "Secilen",
-            GrantHolder.SubtitleFolder to "Altyazilar",
             GrantHolder.Converter to "Donusturulen",
-            GrantHolder.VideoRecordings to "Kayitlar",
-            GrantHolder.Screenshots to "Ekran",
             GrantHolder.RadioRecordings to "Radyo",
             GrantHolder.PodcastDownloads to "Podcast",
             GrantHolder.TvLab to "Toplu",
@@ -78,11 +69,11 @@ class FolderGrantsTest {
         val folder = tree("Ortak")
         // a library section reads it: only the writing goes
         assertEquals(write, FolderGrants.releasable(folder, both, mapOf(GrantHolder.LibrarySections to setOf(folder))))
-        // the screenshots are written there: nothing goes, nor the S-309 folder's reading
-        assertEquals(0, FolderGrants.releasable(folder, both, mapOf(GrantHolder.Screenshots to setOf(folder))))
-        assertEquals(0, FolderGrants.releasable(folder, read, mapOf(GrantHolder.Screenshots to setOf(folder))))
-        assertEquals(setOf(GrantHolder.LibrarySections, GrantHolder.Screenshots),
-            FolderGrants.holdersOf(folder, mapOf(GrantHolder.LibrarySections to setOf(folder), GrantHolder.Screenshots to setOf(folder), GrantHolder.Lyrics to setOf(tree("Sozler")))))
+        // the radio's recordings are written there: nothing goes, nor the S-309 folder's reading
+        assertEquals(0, FolderGrants.releasable(folder, both, mapOf(GrantHolder.RadioRecordings to setOf(folder))))
+        assertEquals(0, FolderGrants.releasable(folder, read, mapOf(GrantHolder.RadioRecordings to setOf(folder))))
+        assertEquals(setOf(GrantHolder.LibrarySections, GrantHolder.RadioRecordings),
+            FolderGrants.holdersOf(folder, mapOf(GrantHolder.LibrarySections to setOf(folder), GrantHolder.RadioRecordings to setOf(folder), GrantHolder.Lyrics to setOf(tree("Sozler")))))
     }
 
     @Test

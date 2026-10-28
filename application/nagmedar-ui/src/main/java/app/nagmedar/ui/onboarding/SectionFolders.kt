@@ -25,7 +25,7 @@ import app.nagmedar.ui.library.rememberSourceActions
 import app.nagmedar.ui.theme.NagTheme
 
 /**
- * The folders Films, Series, Videos and Music each show, chosen from the Sources step: the very
+ * The folders the music shows, chosen from the Sources step: the very
  * rows of Settings › Library, with the same picker, suggestions and store, one card for each
  * section. A section without folders shows all of the library, so nothing here has to be chosen.
  */

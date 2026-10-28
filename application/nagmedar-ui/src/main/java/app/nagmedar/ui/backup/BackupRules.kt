@@ -5,16 +5,10 @@ import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.convert.ConvertOptions
 import app.nagmedar.ui.library.LibrarySources
 import app.nagmedar.ui.onboarding.FolderGrants
-import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
-import app.nagmedar.ui.player.snapshot.SnapshotSettings
-import app.nagmedar.ui.player.subtitles.PrefsOnlineQuotaStore
-import app.nagmedar.ui.player.subtitles.providers.SubtitleFolderStore
 import app.nagmedar.ui.podcast.PodcastSettingsStore
-import app.nagmedar.ui.player.subtitles.extract.ExtractJobs
-import app.nagmedar.ui.player.subtitles.translate.TranslationJobs
-import app.nagmedar.ui.player.subtitles.whisper.WhisperPrefs
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
+import app.nagmedar.ui.transcribe.WhisperPrefs
 import app.nagmedar.ui.tvlab.FileProfileStore
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
@@ -38,15 +32,27 @@ object BackupSettings {
     /** When the last backup was made (ms), for Settings › Backup. */
     const val KEY_LAST_BACKUP = "nagmedar_last_backup"
 
+    /**
+     * 1.0: the keys of the video features 0.5 had (the screenshots' and recordings' folders, the
+     * OpenSubtitles quota, the local subtitle folder, the subtitle jobs' time limits): an updated
+     * device still has them, and a backup does not carry them about.
+     */
+    private val REMOVED_FEATURES = arrayOf(
+        "nagmedar_snapshot_folder",
+        "nagmedar_recording_folder",
+        "nagmedar_opensubtitles_quota",
+        "nagmedar_subtitle_folder",
+        "nagmedar_translate_timed_out",
+        "nagmedar_extract_timed_out",
+    )
+
     private val LEFT_OUT = setOf(
         // their own parts
         NagmedarPreferences.KEY_SHORTCUTS,
         FileProfileStore.KEY_SELECTED,
-        // this device's: folder permissions, the window on this screen, a picked snapshot, recording, converter's or podcast download folder
+        // this device's: folder permissions, the window on this screen, a picked converter's or podcast download folder
         NAGMEDAR_SAF_FOLDERS,
         NAGMEDAR_WINDOW_BOUNDS,
-        SnapshotSettings.KEY_FOLDER,
-        KEY_RECORDING_FOLDER,
         ConvertOptions.KEY_FOLDER,
         PodcastSettingsStore.KEY_FOLDER,
         RecordingPrefs.KEY_FOLDER,
@@ -57,20 +63,16 @@ object BackupSettings {
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,
-        // an account: OpenSubtitles' sign-in and quotas
+        // an account: OpenSubtitles' sign-in and quotas (VLC's, still in its preferences)
         KEY_OPEN_SUBTITLES_USER,
         KEY_OPEN_SUBTITLES_LIMIT,
-        PrefsOnlineQuotaStore.KEY,
-        // this device's: the folder of the local subtitle provider (S-707)
-        SubtitleFolderStore.KEY,
-        // this device's: the subtitles from speech's last job and what its GPU did (S-709)
+        // what the video features of 0.5 left in an updated device's preferences: its folders, a quota, its jobs
+        *REMOVED_FEATURES,
+        // this device's: the transcription's last job and what its GPU did (S-709)
         WhisperPrefs.KEY_SEEN,
         WhisperPrefs.KEY_TIMED_OUT,
         WhisperPrefs.KEY_GPU_RUNNING,
         WhisperPrefs.KEY_GPU_STOPPED,
-        // this device's: the last translation and extraction Android's time limit ended
-        TranslationJobs.KEY_TIMED_OUT,
-        ExtractJobs.KEY_TIMED_OUT,
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
         *ScrobbleSettings.keys.toTypedArray(),
         // a TV's: VLC's TV interface and its language, which a phone, a tablet or DeX ignores

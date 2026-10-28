@@ -277,9 +277,6 @@ internal fun VisualizerSection(prefs: NagmedarPreferences, batteryWh: Double? = 
         SettingRow(stringResource(R.string.nag_vis_music), subtitle = stringResource(R.string.nag_vis_music_hint)) {
             SegmentedChoice(options = listOf(true to on, false to off), selected = settings.music, onSelect = { prefs.updateVisualizer(settings.copy(music = it)) })
         }
-        SettingRow(stringResource(R.string.nag_vis_video), subtitle = stringResource(R.string.nag_vis_video_hint)) {
-            SegmentedChoice(options = listOf(true to on, false to off), selected = settings.video, onSelect = { prefs.updateVisualizer(settings.copy(video = it)) })
-        }
         SettingRow(stringResource(R.string.nag_vis_kind), subtitle = stringResource(R.string.nag_vis_projectm)) {
             SegmentedChoice(
                 options = VisualizerKind.entries.map { it to stringResource(it.label) },
@@ -309,70 +306,6 @@ internal fun VisualizerSection(prefs: NagmedarPreferences, batteryWh: Double? = 
         ) {
             Icon(NagIcons.Warning, contentDescription = null, tint = NagTheme.colors.warning, modifier = Modifier.padding(top = 1.dp).size(16.dp))
             Text(stringResource(R.string.nag_vis_battery_warning), style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary)
-        }
-    }
-}
-
-// --------------------------------------------------------------- in the video player
-
-/**
- * S-611: the visualiser in the video player: large in the middle over sound alone (radio, a
- * podcast, an audio file), small in the corner beside a video's picture. libVLC's output, through
- * the system's visualiser.
- */
-@Composable
-fun PlayerVisualizer(
-    settings: VisualizerSettings,
-    audioOnly: Boolean,
-    playing: Boolean,
-    mediaKey: Any?,
-    onSettings: (VisualizerSettings) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    val source = remember(context) { PlayingScopeSource(context) }
-    val conditions = rememberVisualizerConditions(playing)
-    var permissions by remember { mutableIntStateOf(0) }
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { permissions++ }
-    val state = rememberVisualizer(source, settings, conditions, key = listOf(mediaKey, settings, permissions))
-    PlayerVisualizerLayout(
-        kind = settings.kind,
-        state = state,
-        audioOnly = audioOnly,
-        onAllow = { runCatching { permission.launch(Manifest.permission.RECORD_AUDIO) } },
-        onRunOnBatterySaver = { onSettings(settings.copy(onBatterySaver = true)) },
-        modifier = modifier,
-    )
-}
-
-/** S-611: the video player's visualiser as it is drawn: large over sound alone, a card beside a picture. */
-@Composable
-fun PlayerVisualizerLayout(
-    kind: VisualizerKind,
-    state: VisualizerState,
-    audioOnly: Boolean,
-    modifier: Modifier = Modifier,
-    onAllow: (() -> Unit)? = null,
-    onRunOnBatterySaver: (() -> Unit)? = null,
-) {
-    if (audioOnly) {
-        Box(modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 96.dp).testTag("player-visualizer"), contentAlignment = Alignment.Center) {
-            VisualizerCanvas(kind, state, Modifier.fillMaxSize(), large = true)
-            VisualizerNotice(state, onAllow, onRunOnBatterySaver)
-        }
-    } else {
-        val shape = RoundedCornerShape(NagTheme.dimens.radiusCard)
-        Box(
-            modifier
-                .size(width = 320.dp, height = 150.dp)
-                .background(NagTheme.colors.surface.copy(alpha = 0.82f), shape)
-                .border(1.dp, NagTheme.colors.border, shape)
-                .padding(NagTheme.dimens.gapS)
-                .testTag("player-visualizer"),
-            contentAlignment = Alignment.Center,
-        ) {
-            VisualizerCanvas(kind, state, Modifier.fillMaxSize())
-            VisualizerNotice(state, onAllow, onRunOnBatterySaver)
         }
     }
 }

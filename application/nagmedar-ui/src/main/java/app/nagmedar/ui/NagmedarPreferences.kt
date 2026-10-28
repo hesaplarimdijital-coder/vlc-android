@@ -16,9 +16,6 @@ import app.nagmedar.ui.input.ShortcutOverrides
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.LibraryScopes
 import app.nagmedar.ui.library.LibrarySources
-import app.nagmedar.ui.player.record.KEY_RECORDING_FOLDER
-import app.nagmedar.ui.player.refresh.RefreshMatch
-import app.nagmedar.ui.player.snapshot.SnapshotSettings
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.radio.record.RecordingSettings
 import app.nagmedar.ui.shell.PaneWidths
@@ -27,12 +24,7 @@ import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.VisualizerSettings
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
-import org.videolan.tools.NAGMEDAR_MIDDLE_CLICK
-import org.videolan.tools.NAGMEDAR_MIDDLE_PLAY_PAUSE
-import org.videolan.tools.NAGMEDAR_PLAYER_FULLSCREEN
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
-import org.videolan.tools.NAGMEDAR_WHEEL_SEEKS
-import org.videolan.tools.KEY_VIDEO_MATCH_FRAME_RATE
 import org.videolan.tools.Settings
 
 /**
@@ -51,42 +43,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     var sidebarCollapsed by mutableStateOf(prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false))
         private set
 
-    /** S-408: the mouse wheel seeks in the video player, Ctrl+wheel sets the volume (else the other way round). */
-    var wheelSeeks by mutableStateOf(prefs.getBoolean(NAGMEDAR_WHEEL_SEEKS, false))
-        private set
-
-    /** S-408: what the middle button does in the video player. */
-    var middleClick by mutableStateOf(prefs.getString(NAGMEDAR_MIDDLE_CLICK, null) ?: NAGMEDAR_MIDDLE_PLAY_PAUSE)
-        private set
-
-    /** S-409: the video player opened from a desktop window asks to fill the screen. */
-    var playerFullscreen by mutableStateOf(prefs.getBoolean(NAGMEDAR_PLAYER_FULLSCREEN, true))
-        private set
-
-    fun updatePlayerFullscreen(value: Boolean) {
-        playerFullscreen = value
-        prefs.edit().putBoolean(NAGMEDAR_PLAYER_FULLSCREEN, value).apply()
-    }
-
-    fun updateWheelSeeks(value: Boolean) {
-        wheelSeeks = value
-        prefs.edit().putBoolean(NAGMEDAR_WHEEL_SEEKS, value).apply()
-    }
-
-    fun updateMiddleClick(value: String) {
-        middleClick = value
-        prefs.edit().putString(NAGMEDAR_MIDDLE_CLICK, value).apply()
-    }
-
-    /** S-606: the screenshots' format, subtitles, HDR and folder. */
-    var snapshot by mutableStateOf(SnapshotSettings.read(prefs))
-        private set
-
-    fun updateSnapshot(value: SnapshotSettings) {
-        snapshot = value
-        value.write(prefs.edit()).apply()
-    }
-
     /** S-611: the visualisers: with music, in the video player, their kind, frame rate and Battery Saver. */
     var visualizer by mutableStateOf(VisualizerSettings.read(prefs))
         private set
@@ -95,17 +51,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         visualizer = value
         value.write(prefs.edit()).apply()
     }
-
-    /** S-607: the recordings' folder (a tree the system's picker gave); null for Movies, Music or Download/Nağmedar. */
-    var recordingFolder by mutableStateOf(readRecordingFolder())
-        private set
-
-    fun updateRecordingFolder(value: String?) {
-        recordingFolder = value
-        prefs.edit().putString(KEY_RECORDING_FOLDER, value).apply()
-    }
-
-    private fun readRecordingFolder(): String? = prefs.getString(KEY_RECORDING_FOLDER, null)?.takeIf { it.isNotEmpty() }
 
     /** S-1107: radio recording's folder, shortest track, padding and limits (Settings › Radio). */
     var radioRecording by mutableStateOf(RecordingPrefs.read(prefs))
@@ -119,15 +64,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     fun updateRadioRecordingFolder(value: String?) {
         radioRecording = radioRecording.copy(folder = value)
         prefs.edit().putString(RecordingPrefs.KEY_FOLDER, value).apply()
-    }
-
-    /** S-612: whether the screen's refresh rate follows the film: always, if seamless, never. */
-    var refreshMatch by mutableStateOf(RefreshMatch.read(prefs))
-        private set
-
-    fun updateRefreshMatch(value: RefreshMatch) {
-        refreshMatch = value
-        prefs.edit().putString(RefreshMatch.KEY, value.key).apply()
     }
 
     /** S-404: how long the mouse rests before a tooltip shows. */
@@ -176,9 +112,6 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         if (key == null || key == KEY_ACCENT) accent = prefs.enumValue(KEY_ACCENT, Accent.Blue)
         if (key == null || key == KEY_DENSITY) density = prefs.enumValue(KEY_DENSITY, DensityPreference.Auto)
         if (key == null || key == KEY_SIDEBAR_COLLAPSED) sidebarCollapsed = prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false)
-        if (key == null || key == NAGMEDAR_WHEEL_SEEKS) wheelSeeks = prefs.getBoolean(NAGMEDAR_WHEEL_SEEKS, false)
-        if (key == null || key == NAGMEDAR_MIDDLE_CLICK) middleClick = prefs.getString(NAGMEDAR_MIDDLE_CLICK, null) ?: NAGMEDAR_MIDDLE_PLAY_PAUSE
-        if (key == null || key == NAGMEDAR_PLAYER_FULLSCREEN) playerFullscreen = prefs.getBoolean(NAGMEDAR_PLAYER_FULLSCREEN, true)
         if (key == null || key == KEY_TOOLTIP_DELAY) tooltipDelay = prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal)
         if (key == null || key == NAGMEDAR_FIRST_RUN_DONE) firstRunDone = prefs.getBoolean(NAGMEDAR_FIRST_RUN_DONE, false)
         if (key == null || key == KEY_PALETTE_RECENT) {
@@ -190,11 +123,8 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         }
         if (key == null || key == NAGMEDAR_SAF_FOLDERS) safFolders = prefs.getStringSet(NAGMEDAR_SAF_FOLDERS, null)?.toSet().orEmpty()
         if (key == null || key in LibrarySources.keys) librarySources = LibrarySources.read(prefs)
-        if (key == null || key in SnapshotSettings.keys) snapshot = SnapshotSettings.read(prefs)
-        if (key == null || key == KEY_RECORDING_FOLDER) recordingFolder = readRecordingFolder()
         if (key == null || key in VisualizerSettings.keys) visualizer = VisualizerSettings.read(prefs)
         if (key == null || key in RecordingPrefs.keys) radioRecording = RecordingPrefs.read(prefs)
-        if (key == null || key == RefreshMatch.KEY || key == KEY_VIDEO_MATCH_FRAME_RATE) refreshMatch = RefreshMatch.read(prefs)
     }
 
     fun updateThemeMode(value: ThemeMode) {
