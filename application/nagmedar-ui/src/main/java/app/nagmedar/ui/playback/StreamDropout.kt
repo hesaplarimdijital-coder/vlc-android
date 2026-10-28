@@ -70,33 +70,49 @@ object StreamDropout {
 }
 
 /**
+ * What libVLC counts of the stream that plays (its `--stats`, `IMedia.Stats`): the bytes its access and its demuxer read,
+ * the audio buffers it played. All 0 when it keeps none.
+ */
+data class StreamCounters(val readBytes: Long, val demuxBytes: Long, val playedBuffers: Long) {
+    /** Whether libVLC counts anything for the stream. */
+    val counted: Boolean get() = readBytes > 0L || demuxBytes > 0L || playedBuffers > 0L
+}
+
+/**
  * A network stream that plays with nothing coming: libVLC keeps the connection open and says it buffers or plays while
- * its time stands still. No progress for [limitMs] while it plays (not paused, not waiting to be opened again), once its
- * time has moved, is a stall, taken as a dropout ([StreamDropout]); a seek moves the time, so it is progress. A stream
- * that never moved (still opening) is left to libVLC. Fed a look a second by [app.nagmedar.ui.podcast.DropoutRecovery];
- * pure.
+ * its time stands still. Progress is its time moving, or libVLC's [StreamCounters] growing (bytes coming, audio
+ * played), so a stream whose time freezes while it still sounds never stalls. No progress for [limitMs] while it plays
+ * (not paused, not waiting to be opened again), once it has made some, is a stall, taken as a dropout
+ * ([StreamDropout]); a seek moves the time, so it is progress. A stream that never moved (still opening) is left to
+ * libVLC. With no counters to look at, the time alone is watched, for a live stream [BLIND_LIVE_MS] at least (its time
+ * is all there is to go by). Fed a look a second by [app.nagmedar.ui.podcast.DropoutRecovery]; pure.
  */
 class StreamStall(private val limitMs: Long) {
     private var lastTimeMs = -1L
+    private var lastCounters: StreamCounters? = null
     private var sinceMs = -1L
     private var moved = false
 
     /**
-     * One look: at [nowMs] (a monotonic clock) the stream is at [timeMs], and [playing] says whether it plays and counts.
-     * True when it stalled; the wait then starts again.
+     * One look: at [nowMs] (a monotonic clock) the stream is at [timeMs] with libVLC's [counters] (null: none), and
+     * [playing] says whether it plays and counts; [live] whether it is a live stream. True when it stalled; the wait
+     * then starts again.
      */
-    fun look(timeMs: Long, playing: Boolean, nowMs: Long): Boolean {
+    fun look(timeMs: Long, playing: Boolean, nowMs: Long, counters: StreamCounters? = null, live: Boolean = false): Boolean {
         if (!playing) {
             sinceMs = -1L
             return false
         }
-        if (sinceMs < 0L || timeMs != lastTimeMs) {
+        val counted = counters?.takeIf { it.counted }
+        if (sinceMs < 0L || timeMs != lastTimeMs || (counted != null && counted != lastCounters)) {
             if (sinceMs >= 0L) moved = true
             lastTimeMs = timeMs
+            lastCounters = counted
             sinceMs = nowMs
             return false
         }
-        if (!moved || nowMs - sinceMs < limitMs) return false
+        val limit = if (counted == null && live) maxOf(limitMs, BLIND_LIVE_MS) else limitMs
+        if (!moved || nowMs - sinceMs < limit) return false
         sinceMs = -1L
         return true
     }
@@ -104,6 +120,9 @@ class StreamStall(private val limitMs: Long) {
     companion object {
         /** The least time with no progress that is a stall. */
         const val MIN_STALL_MS = 20_000L
+
+        /** The least for a live stream whose libVLC counts nothing: its time alone says it stalled. */
+        const val BLIND_LIVE_MS = 45_000L
 
         /** The most network caching VLCOptions gives libVLC, ms. */
         private const val MAX_CACHING_MS = 60_000

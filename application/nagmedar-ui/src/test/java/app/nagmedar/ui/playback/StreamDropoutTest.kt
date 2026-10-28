@@ -153,4 +153,54 @@ class StreamDropoutTest {
         assertEquals(120_000L, StreamStall.limitMs(600_000))
         assertEquals(20_000L, StreamStall.limitMs(-5))
     }
+
+    @Test
+    fun aStreamThatStillSoundsOrReadsIsNoStallWhileItsTimeIsFrozen() {
+        val stall = StreamStall(20_000)
+        assertFalse(stall.look(10_000, playing = true, nowMs = 0, counters = StreamCounters(1_000, 900, 10)))
+        assertFalse(stall.look(11_000, playing = true, nowMs = 1_000, counters = StreamCounters(2_000, 1_900, 20)))
+        // the time freezes; audio is still played, then only bytes still come: progress all the same
+        for (second in 2..40) {
+            assertFalse(stall.look(11_000, playing = true, nowMs = second * 1_000L, counters = StreamCounters(2_000, 1_900, 20L + second)))
+        }
+        for (second in 41..80) {
+            assertFalse(stall.look(11_000, playing = true, nowMs = second * 1_000L, counters = StreamCounters(2_000L + second, 1_900, 60)))
+        }
+        // nothing moves any more: a stall after the limit
+        assertFalse(stall.look(11_000, playing = true, nowMs = 99_999, counters = StreamCounters(2_080, 1_900, 60)))
+        assertTrue(stall.look(11_000, playing = true, nowMs = 100_000, counters = StreamCounters(2_080, 1_900, 60)))
+    }
+
+    @Test
+    fun aStreamWhoseCountersAndTimeStandStillHasStalled() {
+        val stall = StreamStall(20_000)
+        val frozen = StreamCounters(5_000, 4_000, 50)
+        assertFalse(stall.look(10_000, playing = true, nowMs = 0, counters = StreamCounters(4_000, 3_000, 40), live = true))
+        assertFalse(stall.look(11_000, playing = true, nowMs = 1_000, counters = frozen, live = true))
+        assertFalse(stall.look(11_000, playing = true, nowMs = 20_999, counters = frozen, live = true))
+        assertTrue(stall.look(11_000, playing = true, nowMs = 21_000, counters = frozen, live = true))
+    }
+
+    @Test
+    fun withNoCountersALiveStreamWaitsLongerOnItsTimeAlone() {
+        // none (null) or all 0: libVLC counts nothing for it
+        for (counters in listOf(null, StreamCounters(0, 0, 0))) {
+            val live = StreamStall(20_000)
+            assertFalse(live.look(10_000, playing = true, nowMs = 0, counters = counters, live = true))
+            assertFalse(live.look(11_000, playing = true, nowMs = 1_000, counters = counters, live = true))
+            assertFalse(live.look(11_000, playing = true, nowMs = 45_999, counters = counters, live = true))
+            assertTrue(live.look(11_000, playing = true, nowMs = 46_000, counters = counters, live = true))
+            // an episode keeps the limit
+            val episode = StreamStall(20_000)
+            assertFalse(episode.look(10_000, playing = true, nowMs = 0, counters = counters))
+            assertFalse(episode.look(11_000, playing = true, nowMs = 1_000, counters = counters))
+            assertTrue(episode.look(11_000, playing = true, nowMs = 21_000, counters = counters))
+        }
+        // a longer caching's limit stays
+        val cached = StreamStall(120_000)
+        assertFalse(cached.look(0, playing = true, nowMs = 0, live = true))
+        assertFalse(cached.look(1_000, playing = true, nowMs = 1_000, live = true))
+        assertFalse(cached.look(1_000, playing = true, nowMs = 120_999, live = true))
+        assertTrue(cached.look(1_000, playing = true, nowMs = 121_000, live = true))
+    }
 }

@@ -1660,6 +1660,22 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     /**
+     * Nağmedar: libVLC's statistics of the current item (`--stats`: bytes read, audio buffers played), which tell a
+     * stalled stream from one whose time stands still while it sounds ([DropoutGuard]); null when libVLC does not have it.
+     */
+    @MainThread
+    fun currentStats(): IMedia.Stats? {
+        if (engine !== player || player.mediaplayer.isReleased) return null
+        val media = player.mediaplayer.media ?: return null
+        return try {
+            media.stats
+        } finally {
+            // the player's media comes retained
+            media.release()
+        }
+    }
+
+    /**
      * Nağmedar: libVLC plays the current item's stream with nothing coming (a stall, [DropoutGuard]): it is stopped on
      * it, the queue as it is, for the guard to open it again ([reopenCurrent]); libVLC says its stop as an end, which
      * the guard takes over. False, and nothing done, when libVLC does not have the item.

@@ -8,6 +8,7 @@ import android.net.NetworkRequest
 import android.os.SystemClock
 import app.nagmedar.ui.R
 import app.nagmedar.ui.playback.DropoutVerdict
+import app.nagmedar.ui.playback.StreamCounters
 import app.nagmedar.ui.playback.StreamDropout
 import app.nagmedar.ui.playback.StreamStall
 import kotlinx.coroutines.CompletableDeferred
@@ -70,7 +71,9 @@ internal class DropoutRecovery(
         episode = context
         if (location != null && streamed(location)) {
             // waiting to be opened again, libVLC's state is the dropped stream's: no stall to see
-            if (stall.look(timeMs, playing && !(reopenedAtMs >= 0L && !opened), nowMs)) {
+            val watched = playing && !(reopenedAtMs >= 0L && !opened)
+            val liveNow = context == null && lengthMs <= 0L && seenLengthMs <= 0L
+            if (stall.look(timeMs, watched, nowMs, if (watched) counters() else null, liveNow)) {
                 stalled(location, timeMs, lengthMs)
                 return
             }
@@ -140,6 +143,10 @@ internal class DropoutRecovery(
 
     /** A stream that is not an episode and has shown no length: a radio station, a live stream. */
     private fun live(): Boolean = episode == null && seenLengthMs <= 0L
+
+    /** What libVLC counts of the stream it plays (bytes read, audio played); null when it is not libVLC's or it counts nothing. */
+    private fun counters(): StreamCounters? = runCatching { service.playlistManager.currentStats() }.getOrNull()
+        ?.let { StreamCounters(it.readBytes, it.demuxReadBytes, it.playedAbuffers) }
 
     private fun networkCachingMs(): Int = runCatching { Settings.getInstance(service).getInt(KEY_NETWORK_CACHING_VALUE, 0) }.getOrDefault(0)
 
