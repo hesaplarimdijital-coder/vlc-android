@@ -197,7 +197,7 @@ fun NagmedarShell(
                 CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass) {
                     NavHost(
                         navController = navController,
-                        startDestination = Destination.Home.route,
+                        startDestination = Destination.Music.route,
                         modifier = Modifier.fillMaxSize(),
                         enterTransition = enter,
                         exitTransition = exit,

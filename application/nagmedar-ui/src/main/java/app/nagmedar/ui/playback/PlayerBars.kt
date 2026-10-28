@@ -278,9 +278,9 @@ class ServicePlayerBarActions(
     private val onOpenAudio: (() -> Unit)? = null,
 ) : PlayerBarActions {
     override fun openPlayer() {
-        // a video goes to the video player; music, radio, podcasts and streams stay in this interface
+        // music, radio, podcasts and streams open in this interface
         val open = onOpenAudio
-        if (!PlaybackActions.playsVideo() && open != null) open() else PlaybackActions.openPlayer(context)
+        if (open != null) open() else PlaybackActions.openPlayer(context)
     }
 
     override fun openQueue() = onQueue()

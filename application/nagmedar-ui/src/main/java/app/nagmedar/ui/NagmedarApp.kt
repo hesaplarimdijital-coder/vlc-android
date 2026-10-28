@@ -68,16 +68,12 @@ import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.menuBarSpecs
 import app.nagmedar.ui.input.rememberInputModeState
 import app.nagmedar.ui.input.trackInputMode
-import app.nagmedar.ui.library.HomeScreen
 import app.nagmedar.ui.library.LibraryAccess
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaInfoHost
 import app.nagmedar.ui.library.MediaRepository
-import app.nagmedar.ui.library.MoviesScreen
 import app.nagmedar.ui.library.SectionSourcesDialog
-import app.nagmedar.ui.library.SeriesScreen
-import app.nagmedar.ui.library.VideosScreen
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.lyrics.LyricsSession
 import app.nagmedar.ui.lyrics.LyricsTrack
@@ -123,8 +119,7 @@ import app.nagmedar.ui.audio.EqualizerSide
 import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.screens.AboutScreen
 import app.nagmedar.ui.tvlab.Step
-import app.nagmedar.ui.player.subtitles.tools.SubtitleToolsHost
-import app.nagmedar.ui.player.subtitles.whisper.WhisperHost
+import app.nagmedar.ui.transcribe.WhisperHost
 import app.nagmedar.ui.tvlab.TvLabScreen
 import app.nagmedar.ui.tvlab.TvLabSession
 import app.nagmedar.ui.tvlab.percentLabel
@@ -170,16 +165,12 @@ import app.nagmedar.ui.widget.PlayerWidgetMigration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
-import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.MediaUtils
-import org.videolan.vlc.repository.SlaveRepository
-import app.nagmedar.ui.transcode.TranscodeRequests
-import app.nagmedar.ui.transcode.TranscodeScreen
 import org.videolan.tools.Notices
 
 /**
@@ -288,7 +279,7 @@ private fun NagmedarMain(
     // the sections' picked trees count as picked folders; a change of any section's folders reloads the screens
     val sources = prefs.librarySources
     val libraryAccess = LibraryAccess(access.mediaAccess, access.folders + sources.trees, access::requestMedia, access::pickFolder, sources)
-    // the home page's "Klasör ekle": every section's folders, in Settings › Library
+    // "Klasör ekle" for every section's folders: Settings › Library
     var libraryListRequests by remember { mutableIntStateOf(0) }
     val addFolder: () -> Unit = {
         navigator.navigate(Destination.Settings)
@@ -358,12 +349,7 @@ private fun NagmedarMain(
     // what each section shows by its folders (Settings › Library)
     val counts by produceState<Map<Destination, String>>(emptyMap(), access.mediaAccess, access.folders, sources) {
         val c = repository.sectionCounts()
-        value = mapOf(
-            Destination.Movies to c.films.toString(),
-            Destination.Series to c.shows.toString(),
-            Destination.Videos to c.clips.toString(),
-            Destination.Music to c.tracks.toString(),
-        )
+        value = mapOf(Destination.Music to c.tracks.toString())
     }
     // S-1202: a long analysis goes on while other screens show; the sidebar says how far it is
     val tvLab = remember(context) { TvLabSession.get(context) }
@@ -383,8 +369,6 @@ private fun NagmedarMain(
                 }
             } else if (page != null) {
                 navigator.navigate(page)
-            } else if (PlaybackActions.playsVideo()) {
-                PlaybackActions.openPlayer(context)
             }
         }
         // a player's artist or album link: the music view takes it (the phone's player closes for it)
@@ -472,9 +456,7 @@ private fun NagmedarMain(
                     MediaInfoHost()
                     // remote access's addresses, how it works, and the one-time code a new browser asks for
                     RemoteAccessHost()
-                    // S-708: the subtitle tools, asked for from a film's menu
-                    SubtitleToolsHost()
-                    // S-709: subtitles from a film's speech, asked for from its menu, and what came of the job
+                    // S-709: a transcription from speech, its window and what came of the job
                     WhisperHost(Modifier.align(Alignment.BottomEnd).padding(16.dp))
                     // S-1005: the lyrics editor, over the lyrics
                     if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false })
@@ -512,11 +494,6 @@ private fun NagmedarMain(
                 },
                 screen = { destination, shellNavigator ->
                     when (destination) {
-                        Destination.Home -> HomeScreen(repository, onAddFolder = addFolder, onBrowse = shellNavigator::navigate)
-                        // "Klasör ekle" opens the section's own folders
-                        Destination.Movies -> MoviesScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Movies })
-                        Destination.Series -> SeriesScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Series })
-                        Destination.Videos -> VideosScreen(repository, onAddFolder = { sourcesFor = LibrarySection.Videos })
                         // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
                         Destination.Music -> MusicScreen(
                             repository,
@@ -540,8 +517,6 @@ private fun NagmedarMain(
                         Destination.TvLab -> TvLabScreen(tvLab)
                         // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
                         Destination.Network -> NetworkScreen(undo)
-                        // S-1303: video conversions, their queue and the HLS stream
-                        Destination.Convert -> TranscodeScreen()
                         Destination.Settings -> SettingsScreen(
                             prefs = prefs,
                             onOpenAllSettings = { shellNavigator.navigate(Destination.AllSettings) },
@@ -603,9 +578,7 @@ private fun NagmedarMain(
     if (paletteOpen) {
         // the library's media come when the palette opens; commands, screens and settings at once
         val media by produceState(emptyList<PaletteItem>()) {
-            value = mediaItems(context.resources, repository.videos() + repository.tracks()) { item ->
-                if (item.type == MediaWrapper.TYPE_VIDEO) PlaybackActions.playVideo(context, item) else PlaybackActions.playList(context, listOf(item), 0)
-            }
+            value = mediaItems(context.resources, repository.tracks()) { item -> PlaybackActions.playList(context, listOf(item), 0) }
         }
         // every line of "All settings", read from its XML away from the main thread
         val preferences by produceState(emptyList<PaletteItem>()) {
@@ -682,26 +655,16 @@ class AppActions(
     fun menuBarKey(keyCode: Int, down: Boolean, rtl: Boolean): Boolean = menuBar.onKey(keyCode, down, rtl)
 
     /**
-     * Files dropped on the window and on no target (S-406): media play in the order dropped,
-     * subtitles join the video playing (and are kept with it), else a word on what to do.
+     * Files dropped on the window and on no target (S-406): media play in the order dropped (a
+     * video is heard), else a word on what to do.
      */
     fun dropFiles(files: List<DroppedFile>): Boolean {
-        val service = PlaybackService.instance
-        val video = service?.currentMediaWrapper?.takeIf { service.isVideoPlaying }
         val res = context.resources
-        val message = when (val plan = planDrop(files, video != null)) {
+        val message = when (val plan = planDrop(files)) {
             is DropPlan.Play -> {
-                MediaUtils.openList(context, plan.uris.map { MLServiceLocator.getAbstractMediaWrapper(Uri.parse(it)) }, 0)
+                MediaUtils.openList(context, plan.uris.map(::heard), 0)
                 res.getQuantityString(R.plurals.nag_drop_playing, plan.uris.size, plan.uris.size)
             }
-            is DropPlan.LoadSubtitles -> {
-                plan.uris.forEach { uri ->
-                    service?.addSubtitleTrack(Uri.parse(uri), true)
-                    if (video != null) SlaveRepository.getInstance(context).saveSlave(video.location, IMedia.Slave.Type.Subtitle, 2, uri)
-                }
-                res.getQuantityString(R.plurals.nag_drop_subtitles_loaded, plan.uris.size, plan.uris.size)
-            }
-            DropPlan.SubtitlesNeedAVideo -> res.getString(R.string.nag_drop_subtitle_needs_video)
             DropPlan.Nothing -> res.getString(R.string.nag_drop_nothing)
         }
         Notices.show(context, message)
@@ -712,10 +675,14 @@ class AppActions(
     fun queueFiles(files: List<DroppedFile>): Boolean {
         val media = files.filter { it.playable }
         if (media.isEmpty()) return false
-        MediaUtils.appendMedia(context, media.map { MLServiceLocator.getAbstractMediaWrapper(Uri.parse(it.uri)) })
+        MediaUtils.appendMedia(context, media.map { heard(it.uri) })
         Notices.show(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, media.size, media.size))
         return true
     }
+
+    /** A dropped file as the service plays it: sound alone, a video's too (Nağmedar plays no picture). */
+    private fun heard(uri: String): MediaWrapper =
+        MLServiceLocator.getAbstractMediaWrapper(Uri.parse(uri)).apply { addFlags(MediaWrapper.MEDIA_FORCE_AUDIO) }
 
     /** The shortcut editor in Settings (S-402), scrolled to: the card of keys leads here (S-1504). */
     fun editShortcuts() {
@@ -804,13 +771,10 @@ class AppActions(
             ShortcutId.Cast -> Casting.openPicker()
             ShortcutId.Lyrics -> toggleLyrics()
             ShortcutId.Visualizer -> toggleVisualizer()
-            // S-1303: the convert page's windows, for the media playing (or one to pick)
-            ShortcutId.ConvertSave -> TranscodeRequests.open(context, TranscodeRequests.Kind.Convert, null)
-            ShortcutId.StreamHls -> TranscodeRequests.open(context, TranscodeRequests.Kind.Stream, null)
             ShortcutId.LyricsEarlier -> shiftLyrics(-LyricsSession.STEP_MS)
             ShortcutId.LyricsLater -> shiftLyrics(LyricsSession.STEP_MS)
             ShortcutId.Settings -> navigator.navigate(Destination.Settings)
-            // S-906: in the library the music engine's equaliser; the video player keeps libVLC's
+            // S-906: the music engine's equaliser
             ShortcutId.Equalizer -> navigator.navigate(Destination.Equalizer)
             // S-912: from anywhere, while the engine plays through a chain that changes the sound
             ShortcutId.AbSwitch -> {

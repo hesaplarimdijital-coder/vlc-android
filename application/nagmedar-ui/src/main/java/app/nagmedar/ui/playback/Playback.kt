@@ -28,7 +28,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
-import org.videolan.resources.PLAY_EXTRA_START_TIME
 import org.videolan.tools.NAGMEDAR_DESTINATION_NOW_PLAYING
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.vlc.PlaybackService
@@ -150,15 +149,6 @@ fun rememberPlaybackTime(nowPlaying: NowPlaying): PlaybackTime {
  */
 object PlaybackActions {
 
-    fun playVideo(context: Context, media: MediaWrapper) = MediaUtils.openMedia(context, media)
-
-    /** Plays a video from [startMs] (S-311: a line found in its subtitles). */
-    fun playVideoAt(context: Context, media: MediaWrapper, startMs: Long) {
-        val intent = VideoPlayerActivity.getIntent(context, media.uri, media.title, false, -1).putExtra(PLAY_EXTRA_START_TIME, startMs)
-        if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-
     /** Plays [list] from [position]; [from] is the album, artist or playlist it comes from, which the phone's player names. */
     fun playList(context: Context, list: List<MediaWrapper>, position: Int, from: PlaySource? = null) {
         PlaySources.start(from, list)
@@ -238,19 +228,14 @@ object PlaybackActions {
     }
 
     /**
-     * Brings back the player: the video player for videos; anything else in the Nağmedar window,
-     * on the page that shows it (an open window takes the request instead of a new one).
+     * Brings back what plays in the Nağmedar window, on the page that shows it (an open window
+     * takes the request instead of a new one).
      */
     fun openPlayer(context: Context) {
-        val service = PlaybackService.instance
-        if (service != null && playsVideo()) {
-            service.switchToVideo()
-        } else {
-            val intent = Intent(context, NagmedarActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(NAGMEDAR_EXTRA_DESTINATION, NAGMEDAR_DESTINATION_NOW_PLAYING)
-            if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            runCatching { context.startActivity(intent) }
-        }
+        val intent = Intent(context, NagmedarActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(NAGMEDAR_EXTRA_DESTINATION, NAGMEDAR_DESTINATION_NOW_PLAYING)
+        if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { context.startActivity(intent) }
     }
 }

@@ -26,6 +26,15 @@ class WidthClassTest {
     }
 
     @Test
+    fun thePhonesBarIsMusicPodcastsRadioAndMore() {
+        assertEquals(listOf(Destination.Music, Destination.Podcasts, Destination.Radio, Destination.More), Destination.bottomBar)
+        // Music is the start page, and the page of a route no more there (0.5's "home", "movies")
+        assertEquals(Destination.Music, Destination.fromRoute(null))
+        assertEquals(Destination.Music, Destination.fromRoute("home"))
+        assertEquals(Destination.Music, Destination.fromRoute("movies"))
+    }
+
+    @Test
     fun everyDestinationIsReachableFromEveryChrome() {
         val chromes = mapOf(
             NavKind.BottomBar to Destination.bottomBar,

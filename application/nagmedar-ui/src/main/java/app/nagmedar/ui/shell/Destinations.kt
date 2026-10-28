@@ -20,12 +20,6 @@ enum class Destination(
     val section: NavSection,
     @StringRes val description: Int? = null,
 ) {
-    Home("home", R.string.nag_nav_home, NavSection.Library),
-    Movies("movies", R.string.nag_nav_movies, NavSection.Library),
-    Series("series", R.string.nag_nav_series, NavSection.Library),
-
-    /** The phone's own videos: camera clips, recordings, what is neither film nor episode. */
-    Videos("videos", R.string.nag_nav_videos, NavSection.Library),
     Music("music", R.string.nag_nav_music, NavSection.Library),
     Podcasts("podcasts", R.string.nag_nav_podcasts, NavSection.Library, R.string.nag_podcasts_description),
     Radio("radio", R.string.nag_nav_radio, NavSection.Library),
@@ -34,7 +28,6 @@ enum class Destination(
     Network("network", R.string.nag_nav_network, NavSection.Sources),
     Streams("streams", R.string.nag_nav_streams, NavSection.Sources, R.string.nag_coming_streams),
     TvLab("tvlab", R.string.nag_nav_tv_lab, NavSection.Tools, R.string.nag_coming_tv_lab),
-    Convert("convert", R.string.nag_nav_convert, NavSection.Tools, R.string.nag_coming_convert),
     Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),
     More("more", R.string.nag_nav_more, NavSection.Footer),
@@ -59,10 +52,6 @@ enum class Destination(
 
     val icon: ImageVector
         get() = when (this) {
-            Home -> NagIcons.Home
-            Movies -> NagIcons.Movies
-            Series -> NagIcons.Series
-            Videos -> NagIcons.Videos
             Music -> NagIcons.Music
             Podcasts -> NagIcons.Podcasts
             Radio -> NagIcons.Radio
@@ -71,7 +60,6 @@ enum class Destination(
             Network -> NagIcons.Network
             Streams -> NagIcons.Streams
             TvLab -> NagIcons.TvLab
-            Convert -> NagIcons.Convert
             Downloads -> NagIcons.Downloads
             Settings -> NagIcons.Settings
             More -> NagIcons.Menu
@@ -95,8 +83,9 @@ enum class Destination(
         }
 
     companion object {
-        val bottomBar = listOf(Home, Movies, Music, Podcasts, More)
-        val rail = listOf(Home, Movies, Series, Videos, Music, Podcasts, Radio, TvLab)
+        /** The phone's bar (1.0): Müzik · Podcast · Radyo · ⋯, the rest in "Daha fazla". */
+        val bottomBar = listOf(Music, Podcasts, Radio, More)
+        val rail = listOf(Music, Podcasts, Radio, TvLab)
         val railFooter = listOf(More, Settings)
         /** Pages opened from others, never listed in the navigation. */
         val unlisted = setOf(Search, About, Equalizer, Guide, ShortcutCard, AllSettings)
@@ -106,6 +95,7 @@ enum class Destination(
         /** Destinations reachable through "More" when [shown] are already in the navigation chrome. */
         fun overflow(shown: Collection<Destination>) = entries.filter { it != More && it !in unlisted && it !in shown }
 
-        fun fromRoute(route: String?): Destination = entries.firstOrNull { it.route == route } ?: Home
+        /** The page of [route]; Music, the start page, for none (or a page of an earlier version). */
+        fun fromRoute(route: String?): Destination = entries.firstOrNull { it.route == route } ?: Music
     }
 }

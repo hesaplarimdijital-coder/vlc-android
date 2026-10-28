@@ -32,7 +32,7 @@ import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.library.NewDrives
-import app.nagmedar.ui.library.metadata.FilmInfoCenter
+import app.nagmedar.ui.notify.RemovedChannels
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastNotifier
@@ -40,8 +40,6 @@ import app.nagmedar.ui.radio.RadioCenter
 import app.nagmedar.ui.remoteaccess.RemoteAccessPage
 import app.nagmedar.ui.remoteaccess.RemoteAccessPages
 import app.nagmedar.ui.shell.ShellRequests
-import app.nagmedar.ui.transcode.HlsStream
-import app.nagmedar.ui.transcode.TranscodeQueue
 import app.nagmedar.ui.tvlab.remux.RemuxQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,14 +85,15 @@ class NagmedarActivity : ComponentActivity() {
         }
         // S-1103: the feeds' refresh runs in the background while there is a subscription; set again at each start, which changes nothing when it is as it was
         if (Build.FINGERPRINT != "robolectric") PodcastCenter.schedule(this)
+        // 1.0: the channels of the video features an earlier version made, out of the system's settings
+        lifecycleScope.launch(Dispatchers.IO) { RemovedChannels.delete(applicationContext) }
         // S-1006: the album covers are looked for in the app; its Robolectric tests run it too, offline
         CoverCenter.active = Build.FINGERPRINT != "robolectric"
-        FilmInfoCenter.active = CoverCenter.active
         // S-1105: the radio directory and the station logos are asked in the app, not in its tests
         RadioCenter.active = Build.FINGERPRINT != "robolectric"
         setContent {
             NagmedarApp(
-                onOpenFile = { openDocument.launch(arrayOf("video/*", "audio/*", "application/x-mpegurl", "application/octet-stream")) },
+                onOpenFile = { openDocument.launch(arrayOf("audio/*", "application/x-mpegurl", "application/octet-stream")) },
                 onActionsReady = { actions = it },
                 requestedDestination = destination,
                 onDestinationShown = { destination = null },
@@ -177,10 +176,6 @@ class NagmedarActivity : ComponentActivity() {
         super.onStart()
         PhysicalKeys.forget()
         getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
-        // S-1303: a conversion left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
-        lifecycleScope.launch(Dispatchers.IO) { TranscodeQueue.resume(applicationContext) }
-        // S-1303: the segments a dead process's HLS stream left in the app's storage
-        lifecycleScope.launch(Dispatchers.IO) { HlsStream.cleanUp(applicationContext) }
         // S-1206: a remux left waiting (by a dead process, or for the app to show) goes on now that it may run in the foreground
         lifecycleScope.launch { RemuxQueue.get(applicationContext).resume() }
         // S-1005: a tag write a dead process left half done: the file back from its copy, the copy gone

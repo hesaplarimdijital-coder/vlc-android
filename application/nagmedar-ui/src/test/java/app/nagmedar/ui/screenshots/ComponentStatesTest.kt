@@ -53,7 +53,6 @@ import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TableColumn
 import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.components.rememberSplitState
-import app.nagmedar.ui.sampleMovies
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagPalette
 import app.nagmedar.ui.theme.NagTheme
@@ -142,7 +141,7 @@ class ComponentStatesTest {
                         TableColumn("Biçim", ColumnWidth.Fixed(140.dp), mono = true) { it.resolution },
                         TableColumn("Süre", ColumnWidth.Fixed(100.dp), alignEnd = true, mono = true) { it.duration },
                     ),
-                    rows = sampleMovies.take(2),
+                    rows = tableRows,
                     key = { it.title },
                     onRowClick = { _, _ -> },
                     sort = TableSort(0, ascending = true),
@@ -269,3 +268,11 @@ class ComponentStatesTest {
     @Test
     fun lightStates() = run(ThemeMode.Light, "components-light")
 }
+
+/** Two rows of a dense table: a title, a format and a length. */
+private data class TableRow(val title: String, val resolution: String, val duration: String)
+
+private val tableRows = listOf(
+    TableRow("Kuzey Işığı", "2160p DV P7", "2:11:45"),
+    TableRow("Sessiz Liman", "2160p HDR10", "1:52:07"),
+)

@@ -1,20 +1,9 @@
 package app.nagmedar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -53,24 +42,24 @@ import app.nagmedar.ui.tvlab.TvLabContent
 import app.nagmedar.ui.tvlab.sampleTvLabView
 
 /** Sample rows for screenshots and layout tests (the medialibrary is native and not available in JVM tests). */
-data class SampleMovie(val title: String, val resolution: String, val duration: String)
+data class SampleTrack(val title: String, val artist: String, val duration: String)
 
-val sampleMovies = listOf(
-    SampleMovie("Kuzey Işığı", "2160p DV P7", "2:11:45"),
-    SampleMovie("Sessiz Liman", "2160p HDR10", "1:52:07"),
-    SampleMovie("Demir Vadi", "2160p DV P8", "2:04:31"),
-    SampleMovie("Mavi Kanal", "1080p", "1:38:12"),
-    SampleMovie("Kırık Pusula", "2160p HDR10+", "2:20:03"),
-    SampleMovie("Tuz ve Kül", "2160p DV P8", "1:47:55"),
-    SampleMovie("Uzak Sinyal", "2160p HDR10", "2:02:40"),
-    SampleMovie("Cam Şehir", "2160p DV P5", "1:59:19"),
+val sampleTracks = listOf(
+    SampleTrack("Sabaha Kadar", "Ada Karan", "4:18"),
+    SampleTrack("Gece Yolcusu", "Cemre Kaya", "4:14"),
+    SampleTrack("Neva Kâr", "Kadri Erdem", "8:18"),
+    SampleTrack("Yağmur", "Cemre Kaya", "3:51"),
+    SampleTrack("Liman Işıkları", "Deniz Aral", "5:02"),
+    SampleTrack("Tuz ve Kül", "Ada Karan", "3:47"),
+    SampleTrack("Uzak Sinyal", "Kuzey Ekibi", "6:20"),
+    SampleTrack("Cam Şehir", "Deniz Aral", "4:39"),
 )
 
 /** The real shell with sample screens and a sample transport bar. */
 @Composable
 fun TestShell(
     widthClass: WidthClass,
-    startDestination: Destination = Destination.Home,
+    startDestination: Destination = Destination.Music,
     sidebarCollapsed: Boolean = false,
     menuBar: MenuBarState? = null,
     /** "Sıradaki" open (S-310): its button lit, the panel in [overlay]. */
@@ -84,7 +73,7 @@ fun TestShell(
 ) {
     val navController = rememberNavController()
     LaunchedEffect(startDestination) {
-        if (startDestination != Destination.Home) ShellNavigator(navController).navigate(startDestination)
+        if (startDestination != Destination.Music) ShellNavigator(navController).navigate(startDestination)
     }
     NagmedarShell(
         widthClass = widthClass,
@@ -92,7 +81,6 @@ fun TestShell(
         onSidebarCollapsedChange = {},
         // sample counts; the podcasts' "new" is the sample's own word (S-1501: the screens in English too)
         badges = mapOf(
-            Destination.Movies to "128",
             Destination.Music to "4 812",
             Destination.Podcasts to if (currentLocale().language == "tr") "4 yeni" else "4 new",
         ),
@@ -114,37 +102,24 @@ fun TestShell(
 @Composable
 fun SampleScreen(destination: Destination) {
     when (destination) {
-        Destination.Movies -> Column(Modifier.fillMaxSize()) {
-            PageHeader(title = stringResource(R.string.nag_nav_movies), subtitle = pluralStringResource(R.plurals.nag_films_count, 128, 128)) {
+        Destination.Music -> Column(Modifier.fillMaxSize()) {
+            PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = pluralStringResource(R.plurals.nag_tracks_count, 4812, 4812)) {
                 NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), {})
                 NagIconButton(NagIcons.ListView, stringResource(R.string.nag_view_list), {}, selected = true)
             }
             DenseTable(
                 columns = listOf(
-                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_title), ColumnWidth.Weight(1f)) { it.title },
-                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_resolution), ColumnWidth.Fixed(140.dp), mono = true) { it.resolution },
-                    TableColumn<SampleMovie>(stringResource(R.string.nag_column_duration), ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { it.duration },
+                    TableColumn<SampleTrack>(stringResource(R.string.nag_column_title), ColumnWidth.Weight(1f)) { it.title },
+                    TableColumn<SampleTrack>(stringResource(R.string.nag_column_artist), ColumnWidth.Fixed(140.dp)) { it.artist },
+                    TableColumn<SampleTrack>(stringResource(R.string.nag_column_duration), ColumnWidth.Fixed(90.dp), alignEnd = true, mono = true) { it.duration },
                 ),
-                rows = sampleMovies,
+                rows = sampleTracks,
                 key = { it.title },
-                selectedKey = "Kuzey Işığı",
+                selectedKey = "Sabaha Kadar",
                 sort = TableSort(0, true),
                 onSortChange = {},
                 onRowClick = { _, _ -> },
             )
-        }
-        Destination.Home -> Column(Modifier.fillMaxSize()) {
-            PageHeader(title = stringResource(R.string.nag_nav_home))
-            Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                sampleMovies.take(3).forEach { movie ->
-                    Column(Modifier.width(200.dp)) {
-                        Box(Modifier.fillMaxWidth().height(112.dp).background(NagTheme.colors.surfaceRaised, RoundedCornerShape(6.dp)))
-                        Spacer(Modifier.height(8.dp))
-                        Text(movie.title, style = NagTheme.type.bodyStrong, color = NagTheme.colors.text)
-                        Text(movie.duration, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
-                    }
-                }
-            }
         }
         // S-1201: the TV Lab with the sample film analysed
         Destination.TvLab -> TvLabContent(sampleTvLabView(), NoTvLabActions)

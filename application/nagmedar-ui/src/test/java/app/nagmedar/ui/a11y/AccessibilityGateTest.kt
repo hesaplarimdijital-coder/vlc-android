@@ -83,14 +83,14 @@ class AccessibilityGateTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun pointerTargetsAndNames() {
-        render(WidthClass.Large, InputMode.Pointer, Destination.Movies)
+        render(WidthClass.Large, InputMode.Pointer, Destination.Music)
         checkTargets(24.dp)
         checkNames()
     }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun touchTargetsAndNamesCompact() {
-        render(WidthClass.Compact, InputMode.Touch, Destination.Movies)
+        render(WidthClass.Compact, InputMode.Touch, Destination.Music)
         checkTargets(48.dp)
         checkNames()
     }
@@ -105,7 +105,7 @@ class AccessibilityGateTest {
     @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun tabMovesFocusThroughControls() {
-        render(WidthClass.Large, InputMode.Pointer, Destination.Movies)
+        render(WidthClass.Large, InputMode.Pointer, Destination.Music)
         // A hardware Tab first takes the window out of touch mode (ViewRootImpl does this before
         // the key reaches Compose); injected test keys skip that step, so do it here. Clickables
         // are focusable only outside touch mode.

@@ -18,12 +18,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.input.PhysicalKeys
-import app.nagmedar.ui.library.MovieOrder
-import app.nagmedar.ui.library.MovieSamples
-import app.nagmedar.ui.library.MoviesLibrary
-import app.nagmedar.ui.library.MoviesView
 import app.nagmedar.ui.playback.FakeQueue
 import app.nagmedar.ui.playback.QueuePanel
 import app.nagmedar.ui.screens.AppearanceSection
@@ -46,8 +41,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * S-310: by touch every target is at least 48 dp each way, on a phone and a tablet: the shell, the
- * films with their chips and selection bar, "Sıradaki", the settings and the shortcut editor.
+ * S-310: by touch every target is at least 48 dp each way, on a phone and a tablet: the shell,
+ * "Sıradaki", the settings and the shortcut editor.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -87,40 +82,14 @@ class TouchTargetTest {
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-mdpi")
     fun phoneShell() {
-        touch { TestShell(WidthClass.Compact, startDestination = Destination.Movies) }
+        touch { TestShell(WidthClass.Compact, startDestination = Destination.Music) }
         assertTargets("phone shell")
     }
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun tabletShell() {
-        touch { TestShell(WidthClass.Expanded, startDestination = Destination.Movies) }
+        touch { TestShell(WidthClass.Expanded, startDestination = Destination.Music) }
         assertTargets("tablet shell")
-    }
-
-    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun filmsWithTheSelectionBar() {
-        val selection = MultiSelection().apply { startSelecting(MovieSamples.demirVadi.key) }
-        touch {
-            MoviesLibrary(
-                library = MovieSamples.library,
-                tech = MovieSamples.tech,
-                view = MoviesView.Grid,
-                filters = emptySet(),
-                onFiltersChange = {},
-                order = MovieOrder.Added,
-                folder = null,
-                onOpenFolder = {},
-                sort = null,
-                onSortChange = {},
-                selected = null,
-                onSelect = {},
-                onShowDetails = {},
-                onPlay = {},
-                menu = { _, _, _ -> emptyList() },
-                selection = selection,
-            )
-        }
-        assertTargets("films")
     }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-mdpi")
