@@ -25,7 +25,7 @@ import org.videolan.vlc.media.ResumeOwner
  * place kept every few seconds and when it pauses or stops, the episode marked played at its end, and the next one started
  * when the show's outro begins, and the show's volume boost applied for as long as its episode plays. The rules are
  * [EpisodeTracker]'s; this looks, asks Room, and does what it says. A stream that drops before its end is opened again
- * where it was ([DropoutRecovery]).
+ * where it was, a live stream (radio) connected to again, and one that stalls taken as dropped ([DropoutRecovery]).
  * A look a second while it plays, every few seconds while it does not.
  */
 class PodcastPlaybackObserver : PlaybackObserver {

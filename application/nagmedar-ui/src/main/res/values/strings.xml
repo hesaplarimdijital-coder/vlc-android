@@ -2142,6 +2142,7 @@
     <string name="nag_pod_ep_pause">Pause</string>
     <string name="nag_pod_ep_resume">Resume · %s</string>
     <string name="nag_pod_dropout_gave_up">The connection dropped and the episode could not go on. Its place is kept: play it to resume.</string>
+    <string name="nag_live_dropout_gave_up">The stream dropped and could not be reconnected.</string>
     <string name="nag_pod_ep_offline_text">The episode plays only if it is downloaded. Its chapters and transcript come when you are connected.</string>
     <string name="nag_pod_dl_queued_title">Waiting to download</string>
     <string name="nag_pod_dl_queued_text">It starts when the network allows; automatic downloads wait for Wi-Fi and a charged battery.</string>

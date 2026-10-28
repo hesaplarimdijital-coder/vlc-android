@@ -191,7 +191,7 @@ Sözlüğü testler denetler:
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |
 | giriş, kapanış | intro, outro | | | Bir podcast bölümünün başında ve sonunda atlanan saniyeler: “Girişi atla”, “Kapanışı atla” |
-| bağlantı kopması | dropout | | | Akışla çalan bir bölümün bağlantısı sonundan önce gidince (ağ kaybı, Wi-Fi'den mobil veriye geçiş) bölüm bitmiş sayılmaz, kaldığı yerden yeniden açılır; olmazsa “Bağlantı koptu, bölüm sürdürülemedi.” |
+| bağlantı kopması | dropout | | | Akışla çalan bir bölümün bağlantısı sonundan önce gidince (ağ kaybı, Wi-Fi'den mobil veriye geçiş) bölüm bitmiş sayılmaz, kaldığı yerden yeniden açılır; olmazsa “Bağlantı koptu, bölüm sürdürülemedi.” Radyoda ve canlı akışta aynı adrese yeniden bağlanılır; olmazsa “Yayın koptu, yeniden bağlanılamadı.” Açık kalıp veri getirmeyen bağlantı da kopmuş sayılır |
 | dönüştürmek | convert | | transcode | Bir müzik dosyasını başka bir biçimde (Opus, MP3, AAC) yeni bir dosyaya yazmak; asıl dosyaya dokunulmaz: “Dönüştür…”, “Dönüştürme bitti” |
 | hedef klasör | destination folder | | target folder | Dönüştürülen dosyaların yazıldığı, sistemin seçicisiyle bir kez seçilen klasör |
 | kayıplı | lossy | | | MP3, AAC, Opus, Vorbis gibi biçimler; kayıplı bir parça yeniden dönüştürülünce kalitesi biraz daha düşer |

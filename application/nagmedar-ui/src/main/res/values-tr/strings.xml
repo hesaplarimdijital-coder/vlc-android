@@ -2133,6 +2133,7 @@
     <string name="nag_pod_ep_pause">Duraklat</string>
     <string name="nag_pod_ep_resume">Devam et · %s</string>
     <string name="nag_pod_dropout_gave_up">Bağlantı koptu, bölüm sürdürülemedi. Kaldığı yer saklandı; oynatınca oradan devam eder.</string>
+    <string name="nag_live_dropout_gave_up">Yayın koptu, yeniden bağlanılamadı.</string>
     <string name="nag_pod_ep_offline_text">Bölüm ancak indirildiyse oynatılır. Kısımları ve dökümü bağlandığınızda gelir.</string>
     <string name="nag_pod_dl_queued_title">İndirilmeyi bekliyor</string>
     <string name="nag_pod_dl_queued_text">Ağ uygun olunca başlar; otomatik indirmeler Wi-Fi\'ı ve dolu bir pili bekler.</string>
