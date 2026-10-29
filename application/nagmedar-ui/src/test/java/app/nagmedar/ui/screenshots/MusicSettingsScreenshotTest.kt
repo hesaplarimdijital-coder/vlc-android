@@ -70,8 +70,8 @@ class MusicSettingsScreenshotTest {
         usbDacs: List<UsbDac> = emptyList(),
         device: String? = null,
         scan: ReplayGainScan.Progress = ReplayGainScan.Progress(),
-        prefs: SharedPreferences.Editor.() -> Unit = {},
         fontScale: Float? = null,
+        prefs: SharedPreferences.Editor.() -> Unit = {},
     ) {
         // the settings the section reads, as a user left them
         val settings = compose.activity.getSharedPreferences("music-shot-$name", Context.MODE_PRIVATE)
