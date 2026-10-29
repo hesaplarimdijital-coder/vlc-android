@@ -1,24 +1,36 @@
 #!/usr/bin/env python3
 """Emulator smoke test of the Nağmedar app (adb + uiautomator dump + input; no extra APKs).
 
-Installs the debug APK on the running emulator, walks the app like a user would and, after
-every step, saves a screenshot, the UI hierarchy and a verdict from logcat (crashes, ANRs,
-StrictMode violations). The walk, in passes (a size and a language each):
+Installs the APK on the running emulator, walks the app like a user would and, after every step,
+saves a screenshot, the UI hierarchy and a verdict from logcat (crashes, ANRs, StrictMode
+violations). The walk, in passes (a size and a language each):
 
-  tablet-en  first run (every step), then each top-level destination, Settings and its pages
-  phone-en   the same on a phone-sized screen with media granted and test files scanned, the
-             first-run flow again, opening files for playback (a video, a video stored turned
-             as a phone records in portrait, which must show upright, and a music file), the
-             command palette (Ctrl+K), the shortcut list, rotation, background and foreground
-  phone-tr   every destination and Settings in Turkish
+  tablet-en    first run (every step), then each top-level destination, Settings and its pages
+  phone-en     the same on a phone-sized screen with media granted and test files scanned, the
+               first-run flow again, then 1.0's phone: the bottom bar (Music · Podcast · Radio · ⋯
+               and nothing else), the ⋯ sheet opened and closed with Back, a track's ⋯ sheet, a
+               track played, the mini player dragged up into the full player and down again, a
+               sideways swipe on it to the next track, a podcast followed (--feed) and an
+               episode's page whose play button must not move after it opened, the Radio; then a
+               music file opened from outside, the command palette (Ctrl+K), the shortcut list,
+               rotation, background and foreground
+  workstation  the tablet's Music: the inspector shown, Ctrl+I hides and shows it, the table's
+               column chooser (a title's long press) opens and Escape closes it
+  phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ sheet
+
+Every dump of the app is also searched for the words of what 1.0 deleted (films, series, videos,
+the Home page, TV Lab). Around a long list's scroll and the player's drag the frames are counted
+(dumpsys gfxinfo: janky frames and the 50/90/95/99th percentiles, informational on an emulator).
+Each 1.0 check is a row of the report's "1.0 checks"; a failed one fails the run, as do a crash,
+an ANR and, for the debug build (--build debug), a StrictMode violation of the app.
 
 Destinations are found by their labels: every nag_nav_* string of app/nagmedar-ui's
 strings.xml (in the pass's language) that shows up in the UI hierarchy is visited, so a
 destination added later is visited without a change here. The Nağmedar native libraries exist
 for arm64 only: on this x86_64 emulator they are missing, and the app must say so and go on.
 
-Exit status 1 when the app crashed, hung (ANR) or the driver itself failed; the report
-(report.md, report.json), annotations.txt and the evidence go to the --out directory.
+Exit status 1 when the app crashed, hung (ANR), a check failed or the driver itself failed; the
+report (report.md, report.json), annotations.txt and the evidence go to the --out directory.
 """
 import argparse
 import collections
@@ -44,6 +56,8 @@ PERMISSIONS_MEDIA = ["android.permission.READ_MEDIA_AUDIO", "android.permission.
 NAV_SKIP = {"nag_nav_settings", "nag_nav_more", "nag_nav_search"}
 LOG_RE = re.compile(r"^(\S+ \S+)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.+?)\s*: (.*)$")
 BOUNDS_RE = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
+# what 1.0 deleted (films, series, videos, the Home page, TV Lab) must not be named on the app's screens
+GONE_RE = re.compile(r"(?<!\w)(Filmler|Diziler|Videolar|Ana sayfa|TV Lab|Films|Movies|TV shows|Videos)(?!\w)")
 
 
 class Node:
@@ -55,6 +69,7 @@ class Node:
         self.pkg = a.get("package", "")
         self.rid = a.get("resource-id", "")
         self.clickable = a.get("clickable") == "true"
+        self.scrollable = a.get("scrollable") == "true"
         m = BOUNDS_RE.match(a.get("bounds", ""))
         self.b = tuple(int(g) for g in m.groups()) if m else (0, 0, 0, 0)
 
@@ -112,6 +127,9 @@ class Smoke:
         self.launcher = None
         self.last_sig = None
         self.relaunches = 0
+        self.checks = []  # 1.0's checks: pass, name, ok, detail, step
+        self.jank = []  # dumpsys gfxinfo around a gesture
+        self.gone = collections.OrderedDict()  # a deleted feature's word -> where it was first seen
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
@@ -490,6 +508,7 @@ class Smoke:
             xml = self.settle(0.5)
             nodes = self.nodes(xml)
         sig = self.signature(nodes) if nodes else None
+        self.gone_words(nodes, name)
         if xml is None:
             note.append("no UI dump (the screen never went idle?)")
             self.warnings.append("[%s] step %d %s: no UI dump" % (self.cur_pass, n, title))
@@ -703,6 +722,337 @@ class Smoke:
             self.step("%s step %d (%s)" % (title, i + 1, target.text.strip() or target.desc.strip()),
                       lambda t=target: self.tap(t), wait=1.0)
 
+    # ---------------------------------------------------------------- 1.0 checks
+
+    def check(self, name, ok, detail=""):
+        """One of 1.0's checks, with the step it was read at; a failed one fails the run."""
+        self.checks.append({"pass": self.cur_pass, "name": name, "ok": bool(ok), "detail": detail, "step": self.n})
+        self.log("check [%s] %s: %s %s" % (self.cur_pass, name, "ok" if ok else "FAILED", detail))
+        if self.steps and not ok:
+            st = self.steps[-1]
+            st["note"] += ("; " if st["note"] else "") + "check failed: " + name
+        return ok
+
+    def gone_words(self, nodes, where):
+        for n in nodes:
+            if n.pkg != self.pkg:
+                continue
+            for text in (n.text, n.desc):
+                m = GONE_RE.search(text)
+                if m and m.group(1) not in self.gone:
+                    self.gone[m.group(1)] = '%s: "%s"' % (where, text.replace("\n", " ")[:120])
+
+    def app_nodes(self, nodes):
+        return [n for n in nodes if n.pkg == self.pkg and n.area]
+
+    def by_id(self, nodes, rid):
+        """The app's nodes whose test tag (a resource id, testTagsAsResourceId) is [rid]."""
+        return [n for n in self.app_nodes(nodes) if n.rid == rid or n.rid.endswith(":id/" + rid)]
+
+    def texts(self, nodes):
+        return {n.text.strip() for n in self.app_nodes(nodes)} | {n.desc.strip() for n in self.app_nodes(nodes)}
+
+    def wait_for(self, find, seconds=10.0):
+        """The first dump's nodes for which find(nodes) is true within [seconds]; (nodes, result)."""
+        end = time.time() + seconds
+        nodes, found = [], None
+        while True:
+            nodes = self.nodes(self.dump())
+            found = find(nodes)
+            if found or time.time() > end:
+                return nodes, found
+            time.sleep(0.7)
+
+    def bottom_bar(self, nodes):
+        """The labels of the phone's bottom bar, left to right (the row of the lowest Music label)."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        music = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_music"] and n.center[1] > h * 0.8]
+        if not music:
+            return []
+        y = max(n.center[1] for n in music)
+        row = [n for n in self.app_nodes(nodes) if n.text.strip() and abs(n.center[1] - y) <= 16]
+        return [n.text.strip() for n in sorted(row, key=lambda n: n.b[0])]
+
+    def check_bottom_bar(self, nodes):
+        s = self.strings[self.lang]
+        want = [s["nag_nav_music"], s["nag_nav_podcasts_short"], s["nag_nav_radio"], s["nag_nav_more"]]
+        got = self.bottom_bar(nodes)
+        return self.check("bottom bar is %s" % " · ".join(want), got == want, "seen: %s" % (" · ".join(got) or "no bar"))
+
+    def animations(self, on):
+        """The system's animation scales: on (1) around the frame counts, as on a device; off (0) elsewhere."""
+        for k in ("window_animation_scale", "transition_animation_scale", "animator_duration_scale"):
+            self.sh("settings put global %s %s" % (k, "1" if on else "0"))
+
+    def frames_reset(self):
+        self.sh("dumpsys gfxinfo %s reset" % self.pkg, timeout=60)
+
+    def frames_read(self, what):
+        """dumpsys gfxinfo's summary since the last reset: frames, janky %, 50/90/95/99th percentiles."""
+        out = self.sh("dumpsys gfxinfo %s" % self.pkg, timeout=60)
+        r = {"pass": self.cur_pass, "what": what, "step": self.n}
+        for key, rx in (("frames", r"Total frames rendered:\s*(\d+)"), ("janky", r"Janky frames:\s*\d+\s*\(([\d.]+)%\)"),
+                        ("janky_n", r"Janky frames:\s*(\d+)"), ("p50", r"50th percentile:\s*(\d+)ms"),
+                        ("p90", r"90th percentile:\s*(\d+)ms"), ("p95", r"95th percentile:\s*(\d+)ms"),
+                        ("p99", r"99th percentile:\s*(\d+)ms")):
+            m = re.search(rx, out)
+            r[key] = float(m.group(1)) if m else None
+        self.jank.append(r)
+        self.log("frames [%s] %s: %s" % (self.cur_pass, what, r))
+        if r["janky"] is not None and r["janky"] > 40:
+            self.warnings.append("[%s] %s: %.1f %% janky frames (over 40 %%; informational on an emulator)" % (self.cur_pass, what, r["janky"]))
+        return r
+
+    def open_music(self):
+        s = self.strings[self.lang]
+        if not self.open_label(s["nag_nav_music"]):
+            self.warnings.append("[%s] Music not found in the UI" % self.cur_pass)
+        return self.step("Music")
+
+    def phone_sheets(self):
+        """⋯ of the bottom bar opens the glass sheet of the other pages, Back closes it (from the Music)."""
+        s = self.strings[self.lang]
+        nodes = self.open_music()
+        self.check_bottom_bar(nodes)
+        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"]]
+        if not self.check("⋯ in the bottom bar", bool(more)):
+            return
+        sheet = (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])
+        nodes = self.step("Bottom bar ⋯", lambda: self.tap(more[-1]))
+        seen = self.texts(nodes)
+        self.check("⋯ opens the sheet", all(x in seen for x in sheet), "seen: %s" % ", ".join(x for x in sheet if x in seen))
+        self.key(4)
+        nodes = self.step("Back with the sheet open")
+        seen = self.texts(nodes)
+        self.check("Back closes the sheet", not any(x in seen for x in sheet[:2]) and bool(self.bottom_bar(nodes)),
+                   "left: %s" % (", ".join(x for x in sheet[:2] if x in seen) or "none"))
+
+    def item_sheet(self, nodes):
+        """A track's ⋯ opens its sheet (Add to queue …), Back closes it."""
+        s = self.strings[self.lang]
+        rx = self.fmt_regex(s["nag_more_actions_for"])
+        w, h = self.screen_size(nodes)
+        buttons = [n for n in self.app_nodes(nodes) if rx.match(n.desc.strip()) and h * 0.2 < n.center[1] < h * 0.75]
+        if not self.check("a track's ⋯ button", bool(buttons)):
+            return
+        b = buttons[0]
+        nodes = self.step("A track's ⋯ (%s)" % b.desc.strip()[:40], lambda: self.tap(b))
+        opened = s["nag_add_to_queue"] in self.texts(nodes)
+        self.check("a track's ⋯ opens its sheet", opened)
+        if opened:
+            self.key(4)
+            nodes = self.step("Back from the track's sheet")
+            self.check("Back closes the track's sheet", s["nag_add_to_queue"] not in self.texts(nodes))
+
+    def music_list(self, nodes):
+        """The Music's scrolling list (its biggest scrollable view) or None."""
+        lists = [n for n in self.app_nodes(nodes) if n.scrollable]
+        return max(lists, key=lambda n: n.area) if lists else None
+
+    def scroll_frames(self, what, nodes):
+        """Flings the biggest list down and back and counts the frames."""
+        lst = self.music_list(nodes)
+        w, h = self.screen_size(nodes)
+        if lst is None or lst.b[3] - lst.b[1] < h // 3:
+            self.warnings.append("[%s] no long scrolling list for '%s': the middle of the screen is swiped" % (self.cur_pass, what))
+            box = (w // 3, int(h * 0.3), w * 2 // 3, int(h * 0.75))
+        else:
+            box = lst.b
+        x = (box[0] + box[2]) // 2
+        top, bottom = box[1] + (box[3] - box[1]) // 5, box[3] - (box[3] - box[1]) // 5
+        self.animations(True)
+        self.frames_reset()
+        for direction in (1, 1, 1, -1, -1, -1):
+            a, b = (bottom, top) if direction > 0 else (top, bottom)
+            self.sh("input swipe %d %d %d %d 150" % (x, a, x, b))
+            time.sleep(1.2)
+        self.frames_read(what)
+        self.animations(False)
+        self.step(what + " (after the scroll)")
+
+    def play_track(self, nodes):
+        """Plays the first of the walk's tracks (--music, "Profile track …") from the Music's list."""
+        rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track")]
+        if not rows:
+            rows = [n for n in self.app_nodes(nodes) if n.text.strip() == "Smoke tone"]
+        if not self.check("a track in the Music's list", bool(rows)):
+            return []
+        row = rows[0]
+        self.step("Play %s" % row.text.strip(), lambda: self.tap(row), wait=2)
+        nodes, mini = self.wait_for(lambda ns: self.by_id(ns, "mini-player"), 10)
+        self.check("the mini player shows the track", bool(mini))
+        return nodes
+
+    def mini_title(self, nodes):
+        mini = self.by_id(nodes, "mini-player")
+        if not mini:
+            return None
+        b = mini[0].b
+        inside = [n for n in self.app_nodes(nodes) if n.text.strip() and b[0] <= n.center[0] <= b[2] and b[1] <= n.center[1] <= b[3]]
+        return " / ".join(n.text.strip() for n in inside)
+
+    def player_drag(self):
+        """The mini player dragged up into the full player and down again; then swiped sideways."""
+        nodes = self.nodes(self.dump())
+        mini = self.by_id(nodes, "mini-player")
+        if not self.check("a mini player to drag", bool(mini)):
+            return
+        w, h = self.screen_size(nodes)
+        cx, cy = mini[0].center
+        self.animations(True)
+        self.frames_reset()
+        nodes = self.step("Drag the mini player up", lambda: self.sh("input swipe %d %d %d %d 450" % (cx, cy, cx, int(h * 0.12))), wait=1.5)
+        self.check("dragged up, the full player shows", bool(self.by_id(nodes, "phone-player")))
+        nodes = self.step("Drag the full player down", lambda: self.sh("input swipe %d %d %d %d 450" % (w // 2, int(h * 0.3), w // 2, int(h * 0.95))), wait=1.5)
+        self.frames_read("player drag up and down")
+        self.animations(False)
+        self.check("dragged down, the mini player again", not self.by_id(nodes, "phone-player") and bool(self.by_id(nodes, "mini-player")))
+        before = self.mini_title(nodes)
+        mini = self.by_id(nodes, "mini-player")
+        if not mini:
+            return
+        b = mini[0].b
+        y = (b[1] + b[3]) // 2
+        x0, x1 = b[0] + int((b[2] - b[0]) * 0.8), b[0] + int((b[2] - b[0]) * 0.1)
+        self.step("Swipe the mini player sideways", lambda: self.sh("input swipe %d %d %d %d 300" % (x0, y, x1, y)), wait=2)
+        nodes, after = self.wait_for(lambda ns: (lambda t: t if t and t != before else None)(self.mini_title(ns)), 6)
+        self.check("a sideways swipe changes the track", bool(after), "%s → %s" % (before, after or self.mini_title(nodes)))
+
+    def follow_podcast(self, nodes):
+        """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
+        s = self.strings[self.lang]
+        add = self.by_id(nodes, "podcast-add")
+        if not add:
+            self.warnings.append("[%s] no 'podcast-add' on the Podcasts" % self.cur_pass)
+            return nodes
+        nodes = self.step("Add a podcast by its address", lambda: self.tap(add[0]))
+        field = [n for n in self.app_nodes(nodes) if n.rid.endswith("podcast-add-field") or n.cls == "android.widget.EditText"]
+        if not self.check("the podcast address field", bool(field)):
+            self.key(4)
+            return self.step("Back from the address dialog")
+        self.tap(field[0])
+        time.sleep(0.5)
+        self.sh("input text '%s'" % self.a.feed)
+        nodes = self.step("The feed's address typed")
+        submit = [n for n in self.app_nodes(nodes) if n.rid.endswith("podcast-add-submit") or n.text.strip() == s["nag_pod_subscribe"]]
+        self.step("Subscribe", (lambda: self.tap(submit[-1])) if submit else (lambda: self.key(66)), wait=2)
+        nodes, done = self.wait_for(lambda ns: self.by_id(ns, "podcast-page") or self.by_id(ns, "podcast-episode") or self.by_id(ns, "podcast-row"), 30)
+        self.check("the feed is followed", bool(done))
+        return self.step("Followed")
+
+    def episode_page(self):
+        """A followed podcast's page, then an episode's: its play button stays where it first showed."""
+        s = self.strings[self.lang]
+        self.open_label(s["nag_nav_podcasts_short"]) or self.open_label(s["nag_nav_podcasts"])
+        nodes = self.step("Podcasts")
+        self.check("the Podcasts open", bool(self.by_id(nodes, "podcast-add") or self.by_id(nodes, "podcast-list")
+                                             or self.by_id(nodes, "podcast-grid") or self.by_id(nodes, "podcast-row")))
+        if not self.a.feed:
+            return
+        if not (self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")):
+            nodes = self.follow_podcast(nodes)
+        if not self.by_id(nodes, "podcast-episode"):
+            show = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
+            if not self.check("a followed podcast", bool(show)):
+                return
+            self.step("The podcast's page", lambda: self.tap(show[0]))
+            nodes, _ = self.wait_for(lambda ns: self.by_id(ns, "podcast-episode"), 15)
+        episodes = self.by_id(nodes, "podcast-episode")
+        if not self.check("an episode on the podcast's page", bool(episodes)):
+            return
+        # the play button's bounds in the first dump that has it and in one at least 1.5 s later
+        self.tap(episodes[0])
+        t_tap = time.time()
+        first, t_first = None, None
+        while time.time() - t_tap < 12:
+            nd = self.nodes(self.dump())
+            play = self.by_id(nd, "episode-play")
+            if play:
+                first, t_first = play[0].b, time.time()
+                break
+        if not self.check("the episode's play button", first is not None):
+            self.key(4)
+            return
+        time.sleep(1.6)
+        later = []
+        for _ in range(2):
+            nd = self.nodes(self.dump())
+            play = self.by_id(nd, "episode-play")
+            later.append((round(time.time() - t_first, 1), play[0].b if play else None))
+            time.sleep(1.0)
+        self.step("Episode page (the play button watched)")
+        moved = [(dt, b) for dt, b in later if b != first]
+        self.check("the episode's play button does not move", not moved,
+                   "first %s at %.1f s; then %s" % (first, t_first - t_tap, "; ".join("%s at +%.1f s" % (b, dt) for dt, b in later)))
+        self.key(4)
+        self.step("Back from the episode")
+        self.key(4)
+        self.step("Back from the podcast")
+
+    def radio_opens(self):
+        s = self.strings[self.lang]
+        self.open_label(s["nag_nav_radio"])
+        nodes = self.step("Radio")
+        ids = {"radio-tabs", "radio-list", "radio-offline", "radio-none", "radio-retry"}
+        self.check("the Radio opens", any(self.by_id(nodes, i) for i in ids))
+
+    def phone_player(self):
+        """1.0's phone: sheets, a track played, the list's frames, the player's drag, the episode page, the Radio."""
+        nodes = self.open_music()
+        self.item_sheet(nodes)
+        self.phone_sheets()
+        nodes = self.open_music()
+        self.scroll_frames("Music list scroll", nodes)
+        for _ in range(4):
+            self.swipe_down(nodes)
+        nodes = self.nodes(self.settle(0.8))
+        self.play_track(nodes)
+        self.player_drag()
+        self.episode_page()
+        self.radio_opens()
+
+    def column_header(self, nodes):
+        """The Music table's column titles: the row where at least three of them stand side by side."""
+        s = self.strings[self.lang]
+        names = {s[k] for k in ("nag_column_title", "nag_column_artist", "nag_column_album", "nag_column_duration",
+                                "nag_column_year", "nag_column_track_number") if k in s}
+        hits = [n for n in self.app_nodes(nodes) if n.text.strip() in names]
+        rows = collections.defaultdict(list)
+        for n in hits:
+            rows[n.center[1] // 12].append(n)
+        best = max(rows.values(), key=len, default=[])
+        return best if len(best) >= 3 else []
+
+    def pass_workstation(self):
+        """The tablet's (and DeX's) Music: the inspector, Ctrl+I, the column chooser, the table's frames."""
+        self.cur_pass, self.lang = "workstation", "en"
+        s = self.strings["en"]
+        self.set_display(None, None)
+        self.rotate(0)
+        self.launch()
+        nodes = self.open_music()
+        nodes, _ = self.wait_for(lambda ns: self.by_id(ns, "inspector"), 6)
+        self.check("the Music shows the inspector", bool(self.by_id(nodes, "inspector")))
+        self.combo(113, 37)  # Ctrl+I
+        nodes = self.step("Ctrl+I (hide the inspector)", wait=1.2)
+        self.check("Ctrl+I hides the inspector", not self.by_id(nodes, "inspector"))
+        self.combo(113, 37)
+        nodes = self.step("Ctrl+I (show the inspector)", wait=1.2)
+        self.check("Ctrl+I shows the inspector again", bool(self.by_id(nodes, "inspector")))
+        header = self.column_header(nodes)
+        if self.check("the table's column titles", bool(header), ", ".join(n.text for n in header)):
+            cell = sorted(header, key=lambda n: n.b[0])[1]
+            x, y = cell.center
+            nodes = self.step("Long press on the column title %s" % cell.text, lambda: self.sh("input swipe %d %d %d %d 1200" % (x, y, x, y)), wait=1.2)
+            opened = s["nag_columns_reset"] in self.texts(nodes)
+            self.check("the column chooser opens", opened)
+            if opened:
+                self.key(111)  # Escape
+                nodes = self.step("Escape closes the column chooser")
+                self.check("Escape closes the column chooser", s["nag_columns_reset"] not in self.texts(nodes))
+        self.scroll_frames("Music table scroll (tablet)", self.nodes(self.dump()))
+
     # ---------------------------------------------------------------- passes
 
     def pass_tablet_en(self):
@@ -723,7 +1073,8 @@ class Smoke:
         self.set_display("1080x2400", "420")
         self.prepare_media()
         self.launch()
-        self.step("Launch (phone)")
+        nodes = self.step("Launch (phone)")
+        self.check_bottom_bar(nodes)
         self.visit_destinations()
         self.settings_pass(full=True)
         self.open_label(s["nag_nav_settings"])
@@ -736,6 +1087,7 @@ class Smoke:
         else:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
         self.visit_destinations("Reopen")
+        self.phone_player()
         self.playback()
         self.palette()
         self.rotation_and_background()
@@ -746,6 +1098,7 @@ class Smoke:
             self.warnings.append("[phone-tr] the Turkish interface could not be set; the pass was skipped")
             return
         self.step("Launch (Turkish)")
+        self.phone_sheets()
         self.visit_destinations()
         self.settings_pass(full=True)
         self.sh("cmd locale set-app-locales %s --locales en-US" % self.pkg)
@@ -756,19 +1109,22 @@ class Smoke:
             return
         for perm in PERMISSIONS_MEDIA:
             self.sh("pm grant %s %s" % (self.pkg, perm))
-        for f, dest in (("tone.mp3", "/sdcard/Music/"), ("smoke.mp4", "/sdcard/Movies/"), ("rotated.mp4", "/sdcard/Movies/")):
+        for f, dest in (("tone.mp3", "/sdcard/Music/"),):
             src = os.path.join(self.a.media, f)
             if os.path.exists(src):
                 self.sh("mkdir -p " + dest)
                 self.adb("push", src, dest + f, timeout=120)
                 self.sh("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://%s%s" % (dest, f))
+        # the walk's tracks (a long list to scroll, a queue to swipe through): a folder of their own
+        if self.a.music and os.path.isdir(self.a.music):
+            self.sh("mkdir -p /sdcard/Music/nagmedar-walk")
+            rc, out = self.adb("push", *sorted(glob.glob(os.path.join(self.a.music, "*.mp3"))), "/sdcard/Music/nagmedar-walk/", timeout=300)
+            if rc != 0:
+                self.warnings.append("the walk's tracks were not pushed: " + out.strip()[-200:])
 
     def playback(self):
-        # rotated.mp4 is stored as a phone records in portrait (landscape pictures, "rotate 90"):
-        # its shots must show it upright, "TOP" at the top, filling the width
-        for f, mime, title in (("/sdcard/Movies/smoke.mp4", "video/mp4", "video"),
-                               ("/sdcard/Movies/rotated.mp4", "video/mp4", "rotated video"),
-                               ("/sdcard/Music/tone.mp3", "audio/mpeg", "audio")):
+        # a music file opened from another app (1.0 plays no video: it offers itself for audio only)
+        for f, mime, title in (("/sdcard/Music/tone.mp3", "audio/mpeg", "audio"),):
             if self.over_time():
                 return
             if not self.sh("ls %s 2>/dev/null" % f):
@@ -888,8 +1244,15 @@ class Smoke:
             self.strict_dropbox()
         except Exception as e:  # the report must still be written
             self.warnings.append("dropbox could not be read: %s" % e)
-        n_fail = sum(1 for s in self.steps if s["status"] == "FAIL")
-        verdict = "FAILED" if (self.crashes or self.errors) else "passed"
+        # the words of what 1.0 deleted, over every dump of the walk
+        self.cur_pass = "all"
+        self.check("no film, series, video, Home or TV Lab words on the app's screens", not self.gone,
+                   "; ".join("%s (%s)" % kv for kv in self.gone.items()))
+        if self.a.build == "debug":
+            self.check("no StrictMode violation of the app (debug build)", self.strict_total == 0 and not self.strict_dropbox_count,
+                       "%d in the log, %d in the dropbox" % (self.strict_total, sum(self.strict_dropbox_count.values())))
+        failed = [c for c in self.checks if not c["ok"]]
+        verdict = "FAILED" if (self.crashes or self.errors or failed) else "passed"
         dur = int(time.time() - self.t0)
         md = []
         md.append("# Emulator smoke test: %s\n" % verdict)
@@ -897,8 +1260,26 @@ class Smoke:
         md.append("- installed: %s" % (getattr(self, "app_info", "") or "?"))
         md.append("- device: %s" % ", ".join("%s=%s" % kv for kv in getattr(self, "device", {}).items()))
         md.append("- source: %s" % (self.a.source or "?"))
-        md.append("- %d steps in %d min %d s; %d crash/ANR finding(s), %d driver error(s), %d StrictMode violation(s)\n"
-                  % (len(self.steps), dur // 60, dur % 60, len(self.crashes), len(self.errors), self.strict_total))
+        md.append("- %d steps in %d min %d s; %d crash/ANR finding(s), %d driver error(s), %d StrictMode violation(s), "
+                  "%d of %d 1.0 checks failed\n"
+                  % (len(self.steps), dur // 60, dur % 60, len(self.crashes), len(self.errors), self.strict_total,
+                     len(failed), len(self.checks)))
+        md.append("## 1.0 checks\n")
+        md.append("| pass | step | check | result | seen |")
+        md.append("|------|------|-------|--------|------|")
+        for c in self.checks:
+            md.append("| %s | %d | %s | %s | %s |" % (c["pass"], c["step"], c["name"], "ok" if c["ok"] else "**FAILED**",
+                                                    c["detail"].replace("|", "/").replace("\n", " ")[:300]))
+        md.append("")
+        md.append("## Frames (dumpsys gfxinfo; informational on an emulator, over 40 % janky is flagged)\n")
+        md.append("| pass | step | gesture | frames | janky | 50th | 90th | 95th | 99th |")
+        md.append("|------|------|---------|--------|-------|------|------|------|------|")
+        for r in self.jank:
+            pct = lambda k: "%d ms" % r[k] if r[k] is not None else "?"
+            janky = "?" if r["janky"] is None else "%.1f %%%s" % (r["janky"], " **(over 40 %)**" if r["janky"] > 40 else "")
+            md.append("| %s | %d | %s | %s | %s | %s | %s | %s | %s |" % (r["pass"], r["step"], r["what"],
+                      "?" if r["frames"] is None else "%d" % r["frames"], janky, pct("p50"), pct("p90"), pct("p95"), pct("p99")))
+        md.append("")
         if self.crashes:
             md.append("## Crashes and ANRs\n")
             for i, c in enumerate(self.crashes, 1):
@@ -946,7 +1327,8 @@ class Smoke:
             f.write("\n".join(md))
         with open(os.path.join(self.out, "report.json"), "w", encoding="utf-8") as f:
             json.dump({"verdict": verdict, "steps": self.steps, "crashes": self.crashes, "errors": self.errors,
-                       "warnings": self.warnings, "strictmode": self.strict_total, "seconds": dur}, f, indent=1)
+                       "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
+                       "frames": self.jank, "seconds": dur}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
@@ -954,14 +1336,16 @@ class Smoke:
             ann.append("::error title=Emulator %s (%s, step %d)::%s" % (c["kind"], c["pass"], c["step"], enc(body[:900])))
         for e in self.errors:
             ann.append("::error title=Emulator driver::%s" % enc(e[:600]))
-        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d warnings, %d min. Evidence: branch %s, report.md" % (
-            verdict, len(self.steps), len(self.crashes), self.strict_total, len(self.warnings), dur // 60,
-            self.a.branch or "ci/emulator")
+        for c in failed:
+            ann.append("::error title=Emulator check (%s, step %d)::%s %s" % (c["pass"], c["step"], c["name"], enc(c["detail"][:600])))
+        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d/%d checks failed, %d warnings, %d min. Evidence: branch %s, report.md" % (
+            verdict, len(self.steps), len(self.crashes), self.strict_total, len(failed), len(self.checks), len(self.warnings),
+            dur // 60, self.a.branch or "ci/emulator")
         ann.append("::notice title=Emulator Ekran görüntüleri ve rapor::%s" % enc(summary))
         with open(os.path.join(self.out, "annotations.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(ann) + "\n")
         print("\n".join(md[:12]))
-        return 1 if (self.crashes or self.errors) else 0
+        return 1 if (self.crashes or self.errors or failed) else 0
 
 
 def enc(s):
@@ -974,8 +1358,11 @@ def main():
     p.add_argument("--package", default="app.nagmedar.debug")
     p.add_argument("--out", default="emulator-out")
     p.add_argument("--res", default="application/nagmedar-ui/src/main/res")
-    p.add_argument("--media", default="", help="directory with tone.mp3, smoke.mp4 and rotated.mp4 to push to the device")
-    p.add_argument("--passes", default="tablet-en,phone-en,phone-tr")
+    p.add_argument("--media", default="", help="directory with tone.mp3 to push to the device")
+    p.add_argument("--music", default="", help="directory of tagged .mp3 tracks (\"Profile track …\") pushed to the device's Music")
+    p.add_argument("--feed", default="", help="a podcast feed's address the walk follows (the emulator's view of it)")
+    p.add_argument("--build", default="debug", help="the build walked (debug: StrictMode violations fail the run)")
+    p.add_argument("--passes", default="tablet-en,phone-en,workstation,phone-tr")
     p.add_argument("--adb", default="adb")
     p.add_argument("--deadline-min", type=int, default=40, help="stop starting new work after this many minutes")
     p.add_argument("--source", default="", help="what was tested (ref and commit), for the report")
