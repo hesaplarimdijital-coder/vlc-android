@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MusicScreenshotTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:12:22.565Z" hostname="runnervmnwato" time="1.306">
+  <properties/>
+  <testcase name="phonePlayer" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.108"/>
+  <testcase name="ratingWindow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.073"/>
+  <testcase name="lyricsDex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.148"/>
+  <testcase name="phonePlayerNarrow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.134"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.114"/>
+  <testcase name="phonePlayerOledEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.096"/>
+  <testcase name="phonePlayerSideways" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.114"/>
+  <testcase name="phonePlayerLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.098"/>
+  <testcase name="dexLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.124"/>
+  <testcase name="tabletLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.092"/>
+  <testcase name="tabletGenres" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.089"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.116"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

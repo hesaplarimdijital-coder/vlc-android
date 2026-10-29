@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.CastScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:12:14.080Z" hostname="runnervmnwato" time="1.013">
+  <properties/>
+  <testcase name="noNetworkTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.121"/>
+  <testcase name="phonePlayerEnglish" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.141"/>
+  <testcase name="emptyPhone" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.134"/>
+  <testcase name="miniPlayerTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.089"/>
+  <testcase name="devicesPhoneEnglish" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.137"/>
+  <testcase name="devicesDex" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.136"/>
+  <testcase name="musicDex" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.127"/>
+  <testcase name="searchingTablet" classname="app.nagmedar.ui.screenshots.CastScreenshotTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

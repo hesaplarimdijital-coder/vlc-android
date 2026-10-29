@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.PlayerAndSheetTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:10:20.267Z" hostname="runnervmnwato" time="1.296">
+  <properties/>
+  <testcase name="theMoreTabOpensTheSheetOfPagesAndActions" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.244"/>
+  <testcase name="theFullPlayerIsComposedOnceAndHiddenWhileTheStripRests" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.165"/>
+  <testcase name="aDragSettlesOnTheNearerSide" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.185"/>
+  <testcase name="aDragDownOnTheArtworkClosesThePlayerInOneGesture" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.15"/>
+  <testcase name="pullingTheLyricsDownAtTheirTopClosesThePlayer" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.156"/>
+  <testcase name="dismissStyleFollowsTheHardwareKeyboard" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.047"/>
+  <testcase name="aMenuSplitsIntoTheSheetsGroupsAtItsRules" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.042"/>
+  <testcase name="aClosedSheetTakesNoOverlayNorAFrame" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.083"/>
+  <testcase name="aSidewaysSwipeSkipsPastTheThreshold" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.126"/>
+  <testcase name="aTapExpandsAndBackCollapses" classname="app.nagmedar.ui.components.PlayerAndSheetTest" time="0.098"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

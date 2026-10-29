@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.MenuBarTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:12:40.708Z" hostname="runnervmnwato" time="0.369">
+  <properties/>
+  <testcase name="aPointerHasTheMenuBar" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.063"/>
+  <testcase name="altAndTheArrowsWalkTheMenus" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.068"/>
+  <testcase name="theBarLeavesWhenItGoes" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.036"/>
+  <testcase name="touchHasNoMenuBarButKeepsTheSearch" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.043"/>
+  <testcase name="theBarTakesOnlyItsKeys" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.041"/>
+  <testcase name="escapeReturnsToTheTitleAndAltLeaves" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.071"/>
+  <testcase name="theMenusComeFromTheShortcutTable" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.047"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

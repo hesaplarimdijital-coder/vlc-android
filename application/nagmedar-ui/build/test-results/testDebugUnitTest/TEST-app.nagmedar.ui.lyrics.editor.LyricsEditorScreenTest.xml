@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:11:49.136Z" hostname="runnervmnwato" time="1.034">
+  <properties/>
+  <testcase name="savingSaysWhatIsLeftThenWhereItWent" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.135"/>
+  <testcase name="closingACleanEditorClosesAtOnce" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.099"/>
+  <testcase name="spaceStaysPlayAndPause" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.066"/>
+  <testcase name="aClickOnALineGoesThere" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.079"/>
+  <testcase name="theKeysAreNotTheEditorsWhileAnImportBoxHasTheKeyboard" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.094"/>
+  <testcase name="closingWithUnsavedStampsAsksFirst" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.097"/>
+  <testcase name="theOtherKeysMoveUndoAndNudge" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.112"/>
+  <testcase name="enterStampsTheLineAtTheTracksPositionAndTheCursorGoesOn" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.085"/>
+  <testcase name="aFolderTheAppCannotWriteToAsksForOne" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.095"/>
+  <testcase name="lrclibIsAskedAboutBeforeAnythingIsSent" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.098"/>
+  <testcase name="anEmptyEditorSaysSo" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorScreenTest" time="0.072"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

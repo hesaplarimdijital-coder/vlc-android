@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MediaMenuScreenshotTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:12:21.936Z" hostname="runnervmnwato" time="0.155">
+  <properties/>
+  <testcase name="trackMenuDex" classname="app.nagmedar.ui.screenshots.MediaMenuScreenshotTest" time="0.083"/>
+  <testcase name="trackMenuTabletEnglish" classname="app.nagmedar.ui.screenshots.MediaMenuScreenshotTest" time="0.071"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

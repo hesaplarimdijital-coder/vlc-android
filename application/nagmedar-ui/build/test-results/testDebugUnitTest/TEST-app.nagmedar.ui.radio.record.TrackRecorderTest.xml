@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.TrackRecorderTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:12:10.025Z" hostname="runnervmnwato" time="0.024">
+  <properties/>
+  <testcase name="theFirstAndTheLastTrackArePartialAndTheOnesBetweenAreComplete" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.002"/>
+  <testcase name="aTitleThatIsTheStationsNameGivesAFileNamedByTheTime" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="paddingGivesTheNextTrackTheEndOfTheLastAndTheLastTheStartOfTheNext" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="aTrackKnowsItsLengthAndSize" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="aWriteThatFailsReachesTheCaller" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="aStreamWithoutTitlesIsOneFileAndSaysSo" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="theFilesAreTheSameWhateverTheReadsAre" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.01"/>
+  <testcase name="orKeptAndMarkedPartial" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="theFilesAreTheStreamsOwnBytesBehindATag" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="anOggChainIsCutWhereTheStationChainsAndNamedByItsComments" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.003"/>
+  <testcase name="theAudioBeforeTheFirstTitleIsThatTitlesTrack" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="noChangeBlocksAreNotCuts" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="theSameTitleAgainIsNotACut" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="aTrackShorterThanTheLimitIsThrownAway" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="aFileIsMadePerTitleAndCutAtTheFrameTheTitleCameAt" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="aacIsCutAndTaggedToo" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.002"/>
+  <testcase name="theSameSongTwiceGetsANumber" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.0"/>
+  <testcase name="aFirstTitleThatNeverComesOpensTheFirstTrackAnyway" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <testcase name="onlyTheShortOnesAreDroppedWhenSomeAreLongEnough" classname="app.nagmedar.ui.radio.record.TrackRecorderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.playback.CastingTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:07:36.032Z" hostname="runnervmnwato" time="0.111">
+  <properties/>
+  <testcase name="anotherAddressTakesTheShownOnesPlace" classname="app.nagmedar.playback.CastingTest" time="0.053"/>
+  <testcase name="theKindsComeFromLibVlcsTypes" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <testcase name="aDeviceFoundTwiceIsListedOnce" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <testcase name="aTrackerModuleStaysOnThisDevice" classname="app.nagmedar.playback.CastingTest" time="0.029"/>
+  <testcase name="devicesKeepTheOrderTheyWereFoundIn" classname="app.nagmedar.playback.CastingTest" time="0.008"/>
+  <testcase name="aPausedTrackStaysPaused" classname="app.nagmedar.playback.CastingTest" time="0.002"/>
+  <testcase name="nothingPlayingOrNoChangeIsNoHandover" classname="app.nagmedar.playback.CastingTest" time="0.003"/>
+  <testcase name="theSameNameOfAnotherKindIsAnotherDevice" classname="app.nagmedar.playback.CastingTest" time="0.001"/>
+  <testcase name="dsdIsHandedOverToBeSentAsPcm" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <testcase name="libVlcsItemsChangeRendererWithoutAHandover" classname="app.nagmedar.playback.CastingTest" time="0.001"/>
+  <testcase name="castingWhileTheEnginePlaysHandsTheTrackToLibVlcWhereItWas" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <testcase name="whatTheEngineDoesNotTakeStaysWithLibVlc" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <testcase name="whatARendererGets" classname="app.nagmedar.playback.CastingTest" time="0.001"/>
+  <testcase name="castingStoppedGivesTheTrackBackToTheEngine" classname="app.nagmedar.playback.CastingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

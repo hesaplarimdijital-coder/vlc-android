@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:11:57.652Z" hostname="runnervmnwato" time="0.007">
+  <properties/>
+  <testcase name="aCopyOfAPresetIsTheUsersToChange" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.004"/>
+  <testcase name="aCopysNameIsNoOtherEqualizers" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.001"/>
+  <testcase name="aFilmWithItsOwnEqualizerFollowsThePlayersAgain" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="theUsersOwnIsDeletedAndTheFirstPresetTakesItsPlace" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="choosingAPresetTurnsTheEqualizerOn" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.001"/>
+  <testcase name="aPresetStaysAsItIs" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="theUsersOwnIsRenamedUnlessTheNameIsTaken" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="aDatabaseThatCannotBeReadIsSaidSo" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.001"/>
+  <testcase name="vlcsSettingIsRead" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="aPresetIsNotDeleted" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <testcase name="onAndOffAreHeardAndKept" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

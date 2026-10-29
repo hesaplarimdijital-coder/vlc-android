@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.RatingTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:11:52.142Z" hostname="runnervmnwato" time="0.186">
+  <properties/>
+  <testcase name="theKeysSetTheStars" classname="app.nagmedar.ui.music.RatingTest" time="0.057"/>
+  <testcase name="theWindowSetsTheStarsOfASelectionAndTakesThemBack" classname="app.nagmedar.ui.music.RatingTest" time="0.065"/>
+  <testcase name="theTablesStarsSetARating" classname="app.nagmedar.ui.music.RatingTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

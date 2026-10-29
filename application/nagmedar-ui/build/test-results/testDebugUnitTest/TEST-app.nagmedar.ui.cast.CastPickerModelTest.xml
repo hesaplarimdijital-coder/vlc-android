@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.cast.CastPickerModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:10:19.765Z" hostname="runnervmnwato" time="0.003">
+  <properties/>
+  <testcase name="playOnIsNotOfferedForATrackerModule" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.001"/>
+  <testcase name="noLocalNetwork" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.001"/>
+  <testcase name="aDeviceIsKnownByItsNameAndKind" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.0"/>
+  <testcase name="searchingThenWhatToCheck" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.0"/>
+  <testcase name="theDeviceCastToIsListedEvenBeforeItIsFoundAgain" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.0"/>
+  <testcase name="castingTurnedOffComesFirst" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.0"/>
+  <testcase name="theDevicesAsTheyComeAndGo" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.001"/>
+  <testcase name="whatIsSaidOfAnItem" classname="app.nagmedar.ui.cast.CastPickerModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
