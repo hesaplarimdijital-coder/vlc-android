@@ -288,15 +288,15 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
 
     /** The music read and kept, else read now: waited for [ML_WAIT_MS] at most, the reading going on behind. */
     private suspend fun snapshot(): Snapshot {
-        fresh()?.let { return it }
+        keptMusic()?.let { return it }
         val job = musicLock.withLock {
-            fresh()?.let { return it }
+            keptMusic()?.let { return it }
             reading?.takeIf { it.isActive } ?: generation.get().let { begun -> scope.async { read(begun) } }.also { reading = it }
         }
         return withTimeoutOrNull(ML_WAIT_MS) { job.await() } ?: throw MusicUnavailable()
     }
 
-    private fun fresh(): Snapshot? = music?.takeIf { System.currentTimeMillis() - it.at < MUSIC_KEEP_MS }
+    private fun keptMusic(): Snapshot? = music?.takeIf { System.currentTimeMillis() - it.at < MUSIC_KEEP_MS }
 
     /** Reads the music; kept when the medialibrary did not change since [begun]. */
     private suspend fun read(begun: Int): Snapshot {
