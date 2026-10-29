@@ -49,7 +49,7 @@ CI APK'yı sizin teslim anahtarınızın açık yarısıyla ([`delivery.pub`](de
    Betik APK'nın SHA-256'sını zarftakiyle karşılaştırır; tutmazsa dosyayı siler.
 4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.0.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
 
-Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir; dosyalarınıza dokunulmaz.
+Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. Sürümün notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasının 1.0.0 bölümündedir.
 
 ### R8 ve kurallar
 
