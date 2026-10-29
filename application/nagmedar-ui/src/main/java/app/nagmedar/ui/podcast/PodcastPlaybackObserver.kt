@@ -52,7 +52,7 @@ class PodcastPlaybackObserver : PlaybackObserver {
             override fun engineVolume(volume: Int): Int = booster.listenerSets(volume)
         }
         // a stream that drops before its end is no end: opened again where it was
-        val recovery = DropoutRecovery(service) { tracker.reopened(System.currentTimeMillis()) }.also { this.recovery = it }
+        val recovery = DropoutRecovery(ServiceDropoutHost(service)) { tracker.reopened(System.currentTimeMillis()) }.also { this.recovery = it }
         ResumeHook.dropout = recovery
         job?.cancel()
         job = AppScope.launch {

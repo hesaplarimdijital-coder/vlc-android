@@ -57,12 +57,13 @@ object NativeLab {
      * for the best one) transcribed with the ggml model at [model], in [language] ("tr", "en",
      * "auto"), into English when [translate], on [threads] threads (0: the performance cores), on
      * the GPU through Vulkan when [gpu] and the device has one (else, or when it stops, on the
-     * processor); five minutes at a time, so a film of any length fits in memory. Blocking;
-     * [cancelTranscription] stops it. The result is a JSON object: "error" ("" when it went
-     * through), "detail", "language", "audio_seconds", "seconds" (the time it took), "gpu",
-     * "device", "threads", "fallback" ("" or why the GPU asked for was not used).
+     * processor); five minutes at a time, so a film of any length fits in memory; from [startMs] on
+     * (0: the start; a job taken up again goes on after the lines it has, the audio before is decoded
+     * and left). Blocking; [cancelTranscription] stops it. The result is a JSON object: "error" (""
+     * when it went through), "detail", "language", "audio_seconds" (where it got to), "seconds" (the
+     * time it took), "gpu", "device", "threads", "fallback" ("" or why the GPU asked for was not used).
      */
-    @JvmStatic external fun transcribe(model: String, input: String, audioTrack: Int, language: String, translate: Boolean, threads: Int, gpu: Boolean, listener: Transcription): String
+    @JvmStatic external fun transcribe(model: String, input: String, audioTrack: Int, language: String, translate: Boolean, threads: Int, gpu: Boolean, startMs: Long, listener: Transcription): String
 
     /** S-709: stops the running [transcribe] soon; the Lab's [cancel] does not. */
     @JvmStatic external fun cancelTranscription()

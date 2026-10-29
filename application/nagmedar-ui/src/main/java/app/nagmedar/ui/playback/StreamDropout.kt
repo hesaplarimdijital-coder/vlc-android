@@ -26,13 +26,18 @@ object StreamDropout {
     /** An end this near the place of the dropout before it is the same end. */
     const val SAME_PLACE_MS = 2_000L
 
+    /** A live stream that cannot be sought in and ends at the same place this many times in a row has ended. */
+    const val SAME_END_TIMES = 3
+
     /**
      * The verdict on an end ([error] false) or an error of an episode. [streamed] says it plays from the network (a
      * downloaded file has no dropouts); [positionMs] is the furthest place it played at, [durationMs] its length (0:
      * unknown, every end is the end); [retries] the openings again made since it last played on, [lastDropMs] the place
      * of the dropout the last one was for (-1: none) and [playedSinceReopen] whether it played since. An end without an
      * error where the stream ended before, after it played again, is the stream's own end (its length was an estimate).
-     * Not an [episode] and with no length, the stream is live ([live]); not an episode with a length, it is not ours.
+     * Not an [episode] and with no length, the stream is live ([live]): [seekable] says whether it could be sought in when
+     * it last played, [repeats] how many drops before this one came, one after the other, at about this place. Not an
+     * episode with a length, it is not ours.
      */
     fun verdict(
         streamed: Boolean,
@@ -43,27 +48,35 @@ object StreamDropout {
         lastDropMs: Long = -1L,
         playedSinceReopen: Boolean = false,
         episode: Boolean = true,
+        seekable: Boolean = false,
+        repeats: Int = 0,
     ): DropoutVerdict {
         if (!streamed) return DropoutVerdict.End
-        if (!episode) return if (durationMs <= 0L) live(positionMs, retries, error, lastDropMs) else DropoutVerdict.End
+        if (!episode) return if (durationMs <= 0L) live(positionMs, retries, error, lastDropMs, seekable, repeats) else DropoutVerdict.End
         if (durationMs <= 0L) return DropoutVerdict.End
         if (positionMs >= durationMs - PlaybackRules.RESUME_END_THRESHOLD_MS) return DropoutVerdict.End
         if (!error && playedSinceReopen && lastDropMs >= 0L && abs(positionMs - lastDropMs) <= SAME_PLACE_MS) return DropoutVerdict.End
         if (retries >= MAX_RETRIES) return DropoutVerdict.GiveUp
-        val at = (positionMs - PlaybackRules.REWIND_MS).coerceAtLeast(0L)
-        return DropoutVerdict.Reopen(at, BACKOFF_MS[retries.coerceIn(0, BACKOFF_MS.lastIndex)], retries + 1)
+        return DropoutVerdict.Reopen(reopenAt(positionMs, live = false), BACKOFF_MS[retries.coerceIn(0, BACKOFF_MS.lastIndex)], retries + 1)
     }
+
+    /** Where a stream that dropped at [positionMs] is opened again: an episode a few seconds before; a [live] one at its live edge. */
+    fun reopenAt(positionMs: Long, live: Boolean): Long = if (live) 0L else (positionMs - PlaybackRules.REWIND_MS).coerceAtLeast(0L)
 
     /**
      * The verdict on an end or an error of a live stream, [positionMs] into its connection (its time starts at 0 on each).
      * One that never played, and is not being connected to again, ends as it always did: an address that holds a playlist
      * (its stations are played next), or one that does not answer. One that ends without an error where it ended last
-     * time ([lastDropMs]), well after its start, is a file with no length that ended, not a drop. Else it is connected to
-     * again ([DropoutVerdict.Reopen] at 0: its live edge), [MAX_RETRIES] times at most.
+     * time ([lastDropMs]), well after its start, is a file with no length that ended, not a drop, when it can be sought in
+     * ([seekable]); one that cannot is a live stream whose server cuts every connection after the same time (a listening
+     * limit, a token that expires), connected to again until it ends there a [SAME_END_TIMES]th time in a row ([repeats]
+     * the drops at that place before this one). Else it is connected to again ([DropoutVerdict.Reopen] at 0: its live
+     * edge), [MAX_RETRIES] times at most.
      */
-    private fun live(positionMs: Long, retries: Int, error: Boolean, lastDropMs: Long): DropoutVerdict {
+    private fun live(positionMs: Long, retries: Int, error: Boolean, lastDropMs: Long, seekable: Boolean, repeats: Int): DropoutVerdict {
         if (positionMs <= 0L && retries == 0) return DropoutVerdict.End
-        if (!error && lastDropMs >= RECOVERED_MS && abs(positionMs - lastDropMs) <= SAME_PLACE_MS) return DropoutVerdict.End
+        val samePlace = !error && lastDropMs >= RECOVERED_MS && abs(positionMs - lastDropMs) <= SAME_PLACE_MS
+        if (samePlace && (seekable || repeats + 1 >= SAME_END_TIMES)) return DropoutVerdict.End
         if (retries >= MAX_RETRIES) return DropoutVerdict.GiveUp
         return DropoutVerdict.Reopen(0L, BACKOFF_MS[retries.coerceIn(0, BACKOFF_MS.lastIndex)], retries + 1)
     }

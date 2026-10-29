@@ -28,15 +28,17 @@ typedef struct WsCallbacks {
  * Transcribes audio track [audio_track] of [input] (the n-th audio stream, 0 first; -1 for the
  * one FFmpeg finds best) with the ggml model at [model], in [language] ("tr", "en" or "auto"),
  * into English when [translate], on [threads] threads (0: the performance cores), on the GPU when
- * [gpu] and the device has one (else, or when it fails, on the processor). The track is decoded
- * and transcribed five minutes at a time, so memory stays the same for a film of any length.
+ * [gpu] and the device has one (else, or when it fails, on the processor), from [start_ms] of the
+ * film on (0: its start; a job taken up again goes on after the lines it already has, what comes
+ * before is decoded and left). The track is decoded and transcribed five minutes at a time, so
+ * memory stays the same for a film of any length.
  * [cancel] set to non-zero stops it soon. Returns a JSON object: "error" ("" or "open",
  * "no_audio", "decoder", "model", "whisper", "cancelled"), "detail", "language",
  * "audio_seconds", "segments", "seconds" (the transcription's time, the model's load included)
  * and what it ran on (whisper_engine_json). The caller frees it.
  */
 char *whisper_subs_run(const char *model, const char *input, int audio_track, const char *language, int translate, int threads,
-                       int gpu, const WsCallbacks *callbacks, volatile int *cancel);
+                       int gpu, int64_t start_ms, const WsCallbacks *callbacks, volatile int *cancel);
 
 #ifdef __cplusplus
 }

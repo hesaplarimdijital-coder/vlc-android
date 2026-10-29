@@ -291,6 +291,11 @@ class PlayerController(val context: Context) : MediaPlayer.EventListener, Corout
 
     private var lastTime = 0L
     var lastPosition = 0F
+
+    /** Nağmedar: the player just before libVLC's last error reset it (stopped, at 0 of 0): paused or not, its place. */
+    internal var beforeError = PlayerPlace(paused = false, timeMs = 0L, lengthMs = 0L)
+        private set
+
     @OptIn(ObsoleteCoroutinesApi::class)
     private val eventActor = actor<MediaPlayer.Event>(capacity = Channel.UNLIMITED, start = CoroutineStart.UNDISPATCHED) {
         for (event in channel) {
@@ -302,7 +307,11 @@ class PlayerController(val context: Context) : MediaPlayer.EventListener, Corout
                     applyUserVolume()
                 }
                 MediaPlayer.Event.Paused -> playbackState = PlaybackStateCompat.STATE_PAUSED
-                MediaPlayer.Event.EncounteredError -> setPlaybackStopped()
+                MediaPlayer.Event.EncounteredError -> {
+                    // Nağmedar: what it was, for a stream that dropped and is opened again as it was (DropoutHold)
+                    beforeError = PlayerPlace(playbackState == PlaybackStateCompat.STATE_PAUSED, getCurrentTime(), getLength())
+                    setPlaybackStopped()
+                }
                 MediaPlayer.Event.PausableChanged -> pausable = event.pausable
                 MediaPlayer.Event.SeekableChanged -> seekable = event.seekable
                 MediaPlayer.Event.LengthChanged -> updateProgress(newLength = event.lengthChanged)

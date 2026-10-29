@@ -301,7 +301,14 @@ class PodcastRepository(
 
     private fun refreshed(base: PodcastFeed, fetch: FeedFetch, at: Long): RefreshResult = when (fetch) {
         is FeedFetch.NotModified -> {
-            dao.updateFeed(base.copy(refreshedAt = at))
+            // only what the refresh learnt: the row read before the fetch would write back a stale show (its
+            // transcript language, speed or skips changed meanwhile)
+            val now = dao.feed(base.id)
+            if (now != null && (now.feedUrl != base.feedUrl || now.aliasKeys != base.aliasKeys)) {
+                dao.setMovedRefreshedAt(base.id, base.feedUrl, base.aliasKeys, at)
+            } else {
+                dao.setRefreshedAt(base.id, at)
+            }
             RefreshResult.NotModified
         }
         is FeedFetch.Fresh -> {

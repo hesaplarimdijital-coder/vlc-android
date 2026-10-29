@@ -388,6 +388,38 @@ class PodcastRepositoryTest {
     }
 
     @Test
+    fun aChoiceMadeWhileTheServerAnswersNotModifiedStays() = runBlocking {
+        serve("https://example.org/feed" to fresh(feed(), "https://example.org/feed"))
+        val id = (repository.subscribe("https://example.org/feed") as SubscribeResult.Added).feed.id
+        clock += 1_000
+        handler = { url ->
+            // the listener chooses while the feed is read
+            db.podcasts().setTranscriptLanguage(id, "en")
+            db.podcasts().setSpeed(id, 1.5f)
+            FeedFetch.NotModified(url, null)
+        }
+        assertEquals(RefreshResult.NotModified, repository.refresh(id))
+        val after = db.podcasts().feed(id)!!
+        assertEquals("en", after.transcriptLanguage)
+        assertEquals(1.5f, after.speed, 0f)
+        assertEquals(clock, after.refreshedAt)
+    }
+
+    @Test
+    fun aNotModifiedFeedThatMovedFollowsItAndKeepsTheChoices() = runBlocking {
+        serve("https://old.example.org/feed" to fresh(feed(), "https://old.example.org/feed"))
+        val id = (repository.subscribe("https://old.example.org/feed") as SubscribeResult.Added).feed.id
+        handler = { url ->
+            db.podcasts().setTranscriptLanguage(id, "tr")
+            FeedFetch.NotModified("https://new.example.org/feed", "https://new.example.org/feed").takeIf { url == "https://old.example.org/feed" } ?: error(url)
+        }
+        assertEquals(RefreshResult.NotModified, repository.refresh(id))
+        val after = db.podcasts().feed(id)!!
+        assertEquals("https://new.example.org/feed", after.feedUrl)
+        assertEquals("tr", after.transcriptLanguage)
+    }
+
+    @Test
     fun refreshingFollowsAFeedThatMoved() = runBlocking {
         serve("https://old.example.org/feed" to fresh(feed(), "https://old.example.org/feed"))
         val id = (repository.subscribe("https://old.example.org/feed") as SubscribeResult.Added).feed.id
