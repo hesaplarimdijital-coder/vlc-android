@@ -84,13 +84,12 @@ class DenseTableHeaderTest {
         table()
         val title = compose.onNodeWithText("Title", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         // the table's edge, at the titles' height: no title there, but a row beneath the glass
-        val point = Offset(1f, title.center.y)
-        val beneath = tracks.filter { track ->
-            val bounds = runCatching { compose.onNodeWithTag("row-$track", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot }.getOrNull()
-            bounds != null && bounds.contains(point)
+        val rows = tracks.mapNotNull { track ->
+            runCatching { compose.onNodeWithTag("row-$track", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot }.getOrNull()?.let { track to it }
         }
-        assertTrue("a row lies beneath the titles", beneath.isNotEmpty())
-
+        val beneath = rows.firstOrNull { (_, bounds) -> bounds.top < title.bottom && bounds.bottom > title.top }
+        assertTrue("a row lies beneath the titles $title: ${rows.take(8)}", beneath != null)
+        val point = Offset(1f, (maxOf(title.top, beneath!!.second.top) + minOf(title.bottom, beneath.second.bottom)) / 2)
         compose.onRoot().performTouchInput { longClick(point) }
         compose.waitForIdle()
         assertEquals(emptyList<String>(), rowMenus)
@@ -112,6 +111,7 @@ class DenseTableHeaderTest {
         val layouts = mutableListOf<TextLayoutResult>()
         val node = compose.onNodeWithText("Duration", useUnmergedTree = true).fetchSemanticsNode()
         node.config[SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
-        assertFalse("Duration is read whole", layouts.single().hasVisualOverflow)
+        val layout = layouts.single()
+        assertFalse("Duration is read whole: ${layout.size} for ${layout.multiParagraph.width}", layout.hasVisualOverflow)
     }
 }

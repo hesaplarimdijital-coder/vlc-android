@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -425,7 +426,8 @@ private val SORT_ARROW_GAP = 4.dp
 @Composable
 private fun <T> fittedWidths(columns: List<TableColumn<T>>, sortable: Boolean): List<ColumnWidth> {
     val measurer = rememberTextMeasurer()
-    val style = NagTheme.type.labelSmall
+    // as the title's Text sets it: its own style over the surrounding one (letter spacing and all)
+    val style = LocalTextStyle.current.merge(NagTheme.type.labelSmall)
     val density = LocalDensity.current
     val titles = columns.map { Triple(it.title, it.width, it.sortable) }
     return remember(titles, style, density, sortable) {
@@ -433,7 +435,8 @@ private fun <T> fittedWidths(columns: List<TableColumn<T>>, sortable: Boolean): 
             if (width !is ColumnWidth.Fixed) return@map width
             val text = measurer.measure(title, style, maxLines = 1, softWrap = false, density = density).size.width
             val arrow = if (sortable && sorts) SORT_ARROW + SORT_ARROW_GAP else 0.dp
-            val needed = with(density) { text.toDp() } + CELL_PADDING * 2 + arrow
+            // and a pixel's slack: the paddings and the arrow are rounded to whole pixels apart
+            val needed = with(density) { (text + 1).toDp() } + CELL_PADDING * 2 + arrow
             if (needed > width.width) ColumnWidth.Fixed(needed) else width
         }
     }
