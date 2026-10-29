@@ -57,6 +57,8 @@ import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
@@ -125,7 +127,7 @@ internal fun PlaylistOverview(
             }
             layout == OverviewLayout.Grid -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 156.dp),
-                contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+                contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
                 horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
                 verticalArrangement = Arrangement.spacedBy(dimens.gapM),
                 modifier = Modifier.fillMaxSize(),
@@ -135,7 +137,7 @@ internal fun PlaylistOverview(
                 }
             }
             else -> LazyColumn(
-                contentPadding = PaddingValues(horizontal = dimens.gapS, vertical = dimens.gapXs),
+                contentPadding = PaddingValues(horizontal = dimens.gapS, vertical = dimens.gapXs) + LocalShellBottomPadding.current,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {

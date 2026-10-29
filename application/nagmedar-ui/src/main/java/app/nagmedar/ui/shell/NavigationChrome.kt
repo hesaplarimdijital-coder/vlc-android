@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -70,8 +71,11 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.theme.GlassThickness
+import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.glass
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
 typealias NavBadges = Map<Destination, String>
@@ -87,11 +91,12 @@ fun BrandMark(modifier: Modifier = Modifier) {
 
 // ---------------------------------------------------------------- compact: bottom bar
 
+/** The phone's bottom bar (Desktop Kit 1.0: glass inside the shell, the chrome colour elsewhere). */
 @Composable
 fun BottomNavBar(current: Destination, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val label = stringResource(R.string.nag_main_navigation)
-    Column(modifier.fillMaxWidth().background(colors.chrome)) {
+    Column(modifier.fillMaxWidth().glass(NagGlass.chrome(colors, GlassThickness.Regular))) {
         HorizontalRule()
         Row(
             modifier = Modifier
@@ -467,20 +472,35 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
  * itself). In a desktop window's [caption] bar (S-306) it is the bar: the title moves the window,
  * the search button takes its clicks, the system's buttons keep their place. [scrolled] (a phone's
  * content has left its top): the bar takes the chrome colour and a thin rule shows under it, as
- * Android's top app bar does (Desktop Kit 0.2.0); its height stays. The bar is at least its
- * height, so larger text is not cut.
+ * Android's top app bar does (Desktop Kit 0.2.0); its height stays. With [glass] (the phone's shell,
+ * where the content lies under the bar) it turns to glass once [scrolled] instead (Desktop Kit 1.0).
+ * The bar is at least its height, so larger text is not cut.
  */
 @Composable
-fun PageTopBar(title: String, onSearch: (() -> Unit)?, modifier: Modifier = Modifier, caption: CaptionBar? = null, scrolled: Boolean = false) {
+fun PageTopBar(
+    title: String,
+    onSearch: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    caption: CaptionBar? = null,
+    scrolled: Boolean = false,
+    glass: Boolean = false,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
-    val background by animateColorAsState(if (scrolled) colors.chrome else colors.background, motion.standard(NagMotion.MEDIUM), label = "topBar")
+    // content scrolled beneath: the bar takes the chrome colour, or turns to glass over content lying under it (the phone's, Desktop Kit 1.0)
+    val rest = if (glass) colors.background else Color.Transparent
+    val background by animateColorAsState(
+        if (scrolled) (if (glass) Color.Transparent else colors.chrome) else colors.background,
+        motion.standard(NagMotion.MEDIUM),
+        label = "topBar",
+    )
     val ruleAlpha = animateFloatAsState(if (scrolled) 1f else 0f, motion.standard(NagMotion.MEDIUM), label = "topBarRule")
     val rule = colors.border
     Column(
         modifier
             .fillMaxWidth()
+            .glass(NagGlass.chrome(colors, GlassThickness.Regular), enabled = glass && scrolled, rest = rest)
             .background(background)
             // over the bottom edge, so the bar keeps its height with the rule or without it
             .drawBehind {

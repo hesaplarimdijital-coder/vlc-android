@@ -78,8 +78,10 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.music.PlaylistNameDialog
 import app.nagmedar.ui.radio.Station
 import app.nagmedar.ui.radio.StationLogo
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import java.time.ZoneId
@@ -147,7 +149,7 @@ fun RecordingsTab(
         } else {
             LazyColumn(
                 Modifier.fillMaxSize().testTag("recordings-list"),
-                contentPadding = PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs),
+                contentPadding = PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs) + LocalShellBottomPadding.current,
             ) {
                 item(key = "banners") { Banners(controller, onChooseFolder, onUseDefaultFolder, onAllowExact) }
                 if (controller.live.isNotEmpty()) {

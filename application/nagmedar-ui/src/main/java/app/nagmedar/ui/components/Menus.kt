@@ -49,6 +49,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.InputMode
@@ -79,8 +80,12 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import app.nagmedar.ui.input.MenuBarKey
+import app.nagmedar.ui.theme.GlassMode
+import app.nagmedar.ui.theme.GlassThickness
+import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.glass
 
 /** One line of a menu bar drop-down or a context menu. */
 @Immutable
@@ -108,7 +113,9 @@ class MenuSpec(val title: String, val entries: () -> List<MenuEntry>)
  *
  * As Android's own pop-up menus (Desktop Kit 0.2.0) it grows in from its corner while fading in
  * ([NagMotion.COLOR]) and fades out when closed ([NagMotion.SHORT]); while it fades it takes
- * neither the focus nor a click. With "Remove animations" it simply appears and goes.
+ * neither the focus nor a click. With "Remove animations" it simply appears and goes. Inside the
+ * shell it is frosted glass over the screen (Desktop Kit 1.0, [NagGlass]); elsewhere a solid
+ * raised surface with a shadow.
  */
 @Composable
 fun MenuPopup(
@@ -141,6 +148,7 @@ fun MenuPopup(
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
+    val glassy = NagGlass.source != null && NagGlass.mode != GlassMode.Solid
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val ownKeys = onEscape != null
     val latestOnDismiss by rememberUpdatedState(onDismiss)
@@ -172,8 +180,9 @@ fun MenuPopup(
                     .then(if (open) Modifier else Modifier.pointerInput(Unit) { consumeEveryPointerEvent() })
                     .widthIn(min = minWidth, max = 420.dp)
                     .width(IntrinsicSize.Max)
-                    .shadow(12.dp, shape)
-                    .background(colors.surfaceRaised, shape)
+                    // a shadow would show through glass; solid menus keep it
+                    .then(if (glassy) Modifier else Modifier.shadow(12.dp, shape))
+                    .glass(NagGlass.raised(colors, GlassThickness.Regular), shape)
                     .border(1.dp, colors.borderStrong, shape)
                     .onPreviewKeyEvent { event ->
                         val down = event.type == KeyEventType.KeyDown
@@ -257,7 +266,8 @@ internal fun MenuItemRow(item: MenuEntry.Item, modifier: Modifier = Modifier, on
             .fillMaxWidth()
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
             .focusRing(state, shape)
-            .background(if (item.enabled) stateBackground(state) else colors.surfaceRaised, shape)
+            // a disabled row lets the menu's surface (glass, Desktop Kit 1.0) show through
+            .background(if (item.enabled) stateBackground(state) else Color.Transparent, shape)
             // a menu is a popup window of its own, whose input mode may still be touch's when the
             // keyboard opened it: its items take the focus in any mode
             .focusProperties { canFocus = item.enabled }

@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.CancellationException
@@ -46,7 +48,7 @@ data class DetailFrame(val listShift: Float, val listAlpha: Float, val detailShi
 
 /**
  * Android's screen transition between a list and the detail opened from it (Desktop Kit 0.2.0,
- * Material's shared axis): opening, the detail comes a tenth of the width from the end while it
+ * Material's shared axis; on a phone the progress runs on the gesture spring, Desktop Kit 1.0): opening, the detail comes a tenth of the width from the end while it
  * fades in and the list goes the other way fading out; closing is the same backwards. The frames
  * are a function of the progress (0 the list, 1 the detail) run linearly over [NagMotion.LONG];
  * each part keeps its own curve and timing within it.
@@ -102,12 +104,18 @@ class DetailMotionState internal constructor(open: Boolean) {
     /** The detail covers the list and nothing moves: the list is neither drawn nor read out. */
     val covered: Boolean get() = progress.value >= 1f && back.value == 0f
 
-    /** Opens or closes the detail; the rest of the way takes its share of [NagMotion.LONG]. */
-    suspend fun show(open: Boolean, motion: NagMotion) {
+    /**
+     * Opens or closes the detail; the rest of the way takes its share of [NagMotion.LONG]. On a
+     * phone ([MotionTier.Gesture], Desktop Kit 1.0) the way runs on the gesture spring instead, which
+     * a new open or close catches where it is.
+     */
+    suspend fun show(open: Boolean, motion: NagMotion, tier: MotionTier = MotionTier.Timed) {
         opening = open
         val target = if (open) 1f else 0f
-        if (motion.reduced) {
+        if (motion.reduced || tier == MotionTier.Reduced) {
             progress.snapTo(target)
+        } else if (tier == MotionTier.Gesture) {
+            progress.animateTo(target, NagMotion.gesture())
         } else {
             val duration = (abs(target - progress.value) * NagMotion.LONG).roundToInt()
             progress.animateTo(target, tween(duration, easing = LinearEasing))
@@ -202,6 +210,7 @@ fun <T : Any> DetailTransition(
     detailContent: @Composable (T) -> Unit,
 ) {
     val motion = NagTheme.motion
+    val tier = LocalMotionTier.current
     val state = rememberDetailMotion(detail != null)
     var retained by remember { mutableStateOf(detail) }
     // registered before the detail's own handlers: those (a selection inside it) go first
@@ -209,9 +218,9 @@ fun <T : Any> DetailTransition(
     LaunchedEffect(detail?.let(detailKey)) {
         if (detail != null) {
             retained = detail
-            state.show(open = true, motion)
+            state.show(open = true, motion, tier)
         } else {
-            state.show(open = false, motion)
+            state.show(open = false, motion, tier)
             retained = null
         }
     }

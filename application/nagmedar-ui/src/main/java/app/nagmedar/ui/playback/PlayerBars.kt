@@ -80,13 +80,18 @@ import app.nagmedar.ui.library.audioFormatLabel
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
 import app.nagmedar.ui.music.MusicLinks
+import app.nagmedar.ui.music.rememberArtworkColor
 import app.nagmedar.ui.podcast.Chapter
 import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
+import app.nagmedar.ui.theme.ArtworkAccent
+import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.glass
 import kotlin.math.roundToInt
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -351,10 +356,13 @@ fun PlayerBar(
         ServicePlayerBarActions(context, { currentOnQueue() }, { currentOnOpenAudio?.invoke() ?: PlaybackActions.openPlayer(context) })
     }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
-    if (navKind == NavKind.Sidebar) {
-        TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
-    } else {
-        MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
+    // Desktop Kit 1.0: while music plays the bar takes its artwork's accent, cross-fading from one track to the next
+    ArtworkAccent(rememberArtworkColor(media.takeIf { it.type == MediaWrapper.TYPE_AUDIO })) {
+        if (navKind == NavKind.Sidebar) {
+            TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
+        } else {
+            MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
+        }
     }
 }
 
@@ -422,7 +430,8 @@ fun MiniPlayer(
             Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(if (floating) colors.surfaceRaised else colors.chrome)
+                // a phone's card is glass over the content passing under it (Desktop Kit 1.0)
+                .then(if (floating) Modifier.glass(NagGlass.raised(colors, GlassThickness.Thin), shape) else Modifier.background(colors.chrome))
                 .then(if (floating) Modifier.border(1.dp, colors.border, shape) else Modifier)
                 .hoverable(hover)
                 .onFocusChanged { focusInside = it.hasFocus }

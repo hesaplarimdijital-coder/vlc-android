@@ -84,8 +84,10 @@ import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.network.EntryKind
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.CoroutineScope
@@ -284,7 +286,7 @@ private fun PlacesPane(model: DeviceBrowserModel, modifier: Modifier) {
     val picked = roots.orEmpty().filter { it.kind == RootKind.Picked }
     val open = model.trail.firstOrNull()?.location
     val internalName = stringResource(R.string.nag_device_internal)
-    LazyColumn(modifier.testTag("device-places"), contentPadding = PaddingValues(vertical = dimens.gapS)) {
+    LazyColumn(modifier.testTag("device-places"), contentPadding = PaddingValues(vertical = dimens.gapS) + LocalShellBottomPadding.current) {
         if (access != null && !access.media) {
             item(key = "access") {
                 Column(Modifier.fillMaxWidth().padding(horizontal = dimens.gapM, vertical = dimens.gapS), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
@@ -428,7 +430,7 @@ private fun FolderPane(model: DeviceBrowserModel, actions: DeviceActions, modifi
 
 @Composable
 private fun Centered(content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center) { content() }
+    Box(Modifier.fillMaxSize().padding(LocalShellBottomPadding.current).verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center) { content() }
 }
 
 /** Where the folder is (each folder on the way a button back to it) and what is done with all it holds. */
@@ -557,6 +559,7 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
         rowMenu = { entry, _ -> entryMenu(res, entry, entries, model, actions) },
         rowMenuLabel = stringResource(R.string.nag_more_actions),
         modifier = Modifier.testTag("device-table"),
+        contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
     )
 }
 

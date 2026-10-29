@@ -1,6 +1,8 @@
 package app.nagmedar.ui.theme
 
 import android.os.Build
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -12,12 +14,20 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 val LocalNagColors = staticCompositionLocalOf { NagPalette.dark(Accent.Blue) }
 val LocalNagType = staticCompositionLocalOf { NagType.Pointer }
@@ -55,6 +65,10 @@ object NagTheme {
  * (600 dp and wider, the rail and sidebar layouts) every text style is [largeWindowTextStep] sp
  * larger; on a phone's window the touch sizes are a little tighter ([compactSizes]: a 64 dp
  * bottom bar, 52 dp rows, targets still 48 dp).
+ *
+ * As Desktop Kit 1.0 has it, a new accent or theme cross-fades over [colorChangeMillis] (150 ms;
+ * glass tints follow, as they are made from these colours), at once with reduced motion; and the
+ * window's [MotionTier] is provided ([LocalMotionTier]: springs on a phone's window).
  */
 @Composable
 fun NagmedarTheme(
@@ -64,11 +78,14 @@ fun NagmedarTheme(
     reduceMotion: Boolean? = null,
     largeWindowTextStep: Float = LARGE_WINDOW_TEXT_STEP,
     compactSizes: Boolean = true,
+    colorChangeMillis: Int = NagMotion.COLOR_CHANGE,
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
     val seed = if (accent == Accent.System) systemAccentSeed() else null
-    val colors = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
+    val target = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
+    val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
+    val colors = animatePalette(target, if (motion.reduced) 0 else colorChangeMillis)
     val largeWindow = LocalConfiguration.current.screenWidthDp >= LARGE_WINDOW_DP
     val type = remember(inputMode, largeWindow, largeWindowTextStep) {
         NagType.forMode(inputMode).let { if (largeWindow) it.grow(largeWindowTextStep) else it }
@@ -76,7 +93,11 @@ fun NagmedarTheme(
     val dimens = NagDimens.forMode(inputMode).let { if (compactSizes && !largeWindow) it.forCompactWindow() else it }
     val scheme = remember(colors) { colors.toMaterialScheme() }
     val selection = remember(colors) { TextSelectionColors(handleColor = colors.accent, backgroundColor = colors.accent.copy(alpha = 0.35f)) }
-    val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
+    val tier = when {
+        motion.reduced -> MotionTier.Reduced
+        largeWindow -> MotionTier.Timed
+        else -> MotionTier.Gesture
+    }
     CompositionLocalProvider(
         LocalNagColors provides colors,
         LocalNagType provides type,
@@ -84,6 +105,7 @@ fun NagmedarTheme(
         LocalInputMode provides inputMode,
         LocalNagMotion provides motion,
         LocalLargeWindow provides largeWindow,
+        LocalMotionTier provides tier,
     ) {
         MaterialTheme(colorScheme = scheme, typography = type.toMaterialTypography()) {
             CompositionLocalProvider(
@@ -93,6 +115,102 @@ fun NagmedarTheme(
             )
         }
     }
+}
+
+/**
+ * [target], cross-faded from the previous palette over [durationMillis] whenever it changes
+ * (Desktop Kit 1.0). The first composition shows [target] at once; a change that interrupts
+ * another starts from what is on screen.
+ */
+@Composable
+internal fun animatePalette(target: NagColors, durationMillis: Int): NagColors {
+    var from by remember { mutableStateOf(target) }
+    var to by remember { mutableStateOf(target) }
+    val progress = remember { Animatable(1f) }
+    LaunchedEffect(target, durationMillis) {
+        if (target == to) return@LaunchedEffect
+        from = lerpColors(from, to, progress.value)
+        to = target
+        if (durationMillis <= 0) {
+            progress.snapTo(1f)
+        } else {
+            progress.snapTo(0f)
+            progress.animateTo(1f, tween(durationMillis, easing = NagMotion.Standard))
+        }
+    }
+    val t = progress.value
+    return if (t >= 1f || from == to) to else lerpColors(from, to, t)
+}
+
+/** Every colour token of [a] moved [t] of the way to [b]; [NagColors.isDark] is [b]'s. */
+fun lerpColors(a: NagColors, b: NagColors, t: Float): NagColors = when {
+    t >= 1f -> b
+    t <= 0f -> a.copy(isDark = b.isDark)
+    else -> NagColors(
+        isDark = b.isDark,
+        background = lerp(a.background, b.background, t),
+        chrome = lerp(a.chrome, b.chrome, t),
+        surface = lerp(a.surface, b.surface, t),
+        surfaceRaised = lerp(a.surfaceRaised, b.surfaceRaised, t),
+        hover = lerp(a.hover, b.hover, t),
+        pressed = lerp(a.pressed, b.pressed, t),
+        border = lerp(a.border, b.border, t),
+        borderStrong = lerp(a.borderStrong, b.borderStrong, t),
+        text = lerp(a.text, b.text, t),
+        textSecondary = lerp(a.textSecondary, b.textSecondary, t),
+        textTertiary = lerp(a.textTertiary, b.textTertiary, t),
+        accent = lerp(a.accent, b.accent, t),
+        onAccent = lerp(a.onAccent, b.onAccent, t),
+        accentText = lerp(a.accentText, b.accentText, t),
+        selection = lerp(a.selection, b.selection, t),
+        onSelection = lerp(a.onSelection, b.onSelection, t),
+        focusRing = lerp(a.focusRing, b.focusRing, t),
+        success = lerp(a.success, b.success, t),
+        warning = lerp(a.warning, b.warning, t),
+        danger = lerp(a.danger, b.danger, t),
+        brandBlue = lerp(a.brandBlue, b.brandBlue, t),
+        brandCoral = lerp(a.brandCoral, b.brandCoral, t),
+        scrim = lerp(a.scrim, b.scrim, t),
+        inverseSurface = lerp(a.inverseSurface, b.inverseSurface, t),
+        onInverseSurface = lerp(a.onInverseSurface, b.onInverseSurface, t),
+        inverseAccent = lerp(a.inverseAccent, b.inverseAccent, t),
+    )
+}
+
+/**
+ * These colours with the accent of [tones] in their place: the accent fills, its text, the
+ * selection and the focus ring, as [NagPalette] makes them for this palette (light, dark or OLED).
+ */
+fun NagColors.withAccent(tones: AccentTones): NagColors = if (!isDark) {
+    copy(accent = tones.deep, accentText = tones.deep, selection = tones.lightSelection, focusRing = tones.deep, inverseAccent = tones.base)
+} else {
+    copy(
+        accent = tones.base,
+        accentText = tones.base,
+        selection = if (background == Color.Black) tones.oledSelection else tones.darkSelection,
+        onSelection = tones.onDarkSelection,
+        focusRing = tones.base,
+        inverseAccent = tones.darkInverse,
+    )
+}
+
+/**
+ * Desktop Kit 1.0's artwork accent, for the player's surfaces only: below this point the accent
+ * (and the glass tint made from it) is the one of [seed], the playing track's artwork colour
+ * ([app.nagmedar.ui.music.rememberArtworkColor]), tuned to keep every contrast
+ * ([AccentTones.fromSeed]); a new track's colour cross-fades in [NagMotion.COLOR_CHANGE] ms (at
+ * once with reduced motion). [seed] null keeps the theme's accent, cross-fading back to it.
+ */
+@Composable
+fun ArtworkAccent(seed: Color?, content: @Composable () -> Unit) {
+    val base = LocalNagColors.current
+    // the tones are tuned against all three palettes: away from the main thread
+    val tones by produceState<AccentTones?>(null, seed) {
+        value = seed?.let { color -> withContext(Dispatchers.Default) { AccentTones.fromSeed(color) } }
+    }
+    val target = remember(base, tones) { tones?.let(base::withAccent) ?: base }
+    val colors = animatePalette(target, if (NagTheme.motion.reduced) 0 else NagMotion.COLOR_CHANGE)
+    CompositionLocalProvider(LocalNagColors provides colors, content = content)
 }
 
 private fun NagColors.toMaterialScheme(): ColorScheme = if (isDark) darkColorScheme(

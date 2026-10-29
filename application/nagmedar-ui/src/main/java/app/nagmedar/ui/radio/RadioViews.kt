@@ -89,8 +89,10 @@ import app.nagmedar.ui.radio.record.RecordingsController
 import app.nagmedar.ui.radio.record.RecordingsTab
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -615,7 +617,7 @@ private fun StationList(
     val moreActions = stringResource(R.string.nag_more_actions)
     LazyColumn(
         modifier.fillMaxSize().testTag("radio-list"),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs) + LocalShellBottomPadding.current,
     ) {
         items(stations, key = { it.key }) { station ->
             val actions = StationActions(

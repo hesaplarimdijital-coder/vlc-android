@@ -63,8 +63,10 @@ import app.nagmedar.ui.library.MediaFile
 import app.nagmedar.ui.library.fileMenuEntries
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.playback.PlaybackRules
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -91,7 +93,7 @@ internal fun PodcastPageView(
     val dates = remember(res.configuration) { DateFormat.getDateInstance(DateFormat.MEDIUM, res.locale()) }
     LazyColumn(
         Modifier.fillMaxSize().background(NagTheme.colors.background).testTag("podcast-page"),
-        contentPadding = PaddingValues(bottom = dimens.gapL),
+        contentPadding = PaddingValues(bottom = dimens.gapL) + LocalShellBottomPadding.current,
     ) {
         item(key = "top") { PageTop(page, fullScreen, actions) }
         val episodes = page.episodes

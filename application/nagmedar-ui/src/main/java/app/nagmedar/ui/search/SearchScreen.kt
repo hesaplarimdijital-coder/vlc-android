@@ -72,6 +72,9 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
+import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.LocalShellTopPadding
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
@@ -177,7 +180,8 @@ fun SearchContent(
     var fieldFocused by rememberSaveable { mutableStateOf(false) }
     LazyColumn(
         Modifier.fillMaxSize().testTag("search"),
-        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapM),
+        // the page scrolls under the phone's bars (Desktop Kit 1.0)
+        contentPadding = LocalShellTopPadding.current + PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapM) + LocalShellBottomPadding.current,
         verticalArrangement = Arrangement.spacedBy(dimens.gapS),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

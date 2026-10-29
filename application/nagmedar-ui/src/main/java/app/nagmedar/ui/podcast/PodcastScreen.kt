@@ -88,8 +88,10 @@ import app.nagmedar.ui.openLink
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.shell.ListDetailPanes
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.AppScope
 
@@ -382,7 +384,7 @@ private fun Results(search: SearchUi.Found, model: PodcastScreenModel, actions: 
     }
     LazyColumn(
         Modifier.fillMaxSize().testTag("podcast-results"),
-        contentPadding = PaddingValues(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapS),
+        contentPadding = PaddingValues(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapS) + LocalShellBottomPadding.current,
         verticalArrangement = Arrangement.spacedBy(NagTheme.dimens.gapXs),
     ) {
         item(key = "header") {
@@ -522,7 +524,7 @@ private fun SubscriptionGrid(subscriptions: List<PodcastFeedSummary>, actions: P
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = Modifier.fillMaxSize().testTag("podcast-grid"),
-        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
         horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
         verticalArrangement = Arrangement.spacedBy(dimens.gapM),
     ) {
@@ -578,7 +580,7 @@ private fun SubscriptionList(subscriptions: List<PodcastFeedSummary>, actions: P
     val dimens = NagTheme.dimens
     LazyColumn(
         Modifier.fillMaxSize().testTag("podcast-list"),
-        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS),
+        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
         verticalArrangement = Arrangement.spacedBy(dimens.gapXs),
     ) {
         items(subscriptions, key = { it.feed.id }) { summary -> SubscriptionRow(summary, actions, Modifier.widthIn(max = ListWidth)) }

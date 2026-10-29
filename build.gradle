@@ -131,8 +131,11 @@ ext {
     testCore = '1.5.0'
     // Nağmedar Compose UI (application/nagmedar-ui)
     composeBomVersion = '2024.12.01'
-    activityComposeVersion = '1.9.3'
+    // 1.10.1: what Haze 1.5.4 builds on (Desktop Kit 1.0)
+    activityComposeVersion = '1.10.1'
     navigationComposeVersion = '2.8.4'
+    // Desktop Kit 1.0's frosted glass; 1.5.x is the last line on Compose 1.7
+    hazeVersion = '1.5.4'
     lifecycleComposeVersion = '2.8.7'
     nagmedarRobolectricVersion = '4.14.1'
     // S-1010: the converter's jobs (application/nagmedar-ui)

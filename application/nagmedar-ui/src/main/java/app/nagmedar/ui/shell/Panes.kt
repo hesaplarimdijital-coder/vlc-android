@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.paneHandleWidth
+import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
@@ -126,6 +127,7 @@ fun <K : Any> ListDetailPanes(
 ) {
     val side = currentWidthClass() >= WidthClass.Expanded
     val motion = NagTheme.motion
+    val tier = LocalMotionTier.current
     val width = rememberPaneWidth(widthKey, defaultDetailWidth)
     val state = rememberDetailMotion(detail != null)
     val progress = state.progress
@@ -135,9 +137,9 @@ fun <K : Any> ListDetailPanes(
     LaunchedEffect(detail, side) {
         if (detail != null) {
             retained = detail
-            if (side) progress.animateTo(1f, motion.emphasized()) else state.show(open = true, motion)
+            if (side) progress.animateTo(1f, motion.emphasized()) else state.show(open = true, motion, tier)
         } else {
-            if (side) progress.animateTo(0f, motion.emphasizedExit()) else state.show(open = false, motion)
+            if (side) progress.animateTo(0f, motion.emphasizedExit()) else state.show(open = false, motion, tier)
             retained = null
         }
     }

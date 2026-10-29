@@ -78,8 +78,10 @@ import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.TimelineStyle
 import app.nagmedar.ui.playback.rememberChapterMarks
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import java.text.DateFormat
@@ -158,7 +160,7 @@ internal fun EpisodeDetailView(ui: EpisodeDetailUi, fullScreen: Boolean, actions
     LazyColumn(
         state = list,
         modifier = Modifier.fillMaxSize().background(NagTheme.colors.background).testTag("episode-detail"),
-        contentPadding = PaddingValues(bottom = if (compact) dimens.gapXl else dimens.gapL),
+        contentPadding = PaddingValues(bottom = if (compact) dimens.gapXl else dimens.gapL) + LocalShellBottomPadding.current,
     ) {
         item(key = "top") { Frame(tight = compact) { TopBar(ui, fullScreen, actions) } }
         item(key = "header") { Frame(tight = compact) { Header(ui, now, compact) } }

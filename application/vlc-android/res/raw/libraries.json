@@ -61,6 +61,11 @@
       "license"  : "harfbuzz"
     },
     {
+      "title"    : "Haze",
+      "copyright": "Copyright © 2023 Chris Banes",
+      "license"  : "apache2.0"
+    },
+    {
       "title"    : "IBM Plex",
       "copyright": "Copyright © 2017 IBM Corp. with Reserved Font Name \"Plex\"",
       "license"  : "ofl"

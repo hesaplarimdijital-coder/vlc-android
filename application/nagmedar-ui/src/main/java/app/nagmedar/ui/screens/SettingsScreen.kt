@@ -56,6 +56,9 @@ import app.nagmedar.ui.radio.record.RadioRecordingSection
 import app.nagmedar.ui.podcast.PodcastSection
 import app.nagmedar.ui.remoteaccess.RemoteAccessSection
 import app.nagmedar.ui.scrobble.ScrobbleSection
+import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.LocalShellTopPadding
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
@@ -133,7 +136,8 @@ fun SettingsScreen(
         state = listState,
         // the macrobenchmarks scroll it by this tag (S-1404)
         modifier = Modifier.fillMaxSize().testTag("settings"),
-        contentPadding = PaddingValues(bottom = dimens.gapXl),
+        // the page scrolls under the phone's bars (Desktop Kit 1.0)
+        contentPadding = LocalShellTopPadding.current + PaddingValues(bottom = dimens.gapXl) + LocalShellBottomPadding.current,
         horizontalAlignment = Alignment.Start,
     ) {
         items(SettingsItem.entries, key = { it.key }) { entry ->

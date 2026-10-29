@@ -59,6 +59,8 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.components.DialogCard
 import app.nagmedar.ui.components.DialogFrame
+import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.transcribe.WhisperJobs
 import app.nagmedar.ui.transcribe.WhisperModel
 import app.nagmedar.ui.transcribe.WhisperModels
@@ -141,7 +143,7 @@ fun DownloadsScreen() {
             return@Column
         }
         val dimens = NagTheme.dimens
-        LazyColumn(Modifier.fillMaxSize().testTag("downloads-list"), contentPadding = PaddingValues(bottom = dimens.gapXl)) {
+        LazyColumn(Modifier.fillMaxSize().testTag("downloads-list"), contentPadding = PaddingValues(bottom = dimens.gapXl) + LocalShellBottomPadding.current) {
             if (list.isNotEmpty()) {
                 item(key = "episodes") { Caption(stringResource(R.string.nag_downloads_episodes)) }
                 items(list, key = { "episode-${it.id}" }) { episode ->

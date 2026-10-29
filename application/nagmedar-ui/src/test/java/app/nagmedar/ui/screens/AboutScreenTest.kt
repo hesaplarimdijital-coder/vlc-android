@@ -58,11 +58,12 @@ class AboutScreenTest {
 
     @Test
     fun theListIsS005s() {
-        // 85, and the Vulkan and SPIR-V headers whisper's GPU backend is built with (S-709); 1.0: without the subtitle
-        // translation's engine, tokenizer and models and the Dolby Vision parser
-        assertEquals(76, libraries.size)
+        // 85, the Vulkan and SPIR-V headers whisper's GPU backend is built with (S-709) and Haze (Desktop Kit 1.0's glass);
+        // 1.0: without the subtitle translation's engine, tokenizer and models and the Dolby Vision parser
+        assertEquals(77, libraries.size)
         val byTitle = libraries.associateBy { it.title }
         // the lab's and the music engine's native additions are there, with their licences
+        assertEquals("apache2.0", byTitle.getValue("Haze").license?.id)
         assertEquals("lgpl2.1", byTitle.getValue("libusb").license?.id)
         assertEquals("mit", byTitle.getValue("whisper.cpp").license?.id)
         assertEquals("lgpl2.1", byTitle.getValue("TagLib").license?.id)

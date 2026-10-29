@@ -2,6 +2,7 @@ package app.nagmedar.ui.music
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
@@ -24,8 +26,10 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -188,6 +192,7 @@ internal fun SmartPane(
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
                     rowMenuAsSheet = true,
                     rowModifier = { track -> actions.rowModifier(track) { listOf(track) } },
+                    contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
                 )
             }
         }
