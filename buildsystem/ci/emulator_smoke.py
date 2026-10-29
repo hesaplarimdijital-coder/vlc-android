@@ -788,10 +788,10 @@ class Smoke:
         return [n.text.strip() for n in sorted(row, key=lambda n: n.b[0])]
 
     def has_bottom_bar(self, nodes):
-        """The phone's bottom bar is on screen: its ⋯ tab, a control at the screen's foot."""
+        """The phone's bottom bar is on screen: its ⋯ tab's label at the screen's foot (the label is a child of the tab)."""
         s = self.strings[self.lang]
         w, h = self.screen_size(nodes)
-        return any(n.text.strip() == s["nag_nav_more"] and n.clickable and n.center[1] > h * 0.85 for n in self.app_nodes(nodes))
+        return any(n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.85 for n in self.app_nodes(nodes))
 
     def check_bottom_bar(self, nodes):
         s = self.strings[self.lang]
@@ -824,13 +824,13 @@ class Smoke:
         return r
 
     def back_to_tabs(self):
-        """Back until the phone's bottom bar shows (a page of its own, Settings, has none); never past it."""
+        """Back while a page of its own (Settings) hides the phone's bottom bar; only where its back arrow shows, never out of the app."""
         nodes = self.nodes(self.dump())
         # a phone's screen only: a tablet has no bottom bar, and Back would leave the app
         if self.screen_size(nodes)[0] >= 1600:
             return
         for _ in range(4):
-            if self.has_bottom_bar(nodes):
+            if self.has_bottom_bar(nodes) or not self.back_arrow(nodes):
                 return
             self.key(4)
             nodes = self.nodes(self.settle(0.8))
@@ -859,7 +859,8 @@ class Smoke:
         self.check_bottom_bar(nodes)
         self.top_bar_colour_check(nodes)
         nodes = self.open_music()
-        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"] and n.clickable]
+        w, h = self.screen_size(nodes)
+        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.85]
         if not self.check("⋯ in the bottom bar", bool(more)):
             return
         rows = (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])
