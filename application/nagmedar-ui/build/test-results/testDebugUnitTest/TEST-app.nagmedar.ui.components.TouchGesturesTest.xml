@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.TouchGesturesTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:30:57.339Z" hostname="runnervmnwato" time="0.486">
+  <properties/>
+  <testcase name="aHandleDraggedByTouchMovesItsRow" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.081"/>
+  <testcase name="aHandleDraggedWithTheMouseMovesItsRowUp" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.08"/>
+  <testcase name="aSwipeTowardTheStartRemoves" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.097"/>
+  <testcase name="aMouseDoesNotSwipe" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.065"/>
+  <testcase name="aShortSlowSwipeComesBack" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.096"/>
+  <testcase name="screenReadersHaveTheActionWithoutTheSwipe" classname="app.nagmedar.ui.components.TouchGesturesTest" time="0.067"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

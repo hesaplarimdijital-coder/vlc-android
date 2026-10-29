@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:31:14.593Z" hostname="runnervmnwato" time="0.492">
+  <properties/>
+  <testcase name="theMenuMakesItAgainOrRemovesIt" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.063"/>
+  <testcase name="theTranscriptMadeIsShownAsAFeedsIs" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.137"/>
+  <testcase name="noTranscriptOffersWhisperWithTheModelsSize" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.066"/>
+  <testcase name="aFailedTryIsSaidAndCanBeAskedAgain" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.072"/>
+  <testcase name="aWaitingJobSaysWhatItWaitsFor" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.065"/>
+  <testcase name="aJobUnderWayShowsHowFarItIsAndStops" classname="app.nagmedar.ui.podcast.EpisodeTranscriptTabTest" time="0.089"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

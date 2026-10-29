@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.playback.SessionButtonsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:26:58.002Z" hostname="runnervmnwato" time="0.017">
+  <properties/>
+  <testcase name="anEpisodesSkipsStayInsideIt" classname="app.nagmedar.playback.SessionButtonsTest" time="0.0"/>
+  <testcase name="musicOnThePhonesControlsSeeks" classname="app.nagmedar.playback.SessionButtonsTest" time="0.011"/>
+  <testcase name="anEpisodeHasItsSkipsEverywhere" classname="app.nagmedar.playback.SessionButtonsTest" time="0.0"/>
+  <testcase name="musicInTheCarShufflesAndRepeats" classname="app.nagmedar.playback.SessionButtonsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.backup.BackupCodecTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:30:53.086Z" hostname="runnervmnwato" time="0.297">
+  <properties/>
+  <testcase name="whatIsNotABackupIsSaidSo" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.035"/>
+  <testcase name="onlyChosenCoversAreTakenFromTheFile" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.024"/>
+  <testcase name="theParentalControlNeitherGoesOutNorComesBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.032"/>
+  <testcase name="aBackupGoesOutAndComesBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.037"/>
+  <testcase name="theManifestAloneIsABackupWithoutCovers" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.04"/>
+  <testcase name="aTvsOwnSettingsNeitherGoOutNorComeBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.033"/>
+  <testcase name="theSettingsLeaveOutThisDevicesAndAnAccountsKeys" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.029"/>
+  <testcase name="onlyTheChosenParts" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.036"/>
+  <testcase name="unknownKeysAndBadEntriesArePassedOver" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.029"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

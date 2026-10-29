@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.PaletteContrastTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:32:08.420Z" hostname="runnervmnwato" time="0.173">
+  <properties/>
+  <testcase name="everyFixedAccentKeepsItsContrast" classname="app.nagmedar.ui.theme.PaletteContrastTest" time="0.002"/>
+  <testcase name="theWallpaperHueIsKept" classname="app.nagmedar.ui.theme.PaletteContrastTest" time="0.064"/>
+  <testcase name="systemModeFollowsTheSystem" classname="app.nagmedar.ui.theme.PaletteContrastTest" time="0.0"/>
+  <testcase name="theWallpaperAccentKeepsContrastForAnyWallpaper" classname="app.nagmedar.ui.theme.PaletteContrastTest" time="0.106"/>
+  <testcase name="theRulesCatchAPoorPalette" classname="app.nagmedar.ui.theme.PaletteContrastTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

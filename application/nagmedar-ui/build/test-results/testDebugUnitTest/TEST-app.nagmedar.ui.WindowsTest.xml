@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.WindowsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:30:38.864Z" hostname="runnervmnwato" time="2.693">
+  <properties/>
+  <testcase name="whatOneWindowChangesTheOthersFollow" classname="app.nagmedar.ui.WindowsTest" time="2.555"/>
+  <testcase name="aNewWindowIsATaskOfItsOwnOnTheSameScreen" classname="app.nagmedar.ui.WindowsTest" time="0.077"/>
+  <testcase name="theManifestSaysSo" classname="app.nagmedar.ui.WindowsTest" time="0.06"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

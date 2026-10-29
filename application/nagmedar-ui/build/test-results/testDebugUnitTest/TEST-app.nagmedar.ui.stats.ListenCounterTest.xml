@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.stats.ListenCounterTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:32:08.011Z" hostname="runnervmnwato" time="0.002">
+  <properties/>
+  <testcase name="playedAgainFromTheStartCountsAgain" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.002"/>
+  <testcase name="fourMinutesOfALongTrackAreAPlay" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <testcase name="leftEarlyForAnotherTrackIsASkip" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <testcase name="halfOfATrackIsAPlayOnce" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <testcase name="aSeekIsNotListening" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <testcase name="aStopIsNotASkip" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <testcase name="fasterPlaybackCountsItsSteps" classname="app.nagmedar.ui.stats.ListenCounterTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.PlaylistFilesTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:31:07.850Z" hostname="runnervmnwato" time="0.008">
+  <properties/>
+  <testcase name="theWrittenFiles" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.003"/>
+  <testcase name="aFileWithoutItsExtensionIsKnownByItsStart" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.0"/>
+  <testcase name="aListsFilesAreFoundInTheLibrary" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.001"/>
+  <testcase name="anXspf" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.001"/>
+  <testcase name="anOldTurkishM3uAndAByteOrderMark" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.0"/>
+  <testcase name="formatsByTheirNames" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.0"/>
+  <testcase name="aPls" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.001"/>
+  <testcase name="anM3uWithItsNamesLengthsAndPaths" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.0"/>
+  <testcase name="pathsAreWrittenRelativeInTheirOwnTreeOnly" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.0"/>
+  <testcase name="eachFormatReadsBackWhatItWrote" classname="app.nagmedar.ui.music.PlaylistFilesTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

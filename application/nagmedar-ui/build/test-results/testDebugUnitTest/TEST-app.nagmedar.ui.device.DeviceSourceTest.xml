@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.device.DeviceSourceTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:30:59.003Z" hostname="runnervmnwato" time="0.101">
+  <properties/>
+  <testcase name="aProviderFailingWhileReadIsAnUnreadableFolder" classname="app.nagmedar.ui.device.DeviceSourceTest" time="0.081"/>
+  <testcase name="aFolderIsReadThroughItsProvider" classname="app.nagmedar.ui.device.DeviceSourceTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

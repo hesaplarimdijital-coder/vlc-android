@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.backup.AppBackupTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:30:51.442Z" hostname="runnervmnwato" time="1.639">
+  <properties/>
+  <testcase name="aBackupComesBackOnAnotherDevice" classname="app.nagmedar.ui.backup.AppBackupTest" time="1.639"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

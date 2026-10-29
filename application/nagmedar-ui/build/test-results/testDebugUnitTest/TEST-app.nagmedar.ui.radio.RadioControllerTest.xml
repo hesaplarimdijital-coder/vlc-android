@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioControllerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:31:21.773Z" hostname="runnervmnwato" time="0.179">
+  <properties/>
+  <testcase name="aVoteTheDirectoryRefusedDoesNotCount" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.028"/>
+  <testcase name="playingStartsTheStationAndShowsItAsPlayed" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.017"/>
+  <testcase name="theRule" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.014"/>
+  <testcase name="otherStationsAreVotedForTheSameDay" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.016"/>
+  <testcase name="twoQuickTapsSendOneVote" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.024"/>
+  <testcase name="aVoteIsCountedAndRemembered" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.019"/>
+  <testcase name="aVoteThatCouldNotBeSentIsNotRemembered" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.016"/>
+  <testcase name="theSameStationTwiceInADayIsVotedOnce" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.015"/>
+  <testcase name="aStaleRowDoesNotSendASecondVote" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.015"/>
+  <testcase name="aStationOfTheUsersHasNoOneToVoteFor" classname="app.nagmedar.ui.radio.RadioControllerTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

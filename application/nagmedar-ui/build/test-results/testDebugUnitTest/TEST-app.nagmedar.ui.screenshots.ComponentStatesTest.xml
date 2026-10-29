@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.ComponentStatesTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:31:33.043Z" hostname="runnervmnwato" time="1.109">
+  <properties/>
+  <testcase name="darkStates" classname="app.nagmedar.ui.screenshots.ComponentStatesTest" time="0.562"/>
+  <testcase name="lightStates" classname="app.nagmedar.ui.screenshots.ComponentStatesTest" time="0.547"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

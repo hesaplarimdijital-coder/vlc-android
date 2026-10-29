@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.RecordingTextTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T03:31:26.681Z" hostname="runnervmnwato" time="0.307">
+  <properties/>
+  <testcase name="endsTheUserShouldKnowAreTold" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.022"/>
+  <testcase name="sizesAreWrittenAsTheRestOfTheAppWritesThem" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.017"/>
+  <testcase name="theOngoingNotificationSaysWhatIsGoingOn" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.018"/>
+  <testcase name="howLongARecordingHasGoneOn" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.015"/>
+  <testcase name="theOngoingNotificationNamesTheTrackAndTheCount" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.014"/>
+  <testcase name="noticesAreOneLines" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.088"/>
+  <testcase name="repeatsInTurkish" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.044"/>
+  <testcase name="whenAScheduleRunsNextOrWhyItDoesNot" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.022"/>
+  <testcase name="repeatsAreSaidInWords" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.022"/>
+  <testcase name="daysAndTimesInEnglish" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.019"/>
+  <testcase name="endsInTurkish" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.013"/>
+  <testcase name="daysAndTimesInTurkish" classname="app.nagmedar.ui.radio.record.RecordingTextTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
