@@ -202,10 +202,12 @@ private fun UiDevice.subscribeOnce(feed: String) {
     val followed = waitFor(3_000) { findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
     if (followed == null) passOver {
         add?.click() ?: missing("podcast-add")
-        val field: UiObject2? = waitFor { findObject(By.res("podcast-add-field")) }
+        // the dialog is a window of its own, whose test tags may not be resource ids: its text field
+        // is then the screen's one EditText, and Enter in it subscribes
+        val field: UiObject2? = waitFor { findObject(By.res("podcast-add-field")) ?: findObject(By.clazz("android.widget.EditText")) }
         if (field != null) {
             field.setText(feed)
-            waitFor { findObject(By.res("podcast-add-submit")) }?.click() ?: missing("podcast-add-submit")
+            findObject(By.res("podcast-add-submit"))?.click() ?: pressEnter()
             val done = waitFor(30_000) { findObject(By.res("podcast-page")) ?: findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
             if (done != null) trace("subscribed to $feed") else missing("podcast-subscribed")
         } else {
