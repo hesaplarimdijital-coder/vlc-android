@@ -1317,7 +1317,9 @@ class Smoke:
                 self.key(4)
                 break
             nodes = self.step("Sort menu: %s" % s[entry], lambda: self.tap(item[0]))
-            self.check("after '%s' the drive still lists its folders" % s[entry], bool(self.in_tag(nodes, "device-table", folder)))
+            # the rows may still be moving to their new places when the screen is read: read again for a moment
+            nodes, listed = self.wait_for(lambda ns: self.in_tag(ns, "device-table", folder), 5)
+            self.check("after '%s' the drive still lists its folders" % s[entry], bool(listed))
         if not wide:
             self.key(4)
             nodes = self.step("Back (to the places)")
