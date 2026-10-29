@@ -928,8 +928,11 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         executeUpdate()
     }
 
-    /** Nağmedar: the Wi-Fi lock held while a network stream plays or waits to be opened again, never for local media. */
-    private fun updateWifiLock() {
+    /**
+     * Nağmedar: the Wi-Fi lock held while a network stream plays or waits to be opened again, never for local media; it
+     * works only with the screen on ([StreamWifiLock]), the reconnect logic is what covers the screen off.
+     */
+    internal fun updateWifiLock() {
         wifiLock.hold((isPlaying || ResumeHook.dropout?.recovering == true) && isSchemeStreaming(currentMediaLocation))
     }
 

@@ -22,10 +22,19 @@ class StreamDropoutTest {
         lastDrop: Long = -1L,
         played: Boolean = false,
         episode: Boolean = true,
-    ) = StreamDropout.verdict(streamed, position, duration, retries, error, lastDrop, played, episode)
+        seekable: Boolean = false,
+        repeats: Int = 0,
+    ) = StreamDropout.verdict(streamed, position, duration, retries, error, lastDrop, played, episode, seekable, repeats)
 
-    private fun live(position: Long, retries: Int = 0, error: Boolean = false, lastDrop: Long = -1L, streamed: Boolean = true) =
-        verdict(position, duration = 0, retries = retries, error = error, streamed = streamed, lastDrop = lastDrop, episode = false)
+    private fun live(
+        position: Long,
+        retries: Int = 0,
+        error: Boolean = false,
+        lastDrop: Long = -1L,
+        streamed: Boolean = true,
+        seekable: Boolean = false,
+        repeats: Int = 0,
+    ) = verdict(position, duration = 0, retries = retries, error = error, streamed = streamed, lastDrop = lastDrop, episode = false, seekable = seekable, repeats = repeats)
 
     @Test
     fun anEndInTheMiddleIsADropoutOpenedAgainAFewSecondsEarlier() {
@@ -89,11 +98,21 @@ class StreamDropoutTest {
 
     @Test
     fun aStreamWithNoLengthThatEndsWhereItEndedIsAFileThatEnded() {
-        assertEquals(DropoutVerdict.End, live(181_000, lastDrop = 180_000))
+        // one that can be sought in is a file
+        assertEquals(DropoutVerdict.End, live(181_000, lastDrop = 180_000, seekable = true, repeats = 1))
         // an error, another place, or the first seconds: a drop again
-        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(181_000, error = true, lastDrop = 180_000))
-        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(240_000, lastDrop = 180_000))
-        assertEquals(DropoutVerdict.Reopen(0, 3_000, 2), live(1_500, retries = 1, lastDrop = 1_000))
+        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(181_000, error = true, lastDrop = 180_000, seekable = true, repeats = 1))
+        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(240_000, lastDrop = 180_000, seekable = true))
+        assertEquals(DropoutVerdict.Reopen(0, 3_000, 2), live(1_500, retries = 1, lastDrop = 1_000, seekable = true, repeats = 1))
+    }
+
+    @Test
+    fun aLiveStreamCutAfterTheSameTimeEachConnectionGoesOnUntilTheThirdCut() {
+        // a server's listening limit or a token's expiry: an hour each time
+        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(3_600_500, lastDrop = 3_600_000, repeats = 1))
+        assertEquals(DropoutVerdict.End, live(3_600_500, lastDrop = 3_600_000, repeats = 2))
+        // with an error it is a drop, however often
+        assertEquals(DropoutVerdict.Reopen(0, 1_000, 1), live(3_600_500, error = true, lastDrop = 3_600_000, repeats = 5))
     }
 
     @Test
