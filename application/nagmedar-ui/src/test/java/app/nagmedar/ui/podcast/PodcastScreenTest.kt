@@ -8,6 +8,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -47,6 +48,9 @@ class PodcastScreenTest {
     private val calls = mutableListOf<String>()
     private var model by mutableStateOf(PodcastSamples.model())
 
+    /** The window shows the feed being read once the address is sent, as the controller's does. */
+    private var readsOnSubmit = false
+
     private val actions = PodcastActions(
         onQueryChange = { calls += "query:$it" },
         onSearch = { calls += "search" },
@@ -59,7 +63,10 @@ class PodcastScreenTest {
         onOpenEpisode = { calls += "open-episode:$it" },
         onSetPlayed = { id, played -> calls += "played:$id:$played" },
         onAdd = { calls += "add" },
-        onAddSubmit = { calls += "submit:$it" },
+        onAddSubmit = {
+            calls += "submit:$it"
+            if (readsOnSubmit) model = PodcastSamples.model(add = AddUi(it, working = true))
+        },
         onAddDismiss = { calls += "dismiss" },
         onImport = { calls += "import" },
         onClosePage = { calls += "close" },
@@ -176,6 +183,26 @@ class PodcastScreenTest {
         compose.onNodeWithTag("podcast-add-submit").assertIsEnabled()
         compose.onNodeWithTag("podcast-add-field").performKeyInput { pressKey(Key.Enter) }
         assertEquals(listOf("submit:feed://example.org/rss"), calls)
+    }
+
+    @Test
+    fun enterReleasedWhileTheFeedIsReadIsNoCancel() {
+        // 1.0.1: Enter's press sent the address and the field, disabled while the feed was read, gave the focus away;
+        // Enter's release then clicked "Cancel", and closing the window cancelled the subscription
+        readsOnSubmit = true
+        model = PodcastSamples.model(add = AddUi())
+        show()
+        val field = compose.onNodeWithTag("podcast-add-field")
+        field.performTextInput("feed://example.org/rss")
+        field.performKeyInput { keyDown(Key.Enter) }
+        compose.waitForIdle()
+        field.performKeyInput {
+            advanceEventTime(150)
+            keyUp(Key.Enter)
+        }
+        compose.waitForIdle()
+        assertEquals(listOf("submit:feed://example.org/rss"), calls)
+        field.assertIsFocused()
     }
 
     @Test

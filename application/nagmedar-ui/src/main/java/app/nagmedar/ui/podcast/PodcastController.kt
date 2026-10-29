@@ -66,10 +66,10 @@ class EpisodeServices(
  * on [scope]; the screen only draws [model] and calls back.
  *
  * [undo] (when the shell has an undo bar) brings back a subscription taken away and takes back one
- * just made. What must not stop when the screen is left (the undo, the import, the export, the
- * unsubscribing and the played marks) runs on [background], which outlives it (the app's scope in the app);
- * what only matters while the screen is there (the search, a subscription in progress, the page) runs on [scope],
- * and cancelling it cancels the network call under it.
+ * just made. What must not stop when the screen is left (a subscription once asked for, the undo, the import, the
+ * export, the unsubscribing and the played marks) runs on [background], which outlives it (the app's scope in the app);
+ * what only matters while the screen is there (the search, the page) runs on [scope], and cancelling it cancels the
+ * network call under it.
  */
 @Stable
 class PodcastController(
@@ -110,7 +110,9 @@ class PodcastController(
 
     private var searchJob: Job? = null
     private var pageJob: Job? = null
-    private var addJob: Job? = null
+
+    /** Counts the "add" windows opened and the addresses sent: only the latest one's subscription speaks in the window. */
+    private var addTurn = 0
 
     val model: PodcastScreenModel
         get() {
@@ -230,12 +232,15 @@ class PodcastController(
 
     // ------------------------------------------------------------ subscribing
 
-    /** One tap on a search result: subscribes; the result says "Abone" when it is done, or why it could not be. */
+    /**
+     * One tap on a search result: subscribes; the result says "Abone" when it is done, or why it could not be. Once asked
+     * for, the subscription is made even if the screen goes meanwhile.
+     */
     fun subscribe(hit: PodcastHit) {
         val key = FeedUrl.key(hit.feedUrl)
         if (subscribing[key] == SubscribeUi.Working) return
         subscribing[key] = SubscribeUi.Working
-        scope.launch {
+        background.launch {
             when (val result = repository.subscribe(hit.feedUrl, hit)) {
                 is SubscribeResult.Added -> {
                     subscribing.remove(key)
@@ -251,34 +256,47 @@ class PodcastController(
         }
     }
 
-    /** Subscribes to the address typed in the "add" window; the window stays with the reason when it is no feed. */
+    /**
+     * Subscribes to the address typed in the "add" window; the window stays with the reason when it is no feed. 1.0.1:
+     * once sent, the subscription is made or refused even if the window is closed or the screen goes meanwhile (it runs
+     * on [background]; closing the window used to cancel it after the feed was read, and nothing was saved): the window,
+     * while it is still the one that sent it, closes onto the show's page or says why; a closed one's refusal is said in
+     * a notice, its subscription in the undo bar.
+     */
     fun submitAddress(text: String) {
-        addJob?.cancel()
+        val turn = ++addTurn
         add = AddUi(text, working = true)
-        addJob = scope.launch {
-            when (val result = repository.subscribe(text)) {
+        background.launch {
+            val result = repository.subscribe(text)
+            val shown = addTurn == turn && add != null
+            when (result) {
                 is SubscribeResult.Added -> {
-                    add = null
                     announce(result.feed)
-                    open(result.feed.id)
+                    if (shown) {
+                        add = null
+                        open(result.feed.id)
+                    }
                 }
                 is SubscribeResult.Already -> {
-                    add = null
                     say(res.getString(R.string.nag_pod_already, result.feed.title))
-                    open(result.feed.id)
+                    if (shown) {
+                        add = null
+                        open(result.feed.id)
+                    }
                 }
-                is SubscribeResult.Failed -> add = AddUi(text, failure = result.failure)
+                is SubscribeResult.Failed -> if (shown) add = AddUi(text, failure = result.failure) else say(result.failure.describe(res), long = true)
             }
         }
     }
 
     fun openAdd() {
+        addTurn++
         add = AddUi()
     }
 
+    /** Closes the "add" window; a subscription it sent goes on and says how it went. */
     fun dismissAdd() {
-        addJob?.cancel()
-        addJob = null
+        addTurn++
         add = null
     }
 

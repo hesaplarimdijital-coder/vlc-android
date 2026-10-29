@@ -2,6 +2,8 @@ package app.nagmedar.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -46,6 +49,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -53,6 +57,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
@@ -175,8 +180,9 @@ fun <T> DenseTable(
     val focusManager = LocalFocusManager.current
     val focused = remember { FocusedRow<T>() }
     val extend by rememberUpdatedState(onExtendSelection)
+    val widths = fittedWidths(columns, sortable = onSortChange != null)
     val header = @Composable { modifier: Modifier ->
-        Column(modifier) {
+        Column(modifier.coversRowsBeneath()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,11 +194,11 @@ fun <T> DenseTable(
                 val rest = if (glassHeader) Color.Transparent else colors.background
                 columns.forEachIndexed { index, column ->
                     if (headerMenu != null) {
-                        ContextMenuArea(entries = { headerMenu(index) }, modifier = Modifier.cell(this, column.width), accessibilityLabel = headerMenuLabel) {
+                        ContextMenuArea(entries = { headerMenu(index) }, modifier = Modifier.cell(this, widths[index]), accessibilityLabel = headerMenuLabel) {
                             Row { HeaderCell(column, index, sort, onSortChange, rest, Modifier.weight(1f)) }
                         }
                     } else {
-                        HeaderCell(column, index, sort, onSortChange, rest, Modifier.cell(this, column.width))
+                        HeaderCell(column, index, sort, onSortChange, rest, Modifier.cell(this, widths[index]))
                     }
                 }
                 if (more) Spacer(Modifier.width(moreWidth()))
@@ -227,6 +233,7 @@ fun <T> DenseTable(
                 val row = @Composable { outer: Modifier ->
                     TableRow(
                         columns = columns,
+                        widths = widths,
                         item = item,
                         selected = selectedKeys?.contains(key(item)) ?: (selectedKey != null && key(item) == selectedKey),
                         onClick = { onRowClick(item, index) },
@@ -317,15 +324,15 @@ private fun <T> HeaderCell(column: TableColumn<T>, index: Int, sort: TableSort?,
                     onSortChange?.invoke(TableSort(index, if (active) !(sort?.ascending ?: true) else true))
                 }, role = Role.Button) else Modifier,
             )
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = CELL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (column.alignEnd) Spacer(Modifier.weight(1f))
         Text(column.title, style = NagTheme.type.labelSmall, color = if (active) colors.text else colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (active) {
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(SORT_ARROW_GAP))
             Icon(if (sort?.ascending != false) NagIcons.ChevronUp else NagIcons.ChevronDown, contentDescription = null,
-                tint = colors.textSecondary, modifier = Modifier.size(12.dp))
+                tint = colors.textSecondary, modifier = Modifier.size(SORT_ARROW))
         }
     }
 }
@@ -333,6 +340,7 @@ private fun <T> HeaderCell(column: TableColumn<T>, index: Int, sort: TableSort?,
 @Composable
 private fun <T> TableRow(
     columns: List<TableColumn<T>>,
+    widths: List<ColumnWidth>,
     item: T,
     selected: Boolean,
     onClick: () -> Unit,
@@ -372,7 +380,7 @@ private fun <T> TableRow(
             }
         }
         columns.forEachIndexed { index, column ->
-            Box(Modifier.cell(this, column.width).padding(horizontal = 8.dp), contentAlignment = if (column.alignEnd) Alignment.CenterEnd else Alignment.CenterStart) {
+            Box(Modifier.cell(this, widths[index]).padding(horizontal = CELL_PADDING), contentAlignment = if (column.alignEnd) Alignment.CenterEnd else Alignment.CenterStart) {
                 val content = column.content
                 if (content != null) {
                     content(item, selected)
@@ -403,6 +411,46 @@ private fun moreWidth(): Dp = NagTheme.dimens.minTarget.coerceAtLeast(NagTheme.d
 /** The reorder handle's column: a finger's width by touch. */
 @Composable
 private fun handleWidth(): Dp = NagTheme.dimens.minTarget.coerceAtLeast(28.dp)
+
+/** A cell's padding at each side, the titles' and the rows'. */
+private val CELL_PADDING = 8.dp
+
+/** The sort's arrow beside its column's title, and the gap before it. */
+private val SORT_ARROW = 12.dp
+private val SORT_ARROW_GAP = 4.dp
+
+/**
+ * 1.0: the columns' widths, a fixed one never narrower than its title (with the sort's arrow, when the column sorts): a
+ * title is read whole in either language and at any text size ("Duration" was "Durati…" on a tablet). Shares stay shares.
+ */
+@Composable
+private fun <T> fittedWidths(columns: List<TableColumn<T>>, sortable: Boolean): List<ColumnWidth> {
+    val measurer = rememberTextMeasurer()
+    // as the title's Text sets it: its own style over the surrounding one (letter spacing and all)
+    val style = LocalTextStyle.current.merge(NagTheme.type.labelSmall)
+    val density = LocalDensity.current
+    val titles = columns.map { Triple(it.title, it.width, it.sortable) }
+    return remember(titles, style, density, sortable) {
+        titles.map { (title, width, sorts) ->
+            if (width !is ColumnWidth.Fixed) return@map width
+            val text = measurer.measure(title, style, maxLines = 1, softWrap = false, density = density).size.width
+            val arrow = if (sortable && sorts) SORT_ARROW + SORT_ARROW_GAP else 0.dp
+            // and a pixel's slack: the paddings and the arrow are rounded to whole pixels apart
+            val needed = with(density) { (text + 1).toDp() } + CELL_PADDING * 2 + arrow
+            if (needed > width.width) ColumnWidth.Fixed(needed) else width
+        }
+    }
+}
+
+/**
+ * 1.0: the column titles take every press in their band, beside and between the titles too, so that a long press there
+ * never reaches a row passing beneath them (under the glass header, or under the titles kept at the top of a phone's
+ * list), whose menu would open instead of the column chooser. Nothing is consumed: the titles under the finger still
+ * sort and open their menu.
+ */
+private fun Modifier.coversRowsBeneath(): Modifier = pointerInput(Unit) {
+    awaitEachGesture { awaitFirstDown(requireUnconsumed = false) }
+}
 
 /** Column width inside a table row: weight needs the RowScope receiver. */
 private fun Modifier.cell(scope: RowScope, width: ColumnWidth): Modifier = with(scope) {
