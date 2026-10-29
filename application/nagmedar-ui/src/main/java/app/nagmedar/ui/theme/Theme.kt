@@ -1,6 +1,7 @@
 package app.nagmedar.ui.theme
 
 import android.os.Build
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -198,8 +200,12 @@ fun NagColors.withAccent(tones: AccentTones): NagColors = if (!isDark) {
  * Desktop Kit 1.0's artwork accent, for the player's surfaces only: below this point the accent
  * (and the glass tint made from it) is the one of [seed], the playing track's artwork colour
  * ([app.nagmedar.ui.music.rememberArtworkColor]), tuned to keep every contrast
- * ([AccentTones.fromSeed]); a new track's colour cross-fades in [NagMotion.COLOR_CHANGE] ms (at
- * once with reduced motion). [seed] null keeps the theme's accent, cross-fading back to it.
+ * ([AccentTones.fromSeed]). [seed] null keeps the theme's accent.
+ *
+ * 1.0's review: the palette below changes once, when a new track's tones are ready, never on every
+ * frame of a cross-fade (a static local recomposes all it holds, the mini player in the middle of
+ * its swipe and the whole full player). The surfaces that show the accent largely (the timeline,
+ * the progress line, the play button) cross-fade to it themselves while drawing ([animatedAccent]).
  */
 @Composable
 fun ArtworkAccent(seed: Color?, content: @Composable () -> Unit) {
@@ -208,10 +214,19 @@ fun ArtworkAccent(seed: Color?, content: @Composable () -> Unit) {
     val tones by produceState<AccentTones?>(null, seed) {
         value = seed?.let { color -> withContext(Dispatchers.Default) { AccentTones.fromSeed(color) } }
     }
-    val target = remember(base, tones) { tones?.let(base::withAccent) ?: base }
-    val colors = animatePalette(target, if (NagTheme.motion.reduced) 0 else NagMotion.COLOR_CHANGE)
+    val colors = remember(base, tones) { tones?.let(base::withAccent) ?: base }
     CompositionLocalProvider(LocalNagColors provides colors, content = content)
 }
+
+/**
+ * [color], an accent token, as it is on screen while it cross-fades to a new accent (a new track's
+ * artwork, [ArtworkAccent]; another accent chosen) over [NagMotion.COLOR_CHANGE] ms, at once with
+ * reduced motion. Read its value while drawing (`drawBehind { drawRect(fill.value) }`): the fade
+ * then redraws the surface on each frame without recomposing anything.
+ */
+@Composable
+fun animatedAccent(color: Color, label: String = "accent"): State<Color> =
+    animateColorAsState(color, NagTheme.motion.color(), label = label)
 
 private fun NagColors.toMaterialScheme(): ColorScheme = if (isDark) darkColorScheme(
     primary = accent,

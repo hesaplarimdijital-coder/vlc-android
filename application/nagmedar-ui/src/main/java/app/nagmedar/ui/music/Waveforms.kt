@@ -5,11 +5,14 @@ import android.net.Uri
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.audio.LoudnessScanner
 import app.nagmedar.audio.MusicEngine
 import app.nagmedar.audio.Waveform
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
@@ -61,11 +64,16 @@ object Waveforms {
         MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }
 }
 
-/** The waveform of [uri] once measured; null meanwhile, and for none. */
+/**
+ * The waveform of [uri] once measured; null meanwhile, and for none. Measured once [wanted] says so (1.0: the phone's
+ * player, composed while it waits under the mini player, asks for it once it is out, as it did when it was opened).
+ */
 @Composable
-fun rememberWaveform(uri: String?): Waveform? {
+fun rememberWaveform(uri: String?, wanted: () -> Boolean = { true }): Waveform? {
     val context = LocalContext.current
+    val latestWanted = rememberUpdatedState(wanted)
     return produceState<Waveform?>(null, uri) {
+        if (uri != null) snapshotFlow { latestWanted.value() }.first { it }
         value = uri?.let { runCatching { Waveforms.of(context, it) }.getOrNull() }
     }.value
 }

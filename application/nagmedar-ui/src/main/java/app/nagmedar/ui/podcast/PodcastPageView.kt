@@ -249,7 +249,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
             NagPlayButton(playWord, { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
             // a phone's episode ends with "⋯": the same menu as the long press, as a sheet (Desktop Kit 1.0)
             if (currentWidthClass() == WidthClass.Compact) {
-                MoreButton(groups = { menu().toActionGroups() }, title = episode.title, contentDescription = res.getString(R.string.nag_pod_actions))
+                MoreButton(groups = { menu().toActionGroups() }, title = episode.title)
             }
         }
     }

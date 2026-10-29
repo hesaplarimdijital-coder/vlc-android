@@ -757,7 +757,7 @@ private fun StationRow(
                 modifier = Modifier.testTag("favourite-${station.key}"),
             )
             // "⋯": a sheet on a phone, the menu on a wider window (Desktop Kit 1.0)
-            MoreButton(groups = { menu().toActionGroups() }, title = station.name, contentDescription = moreActions)
+            MoreButton(groups = { menu().toActionGroups() }, title = station.name)
         }
     }
 }

@@ -119,18 +119,18 @@ class RadioPageTest {
     fun theMenuVotesAndCopiesTheAddress() {
         directory.onSearch = { listOf(RadioSamples.jazz) }
         show()
-        compose.onAllNodesWithContentDescription("Diğer işlemler")[0].performClick()
+        compose.onAllNodesWithContentDescription("Gece Cazı için diğer işlemler")[0].performClick()
         compose.onNodeWithText("Akış adresini kopyala").performClick()
         compose.waitForIdle()
         assertEquals(listOf(RadioSamples.jazz.streamUrl), copied.map { it.streamUrl })
-        compose.onAllNodesWithContentDescription("Diğer işlemler")[0].performClick()
+        compose.onAllNodesWithContentDescription("Gece Cazı için diğer işlemler")[0].performClick()
         compose.onNodeWithText("Bu radyoya oy ver").performClick()
         compose.waitForIdle()
         assertEquals(listOf("a1-caz"), directory.votes.toList())
         assertEquals("Gece Cazı için oy verdiniz", ShadowToast.getTextOfLatestToast())
         // the vote is counted in the row, and the menu says it was cast
         compose.onNodeWithText("18.403 oy").assertExists()
-        compose.onAllNodesWithContentDescription("Diğer işlemler")[0].performClick()
+        compose.onAllNodesWithContentDescription("Gece Cazı için diğer işlemler")[0].performClick()
         compose.onNodeWithText("Son bir günde oy verildi").assertExists()
     }
 

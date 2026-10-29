@@ -385,6 +385,12 @@ private fun NagmedarMain(
             closePlayer()
             navigator.navigate(Destination.Music)
         }
+        // nothing plays any more (stopped from the notification, the queue's end): the phone's player goes back to the
+        // strip, so that the next track starts on the mini player with the bottom bar shown, not expanded at once
+        val nothingPlays = nowPlaying.media == null
+        LaunchedEffect(nothingPlays) {
+            if (nothingPlays) expandingPlayer.snapTo(PlayerValue.Collapsed)
+        }
         // turned sideways (a phone's window becomes a rail's) or back: the open player stays open in the other form
         val navKindNow = NavKind.forWidth(widthClass)
         LaunchedEffect(navKindNow) {

@@ -80,6 +80,7 @@ import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.rememberReorderState
 import app.nagmedar.ui.components.stateBackground
@@ -610,7 +611,7 @@ private fun PlaylistPane(
             actions = {
                 NagButton(stringResource(R.string.nag_play), { actions.play(tracks, 0) }, icon = NagIcons.Play, primary = true, enabled = tracks.isNotEmpty())
                 NagButton(stringResource(R.string.nag_shuffle), { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = tracks.size > 1)
-                ActionMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu, sheetTitle = open.name)
+                ActionMenuButton(NagIcons.MoreHorizontal, moreActionsLabel(open.name), menu, sheetTitle = open.name)
             },
         )
         if (selection.count > 1 || selection.selecting) {
