@@ -90,11 +90,14 @@ internal object PlayerWidgets {
         }
     }
 
-    private fun stateOf(service: PlaybackService?): WidgetState {
+    private suspend fun stateOf(service: PlaybackService?): WidgetState {
         val media = service?.currentMediaWrapper ?: return last?.copy(playing = false) ?: WidgetState(null, null, false, false, null)
         val subtitle = service.artist?.takeIf { it.isNotBlank() } ?: service.album?.takeIf { it.isNotBlank() }
-        val coverPath = if (media.type == MediaWrapper.TYPE_VIDEO) null else CoverHook.artwork(media)
-        return WidgetState(service.title ?: media.title, subtitle, service.isPlaying, true, coverPath)
+        val title = service.title ?: media.title
+        val playing = service.isPlaying
+        // the kept cover is looked for on the disk: off the main thread (the service's start asks from it)
+        val coverPath = if (media.type == MediaWrapper.TYPE_VIDEO) null else withContext(Dispatchers.IO) { CoverHook.artwork(media) }
+        return WidgetState(title, subtitle, playing, true, coverPath)
     }
 
     private suspend fun draw(context: Context, state: WidgetState) {
