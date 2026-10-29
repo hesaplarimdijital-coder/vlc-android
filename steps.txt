@@ -1,0 +1,79 @@
+--------- beginning of main
+10-29 13:05:40.062  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:05:40.143  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:05:41.850  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:05:41.910  3553  3593 I NagmedarProfile: tablet: diag: text set: http://10.0.2.2:8765/feed.xml
+10-29 13:05:42.057  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:05:43.465  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:06:43.481  3553  3593 W NagmedarProfile: tablet: missing: podcast-subscribed
+10-29 13:06:43.539  3553  3593 I NagmedarProfile: tablet: diag: attempt 2, add=false
+10-29 13:06:43.600  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:06:45.406  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:06:45.415  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:06:45.712  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:06:46.275  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:06:47.599  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:06:48.508  3553  3593 I NagmedarProfile: tablet: diag: round 0
+10-29 13:07:10.471  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:07:10.533  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:07:11.431  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:07:11.449  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:07:11.455  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:07:11.960  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:07:14.034  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:07:14.542  3553  3593 I NagmedarProfile: tablet: diag: round 1
+10-29 13:07:34.684  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:07:34.755  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:07:36.494  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:07:36.498  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:07:36.693  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:07:37.256  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:07:38.803  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:07:39.295  3553  3593 I NagmedarProfile: tablet: diag: round 2
+10-29 13:08:01.142  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:08:01.198  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:08:03.034  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:03.039  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:08:03.158  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:08:03.737  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:08:05.502  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:06.142  3553  3593 I NagmedarProfile: tablet: diag: round 3
+10-29 13:08:26.660  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:08:26.715  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:08:28.468  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:28.474  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:08:28.550  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:08:29.130  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:08:30.907  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:31.372  3553  3593 I NagmedarProfile: tablet: diag: round 4
+10-29 13:08:53.722  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:08:53.784  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:08:55.812  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:55.814  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:08:55.985  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:08:56.469  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:08:58.190  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:58.621  3553  3593 I NagmedarProfile: tablet: diag: round 5
+10-29 13:09:20.950  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:09:21.015  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:09:22.709  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:09:22.712  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:09:22.904  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:09:23.411  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:09:25.128  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:09:25.455  3553  3593 I NagmedarProfile: tablet: diag: round 6
+10-29 13:09:47.687  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:09:47.761  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:09:49.336  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:09:49.341  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:09:49.470  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:09:50.036  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:09:51.685  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:09:51.996  3553  3593 I NagmedarProfile: tablet: diag: round 7
+10-29 13:10:15.984  3553  3593 I NagmedarProfile: tablet: diag: attempt 1, add=true
+10-29 13:10:16.054  3553  3593 I NagmedarProfile: tablet: diag: add clicked
+10-29 13:10:17.854  3553  3593 I NagmedarProfile: tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:10:17.859  3553  3593 I NagmedarProfile: tablet: diag: text set: 
+10-29 13:10:18.051  3553  3593 I NagmedarProfile: tablet: diag: submit button false
+10-29 13:10:18.508  3553  3593 I NagmedarProfile: tablet: diag: submitted
+10-29 13:10:20.302  3553  3593 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml

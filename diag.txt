@@ -1,0 +1,1107 @@
+10-29 13:05:13.793 D/AndroidRuntime( 3541): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-29 13:05:13.795 I/AndroidRuntime( 3541): Using default boot image
+10-29 13:05:13.795 I/AndroidRuntime( 3541): Leaving lock profiling enabled
+10-29 13:05:13.939 D/AndroidRuntime( 3541): Calling main entry com.android.commands.am.Am
+10-29 13:05:13.947 I/ActivityManager(  552): Force stopping app.nagmedar.macrobenchmark appid=10210 user=0: start instr
+10-29 13:05:13.983 I/ActivityManager(  552): Start proc 3553:app.nagmedar.macrobenchmark/u0a210 for added application app.nagmedar.macrobenchmark
+10-29 13:05:14.667 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=3615) has no WPC
+10-29 13:05:14.676 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:05:14.857 I/ActivityManager(  552): Start proc 3628:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:05:15.990 I/NagDiag ( 3628): activity create 134021497 saved=false task=8 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:05:16.924 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +2s229ms
+10-29 13:05:18.850 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:05:18.907 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:05:18.914 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:05:20.203 I/NagDiag ( 3628): main enter 54706955
+10-29 13:05:20.361 I/NagDiag ( 3628): nav music acbdb4bf-9c84-49cd-a48e-80094bce6805 167325581
+10-29 13:05:20.369 I/NagDiag ( 3628): requested null
+10-29 13:05:23.394 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:05:23.417 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:05:24.068 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=4050) has no WPC
+10-29 13:05:24.112 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:05:24.388 I/ActivityTaskManager(  552): Activity reported stop, but no longer stopping: ActivityRecord{8071819 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t8} RESUMED
+10-29 13:05:25.591 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:05:25.604 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:05:25.705 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=4072) has no WPC
+10-29 13:05:25.716 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:05:26.218 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{69d28f7 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:05:29.296 I/lowmemorykiller(  138): lmkd data connection established
+10-29 13:05:29.313 I/lowmemorykiller(  138): Using psi monitors for memory pressure detection
+10-29 13:05:29.313 I/lowmemorykiller(  138): Properties reinitilized
+10-29 13:05:29.313 I/lowmemorykiller( 4193): lmkd updated properties successfully
+10-29 13:05:29.313 I/lowmemorykiller(  138): lmkd data connection dropped
+10-29 13:05:29.313 I/lowmemorykiller(  138): closing lmkd data connection
+10-29 13:05:30.014 D/ActivityTaskManager(  552): Remove task fragment: deleteTaskFragment
+10-29 13:05:32.853 D/ActivityTaskManager(  552): Remove task fragment: deleteTaskFragment
+10-29 13:05:33.313 I/ActivityTaskManager(  552): Activity reported stop, but no longer stopping: ActivityRecord{4edd22d u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7} STOPPED
+10-29 13:05:33.995 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4347
+10-29 13:05:33.996 I/ActivityManager(  552): Killing 3628:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 4347
+10-29 13:05:34.007 W/ActivityTaskManager(  552): Force removing ActivityRecord{8071819 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t8 f}}: app died, no saved state
+10-29 13:05:34.058 V/ActivityManager(  552): Got obituary of 3628:app.nagmedar.benchmark
+10-29 13:05:34.078 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:05:34.087 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=4355) has no WPC
+10-29 13:05:34.190 I/ActivityTaskManager(  552): Add Task{b310de #8 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{25ebae2 #9 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:05:34.196 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:05:34.343 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:05:34.431 I/ActivityManager(  552): Start proc 4362:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:05:34.742 I/NagDiag ( 4362): activity create 254125400 saved=false task=9 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:05:34.926 I/NagDiag ( 4362): main enter 102479927
+10-29 13:05:35.980 I/NagDiag ( 4362): nav music 88a6b36b-7315-4e1b-8690-39092afd98da 149956421
+10-29 13:05:35.980 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s886ms
+10-29 13:05:35.988 I/NagDiag ( 4362): requested podcasts
+10-29 13:05:36.011 I/NagDiag ( 4362): nav podcasts 591b6516-8f8e-42a0-8591-432c6ec7ce94 188600910
+10-29 13:05:36.208 I/NagDiag ( 4362): requested null
+10-29 13:05:36.310 I/NagDiag ( 4362): screen enter 133321861 ctx=254125400
+10-29 13:05:36.561 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:05:36.720 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:05:36.744 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:05:37.075 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{9ddf879 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:05:40.062 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:05:40.102 I/NagDiag ( 4362): openAdd 133321861 add=null job=null
+10-29 13:05:40.143 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:05:41.850 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:05:41.910 I/NagmedarProfile( 3553): tablet: diag: text set: http://10.0.2.2:8765/feed.xml
+10-29 13:05:42.057 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:05:43.047 I/NagDiag ( 4362): submitAddress 133321861 http://10.0.2.2:8765/feed.xml
+10-29 13:05:43.047 I/NagDiag ( 4362): java.lang.Throwable: submit
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:05:43.047 I/NagDiag ( 4362): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:05:43.311 I/NagDiag ( 4362): dismissAdd 133321861 job=true
+10-29 13:05:43.311 I/NagDiag ( 4362): java.lang.Throwable: dismiss
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController.dismissAdd(PodcastController.kt:284)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$13.invoke(PodcastController.kt:672)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$13.invoke(PodcastController.kt:672)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at androidx.compose.foundation.AbstractClickableNode.onKeyEvent-ZmokQxo(Clickable.kt:1089)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:278)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7328)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ImeInputStage.onFinishedInputEvent(ViewRootImpl.java:7554)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.inputmethod.InputMethodManager$PendingEvent.run(InputMethodManager.java:4871)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.inputmethod.InputMethodManager.invokeFinishedInputEventCallback(InputMethodManager.java:4262)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.inputmethod.InputMethodManager.finishedInputEvent(InputMethodManager.java:4253)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.inputmethod.InputMethodManager.-$$Nest$mfinishedInputEvent(Unknown Source:0)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.inputmethod.InputMethodManager$ImeInputEventSender.onInputEventFinished(InputMethodManager.java:4848)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.view.InputEventSender.dispatchInputEventFinished(InputEventSender.java:181)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.os.MessageQueue.nativePollOnce(Native Method)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.os.MessageQueue.next(MessageQueue.java:346)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.os.Looper.loopOnce(Looper.java:189)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:05:43.311 I/NagDiag ( 4362): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:05:43.330 W/NagDiag ( 4362): subscribe threw 133321861
+10-29 13:05:43.330 W/NagDiag ( 4362): kotlinx.coroutines.JobCancellationException: StandaloneCoroutine was cancelled; job=StandaloneCoroutine{Cancelling}@b4fda5b
+10-29 13:05:43.465 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:06:43.481 W/NagmedarProfile( 3553): tablet: missing: podcast-subscribed
+10-29 13:06:43.539 I/NagmedarProfile( 3553): tablet: diag: attempt 2, add=false
+10-29 13:06:43.568 I/NagDiag ( 4362): openAdd 133321861 add=null job=null
+10-29 13:06:43.600 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:06:45.406 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:06:45.415 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:06:45.712 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:06:46.192 I/NagDiag ( 4362): submitAddress 133321861 http://10.0.2.2:8765/feed.xml
+10-29 13:06:46.192 I/NagDiag ( 4362): java.lang.Throwable: submit
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:06:46.192 I/NagDiag ( 4362): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:06:46.275 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:06:46.948 I/NagDiag ( 4362): subscribe result 133321861 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279206946, autoDownload=false, subscribedAt=1793279206946, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:06:47.599 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:06:47.924 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:06:47.928 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:06:48.007 I/ActivityTaskManager(  552): Config changes=20000d80 {1.0 310mcc260mnc [en_US] ldltr sw540dp w540dp h1170dp 320dpi lrg long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2340) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.43 fontWeightAdjustment=0}
+10-29 13:06:48.014 V/ActivityTaskManager(  552): Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw540dp w540dp h1138dp 320dpi lrg long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2276) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.97 fontWeightAdjustment=0}
+10-29 13:06:48.222 I/ActivityTaskManager(  552): Config changes=1d00 {1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h891dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2340) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.110 fontWeightAdjustment=0}
+10-29 13:06:48.238 V/ActivityTaskManager(  552): Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h867dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 0 - 1080, 2276) mMaxBounds=Rect(0, 0 - 1080, 2340) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.164 fontWeightAdjustment=0}
+10-29 13:06:48.310 I/ActivityTaskManager(  552): Config changes=20000d80 {1.0 310mcc260mnc [en_US] ldltr sw610dp w975dp h610dp 420dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2560, 1600) mAppBounds=Rect(0, 0 - 2560, 1600) mMaxBounds=Rect(0, 0 - 2560, 1600) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.177 fontWeightAdjustment=0}
+10-29 13:06:48.320 V/ActivityTaskManager(  552): Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw610dp w975dp h585dp 420dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2560, 1600) mAppBounds=Rect(0, 0 - 2560, 1536) mMaxBounds=Rect(0, 0 - 2560, 1600) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.231 fontWeightAdjustment=0}
+10-29 13:06:48.413 I/ActivityTaskManager(  552): Config changes=1d00 {1.0 310mcc260mnc [en_US] ldltr sw800dp w1280dp h800dp 320dpi xlrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2560, 1600) mAppBounds=Rect(0, 0 - 2560, 1600) mMaxBounds=Rect(0, 0 - 2560, 1600) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.244 fontWeightAdjustment=0}
+10-29 13:06:48.423 V/ActivityTaskManager(  552): Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw800dp w1280dp h768dp 320dpi xlrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2560, 1600) mAppBounds=Rect(0, 0 - 2560, 1536) mMaxBounds=Rect(0, 0 - 2560, 1600) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.298 fontWeightAdjustment=0}
+10-29 13:06:48.508 I/NagmedarProfile( 3553): tablet: diag: round 0
+10-29 13:06:48.582 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:06:48.600 I/ActivityManager(  552): Killing 4362:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to clear data
+10-29 13:06:48.601 W/ActivityTaskManager(  552): Force removing ActivityRecord{ab6d7ad u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+10-29 13:06:48.654 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:06:48.700 V/ActivityManager(  552): Got obituary of 4362:app.nagmedar.benchmark
+10-29 13:06:49.021 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=4763) has no WPC
+10-29 13:06:49.037 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:06:49.054 I/ActivityManager(  552): Start proc 4774:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:06:49.534 W/ActivityTaskManager(  552): Activity top resumed state loss timeout for ActivityRecord{4edd22d u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+10-29 13:06:49.539 W/ActivityTaskManager(  552): Activity pause timeout for ActivityRecord{4edd22d u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+10-29 13:06:49.585 I/NagDiag ( 4774): activity create 203892858 saved=false task=10 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:06:49.928 D/ActivityTaskManager(  552): Remove task fragment: deleteTaskFragment
+10-29 13:06:50.836 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s820ms
+10-29 13:06:52.252 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:06:52.290 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:06:52.301 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:06:53.247 I/NagDiag ( 4774): main enter 252817399
+10-29 13:06:53.316 I/NagDiag ( 4774): nav music 74152276-5601-4c96-afa8-e7dafd1c659f 86877068
+10-29 13:06:53.317 I/NagDiag ( 4774): requested null
+10-29 13:06:54.110 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{975b2f u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:06:56.380 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:06:56.401 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:06:56.505 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5061) has no WPC
+10-29 13:06:56.512 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:06:57.227 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:06:57.231 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:06:57.309 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5072) has no WPC
+10-29 13:06:57.324 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:07:05.481 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5139
+10-29 13:07:05.483 I/ActivityManager(  552): Killing 4774:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5139
+10-29 13:07:05.484 W/ActivityTaskManager(  552): Force removing ActivityRecord{231d481 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+10-29 13:07:05.550 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5146) has no WPC
+10-29 13:07:05.563 V/ActivityManager(  552): Got obituary of 4774:app.nagmedar.benchmark
+10-29 13:07:05.573 I/ActivityTaskManager(  552): Add Task{abcf926 #10 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{68f0682 #11 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:07:05.574 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:07:05.584 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:07:05.638 I/ActivityManager(  552): Start proc 5150:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:07:05.923 I/NagDiag ( 5150): activity create 254125400 saved=false task=11 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:07:06.009 I/NagDiag ( 5150): main enter 47823629
+10-29 13:07:06.563 I/NagDiag ( 5150): nav music 36c14959-a3ff-45d6-990f-7c2cf38c4390 161854411
+10-29 13:07:06.563 I/NagDiag ( 5150): requested podcasts
+10-29 13:07:06.583 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s15ms
+10-29 13:07:06.599 I/NagDiag ( 5150): nav podcasts a7a5ed74-726a-48b6-a089-5af49bf9a010 96108399
+10-29 13:07:06.655 I/NagDiag ( 5150): requested null
+10-29 13:07:06.783 I/NagDiag ( 5150): screen enter 216923299 ctx=254125400
+10-29 13:07:06.953 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:07.126 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:07.133 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:07.228 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{78eac8 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:07.279 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:07.302 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:2; bindFromPackage:null: isBindService:false]
+10-29 13:07:07.331 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{78eac8 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:10.471 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:07:10.510 I/NagDiag ( 5150): openAdd 216923299 add=null job=null
+10-29 13:07:10.533 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:07:11.431 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:07:11.449 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:07:11.455 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:07:11.846 I/NagDiag ( 5150): submitAddress 216923299 http://10.0.2.2:8765/feed.xml
+10-29 13:07:11.846 I/NagDiag ( 5150): java.lang.Throwable: submit
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:07:11.846 I/NagDiag ( 5150): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:07:11.960 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:07:13.079 I/NagDiag ( 5150): subscribe result 216923299 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279233067, autoDownload=false, subscribedAt=1793279233067, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:07:14.034 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:07:14.065 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:14.073 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:14.542 I/NagmedarProfile( 3553): tablet: diag: round 1
+10-29 13:07:14.713 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:07:14.714 I/ActivityManager(  552): Killing 5150:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to clear data
+10-29 13:07:14.716 W/ActivityTaskManager(  552): Force removing ActivityRecord{dd08dcd u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t11 f}}: app died, no saved state
+10-29 13:07:14.785 W/ActivityManager(  552): Service done with onDestroy, but not inDestroying: ServiceRecord{2bb02ef u0 app.nagmedar.benchmark/androidx.work.impl.background.systemjob.SystemJobService c:android}, app=ProcessRecord{840b619 0:app.nagmedar.benchmark/u0a209}
+10-29 13:07:14.786 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:07:14.827 V/ActivityManager(  552): Got obituary of 5150:app.nagmedar.benchmark
+10-29 13:07:14.966 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5322) has no WPC
+10-29 13:07:14.995 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:07:15.055 I/ActivityManager(  552): Start proc 5327:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:07:15.833 I/NagDiag ( 5327): activity create 9005286 saved=false task=12 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:07:16.348 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s373ms
+10-29 13:07:17.474 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:17.479 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:17.482 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:18.422 I/NagDiag ( 5327): main enter 214308348
+10-29 13:07:18.480 I/NagDiag ( 5327): nav music 8dfae9f4-a92e-4ef4-a620-8eddc84899bd 167325581
+10-29 13:07:18.481 I/NagDiag ( 5327): requested null
+10-29 13:07:18.563 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:18.646 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:18.814 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5483) has no WPC
+10-29 13:07:18.820 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:07:19.497 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{67459f9 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:20.197 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:20.204 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:20.658 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5520) has no WPC
+10-29 13:07:20.679 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:07:29.480 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5532
+10-29 13:07:29.481 I/ActivityManager(  552): Killing 5327:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5532
+10-29 13:07:29.484 W/ActivityTaskManager(  552): Force removing ActivityRecord{256c957 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t12 f}}: app died, no saved state
+10-29 13:07:29.531 V/ActivityManager(  552): Got obituary of 5327:app.nagmedar.benchmark
+10-29 13:07:29.541 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:07:29.555 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5539) has no WPC
+10-29 13:07:29.580 I/ActivityTaskManager(  552): Add Task{614a3f3 #12 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{854d364 #13 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:07:29.584 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:07:29.645 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:07:29.664 I/ActivityManager(  552): Start proc 5545:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:07:29.905 I/NagDiag ( 5545): activity create 254125400 saved=false task=13 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:07:29.977 I/NagDiag ( 5545): main enter 47823629
+10-29 13:07:30.723 I/NagDiag ( 5545): nav music 763da44a-0301-44c5-9865-eab375311fa0 161854411
+10-29 13:07:30.723 I/NagDiag ( 5545): requested podcasts
+10-29 13:07:30.733 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s174ms
+10-29 13:07:30.758 I/NagDiag ( 5545): nav podcasts b5c4e256-2f7a-47ba-8222-d6b543a0df1e 96108399
+10-29 13:07:30.782 I/NagDiag ( 5545): requested null
+10-29 13:07:30.823 I/NagDiag ( 5545): screen enter 247176797 ctx=254125400
+10-29 13:07:31.032 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:31.167 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:31.192 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:31.296 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{5b00425 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:31.342 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:31.404 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{5b00425 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:34.684 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:07:34.727 I/NagDiag ( 5545): openAdd 247176797 add=null job=null
+10-29 13:07:34.755 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:07:36.494 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:07:36.498 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:07:36.693 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:07:37.235 I/NagDiag ( 5545): submitAddress 247176797 http://10.0.2.2:8765/feed.xml
+10-29 13:07:37.235 I/NagDiag ( 5545): java.lang.Throwable: submit
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:07:37.235 I/NagDiag ( 5545): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:07:37.256 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:07:37.942 I/NagDiag ( 5545): subscribe result 247176797 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279257935, autoDownload=false, subscribedAt=1793279257935, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:07:38.803 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:07:38.833 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:38.843 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:39.295 I/NagmedarProfile( 3553): tablet: diag: round 2
+10-29 13:07:39.324 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:07:39.450 I/ActivityManager(  552): Killing 5545:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to clear data
+10-29 13:07:39.466 W/ActivityTaskManager(  552): Force removing ActivityRecord{f3fd8f7 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t13 f}}: app died, no saved state
+10-29 13:07:39.652 V/ActivityManager(  552): Got obituary of 5545:app.nagmedar.benchmark
+10-29 13:07:39.655 W/ActivityManager(  552): Service done with onDestroy, but not inDestroying: ServiceRecord{b292d99 u0 app.nagmedar.benchmark/androidx.work.impl.background.systemjob.SystemJobService c:android}, app=ProcessRecord{6f8b501 0:app.nagmedar.benchmark/u0a209}
+10-29 13:07:39.670 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:07:39.760 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5710) has no WPC
+10-29 13:07:39.770 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:07:39.790 I/ActivityManager(  552): Start proc 5714:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:07:40.209 I/NagDiag ( 5714): activity create 184331217 saved=false task=14 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:07:40.923 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s158ms
+10-29 13:07:42.677 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:42.680 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:42.684 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:43.612 I/NagDiag ( 5714): main enter 92114409
+10-29 13:07:43.687 I/NagDiag ( 5714): nav music 69759da5-ac34-42aa-8458-abd3d918fa81 15229526
+10-29 13:07:43.690 I/NagDiag ( 5714): requested null
+10-29 13:07:44.297 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{ce25660 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:46.733 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:46.745 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:46.902 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5883) has no WPC
+10-29 13:07:46.907 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:07:48.047 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:07:48.053 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:07:48.111 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5895) has no WPC
+10-29 13:07:48.125 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:07:56.359 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5901
+10-29 13:07:56.360 I/ActivityManager(  552): Killing 5714:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5901
+10-29 13:07:56.361 W/ActivityTaskManager(  552): Force removing ActivityRecord{2494c0a u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t14 f}}: app died, no saved state
+10-29 13:07:56.376 V/ActivityManager(  552): Got obituary of 5714:app.nagmedar.benchmark
+10-29 13:07:56.400 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=5907) has no WPC
+10-29 13:07:56.428 I/ActivityTaskManager(  552): Add Task{81c9c7b #14 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{9448074 #15 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:07:56.429 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:07:56.434 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:07:56.452 I/ActivityManager(  552): Start proc 5912:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:07:56.475 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:07:56.626 I/NagDiag ( 5912): activity create 225900746 saved=false task=15 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:07:56.765 I/NagDiag ( 5912): main enter 47823629
+10-29 13:07:57.375 I/NagDiag ( 5912): nav music 1c4aa82e-ab82-480e-9396-467f43ecc154 161854411
+10-29 13:07:57.376 I/NagDiag ( 5912): requested podcasts
+10-29 13:07:57.380 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +978ms
+10-29 13:07:57.414 I/NagDiag ( 5912): nav podcasts 6457abe8-41fb-4149-beb8-79f25b93ccba 35013756
+10-29 13:07:57.456 I/NagDiag ( 5912): requested null
+10-29 13:07:57.519 I/NagDiag ( 5912): screen enter 216923299 ctx=225900746
+10-29 13:07:57.632 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:57.802 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:07:57.810 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:57.870 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{f10997e u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:07:57.909 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:07:57.978 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{f10997e u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:01.142 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:08:01.173 I/NagDiag ( 5912): openAdd 216923299 add=null job=null
+10-29 13:08:01.198 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:08:03.034 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:03.039 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:08:03.158 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:08:03.682 I/NagDiag ( 5912): submitAddress 216923299 http://10.0.2.2:8765/feed.xml
+10-29 13:08:03.682 I/NagDiag ( 5912): java.lang.Throwable: submit
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:08:03.682 I/NagDiag ( 5912): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:08:03.737 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:08:04.629 I/NagDiag ( 5912): subscribe result 216923299 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279284460, autoDownload=false, subscribedAt=1793279284460, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:08:05.502 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:05.538 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:05.547 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:06.142 I/NagmedarProfile( 3553): tablet: diag: round 3
+10-29 13:08:06.166 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:08:06.174 I/ActivityManager(  552): Killing 5912:app.nagmedar.benchmark/u0a209 (adj 700): stop app.nagmedar.benchmark due to clear data
+10-29 13:08:06.176 W/ActivityTaskManager(  552): Force removing ActivityRecord{23cd047 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t15 f}}: app died, no saved state
+10-29 13:08:06.199 W/ActivityTaskManager(  552): getTaskSnapshot: taskId=15 not found
+10-29 13:08:06.203 W/ActivityTaskManager(  552): takeTaskSnapshot: taskId=15 not found or not visible
+10-29 13:08:06.208 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:08:06.252 V/ActivityManager(  552): Got obituary of 5912:app.nagmedar.benchmark
+10-29 13:08:06.524 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6065) has no WPC
+10-29 13:08:06.563 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:08:06.606 I/ActivityManager(  552): Start proc 6074:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:08:07.277 I/NagDiag ( 6074): activity create 244270531 saved=false task=16 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:08:07.751 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s234ms
+10-29 13:08:09.528 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:09.531 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:09.534 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:10.565 I/NagDiag ( 6074): main enter 117123882
+10-29 13:08:10.630 I/NagDiag ( 6074): nav music 9b8199be-5236-4d8e-a203-4dcebad4b320 36266339
+10-29 13:08:10.630 I/NagDiag ( 6074): requested null
+10-29 13:08:10.919 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:10.926 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:11.240 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6241) has no WPC
+10-29 13:08:11.245 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:08:12.164 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{81651d4 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:12.857 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:12.861 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:12.974 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6254) has no WPC
+10-29 13:08:12.979 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:08:21.633 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6264
+10-29 13:08:21.633 I/ActivityManager(  552): Killing 6074:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 6264
+10-29 13:08:21.636 W/ActivityTaskManager(  552): Force removing ActivityRecord{bfe35ad u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t16 f}}: app died, no saved state
+10-29 13:08:21.675 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6270) has no WPC
+10-29 13:08:21.694 V/ActivityManager(  552): Got obituary of 6074:app.nagmedar.benchmark
+10-29 13:08:21.700 I/ActivityTaskManager(  552): Add Task{84b1ccf #16 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{b01b53e #17 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:08:21.701 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:08:21.711 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:08:21.796 I/ActivityManager(  552): Start proc 6275:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:08:21.963 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:08:22.011 I/NagDiag ( 6275): activity create 254125400 saved=false task=17 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:08:22.247 I/NagDiag ( 6275): main enter 155242806
+10-29 13:08:22.826 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s146ms
+10-29 13:08:22.828 I/NagDiag ( 6275): nav music d43caedb-02eb-4fdb-8256-947c05fcaf3d 149956421
+10-29 13:08:22.828 I/NagDiag ( 6275): requested podcasts
+10-29 13:08:22.863 I/NagDiag ( 6275): nav podcasts 29527f46-4f56-4eaa-a1c9-546e877f3e87 172439881
+10-29 13:08:22.937 I/NagDiag ( 6275): requested null
+10-29 13:08:23.077 I/NagDiag ( 6275): screen enter 224422816 ctx=254125400
+10-29 13:08:23.169 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:23.345 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:23.348 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:23.409 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{4fa396a u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:23.418 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:23.531 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{4fa396a u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:26.660 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:08:26.691 I/NagDiag ( 6275): openAdd 224422816 add=null job=null
+10-29 13:08:26.715 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:08:28.468 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:28.474 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:08:28.550 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:08:29.096 I/NagDiag ( 6275): submitAddress 224422816 http://10.0.2.2:8765/feed.xml
+10-29 13:08:29.096 I/NagDiag ( 6275): java.lang.Throwable: submit
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:08:29.096 I/NagDiag ( 6275): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:08:29.130 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:08:29.868 I/NagDiag ( 6275): subscribe result 224422816 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279309794, autoDownload=false, subscribedAt=1793279309794, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:08:30.907 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:30.939 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:30.943 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:31.372 I/NagmedarProfile( 3553): tablet: diag: round 4
+10-29 13:08:31.479 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:08:31.607 I/ActivityManager(  552): Killing 6275:app.nagmedar.benchmark/u0a209 (adj 200): stop app.nagmedar.benchmark due to clear data
+10-29 13:08:31.608 W/ActivityTaskManager(  552): Force removing ActivityRecord{d4950c0 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t17 f}}: app died, no saved state
+10-29 13:08:31.643 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:08:31.733 V/ActivityManager(  552): Got obituary of 6275:app.nagmedar.benchmark
+10-29 13:08:31.860 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6438) has no WPC
+10-29 13:08:31.868 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:08:31.898 I/ActivityManager(  552): Start proc 6446:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:08:32.442 I/NagDiag ( 6446): activity create 18630967 saved=false task=18 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:08:32.995 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s123ms
+10-29 13:08:34.848 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:34.864 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:34.874 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:35.080 I/NagDiag ( 6446): main enter 10427603
+10-29 13:08:35.170 I/NagDiag ( 6446): nav music 6b48cd04-637d-4c70-83a0-fc7ea8f03b62 71402656
+10-29 13:08:35.171 I/NagDiag ( 6446): requested null
+10-29 13:08:36.670 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{d442de1 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:38.191 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:38.200 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:38.568 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6612) has no WPC
+10-29 13:08:38.625 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:08:39.850 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:39.859 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:39.962 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6623) has no WPC
+10-29 13:08:39.966 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:08:48.235 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6629
+10-29 13:08:48.236 I/ActivityManager(  552): Killing 6446:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 6629
+10-29 13:08:48.236 W/ActivityTaskManager(  552): Force removing ActivityRecord{b40001d u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t18 f}}: app died, no saved state
+10-29 13:08:48.269 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:08:48.280 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6635) has no WPC
+10-29 13:08:48.311 V/ActivityManager(  552): Got obituary of 6446:app.nagmedar.benchmark
+10-29 13:08:48.344 I/ActivityTaskManager(  552): Add Task{db71292 #18 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{dec6b5b #19 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:08:48.346 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:08:48.418 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:08:48.419 I/ActivityManager(  552): Start proc 6643:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:08:48.604 I/NagDiag ( 6643): activity create 28420667 saved=false task=19 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:08:48.692 I/NagDiag ( 6643): main enter 113298114
+10-29 13:08:49.314 I/NagDiag ( 6643): nav music 431ac16a-c39c-479b-8a14-7890b93d6d8a 39294888
+10-29 13:08:49.315 I/NagDiag ( 6643): requested podcasts
+10-29 13:08:49.329 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s40ms
+10-29 13:08:49.336 I/NagDiag ( 6643): nav podcasts ae581f7b-aa7d-4061-bd65-6073d26685c1 35013756
+10-29 13:08:49.354 I/NagDiag ( 6643): requested null
+10-29 13:08:49.459 I/NagDiag ( 6643): screen enter 224422816 ctx=28420667
+10-29 13:08:49.651 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:49.788 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:08:49.792 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:49.906 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{c8921e3 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:49.912 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:08:49.981 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:2; bindFromPackage:null: isBindService:false]
+10-29 13:08:50.009 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{c8921e3 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:08:53.722 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:08:53.753 I/NagDiag ( 6643): openAdd 224422816 add=null job=null
+10-29 13:08:53.784 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:08:55.812 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:08:55.814 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:08:55.985 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:08:56.450 I/NagDiag ( 6643): submitAddress 224422816 http://10.0.2.2:8765/feed.xml
+10-29 13:08:56.450 I/NagDiag ( 6643): java.lang.Throwable: submit
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:08:56.450 I/NagDiag ( 6643): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:08:56.469 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:08:57.283 I/NagDiag ( 6643): subscribe result 224422816 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279337260, autoDownload=false, subscribedAt=1793279337260, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:08:58.190 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:08:58.207 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:08:58.215 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:08:58.621 I/NagmedarProfile( 3553): tablet: diag: round 5
+10-29 13:08:58.707 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:08:58.709 I/ActivityManager(  552): Killing 6643:app.nagmedar.benchmark/u0a209 (adj 200): stop app.nagmedar.benchmark due to clear data
+10-29 13:08:58.709 W/ActivityTaskManager(  552): Force removing ActivityRecord{d8a6a u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t19 f}}: app died, no saved state
+10-29 13:08:58.738 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:08:58.754 V/ActivityManager(  552): Got obituary of 6643:app.nagmedar.benchmark
+10-29 13:08:59.024 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6801) has no WPC
+10-29 13:08:59.040 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:08:59.074 I/ActivityManager(  552): Start proc 6808:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:08:59.907 I/NagDiag ( 6808): activity create 34885184 saved=false task=20 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:09:00.467 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s440ms
+10-29 13:09:02.249 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:02.259 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:02.274 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:02.517 I/NagDiag ( 6808): main enter 62225678
+10-29 13:09:02.623 I/NagDiag ( 6808): nav music 4cd41775-c384-45ff-a17b-cf28c03ca2cc 28559761
+10-29 13:09:02.624 I/NagDiag ( 6808): requested null
+10-29 13:09:04.007 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{6a0223e u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:06.241 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:06.246 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:06.374 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=6991) has no WPC
+10-29 13:09:06.413 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:09:07.627 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:07.634 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:07.749 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7004) has no WPC
+10-29 13:09:07.759 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:09:15.925 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7020
+10-29 13:09:15.926 I/ActivityManager(  552): Killing 6808:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 7020
+10-29 13:09:15.927 W/ActivityTaskManager(  552): Force removing ActivityRecord{22af59c u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t20 f}}: app died, no saved state
+10-29 13:09:15.965 V/ActivityManager(  552): Got obituary of 6808:app.nagmedar.benchmark
+10-29 13:09:15.972 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:09:15.975 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7026) has no WPC
+10-29 13:09:15.997 I/ActivityTaskManager(  552): Add Task{d112f59 #20 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{84aaf3b #21 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:09:16.008 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:09:16.061 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:09:16.129 I/ActivityManager(  552): Start proc 7034:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:09:16.322 I/NagDiag ( 7034): activity create 91776689 saved=false task=21 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:09:16.396 I/NagDiag ( 7034): main enter 113298114
+10-29 13:09:17.039 I/NagDiag ( 7034): nav music 2c3588e3-15fe-4ced-a02f-f199ff0daf5f 39294888
+10-29 13:09:17.040 I/NagDiag ( 7034): requested podcasts
+10-29 13:09:17.044 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s64ms
+10-29 13:09:17.091 I/NagDiag ( 7034): nav podcasts 1284de14-dbb1-468a-a5a3-8a81bb2fbcd9 35013756
+10-29 13:09:17.157 I/NagDiag ( 7034): requested null
+10-29 13:09:17.233 I/NagDiag ( 7034): screen enter 10011481 ctx=91776689
+10-29 13:09:17.353 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:17.486 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:17.493 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:17.613 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{a0f74b6 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:17.668 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:17.728 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{a0f74b6 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:20.950 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:09:20.990 I/NagDiag ( 7034): openAdd 10011481 add=null job=null
+10-29 13:09:21.015 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:09:22.709 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:09:22.712 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:09:22.904 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:09:23.351 I/NagDiag ( 7034): submitAddress 10011481 http://10.0.2.2:8765/feed.xml
+10-29 13:09:23.351 I/NagDiag ( 7034): java.lang.Throwable: submit
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:09:23.351 I/NagDiag ( 7034): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:09:23.411 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:09:24.184 I/NagDiag ( 7034): subscribe result 10011481 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279364110, autoDownload=false, subscribedAt=1793279364110, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:09:25.128 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:09:25.139 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:25.146 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:25.358 W/system_server(  552): Long monitor contention with owner android.anim (579) at void com.android.server.wm.WindowAnimator.lambda$new$1(long)(WindowAnimator.java:103) waiters=1 in android.app.ActivityTaskManager$RootTaskInfo com.android.server.wm.ActivityTaskManagerService.getFocusedRootTaskInfo() for 103ms
+10-29 13:09:25.455 I/NagmedarProfile( 3553): tablet: diag: round 6
+10-29 13:09:25.531 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:09:25.558 I/ActivityManager(  552): Killing 7034:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to clear data
+10-29 13:09:25.568 W/ActivityTaskManager(  552): Force removing ActivityRecord{c6cf1ca u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t21 f}}: app died, no saved state
+10-29 13:09:25.579 W/ActivityManager(  552): Service done with onDestroy, but not inDestroying: ServiceRecord{751a035 u0 app.nagmedar.benchmark/androidx.work.impl.background.systemjob.SystemJobService c:android}, app=ProcessRecord{1945f0f 0:app.nagmedar.benchmark/u0a209}
+10-29 13:09:25.664 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:09:25.836 V/ActivityManager(  552): Got obituary of 7034:app.nagmedar.benchmark
+10-29 13:09:26.015 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7181) has no WPC
+10-29 13:09:26.030 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:09:26.093 I/ActivityManager(  552): Start proc 7193:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:09:26.812 I/NagDiag ( 7193): activity create 6024743 saved=false task=22 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:09:27.363 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s345ms
+10-29 13:09:29.093 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:29.100 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:29.113 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:30.126 I/NagDiag ( 7193): main enter 252178298
+10-29 13:09:30.198 I/NagDiag ( 7193): nav music b0b0f769-6604-4e16-bcac-d5779696b5e3 24771632
+10-29 13:09:30.201 I/NagDiag ( 7193): requested null
+10-29 13:09:30.676 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{25aa74 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:33.214 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:33.224 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:33.262 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7362) has no WPC
+10-29 13:09:33.272 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:09:33.952 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:33.962 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:34.150 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7372) has no WPC
+10-29 13:09:34.163 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:09:42.401 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7379
+10-29 13:09:42.403 I/ActivityManager(  552): Killing 7193:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 7379
+10-29 13:09:42.405 W/ActivityTaskManager(  552): Force removing ActivityRecord{2258657 u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t22 f}}: app died, no saved state
+10-29 13:09:42.430 V/ActivityManager(  552): Got obituary of 7193:app.nagmedar.benchmark
+10-29 13:09:42.435 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:09:42.576 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7385) has no WPC
+10-29 13:09:42.579 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:09:42.667 I/ActivityManager(  552): Start proc 7393:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:09:43.214 I/NagDiag ( 7393): activity create 225900746 saved=false task=23 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:09:43.726 I/NagDiag ( 7393): main enter 155242806
+10-29 13:09:44.278 I/NagDiag ( 7393): nav music 96291fde-93cb-4a4a-8b43-99e390a6adce 237009852
+10-29 13:09:44.278 I/NagDiag ( 7393): requested podcasts
+10-29 13:09:44.290 I/NagDiag ( 7393): nav podcasts ac4560db-7fd3-4212-8ebc-ae43b0732f0a 266879824
+10-29 13:09:44.294 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s703ms
+10-29 13:09:44.315 I/NagDiag ( 7393): requested null
+10-29 13:09:44.394 I/NagDiag ( 7393): screen enter 214308348 ctx=225900746
+10-29 13:09:44.494 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:44.630 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:44.666 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:46.011 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{5d7ae2 u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:47.687 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:09:47.731 I/NagDiag ( 7393): openAdd 214308348 add=null job=null
+10-29 13:09:47.761 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:09:49.336 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:09:49.341 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:09:49.470 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:09:49.976 I/NagDiag ( 7393): submitAddress 214308348 http://10.0.2.2:8765/feed.xml
+10-29 13:09:49.976 I/NagDiag ( 7393): java.lang.Throwable: submit
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:09:49.976 I/NagDiag ( 7393): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:09:50.036 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:09:50.689 I/NagDiag ( 7393): subscribe result 214308348 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279390686, autoDownload=false, subscribedAt=1793279390686, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:09:51.685 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:09:51.721 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:51.726 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:09:51.996 I/NagmedarProfile( 3553): tablet: diag: round 7
+10-29 13:09:52.128 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: clear data
+10-29 13:09:52.227 I/ActivityManager(  552): Killing 7393:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to clear data
+10-29 13:09:52.228 W/ActivityTaskManager(  552): Force removing ActivityRecord{151d92f u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t23 f}}: app died, no saved state
+10-29 13:09:52.233 W/ActivityManager(  552): Service done with onDestroy, but not inDestroying: ServiceRecord{7d710ce u0 app.nagmedar.benchmark/androidx.work.impl.background.systemjob.SystemJobService c:android}, app=ProcessRecord{ecf8f28 0:app.nagmedar.benchmark/u0a209}
+10-29 13:09:52.334 V/ActivityManager(  552): Got obituary of 7393:app.nagmedar.benchmark
+10-29 13:09:52.335 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=-1: clearApplicationUserData
+10-29 13:09:52.556 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7536) has no WPC
+10-29 13:09:52.572 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:09:52.672 I/ActivityManager(  552): Start proc 7539:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:09:53.482 I/NagDiag ( 7539): activity create 137308993 saved=false task=24 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity }
+10-29 13:09:54.150 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s589ms
+10-29 13:09:55.891 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:55.897 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:09:55.904 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:09:56.857 I/NagDiag ( 7539): main enter 239458509
+10-29 13:09:56.926 I/NagDiag ( 7539): nav music e1e26bf4-cfec-4d20-9b6b-f68ef33b8408 264215003
+10-29 13:09:56.927 I/NagDiag ( 7539): requested null
+10-29 13:09:57.713 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{d90a83b u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:09:59.962 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:09:59.976 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:10:00.201 W/system_server(  552): Long monitor contention with owner android.anim (579) at void com.android.server.wm.WindowSurfacePlacer$Traverser.run()(WindowSurfacePlacer.java:58) waiters=1 in android.app.ActivityTaskManager$RootTaskInfo com.android.server.wm.ActivityTaskManagerService.getRootTaskInfo(int, int) for 115ms
+10-29 13:10:00.213 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7718) has no WPC
+10-29 13:10:00.251 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:10:01.585 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:10:01.594 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:10:01.778 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7732) has no WPC
+10-29 13:10:01.787 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+10-29 13:10:10.185 I/ActivityManager(  552): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7742
+10-29 13:10:10.187 I/ActivityManager(  552): Killing 7539:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 7742
+10-29 13:10:10.189 W/ActivityTaskManager(  552): Force removing ActivityRecord{4b9574b u0 app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity t24 f}}: app died, no saved state
+10-29 13:10:10.218 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:10:10.280 W/ActivityTaskManager(  552): callingPackage for (uid=2000, pid=7746) has no WPC
+10-29 13:10:10.282 V/ActivityManager(  552): Got obituary of 7539:app.nagmedar.benchmark
+10-29 13:10:10.311 I/ActivityTaskManager(  552): Add Task{5da0241 #24 type=standard A=10209:app.nagmedar.benchmark} to hidden list because adding Task{395cacd #25 type=standard A=10209:app.nagmedar.benchmark}
+10-29 13:10:10.312 I/ActivityTaskManager(  552): START u0 {flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras)} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-29 13:10:10.330 I/ActivityManager(  552): Start proc 7755:app.nagmedar.benchmark/u0a209 for next-top-activity {app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity}
+10-29 13:10:10.390 W/ActivityTaskManager(  552): Unable to send transaction to client proc app.nagmedar.benchmark: no app thread
+10-29 13:10:10.664 I/NagDiag ( 7755): activity create 225900746 saved=false task=25 intent=Intent { flg=0x10000000 cmp=app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity (has extras) }
+10-29 13:10:10.982 I/NagDiag ( 7755): main enter 47823629
+10-29 13:10:11.482 I/NagDiag ( 7755): nav music ee67a194-f5ca-4a37-8bbf-4925d5719a7f 161854411
+10-29 13:10:11.483 I/NagDiag ( 7755): requested podcasts
+10-29 13:10:11.513 I/ActivityTaskManager(  552): Displayed app.nagmedar.benchmark/app.nagmedar.ui.NagmedarActivity for user 0: +1s203ms
+10-29 13:10:11.531 I/NagDiag ( 7755): nav podcasts 0373b81f-45e7-45d1-a197-c9e0733996f0 96108399
+10-29 13:10:11.598 I/NagDiag ( 7755): requested null
+10-29 13:10:11.672 I/NagDiag ( 7755): screen enter 216923299 ctx=225900746
+10-29 13:10:11.856 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:10:12.039 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-29 13:10:12.046 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:10:12.172 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{1823e8f u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:10:12.205 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+10-29 13:10:12.248 I/ActivityManager(  552): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=medialibrary_init cmp=app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:2; bindFromPackage:null: isBindService:false]
+10-29 13:10:12.276 D/ActivityManager(  552): Stop FGS timeout: ServiceRecord{1823e8f u0 app.nagmedar.benchmark/org.videolan.vlc.MediaParsingService c:app.nagmedar.benchmark}
+10-29 13:10:15.984 I/NagmedarProfile( 3553): tablet: diag: attempt 1, add=true
+10-29 13:10:16.024 I/NagDiag ( 7755): openAdd 216923299 add=null job=null
+10-29 13:10:16.054 I/NagmedarProfile( 3553): tablet: diag: add clicked
+10-29 13:10:17.854 I/NagmedarProfile( 3553): tablet: diag: field res=null focused=true pkg=app.nagmedar.benchmark
+10-29 13:10:17.859 I/NagmedarProfile( 3553): tablet: diag: text set: 
+10-29 13:10:18.051 I/NagmedarProfile( 3553): tablet: diag: submit button false
+10-29 13:10:18.481 I/NagDiag ( 7755): submitAddress 216923299 http://10.0.2.2:8765/feed.xml
+10-29 13:10:18.481 I/NagDiag ( 7755): java.lang.Throwable: submit
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastController.submitAddress(PodcastController.kt:256)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastController$actions$12.invoke(PodcastController.kt:671)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastDialogsKt.AddAddressSurface$lambda$7$lambda$6(PodcastDialogs.kt:84)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$$ExternalSyntheticLambda17.invoke(D8$$SyntheticClass:0)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke-ZmokQxo(PodcastDialogs.kt:124)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.podcast.PodcastDialogsKt$AddAddressSurface$1$4$1.invoke(PodcastDialogs.kt:120)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at androidx.compose.ui.input.key.KeyInputNode.onPreKeyEvent-ZmokQxo(KeyInputModifier.kt:81)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at androidx.compose.ui.focus.FocusOwnerImpl.dispatchKeyEvent-YhN2O0w(FocusOwnerImpl.kt:276)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at androidx.compose.ui.focus.FocusOwner$-CC.dispatchKeyEvent-YhN2O0w$default(FocusOwner.kt:142)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at androidx.compose.ui.platform.AndroidComposeView.dispatchKeyEvent(AndroidComposeView.android.kt:945)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1962)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:446)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1970)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:899)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at app.nagmedar.ui.components.EscapeCallback.dispatchKeyEvent(NagDialog.kt:51)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:360)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:7866)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:7706)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7106)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:7295)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:7352)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:7163)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:7129)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:7137)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:7110)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:10214)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:10165)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:10134)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:6804)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:6683)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.os.Looper.loop(Looper.java:317)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at java.lang.reflect.Method.invoke(Native Method)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+10-29 13:10:18.481 I/NagDiag ( 7755): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+10-29 13:10:18.508 I/NagmedarProfile( 3553): tablet: diag: submitted
+10-29 13:10:19.225 I/NagDiag ( 7755): subscribe result 216923299 Added(feed=PodcastFeed(id=1, feedUrl=http://10.0.2.2:8765/feed.xml, title=Nagmedar profile feed, author=Nagmedar QA, description=A podcast for the Baseline Profile's run., imageUrl=null, podcastIndexId=null, etag=null, lastModified=Thu, 29 Oct 2026 13:03:33 GMT, refreshedAt=1793279419214, autoDownload=false, subscribedAt=1793279419214, link=http://10.0.2.2:8765/, podcastGuid=null, fundingUrl=null, fundingMessage=null, aliasKeys=, notify=true, autoDownloadCount=3, keepLatest=0, speed=1.0, skipIntroSeconds=0, skipOutroSeconds=0, volumeBoost=0, language=en, transcriptLanguage=null), episodes=3)
+10-29 13:10:20.302 I/NagmedarProfile( 3553): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+10-29 13:10:20.341 W/ActivityTaskManager(  552): callingPackage for (uid=-1, pid=0) has no WPC
+10-29 13:10:20.352 I/ActivityTaskManager(  552): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 0 (BAL_ALLOW_ALLOWLISTED_UID) result code=2
+10-29 13:10:21.004 I/ActivityManager(  552): Force stopping app.nagmedar.macrobenchmark appid=10210 user=0: finished inst
+10-29 13:10:21.015 I/AndroidRuntime( 3541): VM exiting with result code 0.
+10-29 13:10:21.104 I/ActivityManager(  552): Killing 3553:app.nagmedar.macrobenchmark/u0a210 (adj 0): stop app.nagmedar.macrobenchmark due to finished inst
+10-29 13:10:21.268 V/ActivityManager(  552): Got obituary of 3553:app.nagmedar.macrobenchmark
