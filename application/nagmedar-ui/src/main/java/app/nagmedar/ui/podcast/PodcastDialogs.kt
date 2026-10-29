@@ -97,7 +97,10 @@ internal fun AddAddressSurface(add: AddUi, onSubmit: (String) -> Unit, onDismiss
         BasicTextField(
             value = value,
             onValueChange = { value = it },
-            enabled = !add.working,
+            // 1.0.1: read-only, not disabled, while the feed is read: a disabled field gave the focus away between
+            // Enter's press (which sends) and its release, and the release clicked "Cancel", whose closing cancelled
+            // the subscription; the field keeps the focus and the release
+            readOnly = add.working,
             singleLine = true,
             textStyle = NagTheme.type.body.copy(color = colors.text),
             cursorBrush = SolidColor(colors.accent),
@@ -118,6 +121,8 @@ internal fun AddAddressSurface(add: AddUi, onSubmit: (String) -> Unit, onDismiss
                 .testTag("podcast-add-field")
                 .tabMovesFocus(focusManager)
                 .onPreviewKeyEvent { event ->
+                    // Enter's release is the field's too, so that nothing else takes it for a click
+                    if (event.type == KeyEventType.KeyUp) return@onPreviewKeyEvent event.key == Key.Enter || event.key == Key.NumPadEnter
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     when (event.key) {
                         Key.Enter, Key.NumPadEnter -> {

@@ -10,6 +10,7 @@ import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.components.UndoBarState
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,9 +55,14 @@ class PodcastControllerTest {
     private var secondary: () -> List<PodcastHit> = { emptyList() }
     private var primaryAvailable = true
 
+    /** While set, a feed answers only once it is completed. */
+    private var gate: CompletableDeferred<Unit>? = null
+
     private val source = object : FeedSource {
-        override suspend fun fetch(url: String, etag: String?, lastModified: String?): FeedFetch =
-            feeds[url]?.invoke() ?: throw FeedFailure.Server(404)
+        override suspend fun fetch(url: String, etag: String?, lastModified: String?): FeedFetch {
+            gate?.await()
+            return feeds[url]?.invoke() ?: throw FeedFailure.Server(404)
+        }
     }
 
     private fun directory(available: () -> Boolean, hits: () -> List<PodcastHit>) = object : PodcastDirectory {
@@ -188,6 +194,52 @@ class PodcastControllerTest {
         assertTrue(controller.model.add!!.failure is FeedFailure.BadAddress)
         controller.dismissAdd()
         assertNull(controller.model.add)
+    }
+
+    @Test
+    fun aSubscriptionByAddressOutlivesTheScreenThatSentIt() {
+        serve("https://example.org/feed")
+        gate = CompletableDeferred()
+        controller.openAdd()
+        controller.submitAddress("https://example.org/feed")
+        assertTrue(controller.model.add!!.working)
+        // the screen leaves the composition while the feed is read: its scope ends, the subscription goes on
+        scope.cancel()
+        gate!!.complete(Unit)
+        eventually("saved") { db.podcasts().feedList().size == 1 }
+        assertEquals(1, undo.messages.size)
+    }
+
+    @Test
+    fun aClosedAddWindowsSubscriptionGoesOnAndSaysHowItWent() {
+        // 1.0.1: the window closed while the feed was read (Enter's release clicking "Cancel") cancelled the
+        // subscription: the feed was read and nothing saved
+        serve("https://example.org/feed")
+        gate = CompletableDeferred()
+        controller.openAdd()
+        controller.submitAddress("https://example.org/feed")
+        controller.dismissAdd()
+        gate!!.complete(Unit)
+        eventually("subscribed") { controller.model.subscriptions?.size == 1 }
+        // "Gece Yayını eklendi · Geri al"; no window and no page come back after it was closed
+        assertEquals(1, undo.messages.size)
+        assertNull(controller.model.add)
+        assertNull(controller.model.page)
+
+        // a refusal after the window was closed: a notice
+        feeds["https://example.org/html"] = { throw FeedFailure.Invalid(InvalidReason.NotFeed) }
+        gate = CompletableDeferred()
+        controller.openAdd()
+        controller.submitAddress("https://example.org/html")
+        controller.dismissAdd()
+        gate!!.complete(Unit)
+        val reason = FeedFailure.Invalid(InvalidReason.NotFeed).describe(context.resources)
+        eventually("said") {
+            shadowOf(Looper.getMainLooper()).idle()
+            ShadowToast.getTextOfLatestToast() == reason
+        }
+        assertNull(controller.model.add)
+        assertEquals(1, db.podcasts().feedList().size)
     }
 
     @Test
