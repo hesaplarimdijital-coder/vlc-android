@@ -37,10 +37,13 @@ class BaselineProfileGenerator {
 
     @Before
     fun prepare() {
-        screen(PHONE)
+        // the first run and the subscription on the tablet's screen, where its dialog is a window
+        // of the app's; each test then sets the screen it walks
+        screen(TABLET)
         device.pastFirstRun()
         device.waitForLibrary()
         Arguments.feed?.let { device.subscribeOnce(it) }
+        screen(PHONE)
     }
 
     @After
@@ -90,8 +93,12 @@ class BaselineProfileGenerator {
             device.waitForIdle()
         }
         passOver { waitFor { device.findObject(By.res("music"))?.findObject(By.scrollable(true))?.findObject(By.clickable(true)) }?.click() }
-        // the phone's mini player opens the phone player; a tablet shows the track in its inspector
-        passOver { waitFor(5_000) { device.findObject(By.res("mini-player")) }?.click() }
+        // the phone's mini player opens the phone player (its first clickable part, the track's
+        // title, does); a tablet shows the track in its inspector
+        passOver {
+            val mini = waitFor(5_000) { device.findObject(By.res("mini-player")) }
+            (mini?.findObject(By.clickable(true)) ?: mini)?.click()
+        }
         if (waitFor(5_000) { device.findObject(By.res("phone-player")) } != null) {
             trace("music: the phone player")
             device.waitForIdle()
@@ -142,16 +149,17 @@ class BaselineProfileGenerator {
     }
 
     private fun screen(size: Screen) {
+        screenName = size.name
         device.executeShellCommand("wm size ${size.size}")
         device.executeShellCommand("wm density ${size.density}")
     }
 
     /** A screen size and density: [PHONE] as the Galaxy S24's, [TABLET] as a landscape tablet's. */
-    private class Screen(val size: String, val density: Int)
+    private class Screen(val name: String, val size: String, val density: Int)
 
     private companion object {
-        val PHONE = Screen("1080x2340", 420)
-        val TABLET = Screen("2560x1600", 320)
+        val PHONE = Screen("phone", "1080x2340", 420)
+        val TABLET = Screen("tablet", "2560x1600", 320)
         const val ITERATIONS = 6
         const val STABLE_ITERATIONS = 2
     }
@@ -159,8 +167,11 @@ class BaselineProfileGenerator {
 
 private const val TAG = "NagmedarProfile"
 
+/** The screen walked (phone, tablet), in the log and the names of the hierarchies left behind. */
+private var screenName = ""
+
 private fun trace(step: String) {
-    Log.i(TAG, step)
+    Log.i(TAG, "$screenName: $step")
 }
 
 /**
@@ -169,10 +180,10 @@ private fun trace(step: String) {
  */
 @Suppress("DEPRECATION")
 private fun UiDevice.missing(element: String) {
-    Log.w(TAG, "missing: $element")
+    Log.w(TAG, "$screenName: missing: $element")
     passOver {
         val dir = InstrumentationRegistry.getInstrumentation().context.externalMediaDirs.firstOrNull() ?: return@passOver
-        val file = File(dir, "missing-$element.xml")
+        val file = File(dir, "missing-$screenName-$element.xml")
         if (!file.exists()) {
             dir.mkdirs()
             dumpWindowHierarchy(file)
