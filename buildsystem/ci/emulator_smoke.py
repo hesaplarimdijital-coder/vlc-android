@@ -961,11 +961,20 @@ class Smoke:
         nodes, after = self.wait_for(changed, 6)
         tries = 1
         if not after:
-            # once more, should the first swipe have come while the strip was still settling
+            # once more, should the first swipe have come while the strip was still settling; a slow emulator can
+            # deliver the swipe as a tap, which opens the full player: it is closed first (1.0.1: the walk went on
+            # inside the full player and found no Podcasts, Radio or Bu cihaz)
             tries = 2
+            if self.by_id(nodes, "phone-player"):
+                self.key(4)
+                nodes = self.step("Back: the swipe came as a tap and opened the full player")
             self.step("Swipe the mini player sideways again", lambda: self.sh("input swipe %d %d %d %d 300" % (x0, y, x1, y)), wait=2)
             nodes, after = self.wait_for(changed, 6)
         self.check("a sideways swipe changes the track", bool(after), "%s → %s (swipes: %d)" % (before, after or self.mini_title(nodes), tries))
+        if self.by_id(nodes, "phone-player"):
+            # the walk goes on from the mini player
+            self.key(4)
+            self.step("Back: the full player closed")
 
     def follow_podcast(self, nodes):
         """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
