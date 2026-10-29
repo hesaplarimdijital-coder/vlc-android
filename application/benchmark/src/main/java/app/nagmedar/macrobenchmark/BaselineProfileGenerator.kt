@@ -39,8 +39,8 @@ class BaselineProfileGenerator {
     fun prepare() {
         screen(PHONE)
         device.pastFirstRun()
-        Arguments.feed?.let { device.subscribeOnce(it) }
         device.waitForLibrary()
+        Arguments.feed?.let { device.subscribeOnce(it) }
     }
 
     @After
@@ -191,10 +191,17 @@ private inline fun passOver(step: () -> Unit) {
 
 /** Subscribes the app to [feed] (the Podcasts' "Add by address") when it follows no podcast yet. */
 private fun UiDevice.subscribeOnce(feed: String) {
-    executeShellCommand("am start -W -n $TARGET/$SHELL_ACTIVITY --es $EXTRA_DESTINATION podcasts")
-    val followed = waitFor(5_000) { findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
+    // right after the first run the window may keep the Music: started again until it shows the Podcasts
+    var add: UiObject2? = null
+    for (attempt in 1..3) {
+        executeShellCommand("am start -W -n $TARGET/$SHELL_ACTIVITY --es $EXTRA_DESTINATION podcasts")
+        add = waitFor(8_000) { findObject(By.res("podcast-add")) }
+        if (add != null) break
+        executeShellCommand("am force-stop $TARGET")
+    }
+    val followed = waitFor(3_000) { findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
     if (followed == null) passOver {
-        waitFor { findObject(By.res("podcast-add")) }?.click() ?: missing("podcast-add")
+        add?.click() ?: missing("podcast-add")
         val field: UiObject2? = waitFor { findObject(By.res("podcast-add-field")) }
         if (field != null) {
             field.setText(feed)
