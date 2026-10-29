@@ -1296,7 +1296,8 @@ class Smoke:
         """1.0.2: the transport bar's "open the player" opens the big player over the window (not the Music page);
         Back closes it and the bar is there again."""
         nodes = self.nodes(self.dump())
-        button = self.by_id(nodes, "transport-open-player")
+        # the sidebar's transport bar has the button; a rail's mini player opens it from its words
+        button = self.by_id(nodes, "transport-open-player") or self.by_id(nodes, "mini-player")
         if not self.check("the transport bar's open button", bool(button)):
             return nodes
         nodes, shown = self.tap_until("The bar's open button", button[0], lambda ns: self.by_id(ns, "phone-player"))
