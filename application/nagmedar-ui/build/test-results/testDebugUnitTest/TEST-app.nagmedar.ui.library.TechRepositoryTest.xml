@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.TechRepositoryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:20:24.704Z" hostname="runnervmnwato" time="0.097">
+  <properties/>
+  <testcase name="aFileReplacedInPlaceIsNotAnsweredWithTheOldProbe" classname="app.nagmedar.ui.library.TechRepositoryTest" time="0.04"/>
+  <testcase name="theProbeOfTheFileAsItWas" classname="app.nagmedar.ui.library.TechRepositoryTest" time="0.021"/>
+  <testcase name="theSameSizeAtAnotherTimeIsAnotherFile" classname="app.nagmedar.ui.library.TechRepositoryTest" time="0.018"/>
+  <testcase name="anOlderProbesResultIsNotUsed" classname="app.nagmedar.ui.library.TechRepositoryTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

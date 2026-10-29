@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:21:06.579Z" hostname="runnervmnwato" time="0.653">
+  <properties/>
+  <testcase name="settingsTablet" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.065"/>
+  <testcase name="spectrumTablet" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.093"/>
+  <testcase name="phonePlayer" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.09"/>
+  <testcase name="settingsTabletEnglish" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.05"/>
+  <testcase name="settingsPhone" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.06"/>
+  <testcase name="settingsDex" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.058"/>
+  <testcase name="nowPlayingDex" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.073"/>
+  <testcase name="vuPhone" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.1"/>
+  <testcase name="scopeDexEnglish" classname="app.nagmedar.ui.screenshots.VisualizerScreenshotTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

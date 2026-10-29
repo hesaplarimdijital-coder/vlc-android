@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.ConvertScreenshotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:20:47.517Z" hostname="runnervmnwato" time="0.672">
+  <properties/>
+  <testcase name="progressTablet" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.077"/>
+  <testcase name="dialogPhoneEnglish" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.094"/>
+  <testcase name="doneDexEnglish" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.078"/>
+  <testcase name="stoppedDexEnglish" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.1"/>
+  <testcase name="dialogTablet" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.066"/>
+  <testcase name="dialogDex" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.088"/>
+  <testcase name="summaryPhone" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.079"/>
+  <testcase name="waitingPhone" classname="app.nagmedar.ui.screenshots.ConvertScreenshotTest" time="0.089"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

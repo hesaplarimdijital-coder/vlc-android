@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.ComposeSandboxTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:20:01.113Z" hostname="runnervmnwato" time="0.187">
+  <properties/>
+  <testcase name="everyComposeTestRunsInTheNativeSandbox" classname="app.nagmedar.ui.ComposeSandboxTest" time="0.184"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

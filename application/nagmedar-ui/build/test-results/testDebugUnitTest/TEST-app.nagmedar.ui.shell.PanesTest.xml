@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.PanesTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:21:09.472Z" hostname="runnervmnwato" time="0.642">
+  <properties/>
+  <testcase name="aCollapsedSidebarCannotBeDragged" classname="app.nagmedar.ui.shell.PanesTest" time="0.053"/>
+  <testcase name="draggingTheEdgeResizesAndSavesOnRelease" classname="app.nagmedar.ui.shell.PanesTest" time="0.051"/>
+  <testcase name="besideTheListInExpandedWindows" classname="app.nagmedar.ui.shell.PanesTest" time="0.06"/>
+  <testcase name="keysAndScreenReadersSetTheWidthAndItIsKept" classname="app.nagmedar.ui.shell.PanesTest" time="0.05"/>
+  <testcase name="overTheListOnPhonesAndBackReturnsToItsPlace" classname="app.nagmedar.ui.shell.PanesTest" time="0.071"/>
+  <testcase name="theListKeepsItsPlaceAcrossWidthClasses" classname="app.nagmedar.ui.shell.PanesTest" time="0.044"/>
+  <testcase name="theSidebarIsDraggedToAKeptWidth" classname="app.nagmedar.ui.shell.PanesTest" time="0.046"/>
+  <testcase name="besideTheListInLargeWindows" classname="app.nagmedar.ui.shell.PanesTest" time="0.044"/>
+  <testcase name="escapeClosesTheDetails" classname="app.nagmedar.ui.shell.PanesTest" time="0.047"/>
+  <testcase name="theRememberedWidthComesBackAndFitsTheWindow" classname="app.nagmedar.ui.shell.PanesTest" time="0.04"/>
+  <testcase name="rightToLeftThePaneIsOnTheLeft" classname="app.nagmedar.ui.shell.PanesTest" time="0.062"/>
+  <testcase name="aWidthTooLargeForTheWindowLeavesRoomForTheList" classname="app.nagmedar.ui.shell.PanesTest" time="0.038"/>
+  <testcase name="overTheListInMediumWindows" classname="app.nagmedar.ui.shell.PanesTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

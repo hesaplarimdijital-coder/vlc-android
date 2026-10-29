@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.KeyboardMapScreenshotTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:20:51.361Z" hostname="runnervmnwato" time="0.463">
+  <properties/>
+  <testcase name="tablet" classname="app.nagmedar.ui.screenshots.KeyboardMapScreenshotTest" time="0.139"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.KeyboardMapScreenshotTest" time="0.099"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.KeyboardMapScreenshotTest" time="0.13"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.KeyboardMapScreenshotTest" time="0.094"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

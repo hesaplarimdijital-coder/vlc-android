@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcribe.SubtitleDocumentTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:21:11.249Z" hostname="runnervmnwato" time="0.007">
+  <properties/>
+  <testcase name="aHugeHourNeitherCrashesNorMakesATime" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.005"/>
+  <testcase name="assTimesAreRoundedToHundredths" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="webVttKeepsItsHeaderNotesIdentifiersAndSettings" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="theByteOrderMarkIsRemembered" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.001"/>
+  <testcase name="timesTypedInAFieldAreRead" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="anSrtIsReadAndWrittenAgain" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="aBlankLineInEditedTextDoesNotBreakTheSrtItIsWrittenTo" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="anSrtWithWindowsLineBreaksKeepsThem" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="anAssFileUntouchedIsWrittenByteForByte" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="theFormatIsWhatTheTextIsWhateverTheNameSays" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.001"/>
+  <testcase name="anSrtBecomesWebVttAndBack" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="textAfterABlankLineInsideAnSrtCueIsKept" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <testcase name="anSrtThatIsNotTidyIsReadAnyway" classname="app.nagmedar.ui.transcribe.SubtitleDocumentTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

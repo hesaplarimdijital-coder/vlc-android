@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarVoiceTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:20:16.357Z" hostname="runnervmnwato" time="0.002">
+  <properties/>
+  <testcase name="candidatesAreRanked" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <testcase name="theBestAnswerWinsAndTooLittleIsNone" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.001"/>
+  <testcase name="anEnglishRequestToo" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <testcase name="theKindARequestNamesIsReadOff" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <testcase name="aTurkishRequestLosesItsCommand" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.001"/>
+  <testcase name="theWordsAsSaidKeepTheirLetters" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <testcase name="wordsAreFoldedForComparing" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <testcase name="anEmptyRequestAsksForWhatPlayedLast" classname="app.nagmedar.ui.auto.CarVoiceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

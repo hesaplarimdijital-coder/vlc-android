@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.work.RetiredWorkTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T13:21:11.753Z" hostname="runnervmnwato" time="0.204">
+  <properties/>
+  <testcase name="eachStepRunsOnce" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.036"/>
+  <testcase name="theDroppedJobsNoteAndTvLabsFilesGoOnce" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.033"/>
+  <testcase name="theRemovedFeaturesWorkIsCancelledAndOneZerosStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.045"/>
+  <testcase name="theTvLabNightAlarmIsCancelled" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.036"/>
+  <testcase name="theVideoFoldersLetGoAsFarAsNothingInOneZeroKeepsThem" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.026"/>
+  <testcase name="theVideoFeaturesFilesGoAndWhatOneZeroUsesStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
