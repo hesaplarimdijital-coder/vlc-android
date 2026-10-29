@@ -91,7 +91,10 @@ fun BrandMark(modifier: Modifier = Modifier) {
 
 // ---------------------------------------------------------------- compact: bottom bar
 
-/** The phone's bottom bar (Desktop Kit 1.0: glass inside the shell, the chrome colour elsewhere). */
+/**
+ * The phone's bottom bar: Müzik · Podcast · Radyo · ⋯ (Desktop Kit 1.0: glass inside the shell, the
+ * chrome colour elsewhere; the shell opens its "⋯" sheet for [Destination.More]).
+ */
 @Composable
 fun BottomNavBar(current: Destination, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
@@ -131,7 +134,8 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
     ) {
         NavIndicator(selected, state, pill, Modifier.width(56.dp).height(30.dp)) {
             Icon(
-                destination.icon,
+                // the phone's last tab is "⋯", its sheet of the other pages (Desktop Kit 1.0)
+                if (destination == Destination.More) NagIcons.MoreHorizontal else destination.icon,
                 contentDescription = null,
                 tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
                 modifier = Modifier.size(dimens.icon),

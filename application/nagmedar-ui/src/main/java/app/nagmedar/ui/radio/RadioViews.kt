@@ -61,10 +61,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntSize
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ChipRow
-import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.LoadingState
 import app.nagmedar.ui.components.MenuButton
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -79,6 +79,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
+import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -755,7 +756,8 @@ private fun StationRow(
                 tint = if (station.favourite) colors.accent else colors.textSecondary,
                 modifier = Modifier.testTag("favourite-${station.key}"),
             )
-            IconMenuButton(NagIcons.MoreHorizontal, moreActions, menu)
+            // "⋯": a sheet on a phone, the menu on a wider window (Desktop Kit 1.0)
+            MoreButton(groups = { menu().toActionGroups() }, title = station.name, contentDescription = moreActions)
         }
     }
 }

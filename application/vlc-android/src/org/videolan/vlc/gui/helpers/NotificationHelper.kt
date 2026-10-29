@@ -45,8 +45,8 @@ import org.videolan.resources.ACTION_STOP_SERVER
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.CUSTOM_ACTION
-import org.videolan.resources.CUSTOM_ACTION_BOOKMARK
-import org.videolan.resources.CUSTOM_ACTION_SPEED
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_BACK
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_FORWARD
 import org.videolan.resources.EXTRA_CUSTOM_ACTION_ID
 import org.videolan.resources.START_ACTIVITY
 import org.videolan.tools.NAGMEDAR_ACTION_LIBRARY
@@ -73,7 +73,7 @@ object NotificationHelper {
 
     fun createPlaybackNotification(ctx: Context, title: String, artist: String,
                                    album: String, cover: Bitmap?, playing: Boolean, pausable: Boolean,
-                                   seekable: Boolean, speed: Float, podcastMode: Boolean,
+                                   seekable: Boolean, episode: Boolean,
                                    seekInCompactView: Boolean, enabledActions: FlagSet<PlaybackAction>,
                                    sessionToken: MediaSessionCompat.Token?,
                                    spi: PendingIntent?,
@@ -97,19 +97,16 @@ object NotificationHelper {
         castingTo?.let { builder.setSubText(it) }
         spi?.let { builder.setContentIntent(it) }
         /* Previous */
-        if (podcastMode) {
-            builder.addAction(NotificationCompat.Action(speedIcon(speed), ctx.getString(R.string.playback_speed),
-                    buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_SPEED)
-            ))
+        builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_previous, ctx.getString(R.string.previous),
+                buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_PREVIOUS)))
+        /* Rewind: 1.0, an episode's 15 s back (SessionButtons) */
+        builder.addAction(if (episode) {
+            NotificationCompat.Action(R.drawable.nagmedar_episode_back_15, ctx.getString(R.string.nagmedar_episode_back),
+                    buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_EPISODE_BACK))
         } else {
-            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_previous, ctx.getString(R.string.previous),
-                    buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_PREVIOUS)))
-        }
-        /* Rewind */
-        builder.addAction(NotificationCompat.Action(
-                R.drawable.nagmedar_pip_back,
-                ctx.getString(R.string.playback_rewind),
-                buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_REWIND)))
+            NotificationCompat.Action(R.drawable.nagmedar_pip_back, ctx.getString(R.string.playback_rewind),
+                    buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_REWIND))
+        })
         /* Play/Pause or Stop */
         if (pausable) {
             if (playing) builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_pip_pause, ctx.getString(R.string.pause),
@@ -117,22 +114,19 @@ object NotificationHelper {
             else builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_pip_play, ctx.getString(R.string.play),
                     MediaButtonReceiver.buildMediaButtonPendingIntent(ctx, PlaybackStateCompat.ACTION_PLAY_PAUSE)))
         } else builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_stop, ctx.getString(R.string.stop), piStop))
-        /* Fast Forward */
-        builder.addAction(NotificationCompat.Action(
-                R.drawable.nagmedar_pip_forward,
-                ctx.getString(R.string.playback_forward),
-                buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_FAST_FORWARD)))
-        /* Next */
-        if (podcastMode) {
-            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_bookmark, ctx.getString(R.string.add_bookmark),
-                    buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_BOOKMARK)
-            ))
+        /* Fast Forward: 1.0, an episode's 30 s forward */
+        builder.addAction(if (episode) {
+            NotificationCompat.Action(R.drawable.nagmedar_episode_forward_30, ctx.getString(R.string.nagmedar_episode_forward),
+                    buildCustomButtonPendingIntent(ctx, CUSTOM_ACTION_EPISODE_FORWARD))
         } else {
-            builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_next, ctx.getString(R.string.next),
-                    buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_NEXT)))
-        }
+            NotificationCompat.Action(R.drawable.nagmedar_pip_forward, ctx.getString(R.string.playback_forward),
+                    buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_FAST_FORWARD))
+        })
+        /* Next */
+        builder.addAction(NotificationCompat.Action(R.drawable.nagmedar_notif_next, ctx.getString(R.string.next),
+                buildMediaButtonPendingIntent(ctx, enabledActions, PlaybackAction.ACTION_SKIP_TO_NEXT)))
         if (AndroidDevices.showMediaStyle) {
-            val showActions = if (podcastMode || (seekable && seekInCompactView)) intArrayOf(1, 2, 3) else intArrayOf(0, 2, 4)
+            val showActions = if (episode || (seekable && seekInCompactView)) intArrayOf(1, 2, 3) else intArrayOf(0, 2, 4)
             val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
                     .setShowActionsInCompactView(*showActions)
                     .setShowCancelButton(true)

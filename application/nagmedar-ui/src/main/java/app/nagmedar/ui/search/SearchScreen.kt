@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ChipRow
 import app.nagmedar.ui.components.FilterChip
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -65,6 +66,7 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
+import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.mediaMenu
@@ -74,6 +76,8 @@ import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.LocalShellTopPadding
+import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -309,11 +313,19 @@ private fun marked(text: String, query: SearchQuery): AnnotatedString {
 private fun HitRow(onClick: () -> Unit, label: String, media: MediaWrapper?, content: @Composable RowScope.() -> Unit) {
     val context = LocalContext.current
     // the same menu as in the lists; a hit without an item of the medialibrary has none
+    val menu = { media?.let { mediaMenu(context, it, onClick) }.orEmpty() }
+    // a phone's hit ends with "⋯": the same menu as the long press, as a sheet (Desktop Kit 1.0)
+    val more = media != null && currentWidthClass() == WidthClass.Compact
     ContextMenuArea(
-        entries = { media?.let { mediaMenu(context, it, onClick) }.orEmpty() },
+        entries = menu,
         enabled = media != null,
         accessibilityLabel = stringResource(R.string.nag_more_actions),
-    ) { HitRowBody(onClick, label, content) }
+    ) {
+        HitRowBody(onClick, label) {
+            content()
+            if (more) MoreButton(groups = { menu().toActionGroups() }, title = label)
+        }
+    }
 }
 
 @Composable

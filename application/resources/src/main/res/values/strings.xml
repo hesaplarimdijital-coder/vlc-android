@@ -317,6 +317,9 @@
         <item quantity="other">%d items play next</item>
     </plurals>
     <string name="nagmedar_getting_ready">Getting playback ready…</string>
+    <!-- 1.0: a podcast episode's skip buttons on Android Auto, the notification and the lock screen -->
+    <string name="nagmedar_episode_back">Jump back 15 s</string>
+    <string name="nagmedar_episode_forward">Jump forward 30 s</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and VLC Authors.</string>

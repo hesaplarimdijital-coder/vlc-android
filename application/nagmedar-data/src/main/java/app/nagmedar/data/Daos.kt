@@ -26,6 +26,14 @@ data class PodcastFeedSummary(
     @ColumnInfo(name = "new_count") val newCount: Int,
 )
 
+/** 1.0: an episode's title and where it belongs, without the rest of its row (its notes): what Android Auto's search reads of every episode. */
+data class PodcastEpisodeTitle(
+    val id: Long,
+    @ColumnInfo(name = "feed_id") val feedId: Long,
+    val title: String,
+    @ColumnInfo(name = "published_at") val publishedAt: Long,
+)
+
 @Dao
 abstract class PodcastDao {
     @Query("SELECT * FROM podcast_feed ORDER BY title COLLATE NOCASE")
@@ -106,6 +114,24 @@ abstract class PodcastDao {
     /** S-1104: the episode that plays from [location], its enclosure's address or its downloaded copy. */
     @Query("SELECT * FROM podcast_episode WHERE audio_url = :location OR download_path = :location ORDER BY id LIMIT 1")
     abstract fun episodeAt(location: String): PodcastEpisode?
+
+    /** 1.0: the episodes left in the middle, not played and with a place kept (Android Auto's "Devam eden bölümler"). */
+    @Query("SELECT * FROM podcast_episode WHERE played = 0 AND position_ms > 0")
+    abstract fun inProgress(): List<PodcastEpisode>
+
+    /** 1.0: the new episodes, unplayed and added by a refresh after the subscription, the newest first (Android Auto's "Yeni bölümler"). */
+    @Query(
+        "SELECT e.* FROM podcast_episode e JOIN podcast_feed f ON f.id = e.feed_id " +
+            "WHERE e.played = 0 AND e.added_at > f.subscribed_at ORDER BY e.published_at DESC LIMIT :limit",
+    )
+    abstract fun newEpisodeList(limit: Int): List<PodcastEpisode>
+
+    /** 1.0: every episode's title, the newest first: what Android Auto's search and voice requests compare. */
+    @Query("SELECT id, feed_id, title, published_at FROM podcast_episode ORDER BY published_at DESC")
+    abstract fun episodeTitles(): List<PodcastEpisodeTitle>
+
+    @Query("SELECT * FROM podcast_episode WHERE id IN (:ids)")
+    abstract fun episodesById(ids: List<Long>): List<PodcastEpisode>
 
     /** S-1103: the episodes in a download [state] (see [DownloadState]), the newest first. */
     @Query("SELECT * FROM podcast_episode WHERE download_state = :state ORDER BY published_at DESC")

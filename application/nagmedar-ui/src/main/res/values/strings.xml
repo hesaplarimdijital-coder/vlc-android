@@ -1063,6 +1063,25 @@
     <string name="nag_music_recent_shelf">Recently played music</string>
     <string name="nag_music_recent_none_title">No track played yet</string>
     <string name="nag_music_recent_none_desc">The tracks you listen to come here, the latest first.</string>
+    <!-- 1.0: Android Auto's tabs and lists (Music, Podcast, Radio, Recently played), its search's headings -->
+    <string name="nag_auto_continue">Continue listening</string>
+    <string name="nag_auto_subscriptions">Subscriptions</string>
+    <string name="nag_auto_new_episodes">New episodes</string>
+    <string name="nag_auto_favourite_stations">Favourite stations</string>
+    <string name="nag_auto_categories">Categories</string>
+    <string name="nag_auto_found_tracks">Tracks</string>
+    <string name="nag_auto_found_episodes">Podcast episodes</string>
+    <string name="nag_auto_found_shows">Shows</string>
+    <string name="nag_auto_found_stations">Radio stations</string>
+    <string name="nag_auto_empty">Nothing here yet</string>
+    <string name="nag_auto_radio_offline">The radio directory can\'t be reached right now</string>
+    <string name="nag_auto_no_result">No results</string>
+    <string name="nag_auto_decade_front">%1$ds</string>
+    <string name="nag_auto_decade_back">%1$ds</string>
+    <plurals name="nag_auto_stations">
+        <item quantity="one">%d station</item>
+        <item quantity="other">%d stations</item>
+    </plurals>
     <string name="nag_music_unknown_album">Unknown album</string>
     <string name="nag_music_unknown_genre">No genre</string>
     <string name="nag_music_unknown_composer">No composer</string>

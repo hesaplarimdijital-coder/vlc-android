@@ -59,6 +59,9 @@ class PodcastCoverFinder(
         kept
     }
 
+    /** The file the cover at [url] is kept in, when it was fetched before; nothing is fetched. */
+    fun kept(url: String): File? = store.kept(url)?.file
+
     companion object {
         /** An address with no image is asked about again after a week. */
         const val MISS_RETRY_MS = CoverFinder.MISS_RETRY_MS
@@ -99,6 +102,9 @@ object PodcastCovers {
         if (!CoverCenter.active) return null
         return withContext(Dispatchers.IO) { finder(context).find(url)?.let { CoverImages.load(it, px, shownAs = shownName(url, px)) } }
     }
+
+    /** 1.0: the file the cover at [url] is kept in (Android Auto's artwork), when the app fetched it before; null otherwise. Off the main thread. */
+    fun keptFile(context: Context, url: String): File? = finder(context).kept(url)
 
     /** The cover at [url] for [px] pixels when it was shown a moment ago and is still in memory; null otherwise. */
     fun shown(url: String, px: Int): ImageBitmap? = if (CoverCenter.active) CoverImages.shown(shownName(url, px)) else null

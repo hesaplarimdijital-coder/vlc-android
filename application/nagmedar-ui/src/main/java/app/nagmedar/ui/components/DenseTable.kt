@@ -151,9 +151,16 @@ fun <T> DenseTable(
     reorder: ReorderState? = null,
     /** What a row's handle says to a screen reader ("Neva Kâr: sürükleyerek taşı"). */
     handleLabel: (T) -> String = { "" },
+    /**
+     * Desktop Kit 1.0: each row ends with a "⋯" button opening [rowMenu]'s entries in a [MoreSheet]
+     * (a phone's) under [rowMoreTitle]; the same entries as the long press.
+     */
+    rowMoreButton: Boolean = false,
+    rowMoreTitle: (T) -> String? = { null },
     glassHeader: Boolean = false,
     onExtendSelection: ((focused: T, delta: Int) -> Boolean)? = null,
 ) {
+    val more = rowMoreButton && rowMenu != null
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val density = LocalDensity.current
@@ -180,6 +187,7 @@ fun <T> DenseTable(
                         HeaderCell(column, index, sort, onSortChange, rest, Modifier.cell(this, column.width))
                     }
                 }
+                if (more) Spacer(Modifier.width(moreWidth()))
             }
             HorizontalRule()
         }
@@ -214,6 +222,9 @@ fun <T> DenseTable(
                         modifier = outer.then(rowModifier(item)).then(tracked),
                         handle = reorder?.let { Modifier.reorderHandle(it, key(item)) },
                         handleLabel = if (reorder != null) handleLabel(item) else "",
+                        trailing = if (more && rowMenu != null) ({
+                            MoreButton(groups = { rowMenu(item, index).toActionGroups() }, title = rowMoreTitle(item))
+                        }) else null,
                     )
                 }
                 if (rowMenu != null) {
@@ -310,6 +321,7 @@ private fun <T> TableRow(
     modifier: Modifier,
     handle: Modifier? = null,
     handleLabel: String = "",
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -361,8 +373,13 @@ private fun <T> TableRow(
                 }
             }
         }
+        trailing?.invoke()
     }
 }
+
+/** The row's "⋯" button's column: an icon button's width. */
+@Composable
+private fun moreWidth(): Dp = NagTheme.dimens.minTarget.coerceAtLeast(NagTheme.dimens.controlHeight)
 
 /** The reorder handle's column: a finger's width by touch. */
 @Composable

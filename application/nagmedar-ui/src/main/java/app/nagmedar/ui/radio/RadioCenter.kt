@@ -78,6 +78,12 @@ object RadioCenter {
     /** The player: S-1107 asks it for the address a station plays from, as the recordings must read the same stream. */
     internal fun player(context: Context): RadioPlayer = parts(context).player
 
+    /** 1.0: the directory, which Android Auto's categories and searches ask too. */
+    internal fun directory(context: Context): RadioDirectory = parts(context).directory
+
+    /** 1.0: the stations kept, which Android Auto lists. */
+    internal fun library(context: Context): RadioLibrary = parts(context).library
+
     private fun build(context: Context): RadioController {
         val parts = parts(context)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)

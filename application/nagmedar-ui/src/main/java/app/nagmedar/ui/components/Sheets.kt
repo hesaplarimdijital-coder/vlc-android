@@ -208,6 +208,8 @@ fun MoreSheet(
     groups: List<ActionGroup>,
     title: String? = null,
     menuOffset: IntOffset = IntOffset.Zero,
+    /** Opened from the keyboard: on a wider window the menu's first item takes the focus. */
+    focusFirst: Boolean = false,
 ) {
     if (currentWidthClass() == WidthClass.Compact) {
         val held = remember { ActionGroupsKept(groups) }
@@ -220,7 +222,14 @@ fun MoreSheet(
             ActionGroupList(held.groups, onDismiss)
         }
     } else {
-        MenuPopup(visible = visible, onDismiss = onDismiss, entries = if (visible) groups.toMenuEntries() else emptyList(), offset = menuOffset)
+        MenuPopup(
+            visible = visible,
+            onDismiss = onDismiss,
+            entries = if (visible) groups.toMenuEntries() else emptyList(),
+            offset = menuOffset,
+            minWidth = 180.dp,
+            focusFirst = focusFirst,
+        )
     }
 }
 
@@ -237,14 +246,25 @@ fun MoreButton(
 ) {
     var open by remember { mutableStateOf(false) }
     var height by remember { mutableIntStateOf(0) }
+    val inputModes = LocalInputModeManager.current
+    var byKeys by remember { mutableStateOf(false) }
     Box(modifier.onSizeChanged { height = it.height }) {
-        NagIconButton(NagIcons.MoreHorizontal, contentDescription, { open = true }, selected = open)
+        NagIconButton(
+            NagIcons.MoreHorizontal,
+            contentDescription,
+            {
+                byKeys = inputModes.inputMode == ComposeInputMode.Keyboard
+                open = true
+            },
+            selected = open,
+        )
         MoreSheet(
             visible = open,
             onDismiss = { open = false },
             groups = if (open) groups() else emptyList(),
             title = title,
-            menuOffset = IntOffset(0, height),
+            menuOffset = IntOffset(0, height + 4),
+            focusFirst = byKeys,
         )
     }
 }
@@ -340,7 +360,7 @@ fun GlassBottomSheet(
     val latestDismiss by rememberUpdatedState(onDismiss)
     val host = shellOverlayHere()
     if (host != null) {
-        OverlayLayer(host) { SheetSurface(progress, drag, tier, label, modifier, inShell = true, { latestDismiss() }, content) }
+        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, tier, label, modifier, inShell = true, { latestDismiss() }, content) }
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -357,13 +377,16 @@ internal fun shellOverlayHere(): ShellOverlayHost? {
     return host.takeIf { it.rootView == null || it.rootView === root }
 }
 
-/** Draws [content] in the shell's overlay layer while this is in composition, with the caller's composition locals. */
+/**
+ * Draws [content] in the shell's overlay at depth [z] ([ShellOverlayHost.PLAYER] or
+ * [ShellOverlayHost.SHEET]) while this is in composition, with the caller's composition locals.
+ */
 @Composable
-internal fun OverlayLayer(host: ShellOverlayHost, content: @Composable () -> Unit) {
+internal fun OverlayLayer(host: ShellOverlayHost, z: Int, content: @Composable () -> Unit) {
     val locals by rememberUpdatedState(currentCompositionLocalContext)
     val latest by rememberUpdatedState(content)
-    val layer = remember(host) {
-        ShellOverlayHost.Layer { CompositionLocalProvider(locals) { latest() } }
+    val layer = remember(host, z) {
+        ShellOverlayHost.Layer(z) { CompositionLocalProvider(locals) { latest() } }
     }
     DisposableEffect(host, layer) {
         host.layers.add(layer)

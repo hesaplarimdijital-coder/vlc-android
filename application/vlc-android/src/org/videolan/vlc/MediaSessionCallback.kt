@@ -29,6 +29,7 @@ import android.content.ContentUris
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -36,41 +37,36 @@ import android.view.KeyEvent
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
+import app.nagmedar.playback.SessionButtons
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.Tools
-import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
-import org.videolan.medialibrary.interfaces.media.Playlist
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.CUSTOM_ACTION_BOOKMARK
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_BACK
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_FORWARD
 import org.videolan.resources.CUSTOM_ACTION_FAST_FORWARD
 import org.videolan.resources.CUSTOM_ACTION_REPEAT
 import org.videolan.resources.CUSTOM_ACTION_REWIND
 import org.videolan.resources.CUSTOM_ACTION_SHUFFLE
 import org.videolan.resources.CUSTOM_ACTION_SPEED
-import org.videolan.resources.EXTRA_RELATIVE_MEDIA_ID
-import org.videolan.resources.MEDIALIBRARY_PAGE_SIZE
 import org.videolan.resources.util.getFromMl
 import org.videolan.resources.util.parcelable
 import org.videolan.tools.KEY_IGNORE_HEADSET_MEDIA_BUTTON_PRESSES
 import org.videolan.tools.KEY_PLAYBACK_SPEED_AUDIO_GLOBAL
 import org.videolan.tools.KEY_PLAYBACK_SPEED_AUDIO_GLOBAL_VALUE
 import org.videolan.tools.Settings
-import org.videolan.tools.removeQuery
-import org.videolan.tools.retrieveParent
-import org.videolan.vlc.gui.helpers.MediaComparators
+import org.videolan.vlc.media.CarHook
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.media.PlaylistManager
+import org.videolan.vlc.media.VoiceFocus
+import org.videolan.vlc.media.VoiceRequest
 import org.videolan.vlc.util.Permissions.canCheckBluetoothDevices
 import org.videolan.vlc.util.TextUtils
-import org.videolan.vlc.util.VoiceSearchParams
-import org.videolan.vlc.util.awaitMedialibraryStarted
 import org.videolan.vlc.util.mergeSorted
-import java.security.SecureRandom
 import kotlin.math.absoluteValue
-import kotlin.math.min
 
 private const val TAG = "VLC/MediaSessionCallback"
 private const val ONE_SECOND = 1000L
@@ -259,6 +255,12 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
             }
             CUSTOM_ACTION_REWIND -> onRewind()
             CUSTOM_ACTION_FAST_FORWARD -> onFastForward()
+            // 1.0: an episode's 15 s back and 30 s forward
+            CUSTOM_ACTION_EPISODE_BACK -> seek(SessionButtons.episodeSeek(forward = false, playbackService.getTime(), playbackService.length))
+            CUSTOM_ACTION_EPISODE_FORWARD -> {
+                seek(SessionButtons.episodeSeek(forward = true, playbackService.getTime(), playbackService.length))
+                checkForSeekFailure(forward = true)
+            }
             CUSTOM_ACTION_SHUFFLE -> if (playbackService.canShuffle()) playbackService.shuffle()
             CUSTOM_ACTION_REPEAT -> playbackService.repeatType = when (playbackService.repeatType) {
                 PlaybackStateCompat.REPEAT_MODE_NONE -> PlaybackStateCompat.REPEAT_MODE_ALL
@@ -269,90 +271,25 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
         }
     }
 
+    /**
+     * 1.0: an entry of Android Auto's tree is played as the catalog says ([CarHook]): as tapping it in the app would. A
+     * medialibrary media by its id (the session's metadata, the queue) plays as before; the "nothing here" entry plays
+     * nothing.
+     */
     override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
         playbackService.lifecycleScope.launch {
-            val context = playbackService.applicationContext
             try {
-                val mediaIdUri = (extras?.getString(EXTRA_RELATIVE_MEDIA_ID) ?: mediaId).toUri()
-                val position = mediaIdUri.getQueryParameter("i")?.toInt() ?: 0
-                val page = mediaIdUri.getQueryParameter("p")
-                val pageOffset = page?.toInt()?.times(MediaSessionBrowser.MAX_RESULT_SIZE) ?: 0
-                when (mediaIdUri.removeQuery().toString()) {
-                    MediaSessionBrowser.ID_NO_MEDIA -> playbackService.displayPlaybackError(R.string.search_no_result)
-                    MediaSessionBrowser.ID_NO_PLAYLIST -> playbackService.displayPlaybackError(R.string.noplaylist)
-                    MediaSessionBrowser.ID_SHUFFLE_ALL -> {
-                        val tracks = context.getFromMl { audio }
-                        if (tracks.isNotEmpty() && isActive) {
-                            tracks.sortWith(MediaComparators.ANDROID_AUTO)
-                            loadMedia(tracks.toList(), SecureRandom().nextInt(min(tracks.size, MEDIALIBRARY_PAGE_SIZE)))
-                            if (!playbackService.isShuffling) playbackService.shuffle()
-                        } else {
-                            playbackService.displayPlaybackError(R.string.search_no_result)
-                        }
+                when {
+                    mediaId == MediaSessionBrowser.ID_NO_MEDIA -> Unit
+                    mediaId.startsWith("${MediaSessionBrowser.ID_MEDIA}/") -> {
+                        val id = ContentUris.parseId(mediaId.toUri())
+                        val tracks = playbackService.applicationContext.getFromMl { getMedia(id)?.tracks }
+                        if (isActive) tracks?.let { loadMedia(it.toList()) }
                     }
-                    MediaSessionBrowser.ID_LAST_ADDED -> {
-                        val tracks = context.getFromMl { getPagedAudio(Medialibrary.SORT_INSERTIONDATE, true, false, false, MediaSessionBrowser.MAX_HISTORY_SIZE, 0) }
-                        if (tracks.isNotEmpty() && isActive) {
-                            loadMedia(tracks.toList(), position)
-                        }
-                    }
-                    MediaSessionBrowser.ID_HISTORY -> {
-                        val tracks = context.getFromMl { history(Medialibrary.HISTORY_TYPE_LOCAL)?.toList()?.filter { MediaSessionBrowser.isMediaAudio(it) } }
-                        if (!tracks.isNullOrEmpty() && isActive) {
-                            val mediaList = tracks.subList(0, tracks.size.coerceAtMost(MediaSessionBrowser.MAX_HISTORY_SIZE))
-                            loadMedia(mediaList, position)
-                        }
-                    }
-                    MediaSessionBrowser.ID_STREAM -> {
-                        val tracks = context.getFromMl { history(Medialibrary.HISTORY_TYPE_NETWORK) }
-                        if (tracks.isNotEmpty() && isActive) {
-                            tracks.sortWith(MediaComparators.ANDROID_AUTO)
-                            loadMedia(tracks.toList(), position)
-                        }
-                    }
-                    MediaSessionBrowser.ID_TRACK -> {
-                        val tracks = context.getFromMl { audio }
-                        if (tracks.isNotEmpty() && isActive) {
-                            tracks.sortWith(MediaComparators.ANDROID_AUTO)
-                            loadMedia(tracks.toList(), pageOffset + position)
-                        }
-                    }
-                    MediaSessionBrowser.ID_SEARCH -> {
-                        val query = mediaIdUri.getQueryParameter("query") ?: ""
-                        val tracks = context.getFromMl {
-                            search(query, false, false)?.tracks?.toList() ?: emptyList()
-                        }
-                        if (tracks.isNotEmpty() && isActive) {
-                            loadMedia(tracks, position)
-                        }
-                    }
-                    else -> {
-                        val id = ContentUris.parseId(mediaIdUri)
-                        when (mediaIdUri.retrieveParent().toString()) {
-                            MediaSessionBrowser.ID_ALBUM -> {
-                                val tracks = context.getFromMl { getAlbum(id)?.tracks }
-                                if (isActive) tracks?.let { loadMedia(it.toList(), position) }
-                            }
-                            MediaSessionBrowser.ID_ARTIST -> {
-                                val tracks = context.getFromMl { getArtist(id)?.tracks }
-                                if (isActive) tracks?.let { loadMedia(it.toList(), allowRandom = true) }
-                            }
-                            MediaSessionBrowser.ID_GENRE -> {
-                                val tracks = context.getFromMl { getGenre(id)?.albums?.flatMap { it.tracks.toList() } }
-                                if (isActive) tracks?.let { loadMedia(it.toList(), allowRandom = true) }
-                            }
-                            MediaSessionBrowser.ID_PLAYLIST -> {
-                                val tracks = context.getFromMl { getPlaylist(id, Settings.includeMissing, false)?.tracks }
-                                if (isActive) tracks?.let { loadMedia(it.toList(), allowRandom = true) }
-                            }
-                            MediaSessionBrowser.ID_MEDIA -> {
-                                val tracks = context.getFromMl { getMedia(id)?.tracks }
-                                if (isActive) tracks?.let { loadMedia(it.toList()) }
-                            }
-                            else -> throw IllegalStateException("Failed to load: $mediaId")
-                        }
-                    }
+                    CarHook.catalog?.play(playbackService, mediaId) != true -> throw IllegalStateException("Failed to load: $mediaId")
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Could not play media: $mediaId", e)
                 when {
@@ -363,13 +300,34 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
         }
     }
 
-    private fun loadMedia(mediaList: List<MediaWrapper>?, position: Int = 0, allowRandom: Boolean = false) {
+    private fun loadMedia(mediaList: List<MediaWrapper>?, position: Int = 0) {
         mediaList?.let {
             if (playbackService.isCarMode())
                 mediaList.forEach { mw -> mw.addFlags(MediaWrapper.MEDIA_FORCE_AUDIO) }
-            // Pick a random first track if allowRandom is true and shuffle is enabled
-            playbackService.load(mediaList, if (allowRandom && playbackService.isShuffling) SecureRandom().nextInt(min(mediaList.size, MEDIALIBRARY_PAGE_SIZE)) else position)
+            playbackService.load(mediaList, position)
         }
+    }
+
+    /** The assistant's request: the words heard, and the field they are about with what it heard for each (MediaStore's extras). */
+    private fun voiceRequest(query: String?, extras: Bundle?): VoiceRequest {
+        val focus = when (extras?.getString(MediaStore.EXTRA_MEDIA_FOCUS)) {
+            MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> VoiceFocus.Artist
+            MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> VoiceFocus.Album
+            MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> VoiceFocus.Title
+            MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE -> VoiceFocus.Genre
+            MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE -> VoiceFocus.Playlist
+            else -> null
+        }
+        return VoiceRequest(
+            query = query.orEmpty(),
+            focus = focus,
+            artist = extras?.getString(MediaStore.EXTRA_MEDIA_ARTIST),
+            album = extras?.getString(MediaStore.EXTRA_MEDIA_ALBUM),
+            // "Title (Live)": the assistant hears the title, not what the brackets add
+            title = extras?.getString(MediaStore.EXTRA_MEDIA_TITLE)?.substringBefore('(')?.trim(),
+            genre = extras?.getString(MediaStore.EXTRA_MEDIA_GENRE),
+            playlist = extras?.getString(MediaStore.EXTRA_MEDIA_PLAYLIST),
+        )
     }
 
     private fun seek(position: Long) {
@@ -387,53 +345,33 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) = playbackService.loadUri(uri)
 
+    /**
+     * 1.0: "Hey Google, … çal": music first, by the field the assistant names (artist, album, title, genre, playlist), then
+     * podcasts (a show, an episode), then radio (the favourites, then the directory); the catalog decides ([CarHook]). A
+     * request with nothing in it plays what played last. Nothing found: what was loaded plays on, else Auto says there is
+     * no result.
+     */
     override fun onPlayFromSearch(query: String?, extras: Bundle?) {
         val playbackState = PlaybackStateCompat.Builder()
                 .setActions(playbackService.enabledActions.getCapabilities())
                 .setState(PlaybackStateCompat.STATE_CONNECTING, playbackService.getTime(), playbackService.speed)
                 .build()
         playbackService.mediaSession.setPlaybackState(playbackState)
-        playbackService.lifecycleScope.launch(Dispatchers.IO) {
-            if (!isActive) return@launch
-            playbackService.awaitMedialibraryStarted()
-            val vsp = VoiceSearchParams(query ?: "", extras)
-            var tracks = when {
-                vsp.isAny -> playbackService.medialibrary.audio
-                vsp.isSongFocus -> playbackService.medialibrary.searchMedia(vsp.song)
-                else -> null
+        val request = voiceRequest(query, extras)
+        playbackService.lifecycleScope.launch {
+            val played = try {
+                CarHook.catalog?.play(playbackService, request) == true
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Could not play from search: $query", e)
+                false
             }
-            tracks?.sortWith(MediaComparators.ANDROID_AUTO)
-            val items = when {
-                vsp.isAlbumFocus -> playbackService.medialibrary.searchAlbum(vsp.album)
-                vsp.isGenreFocus -> playbackService.medialibrary.searchGenre(vsp.genre)
-                vsp.isArtistFocus -> playbackService.medialibrary.searchArtist(vsp.artist)
-                vsp.isPlaylistFocus -> playbackService.medialibrary.searchPlaylist(vsp.playlist, Playlist.Type.All, Settings.includeMissing, false)
-                else -> null
-            }
-            if (!isActive) return@launch
-            if (tracks.isNullOrEmpty() && items.isNullOrEmpty() && query?.isNotEmpty() == true) {
-                playbackService.medialibrary.search(query, Settings.includeMissing, false)?.run {
-                    tracks = when {
-                        !albums.isNullOrEmpty() -> albums!!.flatMap { it.tracks.toList() }.toTypedArray()
-                        !artists.isNullOrEmpty() -> artists!!.flatMap { it.tracks.toList() }.toTypedArray()
-                        !playlists.isNullOrEmpty() -> playlists!!.flatMap { it.tracks.toList() }.toTypedArray()
-                        !genres.isNullOrEmpty() -> genres!!.flatMap { it.tracks.toList() }.toTypedArray()
-                        else -> null
-                    }
-                }
-            }
-            if (!isActive) return@launch
-            if (tracks.isNullOrEmpty() && !items.isNullOrEmpty()) tracks = items.flatMap { it.tracks.toList() }.toTypedArray()
-            playbackService.lifecycleScope.launch(Dispatchers.Main) {
-                when {
-                    !tracks.isNullOrEmpty() -> {
-                        loadMedia(tracks?.toList(), if (vsp.isAny) SecureRandom().nextInt(min(tracks!!.size, MEDIALIBRARY_PAGE_SIZE)) else 0)
-                        // Enable shuffle when isAny is true and disable when false
-                        if (vsp.isAny == !playbackService.isShuffling) playbackService.shuffle()
-                    }
-                    playbackService.hasMedia() -> playbackService.play()
-                    else -> playbackService.displayPlaybackError(R.string.search_no_result)
-                }
+            if (played || !isActive) return@launch
+            when {
+                playbackService.hasMedia() -> playbackService.play()
+                query.isNullOrBlank() -> PlaybackService.loadLastAudio(playbackService, playOnly = true)
+                else -> playbackService.displayPlaybackError(R.string.search_no_result)
             }
         }
     }
