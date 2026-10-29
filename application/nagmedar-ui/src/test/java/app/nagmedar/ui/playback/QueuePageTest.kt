@@ -11,15 +11,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,6 +45,8 @@ import org.robolectric.annotation.GraphicsMode
  * 1.0.1: "Sıradaki" on a phone is a page of its own over the whole window: the bars and the mini
  * player are under it, a drag on its empty state does not scroll the list behind it (the user's
  * report), Back and its arrow close it, and "Temizle" is there only while something is to come.
+ * 1.0.2: pulled down from its list's top it closes as a sheet does, not while a row is moved by its
+ * handle.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -133,6 +138,42 @@ class QueuePageTest {
         compose.waitForIdle()
         assertEquals(listOf("Sabaha Kadar"), queue.titles)
         compose.onNodeWithTag("queue-clear").assertDoesNotExist()
+    }
+
+    @Test
+    fun aPullDownFromTheListsTopClosesIt() {
+        val queue = FakeQueue(FakeQueue.sample, current = 0)
+        page(queue)
+        val top = compose.onNodeWithTag("queue-page").getBoundsInRoot().top
+        // a short, slow pull: it springs back
+        compose.onNodeWithTag("queue-Fener").performTouchInput { swipe(center, center + Offset(0f, 120f * density), durationMillis = 1500) }
+        compose.waitForIdle()
+        assertTrue(open)
+        assertEquals(top, compose.onNodeWithTag("queue-page").getBoundsInRoot().top)
+        // past a third of the window: it goes, and what the drag began on does not play
+        compose.onNodeWithTag("queue-Fener").performTouchInput { swipe(center, center + Offset(0f, 450f * density), durationMillis = 1500) }
+        compose.waitForIdle()
+        assertFalse(open)
+        assertEquals(1, closes)
+        assertEquals(emptyList<Int>(), queue.played)
+        compose.onNodeWithTag("queue-page").assertDoesNotExist()
+    }
+
+    @Test
+    fun theHandleMovesARowAndLeavesThePage() {
+        val queue = FakeQueue(FakeQueue.sample, current = 0)
+        page(queue)
+        val height = compose.onNodeWithTag("queue-Fener").fetchSemanticsNode().size.height.toFloat()
+        // down past two rows by the handle: the row moves, the page stays
+        compose.onNodeWithContentDescription("Fener: sürükleyerek taşı").performTouchInput {
+            down(center)
+            repeat(10) { moveBy(Offset(0f, height * 0.23f)) }
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(listOf("Sabaha Kadar", "Liman Işıkları", "Açılış", "Fener", "Sis"), queue.titles)
+        assertTrue(open)
+        assertEquals(0, closes)
     }
 
     @Test
