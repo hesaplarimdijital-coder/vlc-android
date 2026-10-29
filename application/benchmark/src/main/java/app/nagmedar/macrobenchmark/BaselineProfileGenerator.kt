@@ -95,12 +95,17 @@ class BaselineProfileGenerator {
         }
         // a track by its title (the phone's rows also hold a ⋯ button, which opens a sheet instead):
         // the CI run's tracks are "Profile track …" (emulator.yml), another library's first row; a
-        // row of the table, not a card of the "recently played" shelf above it, which plays nothing
+        // row of the table, not a card of the "recently played" shelf above it, which plays nothing.
+        // 1.0.1: the middle one of those in sight, since the column titles' band takes every press
+        // over it (a row half under the pinned titles no longer plays) and the bars lie over the end
         passOver {
             waitFor {
                 device.findObject(By.res("music"))?.let { music ->
                     val shelf = music.findObject(By.res("recent-shelf"))?.visibleBounds
-                    music.findObjects(By.textStartsWith("Profile track")).firstOrNull { shelf == null || !Rect.intersects(shelf, it.visibleBounds) }
+                    music.findObjects(By.textStartsWith("Profile track"))
+                        .filter { shelf == null || !Rect.intersects(shelf, it.visibleBounds) }
+                        .sortedBy { it.visibleBounds.top }
+                        .let { rows -> rows.getOrNull(rows.size / 2) }
                         ?: music.findObject(By.scrollable(true))?.findObject(By.clickable(true))
                 }
             }?.click()
