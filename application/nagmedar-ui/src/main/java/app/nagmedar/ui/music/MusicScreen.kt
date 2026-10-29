@@ -752,6 +752,8 @@ fun MusicBrowser(
                 state = inspectorState,
                 main = panes,
                 inspector = { MusicInspectorPane(inspectorState, inspector, subject) },
+                // the table keeps the room for its title beside the fixed columns (and the groups beside it): the inspector gives way
+                minMain = if (wide) 760.dp else 560.dp,
             )
         }
     }
