@@ -954,6 +954,22 @@ class Smoke:
             self.key(4)
             nodes = self.step("Back from the track's sheet")
             self.check("Back closes the track's sheet", s["nag_add_to_queue"] not in self.texts(nodes))
+            self.sheet_drag(b)
+
+    def sheet_drag(self, button):
+        """1.0.2: the track's sheet again, dragged down from its middle (over its rows, not its handle): it goes."""
+        s = self.strings[self.lang]
+        nodes = self.step("A track's ⋯ again", lambda: self.tap(button))
+        rows = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_add_to_queue"]]
+        if not self.check("the track's sheet opens again", bool(rows)):
+            return
+        w, h = self.screen_size(nodes)
+        sheet = self.by_id(nodes, "sheet")
+        box = sheet[0].b if sheet else (0, rows[0].b[1], w, h)
+        x, y = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
+        nodes = self.step("Drag the sheet down from its middle", lambda: self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97))), wait=1.5)
+        self.check("a drag down from the sheet's middle closes it",
+                   s["nag_add_to_queue"] not in self.texts(nodes) and not self.by_id(nodes, "sheet"), "from y=%d of %d" % (y, h))
 
     def music_list(self, nodes):
         """The Music's scrolling list (its biggest scrollable view) or None."""

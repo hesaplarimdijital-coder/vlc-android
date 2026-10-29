@@ -3,13 +3,14 @@ package app.nagmedar.ui.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,9 +35,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
@@ -54,17 +58,23 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -82,6 +92,8 @@ import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.glass
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.InputMode as ComposeInputMode
 
@@ -344,10 +356,11 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
 }
 
 /**
- * A modal bottom sheet of glass (Desktop Kit 1.0): slides up over a scrim, follows the finger when
- * dragged down and closes past a third of its height or on a downward fling (springs on a phone,
- * nothing moves with reduced motion). Esc, Back and a tap on the scrim call [onDismiss]. At most
- * 640 dp wide, centred; [label] names it for a screen reader.
+ * A modal bottom sheet of glass (Desktop Kit 1.0): slides up over a scrim and closes on Esc, Back
+ * and a tap on the scrim ([onDismiss]). 1.0.2: dragged down anywhere on it (its handle, its title,
+ * its rows) it follows the finger as the phone's full player does; what it holds scrolls back to
+ * its top first. Let go past a third of its height or flung down it closes, short of that it
+ * springs back ([SheetDrag]). At most 640 dp wide, centred; [label] names it for a screen reader.
  *
  * In the shell's window it is drawn in the shell's overlay over everything (and blurs the screen
  * behind it); elsewhere (in a dialog, before the shell) in a window of its own, solid. Closed and
@@ -368,28 +381,160 @@ fun GlassBottomSheet(
     // closed and at rest (every row's "⋯" and menu has one): no animation, no overlay, no focus, no blur
     if (!showing) return
     val tier = LocalMotionTier.current
-    val drag = remember { Animatable(0f) }
+    val latestDismiss by rememberUpdatedState(onDismiss)
+    val drag = rememberSheetDrag { latestDismiss() }
     LaunchedEffect(visible) {
         if (visible) {
-            drag.snapTo(0f)
+            drag.reset()
             progress.animateTo(1f, NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate)))
         } else {
             progress.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate)))
         }
     }
-    val latestDismiss by rememberUpdatedState(onDismiss)
     val host = shellOverlayHere()
     if (host != null) {
-        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, tier, label, modifier, inShell = true, { latestDismiss() }, content) }
+        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, content) }
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
             // the sheet slides up opaque; the window does not fade it in over the page (1.0.1)
             StillDialogWindow()
-            SheetSurface(progress, drag, tier, label, modifier, inShell = false, { latestDismiss() }, content)
+            SheetSurface(progress, drag, label, modifier, inShell = false, { latestDismiss() }, content)
         }
     }
 }
+
+/**
+ * 1.0.2: a sheet pulled down by the finger, anywhere on it (the user's words: as the player goes
+ * down to the mini player from anywhere on it). [offset] is how far it is below its place. Through
+ * [sheetDrag] a drag on what does not scroll pulls it at once; a list in it ([nestedScroll]) scrolls
+ * back to its top first and hands the rest of the drag down to the sheet, and a sheet pulled down
+ * goes back up before the list scrolls on. Let go past a third of its [height], or flung down
+ * faster than [FLING_CLOSE], it closes ([onClose]); short of that it springs back on the motion
+ * tier's spring with the finger's speed (a jump with reduced motion). Only a pressed pointer pulls:
+ * a mouse wheel at the list's top leaves the sheet where it is.
+ */
+@Stable
+class SheetDrag internal constructor(private val scope: CoroutineScope, private val flingClosePx: Float) {
+    /** How far below its place the sheet is, in px; read it in a layer or draw lambda. */
+    var offset by mutableFloatStateOf(0f)
+        private set
+
+    /** The sheet's height, in px: a third of it closes. */
+    internal var height by mutableIntStateOf(0)
+
+    internal var onClose: () -> Unit = {}
+    internal var tier: MotionTier = MotionTier.Gesture
+
+    /** A finger (or a pressed button) is on the sheet. */
+    internal var held = false
+
+    /** Let go far enough: it is going, nothing pulls it any more. */
+    private var closing = false
+    private var settling: Job? = null
+
+    /** The sheet is below its place: dragged, or springing back. */
+    val pulled: Boolean get() = offset > 0f
+
+    /** Moves the sheet [delta] px down (up when negative), never above its place; returns what it took. */
+    fun pull(delta: Float): Float {
+        // going: the drag's rest goes nowhere else
+        if (closing) return delta
+        settling?.cancel()
+        settling = null
+        val before = offset
+        offset = (before + delta).coerceAtLeast(0f)
+        return offset - before
+    }
+
+    /** Let go at [velocity] px/s (down positive): it closes or springs back. */
+    fun release(velocity: Float) {
+        if (closing || !pulled) return
+        if (SheetDragRules.closes(offset, height, velocity, flingClosePx)) {
+            closing = true
+            onClose()
+            return
+        }
+        settling?.cancel()
+        settling = scope.launch {
+            val spec = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized))
+            animate(offset, 0f, velocity, spec) { value, _ -> offset = value.coerceAtLeast(0f) }
+        }
+    }
+
+    /** Back at its place at once, nothing going: the sheet (re)opens. */
+    fun reset() {
+        settling?.cancel()
+        settling = null
+        closing = false
+        offset = 0f
+    }
+
+    internal val draggable = DraggableState { delta -> pull(delta) }
+
+    /** What a list in the sheet leaves of a drag moves the sheet; see the class. */
+    val nestedScroll: NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            // pushed back up while pulled down: the sheet goes back first, then the list scrolls
+            if (source != NestedScrollSource.UserInput || available.y >= 0f || !pulled) return Offset.Zero
+            return Offset(0f, pull(available.y))
+        }
+
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            // what the list cannot take (pulled down at its top) moves the sheet; a fling's rest and a wheel do not
+            if (source != NestedScrollSource.UserInput || available.y <= 0f || !held) return Offset.Zero
+            return Offset(0f, pull(available.y))
+        }
+
+        override suspend fun onPreFling(available: Velocity): Velocity {
+            // let go with the sheet pulled down: it settles with the finger's speed and the list does not fling
+            if (!pulled) return Velocity.Zero
+            release(available.y)
+            return available
+        }
+
+        override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+            // a drag that ended without a fling of its own leaves the sheet at its place or going
+            if (pulled && settling?.isActive != true) release(0f)
+            return Velocity.Zero
+        }
+    }
+}
+
+/** 1.0.2: what letting a pulled sheet go does (pure, for the tests). */
+internal object SheetDragRules {
+    /** Pulled [offset] px down a sheet [height] px high and let go at [velocity] px/s: past a third, or flung down, it closes. */
+    fun closes(offset: Float, height: Int, velocity: Float, flingClosePx: Float): Boolean =
+        offset > 0f && ((height > 0 && offset > height / 3f) || velocity > flingClosePx)
+}
+
+/** A [SheetDrag] that closes with [onClose] (the latest one), on the window's motion tier. */
+@Composable
+internal fun rememberSheetDrag(onClose: () -> Unit): SheetDrag {
+    val scope = rememberCoroutineScope()
+    val flingClose = with(LocalDensity.current) { FLING_CLOSE.toPx() }
+    val drag = remember(scope, flingClose) { SheetDrag(scope, flingClose) }
+    drag.onClose = onClose
+    drag.tier = LocalMotionTier.current
+    return drag
+}
+
+/**
+ * The sheet [drag] pulls (1.0.2): its height, what its lists leave of a drag, and a vertical drag
+ * on what does not scroll in it. A sideways drag (a slider, a row of chips) stays where it began.
+ */
+internal fun Modifier.sheetDrag(drag: SheetDrag): Modifier = this
+    .onSizeChanged { drag.height = it.height }
+    .pointerInput(drag) {
+        // watches, before anything in the sheet, whether a pointer is pressed; consumes nothing
+        awaitPointerEventScope {
+            while (true) {
+                drag.held = awaitPointerEvent(PointerEventPass.Initial).changes.any { it.pressed }
+            }
+        }
+    }
+    .nestedScroll(drag.nestedScroll)
+    .draggable(drag.draggable, Orientation.Vertical, onDragStopped = { velocity -> drag.release(velocity) })
 
 /** The shell's overlay when this composition draws in the shell's own window (not in a dialog or pop-up of it); else null. */
 @Composable
@@ -419,8 +564,7 @@ internal fun OverlayLayer(host: ShellOverlayHost, z: Int, content: @Composable (
 @Composable
 private fun SheetSurface(
     progress: Animatable<Float, AnimationVector1D>,
-    drag: Animatable<Float, AnimationVector1D>,
-    tier: MotionTier,
+    drag: SheetDrag,
     label: String?,
     modifier: Modifier,
     inShell: Boolean,
@@ -429,9 +573,6 @@ private fun SheetSurface(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val scope = rememberCoroutineScope()
-    val density = LocalDensity.current
-    var sheetHeight by remember { mutableIntStateOf(0) }
     val focus = remember { FocusRequester() }
     val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     val name = label ?: stringResource(R.string.nag_more_actions)
@@ -444,7 +585,8 @@ private fun SheetSurface(
                 .then(
                     if (!inShell) Modifier else Modifier
                         .graphicsLayer {
-                            val dragged = if (sheetHeight > 0) (drag.value / sheetHeight).coerceIn(0f, 1f) else 0f
+                            val height = drag.height
+                            val dragged = if (height > 0) (drag.offset / height).coerceIn(0f, 1f) else 0f
                             alpha = progress.value.coerceIn(0f, 1f) * (1f - dragged)
                         }
                         .background(colors.scrim),
@@ -456,10 +598,10 @@ private fun SheetSurface(
                 .align(Alignment.BottomCenter)
                 .widthIn(max = 640.dp)
                 .fillMaxWidth()
-                .onSizeChanged { sheetHeight = it.height }
                 .graphicsLayer {
-                    val hidden = (1f - progress.value) * (if (sheetHeight > 0) sheetHeight.toFloat() else 2000f)
-                    translationY = hidden + drag.value
+                    val height = drag.height
+                    val hidden = (1f - progress.value) * (if (height > 0) height.toFloat() else 2000f)
+                    translationY = hidden + drag.offset
                 }
                 // in a window of its own there is nothing of the screen to blur: the solid surface
                 .then(
@@ -469,6 +611,7 @@ private fun SheetSurface(
                 // taps inside stay inside
                 .pointerInput(Unit) { detectTapGestures { } }
                 .semantics { paneTitle = name }
+                .testTag("sheet")
                 .onPreviewKeyEvent { event ->
                     val esc = event.key == Key.Escape && event.type == KeyEventType.KeyDown
                     if (esc) onDismiss()
@@ -476,22 +619,8 @@ private fun SheetSurface(
                 }
                 .focusRequester(focus)
                 .focusable()
-                .draggable(
-                    orientation = Orientation.Vertical,
-                    state = rememberDraggableState { delta ->
-                        scope.launch { drag.snapTo((drag.value + delta).coerceAtLeast(0f)) }
-                    },
-                    onDragStopped = { velocity ->
-                        val far = sheetHeight > 0 && drag.value > sheetHeight / 3f
-                        val flung = velocity > with(density) { FLING_CLOSE.toPx() }
-                        if (far || flung) {
-                            onDismiss()
-                        } else {
-                            val spec = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized))
-                            drag.animateTo(0f, spec, initialVelocity = velocity)
-                        }
-                    },
-                )
+                // 1.0.2: the whole sheet follows a drag down, its rows and title as well as its handle
+                .sheetDrag(drag)
                 .then(if (inShell) Modifier else Modifier.navigationBarsPadding())
                 .padding(bottom = dimens.gapM),
         ) {

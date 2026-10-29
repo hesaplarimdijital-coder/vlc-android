@@ -27,11 +27,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -74,9 +76,11 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberReorderState
+import app.nagmedar.ui.components.rememberSheetDrag
 import app.nagmedar.ui.components.reorderHandle
 import app.nagmedar.ui.components.reorderItem
 import app.nagmedar.ui.components.reorderList
+import app.nagmedar.ui.components.sheetDrag
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
@@ -389,7 +393,10 @@ fun rememberQueuePanelState(): QueuePanelState = rememberSaveable(saver = QueueP
  * bottom and goes down again (nothing moves with reduced motion). Back, the predictive gesture
  * (the page shrinks with the finger, as a detail does) and its back arrow close it. While it is
  * open nothing under it reacts to a touch, a scroll or a key ([blockInputBelow]), and once it is
- * up a screen reader reads only it.
+ * up a screen reader reads only it. 1.0.2: dragged down while its list is at its top (or on its
+ * title, what plays now, its hint) it follows the finger and closes past a third of the window or
+ * on a fling down, as the sheets do; short of that it springs back. A row's handle still moves the
+ * row and a row swiped toward the start still goes.
  */
 @Composable
 fun QueuePage(
@@ -409,14 +416,22 @@ fun QueuePage(
     visible.targetState = open
     AnimatedVisibility(visible, modifier = modifier, enter = pageEnter(motion), exit = motion.sheetExit()) {
         val back = rememberDetailMotion(open = true)
-        // up and at rest, no Back gesture moving it: the shell may stop drawing what is under it
-        val covers by remember(back, visible) { derivedStateOf { visible.isIdle && visible.currentState && back.covered } }
+        // 1.0.2: pulled down from its list's top it follows the finger and closes as a sheet does
+        val latestClose by rememberUpdatedState(onClose)
+        val drag = rememberSheetDrag { latestClose() }
+        // opened again while still going down
+        LaunchedEffect(open) { if (open) drag.reset() }
+        // up and at rest, no Back gesture or drag moving it: the shell may stop drawing what is under it
+        val covers by remember(back, visible, drag) { derivedStateOf { visible.isIdle && visible.currentState && back.covered && !drag.pulled } }
         WindowPage(covers = covers)
         panel(
             Modifier
                 .fillMaxSize()
+                .graphicsLayer { translationY = drag.offset }
                 .graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } }
                 .blockInputBelow()
+                // a row's handle and its sideways swipe keep their drags; the list and the rest of the page pull it
+                .sheetDrag(drag)
                 .testTag("queue-page"),
         )
         DetailBackHandler(enabled = open, state = back, onBack = onClose)
