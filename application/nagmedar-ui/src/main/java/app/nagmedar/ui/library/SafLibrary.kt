@@ -1,6 +1,7 @@
 package app.nagmedar.ui.library
 
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
 import app.nagmedar.audio.MusicFormats
@@ -80,27 +81,33 @@ object SafLibrary {
             val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, documentId)
             // a folder that went away (disk removed, permission revoked) is skipped
             val cursor = runCatching { resolver.query(children, PROJECTION, null, null, null) }.getOrNull() ?: continue
-            cursor.use { c ->
-                while (c.moveToNext() && found.size < MAX_ITEMS) {
-                    val id = c.getString(0) ?: continue
-                    val name = c.getString(1) ?: continue
-                    val mime = c.getString(2)
-                    if (mime == DocumentsContract.Document.MIME_TYPE_DIR) {
-                        if (depth < MAX_DEPTH && !name.startsWith(".")) queue.add(id to depth + 1)
-                        continue
-                    }
-                    val type = typeOf(name, mime)
-                    if (type != MediaWrapper.TYPE_VIDEO && type != MediaWrapper.TYPE_AUDIO) continue
-                    val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)
-                    val media = MLServiceLocator.getAbstractMediaWrapper(uri)
-                    if (!c.isNull(4)) sizes[uri.toString()] = c.getLong(4)
-                    media.setType(type)
-                    media.setTitle(name.substringBeforeLast('.'))
-                    media.setLastModified(c.getLong(3) / 1000)
-                    found += media
-                }
-            }
+            // 1.0.1: the provider can fail while its rows are read too (it died, the disk went): what was read stays
+            runCatching { readFolder(cursor, tree, depth, queue, found) }
         }
         return found
+    }
+
+    /** The rows of one folder: its media into [found], its folders into [queue]. */
+    private fun readFolder(cursor: Cursor, tree: Uri, depth: Int, queue: ArrayDeque<Pair<String, Int>>, found: MutableList<MediaWrapper>) {
+        cursor.use { c ->
+            while (c.moveToNext() && found.size < MAX_ITEMS) {
+                val id = c.getString(0) ?: continue
+                val name = c.getString(1) ?: continue
+                val mime = c.getString(2)
+                if (mime == DocumentsContract.Document.MIME_TYPE_DIR) {
+                    if (depth < MAX_DEPTH && !name.startsWith(".")) queue.add(id to depth + 1)
+                    continue
+                }
+                val type = typeOf(name, mime)
+                if (type != MediaWrapper.TYPE_VIDEO && type != MediaWrapper.TYPE_AUDIO) continue
+                val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)
+                val media = MLServiceLocator.getAbstractMediaWrapper(uri)
+                if (!c.isNull(4)) sizes[uri.toString()] = c.getLong(4)
+                media.setType(type)
+                media.setTitle(name.substringBeforeLast('.'))
+                media.setLastModified(c.getLong(3) / 1000)
+                found += media
+            }
+        }
     }
 }

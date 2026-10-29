@@ -20,6 +20,11 @@ violations). The walk, in passes (a size and a language each):
                column chooser (a title's long press) opens and Escape closes it
   phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
 
+1.0.1 (the user's crash in Bu cihaz): phone-en, phone-tr and workstation also walk This device /
+Bu cihaz: the internal storage, its Music folder (the walk's files), a file played from it, back up
+to the drive and to the places, the sort menu's orders and hidden files, Home and back with the
+folder open, rotation.
+
 Every dump of the app is also searched for the words of what 1.0 deleted (films, series, videos,
 the Home page, TV Lab). Around a long list's scroll and the player's drag the frames are counted
 (dumpsys gfxinfo: janky frames and the 50/90/95/99th percentiles, informational on an emulator).
@@ -747,8 +752,10 @@ class Smoke:
         return ok
 
     def gone_words(self, nodes, where):
+        # the names of files and folders (Bu cihaz's rows and trail: Android's own "Movies") are the user's, not the app's words
+        names = [n.b for n in nodes if n.rid.endswith("device-table") or n.rid.endswith("device-trail")]
         for n in nodes:
-            if n.pkg != self.pkg:
+            if n.pkg != self.pkg or any(self.inside(n, b) for b in names):
                 continue
             for text in (n.text, n.desc):
                 m = GONE_RE.search(text)
@@ -1030,11 +1037,20 @@ class Smoke:
         nodes, after = self.wait_for(changed, 6)
         tries = 1
         if not after:
-            # once more, should the first swipe have come while the strip was still settling
+            # once more, should the first swipe have come while the strip was still settling; a slow emulator can
+            # deliver the swipe as a tap, which opens the full player: it is closed first (1.0.1: the walk went on
+            # inside the full player and found no Podcasts, Radio or Bu cihaz)
             tries = 2
+            if self.by_id(nodes, "phone-player"):
+                self.key(4)
+                nodes = self.step("Back: the swipe came as a tap and opened the full player")
             self.step("Swipe the mini player sideways again", lambda: self.sh("input swipe %d %d %d %d 300" % (x0, y, x1, y)), wait=2)
             nodes, after = self.wait_for(changed, 6)
         self.check("a sideways swipe changes the track", bool(after), "%s → %s (swipes: %d)" % (before, after or self.mini_title(nodes), tries))
+        if self.by_id(nodes, "phone-player"):
+            # the walk goes on from the mini player
+            self.key(4)
+            self.step("Back: the full player closed")
 
     def follow_podcast(self, nodes):
         """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
@@ -1184,6 +1200,164 @@ class Smoke:
                 nodes = self.step("Escape closes the column chooser")
                 self.check("Escape closes the column chooser", not any(h in self.texts(nodes) for h in hidden))
         self.scroll_frames("Music table scroll (tablet)", self.nodes(self.dump()))
+        self.device_walk(wide=True)
+
+    # ---------------------------------------------------------------- 1.0.1: Bu cihaz
+
+    @staticmethod
+    def inside(node, box):
+        x, y = node.center
+        return box[0] <= x <= box[2] and box[1] <= y <= box[3]
+
+    def in_tag(self, nodes, tag, text):
+        """The app's nodes reading [text] inside the node tagged [tag] (a row of the device table, a place)."""
+        boxes = [n.b for n in self.by_id(nodes, tag)]
+        return [n for n in self.app_nodes(nodes) if n.text.strip() == text and any(self.inside(n, b) for b in boxes)]
+
+    def open_device_page(self):
+        """This device / Bu cihaz: on a phone through ⋯ (a sheet or a page: found by its text, scrolled to), on a tablet in the sidebar."""
+        s = self.strings[self.lang]
+        label = s["nag_nav_device"]
+        self.back_to_tabs()
+        nodes = self.nodes(self.dump())
+        node = self.find(nodes, label)
+        w, h = self.screen_size(nodes)
+        if not node and w > 1500:
+            # a tablet's sidebar scrolls: the sources are below the library
+            for dy in (1, 1, 1, -1, -1, -1, -1, -1, -1):
+                a, b = (int(h * 0.75), int(h * 0.30)) if dy > 0 else (int(h * 0.30), int(h * 0.75))
+                self.sh("input swipe %d %d %d %d 350" % (w // 10, a, w // 10, b))
+                nodes = self.nodes(self.settle(0.6))
+                node = self.find(nodes, label)
+                if node:
+                    break
+        if not node:
+            more = self.find(nodes, s["nag_nav_more"])
+            if more:
+                self.tap(more)
+                nodes = self.nodes(self.settle(0.8))
+                for _ in range(4):
+                    node = self.find(nodes, label)
+                    if node:
+                        break
+                    self.swipe_up(nodes)
+                    nodes = self.nodes(self.settle(0.6))
+        if not self.check("%s is found (⋯ or the sidebar)" % label, bool(node)):
+            return None
+        nodes = self.step("Open %s" % label, lambda: self.tap(node))
+        nodes, places = self.wait_for(lambda ns: self.in_tag(ns, "device-places", s["nag_device_internal"]), 8)
+        self.check("%s lists the places, the internal storage first" % label, bool(places))
+        return nodes
+
+    def device_playing(self, nodes):
+        """A file of the folder plays: the phone's mini player, or the app's media session playing."""
+        if self.by_id(nodes, "mini-player"):
+            return "mini player"
+        # a wide window's transport bar, titled with the file (its tag "tone", or its name)
+        bar = [n.b for n in self.by_id(nodes, "transport-bar")]
+        title = [n.text.strip() for n in self.app_nodes(nodes) if n.text.strip() in ("tone", "Smoke tone") and any(self.inside(n, b) for b in bar)]
+        if title:
+            return "transport bar: %s" % title[0]
+        out = self.sh("dumpsys media_session", timeout=30)
+        block = out[out.find("package=" + self.pkg):] if ("package=" + self.pkg) in out else ""
+        if re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3)\b", block[:3000]):
+            return "media session playing"
+        return None
+
+    def tap_until(self, title, node, find, seconds=8.0):
+        """Taps [node] (once more if nothing came of it: a first touch may only switch the input mode) until find(nodes)."""
+        nodes = self.step(title, lambda: self.tap(node), wait=1.0)
+        nodes, found = self.wait_for(find, seconds)
+        if not found:
+            nodes = self.step(title + " (again)", lambda: self.tap(node), wait=1.0)
+            nodes, found = self.wait_for(find, seconds)
+        return nodes, found
+
+    def device_walk(self, wide):
+        """1.0.1 (the user's crash of 29 Oct): the internal storage, its Music folder, a file played from it, back up to
+        the drive and the places, the sort menu, hidden files, Home and back with the folder open, rotation."""
+        s = self.strings[self.lang]
+        internal, folder, tone = s["nag_device_internal"], "Music", "tone.mp3"
+        nodes = self.open_device_page()
+        if nodes is None:
+            return
+        drive = self.in_tag(nodes, "device-places", internal)
+        if not drive:
+            return
+        nodes, rows = self.tap_until("Open %s" % internal, drive[0], lambda ns: self.in_tag(ns, "device-table", folder))
+        boxes = [n.b for n in self.by_id(nodes, "device-table")]
+        listed = sorted({n.text.strip() for n in self.app_nodes(nodes) if n.text.strip() and any(self.inside(n, b) for b in boxes)})
+        if not self.check("%s opens and lists its folders (Music among them)" % internal, bool(rows), "rows: %s" % (", ".join(listed[:12]) or "none")):
+            return
+        nodes, files = self.tap_until("Open its Music folder", rows[0], lambda ns: self.in_tag(ns, "device-table", tone))
+        if not self.check("the Music folder lists the walk's files (%s)" % tone, bool(files)):
+            return
+        nodes, playing = self.tap_until("Play %s from the folder" % tone, files[0], self.device_playing, 10)
+        self.check("a file of the folder plays", bool(playing), playing or "no mini player, no session playing")
+        # back to the drive: Back on a phone, the trail's first folder beside the places
+        if wide:
+            crumb = self.in_tag(nodes, "device-trail", internal)
+            if not self.check("the trail names the drive", bool(crumb)):
+                return
+            nodes = self.step("The trail back to %s" % internal, lambda: self.tap(crumb[0]))
+        else:
+            self.key(4)
+            nodes = self.step("Back (up to %s)" % internal)
+        nodes, up = self.wait_for(lambda ns: self.in_tag(ns, "device-table", folder) and not self.in_tag(ns, "device-table", tone), 6)
+        self.check("back up at the drive, its folders listed", bool(up))
+        # the order and the hidden files, from the header's menu
+        for entry in ("nag_device_sort_size", "nag_device_sort_name", "nag_device_show_hidden", "nag_device_show_hidden"):
+            menu = self.by_id(self.nodes(self.dump()), "device-view")
+            if not self.check("the sort menu's button", bool(menu)):
+                break
+            nodes = self.step("Sort menu", lambda: self.tap(menu[0]))
+            item = [n for n in self.app_nodes(nodes) if n.text.strip() == s[entry]]
+            listed = all(any(n.text.strip() == s[k] for n in self.app_nodes(nodes)) for k in ("nag_device_sort_name", "nag_device_sort_size", "nag_device_sort_date"))
+            if not self.check("the sort menu lists the orders and the hidden files", listed and bool(item)):
+                self.key(4)
+                break
+            nodes = self.step("Sort menu: %s" % s[entry], lambda: self.tap(item[0]))
+            # the rows may still be moving to their new places when the screen is read: read again for a moment
+            nodes, listed = self.wait_for(lambda ns: self.in_tag(ns, "device-table", folder), 5)
+            self.check("after '%s' the drive still lists its folders" % s[entry], bool(listed))
+        if not wide:
+            self.key(4)
+            nodes = self.step("Back (to the places)")
+            nodes, places = self.wait_for(lambda ns: self.by_id(ns, "device-places") and not self.by_id(ns, "device-table"), 6)
+            self.check("Back goes on to the places", bool(places))
+            drive = self.in_tag(nodes, "device-places", internal)
+            if not drive:
+                return
+            nodes, rows = self.tap_until("Open %s again" % internal, drive[0], lambda ns: self.in_tag(ns, "device-table", folder))
+        else:
+            self.check("the places stay beside the folder", bool(self.in_tag(nodes, "device-places", internal)))
+            rows = self.in_tag(nodes, "device-table", folder)
+        if not rows:
+            return
+        nodes, files = self.tap_until("Open the Music folder again", rows[0], lambda ns: self.in_tag(ns, "device-table", tone))
+        if not files:
+            return
+        # the folder open while the app goes to the background and comes back, then turned
+        self.key(3)
+        time.sleep(2)
+        self.step("Home with the folder open")
+        self.launch(force=False)
+        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 8)
+        self.step("Back in the app with the folder open")
+        self.check("after Home the folder is still open", bool(kept))
+        self.rotate(1)
+        nodes = self.step("Rotated with the folder open", wait=1.5)
+        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 6)
+        self.check("rotated, the folder is still open", bool(kept))
+        self.rotate(0)
+        nodes = self.step("Rotated back with the folder open", wait=1.5)
+        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 6)
+        self.check("rotated back, the folder is still open", bool(kept))
+        if not wide:
+            self.key(4)
+            self.step("Back (up to the drive)")
+            self.key(4)
+            self.step("Back (to the places)")
 
     # ---------------------------------------------------------------- passes
 
@@ -1220,6 +1394,7 @@ class Smoke:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
         self.visit_destinations("Reopen")
         self.phone_player()
+        self.device_walk(wide=False)
         self.playback()
         self.palette()
         self.rotation_and_background()
@@ -1232,6 +1407,7 @@ class Smoke:
             return
         self.step("Launch (Turkish)")
         self.phone_pages()
+        self.device_walk(wide=False)
         self.visit_destinations()
         self.settings_pass(full=True)
         self.sh("cmd locale set-app-locales %s --locales en-US" % self.pkg)

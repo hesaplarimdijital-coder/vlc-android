@@ -3,11 +3,13 @@ package app.nagmedar.ui.covers
 import android.content.Context
 import android.os.SystemClock
 import app.nagmedar.ui.podcast.PodcastCovers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.AppScope
 import org.videolan.vlc.PlaybackService
@@ -79,7 +81,8 @@ class CoverObserver : PlaybackObserver, AlbumCovers {
                 val track = media?.let(CoverTrack::of) ?: continue
                 if (track.key == last) continue
                 last = track.key
-                val before = coverFor(track.key)
+                // 1.0.1: the kept cover is a file looked at: off the main thread (StrictMode, the emulator walk on API 37)
+                val before = withContext(Dispatchers.IO) { coverFor(track.key) }
                 val found = runCatching { CoverCenter.finder(service.applicationContext).find(track) }.getOrNull()?.file
                 if (found != null && found != before) {
                     told[track.key] = Told(found, SystemClock.elapsedRealtime())

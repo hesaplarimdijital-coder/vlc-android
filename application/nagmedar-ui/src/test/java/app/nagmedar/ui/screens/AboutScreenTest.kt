@@ -62,6 +62,8 @@ class AboutScreenTest {
         // 1.0: without the subtitle translation's engine, tokenizer and models and the Dolby Vision parser
         assertEquals(77, libraries.size)
         val byTitle = libraries.associateBy { it.title }
+        // 1.0.1: the list keys its rows by title, and a title listed twice would end the app
+        assertEquals(libraries.size, byTitle.size)
         // the lab's and the music engine's native additions are there, with their licences
         assertEquals("apache2.0", byTitle.getValue("Haze").license?.id)
         assertEquals("lgpl2.1", byTitle.getValue("libusb").license?.id)

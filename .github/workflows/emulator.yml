@@ -8,7 +8,9 @@
 # the full player and swiped sideways, an episode's page that must not shift) and the tablet's Music
 # (the inspector, Ctrl+I, the column chooser), with the frames of a list's scroll and of the
 # player's drag counted; a music file opened from outside, the command palette, rotation,
-# background / foreground. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
+# background / foreground; 1.0.1: This device / Bu cihaz on the phone (both languages) and the
+# tablet: the internal storage, its Music folder, a file played from it, back up, the sort menu,
+# Home and rotation with the folder open. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
 # crash or ANR of the app, a failed 1.0 check or (debug build) a StrictMode violation fails the job.
 #
 # Baseline Profile (baseline_profile=true): builds the app's benchmark build (without R8, so that the

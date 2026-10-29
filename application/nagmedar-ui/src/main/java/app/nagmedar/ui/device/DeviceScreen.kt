@@ -112,18 +112,18 @@ private const val KEY_SORT = "nagmedar_device_sort"
  * A file plays or joins the queue; a folder plays, joins the queue or becomes a section's source folder.
  * On a wide window the places stay beside the folder; on a phone the folder covers them, Back
  * going up. A library menu's "Dosyada göster" ([DeviceRequests]) opens a file's folder with the
- * file selected in sight.
+ * file selected in sight. [source] reads the places and folders (the device's own when null; a test's).
  */
 @Composable
-fun DeviceScreen(prefs: NagmedarPreferences) {
+fun DeviceScreen(prefs: NagmedarPreferences, source: DeviceSource? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val locale = currentLocale()
     val access = LocalLibraryAccess.current
     val settings = remember(context) { Settings.getInstance(context) }
     val picked by rememberUpdatedState(access?.folders.orEmpty())
-    val model = remember(context, locale) {
-        DeviceBrowserModel(AndroidDeviceSource(context) { picked }, scope, locale).apply {
+    val model = remember(context, locale, source) {
+        DeviceBrowserModel(source ?: AndroidDeviceSource(context) { picked }, scope, locale).apply {
             showHidden = settings.getBoolean(KEY_HIDDEN, false)
             sort = readSort(settings.getString(KEY_SORT, null))
         }
@@ -537,9 +537,10 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
     DenseTable(
         columns = if (compact) listOf(name) else listOf(name, size, modified),
         rows = entries,
-        key = { it.location },
+        // a lazy list keeps its rows' keys in the window's Bundle: the location's address, a string
+        key = { it.location.uri },
         state = listState,
-        selectedKey = selected,
+        selectedKey = selected?.uri,
         sort = if (compact) null else TableSort(sortColumn, model.sort.ascending),
         onSortChange = if (compact) {
             null

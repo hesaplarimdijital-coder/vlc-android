@@ -61,10 +61,12 @@ fun paletteResults(
     perGroup: Int = 6,
 ): PaletteResults {
     val (query, effective) = parsePaletteQuery(raw, scope)
-    val pool = if (effective == null) items else items.filter { it.kind == effective }
+    // 1.0.1: each item once, the first of an id (the list keys its rows by id: a file twice in the library, a recent
+    // id kept twice, would end the app)
+    val pool = (if (effective == null) items else items.filter { it.kind == effective }).distinctBy { it.id }
     if (query.isEmpty()) {
         val byId = pool.associateBy { it.id }
-        val recents = recent.mapNotNull { byId[it] }.map { PaletteHit(it, IntArray(0), 0) }
+        val recents = recent.distinct().mapNotNull { byId[it] }.map { PaletteHit(it, IntArray(0), 0) }
         val rest = pool.filter { it.id !in recent && (effective != null || it.kind == PaletteKind.Command) }
             .map { PaletteHit(it, IntArray(0), 0) }
         val groups = listOfNotNull(

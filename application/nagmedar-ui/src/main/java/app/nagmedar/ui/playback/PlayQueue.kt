@@ -47,6 +47,21 @@ fun queueEntries(list: List<MediaWrapper>): List<QueueEntry> {
     }
 }
 
+/**
+ * 1.0.1: [list] keyed again in its order, as [queueEntries] keys the service's: each item by its location and the
+ * times it came before. The panel's list keys its rows by them, and a key there twice would end the app.
+ */
+internal fun rekeyed(list: List<QueueEntry>): List<QueueEntry> {
+    val seen = HashMap<String, Int>()
+    return list.map { entry ->
+        val location = entry.key.substringBeforeLast('#')
+        val time = (seen[location] ?: 0) + 1
+        seen[location] = time
+        val key = "$location#$time"
+        if (key == entry.key) entry else entry.copy(key = key)
+    }
+}
+
 /** Changes to a queue, done to the list shown at once and to the playback service. */
 interface QueueActions {
     fun play(index: Int)
@@ -117,7 +132,8 @@ class PlayQueue : QueueActions {
 
     override fun restore(index: Int, removed: List<QueueEntry>) {
         val at = index.coerceIn(0, entries.size)
-        entries = entries.toMutableList().apply { addAll(at, removed) }
+        // 1.0.1: keyed again; the list may have been read since the removal, a file there twice taking the key it had
+        entries = rekeyed(entries.toMutableList().apply { addAll(at, removed) })
         // what plays now moves down when items come back before it
         if (current >= at) current += removed.size
         removed.forEachIndexed { offset, entry -> entry.media?.let { service?.insertItem(at + offset, it) } }

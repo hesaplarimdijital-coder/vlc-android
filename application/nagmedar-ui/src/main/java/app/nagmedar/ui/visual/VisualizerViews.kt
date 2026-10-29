@@ -106,7 +106,8 @@ private fun DrawScope.drawSpectrum(
     val dash = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))
     val grid = (0 downTo floor.toInt() step 12).toList()
     val dbTexts = if (large) grid.map { measurer.measure(texts.db(it), label) } else emptyList()
-    val dbTops = dbTexts.mapIndexed { i, text -> (y(grid[i].toFloat()) - text.size.height / 2f).coerceIn(0f, height - text.size.height) }
+    // 1.0.1: a pane lower or narrower than a label leaves no room: an empty range would end the app
+    val dbTops = dbTexts.mapIndexed { i, text -> (y(grid[i].toFloat()) - text.size.height / 2f).coerceIn(0f, (height - text.size.height).coerceAtLeast(0f)) }
     val dbShown = if (large) {
         val centres = dbTops.mapIndexed { i, top -> top + dbTexts[i].size.height / 2f }
         ScaleMarks.spaced(centres, dbTexts.maxOf { it.size.height }.toFloat(), MARK_GAP.toPx()).toSet()
@@ -142,7 +143,7 @@ private fun DrawScope.drawSpectrum(
         val hzTexts = FREQUENCY_MARKS.map { measurer.measure(texts.hertz(it.toInt()), label) }
         val hzLefts = FREQUENCY_MARKS.mapIndexed { i, hz ->
             val x = leftPad + width * (ln(hz / SpectrumBands.MIN_HZ) / span)
-            (x - hzTexts[i].size.width / 2f).coerceIn(leftPad, size.width - hzTexts[i].size.width)
+            (x - hzTexts[i].size.width / 2f).coerceIn(leftPad, (size.width - hzTexts[i].size.width).coerceAtLeast(leftPad))
         }
         val widest = hzTexts.maxOf { it.size.width }.toFloat()
         for (i in ScaleMarks.spaced(hzLefts.mapIndexed { i, left -> left + hzTexts[i].size.width / 2f }, widest, MARK_GAP.toPx())) {
@@ -246,7 +247,7 @@ private fun DrawScope.drawMeter(
         var nextRight = Float.MAX_VALUE
         for (db in METER_MARKS.reversed()) {
             val text = measurer.measure(texts.db(db), label)
-            val mx = (x(db.toFloat()) - text.size.width / 2f).coerceIn(left, right - text.size.width)
+            val mx = (x(db.toFloat()) - text.size.width / 2f).coerceIn(left, (right - text.size.width).coerceAtLeast(left))
             if (mx + text.size.width + 4.dp.toPx() > nextRight) continue
             drawText(text, topLeft = Offset(mx, y))
             nextRight = mx
