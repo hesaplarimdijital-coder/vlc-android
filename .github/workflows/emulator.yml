@@ -8,8 +8,8 @@
 # foreground. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a crash or ANR
 # of the app fails the job.
 #
-# Baseline Profile (baseline_profile=true): builds the app's benchmark build (release code, names
-# kept) and application/benchmark's tests, boots an API 35 emulator with music files and a podcast
+# Baseline Profile (baseline_profile=true): builds the app's benchmark build (without R8, so that the
+# profile names the code R8 is given) and application/benchmark's tests, boots an API 35 emulator with music files and a podcast
 # feed served from the runner, and runs buildsystem/benchmark/baseline-profile.sh: the generator's
 # cold start, then its path through the Music, the phone player, the Podcasts, an episode and the
 # Radio, on a phone and on a tablet screen. The merged profiles go to the ci/baseline-profile branch
@@ -164,8 +164,9 @@ jobs:
         run: |
           set -o pipefail
           if [ "$PROFILE" = true ]; then
+            # the benchmark build without R8: the profile names the code R8 is given
             ./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark \
-              -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+              -PnagmedarAbis=x86_64 -PnagmedarProfileSource --console=plain 2>&1 | tee build.log
             echo "APK_DIR=application" >> "$GITHUB_ENV"
           elif [ "$BUILD" = personal ]; then
             ./gradlew :application:app:assemblePersonal -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log

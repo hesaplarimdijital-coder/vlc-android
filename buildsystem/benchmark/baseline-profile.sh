@@ -69,6 +69,7 @@ if [ -n "$MUSIC" ] && [ -d "$MUSIC" ]; then
     echo "Müzik: $(ls "$MUSIC" | wc -l) dosya"
 fi
 
+adb logcat -c 2>/dev/null || true
 # earlier runs' files would be merged into this one's
 adb shell rm -rf "/sdcard/Android/media/$TESTS" 2>/dev/null || true
 
@@ -80,11 +81,15 @@ adb pull "/sdcard/Android/media/$TESTS" "$OUT/device" >/dev/null 2>&1 || true
 adb shell wm size reset 2>/dev/null || true
 adb shell wm density reset 2>/dev/null || true
 
-# the three tests' profiles in one, each rule once, in the order first written (the cold start's
-# first); the startup profile from the cold start's test alone
+adb logcat -d -s NagmedarProfile:V | tr -d '\r' > "$OUT/steps.txt" || true
+
+# the three tests' profiles in one, each rule once, the cold start's first (its test writes only a
+# startup profile, whose rules belong to the Baseline Profile too); the startup profile from the
+# cold start's test alone
 DEST="$OUT/application/app/src/main/baselineProfiles"
 mkdir -p "$DEST"
-find "$OUT/device" -name '*-baseline-prof*.txt' | sort | xargs -r cat | awk 'NF && !seen[$0]++' > "$DEST/baseline-prof.txt"
+{ find "$OUT/device" -name '*-startup-prof*.txt' | sort; find "$OUT/device" -name '*-baseline-prof*.txt' | sort; } \
+    | xargs -r cat | awk 'NF && !seen[$0]++' > "$DEST/baseline-prof.txt"
 find "$OUT/device" -name '*-startup-prof*.txt' | sort | xargs -r cat | awk 'NF && !seen[$0]++' > "$DEST/startup-prof.txt"
 [ -s "$DEST/startup-prof.txt" ] || rm -f "$DEST/startup-prof.txt"
 
@@ -97,6 +102,13 @@ STARTUP=$( [ -f "$DEST/startup-prof.txt" ] && wc -l < "$DEST/startup-prof.txt" |
     echo "- APK: \`$(basename "$APP_APK")\`"
     echo "- rules: $RULES ($APP_RULES of Nağmedar's and VLC's own code), startup profile: $STARTUP"
     echo "- tests: $(grep -E '^(OK|FAILURES|Tests run)' "$OUT/instrument.txt" | tr '\n' ' ')"
+    echo "- screens missing an awaited element: $(find "$OUT/device" -name 'missing-*.xml' -exec basename {} .xml \; | sort | tr '\n' ' ')"
+    echo
+    echo "Steps reached (logcat NagmedarProfile):"
+    echo
+    echo '```'
+    grep -o 'NagmedarProfile: .*' "$OUT/steps.txt" | sort | uniq -c || true
+    echo '```'
     echo
     echo '```'
     grep -E 'INSTRUMENTATION_STATUS: (class|test|stack)=|INSTRUMENTATION_STATUS_CODE: -' "$OUT/instrument.txt" | head -n 60 || true

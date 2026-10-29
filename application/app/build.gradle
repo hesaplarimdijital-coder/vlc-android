@@ -132,6 +132,12 @@ android {
             applicationIdSuffix ".benchmark"
             debuggable = false
             profileable = true
+            // the Baseline Profile's generation (emulator.yml) collects from the code before R8,
+            // the names and signatures the profile's rules must match when R8 builds the release
+            if (project.hasProperty('nagmedarProfileSource')) {
+                minifyEnabled false
+                shrinkResources false
+            }
         }
         // Nağmedar 1.0: the owner's own release, delivered encrypted by CI (personal_release,
         // buildsystem/release/README.md): release code (R8, the Baseline Profile), neither
