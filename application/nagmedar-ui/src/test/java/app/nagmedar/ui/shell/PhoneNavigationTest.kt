@@ -28,6 +28,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -199,7 +200,7 @@ class PhoneNavigationTest {
         val scrolled = topBarPixel()
         assertEquals("top bar ${Integer.toHexString(atRest)} → ${Integer.toHexString(scrolled)}", atRest, scrolled)
         // and in between, while the content moves the other way
-        compose.onNodeWithTag("tracks").performTouchInput { swipeUp(startY = top + 300f, endY = bottom - 300f, durationMillis = 400) }
+        compose.onNodeWithTag("tracks").performTouchInput { swipeDown(startY = top + 300f, endY = bottom - 300f, durationMillis = 400) }
         compose.waitForIdle()
         assertEquals(atRest, topBarPixel())
     }

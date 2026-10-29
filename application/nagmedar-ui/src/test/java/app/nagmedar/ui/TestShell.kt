@@ -83,8 +83,10 @@ fun TestShell(
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) { ShellNavigator(navController) }
+    // the start page reached as a person reaches it (1.0.1): a page through the tab it is opened from, so the
+    // right tab is lit and the back arrow shows
     LaunchedEffect(startDestination) {
-        if (startDestination != Destination.Music) navigator.navigate(startDestination)
+        if (startDestination != Destination.Music) wayTo(startDestination, navigator.navKind).forEach(navigator::navigate)
     }
     NagmedarShell(
         widthClass = widthClass,
@@ -111,6 +113,21 @@ fun TestShell(
         floatingPlayer = floatingPlayer,
         glass = glass,
     )
+}
+
+/**
+ * The pages a person goes through to [destination] in a window of [kind]: a tab at once; Settings' pages
+ * through Settings (itself through "⋯" on a phone); the other pages "⋯" lists through "⋯"; the search page
+ * and the equaliser on a desktop from where the window is.
+ */
+fun wayTo(destination: Destination, kind: NavKind): List<Destination> {
+    val more = if (NavRules.isTab(Destination.More, kind)) listOf(Destination.More) else emptyList()
+    return when {
+        NavRules.isTab(destination, kind) || destination == Destination.Search -> listOf(destination)
+        destination in NavRules.fullPages -> (if (NavRules.isTab(Destination.Settings, kind)) emptyList() else more) +
+            listOf(Destination.Settings, destination).distinct()
+        else -> more + destination
+    }
 }
 
 /** A sample page of [destination]; "Daha fazla" is the real page, its rows opening pages through [navigator]. */
