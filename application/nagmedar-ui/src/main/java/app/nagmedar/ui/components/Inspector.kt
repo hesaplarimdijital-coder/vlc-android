@@ -4,7 +4,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,8 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +29,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -48,6 +46,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -236,6 +237,21 @@ fun InspectorPane(
     val label = stringResource(R.string.nag_inspector)
     val index = selected.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val reduced = NagTheme.motion.reduced
+    // the selected tab is scrolled into sight when the tabs are wider than the pane
+    val scroll = rememberScrollState()
+    val spans = remember { mutableStateMapOf<Int, IntRange>() }
+    var viewport by remember { mutableIntStateOf(0) }
+    val span = spans[index]
+    LaunchedEffect(index, span, viewport) {
+        if (span == null || viewport <= 0) return@LaunchedEffect
+        val target = when {
+            span.first < scroll.value -> span.first
+            span.last > scroll.value + viewport -> span.last - viewport
+            else -> return@LaunchedEffect
+        }
+        if (reduced) scroll.scrollTo(target) else scroll.animateScrollTo(target)
+    }
     Column(modifier.fillMaxSize().background(background).semantics { paneTitle = label }.testTag("inspector")) {
         Row(
             Modifier.fillMaxWidth().heightIn(min = dimens.minTarget.coerceAtLeast(40.dp)).padding(horizontal = dimens.gapXs),
@@ -244,7 +260,8 @@ fun InspectorPane(
             Row(
                 Modifier
                     .weight(1f)
-                    .horizontalScroll(rememberScrollState())
+                    .onSizeChanged { viewport = it.width }
+                    .horizontalScroll(scroll)
                     .selectableGroup()
                     .onKeyEvent { event ->
                         if (event.type != KeyEventType.KeyDown || tabs.isEmpty()) return@onKeyEvent false
@@ -259,7 +276,18 @@ fun InspectorPane(
                     },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                tabs.forEachIndexed { i, tab -> InspectorTabButton(tab, i == index) { onSelect(i) } }
+                tabs.forEachIndexed { i, tab ->
+                    InspectorTabButton(
+                        tab,
+                        i == index,
+                        Modifier.onPlaced { placed ->
+                            val x = placed.positionInParent().x.toInt()
+                            val placedSpan = x..(x + placed.size.width)
+                            // written only when it moved: a write each layout would compose again and again
+                            if (spans[i] != placedSpan) spans[i] = placedSpan
+                        },
+                    ) { onSelect(i) }
+                }
             }
             if (onCollapse != null) {
                 NagIconButton(
@@ -283,20 +311,15 @@ fun InspectorPane(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun InspectorTabButton(tab: InspectorTab, selected: Boolean, onClick: () -> Unit) {
+private fun InspectorTabButton(tab: InspectorTab, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
-    // the selected tab is scrolled into sight when the row is wider than the pane
-    val requester = remember { BringIntoViewRequester() }
-    LaunchedEffect(selected) { if (selected) requester.bringIntoView() }
     Column(
-        Modifier
-            .bringIntoViewRequester(requester)
+        modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(36.dp))
             .focusRing(state, shape)
             .background(stateBackground(state), shape)
