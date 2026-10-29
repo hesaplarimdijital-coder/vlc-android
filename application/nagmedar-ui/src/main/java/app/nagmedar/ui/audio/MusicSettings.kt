@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -371,7 +372,8 @@ private fun SoundRows(settings: SharedPreferences) {
                 },
                 keyStep = 1f / (2 * PITCH_RANGE),
                 wheelStep = 1f / (2 * PITCH_RANGE),
-                modifier = Modifier.width(200.dp),
+                // 1.0.1: narrower where the window is (320 dp, the largest font), the value keeps its one line
+                modifier = Modifier.weight(1f, fill = false).widthIn(max = 200.dp),
             )
             Spacer(Modifier.width(NagTheme.dimens.gapS))
             val signed = when {
@@ -383,7 +385,9 @@ private fun SoundRows(settings: SharedPreferences) {
                 pluralStringResource(R.plurals.nag_pitch_semitones, abs(pitch), signed),
                 style = NagTheme.type.mono,
                 color = colors.textSecondary,
-                modifier = Modifier.width(110.dp),
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.widthIn(min = 110.dp),
             )
         }
     }
@@ -400,7 +404,7 @@ private fun SoundRows(settings: SharedPreferences) {
                 },
                 keyStep = 1f / 20,
                 wheelStep = 1f / 20,
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.weight(1f, fill = false).widthIn(max = 200.dp),
             )
             Spacer(Modifier.width(NagTheme.dimens.gapS))
             Text(
@@ -411,7 +415,9 @@ private fun SoundRows(settings: SharedPreferences) {
                 },
                 style = NagTheme.type.mono,
                 color = colors.textSecondary,
-                modifier = Modifier.width(110.dp),
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.widthIn(min = 110.dp),
             )
         }
     }
