@@ -226,10 +226,21 @@ class Smoke:
         if force:
             self.sh("am force-stop " + self.pkg)
             time.sleep(1)
-        out = self.sh("am start -W -n %s" % self.launcher, timeout=90)
-        if "Error" in out:
-            self.warnings.append("am start: " + out[:300])
-        time.sleep(2)
+        for attempt in range(3):
+            out = self.sh("am start -W -n %s" % self.launcher, timeout=90)
+            if "Error" in out:
+                self.warnings.append("am start: " + out[:300])
+            time.sleep(2)
+            # the app's window in front; else the system was busy (an emulator's system server may
+            # restart under load): it is waited for and the app started again
+            if any(n.pkg == self.pkg for n in self.nodes(self.dump())):
+                return
+            top = [l.strip() for l in self.sh("dumpsys activity activities", timeout=60).splitlines()
+                   if re.search(r"(topResumedActivity|mResumedActivity|ResumedActivity:)", l)][:2]
+            self.warnings.append("[%s] the app was not in front after it was started (attempt %d): am start said %s; resumed: %s"
+                                 % (self.cur_pass, attempt + 1, " ".join(out.split())[:300], " / ".join(top)[:300]))
+            self.wait_boot(timeout=180)
+            self.sh("input keyevent 82")
 
     def set_display(self, size=None, density=None):
         self.sh("wm size %s" % (size or "reset"))
@@ -929,10 +940,18 @@ class Smoke:
             return
         b = mini[0].b
         y = (b[1] + b[3]) // 2
-        x0, x1 = b[0] + int((b[2] - b[0]) * 0.8), b[0] + int((b[2] - b[0]) * 0.1)
+        # from the title's middle towards the start edge (past the 30 % threshold), clear of the buttons
+        x0, x1 = b[0] + int((b[2] - b[0]) * 0.5), b[0] + int((b[2] - b[0]) * 0.03)
+        changed = lambda ns: (lambda t: t if t and t != before else None)(self.mini_title(ns))
         self.step("Swipe the mini player sideways", lambda: self.sh("input swipe %d %d %d %d 300" % (x0, y, x1, y)), wait=2)
-        nodes, after = self.wait_for(lambda ns: (lambda t: t if t and t != before else None)(self.mini_title(ns)), 6)
-        self.check("a sideways swipe changes the track", bool(after), "%s → %s" % (before, after or self.mini_title(nodes)))
+        nodes, after = self.wait_for(changed, 6)
+        tries = 1
+        if not after:
+            # once more, should the first swipe have come while the strip was still settling
+            tries = 2
+            self.step("Swipe the mini player sideways again", lambda: self.sh("input swipe %d %d %d %d 300" % (x0, y, x1, y)), wait=2)
+            nodes, after = self.wait_for(changed, 6)
+        self.check("a sideways swipe changes the track", bool(after), "%s → %s (swipes: %d)" % (before, after or self.mini_title(nodes), tries))
 
     def follow_podcast(self, nodes):
         """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
