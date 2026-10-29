@@ -34,3 +34,34 @@ Sonuçlar `benchmark-results/TARİH/` altına düşer: macrobenchmark JSON'u ve 
 - Benchmark derlemesi ayrı bir uygulama olarak kurulur: kütüphanesi ve ayarları yüklü Nağmedar'dan ayrıdır. Betik ilk açılış adımlarını “Atla” ile geçer.
 - Pil tüketimi bilgisayara bağlıyken ölçülemez (USB şarj eder); onu Ayarlar › Performans gösterir: şarjdan çıkarıp beş dakikadan uzun bir şey dinleyin.
 - CI bu testleri yalnızca derler; cihazda çalıştırmak elle yapılır.
+- 1.0'dan beri benchmark derlemesi R8'lidir (kişisel sürümün kodu ve kuralları, adlar korunur) ve Baseline Profile'ı içerir: ölçülen, teslim edilenle aynı koddur.
+
+## Baseline Profile (1.0)
+
+Uygulama Baseline Profile ve başlangıç profiliyle gelir: `application/app/src/main/baselineProfiles/baseline-prof.txt` (ilk açılışta ve sık yollarda JIT beklemeden önceden derlenecek sınıflar ve yöntemler) ve `startup-prof.txt` (R8'in dex dosyalarını açılışa göre dizmesi). APK'daki `androidx.profileinstaller` profili yandan yüklenen kurulumda da (mağaza olmadan) etkinleştirir. Profili `application/benchmark` modülündeki `BaselineProfileGenerator` toplar, benchmark derlemesine karşı (R8'li, adlar korunur: toplanan adlar kaynaktakilerle aynıdır):
+
+| Test | Yol |
+| --- | --- |
+| `startup` | başlatıcıdan soğuk açılış (başlangıç profili de buradan) |
+| `phone` | telefon ekranında (1080 × 2340): açılış → Müzik tablosu kaydırılır → bir parça çalınır, telefon oynatıcısı açılır → Podcastler → bir programın sayfası → bir bölümün sayfası → Radyo |
+| `tablet` | aynısı yatay tablet ekranında (2560 × 1600) |
+
+Ekranın sunmadığı bir adım (müzik, podcast ya da ağ yoksa) atlanır; arayüz değişince üretici çökmez, yalnızca o yol profile girmez.
+
+### Yeniden üretmek
+
+Arayüz değiştikçe profil yenilenmeli. CI emülatöründe (API 35, x86_64; müzik dosyaları ve koşucunun sunduğu üç bölümlük bir podcast akışıyla) tek bir çalıştırma:
+
+```sh
+gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches \
+  -f ref=<dal> -F 'inputs[baseline_profile]=true'
+```
+
+İş (yaklaşık 50 dakika) profilleri ve raporu `ci/baseline-profile` dalına, depodaki yerlerine koyar. Dala almak tek komut:
+
+```sh
+git fetch origin ci/baseline-profile && git checkout origin/ci/baseline-profile -- application/app/src/main/baselineProfiles
+git show origin/ci/baseline-profile:report.md   # kural sayıları ve testlerin sonucu
+```
+
+Sonra değişikliği commit'leyin. Bağlı bir cihazda da çalışır: `sh buildsystem/benchmark/baseline-profile.sh --music ~/Müzik/örnek --out /tmp/profil` (sonuç `/tmp/profil/application/app/src/main/baselineProfiles/` altında). Emülatörde müzik motorunun ve laboratuvarın yerel kitaplıkları yoktur (yalnız arm64); onların Kotlin tarafı profile girmez, Android onları ilk kullanımda JIT ile derler.

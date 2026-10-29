@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nağmedar 1.0: resources the resource shrinker of the release-type builds cannot see used. The
+     remote access page (S-1304) asks the server for these drawables by name (its icons.js), the
+     About dialog finds the remote access versions by name. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_icon,@drawable/ic_video,@drawable/ic_folder,@drawable/ic_playlist,@drawable/ic_nav_more,@drawable/ic_menu_audio,@drawable/ic_group,@drawable/ic_play_all,@drawable/ic_resume_playback,@drawable/ic_no_artist,@drawable/ic_album,@drawable/ic_genre,@drawable/ic_empty,@string/remote_access_version,@string/build_remote_access_revision" />

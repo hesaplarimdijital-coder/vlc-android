@@ -192,6 +192,11 @@ class Smoke:
         else:
             raise RuntimeError("adb install failed")
         self.sh("pm grant %s android.permission.POST_NOTIFICATIONS" % self.pkg)
+        # what was installed: a release-type build (personal) is neither debuggable nor profileable
+        dump = self.sh("dumpsys package %s" % self.pkg, timeout=60)
+        keep = [l.strip() for l in dump.splitlines() if re.match(r"\s*(versionCode|versionName|pkgFlags)=", l)]
+        self.app_info = "; ".join(dict.fromkeys(keep))
+        self.log("installed: %s" % self.app_info)
         rc, out = self.adb("shell", "cmd package resolve-activity --brief -c android.intent.category.LAUNCHER %s" % self.pkg)
         lines = [l.strip() for l in out.splitlines() if "/" in l and not l.startswith("priority")]
         if not lines:
@@ -832,9 +837,10 @@ class Smoke:
             shutil.copytree(self.out, work, ignore=shutil.ignore_patterns("raw", ".git"))
             env = dict(os.environ, GIT_AUTHOR_NAME="emulator", GIT_AUTHOR_EMAIL="ci@invalid",
                        GIT_COMMITTER_NAME="emulator", GIT_COMMITTER_EMAIL="ci@invalid")
-            for cmd in (["git", "init", "-q"], ["git", "checkout", "-q", "--orphan", "ci/emulator"], ["git", "add", "-A"],
+            branch = self.a.branch or "ci/emulator"
+            for cmd in (["git", "init", "-q"], ["git", "checkout", "-q", "--orphan", branch], ["git", "add", "-A"],
                         ["git", "commit", "-q", "-m", "Emulator smoke test, partial: " + why],
-                        ["git", "push", "-q", "--force", url, "HEAD:refs/heads/ci/emulator"]):
+                        ["git", "push", "-q", "--force", url, "HEAD:refs/heads/" + branch]):
                 subprocess.run(cmd, cwd=work, env=env, capture_output=True, timeout=180)
         except Exception as e:
             self.log("publish failed: %r" % e)
@@ -888,6 +894,7 @@ class Smoke:
         md = []
         md.append("# Emulator smoke test: %s\n" % verdict)
         md.append("- app: `%s`, APK `%s`" % (self.pkg, os.path.basename(self.a.apk.rstrip("/"))))
+        md.append("- installed: %s" % (getattr(self, "app_info", "") or "?"))
         md.append("- device: %s" % ", ".join("%s=%s" % kv for kv in getattr(self, "device", {}).items()))
         md.append("- source: %s" % (self.a.source or "?"))
         md.append("- %d steps in %d min %d s; %d crash/ANR finding(s), %d driver error(s), %d StrictMode violation(s)\n"

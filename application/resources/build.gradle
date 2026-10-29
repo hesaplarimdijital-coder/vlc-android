@@ -40,6 +40,12 @@ android {
             matchingFallbacks = ['release']
             buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.benchmark\""
         }
+        // Nağmedar 1.0: the personal release, app.nagmedar.debug (app/build.gradle)
+        personal {
+            initWith release
+            matchingFallbacks = ['release']
+            buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.debug\""
+        }
 
     }
 
@@ -78,6 +84,8 @@ dependencies {
     // S-1404: the macrobenchmarks' build
     benchmarkApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     benchmarkApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    personalApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
+    personalApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     vlcBundleApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     vlcBundleApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
 

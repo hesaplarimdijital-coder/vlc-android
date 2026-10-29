@@ -1,23 +1,34 @@
-# Nağmedar emulator smoke test
+# Nağmedar emulator smoke test, and the Baseline Profile's generation
 #
-# Builds the debug APK for x86_64, boots an Android 15 emulator (KVM) and drives the real app with
+# Walk (the default): builds the app for x86_64 (the debug build, or with build=personal the
+# release-type personal build: R8, not debuggable, signed with the shared debug key as
+# app.nagmedar.debug), boots an emulator (KVM) for each API level asked and drives the real app with
 # buildsystem/ci/emulator_smoke.py: first run, every top-level destination and Settings on a tablet
-# and on a phone, Turkish, playback of a video, of a video stored turned (a phone's portrait
-# recording) and of a music file, the command palette, rotation, background / foreground. Each step
-# leaves a screenshot, the UI hierarchy and a logcat verdict; a crash or ANR of the app fails the job.
+# and on a phone, Turkish, playback of files, the command palette, rotation, background /
+# foreground. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a crash or ANR
+# of the app fails the job.
+#
+# Baseline Profile (baseline_profile=true): builds the app's benchmark build (release code, names
+# kept) and application/benchmark's tests, boots an API 35 emulator with music files and a podcast
+# feed served from the runner, and runs buildsystem/benchmark/baseline-profile.sh: the generator's
+# cold start, then its path through the Music, the phone player, the Podcasts, an episode and the
+# Radio, on a phone and on a tablet screen. The merged profiles go to the ci/baseline-profile branch
+# at their place in the repository; buildsystem/benchmark/README.md says how they reach the app.
 #
 # The Nağmedar native libraries (engine, lab) exist for arm64 only, so on this x86_64 emulator they
 # are missing: the app has to say so and keep working, and that is part of what is checked.
 #
 # Evidence (report.md, screenshots, dumps, filtered logcat) is force-pushed to the ci/emulator
-# branch (orphan commit), because artifacts cannot be downloaded without a login; read it with
+# branch (API 35; another level's to ci/emulator-api<level>), an orphan commit, because artifacts
+# cannot be downloaded without a login; read it with
 #   git fetch origin ci/emulator && git show origin/ci/emulator:report.md
 # Findings are annotations of the job: crashes as errors, the summary as a notice.
 #
 # Run it on any branch:
-#   gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches -f ref=<branch>
-# (the workflow file must exist on master for a dispatch; until then the pull request runs it when
-# this file or the driver change). About 40 to 60 minutes with a warm Gradle cache.
+#   gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches -f ref=<branch> \
+#     [-f inputs[build]=personal] [-f inputs[api_levels]=35,37.0] [-F inputs[baseline_profile]=true]
+# (the pull request runs the default walk when this file or the driver change). About 40 to 60
+# minutes with a warm Gradle cache; the personal build adds R8's few minutes.
 
 name: Emulator
 
@@ -32,13 +43,26 @@ on:
         description: 'Passes of the walk (tablet-en,phone-en,phone-tr)'
         type: string
         default: 'tablet-en,phone-en,phone-tr'
+      build:
+        description: 'Build walked: debug, or personal (R8, the release-type build)'
+        type: choice
+        options: [debug, personal]
+        default: debug
+      api_levels:
+        description: 'Emulator API levels, comma-separated (35; Android 17: 37.0)'
+        type: string
+        default: '35'
+      baseline_profile:
+        description: 'Generate the Baseline Profile (ci/baseline-profile) instead of the walk'
+        type: boolean
+        default: false
   pull_request:
     paths:
       - '.github/workflows/emulator.yml'
       - 'buildsystem/ci/emulator_smoke.py'
 
 concurrency:
-  group: emulator-${{ github.ref }}
+  group: emulator-${{ github.ref }}-${{ inputs.baseline_profile }}-${{ inputs.build }}-${{ inputs.api_levels }}
   cancel-in-progress: true
 
 defaults:
@@ -54,12 +78,42 @@ env:
   GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
 
 jobs:
-  smoke:
-    name: Emülatör · uygulama yürüyüşü
+  plan:
+    name: Emülatör · plan
     runs-on: ubuntu-latest
-    timeout-minutes: 85
+    outputs:
+      apis: ${{ steps.plan.outputs.apis }}
+    steps:
+      - id: plan
+        env:
+          LEVELS: ${{ inputs.api_levels || '35' }}
+          PROFILE: ${{ inputs.baseline_profile && 'true' || 'false' }}
+        run: |
+          # the Baseline Profile is made on one emulator: the first level asked
+          python3 -c '
+          import json, os
+          levels = [x.strip() for x in os.environ["LEVELS"].split(",") if x.strip()] or ["35"]
+          if os.environ["PROFILE"] == "true":
+              levels = levels[:1]
+          print("apis=" + json.dumps(levels))' >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+  smoke:
+    name: ${{ inputs.baseline_profile && 'Emülatör · Baseline Profile' || 'Emülatör · uygulama yürüyüşü' }} (API ${{ matrix.api }})
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        api: ${{ fromJSON(needs.plan.outputs.apis) }}
+    env:
+      BUILD: ${{ inputs.build || 'debug' }}
+      PROFILE: ${{ inputs.baseline_profile && 'true' || 'false' }}
+      # API 35's evidence on ci/emulator, another level's beside it
+      EVIDENCE: ${{ matrix.api == '35' && 'ci/emulator' || format('ci/emulator-api{0}', matrix.api) }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -87,6 +141,11 @@ jobs:
       - name: Android SDK ve NDK
         run: ./buildsystem/ci/setup-android.sh
 
+      # a release-type build (personal, benchmark) carries the remote access web app (S-1304)
+      - name: Uzaktan erişim web uygulaması
+        if: env.BUILD == 'personal' || env.PROFILE == 'true'
+        uses: ./.github/actions/remoteaccess-web
+
       - name: Gradle önbelleği
         uses: actions/cache@v4
         with:
@@ -101,8 +160,21 @@ jobs:
         run: ./buildsystem/compile.sh --init 2>&1 | tee init.log
 
       # the lab's and the engine's native libraries are arm64 only: none are built here
-      - name: Derleme (debug, x86_64)
-        run: ./gradlew :application:app:assembleDebug -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+      - name: Derleme (${{ inputs.baseline_profile && 'benchmark' || inputs.build || 'debug' }}, x86_64)
+        run: |
+          set -o pipefail
+          if [ "$PROFILE" = true ]; then
+            ./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark \
+              -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+            echo "APK_DIR=application" >> "$GITHUB_ENV"
+          elif [ "$BUILD" = personal ]; then
+            ./gradlew :application:app:assemblePersonal -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+            echo "APK_DIR=application/app/build/outputs/apk/personal" >> "$GITHUB_ENV"
+          else
+            ./gradlew :application:app:assembleDebug -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+            echo "APK_DIR=application/app/build/outputs/apk/debug" >> "$GITHUB_ENV"
+          fi
+          find application/app/build/outputs/apk -name '*.apk' -exec ls -l {} \;
 
       - name: Hataları işaretle
         if: failure()
@@ -111,7 +183,8 @@ jobs:
       # videos and a music file for the library and for playback (video: H.264/AAC, music: MP3 with
       # tags); rotated.mp4 is stored as a phone records in portrait: an upright 360x640 picture
       # ("TOP" at its top) kept turned a quarter left as 640x360, with the track matrix that turns
-      # it back ("rotate 90"), and must show upright
+      # it back ("rotate 90"), and must show upright. For the Baseline Profile: 24 tagged tracks in
+      # four albums, and a podcast feed of three episodes served to the emulator (10.0.2.2:8765)
       - name: Deneme ortamı
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
@@ -128,17 +201,42 @@ jobs:
           ffmpeg -loglevel error -display_rotation -90 -i "$RUNNER_TEMP/rotated-stored.mp4" -c copy "$RUNNER_TEMP/media/rotated.mp4"
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height:stream_side_data=rotation -of compact "$RUNNER_TEMP/media/rotated.mp4"
           ls -l "$RUNNER_TEMP/media"
+          if [ "$PROFILE" = true ]; then
+            music="$RUNNER_TEMP/music" feed="$RUNNER_TEMP/feed"
+            mkdir -p "$music" "$feed"
+            for album in 1 2 3 4; do
+              for track in 1 2 3 4 5 6; do
+                ffmpeg -loglevel error -f lavfi -i "sine=frequency=$((200 + album * 60 + track * 7)):duration=20" \
+                  -metadata title="Profile track $album.$track" -metadata artist="Nagmedar Artist $(( (album + 1) / 2 ))" \
+                  -metadata album="Profile album $album" -metadata track="$track" -metadata date="202$album" \
+                  "$music/album$album-track$track.mp3"
+              done
+            done
+            items=""
+            for ep in 1 2 3; do
+              ffmpeg -loglevel error -f lavfi -i "sine=frequency=$((300 + ep * 50)):duration=60" -metadata title="Episode $ep" "$feed/episode$ep.mp3"
+              size=$(stat -c %s "$feed/episode$ep.mp3")
+              items="$items<item><title>Episode $ep</title><guid isPermaLink=\"false\">nagmedar-profile-$ep</guid><pubDate>Mon, 0$ep Jun 2026 08:00:00 +0000</pubDate><description>Episode $ep of the profile feed.</description><enclosure url=\"http://10.0.2.2:8765/episode$ep.mp3\" length=\"$size\" type=\"audio/mpeg\"/><itunes:duration>60</itunes:duration></item>"
+            done
+            printf '%s' "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\"><channel><title>Nagmedar profile feed</title><link>http://10.0.2.2:8765/</link><description>A podcast for the Baseline Profile's run.</description><language>en</language><itunes:author>Nagmedar QA</itunes:author>$items</channel></rss>" > "$feed/feed.xml"
+            # kept running for the next steps; the job's end stops it
+            (cd "$feed" && nohup python3 -m http.server 8765 > "$RUNNER_TEMP/feed.log" 2>&1 &)
+            sleep 2
+            curl -fsS http://127.0.0.1:8765/feed.xml | head -c 300; echo
+            ls -l "$music" | head -5
+          fi
 
       - name: Emülatör ve yürüyüş
         id: walk
+        if: env.PROFILE != 'true'
         continue-on-error: true
-        timeout-minutes: 50
+        timeout-minutes: 55
         env:
           # the driver pushes its evidence so far now and then: a hung or cancelled run leaves some
           EMULATOR_PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: ${{ matrix.api }}
           target: google_apis
           arch: x86_64
           profile: pixel_tablet
@@ -148,10 +246,29 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
-          script: python3 buildsystem/ci/emulator_smoke.py --apk application/app/build/outputs/apk/debug --out ${{ runner.temp }}/emulator-out --media ${{ runner.temp }}/media --passes ${{ inputs.passes || 'tablet-en,phone-en,phone-tr' }} --deadline-min 40 --branch ci/emulator --source "${{ github.sha }} (${{ inputs.ref || github.ref_name }}), run ${{ github.run_id }}"
+          script: python3 buildsystem/ci/emulator_smoke.py --apk ${{ env.APK_DIR }} --out ${{ runner.temp }}/emulator-out --media ${{ runner.temp }}/media --passes ${{ inputs.passes || 'tablet-en,phone-en,phone-tr' }} --deadline-min 40 --branch ${{ env.EVIDENCE }} --source "${{ github.sha }} (${{ inputs.ref || github.ref_name }}, ${{ env.BUILD }} build, API ${{ matrix.api }}), run ${{ github.run_id }}"
+
+      - name: Emülatör ve Baseline Profile
+        id: profile
+        if: env.PROFILE == 'true'
+        continue-on-error: true
+        timeout-minutes: 60
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_tablet
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 6000M
+          disable-animations: true
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          script: sh buildsystem/benchmark/baseline-profile.sh --apks ${{ env.APK_DIR }} --music ${{ runner.temp }}/music --feed http://10.0.2.2:8765/feed.xml --out ${{ runner.temp }}/profile-out
 
       - name: Bulgular
-        if: always()
+        if: always() && env.PROFILE != 'true'
         run: |
           out="$RUNNER_TEMP/emulator-out"
           if [ -f "$out/annotations.txt" ]; then cat "$out/annotations.txt"; else
@@ -160,7 +277,7 @@ jobs:
 
       # evidence on the ci/emulator branch, readable with git (artifacts are not)
       - name: Kanıtları ci/emulator dalına koy
-        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        if: always() && env.PROFILE != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           TOKEN: ${{ github.token }}
         run: |
@@ -169,19 +286,29 @@ jobs:
           rm -rf "$out/raw"
           for f in init.log build.log; do [ -f "$f" ] && tail -n 300 "$f" > "$out/$f.tail.txt"; done
           cd "$out"
-          git init -q && git checkout -q --orphan ci/emulator
-          git add -A && git commit -q -m "Emulator smoke test of ${GITHUB_SHA::7} (run ${GITHUB_RUN_ID})"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/emulator
+          git init -q && git checkout -q --orphan "$EVIDENCE"
+          git add -A && git commit -q -m "Emulator smoke test of ${GITHUB_SHA::7} ($BUILD, API ${{ matrix.api }}, run ${GITHUB_RUN_ID})"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$EVIDENCE"
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: emulator-smoke
-          path: ${{ runner.temp }}/emulator-out
-          if-no-files-found: ignore
+      # the profiles at their place in the repository, with the run's report, on ci/baseline-profile
+      - name: Profili ci/baseline-profile dalına koy
+        if: always() && env.PROFILE == 'true'
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/profile-out"
+          [ -d "$out" ] || { mkdir -p "$out"; echo "No profile: the generator did not start." > "$out/report.md"; }
+          for f in init.log build.log; do [ -f "$f" ] && tail -n 300 "$f" > "$out/$f.tail.txt"; done
+          [ -f "$RUNNER_TEMP/feed.log" ] && cp "$RUNNER_TEMP/feed.log" "$out/feed.log"
+          cd "$out"
+          git init -q && git checkout -q --orphan ci/baseline-profile
+          git add -A && git commit -q -m "Baseline Profile of ${GITHUB_SHA::7} (${{ inputs.ref || github.ref_name }}, run ${GITHUB_RUN_ID})"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/baseline-profile
+          rules=$(wc -l < application/app/src/main/baselineProfiles/baseline-prof.txt 2>/dev/null || echo 0)
+          echo "::notice title=Baseline Profile Ekran::$rules rules on ci/baseline-profile (report.md)"
 
       - name: Sonuç
-        if: always() && steps.walk.outcome != 'success'
+        if: always() && (steps.walk.outcome == 'failure' || steps.profile.outcome == 'failure')
         run: |
-          echo "::error title=Emulator::the smoke test failed (a crash or ANR of the app, or the setup); see the annotations above and the ci/emulator branch"
+          echo "::error title=Emulator::the ${{ inputs.baseline_profile && 'Baseline Profile generation' || 'smoke test' }} failed (a crash or ANR of the app, the generator, or the setup); see the annotations above and the evidence branch"
           exit 1

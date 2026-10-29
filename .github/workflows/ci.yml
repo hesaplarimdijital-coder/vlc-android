@@ -8,10 +8,11 @@
 # native-host: the host tests of the media probe, the
 #            whisper pipeline and the engine's bit-exact decoding, on every run that runs the
 #            tests, whether lab-native's libraries came from the cache or not.
-# app      : every push / PR. Builds the arm64 debug APK (uploaded), an unsigned release
-#            (compile check) and the macrobenchmarks with the benchmark build they measure
-#            (uploaded, S-1404) against the published libVLC 4 AAR, without native
-#            compilation, on the hosted runner's Android SDK. The debug leg also runs the
+# app      : every push / PR. Builds the arm64 debug APK, the arm64 personal build (R8, the
+#            release-type build personal_release delivers) and the macrobenchmarks with the
+#            benchmark build they measure (S-1404), none uploaded, against the published libVLC 4
+#            AAR, without native compilation, on the hosted runner's Android SDK; each leg notes
+#            its APK's size (an annotation). The debug leg also runs the
 #            Nağmedar UI tests (tokens, shortcuts, layout state, accessibility gate,
 #            screenshots), compares the screenshots with src/test/screenshots and, on
 #            master, pushes them to the ci/screenshots branch for review. Compiler errors
@@ -27,6 +28,11 @@
 #            who can push see it; never published, never an artifact. Needs the keystore secrets
 #            (NAGMEDAR_KEYSTORE_BASE64, NAGMEDAR_KEYSTORE_PASSWORD, NAGMEDAR_KEY_ALIAS); without
 #            them it is skipped with a notice. buildsystem/release/README.md has the steps.
+# personal-release: manual only (Kişisel sürüm: personal_release). The arm64 personal build with
+#            the lab's libraries (app.nagmedar.debug, signed with the shared debug key: it installs
+#            over the debug build), checked and encrypted with the owner's delivery key
+#            (buildsystem/release/delivery.pub); only the ciphertext is pushed, to the orphan branch
+#            ci/personal-release, replaced each run. buildsystem/release/README.md has the steps.
 # native   : manual only. Rebuilds libVLC from source for one ABI inside the
 #            VideoLAN Docker image (slow; uses prebuilt contribs when available), then the
 #            app's dev APK with it: Nağmedar's own libVLC (libvlcjni/nagmedar, S-503 …
@@ -43,6 +49,10 @@ on:
     inputs:
       release:
         description: 'İmzalı release APK üret'
+        type: boolean
+        default: false
+      personal_release:
+        description: 'Kişisel sürüm: arm64 personal APK, şifreli, ci/personal-release dalına'
         type: boolean
         default: false
       native_abi:
@@ -247,7 +257,9 @@ jobs:
           NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
         run: |
           if [ "${{ matrix.variant }}" = release ]; then
-            ./gradlew :application:app:assembleRelease --console=plain 2>&1 | tee build.log
+            # Nağmedar 1.0: R8's build, as personal_release delivers it (arm64; release and
+            # signedRelease are the same code and rules under another identity)
+            ./gradlew :application:app:assemblePersonal -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee build.log
             # S-1404: the macrobenchmarks and the app's benchmark build they measure, arm64
             ./gradlew :application:app:assembleBenchmark :application:benchmark:assembleBenchmark \
               -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee -a build.log
@@ -270,6 +282,14 @@ jobs:
       - name: Hataları işaretle
         if: failure()
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      # the arm64 APKs' sizes: the debug build's beside the personal one's that R8 made
+      - name: APK boyutu
+        if: success()
+        run: |
+          find application/app/build/outputs/apk -name '*.apk' | sort | while read -r apk; do
+            echo "::notice title=APK boyutu::$(basename "$apk"): $(stat -c %s "$apk") bytes"
+          done
 
       # VLC's notification, widget and speed glyphs out of Nağmedar's code, its orange out of the
       # launcher's icon and shortcuts (the classic UI's review); the build's own result stays above
@@ -442,6 +462,80 @@ jobs:
           fi
           gh release upload "$tag" "$apks"/*.apk "$apks/SHA256SUMS" --clobber
           echo "::notice title=Taslak sürüm::Nağmedar $VERSION ($tag): Releases'ta taslak olarak duruyor; yalnızca depoya yazabilenler görür."
+
+  # Nağmedar 1.0: the owner's own release for his two arm64 devices; never published, never an
+  # artifact: the APK leaves the runner encrypted, and only its owner's delivery key opens it
+  personal-release:
+    name: Kişisel sürüm (şifreli)
+    needs: lab-native
+    if: ${{ !cancelled() && needs.lab-native.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.personal_release }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      # the lab's and the music engine's native libraries (arm64): the release has them
+      - name: Laboratuvar kitaplıkları
+        uses: actions/download-artifact@v4
+        with:
+          name: lab-jnilibs
+          path: application
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK ve NDK
+        run: ./buildsystem/ci/setup-android.sh
+
+      - name: Uzaktan erişim web uygulaması
+        uses: ./.github/actions/remoteaccess-web
+
+      - name: Gradle önbelleği
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            gradle-9.3.1
+          key: gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties', 'buildsystem/compile.sh') }}
+          restore-keys: gradle-
+
+      - name: Hazırlık (libvlcjni, VLC kaynağı, Gradle)
+        run: ./buildsystem/compile.sh --init 2>&1 | tee init.log
+
+      - name: Derleme (personal, arm64)
+        env:
+          # Nağmedar's own API keys, baked into BuildConfig; empty where the secrets are not set
+          NAGMEDAR_PODCASTINDEX_KEY: ${{ secrets.NAGMEDAR_PODCASTINDEX_KEY }}
+          NAGMEDAR_PODCASTINDEX_SECRET: ${{ secrets.NAGMEDAR_PODCASTINDEX_SECRET }}
+          NAGMEDAR_LASTFM_API_KEY: ${{ secrets.NAGMEDAR_LASTFM_API_KEY }}
+          NAGMEDAR_LASTFM_SECRET: ${{ secrets.NAGMEDAR_LASTFM_SECRET }}
+        run: ./gradlew :application:app:assemblePersonal -PnagmedarAbis=arm64-v8a --console=plain 2>&1 | tee build.log
+
+      - name: Hataları işaretle
+        if: failure()
+        run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
+
+      # checked (identity, signature, profile, engine), then encrypted; the APK is deleted after
+      - name: Denetle ve şifrele
+        run: |
+          sh buildsystem/release/deliver_personal.sh application/app/build/outputs/apk/personal "$RUNNER_TEMP/delivery" \
+            "${GITHUB_REF_NAME} @ ${GITHUB_SHA} (run ${GITHUB_RUN_ID})"
+          rm -rf application/app/build/outputs/apk
+
+      - name: ci/personal-release dalına koy
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/delivery"
+          git init -q && git checkout -q --orphan ci/personal-release
+          git add -A && git commit -q -m "Nağmedar personal release of ${GITHUB_SHA::7} (run ${GITHUB_RUN_ID}), encrypted"
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/personal-release
+          echo "::notice title=Kişisel sürüm::$(sed -n 's/^| versionCode | \(.*\) |$/versionCode \1/p' README.md); ci/personal-release dalında (şifreli)"
 
   native:
     name: Native libVLC (${{ inputs.native_abi }})

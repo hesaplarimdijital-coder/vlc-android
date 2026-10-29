@@ -14,8 +14,9 @@ def vlcMajorVersion = hasProperty('forceVlc3') ? 3 : 4
 
 android {
     minSdk = vlcMajorVersion == 3 ? 17 : 23
+    // Nağmedar 1.0: Android 17's SDK, Android 16's behaviour (build.gradle, targetSdkVersion)
     targetSdk = 36
-    compileSdk = 36 // Dockers: 3.0=36 / 4.0=36
+    compileSdk = 37
     buildToolsVersion = '36.0.0'
 }
 

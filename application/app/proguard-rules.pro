@@ -133,3 +133,68 @@
 # Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }
+
+# ---------------------------------------------------------------- Nağmedar 1.0: R8 on release builds
+# Names stay as written. A crash on the devices reads without a mapping file (none leaves CI: the
+# personal build's only output is its ciphertext), and what the debug build it replaces wrote by
+# name (WorkManager's worker classes, Moshi's JSON fields, Parcelables in pending alarms) reads the
+# same. R8 still removes, inlines and optimizes; the rules below keep what it cannot see used.
+-dontobfuscate
+
+# libnagmedar_audio.so (native/audio/audio_jni.c): NativeAudio's natives are bound by their JNI
+# names; the engine's events and the converter's progress are called back by method name
+-keep class app.nagmedar.audio.NativeAudio { native <methods>; }
+-keep interface app.nagmedar.audio.NativeAudio$Listener { *; }
+-keep interface app.nagmedar.audio.NativeAudio$ConvertListener { *; }
+-keepclassmembers class * implements app.nagmedar.audio.NativeAudio$Listener { *; }
+-keepclassmembers class * implements app.nagmedar.audio.NativeAudio$ConvertListener { *; }
+
+# libnagmedar_lab.so (native/lab): NativeLab's natives (the media probe, whisper's transcription,
+# the USB audio tools) and its progress callback, by name
+-keep class app.nagmedar.lab.NativeLab { native <methods>; }
+-keep interface app.nagmedar.lab.NativeLab$Progress { *; }
+-keepclassmembers class * implements app.nagmedar.lab.NativeLab$Progress { *; }
+
+# WorkManager makes its workers by class name, from the rows its database keeps across updates
+-keep class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+
+# Moshi 1.8 without code generation reads and writes fields by name: the settings backup and the
+# equalizers' export (files the debug build may have written), the remote access server's JSON
+# (the web page's, and its sessions in the preferences), the licences, the locales, Moviepedia's
+-keepclassmembers class org.videolan.vlc.gui.preferences.search.SettingsBackup { <fields>; }
+-keepclassmembers class org.videolan.vlc.gui.preferences.search.SettingEntry { <fields>; }
+-keepclassmembers class org.videolan.vlc.util.EqualizerExport { <fields>; }
+-keepclassmembers class org.videolan.vlc.util.EqualizerState { <fields>; }
+-keepclassmembers class org.videolan.vlc.mediadb.models.** { <fields>; }
+-keepclassmembers class org.videolan.vlc.util.LocaleUtil$VLCLocale { <fields>; }
+-keepclassmembers class org.videolan.vlc.gui.Licenses { <fields>; }
+-keepclassmembers class org.videolan.vlc.gui.Library { <fields>; }
+-keepclassmembers class org.videolan.vlc.gui.LibraryWithLicense { <fields>; }
+-keepclassmembers class org.videolan.vlc.remoteaccessserver.** { <fields>; }
+-keepclassmembers class org.videolan.moviepedia.models.** { <fields>; }
+# its enum adapter looks each constant's field up by the constant's name
+-keepclassmembers enum org.videolan.** { <fields>; }
+
+# Retrofit (Moviepedia) under R8's full mode: the service interfaces' generic return types
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-if interface * { @retrofit2.http.* <methods>; }
+-keep,allowobfuscation interface <1>
+
+# Ktor's Netty engine (the remote access server, S-1304) makes its channels from their classes and
+# reaches fields through Unsafe and field updaters by name
+-keep class io.netty.** { *; }
+-keepclassmembers class io.ktor.** { volatile <fields>; }
+
+# Serializable classes keep what Java serialization reads by name
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}

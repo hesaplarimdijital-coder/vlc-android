@@ -95,6 +95,14 @@ android {
             buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.benchmark\""
             resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.benchmark.tv"
         }
+        // Nağmedar 1.0: the personal release (app/build.gradle): release code under the debug
+        // build's identity, app.nagmedar.debug, whose authorities and shortcuts it keeps
+        personal {
+            initWith release
+            matchingFallbacks = ['release']
+            buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.debug\""
+            resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.debug.tv"
+        }
         dev {
             initWith debug
             matchingFallbacks = ['debug']
@@ -117,6 +125,10 @@ android {
     sourceSets.dev {
         res.srcDirs = ['flavors/debug/res']
         assets.srcDirs = ['flavors/debug/assets']
+    }
+    // the launcher shortcuts that open app.nagmedar.debug
+    sourceSets.personal {
+        res.srcDirs = ['flavors/debug/res']
     }
     sourceSets.test {
         java.srcDirs = ['test', 'test-common']
@@ -172,6 +184,8 @@ dependencies {
     // S-1404: the macrobenchmarks' build
     benchmarkApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
     benchmarkApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    personalApi "org.videolan.android:libvlc-all:$rootProject.ext.libvlcVersion"
+    personalApi "org.videolan.android:medialibrary-all:$rootProject.ext.medialibraryVersion"
     api project(':application:tools')
     api project(':application:resources')
     api project(':application:mediadb')

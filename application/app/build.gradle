@@ -3,6 +3,13 @@ plugins {
     id 'kotlin-android'
 }
 
+// -PnagmedarAbis=arm64-v8a,... limits the native libraries: the ABIs of the split APKs of the
+// release-type builds (assemble...Release, assemblePersonal), the abiFilters of the others
+def nagmedarAbis = project.hasProperty('nagmedarAbis') ? project.property('nagmedarAbis').toString().split(',').collect { it.trim() }.findAll { it } : []
+// one APK per ABI (and the ABI's digit in its versionCode) for these builds; the task may be
+// named with its project path (:application:app:assemblePersonal)
+def splitBuild = gradle.startParameter.taskNames.any { it.toLowerCase() ==~ /(.*:)?assemble.*(release|personal)/ }
+
 android {
     compileOptions {
         coreLibraryDesugaringEnabled = true
@@ -35,9 +42,8 @@ android {
         multiDexEnabled = true
 
         testInstrumentationRunner "org.videolan.vlc.MultidexTestRunner"
-        // -PnagmedarAbis=arm64-v8a,... limits the native libraries of non-split (debug) builds
-        if (project.hasProperty('nagmedarAbis')) {
-            ndk { abiFilters.addAll(project.property('nagmedarAbis').toString().split(',')) }
+        if (nagmedarAbis && !splitBuild) {
+            ndk { abiFilters.addAll(nagmedarAbis) }
         }
         // The following argument makes the Android Test Orchestrator run its
         // "pm clear" command after each test invocation. This command ensures
@@ -82,11 +88,21 @@ android {
         beforeVariants(selector().withBuildType("vlcBundle")) { variantBuilder ->
             variantBuilder.minSdk = 30
         }
+        // Nağmedar 1.0: the Baseline Profile and the startup profile that orders the dex files,
+        // collected on the CI emulator (buildsystem/benchmark/README.md), in every build R8 makes
+        def baselineProfiles = file('src/main/baselineProfiles')
+        onVariants(selector().all()) { variant ->
+            if (baselineProfiles.isDirectory()) variant.sources.baselineProfiles?.addStaticSourceDirectory(baselineProfiles.absolutePath)
+        }
     }
 
     buildTypes {
+        // Nağmedar 1.0: R8 shrinks and optimizes every release-type build (signedRelease, benchmark
+        // and personal start from this one); proguard-rules.pro keeps what JNI, reflection and
+        // Moshi reach by name, res/raw/nagmedar_keep.xml the drawables the remote access page asks for
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             kotlin {
                 compilerOptions {
@@ -117,6 +133,19 @@ android {
             debuggable = false
             profileable = true
         }
+        // Nağmedar 1.0: the owner's own release, delivered encrypted by CI (personal_release,
+        // buildsystem/release/README.md): release code (R8, the Baseline Profile), neither
+        // debuggable nor profileable, but signed with the shared debug key as app.nagmedar.debug,
+        // so that it installs over the debug build as an update and keeps its library and settings
+        personal {
+            initWith release
+            signingConfig = signingConfigs.debug
+            matchingFallbacks = ['release']
+            applicationIdSuffix ".debug"
+            debuggable = false
+            jniDebuggable = false
+            profileable = false
+        }
         debug {
             applicationIdSuffix ".debug"
             jniDebuggable true
@@ -145,20 +174,9 @@ android {
 
     splits {
         abi {
-            def isReleaseBuild = false
-            gradle.startParameter.taskNames.find {
-                // Enable split for release builds in different build flavors
-                // (assemblePaidRelease, assembleFreeRelease, etc.).
-                if (it.toLowerCase() ==~ /assemble.*Release/.toLowerCase()) {
-                    isReleaseBuild = true
-                    return true // break
-                }
-                return false // continue
-            }
-            enable = isReleaseBuild
+            enable = splitBuild
             reset()
-            include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
-//            universalApk !isReleaseBuild
+            if (nagmedarAbis) include(*nagmedarAbis) else include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
         }
     }
 
@@ -184,6 +202,7 @@ android {
             outputName += variant.versionName.replace(" ", "-")
             if (variant.buildType.name == "debug") outputName += "-debug"
             if (variant.buildType.name == "benchmark") outputName += "-benchmark"
+            if (variant.buildType.name == "personal") outputName += "-personal"
             outputName += "-" + abiName + ".apk"
             output.outputFileName = outputName
         }
@@ -207,6 +226,7 @@ dependencies {
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.ext.archVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugarLib"
+    implementation "androidx.profileinstaller:profileinstaller:$rootProject.ext.profileInstallerVersion"
     androidTestUtil "androidx.test:orchestrator:$rootProject.ext.orchestrator"
     testImplementation "androidx.test:core:$rootProject.ext.testCore"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"

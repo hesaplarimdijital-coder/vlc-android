@@ -58,7 +58,8 @@ OUT="$ROOT/benchmark-results/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$OUT"
 adb logcat -c
 set -- -w -r -e nagmedar.seconds "$SECONDS_TO_PLAY"
-[ -n "$ONLY" ] && set -- "$@" -e class "$TESTS.$ONLY"
+# the Baseline Profile's generator is not a measure (baseline-profile.sh runs it)
+if [ -n "$ONLY" ]; then set -- "$@" -e class "$TESTS.$ONLY"; else set -- "$@" -e notClass "$TESTS.BaselineProfileGenerator"; fi
 echo "Ölçülüyor; birkaç dakika sürer, cihaza dokunmayın…"
 adb shell am instrument "$@" "$TESTS/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r' > "$OUT/instrument.txt" || true
 adb logcat -d -s NagmedarPerf:I NagmedarBench:I | tr -d '\r' > "$OUT/perf.log" || true

@@ -14,11 +14,16 @@ const val TARGET = "app.nagmedar.benchmark"
 const val SHELL_ACTIVITY = "app.nagmedar.ui.NagmedarActivity"
 const val EXTRA_DESTINATION = "nagmedar_destination"
 
-/** The run's arguments (am instrument -e): "nagmedar.seconds", how long the track plays (10). */
+/**
+ * The run's arguments (am instrument -e): "nagmedar.seconds", how long the track plays (10);
+ * "nagmedar.feed", a podcast feed the Baseline Profile's run subscribes to when the app has none.
+ */
 object Arguments {
     private val arguments get() = InstrumentationRegistry.getArguments()
 
     val playSeconds: Int get() = arguments.getString("nagmedar.seconds")?.toIntOrNull() ?: 10
+
+    val feed: String? get() = arguments.getString("nagmedar.feed")?.takeIf { it.isNotBlank() }
 }
 
 fun uiDevice(): UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())

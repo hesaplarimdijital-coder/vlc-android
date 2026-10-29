@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """S-1503: a release's version and notes.
 
-    notes.py --version        the app's version, as build.gradle names it for libVLC 4 (0.1.0)
+    notes.py --version        the app's version, as build.gradle names it for libVLC 4 (1.0.0)
     notes.py [VERSION]        that version's section of CHANGELOG.md (the app's version by default),
                               without its heading, as the GitHub release's notes
 
@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 def version() -> str:
     gradle = (ROOT / "build.gradle").read_text(encoding="utf-8")
-    # versionName = vlcMajorVersion == 3 ? '0.1.0-vlc3' : '0.1.0'
+    # versionName = vlcMajorVersion == 3 ? '1.0.0-vlc3' : '1.0.0'
     match = re.search(r"versionName\s*=.*:\s*'([^']+)'", gradle)
     if not match:
         sys.exit("versionName not found in build.gradle")
