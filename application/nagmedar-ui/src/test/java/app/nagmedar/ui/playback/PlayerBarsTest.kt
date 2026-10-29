@@ -118,18 +118,25 @@ class PlayerBarsTest {
 
     private val seekBar = hasContentDescription("Parça konumu") and SemanticsMatcher.keyIsDefined(SemanticsActions.SetProgress)
 
+    /** 1.0.2: a phone's bar is the tablet's: previous, play and next, and the seek bar with its times, by touch too. */
     @Test
     @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun aTapOpensThePlayerAndTheButtonsControlPlayback() {
         bar(NavKind.BottomBar, InputMode.Touch)
         compose.onNodeWithText("Sabaha Kadar").performClick()
         compose.onNodeWithContentDescription("Duraklat").performClick()
+        compose.onNodeWithContentDescription("Önceki parça").performClick()
         compose.onNodeWithContentDescription("Sonraki parça").performClick()
-        assertEquals(listOf("open", "playPause", "next"), actions.calls)
+        assertEquals(listOf("open", "playPause", "previous", "next"), actions.calls)
         // the second line: artist and format
         compose.onNodeWithText("Ada Karan · Gece Mavisi · FLAC 24/96").assertExists()
-        // by touch there is nothing to hover
-        compose.onNodeWithContentDescription("Önceki parça").assertDoesNotExist()
+        // 42 % of 4:18 played: the time played and the time left either side of the seek bar
+        compose.onNodeWithText("1:48").assertExists()
+        compose.onNodeWithText("−2:30").assertExists()
+        compose.onNode(seekBar).performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
+        assertEquals(listOf(0.5f), actions.seeks)
+        // an upright phone has no room for shuffle and repeat; stop is the full player's
+        compose.onNodeWithContentDescription("Karıştır").assertDoesNotExist()
         compose.onNodeWithContentDescription("Durdur").assertDoesNotExist()
     }
 

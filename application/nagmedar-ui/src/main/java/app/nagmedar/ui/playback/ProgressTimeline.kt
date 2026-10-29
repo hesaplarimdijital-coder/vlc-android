@@ -226,7 +226,9 @@ fun ProgressTimeline(
                     .hoverable(interaction)
                     .focusable(interactionSource = interaction)
                     .focusRing(state, RoundedCornerShape(dimens.radiusSmall))
-                    .semantics {
+                    // a node of its own: inside a bar that opens the player on a tap (the phone's, 1.0.2) a screen
+                    // reader still finds the seek bar and sets it
+                    .semantics(mergeDescendants = true) {
                         contentDescription = label
                         stateDescription = playingMark?.let { "$position · ${it.label}" } ?: position
                         progressBarRangeInfo = ProgressBarRangeInfo(if (lengthMs > 0L) (elapsedMs.toFloat() / lengthMs).coerceIn(0f, 1f) else 0f, 0f..1f)
@@ -572,17 +574,24 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
 
 // --------------------------------------------------------------- the transport
 
-/** How large the transport is drawn: the bars', the desktop pane's, the phone's; [Narrow] the phone's on a narrow or a short window. */
+/**
+ * How large the transport is drawn: the bars', the desktop pane's, the phone's; [Narrow] the phone's on a narrow or a
+ * short window; [Compact] the phone's bar (1.0.2); [Large] the big player of a tablet and a desktop (1.0.2). None is
+ * smaller than a target of the input in use.
+ */
 enum class TransportSize(val button: Dp, val icon: Dp, val play: Dp, val playIcon: Dp) {
     Bar(36.dp, 16.dp, 40.dp, 18.dp),
+    Compact(44.dp, 20.dp, 44.dp, 22.dp),
     Phone(56.dp, 24.dp, 76.dp, 32.dp),
     Narrow(48.dp, 22.dp, 64.dp, 28.dp),
+    Large(64.dp, 28.dp, 88.dp, 36.dp),
 }
 
 /**
  * Shuffle, previous, play or pause as a filled circle, next and repeat, as the music apps lay them out. Every button
  * shrinks a little under the press and springs back; shuffle and repeat are lit with a dot under them while on, repeat
- * one with a "1" on it. Each has its label (and its keys in the tooltip).
+ * one with a "1" on it. Each has its label (and its keys in the tooltip). Without [modes] (a phone's bar with no room
+ * for them, 1.0.2) previous, play and next alone.
  */
 @Composable
 fun TransportControls(
@@ -594,32 +603,34 @@ fun TransportControls(
     size: TransportSize = TransportSize.Bar,
     repeatOne: Boolean = false,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(4.dp),
+    modes: Boolean = true,
 ) {
-    val bar = size == TransportSize.Bar
-    val button = if (bar) size.button.coerceAtLeast(NagTheme.dimens.minTarget) else size.button
-    val play = if (bar) size.play.coerceAtLeast(NagTheme.dimens.minTarget) else size.play
+    val button = size.button.coerceAtLeast(NagTheme.dimens.minTarget)
+    val play = size.play.coerceAtLeast(NagTheme.dimens.minTarget)
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = horizontalArrangement) {
-        TransportButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, button, size.icon, selected = shuffling, toggle = true, shortcut = ShortcutId.Shuffle)
+        if (modes) TransportButton(NagIcons.Shuffle, stringResource(R.string.nag_shuffle), actions::shuffle, button, size.icon, selected = shuffling, toggle = true, shortcut = ShortcutId.Shuffle)
         TransportButton(NagIcons.Previous, stringResource(R.string.nag_previous), actions::previous, button, size.icon * 1.15f, shortcut = ShortcutId.Previous, strong = true)
         PlayPauseCircle(playing, actions::togglePlayPause, play, size.playIcon)
         TransportButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, button, size.icon * 1.15f, shortcut = ShortcutId.Next, strong = true)
-        TransportButton(
-            NagIcons.Repeat,
-            stringResource(
-                when {
-                    repeatOne -> R.string.nag_player_repeat_one
-                    repeating -> R.string.nag_player_repeat_all
-                    else -> R.string.nag_repeat
-                },
-            ),
-            actions::cycleRepeat,
-            button,
-            size.icon,
-            selected = repeating || repeatOne,
-            toggle = true,
-            badge = if (repeatOne) "1" else null,
-            shortcut = ShortcutId.Repeat,
-        )
+        if (modes) {
+            TransportButton(
+                NagIcons.Repeat,
+                stringResource(
+                    when {
+                        repeatOne -> R.string.nag_player_repeat_one
+                        repeating -> R.string.nag_player_repeat_all
+                        else -> R.string.nag_repeat
+                    },
+                ),
+                actions::cycleRepeat,
+                button,
+                size.icon,
+                selected = repeating || repeatOne,
+                toggle = true,
+                badge = if (repeatOne) "1" else null,
+                shortcut = ShortcutId.Repeat,
+            )
+        }
     }
 }
 

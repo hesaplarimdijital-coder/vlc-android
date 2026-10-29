@@ -25,6 +25,7 @@ import app.nagmedar.ui.components.TableSort
 import app.nagmedar.ui.input.menuBarSpecs
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.playback.CompactTransportBar
 import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.PlayerBarInfo
@@ -194,15 +195,15 @@ object NoPlayerActions : PlayerBarActions {
     override fun setVolume(volume: Int) = Unit
 }
 
-/** The real player bars (S-304) with [samplePlayerInfo], 42 % played. */
+/** The real player bars (S-304) with [samplePlayerInfo], 42 % played; on a phone the tablet's bar laid out for it (1.0.2). */
 @Composable
 fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions, queueOpen: Boolean = false) {
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
     // in the shell's floating bar, as the app's bars are
     val transparent = LocalFloatingPlayer.current
-    if (kind == NavKind.Sidebar) {
-        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)
-    } else {
-        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen, transparent = transparent)
+    when (kind) {
+        NavKind.Sidebar -> TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)
+        NavKind.BottomBar -> CompactTransportBar(info, { 0.42f }, actions, artwork)
+        NavKind.Rail -> MiniPlayer(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)
     }
 }
