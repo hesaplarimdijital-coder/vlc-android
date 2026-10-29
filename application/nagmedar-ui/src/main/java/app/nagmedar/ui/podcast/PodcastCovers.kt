@@ -15,14 +15,18 @@ import app.nagmedar.ui.covers.CoverStore
 import app.nagmedar.ui.covers.fitForKeeping
 import app.nagmedar.ui.covers.readAtMost
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.videolan.vlc.media.WebImages
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 /** The bytes of a show's cover at an address; null when there is none (404, not an image). Throws when the network fails. */
@@ -59,21 +63,24 @@ class PodcastCoverFinder(
         kept
     }
 
-    /** The file the cover at [url] is kept in, when it was fetched before; nothing is fetched. */
-    fun kept(url: String): File? = store.kept(url)?.file
-
     companion object {
         /** An address with no image is asked about again after a week. */
         const val MISS_RETRY_MS = CoverFinder.MISS_RETRY_MS
     }
 }
 
-/** The app's podcast covers: fetched over OkHttp, four at a time, 12 MB at most each. */
+/**
+ * The app's podcast covers: fetched over OkHttp, four at a time, 12 MB at most each. 1.0: also the web images the
+ * playback service shows outside the app ([webImages]: Android Auto's covers, episodes' images and stations' logos).
+ */
 object PodcastCovers {
     @Volatile
     private var finder: PodcastCoverFinder? = null
 
     private val gate = Semaphore(4)
+
+    /** The files being fetched, by address: one image asked for by several at once is fetched once. */
+    private val fetching = ConcurrentHashMap<String, Deferred<File?>>()
 
     private val client by lazy { OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS).build() }
 
@@ -103,8 +110,28 @@ object PodcastCovers {
         return withContext(Dispatchers.IO) { finder(context).find(url)?.let { CoverImages.load(it, px, shownAs = shownName(url, px)) } }
     }
 
-    /** 1.0: the file the cover at [url] is kept in (Android Auto's artwork), when the app fetched it before; null otherwise. Off the main thread. */
-    fun keptFile(context: Context, url: String): File? = finder(context).kept(url)
+    /**
+     * 1.0: the file the image at [url] is kept in, fetched and kept first when it is not (once, however many ask at the
+     * same time); null when there is none. What the playback service's artwork shows outside the app (Android Auto).
+     */
+    suspend fun file(context: Context, url: String): File? {
+        val mine = CompletableDeferred<File?>()
+        fetching.putIfAbsent(url, mine)?.let { return it.await() }
+        return try {
+            finder(context).find(url)?.file.also { mine.complete(it) }
+        } catch (e: Throwable) {
+            mine.completeExceptionally(e)
+            throw e
+        } finally {
+            fetching.remove(url, mine)
+        }
+    }
+
+    /** [file] as the playback service asks for it. */
+    fun webImages(context: Context): WebImages {
+        val app = context.applicationContext
+        return WebImages { url -> file(app, url) }
+    }
 
     /** The cover at [url] for [px] pixels when it was shown a moment ago and is still in memory; null otherwise. */
     fun shown(url: String, px: Int): ImageBitmap? = if (CoverCenter.active) CoverImages.shown(shownName(url, px)) else null

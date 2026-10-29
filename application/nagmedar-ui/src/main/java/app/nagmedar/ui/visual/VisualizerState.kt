@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import app.nagmedar.audio.ScopeFrame
+import app.nagmedar.ui.components.LocalPlayerSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -74,7 +75,8 @@ class VisualizerState(bands: Int = BANDS) {
 
 /**
  * S-611: the device's side of the battery rules, as a pane sees it: whether it is in front (its
- * lifecycle started), the screen lit and Battery Saver on; [playing] is the playback's.
+ * lifecycle started, and in the phone's player the player out), the screen lit and Battery Saver
+ * on; [playing] is the playback's.
  */
 @Composable
 fun rememberVisualizerConditions(playing: Boolean): VisualizerConditions {
@@ -98,7 +100,9 @@ fun rememberVisualizerConditions(playing: Boolean): VisualizerConditions {
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         onDispose { runCatching { context.unregisterReceiver(receiver) } }
     }
-    return VisualizerConditions(lifecycle.isAtLeast(Lifecycle.State.STARTED), screenOn, powerSave, playing)
+    // the phone's player waits composed under the mini player while it is not out (1.0): hidden then
+    val out = LocalPlayerSheet.current?.shown != false
+    return VisualizerConditions(lifecycle.isAtLeast(Lifecycle.State.STARTED) && out, screenOn, powerSave, playing)
 }
 
 /**

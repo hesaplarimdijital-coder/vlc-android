@@ -65,8 +65,23 @@ interface CarCatalog {
      */
     suspend fun play(service: PlaybackService, request: VoiceRequest): Boolean
 
-    /** The medialibrary changed ([history]: only what was played): the music read is read again; returns the entries to tell Auto about. */
+    /**
+     * The medialibrary changed ([history]: only what was played): the music read is read again; returns the entries to
+     * tell Auto about now. Those a burst of changes leaves untold are told by the catalog itself once it ends.
+     */
     fun libraryChanged(history: Boolean): List<String>
+
+    /**
+     * What a line that plays nothing says when tapped ([MediaSessionBrowser.isNoMedia]: an empty list's, an offline
+     * directory's), or with no [mediaId] what a voice request that found nothing says; in [context]'s language.
+     */
+    fun nothingText(context: Context, mediaId: String?): String
+
+    /**
+     * The tree's id of what plays from [location] (a track of a list Auto played, an episode, a station), which Auto marks
+     * as playing; null when it is none of the tree's. Quick: called on the main thread at every state change.
+     */
+    fun playingId(location: String?): String?
 }
 
 object CarHook {

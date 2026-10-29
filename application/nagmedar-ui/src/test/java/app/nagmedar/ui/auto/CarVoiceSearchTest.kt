@@ -124,6 +124,32 @@ class CarVoiceSearchTest {
     }
 
     @Test
+    fun theDirectoryIsAskedWithTheWordsAsSaid() {
+        val gunes = station(0, "Radyo Güneş FM", uuid = "u-gunes")
+        val data = data().apply { directory = listOf(gunes) }
+        // the directory folds nothing: "gunes fm" would find no "Güneş FM"
+        assertEquals("u-gunes", (resolve(VoiceRequest("Güneş FM'i çal"), data) as CarPlay.Radio).station.uuid)
+        assertEquals(listOf("Güneş FM"), data.stationQueries)
+    }
+
+    @Test
+    fun theDirectorysOwnAnswerPlaysWhenNoneAnswersWordForWord() {
+        // the directory finds "eksen" inside one word; that is less than word for word here, yet it is its answer
+        val joined = station(0, "RadyoEksen Rock", uuid = "u-joined")
+        val data = FakeCarData(directory = listOf(joined))
+        assertEquals("u-joined", (resolve(VoiceRequest("Eksen radyosunu aç"), data) as CarPlay.Radio).station.uuid)
+        assertEquals(listOf("Eksen"), data.stationQueries)
+    }
+
+    @Test
+    fun aMedialibraryThatDoesNotAnswerLeavesThePodcastsAndTheRadio() {
+        val data = data().apply { musicUnavailable = true }
+        assertEquals(12L, (resolve(VoiceRequest("uzay yolculuğu"), data) as CarPlay.Episode).episode.id)
+        assertEquals(eksen, (resolve(VoiceRequest("Radyo Eksen'i aç"), data) as CarPlay.Radio).station)
+        assertNull(resolve(VoiceRequest("müzik çal"), data))
+    }
+
+    @Test
     fun anEmptyLibraryLooksElsewhere() {
         val play = resolve(VoiceRequest("radyo eksen"), FakeCarData(favourites = listOf(eksen)))
         assertEquals(CarPlay.Radio(eksen), play)

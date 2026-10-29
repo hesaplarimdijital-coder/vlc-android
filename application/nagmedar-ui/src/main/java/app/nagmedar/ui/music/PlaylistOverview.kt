@@ -53,6 +53,7 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.rememberMenuState
+import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.input.ContextMenuArea
@@ -198,7 +199,7 @@ private fun PlaylistGridCard(
                     }
                     // under the pointer or the keyboard, or always where a finger is the pointer
                     if (touch || state.hovered || within || menuState.isOpen) {
-                        ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActions, { menu(card) }, Modifier.align(Alignment.TopEnd).padding(2.dp), card.name)
+                        ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActionsLabel(card.name), { menu(card) }, Modifier.align(Alignment.TopEnd).padding(2.dp), card.name)
                     }
                 }
                 Spacer(Modifier.size(8.dp))
@@ -289,7 +290,7 @@ private fun PlaylistRowCard(
                     )
                 }
                 if (touch || state.hovered || within || menuState.isOpen) {
-                    ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActions, { menu(card) }, sheetTitle = card.name)
+                    ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActionsLabel(card.name), { menu(card) }, sheetTitle = card.name)
                 }
             }
         }

@@ -644,6 +644,7 @@
     <string name="nag_license_old_mit">Eski MIT</string>
     <string name="nag_license_public_domain">Kamu malı</string>
     <string name="nag_more_actions">Diğer işlemler</string>
+    <string name="nag_more_actions_for">%1$s için diğer işlemler</string>
     <string name="nag_play_next">Hemen sonra oynat</string>
     <string name="nag_add_to_queue">Sıraya ekle</string>
     <string name="nag_unavailable_mvp">Sonraki bir sürümde geliyor</string>
@@ -1070,6 +1071,7 @@
     <string name="nag_auto_empty">Burada henüz bir şey yok</string>
     <string name="nag_auto_radio_offline">Radyo rehberine şu an ulaşılamıyor</string>
     <string name="nag_auto_no_result">Sonuç yok</string>
+    <string name="nag_auto_music_unavailable">Müzik kütüphanesi şu an okunamıyor</string>
     <string name="nag_auto_decade_front">%1$d\'ler</string>
     <string name="nag_auto_decade_back">%1$d\'lar</string>
     <plurals name="nag_auto_stations">
@@ -1688,6 +1690,7 @@
     <string name="nag_pod_ep_resume">Devam et · %s</string>
     <string name="nag_pod_dropout_gave_up">Bağlantı koptu, bölüm sürdürülemedi. Kaldığı yer saklandı; oynatınca oradan devam eder.</string>
     <string name="nag_live_dropout_gave_up">Yayın koptu, yeniden bağlanılamadı.</string>
+    <string name="nag_live_dropout_paused">Yayın koptu, yeniden bağlanılamadı. Oynatınca yeniden bağlanılır.</string>
     <string name="nag_pod_ep_offline_text">Bölüm ancak indirildiyse oynatılır. Kısımları ve dökümü bağlandığınızda gelir.</string>
     <string name="nag_pod_dl_queued_title">İndirilmeyi bekliyor</string>
     <string name="nag_pod_dl_queued_text">Ağ uygun olunca başlar; otomatik indirmeler Wi-Fi\'ı ve dolu bir pili bekler.</string>
@@ -1745,6 +1748,7 @@
     <string name="nag_pod_whisper_queued_title">Döküm sırada</string>
     <string name="nag_pod_whisper_queued_text">Önündeki iş bitince başlar.</string>
     <string name="nag_pod_whisper_queued_auto">Cihaz şarj olurken ve boştayken başlar.</string>
+    <string name="nag_pod_whisper_queued_app">Uygulamayı açınca sürer: Android arka plandaki işi süre sınırında durdurdu.</string>
     <string name="nag_pod_set_language">Döküm dili</string>
     <string name="nag_pod_set_language_hint">Whisper\'ın bu programın bölümlerini hangi dilde duyacağı.</string>
     <string name="nag_pod_set_language_feed">Yayındaki: %1$s</string>
@@ -1995,7 +1999,7 @@
     <string name="nag_whisper_model_small_hint">Önerilen: Türkçede hız ile doğruluk arasında iyi bir denge.</string>
     <string name="nag_whisper_model_turbo_hint">En doğrusu ve en yavaşı: bölümün süresinden uzun sürebilir.</string>
     <string name="nag_whisper_cancel">İptal</string>
-    <string name="nag_whisper_restarted">Baştan başlıyor…</string>
+    <string name="nag_whisper_restarted">Yeniden başlıyor…</string>
     <string name="nag_whisper_starting">Başlıyor…</string>
     <string name="nag_whisper_transcribing">Konuşma yazıya dökülüyor…</string>
     <string name="nag_whisper_downloading">Model: %1$d / %2$d MB</string>
@@ -2008,6 +2012,8 @@
     <string name="nag_whisper_running_title">Döküm oluşturuluyor · %1$s</string>
     <string name="nag_whisper_done_title">Döküm hazır · %1$s</string>
     <string name="nag_whisper_failed_title">Döküm oluşturulamadı · %1$s</string>
+    <string name="nag_whisper_held_title">Döküm bekliyor · %1$s</string>
+    <string name="nag_whisper_held_text">Android arka plandaki işi süre sınırında durdurdu. Uygulamayı açınca kaldığı yerden sürer.</string>
     <plurals name="nag_whisper_ready">
         <item quantity="one">Döküm hazır · %d satır</item>
         <item quantity="other">Döküm hazır · %d satır</item>
@@ -2028,7 +2034,7 @@
     <string name="nag_whisper_fail_engine">Whisper bölümün sesinde durdu.</string>
     <string name="nag_whisper_fail_empty">Bölümde konuşma duyulmadı.</string>
     <string name="nag_whisper_fail_output">Döküm uygulamanın deposuna yazılamadı.</string>
-    <string name="nag_whisper_fail_timeout">Android işi bitirdi: arka plandaki bir iş günde en çok altı saat sürebilir. Yeniden isteyin; iş baştan başlar. Bekleyen işler uygulamayı yeniden açınca sürer.</string>
+    <string name="nag_whisper_fail_timeout">Android işi bitirdi: arka plandaki bir iş günde en çok altı saat sürebilir. Yeniden isteyin; iş kaldığı yerden sürer. Bekleyen işler uygulamayı yeniden açınca sürer.</string>
     <string name="nag_whisper_acceleration">Hızlandırma</string>
     <string name="nag_whisper_accel_auto">Otomatik (GPU varsa)</string>
     <string name="nag_whisper_accel_cpu">Yalnız işlemci</string>

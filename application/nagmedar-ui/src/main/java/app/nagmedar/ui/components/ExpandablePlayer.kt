@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -42,14 +43,21 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -57,12 +65,14 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.shell.ShellOverlayHost
@@ -178,6 +188,10 @@ fun rememberExpandablePlayerState(initialValue: PlayerValue = PlayerValue.Collap
  * plain mini player whose taps are its own. [mini] draws its own surface (the glass card); [full]
  * its own background and a collapse button (`scope.launch { state.collapse() }`). Only inside the
  * shell (its overlay layer); elsewhere only the mini player shows.
+ *
+ * 1.0: [full] is composed with the strip and stays so, not drawn while the strip rests, so that
+ * opening it never composes it on the drag's first frame; it learns from [LocalPlayerSheet] that it
+ * is in the sheet (whose drag down and Back close it) and whether it is out.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -208,6 +222,7 @@ fun ExpandablePlayer(
         measureAnchor()
         host?.onExpandStart?.invoke()
     }
+    val latestBeforeExpand by rememberUpdatedState(beforeExpand)
     SideEffect { state.beforeExpand = beforeExpand }
     if (host != null) {
         val progressOf = remember(state, canExpand) { if (canExpand) ({ state.progress }) else ({ 0f }) }
@@ -232,13 +247,9 @@ fun ExpandablePlayer(
             .graphicsLayer { alpha = if (canExpand && state.progress > 0.001f) 0f else 1f }
             .then(
                 if (!canExpand) Modifier else Modifier
-                    // a finger on the strip brings the bars back first, so the sheet starts from where the strip rests
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                            beforeExpand()
-                        }
-                    }
+                    // a drag up brings the bars back first, so the sheet starts from where the strip rests; a press
+                    // (Play, the start of a sideways swipe) leaves them where they are (a click expands through expand())
+                    .pointerInput(Unit) { awaitVerticalDragStart { latestBeforeExpand() } }
                     .anchoredDraggable(state.draggable, Orientation.Vertical, enabled = state.collapsedTop > 0f)
                     .semantics {
                         customActions = listOf(CustomAccessibilityAction(expandLabel) { scope.launch { state.expand() }; true })
@@ -252,19 +263,90 @@ fun ExpandablePlayer(
     }
 
     if (host != null && canExpand) {
-        val open by remember(state) { derivedStateOf { state.progress > 0f || state.targetValue == PlayerValue.Expanded } }
-        if (open) {
-            // the collapse runs in this scope: the Back handler's own one ends once the player is no longer expanded
-            OverlayLayer(host, ShellOverlayHost.PLAYER) { PlayerSheet(state, miniHeight, mini, full, collapse = { scope.launch { state.collapse() } }) }
+        // 1.0: composed for as long as there is a full player to show, so that an expand never composes it on its
+        // first frame; while the mini player rests it is neither drawn, read out, focused nor touched
+        val sheet = remember(state) { PlayerSheetScope(state) }
+        // the collapse runs in this scope: the Back handler's own one ends once the player is no longer expanded
+        OverlayLayer(host, ShellOverlayHost.PLAYER) { PlayerSheet(state, sheet, miniHeight, mini, full, collapse = { scope.launch { state.collapse() } }) }
+    }
+}
+
+/**
+ * What [ExpandablePlayer] tells the full player it holds (1.0): whether it is out ([shown]); while
+ * the mini player rests the full player stays composed but is not drawn, so what runs on its own
+ * (a visualiser's capture, a timeline's glide) waits for [shown]. Its [nestedScroll] hands what a
+ * list in it cannot scroll (the lyrics pulled down at their top) to the sheet, so that the pull
+ * closes the player as a drag on it does, with the finger's speed. Inside the sheet, the player
+ * leaves vertical drags and Back to it ([LocalPlayerSheet]).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Stable
+class PlayerSheetScope internal constructor(private val state: ExpandablePlayerState) {
+    private val out = derivedStateOf { state.progress > 0f || state.targetValue == PlayerValue.Expanded }
+
+    /** The full player is out: dragged, opening, open or closing. */
+    val shown: Boolean get() = out.value
+
+    /** Where the sheet is, between its places: what a release settles. */
+    private val between: Boolean get() = state.collapsedTop > 0f && state.sheetTop() > 0.5f
+
+    val nestedScroll: NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            // pushed back up while the sheet is pulled down: the sheet goes back first, then the list scrolls
+            if (source != NestedScrollSource.UserInput || available.y >= 0f || !between) return Offset.Zero
+            return Offset(0f, state.draggable.dispatchRawDelta(available.y))
+        }
+
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            // what the list cannot take (pulled down at its top) moves the sheet
+            if (source != NestedScrollSource.UserInput || available.y == 0f || state.collapsedTop <= 0f) return Offset.Zero
+            return Offset(0f, state.draggable.dispatchRawDelta(available.y))
+        }
+
+        override suspend fun onPreFling(available: Velocity): Velocity {
+            // let go with the sheet pulled down: it settles with the finger's speed and the list does not fling
+            if (!between) return Velocity.Zero
+            state.draggable.settle(available.y)
+            return available
         }
     }
 }
 
-/** The full part, drawn in the shell's overlay from the mini player's place to the top. */
+/** The sheet the full player lies in, when [ExpandablePlayer] holds it; null where the player stands alone (a tablet's overlay). */
+val LocalPlayerSheet = staticCompositionLocalOf<PlayerSheetScope?> { null }
+
+/**
+ * Waits, gesture by gesture, for a press that moves past the touch slop mostly up or down, and calls
+ * [onStart] then, before the drag that follows moves anything; only watches, never consumes.
+ */
+private suspend fun PointerInputScope.awaitVerticalDragStart(onStart: () -> Unit) {
+    val slop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        var moved = Offset.Zero
+        while (true) {
+            val change = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id } ?: break
+            if (!change.pressed) break
+            moved += change.position - change.previousPosition
+            if (abs(moved.y) > slop && abs(moved.y) > abs(moved.x)) {
+                onStart()
+                break
+            }
+            if (abs(moved.x) > slop) break
+        }
+    }
+}
+
+/**
+ * The full part, drawn in the shell's overlay from the mini player's place to the top. While the
+ * mini player rests it is measured but not placed: nothing of it is drawn or touched, and focus
+ * never moves into it; its semantics are cleared too.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlayerSheet(
     state: ExpandablePlayerState,
+    sheet: PlayerSheetScope,
     miniHeight: Int,
     mini: @Composable () -> Unit,
     full: @Composable () -> Unit,
@@ -275,7 +357,17 @@ private fun PlayerSheet(
     val backProgress = remember { Animatable(0f) }
     val label = stringResource(R.string.nag_now_playing)
     val density = LocalDensity.current
-    Box(Modifier.fillMaxSize()) {
+    val shown = sheet.shown
+    Box(
+        Modifier
+            .fillMaxSize()
+            .then(if (shown) Modifier else Modifier.clearAndSetSemantics {})
+            // read while placing: the first frame of a drag places it, nothing recomposes for it
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) { if (sheet.shown) placeable.place(0, 0) }
+            },
+    ) {
         Box(
             Modifier
                 .fillMaxSize()
@@ -294,24 +386,28 @@ private fun PlayerSheet(
                     scaleY = scale
                     translationY = 48.dp.toPx() * back
                     // rounded while it travels; at rest over the window its backdrop goes on under the system's bars
-                    shape = RoundedCornerShape((16f * (1f - p) + 28f * back).dp)
+                    shape = sheetCorner(16f * (1f - p) + 28f * back)
                     clip = p < 1f || back > 0f
                 }
                 .background(colors.background)
                 .anchoredDraggable(state.draggable, Orientation.Vertical)
+                .nestedScroll(sheet.nestedScroll)
                 .semantics { paneTitle = label },
         ) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(with(density) { miniHeight.toDp() })
-                    .graphicsLayer { alpha = (1f - state.progress / 0.25f).coerceIn(0f, 1f) },
-            ) { mini() }
+            // the strip's copy only while the sheet is out: it fades into the full player in the first quarter
+            if (shown) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(with(density) { miniHeight.toDp() })
+                        .graphicsLayer { alpha = (1f - state.progress / 0.25f).coerceIn(0f, 1f) },
+                ) { mini() }
+            }
             Box(
                 Modifier
                     .fillMaxSize()
                     .graphicsLayer { alpha = ((state.progress - 0.15f) / 0.85f).coerceIn(0f, 1f) },
-            ) { full() }
+            ) { CompositionLocalProvider(LocalPlayerSheet provides sheet, content = full) }
         }
     }
 
@@ -327,6 +423,12 @@ private fun PlayerSheet(
         }
     }
 }
+
+/** The sheet's corners for a radius of [dp] dp, rounded to a whole dp: made once each, not on every frame of a drag. */
+private fun sheetCorner(dp: Float): Shape = SHEET_CORNERS[dp.roundToInt().coerceIn(0, SHEET_CORNERS.lastIndex)]
+
+/** 0 … 44 dp: the travelling sheet's 16 dp and the Back gesture's 28 dp more. */
+private val SHEET_CORNERS: Array<Shape> = Array(45) { RoundedCornerShape(it.dp) }
 
 /** What a sideways swipe on the mini player does. */
 enum class MiniSwipeAction { None, Previous, Next }
@@ -389,7 +491,7 @@ private fun MiniSwipeArea(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?, cont
             .fillMaxWidth()
             .onSizeChanged { width = it.width.toFloat().coerceAtLeast(1f) }
             .then(
-                if (!enabled) Modifier else Modifier.pointerInput(Unit) {
+                if (!enabled) Modifier else Modifier.pointerInput(tier, rtl) {
                     val tracker = VelocityTracker()
                     var raw = 0f
                     var armed = false

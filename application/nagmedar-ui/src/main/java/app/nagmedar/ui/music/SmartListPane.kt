@@ -20,6 +20,7 @@ import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.StateAction
@@ -154,7 +155,7 @@ internal fun SmartPane(
                 NagButton(stringResource(R.string.nag_shuffle), { actions.play(playable.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = playable.size > 1)
                 // beside the name there is room for the rules' button; under it they are in the menu
                 if (!stacked) NagButton(stringResource(R.string.nag_smart_edit), onEdit, icon = NagIcons.SmartList)
-                ActionMenuButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_more_actions), menu, sheetTitle = list.name)
+                ActionMenuButton(NagIcons.MoreHorizontal, moreActionsLabel(list.name), menu, sheetTitle = list.name)
             },
         )
         HorizontalRule()

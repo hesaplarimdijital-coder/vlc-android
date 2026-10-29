@@ -6,8 +6,9 @@ enum class SessionButton { Shuffle, Repeat, Rewind, Forward, Speed, EpisodeBack,
 /**
  * 1.0: the media session's custom actions, the one rule of Android Auto, the system's media controls (notification and
  * lock screen) and Wear: while a podcast episode plays, [SessionButton.EpisodeBack] and [SessionButton.EpisodeForward]
- * ([EPISODE_BACK_S] back, [EPISODE_FORWARD_S] forward) instead of the music's; music keeps its own, shuffle and repeat in
- * the car (with the seek and speed buttons when Settings asks for them), the seek buttons on the system's controls.
+ * ([EPISODE_BACK_S] back, [EPISODE_FORWARD_S] forward) instead of the music's, and in the car the speed too (0.5's
+ * podcast mode had it there); music keeps its own, shuffle and repeat in the car (with the seek and speed buttons when
+ * Settings asks for them), the seek buttons on the system's controls.
  */
 object SessionButtons {
     /** How far an episode's back button goes, in seconds. */
@@ -22,6 +23,7 @@ object SessionButtons {
      * [seekButtons] and [speedButtons]: Settings › Android Auto's switches.
      */
     fun of(episode: Boolean, carMode: Boolean, systemControls: Boolean, seekButtons: Boolean = false, speedButtons: Boolean = false): List<SessionButton> = when {
+        episode && carMode -> listOf(SessionButton.EpisodeBack, SessionButton.EpisodeForward, SessionButton.Speed)
         episode -> listOf(SessionButton.EpisodeBack, SessionButton.EpisodeForward)
         systemControls && !carMode -> listOf(SessionButton.Rewind, SessionButton.Forward)
         else -> buildList {

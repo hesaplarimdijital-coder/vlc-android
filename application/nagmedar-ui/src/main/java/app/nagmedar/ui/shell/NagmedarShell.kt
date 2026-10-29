@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -255,7 +256,7 @@ fun NagmedarShell(
                         caption = caption,
                         scrolled = navKind == NavKind.BottomBar && scroll.scrolled,
                         glass = navKind == NavKind.BottomBar,
-                        modifier = Modifier.onSizeChanged { metrics.topPx = it.height },
+                        modifier = Modifier.onSizeChanged { metrics.topPx = it.height }.underPlayer(playerOver),
                     )
                 }
             },
@@ -270,8 +271,12 @@ fun NagmedarShell(
                                     scroll.maxOffsetPx = it.height.toFloat()
                                     metrics.navPx = it.height
                                 }
-                                // an expanding player pushes the bar out of the way
-                                .graphicsLayer { translationY = overlayHost.expandProgress() * size.height },
+                                // an expanding player pushes the bar out of the way; once it covers the window the bar is not drawn
+                                .graphicsLayer {
+                                    translationY = overlayHost.expandProgress() * size.height
+                                    alpha = if (playerOver) 0f else 1f
+                                }
+                                .then(if (playerOver) Modifier.clearAndSetSemantics {} else Modifier),
                         )
                     }
                     NavKind.Rail -> NavRail(current, navigator::navigate)
@@ -291,6 +296,7 @@ fun NagmedarShell(
                 Box(
                     Modifier
                         .onSizeChanged { metrics.playerPx = it.height }
+                        .underPlayer(playerOver)
                         .then(
                             if (!floating) Modifier else Modifier
                                 .clip(shape)
@@ -305,6 +311,7 @@ fun NagmedarShell(
                 Box(
                     Modifier
                         .fillMaxSize()
+                        .underPlayer(playerOver)
                         .glassSource(glassSource, glassMode)
                         .background(NagTheme.colors.background)
                         .nestedScroll(scroll.connection),
@@ -368,6 +375,15 @@ fun NagmedarShell(
         }
     }
 }
+
+/**
+ * What the phone's expanded player covers (1.0), while [covered]: not drawn (no overdraw, no blur
+ * under the opaque player on every frame of its seek bar or visualiser) and not read out, as
+ * [DetailTransition]'s covered list. The layer is always there, so the player's first move down
+ * only turns it visible again, without recording anything anew.
+ */
+private fun Modifier.underPlayer(covered: Boolean): Modifier =
+    graphicsLayer { alpha = if (covered) 0f else 1f }.then(if (covered) Modifier.clearAndSetSemantics {} else Modifier)
 
 /** The pages the phone's bottom bar leaves out, by the sidebar's sections (Settings last), as the "⋯" sheet's entries. */
 @Composable

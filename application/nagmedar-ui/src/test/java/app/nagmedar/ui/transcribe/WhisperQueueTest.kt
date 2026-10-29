@@ -107,4 +107,73 @@ class WhisperQueueTest {
         assertFalse(JobNeeds().covers(JobNeeds(NetworkNeed.Any)))
         assertFalse(JobNeeds(NetworkNeed.Unmetered).covers(auto))
     }
+
+    @Test
+    fun aHeldRequestWaitsForTheAppAndGoesOnAsAskedByHand() {
+        val queue = WhisperQueue().add(auto(1)).add(auto(2)).begin(1).hold(1)
+        assertTrue(queue.waitsForApp)
+        assertNull("not under way", queue.running)
+        assertEquals("it keeps its place", listOf(1L, 2L), queue.ids())
+        val released = queue.release()
+        assertFalse(released.waitsForApp)
+        // the charger and an idle device cannot come while the app is used
+        assertEquals(listOf(false, true), released.requests.map { it.auto })
+        assertEquals(listOf(1L, 2L), released.ids())
+    }
+
+    @Test
+    fun aHeldRequestAskedAgainByHandOrRemovedWaitsNoMore() {
+        val held = WhisperQueue().add(auto(1)).hold(1)
+        assertFalse(held.add(hand(1)).waitsForApp)
+        assertTrue("an automatic ask again changes nothing", held.add(auto(1)).waitsForApp)
+        assertTrue(held.remove(1).held.isEmpty())
+        assertTrue(held.failed(1, WhisperFailure.Engine).held.isEmpty())
+        // one no longer queued is not held
+        assertTrue(WhisperQueue().hold(5).held.isEmpty())
+    }
+
+    @Test
+    fun theHoldsAreKeptWithTheQueue() {
+        val queue = WhisperQueue().add(auto(1)).add(hand(2)).hold(1)
+        assertEquals(setOf(1L), WhisperQueue.parse(queue.toJson()).held)
+        // a hold of a request gone is dropped
+        val json = queue.toJson().replace("\"held\":[1]", "\"held\":[1,9]")
+        assertEquals(setOf(1L), WhisperQueue.parse(json).held)
+    }
+
+    private fun stop(
+        foregroundTimeLimit: Boolean = false,
+        queued: Boolean = true,
+        foreground: Boolean = true,
+        jobTimeLimit: Boolean = false,
+        attempt: Int = 0,
+        appInFront: Boolean = false,
+    ) = WhisperStop.of(foregroundTimeLimit, queued, foreground, jobTimeLimit, attempt, appInFront)
+
+    @Test
+    fun aStoppedJobFailsGoesOnWaitsOrIsTriedAgain() {
+        assertEquals("Android 15's foreground time", WhisperStop.Fail, stop(foregroundTimeLimit = true))
+        assertEquals("cancelled by the listener", WhisperStop.Next, stop(queued = false))
+        assertEquals("the system stopped a foreground job", WhisperStop.Retry, stop(attempt = 3))
+        // a plain job (no foreground) stopped at about ten minutes: once more, then it waits for the app
+        assertEquals(WhisperStop.Retry, stop(foreground = false, jobTimeLimit = true))
+        assertEquals(WhisperStop.Hold, stop(foreground = false, jobTimeLimit = true, attempt = 1))
+        assertEquals(WhisperStop.Hold, stop(foreground = false, attempt = 1))
+        assertEquals(WhisperStop.Hold, stop(jobTimeLimit = true, attempt = 2))
+        // the app is in front: started again, it gets its foreground
+        assertEquals(WhisperStop.Retry, stop(foreground = false, jobTimeLimit = true, attempt = 1, appInFront = true))
+    }
+
+    @Test
+    fun aCheckpointGoesOnAfterItsLastPassage() {
+        val checkpoint = WhisperCheckpoint(
+            "small", "tr", null,
+            listOf(SpeechSegment(0, 4_000, "Merhaba"), SpeechSegment(4_000, 9_500, "ve hoş geldiniz")),
+        )
+        assertEquals(9_500L, checkpoint.resumeAtMs)
+        assertEquals(checkpoint, WhisperCheckpoint.parse(checkpoint.toJson()))
+        assertEquals("en", WhisperCheckpoint.parse(checkpoint.copy(heard = "en").toJson())?.heard)
+        assertNull(WhisperCheckpoint.parse("{bozuk"))
+        assertEquals(0L, checkpoint.copy(segments = emptyList()).resumeAtMs)
+    }
 }

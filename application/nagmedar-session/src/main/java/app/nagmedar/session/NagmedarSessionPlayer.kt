@@ -146,13 +146,20 @@ class NagmedarSessionPlayer(looper: Looper, private val source: SessionSource) :
         return done()
     }
 
-    /** Android Auto and Assistant requests arrive as one item carrying a media id or a search. */
+    /**
+     * Android Auto and Assistant requests arrive as one item carrying a media id or a search. 1.0: Media3's legacy stub
+     * (1.4.x) passes a search on as it came, a null query too ("Hey Google, Nağmedar'da çal" may carry none): an item
+     * with no id, no address and no query is that empty search, which plays what played last, as on the legacy session.
+     */
     override fun handleSetMediaItems(mediaItems: List<MediaItem>, startIndex: Int, startPositionMs: Long): ListenableFuture<*> {
         val item = mediaItems.getOrNull(startIndex.coerceAtLeast(0)) ?: mediaItems.firstOrNull() ?: return done()
-        val query = item.requestMetadata.searchQuery
+        val request = item.requestMetadata
+        val query = request.searchQuery
+        val hasId = item.mediaId.isNotEmpty() && item.mediaId != MediaItem.DEFAULT_MEDIA_ID
         when {
-            query != null -> source.playFromSearch(query, item.requestMetadata.extras)
-            item.mediaId.isNotEmpty() && item.mediaId != MediaItem.DEFAULT_MEDIA_ID -> source.playFromMediaId(item.mediaId, item.requestMetadata.extras)
+            query != null -> source.playFromSearch(query, request.extras)
+            hasId -> source.playFromMediaId(item.mediaId, request.extras)
+            request.mediaUri == null && item.localConfiguration == null -> source.playFromSearch("", request.extras)
         }
         return done()
     }

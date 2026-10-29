@@ -27,16 +27,26 @@ class FakeCarData(
     var directory: List<Station> = emptyList(),
     /** The directory cannot be reached. */
     var offline: Boolean = false,
+    /** The medialibrary does not answer in time. */
+    var musicUnavailable: Boolean = false,
 ) : CarData {
     var directoryAsked = 0
 
-    override suspend fun music() = MusicLibrary(tracks, Locale.ROOT)
+    /** The words the directory was asked for stations by, in order. */
+    val stationQueries = ArrayList<String>()
 
-    override suspend fun recentTracks() = recent
+    override suspend fun music() = medialibrary { MusicLibrary(tracks, Locale.ROOT) }
 
-    override suspend fun playlists() = playlists.keys.toList()
+    override suspend fun recentTracks() = medialibrary { recent }
 
-    override suspend fun playlistTracks(id: Long) = playlists.entries.firstOrNull { it.key.id == id }?.value.orEmpty()
+    override suspend fun playlists() = medialibrary { playlists.keys.toList() }
+
+    override suspend fun playlistTracks(id: Long) = medialibrary { playlists.entries.firstOrNull { it.key.id == id }?.value.orEmpty() }
+
+    private fun <T> medialibrary(answer: () -> T): T {
+        if (musicUnavailable) throw MusicUnavailable()
+        return answer()
+    }
 
     override suspend fun feeds() = feeds.sortedBy { it.title }
 
@@ -64,8 +74,10 @@ class FakeCarData(
 
     override suspend fun tagged(tag: String): List<Station> = directory { tagged[tag].orEmpty() }
 
+    /** As radio-browser's name search: the name has the words as they are, in any case; nothing is folded ("ş" is no "s"). */
     override suspend fun findStations(query: String): List<Station> = directory {
-        directory.filter { CarVoice.score(query, it.name) >= CarVoice.PART }
+        stationQueries += query
+        directory.filter { it.name.contains(query, ignoreCase = true) }
     }
 
     private fun <T> directory(answer: () -> T): T {

@@ -69,6 +69,10 @@ object CarVoice {
     private val suffix = Regex("['’`´](?:" + endings.joinToString("|") + ")(?![\\p{L}\\p{N}])")
     private val notWord = Regex("[^\\p{L}\\p{N}]+")
 
+    // a run of letters and digits as said, apostrophes inside ("Eksen'i", "Rock'n'Roll"); the apostrophes it is cut at
+    private val wordRun = Regex("[\\p{L}\\p{M}\\p{N}]+(?:['’`´][\\p{L}\\p{M}\\p{N}]+)*")
+    private val apostrophe = Regex("['’`´]")
+
     /** [text] for comparing: [foldForSearch]'s, without an apostrophe's Turkish ending, one space between words. */
     fun fold(text: String?): String {
         if (text.isNullOrBlank()) return ""
@@ -108,15 +112,52 @@ object CarVoice {
 
     /** [raw] as a request: the command and the app's name taken off, the kind it names at its end (or a podcast at its start) read off. */
     fun parse(raw: String?): VoiceQuery {
-        val words = fold(raw).split(' ').filter { it.isNotEmpty() }.toMutableList()
+        val (words, kind) = request(raw)
+        return VoiceQuery(words.joinToString(" ") { it.folded }, kind)
+    }
+
+    /**
+     * The words of [raw] [parse] keeps, as they were said: their letters and capitals as heard ("Güneş FM"), an
+     * apostrophe's Turkish ending left out. What a service that does not fold searches with (the radio directory).
+     */
+    fun spoken(raw: String?): String = request(raw).first.joinToString(" ") { it.said }
+
+    /** A word of a request: as said, and [fold]ed. */
+    private class Word(val said: String, val folded: String)
+
+    /**
+     * [raw]'s words: each run of letters and digits (apostrophes inside), folded as [fold] folds it; a run [fold] cuts at
+     * its apostrophes ("Rock'n'Roll") gives its parts, its Turkish ending ("Eksen'i") left out of both.
+     */
+    private fun wordsOf(raw: String?): List<Word> {
+        if (raw.isNullOrBlank()) return emptyList()
+        val out = ArrayList<Word>()
+        for (run in wordRun.findAll(raw)) {
+            val folded = fold(run.value).split(' ').filter { it.isNotEmpty() }
+            if (folded.isEmpty()) continue
+            val said = run.value.split(apostrophe).filter { it.isNotEmpty() }
+            if (said.size >= folded.size) {
+                folded.forEachIndexed { i, word -> out += Word(said[i], word) }
+            } else {
+                // a folding that changed the parts: the run as said stands for its first word
+                out += Word(run.value, folded.first())
+                folded.drop(1).forEach { out += Word("", it) }
+            }
+        }
+        return out
+    }
+
+    /** [raw]'s words without the command, the app's name and the kind named, and that kind. */
+    private fun request(raw: String?): Pair<List<Word>, VoiceKind> {
+        val words = wordsOf(raw).toMutableList()
         // "play …", "listen to …"
-        startCommands.map { it.split(' ') }.firstOrNull { command -> words.size > command.size && words.subList(0, command.size) == command }
+        startCommands.map { it.split(' ') }.firstOrNull { command -> words.size > command.size && words.subList(0, command.size).map { it.folded } == command }
             ?.let { command -> repeat(command.size) { words.removeAt(0) } }
         // "… on Nağmedar", "Nağmedar'da …", "… Nağmedar ile"
         stripApp(words)
         var kind = VoiceKind.Any
         while (words.isNotEmpty()) {
-            val last = words.last()
+            val last = words.last().folded
             val named = when (last) {
                 in podcastWords -> VoiceKind.Podcast
                 in radioWords -> VoiceKind.Radio
@@ -133,24 +174,24 @@ object CarVoice {
         }
         // "the podcast …", "podcast …": English names the kind first
         if (kind == VoiceKind.Any) {
-            val lead = if (words.firstOrNull() == "the") 1 else 0
-            if (words.getOrNull(lead) == "podcast" && words.size > lead + 1) {
+            val lead = if (words.firstOrNull()?.folded == "the") 1 else 0
+            if (words.getOrNull(lead)?.folded == "podcast" && words.size > lead + 1) {
                 repeat(lead + 1) { words.removeAt(0) }
                 kind = VoiceKind.Podcast
             }
         }
-        return VoiceQuery(words.joinToString(" "), kind)
+        return words to kind
     }
 
-    private fun stripApp(words: MutableList<String>) {
+    private fun stripApp(words: MutableList<Word>) {
         if (words.isEmpty()) return
-        if (words.last() in app) {
+        if (words.last().folded in app) {
             words.removeAt(words.lastIndex)
-            if (words.isNotEmpty() && words.last() in appLinks) words.removeAt(words.lastIndex)
-        } else if (words.size >= 2 && words[words.lastIndex - 1] in app && words.last() in appLinks) {
+            if (words.isNotEmpty() && words.last().folded in appLinks) words.removeAt(words.lastIndex)
+        } else if (words.size >= 2 && words[words.lastIndex - 1].folded in app && words.last().folded in appLinks) {
             words.removeAt(words.lastIndex)
             words.removeAt(words.lastIndex)
         }
-        if (words.isNotEmpty() && words.first() in app) words.removeAt(0)
+        if (words.isNotEmpty() && words.first().folded in app) words.removeAt(0)
     }
 }

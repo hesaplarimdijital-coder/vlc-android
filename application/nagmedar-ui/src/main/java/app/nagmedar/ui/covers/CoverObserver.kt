@@ -2,6 +2,7 @@ package app.nagmedar.ui.covers
 
 import android.content.Context
 import android.os.SystemClock
+import app.nagmedar.ui.podcast.PodcastCovers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
@@ -21,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap
  * the notification and the lock screen, the media session (Android Auto), the widgets. A kept
  * cover is told at once; the playing track's album's is looked for when it starts (its tags, its
  * folder, Cover Art Archive when allowed), and the service shows it once found. A cover changed in
- * the app shows there too.
+ * the app shows there too. 1.0: also the web images shown there (shows' covers, stations' logos:
+ * [PodcastCovers.webImages]).
  */
 class CoverObserver : PlaybackObserver, AlbumCovers {
 
@@ -60,6 +62,7 @@ class CoverObserver : PlaybackObserver, AlbumCovers {
     override fun attach(service: PlaybackService) {
         use(service.applicationContext)
         CoverHook.covers = this
+        CoverHook.web = PodcastCovers.webImages(service)
         job?.cancel()
         job = AppScope.launch {
             // a cover chosen, looked for again or taken away in the app
@@ -89,7 +92,10 @@ class CoverObserver : PlaybackObserver, AlbumCovers {
     override fun detach() {
         job?.cancel()
         job = null
-        if (CoverHook.covers === this) CoverHook.covers = null
+        if (CoverHook.covers === this) {
+            CoverHook.covers = null
+            CoverHook.web = null
+        }
     }
 
     private companion object {

@@ -13,6 +13,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -87,6 +88,7 @@ import app.nagmedar.ui.cast.rememberCastDevice
 import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.HoverTooltip
 import app.nagmedar.ui.components.IconMenuButton
+import app.nagmedar.ui.components.LocalPlayerSheet
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -146,8 +148,10 @@ import org.videolan.vlc.media.PlaylistManager
  * the track in a playlist; a slim timeline over a faint band of the waveform; the controls low, where one thumb reaches
  * them; under them where it plays (casting, the format and the output), sharing and the queue. Nothing in it is a word
  * that could wrap. The artwork swiped left plays the next track and right the previous; swiped down, or Back, closes
- * the player. Held sideways, the artwork is on the left and the rest beside it. The artist and the album open their
- * tracks in the music view ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock screen's,
+ * the player: in the phone's expanding sheet ([LocalPlayerSheet]) the sheet's own drag and Back do, so that the
+ * player goes down with the finger in one piece (1.0); standing alone (a tablet's overlay) its own. Held sideways,
+ * the artwork is on the left and the rest beside it. The artist and the album open their tracks in the music view
+ * ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock screen's,
  * from the same media session.
  */
 @Composable
@@ -196,8 +200,10 @@ fun PhonePlayer(
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val res = LocalContext.current.resources
+    // in the phone's sheet, a drag down and Back are the sheet's (1.0); standing alone, the player's own
+    val hosted = LocalPlayerSheet.current != null
     val drop = remember { Animatable(0f) }
-    BackHandler(onBack = onClose)
+    if (!hosted) BackHandler(onBack = onClose)
     // S-1007: the sleep timer's window, from the menu
     var sleepOpen by rememberSaveable { mutableStateOf(false) }
     val top = remember(colors, tint) { tint?.let { backdropTop(colors, it) } }
@@ -235,6 +241,7 @@ fun PhonePlayer(
         actions = actions,
         onClose = onClose,
         drop = drop,
+        hosted = hosted,
         artwork = artwork,
         stage = when {
             lyrics != null && lyricsShown -> lyrics
@@ -351,6 +358,8 @@ private class PlayerParts(
     val actions: PlayerBarActions,
     val onClose: () -> Unit,
     val drop: Animatable<Float, AnimationVector1D>,
+    /** In the phone's expanding sheet: a vertical drag on the artwork is the sheet's, not [drop]'s. */
+    val hosted: Boolean,
     val artwork: @Composable (Dp) -> Unit,
     /** The lyrics or the visualiser in the artwork's place; null: the artwork. */
     val stage: (@Composable (Modifier) -> Unit)?,
@@ -420,62 +429,70 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                     CustomAccessibilityAction(close) { latestClose(); true },
                 )
             }
-            .pointerInput(Unit) {
+            .pointerInput(parts.hosted) {
                 val sideways = with(density) { SWIPE.toPx() }
                 val down = with(density) { CLOSE.toPx() }
                 var dx = 0f
                 var dy = 0f
-                detectDragGestures(
-                    onDragStart = {
-                        dx = 0f
-                        dy = 0f
-                        // a swipe again before the last one's picture has gone: it goes now
-                        if (handover?.isActive == true) {
-                            handover?.cancel()
-                            scope.launch { swipe.snapTo(0f) }
-                        }
-                    },
-                    onDragEnd = {
-                        val horizontal = abs(dx) > abs(dy)
-                        val change: (() -> Unit)? = when {
-                            horizontal && dx <= -sideways -> latestActions::next
-                            horizontal && dx >= sideways -> latestActions::previous
-                            else -> null
-                        }
-                        if (change != null) {
-                            handover = scope.launch {
-                                handing = true
-                                leaving.snapTo(1f)
-                                change()
-                                launch { drop.animateTo(0f, settle) }
-                                try {
-                                    leaving.animateTo(0f, motion.exit(NagMotion.MEDIUM))
-                                } finally {
-                                    handing = false
-                                }
-                                swipe.snapTo(0f)
+                val start: (Offset) -> Unit = {
+                    dx = 0f
+                    dy = 0f
+                    // a swipe again before the last one's picture has gone: it goes now
+                    if (handover?.isActive == true) {
+                        handover?.cancel()
+                        scope.launch { swipe.snapTo(0f) }
+                    }
+                }
+                val end: () -> Unit = {
+                    val horizontal = abs(dx) > abs(dy)
+                    val change: (() -> Unit)? = when {
+                        horizontal && dx <= -sideways -> latestActions::next
+                        horizontal && dx >= sideways -> latestActions::previous
+                        else -> null
+                    }
+                    if (change != null) {
+                        handover = scope.launch {
+                            handing = true
+                            leaving.snapTo(1f)
+                            change()
+                            launch { drop.animateTo(0f, settle) }
+                            try {
+                                leaving.animateTo(0f, motion.exit(NagMotion.MEDIUM))
+                            } finally {
+                                handing = false
                             }
-                        } else {
-                            scope.launch {
-                                if (!horizontal && dy >= down) latestClose()
-                                // back to rest on the spatial spring, both at once
-                                launch { swipe.animateTo(0f, settle) }
-                                drop.animateTo(0f, settle)
-                            }
+                            swipe.snapTo(0f)
                         }
-                    },
-                    onDragCancel = {
+                    } else {
                         scope.launch {
+                            if (!horizontal && dy >= down) latestClose()
+                            // back to rest on the spatial spring, both at once
                             launch { swipe.animateTo(0f, settle) }
                             drop.animateTo(0f, settle)
                         }
-                    },
-                ) { change, amount ->
-                    change.consume()
-                    dx += amount.x
-                    dy += amount.y
+                    }
+                }
+                val cancel: () -> Unit = {
                     scope.launch {
-                        if (abs(dx) > abs(dy)) swipe.snapTo(dx) else drop.snapTo(dy.coerceAtLeast(0f))
+                        launch { swipe.animateTo(0f, settle) }
+                        drop.animateTo(0f, settle)
+                    }
+                }
+                if (parts.hosted) {
+                    // in the sheet only the sideways swipe is the artwork's: a drag down moves the sheet itself
+                    detectHorizontalDragGestures(onDragStart = start, onDragEnd = end, onDragCancel = cancel) { change, amount ->
+                        change.consume()
+                        dx += amount
+                        scope.launch { swipe.snapTo(dx) }
+                    }
+                } else {
+                    detectDragGestures(onDragStart = start, onDragEnd = end, onDragCancel = cancel) { change, amount ->
+                        change.consume()
+                        dx += amount.x
+                        dy += amount.y
+                        scope.launch {
+                            if (abs(dx) > abs(dy)) swipe.snapTo(dx) else drop.snapTo(dy.coerceAtLeast(0f))
+                        }
                     }
                 }
             },
@@ -660,7 +677,9 @@ fun PhonePlayerHost(
         return
     }
     val progress by rememberPlaybackProgress(nowPlaying)
-    val waveform = rememberWaveform(media.uri?.toString())
+    // the phone's player, composed while it waits: the waveform is measured for a track once the player is out
+    val sheet = LocalPlayerSheet.current
+    val waveform = rememberWaveform(media.uri?.toString()) { sheet?.shown != false }
     val path = rememberSignalPath()
     val shuffling by PlaylistManager.shuffling.collectAsState()
     val repeating by PlaylistManager.repeating.collectAsState()
@@ -688,8 +707,9 @@ fun PhonePlayerHost(
         PlaySources.playingFrom(started, PlaySources.locationOf(media), queue.entries.mapNotNull { entry -> entry.media?.let(PlaySources::locationOf) })
     }
     val tint = rememberArtworkColor(media)
-    // Desktop Kit 1.0: the player takes the artwork's accent too, cross-fading from one track to the next
-    ArtworkAccent(tint) {
+    // Desktop Kit 1.0: the player takes the artwork's accent too; in the phone's sheet it has it from the mini player's
+    // (PlayerBar), standing alone (a tablet's overlay) from its own
+    AccentUnless(sheet != null, tint) {
         PhonePlayer(
             info = NowPlayingInfo(
                 title = media.nowPlaying ?: media.title ?: "",
@@ -740,6 +760,12 @@ fun PhonePlayerHost(
     }
     if (adding) AddToPlaylistHost(listOf(track), scope) { adding = false }
     if (rating && key != null) RatingDialog(listOf(track), stats, onRate = { stars -> TrackStatsIndex.rate(context, key, stars) }, onDismiss = { rating = false })
+}
+
+/** [content] with the artwork's accent of [seed] ([ArtworkAccent]), unless [given]: the caller's already is. */
+@Composable
+private fun AccentUnless(given: Boolean, seed: Color?, content: @Composable () -> Unit) {
+    if (given) content() else ArtworkAccent(seed, content)
 }
 
 /** What plays shared with the system's sheet: the file itself where there is one, its address otherwise. */

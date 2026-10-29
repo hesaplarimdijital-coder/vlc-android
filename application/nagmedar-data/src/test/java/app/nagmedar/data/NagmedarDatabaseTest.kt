@@ -110,6 +110,48 @@ class NagmedarDatabaseTest {
         assertNull(podcasts.feed(999))
     }
 
+    /** 1.0: what Android Auto reads of the podcasts: the episodes left in the middle, the new ones, every title, some by id. */
+    @Test
+    fun androidAutosPodcastQueries() {
+        val podcasts = db.podcasts()
+        fun episode(guid: String, at: Long, added: Long = 1_000) =
+            PodcastEpisode(feedId = 0, guid = guid, title = "Bölüm $guid", audioUrl = "https://example.org/$guid.mp3", publishedAt = at, addedAt = added)
+        val zebra = podcasts.subscribeWith(
+            PodcastFeed(feedUrl = "https://example.org/z.xml", title = "Zebra", subscribedAt = 1_000),
+            listOf(episode("a", 10), episode("b", 20), episode("c", 30, added = 5_000), episode("d", 40, added = 5_000)),
+        )
+        val agac = podcasts.subscribeWith(
+            PodcastFeed(feedUrl = "https://example.org/a.xml", title = "Ağaç", subscribedAt = 8_000),
+            // added before this show's own subscription: not new, though after Zebra's
+            listOf(episode("e", 50, added = 6_000), episode("f", 60, added = 9_000)),
+        )
+        val ids = (podcasts.episodeList(zebra) + podcasts.episodeList(agac)).associate { it.guid to it.id }
+
+        // left in the middle: a place kept and not played
+        podcasts.savePosition(ids.getValue("a"), positionMs = 60_000, played = false)
+        podcasts.savePosition(ids.getValue("b"), positionMs = 90_000, played = true)
+        podcasts.savePosition(ids.getValue("e"), positionMs = 30_000, played = false)
+        assertEquals(setOf("a", "e"), podcasts.inProgress().map { it.guid }.toSet())
+
+        // new: unplayed, added after its own show's subscription, the newest first, as many as asked
+        assertEquals(listOf("f", "d", "c"), podcasts.newEpisodeList(10).map { it.guid })
+        podcasts.setPlayed(ids.getValue("d"), true)
+        assertEquals(listOf("f", "c"), podcasts.newEpisodeList(10).map { it.guid })
+        assertEquals(listOf("f"), podcasts.newEpisodeList(1).map { it.guid })
+
+        // every title with its show, the newest first
+        val titles = podcasts.episodeTitles()
+        assertEquals(listOf("f", "e", "d", "c", "b", "a").map { "Bölüm $it" }, titles.map { it.title })
+        assertEquals(agac, titles.first().feedId)
+        assertEquals(ids.getValue("f"), titles.first().id)
+
+        // by id, whole rows; an id that is none is left out
+        val some = podcasts.episodesById(listOf(ids.getValue("c"), ids.getValue("e"), 999))
+        assertEquals(setOf("c", "e"), some.map { it.guid }.toSet())
+        assertEquals("https://example.org/c.mp3", some.first { it.guid == "c" }.audioUrl)
+        assertTrue(podcasts.episodesById(emptyList()).isEmpty())
+    }
+
     /** Version 21: a refresh keeps the language chosen for Whisper and the episode's own transcript; a gone episode changes nothing. */
     @Test
     fun anEpisodesOwnTranscriptAndTheShowsLanguageOutliveARefresh() {

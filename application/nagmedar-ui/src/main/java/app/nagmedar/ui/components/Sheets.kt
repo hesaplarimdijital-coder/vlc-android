@@ -35,6 +35,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentCompositionLocalContext
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -236,13 +237,17 @@ fun MoreSheet(
 /** The groups a sheet shows, kept while it goes down. */
 private class ActionGroupsKept(var groups: List<ActionGroup>)
 
-/** A "⋯" icon button that opens [MoreSheet] with [groups] (a menu under the button on wider windows). */
+/**
+ * A "⋯" icon button that opens [MoreSheet] with [groups] (a menu under the button on wider windows).
+ * A screen reader reads it with [title], the item's name ([moreActionsLabel]), unless
+ * [contentDescription] says otherwise.
+ */
 @Composable
 fun MoreButton(
     groups: () -> List<ActionGroup>,
     modifier: Modifier = Modifier,
     title: String? = null,
-    contentDescription: String = stringResource(R.string.nag_more_actions),
+    contentDescription: String = moreActionsLabel(title),
 ) {
     var open by remember { mutableStateOf(false) }
     var height by remember { mutableIntStateOf(0) }
@@ -268,6 +273,14 @@ fun MoreButton(
         )
     }
 }
+
+/**
+ * What an item's "⋯" button is read as: "Sabaha Kadar için diğer işlemler" with the item's [name],
+ * so that a screen reader tells one row's button from the next; "Diğer işlemler" without one.
+ */
+@Composable
+fun moreActionsLabel(name: String?): String =
+    if (name.isNullOrBlank()) stringResource(R.string.nag_more_actions) else stringResource(R.string.nag_more_actions_for, name)
 
 /** The rows of [MoreSheet]: group captions, then one row per action. */
 @Composable
@@ -334,7 +347,9 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
  * 640 dp wide, centred; [label] names it for a screen reader.
  *
  * In the shell's window it is drawn in the shell's overlay over everything (and blurs the screen
- * behind it); elsewhere (in a dialog, before the shell) in a window of its own, solid.
+ * behind it); elsewhere (in a dialog, before the shell) in a window of its own, solid. Closed and
+ * at rest it is nothing at all (1.0's review: every row's "⋯" holds one): only while it is open or
+ * going down does it animate, take the overlay, the focus and Back.
  */
 @Composable
 fun GlassBottomSheet(
@@ -344,8 +359,12 @@ fun GlassBottomSheet(
     label: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val tier = LocalMotionTier.current
     val progress = remember { Animatable(0f) }
+    // open, or still going down; read from the animation without recomposing on its frames
+    val showing by remember(visible) { derivedStateOf { visible || progress.value > 0f } }
+    // closed and at rest (every row's "⋯" and menu has one): no animation, no overlay, no focus, no blur
+    if (!showing) return
+    val tier = LocalMotionTier.current
     val drag = remember { Animatable(0f) }
     LaunchedEffect(visible) {
         if (visible) {
@@ -355,8 +374,6 @@ fun GlassBottomSheet(
             progress.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate)))
         }
     }
-    val showing = visible || progress.value > 0f || progress.isRunning
-    if (!showing) return
     val latestDismiss by rememberUpdatedState(onDismiss)
     val host = shellOverlayHere()
     if (host != null) {

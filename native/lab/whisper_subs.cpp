@@ -285,7 +285,7 @@ struct Run {
 } // namespace
 
 extern "C" char *whisper_subs_run(const char *model, const char *input, int audio_track, const char *language, int translate, int threads,
-                                  int gpu, const WsCallbacks *cb, volatile int *cancel)
+                                  int gpu, int64_t start_ms, const WsCallbacks *cb, volatile int *cancel)
 {
     auto started = std::chrono::steady_clock::now();
     std::string code, detail;
@@ -312,7 +312,25 @@ extern "C" char *whisper_subs_run(const char *model, const char *input, int audi
         pcm.reserve(PIECE + RATE);
         /* samples of the track before pcm[0] */
         int64_t offset = 0;
-        while (true) {
+        // a job taken up again goes on where the one before it stopped: the audio before is decoded and left
+        int64_t skip = start_ms > s.lead_ms ? (start_ms - s.lead_ms) * RATE / 1000 : 0;
+        while (skip > 0) {
+            if (!decode_more(s, pcm, PIECE, cancel, detail)) {
+                code = "decoder";
+                break;
+            }
+            if (cancel && *cancel) {
+                code = "cancelled";
+                break;
+            }
+            size_t drop = static_cast<size_t>(std::min<int64_t>(skip, static_cast<int64_t>(pcm.size())));
+            pcm.erase(pcm.begin(), pcm.begin() + static_cast<std::ptrdiff_t>(drop));
+            offset += static_cast<int64_t>(drop);
+            skip -= static_cast<int64_t>(drop);
+            if (s.eof)
+                break;
+        }
+        while (code.empty()) {
             if (!decode_more(s, pcm, PIECE, cancel, detail)) {
                 code = "decoder";
                 break;

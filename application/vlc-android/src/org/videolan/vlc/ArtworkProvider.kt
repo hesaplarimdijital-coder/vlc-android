@@ -45,7 +45,6 @@ import org.videolan.libvlc.FactoryManager
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.interfaces.IMediaFactory
 import org.videolan.medialibrary.MLServiceLocator
-import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.Album
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.MediaLibraryItem
@@ -56,19 +55,15 @@ import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.BitmapUtil
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
 import org.videolan.vlc.media.CoverHook
-import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.util.AccessControl
 import org.videolan.vlc.util.ThumbnailsProvider
+import org.videolan.vlc.util.isSchemeHttpOrHttps
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.security.SecureRandom
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
-import java.util.zip.CRC32
 import kotlin.math.max
 
 private const val TAG = "VLC/ArtworkProvider"
@@ -98,15 +93,12 @@ private const val ENABLE_TRACING = false
  * content://org.videolan.vlc.artwork/album/<track count>/<id>
  * content://org.videolan.vlc.artwork/artist/<track count>/<id>
  * content://org.videolan.vlc.artwork/media/<last modified>/<id>
- * content://org.videolan.vlc.artwork/play_all/artist/<track count>/<id>
- * content://org.videolan.vlc.artwork/play_all/genre/<track count>/<id>
- * content://org.videolan.vlc.artwork/play_all/playlist/<CRC32 checksum>/<track count>/<id>
- * content://org.videolan.vlc.artwork/shuffle_all/<half day expiration time>/<track count>
- * content://org.videolan.vlc.artwork/history/<XOR checksum>/<track count>
- * content://org.videolan.vlc.artwork/last_added/<XOR checksum>/<track count>
+ * content://org.videolan.vlc.artwork/playlist/<id>
  *
  * Non-Medialibrary remote cache:
  * content://org.videolan.vlc.artwork/remote?path=<encoded uri>
+ *
+ * 1.0: the old Android Auto home's images (history, last added, shuffle all, play all) are gone with its tree.
  */
 class ArtworkProvider : ContentProvider() {
 
@@ -127,9 +119,6 @@ class ArtworkProvider : ContentProvider() {
             val remoteAccess = uri.getQueryParameter(REMOTE_ACCESS)  == "1"
             //retrieve thumbnails.
             when (uriSegments[0]) {
-                HISTORY -> getPFDFromByteArray(getHistory(ctx))
-                LAST_ADDED -> getPFDFromByteArray(getLastAdded(ctx))
-                SHUFFLE_ALL -> getPFDFromByteArray(getShuffleAll(ctx))
                 VIDEO -> if (remoteAccess)
                     getMediaImage(ctx, ContentUris.parseId(uri), false, fallbackIcon =  if (bigVariant) R.drawable.ic_remote_video_unknown_big else R.drawable.ic_remote_video_unknown, isLarge = true)
                 else
@@ -140,8 +129,6 @@ class ArtworkProvider : ContentProvider() {
                 REMOTE -> getRemoteImage(ctx, uri.getQueryParameter(PATH))
                 GENRE -> if (remoteAccess) getGenreImage(ctx, ContentUris.parseId(uri), fallbackIcon = if (bigVariant) R.drawable.ic_remote_genre_unknown_big else R.drawable.ic_remote_genre_unknown) else getGenreImage(ctx, ContentUris.parseId(uri))
                 PLAYLIST -> if (remoteAccess) getPlaylistImage(ctx, ContentUris.parseId(uri), fallbackIcon = if (bigVariant) R.drawable.ic_remote_playlist_unknown_big else R.drawable.ic_remote_playlist_unknown) else getPlaylistImage(ctx, ContentUris.parseId(uri))
-                PLAY_ALL -> getPlayAllImage(ctx, uriSegments[1], ContentUris.parseId(uri),
-                        uri.getBooleanQueryParameter(SHUFFLE, false))
                 else -> throw FileNotFoundException("Uri is not supported: $uri")
             }
         } catch (e: Exception) {
@@ -153,13 +140,18 @@ class ArtworkProvider : ContentProvider() {
      * Load an image from a remote path and cache it in memory. When a URI is passed to the OS for
      * cover art it is requested from several different places, such as Android Auto, bluetooth, etc.
      * Rather than going over the network repeatedly we request it once and return it internally.
+     *
+     * 1.0: a web address (a show's cover, an episode's image, a station's logo) is fetched by the app's
+     * own fetcher ([CoverHook.webFile]: its User-Agent and timeouts, once, kept on disk), outside the
+     * memory cache's lock; without it there is the placeholder. Decoded for [width] pixels.
      */
     private fun getRemoteImage(ctx: Context, path: String?): ParcelFileDescriptor? {
         val width = 512
         if (path == null) return null
+        val local = if (isSchemeHttpOrHttps(path)) runBlocking(Dispatchers.IO) { CoverHook.webFile(path)?.path } else path
         val image = getOrPutImage(path) {
             runBlocking(Dispatchers.IO) {
-                var bitmap = AudioUtil.readCoverBitmap(path, width)
+                var bitmap = local?.let { AudioUtil.readCoverBitmap(it, width) }
                 if (bitmap != null) bitmap = padSquare(bitmap)
                 if (bitmap == null) bitmap = ctx.getBitmapFromDrawable(noCover(MediaWrapper.TYPE_AUDIO), width, width)
                 return@runBlocking BitmapUtil.encodeImage(bitmap, ENABLE_TRACING){
@@ -325,91 +317,6 @@ class ArtworkProvider : ContentProvider() {
         return getPFDFromBitmap(bitmap)
     }
 
-    private fun getPlayAllImage(ctx: Context, type: String, id: Long, shuffle: Boolean): ParcelFileDescriptor {
-        val bitmap = runBlocking(Dispatchers.IO) {
-            val tracks = when (type) {
-                GENRE -> ctx.getFromMl { getGenre(id)?.albums?.flatMap { it.tracks.toList() } }
-                ARTIST -> ctx.getFromMl { getArtist(id)?.tracks?.toList() }
-                PLAYLIST -> ctx.getFromMl { getPlaylist(id, true, false)?.tracks?.toList() }
-                else -> null
-            }
-            val cover = tracks?.let {
-                val iconAddition = when {
-                    type == PLAYLIST -> null
-                    shuffle -> ctx.getBitmapFromDrawable(R.drawable.ic_auto_shuffle_circle)
-                    else -> ctx.getBitmapFromDrawable(R.drawable.ic_auto_playall_circle)
-                }
-                val key = if (shuffle) "${type}_shuffle" else type
-                ThumbnailsProvider.getPlaylistOrGenreImage("${key}:${id}_256", tracks, 256, iconAddition)
-            }
-            return@runBlocking when {
-                cover != null -> cover
-                type == PLAYLIST -> ctx.getBitmapFromDrawable(R.drawable.ic_auto_playlist_unknown)
-                else -> ctx.getBitmapFromDrawable(R.drawable.ic_auto_playall)
-            }
-        }
-        return getPFDFromBitmap(bitmap)
-    }
-
-    private fun getHistory(ctx: Context): ByteArray? {
-        return runBlocking(Dispatchers.IO) {
-            /* Last Played */
-            val lastMediaPlayed = ctx.getFromMl { history(Medialibrary.HISTORY_TYPE_LOCAL)?.toList()?.filter { MediaSessionBrowser.isMediaAudio(it) } }
-            if (!lastMediaPlayed.isNullOrEmpty()) {
-                return@runBlocking getHomeImage(ctx, HISTORY, lastMediaPlayed.toTypedArray())
-            }
-            null
-        }
-    }
-
-    private fun getShuffleAll(ctx: Context): ByteArray? {
-        return runBlocking(Dispatchers.IO) {
-            /* Shuffle All */
-            val audioCount = ctx.getFromMl { audioCount }
-            /* Show cover art from the whole library */
-            val offset = SecureRandom().nextInt((audioCount - MediaSessionBrowser.MAX_COVER_ART_ITEMS).coerceAtLeast(1))
-            val list = ctx.getFromMl { getPagedAudio(Medialibrary.SORT_ALPHA, false, false, false, MediaSessionBrowser.MAX_COVER_ART_ITEMS, offset) }
-            return@runBlocking getHomeImage(ctx, SHUFFLE_ALL, list)
-        }
-    }
-
-    private fun getLastAdded(ctx: Context): ByteArray? {
-        return runBlocking(Dispatchers.IO) {
-            /* Last Added */
-            val recentAudio = ctx.getFromMl { getPagedAudio(Medialibrary.SORT_INSERTIONDATE, true, false, false, MediaSessionBrowser.MAX_HISTORY_SIZE, 0) }
-            return@runBlocking getHomeImage(ctx, LAST_ADDED, recentAudio)
-        }
-    }
-
-    /**
-     *  Generate shuffle all, last added, and history images for the home screen.
-     */
-    private suspend fun getHomeImage(context: Context, key: String, list: Array<MediaWrapper>?): ByteArray? {
-        var cover: Bitmap? = null
-        val tracks: ArrayList<MediaWrapper> = ArrayList()
-        list?.let {
-            tracks.ensureCapacity(list.size.coerceAtMost(MediaSessionBrowser.MAX_COVER_ART_ITEMS))
-            for (libraryItem in list) {
-                if (libraryItem.itemType == MediaLibraryItem.TYPE_MEDIA && libraryItem.type != MediaWrapper.TYPE_AUDIO)
-                    continue
-                tracks.add(libraryItem)
-                if (tracks.size == MediaSessionBrowser.MAX_COVER_ART_ITEMS) break
-            }
-            if (tracks.any { mw -> mw.artworkMrl != null && mw.artworkMrl.isNotEmpty() }) {
-                val iconAddition = when (key) {
-                    SHUFFLE_ALL -> getBitmapFromDrawable(context, R.drawable.ic_auto_shuffle_circle)
-                    LAST_ADDED -> getBitmapFromDrawable(context, R.drawable.ic_auto_new_circle)
-                    HISTORY -> getBitmapFromDrawable(context, R.drawable.ic_auto_history_circle)
-                    else -> null
-                }
-                cover = ThumbnailsProvider.getPlaylistOrGenreImage("${key}_256", tracks, 256, iconAddition)
-            }
-        }
-        return BitmapUtil.encodeImage(cover ?: context.getBitmapFromDrawable(R.drawable.ic_auto_playall), ENABLE_TRACING){
-            getTimestamp()
-        }
-    }
-
     /**
      * Test if the cover art image is square to determine if padding is required. Also check if the
      * image is larger than 2000x2000px. Images 3000x3000px crash Android Auto.
@@ -551,12 +458,7 @@ class ArtworkProvider : ContentProvider() {
         const val MEDIA = "media"
         const val ARTIST = "artist"
         const val REMOTE = "remote"
-        const val HISTORY = "history"
         const val PLAYLIST = "playlist"
-        const val PLAY_ALL = "play_all"
-        const val LAST_ADDED = "last_added"
-        const val SHUFFLE = "shuffle"
-        const val SHUFFLE_ALL = "shuffle_all"
 
         /**
          * Nağmedar: the cover of a media that has none, as the new interface draws it: a film's
@@ -589,23 +491,6 @@ class ArtworkProvider : ContentProvider() {
         }
 
         /**
-         * Compute an expiration time for thumbs we would like to periodically rotate.
-         * @param halfDayExpiration If true (default), return the time rounded to midnight,
-         * if between midnight and noon, or time rounded to noon, if between noon and midnight.
-         * If false, return the current time (will always refresh thumbnail on page load).
-         */
-        fun computeExpiration(halfDayExpiration: Boolean = true): String {
-            val cal = Calendar.getInstance()
-            if (halfDayExpiration) {
-                cal.set(Calendar.HOUR_OF_DAY, if (cal.get(Calendar.HOUR_OF_DAY) < 12) 0 else 12)
-                cal.set(Calendar.MINUTE, 0)
-                cal.set(Calendar.SECOND, 0)
-                cal.set(Calendar.MILLISECOND, 0)
-            }
-            return cal.timeInMillis.toString()
-        }
-
-        /**
          * Construct the URI used to access this content provider
          */
         fun buildUri(ctx: Context, path: Uri?): Uri {
@@ -631,31 +516,5 @@ class ArtworkProvider : ContentProvider() {
                     .build())
         }
 
-        /**
-         * Compute either a CRC32 or a simple XOR checksum. For playlists, the CRC32 enables
-         * detection if the contents of the playlist are re-ordered. This is important for capturing
-         * the cover art change for playlists with videos. For last added and history on the home
-         * screen we actually want to ignore re-ordering. If the user likes to play the
-         * same songs from their history over and over, it will simply re-sort the history. As XOR
-         * is commutative, the value computed will be the same and the cached image will be shown.
-         */
-        fun computeChecksum(list: List<MediaWrapper>, detectReordering: Boolean = false): Long {
-            if (detectReordering) {
-                val checksum = CRC32()
-                val buffer = ByteBuffer.allocate(Long.SIZE_BYTES)
-                list.forEach {
-                    buffer.putLong(it.lastModified)
-                    checksum.update(buffer.array())
-                    buffer.clear()
-                }
-                return checksum.value
-            } else {
-                var checksum = 0L
-                list.forEach {
-                    checksum = checksum xor it.lastModified
-                }
-                return checksum
-            }
-        }
     }
 }

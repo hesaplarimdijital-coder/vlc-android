@@ -16,10 +16,18 @@ class SessionButtonsTest {
     @Test
     fun anEpisodeHasItsSkipsEverywhere() {
         val skips = listOf(EpisodeBack, EpisodeForward)
-        // Android Auto, the system's controls, an older phone: the same two, whatever Settings says
-        assertEquals(skips, SessionButtons.of(episode = true, carMode = true, systemControls = true, seekButtons = true, speedButtons = true))
+        // the system's controls, an older phone: the same two, whatever Settings says
+        assertEquals(skips, SessionButtons.of(episode = true, carMode = false, systemControls = true, seekButtons = true, speedButtons = true))
         assertEquals(skips, SessionButtons.of(episode = true, carMode = false, systemControls = true))
         assertEquals(skips, SessionButtons.of(episode = true, carMode = false, systemControls = false))
+    }
+
+    @Test
+    fun anEpisodeInTheCarAlsoHasItsSpeed() {
+        val car = listOf(EpisodeBack, EpisodeForward, Speed)
+        // as 0.5's podcast mode had it, whatever Settings says of the music's buttons
+        assertEquals(car, SessionButtons.of(episode = true, carMode = true, systemControls = true))
+        assertEquals(car, SessionButtons.of(episode = true, carMode = true, systemControls = false, seekButtons = true, speedButtons = false))
     }
 
     @Test

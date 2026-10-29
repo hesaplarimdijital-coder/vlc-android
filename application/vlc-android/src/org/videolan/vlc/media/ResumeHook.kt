@@ -50,8 +50,20 @@ interface DropoutGuard {
     /** The playlist stops: a media waiting to be opened again is left. */
     fun stopped()
 
-    /** Whether a media is waiting to be opened again: the service stays in the foreground, the Wi-Fi awake. */
+    /**
+     * Whether an opening again is pending: libVLC stopped on the media, which is not opened yet. The playlist then shows
+     * it playing or paused as it was ([DropoutHold]); a pause makes it open paused, a stop leaves it.
+     */
+    val reopenPending: Boolean
+
+    /**
+     * Whether the service holds on for the media: an opening again pending, or opened and not playing on yet (not
+     * while it is paused). The service stays in the foreground, the Wi-Fi awake.
+     */
     val recovering: Boolean
+
+    /** The listener plays while an opening is [reopenPending]: one given up while it was paused is opened now. */
+    fun playRequested() {}
 }
 
 object ResumeHook {
