@@ -7,7 +7,8 @@ becomes a lazily built Compose ImageVector (tinted by Icon()).
 
 The same icons drawn as Android vector drawables, where Compose cannot draw (drawables() below:
 the cover of a media that has none, the speed button of the notification and of Android Auto,
-the launcher's shortcuts), are written into a resource directory when one is given.
+an episode's 15 s back and 30 s forward buttons, Android Auto's tabs and lists, the launcher's
+shortcuts), are written into a resource directory when one is given.
 
 Usage: gen_icons.py <output .kt file> [<res directory>]
   e.g. gen_icons.py application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/NagIcons.kt \
@@ -264,6 +265,31 @@ def speed_svg(speed):
         num(SPEED_HUB[0]), num(SPEED_HUB[1]), num(dx), num(dy))
 
 
+# 1.0: an episode's skip buttons (SessionButtons): the Resume and Forward arcs with the seconds inside, drawn thinner
+SKIP_DIGITS = {
+    15: 'M5.6 6.8 6.6 6v4M10.3 6H8.4l-.2 1.8c.3-.2.7-.3 1-.3.8 0 1.3.5 1.3 1.25S9.95 10 9.2 10c-.5 0-.9-.2-1.2-.5',
+    30: 'M5.5 6.4c.2-.25.55-.4.95-.4.65 0 1.1.4 1.1 1s-.45.95-1.1.95H6.2M6.45 7.95c.7 0 1.2.45 1.2 1.03S7.15 10 6.45 10'
+        'c-.4 0-.75-.15-1-.4M9.6 6c-.6 0-1 .85-1 2s.4 2 1 2 1-.85 1-2-.4-2-1-2z',
+}
+SKIP_DIGIT_STROKE = '1.1'
+
+# 1.0: Android Auto's tabs and the lists under them, by the icon each is drawn with
+AUTO_ICONS = (
+    ('music', 'Music'), ('podcasts', 'Podcasts'), ('radio', 'Radio'), ('recent', 'History'),
+    ('albums', 'Albums'), ('artists', 'Artists'), ('playlists', 'ListView'), ('years', 'Chapters'), ('folders', 'Folder'),
+    ('continue', 'Resume'), ('new', 'Plus'), ('favourites', 'StarFilled'), ('categories', 'Grid'),
+)
+
+
+def skip(comment, arc, seconds):
+    """An episode's skip button: [arc] (Resume or Forward) with [seconds] written inside it."""
+    digits = ('    <path\n        android:fillColor="#00000000"\n        android:pathData="%s"\n'
+              '        android:strokeColor="%s"\n        android:strokeLineCap="round"\n'
+              '        android:strokeLineJoin="round"\n        android:strokeWidth="%s" />\n') % (
+        SKIP_DIGITS[seconds], WHITE, SKIP_DIGIT_STROKE)
+    return vector(comment, 24, 16, drawable_paths(ICONS[arc], WHITE, '    ') + digits)
+
+
 def drawable_paths(svg, color, indent):
     """The icon's parts as <path> elements: strokes 1.6 wide with round ends, fills."""
     out = []
@@ -337,11 +363,14 @@ def drawables():
         label = ('%.2f' % speed).replace('.', '_')
         out.append(('drawable', 'nagmedar_notif_speed_' + label,
                     glyph('the playback speed button at %s×, its needle turned to it' % num(speed), speed_svg(speed), WHITE, 24)))
+    out.append(('drawable', 'nagmedar_episode_back_15', skip('an episode\'s 15 s back button (Android Auto, the notification)', 'Resume', 15)))
+    out.append(('drawable', 'nagmedar_episode_forward_30', skip('an episode\'s 30 s forward button (Android Auto, the notification)', 'Forward', 30)))
+    for short, icon in AUTO_ICONS:
+        out.append(('drawable', 'nagmedar_auto_' + short, glyph('Android Auto\'s %s' % short, ICONS[icon], WHITE, 48)))
     # res/xml/shortcuts.xml of vlc-android
     shortcuts = (
         ('resume', 'Play', 'the launcher shortcut that resumes the music'),
         ('device', 'Device', 'the launcher shortcut to This device'),
-        ('video', 'Movies', 'the launcher shortcut to the films'),
         ('audio', 'Music', 'the launcher shortcut to the music'),
     )
     for short, icon, comment in shortcuts:

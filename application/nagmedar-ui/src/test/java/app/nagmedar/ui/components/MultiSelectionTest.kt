@@ -52,4 +52,26 @@ class MultiSelectionTest {
         assertTrue(selection.keys.isEmpty())
         assertEquals(null, selection.anchor)
     }
+
+    @Test
+    fun shiftArrowsGrowTheRangeFromTheAnchor() {
+        val selection = MultiSelection()
+        selection.click("b", order)
+        assertTrue(selection.extend("b", order, 1))
+        assertEquals(setOf("b", "c"), selection.keys)
+        assertTrue(selection.extend("c", order, 1))
+        assertEquals(setOf("b", "c", "d"), selection.keys)
+        // back up past the anchor: the range turns round it
+        assertTrue(selection.extend("d", order, -1))
+        assertTrue(selection.extend("c", order, -1))
+        assertTrue(selection.extend("b", order, -1))
+        assertEquals(setOf("a", "b"), selection.keys)
+        // at either end nothing changes
+        assertEquals(false, selection.extend("a", order, -1))
+        assertEquals(setOf("a", "b"), selection.keys)
+        // without an anchor the range starts at the focused item
+        selection.clear()
+        assertTrue(selection.extend("e", order, -1))
+        assertEquals(setOf("d", "e"), selection.keys)
+    }
 }

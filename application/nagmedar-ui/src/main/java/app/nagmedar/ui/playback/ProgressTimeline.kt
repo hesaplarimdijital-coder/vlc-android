@@ -432,7 +432,7 @@ private fun BoxScope.TimeBubble(text: String, anchorPx: Float, widthPx: Float) {
  * Bar heights 0..1 for [count] bars from the waveform's buckets: the loudness (RMS) with a share of the peak, each
  * bar averaged with its neighbours, so that the outline is soft.
  */
-private fun softLevels(waveform: Waveform, count: Int): FloatArray {
+internal fun softLevels(waveform: Waveform, count: Int): FloatArray {
     val raw = FloatArray(count) { index ->
         val from = index * waveform.size / count
         val to = max(from + 1, (index + 1) * waveform.size / count).coerceAtMost(waveform.size)

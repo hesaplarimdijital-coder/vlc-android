@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuBarMenus
@@ -32,6 +33,7 @@ import app.nagmedar.ui.playback.TransportBar
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
@@ -66,6 +68,12 @@ fun TestShell(
     caption: CaptionBar? = null,
     /** What the bars show (S-1302: casting). */
     playerInfo: PlayerBarInfo = samplePlayerInfo,
+    /** Desktop Kit 1.0: the player bar floats over a tablet's and a desktop window's content as glass, as in the app. */
+    floatingPlayer: Boolean = false,
+    /** Another player in the bars' place (Desktop Kit 1.0: the phone's expandable player); null: the sample bars. */
+    player: (@Composable (NavKind) -> Unit)? = null,
+    /** The phone's "⋯" sheet's own entries. */
+    moreActions: List<ActionGroup> = emptyList(),
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -88,11 +96,13 @@ fun TestShell(
             val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
             if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
-        player = { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
+        player = player ?: { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
         overlay = overlay,
         caption = caption,
         screen = screen,
+        floatingPlayer = floatingPlayer,
+        moreActions = moreActions,
     )
 }
 
@@ -158,9 +168,11 @@ object NoPlayerActions : PlayerBarActions {
 @Composable
 fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions, queueOpen: Boolean = false) {
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
+    // in the shell's floating glass bar, as the app's bars are
+    val transparent = LocalFloatingPlayer.current
     if (kind == NavKind.Sidebar) {
-        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen)
+        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)
     } else {
-        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen)
+        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen, transparent = transparent)
     }
 }

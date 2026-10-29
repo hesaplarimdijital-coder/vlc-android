@@ -52,12 +52,20 @@ val LocalWidthClass = compositionLocalOf<WidthClass?> { null }
 fun currentWidthClass(): WidthClass =
     LocalWidthClass.current ?: WidthClass.fromWidth(LocalConfiguration.current.screenWidthDp.toFloat())
 
-/** Where dragged pane widths are kept between sessions (S-303). */
+/**
+ * Where dragged pane widths are kept between sessions (S-303), and (Desktop Kit 1.0) whether a pane
+ * that can be hidden, the workstation's inspector, was hidden.
+ */
 interface PaneWidths {
     /** The width saved for [key], in dp, or null. */
     fun paneWidth(key: String): Float?
 
     fun savePaneWidth(key: String, widthDp: Float)
+
+    /** Whether the pane [key] was hidden; shown when nothing was saved. */
+    fun paneCollapsed(key: String): Boolean = false
+
+    fun savePaneCollapsed(key: String, collapsed: Boolean) = Unit
 }
 
 /** Without a store (previews, tests) a width lasts as long as the screen. */
@@ -71,6 +79,9 @@ val LocalPaneWidths = staticCompositionLocalOf<PaneWidths> { NoPaneWidths }
 
 /** The details pane beside lists; screens share its width. */
 const val INSPECTOR_PANE = "inspector"
+
+/** The workstation's inspector on the music view's right (Desktop Kit 1.0): its width and whether it is hidden. */
+const val WORKSTATION_PANE = "workstation"
 
 /** The sidebar of large windows. */
 const val SIDEBAR_PANE = "sidebar"

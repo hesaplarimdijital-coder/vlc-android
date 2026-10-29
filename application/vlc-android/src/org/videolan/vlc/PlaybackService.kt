@@ -73,6 +73,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.media.utils.MediaConstants
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +109,8 @@ import org.videolan.resources.ACTION_REMOTE_STOP
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.CUSTOM_ACTION
-import org.videolan.resources.CUSTOM_ACTION_BOOKMARK
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_BACK
+import org.videolan.resources.CUSTOM_ACTION_EPISODE_FORWARD
 import org.videolan.resources.CUSTOM_ACTION_FAST_FORWARD
 import org.videolan.resources.CUSTOM_ACTION_REPEAT
 import org.videolan.resources.CUSTOM_ACTION_REWIND
@@ -139,6 +141,8 @@ import org.videolan.tools.AUDIO_RESUME_PLAYBACK
 import org.videolan.tools.NAGMEDAR_MEDIA3_SESSION
 import org.videolan.tools.NAGMEDAR_VOLUME
 import org.videolan.tools.putSingle
+import app.nagmedar.playback.SessionButton
+import app.nagmedar.playback.SessionButtons
 import app.nagmedar.session.Media3SessionHost
 import app.nagmedar.session.SessionAction
 import org.videolan.vlc.media.PlaybackObserver
@@ -172,6 +176,8 @@ import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.NotificationHelper
 import org.videolan.vlc.gui.helpers.getBitmapFromDrawable
 import org.videolan.vlc.media.CoverHook
+import org.videolan.vlc.media.CarHook
+import org.videolan.vlc.media.EpisodeLookup
 import org.videolan.vlc.media.MediaSessionBrowser
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.streamDisplay
@@ -180,7 +186,6 @@ import org.videolan.vlc.media.PlayerController
 import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.media.ResumeHook
 import org.videolan.vlc.util.AccessControl
-import org.videolan.vlc.util.FlagSet
 import org.videolan.vlc.util.LifecycleAwareScheduler
 import org.videolan.vlc.util.NetworkConnectionManager
 import org.videolan.vlc.util.Permissions
@@ -192,7 +197,6 @@ import org.videolan.vlc.util.TextUtils
 import org.videolan.vlc.util.ThumbnailsProvider
 import org.videolan.vlc.util.Util
 import org.videolan.vlc.util.VLCAudioFocusHelper
-import org.videolan.vlc.util.awaitMedialibraryStarted
 import org.videolan.vlc.util.firstNotNullAsSpannable
 import org.videolan.vlc.util.isSchemeHttpOrHttps
 import org.videolan.vlc.util.isSchemeStreaming
@@ -259,7 +263,6 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     private var lastLength = 0L
     private var lastChapter = 0
     private var lastChaptersCount = 0
-    private var lastParentId = ""
 
     var lastErrorTime = 0L
     var nbErrors = 0
@@ -394,6 +397,17 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     val isPodcastPlaying: Boolean
         @MainThread
         get() = playlistManager.getCurrentMedia()?.isPodcast == true
+
+    /** 1.0: asks once per media whether it is one of Nağmedar's podcast episodes; set up in [onCreate]. */
+    private lateinit var episodes: EpisodeLookup
+
+    /**
+     * 1.0: a podcast episode plays (one of Nağmedar's shows, or the medialibrary's): the session, Android Auto, the
+     * notification and the lock screen offer its 15 s back and 30 s forward instead of the music's buttons.
+     */
+    val isEpisodePlaying: Boolean
+        @MainThread
+        get() = isPodcastPlaying || (::episodes.isInitialized && episodes.isEpisode(currentMediaLocation))
 
     val speed: Float
         @MainThread
@@ -686,18 +700,15 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         medialibrary = Medialibrary.getInstance()
         artworkMap = HashMap<String, Uri>()
 
+        episodes = EpisodeLookup(lifecycleScope) {
+            publishState()
+            if (notificationShowing) showNotification()
+        }
         browserCallback = MediaBrowserCallback(this)
         browserCallback.registerCallback {
-            notifyChildrenChanged(MediaSessionBrowser.ID_HOME)
-            when (it.updateType) {
-                UpdateType.MEDIA -> notifyChildrenChanged(MediaSessionBrowser.ID_LAST_ADDED)
-                UpdateType.ARTIST -> notifyChildrenChanged(MediaSessionBrowser.ID_ARTIST)
-                UpdateType.ALBUM -> notifyChildrenChanged(MediaSessionBrowser.ID_ALBUM)
-                UpdateType.GENRE -> notifyChildrenChanged(MediaSessionBrowser.ID_GENRE)
-                UpdateType.PLAYLIST -> notifyChildrenChanged(MediaSessionBrowser.ID_PLAYLIST)
-                UpdateType.HISTORY -> notifyChildrenChanged(MediaSessionBrowser.ID_HISTORY)
-                UpdateType.SHUFFLE -> notifyChildrenChanged(lastParentId)
-            }
+            // 1.0: Android Auto's lists read the music again
+            if (it.updateType == UpdateType.SHUFFLE) return@registerCallback
+            CarHook.catalog?.libraryChanged(history = it.updateType == UpdateType.HISTORY)?.forEach(::notifyChildrenChanged)
         }
 
         detectHeadset = settings.getBoolean(KEY_ENABLE_HEADSET_DETECTION, true)
@@ -852,7 +863,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val pi = if (::playlistManager.isInitialized) sessionPendingIntent else null
             NotificationHelper.createPlaybackNotification(ctx,
                     ctx.resources.getString(R.string.loading), "", "", null, false, true,
-                    true, speed, isPodcastMode, false, enabledActions, null, pi)
+                    true, ::playlistManager.isInitialized && isEpisodePlaying, false, enabledActions, null, pi)
         }
         if (startForegroundCompat(NotificationIds.PLAYBACK, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)) {
             isForeground = true
@@ -952,6 +963,8 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             val metaData = mediaSession.controller.metadata
             // Nağmedar (S-1302): where it plays while casting
             val castingTo = renderer.value?.displayName?.let { getString(R.string.nagmedar_casting_to, it) }
+            // 1.0: an episode's buttons are its 15 s back and 30 s forward
+            val episode = isEpisodePlaying
             lifecycleScope.launch(Dispatchers.Default) {
                 delay(100)
                 if (!notificationShowing) return@launch
@@ -968,7 +981,7 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
                     notification = NotificationHelper.createPlaybackNotification(ctx,
                             title, artist, album, cover, playing, isPausable,
-                            isSeekable, speed, isPodcastMode, seekInCompactView, enabledActions,
+                            isSeekable, episode, seekInCompactView, enabledActions,
                             sessionToken, sessionPendingIntent,
                             castingTo = castingTo)
                     if (!VlcMigrationHelper.isLolliPopOrLater || playing || recovering || audioFocusHelper.lossTransient) {
@@ -1201,28 +1214,33 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         pscb.setState(state, time, if (isPaused) 0f else playlistManager.engine.getRate())
         pscb.setActiveQueueItemId(playlistManager.currentIndex.toLong())
         val repeatType = PlaylistManager.repeating.value
-        val podcastMode = isPodcastMode
+        // 1.0: an episode has its 15 s back and 30 s forward instead of the music's buttons (SessionButtons)
+        val episode = isEpisodePlaying
         if (repeatType != PlaybackStateCompat.REPEAT_MODE_NONE || hasNext())
             actions.add(PlaybackAction.ACTION_SKIP_TO_NEXT)
-        if (repeatType != PlaybackStateCompat.REPEAT_MODE_NONE || hasPrevious() || (isSeekable && !podcastMode))
+        if (repeatType != PlaybackStateCompat.REPEAT_MODE_NONE || hasPrevious() || (isSeekable && !episode))
             actions.add(PlaybackAction.ACTION_SKIP_TO_PREVIOUS)
 
-        when {
-            podcastMode -> {
-                manageAutoActions(actions, pscb, repeatType, true)
-                pscb.addCustomAction(CUSTOM_ACTION_BOOKMARK, getString(R.string.add_bookmark), R.drawable.nagmedar_notif_bookmark)
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isCarMode() -> addCustomSeekActions(pscb)
-            else -> manageAutoActions(actions, pscb, repeatType)
-        }
+        val buttons = SessionButtons.of(
+            episode = episode,
+            carMode = isCarMode(),
+            systemControls = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+            seekButtons = settings.getBoolean(ENABLE_ANDROID_AUTO_SEEK_BUTTONS, false),
+            speedButtons = settings.getBoolean(ENABLE_ANDROID_AUTO_SPEED_BUTTONS, false),
+        )
+        if (SessionButton.Repeat in buttons && playlistManager.canRepeat())
+            actions.add(PlaybackAction.ACTION_SET_REPEAT_MODE)
+        if (SessionButton.Shuffle in buttons && playlistManager.canShuffle())
+            actions.add(PlaybackAction.ACTION_SET_SHUFFLE_MODE)
+        buttons.forEach { addCustomButton(pscb, it, repeatType) }
         pscb.setActions(actions.getCapabilities())
         mediaSession.setRepeatMode(repeatType)
         mediaSession.setShuffleMode(if (isShuffling) PlaybackStateCompat.SHUFFLE_MODE_ALL else PlaybackStateCompat.SHUFFLE_MODE_NONE)
         mediaSession.setExtras(Bundle().apply {
-            putBoolean(WEARABLE_RESERVE_SLOT_SKIP_TO_NEXT, !podcastMode)
-            putBoolean(WEARABLE_RESERVE_SLOT_SKIP_TO_PREV, !podcastMode)
-            putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT, !podcastMode)
-            putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV, !podcastMode)
+            putBoolean(WEARABLE_RESERVE_SLOT_SKIP_TO_NEXT, !episode)
+            putBoolean(WEARABLE_RESERVE_SLOT_SKIP_TO_PREV, !episode)
+            putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT, !episode)
+            putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV, !episode)
         })
         currentMediaWrapper?.takeIf { it.id != 0L }?.let { mw ->
             pscb.setExtras(Bundle().apply {
@@ -1251,53 +1269,31 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         }
     }
 
-    private fun manageAutoActions(actions: FlagSet<PlaybackAction>, pscb: PlaybackStateCompat.Builder, repeatType: Int, podcastMode: Boolean = false) {
-        if (playlistManager.canRepeat())
-            actions.add(PlaybackAction.ACTION_SET_REPEAT_MODE)
-        if (playlistManager.canShuffle())
-            actions.add(PlaybackAction.ACTION_SET_SHUFFLE_MODE)
-        /* Always add the icons, regardless of the allowed actions */
-        if (!podcastMode) {
-            val shuffleResId = when {
-                isShuffling -> R.drawable.ic_auto_shuffle_enabled
-                else -> R.drawable.ic_auto_shuffle_disabled
-            }
-            pscb.addCustomAction(CUSTOM_ACTION_SHUFFLE, getString(R.string.shuffle_title), shuffleResId)
-        }
-        if (!podcastMode || repeatType != PlaybackStateCompat.REPEAT_MODE_NONE) {
-            val repeatResId = when (repeatType) {
+    /** [button] as the session's custom action: its id, its label and its Nağmedar icon. */
+    private fun addCustomButton(pscb: PlaybackStateCompat.Builder, button: SessionButton, repeatType: Int) {
+        when (button) {
+            SessionButton.Shuffle -> pscb.addCustomAction(CUSTOM_ACTION_SHUFFLE, getString(R.string.shuffle_title),
+                    if (isShuffling) R.drawable.ic_auto_shuffle_enabled else R.drawable.ic_auto_shuffle_disabled)
+            SessionButton.Repeat -> pscb.addCustomAction(CUSTOM_ACTION_REPEAT, getString(R.string.repeat_title), when (repeatType) {
                 PlaybackStateCompat.REPEAT_MODE_ALL -> R.drawable.ic_auto_repeat_pressed
                 PlaybackStateCompat.REPEAT_MODE_ONE -> R.drawable.ic_auto_repeat_one_pressed
                 else -> R.drawable.ic_auto_repeat_normal
-            }
-            pscb.addCustomAction(CUSTOM_ACTION_REPEAT, getString(R.string.repeat_title), repeatResId)
-        }
-        addCustomSeekActions(pscb, podcastMode or settings.getBoolean(ENABLE_ANDROID_AUTO_SEEK_BUTTONS, false))
-        addCustomSpeedActions(pscb, podcastMode or settings.getBoolean(ENABLE_ANDROID_AUTO_SPEED_BUTTONS, false))
-    }
-
-    private fun addCustomSeekActions(pscb: PlaybackStateCompat.Builder, showSeekActions: Boolean = true) {
-        if (!showSeekActions) return
-        val ctx = applicationContext
-        /* Rewind */
-        pscb.addCustomAction(PlaybackStateCompat.CustomAction.Builder(CUSTOM_ACTION_REWIND,
-                getString(R.string.playback_rewind),
-                DrawableCache.getDrawableFromMemCache(ctx, "ic_auto_rewind_${Settings.audioJumpDelay}", R.drawable.ic_auto_rewind))
-                .setExtras(Bundle().apply { putBoolean(WEARABLE_SHOW_CUSTOM_ACTION, true) })
-                .build())
-        /* Fast Forward */
-        pscb.addCustomAction(PlaybackStateCompat.CustomAction.Builder(CUSTOM_ACTION_FAST_FORWARD,
-                getString(R.string.playback_forward),
-                DrawableCache.getDrawableFromMemCache(ctx, "ic_auto_forward_${Settings.audioJumpDelay}", R.drawable.ic_auto_forward))
-                .setExtras(Bundle().apply { putBoolean(WEARABLE_SHOW_CUSTOM_ACTION, true) })
-                .build())
-    }
-
-    private fun addCustomSpeedActions(pscb: PlaybackStateCompat.Builder, showSpeedActions: Boolean = true) {
-        if (showSpeedActions) {
+            })
+            SessionButton.Rewind -> addWearableAction(pscb, CUSTOM_ACTION_REWIND, getString(R.string.playback_rewind),
+                    DrawableCache.getDrawableFromMemCache(applicationContext, "ic_auto_rewind_${Settings.audioJumpDelay}", R.drawable.ic_auto_rewind))
+            SessionButton.Forward -> addWearableAction(pscb, CUSTOM_ACTION_FAST_FORWARD, getString(R.string.playback_forward),
+                    DrawableCache.getDrawableFromMemCache(applicationContext, "ic_auto_forward_${Settings.audioJumpDelay}", R.drawable.ic_auto_forward))
             // Nağmedar's speed gauge, as on the notification
-            pscb.addCustomAction(CUSTOM_ACTION_SPEED, getString(R.string.playback_speed), NotificationHelper.speedIcon(speed))
+            SessionButton.Speed -> pscb.addCustomAction(CUSTOM_ACTION_SPEED, getString(R.string.playback_speed), NotificationHelper.speedIcon(speed))
+            SessionButton.EpisodeBack -> addWearableAction(pscb, CUSTOM_ACTION_EPISODE_BACK, getString(R.string.nagmedar_episode_back), R.drawable.nagmedar_episode_back_15)
+            SessionButton.EpisodeForward -> addWearableAction(pscb, CUSTOM_ACTION_EPISODE_FORWARD, getString(R.string.nagmedar_episode_forward), R.drawable.nagmedar_episode_forward_30)
         }
+    }
+
+    private fun addWearableAction(pscb: PlaybackStateCompat.Builder, action: String, label: String, icon: Int) {
+        pscb.addCustomAction(PlaybackStateCompat.CustomAction.Builder(action, label, icon)
+                .setExtras(Bundle().apply { putBoolean(WEARABLE_SHOW_CUSTOM_ACTION, true) })
+                .build())
     }
 
     fun notifyTrackChanged() {
@@ -1751,13 +1747,12 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
      * Browsing
      */
 
+    /**
+     * 1.0: Android Auto's root, also without the permission to read the media: the podcasts and the radio need none, and the
+     * music comes from the folders picked with the system's picker then. Its tabs are the catalog's ([MediaSessionBrowser]).
+     */
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
-        val ctx = this@PlaybackService
         AccessControl.logCaller(clientUid, clientPackageName)
-        if (!Permissions.canReadStorage(ctx)) {
-            Log.w(TAG, "Returning null MediaBrowserService root. READ_EXTERNAL_STORAGE permission not granted.")
-            return null
-        }
         return when {
             rootHints?.containsKey(BrowserRoot.EXTRA_SUGGESTED) == true -> BrowserRoot(MediaSessionBrowser.ID_SUGGESTED, null)
             else -> {
@@ -1774,36 +1769,34 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         }
     }
 
+    /** The catalog's entries, read off the main thread (the medialibrary waited for where the music needs it). */
     override fun onLoadChildren(parentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
         result.detach()
-        val rootHints = browserRootHints
-        val reload = parentId == MediaSessionBrowser.ID_LAST_ADDED && parentId != lastParentId
-        lastParentId = parentId
-        lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            awaitMedialibraryStarted()
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    result.sendResult(MediaSessionBrowser.browse(applicationContext, parentId, isShuffling, rootHints))
-                    if (reload && !medialibrary.isWorking) applicationContext.reloadLibrary()
-                } catch (e: RuntimeException) {
-                    Log.e(TAG, "Failed to load children for $parentId", e)
-                }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val children = try {
+                MediaSessionBrowser.browse(this@PlaybackService, parentId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load children for $parentId", e)
+                emptyList()
             }
+            result.sendResult(children)
         }
     }
 
     override fun onSearch(query: String, extras: Bundle?, result: Result<List<MediaBrowserCompat.MediaItem>>) {
         result.detach()
-        val rootHints = browserRootHints
-        lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            awaitMedialibraryStarted()
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    result.sendResult(MediaSessionBrowser.search(applicationContext, query, rootHints))
-                } catch (e: RuntimeException) {
-                    Log.e(TAG, "Failed to search for $query", e)
-                }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val found = try {
+                MediaSessionBrowser.search(this@PlaybackService, query)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to search for $query", e)
+                emptyList()
             }
+            result.sendResult(found)
         }
     }
 

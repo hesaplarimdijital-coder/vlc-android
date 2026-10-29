@@ -206,8 +206,12 @@ internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollSt
  */
 @Stable
 internal class ShellOverlayHost {
-    /** One thing drawn in the overlay; the later ones over the earlier ones. */
-    class Layer(val content: @Composable () -> Unit)
+    /**
+     * One thing drawn over the shell; the later ones over the earlier ones. [PLAYER] layers lie
+     * under the screen's own overlays (the lyrics, "Sıradaki" and the notices opened from the
+     * player come over it), [SHEET] layers over everything.
+     */
+    class Layer(val z: Int, val content: @Composable () -> Unit)
 
     val layers = mutableStateListOf<Layer>()
 
@@ -222,6 +226,17 @@ internal class ShellOverlayHost {
 
     /** Called when the player starts to expand: the shell brings the bars back first. */
     var onExpandStart: () -> Unit = {}
+
+    /** How far the bars have slid down now (px); the player measures where its strip rests without it. */
+    var navigationOffset: () -> Float = { 0f }
+
+    companion object {
+        /** The expanded player: over the bars, under the screen's overlays. */
+        const val PLAYER = 0
+
+        /** The glass sheets: over everything. */
+        const val SHEET = 1
+    }
 }
 
 internal val LocalShellOverlayHost = staticCompositionLocalOf<ShellOverlayHost?> { null }

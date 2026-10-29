@@ -117,9 +117,18 @@ object FolderGrants {
     fun release(context: Context, uri: String, modes: Int = READ or WRITE) {
         if (uri.isBlank()) return
         val app = context.applicationContext
-        AppScope.launch(Dispatchers.IO) {
-            val free = runCatching { releasable(uri, modes, uses(app)) }.getOrDefault(0)
-            if (free != 0) runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(uri), free) }
-        }
+        AppScope.launch(Dispatchers.IO) { releaseNow(app, uri, modes) }
+    }
+
+    /**
+     * [release] on the calling thread, for work already in the background (an upgrade's clean-up): false when what the
+     * holders keep could not be read, and nothing was let go. Off the main thread.
+     */
+    fun releaseNow(context: Context, uri: String, modes: Int = READ or WRITE): Boolean {
+        if (uri.isBlank()) return true
+        val app = context.applicationContext
+        val free = runCatching { releasable(uri, modes, uses(app)) }.getOrElse { return false }
+        if (free != 0) runCatching { app.contentResolver.releasePersistableUriPermission(Uri.parse(uri), free) }
+        return true
     }
 }

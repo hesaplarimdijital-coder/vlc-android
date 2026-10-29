@@ -731,5 +731,8 @@ private fun PlaylistTable(
         },
         // the last rows rest clear of the phone's bars (Desktop Kit 1.0)
         contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
+        // a phone's lines end with "⋯": the same menu as the long press, as a sheet
+        rowMoreButton = currentWidthClass() == WidthClass.Compact,
+        rowMoreTitle = { it.track.title },
     )
 }

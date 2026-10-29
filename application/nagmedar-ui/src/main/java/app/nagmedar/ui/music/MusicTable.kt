@@ -53,13 +53,47 @@ enum class MusicColumn(val key: String, @StringRes val label: Int, val width: Co
         /** What a new table shows. */
         val DEFAULT = listOf(Title, Artist, Album, Year, Format, Duration, Rating)
 
-        /** The columns kept in the settings, Title first; the default for nothing kept. */
+        /**
+         * The columns kept in the settings, in the order kept (Desktop Kit 1.0: the user moves them), Title among
+         * them (first when it was missing); the default for nothing kept.
+         */
         fun parse(text: String?): List<MusicColumn> {
             val chosen = text?.split(',')?.mapNotNull { key -> entries.firstOrNull { it.key == key.trim() } }?.distinct().orEmpty()
-            return if (chosen.isEmpty()) DEFAULT else listOf(Title) + (chosen - Title)
+            return when {
+                chosen.isEmpty() -> DEFAULT
+                Title in chosen -> chosen
+                else -> listOf(Title) + chosen
+            }
         }
 
         fun format(columns: List<MusicColumn>): String = columns.joinToString(",") { it.key }
+    }
+}
+
+/**
+ * The column chooser's rules (Desktop Kit 1.0), free of Compose: the columns shown, in their order;
+ * [MusicColumn.Title] always among them.
+ */
+object MusicColumns {
+
+    /** [column] shown or hidden; shown again it goes back beside the column it follows in the table's own order. */
+    fun toggle(columns: List<MusicColumn>, column: MusicColumn): List<MusicColumn> = when {
+        column == MusicColumn.Title -> columns
+        column in columns -> columns - column
+        else -> {
+            val before = MusicColumn.entries.subList(0, column.ordinal).lastOrNull { it in columns }
+            val at = if (before == null) 0 else columns.indexOf(before) + 1
+            columns.toMutableList().apply { add(at, column) }
+        }
+    }
+
+    /** [column] moved [delta] places (negative: towards the start), kept within the table. */
+    fun move(columns: List<MusicColumn>, column: MusicColumn, delta: Int): List<MusicColumn> {
+        val from = columns.indexOf(column)
+        if (from < 0) return columns
+        val to = (from + delta).coerceIn(0, columns.lastIndex)
+        if (to == from) return columns
+        return columns.toMutableList().apply { add(to, removeAt(from)) }
     }
 }
 
@@ -108,7 +142,7 @@ fun rememberMusicColumns(
                     filledTint = if (selected) NagTheme.colors.onSelection else NagTheme.colors.accent,
                 )
             }
-            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd, mono = column.mono, content = stars) { track ->
+            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd, mono = column.mono, content = stars, id = column.key) { track ->
                 when (column) {
                     MusicColumn.Title -> track.title
                     MusicColumn.Artist -> track.artist?.takeIf { it.isNotBlank() } ?: unknownArtist

@@ -185,6 +185,13 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         prefs.edit().putFloat(KEY_PANE_PREFIX + key, widthDp).apply()
     }
 
+    /** Desktop Kit 1.0: whether the workstation's inspector was hidden (Ctrl+I, its button). */
+    override fun paneCollapsed(key: String): Boolean = prefs.getBoolean(KEY_PANE_COLLAPSED_PREFIX + key, false)
+
+    override fun savePaneCollapsed(key: String, collapsed: Boolean) {
+        prefs.edit().putBoolean(KEY_PANE_COLLAPSED_PREFIX + key, collapsed).apply()
+    }
+
     companion object {
         const val KEY_THEME = "nagmedar_theme"
         const val KEY_ACCENT = "nagmedar_accent"
@@ -192,6 +199,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         const val KEY_SIDEBAR_COLLAPSED = "nagmedar_sidebar_collapsed"
         const val KEY_TOOLTIP_DELAY = "nagmedar_tooltip_delay"
         const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
+        const val KEY_PANE_COLLAPSED_PREFIX = "nagmedar_pane_collapsed_"
         const val KEY_PALETTE_RECENT = "nagmedar_palette_recent"
         const val KEY_SHORTCUTS = "nagmedar_shortcuts"
         const val RECENT_COMMANDS = 8

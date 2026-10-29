@@ -6,10 +6,18 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
+import app.nagmedar.ui.components.ActionGroup
+import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -39,17 +47,29 @@ class ShellScreenshotTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun capture(name: String, widthClass: WidthClass, theme: ThemeMode, input: InputMode, start: Destination = Destination.Music) {
+    private fun capture(
+        name: String,
+        widthClass: WidthClass,
+        theme: ThemeMode,
+        input: InputMode,
+        start: Destination = Destination.Music,
+        /** Desktop Kit 1.0: the phone's "⋯" tab tapped, its sheet open. */
+        moreSheet: Boolean = false,
+    ) {
         // the test activity's theme has an action bar; the app's theme has none
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = start)
+                    TestShell(widthClass, startDestination = start, moreActions = if (moreSheet) playbackActions() else emptyList())
                 }
             }
         }
         compose.waitForIdle()
+        if (moreSheet) {
+            compose.onNodeWithText(compose.activity.getString(R.string.nag_nav_more)).performClick()
+            compose.waitForIdle()
+        }
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }
@@ -95,6 +115,26 @@ class ShellScreenshotTest {
 
     @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
     fun compactLightEnglish() = capture("compact-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch)
+
+    /** Desktop Kit 1.0: the phone's "⋯" tab opens a glass sheet of the other pages, then "Oynatma". */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun compactMoreSheetDark() = capture("compact-more-sheet-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, moreSheet = true)
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun compactMoreSheetLightEnglish() = capture("compact-more-sheet-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, moreSheet = true)
+
+    /** The app's "Oynatma" group of the sheet (NagmedarApp's moreActions). */
+    @Composable
+    private fun playbackActions() = listOf(
+        ActionGroup(
+            stringResource(R.string.nag_menu_playback),
+            listOf(
+                MenuEntry.Item(stringResource(R.string.nag_sc_equalizer), {}, icon = NagIcons.Equalizer),
+                MenuEntry.Item(stringResource(R.string.nag_sc_sleep_timer), {}, icon = NagIcons.Sleep),
+                MenuEntry.Item(stringResource(R.string.nag_queue_title), {}, icon = NagIcons.Queue),
+            ),
+        ),
+    )
 
     companion object {
         private val dir = File(System.getProperty("nagmedar.screenshotDir") ?: "build/outputs/screenshots")

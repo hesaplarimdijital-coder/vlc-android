@@ -46,6 +46,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.LoadingState
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -56,6 +57,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
@@ -194,20 +196,21 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
         episode.publishedAt.takeIf { it > 0 }?.let { dates.format(Date(it)) },
         episode.durationMs.takeIf { it > 0 }?.let { formatDuration(it) },
     ).joinToString(" · ")
+    val menu = {
+        listOf(
+            MenuEntry.Item(playWord, { actions.onPlay(feed, episode) }, icon = NagIcons.Play),
+            MenuEntry.Item(res.getString(R.string.nag_pod_open_episode), { actions.onOpenEpisode(episode.id) }, icon = NagIcons.Info),
+            downloadEntry(res, episode, download, actions),
+            MenuEntry.Item(
+                res.getString(if (played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
+                { actions.onSetPlayed(episode.id, !played) },
+                icon = NagIcons.Check,
+            ),
+            MenuEntry.Item(res.getString(R.string.nag_pod_copy_episode_address), { actions.onCopy(episode.audioUrl) }),
+        ) + downloadedFileEntries(context, episode, download)
+    }
     ContextMenuArea(
-        entries = {
-            listOf(
-                MenuEntry.Item(playWord, { actions.onPlay(feed, episode) }, icon = NagIcons.Play),
-                MenuEntry.Item(res.getString(R.string.nag_pod_open_episode), { actions.onOpenEpisode(episode.id) }, icon = NagIcons.Info),
-                downloadEntry(res, episode, download, actions),
-                MenuEntry.Item(
-                    res.getString(if (played) R.string.nag_pod_mark_unplayed else R.string.nag_pod_mark_played),
-                    { actions.onSetPlayed(episode.id, !played) },
-                    icon = NagIcons.Check,
-                ),
-                MenuEntry.Item(res.getString(R.string.nag_pod_copy_episode_address), { actions.onCopy(episode.audioUrl) }),
-            ) + downloadedFileEntries(context, episode, download)
-        },
+        entries = menu,
         accessibilityLabel = res.getString(R.string.nag_pod_actions),
         modifier = Modifier.fillMaxWidth().padding(horizontal = dimens.gapS),
     ) {
@@ -244,6 +247,10 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
             if (fresh) ToneBadge(stringResource(R.string.nag_pod_new_badge), StateTone.Info, Modifier.testTag("podcast-episode-new"))
             DownloadMark(download)
             NagPlayButton(playWord, { actions.onPlay(feed, episode) }, modifier = Modifier.testTag("podcast-play"))
+            // a phone's episode ends with "⋯": the same menu as the long press, as a sheet (Desktop Kit 1.0)
+            if (currentWidthClass() == WidthClass.Compact) {
+                MoreButton(groups = { menu().toActionGroups() }, title = episode.title, contentDescription = res.getString(R.string.nag_pod_actions))
+            }
         }
     }
 }

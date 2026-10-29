@@ -193,6 +193,9 @@ internal fun SmartPane(
                     rowMenuAsSheet = true,
                     rowModifier = { track -> actions.rowModifier(track) { listOf(track) } },
                     contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
+                    // a phone's rows end with "⋯": the same menu as the long press, as a sheet
+                    rowMoreButton = currentWidthClass() == WidthClass.Compact,
+                    rowMoreTitle = { it.title },
                 )
             }
         }

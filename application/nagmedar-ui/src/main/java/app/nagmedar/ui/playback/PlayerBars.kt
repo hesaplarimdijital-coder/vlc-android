@@ -65,6 +65,8 @@ import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.cast.rememberCastDevice
 import app.nagmedar.ui.cast.rememberCastingEnabled
 import app.nagmedar.ui.components.ArtistAlbumLine
+import app.nagmedar.ui.components.ExpandablePlayer
+import app.nagmedar.ui.components.ExpandablePlayerState
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -83,6 +85,7 @@ import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.music.rememberArtworkColor
 import app.nagmedar.ui.podcast.Chapter
 import app.nagmedar.ui.podcast.ChapterSteps
+import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.ArtworkAccent
@@ -333,7 +336,13 @@ class ServicePlayerBarActions(
     }
 }
 
-/** The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player otherwise. */
+/**
+ * The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player
+ * otherwise. On a phone, given [phonePlayer] and its [fullPlayer], the mini player grows into the
+ * full player when dragged up or tapped (Desktop Kit 1.0's ExpandablePlayer) while music plays, and
+ * a sideways swipe on it skips to the previous or next track; a station's or an episode's opens its
+ * page as before ([onOpenAudio]) and does not skip (the transport has no seek steps for them).
+ */
 @Composable
 fun PlayerBar(
     navKind: NavKind,
@@ -344,6 +353,8 @@ fun PlayerBar(
     onQueue: () -> Unit = {},
     /** Music opened from the bar (S-1002); null: the classic audio player. */
     onOpenAudio: (() -> Unit)? = null,
+    phonePlayer: ExpandablePlayerState? = null,
+    fullPlayer: (@Composable () -> Unit)? = null,
 ) {
     // Nağmedar 1.0 plays everything as audio: the bars show whatever plays
     val media = nowPlaying.media ?: return
@@ -356,12 +367,23 @@ fun PlayerBar(
         ServicePlayerBarActions(context, { currentOnQueue() }, { currentOnOpenAudio?.invoke() ?: PlaybackActions.openPlayer(context) })
     }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
+    // Desktop Kit 1.0: in the shell's floating glass bar (tablet, DeX) the bars draw no surface of their own
+    val transparent = LocalFloatingPlayer.current
     // Desktop Kit 1.0: while music plays the bar takes its artwork's accent, cross-fading from one track to the next
-    ArtworkAccent(rememberArtworkColor(media.takeIf { it.type == MediaWrapper.TYPE_AUDIO })) {
-        if (navKind == NavKind.Sidebar) {
-            TransportBar(info, { progress }, actions, artwork, modifier, queueOpen)
-        } else {
-            MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen)
+    val music = media.type == MediaWrapper.TYPE_AUDIO
+    ArtworkAccent(rememberArtworkColor(media.takeIf { music })) {
+        when {
+            navKind == NavKind.Sidebar -> TransportBar(info, { progress }, actions, artwork, modifier, queueOpen, transparent = transparent)
+            navKind == NavKind.BottomBar && phonePlayer != null && fullPlayer != null -> ExpandablePlayer(
+                state = phonePlayer,
+                mini = { MiniPlayer(info, { progress }, actions, artwork, floating = true, queueOpen = queueOpen) },
+                full = fullPlayer,
+                modifier = modifier,
+                expandable = music,
+                onPrevious = if (music) actions::previous else null,
+                onNext = if (music) actions::next else null,
+            )
+            else -> MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen, transparent = transparent)
         }
     }
 }
@@ -399,7 +421,8 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
  * Compact, medium and expanded windows: what is playing, above the navigation of every screen
  * (S-304). A tap on the artwork or the words opens the full player. On a phone it is a card over
  * the content's edge. With a pointer, hovering it (or tabbing into it) brings out the previous and
- * stop buttons and a seek bar in place of the second line.
+ * stop buttons and a seek bar in place of the second line. [transparent]: it lies in the shell's
+ * floating glass bar of a tablet (Desktop Kit 1.0), its progress along the bottom.
  */
 @Composable
 fun MiniPlayer(
@@ -410,6 +433,7 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     floating: Boolean = false,
     queueOpen: Boolean = false,
+    transparent: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -431,13 +455,19 @@ fun MiniPlayer(
                 .fillMaxWidth()
                 .clip(shape)
                 // a phone's card is glass over the content passing under it (Desktop Kit 1.0)
-                .then(if (floating) Modifier.glass(NagGlass.raised(colors, GlassThickness.Thin), shape) else Modifier.background(colors.chrome))
+                .then(
+                    when {
+                        floating -> Modifier.glass(NagGlass.raised(colors, GlassThickness.Thin), shape)
+                        transparent -> Modifier
+                        else -> Modifier.background(colors.chrome)
+                    },
+                )
                 .then(if (floating) Modifier.border(1.dp, colors.border, shape) else Modifier)
                 .hoverable(hover)
                 .onFocusChanged { focusInside = it.hasFocus }
                 .testTag("mini-player"),
         ) {
-            if (!floating) {
+            if (!floating && !transparent) {
                 HorizontalRule()
                 ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
             }
@@ -503,7 +533,7 @@ fun MiniPlayer(
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
-            if (floating) ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
+            if (floating || transparent) ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
         }
     }
 }
@@ -565,6 +595,7 @@ private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat:
  * Large windows: the transport bar of the mockups across the bottom of every screen (S-304). The
  * artwork and words open the full player; in the middle the transport and the seek bar, which
  * shows the time under the pointer; at the end the format, the volume and the player.
+ * [transparent]: it lies in the shell's floating glass bar (Desktop Kit 1.0), without a surface or a rule.
  */
 @Composable
 fun TransportBar(
@@ -574,14 +605,15 @@ fun TransportBar(
     artwork: @Composable (Dp) -> Unit,
     modifier: Modifier = Modifier,
     queueOpen: Boolean = false,
+    transparent: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val open = remember { MutableInteractionSource() }
     val openState = open.collectState()
     val openLabel = stringResource(R.string.nag_open_player)
-    Column(modifier.fillMaxWidth().background(colors.chrome).testTag("transport-bar")) {
-        HorizontalRule()
+    Column(modifier.fillMaxWidth().then(if (transparent) Modifier else Modifier.background(colors.chrome)).testTag("transport-bar")) {
+        if (!transparent) HorizontalRule()
         // by touch the artist's and album's links take a finger's height (S-1407): the bar grows a little for them
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp).padding(horizontal = dimens.gapL),

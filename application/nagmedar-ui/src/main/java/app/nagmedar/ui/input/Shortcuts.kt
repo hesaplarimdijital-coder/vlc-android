@@ -160,6 +160,7 @@ enum class ShortcutId {
     SleepTimer,
     VolumeUp, VolumeDown, Mute, Equalizer, AbSwitch,
     Settings, CommandPalette, ToggleSidebar, PlayQueue,
+    ToggleInspector,
     ShortcutList, UserGuide,
     Lyrics, LyricsEarlier, LyricsLater,
     Visualizer,
@@ -251,6 +252,8 @@ object ShortcutRegistry {
         Shortcut(ShortcutId.CommandPalette, ShortcutGroup.View, R.string.nag_search, KeyChord(Key.K, ctrl = true)),
         Shortcut(ShortcutId.ToggleSidebar, ShortcutGroup.View, R.string.nag_sc_toggle_sidebar, KeyChord(Key.B, ctrl = true)),
         Shortcut(ShortcutId.PlayQueue, ShortcutGroup.View, R.string.nag_sc_play_queue, KeyChord(Key.L, ctrl = true)),
+        // Desktop Kit 1.0: the music view's inspector on tablet and DeX windows, I for inspector
+        Shortcut(ShortcutId.ToggleInspector, ShortcutGroup.View, R.string.nag_sc_toggle_inspector, KeyChord(Key.I, ctrl = true)),
         // S-1004: the playing track's lyrics over the whole window
         Shortcut(ShortcutId.Lyrics, ShortcutGroup.View, R.string.nag_sc_lyrics, KeyChord(Key.L, ctrl = true, shift = true)),
         // S-1301: a browser's folders, as a file manager's: up a folder, and the folder read again

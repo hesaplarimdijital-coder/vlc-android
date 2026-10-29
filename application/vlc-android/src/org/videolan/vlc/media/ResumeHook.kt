@@ -1,5 +1,11 @@
 package org.videolan.vlc.media
 
+import androidx.annotation.MainThread
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -89,4 +95,49 @@ object ResumeHook {
 
     /** Whether a media is being started now. */
     val switching: Boolean get() = changing.get() > 0
+}
+
+/**
+ * 1.0: whether the media at a location is a podcast episode, as [ResumeHook.owner] says: asked off the main thread once
+ * per location and kept, so that the session's buttons (an episode's 15 s back and 30 s forward) are chosen on the main
+ * thread without a query. Until the answer comes the media counts as none; [changed] is called on the main thread when it
+ * turns out to be one. No answer (no owner yet) is asked again next time.
+ */
+class EpisodeLookup(
+    private val scope: CoroutineScope,
+    private val ask: (String) -> Boolean? = { location -> ResumeHook.owner?.ownsResume(location) },
+    private val changed: () -> Unit,
+) {
+    private val known = object : LinkedHashMap<String, Boolean>(KEPT, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Boolean>?): Boolean = size > KEPT
+    }
+    private val asking = HashSet<String>()
+
+    /** Whether [location] is an episode, as far as is known now. Main thread. */
+    @MainThread
+    fun isEpisode(location: String?): Boolean {
+        if (location == null) return false
+        known[location]?.let { return it }
+        if (asking.add(location)) scope.launch(Dispatchers.IO) {
+            val answer = try {
+                ask(location)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+            withContext(Dispatchers.Main) {
+                asking.remove(location)
+                if (answer != null) {
+                    known[location] = answer
+                    if (answer) changed()
+                }
+            }
+        }
+        return false
+    }
+
+    private companion object {
+        const val KEPT = 32
+    }
 }

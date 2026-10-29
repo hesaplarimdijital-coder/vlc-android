@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -24,9 +26,13 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -34,6 +40,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -42,6 +49,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.components.ActionGroup
+import app.nagmedar.ui.components.ActionGroupList
+import app.nagmedar.ui.components.GlassBottomSheet
+import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
@@ -60,6 +71,12 @@ import kotlin.math.roundToInt
 
 /** Navigation chrome around the current screen; screens show their own title only in [NavKind.Sidebar]. */
 val LocalNavKind = compositionLocalOf { NavKind.Sidebar }
+
+/**
+ * Desktop Kit 1.0: the player bar lies in the shell's floating glass bar (tablet, DeX), which draws
+ * the surface: the bar's content draws no background or top rule of its own.
+ */
+val LocalFloatingPlayer = staticCompositionLocalOf { false }
 
 /** Navigation entry point handed to screens. */
 @Stable
@@ -146,6 +163,8 @@ fun NagmedarShell(
     contentOnly: Boolean = false,
     floatingPlayer: Boolean = false,
     glass: Boolean = true,
+    /** The app's own entries of the phone's "⋯" sheet ("Oynatma": the equaliser, the sleep timer), after the pages. */
+    moreActions: List<ActionGroup> = emptyList(),
 ) {
     val navigator = remember(navController) { ShellNavigator(navController) }
     val entry by navController.currentBackStackEntryAsState()
@@ -185,6 +204,8 @@ fun NagmedarShell(
     val floating = floatingPlayer && navKind != NavKind.BottomBar
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
+    // the phone's player covers the window: only its end, not every frame of the drag, re-measures the overlays
+    val playerOver by remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f } }
     SideEffect {
         scroll.enabled = navKind == NavKind.BottomBar
         scroll.hideOnScroll = showBottomNav
@@ -195,10 +216,17 @@ fun NagmedarShell(
         metrics.floatingMarginPx = with(density) { floatingMargin.roundToPx() }
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         overlayHost.onExpandStart = { scroll.showBars() }
+        overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) scroll.offsetPx else 0f }
         overlayHost.rootView = view.rootView
     }
     // every screen starts with the bars shown and a flat top bar
     LaunchedEffect(current, navKind, showBottomNav, contentOnly) { scroll.reset() }
+    // Desktop Kit 1.0: the phone's "⋯" opens a sheet of the other pages; the rail keeps the "More" page
+    var moreOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(navKind) { if (navKind != NavKind.BottomBar) moreOpen = false }
+    val select: (Destination) -> Unit = { destination ->
+        if (destination == Destination.More && navKind == NavKind.BottomBar) moreOpen = true else navigator.navigate(destination)
+    }
 
     CompositionLocalProvider(
         LocalMotionTier provides tier,
@@ -236,7 +264,7 @@ fun NagmedarShell(
                     NavKind.BottomBar -> if (showBottomNav) {
                         BottomNavBar(
                             current,
-                            navigator::navigate,
+                            select,
                             Modifier
                                 .onSizeChanged {
                                     scroll.maxOffsetPx = it.height.toFloat()
@@ -265,10 +293,13 @@ fun NagmedarShell(
                         .onSizeChanged { metrics.playerPx = it.height }
                         .then(
                             if (!floating) Modifier else Modifier
+                                .clip(shape)
                                 .glass(NagGlass.raised(colors, GlassThickness.Thin), shape)
                                 .border(1.dp, colors.borderStrong, shape),
                         ),
-                ) { player(navKind) }
+                ) {
+                    CompositionLocalProvider(LocalFloatingPlayer provides floating) { player(navKind) }
+                }
             },
             content = {
                 Box(
@@ -303,15 +334,51 @@ fun NagmedarShell(
                     Box(Modifier.fillMaxSize()) { overlay() }
                 }
             },
-            screenOverlayTop = { metrics.topPadPx },
-            screenOverlayBottom = { metrics.bottomPadPx },
-            overlay = {
+            // over the phone's expanded player, the screen's overlays take the whole window
+            screenOverlayTop = { if (playerOver) 0 else metrics.topPadPx },
+            screenOverlayBottom = { if (playerOver) 0 else metrics.bottomPadPx },
+            playerLayer = {
                 Box(Modifier.fillMaxSize().onGloballyPositioned { overlayHost.coordinates = it }) {
-                    overlayHost.layers.forEach { layer -> key(layer) { layer.content() } }
+                    overlayHost.layers.forEach { layer -> if (layer.z == ShellOverlayHost.PLAYER) key(layer) { layer.content() } }
+                }
+            },
+            overlay = {
+                Box(Modifier.fillMaxSize()) {
+                    overlayHost.layers.forEach { layer -> if (layer.z != ShellOverlayHost.PLAYER) key(layer) { layer.content() } }
                 }
             },
             floatingPlayer = floating,
             floatingMargin = floatingMargin,
+            // the transport bar of a desktop window needs the room of its three parts; a tablet's mini player less
+            floatingMaxWidth = if (navKind == NavKind.Sidebar) 1180.dp else 760.dp,
+        )
+        if (navKind == NavKind.BottomBar) {
+            val groups = moreSheetGroups(navigator) + moreActions
+            GlassBottomSheet(visible = moreOpen, onDismiss = { moreOpen = false }, label = stringResource(Destination.More.label)) {
+                Text(
+                    stringResource(Destination.More.label),
+                    style = NagTheme.type.title,
+                    color = NagTheme.colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = NagTheme.dimens.gapL + 4.dp, vertical = NagTheme.dimens.gapS),
+                )
+                ActionGroupList(groups, onDismiss = { moreOpen = false })
+            }
+        }
+    }
+}
+
+/** The pages the phone's bottom bar leaves out, by the sidebar's sections (Settings last), as the "⋯" sheet's entries. */
+@Composable
+private fun moreSheetGroups(navigator: ShellNavigator): List<ActionGroup> {
+    val left = Destination.overflow(Destination.bottomBar)
+    return NavSection.entries.mapNotNull { section ->
+        val items = left.filter { it.section == section }
+        if (items.isEmpty()) return@mapNotNull null
+        ActionGroup(
+            section.title?.let { stringResource(it) },
+            items.map { destination -> MenuEntry.Item(stringResource(destination.label), { navigator.navigate(destination) }, icon = destination.icon) },
         )
     }
 }

@@ -77,16 +77,18 @@ Yerel müzik dosyalarını Nağmedar'ın kendi **müzik motoru** çalar: FFmpeg 
 
 ## Müzik kütüphanesi ve listeler {music-library}
 
-Müzik sayfasında filtreleyin, sıralayın, listeler yapın. Büyük pencerede üç bölme vardır (gruplar, parça tablosu, şimdi çalıyor); telefonda mini oynatıcıya dokununca tam ekran oynatıcı açılır (kapağı sola kaydırmak sonraki parçaya geçer, sağa kaydırmak Önceki düğmesi gibidir).
+Müzik sayfasında filtreleyin, sıralayın, listeler yapın. Tablette ve DeX'te üç bölme vardır (gruplar, parça tablosu, sağda ayrıntı paneli) ve oynatıcı çubuğu içeriğin üstünde buzlu cam olarak durur; telefonda mini oynatıcıya dokununca tam ekran oynatıcı açılır (kapağı sola kaydırmak sonraki parçaya geçer, sağa kaydırmak Önceki düğmesi gibidir).
 
-- **Araç çubuğu:** solda Sanatçılar, Albümler, Türler… (dar pencerede ve telefonda şu anki görünümü gösteren bir menü), sağda Oynat, Karıştır, Sütunlar ve Filtrele. Tablonun sütunlarını “Sütunlar”dan ya da başlığın sağ tık menüsünden seçersiniz.
+- **Araç çubuğu:** solda Sanatçılar, Albümler, Türler… (dar pencerede ve telefonda şu anki görünümü gösteren bir menü), sağda Oynat, Karıştır, Sütunlar ve Filtrele. Tablonun sütunlarını “Sütunlar”dan ya da başlığın sağ tık menüsünden seçersiniz; sütun başlığının menüsü o sütunu sola ya da sağa taşır, “Sütunları sıfırla” baştakileri geri getirir. Her görünüm (Albümler, Türler…) kendi sütunlarını hatırlar.
+- **Ayrıntı paneli** ({key:ToggleInspector}): tabloda seçili parçanın, seçili yoksa çalanın sekmeleri: Etiketler ve spektrum (etiketler, biçim, dalga biçimi, çalarken görselleştirici), Sinyal yolu, Sözler ve Sıra. Kenarından sürükleyerek genişletin; genişliği ve gizli olup olmadığı hatırlanır. Sekmeler arasında ← ve → ile gezinirsiniz.
+- **Seçim:** Ctrl ile tıklamak ekler ya da çıkarır, Shift ile tıklamak ve Shift+↑/↓ aralığı seçer, {key:SelectAll} hepsini seçer, Esc seçimi bırakır. Seçili satırlardan birine sağ tıklayınca menü seçilenlerin hepsine uygulanır.
 - **Filtreler:** “Filtrele” bit derinliği (16, 24, 32 bit, DSD, kayıplı) ve örnekleme hızı filtrelerini bir panelde açar; bir filtre açıkken düğmede bir nokta görünür, “Filtreleri temizle” hepsini kaldırır.
 - **Sıradaki** ({key:PlayQueue}): parçanın menüsündeki “Hemen sonra oynat” çalanın ardına, “Sıraya ekle” sona koyar. Sıralamak için tutamaçla sürükleyin ya da Alt+↑/↓ kullanın.
 - **Çalma listeleri:** bütün listeler, akıllı listeler de, kart olarak görünür: kapak, ad, parça sayısı, süre ve son çalınma. Listelerde arayın; ada, son çalınmaya ya da oluşturulmaya göre sıralayın. Açık listenin adına basınca olduğu yerde değişir (Enter kaydeder, Esc vazgeçer); menüsünde yeniden adlandır, kopyasını yap, Hemen sonra oynat, Sıraya ekle, dışa aktar ve sil vardır.
 - **İçe ve dışa aktarma:** M3U, M3U8, PLS ve XSPF içe ve dışa aktarılır; başka bilgisayarda yapılmış listelerin dosyaları adlarından bulunur.
 - **Akıllı liste:** Çalma listeleri › Akıllı liste ile kurallarla (sanatçı, tür, puan, çalınma, eklenme…) kendiliğinden dolan liste yapın; “Kuralları düzenle…” ile değiştirin.
 - **CUE sayfası:** yanında aynı adlı CUE sayfası (.cue) olan tek dosyalık albüm kütüphanede parçalarıyla görünür ve örnek doğruluğunda çalınır; bir şey yapmanız gerekmez.
-- **Puan:** 1–5 yıldızı tabloda, şimdi çalıyor bölmesinde ya da “Puan ver…” ile verin. Bir parça yarısı ya da dört dakikası dinlenince çalınmış, önce geçilirse atlanmış sayılır.
+- **Puan:** 1–5 yıldızı tabloda, ayrıntı panelinde ya da “Puan ver…” ile verin. Bir parça yarısı ya da dört dakikası dinlenince çalınmış, önce geçilirse atlanmış sayılır.
 
 ### Çalarken
 - İlerleme çubuğunun (şimdi çalıyor bölmesi, telefonun oynatıcısı, alttaki çubuk) arkasında parçanın dalga biçimi silik görünür, geçen ve kalan süre yazar. Tutamacı sürüklerken süre baloncuğu çıkar, bırakınca oraya atlanır; çubuk odaktayken ← ve → 5 sn sarar, Home ve End başa ve sona götürür.
@@ -195,7 +197,7 @@ Geniş pencerede (DeX, harici ekran) Nağmedar masaüstü gibi çalışır: üst
 - **Komut paleti** ({key:CommandPalette}): komutlar, ekranlar, görünüm ayarları ve kütüphanedeki parçalar tek kutuda aranır.
 - **Fare:** sağ tık (ya da Menü tuşu) bağlam menüleri açar; Ctrl ve Shift ile tıklamak birden çok öğe seçer; boş yerde sürükleyerek lastik bantla seçersiniz. Fare geri ve ileri tuşları ekranlar arasında gezinir.
 - **Sürükle ve bırak:** dışarıdan dosya bırakmak oynatır, medyayı oynatıcı çubuğuna bırakmak sıraya ekler.
-- **Pencere:** {key:ToggleSidebar} kenar çubuğunu daraltır, {key:OpenInNewWindow} aynı ekranı yeni pencerede açar. Pencerenin yeri ve boyutu hatırlanır.
+- **Pencere:** {key:ToggleSidebar} kenar çubuğunu daraltır, {key:ToggleInspector} Müzik'in ayrıntı panelini gizler ya da gösterir, {key:OpenInNewWindow} aynı ekranı yeni pencerede açar. Pencerenin yeri ve boyutu hatırlanır.
 - **Kısayollar:** kısayol kartı ({key:ShortcutList}) hepsini listeler; değiştirmek için Ayarlar › Klavye kısayolları'nda bir tuşa tıklayıp yenisine basın. VLC ve mpv ön ayarları, dışa ve içe aktarma ve Türkçe Q klavyede tuşların yerini gösteren bir klavye haritası vardır.
 - Ayarlar › Giriş: arayüz yoğunluğu ve ipucu gecikmesi.
 

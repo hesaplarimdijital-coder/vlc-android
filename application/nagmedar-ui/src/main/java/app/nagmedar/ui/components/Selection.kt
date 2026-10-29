@@ -95,6 +95,21 @@ class MultiSelection {
         }
     }
 
+    /**
+     * Shift+↑ or Shift+↓ on [focused] (Desktop Kit 1.0): the range from the anchor (or [focused]
+     * itself) to the item [delta] places from [focused]; false, and nothing changed, at either end.
+     */
+    fun extend(focused: Any, order: List<Any>, delta: Int): Boolean {
+        val from = order.indexOf(focused)
+        val to = from + delta
+        if (from < 0 || to !in order.indices) return false
+        val start = anchor?.takeIf { it in order } ?: focused
+        val at = order.indexOf(start)
+        keys = order.subList(min(at, to), max(at, to) + 1).toSet()
+        anchor = start
+        return true
+    }
+
     /** The menu's "Seç" on [key]: selecting starts with it. */
     fun startSelecting(key: Any) {
         selecting = true
@@ -203,6 +218,9 @@ class ScreenCommands {
     internal var upHandler: (() -> Boolean)? = null
     internal var refreshHandler: (() -> Boolean)? = null
 
+    /** Desktop Kit 1.0: the music view's inspector shown or hidden (Ctrl+I), while the view has one. */
+    internal var inspectorHandler: (() -> Boolean)? = null
+
     fun selectAll(): Boolean = selectAllHandler?.invoke() ?: false
 
     fun escape(): Boolean = escapeHandler?.invoke() ?: false
@@ -210,6 +228,8 @@ class ScreenCommands {
     fun up(): Boolean = upHandler?.invoke() ?: false
 
     fun refresh(): Boolean = refreshHandler?.invoke() ?: false
+
+    fun toggleInspector(): Boolean = inspectorHandler?.invoke() ?: false
 }
 
 val LocalScreenCommands = staticCompositionLocalOf { ScreenCommands() }
@@ -229,6 +249,21 @@ fun BrowserCommands(onUp: () -> Boolean, onRefresh: () -> Boolean) {
             if (commands.upHandler === upHandler) commands.upHandler = null
             if (commands.refreshHandler === refreshHandler) commands.refreshHandler = null
         }
+    }
+}
+
+/** While composed, the window's "inspector" shortcut (Ctrl+I) does [onToggle]. */
+@Composable
+fun InspectorCommands(onToggle: () -> Unit) {
+    val commands = LocalScreenCommands.current
+    val toggle by rememberUpdatedState(onToggle)
+    DisposableEffect(commands) {
+        val handler = {
+            toggle()
+            true
+        }
+        commands.inspectorHandler = handler
+        onDispose { if (commands.inspectorHandler === handler) commands.inspectorHandler = null }
     }
 }
 

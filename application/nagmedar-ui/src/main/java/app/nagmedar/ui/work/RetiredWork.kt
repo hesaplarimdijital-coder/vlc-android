@@ -23,12 +23,15 @@ import java.io.File
  * them) and notes the files the jobs held a permission to ([NagmedarDatabase.retiredGrants]):
  * those permissions go here, as far as nothing else in the app keeps them ([FolderGrants]), with
  * what TV Lab kept under files/tvlab (its profiles, the charts it shared, its bitrate cache).
+ * 0.5's other video features (the subtitle tools, the conversion and the HLS stream, the player's
+ * screenshots and recordings) leave their queued work, their files and their folders ([videoFeatures]).
  * Off the main thread: it reads preferences, the databases and the disk.
  */
 object RetiredWork {
     private const val FILE = "nagmedar_retired"
     private const val TV_LAB_DONE = "tv_lab"
     private const val TABLES_DONE = "video_tables"
+    private const val VIDEO_DONE = "video_features"
 
     /** What TV Lab kept in the app's files: its profiles, the charts it shared, its bitrate cache. */
     private const val TV_LAB_FILES = "tvlab"
@@ -55,6 +58,7 @@ object RetiredWork {
         val prefs = app.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(TV_LAB_DONE, false)) tvLab(app, prefs)
         if (!prefs.getBoolean(TABLES_DONE, false)) tables(app, prefs)
+        if (!prefs.getBoolean(VIDEO_DONE, false)) videoFeatures(app, prefs)
     }
 
     private fun tvLab(app: Context, prefs: SharedPreferences) {
@@ -66,12 +70,10 @@ object RetiredWork {
                 pending.cancel()
             }
         }
-        runCatching {
-            val settings = Settings.getInstance(app)
-            val folders = settings.getStringSet(TV_LAB_FOLDERS, null).orEmpty().toList()
-            settings.edit().remove(TV_LAB_PROFILE).remove(TV_LAB_FOLDERS).apply()
-            folders.forEach { FolderGrants.release(app, it) }
-        }
+        val settings = Settings.getInstance(app)
+        val folders = runCatching { settings.getStringSet(TV_LAB_FOLDERS, null).orEmpty().toList() }.getOrDefault(emptyList())
+        if (!folders.map { FolderGrants.releaseNow(app, it) }.all { it }) return
+        settings.edit().remove(TV_LAB_PROFILE).remove(TV_LAB_FOLDERS).apply()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             runCatching { app.deleteSharedPreferences(TV_LAB_PREFS) }
         }
@@ -84,14 +86,68 @@ object RetiredWork {
      */
     private fun tables(app: Context, prefs: SharedPreferences) {
         if (runCatching { NagmedarDatabase.get(app).openHelper.writableDatabase }.isFailure) return
-        runCatching {
-            val note = NagmedarDatabase.retiredGrants(app)
-            if (note.exists()) {
-                note.readLines().filter { it.isNotBlank() }.forEach { FolderGrants.release(app, it) }
-                note.delete()
-            }
-        }
+        val note = NagmedarDatabase.retiredGrants(app)
+        val granted = runCatching { if (note.exists()) note.readLines().filter { it.isNotBlank() } else emptyList() }.getOrElse { return }
+        if (!granted.map { FolderGrants.releaseNow(app, it) }.all { it }) return
+        runCatching { note.delete() }
         runCatching { File(app.filesDir, TV_LAB_FILES).deleteRecursively() }
         prefs.edit().putBoolean(TABLES_DONE, true).apply()
     }
+
+    /**
+     * 0.5's video features: their unique works and every request of their workers (WorkManager tags each with its
+     * worker's class, which 1.0 cannot load: "Could not create Worker"), the files they kept in the app's storage
+     * and the folders they were given. A folder's permission goes as far as nothing in 1.0 keeps it ([FolderGrants]);
+     * when that cannot be told now, the step is tried again at the next start.
+     */
+    private fun videoFeatures(app: Context, prefs: SharedPreferences) {
+        runCatching {
+            val work = WorkManager.getInstance(app)
+            VIDEO_WORK.forEach { work.cancelUniqueWork(it) }
+            VIDEO_WORKERS.forEach { work.cancelAllWorkByTag(it) }
+        }
+        val external = runCatching { app.getExternalFilesDir(null) }.getOrNull()
+        val files = listOf(
+            File(app.noBackupFilesDir, "translate-models"),
+            File(app.noBackupFilesDir, "translate-jobs"),
+            File(app.noBackupFilesDir, "extract-jobs"),
+            File(app.filesDir, "hls"),
+            File(app.filesDir, "subtitles"),
+            File(app.filesDir, "transcode"),
+            File(app.cacheDir, "film-images"),
+            File(app.cacheDir, "overlays"),
+        ) + listOfNotNull(external?.let { File(it, "transcode") })
+        files.forEach { runCatching { it.deleteRecursively() } }
+        val settings = Settings.getInstance(app)
+        val folders = VIDEO_FOLDERS.mapNotNull { key -> runCatching { settings.getString(key, null) }.getOrNull()?.takeIf(String::isNotBlank) }
+        if (!folders.map { FolderGrants.releaseNow(app, it) }.all { it }) return
+        settings.edit().apply { VIDEO_FOLDERS.forEach { remove(it) } }.apply()
+        prefs.edit().putBoolean(VIDEO_DONE, true).apply()
+    }
+
+    /** The video features' unique works: the conversion's queue, the subtitle tools' extraction and translation, the models' downloads. */
+    private val VIDEO_WORK = listOf(
+        "nagmedar-transcode",
+        "nagmedar-subtitle-extract",
+        "nagmedar-subtitle-translate",
+        "nagmedar-translate-model-opus-mt-tr-en-int8",
+        "nagmedar-translate-model-opus-mt-tc-big-en-tr-f16",
+    )
+
+    /** Their workers' classes as 0.5 named them, with TV Lab's remux worker and Whisper's before it moved to ui.transcribe. */
+    private val VIDEO_WORKERS = listOf(
+        "app.nagmedar.ui.transcode.TranscodeWorker",
+        "app.nagmedar.ui.player.subtitles.extract.SubtitleExtractWorker",
+        "app.nagmedar.ui.player.subtitles.translate.SubtitleTranslateWorker",
+        "app.nagmedar.ui.player.subtitles.translate.ModelDownloadWorker",
+        "app.nagmedar.ui.player.subtitles.whisper.WhisperWorker",
+        "app.nagmedar.ui.tvlab.remux.RemuxWorker",
+    )
+
+    /** The folders of the player's screenshots and recordings and of the local subtitle provider (Settings, in 0.5). */
+    private val VIDEO_FOLDERS = listOf(
+        "nagmedar_snapshot_folder",
+        "nagmedar_recording_folder",
+        "nagmedar_subtitle_folder",
+    )
 }

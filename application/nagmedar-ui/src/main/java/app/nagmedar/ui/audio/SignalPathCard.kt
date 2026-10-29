@@ -242,7 +242,7 @@ private fun dspRow(stage: SignalPath.DspStage, locale: Locale): PathRow? {
 }
 
 @Composable
-private fun channelsText(channels: Int): String = when (channels) {
+internal fun channelsText(channels: Int): String = when (channels) {
     1 -> stringResource(R.string.nag_sp_mono)
     2 -> stringResource(R.string.nag_sp_stereo)
     else -> pluralStringResource(R.plurals.nag_sp_channels, channels, channels)

@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -76,16 +77,19 @@ import app.nagmedar.ui.theme.NagTheme
  * "Sıradaki", the play queue (S-310): what plays now, then what comes after it. A row tapped
  * plays; by touch a row swiped toward the start goes and one dragged by its handle moves; with a
  * pointer, the handle drags and the row's menu, Delete, Alt+↑ and Alt+↓ do the rest. "Temizle"
- * takes everything after what plays now; what goes comes back with the undo bar.
+ * takes everything after what plays now; what goes comes back with the undo bar. [onClose] null
+ * (the music view's inspector, Desktop Kit 1.0): the panel stays, without its close button, and
+ * leaves Back and Esc to the window; [background] is what it lies on.
  */
 @Composable
 fun QueuePanel(
     entries: List<QueueEntry>,
     current: Int,
     actions: QueueActions,
-    onClose: () -> Unit,
+    onClose: (() -> Unit)?,
     modifier: Modifier = Modifier,
     undo: UndoBarState? = null,
+    background: Color = NagTheme.colors.chrome,
 ) {
     val res = LocalContext.current.resources
     val colors = NagTheme.colors
@@ -96,7 +100,7 @@ fun QueuePanel(
     val first = if (playing != null) current + 1 else 0
     val upcoming = entries.drop(first)
     val title = stringResource(R.string.nag_queue_title)
-    BackHandler(onBack = onClose)
+    BackHandler(enabled = onClose != null) { onClose?.invoke() }
 
     fun remove(index: Int) {
         val entry = entries.getOrNull(index) ?: return
@@ -119,12 +123,12 @@ fun QueuePanel(
 
     Column(
         modifier
-            .background(colors.chrome)
+            .background(background)
             .semantics { paneTitle = title }
             .onKeyEvent { event ->
                 // Esc closes the panel, wherever the focus is in it
-                val esc = event.key == Key.Escape && event.type == KeyEventType.KeyDown
-                if (esc) onClose()
+                val esc = onClose != null && event.key == Key.Escape && event.type == KeyEventType.KeyDown
+                if (esc) onClose?.invoke()
                 esc
             }
             .testTag("queue-panel"),
@@ -144,7 +148,7 @@ fun QueuePanel(
                 modifier = Modifier.weight(1f),
             )
             NagButton(stringResource(R.string.nag_queue_clear), ::clear, enabled = upcoming.isNotEmpty())
-            NagIconButton(NagIcons.Close, stringResource(R.string.nag_queue_close), onClose)
+            if (onClose != null) NagIconButton(NagIcons.Close, stringResource(R.string.nag_queue_close), onClose)
         }
         HorizontalRule()
         if (playing != null) {
@@ -183,7 +187,7 @@ fun QueuePanel(
                         onRemove = { remove(index) },
                         // by touch the swipe; with a pointer the menu and Delete
                         swipe = touch,
-                        color = colors.chrome,
+                        color = background,
                         actions = listOfNotNull(
                             CustomAccessibilityAction(up) { moveUp(); true }.takeIf { position > 0 },
                             CustomAccessibilityAction(down) { moveDown(); true }.takeIf { position < upcoming.lastIndex },
@@ -191,7 +195,7 @@ fun QueuePanel(
                         modifier = Modifier
                             .testTag("queue-${entry.key}")
                             .reorderItem(reorder, entry.key, position)
-                            .background(colors.chrome)
+                            .background(background)
                             .onKeyEvent { event ->
                                 if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
                                 when {
