@@ -1,5 +1,6 @@
 package app.nagmedar.macrobenchmark
 
+import android.graphics.Rect
 import android.util.Log
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.junit4.BaselineProfileRule
@@ -93,10 +94,15 @@ class BaselineProfileGenerator {
             device.waitForIdle()
         }
         // a track by its title (the phone's rows also hold a ⋯ button, which opens a sheet instead):
-        // the CI run's tracks are "Profile track …" (emulator.yml), another library's first row
+        // the CI run's tracks are "Profile track …" (emulator.yml), another library's first row; a
+        // row of the table, not a card of the "recently played" shelf above it, which plays nothing
         passOver {
             waitFor {
-                device.findObject(By.res("music"))?.let { it.findObject(By.textStartsWith("Profile track")) ?: it.findObject(By.scrollable(true))?.findObject(By.clickable(true)) }
+                device.findObject(By.res("music"))?.let { music ->
+                    val shelf = music.findObject(By.res("recent-shelf"))?.visibleBounds
+                    music.findObjects(By.textStartsWith("Profile track")).firstOrNull { shelf == null || !Rect.intersects(shelf, it.visibleBounds) }
+                        ?: music.findObject(By.scrollable(true))?.findObject(By.clickable(true))
+                }
             }?.click()
         }
         // the phone's mini player opens the phone player (its first clickable part, the track's

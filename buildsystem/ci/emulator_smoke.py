@@ -897,7 +897,10 @@ class Smoke:
 
     def play_track(self, nodes):
         """Plays the first of the walk's tracks (--music, "Profile track …") from the Music's list."""
-        rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track")]
+        # a row of the table, not a card of the "recently played" shelf above it
+        shelf = [n.b for n in self.by_id(nodes, "recent-shelf")]
+        inside = lambda n: any(b[0] <= n.center[0] <= b[2] and b[1] <= n.center[1] <= b[3] for b in shelf)
+        rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track") and not inside(n)]
         if not rows:
             rows = [n for n in self.app_nodes(nodes) if n.text.strip() == "Smoke tone"]
         if not self.check("a track in the Music's list", bool(rows)):
