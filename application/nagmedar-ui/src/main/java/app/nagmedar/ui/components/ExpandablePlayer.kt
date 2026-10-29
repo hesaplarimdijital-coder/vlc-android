@@ -138,7 +138,8 @@ class ExpandablePlayerState(initialValue: PlayerValue, density: Density) {
     }
 
     internal fun updateCollapsedTop(top: Float) {
-        if (top <= 0f || top == collapsedTop) return
+        // the bars' slide is taken out of the position again: a float's rounding is no move
+        if (top <= 0f || abs(top - collapsedTop) < 0.5f) return
         collapsedTop = top
         draggable.updateAnchors(
             DraggableAnchors {
