@@ -44,10 +44,9 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
@@ -442,7 +441,7 @@ private fun RenameStreamDialog(stream: SavedStream, onRename: (String) -> Unit, 
             onDismiss()
         }
     }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_streams_rename_title), Modifier.testTag("streams-rename")) {
                 val focus = remember { FocusRequester() }

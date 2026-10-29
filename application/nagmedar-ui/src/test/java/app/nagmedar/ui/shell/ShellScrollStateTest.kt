@@ -1,12 +1,10 @@
 package app.nagmedar.ui.shell
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Desktop Kit 0.2.0: a phone's bottom bar and player strip follow the content's scrolling, the top bar its position. */
+/** Desktop Kit 0.2.0: a phone's bottom bar and player strip follow the content's scrolling (1.0.1: the top bar does not). */
 class ShellScrollStateTest {
 
     private fun state(max: Float = 64f) = ShellScrollState().apply { maxOffsetPx = max }
@@ -14,42 +12,37 @@ class ShellScrollStateTest {
     @Test
     fun scrollingDownSlidesTheBarAwayAndUpBringsItBack() {
         val scroll = state()
-        scroll.onScrolled(consumedY = -20f, availableY = 0f)
+        scroll.onScrolled(consumedY = -20f)
         assertEquals(20f, scroll.offsetPx)
-        assertTrue("the content left its top", scroll.scrolled)
-        scroll.onScrolled(consumedY = -200f, availableY = 0f)
+        scroll.onScrolled(consumedY = -200f)
         assertEquals("no further than its height", 64f, scroll.offsetPx)
-        scroll.onScrolled(consumedY = 30f, availableY = 0f)
+        scroll.onScrolled(consumedY = 30f)
         assertEquals(34f, scroll.offsetPx)
-        scroll.onScrolled(consumedY = 500f, availableY = 0f)
+        scroll.onScrolled(consumedY = 500f)
         assertEquals(0f, scroll.offsetPx)
     }
 
     @Test
-    fun aPullAtTheTopFlattensTheTopBar() {
+    fun aPullTheContentCannotTakeMovesNothing() {
         val scroll = state()
-        scroll.onScrolled(consumedY = -10f, availableY = 0f)
-        assertTrue(scroll.scrolled)
-        scroll.onScrolled(consumedY = 10f, availableY = 0f)
-        assertTrue("still away from the top until it cannot go further", scroll.scrolled)
-        scroll.onScrolled(consumedY = 0f, availableY = 15f)
-        assertFalse(scroll.scrolled)
+        scroll.onScrolled(consumedY = -10f)
+        // at its top, a pull down the list could not take: the bar stays where it is, nothing flips
+        scroll.onScrolled(consumedY = 0f)
+        assertEquals(10f, scroll.offsetPx)
     }
 
     @Test
-    fun withTheKeyboardUpTheBarStaysButTheTopBarFollows() {
+    fun withTheKeyboardUpTheBarStays() {
         val scroll = state().apply { hideOnScroll = false }
-        scroll.onScrolled(consumedY = -40f, availableY = 0f)
+        scroll.onScrolled(consumedY = -40f)
         assertEquals(0f, scroll.offsetPx)
-        assertTrue(scroll.scrolled)
     }
 
     @Test
     fun widerWindowsDoNotMove() {
         val scroll = state().apply { enabled = false }
-        scroll.onScrolled(consumedY = -40f, availableY = 0f)
+        scroll.onScrolled(consumedY = -40f)
         assertEquals(0f, scroll.offsetPx)
-        assertFalse(scroll.scrolled)
     }
 
     @Test
@@ -63,9 +56,8 @@ class ShellScrollStateTest {
     @Test
     fun aNewScreenStartsWithTheBarsShown() {
         val scroll = state()
-        scroll.onScrolled(consumedY = -50f, availableY = 0f)
+        scroll.onScrolled(consumedY = -50f)
         scroll.reset()
         assertEquals(0f, scroll.offsetPx)
-        assertFalse(scroll.scrolled)
     }
 }

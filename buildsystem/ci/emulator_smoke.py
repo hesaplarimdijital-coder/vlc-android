@@ -8,7 +8,9 @@ violations). The walk, in passes (a size and a language each):
   tablet-en    first run (every step), then each top-level destination, Settings and its pages
   phone-en     the same on a phone-sized screen with media granted and test files scanned, the
                first-run flow again, then 1.0's phone: the bottom bar (Music · Podcast · Radio · ⋯
-               and nothing else), the ⋯ sheet opened and closed with Back, a track's ⋯ sheet, a
+               and nothing else), 1.0.1's pages (⋯ opens the "More" page, Settings is a page of its
+               own without the bottom bar and with a back arrow, Back returns to "More", the top
+               bar's colour the same at rest, during and after a scroll), a track's ⋯ sheet, a
                track played, the mini player dragged up into the full player and down again, a
                sideways swipe on it to the next track, a podcast followed (--feed) and an
                episode's page whose play button must not move after it opened, the Radio; then a
@@ -16,7 +18,7 @@ violations). The walk, in passes (a size and a language each):
                rotation, background and foreground
   workstation  the tablet's Music: the inspector shown, Ctrl+I hides and shows it, the table's
                column chooser (a title's long press) opens and Escape closes it
-  phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ sheet
+  phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
 
 1.0.1 (the user's crash in Bu cihaz): phone-en, phone-tr and workstation also walk This device /
 Bu cihaz: the internal storage, its Music folder (the walk's files), a file played from it, back up
@@ -58,7 +60,7 @@ except Exception:  # Pillow is optional: screenshots are then kept at full size
 PERMISSIONS_MEDIA = ["android.permission.READ_MEDIA_AUDIO", "android.permission.READ_MEDIA_VIDEO",
                      "android.permission.READ_MEDIA_IMAGES"]
 # nag_nav_* keys that are not destinations to tap in the loop
-NAV_SKIP = {"nag_nav_settings", "nag_nav_more", "nag_nav_search"}
+NAV_SKIP = {"nag_nav_settings", "nag_nav_more", "nag_nav_search", "nag_nav_back"}
 LOG_RE = re.compile(r"^(\S+ \S+)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.+?)\s*: (.*)$")
 BOUNDS_RE = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
 # what 1.0 deleted (films, series, videos, the Home page, TV Lab) must not be named on the app's screens
@@ -792,6 +794,12 @@ class Smoke:
         row = [n for n in self.app_nodes(nodes) if n.text.strip() and abs(n.center[1] - y) <= 16]
         return [n.text.strip() for n in sorted(row, key=lambda n: n.b[0])]
 
+    def has_bottom_bar(self, nodes):
+        """The phone's bottom bar is on screen: its ⋯ tab's label at the screen's foot (the label is a child of the tab)."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        return any(n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.85 for n in self.app_nodes(nodes))
+
     def check_bottom_bar(self, nodes):
         s = self.strings[self.lang]
         want = [s["nag_nav_music"], s["nag_nav_podcasts_short"], s["nag_nav_radio"], s["nag_nav_more"]]
@@ -822,42 +830,110 @@ class Smoke:
             self.warnings.append("[%s] %s: %.1f %% janky frames (over 40 %%; informational on an emulator)" % (self.cur_pass, what, r["janky"]))
         return r
 
-    def close_more_sheet(self):
-        """Back while the bottom bar's ⋯ sheet is open (the destination loop ends with it open)."""
-        s = self.strings[self.lang]
+    def back_to_tabs(self):
+        """Back while a page of its own (Settings) hides the phone's bottom bar; only where its back arrow shows, never out of the app."""
         nodes = self.nodes(self.dump())
-        # a phone's screen only: a tablet's sidebar always lists these pages, and Back would leave the app
+        # a phone's screen only: a tablet has no bottom bar, and Back would leave the app
         if self.screen_size(nodes)[0] >= 1600:
             return
-        seen = self.texts(nodes)
-        if all(x in seen for x in (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])):
+        for _ in range(4):
+            if self.has_bottom_bar(nodes) or not self.back_arrow(nodes):
+                return
             self.key(4)
-            time.sleep(1)
+            nodes = self.nodes(self.settle(0.8))
 
     def open_music(self):
         s = self.strings[self.lang]
-        self.close_more_sheet()
-        if not self.open_label(s["nag_nav_music"]):
+        self.back_to_tabs()
+        if not self.open_label(s["nag_nav_music"], via_more=False):
             self.warnings.append("[%s] Music not found in the UI" % self.cur_pass)
         return self.step("Music")
 
-    def phone_sheets(self):
-        """⋯ of the bottom bar opens the glass sheet of the other pages, Back closes it (from the Music)."""
+    def page_title(self, nodes, label):
+        """The top bar's title [label]: text that is not a control, in the top tenth of the screen."""
+        w, h = self.screen_size(nodes)
+        return [n for n in self.app_nodes(nodes) if n.text.strip() == label and not n.clickable and n.center[1] < h * 0.12]
+
+    def back_arrow(self, nodes):
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        return [n for n in self.app_nodes(nodes) if n.desc.strip() == s["nag_nav_back"] and n.center[1] < h * 0.12]
+
+    def phone_pages(self):
+        """1.0.1: ⋯ opens the "More" page; Settings is a page of its own; Back returns to "More"; the top bar keeps its colour."""
         s = self.strings[self.lang]
         nodes = self.open_music()
         self.check_bottom_bar(nodes)
-        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"]]
+        self.top_bar_colour_check(nodes)
+        nodes = self.open_music()
+        w, h = self.screen_size(nodes)
+        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.85]
         if not self.check("⋯ in the bottom bar", bool(more)):
             return
-        sheet = (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])
+        rows = (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])
         nodes = self.step("Bottom bar ⋯", lambda: self.tap(more[-1]))
-        seen = self.texts(nodes)
-        self.check("⋯ opens the sheet", all(x in seen for x in sheet), "seen: %s" % ", ".join(x for x in sheet if x in seen))
+        seen = {t.split("\n")[0].strip() for t in self.texts(nodes)}
+        self.check("⋯ opens the More page", all(x in seen for x in rows) and bool(self.page_title(nodes, s["nag_nav_more"]))
+                   and self.has_bottom_bar(nodes), "seen: %s" % ", ".join(x for x in rows if x in seen))
+        settings = self.find(nodes, s["nag_nav_settings"])
+        if not self.check("Settings on the More page", settings is not None):
+            return
+        nodes = self.step("Settings from More", lambda: self.tap(settings), wait=1.2)
+        self.check("Settings is a page of its own: no bottom bar", not self.has_bottom_bar(nodes) and bool(self.page_title(nodes, s["nag_nav_settings"])),
+                   "bottom bar: %s" % ("shown" if self.has_bottom_bar(nodes) else "none"))
+        self.check("Settings has a back arrow", bool(self.back_arrow(nodes)))
         self.key(4)
-        nodes = self.step("Back with the sheet open")
-        seen = self.texts(nodes)
-        self.check("Back closes the sheet", not any(x in seen for x in sheet[:2]) and bool(self.bottom_bar(nodes)),
-                   "left: %s" % (", ".join(x for x in sheet[:2] if x in seen) or "none"))
+        nodes = self.step("Back from Settings", wait=1.2)
+        self.check("Back from Settings shows More", bool(self.page_title(nodes, s["nag_nav_more"])) and self.has_bottom_bar(nodes),
+                   "title: %s" % ", ".join(n.text for n in self.app_nodes(nodes) if n.center[1] < self.screen_size(nodes)[1] * 0.12 and n.text))
+        # the arrow does what Back does
+        settings = self.find(nodes, s["nag_nav_settings"])
+        if settings is not None:
+            nodes = self.step("Settings from More again", lambda: self.tap(settings), wait=1.2)
+            arrow = self.back_arrow(nodes)
+            if arrow:
+                nodes = self.step("The back arrow", lambda: self.tap(arrow[0]), wait=1.2)
+                self.check("the back arrow returns to More", bool(self.page_title(nodes, s["nag_nav_more"])))
+
+    def pixel(self, rel, x, y, width):
+        """The colour at ([x], [y]) of a screen [width] px wide, read from the screenshot [rel]; None without one."""
+        if Image is None or not rel:
+            return None
+        try:
+            im = Image.open(os.path.join(self.out, rel)).convert("RGB")
+        except Exception:
+            return None
+        k = im.width / float(width)
+        return im.getpixel((min(int(x * k), im.width - 1), min(int(y * k), im.height - 1)))
+
+    def top_bar_colour_check(self, nodes):
+        """The top bar's colour (beside the title) at rest, while a finger drags the list and after it: one colour."""
+        s = self.strings[self.lang]
+        titles = self.page_title(nodes, s["nag_nav_music"])
+        w, h = self.screen_size(nodes)
+        if Image is None or not titles:
+            self.warnings.append("[%s] top bar colour not read (%s)" % (self.cur_pass, "no Pillow" if Image is None else "no title"))
+            return
+        t = titles[0]
+        x, y = t.b[2] - 24, t.center[1]
+        rest = self.pixel(self.steps[-1]["shot"], x, y, w)
+        # a slow drag, the screen taken while the finger is still on it
+        mid_name = "%03d-%s-%s" % (self.n + 1, self.cur_pass, "top-bar-mid-drag")
+        self.sh("(input swipe %d %d %d %d 2500 &) ; sleep 1.3 ; screencap -p /sdcard/nag-mid.png" % (w // 2, int(h * 0.75), w // 2, int(h * 0.35)), timeout=60)
+        rc, data = self.adb("exec-out", "cat /sdcard/nag-mid.png", timeout=60, binary=True)
+        mid = None
+        if rc == 0 and len(data) > 1000:
+            rel = "shots/%s.png" % mid_name
+            with open(os.path.join(self.out, rel), "wb") as f:
+                f.write(data)
+            mid = self.pixel(rel, x, y, w)
+        time.sleep(1.5)
+        self.step("Music scrolled (top bar)")
+        after = self.pixel(self.steps[-1]["shot"], x, y, w)
+        self.check("the top bar keeps its colour while the list scrolls", rest is not None and rest == after and (mid is None or mid == rest),
+                   "at rest %s, while dragged %s, after %s" % (rest, mid, after))
+        for _ in range(3):
+            self.swipe_down(nodes)
 
     def item_sheet(self, nodes):
         """A track's ⋯ opens its sheet (Add to queue …), Back closes it."""
@@ -1055,10 +1131,10 @@ class Smoke:
         self.check("the Radio opens", any(self.by_id(nodes, i) for i in ids))
 
     def phone_player(self):
-        """1.0's phone: sheets, a track played, the list's frames, the player's drag, the episode page, the Radio."""
+        """1.0's phone: sheets, the pages, a track played, the list's frames, the player's drag, the episode page, the Radio."""
         nodes = self.open_music()
         self.item_sheet(nodes)
-        self.phone_sheets()
+        self.phone_pages()
         nodes = self.open_music()
         self.scroll_frames("Music list scroll", nodes)
         for _ in range(4):
@@ -1142,7 +1218,7 @@ class Smoke:
         """This device / Bu cihaz: on a phone through ⋯ (a sheet or a page: found by its text, scrolled to), on a tablet in the sidebar."""
         s = self.strings[self.lang]
         label = s["nag_nav_device"]
-        self.close_more_sheet()
+        self.back_to_tabs()
         nodes = self.nodes(self.dump())
         node = self.find(nodes, label)
         w, h = self.screen_size(nodes)
@@ -1328,7 +1404,7 @@ class Smoke:
             self.warnings.append("[phone-tr] the Turkish interface could not be set; the pass was skipped")
             return
         self.step("Launch (Turkish)")
-        self.phone_sheets()
+        self.phone_pages()
         self.device_walk(wide=False)
         self.visit_destinations()
         self.settings_pass(full=True)

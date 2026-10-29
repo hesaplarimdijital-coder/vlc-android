@@ -47,10 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.cast.CastPickerDialog
 import app.nagmedar.ui.cast.Casting
-import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.MenuBarMenus
 import app.nagmedar.ui.components.MenuBarState
-import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NoticeHost
@@ -117,6 +115,8 @@ import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastsScreen
 import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
+import app.nagmedar.ui.screens.MoreAction
+import app.nagmedar.ui.screens.MoreActionGroup
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.SettingsItem
 import app.nagmedar.ui.screens.SettingsReveal
@@ -155,6 +155,7 @@ import app.nagmedar.ui.shell.DropOverlay
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
+import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.UnderShellBars
@@ -329,7 +330,7 @@ private fun NagmedarMain(
     LaunchedEffect(ShellRequests.search) {
         val query = ShellRequests.search ?: return@LaunchedEffect
         searchQuery = query
-        navigator.navigate(Destination.Search)
+        navigator.open(Destination.Search)
         ShellRequests.search = null
     }
     // VLC's widgets are gone: once, a word on Nağmedar's
@@ -428,9 +429,9 @@ private fun NagmedarMain(
                 sidebarCollapsed = prefs.sidebarCollapsed,
                 onSidebarCollapsedChange = prefs::updateSidebarCollapsed,
                 badges = counts,
-                // the menu bar's field is the palette's; phones and tablets go to the search page (S-311)
+                // the menu bar's field is the palette's; phones and tablets open the search page (S-311)
                 onSearch = {
-                    if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.navigate(Destination.Search)
+                    if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.open(Destination.Search)
                 },
                 menus = { MenuBarMenus(menuSpecs(context, actions), menuBar) },
                 // media dropped on the player bar join the queue (S-406)
@@ -453,10 +454,11 @@ private fun NagmedarMain(
                                 onQueue = queuePanel::toggle,
                                 onFullScreenLyrics = { lyricsOpen = true },
                                 onFullScreenVisualizer = { visualizerOpen = true },
-                                // the equaliser's page is the shell's: the player goes down for it
+                                // the equaliser's page is the shell's: the player goes down for it, the page opens over
+                                // the one under the player, in its tab
                                 onEqualizer = {
                                     closePlayer()
-                                    navigator.navigate(Destination.Equalizer)
+                                    navigator.open(Destination.Equalizer)
                                 },
                                 fullWindow = caption == null,
                             )
@@ -464,21 +466,13 @@ private fun NagmedarMain(
                     )
                 },
                 navController = navController,
+                navigator = navigator,
                 caption = caption,
                 contentOnly = playerOverWindow,
-                // Desktop Kit 1.0: on tablet and DeX the player bar floats over the content as glass
+                // Desktop Kit 1.0: on tablet and DeX the player bar floats over the content (a solid card since 1.0.1)
                 floatingPlayer = true,
-                // the phone's "⋯" sheet: after the pages, what playback has of its own (Desktop Kit 1.0)
-                moreActions = listOf(
-                    ActionGroup(
-                        stringResource(R.string.nag_menu_playback),
-                        listOf(
-                            MenuEntry.Item(stringResource(R.string.nag_sc_equalizer), { navigator.navigate(Destination.Equalizer) }, icon = NagIcons.Equalizer),
-                            MenuEntry.Item(stringResource(R.string.nag_sc_sleep_timer), { sleepTimerOpen = true }, icon = NagIcons.Sleep),
-                            MenuEntry.Item(stringResource(R.string.nag_queue_title), queuePanel::toggle, icon = NagIcons.Queue),
-                        ),
-                    ),
-                ),
+                // 1.0.1: bars, menus and sheets are solid surfaces; nothing changes colour with what passes beneath
+                glass = false,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -501,7 +495,7 @@ private fun NagmedarMain(
                             // the equaliser's page is the shell's: the player closes for it
                             onEqualizer = {
                                 phonePlayer = false
-                                navigator.navigate(Destination.Equalizer)
+                                navigator.open(Destination.Equalizer)
                             },
                             // as while it shows, also while it goes down
                             fullWindow = caption == null,
@@ -582,22 +576,22 @@ private fun NagmedarMain(
                             Destination.Network -> NetworkScreen(undo)
                             Destination.Settings -> SettingsScreen(
                                 prefs = prefs,
-                                onOpenAllSettings = { shellNavigator.navigate(Destination.AllSettings) },
-                                onOpenAbout = { shellNavigator.navigate(Destination.About) },
+                                onOpenAllSettings = { shellNavigator.open(Destination.AllSettings) },
+                                onOpenAbout = { shellNavigator.open(Destination.About) },
                                 onShowFirstRun = { prefs.updateFirstRunDone(false) },
                                 listState = settingsList,
                                 undo = undo,
-                                onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
-                                onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
-                                onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
+                                onOpenEqualizer = { shellNavigator.open(Destination.Equalizer) },
+                                onOpenGuide = { shellNavigator.open(Destination.Guide) },
+                                onOpenShortcutCard = { shellNavigator.open(Destination.ShortcutCard) },
                                 reveal = settingsReveal,
                             )
                             // VLC's preference pages, drawn as Nağmedar's
                             Destination.AllSettings -> AllSettingsScreen(
                                 onLink = { link ->
                                     when (link) {
-                                        NagmedarLink.Equalizer -> shellNavigator.navigate(Destination.Equalizer)
-                                        NagmedarLink.About -> shellNavigator.navigate(Destination.About)
+                                        NagmedarLink.Equalizer -> shellNavigator.open(Destination.Equalizer)
+                                        NagmedarLink.About -> shellNavigator.open(Destination.About)
                                         // Library, Appearance, Remote access, Backup: that section of Settings
                                         else -> link.settingsItem?.let(openSettingsAt)
                                     }
@@ -609,20 +603,26 @@ private fun NagmedarMain(
                             // S-906, with S-910's signal path and S-912's A/B test beside the chain
                             Destination.Equalizer -> EqualizerScreen(side = { EqualizerSide() })
                             // S-1504: the guide and the card of keys, each leading to the other
-                            Destination.Guide -> GuideScreen(onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) })
+                            Destination.Guide -> GuideScreen(onOpenShortcutCard = { shellNavigator.open(Destination.ShortcutCard) })
                             Destination.ShortcutCard -> ShortcutCardScreen(
                                 onEdit = actions::editShortcuts,
-                                onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
+                                onOpenGuide = { shellNavigator.open(Destination.Guide) },
                             )
+                            // 1.0.1: the phone's "⋯" tab, "Daha fazla" (and the rail's): the pages the chrome leaves out,
+                            // each opened over it, then what playback has of its own
                             Destination.More -> MoreScreen(
-                                destinations = Destination.overflow(
-                                    when (NavKind.forWidth(widthClass)) {
-                                        NavKind.BottomBar -> Destination.bottomBar
-                                        NavKind.Rail -> Destination.rail + Destination.railFooter
-                                        NavKind.Sidebar -> Destination.sidebar
-                                    },
+                                destinations = Destination.overflow(NavRules.tabs(NavKind.forWidth(widthClass))),
+                                onSelect = shellNavigator::open,
+                                actions = listOf(
+                                    MoreActionGroup(
+                                        stringResource(R.string.nag_menu_playback),
+                                        listOf(
+                                            MoreAction(stringResource(Destination.Equalizer.label), Destination.Equalizer.icon, { shellNavigator.open(Destination.Equalizer) }, opensPage = true),
+                                            MoreAction(stringResource(R.string.nag_sc_sleep_timer), NagIcons.Sleep, { sleepTimerOpen = true }),
+                                            MoreAction(stringResource(R.string.nag_queue_title), NagIcons.Queue, queuePanel::toggle),
+                                        ),
+                                    ),
                                 ),
-                                onSelect = shellNavigator::navigate,
                             )
                             // the network streams opened by their address, and those played before
                             Destination.Streams -> StreamsScreen(undo)
@@ -671,7 +671,7 @@ private fun NagmedarMain(
             onDismiss = { paletteOpen = false },
             onSearchAll = { query ->
                 searchQuery = query
-                navigator.navigate(Destination.Search)
+                navigator.open(Destination.Search)
             },
         )
     }

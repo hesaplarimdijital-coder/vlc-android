@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagTheme
@@ -124,8 +125,8 @@ data class ColumnSort(val id: String, val ascending: Boolean) {
  * [rowMenu] gives every row a context menu (right click, long press, Menu key). With [reorder]
  * (made on the same [state]) each row starts with a handle that drags it to another place (S-804).
  *
- * Desktop Kit 1.0: with [glassHeader] the rows scroll beneath the header, which turns to frosted
- * glass once they do; [headerMenu] is each column title's context menu (the column chooser), told
+ * Desktop Kit 1.0: with [glassHeader] the rows scroll beneath the header, an opaque band of the
+ * page's colour (frosted glass once they pass beneath it, where the shell's [GlassMode] allows glass); [headerMenu] is each column title's context menu (the column chooser), told
  * which column it was opened on; [onExtendSelection] takes Shift+↑ and Shift+↓ on a focused row
  * (the row and the step, true when the selection grew) and the focus follows.
  */
@@ -273,14 +274,18 @@ fun <T> DenseTable(
         true
     }
     if (glassHeader) {
-        // the header lies over the rows, glass once they pass beneath it
+        // the header lies over the rows: opaque, the page's colour, whether rows pass beneath it or not (1.0.1); where
+        // the shell lets glass be glass, it turns to glass once they do
         Box(modifier.fillMaxSize().then(keys)) {
             list(Modifier.fillMaxSize().glassSource(rowsGlass, glassMode))
             header(
                 Modifier
                     .fillMaxWidth()
                     .onSizeChanged { headerPx.intValue = it.height }
-                    .glass(NagGlass.chrome(colors, GlassThickness.Thin), source = rowsGlass, mode = glassMode, enabled = scrolled),
+                    .then(
+                        if (glassMode == GlassMode.Solid) Modifier.background(colors.background)
+                        else Modifier.glass(NagGlass.chrome(colors, GlassThickness.Thin), source = rowsGlass, mode = glassMode, enabled = scrolled, rest = colors.background),
+                    ),
             )
         }
     } else if (lead != null) {

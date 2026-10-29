@@ -33,6 +33,7 @@ import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.samplePlayerInfo
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NavKind
+import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -191,15 +192,16 @@ class PlayerBarsTest {
         assertEquals(listOf(0.25f), actions.seeks)
     }
 
+    /** 1.0.1: but Settings and its pages, pages of their own without the bottom bar and the mini player. */
     @Test
     @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun theBarIsOnEveryScreenOfAPhone() = everyScreen(WidthClass.Compact, InputMode.Touch, "mini-player")
+    fun theBarIsOnEveryScreenOfAPhone() = everyScreen(WidthClass.Compact, InputMode.Touch, "mini-player", without = NavRules.fullPages)
 
     @Test
     @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theBarIsOnEveryScreenOfADesktop() = everyScreen(WidthClass.Large, InputMode.Pointer, "transport-bar")
 
-    private fun everyScreen(widthClass: WidthClass, input: InputMode, tag: String) {
+    private fun everyScreen(widthClass: WidthClass, input: InputMode, tag: String, without: Set<Destination> = emptySet()) {
         var start by mutableStateOf(Destination.Music)
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
@@ -210,7 +212,7 @@ class PlayerBarsTest {
             start = destination
             compose.waitForIdle()
             compose.onNodeWithText(destination.name).assertExists()
-            compose.onNodeWithTag(tag).assertExists()
+            if (destination in without) compose.onNodeWithTag(tag).assertDoesNotExist() else compose.onNodeWithTag(tag).assertExists()
         }
     }
 

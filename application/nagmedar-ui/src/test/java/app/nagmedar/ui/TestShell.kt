@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.ColumnWidth
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.MenuBarMenus
@@ -30,12 +29,16 @@ import app.nagmedar.ui.playback.MiniPlayer
 import app.nagmedar.ui.playback.PlayerBarActions
 import app.nagmedar.ui.playback.PlayerBarInfo
 import app.nagmedar.ui.playback.TransportBar
+import app.nagmedar.ui.screens.MoreActionGroup
+import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalFloatingPlayer
+import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
+import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
@@ -68,17 +71,22 @@ fun TestShell(
     caption: CaptionBar? = null,
     /** What the bars show (S-1302: casting). */
     playerInfo: PlayerBarInfo = samplePlayerInfo,
-    /** Desktop Kit 1.0: the player bar floats over a tablet's and a desktop window's content as glass, as in the app. */
+    /** Desktop Kit 1.0: the player bar floats over a tablet's and a desktop window's content, as in the app. */
     floatingPlayer: Boolean = false,
     /** Another player in the bars' place (Desktop Kit 1.0: the phone's expandable player); null: the sample bars. */
     player: (@Composable (NavKind) -> Unit)? = null,
-    /** The phone's "⋯" sheet's own entries. */
-    moreActions: List<ActionGroup> = emptyList(),
-    screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
+    /** The "Daha fazla" page's own groups after the pages (the app's "Oynatma"). */
+    moreActions: List<MoreActionGroup> = emptyList(),
+    /** Glass menus and sheets, as Desktop Kit 1.0 drew them; the app's are solid (1.0.1). */
+    glass: Boolean = false,
+    screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, navigator -> SampleScreen(destination, navigator, moreActions) },
 ) {
     val navController = rememberNavController()
+    val navigator = remember(navController) { ShellNavigator(navController) }
+    // the start page reached as a person reaches it (1.0.1): a page through the tab it is opened from, so the
+    // right tab is lit and the back arrow shows
     LaunchedEffect(startDestination) {
-        if (startDestination != Destination.Music) ShellNavigator(navController).navigate(startDestination)
+        if (startDestination != Destination.Music) wayTo(startDestination, navigator.navKind).forEach(navigator::navigate)
     }
     NagmedarShell(
         widthClass = widthClass,
@@ -98,17 +106,39 @@ fun TestShell(
         },
         player = player ?: { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
+        navigator = navigator,
         overlay = overlay,
         caption = caption,
         screen = screen,
         floatingPlayer = floatingPlayer,
-        moreActions = moreActions,
+        glass = glass,
     )
 }
 
+/**
+ * The pages a person goes through to [destination] in a window of [kind]: a tab at once; Settings' pages
+ * through Settings (itself through "⋯" on a phone); the other pages "⋯" lists through "⋯"; the search page
+ * and the equaliser on a desktop from where the window is.
+ */
+fun wayTo(destination: Destination, kind: NavKind): List<Destination> {
+    val more = if (NavRules.isTab(Destination.More, kind)) listOf(Destination.More) else emptyList()
+    return when {
+        NavRules.isTab(destination, kind) || destination == Destination.Search -> listOf(destination)
+        destination in NavRules.fullPages -> (if (NavRules.isTab(Destination.Settings, kind)) emptyList() else more) +
+            listOf(Destination.Settings, destination).distinct()
+        else -> more + destination
+    }
+}
+
+/** A sample page of [destination]; "Daha fazla" is the real page, its rows opening pages through [navigator]. */
 @Composable
-fun SampleScreen(destination: Destination) {
+fun SampleScreen(destination: Destination, navigator: ShellNavigator? = null, moreActions: List<MoreActionGroup> = emptyList()) {
     when (destination) {
+        Destination.More -> MoreScreen(
+            destinations = Destination.overflow(NavRules.tabs(LocalNavKind.current)),
+            onSelect = { navigator?.open(it) },
+            actions = moreActions,
+        )
         Destination.Music -> Column(Modifier.fillMaxSize()) {
             PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = pluralStringResource(R.plurals.nag_tracks_count, 4812, 4812)) {
                 NagIconButton(NagIcons.Grid, stringResource(R.string.nag_view_grid), {})
@@ -168,7 +198,7 @@ object NoPlayerActions : PlayerBarActions {
 @Composable
 fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions, queueOpen: Boolean = false) {
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
-    // in the shell's floating glass bar, as the app's bars are
+    // in the shell's floating bar, as the app's bars are
     val transparent = LocalFloatingPlayer.current
     if (kind == NavKind.Sidebar) {
         TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)

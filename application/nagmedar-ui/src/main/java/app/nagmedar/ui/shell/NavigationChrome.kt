@@ -1,6 +1,6 @@
 package app.nagmedar.ui.shell
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,10 +28,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,11 +43,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -72,11 +75,8 @@ import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.keyHint
-import app.nagmedar.ui.theme.GlassThickness
-import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.theme.glass
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
 typealias NavBadges = Map<Destination, String>
@@ -93,14 +93,15 @@ fun BrandMark(modifier: Modifier = Modifier) {
 // ---------------------------------------------------------------- compact: bottom bar
 
 /**
- * The phone's bottom bar: Müzik · Podcast · Radyo · ⋯ (Desktop Kit 1.0: glass inside the shell, the
- * chrome colour elsewhere; the shell opens its "⋯" sheet for [Destination.More]).
+ * The phone's bottom bar: Müzik · Podcast · Radyo · ⋯, a solid surface with a hairline over it
+ * (1.0.1: it never takes the colour of what passes beneath). [selected] is the tab lit: the one
+ * whose pages are on screen, none on the search page.
  */
 @Composable
-fun BottomNavBar(current: Destination, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
+fun BottomNavBar(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val label = stringResource(R.string.nag_main_navigation)
-    Column(modifier.fillMaxWidth().glass(NagGlass.chrome(colors, GlassThickness.Regular))) {
+    Column(modifier.fillMaxWidth().background(colors.chrome)) {
         HorizontalRule()
         Row(
             modifier = Modifier
@@ -111,7 +112,7 @@ fun BottomNavBar(current: Destination, onSelect: (Destination) -> Unit, modifier
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Destination.bottomBar.forEach { destination ->
-                BottomBarItem(destination, selected = isSelected(destination, current, Destination.bottomBar), onClick = { onSelect(destination) })
+                BottomBarItem(destination, selected = destination == selected, onClick = { onSelect(destination) })
             }
         }
     }
@@ -135,7 +136,7 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
     ) {
         NavIndicator(selected, state, pill, Modifier.width(56.dp).height(30.dp)) {
             Icon(
-                // the phone's last tab is "⋯", its sheet of the other pages (Desktop Kit 1.0)
+                // the phone's last tab is "⋯", the page of the other pages
                 if (destination == Destination.More) NagIcons.MoreHorizontal else destination.icon,
                 contentDescription = null,
                 tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
@@ -197,7 +198,7 @@ private fun NavIndicator(selected: Boolean, state: InteractionState, shape: Roun
 // ---------------------------------------------------------------- medium/expanded: rail
 
 @Composable
-fun NavRail(current: Destination, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
+fun NavRail(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_main_navigation)
@@ -217,11 +218,11 @@ fun NavRail(current: Destination, onSelect: (Destination) -> Unit, modifier: Mod
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Destination.rail.forEach { destination ->
-                    RailItem(destination, isSelected(destination, current, Destination.rail + Destination.railFooter)) { onSelect(destination) }
+                    RailItem(destination, destination == selected) { onSelect(destination) }
                 }
             }
             Destination.railFooter.forEach { destination ->
-                RailItem(destination, isSelected(destination, current, Destination.rail + Destination.railFooter)) { onSelect(destination) }
+                RailItem(destination, destination == selected) { onSelect(destination) }
             }
         }
         VerticalRule(Modifier.fillMaxHeight())
@@ -279,7 +280,7 @@ val SidebarWidthRange = 200f..360f
  */
 @Composable
 fun Sidebar(
-    current: Destination,
+    selected: Destination?,
     onSelect: (Destination) -> Unit,
     collapsed: Boolean,
     onToggleCollapsed: () -> Unit,
@@ -306,7 +307,7 @@ fun Sidebar(
     val open = if (span <= 0f) 1f else ((shown.value - dimens.sidebarCollapsedWidth).value / span).coerceIn(0f, 1f)
     Box(modifier.fillMaxHeight()) {
         SidebarColumn(
-            current = current,
+            selected = selected,
             onSelect = onSelect,
             collapsed = collapsed,
             onToggleCollapsed = onToggleCollapsed,
@@ -335,7 +336,7 @@ private fun labelAlpha(open: Float): Float = ((open - 0.5f) * 2f).coerceIn(0f, 1
 
 @Composable
 private fun SidebarColumn(
-    current: Destination,
+    selected: Destination?,
     onSelect: (Destination) -> Unit,
     collapsed: Boolean,
     onToggleCollapsed: () -> Unit,
@@ -375,7 +376,7 @@ private fun SidebarColumn(
                         Spacer(Modifier.height(dimens.gapS))
                     }
                     items.forEach { destination ->
-                        SidebarItem(destination, destination == current, collapsed, badges[destination], open) { onSelect(destination) }
+                        SidebarItem(destination, destination == selected, collapsed, badges[destination], open) { onSelect(destination) }
                     }
                 }
             }
@@ -386,7 +387,7 @@ private fun SidebarColumn(
             ) {
                 if (!collapsed) {
                     Box(Modifier.weight(1f)) {
-                        SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = false, badge = null, open = open) {
+                        SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = false, badge = null, open = open) {
                             onSelect(Destination.Settings)
                         }
                     }
@@ -400,7 +401,7 @@ private fun SidebarColumn(
             }
             if (collapsed) {
                 Box(Modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp)) {
-                    SidebarItem(Destination.Settings, current == Destination.Settings, collapsed = true, badge = null, open = open) {
+                    SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = true, badge = null, open = open) {
                         onSelect(Destination.Settings)
                     }
                 }
@@ -473,13 +474,13 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
 // ---------------------------------------------------------------- top bars
 
 /**
- * Compact and medium top bar: page title and search ([onSearch] null: none, on the search page
- * itself). In a desktop window's [caption] bar (S-306) it is the bar: the title moves the window,
- * the search button takes its clicks, the system's buttons keep their place. [scrolled] (a phone's
- * content has left its top): the bar takes the chrome colour and a thin rule shows under it, as
- * Android's top app bar does (Desktop Kit 0.2.0); its height stays. With [glass] (the phone's shell,
- * where the content lies under the bar) it turns to glass once [scrolled] instead (Desktop Kit 1.0).
- * The bar is at least its height, so larger text is not cut.
+ * Compact and medium top bar: [onBack]'s arrow (a page that is not a tab's first page, 1.0.1), the
+ * page title and search ([onSearch] null: none, on the search page itself). One solid colour at
+ * all times: nothing scrolling beneath it changes it (1.0.1). The arrow, the title and the search
+ * button change with the page, fading through, so two titles never show at once. In a desktop
+ * window's [caption] bar (S-306) it is the bar: the title moves the window, the buttons take their
+ * clicks, the system's buttons keep their place. The bar is at least its height, so larger text
+ * is not cut.
  */
 @Composable
 fun PageTopBar(
@@ -487,49 +488,54 @@ fun PageTopBar(
     onSearch: (() -> Unit)?,
     modifier: Modifier = Modifier,
     caption: CaptionBar? = null,
-    scrolled: Boolean = false,
-    glass: Boolean = false,
+    onBack: (() -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
-    // content scrolled beneath: the bar takes the chrome colour, or turns to glass over content lying under it (the phone's, Desktop Kit 1.0)
-    val rest = if (glass) colors.background else Color.Transparent
-    val background by animateColorAsState(
-        if (scrolled) (if (glass) Color.Transparent else colors.chrome) else colors.background,
-        motion.standard(NagMotion.MEDIUM),
-        label = "topBar",
-    )
-    val ruleAlpha = animateFloatAsState(if (scrolled) 1f else 0f, motion.standard(NagMotion.MEDIUM), label = "topBarRule")
-    val rule = colors.border
-    Column(
-        modifier
-            .fillMaxWidth()
-            .glass(NagGlass.chrome(colors, GlassThickness.Regular), enabled = glass && scrolled, rest = rest)
-            .background(background)
-            // over the bottom edge, so the bar keeps its height with the rule or without it
-            .drawBehind {
-                val alpha = ruleAlpha.value
-                if (alpha > 0f) {
-                    val line = 1.dp.toPx()
-                    drawRect(rule.copy(alpha = rule.alpha * alpha), topLeft = Offset(0f, size.height - line), size = Size(size.width, line))
+    val latestBack by rememberUpdatedState(onBack)
+    val latestSearch by rememberUpdatedState(onSearch)
+    Box(modifier.fillMaxWidth().background(colors.background)) {
+        AnimatedContent(
+            targetState = TopBarContent(title, back = onBack != null, search = onSearch != null),
+            transitionSpec = { motion.topBarChange() },
+            label = "topBar",
+        ) { content ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
+                    .captionPadding(caption)
+                    .padding(start = if (content.back) dimens.gapXs else dimens.pagePadding, end = dimens.gapS),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (content.back) {
+                    NagIconButton(
+                        NagIcons.ChevronLeft,
+                        stringResource(R.string.nag_nav_back),
+                        { latestBack?.invoke() },
+                        Modifier.captionTarget(caption).testTag("top-bar-back"),
+                        size = BACK_TARGET,
+                        tint = colors.text,
+                    )
+                    Spacer(Modifier.width(dimens.gapXs))
                 }
-            },
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
-                .captionPadding(caption)
-                .padding(start = dimens.pagePadding, end = dimens.gapS),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(title, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f))
-            if (onSearch != null) NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch, Modifier.captionTarget(caption))
+                Text(content.title, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).semantics { heading() })
+                if (content.search) {
+                    NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), { latestSearch?.invoke() }, Modifier.captionTarget(caption))
+                }
+            }
         }
     }
 }
+
+/** What the top bar shows: it fades through to another when this changes. */
+@Immutable
+private data class TopBarContent(val title: String, val back: Boolean, val search: Boolean)
+
+/** The back arrow's target: a thumb's, with a pointer too. */
+private val BACK_TARGET = 48.dp
 
 /**
  * Large and extra-large: brand, application menus and the search/command field (Ctrl+K). In a
@@ -603,16 +609,6 @@ fun KeyCap(text: String, modifier: Modifier = Modifier) {
     ) {
         Text(text, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
-}
-
-private fun isSelected(destination: Destination, current: Destination, shown: List<Destination>): Boolean = when {
-    // the search page belongs to no tab; about, the guide, the shortcut card and all settings are Settings'; the music engine's equaliser is Music's
-    current == Destination.Search -> false
-    current == Destination.About || current == Destination.Guide || current == Destination.ShortcutCard || current == Destination.AllSettings ->
-        destination == Destination.Settings
-    current == Destination.Equalizer -> destination == Destination.Music
-    destination == Destination.More -> current !in shown || current == Destination.More
-    else -> destination == current
 }
 
 @Composable

@@ -384,6 +384,8 @@ fun GlassBottomSheet(
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+            // the sheet slides up opaque; the window does not fade it in over the page (1.0.1)
+            StillDialogWindow()
             SheetSurface(progress, drag, tier, label, modifier, inShell = false, { latestDismiss() }, content)
         }
     }

@@ -15,9 +15,9 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
-import app.nagmedar.ui.components.ActionGroup
-import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.screens.MoreAction
+import app.nagmedar.ui.screens.MoreActionGroup
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -53,21 +53,21 @@ class ShellScreenshotTest {
         theme: ThemeMode,
         input: InputMode,
         start: Destination = Destination.Music,
-        /** Desktop Kit 1.0: the phone's "⋯" tab tapped, its sheet open. */
-        moreSheet: Boolean = false,
+        /** 1.0.1: what is tapped after the start, in order (the phone's "⋯" tab, then a row of its page). */
+        taps: List<Int> = emptyList(),
     ) {
         // the test activity's theme has an action bar; the app's theme has none
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = start, moreActions = if (moreSheet) playbackActions() else emptyList())
+                    TestShell(widthClass, startDestination = start, moreActions = playbackActions())
                 }
             }
         }
         compose.waitForIdle()
-        if (moreSheet) {
-            compose.onNodeWithText(compose.activity.getString(R.string.nag_nav_more)).performClick()
+        taps.forEach { label ->
+            compose.onNodeWithText(compose.activity.getString(label)).performClick()
             compose.waitForIdle()
         }
         val window = compose.activity.window.decorView
@@ -116,22 +116,47 @@ class ShellScreenshotTest {
     @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
     fun compactLightEnglish() = capture("compact-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch)
 
-    /** Desktop Kit 1.0: the phone's "⋯" tab opens a glass sheet of the other pages, then "Oynatma". */
+    /** 1.0.1: the phone's "⋯" tab is the "Daha fazla" page: the other pages by section, then "Oynatma". */
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
-    fun compactMoreSheetDark() = capture("compact-more-sheet-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, moreSheet = true)
+    fun compactMorePageDark() = capture("compact-more-page-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, taps = listOf(R.string.nag_nav_more))
+
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun compactMorePageLight() = capture("compact-more-page-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, taps = listOf(R.string.nag_nav_more))
 
     @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
-    fun compactMoreSheetLightEnglish() = capture("compact-more-sheet-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, moreSheet = true)
+    fun compactMorePageLightEnglish() = capture("compact-more-page-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, taps = listOf(R.string.nag_nav_more))
 
-    /** The app's "Oynatma" group of the sheet (NagmedarApp's moreActions). */
+    /** 1.0.1: Settings from "Daha fazla", a page of its own: the back arrow, no bottom bar, no mini player. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun compactSettingsPageDark() = capture(
+        "compact-settings-page-dark", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, taps = listOf(R.string.nag_nav_more, R.string.nag_nav_settings),
+    )
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun compactSettingsPageLightEnglish() = capture(
+        "compact-settings-page-light-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, taps = listOf(R.string.nag_nav_more, R.string.nag_nav_settings),
+    )
+
+    /** 1.0.1: a content page from "⋯" (Network): the back arrow, the bars, "⋯" lit. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun compactNetworkPageLight() = capture(
+        "compact-network-page-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, taps = listOf(R.string.nag_nav_more, R.string.nag_nav_network),
+    )
+
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
+    fun compactNetworkPageDarkEnglish() = capture(
+        "compact-network-page-dark-en", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, taps = listOf(R.string.nag_nav_more, R.string.nag_nav_network),
+    )
+
+    /** The app's "Oynatma" group of the page (NagmedarApp's). */
     @Composable
     private fun playbackActions() = listOf(
-        ActionGroup(
+        MoreActionGroup(
             stringResource(R.string.nag_menu_playback),
             listOf(
-                MenuEntry.Item(stringResource(R.string.nag_sc_equalizer), {}, icon = NagIcons.Equalizer),
-                MenuEntry.Item(stringResource(R.string.nag_sc_sleep_timer), {}, icon = NagIcons.Sleep),
-                MenuEntry.Item(stringResource(R.string.nag_queue_title), {}, icon = NagIcons.Queue),
+                MoreAction(stringResource(R.string.nag_eq_title), NagIcons.Equalizer, {}, opensPage = true),
+                MoreAction(stringResource(R.string.nag_sc_sleep_timer), NagIcons.Sleep, {}),
+                MoreAction(stringResource(R.string.nag_queue_title), NagIcons.Queue, {}),
             ),
         ),
     )

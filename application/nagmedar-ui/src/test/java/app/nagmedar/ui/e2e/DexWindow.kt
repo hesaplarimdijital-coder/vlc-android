@@ -124,6 +124,7 @@ class DexWindow {
                     menus = { MenuBarMenus(menuSpecs(context, appActions), menuBar) },
                     player = { kind -> SamplePlayerBar(kind) },
                     navController = nav,
+                    navigator = navigator,
                     screen = { destination, _ -> SampleScreen(destination) },
                 )
             }
