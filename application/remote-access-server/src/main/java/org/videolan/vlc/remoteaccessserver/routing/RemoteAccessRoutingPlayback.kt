@@ -48,7 +48,6 @@ import org.videolan.resources.PLAYLIST_TYPE_VIDEO
 import org.videolan.resources.util.getFromMl
 import org.videolan.tools.KEY_CURRENT_AUDIO
 import org.videolan.tools.KEY_CURRENT_MEDIA
-import org.videolan.tools.KEY_VIDEO_APP_SWITCH
 import org.videolan.tools.awaitAppIsForegroung
 import org.videolan.tools.livedata.LiveDataset
 import org.videolan.vlc.R
@@ -96,14 +95,6 @@ fun Route.playbackRouting(appContext: Context, scope: CoroutineScope, settings: 
                     "artist" -> getArtist(id.toLong()).tracks
                     "genre" -> getGenre(id.toLong()).tracks
                     "playlist" -> getPlaylist(id.toLong(), false, false).tracks
-                    "video-group" -> {
-                        val group = getVideoGroup(id.toLong())
-                        group.media(Medialibrary.SORT_DEFAULT, false, false, false, group.mediaCount(), 0)
-                    }
-                    "video-folder" -> {
-                        val folder = getFolder(Folder.TYPE_FOLDER_VIDEO, id.toLong())
-                        folder.media(Folder.TYPE_FOLDER_VIDEO, Medialibrary.SORT_DEFAULT, false, false, false, folder.mediaCount(Folder.TYPE_FOLDER_VIDEO), 0)
-                    }
                     else -> arrayOf(getMedia(id.toLong()))
                 }
             }
@@ -114,10 +105,6 @@ fun Route.playbackRouting(appContext: Context, scope: CoroutineScope, settings: 
                     return@get
                 }
                 if (asAudio) medias[0].addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
-                if (medias[0].type == MediaWrapper.TYPE_VIDEO && !appContext.awaitAppIsForegroung() && settings.getString(KEY_VIDEO_APP_SWITCH, "0") != "1") {
-                    call.respond(HttpStatusCode.Forbidden, appContext.getString(R.string.ra_not_in_foreground))
-                    return@get
-                }
                 when {
                     append -> MediaUtils.appendMedia(appContext, medias)
                     else -> MediaUtils.openList(appContext, medias.toList(), 0)
@@ -132,26 +119,6 @@ fun Route.playbackRouting(appContext: Context, scope: CoroutineScope, settings: 
         val resume = (call.request.queryParameters["resume"] ?: "true") == "true"
         val applyPlaylist = (call.request.queryParameters["applyPlaylist"] ?: "true") == "true"
         RemoteAccessServer.getInstance(appContext).service?.let { service ->
-            service.playlistManager.waitForConfirmation.value?.let { confirmation ->
-                scope.launch(Dispatchers.Main) {
-                    if (resume) {
-                        if (applyPlaylist) service.playlistManager.videoResumeStatus = ResumeStatus.ALWAYS
-                        service.playlistManager.playIndex(
-                            confirmation.index,
-                            confirmation.flags,
-                            forceResume = true
-                        )
-                    } else {
-                        if (applyPlaylist) service.playlistManager.videoResumeStatus = ResumeStatus.NEVER
-                        service.playlistManager.playIndex(
-                            confirmation.index,
-                            confirmation.flags,
-                            forceRestart = true
-                        )
-                    }
-                }
-                service.playlistManager.waitForConfirmation.postValue(null)
-            }
             service.playlistManager.waitForConfirmationAudio.value?.let { confirmation ->
                 scope.launch(Dispatchers.Main) {
                     if (resume) {

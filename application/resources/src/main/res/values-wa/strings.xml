@@ -19,7 +19,6 @@
 
     <string name="play">Djouwer</string>
     <string name="play_as_audio">Djouwer come odio</string>
-    <string name="play_as_video">Djouwer come videyo</string>
     <string name="play_all">Djouwer tot</string>
     <string name="append_all">Adjouter tot</string>
     <string name="delete">Disfacer</string>
@@ -51,23 +50,17 @@
     <string name="cover_art">Potchete</string>
     <string name="previous">Di dvant</string>
     <string name="stop">Arester</string>
-    <string name="surface_best_fit">Meyeu adjustaedje</string>
-    <string name="surface_fill">Rimpli</string>
-    <string name="surface_original">Mitan</string>
     <string name="refresh">Rafrister</string>
     <string name="track_audio">Boket odio</string>
     <string name="track_video">Boket videyo</string>
     <string name="track_unknown">Boket nén knoxhou</string>
     <string name="volume">Volume</string>
-    <string name="brightness">Rilujhance</string>
     <string name="playback_speed">Raddisté do djouwaedje</string>
     <string name="revision">Rivizion</string>
     <string name="about">Åd fwait</string>
     <string name="add_custom_path">Radjouter on tchimin da vosse</string>
     <string name="remove_custom_path">Oister li tchimin da vosse</string>
     <string name="automatic">Otomatike</string>
-    <string name="screen_orientation_portrait">Portrait</string>
-    <string name="screen_orientation_landscape">Payisaedje</string>
     <string name="enable_headset_detection">Trover l\' casse odio</string>
     <string name="aout">Rexhowe odio</string>
     <string name="advanced_prefs_category">Sipepieus</string>

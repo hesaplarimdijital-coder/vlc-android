@@ -69,11 +69,4 @@ class AccessibleSeekBar : AppCompatSeekBar {
         customAccessibilityDelegate.force = true
     }
 
-    fun disableAccessibilityEvents() {
-        customAccessibilityDelegate.disabled = true
-    }
-
-    fun enableAccessibilityEvents() {
-        customAccessibilityDelegate.disabled = false
-    }
 }

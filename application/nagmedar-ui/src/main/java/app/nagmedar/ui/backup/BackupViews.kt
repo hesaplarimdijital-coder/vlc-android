@@ -224,7 +224,6 @@ internal fun partLabel(part: BackupPart): Int = when (part) {
     BackupPart.SmartLists -> R.string.nag_backup_part_smart_lists
     BackupPart.Stats -> R.string.nag_backup_part_stats
     BackupPart.Lyrics -> R.string.nag_backup_part_lyrics
-    BackupPart.FileSettings -> R.string.nag_backup_part_file_settings
     BackupPart.Covers -> R.string.nag_backup_part_covers
     BackupPart.Latency -> R.string.nag_backup_part_latency
     BackupPart.RadioSchedules -> R.string.nag_backup_part_radio_schedules
@@ -238,7 +237,6 @@ internal fun partCount(res: Resources, part: BackupPart, count: Int, tracks: Int
         (tracks?.let { SEPARATOR + res.getQuantityString(R.plurals.nag_tracks_count, it, it) } ?: "")
     BackupPart.SmartLists -> res.getQuantityString(R.plurals.nag_backup_lists_count, count, count)
     BackupPart.Stats, BackupPart.Lyrics -> res.getQuantityString(R.plurals.nag_tracks_count, count, count)
-    BackupPart.FileSettings -> res.getQuantityString(R.plurals.nag_backup_files_count, count, count)
     BackupPart.Covers -> res.getQuantityString(R.plurals.nag_music_albums, count, count)
     BackupPart.Latency -> res.getQuantityString(R.plurals.nag_backup_latency_count, count, count)
     BackupPart.RadioSchedules -> res.getQuantityString(R.plurals.nag_backup_schedules_count, count, count)

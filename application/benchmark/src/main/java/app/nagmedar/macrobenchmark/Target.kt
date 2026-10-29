@@ -14,25 +14,11 @@ const val TARGET = "app.nagmedar.benchmark"
 const val SHELL_ACTIVITY = "app.nagmedar.ui.NagmedarActivity"
 const val EXTRA_DESTINATION = "nagmedar_destination"
 
-/** Where a file to play is handed to VLC, as another app's "Open with" does. */
-const val START_ACTIVITY = "org.videolan.vlc.StartActivity"
-
-/** The app's log of what it measured of itself (app.nagmedar.ui.perf.PerfLog). */
-const val PERF_TAG = "NagmedarPerf"
-
-/** What the macrobenchmarks hold Nağmedar to; buildsystem/benchmark/thresholds.json has the rest. */
-const val MAX_DROPPED_PERCENT = 0.1
-
-/**
- * The run's arguments (am instrument -e): "nagmedar.videos", the films to play, by their path on
- * the device and comma-separated; "nagmedar.seconds", how long a longer film plays (60).
- */
+/** The run's arguments (am instrument -e): "nagmedar.seconds", how long the track plays (10). */
 object Arguments {
     private val arguments get() = InstrumentationRegistry.getArguments()
 
-    val videos: List<String> get() = arguments.getString("nagmedar.videos").orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
-
-    val playSeconds: Int get() = arguments.getString("nagmedar.seconds")?.toIntOrNull() ?: 60
+    val playSeconds: Int get() = arguments.getString("nagmedar.seconds")?.toIntOrNull() ?: 10
 }
 
 fun uiDevice(): UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())

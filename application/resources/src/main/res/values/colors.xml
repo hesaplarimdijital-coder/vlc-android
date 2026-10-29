@@ -22,8 +22,6 @@
 
     <color name="red500transparent_10">#1aff0000</color>
     <color name="red500transparent25">#40ff0000</color>
-    <color name="red500transparent">#b4ff0000</color>
-    <color name="red200">#EF9A9A</color>
     <color name="orange500transparent">#b4ff8800</color>
     <color name="orange500focus">#86ff8800</color>
     <color name="orange200transparent">#64ffca7d</color>
@@ -61,9 +59,7 @@
     <color name="playerbackground">#c0141414</color>
     <color name="playerbackground_invert">#c0ebebeb</color>
     <color name="black_more_transparent">#88000000</color>
-    <color name="status_bar_transparency">#cb000000</color>
 
-    <color name="grey200transparent">#33eeeeee</color>
 
     <color name="whitetransparent_b9">#b9ffffff</color>
     <color name="whitetransparent_ea">#eaffffff</color>
@@ -105,7 +101,6 @@
 
     <color name="black_transparent_10">#1a000000</color>
     <color name="black_transparent_20">#33000000</color>
-    <color name="black_transparent_30">#4d000000</color>
     <color name="black_transparent_50">#80000000</color>
     <color name="black_transparent_60">#99000000</color>
     <color name="black_transparent_75">#BF000000</color>
@@ -127,8 +122,5 @@
     <color name="onboarding_grey">#011422</color>
     <color name="onboarding_grey_transparent_20">#33011422</color>
     <color name="onboarding_grey_transparent_75">#BF011422</color>
-    <color name="material_blue">#2196f3</color>
-    <color name="material_pink">#e91e63</color>
     <!-- Nağmedar: the new interface's blue accent on its dark theme (the video player's theme) -->
-    <color name="nagmedar_accent_dark">#8AB0FF</color>
 </resources>

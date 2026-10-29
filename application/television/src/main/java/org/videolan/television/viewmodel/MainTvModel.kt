@@ -59,8 +59,6 @@ import org.videolan.resources.CATEGORY_ARTISTS
 import org.videolan.resources.CATEGORY_GENRES
 import org.videolan.resources.CATEGORY_NOW_PLAYING
 import org.videolan.resources.CATEGORY_NOW_PLAYING_PAUSED
-import org.videolan.resources.CATEGORY_NOW_PLAYING_PIP
-import org.videolan.resources.CATEGORY_NOW_PLAYING_PIP_PAUSED
 import org.videolan.resources.CATEGORY_SONGS
 import org.videolan.resources.FAVORITE_TITLE
 import org.videolan.resources.HEADER_DIRECTORIES
@@ -225,12 +223,7 @@ class MainTvModel(app: Application) : AndroidViewModel(app), Medialibrary.OnMedi
         val list = mutableListOf<MediaLibraryItem>()
         PlaybackService.instance?.run {
             currentMediaWrapper?.let {
-                if (this.playlistManager.player.isVideoPlaying())
-                    if (isPaused)
-                        DummyItem(CATEGORY_NOW_PLAYING_PIP_PAUSED, it.title, it.artistName).apply { setArtWork(coverArt) }
-                    else
-                        DummyItem(CATEGORY_NOW_PLAYING_PIP, it.title, it.artistName).apply { setArtWork(coverArt) }
-                else if (isPaused)
+                if (isPaused)
                     DummyItem(CATEGORY_NOW_PLAYING_PAUSED, it.title, it.artistName).apply { setArtWork(coverArt) }
                 else
                     DummyItem(CATEGORY_NOW_PLAYING, it.title, it.artistName).apply { setArtWork(coverArt) }

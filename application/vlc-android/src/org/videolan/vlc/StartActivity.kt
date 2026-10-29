@@ -71,24 +71,15 @@ import org.videolan.tools.NAGMEDAR_EXTRA_REMOTE_ACCESS
 import org.videolan.tools.NAGMEDAR_EXTRA_SEARCH
 import org.videolan.tools.NAGMEDAR_FIRST_RUN_DONE
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
-import org.videolan.tools.PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER
 import org.videolan.tools.PREF_TV_UI
 import org.videolan.tools.Settings
 import org.videolan.tools.awaitAppIsForegroung
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.putSingle
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.FileUtils
 import org.videolan.vlc.util.Permissions
-import org.videolan.vlc.util.Util
-import org.videolan.vlc.util.checkWatchNextId
-import videolan.org.commontools.TV_CHANNEL_PATH_APP
-import videolan.org.commontools.TV_CHANNEL_PATH_VIDEO
-import videolan.org.commontools.TV_CHANNEL_QUERY_VIDEO_ID
-import videolan.org.commontools.TV_CHANNEL_SCHEME
 
-private const val PROPAGATE_RESULT = 1
 private const val TAG = "VLC/StartActivity"
 class StartActivity : FragmentActivity() {
 
@@ -106,7 +97,6 @@ class StartActivity : FragmentActivity() {
             val action = intent?.action
             if (!action.isNullOrEmpty()) {
                 return when (action) {
-                    "vlc.shortcut.video" -> R.id.nav_video
                     "vlc.shortcut.audio" -> R.id.nav_audio
                     "vlc.shortcut.browser" -> R.id.nav_directories
                     "vlc.shortcut.resume" -> R.id.ml_menu_last_playlist
@@ -149,8 +139,7 @@ class StartActivity : FragmentActivity() {
         val intent = intent
         val action = intent?.action
 
-        if ((Intent.ACTION_VIEW == action || ACTION_VIEW_ARC == action)
-                && TV_CHANNEL_SCHEME != intent.data?.scheme) {
+        if (Intent.ACTION_VIEW == action || ACTION_VIEW_ARC == action) {
             startPlaybackFromApp(intent)
             return
         } else if (Intent.ACTION_SEND == action) {
@@ -158,24 +147,14 @@ class StartActivity : FragmentActivity() {
             val item = if (cd != null && cd.itemCount > 0) cd.getItemAt(0) else null
             val rawUri: Uri? = item?.uri ?: intent.parcelable<Uri>(Intent.EXTRA_STREAM)
             if (rawUri != null) {
-                // try to get a mime type, amaze doesn't seem to share a video with it
-                val mimeType: String? = intent.type
-                    ?.takeIf { it.startsWith("video") || it.startsWith("audio") }
-                    ?: runCatching { contentResolver.getType(rawUri) }.getOrNull()
-                // If we have a video mime, we can force the video player
-                if (mimeType?.startsWith("video") == true) {
-                    startPlaybackFromApp(Intent(Intent.ACTION_VIEW, rawUri).apply {
-                        setDataAndType(rawUri, mimeType)
-                    })
-                } else {
-                    lifecycleScope.launch {
-                        val uri = withContext(Dispatchers.IO) { FileUtils.getUri(rawUri) } ?: rawUri
-                        var media = getFromMl { getMedia(uri) }
-                        if (media == null)
-                            media = MLServiceLocator.getAbstractMediaWrapper(uri)
-                        MediaUtils.openMediaNoUi(this@StartActivity, media)
-                        finish()
-                    }
+                // whatever it is, it plays as audio (Nağmedar 1.0 has no video player)
+                lifecycleScope.launch {
+                    val uri = withContext(Dispatchers.IO) { FileUtils.getUri(rawUri) } ?: rawUri
+                    var media = getFromMl { getMedia(uri) }
+                    if (media == null)
+                        media = MLServiceLocator.getAbstractMediaWrapper(uri)
+                    MediaUtils.openMediaNoUi(this@StartActivity, media)
+                    finish()
                 }
                 return
             } else if (item?.text != null) {
@@ -215,7 +194,6 @@ class StartActivity : FragmentActivity() {
         // Nağmedar's first-run flow keeps the version once it is done (FirstRunHost)
         if (upgrade && !firstRun) settings.putSingle(PREF_FIRST_RUN, currentVersionNumber)
         val removeOldDevices = savedVersionNumber in 3028201..3028399
-        settings.putSingle(PREF_SHOW_VIDEO_SETTINGS_DISCLAIMER, savedVersionNumber < 3060330 && !firstRun)
         // Route search query
         if (Intent.ACTION_SEARCH == action || ACTION_SEARCH_GMS == action) {
             // the system's search: Nağmedar's search page with the words asked for
@@ -226,21 +204,6 @@ class StartActivity : FragmentActivity() {
             val serviceInent = Intent(ACTION_PLAY_FROM_SEARCH, null, this, PlaybackService::class.java)
                     .putExtra(EXTRA_SEARCH_BUNDLE, intent.extras)
             launchForeground(serviceInent)
-        } else if (Intent.ACTION_VIEW == action && intent.data != null) { //launch from TV Channel
-            val data = intent.data
-            val path = data!!.path
-            if (path == "/$TV_CHANNEL_PATH_APP")
-                startNagmedar(firstRun, upgrade, 0, removeOldDevices)
-            else if (path == "/$TV_CHANNEL_PATH_VIDEO") {
-                var id = java.lang.Long.valueOf(data.getQueryParameter(TV_CHANNEL_QUERY_VIDEO_ID)!!)
-                val ctx = this@StartActivity
-                lifecycleScope.launch(Dispatchers.IO) {
-                    id = checkWatchNextId(ctx, id)
-                    withContext(Dispatchers.Main) {
-                        MediaUtils.openMediaNoUi(ctx, id)
-                    }
-                }
-            }
         } else {
             if (action != null && action.startsWith("vlc.mediashortcut:")) {
                 val split = action.split(":")
@@ -266,32 +229,18 @@ class StartActivity : FragmentActivity() {
                 }
             } else {
                 val target = idFromShortcut
-                val service = PlaybackService.instance
                 if (target == R.id.ml_menu_last_playlist) {
                     PlaybackService.loadLastAudio(this, true)
                     startNagmedar(firstRun, upgrade, R.id.nav_audio, removeOldDevices)
-                } else if (service != null && service.isInPiPMode.value == true) {
-                    service.isInPiPMode.value = false
-                    val startIntent = Intent(this, VideoPlayerActivity::class.java)
-                    startIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(startIntent)
-                }
-                else
+                } else {
                     startNagmedar(firstRun, upgrade, target, removeOldDevices)
+                }
             }
         }
         FileUtils.copyLua(applicationContext, upgrade)
         FileUtils.copyHrtfs(applicationContext, upgrade)
         if (AndroidDevices.watchDevices) this.enableStorageMonitoring()
         finish()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PROPAGATE_RESULT) {
-            setResult(resultCode, data)
-            finish()
-        }
     }
 
     /**
@@ -322,7 +271,6 @@ class StartActivity : FragmentActivity() {
             this.intent?.action == NAGMEDAR_ACTION_NOW_PLAYING -> NAGMEDAR_DESTINATION_NOW_PLAYING
             // the library scan's notification: the home page
             this.intent?.action == NAGMEDAR_ACTION_LIBRARY -> "home"
-            target == R.id.nav_video -> "movies"
             target == R.id.nav_audio -> "music"
             target == R.id.nav_directories -> "device"
             else -> null
@@ -374,12 +322,6 @@ class StartActivity : FragmentActivity() {
         // If not should check for permission, and ask them if we don't have them
         if ((intent.data != null && intent.data!!.scheme == "content" && FileUtils.getUri(intent.data) != null)
             || (Permissions.canReadStorage(applicationContext) || askStoragePermission())) when {
-            intent.type?.startsWith("video") == true -> try {
-                startActivityForResult(intent.setClass(this@StartActivity, VideoPlayerActivity::class.java).apply { putExtra(VideoPlayerActivity.FROM_EXTERNAL, true) }, PROPAGATE_RESULT, Util.getFullScreenBundle())
-                return@launch
-            } catch (ex: SecurityException) {
-                intent.data?.let { MediaUtils.openMediaNoUi(this@StartActivity, it) }
-            }
             intent.data?.authority == getString(R.string.tv_provider_authority) -> MediaUtils.openMediaNoUiFromTvContent(this@StartActivity, intent.data)
             intent.data?.authority == "skip_to" -> PlaybackService.instance?.playIndex(intent.getIntExtra("index", 0))
             else -> withContext(Dispatchers.IO) { FileUtils.getUri(intent.data)}?.let {

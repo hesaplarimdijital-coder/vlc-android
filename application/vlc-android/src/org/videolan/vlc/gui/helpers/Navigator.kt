@@ -41,7 +41,7 @@ import org.videolan.resources.EXTRA_FOR_ESPRESSO
 import org.videolan.resources.EXTRA_TARGET
 import org.videolan.resources.ID_AUDIO
 import org.videolan.resources.ID_DIRECTORIES
-import org.videolan.resources.ID_VIDEO
+import org.videolan.resources.ID_PLAYLISTS
 import org.videolan.resources.util.parcelableList
 import org.videolan.tools.KEY_FRAGMENT_ID
 import org.videolan.tools.isStarted
@@ -57,14 +57,13 @@ import org.videolan.vlc.gui.audio.AudioBrowserFragment
 import org.videolan.vlc.gui.browser.BaseBrowserFragment
 import org.videolan.vlc.gui.browser.MainBrowserFragment
 import org.videolan.vlc.gui.helpers.UiTools.isTablet
-import org.videolan.vlc.gui.video.VideoBrowserFragment
 import org.videolan.vlc.util.getScreenWidth
 
 private const val TAG = "Navigator"
 
 class Navigator : NavigationBarView.OnItemSelectedListener, DefaultLifecycleObserver, INavigator {
 
-    private val defaultFragmentId = R.id.nav_video
+    private val defaultFragmentId = R.id.nav_audio
     override var currentFragmentId: Int = 0
     private var currentFragment: Fragment? = null
     private lateinit var activity: MainActivity
@@ -98,13 +97,12 @@ class Navigator : NavigationBarView.OnItemSelectedListener, DefaultLifecycleObse
 
     private fun getNewFragment(id: Int): Fragment {
         return when (id) {
-            R.id.nav_audio -> AudioBrowserFragment()
             R.id.nav_directories -> MainBrowserFragment().apply {
                 arguments = bundleOf(EXTRA_FOR_ESPRESSO to forExpresso)
             }
             R.id.nav_playlists -> PlaylistFragment()
             R.id.nav_more -> MoreFragment()
-            else -> VideoBrowserFragment()
+            else -> AudioBrowserFragment()
         }
     }
 
@@ -151,7 +149,7 @@ class Navigator : NavigationBarView.OnItemSelectedListener, DefaultLifecycleObse
     private fun getTag(id: Int) = when (id) {
         R.id.nav_audio -> ID_AUDIO
         R.id.nav_directories -> ID_DIRECTORIES
-        else -> ID_VIDEO
+        else -> ID_PLAYLISTS
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

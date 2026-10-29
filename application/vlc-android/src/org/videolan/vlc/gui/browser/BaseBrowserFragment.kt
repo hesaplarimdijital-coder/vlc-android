@@ -132,7 +132,6 @@ import org.videolan.vlc.util.ContextOption.CTX_ADD_TO_PLAYLIST
 import org.videolan.vlc.util.ContextOption.CTX_APPEND
 import org.videolan.vlc.util.ContextOption.CTX_BAN_FOLDER
 import org.videolan.vlc.util.ContextOption.CTX_DELETE
-import org.videolan.vlc.util.ContextOption.CTX_DOWNLOAD_SUBTITLES
 import org.videolan.vlc.util.ContextOption.CTX_FAV_ADD
 import org.videolan.vlc.util.ContextOption.CTX_FAV_REMOVE
 import org.videolan.vlc.util.ContextOption.CTX_FIND_METADATA
@@ -822,7 +821,6 @@ abstract class BaseBrowserFragment : MediaBrowserFragment<BrowserModel>(), IRefr
                     if (isMedia) addAll(CTX_ADD_TO_PLAYLIST, CTX_APPEND, CTX_INFORMATION, CTX_PLAY_ALL)
                     if (!isAudio && isMedia) add(CTX_PLAY_AS_AUDIO)
                     if (!isMedia) add(CTX_PLAY)
-                    if (isVideo) add(CTX_DOWNLOAD_SUBTITLES)
                     if ((isVideo || mw.isPodcast) && mw.seen > 0L) add(ContextOption.CTX_MARK_AS_UNPLAYED)
                     if ((isVideo || mw.isPodcast) && mw.seen == 0L) add(ContextOption.CTX_MARK_AS_PLAYED)
                 }
@@ -883,7 +881,6 @@ abstract class BaseBrowserFragment : MediaBrowserFragment<BrowserModel>(), IRefr
             }
 
             CTX_ADD_TO_PLAYLIST -> requireActivity().addToPlaylist(mw.tracks, SavePlaylistDialog.KEY_NEW_TRACKS)
-            CTX_DOWNLOAD_SUBTITLES -> MediaUtils.getSubs(requireActivity(), mw)
             CTX_FAV_REMOVE -> lifecycleScope.launch(Dispatchers.IO) { browserFavRepository.deleteBrowserFav(mw.uri) }
             CTX_ADD_SCANNED -> addToScannedFolders(mw)
             CTX_FIND_METADATA -> {

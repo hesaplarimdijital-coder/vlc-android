@@ -19,10 +19,11 @@ class RemoteAccessBrandTest {
 
     private val patches: List<File> = File(build, "patches").listFiles { f -> f.extension == "patch" }.orEmpty().sortedBy { it.name }
 
-    /** The web app's presentation files: the page, its theme, its header and About page. */
+    /** The web app's presentation files: the page, its theme, its header and About page, and its pages' routes (1.0: no video pages). */
     private val presentation = setOf(
         "public/index.html",
         "src/main.js",
+        "src/routes.js",
         "src/scss/app.scss",
         "src/stores/AppStore.js",
         "src/components/AppHeader.vue",

@@ -454,7 +454,6 @@
     <string name="nag_prefs_not_set">Ayarlanmadı</string>
     <string name="nag_prefs_in_settings">Ayarlar › %1$s bölümünde</string>
     <string name="nag_prefs_opens_page">%1$s sayfasını açar</string>
-    <string name="nag_prefs_speed">%1$s×</string>
     <string name="nag_prefs_turn_off">Kapat</string>
     <string name="nag_prefs_file_failed">Dosya okunamadı.</string>
     <string name="nag_prefs_database_saved">Veri tabanı kaydedildi.</string>
@@ -640,7 +639,6 @@
     <string name="nag_about_no_text">Kamu malı: lisans metni yok.</string>
     <string name="nag_about_full_license">Lisansın tamamı</string>
     <string name="nag_about_copyright">Copyleft © 1996–2026 VideoLAN ve VLC yazarları\nNağmedar değişiklikleri © 2026 Nağmedar katkıcıları</string>
-    <string name="nag_license_bsd2">2 maddeli BSD</string>
     <string name="nag_license_bsd3">3 maddeli BSD</string>
     <string name="nag_license_gsm">GSM izin verici</string>
     <string name="nag_license_old_mit">Eski MIT</string>
@@ -690,9 +688,6 @@
     <string name="nag_pane_divider">Ayrıntılar bölmesinin genişliği</string>
     <string name="nag_sidebar_divider">Kenar çubuğunun genişliği</string>
     <string name="nag_tech_title">Teknik</string>
-    <string name="nag_tech_video">Video</string>
-    <string name="nag_tech_frame_rate">Kare hızı</string>
-    <string name="nag_tech_range">HDR</string>
     <string name="nag_tech_audio">Ses %1$d</string>
     <string name="nag_tech_subtitles">Altyazı</string>
     <string name="nag_tech_bitrate">Bit hızı</string>
@@ -760,16 +755,8 @@
     <string name="nag_player_repeat_one">Bunu tekrarla</string>
 
     <!-- S-508: libVLC's audio output -->
-    <string name="nag_fx_auto">Otomatik</string>
     <string name="nag_fx_off">Kapalı</string>
     <!-- S-508: ses çıkışı -->
-    <string name="nag_out_stereo">Stereo PCM</string>
-    <string name="nag_out_multichannel">Çok kanallı PCM</string>
-    <string name="nag_out_passthrough">Bitstream (passthrough)</string>
-    <string name="nag_out_forced">Bitstream, zorlanan codec\'ler</string>
-    <string name="nag_out_sink_headphones">Kulaklık</string>
-    <string name="nag_out_sink_speaker">Hoparlör</string>
-    <string name="nag_out_sink_other">Başka çıkış</string>
     <string name="nag_panel_pending">Soluk ayarlar oynatıcı motorunun yeni sürümüyle gelecek.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Düz</string>
@@ -1351,7 +1338,6 @@
     <string name="nag_backup_part_smart_lists">Akıllı listeler</string>
     <string name="nag_backup_part_stats">Puanlar ve çalınmalar</string>
     <string name="nag_backup_part_lyrics">Sözleriniz ve gecikmeler</string>
-    <string name="nag_backup_part_file_settings">Dosya ayarları</string>
     <string name="nag_backup_part_covers">Seçtiğiniz kapaklar</string>
     <plurals name="nag_backup_settings_count">
         <item quantity="one">%d ayar</item>
@@ -1364,10 +1350,6 @@
     <plurals name="nag_backup_lists_count">
         <item quantity="one">%d liste</item>
         <item quantity="other">%d liste</item>
-    </plurals>
-    <plurals name="nag_backup_files_count">
-        <item quantity="one">%d dosya</item>
-        <item quantity="other">%d dosya</item>
     </plurals>
     <string name="nag_backup_done_title">Geri yüklendi</string>
     <plurals name="nag_backup_missing">

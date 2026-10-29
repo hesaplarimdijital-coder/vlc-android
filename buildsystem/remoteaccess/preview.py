@@ -104,14 +104,6 @@ def item(i, title, artist='', duration=0, folder=False, playing=False, progress=
             'played': False, 'fileType': kind, 'favorite': i % 4 == 0}
 
 
-VIDEOS = [
-    item(1, 'Kuzey Işığı', '', 5_400_000, resolution='1080p', progress=1_900_000),
-    item(2, 'Boğaz\'da Gün Batımı', '', 1_260_000, resolution='4K'),
-    item(3, 'Mountain Rescue', '', 6_120_000, resolution='1080p'),
-    item(4, 'Çay Bahçesi', '', 2_700_000, resolution='720p'),
-    item(5, 'Harbour Lights', '', 3_300_000, resolution='1080p'),
-    item(6, 'Anadolu Treni', '', 4_500_000, resolution='4K'),
-]
 ARTISTS = [item(10, 'Aylin Kaya', '3 albüm'), item(11, 'The Quiet Hours', '2 albums'), item(12, 'Mert Demir', '1 albüm'),
            item(13, 'Lumen', '4 albums'), item(14, 'Selin Aras', '2 albüm'), item(15, 'North Wind', '5 albums')]
 TRACKS = [item(20, 'Gece Yarısı', 'Aylin Kaya', 213_000), item(21, 'Slow Harbour', 'The Quiet Hours', 245_000),
@@ -197,8 +189,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             hue = sum(map(ord, title)) % 360
             return self.send(200, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio="none"><rect width="10" height="10" '
                                   'fill="hsl(%d,28%%,34%%)"/></svg>' % hue, 'image/svg+xml')
-        if path == '/video-list':
-            return self.json({'content': VIDEOS, 'item': ''})
         if path == '/artist-list':
             return self.json(ARTISTS)
         if path in ('/track-list', '/album-list', '/genre-list', '/playlist-list'):
@@ -294,15 +284,17 @@ def walk(args, https, http_port, failures):
                 wait_text(page, STATE['translation']['INVALID_OTP'])
                 failures.check(not STATE['authed'], 'a wrong code let the browser in')
                 shot(page, 'login-error-en-dark')
-        wait_text(page, STATE['translation']['VIDEO'])
+        # the page opens on the music (Nağmedar plays sound only)
+        wait_text(page, 'Aylin Kaya')
         page.wait_for_selector('.media-list, .card', timeout=15000)
         failures.check(STATE['authed'], 'the right code did not let the browser in')
-        no_vlc(page, 'videos')
-        shot(page, 'videos-en-dark')
+        failures.check(STATE['translation']['VIDEO'] not in visible_text(page), 'the header still offers the videos')
+        no_vlc(page, 'library')
+        shot(page, 'library-en-dark')
         failures.check(not errors, 'login: ' + '; '.join(errors))
         # the page's own identity
         failures.check(page.evaluate('document.documentElement.lang') == 'en', 'the page language is not the app\'s')
-        failures.check('Nağmedar' in page.title(), 'videos: the title is "%s"' % page.title())
+        failures.check('Nağmedar' in page.title(), 'library: the title is "%s"' % page.title())
         manifest = page.evaluate('fetch("/site.webmanifest").then(r => r.json())')
         failures.check(manifest.get('name') == 'Nağmedar', 'the manifest is not Nağmedar\'s: %s' % manifest.get('name'))
         failures.check(page.evaluate('!!document.querySelector("#logo")'), 'the header has no mark')
@@ -333,14 +325,14 @@ def walk(args, https, http_port, failures):
             ctx, page, errors = context('tr', scheme, width, height, mobile)
             ctx.add_cookies([{'name': 'nagmedar-session', 'value': 'ok', 'url': secure}])
             page.goto(secure)
-            wait_text(page, 'Kuzey Işığı')
+            wait_text(page, 'Aylin Kaya')
             if mobile:  # the player is a button on a phone; it opens over the page
                 page.click('.mini-player-fab')
             wait_text(page, 'Gece Yarısı')
-            no_vlc(page, 'videos-tr-' + name)
-            shot(page, 'videos-tr-%s-%s' % (name, scheme))
+            no_vlc(page, 'library-tr-' + name)
+            shot(page, 'library-tr-%s-%s' % (name, scheme))
             failures.check(page.evaluate('document.documentElement.lang') == 'tr', 'the page language is not Turkish')
-            failures.check(not errors, 'videos-tr: ' + '; '.join(errors))
+            failures.check(not errors, 'library-tr: ' + '; '.join(errors))
             page.goto(secure + '#/audio/artists')
             if mobile:  # the first navigation only closes the player
                 page.goto(secure + '#/audio/artists')

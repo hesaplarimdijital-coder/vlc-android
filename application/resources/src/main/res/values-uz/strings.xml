@@ -19,7 +19,6 @@
     <string name="play">Ijro etish</string>
     <string name="play_from_start">Boshidan ijro etish</string>
     <string name="play_as_audio">Audio sifatida ijro etish</string>
-    <string name="play_as_video">Video sifatida ijro etish</string>
     <string name="play_all">Barchasini ijro etish</string>
     <string name="append_all">Barchasini qo‘shish</string>
     <string name="delete">O‘chirish</string>
@@ -65,9 +64,6 @@
     <string name="cover_art">Muqova</string>
     <string name="previous">Avvalgi</string>
     <string name="stop">To‘xtatish</string>
-    <string name="surface_best_fit">Optimal</string>
-    <string name="surface_fill">To‘ldirish</string>
-    <string name="surface_original">Markazga</string>
     <string name="unseekable_stream">Topilmaydigan oqim</string>
     <string name="refresh">Yangilash</string>
     <string name="track_audio">Audio yozuv</string>
@@ -76,9 +72,6 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Til: %1$s\n</string>
     <string name="volume">Ovoz balandligi</string>
-    <string name="sound_on">Ovoz yoqiq</string>
-    <string name="sound_off">Ovoz o\'chiq</string>
-    <string name="brightness">Yorqinlik</string>
     <plurals name="track_channels_info_quantity">
         <item quantity="other">%1$d ta kanallar\n</item>
     </plurals>
@@ -90,7 +83,6 @@
     <string name="playback_speed">Ijro tezligi</string>
     <string name="sleep_title">Uyqu taymeri</string>
     <string name="jump_to_time">Vaqt bo‘yicha o‘tish</string>
-    <string name="subtitle_select">Subtitr faylini tanlang</string>
     <string name="encountered_error_title">Ijro etishda xato</string>
     <string name="encountered_error_message">VLC`da ushbu media bilan muammo boʻldi.\nMedia kutubxonasini yangilashga harakat qiling.</string>
     <string name="invalid_location">%1$s manzilidagi media faylni ijro etib bo‘lmaydi.</string>
@@ -116,29 +108,16 @@
     <string name="add_custom_path">Boshqa yo‘lni qo‘shish</string>
     <string name="add_custom_path_description">Tekshirish uchun boshqa qo‘shimcha katalogni kiriting:</string>
     <string name="remove_custom_path">Qo‘shimcha yo‘lni olib tashlash</string>
-    <string name="hardware_acceleration">Qurilmani tezlatish</string>
-    <string name="hardware_acceleration_disabled">Oʻchirilgan</string>
-    <string name="hardware_acceleration_decoding">Kodni yechish orqali tezlashtirish</string>
-    <string name="hardware_acceleration_full">To‘liq tezlashtirish</string>
     <string name="automatic">Avtomatik</string>
     <string name="screen_orientation">Ekranning joylashuvi</string>
-    <string name="screen_orientation_sensor">Avtomatik (sezgich)</string>
-    <string name="screen_orientation_portrait">Bo‘yiga</string>
-    <string name="screen_orientation_landscape">Eniga</string>
-    <string name="subtitle_text_encoding">Subtitr matnini kodlash</string>
     <string name="extra_prefs_category">Qo‘shimcha sozlamalar</string>
 
     <string name="interface_prefs_screen">Interfeys</string>
     <string name="enable_clone_mode">Nusxasini afzal ko‘rish</string>
-    <string name="enable_brightness_gesture_summary">Video ijrosi davomidagi harakatlarga tegishli yoqrinlikni boshqarish</string>
     <string name="enable_headset_detection">Quloqlikni aniqlash</string>
     <string name="aout">Audio chiqarish</string>
     <string name="performance_prefs_category">Bajarish</string>
     <string name="deblocking">Filter sozlamalarini ochish</string>
-    <string name="deblocking_always">Toʻliq koddan chiqarish (sekin)</string>
-    <string name="deblocking_nonref">Oʻrtacha blokdan chiqarish</string>
-    <string name="deblocking_nonkey">Past blokdan chiqarish</string>
-    <string name="deblocking_all">Bloklanmasin (tez)</string>
     <string name="enable_time_stretching_audio">Ovoz tezligini o‘zgartirish</string>
     <string name="advanced_prefs_category">Qo‘shimcha</string>
     <string name="clear_media_db">Media ma’lumotlar bazasini tozalash</string>

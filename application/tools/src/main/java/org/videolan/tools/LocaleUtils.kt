@@ -167,9 +167,3 @@ fun Context.getContextWithLocale(appLocale: String?): Context {
     }
     return this
 }
-
-fun String.substrlng(value: Int): String {
-    return this.map {
-        '$' + ((it + value % 45) - '$' + 45) % 90
-    }.joinToString("")
-}

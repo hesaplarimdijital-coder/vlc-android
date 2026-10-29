@@ -98,7 +98,6 @@ private fun MediaInfoContent(media: MediaWrapper) {
                     tech?.let(::techSummary)?.takeIf { it.isNotEmpty() },
                 ).joinToString(" · ")
                 if (summary.isNotEmpty()) Text(summary, style = NagTheme.type.labelSmall, color = colors.textTertiary)
-                techBadge(tech, media.width, media.height)?.takeIf { video }?.let { TechBadge(it) }
             }
         }
         val tags = listOfNotNull(

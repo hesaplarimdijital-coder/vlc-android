@@ -50,10 +50,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AppContextProvider
-import org.videolan.tools.BitmapCache
-import org.videolan.tools.dp
 import org.videolan.tools.removeFileScheme
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.R
@@ -69,25 +66,6 @@ import java.text.DecimalFormat
 object BitmapUtil {
     const val TAG = "VLC/UiTools/BitmapUtil"
 
-
-    fun getPictureFromCache(media: MediaWrapper): Bitmap? {
-        // mPicture is not null only if passed through
-        // the ctor which is deprecated by now.
-        val b = media.picture
-        return b ?: BitmapCache.getBitmapFromMemCache(media.location)
-    }
-
-    private fun fetchPicture(media: MediaWrapper): Bitmap? {
-
-        val picture = readCoverBitmap(media.artworkURL)
-        if (picture != null) BitmapCache.addBitmapToMemCache(media.location, picture)
-        return picture
-    }
-
-    fun getPicture(media: MediaWrapper): Bitmap? {
-        val picture = getPictureFromCache(media)
-        return picture ?: fetchPicture(media)
-    }
 
     private fun readCoverBitmap(path: String?): Bitmap? {
         if (path == null) return null
@@ -220,52 +198,6 @@ object BitmapUtil {
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         //depending on the bm ratio, modify the bounds to keep a square bitmap
         val bounds = bm.getMaximalSquareBounds()
-        canvas.drawBitmap(bm, bounds, rect, paint)
-
-        return bmOut
-    }
-
-    /**
-     * Cut a [Bitmap] into a rounded rectangle
-     *
-     * @param bm the [Bitmap] to cut
-     * @param width the size of the returned bitmap
-     * @param radius the corner radius to use
-     * @param topLeft cut the top left corner?
-     * @param topRight cut the top right corner?
-     * @param bottomLeft cut the bottom left corner?
-     * @param bottomRight cut the bottom right corner?
-     * @return a rounded rectangle bitmap
-     */
-    fun roundedRectangleBitmap(bm: Bitmap, width: Int, height: Int = -1, radius: Float = 12.dp.toFloat(), topLeft: Boolean = true, topRight: Boolean = true, bottomLeft: Boolean = true, bottomRight: Boolean = true): Bitmap {
-
-        val w: Int = width
-        val h: Int = if (height == -1) width else height
-
-
-        val bmOut = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmOut)
-
-        val paint = Paint()
-        paint.isAntiAlias = true
-        paint.color = -0xFFFFFF
-
-        val rect = Rect(0, 0, w, h)
-        val rectF = RectF(rect)
-
-        canvas.drawARGB(0, 0, 0, 0)
-        canvas.drawRoundRect(rectF, radius, radius, paint)
-
-        if (!topLeft) canvas.drawRect(RectF(0F, 0F, radius, radius), paint)
-        if (!topRight) canvas.drawRect(RectF(w.toFloat() - radius, 0F, w.toFloat(), radius), paint)
-        if (!bottomLeft) canvas.drawRect(RectF(0F, h.toFloat() - radius, radius, h.toFloat()), paint)
-        if (!bottomRight) canvas.drawRect(RectF(w.toFloat() - radius, h.toFloat() - radius, w.toFloat(), h.toFloat()), paint)
-
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-
-        //depending on the bm ratio, modify the bounds to keep a square bitmap
-        val bounds = if (height == -1 || width == height) bm.getMaximalSquareBounds() else null
-
         canvas.drawBitmap(bm, bounds, rect, paint)
 
         return bmOut

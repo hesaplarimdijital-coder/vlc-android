@@ -323,53 +323,6 @@
                     app:layout_constraintTop_toTopOf="@+id/only_favs_group" />
 
             <View
-                    android:id="@+id/video_groups_group"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:minHeight="48dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/only_favs_group"
-                    app:layout_goneMarginTop="16dp" />
-
-            <ImageView
-                    android:id="@+id/video_group_image"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="24dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/video_groups_group"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/video_groups_group"
-                    app:srcCompat="@drawable/ic_group_display" />
-
-            <TextView
-                    android:id="@+id/video_group_text"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/video_min_group_length_title"
-                    android:textColor="?attr/font_default"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/video_groups_group"
-                    app:layout_constraintEnd_toStartOf="@+id/guideline16"
-                    app:layout_constraintStart_toEndOf="@+id/video_group_image"
-                    app:layout_constraintTop_toTopOf="@+id/video_groups_group" />
-
-            <Spinner
-                    android:id="@+id/video_group_spinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/video_groups_group"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/guideline16"
-                    app:layout_constraintTop_toBottomOf="@+id/only_favs_group" />
-
-            <View
                     android:id="@+id/default_actions_group"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -378,7 +331,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/video_groups_group"
+                    app:layout_constraintTop_toBottomOf="@+id/only_favs_group"
                     app:layout_goneMarginTop="24dp" />
 
             <ImageView

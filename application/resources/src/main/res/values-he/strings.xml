@@ -49,12 +49,6 @@
     <string name="logs_warning">עלול להכיל מידע על המדיה שניגנת. הוא ישותף עם המפתחים של VLC</string>
     <string name="play_from_start">לנגן מההתחלה</string>
     <string name="play_as_audio">להשמיע</string>
-    <string name="play_as_video">לנגן כווידאו</string>
-    <string name="return_to_video">נגיעה ארוכה על העטיפה משחזרת את הווידאו</string>
-    <string name="video_app_switch_title">מצב רקע/חלון בתוך חלון</string>
-    <string name="video_app_switch_summary">נא לבחור מה תהיה ההתנהגות של VLC בעת מעכבר ליישומון אחר במהלך נגינת וידאו</string>
-    <string name="play_pip_title">לנגן וידאו במצב תמונה בתוך תמונה</string>
-    <string name="play_as_audio_background">לנגן סרטוני וידאו ברקע</string>
     <string name="append">הוספה לתור הנגינה</string>
     <string name="insert_next">להכניס כבא בתור</string>
     <string name="play_all">לנגן הכול</string>
@@ -75,7 +69,6 @@
     <string name="eq_cannot_overwrite">לא ניתן לשכתב על אקוולייזר ברירת המחדל</string>
     <string name="equalizer_name">שם האקוולייזר</string>
     <string name="equalizer_deleted">האקוולייזר נמחק</string>
-    <string name="equalizer_leave_warning">יוביל ליציאה מנגן הווידאו</string>
     <string name="invalid_equalizer_file">קובץ אקוולייזר שגוי</string>
     <string name="confirm_delete_eq">למחוק את הערכה הזאת?</string>
     <string name="confirm_delete_vlc_eq">להסתיר את הערכה הזאת?\nאפשר לשחזור אותה בהגדרות האקוולייזרים.</string>
@@ -196,11 +189,6 @@
     <string name="firstsong">השיר הראשון ברשימת הנגינה</string>
     <string name="lastsong">השיר האחרון ברשימת הנגינה</string>
 
-    <string name="surface_best_fit">התאמה מיטבית</string>
-    <string name="surface_fit_screen">התאמה למסך</string>
-    <string name="surface_fill">מילוי</string>
-    <string name="surface_original">מרכוז</string>
-    <string name="resize_tip">נגיעה ארוכה לאפשרויות נוספות</string>
     <string name="unseekable_stream">תזרים ללא אפשרות קפיצה</string>
     <string name="refresh">רענון</string>
     <string name="track_audio">רצועת שמע</string>
@@ -211,12 +199,7 @@
     <string name="track_codec_info">מפענח: %1$s\n</string>
     <string name="track_language_info">שפה: %1$s\n</string>
     <string name="volume">עצמת שמע</string>
-    <string name="system_volume_disabled">%s\nאין גישה לכרך המערכת</string>
-    <string name="sound_on">שמע פעיל</string>
-    <string name="sound_off">שמע כבוי</string>
-    <string name="brightness">בהירות</string>
     <string name="advanced">אפשרויות מתקדמות</string>
-    <string name="audio_boost_warning">יש להחליק כלפי מעלה שוב כדי לעלות מעבר ל־100%</string>
 
     <plurals name="track_channels_info_quantity">
         <item quantity="one">ערוץ אחד\n</item>
@@ -246,7 +229,6 @@
     <string name="sleep_title">לישון</string>
     <string name="sleep_in">לישון בעוד</string>
     <string name="jump_to_time">קפיצה לזמן</string>
-    <string name="subtitle_select">בחירת קובץ כתוביות</string>
     <string name="wait_before_sleep">להמתין לסיום פריט המדיה הנוכחי</string>
     <string name="reset_on_interaction">איפוס עם כל מחוות תפעול</string>
     <string name="default_sleep_timer_summary">%1$s, המתנה לסיום המדיה: %2$s, איפוס עם תפעול: %3$s</string>
@@ -280,8 +262,6 @@
 
     <string name="playback_history_title">היסטוריית נגינה</string>
     <string name="playback_history_summary">לשמור את כל המדיה שהתנגנה באגף ההיסטוריה</string>
-    <string name="video_resume_playback_title">היסטוריית תור נגינת וידאו</string>
-    <string name="video_resume_playback_summary">לאפשר לשמור את תור נגינת הווידאו כדי להמשיך מאוחר יותר</string>
     <string name="audio_resume_playback_title">היסטוריית תור השמעה</string>
     <string name="audio_resume_playback_warning">השבתת היסטוריית תור ההשמעה עלולה לגרום לתקלות בהתנהלות.\nלאחר ההשבתה יכול להיות שאי אפשר יהיה להמשיך להשמיע מתוך:\n\n\t- התקן Bluetooth\n\t- התראת המדיה</string>
     <string name="playback_history_warning">השבתת היסטוריית הנגינה תסתיר את ההיסטוריה, את התקדמות המדיה ואת סמני ההצגה. היישומון ימשיך לשמור את הפעילות שלך והיא תשוחזר אם ההיסטוריה תוחזר.\nכדי להפסיק לשמור את הפעילות שלך לחלוטין, אפשר להשתמש במצב אלמוניות.\nאפשר גם לפנות את ההיסטוריה שלך במסך ההיסטוריה או בהגדרות המתקדמות.</string>
@@ -290,32 +270,18 @@
     <string name="play_button">כפתור נגינה</string>
 
     <!-- Tips -->
-    <string name="tips_title">עצות לנגן הווידאו</string>
     <string name="seek">גלילה</string>
     <string name="subtitles">כתוביות</string>
-    <string name="tips_player_controls">פקדי נגן</string>
-    <string name="tips_player_controls_description">נגיעה בפקדי הנגן להלן מגלה למה הם משמשים</string>
-    <string name="tips_audio_sub">רצועות שמע וכתוביות</string>
-    <string name="tips_play_description">נגיעה לנגינת וידאו</string>
     <string name="lock">נעילה</string>
     <string name="tap">נגיעה לתצוגה</string>
     <string name="tap_to_remove">נגיעה להסרה</string>
     <string name="tap_to_rearrange">נגיעה לסידור מחדש</string>
     <string name="tap_to_previous_next">נגיעה לחזור/להתקדם</string>
-    <string name="lock_orientation">כיוון</string>
-    <string name="lock_orientation_description">נגיעה לנעילת/שחרור כיוון</string>
     <string name="aspect_ratio">יחס תצוגה</string>
-    <string name="aspect_ratio_description">יחס תצוגת הווידאו יתחלף בנגיעה</string>
-    <string name="advanced_options">אפשרויות מתקדמות</string>
-    <string name="advanced_options_description">כגון מהירות הנגינה, מצב חזרה, …</string>
-    <string name="tips_swipe">החלקה למעלה או למטה</string>
     <string name="tips_swipe_horizontal">החלקה ימינה או שמאלה</string>
     <string name="tips_playlist">רשימת נגינה</string>
     <string name="tips_hold_seek">יש להחזיק כדי לחפש</string>
     <string name="tips_long_drop">ללחוץ לחיצה ארוכה ולגרור</string>
-    <string name="pause_description">נגיעה כפולה להשהיה</string>
-    <string name="seek_tap">+/- 10 שנ׳</string>
-    <string name="seek_tap_description">נגיעה כפולה כדי לקפוץ 10 שניות קדימה או אחורה</string>
     <string name="close">סגירה</string>
 
     <string name="playlist_tips">עצות רשימת נגינה</string>
@@ -357,27 +323,13 @@
     <string name="ban_folder">חסימת תיקייה</string>
     <string name="ban_folder_explanation">חסימת התיקייה הזאת תוביל לכך שהמדיה שבה לא תופיע בסעיפי הווידאו או השמע ביישומון, למרות שהם עדיין יהיו נגישים מהדפדפן.\nכדי לבטל את החסימה, יש לגשת להגדרות, %s וללחוץ על התיקייה הזאת ארוכות.</string>
 
-    <string name="hardware_acceleration">האצת חומרה</string>
-    <string name="hardware_acceleration_summary">מושבת: יציב יותר\nפענוח: עשוי לשפר ביצועים\nמלא: עשוי לשפר ביצועים אף יותר</string>
-    <string name="hardware_acceleration_disabled">מושבת</string>
-    <string name="hardware_acceleration_decoding">האצת פענוח</string>
-    <string name="hardware_acceleration_full">האצה מלאה</string>
     <string name="dev_hardware_decoder">מפענח חומרה מתקדם</string>
     <string name="dev_hardware_decoder_summary">אילוץ הפעלת מפענח חומרה, למשתמשים מתקדמים בלבד</string>
     <string name="automatic">אוטומטית</string>
     <string name="screen_orientation">כיוון המסך</string>
-    <string name="screen_orientation_sensor">אוטומטית (חיישן)</string>
-    <string name="screen_orientation_portrait">לאורך</string>
-    <string name="screen_orientation_portrait_reverse">אנכי הפוך</string>
-    <string name="screen_orientation_landscape">לרוחב</string>
-    <string name="screen_orientation_landscape_reverse">לרוחב הפוך</string>
-    <string name="screen_orientation_landscape_sensor">אופקי (חיישן)</string>
-    <string name="screen_orientation_last_locked">הכיוון האחרון שננעל</string>
     <string name="enable_black_theme">ערכת נושא שחורה</string>
     <string name="dark_theme">ערכת עיצוב כהה</string>
     <string name="theme_auto">ערכת עיצוב אוטומטית</string>
-    <string name="subtitle_text_encoding">קידוד טקסט הכתוביות</string>
-    <string name="subtitle_preferred_language">שפת הכתוביות המועדפת</string>
     <string name="daynight_title">מצב יום־לילה</string>
     <string name="daynight_follow_system_title">לעקוב אחר מצב המערכת</string>
     <string name="no_track_preference">אין שפה מועדפת</string>
@@ -386,35 +338,15 @@
     <string name="extra_prefs_category">הגדרות נוספות</string>
 
     <string name="interface_prefs_screen">מנשק</string>
-    <string name="interface_secondary_display_category_title">תצוגה משנית</string>
-    <string name="interface_secondary_display_category_summary">הגדרות כאשר מחוברות תצוגות משניות (HDMI/Chromecast)</string>
     <string name="enable_clone_mode">העדפת שכפול</string>
-    <string name="enable_clone_mode_summary">שכפול מסך ההתקן ללא שלט רחוק</string>
 
     <string name="video_prefs_category">סרטון</string>
-    <string name="video_min_group_length_title">סרטונים קבוצתיים</string>
     <string name="video_min_group_length_disable">לא לקבץ סרטונים</string>
     <string name="video_min_group_length_folder">קיבוץ לפי תיקייה</string>
     <string name="video_min_group_length_name">קיבוץ לפי שם</string>
-    <string name="video_transition_title">מעברונים בין סרטונים</string>
-    <string name="video_transition_summary">הצגת סרטון חדש עם המעבר</string>
     <string name="media_seen">הצגת סמן צפייה</string>
-    <string name="media_seen_summary">סימון צפייה על הסרטון בעת נגינתו עד לסופו</string>
-    <string name="force_play_all_summary">לנגן את כל הסרטונים, החל מזה שעליו לחצת</string>
     <string name="force_play_all_audio_summary">לנגן את כל קטעי השמע, החל מזה שלחצת עליו</string>
-    <string name="force_play_all_title">מצב רשימת סרטונים</string>
     <string name="force_play_all_audio_title">מצב רשימת השמעה</string>
-    <string name="save_brightness_summary">לשמור על רמת הבהירות בין ניגונים</string>
-    <string name="save_brightness_title">שמירת רמת הבהירות</string>
-    <string name="save_audiodelay_summary">שמירת השהיית שמע נקודתית לכל סרטון</string>
-    <string name="save_audiodelay_title">שמירת השהיית השמע</string>
-    <string name="video_show_orientation_button">הצגת כפתור כיוון</string>
-    <string name="enable_brightness_gesture_title">מחוות בהירות</string>
-    <string name="enable_brightness_gesture_summary">ניתן לשלוט בבהירות באמצעות מחוות במהלך נגינת הווידאו</string>
-    <string name="enable_volume_gesture_title">מחוות עצמת שמע</string>
-    <string name="enable_volume_gesture_summary">שליטה על עצמת השמע עם מחווה במהלך נגינת סרטון</string>
-    <string name="enable_seek_buttons">כפתורי שיטוט</string>
-    <string name="enable_seek_buttons_summary">הצגת כפתורי החזרה וקידום מהיר במנשק הווידאו</string>
     <string name="enable_android_auto_speed_buttons">מהירות נגינה ב־Android Auto</string>
     <string name="enable_android_auto_speed_buttons_summary">הצגת בקרת מהירות בתפריט הצף</string>
     <string name="enable_android_auto_seek_buttons">כפתורי סריקה של Android Auto</string>
@@ -424,23 +356,8 @@
     <string name="track">רצועה</string>
     <string name="genre">סגנון</string>
     <string name="playlist">רשימת נגינה</string>
-    <string name="enable_double_tap_seek_title">לחיצה כפולה כדי לחפש</string>
-    <string name="enable_double_tap_seek_summary">לחיצה כפולה על קצוות המסך כדי לדלג על 10 שניות</string>
-    <string name="enable_double_tap_play_title">נגיעה כפולה לנגינה/השהיה</string>
-    <string name="enable_double_tap_play_summary">נגיעה כפולה במסך תנגן או תשהה</string>
-    <string name="enable_swipe_seek_title">החלקה מעבירה בציר הזמן</string>
-    <string name="enable_swipe_seek_summary">יש להחליק את האצבע על גבי המסך כדי לעבור קדימה או אחורה</string>
-    <string name="enable_scale_gesture_title">תקריב עם שתי אצבעות</string>
-    <string name="enable_scale_gesture_summary">התקרבות והתרחקות עם שתי אצבעות</string>
-    <string name="popup_keepscreen_title">להשאיר את המסך פעיל במצב חלונית</string>
-    <string name="popup_keepscreen_summary">תמיד להשאיר את המסך פעיל כאשר מוצג חלון קופץ, אפילו אם הסרטון מושהה.</string>
     <string name="browser_show_hidden_files_title">הצגת קבצים מוסתרים</string>
     <string name="albums_show_track_numbers">הצגת מספרי הרצועות</string>
-    <string name="enable_video_screenshot">צילום המסך</string>
-    <string name="enable_tap_and_hold_fastplay_title">הפעלת נגינה מהירה</string>
-    <string name="enable_tap_and_hold_fastplay_summary">נגיעה והחזקה תגברנה את מהירות הנגינה</string>
-    <string name="fastplay_speed_title">מהירות נגינה מהירה</string>
-    <string name="fastplay_title">מתנגן בקצב %sx</string>
     <string name="fastplay_subtitle">שחרור עוצר</string>
     <string name="show_bookmark_buttons">הצגת כפתורי סימניות</string>
     <string name="show_bookmark_buttons_summary">להציג כפתורים לניווט בין סימניות</string>
@@ -449,39 +366,13 @@
     <string name="show_chapter_buttons">הצגת כפתורי פרקים</string>
     <string name="show_chapter_buttons_summary">הצגת כפתורים לניווט בין הפרקים</string>
 
-    <string name="subtitles_prefs_category">כתוביות</string>
-    <string name="subtitles_size_title">גודל הכתוביות</string>
-    <string name="subtitles_presets_title">ערכות הגדרות לכתוביות</string>
-    <string name="subtitles_size_nano">ננו</string>
-    <string name="subtitles_size_micro">מיקרו</string>
-    <string name="subtitles_size_smallest">הקטן ביותר</string>
-    <string name="subtitles_size_small">קטן</string>
-    <string name="subtitles_size_normal">בינוני</string>
-    <string name="subtitles_size_big">גדול</string>
-    <string name="subtitles_size_huge">ענק</string>
-    <string name="subtitles_font_style">סגנון גופן כתוביות</string>
-    <string name="subtitles_color_title">צבע הכתוביות</string>
-    <string name="subtitles_opacity">אטימות</string>
     <string name="subtitles_color">צבע</string>
-    <string name="subtitles_size">גודל</string>
-    <string name="subtitles_background_color_title">רקע כתוביות</string>
-    <string name="subtitles_background_title">רקע הכתוביות</string>
-    <string name="subtitles_outline_title">מתאר כתוביות</string>
-    <string name="subtitles_shadow_title">הצללת כתוביות</string>
     <string name="subtitles_decoration_title">עיטור כתוביות</string>
     <string name="subtitle_decoration_none">ללא</string>
     <string name="subtitle_decoration_shadow">הצללה</string>
     <string name="subtitle_decoration_outline">קו מתאר</string>
-    <string name="subtitles_bold_title">כתוביות מודגשות</string>
-    <string name="subtitles_autoload_title">טעינת כתוביות אוטומטית</string>
     <string name="previous_color">הצבע הקודם</string>
     <string name="new_color">צבע חדש</string>
-    <string name="subtitles_preset_default">ברירת מחדל</string>
-    <string name="subtitles_preset_default_large">טקסט גדול</string>
-    <string name="subtitles_preset_default_largest">הטקסט והניגודיות הגדולים ביותר</string>
-    <string name="subtitles_preset_white_background">עם רקע</string>
-    <string name="subtitles_yellow">צהוב</string>
-    <string name="subtitles_yellow_background">צהוב עם רקע</string>
 
     <string name="audio_prefs_category">שמע</string>
     <string name="lockscreen_cover_title">תמונת המדיה במסך הנעילה</string>
@@ -494,8 +385,6 @@
     <string name="list_title_ellipsize_right">ימים</string>
     <string name="list_title_ellipsize_middle">אמצע</string>
     <string name="list_title_ellipsize_marquee">גלילה</string>
-    <string name="audio_boost_title">הגברת שמע</string>
-    <string name="audio_boost_summary">לאפשר עצמת שמע עד 200%</string>
     <string name="headset_prefs_category">אזניות</string>
     <string name="enable_headset_detection">זיהוי ערכת שמע</string>
     <string name="enable_headset_detection_summary">זיהוי חיבור או ניתוק של אזניות</string>
@@ -561,7 +450,6 @@
     <string name="tv_folders_first_summary">להציג את התיקיות ורק אחריהן את הקבצים בסייר הקבצים</string>
     <string name="tv_show_hidden_files">הצגת קבצים מוסתרים</string>
     <string name="tv_show_hidden_files_summary">הצגת קבצים מוסתרים בדפדפן הקבצים</string>
-    <string name="ab_repeat_fastseek_warning">חתירה מהירה פעילה. היא יכולה להוביל לבעיות דיוק</string>
 
     <string name="extensions_prefs_category">הרחבות</string>
     <string name="extensions_empty">לא זוהו הרחבות</string>
@@ -574,13 +462,6 @@
 
     <string name="performance_prefs_category">ביצועים</string>
     <string name="deblocking">הגדרות מסנן טשטוש גבולות הריבועים</string>
-    <string name="deblocking_summary">שינוי הגדרות מסנן טשטוש גבולות הריבועים עשוי לשפר את איכות הווידאו (למשתמשים מתקדמים בלבד)</string>
-    <string name="deblocking_always">טשטוש ריבועים מלא (הכי אטי)</string>
-    <string name="deblocking_nonref">טשטוש גבולות ריבועים בינוני</string>
-    <string name="deblocking_nonkey">טשטוש גבולות ריבועים קל</string>
-    <string name="deblocking_all">ללא טשטוש גבולות ריבועים (הכי מהיר)</string>
-    <string name="enable_frame_skip">דילוג על שקופיות</string>
-    <string name="enable_frame_skip_summary">הקידוד מהיר יותר אך איכות הווידאו עלולה להיפגע</string>
     <string name="enable_time_stretching_audio">הפעלת מתיחת זמן השמע</string>
     <string name="enable_time_stretching_audio_summary">הגברה והנמכת המהירות מבלי לשנות את גובה הצליל (דורש מכשיר מהיר)</string>
 
@@ -630,8 +511,6 @@
     <string name="http_user_agent">סוכן משתמש HTTP</string>
     <string name="custom_libvlc_options">אפשרויות מיוחדות ל־libVLC</string>
     <string name="custom_libvlc_options_invalid">אפשרויות libVLC שגויות!</string>
-    <string name="dav1d_thread_number">מספר תהליכון Dav1d</string>
-    <string name="dav1d_thread_number_invalid">מספר תהליכון שגוי! (>=1)</string>
     <string name="browser_quick_play">תפריט נגינה מהירה בדפדפן</string>
     <string name="browser_quick_play_summary">הוספת פעולת נגינה מהירה בפריטי תפריט הדפדפן. היא תטעון את המדיה שלך מהר יותר אבל חלק מנתוני העל יהיו חסרים.</string>
     <string name="browser_quick_play_default">נגינה מהירה כפעולת ברירת מחדל</string>
@@ -644,23 +523,16 @@
     <string name="send_log">שליחת הדוח</string>
     <string name="sending_log">הדוח נשלח…</string>
 
-    <string name="delete_sub_title">מחיקת כתוביות</string>
-    <string name="delete_sub_message">למחוק את הכתוביות האלה?</string>
-    <string name="download_subtitle_title">הורדת כתוביות</string>
 
     <string name="no_result">לא נמצאו תוצאות</string>
     <string name="no_internet_connection">נא לבדוק את החיבור שלך לאינטרנט</string>
     <string name="retry">לנסות שוב</string>
-    <string name="open_subs_download_error">OpenSubtitles לא זמין כרגע. נא לנסות שוב מאוחר יותר</string>
-    <string name="open_subs_download_link_error">יש בעיה עם OpenSubtitles. נא לנסות שוב</string>
 
     <string name="network_browsing">רשת מקומית</string>
     <string name="browsing">עיון</string>
 
     <string name="file_size">גודל קובץ</string>
 
-    <string name="audio_delay">השהיית שמע</string>
-    <string name="spu_delay">השהיית כתוביות</string>
     <string name="network_shares_discovery">מתבצע איתור שיתופי רשת</string>
     <string name="network_empty">התיקייה ריקה.</string>
     <string name="network_connection_needed">אין קישור לרשת המקומית.</string>
@@ -677,7 +549,6 @@
     <string name="current_chapter">פרק: %s</string>
     <string name="confirm_resume">להמשיך מהמיקום האחרון?</string>
     <string name="apply_playqueue">החלה על כל תור הנגינה</string>
-    <string name="confirm_resume_title">להמשיך סרטונים שנעצרו</string>
     <string name="confirm_resume_audio_title">להמשיך קטע שמע שהתנגן</string>
     <string name="tv_ui_title">מנשק טלוויזיית אנדרויד</string>
     <string name="tv_ui_summary">החלפת מנשק המשתמש לערכת נושא תואמת טלוויזייה</string>
@@ -709,7 +580,6 @@
 
     <!-- Accessibility -->
     <string name="more_actions">פעולות נוספות</string>
-    <string name="back_quit_lock">יש ללחוץ על אחורה פעם נוספת כדי לצאת מהסרטון</string>
     <string name="stream_deleted">התזרים נמחק</string>
     <string name="no_subs_found">אין כתוביות בתיקייה זו</string>
     <string name="music_now_playing">מתנגן כעת</string>
@@ -761,36 +631,15 @@
     <string name="download_on_device">הורדה</string>
     <string name="extension_empty">אין פריט להצגה, עליך לעבור להגדרות ההרחבה שלך כדי לקבל כזה.</string>
 
-    <string name="opengl_title">שימוש ב־OpenGL ES2</string>
-    <string name="opengl_summary">כבררת מחדל, נעשה שימוש ב־OpenGL ES2 לטובת פענוח תכנתי וחומרתי בעת הצורך (סרטוני 360°)</string>
-    <string name="opengl_automatic">אוטומטית</string>
-    <string name="opengl_on">להכריח הפעלה</string>
-    <string name="opengl_off">להכריח כיבוי</string>
     <string name="network_favorites">מועדפים ברשת</string>
     <string name="network_shared_folders">תיקיות משותפות</string>
     <string name="encryption_warning">אזהרה, הצפנה אינה זמינה בגרסה זו של אנדרואיד, הססמה תישמר במרחב פרטי אך ללא הצפנה</string>
     <string name="store_password">שמירת הססמה</string>
     <string name="add_to_playlist">להוסיף לרשימת הנגינה</string>
     <string name="popup_playback_title">נגינת סרטונים במצב חלונית</string>
-    <string name="popup_playback">מתנגן במצב חלונית</string>
-    <string name="popup_expand">הרחבת הסרטון</string>
-    <string name="download_subtitles">הורדת כתוביות</string>
-    <string name="powered_opensubtitles">מופעל על גבי OpenSubtitles</string>
-    <string name="open_subtitles_not_logged_in">לא נכנסת ל־OpenSubtitles\nכניסה תעניק לך גישה להורדות נוספות</string>
-    <string name="open_subtitles_logged_in">נכנסת בתור %1$s</string>
-    <string name="open_subtitles_limits">נותרו לך %1$s הורדות מתוך %2$s. המגבלה שלך תתאפס ב־%3$s.</string>
     <string name="open_subtitles_vip">יש לך מינוי אח״מים (VIP) ל־OpenSubtitles</string>
-    <string name="open_subtitles_register">הרשמה</string>
-    <string name="open_subtitles_log_out">יציאה</string>
-    <string name="open_subtitles_username">שם משתמש</string>
-    <string name="open_subtitles_password">סיסמה</string>
-    <string name="open_subtitles_is_vip">חשבון אח״מים (VIP)</string>
-    <string name="open_subtitles_is_not_vip">חשבון רגיל</string>
-    <string name="login_error">פרטי גישה שגויים</string>
-    <string name="unknown_error">שגיאה מפתיעה</string>
     <string name="browse_folder">עיון בתיקייה</string>
     <string name="listen">האזנה</string>
-    <string name="apply_to_bt">החלה על התקן Bluetooth</string>
     <string name="episodes">פרקים</string>
     <string name="movies">סרטים</string>
     <string name="videos">סרטונים</string>
@@ -851,7 +700,6 @@
     <string name="playback_forward">האצה קדימה</string>
     <string name="ml_wizard_scan_checkbox">סריקת התקן לאיתור תוכן מדיה</string>
     <string name="ml_wizard_description">נא לבחור האם VLC יסרוק את אחסון המכשיר שלך כדי לסדר את תיקיית המדיה שלך או פשוט להשתמש בו כנגן פשוט עם דפדפן מובנה.</string>
-    <string name="tv_my_new_videos">הסרטונים החדשים שלי</string>
     <string name="cast_option_title">שידור מדיה למסך אחר</string>
     <string name="otg_device_title">התקן OTG</string>
     <string name="browser">דפדפן</string>
@@ -871,15 +719,7 @@
     <string name="rename">שינוי שם</string>
     <string name="rename_media">שינוי השם של %1$s</string>
     <string name="manual_search">חיפוש ידני</string>
-    <string name="subtitle_search_name_hint">שם</string>
-    <string name="subtitle_query_edit">עריכת שאילתת חיפוש כתוביות</string>
-    <string name="subtitle_search_episode_hint">פרק</string>
-    <string name="subtitle_search_season_hint">עונה</string>
-    <string name="subtitles_download_failed">ההורדה נכשלה</string>
     <string name="language_to_download">שפה</string>
-    <string name="delete_the_selected">מחיקת הבחירה</string>
-    <string name="download_the_selected">הורדת הבחירה</string>
-    <string name="no_sub_history">אין כתוביות לסוג המדיה הזה</string>
     <string name="next">הבא</string>
     <string name="skip">דילוג</string>
     <string name="next_step">הבא</string>
@@ -887,14 +727,8 @@
     <string name="ctx_player_video_track">בחירת רצועת וידאו</string>
     <string name="ctx_player_audio_track">בחירת רצועת שמע</string>
     <string name="ctx_player_subs_track">רצועת כתוביות</string>
-    <string name="ctx_pip_title">נגן קופץ</string>
     <string name="device_dialog_title">חובר מכשיר חיצוני</string>
     <string name="device_dialog_message">חיברת התקן אחסון חדש למערכת הטלוויזיה שלך, לפתוח אותו עם VLC?</string>
-    <string name="videos_folders_title">סרטונים לפי תיקיות</string>
-    <string name="videos_groups_title">קבוצות סרטונים</string>
-    <string name="video_save_clone_mode">להפעיל מצב כפילות אוטומטית?</string>
-    <string name="video_remote_enable">מעבר למצב שלט</string>
-    <string name="video_remote_disable">שכפול מסך</string>
     <string name="removed_from_playlist_anonymous">פריט/ים הוסר/ו מרשימת הנגינה</string>
     <string name="welcome_title">ברוך בואך אל VLC!</string>
     <string name="welcome_subtitle">נגן המולטימדיה החופשי בקוד פתוח</string>
@@ -902,7 +736,6 @@
     <string name="permission_video">ל־VLC דרושה הרשאה כדי לגשת למדיה מסוג וידאו במכשיר שלך</string>
     <string name="permission_audio">ל־VLC דרושה הרשאה כדי לגשת למדיה מסוג שמע במכשיר שלך</string>
     <string name="medialibrary_scan_explanation">ל־VLC יש אפשרות לסרוק את ההתקן שלך אוטומטית כדי לארגן את אוסף המדיה שלך.</string>
-    <string name="player_title_fd_warning">בלי הרשאות לאחסון, VLC לא יכול למשוך כותרות למדיה או לשמור את ההתקדמות</string>
     <string name="onboarding_theme_title">להרגיש כמו בבית</string>
     <string name="done">סיום</string>
     <string name="onboarding_scan_title">זיהוי אוטומטי של המדיה שלך</string>
@@ -920,14 +753,9 @@
     <string name="create">יצירה</string>
     <string name="resume_card_message">להמשיך בנגינה של %1$s?</string>
     <string name="misc">שונות</string>
-    <string name="popup_force_legacy_title">להשתמש בחלונית צפה מותאמת לתמונה בתוך תמונה</string>
-    <string name="popup_force_legacy_summary">להשתמש בחלונית צפה גמישה מותאמת לתמונה בתוך תמונה</string>
-    <string name="restore_background_video_title">שחזור סרטון מהרקע</string>
-    <string name="restore_background_video_summary">לשחזר סרטון מהרקע בעת פתיחת VLC ל־Android מחדש</string>
     <string name="device_default">בררת המחדל של המכשיר</string>
     <string name="track_number">%d רצועות</string>
     <string name="jump_to">קפיצה אל</string>
-    <string name="show_video_thumbnails_summary">הצגת תמונות ייצוגיות של הסרטונים ברשימות</string>
     <string name="show_video_thumbnails">תמונות ייצוגיות של סרטונים</string>
     <string name="eq_snap_bands">הצמדת ערוצים</string>
     <string name="enable_equalizer">הפעלה</string>
@@ -1010,27 +838,14 @@
     <string name="clear">מחיקה</string>
     <string name="abrepeat_add_first_marker">הגדרת נקודת התחלה</string>
     <string name="abrepeat_add_second_marker">הגדרת נקודת סיום</string>
-    <string name="demux_bitrate">קצב סיביות פילוג</string>
-    <string name="input_bitrate">קצב סיביות קלט</string>
-    <string name="video_information">פרטי וידאו</string>
 
     <string name="channels">ערוצים</string>
     <string name="resolution">רזולוציה</string>
-    <string name="resolution_value">%1$d×%2$d</string>
-    <string name="framerate">קצב תמונות</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s לשנייה</string>
     <string name="language">שפה</string>
-    <string name="track_samplerate">קצב דגימה</string>
-    <string name="track_samplerate_value">%1$d הרץ\n</string>
     <string name="bitrate">קצב סיביות</string>
     <string name="codec">מפענח</string>
     <string name="text">טקסט</string>
     <string name="unknown">לא ידוע</string>
-    <string name="audio_delay_start">נשמע צליל</string>
-    <string name="subtitle_delay_first">נשמע קול</string>
-    <string name="audio_delay_end">זוהה קול</string>
-    <string name="subtitle_delay_end">נראה טקסט</string>
     <string name="track_index">רצועה: %s</string>
     <string name="audio_queue_progress">התקדמות: %s</string>
     <string name="audio_queue_progress_remaining">נותרו: %s</string>
@@ -1049,19 +864,12 @@
     <string name="rename_group">שינוי שם קבוצת וידאו</string>
     <string name="ungroup">פירוק הקבוצה</string>
     <string name="group_similar">קיבוץ אוטומטי מחדש</string>
-    <string name="no_group_found">לא נמצאה קבוצת וידאו</string>
     <string name="no_favorite">אין מועדפים</string>
     <string name="empty_directory">ריקה</string>
-    <string name="no_track">אין רצועה</string>
 
     <string name="swipe_unlock">יש להחליק לשחרור</string>
     <string name="swipe_unlock_no_touch">לחיצה ארוכה לשחרור</string>
-    <string name="sub_result_by_name">תוצאות עבור %s</string>
-    <string name="sub_result_by_name_season">עונה %s</string>
-    <string name="sub_result_by_name_episode">פרק %s</string>
-    <string name="sub_result_by_name_hearing_impaired">לכבדי שמיעה בלבד</string>
 
-    <string name="sub_result_by_file">תוצאות לקובץ שלך</string>
     <string name="donate">סיוע ל־VLC</string>
     <string name="donate_desc">ניתן לתמוך במתנדבים שעושים את VLC</string>
     <string name="donate_subscribtion">ברצוני לתרום כל חודש</string>
@@ -1080,33 +888,19 @@
     <string name="mark_as_not_played">סימון כטרם התנגן</string>
     <string name="mark_all_as_played">לסמן הכול כהתנגן</string>
     <string name="mark_all_as_not_played">סימון הכול כטרם נוגן</string>
-    <string name="new_group">קבוצה חדשה</string>
-    <string name="new_group_desc">יצירת קבוצה חדשה</string>
 
-    <string name="air_action_rewind">10 שניות אחורה</string>
-    <string name="air_action_forward">10 שניות קדימה</string>
-    <string name="air_action_play_pause">להשהות/להמשיך נגינה</string>
-    <string name="air_action_volume_up">הגברת עצמת השמע</string>
-    <string name="air_action_volume_down">הנמכת עצמת השמע</string>
-    <string name="air_action_next">הפריט הבא לנגינה</string>
-    <string name="air_action_previous">הפריט הקודם לנגינה</string>
     <string name="allow_otg">לאפשר גישה ל־OTG</string>
     <string name="allow_otg_description">נא לבחור את כונן ה־OTG כדי לאפשר גישה ל־VLC.</string>
-    <string name="timeout_infinite">אינסופי</string>
     <string name="video_hud_timeout">השהיית הסתרת פקדי נגן וידאו</string>
-    <string name="video_hud_timeout_summary">%s שנ׳</string>
     <string name="remove_from_history">הסרה מההיסטוריה</string>
     <string name="prefersmbv1">להעדיף SMB 1</string>
     <string name="prefersmbv1_summary">יש לבטל את ההגדרה הזאת אם נתקלת בתקלות בגלישה בשרת ה־SMB שלך</string>
-    <string name="apply_to_all">להחיל על כל הסרטונים</string>
     <string name="audio_delay_global">השהיית השמע הוגדרה ל־%s מילישניות לכל הסרטונים</string>
-    <string name="audio_delay_bt">השהיית התקן ה־Bluetooth הוגדרה ל־%s מילישניות</string>
     <string name="go_to_folder">עיון בהורה</string>
     <string name="go_to_album">מעבר לאלבום</string>
     <string name="go_to_artist">מעבר לאומן</string>
     <string name="go_to_album_artist">מעבר לאומן האלבום</string>
     <string name="create_shortcut">יצירת קיצור דרך למשגר</string>
-    <string name="no_sub_renderer">עדיין אין תמיכה בכתוביות כחלק מתזרים</string>
     <string name="enqueuing">המדיה שלך נטענת</string>
     <string name="soundfont">MIDI SoundFont</string>
     <string name="soundfont_summary">נא לבחור קובץ SoundFont כדי לנגן רצועות שמע מסוג MIDI</string>
@@ -1136,12 +930,6 @@
     <string name="lock_with_pin_short">נעילה בקוד אישי</string>
     <string name="restrict_settings">הגבלת גישה להגדרות</string>
     <string name="search_prefs">חיפוש בהגדרות</string>
-    <string name="video_match_frame_rate_title">התאמת קצב הרענון של התצוגה</string>
-    <string name="video_match_frame_rate_summary">התאמת קצב רענון התצורה לקצב הרענון של המדיה. למשל, סרט של 24p אמור להתנגן ב־24p</string>
-    <string name="preferred_resolution">רזולוציית הווידאו המועדפת</string>
-    <string name="preferred_resolution_summary">איכות הווידאו המרבית לתזרימים, כשזאת אכן משפיעה, תהיה: %s</string>
-    <string name="pref_resolution_best_available">המיטבית ביותר הזמינה</string>
-    <string name="pref_resolution_very_low">איכות נמוכה במיוחד (240p)</string>
     <string name="stop_unpaubale">אי אפשר להשהות את המדיה הזאת. לעצור אותה במקום?</string>
     <string name="delete_forever">למחוק לצמיתות</string>
     <string name="add_to_existing_playlist">הוספה לרשימת נגינה קיימת</string>
@@ -1179,8 +967,6 @@
     <string name="add_all_button">הוספה של הכול</string>
     <string name="add_new_only_button">הוספת חדשים בלבד</string>
     <string name="discovery_failed">הגילוי נכשל עבור: %s</string>
-    <string name="lock_use_sensor_title">נעילה עם חיישן</string>
-    <string name="lock_use_sensor_summary">כאשר כיוון ההטיה נעול, יש להשתמש בחיישן כדי להפוך את הכיוון</string>
     <string name="start">הפעלה</string>
     <string name="notification_permission">הרשאה להתראות</string>
     <string name="notification_permission_explanation">ל־VLC דרושה הרשאתך לשלוח התראות.\nהיישומון יודיע לך רק כאשר המדיה שלך נסרקת או שנעשה שימוש בסרטון מותאם עם תמונה בתוך תמונה.\nסירוב להרשאה לא ימנע מ־VLC לעבוד אך ההתראות תוסתרנה.</string>
@@ -1198,9 +984,6 @@
     <string name="control_setting">בקרת הגדרות</string>
     <string name="controls_setting">הגדרות פקדים</string> <!-- Unused -->
     <string name="gestures">מחוות</string>
-    <string name="player_controls">פקדי נגן</string>
-    <string name="video_double_tap_jump_delay">זמן השהיית נגיעה כפולה</string>
-    <string name="video_key_jump_delay">זמן השהיית מקשי ניווט</string>
     <string name="banned">תיקייה חסומה (נגיעה ארוכה לשינוי)</string>
     <string name="banned_tv">תיקייה חסומה</string>
     <string name="banned_parent">נחסמה על ידי תיקיית ההורה</string>
@@ -1218,17 +1001,11 @@
     </plurals>
     <string name="official_website">האתר הרשמי</string>
     <string name="view_online">הצגה באופן מקוון</string>
-    <string name="player_under_notch">הצגת סרטון מתחת לבליטה</string>
     <string name="notch">בליטה</string>
-    <string name="always_fast_seek">תמיד להשתמש בשיטוט מהיר</string>
-    <string name="always_fast_seek_summary">השיטוט יהיה מהיר יותר אבל פחות מדויק</string>
     <string name="touch_only">יכולת בנגיעה בלבד</string>
     <string name="touch_only_description">אפשר לעבור למנשק לניידים רק עם מסך מגע או עכבר.\nנא להחליק להלן כדי לאמת ששינוי היכולת הזאת הוא בטוח.</string>
     <string name="no_web_browser">לא מותקן דפדפן</string>
     <string name="no_web_browser_message">אפשר לסרוק את זה בטלפון החכם שלך.\nהכתובת היא %s</string>
-    <string name="no_video">אין וידאו זמין</string>
-    <string name="fold_optimized">מותאם במיוחד למסך המתקפל שלך</string>
-    <string name="fold_optimize">התאמה למסכים מתקפלים</string>
     <string name="foldable">מסך מתקפל</string>
     <string name="undo">החזרה</string>
     <string name="add_server_favorite">הוספת שרת למועדפים</string>
@@ -1258,14 +1035,10 @@
     <string name="seek_forward_content_description">לקפוץ %s שניות קדימה</string>
     <string name="open_vlc">לפתוח את VLC</string>
     <string name="playing">מתנגן</string>
-    <string name="disable_track">השבתת רצועה</string>
     <string name="ascending">עולה</string>
     <string name="descending">יורד</string>
-    <string name="screenshot_error">שגיאה בצילום המסך</string>
     <string name="disabled">מושבת</string>
     <string name="enable_screenshot_gesture">נגיעה ב־3 אצבעות</string>
-    <string name="enable_screenshot_button">להציג את כפתור צילום המסך</string>
-    <string name="enable_screenshot_button_and_gesture">כפתור ומחווה</string>
 
 
 
@@ -1293,18 +1066,9 @@
     <string name="talkback_enter_screen">ניווט אל %s</string>
     <string name="talkback_file_size">גודל: %s</string>
     <string name="talkback_open_in_browser">פתיחה בדפדפן</string>
-    <string name="talkback_video_player">נגן וידאו. נגיעה תציג את הפקדים. נגיעה בכפתור החזרה תסתיר אותם</string>
-    <string name="talkback_video_tracks">רצועות וידאו</string>
-    <string name="talkback_audio_tracks">רצועות שמע</string>
-    <string name="talkback_subtitle_tracks">רצועות כתוביות</string>
-    <string name="talkback_subtitle_dowload_item">שפה: %1$s. %2$s. שם: %3$s</string>
     <string name="selected">נבחר</string>
-    <string name="talkback_increase_delay">הגדלת השהיה</string>
-    <string name="talkback_decrease_delay">הקטנת השהיה</string>
     <string name="talkback_increase_speed">האצה</string>
     <string name="talkback_decrease_speed">האטה</string>
-    <string name="talkback_subtitle_history">היסטוריית כתוביות</string>
-    <string name="talkback_language_selection">נבחרו %s שפות</string>
     <string name="talkback_audio_player_opened">נגן השמע נפתח</string>
     <string name="talkback_audio_player_collapsed">נגן השמע הוקטן</string>
     <string name="talkback_audio_player_closed">נגן השמע נסגר</string>
@@ -1312,7 +1076,6 @@
     <string name="talkback_out_of">%1$s מתוך %2$s</string>
     <string name="talkback_track_index">רצועה %1$s מתוך %2$s</string>
     <string name="downloaded">התקבל</string>
-    <string name="not_downloaded">לא התקבל</string>
     <string name="downloading">מתקבל</string>
     <string name="talkback_action_rewind">לחזור %s שניות</string>
     <string name="talkback_action_forward">להתקדם %s שניות</string>

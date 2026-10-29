@@ -21,7 +21,6 @@
 package org.videolan.resources
 
 import android.annotation.TargetApi
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -180,18 +179,6 @@ object AndroidDevices {
         return false
     }
 
-    fun isDex(ctx: Context): Boolean {
-        if (!AndroidUtil.isNougatOrLater) return false
-        return try {
-            val config = ctx.resources.configuration
-            val configClass = config.javaClass
-            configClass.getField("SEM_DESKTOP_MODE_ENABLED").getInt(configClass) == configClass.getField("semDesktopModeEnabled").getInt(config)
-        } catch (ignored: Exception) {
-            false
-        }
-
-    }
-
     fun hasToForceTV(): Boolean {
         return Build.MODEL in forcedTVModels
     }
@@ -204,7 +191,6 @@ object AndroidDevices {
         private val EXTERNAL_PUBLIC_DCIM_DIRECTORY_FILE: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
         private val WHATSAPP_VIDEOS_FILE: File = File("$EXTERNAL_PUBLIC_DIRECTORY/WhatsApp/Media/WhatsApp Video/")
         private val WHATSAPP_VIDEOS_FILE_A11: File = File("$EXTERNAL_PUBLIC_DIRECTORY/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Video/")
-        private val EXTERNAL_PUBLIC_SCREENSHOTS_DIRECTORY: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Screenshots")
 
         val EXTERNAL_PUBLIC_MOVIES_DIRECTORY_URI = getFolderUri(EXTERNAL_PUBLIC_MOVIES_DIRECTORY_FILE)
         val EXTERNAL_PUBLIC_MUSIC_DIRECTORY_URI = getFolderUri(EXTERNAL_PUBLIC_MUSIC_DIRECTORY_FILE)
@@ -213,7 +199,6 @@ object AndroidDevices {
         val EXTERNAL_PUBLIC_DCIM_DIRECTORY_URI = getFolderUri(EXTERNAL_PUBLIC_DCIM_DIRECTORY_FILE)
         val WHATSAPP_VIDEOS_FILE_URI = getFolderUri(WHATSAPP_VIDEOS_FILE)
         val WHATSAPP_VIDEOS_FILE_URI_A11 = getFolderUri(WHATSAPP_VIDEOS_FILE_A11)
-        val EXTERNAL_PUBLIC_SCREENSHOTS_URI_DIRECTORY = getFolderUri(EXTERNAL_PUBLIC_SCREENSHOTS_DIRECTORY)
 
         private fun getFolderUri(file: File): Uri {
             return try {

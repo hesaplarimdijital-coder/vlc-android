@@ -278,12 +278,6 @@ object Permissions {
         return false
     }
 
-    fun checkPiPPermission(activity: FragmentActivity) {
-        if (!isPiPAllowed(activity)) {
-            showSettingsPermissionDialog(activity, PERMISSION_PIP)
-        }
-    }
-
     fun checkWriteSettingsPermission(activity: FragmentActivity, mode: Int) {
         if (!canWriteSettings(activity)) showSettingsPermissionDialog(activity, mode)
     }

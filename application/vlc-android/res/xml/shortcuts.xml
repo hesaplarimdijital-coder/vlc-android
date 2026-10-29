@@ -28,19 +28,6 @@
         <categories android:name="vlc.shortcut.category" />
     </shortcut>
     <shortcut
-        android:shortcutId="video"
-        android:enabled="false"
-        android:icon="@drawable/nagmedar_shortcut_video"
-        android:shortcutShortLabel="@string/video"
-        android:shortcutLongLabel="@string/video"
-        tools:targetApi="n_mr1">
-        <intent
-            android:action="vlc.shortcut.video"
-            android:targetPackage="app.nagmedar"
-            android:targetClass="org.videolan.vlc.StartActivity" />
-        <categories android:name="vlc.shortcut.category" />
-    </shortcut>
-    <shortcut
         android:shortcutId="audio"
         android:enabled="false"
         android:icon="@drawable/nagmedar_shortcut_audio"

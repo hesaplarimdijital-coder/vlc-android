@@ -31,7 +31,6 @@ import org.videolan.tools.KEY_AUDIO_SHOW_BOOkMARK_BUTTONS
 import org.videolan.tools.KEY_AUDIO_SHOW_TRACK_NUMBERS
 import org.videolan.tools.Settings
 import org.videolan.vlc.R
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 
 class PreferencesAudioControls : BasePreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener  {
 
@@ -59,7 +58,6 @@ class PreferencesAudioControls : BasePreferenceFragment(), SharedPreferences.OnS
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null || key == null) return
-        (activity as? VideoPlayerActivity)?.onChangedControlSetting(key)
         when (key) {
             KEY_AUDIO_JUMP_DELAY -> {
                 Settings.audioJumpDelay = sharedPreferences.getInt(KEY_AUDIO_JUMP_DELAY, 10)

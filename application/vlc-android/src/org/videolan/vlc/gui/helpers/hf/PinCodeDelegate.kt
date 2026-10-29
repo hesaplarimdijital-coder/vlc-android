@@ -12,7 +12,6 @@ import org.videolan.tools.Settings
 import org.videolan.vlc.gui.DialogActivity
 import org.videolan.vlc.gui.PinCodeActivity
 import org.videolan.vlc.gui.PinCodeReason
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 
 private const val UNLOCK = "unlock"
 class PinCodeDelegate : BaseHeadlessFragment() {
@@ -39,7 +38,6 @@ class PinCodeDelegate : BaseHeadlessFragment() {
 }
 
 suspend fun FragmentActivity.checkPIN(unlock:Boolean = false) : Boolean {
-    if (this is VideoPlayerActivity) this.waitingForPin = true
     if (!Settings.safeMode) return true
     val model : PermissionViewmodel by viewModels()
     val fragment = PinCodeDelegate().apply {

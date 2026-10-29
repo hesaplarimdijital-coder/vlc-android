@@ -15,7 +15,6 @@ android {
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}\""
-        buildConfigField 'String', 'VLC_OPEN_SUBTITLES_API_KEY', "\"${getOSApiKey(project)}\""
         vectorDrawables.useSupportLibrary = true
     }
     
@@ -59,10 +58,6 @@ android {
         buildConfig = true
     }
 
-}
-
-static def getOSApiKey(project) {
-    return System.getenv('VLC_OPEN_SUBTITLES_API_KEY') ?:  project.properties['vlc_open_subtitles_api_key'] ?: ""
 }
 
 dependencies {

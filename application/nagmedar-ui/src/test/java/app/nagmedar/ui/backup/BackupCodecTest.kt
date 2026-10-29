@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.data.LatencyProfileEntry
 import app.nagmedar.data.LyricsEntry
-import app.nagmedar.data.MediaSettings
 import app.nagmedar.data.SmartPlaylistEntry
 import app.nagmedar.data.TrackStatsEntry
 import app.nagmedar.ui.NagmedarPreferences
@@ -69,7 +68,6 @@ class BackupCodecTest {
         smartLists = listOf(SmartPlaylistEntry(name = "Sevilenler", rules = "rating|atLeast|4", matchAll = true, sort = "rating:true", limitCount = 50, createdAt = 1L, updatedAt = 2L)),
         stats = listOf(TrackStatsEntry("file:///m/01.flac", rating = 5, playCount = 12, skipCount = 1, firstPlayedAt = 10L, lastPlayedAt = 20L, updatedAt = 20L)),
         lyrics = listOf(LyricsEntry("cemre kaya|gece yolcusu|gece yolcusu|254", "user", synced = true, text = "[00:01.00]Gece", offsetMs = -300L, fetchedAt = 5L)),
-        fileSettings = listOf(MediaSettings("file:///film.mkv", audioDelayMs = -120L, subtitleTrack = "3", playbackRate = 1.25f, updatedAt = 9L)),
         covers = listOf(BackupCover(coverName, png)),
         // S-613: a measured profile, one set by hand, and the speaker's reference; a Bluetooth address stays out of a backup
         latency = listOf(
@@ -150,13 +148,15 @@ class BackupCodecTest {
              "settings":[{"key":"a","type":"string","value":"x"},{"key":"b","type":"colour","value":"#fff"},
                          {"type":"int","value":3},{"key":"c","type":"int","value":null}],
              "playlists":[{"name":"","entries":[]},{"name":"Yol","entries":[{"title":"no location"},{"location":"/m/01.flac"}]}],
-             "stats":[{"track":"k","rating":9,"plays":-2}]}
+             "stats":[{"track":"k","rating":9,"plays":-2}],
+             "file_settings":[{"uri":"file:///film.mkv","audio_delay_ms":-120,"subtitle_track":"3"}]}
         """.trimIndent()
         val back = read(text.toByteArray())
         assertEquals(listOf(SettingValue("a", "x")), back.settings)
         assertEquals(listOf(BackupPlaylist("Yol", listOf(PlaylistEntry("/m/01.flac")))), back.playlists)
         assertEquals(TrackStatsEntry("k", rating = 5), back.stats!!.single())
         assertNull(back.lyrics)
+        // the per-file settings of an older backup (the video player's, 1.0) are passed over
         assertEquals(listOf(BackupPart.Settings, BackupPart.Playlists, BackupPart.Stats), back.parts)
     }
 

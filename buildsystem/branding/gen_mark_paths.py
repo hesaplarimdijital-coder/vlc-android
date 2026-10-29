@@ -155,11 +155,10 @@ def vector(width_dp, viewport, body, translate=(0, 0), height_dp=None, viewport_
 
 # Upstream drawables that showed the VLC cone, replaced by the mark at their original size:
 # name -> (width dp, height dp, style, alpha). 'mono' keeps the single light fill that the
-# widgets tint at runtime; the renderer background keeps its translucency.
-CONE_DRAWABLES = {'ic_about_logo': (112, 112, 'color', None), 'ic_cone_o': (46, 46, 'color', None),
+# widgets tint at runtime.
+CONE_DRAWABLES = {'ic_about_logo': (112, 112, 'color', None),
                   'ic_default_cone': (96, 96, 'color', None), 'ic_icon': (54, 54, 'color', None),
-                  'ic_icon_vlc4': (54, 54, 'color', None), 'ic_widget_icon': (48, 48, 'mono', None),
-                  'ic_renderer_background_cone': (510, 600, 'color', 0.85)}
+                  'ic_icon_vlc4': (54, 54, 'color', None), 'ic_widget_icon': (48, 48, 'mono', None)}
 WIDGET_FILL = '#FFFAFAFA'
 MARK_CENTER = (54.5, 54.0)
 MARK_BOX = 56.0

@@ -272,8 +272,6 @@ class PlaybackSpeedDialog : PlaybackBottomSheetDialogFragment(), PlaybackService
         return com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
     }
 
-    override fun allowRemote() = true
-
     override fun needToManageOrientation(): Boolean {
         return true
     }

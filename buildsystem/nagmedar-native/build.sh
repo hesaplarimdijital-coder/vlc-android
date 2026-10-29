@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-# Native part of Settings > Lab (SP-02 USB audio, SP-05 whisper) with the media probe (S-802),
-# the music engine (S-901, native/audio) and the offline subtitle translation (S-710, native/translate).
+# Native part of Settings > Lab (SP-02 USB audio, SP-05 whisper) with the media probe (S-802) and
+# the music engine (S-901, native/audio).
 #
-#   build.sh host    <prefix>  FFmpeg, libdovi, TagLib, libopenmpt, libopus and LAME for this machine and the
-#                              mediaprobe, subextract, whisper_lab_cli and nagaudio commands (host tests in CI: test-host.sh)
-#   build.sh android <prefix>  FFmpeg, libdovi, whisper.cpp (with ggml's Vulkan backend: glslc is built for this
+#   build.sh host    <prefix>  FFmpeg, TagLib, libopenmpt, libopus and LAME for this machine and the
+#                              mediaprobe, whisper_lab_cli and nagaudio commands (host tests in CI: test-host.sh)
+#   build.sh android <prefix>  FFmpeg, whisper.cpp (with ggml's Vulkan backend: glslc is built for this
 #                              machine first), libusb, TagLib, libopenmpt, libopus, LAME for arm64-v8a;
 #                              libnagmedar_lab.so into application/nagmedar-lab and
-#                              libnagmedar_audio.so into application/nagmedar-audio and, with CTranslate2 and
-#                              SentencePiece, libnagmedar_translate.so into application/nagmedar-translate
-#                              (needs ANDROID_NDK)
+#                              libnagmedar_audio.so into application/nagmedar-audio (needs ANDROID_NDK)
 #
 # Sources are cloned at the versions in versions.env into $NAGMEDAR_NATIVE_WORK
 # (default native/.work). Nothing here is needed for a build without the lab tools:
@@ -142,22 +140,6 @@ build_ffmpeg() { # extra configure args...
     make install > /dev/null
 }
 
-build_dovi() { # cargo target or empty
-    fetch dovi_tool "$DOVI_URL" "$DOVI_REF"
-    if [ -f "$PREFIX/lib/libdovi.a" ]; then return; fi
-    log "libdovi from dovi_tool $DOVI_REF ($TARGET)"
-    cd "$WORK/src/dovi_tool/dolby_vision"
-    local args=(--release --features capi --lib --crate-type staticlib)
-    local out=target/release
-    if [ -n "${1:-}" ]; then
-        args+=(--target "$1")
-        out=target/$1/release
-    fi
-    RUSTFLAGS="-Cpanic=abort ${RUSTFLAGS:-}" cargo rustc "${args[@]}" > "$WORK/dovi-$TARGET.log" 2>&1 ||
-        fail_log "libdovi ($TARGET)" "$WORK/dovi-$TARGET.log"
-    cp "$out/libdolby_vision.a" "$PREFIX/lib/libdovi.a"
-}
-
 build_whisper() { # extra cmake args...
     fetch whisper "$WHISPER_URL" "$WHISPER_REF"
     if [ -f "$PREFIX/lib/libwhisper.a" ]; then return; fi
@@ -220,35 +202,6 @@ build_lab() { # extra cmake args...
     grep -E "warning:" "$dir.build.log" | grep -v "/src/libusb/" | head -20 || true
 }
 
-# S-710: CTranslate2 with the submodules its CPU build uses (spdlog, Ruy and its cpuinfo,
-# cpu_features); the CUDA ones are left out
-fetch_ct2() {
-    if [ ! -f "$WORK/src/ctranslate2/.fetched" ]; then
-        log "fetch ctranslate2 $CT2_REF"
-        rm -rf "$WORK/src/ctranslate2"
-        git clone -q --depth 1 --branch "$CT2_REF" "$CT2_URL" "$WORK/src/ctranslate2"
-        git -C "$WORK/src/ctranslate2" submodule -q update --init --depth 1 third_party/spdlog third_party/ruy third_party/cpu_features
-        git -C "$WORK/src/ctranslate2/third_party/ruy" submodule -q update --init --depth 1 third_party/cpuinfo
-        touch "$WORK/src/ctranslate2/.fetched"
-    fi
-}
-
-# S-710: libnagmedar_translate, CTranslate2 and SentencePiece built into it (their own CMake builds, as subprojects)
-build_translate() { # extra cmake args...
-    fetch_ct2
-    fetch sentencepiece "$SPM_URL" "$SPM_REF"
-    log "libnagmedar_translate ($TARGET)"
-    local dir="$WORK/build-$TARGET/translate"
-    mkdir -p "$WORK/build-$TARGET"
-    # CMake 4 (the runners' since late October 2026) refuses projects below 3.5: CTranslate2's
-    # cpuinfo and clog still say 3.1
-    cmake -S "$ROOT/native/translate" -B "$dir" -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-        -DCT2_SOURCE="$WORK/src/ctranslate2" -DSPM_SOURCE="$WORK/src/sentencepiece" \
-        -DCT2_VERSION="${CT2_REF#v}" -DSPM_VERSION="${SPM_REF#v}" \
-        "$@" > "$dir.configure.log" 2>&1 || fail_log "translate configure ($TARGET)" "$dir.configure.log"
-    cmake --build "$dir" -j"$JOBS" --target nagmedar_translate > "$dir.build.log" 2>&1 || fail_log "libnagmedar_translate ($TARGET)" "$dir.build.log"
-}
-
 build_taglib() { # extra cmake args...
     fetch taglib "$TAGLIB_URL" "$TAGLIB_REF"
     fetch utfcpp "$UTFCPP_URL" "$UTFCPP_REF"
@@ -275,7 +228,6 @@ build_audio() { # extra cmake args...
 
 host() {
     build_ffmpeg --cc="${CC:-cc}"
-    build_dovi ""
     build_whisper
     build_lab
     build_taglib
@@ -288,13 +240,8 @@ host() {
     log "mediaprobe (host)"
     "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/mediaprobe" -I"$PREFIX/include" \
         "$ROOT/native/lab/mediaprobe.c" "$ROOT/native/lab/mediaprobe_cli.c" \
-        -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil "$PREFIX/lib/libdovi.a" -lm -lpthread -ldl \
-        > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
-    log "subextract (host)"
-    "${CC:-cc}" -O2 -Wall -o "$PREFIX/bin/subextract" -I"$PREFIX/include" \
-        "$ROOT/native/lab/subtitle_extract.c" "$ROOT/native/lab/subtitle_extract_cli.c" \
         -L"$PREFIX/lib" -lavformat -lavcodec -lswresample -lavutil -lm -lpthread -ldl \
-        > "$WORK/subextract.log" 2>&1 || fail_log "subextract (host)" "$WORK/subextract.log"
+        > "$WORK/mediaprobe.log" 2>&1 || fail_log "mediaprobe (host)" "$WORK/mediaprobe.log"
 }
 
 android() {
@@ -307,9 +254,6 @@ android() {
         --cc="$cc" --cxx="$cc++" --ld="$cc" --ar="$tc/bin/llvm-ar" --nm="$tc/bin/llvm-nm" \
         --ranlib="$tc/bin/llvm-ranlib" --strip="$tc/bin/llvm-strip" --sysroot="$tc/sysroot" \
         --extra-cflags="-O2 -fPIC -fvisibility=hidden"
-    rustup target add aarch64-linux-android > /dev/null
-    CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$cc" AR_aarch64_linux_android="$tc/bin/llvm-ar" \
-        CC_aarch64_linux_android="$cc" build_dovi aarch64-linux-android
     # ARMv8.2 dot product and FP16: every big core since 2018, the Dimensity 9400+ included.
     # S-709: and the GPU through ggml's Vulkan backend. Vulkan_LIBRARY only satisfies CMake: the
     # library opens the system's loader at run time (native/lab/vulkan_loader.c) and loads on a
@@ -336,12 +280,6 @@ android() {
     cp "$WORK/build-android/audio/libnagmedar_audio.so" "$audio_out/"
     "$tc/bin/llvm-strip" --strip-unneeded "$audio_out/libnagmedar_audio.so"
     ls -la "$audio_out"
-    build_translate "${ndk_cmake[@]}"
-    local translate_out="$ROOT/application/nagmedar-translate/src/main/jniLibs/arm64-v8a"
-    mkdir -p "$translate_out"
-    cp "$WORK/build-android/translate/libnagmedar_translate.so" "$translate_out/"
-    "$tc/bin/llvm-strip" --strip-unneeded "$translate_out/libnagmedar_translate.so"
-    ls -la "$translate_out"
 }
 
 case "$TARGET" in

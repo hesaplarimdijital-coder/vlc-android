@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 
 /** S-809: the Nağmedar database behaves as the features need it, and its schema history is tested. */
 @RunWith(AndroidJUnit4::class)
@@ -437,94 +438,6 @@ class NagmedarDatabaseTest {
         assertTrue(runBlocking { queue.counts().first() }.isEmpty())
     }
 
-    @Test
-    fun mediaSettingsArePerFile() {
-        val settings = db.mediaSettings()
-        val uri = "file:///storage/T7/Kuzey Işığı.mkv"
-        settings.save(MediaSettings(uri, audioDelayMs = -120, subtitleEncoding = "Windows-1254"))
-        settings.save(MediaSettings(uri, audioDelayMs = -80, subtitleEncoding = "Windows-1254", playbackRate = 1.0f))
-        val saved = settings.get(uri)!!
-        assertEquals(-80L, saved.audioDelayMs)
-        assertEquals("Windows-1254", saved.subtitleEncoding)
-        // S-603: the effects panel's values ride along, the delays stay
-        settings.saveEffects(uri, "2.39:1", "auto", "rock", "{\"gain\":150}", updatedAt = 7)
-        settings.get(uri)!!.let {
-            assertEquals("{\"gain\":150}", it.effects)
-            assertEquals("2.39:1", it.aspectRatio)
-            assertEquals("rock", it.equalizerPreset)
-            assertEquals(-80L, it.audioDelayMs)
-        }
-        settings.updateEffects(uri, null, null, null, null, updatedAt = 8)
-        assertNull(settings.get(uri)!!.effects)
-        assertEquals(-80L, settings.get(uri)!!.audioDelayMs)
-        settings.forget(uri)
-        assertNull(settings.get(uri))
-        // a file without a row gets one
-        settings.saveEffects("file:///yeni.mkv", "auto", "auto", null, "{}", updatedAt = 9)
-        assertEquals("{}", settings.get("file:///yeni.mkv")!!.effects)
-        // S-604: the delays and the subtitles' speed, the effects staying
-        settings.saveSync("file:///yeni.mkv", 120, -350, "25>23.976", updatedAt = 10)
-        settings.get("file:///yeni.mkv")!!.let {
-            assertEquals(120L, it.audioDelayMs)
-            assertEquals(-350L, it.subtitleDelayMs)
-            assertEquals("25>23.976", it.subtitleRate)
-            assertEquals("{}", it.effects)
-        }
-        settings.updateSync("file:///yeni.mkv", null, null, null, updatedAt = 11)
-        assertNull(settings.get("file:///yeni.mkv")!!.audioDelayMs)
-        assertEquals("auto", settings.get("file:///yeni.mkv")!!.aspectRatio)
-    }
-
-    /** S-1206: the remux queue: the oldest waiting job next, those a dead process left, a cancel asked. */
-    @Test
-    fun remuxJobsWaitInTheOrderTheyWereQueued() {
-        val jobs = db.remuxJobs()
-        fun job(name: String, at: Long, state: String = RemuxJobState.QUEUED) = RemuxJobEntry(
-            inputUri = "content://docs/$name", inputName = "$name.mkv", inputSize = 1, outputUri = "content://docs/$name-out",
-            outputName = "$name (remux).mkv", plan = "{}", state = state, createdAt = at,
-        )
-        val second = jobs.insert(job("b", 2))
-        val first = jobs.insert(job("a", 1))
-        val running = jobs.insert(job("c", 3, RemuxJobState.RUNNING))
-        jobs.insert(job("d", 4, RemuxJobState.DONE))
-        assertEquals(first, jobs.next()!!.id)
-        assertEquals(listOf(running), jobs.interrupted().map { it.id })
-        assertEquals(listOf("d", "c", "b", "a"), jobs.all().map { it.inputName.removeSuffix(".mkv") })
-        assertEquals(listOf("a"), runBlocking { jobs.observeInput("content://docs/a").first() }.map { it.inputName.removeSuffix(".mkv") })
-        jobs.requestCancel(running)
-        assertTrue(jobs.get(running)!!.cancelRequested)
-        // the worker's column writes leave the cancel asked where it is
-        jobs.saveProgress(running, 0.5f, 400.0, 800.0, 7)
-        jobs.saveState(running, RemuxJobState.PAUSED, RemuxJobError.BATTERY, "1\tpaused\tbattery\n")
-        jobs.saveResult(running, RemuxJobState.VERIFYING, 800.0, 800.0, 9, "{}")
-        jobs.get(running)!!.let {
-            assertTrue(it.cancelRequested)
-            assertEquals(RemuxJobState.VERIFYING, it.state)
-            assertEquals(RemuxJobError.BATTERY, it.error)
-            assertEquals(9L, it.bytesOut)
-            assertEquals("{}", it.result)
-        }
-        assertEquals(1, jobs.claim(second, 1, 5, "5\tstarted\t1\n"))
-        assertEquals("taken up once", 0, jobs.claim(second, 2, 6, ""))
-        assertEquals(1, jobs.get(second)!!.attempts)
-        assertEquals(5L, jobs.get(second)!!.startedAt)
-        jobs.saveOwnsOutput(second, true)
-        assertTrue(jobs.get(second)!!.ownsOutput)
-        // a cancel of a waiting job touches only a job still waiting
-        assertEquals(0, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
-        assertEquals(RemuxJobState.RUNNING, jobs.get(second)!!.state)
-        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
-        assertEquals(1, jobs.cancelQueued(second, RemuxJobError.CANCELLED, 8))
-        assertEquals(RemuxJobState.CANCELLED, jobs.get(second)!!.state)
-        jobs.update(jobs.get(second)!!.copy(state = RemuxJobState.QUEUED))
-        jobs.update(jobs.get(first)!!.copy(state = RemuxJobState.DONE, videoHash = "fad1", verification = "{\"ok\":true}", finishedAt = 9))
-        assertEquals(second, jobs.next()!!.id)
-        assertEquals("fad1", jobs.get(first)!!.videoHash)
-        jobs.delete(second)
-        assertNull(jobs.next())
-        assertEquals(3, runBlocking { jobs.observe().first() }.size)
-    }
-
     /** S-1502: what a backup reads, and its rows restored over these without losing either's. */
     @Test
     fun aBackupsRowsAreReadAndRestored() {
@@ -554,14 +467,6 @@ class NagmedarDatabaseTest {
         assertEquals(listOf("t2", "t3", "t4", "t5"), lyrics.kept().map { it.trackKey })
         lyrics.saveAll(listOf(LyricsEntry("t1", LyricsSource.LRCLIB, synced = true, text = "[00:01.00]bir", offsetMs = -200, fetchedAt = 1)))
         assertEquals(-200L, lyrics.forTrack("t1").single().offsetMs)
-
-        // a file's settings: the newer row
-        val files = db.mediaSettings()
-        files.save(MediaSettings("u1", audioDelayMs = 50, updatedAt = 10))
-        files.restore(listOf(MediaSettings("u1", audioDelayMs = -120, updatedAt = 5), MediaSettings("u2", subtitleDelayMs = 400, updatedAt = 1)))
-        assertEquals(50L, files.get("u1")!!.audioDelayMs)
-        assertEquals(400L, files.get("u2")!!.subtitleDelayMs)
-        assertEquals(listOf("u1", "u2"), files.all().map { it.mediaUri })
 
         val smart = db.smartPlaylists()
         smart.insert(SmartPlaylistEntry(name = "İkinci", rules = "", createdAt = 2))
@@ -599,23 +504,6 @@ class NagmedarDatabaseTest {
         profiles.delete(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF")
         assertNull(profiles.get(8, "Galaxy Buds2 Pro", "AA:BB:CC:DD:EE:FF"))
     }
-
-    /** Film information: a season TMDB has no episodes of is kept as asked, and asked again only once it is old. */
-    @Test
-    fun aSeasonWithoutEpisodesIsAskedAgainOnlyWhenOld() {
-        val films = db.filmInfo()
-        fun episode(season: Int, episode: Int, at: Long) = FilmEpisodeEntry(70, season, episode, title = "Bölüm $episode", language = "tr", fetchedAt = at)
-        fun none(season: Int, at: Long) = FilmEpisodeEntry(70, season, FilmEpisodeEntry.NO_EPISODES, language = "tr", fetchedAt = at)
-        films.saveEpisodes(listOf(episode(1, 1, 100), episode(1, 2, 100), none(0, 100), none(3, 900)))
-        assertEquals(listOf(0, 1, 3), films.seasons(70).sorted())
-        // the specials were asked at 100: older than 500; the third season at 900 is not
-        assertEquals(listOf(0), films.emptySeasonsAskedBefore(70, before = 500))
-        assertEquals(listOf(0, 3), films.emptySeasonsAskedBefore(70, before = 1_000).sorted())
-        // a season that has episodes since is no empty one, its old row aside
-        films.saveEpisodes(listOf(episode(0, 1, 2_000)))
-        assertEquals(listOf(3), films.emptySeasonsAskedBefore(70, before = 3_000))
-        assertTrue(films.emptySeasonsAskedBefore(71, before = 3_000).isEmpty())
-    }
 }
 
 /**
@@ -643,7 +531,7 @@ class NagmedarDatabaseMigrationTest {
         }
         // 1 -> 2 (S-802): the probe cache appears; 2 -> 3 (S-603): the effects column; 3 -> 4 (S-604):
         // the subtitles' speed; the settings stay
-        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+        helper.runMigrationsAndValidate(TEST_DB, 20, true, *NagmedarDatabase.MIGRATIONS).use { db ->
             db.query("SELECT audio_delay_ms, effects, subtitle_rate FROM media_settings WHERE media_uri = 'file:///film.mkv'").use { c ->
                 assertTrue(c.moveToFirst())
                 assertEquals(-120L, c.getLong(0))
@@ -721,6 +609,123 @@ class NagmedarDatabaseMigrationTest {
                 assertEquals(0L, c.getLong(0))
             }
             db.execSQL("UPDATE remux_job SET position = 2 WHERE input_uri = 'content://a'")
+        }
+        // 20 -> 21 (podcast transcripts), 21 -> 22 (1.0): the removed features' tables go, every other row stays
+        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            assertEquals(emptyList<String>(), tables(db).filter { it in NagmedarDatabase.RETIRED_TABLES })
+            for (table in listOf("media_tech", "track_stats", "smart_playlist", "radio_station", "latency_profile", "network_server",
+                "scrobble_queue", "radio_recording", "radio_schedule", "radio_schedule_run")) {
+                assertEquals(table, 1, count(db, "SELECT COUNT(*) FROM $table"))
+            }
+        }
+    }
+
+    /**
+     * 20 → 21 → 22 on the user's database: one with rows in every table the removed features used, and the music,
+     * podcasts and radio's, opens with the app's own migrations; the tables go, the rows that stay are all there, and the files
+     * the jobs held a permission to are noted for the app to let go of.
+     */
+    @Test
+    fun aTwentyWithTheRemovedFeaturesRowsOpensAsTwentyTwo() {
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        assumeTrue("schema ${NagmedarDatabase.VERSION} not exported yet", schemaExported(NagmedarDatabase.VERSION))
+        helper.createDatabase(TEST_DB, 20).use { db ->
+            db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, subtitle_encoding, updated_at) VALUES ('file:///film.mkv', -120, 'Windows-1254', 1)")
+            db.execSQL(
+                "INSERT INTO transcode_profile (name, container, video_codec, video_kbps, max_height, fps, audio_codec, audio_kbps, channels, " +
+                    "sample_rate, subtitles, created_at, updated_at) VALUES ('TV', 'mp4', 'h264', 4000, 1080, 0, 'aac', 192, 2, 48000, 'burn', 1, 1)",
+            )
+            db.query("SELECT * FROM transcode_job").use { c ->
+                val columns = c.columnNames.toList()
+                val values = columns.map { column ->
+                    when (column) {
+                        "id" -> "NULL"
+                        "input_uri" -> "'content://docs/document/eski.mkv'"
+                        "output_uri" -> "'content://docs/document/eski.mp4'"
+                        "input_name", "output_name", "profile", "state", "error" -> "'x'"
+                        "started_at", "finished_at" -> "NULL"
+                        else -> "0"
+                    }
+                }
+                db.execSQL("INSERT INTO transcode_job (${columns.joinToString()}) VALUES (${values.joinToString()})")
+            }
+            remuxJob(db, 3)
+            db.execSQL("UPDATE remux_job SET output_uri = 'content://docs/document/film%20(remux).mkv', input_uri = 'content://docs/document/film.mkv'")
+            db.execSQL("INSERT INTO film_info (query_key, kind, tmdb_id, title, language, manual, fetched_at) VALUES ('kuzey|2024', 'movie', 7, 'Kuzey', 'tr', 0, 1)")
+            db.execSQL("INSERT INTO film_episode (show_id, season, episode, language, fetched_at) VALUES (7, 1, 1, 'tr', 1)")
+            // the user's music, podcasts and radio
+            db.execSQL(
+                "INSERT INTO track_stats (track_key, rating, play_count, skip_count, first_played_at, last_played_at, updated_at) " +
+                    "VALUES ('file:///neva.flac', 4, 2, 0, 1, 2, 2)",
+            )
+            db.execSQL("INSERT INTO smart_playlist (name, rules, match_all, sort, limit_count, created_at, updated_at) VALUES ('En sevilenler', '', 1, NULL, NULL, 1, 1)")
+            feed(db)
+            db.execSQL(
+                "INSERT INTO podcast_episode (feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, download_state) " +
+                    "VALUES (1, 'ep-1', 'Bölüm 1', 'https://example.org/1.mp3', 60000, 9, 1500, 1, 0)",
+            )
+            db.execSQL(
+                "INSERT INTO radio_station (station_uuid, name, stream_url, bitrate, favorite, last_played_at, votes, last_voted_at) " +
+                    "VALUES ('uuid-1', 'Radyo', 'https://radio.example/a', 128, 1, 2, 0, 0)",
+            )
+            schedule(db)
+        }
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val note = File(context.cacheDir, "retired-grants-test").apply { delete() }
+        val room = Room.databaseBuilder(context, NagmedarDatabase::class.java, TEST_DB)
+            .addMigrations(*NagmedarDatabase.migrations { note })
+            .allowMainThreadQueries()
+            .build()
+        try {
+            assertEquals(2, room.trackStats().get("file:///neva.flac")!!.playCount)
+            assertEquals(listOf("En sevilenler"), room.smartPlaylists().all().map { it.name })
+            assertEquals(listOf("Radyo"), runBlocking { room.radio().favorites().first() }.map { it.name })
+            val db = room.openHelper.readableDatabase
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_feed WHERE title = 'Nağmedar Podcast'"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_episode WHERE guid = 'ep-1' AND position_ms = 1500"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM radio_schedule"))
+            assertEquals(emptyList<String>(), tables(db).filter { it in NagmedarDatabase.RETIRED_TABLES })
+        } finally {
+            room.close()
+        }
+        assertEquals(
+            listOf(
+                "content://docs/document/eski.mkv", "content://docs/document/eski.mp4",
+                "content://docs/document/film%20(remux).mkv", "content://docs/document/film.mkv",
+            ),
+            note.readLines().filter { it.isNotBlank() },
+        )
+    }
+
+    /** 21 → 22 from 21 itself: the transcript columns' values stay, the removed features' tables go. */
+    @Test
+    fun aTwentyOneLosesOnlyTheRemovedFeaturesTables() {
+        assumeTrue("schema 21 not exported yet", schemaExported(21))
+        assumeTrue("schema ${NagmedarDatabase.VERSION} not exported yet", schemaExported(NagmedarDatabase.VERSION))
+        helper.createDatabase(TEST_DB, 21).use { db ->
+            feed(db)
+            db.execSQL("UPDATE podcast_feed SET language = 'tr', transcript_language = 'en' WHERE id = 1")
+            db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, updated_at) VALUES ('file:///film.mkv', -120, 1)")
+            remuxJob(db, 3)
+        }
+        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_feed WHERE language = 'tr' AND transcript_language = 'en'"))
+            assertEquals(emptyList<String>(), tables(db).filter { it in NagmedarDatabase.RETIRED_TABLES })
+        }
+    }
+
+    /** 21 → 22 where a pull request's build left some of the dropped tables out: nothing to drop is no failure. */
+    @Test
+    fun aTwentyWithoutSomeOfTheTablesMigratesAllTheSame() {
+        assumeTrue("schema 20 not exported yet", schemaExported(20))
+        assumeTrue("schema ${NagmedarDatabase.VERSION} not exported yet", schemaExported(NagmedarDatabase.VERSION))
+        helper.createDatabase(TEST_DB, 20).use { db ->
+            db.execSQL("DROP TABLE remux_job")
+            db.execSQL("DROP TABLE film_episode")
+            feed(db)
+        }
+        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_feed"))
         }
     }
 
@@ -932,6 +937,11 @@ class NagmedarDatabaseMigrationTest {
     private fun positions(db: SupportSQLiteDatabase): List<Pair<Long, Long>> =
         db.query("SELECT id, position FROM remux_job ORDER BY id").use { c ->
             buildList { while (c.moveToNext()) add(c.getLong(0) to c.getLong(1)) }
+        }
+
+    private fun tables(db: SupportSQLiteDatabase): List<String> =
+        db.query("SELECT name FROM sqlite_master WHERE type = 'table'").use { c ->
+            buildList { while (c.moveToNext()) add(c.getString(0)) }
         }
 
     private fun count(db: SupportSQLiteDatabase, sql: String): Int = db.query(sql).use { c ->

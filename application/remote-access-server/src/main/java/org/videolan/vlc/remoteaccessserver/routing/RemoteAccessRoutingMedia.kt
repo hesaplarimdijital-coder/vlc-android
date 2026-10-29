@@ -30,7 +30,6 @@ import io.ktor.server.routing.Route
 import kotlinx.coroutines.CoroutineScope
 
 fun Route.mediaRouting(appContext: Context, scope: CoroutineScope, settings: SharedPreferences) {
-    videoRouting(appContext, settings)
     audioRouting(appContext, settings)
     playlistRouting(appContext, settings)
     playbackRouting(appContext, scope, settings)

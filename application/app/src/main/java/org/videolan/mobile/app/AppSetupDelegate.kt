@@ -178,7 +178,7 @@ class AppSetupDelegate : AppDelegate,
             } catch (e: Exception) {
                 Log.w(TAG, "the scheduled recordings could not be looked over", e)
             }
-            // Nağmedar 1.0: the removed TV Lab's queued work, night alarm and queue state, once
+            // Nağmedar 1.0: the removed TV Lab's queued work, night alarm and queue state, and the permissions and files the dropped tables leave, once
             RetiredWork.onProcessStart(this@backgroundInit)
         }
         launch(Dispatchers.IO) innerLaunch@ {

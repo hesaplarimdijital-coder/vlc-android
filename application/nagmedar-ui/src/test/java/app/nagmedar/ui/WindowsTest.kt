@@ -26,8 +26,8 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * S-307: Ctrl+Shift+N opens another window of the library on the same screen, a task of its own
- * (beside the first in split screen); the system offers new windows too; the video player is a
- * window of its own; what one window changes in the settings, the others follow.
+ * (beside the first in split screen); the system offers new windows too; what one window changes
+ * in the settings, the others follow.
  */
 @RunWith(AndroidJUnit4::class)
 class WindowsTest {
@@ -69,8 +69,6 @@ class WindowsTest {
             .firstOrNull { it.getAttribute("android:name") == "android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI" }
         assertEquals("true", multiInstance?.getAttribute("android:value"))
         assertFalse("standard launch: many windows", shell.hasAttribute("android:launchMode"))
-        val player = activity(manifest, "org.videolan.vlc.gui.video.VideoPlayerActivity")!!
-        assertEquals("\${applicationId}.player", player.getAttribute("android:taskAffinity"))
     }
 
     @Test

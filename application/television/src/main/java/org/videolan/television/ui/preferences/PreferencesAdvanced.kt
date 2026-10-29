@@ -38,7 +38,6 @@ import android.widget.Toast
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
-import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
@@ -56,7 +55,6 @@ import org.videolan.resources.ROOM_DATABASE
 import org.videolan.resources.SCHEME_PACKAGE
 import org.videolan.resources.VLCInstance
 import org.videolan.tools.BitmapCache
-import org.videolan.tools.DAV1D_THREAD_NUMBER
 import org.videolan.tools.KEY_AOUT
 import org.videolan.tools.KEY_AUDIO_DIGITAL_OUTPUT
 import org.videolan.tools.KEY_AUDIO_LAST_PLAYLIST
@@ -67,14 +65,11 @@ import org.videolan.tools.KEY_CURRENT_AUDIO_RESUME_TITLE
 import org.videolan.tools.KEY_CURRENT_MEDIA
 import org.videolan.tools.KEY_CURRENT_MEDIA_RESUME
 import org.videolan.tools.KEY_CUSTOM_LIBVLC_OPTIONS
-import org.videolan.tools.KEY_DEBLOCKING
-import org.videolan.tools.KEY_ENABLE_FRAME_SKIP
 import org.videolan.tools.KEY_ENABLE_TIME_STRETCHING_AUDIO
 import org.videolan.tools.KEY_ENABLE_VERBOSE_MODE
 import org.videolan.tools.KEY_MEDIA_LAST_PLAYLIST
 import org.videolan.tools.KEY_MEDIA_LAST_PLAYLIST_RESUME
 import org.videolan.tools.KEY_NETWORK_CACHING_VALUE
-import org.videolan.tools.KEY_OPENGL
 import org.videolan.tools.KEY_PREFER_SMBV1
 import org.videolan.tools.KEY_SHOW_UPDATE
 import org.videolan.tools.Settings
@@ -93,7 +88,6 @@ import org.videolan.vlc.gui.dialogs.UPDATE_DATE
 import org.videolan.vlc.gui.dialogs.UPDATE_URL
 import org.videolan.vlc.gui.dialogs.UpdateDialog
 import org.videolan.vlc.gui.helpers.MedialibraryUtils
-import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.hf.StoragePermissionsDelegate.Companion.getWritePermission
 import org.videolan.vlc.gui.helpers.restartMediaPlayer
 import org.videolan.vlc.gui.preferences.search.PreferenceParser
@@ -101,7 +95,6 @@ import org.videolan.vlc.isVLC4
 import org.videolan.vlc.providers.PickerType
 import org.videolan.vlc.util.AutoUpdate
 import org.videolan.vlc.util.FileUtils
-import org.videolan.vlc.util.deleteAllWatchNext
 import java.io.File
 import java.io.IOException
 
@@ -241,7 +234,6 @@ class PreferencesAdvanced : BasePreferenceFragment(), SharedPreferences.OnShared
                             activity.stopService(Intent(activity, MediaParsingService::class.java))
                             withContext((Dispatchers.IO)) {
                                 medialibrary.clearDatabase(false)
-                                deleteAllWatchNext(activity)
                                 //delete thumbnails
                                 try {
                                     activity.getExternalFilesDir(null)?.let {
@@ -392,24 +384,7 @@ class PreferencesAdvanced : BasePreferenceFragment(), SharedPreferences.OnShared
                 }
             }
 
-            DAV1D_THREAD_NUMBER -> {
-                val threadNumber = sharedPreferences.getString(key, "") ?: ""
-                if (threadNumber != "" ) {
-                    if ((threadNumber.isDigitsOnly() && threadNumber.toInt() < 1) || !threadNumber.isDigitsOnly()) {
-                        UiTools.snacker(activity, R.string.dav1d_thread_number_invalid)
-                        sharedPreferences.putSingle(DAV1D_THREAD_NUMBER, "")
-                    }
-                } else {
-                    // In case of failure, after resetting the value to "" the SimpleSummaryProvider
-                    // doesn't re-update it's summary to the default, has to be forced
-                    val pref = findPreference<EditTextPreference>(key)
-                    if (pref?.callChangeListener("") == true) {
-                        pref.setText("");
-                    }
-                }
-            }
-
-            KEY_OPENGL, KEY_DEBLOCKING, KEY_ENABLE_FRAME_SKIP, KEY_ENABLE_TIME_STRETCHING_AUDIO, KEY_ENABLE_VERBOSE_MODE, KEY_PREFER_SMBV1 -> {
+            KEY_ENABLE_TIME_STRETCHING_AUDIO, KEY_ENABLE_VERBOSE_MODE, KEY_PREFER_SMBV1 -> {
                 launch { restartLibVLC() }
             }
         }
