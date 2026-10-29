@@ -2,13 +2,19 @@ package app.nagmedar.ui.perf
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SamplePlayerBar
+import app.nagmedar.ui.samplePlayerInfo
 import app.nagmedar.ui.playback.PlayPauseCircle
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.TimelineStyle
@@ -20,6 +26,7 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import androidx.compose.ui.unit.dp
+import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,19 +44,31 @@ class AccentProbeTest {
 
     private fun probe(name: String, content: @Composable () -> Unit) {
         val first = Color(0xFF2E7D32)
+        val second = Color(0xFFC0392B)
+        var seed by mutableStateOf<Color?>(first)
         var accent = Color.Unspecified
+        var outer = 0
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
-                ArtworkAccent(first) {
+                ArtworkAccent(seed) {
                     val colors = NagTheme.colors
-                    SideEffect { accent = colors.accent }
+                    SideEffect {
+                        outer++
+                        accent = colors.accent
+                    }
                     content()
                 }
             }
         }
-        val ok = runCatching { compose.waitUntil(3_000) { accent == AccentTones.fromSeed(first).base } }.isSuccess
+        val one = runCatching { compose.waitUntil(3_000) { accent == AccentTones.fromSeed(first).base } }.isSuccess
         val idle = runCatching { compose.waitForIdle() }.isSuccess
-        println("PROBE $name: waitUntil=$ok idle=$idle accent=${accent == AccentTones.fromSeed(first).base}")
+        val before = outer
+        seed = second
+        val two = runCatching { compose.waitUntil(3_000) { accent == AccentTones.fromSeed(second).base } }.isSuccess
+        val after = outer
+        val idle2 = runCatching { compose.waitForIdle() }.isSuccess
+        val three = accent == AccentTones.fromSeed(second).base
+        fail("PROBE $name: one=$one idle=$idle two=$two idle2=$idle2 afterIdle=$three outer=$before/$after/$outer")
     }
 
     @Test fun nothing() = probe("nothing") { Box(Modifier) }
@@ -59,6 +78,10 @@ class AccentProbeTest {
     @Test fun sidebar() = probe("sidebar") { SamplePlayerBar(NavKind.Sidebar) }
 
     @Test fun compact() = probe("compact") { SamplePlayerBar(NavKind.BottomBar) }
+
+    @Test fun compactPaused() = probe("compactPaused") { SamplePlayerBar(NavKind.BottomBar, samplePlayerInfo.copy(playing = false)) }
+
+    @Test fun boxWithConstraints() = probe("bwc") { BoxWithConstraints { Text("x") } }
 
     @Test fun play() = probe("play") { PlayPauseCircle(true, {}, 48.dp, 22.dp) }
 
