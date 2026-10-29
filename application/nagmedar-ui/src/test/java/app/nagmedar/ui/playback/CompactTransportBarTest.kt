@@ -131,17 +131,18 @@ class CompactTransportBarTest {
         compose.waitForIdle()
         assertEquals(0, skips)
         assertEquals(1, seeks.size)
-        // across the words of the card's first row, towards the start edge: the next track
-        compose.onNodeWithTag("mini-player").performTouchInput {
+        // across the words of the card's first row, towards the start edge: the next track (the card is one node with
+        // the expandable player that holds it: its own bounds from the unmerged tree)
+        compose.onNodeWithTag("mini-player", useUnmergedTree = true).performTouchInput {
             val y = 28.dp.toPx()
-            swipe(Offset(230.dp.toPx(), y), Offset(16.dp.toPx(), y), durationMillis = 400)
+            swipe(Offset(190.dp.toPx(), y), Offset(16.dp.toPx(), y), durationMillis = 400)
         }
         compose.waitForIdle()
         assertEquals(1, skips)
         // and back
-        compose.onNodeWithTag("mini-player").performTouchInput {
+        compose.onNodeWithTag("mini-player", useUnmergedTree = true).performTouchInput {
             val y = 28.dp.toPx()
-            swipe(Offset(16.dp.toPx(), y), Offset(230.dp.toPx(), y), durationMillis = 400)
+            swipe(Offset(16.dp.toPx(), y), Offset(190.dp.toPx(), y), durationMillis = 400)
         }
         compose.waitForIdle()
         assertEquals(1, backs)
@@ -151,9 +152,9 @@ class CompactTransportBarTest {
 
     @Test
     @Config(qualifiers = "tr-w384dp-h832dp-xxhdpi")
-    fun aTapOnTheWordsOrADragUpOpensTheFullPlayer() {
+    fun aDragUpOnTheCardOpensTheFullPlayer() {
         phone()
-        compose.onNodeWithTag("mini-player").performTouchInput {
+        compose.onNodeWithTag("mini-player", useUnmergedTree = true).performTouchInput {
             val y = 28.dp.toPx()
             swipe(Offset(120.dp.toPx(), y), Offset(120.dp.toPx(), y - 600.dp.toPx()), durationMillis = 600)
         }

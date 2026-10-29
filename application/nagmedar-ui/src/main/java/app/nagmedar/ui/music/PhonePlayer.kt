@@ -79,7 +79,6 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -627,13 +626,18 @@ private fun TitleRow(parts: PlayerParts) {
             Column {
                 Text(
                     title,
-                    style = if (parts.big) NagTheme.type.display else NagTheme.type.headline,
+                    style = if (parts.big) NagTheme.type.display.copy(fontSize = NagTheme.type.size(BIG_TITLE_SP), lineHeight = NagTheme.type.size(BIG_TITLE_SP * 1.25f)) else NagTheme.type.headline,
                     color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("phone-title"),
                 )
-                PlayingArtistAlbum(parts.info.copy(artist = artist, album = album), parts.links, if (parts.big) NagTheme.type.title.copy(fontWeight = FontWeight.Normal) else NagTheme.type.body)
+                val words = if (parts.big) {
+                    NagTheme.type.body.copy(fontSize = NagTheme.type.size(BIG_ARTIST_SP), lineHeight = NagTheme.type.size(BIG_ARTIST_SP * 1.35f))
+                } else {
+                    NagTheme.type.body
+                }
+                PlayingArtistAlbum(parts.info.copy(artist = artist, album = album), parts.links, words)
             }
         }
         parts.onAddToPlaylist?.let { add ->
@@ -768,6 +772,10 @@ private val CONTENT_MAX_WIDTH = 560.dp
 /** 1.0.2: a window at least this wide and high has the big player (a tablet's, a desktop's), its gutters this wide. */
 private val BIG_MIN = 600.dp
 private val BIG_GUTTER = 48.dp
+
+/** The big player's title and its artist and album, in sp (and the window's step): read from a few steps away. */
+private const val BIG_TITLE_SP = 32f
+private const val BIG_ARTIST_SP = 20f
 
 /** The big player upright: the artwork and the rows under it grow no larger than this. */
 private val BIG_ARTWORK_MAX = 680.dp

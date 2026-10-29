@@ -726,9 +726,10 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
             .size(size)
             .pressScale(state.pressed, 0.92f)
             .focusRing(state, CircleShape)
+            // the whole of it takes the press (a finger's target), the circle a little inside
+            .nagClickable(interaction, onClick, onClickLabel = label)
             .padding(2.dp)
             .drawBehind { drawRoundRect(fill.value, cornerRadius = CornerRadius(this.size.minDimension / 2f)) }
-            .nagClickable(interaction, onClick, onClickLabel = label)
             .testTag("play-pause"),
         contentAlignment = Alignment.Center,
     ) {
