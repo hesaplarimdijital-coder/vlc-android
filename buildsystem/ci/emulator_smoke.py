@@ -750,8 +750,10 @@ class Smoke:
         return ok
 
     def gone_words(self, nodes, where):
+        # the names of files and folders (Bu cihaz's rows and trail: Android's own "Movies") are the user's, not the app's words
+        names = [n.b for n in nodes if n.rid.endswith("device-table") or n.rid.endswith("device-trail")]
         for n in nodes:
-            if n.pkg != self.pkg:
+            if n.pkg != self.pkg or any(self.inside(n, b) for b in names):
                 continue
             for text in (n.text, n.desc):
                 m = GONE_RE.search(text)
@@ -1166,6 +1168,11 @@ class Smoke:
         """A file of the folder plays: the phone's mini player, or the app's media session playing."""
         if self.by_id(nodes, "mini-player"):
             return "mini player"
+        # a wide window's transport bar, titled with the file (its tag "tone", or its name)
+        bar = [n.b for n in self.by_id(nodes, "transport-bar")]
+        title = [n.text.strip() for n in self.app_nodes(nodes) if n.text.strip() in ("tone", "Smoke tone") and any(self.inside(n, b) for b in bar)]
+        if title:
+            return "transport bar: %s" % title[0]
         out = self.sh("dumpsys media_session", timeout=30)
         block = out[out.find("package=" + self.pkg):] if ("package=" + self.pkg) in out else ""
         if re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3)\b", block[:3000]):
