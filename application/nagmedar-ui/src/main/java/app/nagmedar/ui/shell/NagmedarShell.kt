@@ -197,8 +197,10 @@ fun NagmedarShell(
     // the phone's player covers the window: only its end, not every frame of the drag, re-measures the overlays
     val playerOverState = remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f } }
     val playerOver by playerOverState
+    // what is a tab in this window, known before any effect asks the navigator for a page (a launcher shortcut's);
+    // a plain field, so writing it here recomposes nothing
+    navigator.navKind = navKind
     SideEffect {
-        navigator.navKind = navKind
         scroll.enabled = navKind == NavKind.BottomBar
         scroll.hideOnScroll = showBottomNav
         scroll.tier = tier
