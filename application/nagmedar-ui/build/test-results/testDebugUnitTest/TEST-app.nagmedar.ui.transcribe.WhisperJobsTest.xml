@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcribe.WhisperJobsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:46.335Z" hostname="runnervmnwato" time="0.148">
+  <properties/>
+  <testcase name="aCheckpointIsReadForItsModelAndLanguageOnly" classname="app.nagmedar.ui.transcribe.WhisperJobsTest" time="0.028"/>
+  <testcase name="cancellingTakesTheRequestOutAndStopsItsJob" classname="app.nagmedar.ui.transcribe.WhisperJobsTest" time="0.028"/>
+  <testcase name="aJobIsStartedWithWhatItsRequestNeeds" classname="app.nagmedar.ui.transcribe.WhisperJobsTest" time="0.037"/>
+  <testcase name="noJobStartsWhileTheFirstWaitsForTheApp" classname="app.nagmedar.ui.transcribe.WhisperJobsTest" time="0.027"/>
+  <testcase name="cancellingOneThatWaitsLeavesTheJobUnderWay" classname="app.nagmedar.ui.transcribe.WhisperJobsTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

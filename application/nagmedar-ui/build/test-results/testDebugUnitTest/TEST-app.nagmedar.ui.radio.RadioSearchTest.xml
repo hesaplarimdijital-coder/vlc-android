@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioSearchTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:10.764Z" hostname="runnervmnwato" time="0.522">
+  <properties/>
+  <testcase name="aPageThatFailsKeepsTheStationsListed" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.011"/>
+  <testcase name="anotherPageFollowsTheSameSearchWithoutRepeats" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.01"/>
+  <testcase name="noStationsIsNotAFailure" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.009"/>
+  <testcase name="theListsForTheFiltersAreFetchedOnce" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.011"/>
+  <testcase name="whatTheUserDidWithAStationShowsInTheList" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.013"/>
+  <testcase name="onlyTheLatestSearchCounts" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.02"/>
+  <testcase name="replacingAStationChangesOnlyItsRow" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.009"/>
+  <testcase name="listsThatFailCanBeAskedForAgain" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.009"/>
+  <testcase name="theFirstSearchIsTheBestStationsAndIsMadeOnce" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.009"/>
+  <testcase name="typingSearchesWhenTheTypingPauses" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.393"/>
+  <testcase name="aFailureIsKeptUntilTryingAgainWorks" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.016"/>
+  <testcase name="whatIsTypedChosenAndOrderedIsWhatIsAsked" classname="app.nagmedar.ui.radio.RadioSearchTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

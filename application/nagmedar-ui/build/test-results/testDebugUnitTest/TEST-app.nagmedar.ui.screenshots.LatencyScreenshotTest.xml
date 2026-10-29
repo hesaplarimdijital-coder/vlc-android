@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.LatencyScreenshotTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:24.335Z" hostname="runnervmnwato" time="0.495">
+  <properties/>
+  <testcase name="notHeardPhoneEnglish" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.072"/>
+  <testcase name="resultPhone" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.078"/>
+  <testcase name="measuringDex" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.091"/>
+  <testcase name="settingsDex" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.084"/>
+  <testcase name="introTablet" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.097"/>
+  <testcase name="settingsPhoneEnglish" classname="app.nagmedar.ui.screenshots.LatencyScreenshotTest" time="0.073"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.NetworkScreenshotTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:27.843Z" hostname="runnervmnwato" time="1.403">
+  <properties/>
+  <testcase name="slowTablet" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.091"/>
+  <testcase name="serversPhone" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.119"/>
+  <testcase name="folderDexEnglish" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.106"/>
+  <testcase name="emptyPhone" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.088"/>
+  <testcase name="sharesOffDex" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.104"/>
+  <testcase name="addServerPhoneEnglish" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.102"/>
+  <testcase name="noLanPhone" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.083"/>
+  <testcase name="addServerDex" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.113"/>
+  <testcase name="folderPhone" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.084"/>
+  <testcase name="folderDex" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.096"/>
+  <testcase name="signInPhoneEnglish" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.083"/>
+  <testcase name="signInDex" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.096"/>
+  <testcase name="unreachableTablet" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.085"/>
+  <testcase name="searchingTablet" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.076"/>
+  <testcase name="questionTablet" classname="app.nagmedar.ui.screenshots.NetworkScreenshotTest" time="0.077"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

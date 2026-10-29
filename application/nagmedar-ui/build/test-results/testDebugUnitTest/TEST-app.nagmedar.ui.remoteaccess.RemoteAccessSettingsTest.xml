@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:14.096Z" hostname="runnervmnwato" time="0.167">
+  <properties/>
+  <testcase name="theSameStateAsksForNothing" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.018"/>
+  <testcase name="turningItOffStopsTheService" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.019"/>
+  <testcase name="theNetworkBrowserNeedsARestart" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.015"/>
+  <testcase name="aValueNoPartHasIsPassedOver" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.013"/>
+  <testcase name="theNotificationsDisableIsFollowed" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.015"/>
+  <testcase name="theLibraryPartsAreStoredAsTheClassicScreenStoresThem" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.013"/>
+  <testcase name="theSwitchesWriteTheirKeys" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.013"/>
+  <testcase name="thePagesAreAskedFor" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.018"/>
+  <testcase name="turningItOnStartsTheService" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.011"/>
+  <testcase name="theDefaultsAreTheClassicScreens" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.01"/>
+  <testcase name="theHowItWorksPagesComeOnlyTheFirstTime" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.012"/>
+  <testcase name="theSettingsOfferNoVideoPart" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSettingsTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.ChaptersTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:03.348Z" hostname="runnervmnwato" time="0.285">
+  <properties/>
+  <testcase name="theChapterPlayingIsTheLastThatStarted" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.033"/>
+  <testcase name="otherFramesBetweenTheChaptersAreSkipped" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.02"/>
+  <testcase name="chaptersNotForTheListAreLeftOut" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.015"/>
+  <testcase name="noTagNoChapters" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="aChaptersFileReadsInTheOrderOfItsTimes" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.011"/>
+  <testcase name="aBareArrayAndAByteOrderMarkRead" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="theTagsSizeIsToldFromItsHeader" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="withoutATableOfContentsTheTimesGiveTheOrder" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.011"/>
+  <testcase name="anAddressThatIsNotHttpIsNotKept" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="aChapterWithoutATitleHasAnEmptyOne" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.018"/>
+  <testcase name="twoChaptersAtOneTimeAreOne" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="theCacheFolderIsAskedForOnTheExtrasThreadNotWhenTheyAreMade" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.021"/>
+  <testcase name="v24ChaptersReadWithTheirTitlesAndTimes" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.013"/>
+  <testcase name="whatIsNoChaptersFileIsEmpty" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.01"/>
+  <testcase name="aTagCutShortKeepsTheChaptersBeforeTheCut" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.011"/>
+  <testcase name="v23ReadsToo_andTitlesInOtherEncodings" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.015"/>
+  <testcase name="nextGoesToTheNextAndStopsAtTheLast" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.013"/>
+  <testcase name="unsynchronisationIsUndone" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.017"/>
+  <testcase name="theTableOfContentsGivesTheOrder" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.012"/>
+  <testcase name="previousGoesToTheStartOfThisOneThenTheOneBefore" classname="app.nagmedar.ui.podcast.ChaptersTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

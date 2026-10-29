@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.convert.ConvertPlannerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:57:49.350Z" hostname="runnervmnwato" time="0.006">
+  <properties/>
+  <testcase name="foldersOfTheAlbumArtistAndTheAlbum" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.003"/>
+  <testcase name="theEnginesSettings" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.001"/>
+  <testcase name="thePresetsByTheirKeys" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <testcase name="namesAFileSystemTakes" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <testcase name="twoTracksOfOneNameAreToldApart" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <testcase name="aDiscNumberOnAnAlbumOfSeveral" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.001"/>
+  <testcase name="aCueTrackCarriesTheSheetsTags" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <testcase name="flatNamesWithTheTracksArtist" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <testcase name="aTrackWithoutATitleIsNamedByItsFile" classname="app.nagmedar.ui.convert.ConvertPlannerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

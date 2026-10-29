@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:58:21.764Z" hostname="runnervmnwato" time="1.161">
+  <properties/>
+  <testcase name="sourcesLight" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.111"/>
+  <testcase name="sources" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.091"/>
+  <testcase name="notificationsGranted" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.072"/>
+  <testcase name="access" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.091"/>
+  <testcase name="sourcesWithSectionFolders" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.1"/>
+  <testcase name="audio" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.077"/>
+  <testcase name="accessGranted" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.074"/>
+  <testcase name="accessRefused" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.079"/>
+  <testcase name="notifications" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.071"/>
+  <testcase name="accessGrantedLight" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.084"/>
+  <testcase name="dexWindow" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.094"/>
+  <testcase name="sourcesWithSectionFoldersEnglish" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.097"/>
+  <testcase name="sourcesEnglish" classname="app.nagmedar.ui.screenshots.FirstRunScreenshotTest" time="0.119"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
