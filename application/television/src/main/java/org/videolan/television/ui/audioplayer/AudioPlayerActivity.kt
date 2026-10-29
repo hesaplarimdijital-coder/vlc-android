@@ -40,7 +40,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
@@ -76,13 +75,10 @@ import org.videolan.vlc.gui.helpers.KeycodeListener
 import org.videolan.vlc.gui.helpers.MediaComparators
 import org.videolan.vlc.gui.helpers.PlayerKeyListenerDelegate
 import org.videolan.vlc.gui.helpers.PlayerOptionsDelegate
-import org.videolan.vlc.gui.helpers.PlayerOptionsDelegateCallback
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.showPinIfNeeded
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.media.PlaylistManager
-import org.videolan.vlc.media.PlaylistManager.Companion.hasMedia
 import org.videolan.vlc.util.getScreenWidth
 import org.videolan.vlc.viewmodels.BookmarkModel
 import org.videolan.vlc.viewmodels.PlayerState
@@ -90,7 +86,7 @@ import org.videolan.vlc.viewmodels.PlaylistModel
 import kotlin.math.absoluteValue
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-class AudioPlayerActivity : BaseTvActivity(),KeycodeListener, PlaybackService.Callback, PlayerOptionsDelegateCallback  {
+class AudioPlayerActivity : BaseTvActivity(),KeycodeListener, PlaybackService.Callback {
 
     private lateinit var binding: TvAudioPlayerBinding
     private lateinit var adapter: PlaylistAdapter
@@ -241,10 +237,6 @@ class AudioPlayerActivity : BaseTvActivity(),KeycodeListener, PlaybackService.Ca
 
         val mw = model.currentMediaWrapper
         lifecycleScope.launch {
-            if (model.switchToVideo()) {
-                finish()
-                return@launch
-            }
             binding.mediaTitle.text = state.title
             binding.mediaArtist.text = state.artist
             binding.buttonShuffle.setImageResource(if (shuffling)
@@ -478,20 +470,6 @@ class AudioPlayerActivity : BaseTvActivity(),KeycodeListener, PlaybackService.Ca
         when (event.type) {
             MediaPlayer.Event.Playing -> {
                 playbackStarted = true
-            }
-        }
-    }
-
-    override fun onResumeToVideoClick() {
-        model.currentMediaWrapper?.let {
-            if (PlaybackService.hasRenderer()) VideoPlayerActivity.startOpened(
-                this,
-                it.uri, model.currentMediaPosition
-            )
-            else if (hasMedia()) {
-                it.removeFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
-                lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { model.switchToVideo() }
-                finish()
             }
         }
     }

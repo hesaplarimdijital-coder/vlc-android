@@ -51,7 +51,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.MediaLibraryItem
@@ -63,7 +62,6 @@ import org.videolan.tools.CloseableUtils
 import org.videolan.tools.REMOTE_ACCESS_FILE_BROWSER_CONTENT
 import org.videolan.tools.REMOTE_ACCESS_LOGS
 import org.videolan.tools.REMOTE_ACCESS_NETWORK_BROWSER_CONTENT
-import org.videolan.tools.REMOTE_ACCESS_PLAYBACK_CONTROL
 import org.videolan.tools.livedata.LiveDataset
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.R
@@ -72,7 +70,6 @@ import org.videolan.vlc.providers.FileBrowserProvider
 import org.videolan.vlc.providers.StorageProvider
 import org.videolan.vlc.remoteaccessserver.RemoteAccessServer
 import org.videolan.vlc.remoteaccessserver.RemoteAccessSession.verifyLogin
-import org.videolan.vlc.repository.SlaveRepository
 import org.videolan.vlc.util.FileUtils
 import org.videolan.vlc.util.Permissions
 import org.videolan.vlc.util.isSchemeFile
@@ -117,54 +114,6 @@ fun Route.authenticatedFileRouting(appContext: Context, scope: CoroutineScope, s
             }
         }
         call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
-    }
-    // Upload a subtitle to the device
-    post("/upload-subtitle") {
-        verifyLogin(settings)
-        if (!settings.getBoolean(REMOTE_ACCESS_PLAYBACK_CONTROL, true)) {
-            call.respond(HttpStatusCode.Forbidden)
-            return@post
-        }
-        var uploaded = false
-        val multipartData = call.receiveMultipart()
-
-        multipartData.forEachPart { part ->
-            when (part) {
-                is PartData.FileItem -> {
-                    val uploadDir = File("${AndroidDevices.MediaFolders.EXTERNAL_PUBLIC_DOWNLOAD_DIRECTORY_URI.path}/subtitles")
-                    uploadDir.mkdirs()
-                    val fileName = part.originalFileName?.let { File(it).name } ?: "subtitle.srt"
-                    val file = File(uploadDir, fileName)
-                    if (!file.isSafelyWithin(uploadDir)) {
-                        call.respond(HttpStatusCode.Forbidden, "Invalid file path")
-                        return@forEachPart
-                    }
-                    part.streamProvider().use { input ->
-                        file.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                    uploaded = true
-
-                    val service = RemoteAccessServer.getInstance(appContext).service
-                    if (service?.hasMedia() == true) {
-                        val uri = Uri.fromFile(file)
-                        withContext(Dispatchers.Main) {
-                            service.addSubtitleTrack(uri, true)
-                            service.currentMediaWrapper?.let { media ->
-                                SlaveRepository.getInstance(appContext).saveSlave(media.location, IMedia.Slave.Type.Subtitle, 2, uri.toString())
-                            }
-                        }
-                    }
-                }
-                else -> {}
-            }
-        }
-        if (uploaded) {
-            call.respond(HttpStatusCode.OK)
-        } else {
-            call.respond(HttpStatusCode.BadRequest)
-        }
     }
     // Download a log file
     get("/download-logfile") {

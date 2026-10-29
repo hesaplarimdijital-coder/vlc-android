@@ -21,7 +21,6 @@
     <string name="play">Produciraj</string>
     <string name="play_from_start">Produciraj od početka</string>
     <string name="play_as_audio">Produciraj kao zvuk</string>
-    <string name="play_as_video">Produciraj kao video</string>
     <string name="play_all">Produciraj sve</string>
     <string name="append_all">Prisvoji sve</string>
     <string name="delete">Izbriši</string>
@@ -75,9 +74,6 @@
     <string name="cover_art">Omot</string>
     <string name="previous">Prethodno</string>
     <string name="stop">Zaustavi</string>
-    <string name="surface_best_fit">Najbolje uklapanje</string>
-    <string name="surface_fill">Popuni</string>
-    <string name="surface_original">Centar</string>
     <string name="unseekable_stream">Nepotraživo stujanje</string>
     <string name="refresh">Osvježi</string>
     <string name="track_audio">Trag zvuka</string>
@@ -86,9 +82,6 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Jezik: %1$s\n</string>
     <string name="volume">Glasnoća</string>
-    <string name="sound_on">Zvuk Uključen</string>
-    <string name="sound_off">Zvuk Isključen</string>
-    <string name="brightness">Svjetlost</string>
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 kanal\n</item>
         <item quantity="few">%1$d kanala\n</item>
@@ -102,7 +95,6 @@
     <string name="playback_speed">Brzina reproduciranja</string>
     <string name="sleep_title">Brojač za spavanje</string>
     <string name="jump_to_time">Skoči na Vrijeme</string>
-    <string name="subtitle_select">Izaberi datoteku podtitla</string>
     <string name="encountered_error_title">Greška reproduciranja</string>
     <string name="encountered_error_message">VLC je naišao na grešku sa ovim medijem.\nMolimo pokušajte osvježiti medijsku biblioteku.</string>
     <string name="invalid_location">Lokacija %1$s se ne može producirati.</string>
@@ -128,29 +120,16 @@
     <string name="add_custom_path">Dodaj prilagođen put</string>
     <string name="add_custom_path_description">Unesi dodatni prilagođen direktorij za skeniranje:</string>
     <string name="remove_custom_path">Ukloni prilagođen put</string>
-    <string name="hardware_acceleration">Hardversko Ubrzanje</string>
-    <string name="hardware_acceleration_disabled">Isključeno</string>
-    <string name="hardware_acceleration_decoding">Ubrzanje dekodiranja</string>
-    <string name="hardware_acceleration_full">Puno ubrzanje</string>
     <string name="automatic">Automatski</string>
     <string name="screen_orientation">Orijentacija video ekrana</string>
-    <string name="screen_orientation_sensor">Automatski (senzor)</string>
-    <string name="screen_orientation_portrait">Portret</string>
-    <string name="screen_orientation_landscape">Pejzaž</string>
-    <string name="subtitle_text_encoding">Kodiranje teksta podtitla</string>
     <string name="extra_prefs_category">Dodatne postavke</string>
 
     <string name="interface_prefs_screen">Interfejs</string>
     <string name="enable_clone_mode">Preferiraj kloniranje</string>
-    <string name="enable_brightness_gesture_summary">Kontrolišite svjetlost sa gesturom tokom video reprodukcije</string>
     <string name="enable_headset_detection">Pronađi slušalice</string>
     <string name="aout">Izlaz zvuka</string>
     <string name="performance_prefs_category">Performansa</string>
     <string name="deblocking">Postavke filtera za deblokiranje</string>
-    <string name="deblocking_always">Puno deblokiranje (najsporije)</string>
-    <string name="deblocking_nonref">Umjereno deblokiranje</string>
-    <string name="deblocking_nonkey">Nisko deblokiranje</string>
-    <string name="deblocking_all">Bez deblokiranja (najbrže)</string>
     <string name="enable_time_stretching_audio">Vremensko-proširavanje zvuka</string>
     <string name="advanced_prefs_category">Napredno</string>
     <string name="clear_media_db">Očisti medijsku bazu podataka</string>

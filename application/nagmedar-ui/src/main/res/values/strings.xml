@@ -454,7 +454,6 @@
     <string name="nag_prefs_not_set">Not set</string>
     <string name="nag_prefs_in_settings">In Settings › %1$s</string>
     <string name="nag_prefs_opens_page">Opens the %1$s page</string>
-    <string name="nag_prefs_speed">%1$s×</string>
     <string name="nag_prefs_turn_off">Turn off</string>
     <string name="nag_prefs_file_failed">The file could not be read.</string>
     <string name="nag_prefs_database_saved">The database was saved.</string>
@@ -640,7 +639,6 @@
     <string name="nag_about_no_text">Public domain: no licence text.</string>
     <string name="nag_about_full_license">The full licence</string>
     <string name="nag_about_copyright">Copyleft © 1996–2026 by VideoLAN and the VLC authors\nNağmedar changes © 2026 the Nağmedar contributors</string>
-    <string name="nag_license_bsd2">2-clause BSD</string>
     <string name="nag_license_bsd3">3-clause BSD</string>
     <string name="nag_license_gsm">GSM permissive</string>
     <string name="nag_license_old_mit">Old MIT</string>
@@ -690,9 +688,6 @@
     <string name="nag_pane_divider">Width of the details pane</string>
     <string name="nag_sidebar_divider">Width of the sidebar</string>
     <string name="nag_tech_title">Technical</string>
-    <string name="nag_tech_video">Video</string>
-    <string name="nag_tech_frame_rate">Frame rate</string>
-    <string name="nag_tech_range">HDR</string>
     <string name="nag_tech_audio">Audio %1$d</string>
     <string name="nag_tech_subtitles">Subtitles</string>
     <string name="nag_tech_bitrate">Bitrate</string>
@@ -760,19 +755,8 @@
     <string name="nag_player_repeat_one">Repeat this one</string>
 
     <!-- S-508: libVLC's audio output -->
-    <string name="nag_fx_auto">Auto</string>
     <string name="nag_fx_off">Off</string>
     <!-- S-508: the audio output -->
-    <string name="nag_out_stereo">Stereo PCM</string>
-    <string name="nag_out_multichannel">Multichannel PCM</string>
-    <string name="nag_out_passthrough">Bitstream (passthrough)</string>
-    <string name="nag_out_forced">Bitstream, forced codecs</string>
-    <string name="nag_out_sink_hdmi" translatable="false">HDMI</string>
-    <string name="nag_out_sink_usb" translatable="false">USB</string>
-    <string name="nag_out_sink_bluetooth" translatable="false">Bluetooth</string>
-    <string name="nag_out_sink_headphones">Headphones</string>
-    <string name="nag_out_sink_speaker">Speaker</string>
-    <string name="nag_out_sink_other">Other output</string>
     <string name="nag_panel_pending">The faded settings come with the next version of the playback engine.</string>
     <!-- VLC's equaliser presets, by VLC's names -->
     <string name="nag_eq_flat">Flat</string>
@@ -1360,7 +1344,6 @@
     <string name="nag_backup_part_smart_lists">Smart lists</string>
     <string name="nag_backup_part_stats">Ratings and play counts</string>
     <string name="nag_backup_part_lyrics">Your lyrics and delays</string>
-    <string name="nag_backup_part_file_settings">Per-file settings</string>
     <string name="nag_backup_part_covers">Covers you chose</string>
     <plurals name="nag_backup_settings_count">
         <item quantity="one">%d setting</item>
@@ -1373,10 +1356,6 @@
     <plurals name="nag_backup_lists_count">
         <item quantity="one">%d list</item>
         <item quantity="other">%d lists</item>
-    </plurals>
-    <plurals name="nag_backup_files_count">
-        <item quantity="one">%d file</item>
-        <item quantity="other">%d files</item>
     </plurals>
     <string name="nag_backup_done_title">Restored</string>
     <plurals name="nag_backup_missing">

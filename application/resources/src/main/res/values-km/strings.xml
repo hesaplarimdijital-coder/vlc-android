@@ -28,11 +28,6 @@
     <string name="Medialibrary_progress">ធ្វើបច្ចុប្បន្នភាព​វឌ្ឍនភាព​ការ​ស្វែងរក​បណ្ណាល័យ​មេឌា</string>
     <string name="play_from_start">ចាក់​ពី​ដើម</string>
     <string name="play_as_audio">ចាក់​ជា​អូឌីយ៉ូ</string>
-    <string name="play_as_video">ចាក់​ជា​វីដេអូ</string>
-    <string name="video_app_switch_title">របៀប​ផ្ទៃ​ខាងក្រោយ/PiP</string>
-    <string name="video_app_switch_summary">ជ្រើសលក្ខណៈរបស់ VLC នៅពេលប្ដូរទៅកម្មវិធីផ្សេងចេញពីកម្មវិធីចាក់វីដេអូត្រឡប់</string>
-    <string name="play_pip_title">ចាក់វីដេអូក្នុងរបៀបរូបភាពក្នុងរូបភាព</string>
-    <string name="play_as_audio_background">ចាក់វីដេអូក្នុងផ្ទៃខាងក្រោយ</string>
     <string name="insert_next">បញ្ចូលបន្ទាប់</string>
     <string name="play_all">ចាក់​ទាំងអស់</string>
     <string name="append_all">បន្ថែម​ទៅ​ចុង​ទាំងអស់</string>
@@ -96,10 +91,6 @@
     <string name="firstsong">បទដំបូងនៃបញ្ជីចាក់</string>
     <string name="lastsong">បទចុងក្រោយនៃបញ្ជីចាក់</string>
 
-    <string name="surface_best_fit">សម​បំផុត</string>
-    <string name="surface_fit_screen">សមទៅនឹងអេក្រង់</string>
-    <string name="surface_fill">បំពេញ</string>
-    <string name="surface_original">កណ្ដាល</string>
     <string name="unseekable_stream">ចរន្ត​ដែល​មិន​អាច​រក​បាន</string>
     <string name="refresh">ផ្ទុក​ឡើងវិញ</string>
     <string name="track_audio">បទ​អូឌីយ៉ូ</string>
@@ -110,14 +101,10 @@
     <string name="track_codec_info">កូដ: %1$s</string>
     <string name="track_language_info">ភាសា៖ %1$s\n</string>
     <string name="volume">កម្រិត​សំឡេង</string>
-    <string name="sound_on">បើកសម្លេង</string>
-    <string name="sound_off">បិទសម្លេង</string>
-    <string name="brightness">ពន្លឺ</string>
     <string name="advanced">ជម្រើសកម្រិតខ្ពស់</string>
     <string name="playback_speed">ល្បឿន​ចាក់​ឡើងវិញ</string>
     <string name="sleep_title">កម្មវិធី​កំណត់​ម៉ោង​ដេក</string>
     <string name="jump_to_time">លោត​ទៅ​ពេល</string>
-    <string name="subtitle_select">ជ្រើស​ឯកសារ​ចំណងជើង​រង</string>
     <string name="server_username_hint">ឈ្មោះប្រើ</string>
     <string name="server_port">ច្រក:</string>
     <string name="login">បញ្ចូល</string>
@@ -140,26 +127,13 @@
     <string name="add_custom_path">បន្ថែម​ផ្លូវ​ផ្ទាល់​ខ្លួន</string>
     <string name="add_custom_path_description">បញ្ចូល​ថត​ផ្ទាល់​ខ្លួន​​បន្ថែម ​ដើម្បី​វិភាគ​រក៖</string>
     <string name="remove_custom_path">លុប​ផ្លូវ​ផ្ទាល់​ខ្លួន</string>
-    <string name="hardware_acceleration">ការ​បង្កើន​ល្បឿន​ផ្នែក​រឹង</string>
-    <string name="hardware_acceleration_disabled">បាន​បិទ</string>
-    <string name="hardware_acceleration_decoding">បង្កើន​ល្បឿន​ការ​ដោះ​លេខ​កូដ</string>
-    <string name="hardware_acceleration_full">បង្កើន​ល្បឿន​ពេញ​លេញ</string>
     <string name="automatic">ស្វ័យប្រវត្តិ</string>
     <string name="screen_orientation">ទិស​អេក្រង់​វីដេអូ</string>
-    <string name="screen_orientation_sensor">​ស្វ័យប្រវត្តិ (ចាប់​សញ្ញា)</string>
-    <string name="screen_orientation_portrait">បញ្ឈរ</string>
-    <string name="screen_orientation_landscape">ផ្ដេក</string>
-    <string name="subtitle_text_encoding">ការ​ដាក់​លេខ​កូដ​អត្ថបទ​ចំណង​ជើង​រង</string>
     <string name="extra_prefs_category">ការ​កំណត់​បន្ថែម</string>
 
     <string name="interface_prefs_screen">ចំណុច​ប្រទាក់</string>
     <string name="enable_clone_mode">ក្លូន​ដែល​ពេញចិត្ត</string>
     <string name="video_prefs_category">វីដេអូ</string>
-    <string name="enable_brightness_gesture_summary">ពិនិត្យ​ពន្លឺ​ដោយ​កាយវិការ​អំឡុង​ពេល​ចាក់​វីដេអូ​ឡើងវិញ</string>
-    <string name="subtitles_size_small">តូច</string>
-    <string name="subtitles_size_normal">ធម្មតា</string>
-    <string name="subtitles_size_big">ធំ</string>
-    <string name="subtitles_size_huge">ទូលាយ</string>
     <string name="audio_prefs_category">សម្លេង</string>
     <string name="headset_prefs_category">កាស</string>
     <string name="enable_headset_detection">រក​កាស</string>
@@ -170,10 +144,6 @@
 
     <string name="performance_prefs_category">ការ​អនុវត្ត</string>
     <string name="deblocking">ការ​កំណត់​តម្រង​វីដេអូ</string>
-    <string name="deblocking_always">តម្រង​វីដេអូ​ទាំងស្រុង (យឺត​បំផុត)</string>
-    <string name="deblocking_nonref">តម្រង​វីដេអូ​ពាក់កណ្ដាល</string>
-    <string name="deblocking_nonkey">តម្រង​វីដេអូ​ទាប</string>
-    <string name="deblocking_all">គ្មាន​តម្រង​វីដេអូ (លឿន​បំផុត)</string>
     <string name="enable_time_stretching_audio">បើក​​អូឌីយ៉ូ​​ពេលវេលា</string>
     <string name="advanced_prefs_category">កម្រិត​ខ្ពស់</string>
     <string name="auto_rescan">ស្កេនដោយស្វ័យប្រវត្ត</string>

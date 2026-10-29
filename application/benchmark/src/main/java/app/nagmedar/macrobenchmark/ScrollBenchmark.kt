@@ -18,9 +18,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * S-1404: lists flung down and back up, their frames timed: Settings, the longest page, the
- * Films (a grid on a tablet, a table in DeX), which needs films on the device, and (S-803) the
- * Music's track table, which needs music. thresholds.json: nine frames in ten on time.
+ * S-1404: lists flung down and back up, their frames timed: Settings, the longest page, and
+ * (S-803) the Music's track table, which needs music on the device. thresholds.json: nine frames
+ * in ten on time.
  */
 @RunWith(AndroidJUnit4::class)
 class ScrollBenchmark {
@@ -33,9 +33,6 @@ class ScrollBenchmark {
 
     @Test
     fun settings() = scroll("settings") { device.findObject(By.res("settings")) }
-
-    @Test
-    fun films() = scroll("movies") { device.findObject(By.res("films"))?.findObject(By.scrollable(true)) }
 
     @Test
     fun music() = scroll("music") { device.findObject(By.res("music"))?.findObject(By.scrollable(true)) }
@@ -52,7 +49,7 @@ class ScrollBenchmark {
         },
     ) {
         val target = waitFor { list() }
-        assumeTrue("nothing to scroll on “$route”: the Films need films on the device, the Music music", target != null)
+        assumeTrue("nothing to scroll on “$route”: the Music needs music on the device", target != null)
         target!!.setGestureMargin(device.displayWidth / 5)
         repeat(3) { target.fling(Direction.DOWN) }
         repeat(3) { target.fling(Direction.UP) }

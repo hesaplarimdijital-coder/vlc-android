@@ -16,6 +16,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -57,11 +58,11 @@ class AboutScreenTest {
 
     @Test
     fun theListIsS005s() {
-        // 85, the Vulkan and SPIR-V headers whisper's GPU backend is built with (S-709) and Haze (Desktop Kit 1.0's glass)
-        assertEquals(88, libraries.size)
+        // 85, the Vulkan and SPIR-V headers whisper's GPU backend is built with (S-709) and Haze (Desktop Kit 1.0's glass);
+        // 1.0: without the subtitle translation's engine, tokenizer and models and the Dolby Vision parser
+        assertEquals(77, libraries.size)
         val byTitle = libraries.associateBy { it.title }
         // the lab's and the music engine's native additions are there, with their licences
-        assertEquals("mit", byTitle.getValue("dovi_tool").license?.id)
         assertEquals("apache2.0", byTitle.getValue("Haze").license?.id)
         assertEquals("lgpl2.1", byTitle.getValue("libusb").license?.id)
         assertEquals("mit", byTitle.getValue("whisper.cpp").license?.id)
@@ -73,11 +74,10 @@ class AboutScreenTest {
         // the remote access page's libraries (S-1304)
         assertEquals("mit", byTitle.getValue("Vue").license?.id)
         assertEquals("mit", byTitle.getValue("Bootstrap").license?.id)
-        // S-709's models and S-710's translation: its engine, its tokenizer and the models it downloads
+        // S-709's models
         assertEquals("mit", byTitle.getValue("Whisper models (OpenAI)").license?.id)
-        assertEquals("mit", byTitle.getValue("CTranslate2").license?.id)
-        assertEquals("apache2.0", byTitle.getValue("SentencePiece").license?.id)
-        assertEquals("ccby4", byTitle.getValue("OPUS-MT tc-big en-tr (translation model, downloaded on request)").license?.id)
+        // 1.0: what only the video features used is gone
+        listOf("dovi_tool", "CTranslate2", "SentencePiece", "spdlog").forEach { assertFalse(it, it in byTitle) }
         assertTrue(libraries.all { it.license != null })
     }
 

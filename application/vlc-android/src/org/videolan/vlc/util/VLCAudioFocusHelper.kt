@@ -83,7 +83,7 @@ class VLCAudioFocusHelper(private val service: PlaybackService) {
     @TargetApi(Build.VERSION_CODES.O)
     private fun requestAudioFocus() = if (AndroidUtil.isOOrLater) {
         val attributes = AudioAttributes.Builder()
-                .setContentType(if (service.isVideoPlaying) AudioAttributes.CONTENT_TYPE_MOVIE else AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build()
         audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setOnAudioFocusChangeListener(audioFocusListener)

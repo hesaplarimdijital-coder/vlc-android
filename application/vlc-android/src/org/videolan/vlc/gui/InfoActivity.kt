@@ -51,7 +51,6 @@ import org.videolan.vlc.gui.browser.PathAdapterListener
 import org.videolan.vlc.gui.helpers.AudioUtil
 import org.videolan.vlc.gui.helpers.FloatingActionButtonBehavior
 import org.videolan.vlc.gui.helpers.MedialibraryUtils
-import org.videolan.vlc.gui.video.MediaInfoAdapter
 import org.videolan.vlc.gui.view.VLCDividerItemDecoration
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.ThumbnailsProvider

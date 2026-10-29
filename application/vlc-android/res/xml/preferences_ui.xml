@@ -85,30 +85,6 @@
             android:title="@string/persistent_incognito_mode"/>
 
     <PreferenceCategory
-            android:title="@string/video"
-            android:key="ui_video_category">
-
-        <CheckBoxPreference
-                app:singleLineTitle="false"
-                android:defaultValue="true"
-                android:key="media_seen"
-                android:summary="@string/media_seen_summary"
-                android:title="@string/media_seen"/>
-        <CheckBoxPreference
-                app:singleLineTitle="false"
-                android:defaultValue="false"
-                android:key="playlist_mode_video"
-                android:summary="@string/force_play_all_summary"
-                android:title="@string/force_play_all_title"/>
-        <CheckBoxPreference
-                app:singleLineTitle="false"
-                android:defaultValue="true"
-                android:key="show_video_thumbnails"
-                android:summary="@string/show_video_thumbnails_summary"
-                android:title="@string/show_video_thumbnails"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
             android:title="@string/audio"
             android:key="ui_audio_category">
 

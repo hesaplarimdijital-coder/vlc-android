@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.icu.text.Transliterator
 import android.net.Uri
 import android.os.Build
@@ -28,7 +27,6 @@ import androidx.core.widget.TextViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -37,7 +35,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +51,6 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.interfaces.media.MediaWrapper.TYPE_ALL
 import org.videolan.medialibrary.interfaces.media.MediaWrapper.TYPE_VIDEO
 import org.videolan.medialibrary.interfaces.media.Playlist
-import org.videolan.medialibrary.interfaces.media.VideoGroup
 import org.videolan.medialibrary.media.MediaLibraryItem
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.util.getFromMl
@@ -163,8 +159,6 @@ fun FragmentActivity.share(medias: List<MediaWrapper>) = lifecycleScope.launch {
 fun MediaWrapper?.isMedia() = this != null && (type == MediaWrapper.TYPE_AUDIO || type == TYPE_VIDEO)
 fun MediaWrapper?.isBrowserMedia() = this != null && (isMedia() || type == MediaWrapper.TYPE_DIR || type == MediaWrapper.TYPE_PLAYLIST)
 fun MediaWrapper.trackNumberText() = if (trackNumber > 0) "$trackNumber." else ""
-
-fun Context.getAppSystemService(name: String) = applicationContext.getSystemService(name)!!
 
 fun Long.random() = (SecureRandom().nextFloat() * this).toLong()
 
@@ -316,11 +310,6 @@ fun String.slugify(replacement: String = "-"): String {
 const val presentReplacementMarker = "§*§"
 const val missingReplacementMarker = "*§*"
 
-fun MediaLibraryItem.getPresenceDescription() = when (this) {
-    is VideoGroup -> TextUtils.separatedString("${this.presentCount} §*§", "${this.mediaCount() - this.presentCount} *§*")
-    else -> ""
-}
-
 @BindingAdapter("app:presenceDescription", requireAll = false)
 fun presenceDescription(view: TextView, description: String?) {
     (view as AppCompatTextView).text = description?.getPresenceDescriptionSpan(view.context)
@@ -341,12 +330,6 @@ fun Array<out CharSequence?>.firstNotNullAsSpannable(): SpannableString? {
     return firstNotNullOfOrNull { it?.let(::SpannableString) }
 }
 
-fun Int.toPixel(): Int {
-    val metrics = Resources.getSystem().displayMetrics
-    val px = toFloat() * (metrics.densityDpi / 160f)
-    return px.roundToInt()
-}
-
 fun Activity.getScreenWidth() : Int {
     val dm = DisplayMetrics().also { windowManager.defaultDisplay.getMetrics(it) }
     return dm.widthPixels
@@ -356,13 +339,6 @@ fun Activity.getScreenHeight(): Int {
     val dm = DisplayMetrics().also { windowManager.defaultDisplay.getMetrics(it) }
     return dm.heightPixels
 }
-
-/**
- * Detect if the device has a notch.
- * @return true if the device has a notch
- * @throws NullPointerException if the window is not attached yet
- */
-fun Activity.hasNotch() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && window.decorView.rootWindowInsets.displayCutout != null
 
 @TargetApi(Build.VERSION_CODES.O)
 fun Context.getPendingIntent(iPlay: Intent): PendingIntent {
@@ -523,16 +499,6 @@ fun Fragment.showParentFolder(media: MediaWrapper) {
     intent.putExtra(KEY_JUMP_TO, media)
     intent.putExtra("fragment", SecondaryActivity.FILE_BROWSER)
     startActivity(intent)
-}
-
-/**
- * Finds the [ViewPager2] current fragment
- * @param fragmentManager: The used [FragmentManager]
- *
- * @return the current fragment if found
- */
-fun ViewPager2.findCurrentFragment(fragmentManager: FragmentManager): Fragment? {
-    return fragmentManager.findFragmentByTag("f$currentItem")
 }
 
 /**

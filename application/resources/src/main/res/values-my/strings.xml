@@ -30,11 +30,6 @@
     <string name="Medialibrary_progress">မီဒီယာတိုက် စီစစ်ခြင်း လုပ်ငန်း နောက်ဆုံးအခြေအနေ</string>
     <string name="play_from_start">အစ မှ ပြသရန်</string>
     <string name="play_as_audio">အသံ အနေဖြင့် ဖွင့်ရန်</string>
-    <string name="play_as_video">ဗီဒီယို အနေဖြင့် ပြသရန်</string>
-    <string name="video_app_switch_title">နောက်ကွယ်/ပုံတွင်းကပုံစနစ်</string>
-    <string name="video_app_switch_summary">ဗီဒီယို ပြသခြင်း ပြုလုပ်နေစဥ် အခြား အပလီကေးရှင်း သို့ သင် ပြောင်း လိုက်သောအခါ VLC ၏ အပြုအမူ ကို ရွေးချယ်ရန်</string>
-    <string name="play_pip_title">ရုပ်ပုံ−တွင်းမှ−ရုပ်ပုံ စနစ် ဖြင့် ဗီဒီယိုများ ပြသရန်</string>
-    <string name="play_as_audio_background">နောက်ကွယ် တွင်သာ ဗီဒီယိုများ ပြသရန်</string>
     <string name="insert_next">နောက် တွင် ထည့်ရန်</string>
     <string name="play_all">အားလုံး ဖွင့်ရန်</string>
     <string name="append_all">အားလုံး ဖြည့်စွက်ရန်</string>
@@ -112,19 +107,11 @@
     <string name="firstsong">ဖွင့်လှစ်စာရင်း ၏ ပထမဆုံး သီချင်း</string>
     <string name="lastsong">ဖွင့်လှစ်စာရင်း ၏ နောက်ဆုံး သီချင်း</string>
 
-    <string name="surface_best_fit">ကွက်တိအကျဆုံး</string>
-    <string name="surface_fit_screen">မျက်နှာပြင် အံကိုက်</string>
-    <string name="surface_fill">ဖြည့်</string>
-    <string name="surface_original">အလယ်</string>
     <string name="track_bitrate_info">Bitrate: %1$s/s\n</string>
     <string name="track_codec_info">Codec: %1$s\n</string>
     <string name="track_language_info">ဘာသာစကား: %1$s\n</string>
     <string name="volume">အသံပမာဏ</string>
-    <string name="sound_on">အသံ ဖွင့်</string>
-    <string name="sound_off">အသံ ပိတ်</string>
-    <string name="brightness">လင်းအား</string>
     <string name="advanced">အဆင့်မြင့် ရွေးစရာများ</string>
-    <string name="audio_boost_warning">100% အလွန်သို့ သွားရန် အပေါ်သို့ ထပ်မံဆွဲတင်ပါ</string>
 
     <string name="track_samplerate_info">Sample rate: %1$d Hz\n</string>
     <string name="track_resolution_info">ပုံရိပ်ပြတ်သားနှုန်း: %1$dx%2$d\n</string>
@@ -133,7 +120,6 @@
     <string name="playback_speed">ပြသခြင်း မြန်နှုန်း</string>
     <string name="sleep_title">အိပ်ချိန် အချိန်မှတ်</string>
     <string name="sleep_in">အကြာတွင် အိပ်ရန်</string>
-    <string name="subtitle_select">စာတမ်းထိုး ဖိုင် ရွေးချယ်ရန်</string>
     <string name="encountered_error_title">ပြသခြင်း အမှား</string>
     <string name="search">ရှာရန်</string>
 
@@ -141,24 +127,12 @@
     <string name="playback_history_title">ပြသ မှတ်တမ်း</string>
     <string name="seek">ရှာဖွေ</string>
     <string name="subtitles">စာတမ်းထိုးများ</string>
-    <string name="subtitles_prefs_category">စာတမ်းထိုးများ</string>
-    <string name="subtitles_size_title">စာတမ်းထိုး အရွယ်အစား</string>
-    <string name="subtitles_size_small">အသေး</string>
-    <string name="subtitles_size_normal">ပုံမှန်</string>
-    <string name="subtitles_size_big">အကြီး</string>
-    <string name="subtitles_size_huge">အလွန်ကြီး</string>
-    <string name="subtitles_color_title">စာတမ်းထိုး အရောင်</string>
-    <string name="subtitles_background_title">စာတမ်းထိုး နောက်ခံ</string>
-    <string name="subtitles_bold_title">စာတမ်းထိုး စာလုံးထူ</string>
-    <string name="subtitles_autoload_title">စာတမ်းထိုး အလိုလျှောက် လုပ်ရန်</string>
     <string name="audio_prefs_category">အသံ</string>
     <string name="list_title_ellipsize_default">မူလ</string>
     <string name="list_title_ellipsize_left">ဘယ်</string>
     <string name="list_title_ellipsize_right">ညာ</string>
     <string name="list_title_ellipsize_middle">အလယ်</string>
     <string name="list_title_ellipsize_marquee">စားတန်းပြေး</string>
-    <string name="audio_boost_title">အသံ−အားမြှင့်</string>
-    <string name="audio_boost_summary">အသံပမာဏ ကို 200% အထိ တိုးခွင့်ပြုသည်</string>
     <string name="network_browsing">အတွင်း ကွန်ယက်</string>
     <string name="file_size">ဖိုင် အရွယ်အစား</string>
 
@@ -174,12 +148,7 @@
     <string name="rename">အမည် ပြောင်းရန်</string>
     <string name="rename_media">%1$s ကို အမည်ပြောင်းရန်</string>
     <string name="manual_search">ကိုယ်တိုင် ရှာရန်</string>
-    <string name="subtitle_search_name_hint">အမည်</string>
-    <string name="subtitle_search_episode_hint">အပိုင်း</string>
-    <string name="subtitle_search_season_hint">အတွဲ</string>
     <string name="language_to_download">ဘာသာစကား</string>
-    <string name="delete_the_selected">ရွေးချယ်မှု ကိုဖျက်ရန်</string>
-    <string name="download_the_selected">ရွေးချယ်မှု ဒေါင်းလုပ်လုပ်ရန်</string>
     <string name="welcome_title">VLC မှ ကြိုဆိုပါသည်။</string>
     <string name="done">ပြီးပြီ</string>
     <string name="send">ပေးပို့</string>
@@ -193,19 +162,10 @@
     <string name="season_number">အတွဲ %s</string>
     <string name="abrepeat_add_first_marker">အစမှတ် သတ်မှတ်ပါ</string>
     <string name="abrepeat_add_second_marker">အဆုံးမှတ် သတ်မှတ်ပါ</string>
-    <string name="demux_bitrate">Demux bitrate</string>
-    <string name="input_bitrate">ထည့်သွင်း bitrate</string>
-    <string name="video_information">ဗီဒီယို အချက်အလက်</string>
 
     <string name="channels">ရုပ်သံလိုင်းများ</string>
     <string name="resolution">ပုံရိပ် ပြတ်သားနှုန်း</string>
-    <string name="resolution_value">%1$dx%2$d</string>
-    <string name="framerate">အကွက်ကြိမ်နှုန်း</string>
-    <string name="framerate_value">%1$.3f</string>
-    <string name="bitrate_value">%1$s/s</string>
     <string name="language">ဘာသာစကား</string>
-    <string name="track_samplerate">နှုန်း နမူနာ</string>
-    <string name="track_samplerate_value">%1$d Hz\n</string>
     <string name="bitrate">Bitrate</string>
     <string name="codec">Codec</string>
     <string name="text">စာသား</string>
@@ -213,12 +173,8 @@
     <string name="sortby_track">အပုဒ်</string>
     <string name="more">နောက်ထပ်</string>
     <string name="empty_directory">ဘာမျှမရှိ</string>
-    <string name="no_track">အပုဒ် မရှိ</string>
 
-    <string name="sub_result_by_name_season">အတွဲ %s</string>
-    <string name="sub_result_by_name_episode">အပိုင်း %s</string>
 
-    <string name="sub_result_by_file">သင်၏ ဖိုင်များ အတွက် ရလဒ်</string>
     <string name="donate">VLC ကို ကူညီရန်</string>
     <string name="tip_jar">VLC ကို ကူညီရန်</string>
     <string name="thank_you">ကျေးဇူးတင်ပါသည်</string>

@@ -32,8 +32,6 @@
     <string name="Medialibrary_progress">Ажурирања напретка при скенирању медијатеке</string>
     <string name="play_from_start">Пусти од почетка</string>
     <string name="play_as_audio">Пусти као звук</string>
-    <string name="play_as_video">Пусти као видео</string>
-    <string name="play_as_audio_background">Пушта видео у позадини</string>
     <string name="insert_next">Убаци следеће</string>
     <string name="play_all">Пусти све</string>
     <string name="append_all">Додај све</string>
@@ -128,10 +126,6 @@
     <string name="firstsong">Прва песма на листи</string>
     <string name="lastsong">Последња песма на листи</string>
 
-    <string name="surface_best_fit">Оптимално</string>
-    <string name="surface_fit_screen">Пун екран</string>
-    <string name="surface_fill">Попуњено</string>
-    <string name="surface_original">По центру</string>
     <string name="unseekable_stream">Ток који не може да се премота</string>
     <string name="refresh">Освежи</string>
     <string name="track_audio">Аудио-запис</string>
@@ -142,9 +136,6 @@
     <string name="track_codec_info">Кодек: %1$s\n</string>
     <string name="track_language_info">Језик: %1$s\n</string>
     <string name="volume">Јачина звука</string>
-    <string name="sound_on">Звук укључен</string>
-    <string name="sound_off">Звук искључен</string>
-    <string name="brightness">Осветљење</string>
     <string name="advanced">напредне опције</string>
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 канал\n</item>
@@ -159,7 +150,6 @@
     <string name="sleep_title">Аутом. гашење</string>
     <string name="sleep_in">Спавај за</string>
     <string name="jump_to_time">Пређи на време</string>
-    <string name="subtitle_select">Избор титла</string>
     <string name="server_add_title">Додај нови сервер у омиљене</string>
     <string name="server_domain_hint">Адреса сервера (домен или ИП)</string>
     <string name="server_folder_hint">Путања фасцикле (опционо)</string>
@@ -214,39 +204,24 @@
     <string name="add_custom_path">Додај прилагођену путању</string>
     <string name="add_custom_path_description">Додатна прилагођена фасцикла за скенирање:</string>
     <string name="remove_custom_path">Уклони прилагођену путању</string>
-    <string name="hardware_acceleration">Хардверско убрзање</string>
-    <string name="hardware_acceleration_disabled">Искључено</string>
-    <string name="hardware_acceleration_decoding">Убрзање декодирања</string>
-    <string name="hardware_acceleration_full">Пуно убрзање</string>
     <string name="dev_hardware_decoder">Напредни хардверски декодер</string>
     <string name="automatic">Аутоматско</string>
     <string name="screen_orientation">Усмерење екрана</string>
-    <string name="screen_orientation_sensor">Аутоматски (сензор)</string>
-    <string name="screen_orientation_portrait">Усправно</string>
-    <string name="screen_orientation_landscape">Положено</string>
     <string name="enable_black_theme">Црна тема</string>
-    <string name="subtitle_text_encoding">Енкодирање текстуалних титлова</string>
     <string name="daynight_title">Режим дан/ноћ</string>
     <string name="daynight_follow_system_title">Прати систем</string>
     <string name="extra_prefs_category">Додатне поставке</string>
 
     <string name="interface_prefs_screen">Сучеље</string>
-    <string name="interface_secondary_display_category_title">Други екран</string>
     <string name="enable_clone_mode">Клонирање</string>
     <string name="video_prefs_category">Видео</string>
-    <string name="video_min_group_length_title">Групиши по </string>
     <string name="video_min_group_length_disable">Не групиши</string>
     <string name="video_min_group_length_folder">Фасцикли</string>
     <string name="video_min_group_length_name">Називу</string>
-    <string name="enable_brightness_gesture_summary">Управљајте осветљењем покретима током репродукције</string>
     <string name="enable_headset_detection">Откриј слушалице</string>
     <string name="aout">Звучни излаз</string>
     <string name="performance_prefs_category">Перформансе</string>
     <string name="deblocking">Поставке филтера за деблокирање</string>
-    <string name="deblocking_always">Пуно деблокирање (најспорије)</string>
-    <string name="deblocking_nonref">Средње деблокирање</string>
-    <string name="deblocking_nonkey">Слабо деблокирање</string>
-    <string name="deblocking_all">Без деблокирања (најбрже)</string>
     <string name="enable_time_stretching_audio">Растезање времена звука</string>
     <string name="advanced_prefs_category">Напредно</string>
     <string name="clear_media_db">Очисти медијску базу</string>
@@ -287,7 +262,6 @@
     <string name="yes">Да</string>
 
     <string name="next">Следеће</string>
-    <string name="videos_folders_title">Видео-снимци по фасциклама</string>
     <string name="welcome_title">Добро дошли у VLC!</string>
     <string name="welcome_subtitle">Бесплатан медијски плејер отвореног кода</string>
     <string name="permission_media">VLC-у је потребна дозвола за приступ медијским датотекама на вашем уређају</string>

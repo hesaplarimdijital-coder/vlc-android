@@ -776,17 +776,12 @@ class RemoteAccessServer(private val context: Context) : PlaybackService.Callbac
                 withContext(Dispatchers.Main) {
                     sleepTimer = playerSleepTime.value?.time?.time ?: 0L
                 }
-                val isVideoPlaying = service.playlistManager.player.isVideoPlaying()
                 val waitForMediaEnd = service.waitForMediaEnd
                 val resetOnInteraction = service.resetOnInteraction
-                val audioTracks = if (isVideoPlaying) service.audioTracks?.map { WSTrack(it.getId(), it.getName()) } ?: listOf() else listOf()
-                val currentAudioTrack = if (isVideoPlaying) service.audioTrack else "-1"
-                val subtitleTracks = if (isVideoPlaying) service.spuTracks?.map { WSTrack(it.getId(), it.getName()) } ?: listOf() else listOf()
-                val currentSubtitleTrack = if (isVideoPlaying) service.spuTrack else "-1"
+                // Nağmedar 1.0 plays sound only: the web page never shows a video's tracks or its remote
                 val nowPlaying = NowPlaying(media.title ?: "", media.artistName
-                        ?: "", service.isPlaying, isVideoPlaying, service.getTime(), service.length, media.id, media.artworkURL
-                        ?: "", media.uri.toString(), getVolume(), speed, sleepTimer, waitForMediaEnd, resetOnInteraction, service.isShuffling, service.repeatType, bookmarks = bookmarks.map { WSBookmark(it.id, it.title, it.time) }, chapters = chapters.map { WSChapter(it.name, it.duration) },
-                        audioTracks = audioTracks, currentAudioTrack = currentAudioTrack, subtitleTracks = subtitleTracks, currentSubtitleTrack = currentSubtitleTrack)
+                        ?: "", service.isPlaying, false, service.getTime(), service.length, media.id, media.artworkURL
+                        ?: "", media.uri.toString(), getVolume(), speed, sleepTimer, waitForMediaEnd, resetOnInteraction, service.isShuffling, service.repeatType, bookmarks = bookmarks.map { WSBookmark(it.id, it.title, it.time) }, chapters = chapters.map { WSChapter(it.name, it.duration) })
                 return nowPlaying
 
             }
@@ -817,17 +812,12 @@ class RemoteAccessServer(private val context: Context) : PlaybackService.Callbac
      *
      * @return an [Int] describing the volume
      */
-    private fun getVolume(): Int = when {
-        service?.isVideoPlaying == true && service!!.volume > 100 -> service!!.volume
-        else -> {
-            (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
-                val vol = it.getStreamVolume(AudioManager.STREAM_MUSIC)
-                val max = it.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                (vol.toFloat() / max * 100).toInt()
-            }
-                    ?: 0
-        }
-    }
+    private fun getVolume(): Int =
+        (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
+            val vol = it.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val max = it.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            (vol.toFloat() / max * 100).toInt()
+        } ?: 0
 
     /**
      * Checks if a given port is the HTTPS port
@@ -1055,7 +1045,6 @@ class RemoteAccessServer(private val context: Context) : PlaybackService.Callbac
     data class SearchResults(val albums: List<PlayQueueItem>, val artists: List<PlayQueueItem>, val genres: List<PlayQueueItem>, val playlists: List<PlayQueueItem>, val videos: List<PlayQueueItem>, val tracks: List<PlayQueueItem>)
     data class BreadcrumbItem(val title: String, val path: String)
     data class BrowsingResult(val content: List<PlayQueueItem>, val breadcrumb: List<BreadcrumbItem>)
-    data class VideoListResult(val content: List<PlayQueueItem>, val item: String)
     data class ArtistResult(val albums: List<PlayQueueItem>, val tracks: List<PlayQueueItem>, val name: String)
     data class AlbumResult(val tracks: List<PlayQueueItem>, val name: String)
     data class PlaylistResult(val tracks: List<PlayQueueItem>, val name: String)

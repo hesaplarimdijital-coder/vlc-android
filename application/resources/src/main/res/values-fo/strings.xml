@@ -20,7 +20,6 @@
     <string name="play">Spæl</string>
     <string name="play_from_start">Spæl frá byrjan</string>
     <string name="play_as_audio">Spæl sum ljóð</string>
-    <string name="play_as_video">Spæl sum video</string>
     <string name="play_all">Spæl alt</string>
     <string name="append_all">Ískoyt alt</string>
     <string name="delete">Strika</string>
@@ -70,9 +69,6 @@
     <string name="cover_art">Húsasnið</string>
     <string name="previous">Undanfarna</string>
     <string name="stop">Steðga</string>
-    <string name="surface_best_fit">Hóskar best</string>
-    <string name="surface_fill">Passa til</string>
-    <string name="surface_original">Miðja</string>
     <string name="unseekable_stream">Finst ikki at stroyma</string>
     <string name="refresh">Endurskapa</string>
     <string name="track_audio">Ljóðspor</string>
@@ -81,9 +77,6 @@
     <string name="track_codec_info">Codec: %1$s\n</string>
     <string name="track_language_info">Mál: %1$s\n</string>
     <string name="volume">Ljóðstyrki</string>
-    <string name="sound_on">Ljóð frá</string>
-    <string name="sound_off">Ljóð fyri</string>
-    <string name="brightness">Ljósstyrki</string>
     <plurals name="track_channels_info_quantity">
         <item quantity="one">1 rás\n</item>
         <item quantity="other">%1$d ræsir\n</item>
@@ -96,7 +89,6 @@
     <string name="playback_speed">Avspælingarferð</string>
     <string name="sleep_title">Svøvnsur</string>
     <string name="jump_to_time">Hopp til tíð</string>
-    <string name="subtitle_select">Vel undirtekstafílu</string>
     <string name="encountered_error_title">Avspælingarvilla</string>
     <string name="encountered_error_message">Ein villa er íkomin, tá ið VLC skuldi spæla henda miðil.\nRoyn og endurbyrja miðlasavnið.</string>
     <string name="invalid_location">Keldan %1$s kann ikki spælast.</string>
@@ -122,29 +114,16 @@
     <string name="add_custom_path">Legg sjálvvalda rás afturat</string>
     <string name="add_custom_path_description">Skriva inn egnar fíluskráir at lesa:</string>
     <string name="remove_custom_path">Strika egnar ræsir</string>
-    <string name="hardware_acceleration">Tólbúnaðakselleratión</string>
-    <string name="hardware_acceleration_disabled">Óvirkjað</string>
-    <string name="hardware_acceleration_decoding">Avkotar akselleratión</string>
-    <string name="hardware_acceleration_full">Full akselleratión</string>
     <string name="automatic">Sjálvvirkandi</string>
     <string name="screen_orientation">Skíggjastøða</string>
-    <string name="screen_orientation_sensor">Sjálvirkandi (varnari)</string>
-    <string name="screen_orientation_portrait">Steyrrætt</string>
-    <string name="screen_orientation_landscape">Loddrætt</string>
-    <string name="subtitle_text_encoding">Kota undirtekstir inn</string>
     <string name="extra_prefs_category">Eyka stillingar</string>
 
     <string name="interface_prefs_screen">Takførisflati</string>
     <string name="enable_clone_mode">Vel hels kloning</string>
-    <string name="enable_brightness_gesture_summary">Stýr ljósstyrki við keipum, tá ið sjónbond verða spæld.</string>
     <string name="enable_headset_detection">Finn høvuðsett</string>
     <string name="aout">Ljóðúttak</string>
     <string name="performance_prefs_category">Avrik</string>
     <string name="deblocking">Stillingar til loysingarfiltur</string>
-    <string name="deblocking_always">Full loysing (seinast)</string>
-    <string name="deblocking_nonref">Miðal loysing</string>
-    <string name="deblocking_nonkey">Lág loysing</string>
-    <string name="deblocking_all">Eingin loysing (skjótast)</string>
     <string name="enable_time_stretching_audio">Tíðarfevnandi ljóð</string>
     <string name="advanced_prefs_category">Víðkað</string>
     <string name="clear_media_db">Rudda miðladátabasu</string>

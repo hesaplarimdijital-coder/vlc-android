@@ -33,7 +33,6 @@ import org.videolan.resources.util.parcelableList
 import org.videolan.vlc.R
 import org.videolan.vlc.gui.dialogs.DeviceDialog
 import org.videolan.vlc.gui.dialogs.NetworkServerDialog
-import org.videolan.vlc.media.MediaUtils
 import org.videolan.vlc.util.showVlcDialog
 
 class DialogActivity : BaseActivity() {
@@ -50,7 +49,6 @@ class DialogActivity : BaseActivity() {
         }
         when (key) {
             KEY_SERVER -> setupServerDialog()
-            KEY_SUBS_DL -> setupSubsDialog()
             KEY_DEVICE -> setupDeviceDialog()
             KEY_DIALOG -> {
                 dialog?.run {
@@ -80,14 +78,6 @@ class DialogActivity : BaseActivity() {
         networkServerDialog.show(supportFragmentManager, "fragment_edit_network")
     }
 
-    private fun setupSubsDialog() {
-        val medialist = intent.parcelable<MediaWrapper>(EXTRA_MEDIA)
-        if (medialist != null)
-            MediaUtils.getSubs(this, medialist)
-        else
-            finish()
-    }
-
     override fun finish() {
         loginDialogShown.postValue(false)
         if (preventFinish) {
@@ -106,7 +96,6 @@ class DialogActivity : BaseActivity() {
         var dialog : Dialog? = null
         var loginDialogShown = MutableLiveData(false)
         const val KEY_SERVER = "serverDialog"
-        const val KEY_SUBS_DL = "subsdlDialog"
         const val KEY_DEVICE = "deviceDialog"
         const val KEY_DIALOG = "vlcDialog"
 

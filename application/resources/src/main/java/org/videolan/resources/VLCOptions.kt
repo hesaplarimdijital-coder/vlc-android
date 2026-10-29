@@ -22,15 +22,12 @@ package org.videolan.resources
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.util.AndroidUtil
-import org.videolan.libvlc.util.VLCUtil
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.KEY_AOUT
 import org.videolan.tools.KEY_AUDIO_DIGITAL_OUTPUT
@@ -43,32 +40,10 @@ import org.videolan.tools.KEY_CASTING_AUDIO_ONLY
 import org.videolan.tools.KEY_CASTING_PASSTHROUGH
 import org.videolan.tools.KEY_CASTING_QUALITY
 import org.videolan.tools.KEY_CUSTOM_LIBVLC_OPTIONS
-import org.videolan.tools.KEY_DEBLOCKING
-import org.videolan.tools.KEY_ENABLE_FRAME_SKIP
 import org.videolan.tools.KEY_ENABLE_TIME_STRETCHING_AUDIO
 import org.videolan.tools.KEY_ENABLE_VERBOSE_MODE
-import org.videolan.tools.KEY_HARDWARE_ACCELERATION
 import org.videolan.tools.KEY_NETWORK_CACHING_VALUE
-import org.videolan.tools.KEY_OPENGL
-import org.videolan.tools.KEY_PREFERRED_RESOLUTION
 import org.videolan.tools.KEY_PREFER_SMBV1
-import org.videolan.tools.KEY_SUBTITLES_AUTOLOAD
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR
-import org.videolan.tools.KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_BOLD
-import org.videolan.tools.KEY_SUBTITLES_COLOR
-import org.videolan.tools.KEY_SUBTITLES_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_FONT
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_OUTLINE_SIZE
-import org.videolan.tools.KEY_SUBTITLES_SHADOW
-import org.videolan.tools.KEY_SUBTITLES_SHADOW_COLOR
-import org.videolan.tools.KEY_SUBTITLES_SHADOW_COLOR_OPACITY
-import org.videolan.tools.KEY_SUBTITLES_SIZE
-import org.videolan.tools.KEY_SUBTITLE_TEXT_ENCODING
 import org.videolan.tools.Preferences
 import org.videolan.tools.Settings
 import org.videolan.tools.putSingle
@@ -83,11 +58,6 @@ object VLCOptions {
     private const val AOUT_AAUDIO = 0
     private const val AOUT_AUDIOTRACK = 1
     private const val AOUT_OPENSLES = 2
-
-    private const val HW_ACCELERATION_AUTOMATIC = -1
-    private const val HW_ACCELERATION_DISABLED = 0
-    private const val HW_ACCELERATION_DECODING = 1
-    private const val HW_ACCELERATION_FULL = 2
 
     var audiotrackSessionId = 0
         private set
@@ -107,68 +77,15 @@ object VLCOptions {
 
             val timeStrechingDefault = context.resources.getBoolean(R.bool.time_stretching_default)
             val timeStreching = pref.getBoolean(KEY_ENABLE_TIME_STRETCHING_AUDIO, timeStrechingDefault)
-            val subtitlesEncoding = pref.getString(KEY_SUBTITLE_TEXT_ENCODING, "") ?: ""
-            val frameSkip = pref.getBoolean(KEY_ENABLE_FRAME_SKIP, false)
             val verboseMode = pref.getBoolean(KEY_ENABLE_VERBOSE_MODE, true)
             val castingAudioOnly = pref.getBoolean(KEY_CASTING_AUDIO_ONLY, false)
-
-            var deblocking = -1
-            try {
-                deblocking = getDeblocking(Integer.parseInt(pref.getString(KEY_DEBLOCKING, "-1")!!))
-            } catch (ignored: NumberFormatException) {
-            }
-
             val networkCaching = pref.getInt(KEY_NETWORK_CACHING_VALUE, 0).coerceIn(0, 60000)
-            val freetypeRelFontsize = pref.getString(KEY_SUBTITLES_SIZE, "16")
-            val freetypeBold = pref.getBoolean(KEY_SUBTITLES_BOLD, false)
 
-            val freetypeColor = try {
-                Integer.decode(String.format("0x%06X", (0xFFFFFF and pref.getInt(KEY_SUBTITLES_COLOR, 16777215))))
-            } catch (e: ClassCastException) {
-                Log.w(TAG, "Forced migration of subtitles color")
-                //Migration failed somehow. Migrating here
-                var color = 16777215
-                pref.getString(KEY_SUBTITLES_COLOR, "16777215")?.let {oldSetting ->
-                    try {
-                        val oldColor = oldSetting.toInt()
-                        val newColor = Color.argb(255, Color.red(oldColor), Color.green(oldColor), Color.blue(oldColor))
-                        pref.putSingle(KEY_SUBTITLES_COLOR, newColor)
-                        color = newColor
-                    } catch (e: Exception) {
-                        pref.edit().remove(KEY_SUBTITLES_COLOR).apply()
-                    }
-                }
-
-                color
-            }
-            val freetypeColorOpacity = pref.getInt(KEY_SUBTITLES_COLOR_OPACITY, 255)
-
-            val freetypeBackgroundColor = Integer.decode(String.format("0x%06X", (0xFFFFFF and pref.getInt(KEY_SUBTITLES_BACKGROUND_COLOR, 16777215))))
-            val freetypeBackgroundColorOpacity = pref.getInt(KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY, 255)
-            val freetypeBackgroundEnabled = pref.getBoolean(KEY_SUBTITLES_BACKGROUND, false)
-
-            val freetypeOutlineEnabled = pref.getBoolean(KEY_SUBTITLES_OUTLINE, true)
-            val freetypeOutlineSize = pref.getString(KEY_SUBTITLES_OUTLINE_SIZE, "4")
-            val freetypeOutlineColor = Integer.decode(String.format("0x%06X", (0xFFFFFF and pref.getInt(KEY_SUBTITLES_OUTLINE_COLOR, 0))))
-            val freetypeOutlineOpacity = pref.getInt(KEY_SUBTITLES_OUTLINE_COLOR_OPACITY, 255)
-
-
-            val freetypeShadowEnabled = pref.getBoolean(KEY_SUBTITLES_SHADOW, true)
-            val freetypeShadowColor = Integer.decode(String.format("0x%06X", (0xFFFFFF and pref.getInt(KEY_SUBTITLES_SHADOW_COLOR, ContextCompat.getColor(context, R.color.black)))))
-            val freetypeShadowOpacity = pref.getInt(KEY_SUBTITLES_SHADOW_COLOR_OPACITY, 128)
-
-
-            val opengl = Integer.parseInt(pref.getString(KEY_OPENGL, "-1")!!)
+            // Nağmedar 1.0 plays sound only: libVLC never decodes nor shows a picture (a film or a
+            // video podcast plays as audio), nor its subtitles
+            options.add("--no-video")
             if (castingAudioOnly) options.add("--no-sout-chromecast-video")
             options.add(if (timeStreching) "--audio-time-stretch" else "--no-audio-time-stretch")
-            options.add("--avcodec-skiploopfilter")
-            options.add("" + deblocking)
-            options.add("--avcodec-skip-frame")
-            options.add(if (frameSkip) "2" else "0")
-            options.add("--avcodec-skip-idct")
-            options.add(if (frameSkip) "2" else "0")
-            options.add("--subsdec-encoding")
-            options.add(subtitlesEncoding)
             options.add("--stats")
             if (networkCaching > 0) options.add("--network-caching=$networkCaching")
             options.add("--audio-resampler")
@@ -177,32 +94,6 @@ object VLCOptions {
             options.add("--soxr-resampler-quality=3")
             options.add("--audiotrack-session-id=$audiotrackSessionId")
 
-            if (isVLC4()) options.add("--sub-text-scale=" + (1600 / freetypeRelFontsize!!.toFloat()).toString()) else options.add("--freetype-rel-fontsize=" + freetypeRelFontsize!!)
-            if (freetypeBold) options.add("--freetype-bold")
-            // Nağmedar (S-705): a system font family other than the default one
-            pref.getString(KEY_SUBTITLES_FONT, null)?.takeIf { it.isNotBlank() }?.let { options.add("--freetype-font=$it") }
-            options.add("--freetype-color=$freetypeColor")
-            options.add("--freetype-opacity=$freetypeColorOpacity")
-            if (freetypeBackgroundEnabled) {
-                options.add("--freetype-background-color=$freetypeBackgroundColor")
-                options.add("--freetype-background-opacity=$freetypeBackgroundColorOpacity")
-            } else options.add("--freetype-background-opacity=0")
-
-            if (freetypeShadowEnabled) {
-                options.add("--freetype-shadow-color=$freetypeShadowColor")
-                options.add("--freetype-shadow-opacity=$freetypeShadowOpacity")
-            } else options.add("--freetype-shadow-opacity=0")
-
-            if (freetypeOutlineEnabled) {
-                options.add("--freetype-outline-thickness=$freetypeOutlineSize")
-                    options.add("--freetype-outline-color=$freetypeOutlineColor")
-                    options.add("--freetype-outline-opacity=$freetypeOutlineOpacity")
-            } else options.add("--freetype-outline-opacity=0")
-
-
-            // Nağmedar (S-503 … S-506): the video output, and what it and the subtitles start with
-            NagmedarVlcOptions.vout(opengl, pref)?.let { options.add(it) }
-            options.addAll(NagmedarVlcOptions.options(pref))
             options.add("--keystore")
             options.add(if (AndroidUtil.isMarshMallowOrLater) "file_crypt,none" else "file_plaintext,none")
             options.add("--keystore-file")
@@ -245,7 +136,6 @@ object VLCOptions {
             if (soundFontFile.exists()) {
                 options.add("--soundfont=${soundFontFile.path}")
             }
-            options.add("--preferred-resolution=${pref.getString(KEY_PREFERRED_RESOLUTION, "-1")!!}")
             if (BuildConfig.DEBUG) Log.d(this::class.java.simpleName, "VLC Options: ${options.joinToString(" ")}")
             return options
         }
@@ -270,61 +160,11 @@ object VLCOptions {
         return if (aout == AOUT_OPENSLES) "opensles" else if (aout == AOUT_AUDIOTRACK) "audiotrack" else null /* aaudio is the default */
     }
 
-    private fun getDeblocking(deblocking: Int): Int {
-        var ret = deblocking
-        if (deblocking < 0) {
-            /**
-             * Set some reasonable deblocking defaults:
-             *
-             * Skip all (4) for armv6 and MIPS by default
-             * Skip non-ref (1) for all armv7 more than 1.2 Ghz and more than 2 cores
-             * Skip non-key (3) for all devices that don't meet anything above
-             */
-            val m = VLCUtil.getMachineSpecs() ?: return ret
-            if (m.hasArmV6 && !m.hasArmV7 || m.hasMips)
-                ret = 4
-            else if (m.frequency >= 1200 && m.processors > 2)
-                ret = 1
-            else if (m.bogoMIPS >= 1200 && m.processors > 2) {
-                ret = 1
-                Log.d(TAG, "Used bogoMIPS due to lack of frequency info")
-            } else
-                ret = 3
-        } else if (deblocking > 4) { // sanity check
-            ret = 3
-        }
-        return ret
-    }
-
-    /** [turned]: Nağmedar, the film's picture is stored turned ([NagmedarVlcOptions.mediaOptions]). */
-    fun setMediaOptions(media: IMedia, context: Context, flags: Int, hasRenderer: Boolean, turned: Boolean = false) {
-        val noHardwareAcceleration = flags and MediaWrapper.MEDIA_NO_HWACCEL != 0
-        val noVideo = flags and MediaWrapper.MEDIA_VIDEO == 0
+    fun setMediaOptions(media: IMedia, context: Context, flags: Int, hasRenderer: Boolean) {
         val paused = flags and MediaWrapper.MEDIA_PAUSED != 0
-        var hardwareAcceleration = HW_ACCELERATION_DISABLED
         val prefs = Settings.getInstance(context)
 
-        if (!noHardwareAcceleration) {
-            try {
-                hardwareAcceleration = Integer.parseInt(prefs.getString(KEY_HARDWARE_ACCELERATION, "$HW_ACCELERATION_AUTOMATIC")!!)
-            } catch (ignored: NumberFormatException) {}
-
-        }
-        if (hardwareAcceleration == HW_ACCELERATION_DISABLED)
-            media.setHWDecoderEnabled(false, false)
-        else if (hardwareAcceleration == HW_ACCELERATION_FULL || hardwareAcceleration == HW_ACCELERATION_DECODING) {
-            media.setHWDecoderEnabled(true, true)
-            if (hardwareAcceleration == HW_ACCELERATION_DECODING) {
-                media.addOption(":no-mediacodec-dr")
-                media.addOption(":no-omxil-dr")
-            }
-        } /* else automatic: use default options */
-
-        // Nağmedar (S-610): the session's video effects that need the pictures in memory, and a picture stored turned
-        if (!noHardwareAcceleration && hardwareAcceleration != HW_ACCELERATION_DISABLED) NagmedarVlcOptions.mediaOptions(turned).forEach { media.addOption(it) }
-        if (noVideo) media.addOption(":no-video")
         if (paused) media.addOption(":start-paused")
-        if (!prefs.getBoolean(KEY_SUBTITLES_AUTOLOAD, true)) media.addOption(":sub-language=none")
 
         if (hasRenderer) {
             media.addOption(":sout-chromecast-audio-passthrough=" + prefs.getBoolean(KEY_CASTING_PASSTHROUGH, true))

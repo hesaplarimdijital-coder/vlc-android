@@ -19,13 +19,10 @@ object Settings : SingletonHolder<SharedPreferences, Context>({ init(it.applicat
     var tvUI = false
     var listTitleEllipsize = 0
     var overrideTvUI = false
-    var videoHudDelay = 2
     var includeMissing = true
     var showHeaders = true
     var showAudioTrackInfo = false
     var videoJumpDelay = 10
-    var videoLongJumpDelay = 20
-    var videoDoubleTapJumpDelay = 10
     var audioJumpDelay = 10
     var audioLongJumpDelay = 20
     var audioShowTrackNumbers = MutableLiveData(false)
@@ -49,13 +46,10 @@ object Settings : SingletonHolder<SharedPreferences, Context>({ init(it.applicat
         // the classic layout there
         tvUI = device.isTv && prefs.getBoolean(PREF_TV_UI, false)
         listTitleEllipsize = prefs.getString(LIST_TITLE_ELLIPSIZE, "0")?.toInt() ?: 0
-        videoHudDelay = prefs.getInt(VIDEO_HUD_TIMEOUT, 4).coerceInOrDefault(1, 15, -1)
         includeMissing = prefs.getBoolean(KEY_INCLUDE_MISSING, true)
         showHeaders = prefs.getBoolean(KEY_SHOW_HEADERS, true)
         showAudioTrackInfo = prefs.getBoolean(KEY_SHOW_TRACK_INFO, false)
         videoJumpDelay = prefs.getInt(KEY_VIDEO_JUMP_DELAY, 10)
-        videoLongJumpDelay = prefs.getInt(KEY_VIDEO_LONG_JUMP_DELAY, 20)
-        videoDoubleTapJumpDelay = prefs.getInt(KEY_VIDEO_DOUBLE_TAP_JUMP_DELAY, 10)
         audioJumpDelay = prefs.getInt(KEY_AUDIO_JUMP_DELAY, 10)
         audioLongJumpDelay = prefs.getInt(KEY_AUDIO_LONG_JUMP_DELAY, 20)
         audioShowTrackNumbers.postValue(prefs.getBoolean(KEY_AUDIO_SHOW_TRACK_NUMBERS, false))
@@ -168,8 +162,6 @@ const val KEY_AUDIO_ALBUM_SONG_CURRENT_TAB = "key_audio_album_song_current_tab"
 //UI
 const val LIST_TITLE_ELLIPSIZE = "list_title_ellipsize"
 const val KEY_VIDEO_JUMP_DELAY = "video_jump_delay"
-const val KEY_VIDEO_LONG_JUMP_DELAY = "video_long_jump_delay"
-const val KEY_VIDEO_DOUBLE_TAP_JUMP_DELAY = "video_double_tap_jump_delay"
 const val KEY_AUDIO_JUMP_DELAY = "audio_jump_delay"
 const val KEY_AUDIO_LONG_JUMP_DELAY = "audio_long_jump_delay"
 const val KEY_AUDIO_FORCE_SHUFFLE = "audio_force_shuffle"
@@ -179,8 +171,6 @@ const val KEY_AUDIO_SHOW_BOOkMARK_BUTTONS = "audio_show_bookmark_buttons"
 const val KEY_AUDIO_SHOW_BOOKMARK_MARKERS = "audio_show_bookmark_markers"
 const val KEY_PERSISTENT_INCOGNITO = "persistent_incognito"
 const val KEY_BROWSE_NETWORK = "browse_network"
-const val KEY_VIDEOS_CARDS = "video_display_in_cards"
-const val KEY_GROUP_VIDEOS = "video_min_group_length"
 
 
 // AudioPlayer
@@ -231,37 +221,19 @@ const val PLAYLIST_MODE_VIDEO = "playlist_mode_video"
 const val PLAYLIST_MODE_AUDIO = "playlist_mode_audio"
 
 const val SCREEN_ORIENTATION = "screen_orientation"
-const val VIDEO_RESUME_TIME = "VideoResumeTime"
-const val VIDEO_RESUME_URI = "VideoResumeUri"
-const val ENABLE_SEEK_BUTTONS = "enable_seek_buttons"
 const val SHOW_SEEK_IN_COMPACT_NOTIFICATION = "show_seek_in_compact_notification"
 const val LOCKSCREEN_COVER = "lockscreen_cover"
-const val ENABLE_DOUBLE_TAP_SEEK = "enable_double_tap_seek"
-const val ENABLE_SWIPE_SEEK = "enable_swipe_seek"
-const val ENABLE_DOUBLE_TAP_PLAY = "enable_double_tap_play"
-const val ENABLE_VOLUME_GESTURE = "enable_volume_gesture"
-const val ENABLE_BRIGHTNESS_GESTURE = "enable_brightness_gesture"
 const val SCREENSHOT_MODE = "screenshot_mode"
-const val ENABLE_SCALE_GESTURE = "enable_scale_gesture"
-const val ENABLE_FASTPLAY = "enable_fastplay"
 const val FASTPLAY_SPEED = "fastplay_speed"
 const val SAVE_BRIGHTNESS = "save_brightness"
-const val BRIGHTNESS_VALUE = "brightness_value"
-const val POPUP_KEEPSCREEN = "popup_keepscreen"
 const val POPUP_FORCE_LEGACY = "popup_force_legacy"
-const val SHOW_ORIENTATION_BUTTON = "show_orientation_button"
-const val RESTORE_BACKGROUND_VIDEO = "restore_background_video"
-const val LOCK_USE_SENSOR = "lock_use_sensor"
 const val DISPLAY_UNDER_NOTCH = "display_under_notch"
-const val ALLOW_FOLD_AUTO_LAYOUT = "allow_fold_auto_layout"
-const val HINGE_ON_RIGHT = "hinge_on_right"
 const val AUDIO_HINGE_ON_RIGHT = "audio_hinge_on_right"
 const val TV_FOLDERS_FIRST = "tv_folders_first"
 const val KEY_OBSOLETE_RESTORE_FILE_WARNED = "obsolete_restore_file_warned"
 
 const val VIDEO_PAUSED = "VideoPaused"
 const val VIDEO_SPEED = "VideoSpeed"
-const val VIDEO_RATIO = "video_ratio"
 const val LOGIN_STORE = "store_login"
 const val KEY_PLAYBACK_SPEED_VIDEO_GLOBAL = "playback_speed_video_global"
 const val KEY_PLAYBACK_SPEED_AUDIO_GLOBAL = "playback_speed_audio_global"
@@ -270,12 +242,10 @@ const val KEY_PLAYBACK_SPEED_AUDIO_GLOBAL_VALUE = "playback_speed_audio_global_v
 const val KEY_INCOGNITO_PLAYBACK_SPEED_VIDEO_GLOBAL_VALUE = "incognito_playback_speed_video_global_value"
 const val KEY_INCOGNITO_PLAYBACK_SPEED_AUDIO_GLOBAL_VALUE = "incognito_playback_speed_audio_global_value"
 const val KEY_VIDEO_APP_SWITCH = "video_action_switch"
-const val VIDEO_TRANSITION_SHOW = "video_transition_show"
 const val VIDEO_HUD_TIMEOUT = "video_hud_timeout_in_s"
 const val RESULT_RESCAN = Activity.RESULT_FIRST_USER + 1
 const val RESULT_RESTART = Activity.RESULT_FIRST_USER + 2
 const val RESULT_RESTART_APP = Activity.RESULT_FIRST_USER + 3
-const val RESULT_UPDATE_SEEN_MEDIA = Activity.RESULT_FIRST_USER + 4
 const val RESULT_UPDATE_ARTISTS = Activity.RESULT_FIRST_USER + 5
 
 const val BETA_WELCOME = "beta_welcome"
@@ -290,14 +260,12 @@ const val AUDIO_DELAY_GLOBAL = "audio_delay_global"
 const val AUDIO_PLAY_PROGRESS_MODE = "audio_play_progress_mode"
 const val AUDIO_STOP_AFTER = "audio_stop_after"
 
-const val LAST_LOCK_ORIENTATION = "last_lock_orientation"
 const val INITIAL_PERMISSION_ASKED = "initial_permission_asked"
 const val PERMISSION_NEVER_ASK = "permission_never_ask"
 const val PERMISSION_NEXT_ASK = "permission_next_ask"
 
 const val WIDGETS_BACKGROUND_LAST_COLORS = "widgets_background_last_colors"
 const val WIDGETS_FOREGROUND_LAST_COLORS = "widgets_foreground_last_colors"
-const val CUSTOM_POPUP_HEIGHT = "custom_popup_height"
 
 const val SLEEP_TIMER_DEFAULT_INTERVAL = "sleep_timer_default_interval"
 const val SLEEP_TIMER_DEFAULT_WAIT = "sleep_timer_default_wait"
@@ -308,14 +276,11 @@ const val SLEEP_TIMER_RESET_INTERACTION = "sleep_timer_reset_interaction"
 const val NOTIFICATION_PERMISSION_ASKED = "notification_permission_asked"
 const val PLAYLIST_REPLACE = "playlist_replace"
 const val HTTP_USER_AGENT = "http_user_agent"
-const val DAV1D_THREAD_NUMBER = "dav1d_thread_number"
 const val KEY_QUICK_PLAY = "quick_play"
 const val KEY_QUICK_PLAY_DEFAULT = "quick_play_default"
 const val KEY_AOUT = "aout"
 
 
-const val KEY_HARDWARE_ACCELERATION = "hardware_acceleration"
-const val KEY_ALWAYS_FAST_SEEK = "always_fast_seek"
 const val KEY_AUDIO_PLAYER_SHOW_COVER = "audio_player_show_cover"
 const val KEY_ENABLE_CLONE_MODE = "enable_clone_mode"
 const val KEY_USER_DECLINED_STORAGE_ACCESS = "user_declined_storage_access"
@@ -336,17 +301,9 @@ const val KEY_IGNORE_HEADSET_MEDIA_BUTTON_PRESSES = "ignore_headset_media_button
 const val KEY_ENABLE_HEADSET_DETECTION = "enable_headset_detection"
 const val KEY_ENABLE_PLAY_ON_HEADSET_INSERTION = "enable_play_on_headset_insertion"
 const val KEY_AUDIO_TASK_REMOVED = "audio_task_removed"
-const val KEY_AUDIO_BOOST = "audio_boost"
 const val KEY_SAVE_INDIVIDUAL_AUDIO_DELAY = "save_individual_audio_delay"
 const val KEY_AUDIO_RESUME_CARD = "audio_resume_card"
 const val KEY_AUDIO_PREFERRED_LANGUAGE = "audio_preferred_language"
-
-//Video
-const val KEY_VIDEO_MATCH_FRAME_RATE = "video_match_frame_rate"
-
-//Subtitles
-const val KEY_SUBTITLE_PREFERRED_LANGUAGE = "subtitle_preferred_language"
-
 
 //UI
 const val KEY_SET_LOCALE = "set_locale"
@@ -383,8 +340,6 @@ const val KEY_CUSTOM_LIBVLC_OPTIONS = "custom_libvlc_options"
 const val KEY_SUBTITLES_COLOR = "subtitles_color"
 const val KEY_AUDIO_DIGITAL_OUTPUT = "audio_digital_output"
 const val KEY_ENABLE_TIME_STRETCHING_AUDIO = "enable_time_stretching_audio"
-const val KEY_SUBTITLE_TEXT_ENCODING = "subtitle_text_encoding"
-const val KEY_ENABLE_FRAME_SKIP = "enable_frame_skip"
 const val KEY_ENABLE_VERBOSE_MODE = "enable_verbose_mode"
 const val KEY_ENABLE_CASTING = "enable_casting"
 const val KEY_CASTING_AUDIO_ONLY = "casting_audio_only"
@@ -392,45 +347,6 @@ const val KEY_CASTING_PASSTHROUGH = "casting_passthrough"
 const val KEY_CASTING_QUALITY = "casting_quality"
 const val KEY_DEBLOCKING = "deblocking"
 const val KEY_NETWORK_CACHING_VALUE = "network_caching_value"
-const val KEY_SUBTITLES_SIZE = "subtitles_size"
-const val KEY_SUBTITLES_BOLD = "subtitles_bold"
-const val KEY_SUBTITLES_BACKGROUND_COLOR = "subtitles_background_color"
-const val KEY_SUBTITLES_COLOR_OPACITY = "subtitles_color_opacity"
-const val KEY_SUBTITLES_BACKGROUND_COLOR_OPACITY = "subtitles_background_color_opacity"
-const val KEY_SUBTITLES_BACKGROUND = "subtitles_background"
-const val KEY_SUBTITLES_OUTLINE = "subtitles_outline"
-const val KEY_SUBTITLES_OUTLINE_SIZE = "subtitles_outline_size"
-const val KEY_SUBTITLES_OUTLINE_COLOR = "subtitles_outline_color"
-const val KEY_SUBTITLES_OUTLINE_COLOR_OPACITY = "subtitles_outline_color_opacity"
-const val KEY_SUBTITLES_SHADOW = "subtitles_shadow"
-const val KEY_SUBTITLES_SHADOW_COLOR = "subtitles_shadow_color"
-const val KEY_SUBTITLES_SHADOW_COLOR_OPACITY = "subtitles_shadow_color_opacity"
-const val KEY_SUBTITLES_AUTOLOAD = "subtitles_autoload"
-// Nağmedar (S-705): the subtitles' font family, one of the system's ("serif", "monospace"); none is VLC's own
-const val KEY_SUBTITLES_FONT = "nagmedar_subtitles_font"
-
-// Nağmedar (S-503 … S-508): what libVLC starts with, read by VLCOptions as the subtitles' font is
-/** The subtitles' height above the picture's bottom edge, in pixels. */
-const val KEY_NAG_SUBTITLE_MARGIN = "nagmedar_subtitle_margin"
-/** Whether the subtitles may stand in the black bars under a wide film. */
-const val KEY_NAG_SUBTITLE_BLACK_BARS = "nagmedar_subtitle_black_bars"
-/** Whether ASS files are shown with the app's look rather than their own styles. */
-const val KEY_NAG_ASS_OURS = "nagmedar_subtitle_ass_ours"
-/** Whether the secondary subtitles stand at the top of the picture. */
-const val KEY_NAG_SECONDARY_SUB_TOP = "nagmedar_secondary_sub_top"
-/** libplacebo's tone-mapping curve for the OpenGL video output: "auto", "bt2390", "hable", "reinhard", "mobius". */
-const val KEY_NAG_TONE_MAPPING = "nagmedar_tone_mapping"
-/** The OpenGL video output's scaler: "auto", "bilinear", "spline36", "ewa_lanczos". */
-const val KEY_NAG_SCALER = "nagmedar_scaler"
-/** The picture turned or mirrored, as VLC's transform filter names it: "", "90", "180", "270", "hflip", "vflip", "transpose", "antitranspose". */
-const val KEY_NAG_TRANSFORM = "nagmedar_transform"
-/** How the sound leaves: "auto", "stereo", "pcm", "passthrough" (as the device reports), "forced" (the codecs below). */
-const val KEY_NAG_AUDIO_OUTPUT = "nagmedar_audio_output"
-/** The codecs sent as a bitstream when forced: "ac3,eac3,dts,dtshd,truehd". */
-const val KEY_NAG_PASSTHROUGH_CODECS = "nagmedar_passthrough_codecs"
-/** Whether a film's forced subtitles show on their own when no subtitles are chosen. */
-const val KEY_NAG_FORCED_SUBTITLES = "nagmedar_forced_subtitles"
-const val KEY_OPENGL = "opengl"
 
 //Control settings
 const val KEY_BLURRED_COVER_BACKGROUND = "blurred_cover_background"
@@ -443,7 +359,6 @@ const val KEY_AUDIO_REPLAY_GAIN_PEAK_PROTECTION = "audio-replay-gain-peak-protec
 const val KEY_AUDIO_REPLAY_GAIN_MODE = "audio-replay-gain-mode"
 const val KEY_AUDIO_REPLAY_GAIN_DEFAULT = "audio-replay-gain-default"
 const val KEY_AUDIO_REPLAY_GAIN_PREAMP = "audio-replay-gain-preamp"
-const val KEY_PREFERRED_RESOLUTION = "preferred_resolution"
 
 //Auto
 const val KEY_ANDROID_AUTO_QUEUE_FORMAT_VAL = "android_auto_queue_format_val"

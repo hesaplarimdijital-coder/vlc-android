@@ -61,7 +61,6 @@ import org.videolan.tools.RESULT_RESCAN
 import org.videolan.tools.RESULT_RESTART
 import org.videolan.tools.RESULT_RESTART_APP
 import org.videolan.tools.RESULT_UPDATE_ARTISTS
-import org.videolan.tools.RESULT_UPDATE_SEEN_MEDIA
 import org.videolan.tools.Settings
 import org.videolan.tools.putSingle
 import org.videolan.vlc.BuildConfig
@@ -79,7 +78,6 @@ import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.helpers.UiTools.isTablet
 import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.gui.preferences.search.PreferenceParser
-import org.videolan.vlc.gui.video.VideoGridFragment
 import org.videolan.vlc.interfaces.Filterable
 import org.videolan.vlc.interfaces.IRefreshable
 import org.videolan.vlc.media.MediaUtils
@@ -341,9 +339,6 @@ class MainActivity : ContentActivity(),
                     finish()
                     startActivity(intent)
                 }
-                RESULT_UPDATE_SEEN_MEDIA -> for (fragment in supportFragmentManager.fragments)
-                    if (fragment is VideoGridFragment)
-                        fragment.updateSeenMediaMarker()
                 RESULT_UPDATE_ARTISTS -> {
                     val fragment = currentFragment
                     if (fragment is AudioBrowserFragment) fragment.viewModel.refresh()

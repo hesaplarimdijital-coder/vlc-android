@@ -1,7 +1,6 @@
 package app.nagmedar.data
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 /** S-1502: a restore joins a backup's rows to these without losing either's. */
@@ -23,14 +22,5 @@ class RestoreMergeTest {
         assertEquals(300L, RestoreMerge.stats(here, kept.copy(firstPlayedAt = 0)).firstPlayedAt)
         // nothing here: the backup's as it is
         assertEquals(kept, RestoreMerge.stats(null, kept))
-    }
-
-    @Test
-    fun aFilesSettingsAreTheNewerOnes() {
-        val mine = MediaSettings("file:///film.mkv", audioDelayMs = 50, updatedAt = 10)
-        val backup = MediaSettings("file:///film.mkv", audioDelayMs = -120, updatedAt = 5)
-        assertNull(RestoreMerge.mediaSettings(mine, backup))
-        assertEquals(backup.copy(updatedAt = 10), RestoreMerge.mediaSettings(mine, backup.copy(updatedAt = 10)))
-        assertEquals(backup, RestoreMerge.mediaSettings(null, backup))
     }
 }

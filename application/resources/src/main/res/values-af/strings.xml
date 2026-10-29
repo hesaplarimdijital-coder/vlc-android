@@ -33,9 +33,6 @@
     <string name="track_codec_info">Kodek: %1$s\n</string>
     <string name="track_language_info">Taal: %1$s\n</string>
     <string name="volume">Volume</string>
-    <string name="sound_on">Klank Aan</string>
-    <string name="sound_off">Klank Af</string>
-    <string name="brightness">Helderheid</string>
     <string name="subtitles">Onderskrifte</string>
     <string name="interface_prefs_screen">Koppelvlak</string>
     </resources>

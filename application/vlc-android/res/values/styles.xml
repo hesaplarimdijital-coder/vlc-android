@@ -84,8 +84,6 @@
         <item name="gridview_progressbar">@drawable/gridview_progressbar</item>
         <item name="progress_mini_player">@drawable/progress_mini_player</item>
         <item name="advanced_options_bg">@drawable/advanced_options_background_light</item>
-        <item name="ic_tips_double_tap">@drawable/tips_double_tap_500</item>
-        <item name="ic_tips_tap">@drawable/tips_tap_500</item>
         <item name="ic_passthrough">@drawable/ic_passthrough</item>
         <item name="ariane_text_color">@color/grey700</item>
         <item name="ariane_text_size">14sp</item>
@@ -97,7 +95,6 @@
         <item name="empty_foreground">@color/grey300</item>
         <item name="empty_background">@color/grey50</item>
         <item name="disabled_overlay_color">@color/white_transparent_50</item>
-        <item name="video_card_background">@drawable/video_grid_card_background</item>
         <item name="video_list_background">@drawable/video_list_background</item>
         <item name="audio_chip_background">@drawable/rounded_corners_audio</item>
         <item name="audio_chip_text_color">@color/white_transparent_60</item>
@@ -278,8 +275,6 @@
         <item name="gridview_progressbar">@drawable/gridview_progressbar_w</item>
         <item name="progress_mini_player">@drawable/progress_mini_player_black</item>
         <item name="advanced_options_bg">@drawable/advanced_options_background_dark</item>
-        <item name="ic_tips_double_tap">@drawable/tips_double_tap</item>
-        <item name="ic_tips_tap">@drawable/tips_tap</item>
         <item name="ic_passthrough">@drawable/ic_passthrough</item>
         <item name="ariane_text_color">@color/grey50</item>
         <item name="ariane_text_size">14sp</item>
@@ -292,7 +287,6 @@
         <item name="empty_foreground">@color/grey800</item>
         <item name="empty_background">@color/grey900</item>
         <item name="disabled_overlay_color">@color/black_transparent_50</item>
-        <item name="video_card_background">@drawable/video_grid_card_background_dark</item>
         <item name="video_list_background">@drawable/video_list_background_dark</item>
         <item name="audio_chip_background">@drawable/rounded_corners_audio_dark</item>
         <item name="audio_chip_text_color">@color/black_transparent_60</item>
@@ -366,8 +360,6 @@
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme.Player</item>
         <item name="disabled_overlay_color">@color/black_transparent_50</item>
         <item name="advanced_options_bg">@drawable/advanced_options_background_dark</item>
-        <item name="ic_tips_double_tap">@drawable/tips_double_tap</item>
-        <item name="ic_tips_tap">@drawable/tips_tap</item>
         <item name="ic_passthrough">@drawable/ic_passthrough</item>
         <item name="colorControlNormal">@color/grey700</item>
         <item name="bookmark_background">@color/black_transparent_80</item>
@@ -489,55 +481,6 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:backgroundDimEnabled">false</item>
-    </style>
-
-    <style name="Theme.VLC.Player" parent="Theme.VLC.Player.7" />
-
-    <style name="Theme.VLC.Player.7" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowBackground">@color/transparent</item>
-        <item name="windowActionBarOverlay">true</item>
-        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
-        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox
-        </item>
-
-        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme.Player</item>
-        <item name="bottom_sheet_background">@color/black_transparent_80</item>
-        <item name="bottom_sheet_radius">4dp</item>
-
-
-        <!-- Nağmedar: its accent, not VLC's orange -->
-        <item name="colorPrimary">@color/nagmedar_accent_dark</item>
-        <item name="colorPrimaryDark">@color/transparent</item>
-        <item name="colorAccent">@color/nagmedar_accent_dark</item>
-        <item name="colorSecondary">@color/nagmedar_accent_dark</item>
-        <item name="background_default_darker">@color/grey875</item>
-
-        <item name="background_default">@color/grey850</item>
-        <item name="advanced_options_bg">@drawable/advanced_options_background</item>
-        <item name="ic_tips_double_tap">@drawable/tips_double_tap</item>
-        <item name="ic_tips_tap">@drawable/tips_tap</item>
-        <item name="ic_passthrough">@drawable/ic_passthrough</item>
-        <item name="font_default">@color/grey50</item>
-        <item name="font_light">@color/grey600</item>
-        <item name="font_disabled">@color/grey600transparent</item>
-        <item name="font_audio_light">@color/grey600</item>
-        <item name="dialog_circle_background">@color/dialog_circle_background_dark</item>
-        <item name="bookmark_background">@color/black_transparent_80</item>
-        <item name="mini_visualizer_color">@color/white_transparent_75</item>
-        <item name="video_list_background">@drawable/video_list_background</item>
-        <item name="default_divider">@color/white_transparent_20</item>
-        <item name="card_border">@color/grey800</item>
-
-        <item name="list_subtitle">@color/grey400</item>
-        <item name="list_title">@color/white</item>
-        <item name="android:colorControlHighlight" tools:targetApi="lollipop">@color/nagmedar_accent_dark
-        </item>
-        <item name="colorControlHighlight">@color/nagmedar_accent_dark</item>
-        <item name="player_icon_color">@color/grey50</item>
-        <item name="background_audio_tips">@color/white_transparent_95</item>
-        <item name="audio_seek_bar">@drawable/audio_seekbar_black</item>
     </style>
 
     <style name="VLCTransparentTheme" parent="VLCTransparentThemeLight" />

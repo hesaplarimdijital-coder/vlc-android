@@ -101,9 +101,7 @@ object VersionMigration {
         if (lastVersion < 2) {
             migrateToVersion2(context)
         }
-        if (lastVersion < 3) {
-            migrateToVersion3(context)
-        }
+        // version 3 removed the TV home's WatchNext programs: Nağmedar has none
         if (lastVersion < 4) {
             migrateToVersion4(settings)
         }
@@ -245,17 +243,6 @@ object VersionMigration {
     }
 
     /**
-     * Deletes all the programs from the WatchNext channel on the TV Home.
-     * After reindexing media ids can change, so programs now also have the uri of their media file.
-     */
-    private suspend fun migrateToVersion3(context: Context) {
-        Log.i(this::class.java.simpleName, "Migrating to Version 3: remove all WatchNext programs")
-        withContext(Dispatchers.IO) {
-            deleteAllWatchNext(context)
-        }
-    }
-
-    /**
      * Migrate the video hud timeout preference to a value in seconds
      */
     private fun migrateToVersion4(settings: SharedPreferences) {
@@ -290,7 +277,6 @@ object VersionMigration {
         Log.i(this::class.java.simpleName, "Migrating to Version 6: Migrate the Video hud timeout to the new range")
         val hudTimeOut = settings.getInt(VIDEO_HUD_TIMEOUT, 4)
         if (hudTimeOut == 0) settings.edit { putInt(VIDEO_HUD_TIMEOUT, 16) }
-        Settings.videoHudDelay = settings.getInt(VIDEO_HUD_TIMEOUT, 4).coerceInOrDefault(1,15,-1)
     }
 
     /**

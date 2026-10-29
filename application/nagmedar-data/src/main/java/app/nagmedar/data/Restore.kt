@@ -22,10 +22,6 @@ object RestoreMerge {
         )
     }
 
-    /** A file's settings: the newer of the two, the backup's when as new; null when here's stays. */
-    fun mediaSettings(here: MediaSettings?, kept: MediaSettings): MediaSettings? =
-        if (here == null || kept.updatedAt >= here.updatedAt) kept else null
-
     /** The earlier of two times, 0 being none. */
     private fun earliest(a: Long, b: Long): Long = when {
         a <= 0L -> b

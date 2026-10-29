@@ -81,7 +81,6 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.library.audioFormatLabel
 import app.nagmedar.ui.library.mainAudio
 import app.nagmedar.ui.library.rememberTechOf
-import app.nagmedar.ui.library.techBadge
 import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.music.rememberArtworkColor
 import app.nagmedar.ui.podcast.Chapter
@@ -96,7 +95,6 @@ import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.glass
 import kotlin.math.roundToInt
-import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
@@ -357,9 +355,8 @@ fun PlayerBar(
     phonePlayer: ExpandablePlayerState? = null,
     fullPlayer: (@Composable () -> Unit)? = null,
 ) {
+    // Nağmedar 1.0 plays everything as audio: the bars show whatever plays
     val media = nowPlaying.media ?: return
-    // the mini player shows a video only while it plays without its player (the desktop's transport bar as before)
-    if (navKind != NavKind.Sidebar && media.type == MediaWrapper.TYPE_VIDEO && !rememberVideoAway(media)) return
     val info = rememberPlayerBarInfo(media, nowPlaying.playing)
     val progress by rememberPlaybackProgress(nowPlaying)
     val context = LocalContext.current
@@ -388,24 +385,6 @@ fun PlayerBar(
     }
 }
 
-/**
- * [PlaybackActions.videoAway] for [media], read again a few times a second: the player's coming and
- * going and the background's switch are not observable.
- */
-@Composable
-private fun rememberVideoAway(media: MediaWrapper): Boolean {
-    val away by produceState(PlaybackActions.videoAway(media), media) {
-        while (true) {
-            value = PlaybackActions.videoAway(media)
-            delay(VIDEO_AWAY_READING_MS)
-        }
-    }
-    return away
-}
-
-/** How often [rememberVideoAway] reads again. */
-private const val VIDEO_AWAY_READING_MS = 250L
-
 @Composable
 private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): PlayerBarInfo {
     val shuffling by PlaylistManager.shuffling.collectAsState()
@@ -420,7 +399,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         isVideo = video,
         playing = playing,
         lengthMs = media.length,
-        format = tech?.let { if (video) techBadge(it, media.width, media.height) else it.mainAudio()?.let(::audioFormatLabel) },
+        format = tech?.mainAudio()?.let(::audioFormatLabel),
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
         // the listener's own volume: a podcast show's boost (S-1104) plays over it and is never kept as theirs

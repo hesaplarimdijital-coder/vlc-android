@@ -29,8 +29,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_corners_full"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:showIn="@layout/player_hud">
+        tools:visibility="visible">
 
     <ImageView
             android:id="@+id/imageView9"

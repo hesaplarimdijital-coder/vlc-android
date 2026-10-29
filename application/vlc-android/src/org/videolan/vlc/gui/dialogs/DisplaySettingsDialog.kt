@@ -46,10 +46,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import kotlinx.coroutines.launch
 import org.videolan.medialibrary.interfaces.Medialibrary
-import org.videolan.resources.AppContextProvider
-import org.videolan.resources.GROUP_VIDEOS_FOLDER
-import org.videolan.resources.GROUP_VIDEOS_NAME
-import org.videolan.resources.GROUP_VIDEOS_NONE
 import org.videolan.tools.setGone
 import org.videolan.vlc.R
 import org.videolan.vlc.databinding.DialogDisplaySettingsBinding
@@ -57,13 +53,10 @@ import org.videolan.vlc.databinding.SortDisplaySettingBinding
 import org.videolan.vlc.gui.helpers.DefaultPlaybackAction
 import org.videolan.vlc.gui.helpers.UiTools.showPinIfNeeded
 import org.videolan.vlc.viewmodels.DisplaySettingsViewModel
-import org.videolan.vlc.viewmodels.mobile.VideoGroupingType
-import org.videolan.vlc.viewmodels.mobile.VideosViewModel
 
 
 const val DISPLAY_IN_CARDS = "display_in_cards"
 const val SHOW_ALL_ARTISTS = "show_all_artists"
-const val VIDEO_GROUPING = "show_video_groups"
 const val ONLY_FAVS = "only_favs"
 const val SORTS = "sorts"
 const val CURRENT_SORT = "current_sort"
@@ -89,7 +82,6 @@ class DisplaySettingsDialog : VLCBottomSheetDialogFragment() {
     private var showOnlyMultimediaFiles: Boolean? = null
     private var showHiddenFiles: Boolean? = null
     private var showTrackNumbers: Boolean? = null
-    private var showVideoGroups: String? = null
     private var defaultPlaybackActions: List<DefaultPlaybackAction>? = null
     private var defaultActionType: String? = null
     private var currentDefaultAction: DefaultPlaybackAction? = null
@@ -100,9 +92,9 @@ class DisplaySettingsDialog : VLCBottomSheetDialogFragment() {
 
     companion object {
 
-        fun newInstance(displayInCards: Boolean?, showAllArtists: Boolean? = null, onlyFavs: Boolean?, sorts: List<Int>, currentSort: Int, currentSortDesc: Boolean, videoGroup: String? = null, showOnlyMultimediaFiles:Boolean? = null, showTrackNumber:Boolean? = null, showHiddenFiles:Boolean? = null, defaultPlaybackActions: List<DefaultPlaybackAction>? = null, defaultActionType: String? = null): DisplaySettingsDialog {
+        fun newInstance(displayInCards: Boolean?, showAllArtists: Boolean? = null, onlyFavs: Boolean?, sorts: List<Int>, currentSort: Int, currentSortDesc: Boolean, showOnlyMultimediaFiles:Boolean? = null, showTrackNumber:Boolean? = null, showHiddenFiles:Boolean? = null, defaultPlaybackActions: List<DefaultPlaybackAction>? = null, defaultActionType: String? = null): DisplaySettingsDialog {
             return DisplaySettingsDialog().apply {
-                arguments = bundleOf(SORTS to sorts, CURRENT_SORT to currentSort, CURRENT_SORT_DESC to currentSortDesc, VIDEO_GROUPING to videoGroup)
+                arguments = bundleOf(SORTS to sorts, CURRENT_SORT to currentSort, CURRENT_SORT_DESC to currentSortDesc)
                 if (displayInCards != null) arguments!!.putBoolean(DISPLAY_IN_CARDS, displayInCards)
                 if (onlyFavs != null) arguments!!.putBoolean(ONLY_FAVS, onlyFavs)
                 if (showAllArtists != null) arguments!!.putBoolean(SHOW_ALL_ARTISTS, showAllArtists)
@@ -140,7 +132,6 @@ class DisplaySettingsDialog : VLCBottomSheetDialogFragment() {
         showOnlyMultimediaFiles = if (arguments?.containsKey(SHOW_ONLY_MULTIMEDIA_FILES) == true) arguments?.getBoolean(SHOW_ONLY_MULTIMEDIA_FILES) else null
         showTrackNumbers = if (arguments?.containsKey(SHOW_TRACK_NUMBER) == true) arguments?.getBoolean(SHOW_TRACK_NUMBER) else null
         showHiddenFiles = if (arguments?.containsKey(SHOW_HIDDEN_FILES) == true) arguments?.getBoolean(SHOW_HIDDEN_FILES) else null
-        showVideoGroups = arguments?.getString(VIDEO_GROUPING, null)
         val defaultActionsKeys = arguments?.getStringArrayList(DEFAULT_ACTIONS)?.toTypedArray()
         defaultPlaybackActions = when(defaultActionsKeys) {
             null -> null
@@ -232,33 +223,6 @@ class DisplaySettingsDialog : VLCBottomSheetDialogFragment() {
             updateShowAllArtists()
             lifecycleScope.launch { displaySettingsViewModel.send(ONLY_FAVS, onlyFavs!!) }
         }
-        if (showVideoGroups == null) {
-            binding.videoGroupsGroup.setGone()
-            binding.videoGroupSpinner.setGone()
-            binding.videoGroupText.setGone()
-            binding.videoGroupImage.setGone()
-        }
-        val spinnerArrayAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, VideoGroup.entries.toTypedArray())
-
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.videoGroupSpinner.adapter = spinnerArrayAdapter
-        binding.videoGroupsGroup.setOnClickListener {
-            binding.videoGroupSpinner.performClick()
-        }
-        binding.videoGroupSpinner.setSelection(VideoGroup.entries.indexOf(VideoGroup.findByValue(showVideoGroups)))
-        binding.videoGroupSpinner.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val groupType = spinnerArrayAdapter.getItem(position) as VideoGroup
-                if (groupType.value != showVideoGroups) {
-                    lifecycleScope.launch { displaySettingsViewModel.send(VIDEO_GROUPING, groupType) }
-                    //dismissing as changing grouping will also change the available sorts
-                    dismiss()
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
         //Default actions
         defaultPlaybackActions?.let {
             val defaultActionsArrayAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, it)
@@ -473,39 +437,4 @@ class DisplaySettingsDialog : VLCBottomSheetDialogFragment() {
      * @param desc is the sort desc
      */
     private fun getSortTag(sort: Int, desc: Boolean) = if (desc) "${sort}_desc" else "${sort}_asc"
-
-    /**
-     * Video grouping entry
-     *
-     * @property value the value to be saved in the shared preferences
-     * @property title the title resources to be shown
-     * @property type the [VideosViewModel] type for this grouping
-     */
-    enum class VideoGroup(val value: String, val title: Int, val type: VideoGroupingType) {
-        GROUP_BY_NAME(GROUP_VIDEOS_NAME, R.string.video_min_group_length_name, VideoGroupingType.NAME),
-        GROUP_BY_FOLDER(GROUP_VIDEOS_FOLDER, R.string.video_min_group_length_folder, VideoGroupingType.FOLDER),
-        NO_GROUP(GROUP_VIDEOS_NONE, R.string.video_min_group_length_disable, VideoGroupingType.NONE);
-
-        override fun toString(): String {
-            return AppContextProvider.appContext.getString(title)
-        }
-
-        companion object {
-            /**
-             * Retrieve a [VideoGroup] by its value
-             *
-             * @param value of the video group to retrieve
-             * @return a [VideoGroup]
-             */
-            fun findByValue(value: String?): VideoGroup {
-                VideoGroup.entries.forEach { if (value == it.value) return it }
-                return GROUP_BY_NAME
-            }
-        }
-    }
 }
-
-
-
-
-

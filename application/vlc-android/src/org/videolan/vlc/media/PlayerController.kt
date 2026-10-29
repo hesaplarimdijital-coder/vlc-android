@@ -1,7 +1,6 @@
 package org.videolan.vlc.media
 
 import android.content.Context
-import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
 import app.nagmedar.audio.latency.AudioDelayMix
@@ -19,21 +18,19 @@ import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.RendererItem
 import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.interfaces.IMediaList
-import org.videolan.libvlc.interfaces.IVLCVout
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.VLCOptions
 import org.videolan.tools.KEY_EQUALIZER_ENABLED
 import org.videolan.tools.*
 import org.videolan.vlc.*
-import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.dialogs.adapters.VlcTrack
 import org.videolan.vlc.repository.EqualizerRepository
 import org.videolan.vlc.repository.SlaveRepository
 import kotlin.math.absoluteValue
 
 /** The libVLC player; Nağmedar's PlaybackEngine contract (S-501) is the transport subset PlaylistManager uses. */
-class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.EventListener, CoroutineScope, PlaybackEngine {
+class PlayerController(val context: Context) : MediaPlayer.EventListener, CoroutineScope, PlaybackEngine {
     override val coroutineContext = Dispatchers.Main.immediate + SupervisorJob()
 
     //    private val exceptionHandler by lazy(LazyThreadSafetyMode.NONE) { CoroutineExceptionHandler { _, _ -> onPlayerError() } }
@@ -45,15 +42,10 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     var mediaplayer = newMediaPlayer()
         private set
-    var switchToVideo = false
     override var seekable = false
     override var pausable = false
-    var previousMediaStats: IMedia.Stats? = null
-        private set
     @Volatile var hasRenderer = false
         private set
-
-    fun getVout(): IVLCVout? = mediaplayer.vlcVout
 
     fun canDoPassthrough() = mediaplayer.hasMedia() && !mediaplayer.isReleased && mediaplayer.canDoPassthrough()
 
@@ -61,7 +53,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     override val engineId = EngineId.LibVlc
 
-    /** libVLC plays everything the music engine (S-901) does not take: video, streams, radio, podcasts, music it cannot. */
+    /** libVLC plays everything the music engine (S-901) does not take: streams, radio, podcasts, music it cannot, films as audio. */
     override fun canPlay(media: EngineMedia) = true
 
     override fun play() {
@@ -98,12 +90,11 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
                 val repository = EqualizerRepository.getInstance(context)
                 mediaplayer.setEqualizer(repository.getCurrentEqualizer(context).getEqualizer())
             }
-            mediaplayer.setVideoTitleDisplay(MediaPlayer.Position.Disable, 0)
             mediaplayer.play()
             // S-613: libVLC starts every media at no delay; the output's own goes back under it
             audioDelay.mediaStarted()
             audioDelay.casting = hasRenderer
-            if (audioDelay.outputLatencyUs != 0L || audioDelay.legacyBluetoothUs != 0L) applyAudioDelay()
+            if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
         }
     }
 
@@ -134,36 +125,13 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     override fun isPaused() = playbackState == PlaybackStateCompat.STATE_PAUSED
 
-    fun isVideoPlaying() = !mediaplayer.isReleased && mediaplayer.vlcVout.areViewsAttached()
-
-    fun canSwitchToVideo() = getVideoTracksCount() > 0
-
-    fun getVideoTracksCount() = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getVideoTracksCount() else 0
-
-    fun getVideoTracks(): Array<out VlcTrack> = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getAllVideoTracks() else emptyArray()
-
-    fun getVideoTrack():String = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSelectedVideoTrack()?.getId() ?: "-1" else "-1"
-
-    fun getCurrentVideoTrack(): VlcTrack? = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSelectedVideoTrack() else null
-
     fun getAudioTracksCount() = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getAudioTracksCount() else 0
 
     fun getAudioTracks(): Array<out VlcTrack>? = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getAllAudioTracks() else emptyArray()
 
     fun getAudioTrack():String = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSelectedAudioTrack()?.getId() ?: "-1" else "-1"
 
-    fun setVideoTrack(index: String) = !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setVideoTrack(index)
-
     fun setAudioTrack(index: String) = !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setAudioTrack(index)
-
-    fun unselectTrackType(trackType: VideoTracksDialog.TrackType) {
-        val vlcTrackType = when(trackType) {
-            VideoTracksDialog.TrackType.VIDEO -> 1
-            VideoTracksDialog.TrackType.AUDIO -> 0
-            VideoTracksDialog.TrackType.SPU -> 2
-        }
-        if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.unselectTrackType(vlcTrackType)
-    }
 
     fun setAudioDigitalOutputEnabled(enabled: Boolean) = !mediaplayer.isReleased && mediaplayer.setAudioDigitalOutputEnabled(enabled)
 
@@ -183,41 +151,10 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
             applyAudioDelay()
         }
 
-    /**
-     * S-613: VLC's classic Bluetooth delay, given by the video player while a Bluetooth output
-     * plays (0 otherwise): the output's share only when no latency profile has one, so a profile
-     * applied before or after it always wins and the two never add up. Main thread.
-     */
-    var legacyBluetoothDelayUs: Long
-        get() = audioDelay.legacyBluetoothUs
-        set(value) {
-            if (audioDelay.legacyBluetoothUs == value) return
-            audioDelay.legacyBluetoothUs = value
-            applyAudioDelay()
-        }
-
     /** The audio delay as the user sees it: the file's own, the output's share left out. */
     fun getAudioDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) audioDelay.userDelayUs else 0L
 
-    fun getSpuDelay() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased) mediaplayer.spuDelay else 0L
-
     override fun getRate() = if (mediaplayer.hasMedia() && !mediaplayer.isReleased && playbackState != PlaybackStateCompat.STATE_STOPPED) mediaplayer.rate else 1.0f
-
-    fun setSpuDelay(delay: Long) = !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setSpuDelay(delay)
-
-    fun setVideoTrackEnabled(enabled: Boolean) = mediaplayer.setVideoTrackEnabled(enabled)
-
-    fun addSubtitleTrack(path: String, select: Boolean) = mediaplayer.addSlave(IMedia.Slave.Type.Subtitle, path, select)
-
-    fun addSubtitleTrack(uri: Uri, select: Boolean) = mediaplayer.addSlave(IMedia.Slave.Type.Subtitle, uri, select)
-
-    fun getSpuTracks(): Array<out VlcTrack>? = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getAllSpuTracks() else emptyArray()
-
-    fun getSpuTrack() = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSelectedSpuTrack()?.getId() ?: "-1" else "-1"
-
-    fun setSpuTrack(index: String) = !mediaplayer.isReleased && mediaplayer.hasMedia() && mediaplayer.setSpuTrack(index)
-
-    fun getSpuTracksCount() = if (!mediaplayer.isReleased && mediaplayer.hasMedia()) mediaplayer.getSpuTracksCount() else 0
 
     fun setAudioDelay(delay: Long): Boolean {
         audioDelay.userDelayUs = delay
@@ -232,15 +169,6 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun setEqualizer(equalizer: MediaPlayer.Equalizer?) = mediaplayer.setEqualizer(equalizer)
 
-    @MainThread
-    fun setVideoScale(scale: Float) {
-        mediaplayer.scale = scale
-    }
-
-    fun setVideoAspectRatio(aspect: String?) {
-        mediaplayer.aspectRatio = aspect
-    }
-
     fun setRenderer(renderer: RendererItem?) {
         if (!mediaplayer.isReleased) mediaplayer.setRenderer(renderer)
         hasRenderer = renderer !== null
@@ -253,8 +181,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     fun release(player: MediaPlayer = mediaplayer) {
         player.setEventListener(null)
-        // Nağmedar (S-610): restart() releases the player it replaced: its own views and media, not the new one's
-        if (!player.isReleased && player.vlcVout.areViewsAttached()) player.vlcVout.detachViews()
+        // restart() releases the player it replaced: its own media, not the new one's
         releaseMedia(player)
         launch(Dispatchers.IO) {
             if (BuildConfig.DEBUG) { // Warn if player release is blocking
@@ -284,14 +211,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
             setAudioDigitalOutputEnabled(VLCOptions.isAudioDigitalOutputEnabled(settings))
             VLCOptions.getAout(settings)?.let { setAudioOutput(it) }
             setRenderer(PlaybackService.renderer.value)
-            this.vlcVout.addCallback(this@PlayerController)
         }
-    }
-
-    override fun onSurfacesCreated(vlcVout: IVLCVout?) {}
-
-    override fun onSurfacesDestroyed(vlcVout: IVLCVout?) {
-        switchToVideo = false
     }
 
     override fun getCurrentTime() = progress.value?.time ?: 0L
@@ -314,37 +234,6 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
         if (id == IMedia.Meta.Publisher) return false
         mw?.updateMeta(mediaplayer)
         return id != IMedia.Meta.NowPlaying || mw?.nowPlaying !== null
-    }
-
-    /**
-     * When changing current media, setPreviousStats is called to store statistics related to the
-     * media. SetCurrentStats is called in the case where repeating is set to
-     * PlaybackStateCompat.REPEAT_MODE_ONE, and the current media should not be released, as
-     * it is still in use.
-     */
-    fun setCurrentStats() {
-        val media = mediaplayer.media ?: return
-        previousMediaStats = media.stats
-    }
-
-    fun setPreviousStats() {
-        val media = mediaplayer.media ?: return
-        previousMediaStats = media.stats
-        media.release()
-    }
-
-    fun updateViewpoint(yaw: Float, pitch: Float, roll: Float, fov: Float, absolute: Boolean) = mediaplayer.updateViewpoint(yaw, pitch, roll, fov, absolute)
-
-    fun navigate(where: Int) = mediaplayer.navigate(where)
-
-    /**
-     * Nağmedar (S-607): libVLC writes what it plays into [directory] as it comes (VLC's record), or
-     * stops when [directory] is null. Whether the request reached libVLC: that it records is told
-     * by the RecordChanged event.
-     */
-    fun record(directory: String?): Boolean {
-        if (mediaplayer.isReleased || !mediaplayer.hasMedia()) return false
-        return mediaplayer.record(directory, directory != null)
     }
 
     fun getChapters(title: Int): Array<out MediaPlayer.Chapter>? = if (!mediaplayer.isReleased) mediaplayer.getChapters(title) else emptyArray()
@@ -409,7 +298,7 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
                 MediaPlayer.Event.Playing -> {
                     playbackState = PlaybackStateCompat.STATE_PLAYING
                     // S-613: the output's delay again, in case the input was not there to take it at the start
-                    if (audioDelay.outputLatencyUs != 0L || audioDelay.legacyBluetoothUs != 0L) applyAudioDelay()
+                    if (audioDelay.outputLatencyUs != 0L) applyAudioDelay()
                     applyUserVolume()
                 }
                 MediaPlayer.Event.Paused -> playbackState = PlaybackStateCompat.STATE_PAUSED

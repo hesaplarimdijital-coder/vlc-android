@@ -30,7 +30,6 @@ import android.media.AudioManager
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.annotation.MainThread
-import androidx.core.net.toUri
 import com.squareup.moshi.Moshi
 import io.ktor.server.routing.Routing
 import io.ktor.server.websocket.WebSocketServerSession
@@ -42,20 +41,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.medialibrary.Tools
 import org.videolan.tools.AppScope
 import org.videolan.tools.REMOTE_ACCESS_PLAYBACK_CONTROL
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
-import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.remoteaccessserver.BuildConfig
 import org.videolan.vlc.remoteaccessserver.RemoteAccessServer
 import org.videolan.vlc.remoteaccessserver.routing.convertToJson
 import org.videolan.vlc.remoteaccessserver.ssl.SecretGenerator
 import org.videolan.vlc.remoteaccessserver.websockets.IncomingMessageType.*
-import org.videolan.vlc.repository.SlaveRepository
-import org.videolan.vlc.util.FileUtils
 import java.util.Calendar
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -164,7 +159,7 @@ object RemoteAccessWebSockets {
                 }
             }
             GET_VOLUME -> {
-                val message = Frame.Text(getVolumeMessage(context, service))
+                val message = Frame.Text(getVolumeMessage(context))
                 webSocketSessions.forEach { (_, session) -> session.send(message) }
             }
             SET_VOLUME -> {
@@ -248,22 +243,11 @@ object RemoteAccessWebSockets {
                         service?.moveItem(index, index - 1)
                 }
             }
-            REMOTE -> incomingMessage.stringValue?.let { action -> VideoPlayerActivity.videoRemoteFlow.emit(action) }
             SET_BROWSER_AUDIO -> {
                 service?.playlistManager?.setBrowserAudio(incomingMessage.id == 1)
             }
             SET_AUDIO_TRACK -> incomingMessage.stringValue?.let { trackId ->
                 try { service?.setAudioTrack(trackId) } catch (e: Exception) { Log.e(TAG, "Failed to set audio track", e) }
-            }
-            SET_SUBTITLE_TRACK -> incomingMessage.stringValue?.let { trackId ->
-                try { service?.setSpuTrack(trackId) } catch (e: Exception) { Log.e(TAG, "Failed to set subtitle track", e) }
-            }
-            PICK_SUBTITLE -> incomingMessage.stringValue?.let { subtitleMrl ->
-                val subtitleUri = subtitleMrl.toUri()
-                service?.addSubtitleTrack(FileUtils.getUri(subtitleUri) ?: subtitleUri, true)
-                service?.currentMediaWrapper?.let {
-                    SlaveRepository.getInstance(context).saveSlave(it.location, IMedia.Slave.Type.Subtitle, 2, subtitleMrl)
-                }
             }
         }
         return true
@@ -296,18 +280,12 @@ object RemoteAccessWebSockets {
      *
      * @return an [String] describing the volume message
      */
-    private fun getVolumeMessage(context: Context, service: PlaybackService?): String {
-        val volume = when {
-            service?.isVideoPlaying == true && service.volume > 100 -> service.volume
-            else -> {
-                (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
-                    val vol = it.getStreamVolume(AudioManager.STREAM_MUSIC)
-                    val max = it.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                    (vol.toFloat() / max * 100).toInt()
-                }
-                        ?: 0
-            }
-        }
+    private fun getVolumeMessage(context: Context): String {
+        val volume = (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
+            val vol = it.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val max = it.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            (vol.toFloat() / max * 100).toInt()
+        } ?: 0
         return convertToJson(RemoteAccessServer.Volume(volume))
     }
 

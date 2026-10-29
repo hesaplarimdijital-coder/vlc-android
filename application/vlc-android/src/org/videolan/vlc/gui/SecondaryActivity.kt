@@ -46,8 +46,6 @@ import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.KEY_ANIMATED
-import org.videolan.resources.KEY_FOLDER
-import org.videolan.resources.KEY_GROUP
 import org.videolan.resources.util.applyOverscanMargin
 import org.videolan.resources.util.parcelable
 import org.videolan.tools.KEY_INCOGNITO
@@ -64,7 +62,6 @@ import org.videolan.vlc.gui.browser.MLStorageBrowserFragment
 import org.videolan.vlc.gui.browser.NetworkBrowserFragment
 import org.videolan.vlc.gui.helpers.UiTools
 import org.videolan.vlc.gui.network.MRLPanelFragment
-import org.videolan.vlc.gui.video.VideoGridFragment
 import org.videolan.vlc.reloadLibrary
 import org.videolan.vlc.util.DialogDelegate
 import org.videolan.vlc.util.IDialogManager
@@ -207,14 +204,6 @@ class SecondaryActivity : ContentActivity(), IDialogManager {
             ABOUT -> fragment = AboutFragment()
             STREAMS -> fragment = MRLPanelFragment()
             HISTORY -> fragment = HistoryFragment()
-            VIDEO_GROUP_LIST -> {
-                fragment = VideoGridFragment().apply {
-                    arguments = bundleOf(
-                        KEY_FOLDER to intent.parcelable(KEY_FOLDER),
-                        KEY_GROUP to intent.parcelable(KEY_GROUP)
-                    )
-                }
-            }
             STORAGE_BROWSER, STORAGE_BROWSER_ONBOARDING -> {
                 fragment = MLStorageBrowserFragment.newInstance(id == STORAGE_BROWSER_ONBOARDING)
                 setResult(RESULT_RESTART)
@@ -241,7 +230,6 @@ class SecondaryActivity : ContentActivity(), IDialogManager {
         const val ABOUT = "about"
         const val STREAMS = "streams"
         const val HISTORY = "history"
-        const val VIDEO_GROUP_LIST = "videoGroupList"
         const val STORAGE_BROWSER = "storage_browser"
         const val STORAGE_BROWSER_ONBOARDING = "storage_browser_onboarding"
         const val FILE_BROWSER = "file_browser"

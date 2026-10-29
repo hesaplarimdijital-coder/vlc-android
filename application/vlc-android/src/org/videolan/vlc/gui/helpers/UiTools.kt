@@ -28,13 +28,11 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
-import android.media.MediaRouter
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -49,7 +47,6 @@ import android.view.DragEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.InputMethodManager
@@ -157,10 +154,8 @@ import org.videolan.vlc.gui.LibrariesActivity
 import org.videolan.vlc.gui.LibraryWithLicense
 import org.videolan.vlc.gui.browser.MediaBrowserFragment
 import org.videolan.vlc.gui.dialogs.AboutVersionDialog
-import org.videolan.vlc.gui.dialogs.AddToGroupDialog
 import org.videolan.vlc.gui.dialogs.LicenseDialog
 import org.videolan.vlc.gui.dialogs.SavePlaylistDialog
-import org.videolan.vlc.gui.dialogs.VideoTracksDialog
 import org.videolan.vlc.gui.helpers.BitmapUtil.vectorToBitmap
 import org.videolan.vlc.gui.helpers.hf.PinCodeDelegate
 import org.videolan.vlc.gui.helpers.hf.checkPIN
@@ -465,10 +460,6 @@ object UiTools {
         return ContextCompat.getColor(context, getResourceFromAttribute(context, attrId))
     }
 
-    fun setViewOnClickListener(v: View?, ocl: View.OnClickListener?) {
-        v?.setOnClickListener(ocl)
-    }
-
     /**
      * Fill the about main view for mobile and TV
      */
@@ -645,13 +636,6 @@ object UiTools {
         return false
     }
 
-    fun FragmentActivity.addToGroup(tracks: List<MediaWrapper>, forbidNewGroup:Boolean) {
-        if (!isStarted()) return
-        val addToGroupDialog = AddToGroupDialog()
-        addToGroupDialog.arguments = bundleOf(AddToGroupDialog.KEY_TRACKS to tracks.toTypedArray(), AddToGroupDialog.FORBID_NEW_GROUP to forbidNewGroup)
-        addToGroupDialog.show(supportFragmentManager, "fragment_add_to_group")
-    }
-
     /**
      * Creates a shortcut to the media on the launcher
      * @param mediaLibraryItem: the [MediaLibraryItem] to create a shortcut to
@@ -689,15 +673,6 @@ object UiTools {
             val successCallback = PendingIntent.getBroadcast(context, 0, pinnedShortcutCallbackIntent,  PendingIntent.FLAG_IMMUTABLE)
             ShortcutManagerCompat.requestPinShortcut(context, pinShortcutInfo, successCallback.intentSender)
         }
-    }
-
-    fun FragmentActivity.showVideoTrack(menuListener:(VideoTracksDialog.VideoTrackOption) -> Unit, trackSelectionListener:(String, VideoTracksDialog.TrackType) -> Unit) {
-        if (!isStarted()) return
-        val videoTracksDialog = VideoTracksDialog()
-        videoTracksDialog.arguments = bundleOf()
-        videoTracksDialog.show(supportFragmentManager, "fragment_video_tracks")
-        videoTracksDialog.menuItemListener = menuListener
-        videoTracksDialog.trackSelectionListener = trackSelectionListener
     }
 
     fun FragmentActivity.showDonations() {
@@ -912,15 +887,6 @@ object UiTools {
         })
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    fun setRotationAnimation(activity: Activity) {
-        if (!VlcMigrationHelper.isJellyBeanMR2OrLater) return
-        val win = activity.window
-        val winParams = win.attributes
-        winParams.rotationAnimation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS else WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT
-        win.attributes = winParams
-    }
-
 
     fun restartDialog(
         activity: Activity,
@@ -960,23 +926,6 @@ object UiTools {
     }
 
 
-
-    fun deleteSubtitleDialog(context: Context, positiveListener: DialogInterface.OnClickListener, negativeListener: DialogInterface.OnClickListener) {
-        AlertDialog.Builder(context)
-                .setTitle(context.resources.getString(R.string.delete_sub_title))
-                .setMessage(context.resources.getString(R.string.delete_sub_message))
-                .setPositiveButton(R.string.delete, positiveListener)
-                .setNegativeButton(R.string.cancel, negativeListener)
-                .create()
-                .show()
-    }
-
-    fun hasSecondaryDisplay(context: Context): Boolean {
-        val mediaRouter = context.getSystemService<MediaRouter>()!!
-        val route = mediaRouter.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_VIDEO)
-        val presentationDisplay = route?.presentationDisplay
-        return presentationDisplay != null
-    }
 
     /**
      * Invalidate the default bitmaps that are different in light and dark modes

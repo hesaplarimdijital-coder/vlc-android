@@ -58,7 +58,6 @@
     <attr name="empty_foreground" format="color" />
     <attr name="empty_background" format="color" />
     <attr name="disabled_overlay_color" format="color" />
-    <attr name="video_card_background" format="reference"/>
     <attr name="video_list_background" format="reference"/>
     <attr name="audio_chip_background" format="color" />
     <attr name="audio_chip_text_color" format="color" />
@@ -93,8 +92,6 @@
     <attr name="ic_passthrough" format="reference" />
     <attr name="player_icon_color" format="reference" />
     <attr name="dialog_circle_background" format="reference"/>
-    <attr name="ic_tips_double_tap" format="reference"/>
-    <attr name="ic_tips_tap" format="reference"/>
 
 
     <attr name="advanced_options_bg" format="reference"/>

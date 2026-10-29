@@ -1,6 +1,5 @@
 package org.videolan.vlc
 
-import android.content.Context
 import org.videolan.libvlc.LibVLC
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.interfaces.IMedia
@@ -48,8 +47,6 @@ fun IMedia.getAllTracks(): List<IMedia.Track> {
 }
 
 
-fun MediaPlayer.getSelectedVideoTrack(): VlcTrack? = currentVideoTrack?.let { VlcTrackImpl(it) }
-
 fun MediaPlayer.getSelectedAudioTrack(): VlcTrack? {
     val currentTrackId = audioTrack
    audioTracks?.forEach {
@@ -58,28 +55,11 @@ fun MediaPlayer.getSelectedAudioTrack(): VlcTrack? {
     return null
 }
 
-fun MediaPlayer.getSelectedSpuTrack(): VlcTrack? {
-    val currentTrackId = spuTrack
-    spuTracks?.forEach {
-        if (it.id == currentTrackId) return VlcTrackImpl(it)
-    }
-    return null
-}
-
-fun MediaPlayer.setVideoTrack(index:String):Boolean {
-    return setVideoTrack(index.toInt())
-}
 fun MediaPlayer.setAudioTrack(index:String):Boolean {
     return setAudioTrack(index.toInt())
 }
 
-fun MediaPlayer.setSpuTrack(index:String):Boolean {
-    return setSpuTrack(index.toInt())
-}
-
 fun MediaPlayer.getAllAudioTracks(): Array<VlcTrack> = audioTracks.convertToVlcTrack()
-fun MediaPlayer.getAllVideoTracks():Array<VlcTrack> = videoTracks.convertToVlcTrack()
-fun MediaPlayer.getAllSpuTracks():Array<VlcTrack> = spuTracks.convertToVlcTrack()
 
 fun Array<MediaPlayer.TrackDescription>?.convertToVlcTrack(): Array<VlcTrack> {
     if (this == null) return arrayOf()
@@ -90,12 +70,6 @@ fun Array<MediaPlayer.TrackDescription>?.convertToVlcTrack(): Array<VlcTrack> {
     return newTracks.toTypedArray()
 }
 
-fun MediaPlayer.unselectTrackType(type: Int) {
-    throw IllegalStateException("This is a VLC 4 only API. It should not be called by VLC 3")
-}
-fun getDisableTrack(context: Context) : VlcTrack {
-    throw IllegalStateException("This is a VLC 4 only API. It should not be called by VLC 3")
-}
 
 /**
  * Scan the system fonts and build the fontconfig cache. VLC3 builds fontconfig for Android, so

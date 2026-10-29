@@ -147,8 +147,6 @@ private fun AllSettingsPages(
     }
 
     BackHandler(enabled = stack.isNotEmpty()) { up() }
-    // the subtitles' look is applied when their page is left, also by leaving the screen
-    DisposableEffect(pageId) { onDispose { controller.left(pageId) } }
 
     LaunchedEffect(requestedKey) {
         val key = requestedKey ?: return@LaunchedEffect

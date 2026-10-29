@@ -95,13 +95,6 @@ object FileUtils {
         return parentPath
     }
 
-    /*
-     * Convert file:// uri from real path to emulated FS path.
-     */
-    fun convertLocalUri(uri: Uri): Uri {
-        return if (uri.scheme != "file" || !uri.path!!.startsWith("/sdcard")) uri else uri.toString().replace("/sdcard", AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY).toUri()
-    }
-
     @WorkerThread
     fun getPathFromURI(contentUri: Uri): String {
         var cursor: Cursor? = null
