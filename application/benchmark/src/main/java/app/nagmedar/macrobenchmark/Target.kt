@@ -3,6 +3,7 @@ package app.nagmedar.macrobenchmark
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
@@ -36,7 +37,11 @@ fun UiDevice.pastFirstRun() {
     executeShellCommand("am start -W -n $TARGET/$SHELL_ACTIVITY")
     for (step in 0..FIRST_RUN_STEPS) {
         val skip = wait(Until.findObject(By.res("first-run-skip")), if (step == 0) 5_000 else 3_000) ?: break
-        skip.click()
+        try {
+            skip.click()
+        } catch (e: StaleObjectException) {
+            // the step slid away under the tap: the next round finds the next one's
+        }
         waitForIdle()
     }
     pressHome()

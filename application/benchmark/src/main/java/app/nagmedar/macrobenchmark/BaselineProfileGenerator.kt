@@ -92,7 +92,13 @@ class BaselineProfileGenerator {
             list.fling(Direction.UP)
             device.waitForIdle()
         }
-        passOver { waitFor { device.findObject(By.res("music"))?.findObject(By.scrollable(true))?.findObject(By.clickable(true)) }?.click() }
+        // a track by its title (the phone's rows also hold a ⋯ button, which opens a sheet instead):
+        // the CI run's tracks are "Profile track …" (emulator.yml), another library's first row
+        passOver {
+            waitFor {
+                device.findObject(By.res("music"))?.let { it.findObject(By.textStartsWith("Profile track")) ?: it.findObject(By.scrollable(true))?.findObject(By.clickable(true)) }
+            }?.click()
+        }
         // the phone's mini player opens the phone player (its first clickable part, the track's
         // title, does); a tablet shows the track in its inspector
         passOver {
