@@ -69,6 +69,7 @@ if [ -n "$MUSIC" ] && [ -d "$MUSIC" ]; then
     echo "Müzik: $(ls "$MUSIC" | wc -l) dosya"
 fi
 
+adb logcat -G 32M 2>/dev/null || true
 adb logcat -c 2>/dev/null || true
 # earlier runs' files would be merged into this one's
 adb shell rm -rf "/sdcard/Android/media/$TESTS" 2>/dev/null || true
@@ -82,6 +83,8 @@ adb shell wm size reset 2>/dev/null || true
 adb shell wm density reset 2>/dev/null || true
 
 adb logcat -d -s NagmedarProfile:V | tr -d '\r' > "$OUT/steps.txt" || true
+adb logcat -d -v time -b main,system,crash | grep -E 'NagDiag|NagmedarProfile|AndroidRuntime|ActivityTaskManager|ActivityManager.*nagmedar|FATAL|lowmemorykiller|nagmedar.*(Kill|died)' | tr -d '\r' > "$OUT/diag.txt" || true
+adb logcat -d -v time -b events | grep -E 'nagmedar' | tr -d '\r' > "$OUT/events.txt" || true
 
 # the three tests' profiles in one, each rule once, the cold start's first (its test writes only a
 # startup profile, whose rules belong to the Baseline Profile too); the startup profile from the

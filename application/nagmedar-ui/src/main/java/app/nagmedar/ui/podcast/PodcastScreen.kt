@@ -130,6 +130,10 @@ fun PodcastsScreen(undo: UndoBarState?) {
         )
     }
     LaunchedEffect(controller) { controller.follow() }
+    androidx.compose.runtime.DisposableEffect(controller) {
+        android.util.Log.i("NagDiag", "screen enter ${System.identityHashCode(controller)} ctx=${System.identityHashCode(context)}")
+        onDispose { android.util.Log.i("NagDiag", "screen dispose ${System.identityHashCode(controller)}", Throwable("dispose")) }
+    }
     // a notification of new episodes was tapped: the show's page
     val requested by PodcastCenter.openRequest.collectAsState()
     LaunchedEffect(requested) {

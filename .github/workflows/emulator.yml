@@ -295,9 +295,9 @@ jobs:
           for f in init.log build.log; do [ -f "$f" ] && tail -n 300 "$f" > "$out/$f.tail.txt"; done
           [ -f "$RUNNER_TEMP/feed.log" ] && cp "$RUNNER_TEMP/feed.log" "$out/feed.log"
           cd "$out"
-          git init -q && git checkout -q --orphan ci/baseline-profile
+          git init -q && git checkout -q --orphan ci/baseline-profile-diag
           git add -A && git commit -q -m "Baseline Profile of ${GITHUB_SHA::7} (${{ inputs.ref || github.ref_name }}, run ${GITHUB_RUN_ID})"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/baseline-profile
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/ci/baseline-profile-diag
           rules=$(wc -l < application/app/src/main/baselineProfiles/baseline-prof.txt 2>/dev/null || echo 0)
           echo "::notice title=Baseline Profile Ekran::$rules rules on ci/baseline-profile (report.md)"
 

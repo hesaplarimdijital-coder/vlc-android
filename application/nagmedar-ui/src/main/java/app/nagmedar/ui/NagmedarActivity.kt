@@ -77,6 +77,7 @@ class NagmedarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        android.util.Log.i("NagDiag", "activity create ${System.identityHashCode(this)} saved=${savedInstanceState != null} task=$taskId intent=$intent")
         if (savedInstanceState == null) {
             destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
             openPodcastOf(intent)
@@ -217,7 +218,18 @@ class NagmedarActivity : ComponentActivity() {
         Settings.getInstance(this).edit().putString(NAGMEDAR_WINDOW_BOUNDS, bounds.flattenToString()).apply()
     }
 
+    override fun onDestroy() {
+        android.util.Log.i("NagDiag", "activity destroy ${System.identityHashCode(this)} finishing=$isFinishing config=$isChangingConfigurations")
+        super.onDestroy()
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        android.util.Log.i("NagDiag", "activity config ${System.identityHashCode(this)} $newConfig")
+    }
+
     override fun onNewIntent(intent: Intent) {
+        android.util.Log.i("NagDiag", "activity newIntent ${System.identityHashCode(this)} $intent")
         super.onNewIntent(intent)
         setIntent(intent)
         intent.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)?.let { destination = it }

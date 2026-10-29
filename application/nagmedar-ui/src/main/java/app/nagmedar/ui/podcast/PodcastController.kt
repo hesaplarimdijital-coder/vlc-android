@@ -253,10 +253,13 @@ class PodcastController(
 
     /** Subscribes to the address typed in the "add" window; the window stays with the reason when it is no feed. */
     fun submitAddress(text: String) {
+        android.util.Log.i("NagDiag", "submitAddress ${System.identityHashCode(this)} $text", Throwable("submit"))
         addJob?.cancel()
         add = AddUi(text, working = true)
         addJob = scope.launch {
-            when (val result = repository.subscribe(text)) {
+            val result = try { repository.subscribe(text) } catch (e: Throwable) { android.util.Log.w("NagDiag", "subscribe threw ${System.identityHashCode(this@PodcastController)}", e); throw e }
+            android.util.Log.i("NagDiag", "subscribe result ${System.identityHashCode(this@PodcastController)} $result")
+            when (result) {
                 is SubscribeResult.Added -> {
                     add = null
                     announce(result.feed)
@@ -273,10 +276,12 @@ class PodcastController(
     }
 
     fun openAdd() {
+        android.util.Log.i("NagDiag", "openAdd ${System.identityHashCode(this)} add=$add job=${addJob?.isActive}")
         add = AddUi()
     }
 
     fun dismissAdd() {
+        android.util.Log.i("NagDiag", "dismissAdd ${System.identityHashCode(this)} job=${addJob?.isActive}", Throwable("dismiss"))
         addJob?.cancel()
         addJob = null
         add = null

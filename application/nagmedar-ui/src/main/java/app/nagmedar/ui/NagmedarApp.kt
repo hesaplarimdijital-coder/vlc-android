@@ -292,6 +292,13 @@ private fun NagmedarMain(
         libraryListRequests++
     }
     LaunchedEffect(actions) { onActionsReady(actions) }
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        android.util.Log.i("NagDiag", "main enter ${System.identityHashCode(navController)}")
+        onDispose { android.util.Log.i("NagDiag", "main dispose ${System.identityHashCode(navController)}") }
+    }
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { e -> android.util.Log.i("NagDiag", "nav ${e.destination.route} ${e.id} ${System.identityHashCode(e)}") }
+    }
     val motion = NagTheme.motion
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests == 0) return@LaunchedEffect
@@ -343,6 +350,7 @@ private fun NagmedarMain(
         if (deviceReveal != null) navigator.navigate(Destination.Device)
     }
     LaunchedEffect(requestedDestination) {
+        android.util.Log.i("NagDiag", "requested $requestedDestination")
         if (requestedDestination == NAGMEDAR_DESTINATION_NOW_PLAYING) {
             nowPlayingRequested = true
             onDestinationShown()
