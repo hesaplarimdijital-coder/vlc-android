@@ -76,7 +76,7 @@ class SearchScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("search-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "ada")
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
@@ -85,14 +85,14 @@ class SearchScreenshotTest {
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phone() = capture("search-phone-light", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, "ada")
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun syntax() = capture("search-empty-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
 
     /** S-1501: in English, the results (English capitals: MUSIC) and the syntax. */
     @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
     fun tabletEnglish() = capture("search-tablet-dark-en", WidthClass.Expanded, ThemeMode.Dark, InputMode.Touch, "ada")
 
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun syntaxEnglish() = capture("search-empty-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, "")
 }
 

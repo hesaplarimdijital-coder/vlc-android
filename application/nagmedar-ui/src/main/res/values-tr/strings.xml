@@ -440,6 +440,10 @@
     <string name="nag_density_touch">Dokunmatik</string>
     <string name="nag_density_pointer">Fare ve klavye</string>
     <string name="nag_settings_about">Hakkında</string>
+    <string name="nag_settings_developer">Geliştirici araçları</string>
+    <string name="nag_settings_developer_hint">Laboratuvar ve performans ölçümleri; günlük kullanım için gerekmez.</string>
+    <string name="nag_settings_developer_show">Göster</string>
+    <string name="nag_settings_developer_hide">Gizle</string>
     <!-- All settings: VLC's preference pages drawn by Nağmedar -->
     <string name="nag_prefs_title">Tüm ayarlar</string>
     <string name="nag_prefs_search">Ayarlarda ara</string>
@@ -2258,6 +2262,7 @@
     <string name="nag_streams_address_hint">https://… · rtsp://… · udp://…</string>
     <string name="nag_streams_paste">Yapıştır</string>
     <string name="nag_streams_open_hint">Enter adresi oynatır; oynattığınız akışlar aşağıda kalır.</string>
+    <string name="nag_streams_open_hint_touch">Oynattığınız akışlar aşağıda kalır.</string>
     <string name="nag_streams_invalid">Bu bir akış adresi değil: adres, https:// ya da rtsp:// gibi protokolüyle başlar.</string>
     <string name="nag_streams_clipboard_empty">Panoda metin yok.</string>
     <string name="nag_streams_empty_title">Henüz akış yok</string>

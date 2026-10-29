@@ -85,7 +85,7 @@ class ConvertScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dialogDex() = capture("convert-dialog-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Window(album, ConvertOptions(ConvertPreset.Opus160, folder = folder))
     }
@@ -120,7 +120,7 @@ class ConvertScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun doneDexEnglish() = capture("convert-done-dex-light-en", ThemeMode.Light, InputMode.Pointer) {
         Box(Modifier.padding(24.dp)) {
             ConvertStatusBar(ConvertStatus.Finished("a1", converted = 9, skipped = 1, failed = 2, cancelled = false), onCancel = {}, onDetails = {}, onDismiss = {})
@@ -142,7 +142,7 @@ class ConvertScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun stoppedDexEnglish() = capture("convert-summary-dex-dark-en", ThemeMode.Dark, InputMode.Pointer) {
         val outcomes = List(6) { index ->
             if (index < 4) ItemOutcome.Converted(item(index), 4_200_000) else ItemOutcome.Failed(item(index), ConvertReason.Cancelled)

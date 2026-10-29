@@ -74,6 +74,7 @@ import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.music.PlaylistNameDialog
@@ -771,7 +772,8 @@ private fun trackMenu(
 @Composable
 private fun EmptyRecordings(controller: RecordingsController, onSearchStations: () -> Unit) {
     val res = LocalContext.current.resources
-    val keys = ShortcutRegistry.chordLabel(ShortcutId.RadioRecord, res)
+    // 1.0.1: by touch the station's menu, not keys to press
+    val keys = keyHint(ShortcutRegistry.chordLabel(ShortcutId.RadioRecord, res))
     StatePanel(
         tone = StateTone.Neutral,
         icon = NagIcons.Record,

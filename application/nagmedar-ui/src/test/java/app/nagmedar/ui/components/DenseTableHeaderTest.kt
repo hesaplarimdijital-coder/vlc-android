@@ -34,7 +34,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class DenseTableHeaderTest {
 
     @get:Rule

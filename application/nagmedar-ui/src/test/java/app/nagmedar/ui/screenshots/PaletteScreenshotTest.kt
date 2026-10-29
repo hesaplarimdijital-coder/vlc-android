@@ -77,7 +77,7 @@ class PaletteScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dexQuery() = capture("palette-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "aç", emptyList())
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
@@ -90,6 +90,6 @@ class PaletteScreenshotTest {
     )
 
     /** S-1501: in English. */
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dexEnglish() = capture("palette-dex-dark-en", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "open", emptyList())
 }

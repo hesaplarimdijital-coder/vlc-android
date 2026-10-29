@@ -63,6 +63,7 @@ import app.nagmedar.ui.components.copyToClipboard
 import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.input.hardwareKeyboard
 import app.nagmedar.ui.music.AddToPlaylistDialog
 import app.nagmedar.ui.music.MediaLibraryPlaylists
 import app.nagmedar.ui.music.PlaylistSummary
@@ -336,7 +337,8 @@ private fun OpenBar(
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("streams-invalid"),
             )
         } else {
-            Text(stringResource(R.string.nag_streams_open_hint), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
+            // 1.0.1: Enter for a keyboard at hand; by touch the Play button is there to see
+            Text(stringResource(if (hardwareKeyboard()) R.string.nag_streams_open_hint else R.string.nag_streams_open_hint_touch), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
         }
     }
 }

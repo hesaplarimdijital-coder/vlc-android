@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
@@ -649,10 +650,12 @@ fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, mod
         )
         Spacer(Modifier.width(12.dp))
         InverseTextButton(message.actionLabel, onUndo)
-        if (message.shortcut != null) {
+        // 1.0.1: the keycap with a keyboard only; by touch "Geri al" says it all
+        val shortcut = keyHint(message.shortcut)
+        if (shortcut != null) {
             Spacer(Modifier.width(4.dp))
             Text(
-                message.shortcut,
+                shortcut,
                 style = NagTheme.type.mono,
                 color = mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.78f),
                 maxLines = 1,

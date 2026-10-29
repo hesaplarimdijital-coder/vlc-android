@@ -83,6 +83,8 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
+import app.nagmedar.ui.input.hardwareKeyboard
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.lyrics.Lrc
@@ -254,7 +256,8 @@ private fun Toolbar(controller: LyricsEditorController, timeMs: () -> Long, play
             modifier = Modifier.semantics { contentDescription = res.getString(R.string.nag_lrc_mode_label) }.testTag("lrc-mode"),
         )
         NagButton(
-            stringResource(R.string.nag_lrc_stamp) + " · " + (ShortcutRegistry.chordLabel(ShortcutId.LrcStamp, res) ?: ""),
+            // 1.0.1: its key beside it with a keyboard only
+            listOfNotNull(stringResource(R.string.nag_lrc_stamp), keyHint(ShortcutRegistry.chordLabel(ShortcutId.LrcStamp, res))).joinToString(" · "),
             controller::stamp,
             primary = true,
             enabled = !state.finished,
@@ -285,7 +288,8 @@ private fun Toolbar(controller: LyricsEditorController, timeMs: () -> Long, play
         )
     }
     val chord = { id: ShortcutId -> ShortcutRegistry.chordLabel(id, res).orEmpty() }
-    Text(
+    // 1.0.1: the keys, for a keyboard at hand; by touch the buttons above say it
+    if (hardwareKeyboard()) Text(
         stringResource(
             R.string.nag_lrc_hint,
             chord(ShortcutId.LrcStamp), chord(ShortcutId.PlayPause), chord(ShortcutId.LrcLineUp), chord(ShortcutId.LrcLineDown),

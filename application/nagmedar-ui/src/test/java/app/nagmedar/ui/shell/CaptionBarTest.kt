@@ -72,7 +72,7 @@ class CaptionBarTest {
 
     private fun excluded(x: Float, y: Float): Boolean = view.systemGestureExclusionRects.any { it.contains(x.toInt(), y.toInt()) }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theMenuBarIsTheCaptionBar() {
         shell(WidthClass.Large)
         val window = view.width
@@ -106,7 +106,7 @@ class CaptionBarTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dexScreenshot() {
         shell(WidthClass.Large)
         capture("caption-dex-dark")

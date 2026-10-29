@@ -100,7 +100,7 @@ class PodcastScreenshotTest {
         key(3) to SubscribeUi.Failed(FeedFailure.Invalid(InvalidReason.NotFeed)),
     )
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun gridDex() = capture("podcasts-grid-dex-dark", ThemeMode.Dark, InputMode.Pointer, shell(WidthClass.Large, PodcastSamples.model()))
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
@@ -109,7 +109,7 @@ class PodcastScreenshotTest {
     @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
     fun listPhoneEnglish() = capture("podcasts-list-phone-light-en", ThemeMode.Light, InputMode.Touch, shell(WidthClass.Compact, PodcastSamples.model()))
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun resultsDex() = capture(
         "podcasts-results-dex-light", ThemeMode.Light, InputMode.Pointer,
         shell(
@@ -135,7 +135,7 @@ class PodcastScreenshotTest {
         shell(WidthClass.Expanded, PodcastSamples.model(query = "gece", search = found(SearchNotice.PodcastIndexFailed), subscribing = states)),
     )
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun pageDex() = capture(
         "podcasts-page-dex-dark", ThemeMode.Dark, InputMode.Pointer,
         shell(WidthClass.Large, PodcastSamples.model(page = PodcastSamples.page)),
@@ -233,13 +233,13 @@ class PodcastScreenshotTest {
         shell(WidthClass.Compact, PodcastSamples.model(query = "gece", search = SearchUi.Failed("gece", SearchFailure.Offline))),
     )
 
-    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun noResultsDexEnglish() = capture(
         "podcasts-no-results-dex-light-en", ThemeMode.Light, InputMode.Pointer,
         shell(WidthClass.Large, PodcastSamples.model(query = "zzzz", search = SearchUi.Found("zzzz", emptyList(), SearchNotice.PodcastIndexMissing))),
     )
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun addRefused() = capture("podcasts-add-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             AddAddressSurface(AddUi("https://example.org/", failure = FeedFailure.Invalid(InvalidReason.NotFeed)), onSubmit = {}, onDismiss = {})
@@ -262,7 +262,7 @@ class PodcastScreenshotTest {
         ),
     )
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun importDone() = capture("podcasts-import-done-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { ImportSurface(ImportUi.Done(summary), onDismiss = {}) }
     }

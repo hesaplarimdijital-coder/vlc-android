@@ -1,6 +1,11 @@
 package app.nagmedar.ui.playback
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -22,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -39,15 +47,18 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
@@ -57,6 +68,8 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SwipeToRemove
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.blockInputBelow
+import app.nagmedar.ui.components.blockPointerBelow
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -70,8 +83,13 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.durationWords
 import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.shell.DetailBackHandler
+import app.nagmedar.ui.shell.WindowPage
+import app.nagmedar.ui.shell.rememberDetailMotion
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import kotlin.math.roundToInt
 
 /**
  * "Sıradaki", the play queue (S-310): what plays now, then what comes after it. A row tapped
@@ -79,7 +97,9 @@ import app.nagmedar.ui.theme.NagTheme
  * pointer, the handle drags and the row's menu, Delete, Alt+↑ and Alt+↓ do the rest. "Temizle"
  * takes everything after what plays now; what goes comes back with the undo bar. [onClose] null
  * (the music view's inspector, Desktop Kit 1.0): the panel stays, without its close button, and
- * leaves Back and Esc to the window; [background] is what it lies on.
+ * leaves Back and Esc to the window; [background] is what it lies on. [page] (1.0.1, a phone's
+ * [QueuePage]): a page's top bar instead, the back arrow before the title and "Temizle" only
+ * while something is to come; Back is the page's.
  */
 @Composable
 fun QueuePanel(
@@ -90,6 +110,7 @@ fun QueuePanel(
     modifier: Modifier = Modifier,
     undo: UndoBarState? = null,
     background: Color = NagTheme.colors.chrome,
+    page: Boolean = false,
 ) {
     val res = LocalContext.current.resources
     val colors = NagTheme.colors
@@ -100,7 +121,7 @@ fun QueuePanel(
     val first = if (playing != null) current + 1 else 0
     val upcoming = entries.drop(first)
     val title = stringResource(R.string.nag_queue_title)
-    BackHandler(enabled = onClose != null) { onClose?.invoke() }
+    BackHandler(enabled = onClose != null && !page) { onClose?.invoke() }
 
     fun remove(index: Int) {
         val entry = entries.getOrNull(index) ?: return
@@ -134,10 +155,14 @@ fun QueuePanel(
             .testTag("queue-panel"),
     ) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(start = dimens.gapL, end = dimens.gapS),
+            Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(start = if (page) dimens.gapXs else dimens.gapL, end = dimens.gapS),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, style = NagTheme.type.title, color = colors.text)
+            if (page && onClose != null) {
+                NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_prefs_back), onClose, modifier = Modifier.testTag("queue-back"))
+                Spacer(Modifier.width(dimens.gapXs))
+            }
+            Text(title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
             Spacer(Modifier.width(dimens.gapS))
             Text(
                 summary(upcoming),
@@ -147,8 +172,12 @@ fun QueuePanel(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            NagButton(stringResource(R.string.nag_queue_clear), ::clear, enabled = upcoming.isNotEmpty())
-            if (onClose != null) NagIconButton(NagIcons.Close, stringResource(R.string.nag_queue_close), onClose)
+            when (clearShown(upcoming.size, page)) {
+                ClearButton.Enabled -> NagButton(stringResource(R.string.nag_queue_clear), ::clear, modifier = Modifier.testTag("queue-clear"))
+                ClearButton.Disabled -> NagButton(stringResource(R.string.nag_queue_clear), ::clear, enabled = false, modifier = Modifier.testTag("queue-clear"))
+                ClearButton.Hidden -> Unit
+            }
+            if (onClose != null && !page) NagIconButton(NagIcons.Close, stringResource(R.string.nag_queue_close), onClose)
         }
         HorizontalRule()
         if (playing != null) {
@@ -247,6 +276,20 @@ fun QueuePanel(
     }
 }
 
+/** How "Temizle" shows (1.0.1). */
+internal enum class ClearButton { Enabled, Disabled, Hidden }
+
+/**
+ * "Temizle" with [upcoming] entries after what plays: pressable while there are any; with none, a
+ * phone's [page] leaves it out (its empty state has the page), the panel beside a wide screen keeps
+ * it in its place, not pressable.
+ */
+internal fun clearShown(upcoming: Int, page: Boolean): ClearButton = when {
+    upcoming > 0 -> ClearButton.Enabled
+    page -> ClearButton.Hidden
+    else -> ClearButton.Disabled
+}
+
 /** "7 parça · 43 dk"; "öğe" when videos are queued too. */
 @Composable
 private fun summary(upcoming: List<QueueEntry>): String {
@@ -340,6 +383,50 @@ class QueuePanelState(open: Boolean = false) {
 @Composable
 fun rememberQueuePanelState(): QueuePanelState = rememberSaveable(saver = QueuePanelState.Saver) { QueuePanelState() }
 
+/**
+ * 1.0.1: "Sıradaki" on a phone, a page of its own over the whole window, the bars and the mini
+ * player included (the shell's [WindowPage]), opaque from its first frame: it comes up from the
+ * bottom and goes down again (nothing moves with reduced motion). Back, the predictive gesture
+ * (the page shrinks with the finger, as a detail does) and its back arrow close it. While it is
+ * open nothing under it reacts to a touch, a scroll or a key ([blockInputBelow]), and once it is
+ * up a screen reader reads only it.
+ */
+@Composable
+fun QueuePage(
+    open: Boolean,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    undo: UndoBarState? = null,
+    /** The page's queue, given the page's modifier: the playback service's; the tests' own. */
+    panel: @Composable (Modifier) -> Unit = { pageModifier ->
+        val queue = rememberPlayQueue()
+        QueuePanel(queue.entries, queue.current, queue, onClose, pageModifier, undo, NagTheme.colors.background, page = true)
+    },
+) {
+    val motion = NagTheme.motion
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val visible = remember { MutableTransitionState(false) }
+    visible.targetState = open
+    AnimatedVisibility(visible, modifier = modifier, enter = pageEnter(motion), exit = motion.sheetExit()) {
+        val back = rememberDetailMotion(open = true)
+        // up and at rest, no Back gesture moving it: the shell may stop drawing what is under it
+        val covers by remember(back, visible) { derivedStateOf { visible.isIdle && visible.currentState && back.covered } }
+        WindowPage(covers = covers)
+        panel(
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } }
+                .blockInputBelow()
+                .testTag("queue-page"),
+        )
+        DetailBackHandler(enabled = open, state = back, onBack = onClose)
+    }
+}
+
+/** The page of [QueuePage] coming up: the whole of it slides up, opaque from the first frame (no fade). */
+private fun pageEnter(motion: NagMotion): EnterTransition =
+    if (motion.reduced) EnterTransition.None else slideInVertically(tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate)) { it }
+
 /** The panel over the screen: beside it from the end on wide windows, over all of it on a phone. */
 @Composable
 fun QueueSheet(
@@ -352,7 +439,8 @@ fun QueueSheet(
     undo: UndoBarState? = null,
 ) {
     val colors = NagTheme.colors
-    Row(modifier.fillMaxHeight().then(if (compact) Modifier.fillMaxWidth() else Modifier.width(380.dp))) {
+    // 1.0.1: its empty places (the empty state, under the last row) keep the page beneath it still
+    Row(modifier.fillMaxHeight().then(if (compact) Modifier.fillMaxWidth() else Modifier.width(380.dp)).blockPointerBelow()) {
         // a hairline between the screen and the panel
         if (!compact) Box(Modifier.width(1.dp).fillMaxHeight().background(colors.border))
         QueuePanel(entries, current, actions, onClose, Modifier.weight(1f).fillMaxHeight(), undo)

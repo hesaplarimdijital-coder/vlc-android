@@ -133,7 +133,7 @@ class FirstRunScreenshotTest {
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
     fun notificationsGranted() = capture("first-run-4-notifications-granted", FirstRunState(FirstRunStep.Notifications).apply { notifications = true })
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dexWindow() = capture("first-run-dex", FirstRunState(FirstRunStep.Sources).apply { mediaAccess = true }, input = InputMode.Pointer)
 
     /** S-1501: in English. */

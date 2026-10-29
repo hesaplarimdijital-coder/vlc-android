@@ -2,6 +2,7 @@ package app.nagmedar.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,18 +13,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +55,12 @@ import app.nagmedar.ui.prefs.NagmedarLink
 import app.nagmedar.ui.components.SwatchChoice
 import app.nagmedar.ui.components.TooltipDelay
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.covers.CoversSection
+import app.nagmedar.ui.input.hardwareKeyboard
 import app.nagmedar.ui.lab.LabSection
 import app.nagmedar.ui.library.LibrarySourcesSection
 import app.nagmedar.ui.lyrics.LyricsSection
@@ -63,6 +76,7 @@ import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.theme.DensityPreference
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.ThemeMode
 import app.nagmedar.ui.visual.VisualizerSection
@@ -96,12 +110,57 @@ enum class SettingsItem(val key: String) {
     Backup("backup"),
     Start("start"),
     About("about"),
+
+    /** 1.0.1: the row that opens the developer tools below it, closed at first. */
+    Developer("developer"),
     Lab("lab"),
     Performance("performance"),
     ;
 
     /** Its place in the list. */
     val index: Int get() = entries.indexOf(this)
+}
+
+/**
+ * Whether Settings shows [item] (1.0.1). Input (density, tooltips) and the keyboard shortcuts are
+ * for a keyboard or a mouse: shown when a [keyboard] is attached, a [pointer] has been used this
+ * session, the user changed them ([inputChanged], [shortcutsChanged]), or a link asked for them
+ * ([revealed]); never hidden on DeX, which has both. The developer tools (Lab, Performance) show
+ * while their row is [developerOpen] or a link asked for them. Every other section always shows.
+ */
+internal fun settingsShown(
+    item: SettingsItem,
+    keyboard: Boolean,
+    pointer: Boolean,
+    inputChanged: Boolean,
+    shortcutsChanged: Boolean,
+    developerOpen: Boolean,
+    revealed: Set<SettingsItem>,
+): Boolean = when (item) {
+    SettingsItem.Input -> keyboard || pointer || inputChanged || item in revealed
+    SettingsItem.Shortcuts -> keyboard || pointer || shortcutsChanged || item in revealed
+    SettingsItem.Lab, SettingsItem.Performance -> developerOpen || item in revealed
+    else -> true
+}
+
+/**
+ * The sections of Settings a link asked for (1.0.1): shown even where they would be left out (a
+ * shortcut card's "Edit shortcuts…" on a phone without a keyboard), for as long as the app runs.
+ */
+@Stable
+class SettingsReveal {
+    var items by mutableStateOf(emptySet<SettingsItem>())
+        private set
+
+    fun reveal(item: SettingsItem) {
+        if (item !in items) items = items + item
+    }
+}
+
+/** Settings' list scrolled to [item], shown first through [reveal] if it was left out (1.0.1). */
+suspend fun LazyListState.scrollToSetting(item: SettingsItem, reveal: SettingsReveal?, reduced: Boolean) {
+    reveal?.reveal(item)
+    if (reduced) scrollToItem(item.index) else animateScrollToItem(item.index)
 }
 
 /** The section of [SettingsScreen] a line of "All settings" leads to; null for a page of its own (the equaliser, About). */
@@ -130,8 +189,19 @@ fun SettingsScreen(
     /** S-1504: the user guide and the shortcut card. */
     onOpenGuide: (() -> Unit)? = null,
     onOpenShortcutCard: (() -> Unit)? = null,
+    /** 1.0.1: the sections links asked for, shown wherever they would be left out. */
+    reveal: SettingsReveal? = null,
 ) {
     val dimens = NagTheme.dimens
+    val keyboard = hardwareKeyboard()
+    val pointerNow = NagTheme.inputMode == InputMode.Pointer
+    // a mouse used once this session keeps its sections: they do not vanish under it when a finger touches the screen
+    var pointerSeen by rememberSaveable { mutableStateOf(pointerNow) }
+    LaunchedEffect(pointerNow) { if (pointerNow) pointerSeen = true }
+    var developerOpen by rememberSaveable { mutableStateOf(false) }
+    val inputChanged = prefs.density != DensityPreference.Auto || prefs.tooltipDelay != TooltipDelay.Normal
+    val shortcutsChanged = prefs.shortcutOverrides.isNotEmpty()
+    val revealed = reveal?.items.orEmpty()
     LazyColumn(
         state = listState,
         // the macrobenchmarks scroll it by this tag (S-1404)
@@ -140,7 +210,9 @@ fun SettingsScreen(
         contentPadding = LocalShellTopPadding.current + PaddingValues(bottom = dimens.gapXl) + LocalShellBottomPadding.current,
         horizontalAlignment = Alignment.Start,
     ) {
+        // every section keeps its place in the list (links scroll to [SettingsItem.index]); one left out is drawn as nothing
         items(SettingsItem.entries, key = { it.key }) { entry ->
+            if (!settingsShown(entry, keyboard, pointerSeen || pointerNow, inputChanged, shortcutsChanged, developerOpen, revealed)) return@items
             when (entry) {
                 SettingsItem.Header -> PageHeader(title = stringResource(R.string.nag_nav_settings))
                 // S-1504: the guide inside the app, and every key on one card
@@ -187,10 +259,50 @@ fun SettingsScreen(
                         NagButton(stringResource(R.string.nag_prefs_title), onOpenAllSettings)
                     }
                 }
+                // 1.0.1: the developer tools, at the end and closed: one row that opens them in place
+                SettingsItem.Developer -> DeveloperRow(developerOpen) { developerOpen = !developerOpen }
                 SettingsItem.Lab -> LabSection(section = { title, content -> SettingsSection(title, content) }) { MediaSessionSwitch() }
                 // S-1404: the start-ups and playbacks this device measured
                 SettingsItem.Performance -> PerformanceSection(section = { title, content -> SettingsSection(title, content) })
             }
+        }
+    }
+}
+
+/**
+ * The row of the developer tools (1.0.1): their name and what they hold, a chevron; a tap (Enter,
+ * Space) opens Lab and Performance under it, or closes them again.
+ */
+@Composable
+internal fun DeveloperRow(open: Boolean, onToggle: () -> Unit) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val shape = RoundedCornerShape(dimens.radiusCard)
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val label = stringResource(if (open) R.string.nag_settings_developer_hide else R.string.nag_settings_developer_show)
+    Box(Modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapS)) {
+        Row(
+            Modifier
+                .widthIn(max = 760.dp)
+                .fillMaxWidth()
+                .heightIn(min = dimens.minTarget)
+                .focusRing(state, shape)
+                .background(stateBackground(state, rest = colors.surface), shape)
+                .border(1.dp, colors.border, shape)
+                .nagClickable(interaction, onToggle, onClickLabel = label)
+                .padding(horizontal = dimens.gapL, vertical = dimens.gapM)
+                .testTag("settings-developer"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.nag_settings_developer), style = NagTheme.type.title, color = colors.text,
+                    modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.nag_settings_developer_hint), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+            }
+            Spacer(Modifier.width(dimens.gapS))
+            Icon(if (open) NagIcons.ChevronUp else NagIcons.ChevronDown, contentDescription = null, tint = colors.textSecondary,
+                modifier = Modifier.size(dimens.icon))
         }
     }
 }

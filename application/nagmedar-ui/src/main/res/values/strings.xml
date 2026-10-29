@@ -440,6 +440,10 @@
     <string name="nag_density_touch">Touch</string>
     <string name="nag_density_pointer">Mouse and keyboard</string>
     <string name="nag_settings_about">About</string>
+    <string name="nag_settings_developer">Developer tools</string>
+    <string name="nag_settings_developer_hint">The lab and the performance measurements; not needed for everyday use.</string>
+    <string name="nag_settings_developer_show">Show</string>
+    <string name="nag_settings_developer_hide">Hide</string>
     <!-- All settings: VLC's preference pages drawn by Nağmedar -->
     <string name="nag_prefs_title">All settings</string>
     <string name="nag_prefs_search">Search settings</string>
@@ -2264,6 +2268,7 @@
     <string name="nag_streams_address_hint">https://… · rtsp://… · udp://…</string>
     <string name="nag_streams_paste">Paste</string>
     <string name="nag_streams_open_hint">Enter plays the address; the streams you play are kept below.</string>
+    <string name="nag_streams_open_hint_touch">The streams you play are kept below.</string>
     <string name="nag_streams_invalid">This is not a stream address: it starts with its protocol, as in https:// or rtsp://.</string>
     <string name="nag_streams_clipboard_empty">The clipboard holds no text.</string>
     <string name="nag_streams_empty_title">No streams yet</string>

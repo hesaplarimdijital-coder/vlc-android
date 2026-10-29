@@ -54,7 +54,7 @@ class PerformanceScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("settings-performance-dex-dark", ThemeMode.Dark, InputMode.Pointer, samplePerfView())
 
     @Test @Config(qualifiers = "en-w800dp-h760dp-mdpi")
@@ -63,6 +63,6 @@ class PerformanceScreenshotTest {
     @Test @Config(qualifiers = "tr-w390dp-h1000dp-hdpi")
     fun phone() = capture("settings-performance-phone-dark", ThemeMode.Dark, InputMode.Touch, samplePerfView())
 
-    @Test @Config(qualifiers = "tr-w1280dp-h480dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h480dp-mdpi-keysexposed-qwerty")
     fun empty() = capture("settings-performance-empty-dex-light", ThemeMode.Light, InputMode.Pointer, PerfView(emptyList()))
 }
