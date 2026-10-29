@@ -2,6 +2,7 @@ package app.nagmedar.ui.music
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
@@ -49,6 +50,7 @@ import java.util.Locale
  * 1.0: the inspector following the selection, its tabs and its keeping, Shift+arrows and the
  * selection's menu.
  */
+@OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w420dp-h900dp-mdpi")
@@ -258,7 +260,6 @@ class MusicBrowserTest {
         compose.onNodeWithTag("inspector").assertWidthIsEqualTo(420.dp)
     }
 
-    @OptIn(ExperimentalTestApi::class)
     @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
     fun shiftArrowsGrowTheSelectionAndItsMenuTakesThemAll() {
         workstation(MapPaneWidths())
