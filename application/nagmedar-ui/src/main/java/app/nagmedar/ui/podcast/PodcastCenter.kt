@@ -212,10 +212,9 @@ object ServiceEpisodeControl : EpisodeControl {
 }
 
 /**
- * [EpisodePlayer] through the existing playback service: the downloaded file (S-1103) or the enclosure's address as a stream, a
- * video enclosure heard as sound alone, started at the place the listener left (S-1104). Starting playback needs an
- * Activity, which is only weakly held: the controller (and the app-scope work that captures it) outlives the screen and
- * must not keep the Activity alive. Episodes are played from the screen, so it is there when it is used.
+ * [EpisodePlayer] through the existing playback service: the episode's media ([EpisodeMedia]) played as a list of one. Starting
+ * playback needs an Activity, which is only weakly held: the controller (and the app-scope work that captures it) outlives
+ * the screen and must not keep the Activity alive. Episodes are played from the screen, so it is there when it is used.
  */
 class ServiceEpisodePlayer(activity: Context) : EpisodePlayer {
     private val activity = WeakReference(activity)
@@ -226,8 +225,20 @@ class ServiceEpisodePlayer(activity: Context) : EpisodePlayer {
 
     private fun start(feed: PodcastFeed, episode: PodcastEpisode, from: Long?) {
         val context = activity.get() ?: return
-        val uri = playableUri(episode)
-        val media = MLServiceLocator.getAbstractMediaWrapper(uri)
+        PlaybackActions.playList(context, listOf(EpisodeMedia.of(feed, episode, from)), 0)
+    }
+}
+
+/**
+ * What an episode plays as, wherever it is started (the app's pages, Android Auto): the downloaded file (S-1103) or the
+ * enclosure's address as a stream, a video enclosure heard as sound alone, titled by the episode and its show, started at
+ * the place the listener left (S-1104) or after the show's intro. The show's speed, outro and volume boost follow from its
+ * address ([PodcastPlaybackObserver]).
+ */
+object EpisodeMedia {
+    /** The media of [episode] of [feed], started at [from] when given (a chapter, a line of the transcript). */
+    fun of(feed: PodcastFeed, episode: PodcastEpisode, from: Long? = null): MediaWrapper {
+        val media = MLServiceLocator.getAbstractMediaWrapper(playableUri(episode))
         // a video enclosure is heard as the others are: Nağmedar plays sound alone
         media.setType(MediaWrapper.TYPE_AUDIO)
         if (episode.mimeType?.startsWith("video/") == true) media.addFlags(MediaWrapper.MEDIA_FORCE_AUDIO)
@@ -237,7 +248,7 @@ class ServiceEpisodePlayer(activity: Context) : EpisodePlayer {
         (episode.imageUrl ?: feed.imageUrl)?.let(media::setArtworkURL)
         val start = from ?: PlaybackRules.startMs(episode.positionMs, episode.played, episode.durationMs, feed.skipIntroSeconds, feed.skipOutroSeconds)
         if (start > 0) media.time = start
-        PlaybackActions.playList(context, listOf(media), 0)
+        return media
     }
 
     private fun playableUri(episode: PodcastEpisode): Uri {

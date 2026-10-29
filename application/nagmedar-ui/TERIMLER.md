@@ -172,6 +172,8 @@ Sözlüğü testler denetler:
 | podcast, abonelik | podcast, subscription | | | “Podcastler” ekranı; Türkçede de “podcast”, çoğulu “podcastler”. “Abone ol” / “Subscribe”, eklenince “Abone” / “Subscribed”, “Abonelikten çık” / “Unsubscribe”. Bölümü “bölüm” (episode) |
 | yayın, RSS adresi | feed, RSS address | besleme | | Bir podcast'in RSS ya da Atom dosyası ve adresi: “RSS adresiyle ekle…”, “Bu adres bir podcast yayını değil” |
 | yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
+| devam eden bölüm | continue listening | | | Android Auto'nun Podcast sekmesinde yarıda bırakılmış, dinlenmemiş bölümler, en son dinlenen başta: “Devam eden bölümler” |
+| kategori | category | | | Android Auto'nun Radyo sekmesinde radyo rehberinin en çok kullanılan etiketleri: “Kategoriler”; altında o etiketin istasyonları |
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |

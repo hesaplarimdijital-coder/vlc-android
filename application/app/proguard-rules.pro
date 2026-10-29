@@ -130,6 +130,9 @@
 # Nağmedar: the playback service finds the home screen widget's observer by name
 -keep class app.nagmedar.ui.widget.PlayerWidgetObserver { <init>(); }
 
+# Nağmedar (1.0): the playback service finds Android Auto's catalog by name
+-keep class app.nagmedar.ui.auto.CarCatalogObserver { <init>(); }
+
 # Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
 -keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }

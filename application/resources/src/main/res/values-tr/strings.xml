@@ -1210,4 +1210,7 @@
         <item quantity="other">%d öğe hemen sonra oynatılacak</item>
     </plurals>
     <string name="nagmedar_getting_ready">Oynatma hazırlanıyor…</string>
+    <!-- 1.0: a podcast episode's skip buttons on Android Auto, the notification and the lock screen -->
+    <string name="nagmedar_episode_back">15 sn geri</string>
+    <string name="nagmedar_episode_forward">30 sn ileri</string>
 </resources>

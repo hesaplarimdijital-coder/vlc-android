@@ -6,7 +6,7 @@ import org.videolan.vlc.PlaybackService
 /**
  * Something of Nağmedar's that follows the playback service for as long as it lives, whatever
  * started it (the new interface, the classic one, the alarm, a widget): S-808's play counts,
- * S-1009's album covers, S-613's latency profiles, S-1301's network sign-ins, S-1104's podcast resume points, the home screen widget.
+ * S-1009's album covers, S-613's latency profiles, S-1301's network sign-ins, S-1104's podcast resume points, the home screen widget, Android Auto's catalog.
  * The implementations live in modules this one does not see, so they are found by name (their keep rules are the app's).
  */
 interface PlaybackObserver {
@@ -25,6 +25,7 @@ interface PlaybackObserver {
             "app.nagmedar.ui.network.NetworkSignInObserver",
             "app.nagmedar.ui.podcast.PodcastPlaybackObserver",
             "app.nagmedar.ui.widget.PlayerWidgetObserver",
+            "app.nagmedar.ui.auto.CarCatalogObserver",
         )
 
         /** The observers the app is built with; none without the new interface. */

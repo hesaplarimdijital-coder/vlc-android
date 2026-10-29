@@ -1057,6 +1057,25 @@
     <string name="nag_music_recent_shelf">Son çalınan müzik</string>
     <string name="nag_music_recent_none_title">Henüz parça çalınmadı</string>
     <string name="nag_music_recent_none_desc">Dinlediğiniz parçalar burada görünür, en yenisi başta.</string>
+    <!-- 1.0: Android Auto's tabs and lists (Music, Podcast, Radio, Recently played), its search's headings -->
+    <string name="nag_auto_continue">Devam eden bölümler</string>
+    <string name="nag_auto_subscriptions">Abonelikler</string>
+    <string name="nag_auto_new_episodes">Yeni bölümler</string>
+    <string name="nag_auto_favourite_stations">Favori istasyonlar</string>
+    <string name="nag_auto_categories">Kategoriler</string>
+    <string name="nag_auto_found_tracks">Müzik parçaları</string>
+    <string name="nag_auto_found_episodes">Podcast bölümleri</string>
+    <string name="nag_auto_found_shows">Programlar</string>
+    <string name="nag_auto_found_stations">Radyo istasyonları</string>
+    <string name="nag_auto_empty">Burada henüz bir şey yok</string>
+    <string name="nag_auto_radio_offline">Radyo rehberine şu an ulaşılamıyor</string>
+    <string name="nag_auto_no_result">Sonuç yok</string>
+    <string name="nag_auto_decade_front">%1$d\'ler</string>
+    <string name="nag_auto_decade_back">%1$d\'lar</string>
+    <plurals name="nag_auto_stations">
+        <item quantity="one">%d istasyon</item>
+        <item quantity="other">%d istasyon</item>
+    </plurals>
     <string name="nag_music_unknown_album">Bilinmeyen albüm</string>
     <string name="nag_music_unknown_genre">Türü yok</string>
     <string name="nag_music_unknown_composer">Bestecisi yok</string>
