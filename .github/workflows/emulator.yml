@@ -186,9 +186,9 @@ jobs:
         run: python3 buildsystem/ci/annotate_gradle_errors.py init.log build.log
 
       # a music file opened from outside (tone.mp3); 64 tagged tracks in eight albums ("Profile track
-      # a.t"), a long list to scroll and a queue to swipe through for the walk, the Music the Baseline
-      # Profile's run walks; and a podcast feed of three episodes served to the emulator
-      # (10.0.2.2:8765), which both follow
+      # a.t", three minutes each, so that none ends while the walk swipes to the next), a long list to
+      # scroll and a queue to swipe through for the walk, the Music the Baseline Profile's run walks;
+      # and a podcast feed of three episodes served to the emulator (10.0.2.2:8765), which both follow
       - name: Deneme ortamı
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
@@ -201,7 +201,7 @@ jobs:
           mkdir -p "$music" "$feed"
           for album in 1 2 3 4 5 6 7 8; do
             for track in 1 2 3 4 5 6 7 8; do
-              ffmpeg -loglevel error -f lavfi -i "sine=frequency=$((200 + album * 60 + track * 7)):duration=20" \
+              ffmpeg -loglevel error -f lavfi -i "sine=frequency=$((200 + album * 60 + track * 7)):duration=180" -ac 1 -b:a 32k \
                 -metadata title="Profile track $album.$track" -metadata artist="Nagmedar Artist $(( (album + 1) / 2 ))" \
                 -metadata album="Profile album $album" -metadata track="$track" -metadata date="20$((20 + album))" \
                 "$music/album$album-track$track.mp3"

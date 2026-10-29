@@ -804,8 +804,17 @@ class Smoke:
             self.warnings.append("[%s] %s: %.1f %% janky frames (over 40 %%; informational on an emulator)" % (self.cur_pass, what, r["janky"]))
         return r
 
+    def close_more_sheet(self):
+        """Back while the bottom bar's ⋯ sheet is open (the destination loop ends with it open)."""
+        s = self.strings[self.lang]
+        seen = self.texts(self.nodes(self.dump()))
+        if all(x in seen for x in (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])):
+            self.key(4)
+            time.sleep(1)
+
     def open_music(self):
         s = self.strings[self.lang]
+        self.close_more_sheet()
         if not self.open_label(s["nag_nav_music"]):
             self.warnings.append("[%s] Music not found in the UI" % self.cur_pass)
         return self.step("Music")
@@ -900,12 +909,18 @@ class Smoke:
             return
         w, h = self.screen_size(nodes)
         cx, cy = mini[0].center
+        # each drag's frames alone: counted from just before the finger goes down to a moment after it settles
         self.animations(True)
-        self.frames_reset()
-        nodes = self.step("Drag the mini player up", lambda: self.sh("input swipe %d %d %d %d 450" % (cx, cy, cx, int(h * 0.12))), wait=1.5)
+
+        def drag(what, x0, y0, x1, y1):
+            self.frames_reset()
+            self.sh("input swipe %d %d %d %d 450" % (x0, y0, x1, y1))
+            time.sleep(1.5)
+            self.frames_read(what)
+
+        nodes = self.step("Drag the mini player up", lambda: drag("player drag up", cx, cy, cx, int(h * 0.12)), wait=0.5)
         self.check("dragged up, the full player shows", bool(self.by_id(nodes, "phone-player")))
-        nodes = self.step("Drag the full player down", lambda: self.sh("input swipe %d %d %d %d 450" % (w // 2, int(h * 0.3), w // 2, int(h * 0.95))), wait=1.5)
-        self.frames_read("player drag up and down")
+        nodes = self.step("Drag the full player down", lambda: drag("player drag down", w // 2, int(h * 0.3), w // 2, int(h * 0.95)), wait=0.5)
         self.animations(False)
         self.check("dragged down, the mini player again", not self.by_id(nodes, "phone-player") and bool(self.by_id(nodes, "mini-player")))
         before = self.mini_title(nodes)
@@ -1045,12 +1060,15 @@ class Smoke:
             cell = sorted(header, key=lambda n: n.b[0])[1]
             x, y = cell.center
             nodes = self.step("Long press on the column title %s" % cell.text, lambda: self.sh("input swipe %d %d %d %d 1200" % (x, y, x, y)), wait=1.2)
-            opened = s["nag_columns_reset"] in self.texts(nodes)
+            # the chooser lists every column with its check, those the table does not show among them
+            # (its last rows, "Reset columns" with them, may be below the screen's edge)
+            hidden = (s["nag_column_album_artist"], s["nag_column_composer"])
+            opened = all(x in self.texts(nodes) for x in hidden)
             self.check("the column chooser opens", opened)
             if opened:
                 self.key(111)  # Escape
                 nodes = self.step("Escape closes the column chooser")
-                self.check("Escape closes the column chooser", s["nag_columns_reset"] not in self.texts(nodes))
+                self.check("Escape closes the column chooser", not any(x in self.texts(nodes) for x in hidden))
         self.scroll_frames("Music table scroll (tablet)", self.nodes(self.dump()))
 
     # ---------------------------------------------------------------- passes
@@ -1094,6 +1112,7 @@ class Smoke:
 
     def pass_phone_tr(self):
         self.cur_pass, self.lang = "phone-tr", "tr"
+        self.set_display("1080x2400", "420")
         if not self.set_locale("tr-TR"):
             self.warnings.append("[phone-tr] the Turkish interface could not be set; the pass was skipped")
             return
