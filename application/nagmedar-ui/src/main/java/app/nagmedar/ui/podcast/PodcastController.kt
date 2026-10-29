@@ -373,7 +373,6 @@ class PodcastController(
         extrasJob?.cancel()
         episodeJob = null
         extrasJob = null
-        transcriptJob = null
         openEpisodeId = null
         episodeRow = null
         listeningState = null
