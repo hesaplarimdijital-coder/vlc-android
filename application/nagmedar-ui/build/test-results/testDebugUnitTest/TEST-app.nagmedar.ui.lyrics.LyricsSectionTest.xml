@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.LyricsSectionTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:31:51.205Z" hostname="runnervmnwato" time="0.145">
+  <properties/>
+  <testcase name="lrclibTurnedOffAndOn" classname="app.nagmedar.ui.lyrics.LyricsSectionTest" time="0.077"/>
+  <testcase name="keptAndCleared" classname="app.nagmedar.ui.lyrics.LyricsSectionTest" time="0.068"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

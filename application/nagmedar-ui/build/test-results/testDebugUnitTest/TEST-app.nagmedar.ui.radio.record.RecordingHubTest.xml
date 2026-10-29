@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.RecordingHubTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:32:13.021Z" hostname="runnervmnwato" time="0.05">
+  <properties/>
+  <testcase name="theSameStationAskedAgainIsOneRecordingWithTheLaterEnd" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.018"/>
+  <testcase name="anEndedRecordingSaysWhy" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.011"/>
+  <testcase name="theFourthStationIsRefused" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.015"/>
+  <testcase name="stationsAreRecordedSideBySide" classname="app.nagmedar.ui.radio.record.RecordingHubTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

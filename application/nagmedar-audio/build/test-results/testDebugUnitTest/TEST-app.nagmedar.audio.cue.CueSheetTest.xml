@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.cue.CueSheetTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:28:11.779Z" hostname="runnervmnwato" time="0.577">
+  <properties/>
+  <testcase name="theSheetBesideAFile" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.155"/>
+  <testcase name="theTrackUris" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.061"/>
+  <testcase name="theEncodings" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.044"/>
+  <testcase name="theTracksAndTheirBounds" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.111"/>
+  <testcase name="whatIsNotASheet" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.095"/>
+  <testcase name="theTimes" classname="app.nagmedar.audio.cue.CueSheetTest" time="0.11"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

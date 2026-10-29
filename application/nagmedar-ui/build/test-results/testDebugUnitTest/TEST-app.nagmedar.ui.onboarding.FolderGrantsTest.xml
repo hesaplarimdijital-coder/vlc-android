@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.onboarding.FolderGrantsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:31:58.908Z" hostname="runnervmnwato" time="0.07">
+  <properties/>
+  <testcase name="everyHolderOfTheSettingsIsRead" classname="app.nagmedar.ui.onboarding.FolderGrantsTest" time="0.02"/>
+  <testcase name="aFileInsideTheFolderKeepsIt" classname="app.nagmedar.ui.onboarding.FolderGrantsTest" time="0.016"/>
+  <testcase name="aFolderNobodyKeepsLetsGoOfBoth" classname="app.nagmedar.ui.onboarding.FolderGrantsTest" time="0.017"/>
+  <testcase name="aReaderKeepsReadingAndAWriterKeepsBoth" classname="app.nagmedar.ui.onboarding.FolderGrantsTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.DropoutRecoveryTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:32:01.361Z" hostname="runnervmnwato" time="0.014">
+  <properties/>
+  <testcase name="aRadioThatNeverPlayedEndsAsBefore" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.003"/>
+  <testcase name="aLiveStreamCutAtTheSamePlaceGoesOnUntilTheThirdTime" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.004"/>
+  <testcase name="aPauseOnceItIsOpenedIsARealPauseAndNoStallIsSeen" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="anErrorWhileItPlaysLooksPlayingWhileItWaitsAndOpensPlaying" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="aStopWhileItWaitsLeavesIt" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.001"/>
+  <testcase name="theSleepTimerStopsAStreamThatWaits" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.003"/>
+  <testcase name="aPlayWhileItWaitsOpensItPlaying" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.001"/>
+  <testcase name="aStreamThatDropsWhilePausedOpensPaused" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="aStreamThatCanBeSoughtInAndEndsAtTheSamePlaceIsAFileThatEnded" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="headphonesUnpluggedWhileItWaitsPauseIt" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="givenUpWhilePlayingItStops" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="givenUpWhilePausedItStaysLoadedAndPausedAndPlayOpensIt" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.001"/>
+  <testcase name="aStreamThatPlaysWithNothingComingIsStoppedAndOpenedAgain" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="aCallWhileItWaitsPausesItAndItOpensPaused" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.0"/>
+  <testcase name="anEndOfAnEpisodeIsItsEndAndAnEndBeforeIsADropout" classname="app.nagmedar.ui.podcast.DropoutRecoveryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

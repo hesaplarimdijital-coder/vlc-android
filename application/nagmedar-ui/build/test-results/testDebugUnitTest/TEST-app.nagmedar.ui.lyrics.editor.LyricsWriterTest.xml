@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:31:52.987Z" hostname="runnervmnwato" time="0.154">
+  <properties/>
+  <testcase name="savingIntoTheTagsKeepsTheTagsLyricsAsTheOriginal" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.022"/>
+  <testcase name="savingBesideTheFileWritesTheLrcWithItsTagsAndKeepsItAsTheUsers" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.016"/>
+  <testcase name="theLrcThatWasThereIsKeptOnceAndNeverOverwritten" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.017"/>
+  <testcase name="theTagsAndTheFileKeepTheirOwnOriginals" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.024"/>
+  <testcase name="withoutPermissionTheUserIsToldToPickAFolderAndTheNextSaveGoesThere" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.021"/>
+  <testcase name="aFailedWriteLeavesNoUserLyrics" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.031"/>
+  <testcase name="aFileThatTakesNoTagsFails" classname="app.nagmedar.ui.lyrics.editor.LyricsWriterTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

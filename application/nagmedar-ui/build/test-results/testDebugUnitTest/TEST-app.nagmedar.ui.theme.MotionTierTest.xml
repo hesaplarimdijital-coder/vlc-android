@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.MotionTierTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:32:55.363Z" hostname="runnervmnwato" time="0.009">
+  <properties/>
+  <testcase name="fadesStayTimedAndSnapWithReducedMotion" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.001"/>
+  <testcase name="phonesGetSpringsWiderWindowsKeepTheTimedCurves" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.0"/>
+  <testcase name="spatialSpecFollowsTheTier" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.0"/>
+  <testcase name="screenTransitionsByTier" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.007"/>
+  <testcase name="anExpandingPlayerBringsTheBarsBack" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.0"/>
+  <testcase name="reducedMotionSettlesAtOnce" classname="app.nagmedar.ui.theme.MotionTierTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

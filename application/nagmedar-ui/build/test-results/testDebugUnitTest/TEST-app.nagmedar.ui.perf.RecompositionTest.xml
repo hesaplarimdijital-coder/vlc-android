@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.perf.RecompositionTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T14:31:59.170Z" hostname="runnervmnwato" time="0.35">
+  <properties/>
+  <testcase name="aNewHistoryComposesTheShelfNotTheMusicList" classname="app.nagmedar.ui.perf.RecompositionTest" time="0.086"/>
+  <testcase name="aNewTracksAccentComposesTheMiniPlayerOnceNotOnEveryFrame" classname="app.nagmedar.ui.perf.RecompositionTest" time="0.264"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
