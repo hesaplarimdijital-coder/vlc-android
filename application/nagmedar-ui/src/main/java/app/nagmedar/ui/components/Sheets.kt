@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.R
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.shell.LocalShellOverlayHost
 import app.nagmedar.ui.shell.ShellOverlayHost
 import app.nagmedar.ui.shell.WidthClass
@@ -334,8 +335,10 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
         Spacer(Modifier.width(dimens.gapM))
         Text(item.label, style = NagTheme.type.body, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f))
-        if (item.shortcut != null) {
-            Text(item.shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
+        // 1.0.1: the keys with a keyboard only
+        val shortcut = keyHint(item.shortcut)
+        if (shortcut != null) {
+            Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
         }
     }
 }

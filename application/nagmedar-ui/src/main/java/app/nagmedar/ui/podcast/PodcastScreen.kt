@@ -88,6 +88,8 @@ import app.nagmedar.ui.openLink
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.shell.ListDetailPanes
+import app.nagmedar.ui.shell.LocalNavKind
+import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -231,34 +233,54 @@ private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focu
     val res = LocalContext.current.resources
     val subscriptions = model.subscriptions
     val wide = currentWidthClass() >= WidthClass.Medium
+    val phone = LocalNavKind.current == NavKind.BottomBar
     var grid by rememberSaveable { mutableStateOf(wide) }
     val showingSubscriptions = model.search is SearchUi.Idle
-    Column(Modifier.fillMaxSize()) {
-        PageHeader(
-            title = stringResource(R.string.nag_nav_podcasts),
-            subtitle = subscriptions?.takeIf { it.isNotEmpty() }?.let { pluralStringResource(R.plurals.nag_pod_count, it.size, it.size) },
-        ) {
-            if (showingSubscriptions && !subscriptions.isNullOrEmpty()) {
-                NagIconButton(
-                    if (grid) NagIcons.ListView else NagIcons.Grid,
-                    stringResource(if (grid) R.string.nag_pod_view_list else R.string.nag_pod_view_grid),
-                    { grid = !grid },
-                    modifier = Modifier.testTag("podcast-view-toggle"),
-                )
-            }
-            if (wide) {
-                NagButton(stringResource(R.string.nag_pod_add), actions.onAdd, icon = NagIcons.Plus, modifier = Modifier.testTag("podcast-add"))
-            } else {
-                NagIconButton(NagIcons.Plus, stringResource(R.string.nag_pod_add), actions.onAdd, modifier = Modifier.testTag("podcast-add"))
-            }
-            IconMenuButton(
-                NagIcons.MoreVertical,
-                stringResource(R.string.nag_pod_more),
-                entries = { overflowMenu(res, subscriptions.orEmpty().isNotEmpty(), actions) },
-                modifier = Modifier.testTag("podcast-more"),
-            )
+    val canToggleView = showingSubscriptions && !subscriptions.isNullOrEmpty()
+    val add: @Composable () -> Unit = {
+        if (wide) {
+            NagButton(stringResource(R.string.nag_pod_add), actions.onAdd, icon = NagIcons.Plus, modifier = Modifier.testTag("podcast-add"))
+        } else {
+            NagIconButton(NagIcons.Plus, stringResource(R.string.nag_pod_add), actions.onAdd, modifier = Modifier.testTag("podcast-add"))
         }
-        SearchRow(model.query, actions, focus)
+    }
+    // 1.0.1: on a phone the list's view is one more line of the menu, as the header is not there
+    val toggleView = { grid = !grid }
+    val more: @Composable () -> Unit = {
+        IconMenuButton(
+            NagIcons.MoreVertical,
+            stringResource(R.string.nag_pod_more),
+            entries = {
+                overflowMenu(res, subscriptions.orEmpty().isNotEmpty(), actions) +
+                    if (phone && canToggleView) viewMenu(res, grid, toggleView) else emptyList()
+            },
+            modifier = Modifier.testTag("podcast-more"),
+        )
+    }
+    Column(Modifier.fillMaxSize()) {
+        // 1.0.1: a phone's top bar already names the page; its actions go beside the search instead of a line of their own
+        if (!phone) {
+            PageHeader(
+                title = stringResource(R.string.nag_nav_podcasts),
+                subtitle = subscriptions?.takeIf { it.isNotEmpty() }?.let { pluralStringResource(R.plurals.nag_pod_count, it.size, it.size) },
+            ) {
+                if (canToggleView) {
+                    NagIconButton(
+                        if (grid) NagIcons.ListView else NagIcons.Grid,
+                        stringResource(if (grid) R.string.nag_pod_view_list else R.string.nag_pod_view_grid),
+                        toggleView,
+                        modifier = Modifier.testTag("podcast-view-toggle"),
+                    )
+                }
+                add()
+                more()
+            }
+        }
+        val besideSearch: @Composable () -> Unit = {
+            add()
+            more()
+        }
+        SearchRow(model.query, model.search, actions, focus, trailing = besideSearch.takeIf { phone })
         when (val search = model.search) {
             SearchUi.Idle -> Subscriptions(subscriptions, grid, actions, focus)
             SearchUi.Searching -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -284,10 +306,26 @@ private fun overflowMenu(res: android.content.res.Resources, hasSubscriptions: B
     MenuEntry.Item(res.getString(R.string.nag_pod_menu_export), actions.onExport, icon = NagIcons.Downloads, enabled = hasSubscriptions),
 )
 
+/** The subscriptions' view as a line of the menu (1.0.1: a phone's, where the header with its button is not shown). */
+private fun viewMenu(res: android.content.res.Resources, grid: Boolean, onToggle: () -> Unit): List<MenuEntry> = listOf(
+    MenuEntry.Separator,
+    MenuEntry.Item(
+        res.getString(if (grid) R.string.nag_pod_view_list else R.string.nag_pod_view_grid),
+        onToggle,
+        icon = if (grid) NagIcons.ListView else NagIcons.Grid,
+    ),
+)
+
+/**
+ * Whether "Ara" can be pressed (1.0.1): there is something to search for, and no search of it is
+ * already under way.
+ */
+internal fun searchEnabled(query: String, search: SearchUi): Boolean = query.isNotBlank() && search !is SearchUi.Searching
+
 // ---------------------------------------------------------------- search
 
 @Composable
-private fun SearchRow(query: String, actions: PodcastActions, focus: FocusRequester) {
+private fun SearchRow(query: String, search: SearchUi, actions: PodcastActions, focus: FocusRequester, trailing: (@Composable () -> Unit)? = null) {
     val dimens = NagTheme.dimens
     Row(
         Modifier
@@ -301,9 +339,11 @@ private fun SearchRow(query: String, actions: PodcastActions, focus: FocusReques
             stringResource(R.string.nag_pod_search),
             actions.onSearch,
             primary = true,
-            enabled = query.isNotBlank(),
+            enabled = searchEnabled(query, search),
             modifier = Modifier.testTag("podcast-search-button"),
         )
+        // a phone's: the page's "+" and "⋮", right beside it
+        if (trailing != null) Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapXs), verticalAlignment = Alignment.CenterVertically) { trailing() }
     }
 }
 

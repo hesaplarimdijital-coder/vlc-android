@@ -60,6 +60,7 @@ import app.nagmedar.ui.components.LocalTooltipDelay
 import app.nagmedar.ui.components.ScreenCommands
 import app.nagmedar.ui.components.TrackClickModifiers
 import app.nagmedar.ui.components.UndoBarHost
+import app.nagmedar.ui.components.blockInputBelow
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.rememberExpandablePlayerState
 import app.nagmedar.ui.components.rememberMenuBarState
@@ -100,6 +101,7 @@ import app.nagmedar.ui.onboarding.rememberAccessController
 import app.nagmedar.ui.onboarding.scanSources
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.PlayerBar
+import app.nagmedar.ui.playback.QueuePage
 import app.nagmedar.ui.playback.QueuePanelState
 import app.nagmedar.ui.playback.QueueSheet
 import app.nagmedar.ui.playback.ResumePromptHost
@@ -117,6 +119,8 @@ import app.nagmedar.ui.radio.record.RadioRecordings
 import app.nagmedar.ui.radio.record.toRecording
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.SettingsItem
+import app.nagmedar.ui.screens.SettingsReveal
+import app.nagmedar.ui.screens.scrollToSetting
 import app.nagmedar.ui.screens.settingsItem
 import app.nagmedar.ui.audio.AbChoice
 import app.nagmedar.ui.audio.AbTest
@@ -293,15 +297,15 @@ private fun NagmedarMain(
     }
     LaunchedEffect(actions) { onActionsReady(actions) }
     val motion = NagTheme.motion
+    // 1.0.1: a section asked for is shown even where Settings would leave it out (the shortcuts on a phone)
+    val settingsReveal = remember { SettingsReveal() }
     LaunchedEffect(shortcutListRequests) {
         if (shortcutListRequests == 0) return@LaunchedEffect
-        val index = SettingsItem.Shortcuts.index
-        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
+        settingsList.scrollToSetting(SettingsItem.Shortcuts, settingsReveal, motion.reduced)
     }
     LaunchedEffect(libraryListRequests) {
         if (libraryListRequests == 0) return@LaunchedEffect
-        val index = SettingsItem.Library.index
-        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
+        settingsList.scrollToSetting(SettingsItem.Library, settingsReveal, motion.reduced)
     }
     // "All settings"' lines that Nağmedar's own sections have: Settings, at that section
     var settingsTarget by remember { mutableStateOf(SettingsItem.Header) }
@@ -313,8 +317,7 @@ private fun NagmedarMain(
     }
     LaunchedEffect(settingsItemRequests) {
         if (settingsItemRequests == 0) return@LaunchedEffect
-        val index = settingsTarget.index
-        if (motion.reduced) settingsList.scrollToItem(index) else settingsList.animateScrollToItem(index)
+        settingsList.scrollToSetting(settingsTarget, settingsReveal, motion.reduced)
     }
     // a preference asked for from outside (the player's metered connection question): its page in "All settings"
     LaunchedEffect(ShellRequests.preference) {
@@ -491,7 +494,8 @@ private fun NagmedarMain(
                         PhonePlayerHost(
                             onClose = { phonePlayer = false },
                             onQueue = queuePanel::toggle,
-                            modifier = Modifier.graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } },
+                            // 1.0.1: nothing under it takes a touch, a scroll or a key
+                            modifier = Modifier.graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } }.blockInputBelow(),
                             onFullScreenLyrics = { lyricsOpen = true },
                             onFullScreenVisualizer = { visualizerOpen = true },
                             // the equaliser's page is the shell's: the player closes for it
@@ -506,34 +510,34 @@ private fun NagmedarMain(
                         DetailBackHandler(enabled = phonePlayerShown, state = back, onBack = { phonePlayer = false })
                     }
                     AnimatedVisibility(lyricsOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
-                        PlayingLyricsFullScreen(onClose = { lyricsOpen = false })
+                        PlayingLyricsFullScreen(onClose = { lyricsOpen = false }, modifier = Modifier.blockInputBelow())
                     }
                     // a media's information, asked for from a menu without a details pane (music, search)
                     MediaInfoHost()
                     // remote access's addresses, how it works, and the one-time code a new browser asks for
                     RemoteAccessHost()
                     // S-1005: the lyrics editor, over the lyrics
-                    if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false })
+                    if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false }, modifier = Modifier.blockInputBelow())
                     AnimatedVisibility(visualizerOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
-                        PlayingVisualizerFullScreen(onClose = { visualizerOpen = false })
+                        PlayingVisualizerFullScreen(onClose = { visualizerOpen = false }, modifier = Modifier.blockInputBelow())
                     }
-                    // "Sıradaki" beside the screen, over it on a phone (S-310), where it comes up and goes down as a sheet
+                    // "Sıradaki" beside the screen (S-310); on a phone a page of its own over the whole window (1.0.1), which
+                    // comes up and goes down as a sheet
                     val compactQueue = NavKind.forWidth(widthClass) == NavKind.BottomBar
-                    AnimatedVisibility(
-                        queuePanel.open,
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        enter = if (compactQueue) motion.sheetEnter() else EnterTransition.None,
-                        exit = if (compactQueue) motion.sheetExit() else ExitTransition.None,
-                    ) {
-                        val queue = rememberPlayQueue()
-                        QueueSheet(
-                            queue.entries,
-                            queue.current,
-                            queue,
-                            compact = compactQueue,
-                            onClose = { queuePanel.close() },
-                            undo = undo,
-                        )
+                    if (compactQueue) {
+                        QueuePage(queuePanel.open, onClose = { queuePanel.close() }, undo = undo)
+                    } else {
+                        AnimatedVisibility(queuePanel.open, modifier = Modifier.align(Alignment.TopEnd), enter = EnterTransition.None, exit = ExitTransition.None) {
+                            val queue = rememberPlayQueue()
+                            QueueSheet(
+                                queue.entries,
+                                queue.current,
+                                queue,
+                                compact = false,
+                                onClose = { queuePanel.close() },
+                                undo = undo,
+                            )
+                        }
                     }
                     // the app's notices (what the library, the service and the screens say), over the undo bars
                     Column(
@@ -586,6 +590,7 @@ private fun NagmedarMain(
                                 onOpenEqualizer = { shellNavigator.navigate(Destination.Equalizer) },
                                 onOpenGuide = { shellNavigator.navigate(Destination.Guide) },
                                 onOpenShortcutCard = { shellNavigator.navigate(Destination.ShortcutCard) },
+                                reveal = settingsReveal,
                             )
                             // VLC's preference pages, drawn as Nağmedar's
                             Destination.AllSettings -> AllSettingsScreen(

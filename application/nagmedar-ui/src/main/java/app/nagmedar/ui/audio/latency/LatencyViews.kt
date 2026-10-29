@@ -391,7 +391,8 @@ internal fun MeasureSurface(
             }
             state is LatencyMeasureSession.State.Done -> {
                 val result = state.result
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // 1.0.1: the caption under the number, where it has the card's width (beside it, it broke in odd places)
+                Column {
                     Text(
                         stringResource(R.string.nag_sync_ms, signed(result.rawMs, locale)),
                         style = NagTheme.type.display,
@@ -402,7 +403,6 @@ internal fun MeasureSurface(
                         stringResource(R.string.nag_latency_result_detail, result.valid, result.total, result.spreadMs),
                         style = NagTheme.type.labelSmall,
                         color = colors.textSecondary,
-                        modifier = Modifier.padding(bottom = 6.dp),
                     )
                 }
                 if (result.saveable && device.kind == OutputKind.Speaker) {

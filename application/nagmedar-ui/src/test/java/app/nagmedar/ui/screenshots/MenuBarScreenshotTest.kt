@@ -121,14 +121,14 @@ class MenuBarScreenshotTest {
     }
 
     // tall enough for the longest column: Playback, with Tools under it
-    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi-keysexposed-qwerty")
     fun menusDark() = capture("menubar-menus-dark", ThemeMode.Dark, InputMode.Pointer) { Menus() }
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1920dp-h1320dp-mdpi-keysexposed-qwerty")
     fun menusLight() = capture("menubar-menus-light", ThemeMode.Light, InputMode.Pointer) { Menus() }
 
     /** Alt and Right: the second title has the keyboard, the window's focus stays where it was. */
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun altHighlightsATitle() {
         val state = MenuBarState()
         capture("menubar-alt-dark", ThemeMode.Dark, InputMode.Pointer) {
@@ -140,7 +140,7 @@ class MenuBarScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun largeByTouch() = capture("menubar-large-touch-dark", ThemeMode.Dark, InputMode.Touch) {
         TestShell(WidthClass.Large, startDestination = Destination.Music)
     }

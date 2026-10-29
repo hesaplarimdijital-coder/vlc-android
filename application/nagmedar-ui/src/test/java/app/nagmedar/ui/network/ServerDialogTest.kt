@@ -24,7 +24,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-206: the add-server form: a fault under its field, nothing saved while one stays, a pasted address read. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class ServerDialogTest {
 
     @get:Rule

@@ -68,7 +68,7 @@ class ShortcutEditorScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture(
         "shortcuts-dex-dark", ThemeMode.Dark, InputMode.Pointer,
         mapOf(ShortcutId.Stop to KeyChord(Key.Q, ctrl = true)),
@@ -88,7 +88,7 @@ class ShortcutEditorScreenshotTest {
     )
 
     /** S-1501: in English. */
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dexEnglish() = capture(
         "shortcuts-dex-dark-en", ThemeMode.Dark, InputMode.Pointer,
         mapOf(ShortcutId.Stop to KeyChord(Key.Q, ctrl = true)),

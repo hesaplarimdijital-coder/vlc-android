@@ -192,6 +192,7 @@ Sözlüğü testler denetler:
 | kısa haber | notice | | toast, snackbar | Pencerenin altında birkaç saniye görünen söz: “Kopyalandı”, “Sıraya eklendi”, “Oynatma hazırlanıyor…”. Android'in bildirim çekmecesindekine “bildirim” denir |
 | süre sınırı | time limit | | | Android 15'in arka plandaki (ön plan hizmeti olarak süren) işlere koyduğu günlük sınır: veri eşitleme ve medya işleme için ayrı ayrı günde altı saat; “Android'in süre sınırı doldu” |
 | Kurtarılan (klasör) | Recovered (folder) | | | Yarıda kalmış bir etiket yazımının, dosyaya geri konamayan (dosya o arada başka yerde değişmiş ya da bir hafta bulunamamış) önceki kopyasının konduğu klasör; uygulamanın depodaki klasöründe (Android/data/…/files). Kısa haber nerede olduğunu söyler |
+| geliştirici araçları | developer tools | | | Ayarlar'ın sonunda kapalı duran satır (1.0.1): açılınca Laboratuvar ve Performans altında görünür; günlük kullanım için gerekmez |
 
 ## Özel adlar
 

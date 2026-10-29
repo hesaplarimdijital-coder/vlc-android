@@ -80,7 +80,7 @@ class KeyboardMapScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("keymap-dex-dark", ThemeMode.Dark, InputMode.Pointer, TestLayouts.turkishQ) {
         compose.onNodeWithContentDescription("Ğ · Yavaşlat").performClick()
         compose.waitForIdle()

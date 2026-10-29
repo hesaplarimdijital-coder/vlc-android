@@ -46,7 +46,7 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
 class KeyboardMapTest {
 
     @get:Rule

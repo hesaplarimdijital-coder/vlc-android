@@ -71,6 +71,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -608,19 +609,38 @@ private fun BottomRow(format: String?, actions: PlayerBarActions, cast: Boolean,
     val dimens = NagTheme.dimens
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         if (cast) CastButton(casting, actions::cast)
-        Text(
-            format.orEmpty(),
-            style = NagTheme.type.mono,
-            color = colors.textTertiary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f).padding(horizontal = dimens.gapXs).testTag("phone-format"),
-        )
+        // 1.0.1: on one line where it fits; on a phone's width the source over the output, each whole, instead of
+        // "FLAC 16/44.1 · AAudi…"
+        BoxWithConstraints(Modifier.weight(1f).padding(horizontal = dimens.gapXs)) {
+            val text = format.orEmpty()
+            val style = NagTheme.type.mono
+            val measurer = rememberTextMeasurer()
+            val width = constraints.maxWidth
+            val fits = remember(text, style, width, measurer) {
+                measurer.measure(text, style, softWrap = false, maxLines = 1).size.width <= width
+            }
+            Text(
+                if (fits) text else formatOnTwoLines(text),
+                style = style,
+                color = colors.textTertiary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("phone-format"),
+            )
+        }
         SleepTimerButton(onlyWhileRunning = true)
         if (onShare != null) NagIconButton(NagIcons.Share, stringResource(R.string.nag_player_share), onShare, modifier = Modifier.testTag("phone-share"))
         NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, shortcut = ShortcutId.PlayQueue)
     }
 }
+
+/**
+ * The player's format line on two lines (1.0.1): the source on the first, how it is played on the
+ * second ("FLAC 16/44.1" over "AAudio · 48 kHz · Bit-perfect"); a line without parts stays as it is.
+ */
+internal fun formatOnTwoLines(format: String): String = format.replaceFirst(FORMAT_SEPARATOR, "\n")
+
+private const val FORMAT_SEPARATOR = " · "
 
 /** How small the artwork settles while paused. */
 private const val PAUSED_SCALE = 0.88f

@@ -87,13 +87,13 @@ class NetworkScreenshotTest {
 
     private fun NetworkModel.openFtp() = open(NetworkSamples.store().rows.value.first { it.id == 1L })
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun folderDex() = capture("network-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer) { Opened { it.openNas() } }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun signInDex() = capture("network-signin-dex-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer) { Opened { it.openFtp() } }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun addServerDex() = capture(
         "network-add-dex-dark",
         WidthClass.Large,
@@ -129,7 +129,7 @@ class NetworkScreenshotTest {
         SampleNetworkBrowser(store = remember { FakeServerStore() }, searching = true) { it.discover() }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun sharesOffDex() = capture("network-off-dex-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer) {
         SampleNetworkBrowser(lan = LanState.Disabled)
     }
@@ -175,7 +175,7 @@ class NetworkScreenshotTest {
         },
     ) { Opened { } }
 
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun folderDexEnglish() = capture("network-dex-light-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer) { Opened { it.openNas() } }
 
     /**

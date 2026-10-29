@@ -24,12 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
+import app.nagmedar.ui.input.hardwareKeyboard
+import app.nagmedar.ui.input.hasHardwareKeyboard
 import app.nagmedar.ui.shell.KeyCap
 import app.nagmedar.ui.theme.NagTheme
 
@@ -41,7 +42,7 @@ import app.nagmedar.ui.theme.NagTheme
 @Composable
 internal fun DialogFrame(
     onDismiss: () -> Unit,
-    dismissStyle: DismissStyle = dismissStyleFor(LocalConfiguration.current),
+    dismissStyle: DismissStyle = if (hardwareKeyboard()) DismissStyle.EscKey else DismissStyle.CloseButton,
     content: @Composable () -> Unit,
 ) {
     val dismiss = remember(dismissStyle, onDismiss) { DialogDismiss(dismissStyle, onDismiss) }
@@ -68,13 +69,11 @@ class DialogDismiss(val style: DismissStyle, val onDismiss: () -> Unit)
 val LocalDialogDismiss = compositionLocalOf<DialogDismiss?> { null }
 
 /**
- * [DismissStyle.EscKey] when [configuration] reports a hardware QWERTY keyboard that is not
- * hidden (`Configuration.KEYBOARD_QWERTY`), [DismissStyle.CloseButton] otherwise.
+ * [DismissStyle.EscKey] when [configuration] reports a hardware keyboard at hand (the app's one
+ * rule, [hasHardwareKeyboard]), [DismissStyle.CloseButton] otherwise.
  */
 fun dismissStyleFor(configuration: Configuration): DismissStyle =
-    if (configuration.keyboard == Configuration.KEYBOARD_QWERTY &&
-        configuration.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
-    ) DismissStyle.EscKey else DismissStyle.CloseButton
+    if (hasHardwareKeyboard(configuration)) DismissStyle.EscKey else DismissStyle.CloseButton
 
 /**
  * The close affordance of the dialog it is in: the "Esc" key cap when a keyboard is at hand (Esc
@@ -85,7 +84,7 @@ fun dismissStyleFor(configuration: Configuration): DismissStyle =
 fun DialogDismissButton(modifier: Modifier = Modifier) {
     val dismiss = LocalDialogDismiss.current
     // the keyboard at hand where the card is drawn decides, as since PR #65 (a frame's window may say otherwise)
-    val keyboard = dismissStyleFor(LocalConfiguration.current) == DismissStyle.EscKey
+    val keyboard = hardwareKeyboard()
     when {
         keyboard || dismiss?.style == DismissStyle.EscKey -> KeyCap(ESCAPE, modifier)
         dismiss != null -> NagIconButton(

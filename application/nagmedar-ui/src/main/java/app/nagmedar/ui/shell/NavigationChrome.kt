@@ -71,6 +71,7 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
@@ -586,7 +587,8 @@ fun SearchField(onClick: () -> Unit, shortcut: String?, modifier: Modifier = Mod
         Spacer(Modifier.width(8.dp))
         Text(stringResource(R.string.nag_search_hint), style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1,
             overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        if (shortcut != null) KeyCap(shortcut)
+        // 1.0.1: the keys with a keyboard only
+        keyHint(shortcut)?.let { KeyCap(it) }
     }
 }
 

@@ -80,6 +80,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import app.nagmedar.ui.input.MenuBarKey
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.NagGlass
@@ -285,9 +286,11 @@ internal fun MenuItemRow(item: MenuEntry.Item, modifier: Modifier = Modifier, on
         Spacer(Modifier.width(10.dp))
         Text(item.label, style = NagTheme.type.body, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f))
-        if (item.shortcut != null) {
+        // 1.0.1: the keys with a keyboard only
+        val shortcut = keyHint(item.shortcut)
+        if (shortcut != null) {
             Spacer(Modifier.width(24.dp))
-            Text(item.shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

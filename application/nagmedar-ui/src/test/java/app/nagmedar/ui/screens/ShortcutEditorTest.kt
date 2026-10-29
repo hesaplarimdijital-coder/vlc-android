@@ -44,7 +44,7 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h3200dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h3200dp-mdpi-keysexposed-qwerty")
 class ShortcutEditorTest {
 
     @get:Rule

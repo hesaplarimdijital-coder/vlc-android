@@ -28,7 +28,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h1200dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h1200dp-mdpi-keysexposed-qwerty")
 class SearchScreenTest {
 
     @get:Rule
@@ -93,7 +93,7 @@ class SearchScreenTest {
     }
 
     /** S-1501: in English the syntax's examples are English, and the groups' titles English capitals. */
-    @Test @Config(qualifiers = "en-w1280dp-h1200dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h1200dp-mdpi-keysexposed-qwerty")
     fun inEnglishTheSyntaxAndTheTitlesAreEnglish() {
         page()
         compose.onNodeWithText("\"night blue\"").assertExists()

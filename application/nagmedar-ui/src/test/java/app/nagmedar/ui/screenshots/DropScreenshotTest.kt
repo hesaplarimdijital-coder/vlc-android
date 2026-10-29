@@ -48,7 +48,7 @@ class DropScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("drop-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer)
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")

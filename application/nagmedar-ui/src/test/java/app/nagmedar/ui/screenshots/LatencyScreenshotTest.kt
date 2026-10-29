@@ -82,7 +82,7 @@ class LatencyScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun settingsDex() = capture("settings-latency-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) { Section() }
     }
@@ -97,7 +97,7 @@ class LatencyScreenshotTest {
         Measure(LatencyMeasureSession.State.Intro)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun measuringDex() = capture("latency-measure-running-dex-light", ThemeMode.Light, InputMode.Pointer) {
         Measure(LatencyMeasureSession.State.Measuring(0.6f))
     }

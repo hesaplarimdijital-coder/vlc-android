@@ -62,7 +62,7 @@ class StatesTest {
         compose.waitForIdle()
     }
 
-    @Test @Config(qualifiers = "tr-w1480dp-h925dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1480dp-h925dp-mdpi-keysexposed-qwerty")
     fun everyStateNamesTheNextStepAndIsAnnounced() {
         renderBoard()
         val missing = mutableListOf<String>()
@@ -76,7 +76,7 @@ class StatesTest {
         assertTrue(missing.joinToString("\n"), missing.isEmpty())
     }
 
-    @Test @Config(qualifiers = "tr-w1480dp-h925dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1480dp-h925dp-mdpi-keysexposed-qwerty")
     fun boardTargetsAreLargeEnoughAndNamed() {
         renderBoard()
         checkTargets(24.dp)

@@ -84,7 +84,7 @@ class SleepScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun timerDex() {
         val timer = timer()
         capture("sleep-timer-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
@@ -100,7 +100,7 @@ class SleepScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h1000dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h1000dp-mdpi-keysexposed-qwerty")
     fun alarmDex() = capture("settings-alarm-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) {
             AlarmSection(

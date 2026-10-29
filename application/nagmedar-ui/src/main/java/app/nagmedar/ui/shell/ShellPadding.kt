@@ -12,6 +12,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -229,6 +230,18 @@ internal class ShellOverlayHost {
 
     /** How far the bars have slid down now (px); the player measures where its strip rests without it. */
     var navigationOffset: () -> Float = { 0f }
+
+    /**
+     * 1.0.1: the pages of the screen's overlay that take the whole window ([WindowPage]), each with
+     * whether it covers it now (open and at rest).
+     */
+    val windowPages = mutableStateMapOf<Any, Boolean>()
+
+    /** A [WindowPage] is shown: the screen's overlays take the whole window, bars included. */
+    val windowPageShown: Boolean get() = windowPages.isNotEmpty()
+
+    /** A [WindowPage] covers the window: the bars and the screen under it are neither drawn nor read out. */
+    val windowCovered: Boolean get() = windowPages.containsValue(true)
 
     companion object {
         /** The expanded player: over the bars, under the screen's overlays. */

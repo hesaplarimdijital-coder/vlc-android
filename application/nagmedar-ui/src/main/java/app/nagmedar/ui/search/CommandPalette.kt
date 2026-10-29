@@ -73,6 +73,8 @@ import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.VerticalRule
+import app.nagmedar.ui.input.hardwareKeyboard
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.components.animateStateColor
@@ -111,6 +113,7 @@ fun PaletteSurface(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val keyboard = hardwareKeyboard()
     var query by remember { mutableStateOf(initialQuery) }
     var scope by remember { mutableStateOf<PaletteKind?>(null) }
     var selected by remember { mutableIntStateOf(0) }
@@ -229,8 +232,11 @@ fun PaletteSurface(
                 Spacer(Modifier.width(12.dp))
                 Text(pluralStringResource(R.plurals.nag_palette_count, results.count, results.count), style = NagTheme.type.labelSmall,
                     color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.width(8.dp))
-                KeyCap("Esc")
+                // 1.0.1: keys with a keyboard only; by touch a tap beside the palette closes it
+                if (keyboard) {
+                    Spacer(Modifier.width(8.dp))
+                    KeyCap("Esc")
+                }
             }
             HorizontalRule()
             // what is searched
@@ -274,8 +280,8 @@ fun PaletteSurface(
                     Preview(chosen, Modifier.width(300.dp))
                 }
             }
-            // keys to press: a pointer comes with a keyboard, a touch screen seldom does
-            if (NagTheme.inputMode != InputMode.Touch) {
+            // keys to press: with a keyboard at hand, while it drives the palette (not touch)
+            if (NagTheme.inputMode != InputMode.Touch && keyboard) {
                 HorizontalRule()
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically) {
@@ -339,7 +345,7 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
-        item.shortcut?.let {
+        keyHint(item.shortcut)?.let {
             Spacer(Modifier.width(8.dp))
             KeyCap(it)
         }
@@ -383,7 +389,7 @@ private fun Preview(hit: PaletteHit, modifier: Modifier = Modifier) {
                 )
             }
         }
-        item.shortcut?.let { keys ->
+        keyHint(item.shortcut)?.let { keys ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.nag_palette_shortcut), style = NagTheme.type.labelSmall, color = colors.textTertiary,
                     modifier = Modifier.width(80.dp))
