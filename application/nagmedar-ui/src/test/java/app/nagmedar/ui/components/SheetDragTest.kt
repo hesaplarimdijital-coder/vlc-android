@@ -1,13 +1,19 @@
 package app.nagmedar.ui.components
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -16,7 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
-import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.shell.WidthClass
@@ -36,7 +42,7 @@ import org.robolectric.annotation.GraphicsMode
  * 1.0.2: a phone's sheet (a track's "⋯") goes down with a drag anywhere on it, not only on its
  * handle (the user's report): past a third of its height it closes, short of it it springs back,
  * a long sheet scrolled down scrolls back to its top first; a tap still runs a row, a drag never
- * does, and a sideways drag leaves the sheet where it is.
+ * does, and a sideways drag stays with what it began on (a slider), the sheet where it is.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -156,13 +162,35 @@ class SheetDragTest {
     }
 
     @Test
-    fun aSidewaysDragLeavesTheSheet() {
-        sheet()
-        val top = sheetTop()
-        compose.onNodeWithText("Sıraya ekle").performTouchInput { swipeLeft(durationMillis = 400) }
+    fun aSidewaysDragStaysWithWhatItBeganOn() {
+        // a slider-like strip in a sheet: it gets the sideways drag, the sheet stays where it is
+        var moved = 0f
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                TestShell(WidthClass.Compact, screen = { _, _ ->
+                    Box(Modifier.fillMaxSize()) {
+                        GlassBottomSheet(visible = open, onDismiss = { open = false }, label = "Ekolayzer") {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp)
+                                    .testTag("strip")
+                                    .draggable(rememberDraggableState { moved += it }, Orientation.Horizontal),
+                            )
+                        }
+                    }
+                })
+            }
+        }
         compose.waitForIdle()
+        val top = sheetTop()
+        compose.onNodeWithTag("strip").performTouchInput {
+            swipe(centerRight - Offset(20f, 0f), centerLeft + Offset(20f, 30f), durationMillis = 400)
+        }
+        compose.waitForIdle()
+        assertTrue("moved $moved", moved < -100f)
         assertTrue(open)
-        assertEquals(emptyList<String>(), ran)
         assertEquals(top, sheetTop(), 0.5f)
     }
 
