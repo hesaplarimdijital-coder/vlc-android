@@ -130,6 +130,11 @@ class RemoteAccessSettingsTest {
     }
 
     @Test
+    fun theSettingsOfferNoVideoPart() {
+        assertEquals(listOf(LibraryPart.Audio, LibraryPart.Playlists, LibraryPart.Search), LibraryPart.shown)
+    }
+
+    @Test
     fun aValueNoPartHasIsPassedOver() {
         prefs.edit().putStringSet(KEY_REMOTE_ACCESS_ML_CONTENT, setOf("2", "9")).commit()
         assertEquals(setOf(LibraryPart.Playlists), settings().library)

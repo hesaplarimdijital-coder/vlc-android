@@ -52,6 +52,9 @@ enum class LibraryPart(val value: String) {
         /** Every part: the classic setting's default (`remote_access_content_values`). */
         val All: Set<LibraryPart> = entries.toSet()
 
+        /** The parts the settings offer (1.0, an audio player: not [Video]; its stored value is kept as it was). */
+        val shown: List<LibraryPart> = entries.filter { it != Video }
+
         /** The parts [values] name; a value no part has is passed over. */
         fun parse(values: Set<String>): Set<LibraryPart> = entries.filter { it.value in values }.toSet()
     }

@@ -58,7 +58,8 @@ internal fun RemoteAccessSection(settings: RemoteAccessSettings = rememberRemote
             Text(stringResource(R.string.nag_ra_library_hint), style = NagTheme.type.labelSmall, color = colors.textTertiary)
             Spacer(Modifier.height(dimens.gapS))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                LibraryPart.entries.forEach { part ->
+                // 1.0 plays no video: the videos' part is no choice of the user's any more
+                LibraryPart.shown.forEach { part ->
                     FilterChip(
                         label = stringResource(part.label),
                         selected = part in settings.library,

@@ -59,7 +59,9 @@ class RemoteAccessSectionTest {
     @Test
     fun theDefaultsAreShown() {
         show()
-        listOf("Video", "Audio", "Playlists", "Search").forEach { compose.onNodeWithTag("ra-part-$it").assertIsOn() }
+        listOf("Audio", "Playlists", "Search").forEach { compose.onNodeWithTag("ra-part-$it").assertIsOn() }
+        // 1.0 plays no video: its part is not offered
+        compose.onNodeWithTag("ra-part-Video").assertDoesNotExist()
         compose.onNodeWithTag("ra-files").assertIsOff()
         compose.onNodeWithTag("ra-network").assertIsOff()
         compose.onNodeWithTag("ra-history").assertIsOff()
