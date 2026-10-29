@@ -117,7 +117,7 @@ class InspectorState(
  * long as the window.
  */
 @Composable
-fun rememberInspectorState(key: String = WORKSTATION_PANE, defaultWidth: Dp = 340.dp): InspectorState {
+fun rememberInspectorState(key: String = WORKSTATION_PANE, defaultWidth: Dp = 384.dp): InspectorState {
     val store = LocalPaneWidths.current
     val commit: (Float, Boolean) -> Unit = { width, collapsed ->
         store.savePaneWidth(key, width)
@@ -263,9 +263,10 @@ fun InspectorPane(
             }
             if (onCollapse != null) {
                 NagIconButton(
-                    if (rtl) NagIcons.ChevronLeft else NagIcons.ChevronRight,
+                    NagIcons.SidebarToggle,
                     stringResource(R.string.nag_inspector_hide),
                     onCollapse,
+                    selected = true,
                     shortcut = ShortcutId.ToggleInspector,
                     modifier = Modifier.testTag("inspector-hide"),
                 )
@@ -301,7 +302,7 @@ private fun InspectorTabButton(tab: InspectorTab, selected: Boolean, onClick: ()
             .background(stateBackground(state), shape)
             .semantics { this.selected = selected }
             .nagClickable(interaction, onClick, role = Role.Tab)
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 6.dp)
             .testTag("inspector-tab-${tab.id}"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

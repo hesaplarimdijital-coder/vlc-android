@@ -98,7 +98,7 @@ class MusicInspectorContent(
     val queue: @Composable () -> Unit,
 )
 
-/** The inspector of the music view: its four tabs over [content], about [subject]; the hide button hides it. */
+/** The inspector of the music view: its four tabs over [content], about [subject]; the page header's button hides it. */
 @Composable
 internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorContent, subject: InspectorSubject) {
     val tabs = listOf(
@@ -109,7 +109,7 @@ internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorCo
     )
     // the last lines rest clear of a floating player bar
     val bottom = LocalShellBottomPadding.current
-    InspectorPane(tabs, state.selectedTab, { state.selectedTab = it }, onCollapse = state::toggle) { tab ->
+    InspectorPane(tabs, state.selectedTab, { state.selectedTab = it }) { tab ->
         Box(Modifier.fillMaxSize().padding(bottom)) {
             when (tab.id) {
                 InspectorTabs.TAGS -> content.tags(subject)

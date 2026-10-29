@@ -16,6 +16,9 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.components.LocalScreenCommands
+import app.nagmedar.ui.components.ScreenCommands
+import androidx.compose.ui.test.assertCountEquals
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.shell.WORKSTATION_PANE
@@ -206,13 +209,16 @@ class MusicBrowserTest {
 
     private lateinit var inputModes: InputModeManager
 
+    /** The window's commands: Ctrl+I goes to the music view through them. */
+    private val commands = ScreenCommands()
+
     private fun workstation(store: PaneWidths) {
         val itri = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
         val state = MusicBrowserState(view = MusicView.Albums, group = itri, columns = listOf(MusicColumn.Title, MusicColumn.Duration))
         compose.setContent {
             inputModes = LocalInputModeManager.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
-                CompositionLocalProvider(LocalWidthClass provides WidthClass.Large, LocalPaneWidths provides store) {
+                CompositionLocalProvider(LocalWidthClass provides WidthClass.Large, LocalPaneWidths provides store, LocalScreenCommands provides commands) {
                     MusicBrowser(library, state, actions, Modifier, inspector = tabs)
                 }
             }
@@ -240,8 +246,8 @@ class MusicBrowserTest {
         compose.onNodeWithTag("inspector-tab-lyrics").performKeyInput { pressKey(Key.DirectionRight) }
         compose.waitForIdle()
         compose.onNodeWithText("sıra").assertExists()
-        // hidden, and kept so
-        compose.onNodeWithTag("inspector-hide").performClick()
+        // Ctrl+I hides it, and it is kept so
+        assertEquals(true, compose.runOnIdle { commands.toggleInspector() })
         compose.waitForIdle()
         compose.onNodeWithTag("inspector").assertDoesNotExist()
         assertEquals(true, store.hidden[WORKSTATION_PANE])
@@ -274,7 +280,10 @@ class MusicBrowserTest {
         // a right click on a selected row: the menu is the selection's
         row("Neva Kâr").performMouseInput { rightClick(center) }
         compose.waitForIdle()
-        compose.onNodeWithText("Sıraya ekle").performClick()
+        // the selection bar's button and the menu's item
+        val queue = compose.onAllNodesWithText("Sıraya ekle")
+        queue.assertCountEquals(2)
+        queue[1].performClick()
         compose.waitForIdle()
         assertEquals(listOf(listOf("Segâh Tekbîr", "Neva Kâr")), queued)
     }

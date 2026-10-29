@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -253,7 +254,7 @@ class MusicScreenshotTest {
         val album = library.groups(MusicView.Albums).first { it.title == "Gece Yolcusu" }.key
         capture("music-lyrics-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
             TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
-                Library(library, MusicBrowserState(view = MusicView.Albums, group = album), inspector, InspectorState(340f, initialTab = 2))
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = album), inspector, remember { InspectorState(384f, initialTab = 2) })
             }
         }
     }
@@ -268,24 +269,28 @@ class MusicScreenshotTest {
         }
     }
 
-    /** A tablet by genre with the 24-bit filter; the inspector on its queue tab, the mini player floating. */
+    /**
+     * A tablet by genre with the 24-bit filter, a genre open (beside the inspector the groups and the table take turns,
+     * as on a narrow window); the inspector on its queue tab, the mini player floating.
+     */
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun tabletGenres() {
         val library = library("tr")
         capture("music-tablet-dark-genres", ThemeMode.Dark, InputMode.Touch) {
             TestShell(WidthClass.Expanded, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
-                Library(library, MusicBrowserState(view = MusicView.Genres, filter = TechFilter(depths = setOf(Depth.Bits24))), inspector, InspectorState(340f, initialTab = 3))
+                val classical = library.groups(MusicView.Genres).first { it.title == "Klasik" }.key
+                Library(library, MusicBrowserState(view = MusicView.Genres, group = classical, filter = TechFilter(depths = setOf(Depth.Bits24))), inspector, remember { InspectorState(384f, initialTab = 3) })
             }
         }
     }
 
-    /** A tablet held upright in the light: the albums, the inspector on the signal path of what plays. */
+    /** A tablet held upright in the light: an album's tracks, the inspector on the signal path of what plays. */
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun tabletLight() {
         val library = library("tr")
         capture("music-tablet-light", ThemeMode.Light, InputMode.Touch) {
             TestShell(WidthClass.Expanded, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
-                Library(library, MusicBrowserState(view = MusicView.Albums, group = itri(library)), inspector, InspectorState(340f, initialTab = 1))
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = itri(library)), inspector, remember { InspectorState(384f, initialTab = 1) })
             }
         }
     }

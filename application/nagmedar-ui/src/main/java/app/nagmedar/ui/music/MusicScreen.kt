@@ -637,7 +637,8 @@ private class HeldGroups {
  *
  * Desktop Kit 1.0 ("MusicBee"): on tablet and DeX windows (Expanded and wider) [inspector]'s tabs stand on the right
  * ([WorkstationLayout]), about the track selected in the table or, with none, what plays; [inspectorState] keeps the
- * pane's width and whether it is hidden (Ctrl+I).
+ * pane's width and whether it is hidden (Ctrl+I). Beside it a tablet's window (narrower than Large) shows the groups,
+ * then the tracks of the one opened, as a narrow window does.
  */
 @Composable
 fun MusicBrowser(
@@ -659,7 +660,9 @@ fun MusicBrowser(
     LaunchedEffect(width, state.view) {
         if (width == WidthClass.Compact && state.view == MusicView.Recent) state.open(MusicView.Tracks)
     }
-    val wide = width >= WidthClass.Expanded
+    val workstation = inspector != null && width >= WidthClass.Expanded
+    // a tablet's window with the inspector shown has the room of a narrow one for the groups and their tracks (Desktop Kit 1.0)
+    val wide = width >= WidthClass.Expanded && !(workstation && !inspectorState.collapsed && width < WidthClass.Large)
     // a wide window always shows a group; a narrow one shows the list until one is opened
     val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide }
     if (!wide && grouped && state.group != null) BackHandler { state.group = null }
@@ -691,10 +694,7 @@ fun MusicBrowser(
     val openActions = remember(actions, state.view, open?.title) { actions.playingFrom(groupSource(state.view, open)) }
     // the table's selection, which the inspector follows (S-405, Desktop Kit 1.0)
     val selection = rememberMultiSelection()
-    val workstation = inspector != null && width >= WidthClass.Expanded
     if (workstation) InspectorCommands(inspectorState::toggle)
-    // beside a shown inspector a tablet's groups give the table some room
-    val groupWidth = if (workstation && !inspectorState.collapsed && width < WidthClass.Large) 220.dp else 260.dp
     val panes: @Composable () -> Unit = {
         when {
             // nothing played yet (no filter hiding what was)
@@ -722,13 +722,13 @@ fun MusicBrowser(
             }
             width >= WidthClass.Large -> Row(Modifier.fillMaxSize()) {
                 if (grouped) {
-                    GroupList(groups, state, actions, open?.key, Modifier.width(groupWidth).fillMaxHeight())
+                    GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                     VerticalRule()
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
             }
             wide && grouped -> Row(Modifier.fillMaxSize()) {
-                GroupList(groups, state, actions, open?.key, Modifier.width(groupWidth).fillMaxHeight())
+                GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
             }
