@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.StationPlaylistsTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:00.316Z" hostname="runnervmnwato" time="0.042">
+  <properties/>
+  <testcase name="aLongListIsCutAtTheLimit" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.03"/>
+  <testcase name="anOldTurkishListInWindows1254" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.001"/>
+  <testcase name="aNameWithBrokenQuotesStillGivesTheStation" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="namesAreCleanedAndShortened" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="aFileWithoutAnExtensionIsReadByItsFirstBytes" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="aHugeFileIsNotAStationList" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.007"/>
+  <testcase name="thePlsOfTheTestMedia" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="filesThatAreNoPlaylistAreSaidSo" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="onlyStreamAddressesAreStationsAndEachOnce" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.001"/>
+  <testcase name="theM3u8OfTheTestMedia" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="anIptvListKeepsItsLogosGroupsAndNames" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="aTruncatedPlsGivesWhatIsWhole" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.0"/>
+  <testcase name="whatIsAStreamAddress" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.001"/>
+  <testcase name="filesWithNoStationAreEmpty" classname="app.nagmedar.ui.radio.StationPlaylistsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

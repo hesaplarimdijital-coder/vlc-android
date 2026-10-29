@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.NewStorageHookTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:03.940Z" hostname="runnervmnwato" time="0.045">
+  <properties/>
+  <testcase name="aDriveBeforeTheHandlerIsSaidOnceItComes" classname="app.nagmedar.ui.library.NewStorageHookTest" time="0.023"/>
+  <testcase name="aDriveKeptIsSaidOnlyOnce" classname="app.nagmedar.ui.library.NewStorageHookTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

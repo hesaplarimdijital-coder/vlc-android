@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.PlayButtonTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:44.872Z" hostname="runnervmnwato" time="0.002">
+  <properties/>
+  <testcase name="aPausedEpisodeResumesWhereThePlayerHasIt" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.001"/>
+  <testcase name="anEpisodeBeingOpenedWaitsAsAPauseWhateverThePlayerSays" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="aSavedPlaceResumesThere" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="aPlayedEpisodePlaysAgainUnlessThePlayerIsInIt" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="nothingSavedPlays" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="theSameSavedPlaceWhenThePlayerHasTheEpisodeLoadedButNotStarted" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="aPlaceInTheLastSecondsPlaysAgain" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="aPlayingEpisodePauses" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.0"/>
+  <testcase name="theTimelineStartsAtTheSavedPlaceUntilThePlayerIsThere" classname="app.nagmedar.ui.playback.PlayButtonTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

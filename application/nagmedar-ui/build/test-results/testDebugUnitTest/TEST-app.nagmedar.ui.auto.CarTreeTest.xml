@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarTreeTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:34:48.569Z" hostname="runnervmnwato" time="0.098">
+  <properties/>
+  <testcase name="theNewEpisodesAreThoseARefreshAddedNotPlayed" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.009"/>
+  <testcase name="eachTabHasItsLists" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.001"/>
+  <testcase name="recentlyPlayedIsTheMusicPlayedLastInItsOrder" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.001"/>
+  <testcase name="theYearsAreDecadesThenYearsThenTracks" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.033"/>
+  <testcase name="anIdOfAnotherTreeIsNotTheCatalogs" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.0"/>
+  <testcase name="playlistsOpenOnTheirTracksAndPlayAsTheList" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.002"/>
+  <testcase name="aKeyWithAnySignInItComesBack" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.001"/>
+  <testcase name="aMedialibraryThatDoesNotAnswerLeavesTheRestAnswering" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.009"/>
+  <testcase name="theFoldersAreTheMusicSectionsFolders" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.007"/>
+  <testcase name="theEpisodesLeftInTheMiddleComeTheOneListenedToLastFirst" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.002"/>
+  <testcase name="anArtistOpensOnTheirAlbums" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.003"/>
+  <testcase name="aSearchThatFindsNothingSaysSo" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.003"/>
+  <testcase name="albumsAreTilesThatOpenOnTheirTracks" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.002"/>
+  <testcase name="theTurkishDecadesTakeTheirEnding" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.0"/>
+  <testcase name="aLongTrackListIsCutIntoPagesThatPlayTheWholeList" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.004"/>
+  <testcase name="theSearchGroupsWhatItFinds" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.004"/>
+  <testcase name="aLongListIsCutIntoPages" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.005"/>
+  <testcase name="anEmptyListSaysSoInOneLineThatPlaysNothing" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.006"/>
+  <testcase name="anOfflineDirectorySaysSo" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.001"/>
+  <testcase name="theCategoriesAreTheDirectorysTagsAndTheirStations" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.002"/>
+  <testcase name="theRadiosStationsPlayAtOneTap" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.0"/>
+  <testcase name="theRootHasExactlyTheFourTabsInOrder" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.0"/>
+  <testcase name="aShowOpensOnItsEpisodesTheNewestFirst" classname="app.nagmedar.ui.auto.CarTreeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

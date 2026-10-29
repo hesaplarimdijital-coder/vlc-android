@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.DeveloperRowScreenshotTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:11.575Z" hostname="runnervmnwato" time="0.209">
+  <properties/>
+  <testcase name="dexEnglish" classname="app.nagmedar.ui.screenshots.DeveloperRowScreenshotTest" time="0.105"/>
+  <testcase name="phone" classname="app.nagmedar.ui.screenshots.DeveloperRowScreenshotTest" time="0.104"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

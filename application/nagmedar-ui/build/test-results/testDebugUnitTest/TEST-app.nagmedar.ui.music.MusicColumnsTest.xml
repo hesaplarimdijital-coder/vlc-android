@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.MusicColumnsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:08.687Z" hostname="runnervmnwato" time="0.006">
+  <properties/>
+  <testcase name="aColumnMovesWithinTheTable" classname="app.nagmedar.ui.music.MusicColumnsTest" time="0.002"/>
+  <testcase name="aColumnShownAgainGoesBesideTheOneItFollows" classname="app.nagmedar.ui.music.MusicColumnsTest" time="0.0"/>
+  <testcase name="eachWayInKeepsItsOwnColumns" classname="app.nagmedar.ui.music.MusicColumnsTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

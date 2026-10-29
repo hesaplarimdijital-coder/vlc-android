@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.audio.AbTestStateTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:34:39.961Z" hostname="runnervmnwato" time="0.016">
+  <properties/>
+  <testcase name="guessing" classname="app.nagmedar.ui.audio.AbTestStateTest" time="0.0"/>
+  <testcase name="theEngineIsBelieved" classname="app.nagmedar.ui.audio.AbTestStateTest" time="0.013"/>
+  <testcase name="theBlindTestHidesXUntilItsEnd" classname="app.nagmedar.ui.audio.AbTestStateTest" time="0.002"/>
+  <testcase name="bothSidesAreDrawn" classname="app.nagmedar.ui.audio.AbTestStateTest" time="0.0"/>
+  <testcase name="theOpenTestSwitchesTheEngine" classname="app.nagmedar.ui.audio.AbTestStateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

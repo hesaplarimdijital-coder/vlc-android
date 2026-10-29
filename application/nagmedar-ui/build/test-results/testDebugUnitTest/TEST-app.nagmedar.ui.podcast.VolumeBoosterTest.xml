@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.VolumeBoosterTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:54.802Z" hostname="runnervmnwato" time="0.002">
+  <properties/>
+  <testcase name="aMuteDuringTheBoostStaysAfterIt" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.002"/>
+  <testcase name="aVolumeSetDuringTheBoostIsTheListenersOwn" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <testcase name="anEpisodePlaysBoostedAndTheNextMediaAtTheListenersVolume" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <testcase name="withoutABoostTheListenersVolumeIsTheEngines" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <testcase name="theVolumeGoesBackWhenAnotherEngineTakesOver" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <testcase name="aChangeOfTheShowsStepReachesTheEpisodePlaying" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <testcase name="aDuckingMeanwhileNeverLeavesTheNextMediaBoosted" classname="app.nagmedar.ui.podcast.VolumeBoosterTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

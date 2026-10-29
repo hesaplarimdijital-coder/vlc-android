@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:42.126Z" hostname="runnervmnwato" time="0.249">
+  <properties/>
+  <testcase name="noNetworkKeepsTheBatchCountsTheFailureAndAsksForAnotherTry" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.023"/>
+  <testcase name="aFailureInTheMiddleOfAnOneByOneSendKeepsTheRest" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.036"/>
+  <testcase name="aServiceThisBuildCannotUseIsLeftAlone" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.028"/>
+  <testcase name="aServiceThatIsOffOrNotSignedInSendsNothingAndKeepsItsQueue" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.023"/>
+  <testcase name="aBatchTheServiceRefusesIsSentOneByOneAndOnlyTheBadOnesAreGivenUp" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.02"/>
+  <testcase name="whatLastFmWouldIgnoreForAgeIsDroppedBeforeSending" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.021"/>
+  <testcase name="theQueueGoesInBatchesOfFiftyOldestFirst" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.026"/>
+  <testcase name="eachServiceSendsItsOwnQueue" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.02"/>
+  <testcase name="aRefusedAccountHoldsTheQueueUntilTheUserSignsInAgain" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.023"/>
+  <testcase name="anAccountWhoseSecretCannotBeOpenedIsHeld" classname="app.nagmedar.ui.scrobble.ScrobbleFlusherTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

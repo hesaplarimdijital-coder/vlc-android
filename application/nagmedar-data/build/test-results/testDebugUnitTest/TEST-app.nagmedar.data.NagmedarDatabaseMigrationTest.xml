@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseMigrationTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:31:08.159Z" hostname="runnervmnwato" time="23.013">
+  <properties/>
+  <testcase name="podcastsGetTheirTranscriptColumnsInTwentyOne" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="19.966"/>
+  <testcase name="aTwentyWithoutSomeOfTheTablesMigratesAllTheSame" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.226"/>
+  <testcase name="scheduleAndShowCrossFromFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.399"/>
+  <testcase name="aTwentyWithTheRemovedFeaturesRowsOpensAsTwentyTwo" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.758"/>
+  <testcase name="aPullRequestBuildsDatabaseEndsAsTwenty" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.57"/>
+  <testcase name="remuxJobsKeepTheirOrderFromNineteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.173"/>
+  <testcase name="everyVersionMigratesToTheLatest" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.252"/>
+  <testcase name="radioRecordingsAppearInFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.149"/>
+  <testcase name="aTwentyOneLosesOnlyTheRemovedFeaturesTables" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.238"/>
+  <testcase name="podcastRowsSurviveTheirNewColumns" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.148"/>
+  <testcase name="radioStationsKeepTheirRowsFromSeven" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.118"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

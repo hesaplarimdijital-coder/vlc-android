@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:07.074Z" hostname="runnervmnwato" time="0.391">
+  <properties/>
+  <testcase name="lrclibNeedsATitleAnArtistALengthAndTimedLines" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.022"/>
+  <testcase name="aChallengeIsReadFromItsHex" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.019"/>
+  <testcase name="theSearchStopsWhenCancelled" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.058"/>
+  <testcase name="severalWorkersFindOneToo" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.024"/>
+  <testcase name="theProgressGrowsWithTheTriesButNeverReachesOne" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.02"/>
+  <testcase name="hashesAreComparedByteByByte" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.021"/>
+  <testcase name="publishingGoesThroughItsStatesAndSendsTheSolvedNonce" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.029"/>
+  <testcase name="aFailureEndsInFailedNotInAnException" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.028"/>
+  <testcase name="theFailuresAreTold" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.101"/>
+  <testcase name="theRequestHasTheTrackAndBothLyrics" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.021"/>
+  <testcase name="theTwoCallsSayWhoAsksAndCarryTheToken" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.025"/>
+  <testcase name="theNonceFoundMeetsTheTargetAsTheServerChecksIt" classname="app.nagmedar.ui.lyrics.editor.ProofOfWorkTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

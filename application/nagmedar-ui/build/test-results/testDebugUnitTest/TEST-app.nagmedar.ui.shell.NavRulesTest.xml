@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.NavRulesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:44.838Z" hostname="runnervmnwato" time="0.003">
+  <properties/>
+  <testcase name="backOnAnotherTabsFirstPageGoesToMusic" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.002"/>
+  <testcase name="pagesThatAreNotATabsFirstHaveTheBackArrow" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <testcase name="theTabOnScreenChosenAgainGoesToItsFirstPage" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.001"/>
+  <testcase name="thePhonesTabsAreTheBottomBar" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <testcase name="settingsAndItsPagesHideThePhonesBars" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <testcase name="aTabSwitchesAndAPageOpens" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <testcase name="theSearchPageLightsNothing" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <testcase name="aPageLightsTheTabWhoseStackItIsIn" classname="app.nagmedar.ui.shell.NavRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

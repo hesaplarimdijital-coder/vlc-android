@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PlayerBarsScreenshotTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:24.677Z" hostname="runnervmnwato" time="0.237">
+  <properties/>
+  <testcase name="transportBarHovered" classname="app.nagmedar.ui.screenshots.PlayerBarsScreenshotTest" time="0.142"/>
+  <testcase name="miniPlayerHovered" classname="app.nagmedar.ui.screenshots.PlayerBarsScreenshotTest" time="0.095"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

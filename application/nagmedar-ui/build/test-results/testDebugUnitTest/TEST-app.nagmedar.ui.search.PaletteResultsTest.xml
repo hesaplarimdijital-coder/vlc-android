@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.PaletteResultsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:43.829Z" hostname="runnervmnwato" time="0.004">
+  <properties/>
+  <testcase name="groupsComeInTheirOrderAndAreCut" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.003"/>
+  <testcase name="withoutAQueryTheRecentLead" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="prefixesNarrowTheSearch" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="eachItemOnceThoughListedTwice" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="whatRanLatelyComesUp" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

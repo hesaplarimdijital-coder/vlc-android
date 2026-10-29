@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.sleep.SleepTimerTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:36:47.233Z" hostname="runnervmnwato" time="0.003">
+  <properties/>
+  <testcase name="theTimeUpStopsAfterAFadeAndTheVolumeComesBack" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.001"/>
+  <testcase name="withTheTrackEndTheTrackPlaysOut" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.0"/>
+  <testcase name="aPauseWhileTheTrackEndIsAwaitedKeepsTheTimer" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.0"/>
+  <testcase name="moreTimeAndAFadeTakenBack" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.001"/>
+  <testcase name="withTheTrackEndTheFadeIsTheTracks" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.0"/>
+  <testcase name="theTrackEndAloneAndCancelled" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.0"/>
+  <testcase name="nothingPlayingWhenTheTimeIsUp" classname="app.nagmedar.ui.sleep.SleepTimerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

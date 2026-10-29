@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.onboarding.FirstRunTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:12.381Z" hostname="runnervmnwato" time="1.524">
+  <properties/>
+  <testcase name="aGivenPermissionSaysSoWhereItsButtonWas" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.082"/>
+  <testcase name="scanPathsNeedMediaAccess" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.049"/>
+  <testcase name="theSectionRowsKeepTheTargetsBigAndNamed" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.328"/>
+  <testcase name="theNotificationsStepSaysSoToo" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.058"/>
+  <testcase name="grantedAccessAndTheSourceCount" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.07"/>
+  <testcase name="refusedAccessOffersFolders" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.105"/>
+  <testcase name="aPermissionNotGivenKeepsItsButton" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.059"/>
+  <testcase name="pickedFileTypes" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.047"/>
+  <testcase name="backReturnsToThePreviousStep" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.079"/>
+  <testcase name="touchTargetsAndNames" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.08"/>
+  <testcase name="folderNames" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.048"/>
+  <testcase name="aFolderPickedLaterShowsInItsRowAtOnce" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.079"/>
+  <testcase name="aFolderChosenForASectionShowsInItsRow" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.069"/>
+  <testcase name="emptyLibraryWithoutAccessAsksForIt" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.059"/>
+  <testcase name="everyGivenPermissionOfTheStepIsMarked" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.055"/>
+  <testcase name="theSourcesStepOffersFoldersForEverySectionAndAsksForNone" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.077"/>
+  <testcase name="everyStepCanBeSkipped" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.111"/>
+  <testcase name="aPermissionGivenAwayFromTheWindowShowsWhenItComesBack" classname="app.nagmedar.ui.onboarding.FirstRunTest" time="0.069"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

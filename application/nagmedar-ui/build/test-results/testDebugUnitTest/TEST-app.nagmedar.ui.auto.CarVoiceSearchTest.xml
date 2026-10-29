@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarVoiceSearchTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:34:48.670Z" hostname="runnervmnwato" time="0.036">
+  <properties/>
+  <testcase name="aMedialibraryThatDoesNotAnswerLeavesThePodcastsAndTheRadio" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.008"/>
+  <testcase name="aGenreAndAPlaylist" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.003"/>
+  <testcase name="anEmptyLibraryLooksElsewhere" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.001"/>
+  <testcase name="nothingThatAnswersPlaysNothing" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.007"/>
+  <testcase name="aKindAlonePlaysItsLatest" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.001"/>
+  <testcase name="musicFirstThenPodcastsThenRadio" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.004"/>
+  <testcase name="aTitlePlaysWithItsAlbumAfterIt" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.002"/>
+  <testcase name="theDirectorysOwnAnswerPlaysWhenNoneAnswersWordForWord" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.002"/>
+  <testcase name="anAlbumOfTheArtistNamed" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.001"/>
+  <testcase name="theAssistantsWrongFocusStillFindsTheShow" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.001"/>
+  <testcase name="aRequestThatNamesItsKindLooksThereAlone" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.001"/>
+  <testcase name="theDirectoryIsAskedWithTheWordsAsSaid" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.002"/>
+  <testcase name="anArtistAsTheAssistantNamesIt" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.0"/>
+  <testcase name="aPlainRequestTakesWhatAnswersBest" classname="app.nagmedar.ui.auto.CarVoiceSearchTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

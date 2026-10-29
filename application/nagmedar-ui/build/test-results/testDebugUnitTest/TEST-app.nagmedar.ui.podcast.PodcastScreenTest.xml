@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastScreenTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:53.442Z" hostname="runnervmnwato" time="1.079">
+  <properties/>
+  <testcase name="theAddWindowShowsWhyAFeedWasRefused" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.195"/>
+  <testcase name="theAddWindowSubmitsOnEnter" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.114"/>
+  <testcase name="aRefusedFeedShowsItsReason" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.077"/>
+  <testcase name="theViewTogglesToAList" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.082"/>
+  <testcase name="enterReleasedWhileTheFeedIsReadIsNoCancel" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.105"/>
+  <testcase name="aSubscribedResultOpensItsPage" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.066"/>
+  <testcase name="oneTapSubscribes" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.072"/>
+  <testcase name="aPodcastPlaysItsEpisodes" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.089"/>
+  <testcase name="theAddWindowChecksTheAddress" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.082"/>
+  <testcase name="theSubscriptionsAreCoversWithTheirNewEpisodes" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.073"/>
+  <testcase name="theSearchButtonWaitsForSomethingToSearch" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.057"/>
+  <testcase name="enterSearches" classname="app.nagmedar.ui.podcast.PodcastScreenTest" time="0.065"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

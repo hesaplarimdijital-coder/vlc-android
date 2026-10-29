@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.WindowPlayerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T23:35:09.842Z" hostname="runnervmnwato" time="0.814">
+  <properties/>
+  <testcase name="theArtworkAndTheWordsOpenItTooAndAPullDownAnywhereClosesIt" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.176"/>
+  <testcase name="aDesktopWindowsCaptionBarStaysTheWindows" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.138"/>
+  <testcase name="aShortPullSpringsBack" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.135"/>
+  <testcase name="escClosesItOnADesktop" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.14"/>
+  <testcase name="theBarsButtonOpensTheBigPlayerOnATabletAndBackClosesIt" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.117"/>
+  <testcase name="anUprightTabletsMiniPlayerOpensItAsTheRailDid" classname="app.nagmedar.ui.music.WindowPlayerTest" time="0.108"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
