@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -122,6 +123,7 @@ data class ColumnSort(val id: String, val ascending: Boolean) {
  * which column it was opened on; [onExtendSelection] takes Shift+↑ and Shift+↓ on a focused row
  * (the row and the step, true when the selection grew) and the focus follows.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> DenseTable(
     columns: List<TableColumn<T>>,
@@ -159,7 +161,13 @@ fun <T> DenseTable(
     rowMoreTitle: (T) -> String? = { null },
     glassHeader: Boolean = false,
     onExtendSelection: ((focused: T, delta: Int) -> Boolean)? = null,
+    /**
+     * 1.0: an item over everything (a phone's shelf of the tracks played last) that scrolls away with the rows; the
+     * column titles come under it and then stay at the top. Not with [reorder] or [glassHeader].
+     */
+    leading: (@Composable () -> Unit)? = null,
 ) {
+    val lead = leading.takeIf { reorder == null && !glassHeader }
     val more = rowMoreButton && rowMenu != null
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -206,6 +214,10 @@ fun <T> DenseTable(
             modifier = modifier.then(if (reorder != null) Modifier.reorderList(reorder) else Modifier),
             contentPadding = padding,
         ) {
+            if (lead != null) {
+                item(key = LEADING_KEY, contentType = LEADING_KEY) { lead() }
+                stickyHeader(key = HEADER_KEY, contentType = HEADER_KEY) { header(Modifier.fillMaxWidth().background(colors.background)) }
+            }
             itemsIndexed(rows, key = { _, item -> key(item) }) { index, item ->
                 // the dragged row rises over the others: its outermost layout carries it
                 val place = if (reorder != null) Modifier.reorderItem(reorder, key(item), index) else Modifier
@@ -259,6 +271,9 @@ fun <T> DenseTable(
                     .glass(NagGlass.chrome(colors, GlassThickness.Thin), source = rowsGlass, mode = glassMode, enabled = scrolled),
             )
         }
+    } else if (lead != null) {
+        // the titles are in the list, under the leading item
+        Box(modifier.fillMaxSize().then(keys)) { list(Modifier.fillMaxSize()) }
     } else {
         Column(modifier.fillMaxSize().then(keys)) {
             header(Modifier.fillMaxWidth())
@@ -266,6 +281,10 @@ fun <T> DenseTable(
         }
     }
 }
+
+/** The keys of a table's leading item and of its column titles in the list (saved with the list's state, so strings). */
+private const val LEADING_KEY = "\u0000leading"
+private const val HEADER_KEY = "\u0000header"
 
 /** The row with the keyboard's focus, for Shift+↑ and Shift+↓; plain, nothing redraws from it. */
 private class FocusedRow<T> {

@@ -118,7 +118,7 @@ class RadioTabsPageTest {
         compose.waitForIdle()
         tab("recent")
         compose.onNodeWithTag("station-a1-caz").assertExists()
-        compose.onAllNodesWithContentDescription("Diğer işlemler")[0].performClick()
+        compose.onAllNodesWithContentDescription("Gece Cazı için diğer işlemler")[0].performClick()
         compose.onNodeWithText("Son çalınanlardan kaldır").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("radio-empty-recent").assertExists()
@@ -136,7 +136,7 @@ class RadioTabsPageTest {
         compose.onNodeWithTag("radio-import").performClick()
         assertEquals(1, imports)
         // an imported station has no directory id: there is no vote in its menu
-        compose.onAllNodesWithContentDescription("Diğer işlemler")[0].performClick()
+        compose.onAllNodesWithContentDescription("için diğer işlemler", substring = true)[0].performClick()
         compose.onNodeWithText("Radyoyu kaldır").assertExists()
         compose.onNodeWithText("Bu radyoya oy ver").assertDoesNotExist()
         compose.onNodeWithText("Radyoyu kaldır").performClick()

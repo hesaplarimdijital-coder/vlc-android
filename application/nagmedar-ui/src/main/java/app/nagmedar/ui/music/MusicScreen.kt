@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.ui.R
@@ -314,21 +315,28 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     val context = LocalContext.current
     val scan = rememberScanState()
     val media = rememberMusicMedia(repository, scan.active)
-    // 1.0: the tracks played last (the playback history, newest first): the shelf on a phone, the Recent view on a wide window
+    // 1.0: the tracks played last (the playback history, newest first): the shelf on a phone, the Recent view on a wide
+    // window. Read on its own, off the main thread, again whenever the history changes while the screen is open; never
+    // part of the library, which a new history would otherwise make again
     val access = LocalLibraryAccess.current
-    val recent by rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", scan.active, access?.media, access?.folders, access?.scopes) {
+    val recent = rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", scan.active, access?.media, access?.folders, access?.scopes) {
         loadWhileScanning(scan.active) { repository.recentAudio() }
+        repository.historyChanges().collect { value = repository.recentAudio() }
     }
-    val recentKeys = remember(recent) { recent.orEmpty().mapNotNull { it.uri?.toString() } }
+    val compact = currentWidthClass() == WidthClass.Compact
+    // on a phone the shelf is the list's first item, scrolling away with it; it alone reads (and follows) the history
+    val shelf: (@Composable () -> Unit)? = if (compact) remember { @Composable { RecentShelf(recent.value.orEmpty()) } } else null
+    // a wide window's Recent view; the same empty list on a phone, so that a new history recomposes nothing there
+    val recentKeys = if (compact) emptyList() else recent.value.orEmpty().let { list -> remember(list) { list.mapNotNull { it.uri?.toString() } } }
     val tech by TrackTechIndex.tech.collectAsState()
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
-    val library = remember(media, tech, locale, recentKeys) {
+    val library = remember(media, tech, locale) {
         // S-808: a CUE sheet's track has its file's technical side; made again only for new tracks or a new probe,
         // not in the first frame of a screen that comes back
         media?.let { list ->
-            repository.lastRead.derived("music", listOf(list, tech, locale, recentKeys)) {
-                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale, recentKeys)
+            repository.lastRead.derived("music", listOf(list, tech, locale)) {
+                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale)
             }
         }
     }
@@ -375,12 +383,10 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
             onAddFolder = onAddFolder,
         ) {
             if (library != null) {
-                Column(Modifier.fillMaxSize()) {
-                    // on a phone the shelf of the tracks played last, above the library's top level
-                    val shelf = recent.orEmpty()
-                    if (currentWidthClass() == WidthClass.Compact && state.group == null && shelf.isNotEmpty()) RecentShelf(shelf)
-                    MusicBrowser(library, state, actions, Modifier.weight(1f), probing = probing, inspector = inspector, inspectorState = inspectorState, stats = stats)
-                }
+                MusicBrowser(
+                    library, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
+                    stats = stats, recent = recentKeys, shelf = shelf,
+                )
             }
         }
     }
@@ -390,9 +396,13 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     }
 }
 
-/** 1.0: the tracks played last, newest first, as the Home page's shelf had them: a tap plays them from there. */
+/**
+ * 1.0: the tracks played last, newest first, as the Home page's shelf had them: a tap plays them from there; a long
+ * press opens their menu as a sheet, as every phone menu is. Nothing while nothing was played.
+ */
 @Composable
 private fun RecentShelf(tracks: List<MediaWrapper>) {
+    if (tracks.isEmpty()) return
     val context = LocalContext.current
     val dimens = NagTheme.dimens
     Column(Modifier.fillMaxWidth().testTag("recent-shelf")) {
@@ -403,6 +413,8 @@ private fun RecentShelf(tracks: List<MediaWrapper>) {
                 ContextMenuArea(
                     entries = { mediaMenu(context, media, play) },
                     accessibilityLabel = stringResource(R.string.nag_more_actions),
+                    asSheet = true,
+                    sheetTitle = media.title,
                 ) {
                     TrackCard(media, Modifier.width(150.dp), onClick = play)
                 }
@@ -570,14 +582,16 @@ private class OrderKey(
     val sort: MusicSort?,
     val locale: Locale,
     val stats: Map<String, TrackStats>,
+    /** The Recent view's history (its one group's tracks change with it); empty for the other views. */
+    val recent: List<String> = emptyList(),
 ) {
     override fun equals(other: Any?): Boolean =
         other is OrderKey && other.view == view && other.filter == filter && other.group == group && other.sort == sort &&
-            other.locale == locale && other.stats === stats
+            other.locale == locale && other.stats === stats && other.recent == recent
 
     override fun hashCode(): Int =
-        ((((view.hashCode() * 31 + filter.hashCode()) * 31 + group.hashCode()) * 31 + sort.hashCode()) * 31 + locale.hashCode()) * 31 +
-            System.identityHashCode(stats)
+        (((((view.hashCode() * 31 + filter.hashCode()) * 31 + group.hashCode()) * 31 + sort.hashCode()) * 31 + locale.hashCode()) * 31 +
+            System.identityHashCode(stats)) * 31 + recent.hashCode()
 }
 
 /**
@@ -593,9 +607,10 @@ private fun rememberOrdered(
     sort: MusicSort?,
     locale: Locale,
     stats: Map<String, TrackStats>,
+    recent: List<String> = emptyList(),
 ): List<Track> {
     if (open == null) return emptyList()
-    val key = OrderKey(view, filter, open.key, sort, locale, stats)
+    val key = OrderKey(view, filter, open.key, sort, locale, stats, if (view == MusicView.Recent) recent else emptyList())
     val held = remember { HeldOrder() }
     library.madeOrder(key)?.let { return held.keep(key, it) }
     val last = held.tracks
@@ -641,6 +656,9 @@ private class HeldGroups {
  * ([WorkstationLayout]), about the track selected in the table or, with none, what plays; [inspectorState] keeps the
  * pane's width and whether it is hidden (Ctrl+I). Beside it a tablet's window (narrower than Large) shows the groups,
  * then the tracks of the one opened, as a narrow window does.
+ *
+ * 1.0: the Recent view lists [recent] (the uris played last, newest first), which is not part of [library]; on a phone
+ * [shelf] (the recently played) is the first item of the list while no group is open, and scrolls away with it.
  */
 @Composable
 fun MusicBrowser(
@@ -653,10 +671,18 @@ fun MusicBrowser(
     inspectorState: InspectorState = rememberInspectorState(),
     /** S-808: the ratings and counts, by track uri. */
     stats: Map<String, TrackStats> = emptyMap(),
+    recent: List<String> = emptyList(),
+    shelf: (@Composable () -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
-    val groups = rememberGroups(library, state.view, state.filter)
+    val groups = if (state.view == MusicView.Recent) {
+        remember(library, recent, state.filter) { library.recentGroups(recent, state.filter) }
+    } else {
+        rememberGroups(library, state.view, state.filter)
+    }
+    // the phone's only: over the groups, or over the whole library's tracks
+    val phoneShelf = shelf.takeIf { width == WidthClass.Compact }
     val grouped = state.view.grouped
     // the recently played are the shelf on a phone, not a view
     LaunchedEffect(width, state.view) {
@@ -672,7 +698,7 @@ fun MusicBrowser(
     val locale = LocalContext.current.resources.locale()
     val sort = effectiveSort(state)
     val sortStats = if (sort?.column in STATS_COLUMNS) stats else emptyMap()
-    val shown = rememberOrdered(library, state.view, state.filter, open, sort, locale, sortStats)
+    val shown = rememberOrdered(library, state.view, state.filter, open, sort, locale, sortStats, recent)
     // a player's artist or album link: its group, wherever the library was
     val context = LocalContext.current
     val link = MusicLinks.pending
@@ -734,8 +760,10 @@ fun MusicBrowser(
                 VerticalRule()
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
             }
-            !grouped || open != null -> if (open != null) TrackPane(open, shown, state, openActions, showBack = grouped, stats, selection)
-            else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize().padding(horizontal = dimens.pagePadding - 12.dp))
+            !grouped || open != null -> if (open != null) {
+                TrackPane(open, shown, state, openActions, showBack = grouped, stats, selection, leading = phoneShelf.takeIf { !grouped })
+            }
+            else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize(), rowPadding = dimens.pagePadding - 12.dp, leading = phoneShelf)
         }
     }
     // "music": what the scroll benchmark (S-803) looks for
@@ -809,8 +837,17 @@ private fun groupLine(group: MusicGroup, view: MusicView): String {
     return parts.joinToString(" · ")
 }
 
+/** The groups of a view; [leading] (a phone's shelf) over them, scrolling with them; each row inset by [rowPadding]. */
 @Composable
-private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, actions: MusicActions, openKey: String?, modifier: Modifier) {
+private fun GroupList(
+    groups: List<MusicGroup>,
+    state: MusicBrowserState,
+    actions: MusicActions,
+    openKey: String?,
+    modifier: Modifier,
+    rowPadding: Dp = 0.dp,
+    leading: (@Composable () -> Unit)? = null,
+) {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
     val reduced = NagTheme.motion.reduced
@@ -819,22 +856,27 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
         val key = state.reveal ?: return@LaunchedEffect
         val index = groups.indexOfFirst { it.key == key }
         if (index >= 0) {
-            if (reduced) listState.scrollToItem(index) else listState.animateScrollToItem(index)
+            val item = index + if (leading != null) 1 else 0
+            if (reduced) listState.scrollToItem(item) else listState.animateScrollToItem(item)
             state.reveal = null
         }
     }
     LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp) + LocalShellBottomPadding.current) {
+        if (leading != null) item(key = LEADING_ITEM, contentType = LEADING_ITEM) { leading() }
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened
             // the menu plays the group's tracks, as the table's rows do one track
             val menu = { groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) }
-            ContextMenuArea(entries = menu, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+            ContextMenuArea(entries = menu, modifier = Modifier.padding(horizontal = rowPadding), accessibilityLabel = stringResource(R.string.nag_more_actions)) {
                 // a phone's album, artist or folder ends with "⋯": the same menu (Desktop Kit 1.0)
                 GroupRow(group, state.view, selected = group.key == openKey, menu = menu.takeIf { compact }) { state.group = group.key }
             }
         }
     }
 }
+
+/** The key of a group list's first item that is not a group (the phone's shelf); no group's key holds a NUL. */
+private const val LEADING_ITEM = "\u0000leading"
 
 /**
  * An album's, an artist's or a folder's menu (right click, long press): play, queue, convert; its
@@ -917,6 +959,8 @@ private fun TrackPane(
     showBack: Boolean,
     stats: Map<String, TrackStats>,
     selection: MultiSelection,
+    /** A phone's shelf over the rows, scrolling away with them. */
+    leading: (@Composable () -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
@@ -1016,6 +1060,7 @@ private fun TrackPane(
             // tablet and DeX: the rows pass under a glass header; Shift+↑ and Shift+↓ grow the selection
             glassHeader = !compact,
             onExtendSelection = if (compact) null else ({ track, delta -> selection.extend(track.uri, keys, delta) }),
+            leading = leading,
         )
     }
 }

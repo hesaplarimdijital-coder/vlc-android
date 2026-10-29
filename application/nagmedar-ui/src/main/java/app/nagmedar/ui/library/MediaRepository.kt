@@ -3,6 +3,10 @@ package app.nagmedar.ui.library
 import android.content.Context
 import app.nagmedar.ui.onboarding.MediaAccess
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -66,6 +70,17 @@ class MediaRepository(private val context: Context) {
         val tracks = audio(LibrarySection.Music).mapNotNullTo(HashSet()) { it.id.takeIf { id -> id > 0 } }
         return played.filter { it.id in tracks }.take(RECENT_AUDIO)
     }
+
+    /**
+     * 1.0: each change of the medialibrary's playback history (a track played, the history cleared), as it comes,
+     * a burst as one; the Music screen reads its recently played again on each while it is open.
+     */
+    fun historyChanges(): Flow<Unit> = callbackFlow {
+        val medialibrary = Medialibrary.getInstance()
+        val callback = Medialibrary.HistoryCb { trySend(Unit) }
+        medialibrary.addHistoryCb(callback)
+        awaitClose { medialibrary.removeHistoryCb(callback) }
+    }.conflate()
 
     suspend fun counts(): LibraryCounts {
         val indexed = context.getFromMl { LibraryCounts(videoCount, audioCount) }

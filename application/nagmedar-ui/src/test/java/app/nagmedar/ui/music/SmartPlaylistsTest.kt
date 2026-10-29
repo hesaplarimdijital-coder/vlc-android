@@ -108,7 +108,7 @@ class SmartPlaylistsTest {
         assertEquals(listOf(SmartRule(SmartField.Plays, SmartOp.AtLeast, "20")), smartStore.kept.single().rules)
         compose.onNodeWithText("Segâh Tekbîr").assertDoesNotExist()
         // deleted from its menu, then back with the undo bar
-        compose.onNode(hasContentDescription("Diğer işlemler")).performClick()
+        compose.onNode(hasContentDescription("En sevilenler için diğer işlemler")).performClick()
         compose.onNodeWithText("Akıllı listeyi sil").performClick()
         compose.waitForIdle()
         assertEquals(emptyList<SmartList>(), smartStore.kept)

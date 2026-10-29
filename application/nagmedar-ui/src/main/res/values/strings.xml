@@ -644,6 +644,7 @@
     <string name="nag_license_old_mit">Old MIT</string>
     <string name="nag_license_public_domain">Public domain</string>
     <string name="nag_more_actions">More actions</string>
+    <string name="nag_more_actions_for">More actions for %1$s</string>
     <string name="nag_play_next">Play next</string>
     <string name="nag_add_to_queue">Add to queue</string>
     <string name="nag_unavailable_mvp">Arrives in a later version</string>

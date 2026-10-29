@@ -44,6 +44,18 @@ class MusicLibraryTest {
     private val library = MusicLibrary(tracks, turkish)
 
     @Test
+    fun theRecentViewListsTheHistoryItIsGivenInItsOrder() {
+        // 1.0: the history is not the library's; a new one is given, the library stays the same
+        val recent = listOf(tracks[3].uri, "file:///gone.flac", tracks[0].uri)
+        val group = library.recentGroups(recent).single()
+        assertEquals(MusicLibrary.RECENT_KEY, group.key)
+        assertEquals(listOf("Yağmur", "Neva Kâr"), group.tracks.map { it.title })
+        // the filter applies to it as to the other views: the lossy and the 16-bit go
+        assertEquals(listOf("Neva Kâr"), library.recentGroups(recent, TechFilter(depths = setOf(Depth.Bits24))).single().tracks.map { it.title })
+        assertEquals(emptyList<Track>(), library.recentGroups(emptyList()).single().tracks)
+    }
+
+    @Test
     fun artistsInTurkishOrderUnknownLast() {
         val artists = library.groups(MusicView.Artists)
         // the album artist files the duet; "Ç" after "C", before "D"; the untagged track last

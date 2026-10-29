@@ -125,10 +125,11 @@ data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBa
 /**
  * S-803: the library's groupings over one list of tracks, the medialibrary's and the picked
  * folders' alike: artists by album artist, albums by artist and name, genres, composers, years
- * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem");
- * and [recent], the uris of the tracks played last (newest first), as the Recent view's one list.
+ * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem").
+ * The Recent view's list is the playback history's, which changes as tracks play: it is not part of
+ * the library (1.0: a new history does not make the library again), see [recentGroups].
  */
-class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault(), private val recent: List<String> = emptyList()) {
+class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault()) {
 
     /** The reader's collator; one for each grouping or sort, as a collator is not for two threads at once. */
     private fun collator(): Collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
@@ -198,12 +199,21 @@ class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.
                 .map { (year, list) -> MusicGroup("year:${year ?: ""}", year?.toString(), null, year, sortedTracks(list, collator)) }
                 .sortedWith(compareByDescending<MusicGroup> { it.year ?: Int.MIN_VALUE })
             MusicView.Folders -> group(shown, collator, { it.folder.takeIf(String::isNotEmpty) }, { it.folder.takeIf(String::isNotEmpty) }).sortedWith(byTitle)
-            // as they were played, the latest first: the playback history's order, not the album's
-            MusicView.Recent -> {
-                val byUri = shown.associateBy { it.uri }
-                listOf(MusicGroup(RECENT_KEY, null, null, null, recent.mapNotNull { byUri[it] }))
-            }
+            // the history is the caller's: recentGroups
+            MusicView.Recent -> listOf(MusicGroup(RECENT_KEY, null, null, null, emptyList()))
         }
+    }
+
+    /** The tracks by uri, made once (by whichever thread asks first). */
+    private val byUri: Map<String, Track> by lazy { tracks.associateBy { it.uri } }
+
+    /**
+     * The Recent view's one group: the tracks of [recent], the uris of the tracks played last (newest first, the
+     * playback history's order, not the album's), those of this library that [filter] lets through.
+     */
+    fun recentGroups(recent: List<String>, filter: TechFilter = TechFilter()): List<MusicGroup> {
+        val played = recent.mapNotNull { byUri[it] }
+        return listOf(MusicGroup(RECENT_KEY, null, null, null, if (filter.active) played.filter(filter::matches) else played))
     }
 
     /** Groups by [key] (case and accents folded), titled by the most common spelling of [title]. */

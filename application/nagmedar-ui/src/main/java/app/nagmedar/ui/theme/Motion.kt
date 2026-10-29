@@ -1,10 +1,7 @@
 package app.nagmedar.ui.theme
 
-import android.animation.ValueAnimator
 import android.content.ContentResolver
-import android.content.Context
 import android.database.ContentObserver
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -299,15 +296,6 @@ enum class MotionTier {
 
 /** The motion tier of the window: the theme's by its width, the shell's by its width class. */
 val LocalMotionTier = compositionLocalOf { MotionTier.Timed }
-
-/** The system's animation switches, readable outside Compose (View code, animators). */
-object SystemMotion {
-    /** "Remove animations" is on, or the animator duration scale is 0. */
-    fun reduced(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !ValueAnimator.areAnimatorsEnabled()) return true
-        return animationsRemoved(context.contentResolver)
-    }
-}
 
 /** True when the system's "Remove animations" setting is on (animator duration scale 0). */
 fun animationsRemoved(resolver: ContentResolver): Boolean =

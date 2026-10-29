@@ -67,6 +67,7 @@ import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
@@ -512,7 +513,7 @@ private fun ScheduleRowView(row: ScheduleRow, now: Long, zone: ZoneId, controlle
                 label = stringResource(if (schedule.enabled) R.string.nag_alarm_on else R.string.nag_alarm_off),
                 modifier = Modifier.testTag("schedule-switch-${schedule.id}"),
             )
-            IconMenuButton(NagIcons.MoreHorizontal, more, menu)
+            IconMenuButton(NagIcons.MoreHorizontal, moreActionsLabel(schedule.station.name), menu)
         }
     }
 }
@@ -588,7 +589,7 @@ private fun SessionHeader(session: SessionGroup, now: Long, zone: ZoneId, contro
     val key = RecordingsController.sessionKey(session)
     val expanded = key in controller.open
     val menu = { sessionMenu(res, session, controller) }
-    val more = stringResource(R.string.nag_more_actions)
+    val title = RecordingText.began(res, session.startedAt, now, zone, locale)
     val line = listOfNotNull(
         pluralStringResource(R.plurals.nag_radio_rec_tracks, session.tracks.size, session.tracks.size),
         RecordingText.size(session.bytes, locale),
@@ -602,14 +603,14 @@ private fun SessionHeader(session: SessionGroup, now: Long, zone: ZoneId, contro
                 onToggle = { controller.toggle(key) },
                 tag = "recordings-session-${session.sessionId}",
                 leading = null,
-                title = RecordingText.began(res, session.startedAt, now, zone, locale),
+                title = title,
                 titleStyle = NagTheme.type.body,
                 line = line,
                 indent = 28.dp,
                 menu = menu,
             )
         }
-        IconMenuButton(NagIcons.MoreHorizontal, more, menu)
+        IconMenuButton(NagIcons.MoreHorizontal, moreActionsLabel(title), menu)
     }
 }
 
@@ -744,7 +745,7 @@ private fun TrackRow(session: SessionGroup, track: RecordedTrack, controller: Re
             }
             NagPlayButton(play, { controller.play(session, track) }, enabled = !gone, modifier = Modifier.testTag("track-play-${track.id}"))
             NagIconButton(NagIcons.Share, share, { onShare(track) }, enabled = !gone, modifier = Modifier.testTag("track-share-${track.id}"))
-            IconMenuButton(NagIcons.MoreHorizontal, more, menu)
+            IconMenuButton(NagIcons.MoreHorizontal, moreActionsLabel(track.displayTitle), menu)
         }
     }
 }

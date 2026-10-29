@@ -1,6 +1,7 @@
 package app.nagmedar.ui.playback
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -39,6 +40,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -79,6 +81,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.audio.Waveform
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HoverTooltip
+import app.nagmedar.ui.components.LocalPlayerSheet
 import app.nagmedar.ui.components.MarkReach
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SliderMark
@@ -95,6 +98,7 @@ import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.animatedAccent
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.max
@@ -147,8 +151,10 @@ fun ProgressTimeline(
     val latestLength by rememberUpdatedState(lengthMs)
     var widthPx by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(smooth) { snapshotFlow { latestProgress.value() }.collect { smooth.report(it.coerceIn(0f, 1f), latestLength) } }
-    LaunchedEffect(playing, lengthMs, rate, widthPx, motion.reduced) {
-        if (playing && !motion.reduced) smooth.glide(lengthMs, rate, widthPx)
+    // in the phone's player while it waits under the mini player (composed, not drawn): no frames for a glide (1.0)
+    val drawn = LocalPlayerSheet.current?.shown != false
+    LaunchedEffect(playing, lengthMs, rate, widthPx, motion.reduced, drawn) {
+        if (playing && drawn && !motion.reduced) smooth.glide(lengthMs, rate, widthPx)
     }
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
@@ -200,15 +206,13 @@ fun ProgressTimeline(
     val reach = with(density) { MarkReach.toPx() } / widthPx
     val step = if (lengthMs > 0L) SEEK_STEP_MS.toFloat() / lengthMs else 0.02f
 
-    val played = colors.accent
+    // a new track's accent cross-fades in while drawing, without recomposing the player (1.0)
+    val accent = animatedAccent(colors.accent, "timelineAccent")
     val rest = colors.borderStrong
     val waveRest = colors.textTertiary.copy(alpha = 0.22f)
-    val wavePlayed = colors.accent.copy(alpha = 0.34f)
-    val waveAhead = colors.accent.copy(alpha = 0.18f)
     val tick = colors.text.copy(alpha = 0.55f)
     val tickNear = colors.text
     val thumbColor = colors.text
-    val halo = colors.accent.copy(alpha = 0.22f)
 
     val timeline: @Composable (Modifier) -> Unit = { boxModifier ->
         Box(boxModifier.height(height)) {
@@ -284,6 +288,10 @@ fun ProgressTimeline(
                     },
             ) {
                 val fraction = shown()
+                val played = accent.value
+                val wavePlayed = played.copy(alpha = 0.34f)
+                val waveAhead = played.copy(alpha = 0.18f)
+                val halo = played.copy(alpha = 0.22f)
                 val w = size.width
                 val middle = if (phone) PHONE_TRACK.toPx() else size.height / 2
                 val playedX = w * fraction
@@ -545,7 +553,7 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
     }
     val percent by remember(lengthMs, playing, rate) { derivedStateOf { (smooth.fraction(playing, lengthMs, rate) * 100).toInt() } }
     val rest = colors.border
-    val fill = colors.accent
+    val fill = animatedAccent(colors.accent, "hairlineAccent")
     Canvas(
         modifier
             .fillMaxWidth()
@@ -558,7 +566,7 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
     ) {
         drawRect(rest)
         val x = size.width * smooth.fraction(playing, lengthMs, rate)
-        if (x > 0f) drawRoundRect(fill, Offset.Zero, Size(x, size.height), CornerRadius(size.height / 2))
+        if (x > 0f) drawRoundRect(fill.value, Offset.Zero, Size(x, size.height), CornerRadius(size.height / 2))
     }
 }
 
@@ -692,13 +700,15 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
     val state = interaction.collectState()
     val label = stringResource(if (playing) R.string.nag_pause else R.string.nag_play)
     val keys = ShortcutRegistry.chordLabel(ShortcutId.PlayPause, LocalContext.current.resources)
-    val fill = animateStateColor(
+    // read while drawing: a press, a hover and a new track's accent fade without recomposing it
+    val fill = animateColorAsState(
         when {
             state.pressed -> lerp(colors.accent, colors.onAccent, 0.2f)
             state.hovered -> lerp(colors.accent, colors.onAccent, 0.1f)
             else -> colors.accent
         },
-        "playPauseFill",
+        motion.color(),
+        label = "playPauseFill",
     )
     Box(
         modifier
@@ -706,7 +716,7 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
             .pressScale(state.pressed, 0.92f)
             .focusRing(state, CircleShape)
             .padding(2.dp)
-            .background(fill, CircleShape)
+            .drawBehind { drawRoundRect(fill.value, cornerRadius = CornerRadius(size.minDimension / 2f)) }
             .nagClickable(interaction, onClick, onClickLabel = label)
             .testTag("play-pause"),
         contentAlignment = Alignment.Center,
