@@ -112,6 +112,8 @@ class DenseTableHeaderTest {
         val node = compose.onNodeWithText("Duration", useUnmergedTree = true).fetchSemanticsNode()
         node.config[SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
         val layout = layouts.single()
-        assertFalse("Duration is read whole: ${layout.size} for ${layout.multiParagraph.width}", layout.hasVisualOverflow)
+        // not "Durati…": one line, not cut short
+        assertEquals(1, layout.lineCount)
+        assertFalse("Duration is read whole", layout.isLineEllipsized(0))
     }
 }
