@@ -72,14 +72,14 @@ allprojects {
 
 ext {
     appId = "app.nagmedar" // Nağmedar; code namespaces stay org.videolan.*
-    // Nağmedar 1.0.0. versionCode = 4000000 + major * 10000 + minor * 100 + patch (minor and patch
+    // Nağmedar 1.0.1. versionCode = 4000000 + major * 10000 + minor * 100 + patch (minor and patch
     // 0 to 99); the 4000000 base keeps it above the VLC 3.x codes that StartActivity's settings
     // migrations compare against. An APK's own code is 10000000 + this + its ABI's digit
-    // (app/build.gradle): 14010006 for the arm64 personal build of 1.0.0, 14010000 for a debug one.
-    versionCode = 4010000
+    // (app/build.gradle): 14010007 for the arm64 personal build of 1.0.1, 14010001 for a debug one.
+    versionCode = 4010001
     // libVLC 4 by default; -PforceVlc3 selects the VLC 3 branch (-PforceVlc4 is accepted and ignored)
     vlcMajorVersion = project.hasProperty('forceVlc3') ? 3 : 4
-    versionName = vlcMajorVersion == 3 ? '1.0.0-vlc3' : '1.0.0'
+    versionName = vlcMajorVersion == 3 ? '1.0.1-vlc3' : '1.0.1'
     remoteAccessVersion = '0.24.0'
     libvlcVersion = vlcMajorVersion == 3 ? '3.7.7' :'4.0.0-eap29'
     medialibraryVersion = (vlcMajorVersion == 3 ? '0.13.24' : '0.13.22-vlc4')
