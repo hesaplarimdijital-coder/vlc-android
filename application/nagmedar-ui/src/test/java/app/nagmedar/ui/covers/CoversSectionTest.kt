@@ -21,7 +21,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1006: Settings › Covers: Cover Art Archive turned off, the covers kept counted and cleared. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class CoversSectionTest {
 
     @get:Rule

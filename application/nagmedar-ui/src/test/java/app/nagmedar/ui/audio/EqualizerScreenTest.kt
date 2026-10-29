@@ -35,7 +35,7 @@ import org.videolan.tools.NAGMEDAR_DSP_PROFILES
 /** S-906: what the equaliser's controls write for the engine. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h1700dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h1700dp-mdpi-qwerty")
 class EqualizerScreenTest {
 
     @get:Rule

@@ -58,7 +58,7 @@ import java.util.Locale
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class MediaFileMenuTest {
 
     @get:Rule

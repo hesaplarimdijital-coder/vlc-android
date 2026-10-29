@@ -172,7 +172,7 @@ class PlayerBarsTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun theTransportBarShufflesRepeatsAndSetsTheVolume() {
         bar(NavKind.Sidebar, InputMode.Pointer)
         compose.onNodeWithText("Sabaha Kadar").performClick()
@@ -196,7 +196,7 @@ class PlayerBarsTest {
     fun theBarIsOnEveryScreenOfAPhone() = everyScreen(WidthClass.Compact, InputMode.Touch, "mini-player")
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun theBarIsOnEveryScreenOfADesktop() = everyScreen(WidthClass.Large, InputMode.Pointer, "transport-bar")
 
     private fun everyScreen(widthClass: WidthClass, input: InputMode, tag: String) {

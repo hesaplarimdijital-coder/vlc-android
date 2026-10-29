@@ -32,7 +32,7 @@ import org.robolectric.shadows.ShadowToast
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
 class RadioTabsPageTest {
 
     @get:Rule

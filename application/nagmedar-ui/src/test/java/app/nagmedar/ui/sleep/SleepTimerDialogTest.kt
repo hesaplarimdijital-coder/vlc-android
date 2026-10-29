@@ -23,7 +23,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1007: the sleep timer's window sets the timer, then says what is left, adds to it and turns it off. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class SleepTimerDialogTest {
 
     @get:Rule

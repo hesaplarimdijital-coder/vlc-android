@@ -76,7 +76,7 @@ class EditorScreenshotTest {
     private fun Editor(c: LyricsEditorController, player: FakePlayer) =
         LyricsEditorScreen(c, timeMs = { player.positionMs }, playing = player.playing, onClose = {})
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun dexWords() {
         val player = FakePlayer()
         val c = controller(player)

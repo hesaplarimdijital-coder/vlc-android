@@ -21,7 +21,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1502: Settings › Backup's buttons, and the restore's window: the parts chosen, what came back. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class BackupSectionTest {
 
     @get:Rule

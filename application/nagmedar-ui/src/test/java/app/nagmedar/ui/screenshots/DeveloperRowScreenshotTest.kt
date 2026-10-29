@@ -64,6 +64,6 @@ class DeveloperRowScreenshotTest {
     @Test @Config(qualifiers = "tr-w384dp-h400dp-xhdpi")
     fun phone() = capture("settings-developer-phone-light", ThemeMode.Light, InputMode.Touch)
 
-    @Test @Config(qualifiers = "en-w1280dp-h360dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h360dp-mdpi-qwerty")
     fun dexEnglish() = capture("settings-developer-dex-dark-en", ThemeMode.Dark, InputMode.Pointer)
 }

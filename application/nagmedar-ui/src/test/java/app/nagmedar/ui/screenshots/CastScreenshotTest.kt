@@ -87,7 +87,7 @@ class CastScreenshotTest {
         Picker(WidthClass.Expanded, CastPickerView.Searching)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun devicesDex() = capture("cast-picker-devices-dex-light", ThemeMode.Light, InputMode.Pointer) {
         Picker(WidthClass.Large, CastPickerView.Devices(listOf(salon, kitchen, study), searching = true), active = salon, notices = listOf(CastNotice.DsdAsPcm, CastNotice.EngineSettings))
     }
@@ -122,7 +122,7 @@ class CastScreenshotTest {
         QueueEntry("c#1", "Yağmur", "Cemre Kaya", 231_000),
     )
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun musicDex() = capture("casting-music-dex-light", ThemeMode.Light, InputMode.Pointer) {
         TestShell(WidthClass.Large, startDestination = Destination.Music, playerInfo = samplePlayerInfo.copy(canCast = true, casting = salon)) { _, _ ->
             Row(Modifier.fillMaxSize()) {

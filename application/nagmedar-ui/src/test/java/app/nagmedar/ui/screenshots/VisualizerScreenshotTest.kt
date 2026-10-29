@@ -112,7 +112,7 @@ class VisualizerScreenshotTest {
         rating = 4,
     )
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
     fun nowPlayingDex() {
         val state = still()
         capture("visualizer-now-playing-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
@@ -171,7 +171,7 @@ class VisualizerScreenshotTest {
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun spectrumTablet() = fullScreen("visualizer-full-tablet-light-spectrum", ThemeMode.Light, InputMode.Touch, VisualizerKind.Spectrum, "≈ 30 fps'de saatte pilin %0,4 kadarı")
 
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-qwerty")
     fun scopeDexEnglish() = fullScreen("visualizer-full-dex-dark-scope-en", ThemeMode.Dark, InputMode.Pointer, VisualizerKind.Scope, "≈ 1.4% of the battery an hour at 60 fps")
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
@@ -185,7 +185,7 @@ class VisualizerScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi-qwerty")
     fun settingsDex() = settings("settings-visualizer-dex-dark", ThemeMode.Dark, InputMode.Pointer, changed = true)
 
     @Test @Config(qualifiers = "tr-w800dp-h720dp-mdpi")

@@ -96,9 +96,9 @@ class TooltipScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun dark() = capture("tooltips-dex-dark", ThemeMode.Dark)
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun light() = capture("tooltips-dex-light", ThemeMode.Light)
 }

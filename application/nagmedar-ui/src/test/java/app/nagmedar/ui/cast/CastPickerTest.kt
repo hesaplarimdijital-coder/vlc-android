@@ -36,7 +36,7 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class CastPickerTest {
 
     @get:Rule

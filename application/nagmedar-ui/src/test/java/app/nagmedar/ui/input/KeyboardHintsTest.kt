@@ -75,7 +75,7 @@ class KeyboardHintsTest {
         compose.onNodeWithText("Ctrl+Z").assertDoesNotExist()
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun theUndoBarWithAKeyboardKeepsItsKeycap() {
         undoBar(keyboard = true)
         compose.onNodeWithText("Ctrl+Z").assertExists()

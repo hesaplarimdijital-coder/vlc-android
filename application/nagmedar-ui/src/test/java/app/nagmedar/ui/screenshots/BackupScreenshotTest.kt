@@ -88,7 +88,7 @@ class BackupScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun settingsDex() = capture("settings-backup-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) { BackupSection(lastBackup = madeAt, onBackUp = {}, onRestore = {}) }
     }
@@ -98,7 +98,7 @@ class BackupScreenshotTest {
         Box(Modifier.padding(top = 16.dp)) { BackupSection(lastBackup = 0L, onBackUp = {}, onRestore = {}) }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun restoreDex() = capture("restore-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             RestoreSurface(RestoreState.Choosing(backup), onRestore = {}, onDismiss = {})

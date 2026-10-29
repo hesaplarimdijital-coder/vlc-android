@@ -36,7 +36,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1010: the converter's window (the choices, the example, Dönüştür), its line above the library and its summary. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
 class ConvertViewsTest {
 
     @get:Rule

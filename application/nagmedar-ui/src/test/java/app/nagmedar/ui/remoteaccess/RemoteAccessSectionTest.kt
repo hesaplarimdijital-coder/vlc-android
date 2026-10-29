@@ -25,7 +25,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1304: Settings › Remote access: the switches reach the settings, the security text is said, the pages open. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi-qwerty")
 class RemoteAccessSectionTest {
 
     @get:Rule

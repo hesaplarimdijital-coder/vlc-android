@@ -101,7 +101,7 @@ class RadioListsScreenshotTest {
         library.played(sabah, at - 86_400_000)
     }
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
     fun dexSearchWithTheStrip() {
         capture("radio-dex-dark-strip", ThemeMode.Dark, InputMode.Pointer) {
             TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ ->
@@ -137,7 +137,7 @@ class RadioListsScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-qwerty")
     fun dexImportedEnglish() {
         capture("radio-dex-light-imported-en", ThemeMode.Light, InputMode.Pointer) {
             TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ ->

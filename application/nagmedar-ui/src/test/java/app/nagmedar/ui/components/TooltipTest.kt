@@ -35,12 +35,13 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-404: a mouse resting on an icon button shows its name and keys after the window's delay and
- * leaving takes them away; touch never shows them; the delay can be turned off and is kept.
+ * leaving takes them away; touch never shows them; the delay can be turned off and is kept; 1.0.1:
+ * the keys only with a keyboard.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w600dp-h400dp-mdpi")
+@Config(qualifiers = "tr-w600dp-h400dp-mdpi-qwerty")
 class TooltipTest {
 
     @get:Rule
@@ -98,6 +99,16 @@ class TooltipTest {
         compose.mainClock.advanceTimeBy(1500)
         assertFalse("touch shows none", tooltipShown())
         playButton.performTouchInput { up() }
+    }
+
+    /** 1.0.1: a mouse without a keyboard: the name alone, no keys it could not press. */
+    @Test @Config(qualifiers = "tr-w600dp-h400dp-mdpi")
+    fun withoutAKeyboardTheNameAlone() {
+        button()
+        playButton.performMouseInput { moveTo(center) }
+        compose.mainClock.advanceTimeBy(700)
+        compose.onNodeWithText("Oynat").assertExists()
+        assertFalse("no keys without a keyboard", tooltipShown())
     }
 
     @Test

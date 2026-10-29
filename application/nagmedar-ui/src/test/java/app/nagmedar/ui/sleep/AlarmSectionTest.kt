@@ -43,7 +43,7 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
 @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi")
+@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi-qwerty")
 class AlarmSectionTest {
 
     @get:Rule

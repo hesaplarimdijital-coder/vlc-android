@@ -224,7 +224,7 @@ class MusicScreenshotTest {
     private val dexColumns = listOf(MusicColumn.Title, MusicColumn.Number, MusicColumn.Composer, MusicColumn.Format, MusicColumn.Duration, MusicColumn.Rating, MusicColumn.Plays)
 
     /** Desktop Kit 1.0: DeX as MusicBee: the albums, an album's table, the inspector on what plays; the bar floats. */
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
     fun dex() {
         val library = library("tr")
         val state = MusicBrowserState(view = MusicView.Albums, group = itri(library), columns = dexColumns)
@@ -236,7 +236,7 @@ class MusicScreenshotTest {
     }
 
     /** The inspector on a track clicked in the table, which is not what plays: its tags, waveform and stars. */
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
     fun dexLight() {
         val library = library("tr")
         val state = MusicBrowserState(view = MusicView.Albums, group = itri(library), columns = dexColumns)
@@ -248,7 +248,7 @@ class MusicScreenshotTest {
     }
 
     /** S-1004 in the inspector's lyrics tab: the line sung lit, a delay set. */
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
     fun lyricsDex() {
         val library = library("tr")
         val album = library.groups(MusicView.Albums).first { it.title == "Gece Yolcusu" }.key
@@ -295,7 +295,7 @@ class MusicScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
     fun ratingWindow() {
         val tracks = MusicSamples.tracks.filter { it.title == "Neva Kâr" }
         capture("music-rating-dex-dark", ThemeMode.Dark, InputMode.Pointer) {

@@ -18,7 +18,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-203: the icon set and the motion tokens on one board, in the dark and light themes. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1480dp-h925dp-mdpi")
+@Config(qualifiers = "tr-w1480dp-h925dp-mdpi-qwerty")
 class IconsMotionScreenshotTest {
 
     @get:Rule
