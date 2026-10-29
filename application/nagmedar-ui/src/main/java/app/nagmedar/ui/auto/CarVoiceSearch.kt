@@ -6,6 +6,7 @@ import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
+import kotlinx.coroutines.withTimeoutOrNull
 import org.videolan.vlc.media.VoiceFocus
 import org.videolan.vlc.media.VoiceRequest
 
@@ -14,18 +15,25 @@ import org.videolan.vlc.media.VoiceRequest
  * album, a title, a genre, a playlist) or, with none, by whichever answers best; then podcasts (a show by its title, which
  * plays where it was left, or an episode by its own); then radio (the favourite and recent stations, then the directory).
  * A request that names its kind ("… podcast'ini çal", "… radyosunu aç") looks there alone; one that names only its kind
- * plays that kind's latest ("radyo aç": the station played last). Nothing that answers less than word for word plays.
+ * plays that kind's latest ("radyo aç": the station played last). Nothing that answers less than word for word plays,
+ * but for the directory's own answer. Music the medialibrary does not give in time ([MusicUnavailable]) is passed over.
  */
 class CarVoiceSearch(private val data: CarData) {
 
     suspend fun resolve(request: VoiceRequest): CarPlay? {
         val query = request.parsed
         val kind = query.kind
-        if (kind == VoiceKind.Any || kind == VoiceKind.Music) music(request)?.let { return it }
+        if (kind == VoiceKind.Any || kind == VoiceKind.Music) {
+            try {
+                music(request)?.let { return it }
+            } catch (e: MusicUnavailable) {
+                // the podcasts and the radio still answer
+            }
+        }
         // the assistant may take a show's or a station's name for an artist: the words heard are looked for there too
         val words = query.text
         if (kind == VoiceKind.Any || kind == VoiceKind.Podcast) podcast(words)?.let { return it }
-        if (kind == VoiceKind.Any || kind == VoiceKind.Radio) radio(words)?.let { return it }
+        if (kind == VoiceKind.Any || kind == VoiceKind.Radio) radio(words, CarVoice.spoken(request.query))?.let { return it }
         return null
     }
 
@@ -124,14 +132,19 @@ class CarVoiceSearch(private val data: CarData) {
         return feeds.firstOrNull { it.id == found.feedId }?.let { CarPlay.Episode(it, found) }
     }
 
-    /** A kept station by its name, else the directory's; nothing named: the station played last, else the first favourite. */
-    private suspend fun radio(words: String): CarPlay? {
+    /**
+     * A kept station by its name ([words], folded), else the directory's: asked with the words as [spoken] (it does not
+     * fold "ş" into "s"), given [CarTree.DIRECTORY_WAIT_MS] as the typed search is; the one that answers word for word,
+     * else the directory's first (its most voted). Nothing named: the station played last, else the first favourite.
+     */
+    private suspend fun radio(words: String, spoken: String): CarPlay? {
         val recent = data.recentStations()
         val favourites = data.favouriteStations()
         if (words.isEmpty()) return (recent.firstOrNull() ?: favourites.firstOrNull())?.let(CarPlay::Radio)
         CarVoice.best(words, (favourites + recent).distinctBy { it.key }) { it.name }?.let { return CarPlay.Radio(it.first) }
-        val found = CarTree.quietly { data.findStations(words) }.orEmpty()
-        val station = CarVoice.best(words, found, least = CarVoice.PART) { it.name }?.first ?: found.firstOrNull() ?: return null
+        val asked = spoken.ifBlank { words }
+        val found = withTimeoutOrNull(CarTree.DIRECTORY_WAIT_MS) { CarTree.quietly { data.findStations(asked) } }.orEmpty()
+        val station = CarVoice.best(words, found) { it.name }?.first ?: found.firstOrNull() ?: return null
         return CarPlay.Radio(station)
     }
 

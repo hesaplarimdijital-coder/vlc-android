@@ -1242,9 +1242,10 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
             putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT, !episode)
             putBoolean(PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV, !episode)
         })
-        currentMediaWrapper?.takeIf { it.id != 0L }?.let { mw ->
+        // 1.0: the tree's id of what plays (the track of the list Auto played, the episode, the station): Auto marks its row
+        currentMediaWrapper?.let { mw -> CarHook.catalog?.playingId(mw.location) ?: mw.takeIf { it.id != 0L }?.let { MediaSessionBrowser.generateMediaId(it) } }?.let { id ->
             pscb.setExtras(Bundle().apply {
-                putString(MediaConstants.PLAYBACK_STATE_EXTRAS_KEY_MEDIA_ID, MediaSessionBrowser.generateMediaId(mw))
+                putString(MediaConstants.PLAYBACK_STATE_EXTRAS_KEY_MEDIA_ID, id)
             })
         }
         val mediaIsActive = state != PlaybackStateCompat.STATE_STOPPED
@@ -1494,15 +1495,17 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         mediaSession.setQueue(queue)
     }
 
-    fun displayPlaybackError(@StringRes resId: Int) {
+    fun displayPlaybackError(@StringRes resId: Int) = displayPlaybackError(getString(resId))
+
+    /** 1.0: the session's error state with [message] (Android Auto shows it: a voice request with no result, an empty list's line). */
+    fun displayPlaybackError(message: String) {
         if (!this@PlaybackService::mediaSession.isInitialized) initMediaSession()
-        val ctx = this@PlaybackService
         if (isPlaying) {
             stop()
         }
         val playbackState = PlaybackStateCompat.Builder()
                 .setState(PlaybackStateCompat.STATE_ERROR, 0, 0f)
-                .setErrorMessage(PlaybackStateCompat.ERROR_CODE_NOT_SUPPORTED, ctx.getString(resId))
+                .setErrorMessage(PlaybackStateCompat.ERROR_CODE_NOT_SUPPORTED, message)
                 .build()
         mediaSession.setPlaybackState(playbackState)
     }

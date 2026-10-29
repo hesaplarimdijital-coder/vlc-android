@@ -22,16 +22,20 @@ import org.videolan.vlc.media.CarStyle
 /**
  * 1.0: what Android Auto's catalog reads: the Music page's library and its playlists, the podcasts in Room, the radio's
  * kept stations and its directory. The app's in [AppCarData], fakes in the tests. Every call is made off the main thread.
+ * What the medialibrary answers (the music, the tracks played last, the playlists) throws [MusicUnavailable] when it
+ * does not answer in time.
  */
 interface CarData {
-    /** The Music page's library (the Music section's folders), its groupings made on first use. */
+    /** The Music page's library (the Music section's folders), its groupings made on first use. Throws [MusicUnavailable]. */
     suspend fun music(): MusicLibrary
 
-    /** The music tracks played last, the latest first (the Music page's "Son çalınan müzik" shelf). */
+    /** The music tracks played last, the latest first (the Music page's "Son çalınan müzik" shelf). Throws [MusicUnavailable]. */
     suspend fun recentTracks(): List<Track>
 
+    /** Throws [MusicUnavailable]. */
     suspend fun playlists(): List<PlaylistSummary>
 
+    /** Throws [MusicUnavailable]. */
     suspend fun playlistTracks(id: Long): List<Track>
 
     /** The subscriptions, by title. */
@@ -67,6 +71,9 @@ interface CarData {
     suspend fun findStations(query: String): List<Station>
 }
 
+/** 1.0: the medialibrary did not answer in time: the music cannot be listed now; the podcasts and the radio still can. */
+class MusicUnavailable : Exception("the medialibrary did not answer in time")
+
 /** A text of Android Auto's entries. */
 enum class CarText {
     Music, Podcasts, Radio, Recent,
@@ -75,7 +82,7 @@ enum class CarText {
     FavouriteStations, RecentStations, Categories,
     UnknownAlbum, UnknownArtist, UnknownYear, UnknownFolder,
     FoundTracks, FoundAlbums, FoundArtists, FoundEpisodes, FoundShows, FoundStations,
-    Empty, RadioOffline, NoResult,
+    Empty, RadioOffline, NoResult, MusicUnavailable,
 }
 
 /** What a count counts. */
@@ -157,22 +164,31 @@ object CarPodcasts {
  * 1.0: Android Auto's browse tree. The root's four tabs: Müzik (albums, artists, playlists, years, the Music section's
  * folders), Podcast (the episodes left in the middle, the subscriptions, the new episodes), Radyo (the favourite stations,
  * those played last, the directory's categories) and Son çalınanlar (the music played last). Long lists are cut into
- * pages of [pageSize]; an empty list says so in one line. Also the search and what an entry plays ([play]).
+ * pages of [pageSize]; an empty list says so in one line, as does music the medialibrary does not give in time
+ * ([MusicUnavailable]). Also the search and what an entry plays ([play]).
  */
 class CarTree(private val data: CarData, private val look: CarLook, private val pageSize: Int = PAGE) {
 
     /** The entries under [id]; null when it is none of the tree's. */
     suspend fun children(id: String): List<CarItem>? {
         val ref = CarIds.parse(id) ?: return null
+        return try {
+            entries(ref)
+        } catch (e: MusicUnavailable) {
+            listOf(nothing(CarText.MusicUnavailable))
+        }
+    }
+
+    private suspend fun entries(ref: CarRef): List<CarItem>? {
         return when (ref.kind) {
             null -> when (ref.path) {
                 CarIds.ROOT -> root()
                 CarIds.MUSIC -> music()
-                CarIds.ALBUMS -> paged(ref, data.music().groups(MusicView.Albums), { it.title ?: look.text(CarText.UnknownAlbum) }, ::album)
-                CarIds.ARTISTS -> paged(ref, data.music().groups(MusicView.Artists), { it.title ?: look.text(CarText.UnknownArtist) }, ::artist)
+                CarIds.ALBUMS -> paged(ref, data.music().groups(MusicView.Albums), CarStyle.Grid, { it.title ?: look.text(CarText.UnknownAlbum) }, ::album)
+                CarIds.ARTISTS -> paged(ref, data.music().groups(MusicView.Artists), CarStyle.Grid, { it.title ?: look.text(CarText.UnknownArtist) }, ::artist)
                 CarIds.PLAYLISTS -> filled(data.playlists().map(::playlist))
                 CarIds.YEARS -> filled(decades(data.music()))
-                CarIds.FOLDERS -> paged(ref, data.music().groups(MusicView.Folders), { folderName(it.title) }, ::folder)
+                CarIds.FOLDERS -> paged(ref, data.music().groups(MusicView.Folders), CarStyle.List, { folderName(it.title) }, ::folder)
                 CarIds.RECENT -> tracks(CarIds.RECENT, ref, data.recentTracks(), album = false)
                 CarIds.PODCASTS -> podcasts()
                 CarIds.CONTINUE -> episodes(data.continuing(), withShow = true)
@@ -206,9 +222,17 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         }
     }
 
-    /** What the entry [id] plays; null for one that plays nothing (or that is none of the tree's). */
+    /** What the entry [id] plays; null for one that plays nothing (or that is none of the tree's), or music not given in time. */
     suspend fun play(id: String): CarPlay? {
         val ref = CarIds.parse(id) ?: return null
+        return try {
+            playing(ref)
+        } catch (e: MusicUnavailable) {
+            null
+        }
+    }
+
+    private suspend fun playing(ref: CarRef): CarPlay? {
         val start = ref.index ?: 0
         return when (ref.kind) {
             null -> when (ref.path) {
@@ -253,19 +277,26 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
     /**
      * Android Auto's search for [query]: music tracks, albums and artists, podcast episodes and shows, then radio stations
      * (the kept ones, then the directory's, given [DIRECTORY_WAIT_MS]); each group under its heading. One line says when
-     * nothing answers.
+     * nothing answers; music the medialibrary does not give in time is one line too, before what the rest found.
      */
     suspend fun search(query: String): List<CarItem> {
         if (CarVoice.fold(query).isEmpty()) return listOf(nothing(CarText.NoResult))
         val found = ArrayList<CarItem>()
-        val library = data.music()
-        searchTracks(query).take(MAX_FOUND).forEachIndexed { i, track ->
-            found += trackItem(CarIds.searchTracks(query), i, track, album = false).copy(group = look.text(CarText.FoundTracks))
+        val library = try {
+            data.music()
+        } catch (e: MusicUnavailable) {
+            found += nothing(CarText.MusicUnavailable)
+            null
         }
-        ranked(query, library.groups(MusicView.Albums)) { it.title }.take(MAX_FOUND_GROUPS)
-            .forEach { found += album(it).copy(group = look.text(CarText.FoundAlbums)) }
-        ranked(query, library.groups(MusicView.Artists)) { it.title }.take(MAX_FOUND_GROUPS)
-            .forEach { found += artist(it).copy(group = look.text(CarText.FoundArtists)) }
+        if (library != null) {
+            ranked(query, library.tracks) { it.title }.take(MAX_FOUND).forEachIndexed { i, track ->
+                found += trackItem(CarIds.searchTracks(query), i, track, album = false).copy(group = look.text(CarText.FoundTracks))
+            }
+            ranked(query, library.groups(MusicView.Albums)) { it.title }.take(MAX_FOUND_GROUPS)
+                .forEach { found += album(it).copy(group = look.text(CarText.FoundAlbums)) }
+            ranked(query, library.groups(MusicView.Artists)) { it.title }.take(MAX_FOUND_GROUPS)
+                .forEach { found += artist(it).copy(group = look.text(CarText.FoundArtists)) }
+        }
         val feeds = data.feeds()
         val byFeed = feeds.associateBy { it.id }
         data.findEpisodes(query, MAX_FOUND).forEach { found += episode(it, byFeed[it.feedId]).copy(group = look.text(CarText.FoundEpisodes)) }
@@ -417,7 +448,7 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
     private fun tracks(listId: String, ref: CarRef, tracks: List<Track>, album: Boolean): List<CarItem> {
         if (tracks.isEmpty()) return listOf(nothing(CarText.Empty))
         val page = ref.page
-        if (page == null && tracks.size > pageSize) return pages(listId, tracks.map { it.title })
+        if (page == null && tracks.size > pageSize) return pages(listId, tracks, CarStyle.List, { it.title }) { look.cover(it) }
         val from = (page ?: 0) * pageSize
         return tracks.withIndex().drop(from).take(pageSize).map { (i, track) -> trackItem(listId, i, track, album) }
     }
@@ -430,17 +461,28 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         playable = true,
     )
 
-    /** [groups] in pages of [pageSize] when there are more, each page named by its first and last title. */
-    private fun <T> paged(ref: CarRef, groups: List<T>, title: (T) -> String, item: (T) -> CarItem): List<CarItem> {
+    /** [groups] in pages of [pageSize] when there are more, each page named by its first and last title; [style]: how the list draws them. */
+    private fun <T> paged(ref: CarRef, groups: List<T>, style: CarStyle, title: (T) -> String, item: (T) -> CarItem): List<CarItem> {
         if (groups.isEmpty()) return listOf(nothing(CarText.Empty))
         val page = ref.page
-        if (page == null && groups.size > pageSize) return pages(ref.path, groups.map(title))
+        if (page == null && groups.size > pageSize) return pages(ref.path, groups, style, title) { item(it).iconUri }
         return groups.drop((page ?: 0) * pageSize).take(pageSize).map(item)
     }
 
-    private fun pages(listId: String, titles: List<String>): List<CarItem> = titles.chunked(pageSize).mapIndexed { page, chunk ->
-        CarItem(id = CarIds.page(listId, page), title = "${chunk.first()} – ${chunk.last()}", browsable = true)
-    }
+    /**
+     * The pages of the long list [listId]: each named by its first and last [title], with its first entry's [icon] (a tile
+     * of a grid is never blank), its own entries drawn as the list's ([style]: a grid of albums stays a grid).
+     */
+    private fun <T> pages(listId: String, entries: List<T>, style: CarStyle, title: (T) -> String, icon: (T) -> String?): List<CarItem> =
+        entries.chunked(pageSize).mapIndexed { page, chunk ->
+            CarItem(
+                id = CarIds.page(listId, page),
+                title = "${title(chunk.first())} – ${title(chunk.last())}",
+                iconUri = icon(chunk.first()) ?: look.icon(CarIcon.NoCover),
+                browsable = true,
+                children = style,
+            )
+        }
 
     private suspend fun episodes(list: List<PodcastEpisode>, withShow: Boolean): List<CarItem> {
         if (list.isEmpty()) return listOf(nothing(CarText.Empty))
@@ -501,8 +543,8 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
 
     private fun filled(items: List<CarItem>): List<CarItem> = items.ifEmpty { listOf(nothing(CarText.Empty)) }
 
-    /** A line that says why a list is empty; it opens and plays nothing. */
-    private fun nothing(text: CarText) = CarItem(id = CarIds.NOTHING, title = look.text(text), iconUri = look.icon(CarIcon.NoCover), playable = true)
+    /** A line that says why a list is empty; it opens and plays nothing, and says so again when tapped (its id carries [text]). */
+    private fun nothing(text: CarText) = CarItem(id = CarIds.nothing(text.name), title = look.text(text), iconUri = look.icon(CarIcon.NoCover), playable = true)
 
     private fun <T> ranked(query: String, items: Iterable<T>, name: (T) -> String?): List<T> {
         val folded = CarVoice.fold(query)

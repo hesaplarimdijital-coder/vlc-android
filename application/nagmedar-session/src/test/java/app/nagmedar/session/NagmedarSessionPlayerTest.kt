@@ -171,6 +171,17 @@ class NagmedarSessionPlayerTest {
     }
 
     @Test
+    fun anEmptySearchPlaysWhatPlayedLast() {
+        val source = FakeSource()
+        val player = player(source)
+        // what Media3's legacy stub makes of onPlayFromSearch(null): no id, no address, no query
+        player.setMediaItem(MediaItem.Builder().setRequestMetadata(MediaItem.RequestMetadata.Builder().build()).build())
+        player.setMediaItem(MediaItem.Builder().setRequestMetadata(MediaItem.RequestMetadata.Builder().setSearchQuery("").build()).build())
+        idle()
+        assertEquals(listOf("search ", "search "), source.calls)
+    }
+
+    @Test
     fun longQueuesArePublishedAsAWindowAroundTheCurrentItem() {
         val source = FakeSource(size = 500)
         source.currentIndex = 250

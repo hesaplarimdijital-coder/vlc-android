@@ -1070,6 +1070,7 @@
     <string name="nag_auto_empty">Burada henüz bir şey yok</string>
     <string name="nag_auto_radio_offline">Radyo rehberine şu an ulaşılamıyor</string>
     <string name="nag_auto_no_result">Sonuç yok</string>
+    <string name="nag_auto_music_unavailable">Müzik kütüphanesi şu an okunamıyor</string>
     <string name="nag_auto_decade_front">%1$d\'ler</string>
     <string name="nag_auto_decade_back">%1$d\'lar</string>
     <plurals name="nag_auto_stations">

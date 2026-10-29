@@ -27,9 +27,16 @@ class MediaRepository(private val context: Context) {
      * The music: the medialibrary's (or the picked folders'), a file with a CUE sheet beside it
      * (S-808) replaced by the sheet's tracks. Each folder is listed once for its sheets.
      */
-    suspend fun tracks(section: LibrarySection? = null): List<MediaWrapper> {
+    suspend fun tracks(section: LibrarySection? = null): List<MediaWrapper> = tracksOfFiles(section).first
+
+    /**
+     * 1.0: [tracks] of [section] with the medialibrary ids of the files they were read from (a CUE sheet's image is one
+     * file): what [recentAudio] keeps the tracks played last to, without listing the library again.
+     */
+    suspend fun tracksOfFiles(section: LibrarySection?): Pair<List<MediaWrapper>, Set<Long>> {
         val files = audio(section)
-        return withContext(Dispatchers.IO) { CueLibrary.expand(context, files) }
+        val ids = files.mapNotNullTo(HashSet()) { it.id.takeIf { id -> id > 0 } }
+        return withContext(Dispatchers.IO) { CueLibrary.expand(context, files) } to ids
     }
 
     /** The audio files, those of [section]'s folders when it is given (the Music page, its smart lists). */
@@ -59,11 +66,14 @@ class MediaRepository(private val context: Context) {
      * getRecentAudio: that is every track by when it was added, and its native side reads two
      * arguments the Java side never passes, so it came back empty at random.
      */
-    suspend fun recentAudio(): List<MediaWrapper> {
+    suspend fun recentAudio(): List<MediaWrapper> = recentAudio { audio(LibrarySection.Music).mapNotNullTo(HashSet()) { it.id.takeIf { id -> id > 0 } } }
+
+    /** 1.0: [recentAudio], the Music section's files known by their ids ([musicFiles]: [tracksOfFiles]'s, when the caller keeps them). */
+    suspend fun recentAudio(musicFiles: suspend () -> Set<Long>): List<MediaWrapper> {
         val played = context.getFromMl { history(Medialibrary.HISTORY_TYPE_LOCAL)?.toList().orEmpty() }
             .filter { it.type == MediaWrapper.TYPE_AUDIO }
         if (played.isEmpty()) return emptyList()
-        val tracks = audio(LibrarySection.Music).mapNotNullTo(HashSet()) { it.id.takeIf { id -> id > 0 } }
+        val tracks = musicFiles()
         return played.filter { it.id in tracks }.take(RECENT_AUDIO)
     }
 

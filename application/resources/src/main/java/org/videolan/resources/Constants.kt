@@ -59,7 +59,6 @@ val ACTION_REMOTE_GENERIC = "remote.".buildPkgString()
 @JvmField val ACTION_REMOTE_SEEK_FORWARD = "${ACTION_REMOTE_GENERIC}SeekForward"
 @JvmField val ACTION_REMOTE_SEEK_BACKWARD = "${ACTION_REMOTE_GENERIC}SeekBackward"
 @JvmField val CUSTOM_ACTION = "CustomAction".buildPkgString()
-@JvmField val CUSTOM_ACTION_BOOKMARK = "bookmark".buildPkgString()
 @JvmField val CUSTOM_ACTION_FAST_FORWARD = "fast_forward".buildPkgString()
 @JvmField val CUSTOM_ACTION_SHUFFLE = "shuffle".buildPkgString()
 @JvmField val CUSTOM_ACTION_SPEED = "speed".buildPkgString()

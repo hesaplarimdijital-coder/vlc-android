@@ -7,7 +7,7 @@ import java.net.URLEncoder
 /**
  * 1.0: the ids of Android Auto's entries: under the browser's root ([MediaSessionBrowser.ID_ROOT]) a path, a key in it
  * encoded (an album's, a folder's path, a tag) and parameters after "?": "p" the page of a long list, "i" the track a
- * list plays from, "n", "u", "l" a directory station's name, address and logo.
+ * list plays from, "n", "u", "l" a directory station's name, address and logo, "t" why a list is empty ([nothing]).
  */
 object CarIds {
     const val ROOT = MediaSessionBrowser.ID_ROOT
@@ -41,10 +41,14 @@ object CarIds {
     private const val DIRECTORY = "$RADIO/dir/"
 
     const val RECENT = MediaSessionBrowser.ID_RECENT
-    private const val SEARCH = "$ROOT/search/"
+    /** The prefix of a search's track list ([searchTracks]). */
+    const val SEARCH = "$ROOT/search/"
 
     /** An entry that is nothing to open or play: an empty list's or an offline directory's line. */
     const val NOTHING = MediaSessionBrowser.ID_NO_MEDIA
+
+    /** The line that says why a list is empty, its reason ("t", a [CarText]'s name) in its id: tapped, it says so. */
+    fun nothing(reason: String) = "$NOTHING?t=$reason"
 
     fun album(key: String) = ALBUM + encode(key)
     fun artist(key: String) = ARTIST + encode(key)

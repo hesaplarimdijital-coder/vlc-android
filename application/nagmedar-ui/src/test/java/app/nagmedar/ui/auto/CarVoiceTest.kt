@@ -49,6 +49,16 @@ class CarVoiceTest {
     }
 
     @Test
+    fun theWordsAsSaidKeepTheirLetters() {
+        assertEquals("Güneş FM", CarVoice.spoken("Güneş FM'i çal"))
+        assertEquals("Eksen", CarVoice.spoken("Eksen radyosunu aç"))
+        assertEquals("Radyo Eksen", CarVoice.spoken("Nağmedar'da Radyo Eksen'i aç"))
+        assertEquals("Jazz FM", CarVoice.spoken("play Jazz FM radio on Nagmedar"))
+        assertEquals("Rock n Roll", CarVoice.spoken("Rock'n'Roll radyosunu aç"))
+        assertEquals("", CarVoice.spoken("radyo aç"))
+    }
+
+    @Test
     fun candidatesAreRanked() {
         assertEquals(CarVoice.EXACT, CarVoice.score("tarkan", "TARKAN"))
         assertEquals(CarVoice.PREFIX, CarVoice.score("sezen", "Sezen Aksu"))

@@ -67,8 +67,10 @@ class CarTreeTest {
         val data = FakeCarData()
         for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.RECENT, CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS)) {
             val list = children(data, id)
-            assertEquals(id, listOf(CarIds.NOTHING), ids(list))
+            assertEquals(id, listOf(CarIds.nothing("Empty")), ids(list))
             assertEquals(id, "Empty", list.single().title)
+            assertTrue(MediaSessionBrowser.isNoMedia(list.single().id))
+            assertNull(runBlocking { tree(data).play(list.single().id) })
             assertNull(runBlocking { tree(data).play(CarIds.NOTHING) })
         }
     }
@@ -114,6 +116,9 @@ class CarTreeTest {
         val pages = children(data, CarIds.ALBUMS, page = 3)
         assertEquals(listOf(CarIds.page(CarIds.ALBUMS, 0), CarIds.page(CarIds.ALBUMS, 1), CarIds.page(CarIds.ALBUMS, 2)), ids(pages))
         assertTrue(pages.all { it.browsable })
+        // a page is a tile with its first album's cover, and its albums stay tiles
+        assertTrue(pages.all { it.children == CarStyle.Grid })
+        assertEquals("cover:file:///music/1.flac", pages[0].iconUri)
         assertTrue(pages[0].title.contains(" – "))
         assertEquals(3, children(data, pages[0].id, page = 3).size)
         assertEquals(1, children(data, pages[2].id, page = 3).size)
@@ -128,6 +133,8 @@ class CarTreeTest {
         val data = FakeCarData(recent = many)
         val pages = children(data, CarIds.RECENT, page = 2)
         assertEquals(3, pages.size)
+        assertTrue(pages.all { it.children == CarStyle.List && it.iconUri != null })
+        assertEquals("cover:file:///music/3.flac", pages[1].iconUri)
         val second = children(data, pages[1].id, page = 2)
         assertEquals(listOf("Parça 3", "Parça 4"), titles(second))
         // a track of the second page plays the whole list from it
@@ -288,7 +295,25 @@ class CarTreeTest {
         val data = FakeCarData(offline = true)
         assertEquals(listOf("RadioOffline"), titles(children(data, CarIds.TAGS)))
         assertEquals(listOf("RadioOffline"), titles(children(data, CarIds.tag("jazz"))))
-        assertEquals(listOf(CarIds.NOTHING), ids(children(data, CarIds.TAGS)))
+        assertEquals(listOf(CarIds.nothing("RadioOffline")), ids(children(data, CarIds.TAGS)))
+    }
+
+    @Test
+    fun aMedialibraryThatDoesNotAnswerLeavesTheRestAnswering() {
+        val data = FakeCarData(
+            tracks = gulumse,
+            feeds = listOf(feed(1, "Tarkan Üzerine")),
+            favourites = listOf(station(3, "Tarkan FM")),
+            musicUnavailable = true,
+        )
+        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.RECENT, CarIds.album("x"))) {
+            assertEquals(id, listOf(CarIds.nothing("MusicUnavailable")), ids(children(data, id)))
+        }
+        assertNull(runBlocking { tree(data).play(CarIds.track(CarIds.RECENT, 0)) })
+        // the podcasts and the radio answer the search, under one line about the music
+        val found = runBlocking { tree(data).search("tarkan") }
+        assertEquals(listOf("MusicUnavailable", "Tarkan Üzerine", "Tarkan FM"), titles(found))
+        assertEquals(listOf(CarIds.show(1)), ids(children(data, CarIds.SHOWS)))
     }
 
     @Test

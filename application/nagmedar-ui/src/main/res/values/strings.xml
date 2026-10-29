@@ -1076,6 +1076,7 @@
     <string name="nag_auto_empty">Nothing here yet</string>
     <string name="nag_auto_radio_offline">The radio directory can\'t be reached right now</string>
     <string name="nag_auto_no_result">No results</string>
+    <string name="nag_auto_music_unavailable">The music library can\'t be read right now</string>
     <string name="nag_auto_decade_front">%1$ds</string>
     <string name="nag_auto_decade_back">%1$ds</string>
     <plurals name="nag_auto_stations">

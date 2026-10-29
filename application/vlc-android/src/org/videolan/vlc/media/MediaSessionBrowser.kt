@@ -30,7 +30,6 @@ import android.support.v4.media.MediaDescriptionCompat
 import androidx.annotation.WorkerThread
 import androidx.core.net.toUri
 import androidx.media.utils.MediaConstants
-import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.MediaLibraryItem
 import org.videolan.resources.CONTENT_STYLE_BROWSABLE_HINT
 import org.videolan.resources.CONTENT_STYLE_CATEGORY_ITEM_HINT_VALUE
@@ -67,9 +66,6 @@ class MediaSessionBrowser {
 
         /** The root's entries, Auto's tabs, in their order. */
         val ROOT_TABS = listOf(ID_MUSIC, ID_PODCASTS, ID_RADIO, ID_RECENT)
-
-        const val MAX_HISTORY_SIZE = 100
-        const val MAX_COVER_ART_ITEMS = 50
 
         /**
          * The entries under [parentId], as the catalog makes them; none without it (a build without the new interface).
@@ -133,11 +129,10 @@ class MediaSessionBrowser {
             }
         }
 
+        /** Whether [mediaId] is a line that plays nothing (an empty list's): [ID_NO_MEDIA], with the reason it gives after "?". */
+        fun isNoMedia(mediaId: String): Boolean = mediaId == ID_NO_MEDIA || mediaId.startsWith("$ID_NO_MEDIA?")
+
         /** The id a medialibrary media is known by in the session's metadata and queue. */
         fun generateMediaId(libraryItem: MediaLibraryItem): String = "$ID_MEDIA/${libraryItem.id}"
-
-        fun isMediaAudio(libraryItem: MediaLibraryItem): Boolean {
-            return libraryItem.itemType == MediaLibraryItem.TYPE_MEDIA && (libraryItem as MediaWrapper).type == MediaWrapper.TYPE_AUDIO
-        }
     }
 }

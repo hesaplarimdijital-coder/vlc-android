@@ -41,10 +41,8 @@ import app.nagmedar.playback.SessionButtons
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.videolan.medialibrary.Tools
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
-import org.videolan.resources.CUSTOM_ACTION_BOOKMARK
 import org.videolan.resources.CUSTOM_ACTION_EPISODE_BACK
 import org.videolan.resources.CUSTOM_ACTION_EPISODE_FORWARD
 import org.videolan.resources.CUSTOM_ACTION_FAST_FORWARD
@@ -241,18 +239,6 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
                 }
                 playbackService.setRate(speed, true)
             }
-            CUSTOM_ACTION_BOOKMARK -> {
-                playbackService.lifecycleScope.launch {
-                    val context = playbackService.applicationContext
-                    playbackService.currentMediaWrapper?.let {
-                        val bookmark = it.addBookmark(playbackService.getTime())
-                        val bookmarkName = context.getString(R.string.bookmark_default_name, Tools.millisToString(playbackService.getTime()))
-                        bookmark?.setName(bookmarkName)
-                        playbackService.displaySubtitleMessage(context.getString(R.string.saved, bookmarkName),
-                                context.resources.getQuantityString(R.plurals.saved_bookmarks_quantity, it.bookmarks.size, it.bookmarks.size))
-                    }
-                }
-            }
             CUSTOM_ACTION_REWIND -> onRewind()
             CUSTOM_ACTION_FAST_FORWARD -> onFastForward()
             // 1.0: an episode's 15 s back and 30 s forward
@@ -273,14 +259,16 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
 
     /**
      * 1.0: an entry of Android Auto's tree is played as the catalog says ([CarHook]): as tapping it in the app would. A
-     * medialibrary media by its id (the session's metadata, the queue) plays as before; the "nothing here" entry plays
-     * nothing.
+     * medialibrary media by its id (the session's metadata, the queue) plays as before; the "nothing here" line plays
+     * nothing and, with nothing loaded, says again what it says (Auto's Now Playing is not left empty).
      */
     override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
         playbackService.lifecycleScope.launch {
             try {
                 when {
-                    mediaId == MediaSessionBrowser.ID_NO_MEDIA -> Unit
+                    MediaSessionBrowser.isNoMedia(mediaId) -> if (!playbackService.hasMedia()) {
+                        playbackService.displayPlaybackError(CarHook.catalog?.nothingText(playbackService, mediaId) ?: playbackService.getString(R.string.search_no_result))
+                    }
                     mediaId.startsWith("${MediaSessionBrowser.ID_MEDIA}/") -> {
                         val id = ContentUris.parseId(mediaId.toUri())
                         val tracks = playbackService.applicationContext.getFromMl { getMedia(id)?.tracks }
@@ -348,8 +336,8 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
     /**
      * 1.0: "Hey Google, … çal": music first, by the field the assistant names (artist, album, title, genre, playlist), then
      * podcasts (a show, an episode), then radio (the favourites, then the directory); the catalog decides ([CarHook]). A
-     * request with nothing in it plays what played last. Nothing found: what was loaded plays on, else Auto says there is
-     * no result.
+     * request with nothing in it plays what played last. Nothing found for words heard: the session's error says there is
+     * no result ("Sonuç yok"), whatever was loaded before is not played instead.
      */
     override fun onPlayFromSearch(query: String?, extras: Bundle?) {
         val playbackState = PlaybackStateCompat.Builder()
@@ -369,9 +357,11 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
             }
             if (played || !isActive) return@launch
             when {
+                !query.isNullOrBlank() -> playbackService.displayPlaybackError(
+                    CarHook.catalog?.nothingText(playbackService, null) ?: playbackService.getString(R.string.search_no_result),
+                )
                 playbackService.hasMedia() -> playbackService.play()
-                query.isNullOrBlank() -> PlaybackService.loadLastAudio(playbackService, playOnly = true)
-                else -> playbackService.displayPlaybackError(R.string.search_no_result)
+                else -> PlaybackService.loadLastAudio(playbackService, playOnly = true)
             }
         }
     }

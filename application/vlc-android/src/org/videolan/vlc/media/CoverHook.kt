@@ -1,5 +1,6 @@
 package org.videolan.vlc.media
 
+import kotlinx.coroutines.CancellationException
 import org.videolan.medialibrary.interfaces.media.Album
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.io.File
@@ -18,9 +19,32 @@ interface AlbumCovers {
     fun albumCoverFile(artist: String?, title: String?): File?
 }
 
+/**
+ * 1.0: the web images the playback service shows outside the app (a show's cover, an episode's image, a station's logo
+ * in Android Auto, the notification): fetched by the new interface's module with the app's User-Agent and timeouts,
+ * once, and kept on disk.
+ */
+fun interface WebImages {
+    /** The file the image at [url] is kept in, fetched first when it is not kept yet; null when there is none. Off the main thread. */
+    suspend fun file(url: String): File?
+}
+
 object CoverHook {
     @Volatile
     var covers: AlbumCovers? = null
+
+    /** Set with [covers]; null without the new interface: a web image is then the placeholder. */
+    @Volatile
+    var web: WebImages? = null
+
+    /** The file of the web image at [url], fetched by the app's own fetcher ([web]); null when there is none to be had. */
+    suspend fun webFile(url: String): File? = try {
+        web?.file(url)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
+    }
 
     /** [media]'s own cover file, when Nağmedar keeps one. */
     fun file(media: MediaWrapper?): File? = media?.let { runCatching { covers?.coverFile(it) }.getOrNull() }
