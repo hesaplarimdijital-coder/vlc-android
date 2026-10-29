@@ -1,0 +1,1498 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :medialibrary
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.r8.optimizedResourceShrinking=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.nonFinalResIds=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :application:live-plot-graph:preBuild UP-TO-DATE
+> Task :application:moviepedia:preBuild UP-TO-DATE
+> Task :application:vlc-android:preBuild UP-TO-DATE
+> Task :application:vlc-android:preDebugBuild UP-TO-DATE
+> Task :application:live-plot-graph:preDebugBuild UP-TO-DATE
+> Task :application:moviepedia:preDebugBuild UP-TO-DATE
+> Task :application:mediadb:preBuild UP-TO-DATE
+> Task :application:mediadb:preDebugBuild UP-TO-DATE
+> Task :application:live-plot-graph:packageDebugRenderscript NO-SOURCE
+> Task :application:nagmedar-audio:preBuild UP-TO-DATE
+> Task :application:mediadb:packageDebugRenderscript NO-SOURCE
+> Task :application:nagmedar-session:preBuild UP-TO-DATE
+> Task :application:nagmedar-session:preDebugBuild UP-TO-DATE
+> Task :application:nagmedar-session:packageDebugRenderscript NO-SOURCE
+> Task :application:nagmedar-audio:preDebugBuild UP-TO-DATE
+> Task :application:resources:preBuild UP-TO-DATE
+> Task :application:resources:preDebugBuild UP-TO-DATE
+> Task :application:nagmedar-audio:packageDebugRenderscript NO-SOURCE
+> Task :application:resources:packageDebugRenderscript NO-SOURCE
+> Task :application:tools:preBuild UP-TO-DATE
+> Task :application:tools:preDebugBuild UP-TO-DATE
+> Task :application:live-plot-graph:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:tools:packageDebugRenderscript NO-SOURCE
+> Task :application:tools:generateDebugResources
+> Task :application:live-plot-graph:generateDebugBuildConfig
+> Task :application:live-plot-graph:generateDebugResources
+> Task :application:tools:packageDebugResources
+> Task :application:tools:processDebugNavigationResources
+> Task :application:live-plot-graph:packageDebugResources
+> Task :application:live-plot-graph:processDebugNavigationResources
+> Task :application:tools:parseDebugLocalResources
+> Task :application:live-plot-graph:parseDebugLocalResources
+> Task :application:live-plot-graph:javaPreCompileDebug
+> Task :application:mediadb:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:mediadb:generateDebugResources
+> Task :application:tools:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:tools:generateDebugBuildConfig
+> Task :application:tools:javaPreCompileDebug
+> Task :application:vlc-android:dataBindingMergeDependencyArtifactsDebug
+> Task :application:mediadb:packageDebugResources
+> Task :application:mediadb:processDebugNavigationResources
+> Task :application:mediadb:parseDebugLocalResources
+> Task :application:tools:generateDebugRFile
+> Task :application:app:preBuild UP-TO-DATE
+> Task :application:app:preDebugBuild UP-TO-DATE
+> Task :application:app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :application:app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :application:vlc-android:compileDebugRenderscript
+RenderScript APIs are deprecated starting in Android 12. RenderScript support will be removed in AGP 10.0. See the following link for a guide to migrate from RenderScript: https://developer.android.com/guide/topics/renderscript/migrate
+
+> Task :application:live-plot-graph:generateDebugRFile
+> Task :application:resources:generateDebugResources
+> Task :application:vlc-android:generateDebugResValues
+> Task :application:mediadb:javaPreCompileDebug
+> Task :application:nagmedar-audio:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:nagmedar-audio:generateDebugResources
+> Task :application:vlc-android:generateDebugResources
+> Task :application:nagmedar-audio:packageDebugResources
+> Task :application:nagmedar-audio:processDebugNavigationResources
+> Task :application:nagmedar-audio:parseDebugLocalResources
+> Task :application:nagmedar-audio:generateDebugRFile
+> Task :application:vlc-android:packageDebugResources
+> Task :application:resources:packageDebugResources
+> Task :application:resources:processDebugNavigationResources
+> Task :application:resources:parseDebugLocalResources
+> Task :application:vlc-android:dataBindingGenBaseClassesDebug
+> Task :application:resources:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:resources:generateDebugBuildConfig
+> Task :application:resources:javaPreCompileDebug
+> Task :application:nagmedar-audio:javaPreCompileDebug
+> Task :application:nagmedar-session:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:nagmedar-session:generateDebugResources
+> Task :application:nagmedar-session:packageDebugResources
+> Task :application:nagmedar-session:processDebugNavigationResources
+> Task :application:nagmedar-session:parseDebugLocalResources
+> Task :application:resources:generateDebugRFile
+> Task :application:nagmedar-session:generateDebugRFile
+> Task :application:mediadb:generateDebugRFile
+> Task :application:nagmedar-session:javaPreCompileDebug
+> Task :application:vlc-android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:vlc-android:compileDebugAidl
+> Task :application:vlc-android:dataBindingTriggerDebug
+> Task :application:vlc-android:generateDebugBuildConfig
+> Task :application:vlc-android:processDebugNavigationResources
+> Task :application:vlc-android:parseDebugLocalResources
+> Task :application:vlc-android:generateDebugRFile
+> Task :application:moviepedia:generateDebugResources
+> Task :application:moviepedia:packageDebugResources
+> Task :application:moviepedia:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:moviepedia:dataBindingTriggerDebug
+> Task :application:moviepedia:generateDebugBuildConfig
+> Task :application:moviepedia:processDebugNavigationResources
+> Task :application:moviepedia:parseDebugLocalResources
+> Task :application:moviepedia:generateDebugRFile
+> Task :application:vlc-android:javaPreCompileDebug
+> Task :application:remote-access-client:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:remote-access-client:webCopy
+> Task :application:remote-access-client:preBuild
+> Task :application:remote-access-client:preDebugBuild
+> Task :application:remote-access-client:generateDebugResValues
+> Task :application:remote-access-client:generateDebugResources
+> Task :application:remote-access-client:packageDebugResources
+> Task :application:remote-access-client:processDebugNavigationResources
+> Task :application:remote-access-client:parseDebugLocalResources
+> Task :application:remote-access-client:generateDebugRFile
+> Task :application:remote-access-client:compileDebugKotlin NO-SOURCE
+> Task :application:remote-access-client:javaPreCompileDebug
+> Task :application:remote-access-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :application:remote-access-client:bundleLibCompileToJarDebug
+> Task :application:remote-access-server:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:remote-access-server:preBuild UP-TO-DATE
+> Task :application:remote-access-server:preDebugBuild UP-TO-DATE
+> Task :application:remote-access-server:generateDebugResources
+> Task :application:remote-access-server:packageDebugResources
+> Task :application:remote-access-server:dataBindingTriggerDebug
+> Task :application:remote-access-server:generateDebugBuildConfig
+> Task :application:remote-access-server:processDebugNavigationResources
+> Task :application:remote-access-server:parseDebugLocalResources
+> Task :application:remote-access-server:generateDebugRFile
+> Task :application:remote-access-server:javaPreCompileDebug
+> Task :application:moviepedia:javaPreCompileDebug
+> Task :application:television:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:television:preBuild UP-TO-DATE
+> Task :application:television:preDebugBuild UP-TO-DATE
+> Task :application:television:generateDebugResources
+> Task :application:television:packageDebugResources
+> Task :application:television:dataBindingTriggerDebug
+> Task :application:television:processDebugNavigationResources
+> Task :application:television:parseDebugLocalResources
+> Task :application:television:generateDebugRFile
+> Task :application:television:javaPreCompileDebug
+> Task :application:app:generateDebugResources
+> Task :application:nagmedar-data:preBuild UP-TO-DATE
+> Task :application:nagmedar-data:preDebugBuild UP-TO-DATE
+> Task :application:nagmedar-data:generateDebugResources
+> Task :application:nagmedar-data:packageDebugResources
+> Task :application:nagmedar-lab:preBuild UP-TO-DATE
+> Task :application:nagmedar-lab:preDebugBuild UP-TO-DATE
+> Task :application:nagmedar-lab:generateDebugResources
+> Task :application:nagmedar-lab:packageDebugResources
+> Task :application:nagmedar-ui:preBuild UP-TO-DATE
+> Task :application:nagmedar-ui:preDebugBuild UP-TO-DATE
+> Task :application:nagmedar-ui:generateDebugResources
+> Task :application:nagmedar-ui:packageDebugResources
+
+> Task :application:nagmedar-session:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-session/src/main/java/app/nagmedar/session/Media3SessionHost.kt:21:65 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+
+> Task :application:nagmedar-session:compileDebugJavaWithJavac NO-SOURCE
+
+> Task :application:app:mergeDebugResources
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:645:4: Multiple substitutions specified in non-positional format of string resource string/talkback_media_content_description. Did you mean to add the formatted="false" attribute?
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:648:4: Multiple substitutions specified in non-positional format of string resource string/talkback_out_of. Did you mean to add the formatted="false" attribute?
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:653:4: Multiple substitutions specified in non-positional format of string resource string/talkback_track_index. Did you mean to add the formatted="false" attribute?
+
+> Task :application:nagmedar-session:bundleLibCompileToJarDebug
+> Task :application:app:dataBindingTriggerDebug
+> Task :application:app:packageDebugResources
+> Task :application:nagmedar-data:processDebugNavigationResources
+> Task :application:nagmedar-lab:processDebugNavigationResources
+> Task :application:nagmedar-ui:processDebugNavigationResources
+> Task :application:app:processDebugNavigationResources
+> Task :application:app:parseDebugLocalResources
+> Task :application:nagmedar-data:parseDebugLocalResources
+> Task :application:nagmedar-data:generateDebugRFile
+> Task :application:nagmedar-lab:parseDebugLocalResources
+> Task :application:nagmedar-lab:generateDebugRFile
+> Task :application:nagmedar-ui:parseDebugLocalResources
+> Task :application:nagmedar-data:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:nagmedar-ui:generateDebugRFile
+> Task :application:app:generateDebugRFile
+> Task :application:nagmedar-data:javaPreCompileDebug
+> Task :application:nagmedar-lab:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :application:tools:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/KotlinExtensions.kt:132:53 'val activeNetworkInfo: NetworkInfo?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/KotlinExtensions.kt:132:72 'val isConnected: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/LocaleUtils.kt:18:44 'field locale: Locale!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/LocaleUtils.kt:100:28 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/LocaleUtils.kt:106:16 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:32:37 'static field CONNECTIVITY_ACTION: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:33:42 'val activeNetworkInfo: NetworkInfo?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:34:74 'val isConnected: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:35:65 'val type: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:35:93 'static field TYPE_MOBILE: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:51:62 'static field CONNECTIVITY_ACTION: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/tools/src/main/java/org/videolan/tools/NetworkMonitor.kt:71:32 'val allNetworks: Array<(out) Network!>' is deprecated. Deprecated in Java.
+
+> Task :application:nagmedar-audio:compileDebugKotlin
+> Task :application:nagmedar-lab:compileDebugKotlin
+> Task :application:nagmedar-lab:javaPreCompileDebug
+> Task :application:nagmedar-lab:compileDebugJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-lab:bundleLibCompileToJarDebug
+> Task :application:nagmedar-ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :application:nagmedar-ui:generateDebugBuildConfig
+> Task :application:nagmedar-ui:javaPreCompileDebug
+> Task :application:app:javaPreCompileDebug
+> Task :application:app:generateDebugAssets UP-TO-DATE
+> Task :application:live-plot-graph:generateDebugAssets UP-TO-DATE
+> Task :application:live-plot-graph:mergeDebugAssets
+> Task :application:mediadb:generateDebugAssets UP-TO-DATE
+> Task :application:mediadb:mergeDebugAssets
+> Task :application:moviepedia:generateDebugAssets UP-TO-DATE
+> Task :application:moviepedia:mergeDebugAssets
+> Task :application:nagmedar-audio:generateDebugAssets UP-TO-DATE
+> Task :application:nagmedar-audio:mergeDebugAssets
+> Task :application:nagmedar-data:generateDebugAssets UP-TO-DATE
+> Task :application:nagmedar-data:mergeDebugAssets
+> Task :application:nagmedar-lab:generateDebugAssets UP-TO-DATE
+> Task :application:nagmedar-lab:mergeDebugAssets
+> Task :application:nagmedar-session:generateDebugAssets UP-TO-DATE
+> Task :application:nagmedar-session:mergeDebugAssets
+> Task :application:nagmedar-ui:generateDebugAssets UP-TO-DATE
+> Task :application:nagmedar-ui:mergeDebugAssets
+> Task :application:remote-access-client:generateDebugAssets UP-TO-DATE
+> Task :application:remote-access-client:mergeDebugAssets
+> Task :application:remote-access-server:generateDebugAssets UP-TO-DATE
+> Task :application:remote-access-server:mergeDebugAssets
+> Task :application:resources:generateDebugAssets UP-TO-DATE
+> Task :application:resources:mergeDebugAssets
+> Task :application:television:generateDebugAssets UP-TO-DATE
+> Task :application:television:mergeDebugAssets
+> Task :application:vlc-android:generateDebugAssets UP-TO-DATE
+> Task :application:vlc-android:mergeDebugAssets
+> Task :application:tools:compileDebugJavaWithJavac
+> Task :application:tools:bundleLibCompileToJarDebug
+> Task :application:live-plot-graph:compileDebugKotlin
+> Task :application:live-plot-graph:compileDebugJavaWithJavac
+> Task :application:live-plot-graph:bundleLibCompileToJarDebug
+> Task :application:nagmedar-audio:compileDebugJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-audio:bundleLibCompileToJarDebug
+> Task :application:tools:generateDebugAssets UP-TO-DATE
+> Task :application:tools:mergeDebugAssets
+> Task :application:resources:compileDebugKotlin
+> Task :application:app:mergeDebugAssets
+> Task :application:resources:compileDebugJavaWithJavac
+> Task :application:app:compressDebugAssets
+> Task :application:resources:bundleLibCompileToJarDebug
+> Task :application:live-plot-graph:processDebugJavaRes
+> Task :application:nagmedar-audio:processDebugJavaRes
+> Task :application:nagmedar-lab:processDebugJavaRes
+> Task :application:nagmedar-session:processDebugJavaRes
+> Task :application:remote-access-client:processDebugJavaRes NO-SOURCE
+> Task :application:resources:processDebugJavaRes
+> Task :application:tools:processDebugJavaRes
+> Task :application:app:checkDebugDuplicateClasses
+> Task :application:app:desugarDebugFileDependencies
+
+> Task :application:mediadb:kspDebugKotlin
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/mediadb/models/EqualizerBand.kt:39: equalizer_entry column references a foreign key but it is not part of an index. This may trigger full table scans whenever parent table is modified so you are highly advised to create an index that covers this column.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/database/EqualizerDao.kt:64: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/database/EqualizerDao.kt:67: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/database/EqualizerDao.kt:70: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/database/EqualizerDao.kt:73: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+
+> Task :application:nagmedar-data:kspDebugKotlin
+> Task :application:app:l8DexDesugarLibDebug
+
+> Task :application:mediadb:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/mediadb/src/main/java/org/videolan/vlc/database/Migrations.kt:265:26 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+
+> Task :application:app:mergeExtDexDebug
+> Task :application:live-plot-graph:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-audio:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-lab:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-session:bundleLibRuntimeToJarDebug
+> Task :application:resources:bundleLibRuntimeToJarDebug
+> Task :application:tools:bundleLibRuntimeToJarDebug
+> Task :application:remote-access-client:bundleLibRuntimeToJarDebug
+> Task :application:mediadb:compileDebugJavaWithJavac
+> Task :application:mediadb:bundleLibCompileToJarDebug
+> Task :application:mediadb:processDebugJavaRes
+> Task :application:mediadb:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-data:compileDebugKotlin
+> Task :application:nagmedar-data:compileDebugJavaWithJavac
+> Task :application:nagmedar-data:bundleLibCompileToJarDebug
+> Task :application:nagmedar-data:processDebugJavaRes
+> Task :application:nagmedar-data:bundleLibRuntimeToJarDebug
+> Task :application:live-plot-graph:writeDebugAarMetadata
+> Task :application:mediadb:writeDebugAarMetadata
+> Task :application:moviepedia:writeDebugAarMetadata
+> Task :application:nagmedar-audio:writeDebugAarMetadata
+> Task :application:nagmedar-data:writeDebugAarMetadata
+> Task :application:nagmedar-lab:writeDebugAarMetadata
+> Task :application:nagmedar-session:writeDebugAarMetadata
+> Task :application:nagmedar-ui:writeDebugAarMetadata
+> Task :application:remote-access-client:writeDebugAarMetadata
+> Task :application:remote-access-server:writeDebugAarMetadata
+> Task :application:resources:writeDebugAarMetadata
+> Task :application:television:writeDebugAarMetadata
+> Task :application:tools:writeDebugAarMetadata
+> Task :application:vlc-android:writeDebugAarMetadata
+> Task :application:app:checkDebugAarMetadata
+> Task :application:app:mapDebugSourceSetPaths
+> Task :application:app:compileDebugNavigationResources
+> Task :application:app:createDebugCompatibleScreenManifests
+> Task :application:app:extractDeepLinksDebug
+> Task :application:live-plot-graph:extractDeepLinksDebug
+> Task :application:live-plot-graph:processDebugManifest
+> Task :application:mediadb:extractDeepLinksDebug
+> Task :application:mediadb:processDebugManifest
+> Task :application:moviepedia:extractDeepLinksDebug
+> Task :application:moviepedia:processDebugManifest
+> Task :application:nagmedar-audio:extractDeepLinksDebug
+> Task :application:nagmedar-audio:processDebugManifest
+> Task :application:nagmedar-data:extractDeepLinksDebug
+> Task :application:nagmedar-data:processDebugManifest
+> Task :application:nagmedar-lab:extractDeepLinksDebug
+> Task :application:nagmedar-lab:processDebugManifest
+> Task :application:nagmedar-session:extractDeepLinksDebug
+> Task :application:nagmedar-session:processDebugManifest
+> Task :application:nagmedar-ui:extractDeepLinksDebug
+> Task :application:nagmedar-ui:processDebugManifest
+> Task :application:remote-access-client:extractDeepLinksDebug
+> Task :application:remote-access-client:processDebugManifest
+> Task :application:remote-access-server:extractDeepLinksDebug
+> Task :application:remote-access-server:processDebugManifest
+> Task :application:resources:extractDeepLinksDebug
+> Task :application:resources:processDebugManifest
+> Task :application:television:extractDeepLinksDebug
+> Task :application:television:processDebugManifest
+> Task :application:tools:extractDeepLinksDebug
+> Task :application:tools:processDebugManifest
+> Task :application:vlc-android:extractDeepLinksDebug
+> Task :application:vlc-android:processDebugManifest
+> Task :application:live-plot-graph:mapDebugSourceSetPaths
+> Task :application:live-plot-graph:compileDebugLibraryResources
+> Task :application:mediadb:mapDebugSourceSetPaths
+> Task :application:mediadb:compileDebugLibraryResources
+> Task :application:moviepedia:mapDebugSourceSetPaths
+> Task :application:moviepedia:compileDebugLibraryResources
+> Task :application:nagmedar-audio:mapDebugSourceSetPaths
+> Task :application:nagmedar-audio:compileDebugLibraryResources
+> Task :application:nagmedar-data:mapDebugSourceSetPaths
+> Task :application:nagmedar-data:compileDebugLibraryResources
+> Task :application:nagmedar-lab:mapDebugSourceSetPaths
+> Task :application:nagmedar-lab:compileDebugLibraryResources
+> Task :application:nagmedar-session:mapDebugSourceSetPaths
+> Task :application:nagmedar-session:compileDebugLibraryResources
+> Task :application:nagmedar-ui:mapDebugSourceSetPaths
+> Task :application:nagmedar-ui:compileDebugLibraryResources
+> Task :application:remote-access-client:mapDebugSourceSetPaths
+> Task :application:app:processDebugMainManifest
+> Task :application:remote-access-client:compileDebugLibraryResources
+> Task :application:remote-access-server:mapDebugSourceSetPaths
+> Task :application:remote-access-server:compileDebugLibraryResources
+> Task :application:resources:mapDebugSourceSetPaths
+> Task :application:app:processDebugManifest
+> Task :application:app:processDebugManifestForPackage
+> Task :application:television:mapDebugSourceSetPaths
+> Task :application:television:compileDebugLibraryResources
+> Task :application:tools:mapDebugSourceSetPaths
+> Task :application:tools:compileDebugLibraryResources
+> Task :application:resources:compileDebugLibraryResources
+> Task :application:vlc-android:mapDebugSourceSetPaths
+> Task :application:app:mergeDebugJniLibFolders
+> Task :application:live-plot-graph:mergeDebugJniLibFolders
+> Task :application:live-plot-graph:mergeDebugNativeLibs NO-SOURCE
+> Task :application:live-plot-graph:copyDebugJniLibsProjectOnly
+> Task :application:mediadb:mergeDebugJniLibFolders
+> Task :application:mediadb:mergeDebugNativeLibs NO-SOURCE
+> Task :application:moviepedia:mergeDebugJniLibFolders
+> Task :application:mediadb:copyDebugJniLibsProjectOnly
+> Task :application:moviepedia:mergeDebugNativeLibs NO-SOURCE
+> Task :application:moviepedia:copyDebugJniLibsProjectOnly
+> Task :application:vlc-android:compileDebugLibraryResources
+> Task :application:nagmedar-data:mergeDebugJniLibFolders
+> Task :application:nagmedar-data:mergeDebugNativeLibs NO-SOURCE
+> Task :application:nagmedar-data:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-audio:mergeDebugJniLibFolders
+> Task :application:nagmedar-audio:mergeDebugNativeLibs
+> Task :application:nagmedar-lab:mergeDebugJniLibFolders
+> Task :application:nagmedar-audio:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-session:mergeDebugJniLibFolders
+> Task :application:nagmedar-session:mergeDebugNativeLibs NO-SOURCE
+> Task :application:nagmedar-session:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-ui:mergeDebugJniLibFolders
+> Task :application:nagmedar-ui:mergeDebugNativeLibs NO-SOURCE
+> Task :application:nagmedar-ui:copyDebugJniLibsProjectOnly
+> Task :application:remote-access-client:mergeDebugJniLibFolders
+> Task :application:remote-access-client:mergeDebugNativeLibs NO-SOURCE
+> Task :application:remote-access-client:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-lab:mergeDebugNativeLibs
+> Task :application:remote-access-server:mergeDebugJniLibFolders
+> Task :application:remote-access-server:mergeDebugNativeLibs NO-SOURCE
+> Task :application:remote-access-server:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-lab:copyDebugJniLibsProjectOnly
+> Task :application:resources:mergeDebugJniLibFolders
+> Task :application:television:mergeDebugJniLibFolders
+> Task :application:television:mergeDebugNativeLibs NO-SOURCE
+> Task :application:television:copyDebugJniLibsProjectOnly
+> Task :application:resources:mergeDebugNativeLibs NO-SOURCE
+> Task :application:tools:mergeDebugJniLibFolders
+> Task :application:tools:mergeDebugNativeLibs NO-SOURCE
+> Task :application:resources:copyDebugJniLibsProjectOnly
+> Task :application:tools:copyDebugJniLibsProjectOnly
+> Task :application:app:validateSigningDebug
+> Task :application:vlc-android:mergeDebugJniLibFolders
+> Task :application:app:writeDebugAppMetadata
+> Task :application:vlc-android:mergeDebugNativeLibs NO-SOURCE
+> Task :application:vlc-android:copyDebugJniLibsProjectOnly
+> Task :application:nagmedar-ui:preDebugUnitTestBuild UP-TO-DATE
+> Task :application:app:writeDebugSigningConfigVersions
+> Task :application:nagmedar-ui:checkDebugUnitTestAarMetadata
+> Task :application:nagmedar-ui:mapDebugUnitTestSourceSetPaths
+> Task :application:nagmedar-ui:generateDebugUnitTestResources
+> Task :application:app:mergeDebugNativeLibs
+warn: removing resource app.nagmedar.debug:string/allow_storage_manager_description without required default value.
+warn: removing resource app.nagmedar.debug:string/allow_storage_manager_explanation without required default value.
+warn: removing resource app.nagmedar.debug:string/allow_storage_manager_title without required default value.
+warn: removing resource app.nagmedar.debug:string/encountered_error_message without required default value.
+warn: removing resource app.nagmedar.debug:string/encountered_error_title without required default value.
+warn: removing resource app.nagmedar.debug:string/playback_speed_summary without required default value.
+warn: removing resource app.nagmedar.debug:string/playback_speed_title without required default value.
+warn: removing resource app.nagmedar.debug:string/presets without required default value.
+warn: removing resource app.nagmedar.debug:string/subs_download_error without required default value.
+
+> Task :application:app:stripDebugDebugSymbols
+> Task :application:tools:preDebugUnitTestBuild UP-TO-DATE
+> Task :application:tools:generateDebugUnitTestStubRFile
+> Task :application:app:processDebugResources
+> Task :application:nagmedar-data:preDebugUnitTestBuild UP-TO-DATE
+> Task :application:nagmedar-data:checkDebugUnitTestAarMetadata
+> Task :application:nagmedar-data:mapDebugUnitTestSourceSetPaths
+> Task :application:nagmedar-data:generateDebugUnitTestResources
+> Task :application:tools:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-data:mergeDebugUnitTestResources
+> Task :application:nagmedar-data:processDebugUnitTestManifest
+
+> Task :application:nagmedar-ui:mergeDebugUnitTestResources
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:645:4: Multiple substitutions specified in non-positional format of string resource string/talkback_media_content_description. Did you mean to add the formatted="false" attribute?
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:648:4: Multiple substitutions specified in non-positional format of string resource string/talkback_out_of. Did you mean to add the formatted="false" attribute?
+/home/runner/work/vlc-android/vlc-android/application/resources/build/intermediates/packaged_res/debug/packageDebugResources/values-in/values-in.xml:653:4: Multiple substitutions specified in non-positional format of string resource string/talkback_track_index. Did you mean to add the formatted="false" attribute?
+
+> Task :application:nagmedar-data:processDebugUnitTestResources
+> Task :application:tools:compileDebugUnitTestKotlin
+> Task :application:tools:compileDebugUnitTestJavaWithJavac
+> Task :application:tools:processDebugUnitTestJavaRes
+> Task :application:nagmedar-ui:processDebugUnitTestManifest
+> Task :application:nagmedar-ui:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-data:kspDebugUnitTestKotlin
+> Task :application:nagmedar-ui:generateDebugUnitTestAssets UP-TO-DATE
+> Task :application:nagmedar-ui:mergeDebugUnitTestAssets
+
+> Task :application:tools:testDebugUnitTest
+test started: app.nagmedar.playback.CastingTest anotherAddressTakesTheShownOnesPlace
+test ended: app.nagmedar.playback.CastingTest anotherAddressTakesTheShownOnesPlace SUCCESS
+test started: app.nagmedar.playback.CastingTest theKindsComeFromLibVlcsTypes
+test ended: app.nagmedar.playback.CastingTest theKindsComeFromLibVlcsTypes SUCCESS
+test started: app.nagmedar.playback.CastingTest aDeviceFoundTwiceIsListedOnce
+test ended: app.nagmedar.playback.CastingTest aDeviceFoundTwiceIsListedOnce SUCCESS
+test started: app.nagmedar.playback.CastingTest aTrackerModuleStaysOnThisDevice
+test ended: app.nagmedar.playback.CastingTest aTrackerModuleStaysOnThisDevice SUCCESS
+test started: app.nagmedar.playback.CastingTest devicesKeepTheOrderTheyWereFoundIn
+test ended: app.nagmedar.playback.CastingTest devicesKeepTheOrderTheyWereFoundIn SUCCESS
+test started: app.nagmedar.playback.CastingTest aPausedTrackStaysPaused
+test ended: app.nagmedar.playback.CastingTest aPausedTrackStaysPaused SUCCESS
+test started: app.nagmedar.playback.CastingTest nothingPlayingOrNoChangeIsNoHandover
+test ended: app.nagmedar.playback.CastingTest nothingPlayingOrNoChangeIsNoHandover SUCCESS
+test started: app.nagmedar.playback.CastingTest theSameNameOfAnotherKindIsAnotherDevice
+test ended: app.nagmedar.playback.CastingTest theSameNameOfAnotherKindIsAnotherDevice SUCCESS
+test started: app.nagmedar.playback.CastingTest dsdIsHandedOverToBeSentAsPcm
+test ended: app.nagmedar.playback.CastingTest dsdIsHandedOverToBeSentAsPcm SUCCESS
+test started: app.nagmedar.playback.CastingTest libVlcsItemsChangeRendererWithoutAHandover
+test ended: app.nagmedar.playback.CastingTest libVlcsItemsChangeRendererWithoutAHandover SUCCESS
+test started: app.nagmedar.playback.CastingTest castingWhileTheEnginePlaysHandsTheTrackToLibVlcWhereItWas
+test ended: app.nagmedar.playback.CastingTest castingWhileTheEnginePlaysHandsTheTrackToLibVlcWhereItWas SUCCESS
+test started: app.nagmedar.playback.CastingTest whatTheEngineDoesNotTakeStaysWithLibVlc
+test ended: app.nagmedar.playback.CastingTest whatTheEngineDoesNotTakeStaysWithLibVlc SUCCESS
+test started: app.nagmedar.playback.CastingTest whatARendererGets
+test ended: app.nagmedar.playback.CastingTest whatARendererGets SUCCESS
+test started: app.nagmedar.playback.CastingTest castingStoppedGivesTheTrackBackToTheEngine
+test ended: app.nagmedar.playback.CastingTest castingStoppedGivesTheTrackBackToTheEngine SUCCESS
+test started: app.nagmedar.playback.EngineHostTest routesLocalMusicToTheAudioEngineAndTheRestToLibVlc
+test ended: app.nagmedar.playback.EngineHostTest routesLocalMusicToTheAudioEngineAndTheRestToLibVlc SUCCESS
+test started: app.nagmedar.playback.EngineHostTest handOverBetweenItems
+test ended: app.nagmedar.playback.EngineHostTest handOverBetweenItems SUCCESS
+test started: app.nagmedar.playback.EngineHostTest aStubEngineLeavesEverythingToLibVlc
+test ended: app.nagmedar.playback.EngineHostTest aStubEngineLeavesEverythingToLibVlc SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest withoutAStationNameTheLinesAreEmpty
+test ended: app.nagmedar.playback.RadioMetadataTest withoutAStationNameTheLinesAreEmpty SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest theMetadataChangesWhenTheTitleDoes
+test ended: app.nagmedar.playback.RadioMetadataTest theMetadataChangesWhenTheTitleDoes SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest enAndEmDashesSplitToo
+test ended: app.nagmedar.playback.RadioMetadataTest enAndEmDashesSplitToo SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest onlyAStreamsWebLogoIsUsed
+test ended: app.nagmedar.playback.RadioMetadataTest onlyAStreamsWebLogoIsUsed SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest nothingPlayingShowsTheStation
+test ended: app.nagmedar.playback.RadioMetadataTest nothingPlayingShowsTheStation SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest aDashWithOneSideEmptyIsNotSplit
+test ended: app.nagmedar.playback.RadioMetadataTest aDashWithOneSideEmptyIsNotSplit SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest aDashInsideAWordIsNoSeparator
+test ended: app.nagmedar.playback.RadioMetadataTest aDashInsideAWordIsNoSeparator SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest spacesQuotesAndControlCharactersAreCleaned
+test ended: app.nagmedar.playback.RadioMetadataTest spacesQuotesAndControlCharactersAreCleaned SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest theFirstDashSplits
+test ended: app.nagmedar.playback.RadioMetadataTest theFirstDashSplits SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest aTextWithoutAnArtistIsTheTitle
+test ended: app.nagmedar.playback.RadioMetadataTest aTextWithoutAnArtistIsTheTitle SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest theStationBeforeTheDashIsNoArtist
+test ended: app.nagmedar.playback.RadioMetadataTest theStationBeforeTheDashIsNoArtist SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest anArtistAndATitleAreSplit
+test ended: app.nagmedar.playback.RadioMetadataTest anArtistAndATitleAreSplit SUCCESS
+test started: app.nagmedar.playback.RadioMetadataTest aStreamShowsItsLogoWhetherOrNotItSendsATitle
+test ended: app.nagmedar.playback.RadioMetadataTest aStreamShowsItsLogoWhetherOrNotItSendsATitle SUCCESS
+test started: app.nagmedar.playback.SessionButtonsTest anEpisodesSkipsStayInsideIt
+test ended: app.nagmedar.playback.SessionButtonsTest anEpisodesSkipsStayInsideIt SUCCESS
+test started: app.nagmedar.playback.SessionButtonsTest anEpisodeInTheCarAlsoHasItsSpeed
+test ended: app.nagmedar.playback.SessionButtonsTest anEpisodeInTheCarAlsoHasItsSpeed SUCCESS
+test started: app.nagmedar.playback.SessionButtonsTest musicOnThePhonesControlsSeeks
+test ended: app.nagmedar.playback.SessionButtonsTest musicOnThePhonesControlsSeeks SUCCESS
+test started: app.nagmedar.playback.SessionButtonsTest anEpisodeHasItsSkipsEverywhere
+test ended: app.nagmedar.playback.SessionButtonsTest anEpisodeHasItsSkipsEverywhere SUCCESS
+test started: app.nagmedar.playback.SessionButtonsTest musicInTheCarShufflesAndRepeats
+test ended: app.nagmedar.playback.SessionButtonsTest musicInTheCarShufflesAndRepeats SUCCESS
+test started: videolan.org.commontools.ExampleUnitTest addition_isCorrect
+test ended: videolan.org.commontools.ExampleUnitTest addition_isCorrect SUCCESS
+
+> Task :application:nagmedar-data:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-data:generateDebugUnitTestAssets UP-TO-DATE
+> Task :application:nagmedar-data:mergeDebugUnitTestAssets
+> Task :application:nagmedar-data:packageDebugUnitTestForUnitTest
+> Task :application:nagmedar-data:generateDebugUnitTestConfig
+> Task :application:nagmedar-session:preDebugUnitTestBuild UP-TO-DATE
+> Task :application:nagmedar-session:checkDebugUnitTestAarMetadata
+> Task :application:nagmedar-session:mapDebugUnitTestSourceSetPaths
+> Task :application:nagmedar-session:generateDebugUnitTestResources
+> Task :application:nagmedar-session:mergeDebugUnitTestResources
+> Task :application:nagmedar-session:processDebugUnitTestManifest
+warn: removing resource app.nagmedar.ui.test:string/allow_storage_manager_description without required default value.
+warn: removing resource app.nagmedar.ui.test:string/allow_storage_manager_explanation without required default value.
+warn: removing resource app.nagmedar.ui.test:string/allow_storage_manager_title without required default value.
+warn: removing resource app.nagmedar.ui.test:string/encountered_error_message without required default value.
+warn: removing resource app.nagmedar.ui.test:string/encountered_error_title without required default value.
+warn: removing resource app.nagmedar.ui.test:string/playback_speed_summary without required default value.
+warn: removing resource app.nagmedar.ui.test:string/playback_speed_title without required default value.
+warn: removing resource app.nagmedar.ui.test:string/presets without required default value.
+warn: removing resource app.nagmedar.ui.test:string/subs_download_error without required default value.
+
+> Task :application:nagmedar-session:processDebugUnitTestResources
+> Task :application:nagmedar-ui:processDebugUnitTestResources
+> Task :application:nagmedar-ui:packageDebugUnitTestForUnitTest
+> Task :application:nagmedar-ui:generateDebugUnitTestConfig
+> Task :application:nagmedar-session:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-session:generateDebugUnitTestAssets UP-TO-DATE
+> Task :application:nagmedar-session:mergeDebugUnitTestAssets
+> Task :application:nagmedar-session:packageDebugUnitTestForUnitTest
+> Task :application:nagmedar-session:generateDebugUnitTestConfig
+> Task :application:nagmedar-lab:preDebugUnitTestBuild UP-TO-DATE
+> Task :application:nagmedar-lab:generateDebugUnitTestStubRFile
+> Task :application:nagmedar-data:compileDebugUnitTestKotlin
+> Task :application:nagmedar-data:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-data:processDebugUnitTestJavaRes
+> Task :application:vlc-android:kspDebugKotlin
+> Task :application:nagmedar-lab:compileDebugUnitTestKotlin
+> Task :application:nagmedar-lab:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-lab:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-lab:processDebugUnitTestJavaRes
+> Task :application:nagmedar-session:compileDebugUnitTestKotlin
+> Task :application:nagmedar-session:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-session:processDebugUnitTestJavaRes
+
+> Task :application:nagmedar-lab:testDebugUnitTest
+test started: app.nagmedar.lab.MediaProbeTest aFilmCachedBeforeKeepsEveryAudioTrack
+test ended: app.nagmedar.lab.MediaProbeTest aFilmCachedBeforeKeepsEveryAudioTrack SUCCESS
+test started: app.nagmedar.lab.MediaProbeTest atmosDtsXAndLossless
+test ended: app.nagmedar.lab.MediaProbeTest atmosDtsXAndLossless SUCCESS
+test started: app.nagmedar.lab.MediaProbeTest failuresAndOldVersionsAreNotProbes
+test ended: app.nagmedar.lab.MediaProbeTest failuresAndOldVersionsAreNotProbes SUCCESS
+test started: app.nagmedar.lab.MediaProbeTest chaptersSubtitlesAndTheContainer
+test ended: app.nagmedar.lab.MediaProbeTest chaptersSubtitlesAndTheContainer SUCCESS
+test started: app.nagmedar.lab.NativeLabTest theFlagTellsWhatTheLoadFoundAndNeverLoads
+test ended: app.nagmedar.lab.NativeLabTest theFlagTellsWhatTheLoadFoundAndNeverLoads SUCCESS
+test started: app.nagmedar.lab.ReportsTest usbReportsReadTheNativeJson
+test ended: app.nagmedar.lab.ReportsTest usbReportsReadTheNativeJson SUCCESS
+test started: app.nagmedar.lab.ReportsTest whisperReportReadsTheBenchmarkJson
+test ended: app.nagmedar.lab.ReportsTest whisperReportReadsTheBenchmarkJson SUCCESS
+
+> Task :application:nagmedar-audio:preDebugUnitTestBuild UP-TO-DATE
+
+> Task :application:nagmedar-data:testDebugUnitTest
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest podcastsGetTheirTranscriptColumnsInTwentyOne
+
+> Task :application:nagmedar-audio:checkDebugUnitTestAarMetadata
+> Task :application:nagmedar-audio:mapDebugUnitTestSourceSetPaths
+> Task :application:nagmedar-audio:generateDebugUnitTestResources
+> Task :application:nagmedar-audio:mergeDebugUnitTestResources
+> Task :application:nagmedar-audio:processDebugUnitTestManifest
+
+> Task :application:nagmedar-session:testDebugUnitTest
+test started: app.nagmedar.session.NagmedarSessionPlayerTest anEmptySearchPlaysWhatPlayedLast
+
+> Task :application:nagmedar-audio:processDebugUnitTestResources
+> Task :application:nagmedar-audio:compileDebugUnitTestKotlin
+> Task :application:nagmedar-audio:javaPreCompileDebugUnitTest
+> Task :application:nagmedar-audio:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :application:nagmedar-audio:generateDebugUnitTestAssets UP-TO-DATE
+> Task :application:nagmedar-audio:mergeDebugUnitTestAssets
+> Task :application:nagmedar-audio:packageDebugUnitTestForUnitTest
+> Task :application:nagmedar-audio:generateDebugUnitTestConfig
+> Task :application:nagmedar-audio:processDebugUnitTestJavaRes
+
+> Task :application:nagmedar-audio:testDebugUnitTest
+test started: app.nagmedar.audio.DspResponseTest bandsBeyondTheOutputDoNothing
+test ended: app.nagmedar.audio.DspResponseTest bandsBeyondTheOutputDoNothing SUCCESS
+test started: app.nagmedar.audio.DspResponseTest theAutomaticPreamp
+test ended: app.nagmedar.audio.DspResponseTest theAutomaticPreamp SUCCESS
+test started: app.nagmedar.audio.DspResponseTest vlcsPresetsOnTwentyBands
+test ended: app.nagmedar.audio.DspResponseTest vlcsPresetsOnTwentyBands SUCCESS
+test started: app.nagmedar.audio.DspResponseTest theModelsResponse
+test ended: app.nagmedar.audio.DspResponseTest theModelsResponse SUCCESS
+test started: app.nagmedar.audio.DspResponseTest theGainsAndTheBypass
+test ended: app.nagmedar.audio.DspResponseTest theGainsAndTheBypass SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest autoEqImport
+test ended: app.nagmedar.audio.DspSettingsTest autoEqImport SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest identity
+test ended: app.nagmedar.audio.DspSettingsTest identity SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest flatForTheEngine
+test ended: app.nagmedar.audio.DspSettingsTest flatForTheEngine SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest jsonRoundTrip
+test ended: app.nagmedar.audio.DspSettingsTest jsonRoundTrip SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest theMeter
+test ended: app.nagmedar.audio.DspSettingsTest theMeter SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest graphicFrequenciesMatchTheEngine
+test ended: app.nagmedar.audio.DspSettingsTest graphicFrequenciesMatchTheEngine SUCCESS
+test started: app.nagmedar.audio.DspSettingsTest headphoneProfiles
+test ended: app.nagmedar.audio.DspSettingsTest headphoneProfiles SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest localMusicFilesAreTheEngines
+test ended: app.nagmedar.audio.MusicFormatsTest localMusicFilesAreTheEngines SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest streamsVideosAndUnknownsStayWithLibVlc
+test ended: app.nagmedar.audio.MusicFormatsTest streamsVideosAndUnknownsStayWithLibVlc SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest theExtension
+test ended: app.nagmedar.audio.MusicFormatsTest theExtension SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest trackerModulesAreTheEngines
+test ended: app.nagmedar.audio.MusicFormatsTest trackerModulesAreTheEngines SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest theSourceInfo
+test ended: app.nagmedar.audio.MusicFormatsTest theSourceInfo SUCCESS
+test started: app.nagmedar.audio.MusicFormatsTest theOutputFormat
+test ended: app.nagmedar.audio.MusicFormatsTest theOutputFormat SUCCESS
+test started: app.nagmedar.audio.ReplayGainTest loudnessOfTheEnginesArray
+test ended: app.nagmedar.audio.ReplayGainTest loudnessOfTheEnginesArray SUCCESS
+test started: app.nagmedar.audio.ReplayGainTest sourceInfoKnowsDsd
+
+> Task :application:nagmedar-session:testDebugUnitTest
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest anEmptySearchPlaysWhatPlayedLast SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest emptyServiceIsIdle
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest emptyServiceIsIdle SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest repeatShuffleAndSpeed
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest repeatShuffleAndSpeed SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest nextPreviousAndSeeksGoToTheService
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest nextPreviousAndSeeksGoToTheService SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest browseAndSearchRequestsReachTheService
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest browseAndSearchRequestsReachTheService SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest mirrorsQueueMetadataAndTransport
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest mirrorsQueueMetadataAndTransport SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest longQueuesArePublishedAsAWindowAroundTheCurrentItem
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest longQueuesArePublishedAsAWindowAroundTheCurrentItem SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest sessionHostPublishesACompatTokenAndCustomActions
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest sessionHostPublishesACompatTokenAndCustomActions SUCCESS
+test started: app.nagmedar.session.NagmedarSessionPlayerTest aStreamsNewTitleReachesTheControllersAfterInvalidate
+test ended: app.nagmedar.session.NagmedarSessionPlayerTest aStreamsNewTitleReachesTheControllersAfterInvalidate SUCCESS
+
+> Task :application:nagmedar-audio:testDebugUnitTest
+test ended: app.nagmedar.audio.ReplayGainTest sourceInfoKnowsDsd SUCCESS
+test started: app.nagmedar.audio.ReplayGainTest theDefaultsLeaveTheSamplesAlone
+test ended: app.nagmedar.audio.ReplayGainTest theDefaultsLeaveTheSamplesAlone SUCCESS
+test started: app.nagmedar.audio.ReplayGainTest displayNameOfAFile
+test ended: app.nagmedar.audio.ReplayGainTest displayNameOfAFile SUCCESS
+test started: app.nagmedar.audio.ReplayGainTest sourceInfoCarriesTheTags
+test ended: app.nagmedar.audio.ReplayGainTest sourceInfoCarriesTheTags SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest silenceIsTheFloor
+test ended: app.nagmedar.audio.ScopeAnalysisTest silenceIsTheFloor SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest theFftFollowsTheRate
+test ended: app.nagmedar.audio.ScopeAnalysisTest theFftFollowsTheRate SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest aSineIsItsBinAtItsLevel
+test ended: app.nagmedar.audio.ScopeAnalysisTest aSineIsItsBinAtItsLevel SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest theWaveStartsOnARisingZeroCrossing
+test ended: app.nagmedar.audio.ScopeAnalysisTest theWaveStartsOnARisingZeroCrossing SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest eachChannelHasItsLevels
+test ended: app.nagmedar.audio.ScopeAnalysisTest eachChannelHasItsLevels SUCCESS
+test started: app.nagmedar.audio.ScopeAnalysisTest theNativeLayoutComesBack
+test ended: app.nagmedar.audio.ScopeAnalysisTest theNativeLayoutComesBack SUCCESS
+test started: app.nagmedar.audio.SignalPathTest theStagesAndTheReason
+test ended: app.nagmedar.audio.SignalPathTest theStagesAndTheReason SUCCESS
+test started: app.nagmedar.audio.SignalPathTest whatIsNotAPath
+test ended: app.nagmedar.audio.SignalPathTest whatIsNotAPath SUCCESS
+test started: app.nagmedar.audio.SignalPathTest dsdAsDop
+test ended: app.nagmedar.audio.SignalPathTest dsdAsDop SUCCESS
+test started: app.nagmedar.audio.SignalPathTest bitPerfectOnTheUsbOutput
+test ended: app.nagmedar.audio.SignalPathTest bitPerfectOnTheUsbOutput SUCCESS
+test started: app.nagmedar.audio.TagLeftoversTest aFileChangedElsewhereSinceStaysAsItIs
+test ended: app.nagmedar.audio.TagLeftoversTest aFileChangedElsewhereSinceStaysAsItIs SUCCESS
+test started: app.nagmedar.audio.TagLeftoversTest aFileTheWriteLeftGetsItsCopyBack
+test ended: app.nagmedar.audio.TagLeftoversTest aFileTheWriteLeftGetsItsCopyBack SUCCESS
+test started: app.nagmedar.audio.TagLeftoversTest aKeptCopyTakesANameOfItsOwn
+test ended: app.nagmedar.audio.TagLeftoversTest aKeptCopyTakesANameOfItsOwn SUCCESS
+test started: app.nagmedar.audio.TagLeftoversTest aFileNotThereIsWaitedForAWeek
+test ended: app.nagmedar.audio.TagLeftoversTest aFileNotThereIsWaitedForAWeek SUCCESS
+test started: app.nagmedar.audio.TagLyricsTest plainAndSynced
+test ended: app.nagmedar.audio.TagLyricsTest plainAndSynced SUCCESS
+test started: app.nagmedar.audio.TagLyricsTest plainThatIsLrc
+test ended: app.nagmedar.audio.TagLyricsTest plainThatIsLrc SUCCESS
+test started: app.nagmedar.audio.TagLyricsTest noneIsNull
+test ended: app.nagmedar.audio.TagLyricsTest noneIsNull SUCCESS
+test started: app.nagmedar.audio.convert.AudioConverterTest stoppedOrFailed
+test ended: app.nagmedar.audio.convert.AudioConverterTest stoppedOrFailed SUCCESS
+test started: app.nagmedar.audio.convert.AudioConverterTest aFileWritten
+test ended: app.nagmedar.audio.convert.AudioConverterTest aFileWritten SUCCESS
+test started: app.nagmedar.audio.convert.AudioConverterTest tagLinesAsTheEngineReadsThem
+test ended: app.nagmedar.audio.convert.AudioConverterTest tagLinesAsTheEngineReadsThem SUCCESS
+test started: app.nagmedar.audio.convert.AudioConverterTest theCodecsFiles
+test ended: app.nagmedar.audio.convert.AudioConverterTest theCodecsFiles SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest theSheetBesideAFile
+test ended: app.nagmedar.audio.cue.CueSheetTest theSheetBesideAFile SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest theTrackUris
+test ended: app.nagmedar.audio.cue.CueSheetTest theTrackUris SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest theEncodings
+test ended: app.nagmedar.audio.cue.CueSheetTest theEncodings SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest theTracksAndTheirBounds
+test ended: app.nagmedar.audio.cue.CueSheetTest theTracksAndTheirBounds SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest whatIsNotASheet
+test ended: app.nagmedar.audio.cue.CueSheetTest whatIsNotASheet SUCCESS
+test started: app.nagmedar.audio.cue.CueSheetTest theTimes
+test ended: app.nagmedar.audio.cue.CueSheetTest theTimes SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest theDirectSoundWinsOverTheRoomsEchoes
+test ended: app.nagmedar.audio.latency.LatencyDspTest theDirectSoundWinsOverTheRoomsEchoes SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest theSignalIsAChirpTrain
+test ended: app.nagmedar.audio.latency.LatencyDspTest theSignalIsAChirpTrain SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest aCleanDelayComesBackExactly
+test ended: app.nagmedar.audio.latency.LatencyDspTest aCleanDelayComesBackExactly SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest silenceGivesNothing
+
+> Task :application:nagmedar-data:testDebugUnitTest
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest podcastsGetTheirTranscriptColumnsInTwentyOne SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyWithoutSomeOfTheTablesMigratesAllTheSame
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyWithoutSomeOfTheTablesMigratesAllTheSame SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest scheduleAndShowCrossFromFifteen
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest scheduleAndShowCrossFromFifteen SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyWithTheRemovedFeaturesRowsOpensAsTwentyTwo
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyWithTheRemovedFeaturesRowsOpensAsTwentyTwo SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest aPullRequestBuildsDatabaseEndsAsTwenty
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest aPullRequestBuildsDatabaseEndsAsTwenty SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest remuxJobsKeepTheirOrderFromNineteen
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest remuxJobsKeepTheirOrderFromNineteen SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest everyVersionMigratesToTheLatest
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest everyVersionMigratesToTheLatest SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest radioRecordingsAppearInFifteen
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest radioRecordingsAppearInFifteen SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyOneLosesOnlyTheRemovedFeaturesTables
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest aTwentyOneLosesOnlyTheRemovedFeaturesTables SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest podcastRowsSurviveTheirNewColumns
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest podcastRowsSurviveTheirNewColumns SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseMigrationTest radioStationsKeepTheirRowsFromSeven
+test ended: app.nagmedar.data.NagmedarDatabaseMigrationTest radioStationsKeepTheirRowsFromSeven SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest aVoteIsRememberedThroughPruning
+test ended: app.nagmedar.data.NagmedarDatabaseTest aVoteIsRememberedThroughPruning SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest theOldestTracksArePrunedFirstAndTheBinBeforeThem
+test ended: app.nagmedar.data.NagmedarDatabaseTest theOldestTracksArePrunedFirstAndTheBinBeforeThem SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest radioStationsAreSavedOncePerDirectoryEntry
+test ended: app.nagmedar.data.NagmedarDatabaseTest radioStationsAreSavedOncePerDirectoryEntry SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest mediaProbesAreCachedPerFile
+test ended: app.nagmedar.data.NagmedarDatabaseTest mediaProbesAreCachedPerFile SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest podcastEpisodesFollowTheirFeed
+test ended: app.nagmedar.data.NagmedarDatabaseTest podcastEpisodesFollowTheirFeed SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest anImportedStationKeptAgainIsTheSameRow
+test ended: app.nagmedar.data.NagmedarDatabaseTest anImportedStationKeptAgainIsTheSameRow SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest aFileIsRecordedOnceAndRenamingKeepsTheRow
+test ended: app.nagmedar.data.NagmedarDatabaseTest aFileIsRecordedOnceAndRenamingKeepsTheRow SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest subscriptionsAreCountedAndTheirNewEpisodesTold
+test ended: app.nagmedar.data.NagmedarDatabaseTest subscriptionsAreCountedAndTheirNewEpisodesTold SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest scrobblesWaitPerServiceOldestFirstAndOnlyOnce
+test ended: app.nagmedar.data.NagmedarDatabaseTest scrobblesWaitPerServiceOldestFirstAndOnlyOnce SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest networkServersAreKeptOncePerAddress
+test ended: app.nagmedar.data.NagmedarDatabaseTest networkServersAreKeptOncePerAddress SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest latencyProfilesArePerOutputDevice
+test ended: app.nagmedar.data.NagmedarDatabaseTest latencyProfilesArePerOutputDevice SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest androidAutosPodcastQueries
+test ended: app.nagmedar.data.NagmedarDatabaseTest androidAutosPodcastQueries SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest scheduledRecordingsAreSavedUpdatedAndDeleted
+test ended: app.nagmedar.data.NagmedarDatabaseTest scheduledRecordingsAreSavedUpdatedAndDeleted SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest musicProbesAreCachedPerFile
+test ended: app.nagmedar.data.NagmedarDatabaseTest musicProbesAreCachedPerFile SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest importedStationsAreThoseWithoutADirectoryId
+test ended: app.nagmedar.data.NagmedarDatabaseTest importedStationsAreThoseWithoutADirectoryId SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest aDirectoryStationReadAgainKeepsTheUsersMarks
+test ended: app.nagmedar.data.NagmedarDatabaseTest aDirectoryStationReadAgainKeepsTheUsersMarks SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest lyricsAreKeyedByTrackAndSource
+test ended: app.nagmedar.data.NagmedarDatabaseTest lyricsAreKeyedByTrackAndSource SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest recordedTracksAreListedBySessionAndTheBinIsLeftOut
+test ended: app.nagmedar.data.NagmedarDatabaseTest recordedTracksAreListedBySessionAndTheBinIsLeftOut SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest smartListsAreKeptInTheOrderTheyWereMade
+test ended: app.nagmedar.data.NagmedarDatabaseTest smartListsAreKeptInTheOrderTheyWereMade SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest anEpisodesOwnTranscriptAndTheShowsLanguageOutliveARefresh
+test ended: app.nagmedar.data.NagmedarDatabaseTest anEpisodesOwnTranscriptAndTheShowsLanguageOutliveARefresh SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest playsSkipsAndRatingsAddUpPerTrack
+test ended: app.nagmedar.data.NagmedarDatabaseTest playsSkipsAndRatingsAddUpPerTrack SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest forgettingAPlayedStationAndPruningTheUnused
+test ended: app.nagmedar.data.NagmedarDatabaseTest forgettingAPlayedStationAndPruningTheUnused SUCCESS
+test started: app.nagmedar.data.NagmedarDatabaseTest aBackupsRowsAreReadAndRestored
+test ended: app.nagmedar.data.NagmedarDatabaseTest aBackupsRowsAreReadAndRestored SUCCESS
+test started: app.nagmedar.data.RestoreMergeTest statisticsAreMerged
+test ended: app.nagmedar.data.RestoreMergeTest statisticsAreMerged SUCCESS
+
+> Task :application:vlc-android:kaptGenerateStubsDebugKotlin
+
+> Task :application:nagmedar-audio:testDebugUnitTest
+test ended: app.nagmedar.audio.latency.LatencyDspTest silenceGivesNothing SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest clippingDoesNotMoveIt
+test ended: app.nagmedar.audio.latency.LatencyDspTest clippingDoesNotMoveIt SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest aStrayDelayIsThrownOut
+test ended: app.nagmedar.audio.latency.LatencyDspTest aStrayDelayIsThrownOut SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest aDriftingRecorderClockStaysWithinAMillisecond
+test ended: app.nagmedar.audio.latency.LatencyDspTest aDriftingRecorderClockStaysWithinAMillisecond SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest theSearchWindowIsBounded
+test ended: app.nagmedar.audio.latency.LatencyDspTest theSearchWindowIsBounded SUCCESS
+test started: app.nagmedar.audio.latency.LatencyDspTest noiseOfTheSignalsOwnPowerDoesNotMoveIt
+test ended: app.nagmedar.audio.latency.LatencyDspTest noiseOfTheSignalsOwnPowerDoesNotMoveIt SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest aRendererChangeGivesTheDelayAgain
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest aRendererChangeGivesTheDelayAgain SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest theDevicesDelayGoesUnderTheFilesOwn
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest theDevicesDelayGoesUnderTheFilesOwn SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest devicesAreKnownByTypeNameAndAStableAddress
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest devicesAreKnownByTypeNameAndAStableAddress SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest theStepperSnapsToTensWithinTheRange
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest theStepperSnapsToTensWithinTheRange SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest theLastRemovableDeviceConnectedIsTheOutput
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest theLastRemovableDeviceConnectedIsTheOutput SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest aProfileIsFoundByItsDeviceWithOrWithoutTheAddress
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest aProfileIsFoundByItsDeviceWithOrWithoutTheAddress SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest theSystemsFirstReportIsNoOrder
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest theSystemsFirstReportIsNoOrder SUCCESS
+test started: app.nagmedar.audio.latency.LatencyProfilesTest theUsersDelayAndTheOutputsAreKeptApart
+test ended: app.nagmedar.audio.latency.LatencyProfilesTest theUsersDelayAndTheOutputsAreKeptApart SUCCESS
+
+> Task :application:vlc-android:kaptDebugKotlin
+/home/runner/work/vlc-android/vlc-android/application/vlc-android/build/tmp/kapt3/stubs/debug/org/videolan/vlc/util/KextensionsKt.java:95: warning: Application namespace for attribute app:asyncText will be ignored.
+    public static final void asyncText(@org.jetbrains.annotations.NotNull()
+                             ^
+/home/runner/work/vlc-android/vlc-android/application/vlc-android/build/tmp/kapt3/stubs/debug/org/videolan/vlc/util/KextensionsKt.java:101: warning: Application namespace for attribute app:asyncText will be ignored.
+    public static final void asyncTextItem(@org.jetbrains.annotations.NotNull()
+                             ^
+/home/runner/work/vlc-android/vlc-android/application/vlc-android/build/tmp/kapt3/stubs/debug/org/videolan/vlc/util/KextensionsKt.java:115: warning: Application namespace for attribute app:browserDescription will be ignored.
+    public static final void browserDescription(@org.jetbrains.annotations.NotNull()
+                             ^
+/home/runner/work/vlc-android/vlc-android/application/vlc-android/build/tmp/kapt3/stubs/debug/org/videolan/vlc/util/KextensionsKt.java:162: warning: Application namespace for attribute app:presenceDescription will be ignored.
+    public static final void presenceDescription(@org.jetbrains.annotations.NotNull()
+                             ^
+
+> Task :application:moviepedia:dataBindingMergeDependencyArtifactsDebug
+> Task :application:remote-access-server:dataBindingMergeDependencyArtifactsDebug
+> Task :application:moviepedia:dataBindingGenBaseClassesDebug
+> Task :application:remote-access-server:dataBindingGenBaseClassesDebug
+
+> Task :application:vlc-android:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:92:34 'static fun getDefaultAdapter(): BluetoothAdapter!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:306:30 'class Playlists : Any, BaseColumns, MediaStore.Audio.PlaylistsColumns' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:306:40 'static field ENTRY_CONTENT_TYPE: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:317:53 'static field EXTRA_MEDIA_PLAYLIST: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1060:41 'static field FLAG_HANDLES_MEDIA_BUTTONS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1060:90 'static field FLAG_HANDLES_TRANSPORT_CONTROLS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1078:54 'static field FLAG_HANDLES_TRANSPORT_CONTROLS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:400:64 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:401:65 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:402:62 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:422:171 'static field BEHAVIOR_SHOW_BARS_BY_TOUCH: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:776:40 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AuthorsActivity.kt:62:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:229:33 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:232:20 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:238:75 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseFragment.kt:62:9 'fun setHasOptionsMenu(p0: Boolean): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseFragment.kt:138:37 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:163:17 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:169:17 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:185:33 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:185:62 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:257:96 'val position: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:46:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:199:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:645:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HistoryFragment.kt:141:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HistoryFragment.kt:143:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/InfoActivity.kt:162:47 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:63:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:129:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:131:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:136:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:138:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:140:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:142:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:147:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:149:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:151:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:125:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:142:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:151:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:161:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:170:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:191:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/PlaylistFragment.kt:35:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/PlaylistFragment.kt:129:46 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SearchActivity.kt:60:65 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:142:59 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:148:13 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:154:58 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumTracksAdapter.kt:35:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumTracksAdapter.kt:63:40 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumTracksAdapter.kt:104:43 'static fun getActionMasked(p0: MotionEvent!): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:34:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:164:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:169:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:342:73 Unchecked cast of 'MedialibraryProvider<out MediaLibraryItem>' to 'MedialibraryProvider<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:39:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:40:8 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:85:5 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:259:53 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:259:96 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:309:43 'static fun getActionMasked(p0: MotionEvent!): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:37:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:288:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:292:87 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:473:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:492:73 Unchecked cast of 'MedialibraryProvider<out MediaLibraryItem>' to 'MedialibraryProvider<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:210:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:214:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:264:9 'var userVisibleHint: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:619:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:899:81 'fun vibrate(p0: Long): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayerAnimator.kt:125:36 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlaylistTipsDelegate.kt:393:34 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlaylistTipsDelegate.kt:393:65 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlaylistTipsDelegate.kt:393:102 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioTipsDelegate.kt:212:32 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioTipsDelegate.kt:212:63 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioTipsDelegate.kt:212:100 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/BaseBrowserFragment.kt:798:41 Check for instance is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:130:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:133:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:153:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:188:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:189:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:197:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:257:32 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:139:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:140:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:149:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:179:27 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:225:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:226:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:235:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:275:30 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:277:34 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:74:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:76:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:89:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/StorageBrowserFragment.kt:110:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/StorageFragmentDelegate.kt:62:28 'constructor(): Handler' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/AboutVersionDialog.kt:100:32 'static field GET_SIGNATURES: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/AboutVersionDialog.kt:101:15 'field signatures: Array<(out) Signature!>?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/ContextSheet.kt:129:54 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/PickTimeFragment.kt:160:34 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:164:48 'fun getSerializable(p0: String?): Serializable?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:164:83 Unchecked cast of 'Serializable?' to 'ArrayList<Playlist>?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:231:69 Unchecked cast of 'List<MediaLibraryItem>' to 'ArrayList<Playlist>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/UpdateDialog.kt:94:21 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/UpdateDialog.kt:122:19 'static field CPU_ABI: String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/VLCBottomSheetDialogFragment.kt:48:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/VlcDialog.kt:52:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/AudioUtil.kt:105:48 'static fun getContentUriForPath(p0: String): Uri?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/BitmapUtil.kt:229:49 'static fun insertImage(p0: ContentResolver!, p1: String!, p2: String!, p3: String!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/BookmarkListDelegate.kt:86:35 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/DefaultPlaybackAction.kt:40:34 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/DefaultPlaybackAction.kt:72:43 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FeedbackUtil.kt:194:40 'fun getInstallerPackageName(p0: String): String?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FloatingActionButtonBehavior.kt:92:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FloatingActionButtonBehavior.kt:93:15 'fun onNestedScroll(p0: CoordinatorLayout, p1: FloatingActionButton, p2: View, p3: Int, p4: Int, p5: Int, p6: Int, p7: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:106:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:109:19 'fun onStopNestedScroll(p0: CoordinatorLayout, p1: V & Any, p2: View): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:126:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:129:19 'fun onNestedPreScroll(p0: CoordinatorLayout, p1: V & Any, p2: View, p3: Int, p4: Int, p5: IntArray): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:40:8 'class Allocation : BaseObj' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:41:8 'class Element : BaseObj' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:42:8 'class RSInvalidStateException : RSRuntimeException' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:43:8 'class RenderScript : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:44:8 'class ScriptIntrinsicBlur : ScriptIntrinsic' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:540:37 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:911:47 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:912:32 'class Fragment : Any, ComponentCallbacks2, View.OnCreateContextMenuListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:912:59 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:1041:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/VectorDrawableUtil.kt:399:13 Expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/VectorDrawableUtil.kt:401:13 Expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/BaseHeadlessFragment.kt:40:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/BaseHeadlessFragment.kt:44:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:59:29 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:72:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:74:20 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:45:21 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:61:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:62:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingScanningFragment.kt:43:22 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingThemeFragment.kt:67:145 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingViewModel.kt:13:127 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/BasePreferenceFragment.kt:68:28 'fun setTargetFragment(p0: Fragment?, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/BasePreferenceFragment.kt:74:20 'fun setTargetFragment(p0: Fragment?, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/search/PreferenceParser.kt:465:96 Unchecked cast of 'Any' to 'ArrayList<String>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/AccessibleSeekBar.kt:21:150 'static fun obtain(): AccessibilityEvent!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/FastScroller.kt:227:63 'fun onDetachedFromWindow(p0: RecyclerView!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/FastScroller.kt:391:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/NumberPickerPreference.kt:61:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/MediaUtils.kt:75:41 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/MediaUtils.kt:440:37 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlayerController.kt:37:68 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlaylistManager.kt:1125:27 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:252:22 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:256:22 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:453:68 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/FileBrowserProvider.kt:168:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/NetworkProvider.kt:97:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/medialibrary/MedialibraryProvider.kt:28:8 'class PositionalDataSource<T : Any> : DataSource<Int, T>' is deprecated. PositionalDataSource is deprecated and has been replaced by PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/medialibrary/MedialibraryProvider.kt:82:78 'fun <Key : Any, Value : Any> DataSource.Factory<Key, Value>.toLiveData(config: PagedList.Config, initialLoadKey: Key? = ..., boundaryCallback: PagedList.BoundaryCallback<Value>? = ..., fetchExecutor: Executor = ...): LiveData<PagedList<Value>>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/medialibrary/MedialibraryProvider.kt:185:32 'class PositionalDataSource<T : Any> : DataSource<Int, T>' is deprecated. PositionalDataSource is deprecated and has been replaced by PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/AutoUpdate.kt:89:23 'static field CPU_ABI: String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Browserutils.kt:63:37 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/FeatureFlagManager.kt:51:52 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/FeatureFlagManager.kt:51:78 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/FlagSet.kt:50:24 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'Array<(out) T! (of class FlagSet<T : Enum<T>, Flag>)>?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:120:32 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:334:52 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:334:67 'fun getMetrics(p0: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:339:52 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:339:67 'fun getMetrics(p0: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:423:80 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/LocaleUtil.kt:82:29 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Permissions.kt:92:29 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:65 'static fun createVideoThumbnail(p0: String, p1: Int): Bitmap?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:113 'class Thumbnails : Any, BaseColumns' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:124 'static field MINI_KIND: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/VersionMigration.kt:210:108 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/BaseModel.kt:73:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+
+> Task :application:vlc-android:compileDebugJavaWithJavac
+> Task :application:vlc-android:processDebugJavaRes
+> Task :application:vlc-android:bundleLibCompileToJarDebug
+> Task :application:vlc-android:bundleLibRuntimeToJarDebug
+
+> Task :application:moviepedia:kspDebugKotlin
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/models/MediaMetadata.kt:39: show_id column references a foreign key but it is not part of an index. This may trigger full table scans whenever parent table is modified so you are highly advised to create an index that covers this column.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/models/MediaMetadata.kt:130: personId column references a foreign key but it is not part of an index. This may trigger full table scans whenever parent table is modified so you are highly advised to create an index that covers this column.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/models/MediaMetadata.kt:171: media_id column references a foreign key but it is not part of an index. This may trigger full table scans whenever parent table is modified so you are highly advised to create an index that covers this column.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaPersonJoinDao.kt:56: The query returns some columns [mediaId, personId, type] which are not used by org.videolan.moviepedia.database.models.Person. You can use @ColumnInfo annotation on the fields to specify the mapping. You can annotate the method with @RewriteQueriesToDropUnusedColumns to direct Room to rewrite your query to avoid fetching unused columns.  You can suppress this warning by annotating the method with @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH). Columns returned by the query: moviepedia_id, name, image, mediaId, personId, type.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaPersonJoinDao.kt:64: The query returns some columns [mediaId, personId, type] which are not used by org.videolan.moviepedia.database.models.Person. You can use @ColumnInfo annotation on the fields to specify the mapping. You can annotate the method with @RewriteQueriesToDropUnusedColumns to direct Room to rewrite your query to avoid fetching unused columns.  You can suppress this warning by annotating the method with @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH). Columns returned by the query: moviepedia_id, name, image, mediaId, personId, type.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:39: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:42: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:45: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:48: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:51: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:54: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:66: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:69: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:72: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:75: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:78: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+w: [ksp] /home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/database/MediaMetadataDataFullDao.kt:81: The return value includes a POJO with a @Relation. It is usually desired to annotate this method with @Transaction to avoid possibility of inconsistent results between the POJO and its relations. See https://developer.android.com/reference/androidx/room/Transaction.html for details.
+
+> Task :application:moviepedia:kaptGenerateStubsDebugKotlin
+
+> Task :application:remote-access-server:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:63:36 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ObsoleteCoroutinesApi' or '@OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:64:23 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ObsoleteCoroutinesApi' or '@OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:74:48 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/TranslationMapping.kt:52:30 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:252:16 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'DateFormat?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:256:22 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'DateFormat?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:256:42 Java type mismatch: inferred type is 'Date?', but 'Date' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/ssl/SecretGenerator.kt:30:8 'class KeyPairGeneratorSpec : Any, AlgorithmParameterSpec' is deprecated. Deprecated in Java.
+
+> Task :application:moviepedia:kaptDebugKotlin
+> Task :application:remote-access-server:compileDebugJavaWithJavac
+> Task :application:television:dataBindingMergeDependencyArtifactsDebug
+> Task :application:television:dataBindingGenBaseClassesDebug
+> Task :application:remote-access-server:bundleLibCompileToJarDebug
+> Task :application:remote-access-server:processDebugJavaRes
+> Task :application:remote-access-server:bundleLibRuntimeToJarDebug
+
+> Task :application:moviepedia:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/models/identify/IdentifyBatchResult.kt:31:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/models/identify/IdentifyBatchResult.kt:33:9 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/models/identify/IdentifyResult.kt:141:80 Java type mismatch: inferred type is 'Date?', but 'Date' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingMovieProvider.kt:30:8 'class LivePagedListBuilder<Key : Any, Value : Any> : Any' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingMovieProvider.kt:31:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingMovieProvider.kt:38:38 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingMovieProvider.kt:41:31 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingMovieProvider.kt:44:9 'constructor<Key : Any, Value : Any>(dataSourceFactory: DataSource.Factory<Key, Value>, config: PagedList.Config): LivePagedListBuilder<Key, Value>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingProvider.kt:31:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingProvider.kt:40:38 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingProvider.kt:68:46 'val dataSource: DataSource<*, MediaMetadataWithImages>' is deprecated. DataSource is deprecated and has been replaced by PagingSource. PagedList offers indirect ways of controlling fetch ('loadAround()', 'retry()') so that you should not need to access the DataSource/PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingProvider.kt:70:31 'val dataSource: DataSource<*, MediaMetadataWithImages>' is deprecated. DataSource is deprecated and has been replaced by PagingSource. PagedList offers indirect ways of controlling fetch ('loadAround()', 'retry()') so that you should not need to access the DataSource/PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/provider/MediaScrapingProvider.kt:72:30 'val dataSource: DataSource<*, MediaMetadataWithImages>' is deprecated. DataSource is deprecated and has been replaced by PagingSource. PagedList offers indirect ways of controlling fetch ('loadAround()', 'retry()') so that you should not need to access the DataSource/PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/repository/MoviepediaApiRepository.kt:42:76 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/repository/MoviepediaApiRepository.kt:47:43 The corresponding parameter in the supertype 'MediaResolverApi' is named 'filesToIndex'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/moviepedia/src/main/java/org/videolan/moviepedia/repository/MoviepediaApiRepository.kt:50:81 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+
+> Task :application:moviepedia:compileDebugJavaWithJavac
+> Task :application:moviepedia:bundleLibCompileToJarDebug
+> Task :application:television:kspDebugKotlin SKIPPED
+> Task :application:moviepedia:processDebugJavaRes
+> Task :application:moviepedia:bundleLibRuntimeToJarDebug
+> Task :application:nagmedar-ui:compileDebugKotlin
+
+> Task :application:television:compileDebugKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MainTvFragment.kt:402:45 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaItemDetailsFragment.kt:223:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaItemDetailsFragment.kt:245:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaItemDetailsFragment.kt:424:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvFragment.kt:126:32 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvFragment.kt:155:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvItemAdapter.kt:37:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvItemAdapter.kt:38:8 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvItemAdapter.kt:61:5 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvItemAdapter.kt:127:26 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvItemAdapter.kt:129:42 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvshowDetailsFragment.kt:170:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvshowDetailsFragment.kt:183:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvshowDetailsFragment.kt:300:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaScrapingTvshowDetailsFragment.kt:308:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaTvItemAdapter.kt:14:8 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaTvItemAdapter.kt:15:8 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaTvItemAdapter.kt:42:155 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaTvItemAdapter.kt:107:26 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/MediaTvItemAdapter.kt:109:42 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/SearchFragment.kt:123:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/audioplayer/AudioPlayerActivity.kt:253:53 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/BaseBrowserTvFragment.kt:371:30 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/BaseBrowserTvFragment.kt:373:34 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/BaseBrowserTvFragment.kt:438:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/FileBrowserTvFragment.kt:232:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/FileBrowserTvFragment.kt:233:15 'fun onActivityCreated(p0: Bundle?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/MediaBrowserTvFragment.kt:101:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/MediaScrapingBrowserTvFragment.kt:117:36 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/browser/MediaScrapingBrowserTvFragment.kt:135:36 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/details/MediaListActivity.kt:88:17 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:31:8 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:44:45 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:45:64 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:47:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:48:9 'fun addPreferencesFromResource(p0: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:51:74 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:54:17 'fun setTargetFragment(p0: Fragment!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:55:17 'fun show(p0: FragmentManager!, p1: String!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:55:50 'val fragmentManager: FragmentManager!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:60:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/BasePreferenceFragment.kt:61:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/CustomEditTextPreferenceDialogFragment.kt:31:8 'class EditTextPreferenceDialogFragment : PreferenceDialogFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/CustomEditTextPreferenceDialogFragment.kt:33:48 'constructor(): EditTextPreferenceDialogFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/CustomEditTextPreferenceDialogFragment.kt:33:48 'class EditTextPreferenceDialogFragment : PreferenceDialogFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/CustomEditTextPreferenceDialogFragment.kt:41:17 'var arguments: Bundle!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/CustomEditTextPreferenceDialogFragment.kt:41:38 'static field ARG_KEY: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesActivity.kt:52:13 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesActivity.kt:72:18 'val fragmentManager: FragmentManager!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesActivity.kt:72:34 'fun popBackStackImmediate(): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:115:24 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:117:37 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:118:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:122:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:133:33 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:134:15 'fun onDisplayPreferenceDialog(p0: Preference): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:139:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:144:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:147:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:148:19 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:153:17 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:158:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:160:35 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:161:37 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:178:70 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:178:128 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:178:184 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:179:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:182:42 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:199:74 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:199:124 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:199:181 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:200:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:201:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:205:60 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:206:21 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:214:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:224:37 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:225:43 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:226:42 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:229:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:234:29 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:234:57 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:239:37 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:254:37 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:270:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:274:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:276:47 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:280:44 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:280:54 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:290:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:292:44 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:300:40 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:300:50 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:308:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:309:60 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:315:47 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:317:17 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:321:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:333:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:337:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:340:40 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:352:38 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:359:58 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:362:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:363:52 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:366:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:367:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:378:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAudio.kt:92:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAudio.kt:152:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:70:10 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:71:49 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:73:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:80:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:89:63 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:96:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:97:23 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:103:25 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:109:21 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:110:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:115:22 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:116:60 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:117:21 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:119:30 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:122:17 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:127:39 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:130:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:132:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:142:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:151:38 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:157:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:162:58 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:165:27 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:173:21 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:174:21 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:55:22 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:57:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:58:59 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:59:26 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:68:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:73:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:79:23 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:80:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:83:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:84:50 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:87:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:93:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:97:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:47:14 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:48:52 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:49:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:55:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:60:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:63:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:67:56 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:68:17 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:71:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:80:36 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:90:81 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:67:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:72:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:77:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:78:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:79:9 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:84:73 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:85:22 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:86:23 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:97:49 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:100:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:107:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:116:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:118:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:125:17 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:74:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:78:20 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:86:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:87:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:91:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:92:15 'fun onResume(): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:93:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:95:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:96:79 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:97:78 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:98:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:105:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:110:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:118:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:129:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:138:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:145:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:151:35 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:156:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:159:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:161:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:167:44 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:172:40 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:176:93 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:177:18 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:5:8 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:6:8 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:16:50 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:18:52 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:17 'static fun instantiate(p0: Context!, p1: String!, p2: Bundle?): Fragment!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:29 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:20:11 'fun setTargetFragment(p0: Fragment!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:18 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:45 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:79:49 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:89:61 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:100:65 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/viewmodel/MainTvModel.kt:141:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+
+> Task :application:television:compileDebugJavaWithJavac
+> Task :application:television:bundleLibCompileToJarDebug
+> Task :application:television:processDebugJavaRes
+> Task :application:app:dataBindingMergeDependencyArtifactsDebug
+> Task :application:television:bundleLibRuntimeToJarDebug
+> Task :application:app:dataBindingGenBaseClassesDebug
+
+> Task :application:nagmedar-ui:compileDebugKotlin FAILED
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:291:9 Overload resolution ambiguity between candidates:
+fun fresh(): AppCarData.Snapshot?
+suspend fun fresh(): List<PodcastEpisode>
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:291:18 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:291:18 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> T.let(block: (T) -> R): R
+    [R|Contract description]
+     <
+        CallsInPlace(block, EXACTLY_ONCE)
+    >
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:291:22 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:293:13 Overload resolution ambiguity between candidates:
+fun fresh(): AppCarData.Snapshot?
+suspend fun fresh(): List<PodcastEpisode>
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:293:22 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:293:22 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> T.let(block: (T) -> R): R
+    [R|Contract description]
+     <
+        CallsInPlace(block, EXACTLY_ONCE)
+    >
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:293:26 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:299:13 Conflicting overloads:
+suspend fun fresh(): List<PodcastEpisode>
+e: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/auto/AppCarCatalog.kt:353:22 Conflicting overloads:
+fun fresh(): AppCarData.Snapshot?
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':application:nagmedar-ui:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 4m 21s
+382 actionable tasks: 382 executed
