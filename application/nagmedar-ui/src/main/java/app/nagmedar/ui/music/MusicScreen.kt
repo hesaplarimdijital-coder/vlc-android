@@ -54,6 +54,7 @@ import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
@@ -70,6 +71,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.convert.ConvertHost
 import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
@@ -751,6 +753,7 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
     val reduced = NagTheme.motion.reduced
+    val compact = currentWidthClass() == WidthClass.Compact
     LaunchedEffect(state.reveal, groups) {
         val key = state.reveal ?: return@LaunchedEffect
         val index = groups.indexOfFirst { it.key == key }
@@ -763,8 +766,10 @@ private fun GroupList(groups: List<MusicGroup>, state: MusicBrowserState, action
         items(groups, key = { it.key }) { group ->
             // the group shown beside, the first one on a wide window until another is opened
             // the menu plays the group's tracks, as the table's rows do one track
-            ContextMenuArea(entries = { groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
-                GroupRow(group, state.view, selected = group.key == openKey) { state.group = group.key }
+            val menu = { groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) }
+            ContextMenuArea(entries = menu, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                // a phone's album, artist or folder ends with "⋯": the same menu (Desktop Kit 1.0)
+                GroupRow(group, state.view, selected = group.key == openKey, menu = menu.takeIf { compact }) { state.group = group.key }
             }
         }
     }
@@ -791,7 +796,7 @@ private fun groupMenu(res: android.content.res.Resources, group: MusicGroup, act
 }
 
 @Composable
-private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOpen: () -> Unit) {
+private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, menu: (() -> List<MenuEntry>)? = null, onOpen: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -799,32 +804,34 @@ private fun GroupRow(group: MusicGroup, view: MusicView, selected: Boolean, onOp
     val shape = RoundedCornerShape(dimens.radiusControl)
     // a folder by its last name; its path in the second line
     val title = if (view == MusicView.Folders) group.title?.substringAfterLast('/') ?: groupTitle(group, view) else groupTitle(group, view)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .heightIn(min = dimens.minTarget.coerceAtLeast(48.dp))
-            .focusRing(state, shape)
-            .background(stateBackground(state, selected), shape)
-            .semantics { this.selected = selected }
-            .nagClickable(interaction, onOpen)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            title,
-            style = NagTheme.type.bodyStrong,
-            color = if (selected) colors.onSelection else if (group.title == null) colors.textSecondary else colors.text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            groupLine(group, view),
-            style = NagTheme.type.labelSmall,
-            color = if (selected) colors.onSelection else colors.textTertiary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            Modifier
+                .weight(1f)
+                .heightIn(min = dimens.minTarget.coerceAtLeast(48.dp))
+                .focusRing(state, shape)
+                .background(stateBackground(state, selected), shape)
+                .semantics { this.selected = selected }
+                .nagClickable(interaction, onOpen)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                title,
+                style = NagTheme.type.bodyStrong,
+                color = if (selected) colors.onSelection else if (group.title == null) colors.textSecondary else colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                groupLine(group, view),
+                style = NagTheme.type.labelSmall,
+                color = if (selected) colors.onSelection else colors.textTertiary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (menu != null) MoreButton(groups = { menu().toActionGroups() }, title = title)
     }
 }
 
@@ -914,6 +921,9 @@ private fun TrackPane(group: MusicGroup, shown: List<Track>, state: MusicBrowser
             },
             headerMenu = if (compact) null else ({ columnMenu(state, labels) }),
             headerMenuLabel = columnsLabel,
+            // a phone's rows end with "⋯": the same menu as the long press, as a sheet (Desktop Kit 1.0)
+            rowMoreButton = compact,
+            rowMoreTitle = { it.title },
             // the last rows rest clear of the phone's bars (Desktop Kit 1.0)
             contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
         )
