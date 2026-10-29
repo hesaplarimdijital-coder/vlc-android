@@ -360,10 +360,11 @@ fun PhonePlayer(
                     val column = (maxWidth * WIDE_CONTROLS_SHARE).coerceIn(WIDE_CONTROLS_MIN, WIDE_CONTROLS_MAX)
                     val gap = (maxWidth * WIDE_GAP_SHARE).coerceIn(dimens.gapXl, WIDE_GAP_MAX)
                     val side = minOf(maxHeight, maxWidth - column - gap, WIDE_ARTWORK_MAX).coerceAtLeast(0.dp)
+                    val high = maxHeight
                     Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
                         Stage(parts, Modifier.size(side))
                         // a window too low for all of it scrolls
-                        Column(Modifier.width(column).heightIn(max = maxHeight).verticalScroll(rememberScrollState()).testTag("player-controls")) {
+                        Column(Modifier.width(column).heightIn(max = high).verticalScroll(rememberScrollState()).testTag("player-controls")) {
                             parts.lyricLine?.invoke(Modifier.fillMaxWidth())
                             TitleRow(parts)
                             Spacer(Modifier.height(dimens.gapL))
