@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MusicScreenshotTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:05:46.850Z" hostname="runnervmnwato" time="1.424">
+  <properties/>
+  <testcase name="phonePlayer" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.187"/>
+  <testcase name="ratingWindow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.088"/>
+  <testcase name="lyricsDex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.158"/>
+  <testcase name="phonePlayerNarrow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.19"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.152"/>
+  <testcase name="phonePlayerOledEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.131"/>
+  <testcase name="phonePlayerSideways" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.138"/>
+  <testcase name="phonePlayerLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.138"/>
+  <testcase name="tabletGenres" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.111"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.13"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

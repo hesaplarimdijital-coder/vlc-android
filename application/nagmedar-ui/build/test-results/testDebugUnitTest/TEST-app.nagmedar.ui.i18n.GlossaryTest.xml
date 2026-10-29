@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.i18n.GlossaryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:05:03.671Z" hostname="runnervmnwato" time="1.116">
+  <properties/>
+  <testcase name="turkishTextsUseTheTerms" classname="app.nagmedar.ui.i18n.GlossaryTest" time="0.825"/>
+  <testcase name="theGlossaryIsRead" classname="app.nagmedar.ui.i18n.GlossaryTest" time="0.004"/>
+  <testcase name="englishTextsUseTheTerms" classname="app.nagmedar.ui.i18n.GlossaryTest" time="0.285"/>
+  <testcase name="aVariantIsFoundWithItsSuffixes" classname="app.nagmedar.ui.i18n.GlossaryTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

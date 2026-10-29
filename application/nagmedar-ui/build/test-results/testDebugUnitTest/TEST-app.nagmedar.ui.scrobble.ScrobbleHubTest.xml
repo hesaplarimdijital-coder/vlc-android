@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleHubTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:06:07.697Z" hostname="runnervmnwato" time="0.097">
+  <properties/>
+  <testcase name="anOldQueueIsSentWhenTheServiceStarts" classname="app.nagmedar.ui.scrobble.ScrobbleHubTest" time="0.02"/>
+  <testcase name="withNoServiceOnTheTrackIsNotEvenLookedAt" classname="app.nagmedar.ui.scrobble.ScrobbleHubTest" time="0.015"/>
+  <testcase name="theStartIsToldToTheServicesThatSendAndNotToAHeldOne" classname="app.nagmedar.ui.scrobble.ScrobbleHubTest" time="0.022"/>
+  <testcase name="aPlayThatCountsIsQueuedForEveryServiceThatIsOn" classname="app.nagmedar.ui.scrobble.ScrobbleHubTest" time="0.02"/>
+  <testcase name="aTrackNotScrobbledIsLeftAlone" classname="app.nagmedar.ui.scrobble.ScrobbleHubTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

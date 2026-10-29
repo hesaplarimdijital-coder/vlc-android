@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastCoverFinderTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:05:21.410Z" hostname="runnervmnwato" time="0.087">
+  <properties/>
+  <testcase name="noSuchImageIsAMiss" classname="app.nagmedar.ui.podcast.PodcastCoverFinderTest" time="0.023"/>
+  <testcase name="fetchedOnceThenKept" classname="app.nagmedar.ui.podcast.PodcastCoverFinderTest" time="0.02"/>
+  <testcase name="whatIsNoImageIsNotKeptAndNotAskedAgainForAWeek" classname="app.nagmedar.ui.podcast.PodcastCoverFinderTest" time="0.02"/>
+  <testcase name="aNetworkFailureIsNotRemembered" classname="app.nagmedar.ui.podcast.PodcastCoverFinderTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

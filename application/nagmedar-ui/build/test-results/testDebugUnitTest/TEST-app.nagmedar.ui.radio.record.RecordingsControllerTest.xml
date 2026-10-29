@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.record.RecordingsControllerTest" tests="27" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:05:30.535Z" hostname="runnervmnwato" time="0.484">
+  <properties/>
+  <testcase name="schedulesThatOverlapAreSaidInTheEditor" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.028"/>
+  <testcase name="aRecordingOfCompleteTracksHasNothingPartialToDelete" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.014"/>
+  <testcase name="trackWhoseFileIsGoneCanBeTakenOutOfTheList" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.015"/>
+  <testcase name="theRecordingsGoingOnAreFollowed" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.015"/>
+  <testcase name="recordingAStationAsksTheControl" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.019"/>
+  <testcase name="theTabWhenShownPurgesAndCatchesUpOnce" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.021"/>
+  <testcase name="aFailingDatabaseIsSaidNotThrown" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.019"/>
+  <testcase name="keepingOnlyCompleteTracksDeletesThePartialOnes" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.018"/>
+  <testcase name="aDraftWithoutAStationIsNotReady" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.02"/>
+  <testcase name="aScheduleRunningNowIsMarked" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.019"/>
+  <testcase name="editingASchedulesDoesNotMeetItself" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.021"/>
+  <testcase name="aDeletedScheduleIsTakenBackWithItsAlarm" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.026"/>
+  <testcase name="aScheduleCanBeSwitchedOffAndOn" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.023"/>
+  <testcase name="theEditorOffersTheNextFullHour" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.022"/>
+  <testcase name="theRoomLeftSaysWhenRecordingIsHeldBack" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.019"/>
+  <testcase name="playingSkipsTracksWhoseFilesAreGone" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.031"/>
+  <testcase name="tracksAreGroupedByStationAndRecordingNewestFirst" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.014"/>
+  <testcase name="savingASchedulePutsItInTheDatabaseAndSetsItsAlarm" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.015"/>
+  <testcase name="aWeeklyScheduleKeepsItsWeekday" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.013"/>
+  <testcase name="whatTheControlSaysOfARefusedStartIsPassedOn" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.015"/>
+  <testcase name="anEndTimeBecomesALengthAcrossMidnight" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.013"/>
+  <testcase name="theFolderAndTheAlarmPermissionAreReadAgain" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.012"/>
+  <testcase name="anEmptyOrRefusedRenameIsSaid" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.015"/>
+  <testcase name="nothingRecordedYetIsEmptyNotLoading" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.013"/>
+  <testcase name="aDeletedTrackLeavesTheListAndComesBackWithUndo" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.013"/>
+  <testcase name="aOneOffForAnHourThatPassedIsForTomorrow" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.016"/>
+  <testcase name="renamingKeepsTheExtensionAndCleansTheName" classname="app.nagmedar.ui.radio.record.RecordingsControllerTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

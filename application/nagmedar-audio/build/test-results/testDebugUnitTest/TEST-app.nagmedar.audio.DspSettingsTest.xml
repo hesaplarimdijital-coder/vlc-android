@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.DspSettingsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-29T00:01:28.083Z" hostname="runnervmnwato" time="9.673">
+  <properties/>
+  <testcase name="autoEqImport" classname="app.nagmedar.audio.DspSettingsTest" time="8.854"/>
+  <testcase name="identity" classname="app.nagmedar.audio.DspSettingsTest" time="0.119"/>
+  <testcase name="flatForTheEngine" classname="app.nagmedar.audio.DspSettingsTest" time="0.132"/>
+  <testcase name="jsonRoundTrip" classname="app.nagmedar.audio.DspSettingsTest" time="0.163"/>
+  <testcase name="theMeter" classname="app.nagmedar.audio.DspSettingsTest" time="0.175"/>
+  <testcase name="graphicFrequenciesMatchTheEngine" classname="app.nagmedar.audio.DspSettingsTest" time="0.11"/>
+  <testcase name="headphoneProfiles" classname="app.nagmedar.audio.DspSettingsTest" time="0.115"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
