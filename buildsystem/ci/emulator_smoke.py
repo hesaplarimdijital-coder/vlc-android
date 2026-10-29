@@ -1081,20 +1081,32 @@ class Smoke:
         self.combo(113, 37)
         nodes = self.step("Ctrl+I (show the inspector)", wait=1.2)
         self.check("Ctrl+I shows the inspector again", bool(self.by_id(nodes, "inspector")))
+        # the table settled after the inspector came back; then a long press on the second title
+        nodes = self.nodes(self.settle(1.0))
         header = self.column_header(nodes)
         if self.check("the table's column titles", bool(header), ", ".join(n.text for n in header)):
-            cell = sorted(header, key=lambda n: n.b[0])[1]
-            x, y = cell.center
-            nodes = self.step("Long press on the column title %s" % cell.text, lambda: self.sh("input swipe %d %d %d %d 1200" % (x, y, x, y)), wait=1.2)
             # the chooser lists every column with its check, those the table does not show among them
             # (its last rows, "Reset columns" with them, may be below the screen's edge)
             hidden = (s["nag_column_album_artist"], s["nag_column_composer"])
-            opened = all(x in self.texts(nodes) for x in hidden)
-            self.check("the column chooser opens", opened)
+            opened, other = False, []
+            for attempt in range(2):
+                cell = sorted(header, key=lambda n: n.b[0])[1]
+                x, y = cell.center
+                nodes = self.step("Long press on the column title %s" % cell.text, lambda: self.sh("input swipe %d %d %d %d 1200" % (x, y, x, y)), wait=1.2)
+                opened = all(h in self.texts(nodes) for h in hidden)
+                if opened:
+                    break
+                # what opened instead (a row's menu?) is closed, and the titles read again
+                instead = "a track's menu" if s["nag_add_to_queue"] in self.texts(nodes) else "no menu"
+                other.append("try %d at (%d, %d): %s" % (attempt + 1, x, y, instead))
+                self.key(111)
+                nodes = self.nodes(self.settle(1.0))
+                header = self.column_header(nodes) or header
+            self.check("the column chooser opens", opened, "; ".join(other))
             if opened:
                 self.key(111)  # Escape
                 nodes = self.step("Escape closes the column chooser")
-                self.check("Escape closes the column chooser", not any(x in self.texts(nodes) for x in hidden))
+                self.check("Escape closes the column chooser", not any(h in self.texts(nodes) for h in hidden))
         self.scroll_frames("Music table scroll (tablet)", self.nodes(self.dump()))
 
     # ---------------------------------------------------------------- passes
