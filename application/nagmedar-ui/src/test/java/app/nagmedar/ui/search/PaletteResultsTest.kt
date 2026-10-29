@@ -46,6 +46,18 @@ class PaletteResultsTest {
     }
 
     @Test
+    fun eachItemOnceThoughListedTwice() {
+        // 1.0.1: the palette keys its rows by kind and id; the library can list a file twice, the recent list an id twice
+        val twice = all + item("m1", PaletteKind.Media, "Kuzey Işığı") + item("c1", PaletteKind.Command, "Komut 1")
+        assertEquals(listOf("m1"), paletteResults("kuzey", null, twice).hits.map { it.item.id })
+        assertEquals(10, paletteResults("kom", PaletteKind.Command, twice).hits.size)
+        val recent = paletteResults("", null, twice, recent = listOf("m1", "m1", "s2"))
+        assertEquals(listOf("m1", "s2"), recent.groups[0].hits.map { it.item.id })
+        val ids = recent.groups.flatMap { group -> group.hits.map { "${group.kind}-${it.item.id}" } }
+        assertEquals(ids.size, ids.toSet().size)
+    }
+
+    @Test
     fun whatRanLatelyComesUp() {
         val twins = listOf(item("a", PaletteKind.Command, "Sesi aç"), item("b", PaletteKind.Command, "Sesi aç"))
         assertEquals("a", paletteResults("ses", null, twins).hits.first().item.id)

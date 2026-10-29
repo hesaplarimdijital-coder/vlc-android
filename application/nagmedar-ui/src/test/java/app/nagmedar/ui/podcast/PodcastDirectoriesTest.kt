@@ -205,6 +205,20 @@ class PodcastDirectoriesTest {
     }
 
     @Test
+    fun aShowListedTwiceIsShownOnce() = runBlocking {
+        // 1.0.1: the results' list keys a show by its feed address; Podcast Index lists one show under two ids
+        val twice = many(9) + hit("https://pi.example.org/3.xml/", "Show 3 again", id = 77)
+        val outcome = PodcastSearch(FakeDirectory { twice }, FakeDirectory { error("enough without iTunes") }).search("gece")
+        assertEquals(9, outcome.hits.size)
+        assertEquals(outcome.hits.size, outcome.hits.map { FeedUrl.key(it.feedUrl) }.toSet().size)
+        assertEquals(77L, outcome.hits[3].podcastIndexId)
+        // fewer than THIN once the doubles are gone: iTunes fills in, still each show once
+        val thin = listOf(hit("https://a.example.org/feed", "A"), hit("https://A.example.org/feed/", "A again"))
+        val filled = PodcastSearch(FakeDirectory { thin }, FakeDirectory { thin + many(1, "https://it.example.org/") }).search("x")
+        assertEquals(listOf("A", "Show 0"), filled.hits.map { it.title })
+    }
+
+    @Test
     fun podcastIndexFindingNothingAsksITunes() = runBlocking {
         val primary = FakeDirectory { emptyList() }
         val secondary = FakeDirectory { many(1, "https://it.example.org/") }

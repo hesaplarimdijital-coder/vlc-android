@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
@@ -62,6 +62,7 @@ import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.lazyKeys
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.components.stateBackground
@@ -262,7 +263,9 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.section(
             )
         }
     }
-    items(hits, key = key) { hit -> Box(Modifier.widthIn(max = ContentWidth).fillMaxWidth()) { row(hit) } }
+    // 1.0.1: one key each, though the library lists a file twice (a key used twice would end the app)
+    val keys = lazyKeys(hits.map(key))
+    itemsIndexed(hits, key = { index, _ -> keys[index] }) { _, hit -> Box(Modifier.widthIn(max = ContentWidth).fillMaxWidth()) { row(hit) } }
 }
 
 @Composable

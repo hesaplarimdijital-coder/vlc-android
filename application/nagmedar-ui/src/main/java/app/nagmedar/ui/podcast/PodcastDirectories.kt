@@ -151,7 +151,7 @@ data class SearchOutcome(val hits: List<PodcastHit>, val notice: SearchNotice? =
  * S-1101: the search across the directories, Podcast Index first and iTunes second. Podcast Index
  * is asked when the build has its keys; iTunes when it has not, when Podcast Index failed, and when
  * Podcast Index found fewer than [THIN] shows (iTunes knows shows it does not). Results are merged
- * by feed address ([merge]). Fails only when no directory could answer.
+ * by feed address ([merge]), each show once. Fails only when no directory could answer.
  */
 class PodcastSearch(
     private val primary: PodcastDirectory,
@@ -165,7 +165,9 @@ class PodcastSearch(
         var failed = false
         if (primary.available) {
             try {
-                first = primary.search(term)
+                // 1.0.1: Podcast Index lists a show twice now and then (two ids, one feed); the results' list keys a
+                // show by its feed address, and one used twice would end the app
+                first = merge(primary.search(term), emptyList())
             } catch (e: DirectoryFailure) {
                 failed = true
             }

@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -76,6 +76,7 @@ import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.fadingEdges
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.lazyKeys
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
@@ -620,7 +621,10 @@ private fun StationList(
         modifier.fillMaxSize().testTag("radio-list"),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs) + LocalShellBottomPadding.current,
     ) {
-        items(stations, key = { it.key }) { station ->
+        // 1.0.1: one key each, though a list holds a station twice (two imported rows of one address, a directory's
+        // page repeating one): a key used twice would end the app
+        val keys = lazyKeys(stations.map { it.key })
+        itemsIndexed(stations, key = { index, _ -> keys[index] }) { _, station ->
             val actions = StationActions(
                 onPlay = { controller.play(station) },
                 onFavourite = { controller.toggleFavourite(station) },

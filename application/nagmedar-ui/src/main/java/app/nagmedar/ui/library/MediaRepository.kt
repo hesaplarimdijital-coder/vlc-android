@@ -78,7 +78,8 @@ class MediaRepository(private val context: Context) {
             .filter { it.type == MediaWrapper.TYPE_AUDIO }
         if (played.isEmpty()) return emptyList()
         val tracks = musicFiles()
-        return played.filter { it.id in tracks }.take(RECENT_AUDIO)
+        // 1.0.1: each track once (the shelf keys its cards by the track's id)
+        return played.filter { it.id in tracks }.distinctBy { it.id }.take(RECENT_AUDIO)
     }
 
     /**
