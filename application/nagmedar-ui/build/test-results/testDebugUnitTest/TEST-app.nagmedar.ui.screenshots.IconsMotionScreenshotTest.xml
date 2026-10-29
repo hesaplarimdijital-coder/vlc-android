@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.IconsMotionScreenshotTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:35:00.775Z" hostname="runnervmnwato" time="0.201">
+  <properties/>
+  <testcase name="boardDark" classname="app.nagmedar.ui.screenshots.IconsMotionScreenshotTest" time="0.104"/>
+  <testcase name="boardLight" classname="app.nagmedar.ui.screenshots.IconsMotionScreenshotTest" time="0.097"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

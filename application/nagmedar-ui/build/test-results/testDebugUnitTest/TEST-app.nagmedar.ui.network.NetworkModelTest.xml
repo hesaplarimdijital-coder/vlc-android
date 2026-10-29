@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.NetworkModelTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:39.784Z" hostname="runnervmnwato" time="0.036">
+  <properties/>
+  <testcase name="serversAreSavedRemovedAndBroughtBack" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.019"/>
+  <testcase name="aFolderThatAsksIsPassedOverWhileGathering" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.004"/>
+  <testcase name="foldersOpenAndCloseWithoutReadingAgain" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="aSignInIsAskedForGivenAndKept" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.002"/>
+  <testcase name="aRememberedSignInForASavedAddressJoinsItsRow" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="theNetworkIsSearched" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.003"/>
+  <testcase name="aSavedServerOpensWithItsSignIn" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.0"/>
+  <testcase name="aSignInThatCannotBeOpenedIsAskedForAgain" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="aFolderPlaysWithTheFoldersUnderIt" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="aSlowFolderIsGivenUp" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.0"/>
+  <testcase name="aKeystoreThatDoesNotAnswerKeepsThePassword" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="aSignInForThisSessionOnlyIsNotSaved" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.0"/>
+  <testcase name="aFolderPlaysWithTheSignInOfItsServerOnly" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <testcase name="aQuestionWaitsOnTheFoldersPage" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.0"/>
+  <testcase name="anUnknownServerIsUnreachableAndAnEmptyFolderIsEmpty" classname="app.nagmedar.ui.network.NetworkModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

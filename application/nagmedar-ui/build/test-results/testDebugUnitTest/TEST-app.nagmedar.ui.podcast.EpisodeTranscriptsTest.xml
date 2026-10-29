@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.EpisodeTranscriptsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:44.249Z" hostname="runnervmnwato" time="0.069">
+  <properties/>
+  <testcase name="thePageOffersWhatTheQueueSays" classname="app.nagmedar.ui.podcast.EpisodeTranscriptsTest" time="0.017"/>
+  <testcase name="anEpisodesTranscriptIsAFileOfTheAppsOwn" classname="app.nagmedar.ui.podcast.EpisodeTranscriptsTest" time="0.021"/>
+  <testcase name="onlyANewDownloadWithoutATranscriptIsTranscribedByItself" classname="app.nagmedar.ui.podcast.EpisodeTranscriptsTest" time="0.016"/>
+  <testcase name="whatWhisperHeardReadsBackAsATimedTranscript" classname="app.nagmedar.ui.podcast.EpisodeTranscriptsTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

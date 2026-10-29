@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.device.DeviceRevealTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:31.856Z" hostname="runnervmnwato" time="0.001">
+  <properties/>
+  <testcase name="aFileIsShownFromTheDriveThatHoldsIt" classname="app.nagmedar.ui.device.DeviceRevealTest" time="0.001"/>
+  <testcase name="aFileOnNoDriveIsNotInTheBrowser" classname="app.nagmedar.ui.device.DeviceRevealTest" time="0.0"/>
+  <testcase name="theExternalStoragesIdsTellTheWay" classname="app.nagmedar.ui.device.DeviceRevealTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

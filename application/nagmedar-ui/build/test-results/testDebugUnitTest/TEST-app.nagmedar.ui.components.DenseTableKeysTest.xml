@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.DenseTableKeysTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:27.935Z" hostname="runnervmnwato" time="0.272">
+  <properties/>
+  <testcase name="aMadeKeyNeverMeetsACallersKey" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.038"/>
+  <testcase name="everyKeyIsOneABundleHolds" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.034"/>
+  <testcase name="anotherKeyBecomesItsTextTheSameEachTime" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.037"/>
+  <testcase name="aKeyUsedAgainIsMadeUniqueInOrder" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.045"/>
+  <testcase name="aTableOfDataClassKeysAndARepeatedOneShowsAndSelectsByTheCallersKey" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.073"/>
+  <testcase name="keysABundleHoldsStayAsTheyAre" classname="app.nagmedar.ui.components.DenseTableKeysTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

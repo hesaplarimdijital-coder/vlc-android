@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:36.190Z" hostname="runnervmnwato" time="0.256">
+  <properties/>
+  <testcase name="theOriginalsAreOfferedAfterSaving" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.03"/>
+  <testcase name="savingBesideTheFileWritesItAndCleansTheEditor" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.015"/>
+  <testcase name="spaceIsStillPlayAndPause" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.015"/>
+  <testcase name="withoutLyricsTheEditorStartsWithTheImport" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.014"/>
+  <testcase name="noStampIsMadeWhileAnotherTrackPlays" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.036"/>
+  <testcase name="lrclibNeedsEveryLineStampedAndTheTracksDetails" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.017"/>
+  <testcase name="lyricsTheTrackHasAreTheStart" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.016"/>
+  <testcase name="publishingCanBeCancelledWhileItSolves" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.035"/>
+  <testcase name="savingIntoTheTagsAndTheFolderAskedFor" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.015"/>
+  <testcase name="savingNeedsEveryLineStamped" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.013"/>
+  <testcase name="aClickGoesToTheLineAndItsTime" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.013"/>
+  <testcase name="theKeysStampAtThePlayersPosition" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.012"/>
+  <testcase name="publishingAsksFirstThenSolvesAndSends" classname="app.nagmedar.ui.lyrics.editor.LyricsEditorControllerTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

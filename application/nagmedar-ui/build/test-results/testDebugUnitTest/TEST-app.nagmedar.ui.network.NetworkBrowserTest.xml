@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.NetworkBrowserTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:39.343Z" hostname="runnervmnwato" time="0.336">
+  <properties/>
+  <testcase name="aTapOpensByTouch" classname="app.nagmedar.ui.network.NetworkBrowserTest" time="0.096"/>
+  <testcase name="aTurnedDownSignInIsAskedForAgain" classname="app.nagmedar.ui.network.NetworkBrowserTest" time="0.085"/>
+  <testcase name="foldersOpenWithTheKeysAndFilesPlay" classname="app.nagmedar.ui.network.NetworkBrowserTest" time="0.091"/>
+  <testcase name="aServersQuestionIsAnsweredOnItsPage" classname="app.nagmedar.ui.network.NetworkBrowserTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

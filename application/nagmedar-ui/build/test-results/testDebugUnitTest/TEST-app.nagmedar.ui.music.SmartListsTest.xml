@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.SmartListsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:38.844Z" hostname="runnervmnwato" time="0.005">
+  <properties/>
+  <testcase name="textIsComparedTheTurkishWay" classname="app.nagmedar.ui.music.SmartListsTest" time="0.002"/>
+  <testcase name="aRuleWithoutItsValueAsksNothing" classname="app.nagmedar.ui.music.SmartListsTest" time="0.0"/>
+  <testcase name="numbersAndDates" classname="app.nagmedar.ui.music.SmartListsTest" time="0.001"/>
+  <testcase name="theTemplates" classname="app.nagmedar.ui.music.SmartListsTest" time="0.002"/>
+  <testcase name="keptAsText" classname="app.nagmedar.ui.music.SmartListsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

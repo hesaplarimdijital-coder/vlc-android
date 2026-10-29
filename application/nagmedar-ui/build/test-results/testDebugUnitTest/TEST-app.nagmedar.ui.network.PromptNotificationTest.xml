@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.PromptNotificationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:39.822Z" hostname="runnervmnwato" time="0.079">
+  <properties/>
+  <testcase name="libVlcsWordsAreSaidInTheInterfacesLanguage" classname="app.nagmedar.ui.network.PromptNotificationTest" time="0.079"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screens.ThemeSettingsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:55.008Z" hostname="runnervmnwato" time="0.118">
+  <properties/>
+  <testcase name="choicesApplyAtOnce" classname="app.nagmedar.ui.screens.ThemeSettingsTest" time="0.072"/>
+  <testcase name="theWallpaperColourIsOffered" classname="app.nagmedar.ui.screens.ThemeSettingsTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

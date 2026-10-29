@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.lab.ReportsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:32:06.436Z" hostname="runnervmnwato" time="0.029">
+  <properties/>
+  <testcase name="usbReportsReadTheNativeJson" classname="app.nagmedar.lab.ReportsTest" time="0.022"/>
+  <testcase name="whisperReportReadsTheBenchmarkJson" classname="app.nagmedar.lab.ReportsTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

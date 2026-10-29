@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.DialogRouterTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-29T22:34:39.333Z" hostname="runnervmnwato" time="0.007">
+  <properties/>
+  <testcase name="aHostIsNamedWholeOnly" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.004"/>
+  <testcase name="howAReadingEnds" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.001"/>
+  <testcase name="aFileStartingToPlaySignsInFromItsSavedServer" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aFoldersQuestionWaitsOnItsPageAndGoesWithIt" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aWebDavRealmGoesToTheOneWebDavServerOpened" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aFoldersSignInIsGivenOnceThenTurnedDown" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.001"/>
+  <testcase name="aSavedServerSignsInForTheLibrarysScanOnceUntilTypedAgain" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aRequestIsAnsweredOnce" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="anotherServersRequestIsNeverAnsweredWithThisOnesSignIn" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aRequestNobodyHereCanAnswerGoesToVlcsWindows" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.0"/>
+  <testcase name="aFilesClaimEndsAfterAMinuteEvenWithNothingElseBegun" classname="app.nagmedar.ui.network.DialogRouterTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
