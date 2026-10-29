@@ -81,7 +81,7 @@ class MotionTierTest {
     fun anExpandingPlayerBringsTheBarsBack() {
         val scroll = ShellScrollState()
         scroll.maxOffsetPx = 64f
-        scroll.onScrolled(consumedY = -64f, availableY = 0f)
+        scroll.onScrolled(consumedY = -64f)
         assertEquals(64f, scroll.offsetPx)
         scroll.showBars()
         assertEquals(0f, scroll.offsetPx)

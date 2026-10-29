@@ -148,7 +148,10 @@ fun MenuPopup(
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
-    val glassy = NagGlass.source != null && NagGlass.mode != GlassMode.Solid
+    // glass only over the shell's own window: a menu opened in a dialog would blur the window behind the dialog (1.0.1)
+    val inShellWindow = shellOverlayHere() != null
+    val source = if (inShellWindow) NagGlass.source else null
+    val glassy = source != null && NagGlass.mode != GlassMode.Solid
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val ownKeys = onEscape != null
     val latestOnDismiss by rememberUpdatedState(onDismiss)
@@ -182,7 +185,7 @@ fun MenuPopup(
                     .width(IntrinsicSize.Max)
                     // a shadow would show through glass; solid menus keep it
                     .then(if (glassy) Modifier else Modifier.shadow(12.dp, shape))
-                    .glass(NagGlass.raised(colors, GlassThickness.Regular), shape)
+                    .glass(NagGlass.raised(colors, GlassThickness.Regular), shape, source = source)
                     .border(1.dp, colors.borderStrong, shape)
                     .onPreviewKeyEvent { event ->
                         val down = event.type == KeyEventType.KeyDown

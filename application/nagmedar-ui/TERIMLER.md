@@ -79,6 +79,8 @@ Sözlüğü testler denetler:
 | tuş | key | | | |
 | pencere | window | | | “Yeni pencerede aç” |
 | kenar çubuğu | sidebar | yan çubuk, yan menü | side bar | |
+| Daha fazla (sayfa) | More (page) | | | Telefonun alt çubuğundaki “⋯” sekmesi: alt çubukta olmayan sayfalar (Çalma listeleri, Bu cihaz, Ağ, Akışlar, İndirmeler, Ayarlar) ve “Oynatma”; açılan her sayfa bunun üstüne açılır |
+| geri oku | back arrow | | | Bir sekmenin ilk sayfası olmayan her sayfada üst çubuğun solunda; Geri tuşuyla aynı şeyi yapar, sayfayı açan sayfaya döner. Ekran okuyucu “Geri” der |
 | menü çubuğu | menu bar | | | |
 | komut paleti | command palette | | | |
 | ayarlar | settings | tercihler | preferences | Menü yolu: “Ayarlar › Ses” |

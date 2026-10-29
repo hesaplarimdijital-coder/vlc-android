@@ -41,13 +41,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.data.DownloadState
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
@@ -319,7 +318,7 @@ private fun WhisperRow(file: WhisperFile, job: WhisperStatus.Running?, onCancel:
 /** "Delete the downloaded file?": the file goes, an episode stays in its show's list. */
 @Composable
 private fun RemoveDialog(removal: Removal, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_downloads_delete_title), Modifier.testTag("downloads-delete")) {
                 Text(removal.name, style = NagTheme.type.bodyStrong, color = NagTheme.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)

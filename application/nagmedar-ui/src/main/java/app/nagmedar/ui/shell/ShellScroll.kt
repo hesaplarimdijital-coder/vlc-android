@@ -20,9 +20,9 @@ import app.nagmedar.ui.theme.NagMotion
  * - scrolling down slides the bottom navigation bar out of the window and the player strip above
  *   it down to the edge, so the list gets the height; scrolling up brings them back. When the
  *   finger lifts half way they settle fully shown or fully hidden ([settle]), on a phone on a
- *   spring that takes over the fling's speed (Desktop Kit 1.0);
- * - once the content has moved away from its top the top bar takes the chrome colour and a thin
- *   rule shows under it ([scrolled]), so the title stays apart from what passes beneath it.
+ *   spring that takes over the fling's speed (Desktop Kit 1.0).
+ *
+ * 1.0.1: the top bar no longer follows the scrolling; it keeps one solid colour.
  *
  * [offsetPx] is only read while drawing (a layer translation) and by the screens that leave their
  * padding to the shell, so a scrolled pixel neither measures nor recomposes a screen that lies
@@ -38,14 +38,10 @@ class ShellScrollState {
     /** The bottom bar's height: how far it can go. */
     var maxOffsetPx by mutableFloatStateOf(0f)
 
-    /** The content has scrolled away from its top. */
-    var scrolled by mutableStateOf(false)
-        private set
-
-    /** False on tablet and DeX windows: nothing moves and the top bar stays flat. */
+    /** False on tablet and DeX windows: nothing moves. */
     var enabled by mutableStateOf(true)
 
-    /** False keeps the bottom bar in place (the keyboard is up); the top bar still follows. */
+    /** False keeps the bottom bar in place (the keyboard is up). */
     var hideOnScroll by mutableStateOf(true)
 
     /** How a bar left half way settles: the gesture spring on a phone, nothing with reduced motion. */
@@ -53,7 +49,7 @@ class ShellScrollState {
 
     val connection: NestedScrollConnection = object : NestedScrollConnection {
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-            onScrolled(consumed.y, available.y)
+            onScrolled(consumed.y)
             return Offset.Zero
         }
 
@@ -64,12 +60,9 @@ class ShellScrollState {
         }
     }
 
-    /** The content moved by [consumedY] px (negative: towards its end); [availableY] is what it could not take. */
-    fun onScrolled(consumedY: Float, availableY: Float) {
+    /** The content moved by [consumedY] px (negative: towards its end). */
+    fun onScrolled(consumedY: Float) {
         if (!enabled) return
-        if (consumedY < 0f) scrolled = true
-        // a pull downwards the content could not take: it is at its top
-        if (availableY > 0f) scrolled = false
         if (hideOnScroll && consumedY != 0f) offsetPx = (offsetPx - consumedY).coerceIn(0f, maxOffsetPx)
     }
 
@@ -94,10 +87,9 @@ class ShellScrollState {
         offsetPx = 0f
     }
 
-    /** A new screen starts with the bars shown and the top bar flat. */
+    /** A new screen starts with the bars shown. */
     fun reset() {
         offsetPx = 0f
-        scrolled = false
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package app.nagmedar.ui.shell
 
 import android.view.View
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,16 +20,19 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
 
 /**
  * Sizes of the chrome lying over the content, measured by the shell (Desktop Kit 1.0). On a phone
  * the top bar, the player strip and the bottom bar cover the content's edges; on tablet and DeX
- * only a floating player does.
+ * only a floating player does. 1.0.1: a phone's full page (Settings and its pages) has no bottom
+ * bar and no player strip ([barsHidden] while one is on screen).
  */
 @Stable
 internal class ShellChromeMetrics {
@@ -42,30 +46,41 @@ internal class ShellChromeMetrics {
     /** Content lies under the bottom bar and the player strip (phone). */
     var underBottom by mutableStateOf(false)
 
+    /** The page on screen is a full page: the phone's bottom bar and player strip are away. */
+    var barsHidden by mutableStateOf(false)
+
     /** Content lies under a floating player (tablet, DeX); its margin is added. */
     var underFloatingPlayer by mutableStateOf(false)
     var floatingMarginPx by mutableIntStateOf(0)
 
     val topPadPx: Int get() = if (underTop) topPx else 0
 
-    val bottomPadPx: Int
-        get() = when {
-            underBottom -> navPx + playerPx
-            underFloatingPlayer && playerPx > 0 -> playerPx + 2 * floatingMarginPx
-            else -> 0
-        }
+    /** What covers the bottom of the page on screen. */
+    val bottomPadPx: Int get() = bottomPadPx(bars = !barsHidden)
+
+    /** What covers the bottom of a page that has the phone's bottom bar and player strip ([bars]) or not. */
+    fun bottomPadPx(bars: Boolean): Int = when {
+        underBottom -> if (bars) navPx + playerPx else 0
+        underFloatingPlayer && playerPx > 0 -> playerPx + 2 * floatingMarginPx
+        else -> 0
+    }
 }
 
-/** The covered edges as padding; read while measuring, so a change re-measures without recomposing. */
-private class ShellPaddingValues(private val metrics: ShellChromeMetrics, private val density: Density) : PaddingValues {
+/**
+ * The covered edges as padding; read while measuring, so a change re-measures without recomposing.
+ * [bars]: those of a page with or without the phone's bottom bar; null, those of the page on screen.
+ */
+private class ShellPaddingValues(private val metrics: ShellChromeMetrics, private val density: Density, private val bars: Boolean?) : PaddingValues {
+    private val bottomPx: Int get() = if (bars == null) metrics.bottomPadPx else metrics.bottomPadPx(bars)
     override fun calculateTopPadding(): Dp = with(density) { metrics.topPadPx.toDp() }
-    override fun calculateBottomPadding(): Dp = with(density) { metrics.bottomPadPx.toDp() }
+    override fun calculateBottomPadding(): Dp = with(density) { bottomPx.toDp() }
     override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = 0.dp
     override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = 0.dp
-    override fun toString() = "ShellPaddingValues(top=${metrics.topPadPx}px, bottom=${metrics.bottomPadPx}px)"
+    override fun toString() = "ShellPaddingValues(top=${metrics.topPadPx}px, bottom=${bottomPx}px)"
 }
 
-internal fun shellPaddingValues(metrics: ShellChromeMetrics, density: Density): PaddingValues = ShellPaddingValues(metrics, density)
+internal fun shellPaddingValues(metrics: ShellChromeMetrics, density: Density, bars: Boolean? = null): PaddingValues =
+    ShellPaddingValues(metrics, density, bars)
 
 /**
  * How much of the screen the shell's chrome covers: on a phone the top bar (top) and the bottom
@@ -86,7 +101,7 @@ internal val LocalShellScreen = staticCompositionLocalOf<ShellScreenState?> { nu
  * Desktop Kit 1.0: the padding a screen needs so nothing stays hidden under the phone's bars, for
  * a screen that lays its content out under them: pass it to a list
  * (`LazyColumn(contentPadding = padding + PaddingValues(…))`) so the first and last items can rest
- * clear of the bars while the rest scrolls beneath the glass; a header above the list takes its
+ * clear of the bars while the rest scrolls beneath the bars; a header above the list takes its
  * top ([topOnly]).
  *
  * Calling this tells the shell that the screen handles the padding itself. Screens that never
@@ -122,7 +137,7 @@ val LocalShellTopPadding = staticCompositionLocalOf<PaddingValues> { PaddingValu
  * bar and hands the bottom to its lists through [LocalShellBottomPadding], so they scroll
  * beneath the bottom bar and the player strip and their last rows rest clear of them. A screen
  * that is one list from the top ([listOnTop]: Settings, Search, More) gets the top through
- * [LocalShellTopPadding] too and scrolls beneath the top bar's glass. On tablet and DeX the
+ * [LocalShellTopPadding] too and scrolls beneath the top bar. On tablet and DeX the
  * padding is zero and nothing changes.
  */
 @Composable
@@ -171,25 +186,31 @@ fun PaddingValues.bottomOnly(): PaddingValues = object : PaddingValues {
 }
 
 /**
- * Wraps one screen of the shell. A screen that never asks for [rememberShellContentPadding] is
- * kept clear of the bars, as in 0.2.0: padded by the covered edges, and the bottom padding shrinks
- * while the bars slide away (the only case where scrolling re-measures).
+ * Wraps one screen of the shell, on an opaque background (a page opened slides over the one under
+ * it). A screen that never asks for [rememberShellContentPadding] is kept clear of the bars, as in
+ * 0.2.0: padded by the covered edges, and the bottom padding shrinks while the bars slide away (the
+ * only case where scrolling re-measures). [bars]: the screen has the phone's bottom bar and player
+ * strip; a full page (1.0.1) has none and reaches down to the window's edge. The screen's
+ * [LocalShellContentPadding] says the same.
  */
 @Composable
-internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollState, content: @Composable () -> Unit) {
+internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollState, bars: Boolean, content: @Composable () -> Unit) {
     val screen = remember { ShellScreenState() }
-    CompositionLocalProvider(LocalShellScreen provides screen) {
+    val density = LocalDensity.current
+    val padding = remember(metrics, density, bars) { shellPaddingValues(metrics, density, bars) }
+    CompositionLocalProvider(LocalShellScreen provides screen, LocalShellContentPadding provides padding) {
         Box(
             Modifier
                 .fillMaxSize()
+                .background(NagTheme.colors.background)
                 .layout { measurable, constraints ->
                     if (screen.handlers > 0) {
                         val placeable = measurable.measure(constraints)
                         return@layout layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                     }
                     val top = metrics.topPadPx
-                    val hidden = if (metrics.underBottom) scroll.offsetPx.roundToInt().coerceIn(0, metrics.navPx) else 0
-                    val bottom = (metrics.bottomPadPx - hidden).coerceAtLeast(0)
+                    val hidden = if (metrics.underBottom && bars) scroll.offsetPx.roundToInt().coerceIn(0, metrics.navPx) else 0
+                    val bottom = (metrics.bottomPadPx(bars) - hidden).coerceAtLeast(0)
                     val maxHeight = if (constraints.hasBoundedHeight) (constraints.maxHeight - top - bottom).coerceAtLeast(0) else constraints.maxHeight
                     val inner = constraints.copy(minHeight = constraints.minHeight.coerceAtMost(maxHeight), maxHeight = maxHeight)
                     val placeable = measurable.measure(inner)
@@ -202,7 +223,7 @@ internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollSt
 
 /**
  * A layer over the whole shell, for what must cover the bars as well: the expanded player and
- * the glass sheets ([app.nagmedar.ui.components.GlassBottomSheet]) register layers here.
+ * the sheets ([app.nagmedar.ui.components.GlassBottomSheet]) register layers here.
  */
 @Stable
 internal class ShellOverlayHost {

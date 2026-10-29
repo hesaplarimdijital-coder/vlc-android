@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -60,7 +59,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * Desktop Kit 1.0 on a phone: the mini player that grows into the player (a tap, a drag up, Back),
- * its sideways swipe, the "⋯" tab's sheet of the other pages, and the dialogs' close affordance.
+ * its sideways swipe, the sheets, and the dialogs' close affordance (the "⋯" tab's page: PhoneNavigationTest).
  * 1.0's review: the full player composed once and hidden while the strip rests, a drag down on it
  * (its artwork, its lyrics at their top) closing it as one gesture, and closed sheets that are
  * nothing at all.
@@ -76,7 +75,6 @@ class PlayerAndSheetTest {
     private lateinit var player: ExpandablePlayerState
     private var skips = 0
     private var backs = 0
-    private var equalizer = 0
 
     /** Back that nothing in the app took. */
     private var unhandledBacks = 0
@@ -104,7 +102,6 @@ class PlayerAndSheetTest {
                             )
                         }
                     },
-                    moreActions = listOf(ActionGroup("Oynatma", listOf(MenuEntry.Item("Ekolayzer…", { equalizer++ })))),
                 )
             }
         }
@@ -160,32 +157,6 @@ class PlayerAndSheetTest {
     }
 
     @Test
-    fun theMoreTabOpensTheSheetOfPagesAndActions() {
-        phone()
-        compose.onNodeWithText("Daha fazla").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithText("Ekolayzer…").assertIsDisplayed()
-        compose.onNodeWithText("Kaynaklar").assertIsDisplayed()
-        compose.onNodeWithText("Bu cihaz").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithText("Ekolayzer…").assertDoesNotExist()
-        assertTrue(compose.onAllNodesWithText("Bu cihaz").fetchSemanticsNodes().isNotEmpty())
-        // the app's own entries run their action
-        compose.onNodeWithText("Daha fazla").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithText("Ekolayzer…").performClick()
-        compose.waitForIdle()
-        assertEquals(1, equalizer)
-        // Back closes the sheet without leaving the page
-        compose.onNodeWithText("Daha fazla").performClick()
-        compose.waitForIdle()
-        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
-        compose.waitForIdle()
-        compose.onNodeWithText("Ekolayzer…").assertDoesNotExist()
-        assertTrue(compose.onAllNodesWithText("Bu cihaz").fetchSemanticsNodes().isNotEmpty())
-    }
-
-    @Test
     fun theFullPlayerIsComposedOnceAndHiddenWhileTheStripRests() {
         var made = 0
         phone(full = {
@@ -195,11 +166,13 @@ class PlayerAndSheetTest {
         // composed with the strip, before any expand, and neither read out nor in the way of a touch
         assertEquals(1, made)
         compose.onNodeWithTag("full-player").assertDoesNotExist()
+        // another tab and Back from it: the player stays as it is
         compose.onNodeWithText("Daha fazla").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("Ekolayzer…").assertIsDisplayed()
+        compose.onNodeWithTag("more-page").assertIsDisplayed()
         compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()
+        compose.onNodeWithTag("more-page").assertDoesNotExist()
         // opened, closed and opened again: the same composition
         compose.onNodeWithTag("mini").performClick()
         compose.waitForIdle()

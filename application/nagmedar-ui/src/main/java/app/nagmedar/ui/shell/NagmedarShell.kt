@@ -1,8 +1,12 @@
 package app.nagmedar.ui.shell
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -13,23 +17,18 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,33 +37,26 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import app.nagmedar.ui.components.ActionGroup
-import app.nagmedar.ui.components.ActionGroupList
-import app.nagmedar.ui.components.GlassBottomSheet
-import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.theme.GlassMode
-import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalGlassMode
 import app.nagmedar.ui.theme.LocalGlassSource
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
-import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.theme.glass
 import app.nagmedar.ui.theme.glassSource
 import app.nagmedar.ui.theme.rememberSystemGlassMode
 import dev.chrisbanes.haze.HazeState
@@ -74,53 +66,10 @@ import kotlin.math.roundToInt
 val LocalNavKind = compositionLocalOf { NavKind.Sidebar }
 
 /**
- * Desktop Kit 1.0: the player bar lies in the shell's floating glass bar (tablet, DeX), which draws
- * the surface: the bar's content draws no background or top rule of its own.
+ * Desktop Kit 1.0: the player bar lies in the shell's floating bar (tablet, DeX), which draws the
+ * surface (a solid card since 1.0.1): the bar's content draws no background or top rule of its own.
  */
 val LocalFloatingPlayer = staticCompositionLocalOf { false }
-
-/** Navigation entry point handed to screens. */
-@Stable
-class ShellNavigator(private val navController: NavHostController) {
-    /** Where back went from, latest last: the mouse's forward button returns there (S-408). */
-    private val forwardRoutes = ArrayDeque<String>()
-
-    /** The route on screen. */
-    val currentRoute: String? get() = navController.currentDestination?.route
-
-    /** Switches top-level destination, keeping each destination's own back stack and state. */
-    fun navigate(destination: Destination) {
-        forwardRoutes.clear()
-        go(destination)
-    }
-
-    private fun go(destination: Destination) {
-        navController.navigate(destination.route) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    fun back(): Boolean {
-        val from = currentRoute
-        val popped = navController.popBackStack()
-        if (popped) wentBack(from)
-        return popped
-    }
-
-    /** A back that happened elsewhere (the system's) left [from]: forward can return to it. */
-    fun wentBack(from: String?) {
-        if (from != null && from != currentRoute) forwardRoutes.addLast(from)
-    }
-
-    /** The mouse's forward button: to where back last went from; false when there is nowhere. */
-    fun forward(): Boolean {
-        val route = forwardRoutes.removeLastOrNull() ?: return false
-        go(Destination.fromRoute(route))
-        return true
-    }
-}
 
 /**
  * The adaptive shell (S-301): bottom bar on compact windows, a rail on medium and expanded
@@ -131,19 +80,24 @@ class ShellNavigator(private val navController: NavHostController) {
  * the screen and its overlay take the whole window, the bars stand aside (S-1002: the player over
  * a tablet's window).
  *
- * As Desktop Kit 0.2.0 has it: screens change with Android's fade-through on phones and tablets
- * and a still cross-fade on a desktop (Back plays the change along with the predictive gesture);
- * on a phone the bottom bar and the player strip make way while the content scrolls down, the
- * top bar takes the chrome colour once the content has left its top, and the bottom bar steps
- * aside while the keyboard is up.
+ * As Desktop Kit 0.2.0 has it: tabs change with Android's fade-through on phones and tablets and a
+ * still cross-fade on a desktop; on a phone the bottom bar and the player strip make way while the
+ * content scrolls down, and the bottom bar steps aside while the keyboard is up.
  *
- * As Desktop Kit 1.0 has it: on a phone the content fills the window and the bars lie over it as
- * frosted glass ([app.nagmedar.ui.theme.NagGlass]); a screen that lays its lists out under them
- * asks for [rememberShellContentPadding], the others are kept clear of the bars as before. The
- * bars move in the draw phase only. The content area is the glass source of the bars, sheets and
- * menus; the shell provides the window's [MotionTier] (springs on a phone) and [GlassMode].
- * [floatingPlayer] (tablet, DeX): the [player] floats over the content's bottom edge instead of
- * being stacked under it. [glass] false draws every bar, sheet and menu as a solid surface.
+ * 1.0.1: each tab keeps a stack of pages ([ShellNavigator]). A page opened from a page slides in
+ * from the end edge over it, and Back (the key, the predictive gesture, the top bar's arrow) plays
+ * that in reverse; Back on another tab's first page goes to Müzik. The phone's "⋯" is a tab, the
+ * "Daha fazla" page. Settings and the pages under it are pages of their own on a phone: the bottom
+ * bar and the mini player slide away for them ([NavRules.hidesBars]). Every bar is one solid
+ * colour whatever passes beneath it.
+ *
+ * As Desktop Kit 1.0 has it: on a phone the content fills the window and the bars lie over it; a
+ * screen that lays its lists out under them asks for [rememberShellContentPadding], the others are
+ * kept clear of the bars as before. The bars move in the draw phase only. The shell provides the
+ * window's [MotionTier] (springs on a phone) and [GlassMode]: [glass] true lets menus and sheets be
+ * frosted glass over the content (the kit's [app.nagmedar.ui.theme.NagGlass]); false, the default
+ * since 1.0.1, draws them as solid surfaces. [floatingPlayer] (tablet, DeX): the [player] floats
+ * over the content's bottom edge instead of being stacked under it.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -158,16 +112,15 @@ fun NagmedarShell(
     screen: @Composable (Destination, ShellNavigator) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    /** The navigator of [navController] the app's actions use too; the shell tells it the window's [NavKind]. */
+    navigator: ShellNavigator = remember(navController) { ShellNavigator(navController) },
     overlay: @Composable BoxScope.() -> Unit = {},
     /** The desktop window's caption bar the top bar goes up into (S-306); null for none. */
     caption: CaptionBar? = null,
     contentOnly: Boolean = false,
     floatingPlayer: Boolean = false,
-    glass: Boolean = true,
-    /** The app's own entries of the phone's "⋯" sheet ("Oynatma": the equaliser, the sleep timer), after the pages. */
-    moreActions: List<ActionGroup> = emptyList(),
+    glass: Boolean = false,
 ) {
-    val navigator = remember(navController) { ShellNavigator(navController) }
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
     val navKind = NavKind.forWidth(widthClass)
@@ -176,18 +129,41 @@ fun NagmedarShell(
     val systemGlass = rememberSystemGlassMode()
     val glassMode = if (!glass) GlassMode.Solid else LocalGlassMode.current ?: systemGlass
     val pointer = NagTheme.inputMode == InputMode.Pointer
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
-    // The graph builder below must not capture changing values, or NavHost would rebuild the graph.
+    // the graph builder below must not capture changing values, or NavHost would rebuild the graph
     val currentScreen by rememberUpdatedState(screen)
     // read when a transition starts, so a new width class or motion setting applies to the next one
     val currentKind by rememberUpdatedState(navKind)
     val currentMotion by rememberUpdatedState(motion)
     val currentTier by rememberUpdatedState(tier)
-    val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember {
-        { currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier) }
+    val currentRtl by rememberUpdatedState(rtl)
+    // a page opened from a page slides in over it and Back slides it away; tabs fade through; a desktop cross-fades still
+    val paged: () -> Boolean = remember(navigator) { { currentKind != NavKind.Sidebar } }
+    val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember(navigator) {
+        {
+            if (paged() && navigator.lastMove == NavMove.Open) currentMotion.pageEnter(currentTier, currentRtl)
+            else currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+        }
     }
-    val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember {
-        { currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier) }
+    val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember(navigator) {
+        {
+            if (paged() && navigator.lastMove == NavMove.Open) currentMotion.pageExit(currentTier, currentRtl)
+            else currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+        }
+    }
+    // every pop is Back from a page (the key, the gesture, the arrow) but a tab chosen again, which goes to its first page
+    val popEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember(navigator) {
+        {
+            if (paged() && navigator.lastMove != NavMove.Reselect) currentMotion.pagePopEnter(currentTier, currentRtl)
+            else currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+        }
+    }
+    val popExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember(navigator) {
+        {
+            if (paged() && navigator.lastMove != NavMove.Reselect) currentMotion.pagePopExit(currentTier, currentRtl)
+            else currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+        }
     }
     // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
     // keyboard must also take room, as isImeVisible reads true until the first insets arrive
@@ -205,28 +181,49 @@ fun NagmedarShell(
     val floating = floatingPlayer && navKind != NavKind.BottomBar
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
+    // the tab lit: the one whose pages are on screen (none on the search page)
+    val selected = NavRules.highlighted(current, navigator::inStack, navKind)
+    // Settings and its pages on a phone: the bottom bar and the mini player slide away, the page takes their room
+    val barsHidden = NavRules.hidesBars(current, navKind)
+    val hidden = animateFloatAsState(
+        if (barsHidden) 1f else 0f,
+        NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.Emphasized)),
+        label = "barsHidden",
+    )
+    // how far the bottom bar and the player strip are down: scrolled away, or away for a page of their own
+    val bottomOffset: () -> Float = remember(scroll, metrics, hidden) {
+        { maxOf(scroll.offsetPx, hidden.value * (metrics.navPx + metrics.playerPx)) }
+    }
     // the phone's player covers the window: only its end, not every frame of the drag, re-measures the overlays
-    val playerOver by remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f } }
+    val playerOverState = remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f } }
+    val playerOver by playerOverState
     SideEffect {
+        navigator.navKind = navKind
         scroll.enabled = navKind == NavKind.BottomBar
         scroll.hideOnScroll = showBottomNav
         scroll.tier = tier
         metrics.underTop = phone
         metrics.underBottom = phone
+        metrics.barsHidden = barsHidden
         metrics.underFloatingPlayer = floating && !contentOnly
         metrics.floatingMarginPx = with(density) { floatingMargin.roundToPx() }
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         overlayHost.onExpandStart = { scroll.showBars() }
-        overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) scroll.offsetPx else 0f }
+        overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset() else 0f }
         overlayHost.rootView = view.rootView
     }
-    // every screen starts with the bars shown and a flat top bar
+    // every screen starts with the bars shown
     LaunchedEffect(current, navKind, showBottomNav, contentOnly) { scroll.reset() }
-    // Desktop Kit 1.0: the phone's "⋯" opens a sheet of the other pages; the rail keeps the "More" page
-    var moreOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(navKind) { if (navKind != NavKind.BottomBar) moreOpen = false }
-    val select: (Destination) -> Unit = { destination ->
-        if (destination == Destination.More && navKind == NavKind.BottomBar) moreOpen = true else navigator.navigate(destination)
+    // the top bar's arrow does what Back does: a detail open in the page closes first, as with the key
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val onBack: () -> Unit = {
+        val from = navigator.currentRoute
+        if (backDispatcher != null) {
+            backDispatcher.onBackPressed()
+            navigator.wentBack(from)
+        } else {
+            navigator.back()
+        }
     }
 
     CompositionLocalProvider(
@@ -240,7 +237,7 @@ fun NagmedarShell(
             navKind = navKind,
             modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
             contentOnly = contentOnly,
-            navigationOffset = { if (navKind == NavKind.BottomBar) scroll.offsetPx.roundToInt() else 0 },
+            navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset().roundToInt() else 0 },
             topBar = {
                 if (navKind == NavKind.Sidebar) {
                     // the menus are a pointer's and a keyboard's (S-302); by touch the bar keeps the search
@@ -254,8 +251,7 @@ fun NagmedarShell(
                         title = stringResource(current.label),
                         onSearch = onSearch.takeIf { current != Destination.Search },
                         caption = caption,
-                        scrolled = navKind == NavKind.BottomBar && scroll.scrolled,
-                        glass = navKind == NavKind.BottomBar,
+                        onBack = onBack.takeIf { NavRules.showsBack(current, navKind) },
                         modifier = Modifier.onSizeChanged { metrics.topPx = it.height }.underPlayer(playerOver),
                     )
                 }
@@ -264,8 +260,8 @@ fun NagmedarShell(
                 when (navKind) {
                     NavKind.BottomBar -> if (showBottomNav) {
                         BottomNavBar(
-                            current,
-                            select,
+                            selected,
+                            navigator::selectTab,
                             Modifier
                                 .onSizeChanged {
                                     scroll.maxOffsetPx = it.height.toFloat()
@@ -276,13 +272,13 @@ fun NagmedarShell(
                                     translationY = overlayHost.expandProgress() * size.height
                                     alpha = if (playerOver) 0f else 1f
                                 }
-                                .then(if (playerOver) Modifier.clearAndSetSemantics {} else Modifier),
+                                .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier),
                         )
                     }
-                    NavKind.Rail -> NavRail(current, navigator::navigate)
+                    NavKind.Rail -> NavRail(selected, navigator::selectTab)
                     NavKind.Sidebar -> Sidebar(
-                        current = current,
-                        onSelect = navigator::navigate,
+                        selected = selected,
+                        onSelect = navigator::selectTab,
                         collapsed = sidebarCollapsed,
                         onToggleCollapsed = { onSidebarCollapsedChange(!sidebarCollapsed) },
                         badges = badges,
@@ -297,10 +293,12 @@ fun NagmedarShell(
                     Modifier
                         .onSizeChanged { metrics.playerPx = it.height }
                         .underPlayer(playerOver)
+                        .then(if (barsHidden && navKind == NavKind.BottomBar) Modifier.clearAndSetSemantics {} else Modifier)
                         .then(
+                            // a solid card with its border, whatever passes beneath (1.0.1)
                             if (!floating) Modifier else Modifier
                                 .clip(shape)
-                                .glass(NagGlass.raised(colors, GlassThickness.Thin), shape)
+                                .background(colors.surfaceRaised, shape)
                                 .border(1.dp, colors.borderStrong, shape),
                         ),
                 ) {
@@ -323,12 +321,22 @@ fun NagmedarShell(
                             modifier = Modifier.fillMaxSize(),
                             enterTransition = enter,
                             exitTransition = exit,
-                            popEnterTransition = enter,
-                            popExitTransition = exit,
+                            popEnterTransition = popEnter,
+                            popExitTransition = popExit,
                         ) {
                             Destination.entries.forEach { destination ->
                                 composable(destination.route) {
-                                    ShellScreenFrame(metrics, scroll) { currentScreen(destination, navigator) }
+                                    // another tab's first page: Back goes to Müzik as it was left. First in the page, so
+                                    // what the page opens (a detail, a selection) takes Back before it; not while the
+                                    // phone's player, whose handler is older, is open over it
+                                    if (destination != Destination.Music) {
+                                        BackHandler(enabled = NavRules.backToStart(destination, currentKind) && !playerOverState.value) {
+                                            navigator.backToStart()
+                                        }
+                                    }
+                                    ShellScreenFrame(metrics, scroll, bars = !NavRules.hidesBars(destination, currentKind)) {
+                                        currentScreen(destination, navigator)
+                                    }
                                 }
                             }
                         }
@@ -359,20 +367,6 @@ fun NagmedarShell(
             // the transport bar of a desktop window needs the room of its three parts; a tablet's mini player less
             floatingMaxWidth = if (navKind == NavKind.Sidebar) 1180.dp else 760.dp,
         )
-        if (navKind == NavKind.BottomBar) {
-            val groups = moreSheetGroups(navigator) + moreActions
-            GlassBottomSheet(visible = moreOpen, onDismiss = { moreOpen = false }, label = stringResource(Destination.More.label)) {
-                Text(
-                    stringResource(Destination.More.label),
-                    style = NagTheme.type.title,
-                    color = NagTheme.colors.text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = NagTheme.dimens.gapL + 4.dp, vertical = NagTheme.dimens.gapS),
-                )
-                ActionGroupList(groups, onDismiss = { moreOpen = false })
-            }
-        }
     }
 }
 
@@ -384,20 +378,6 @@ fun NagmedarShell(
  */
 private fun Modifier.underPlayer(covered: Boolean): Modifier =
     graphicsLayer { alpha = if (covered) 0f else 1f }.then(if (covered) Modifier.clearAndSetSemantics {} else Modifier)
-
-/** The pages the phone's bottom bar leaves out, by the sidebar's sections (Settings last), as the "⋯" sheet's entries. */
-@Composable
-private fun moreSheetGroups(navigator: ShellNavigator): List<ActionGroup> {
-    val left = Destination.overflow(Destination.bottomBar)
-    return NavSection.entries.mapNotNull { section ->
-        val items = left.filter { it.section == section }
-        if (items.isEmpty()) return@mapNotNull null
-        ActionGroup(
-            section.title?.let { stringResource(it) },
-            items.map { destination -> MenuEntry.Item(stringResource(destination.label), { navigator.navigate(destination) }, icon = destination.icon) },
-        )
-    }
-}
 
 /** Where a new screen grows from in the fade-through: a phone's, a tablet's (no movement on a desktop). */
 private fun screenScale(kind: NavKind): Float = if (kind == NavKind.BottomBar) NagMotion.PHONE_SCALE else NagMotion.TABLET_SCALE

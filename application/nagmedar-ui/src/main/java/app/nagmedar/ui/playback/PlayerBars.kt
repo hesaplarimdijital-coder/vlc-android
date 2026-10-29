@@ -89,12 +89,9 @@ import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.ArtworkAccent
-import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
-import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.theme.glass
 import kotlin.math.roundToInt
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -367,7 +364,7 @@ fun PlayerBar(
         ServicePlayerBarActions(context, { currentOnQueue() }, { currentOnOpenAudio?.invoke() ?: PlaybackActions.openPlayer(context) })
     }
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media, size, video = info.isVideo) }
-    // Desktop Kit 1.0: in the shell's floating glass bar (tablet, DeX) the bars draw no surface of their own
+    // Desktop Kit 1.0: in the shell's floating bar (tablet, DeX) the bars draw no surface of their own
     val transparent = LocalFloatingPlayer.current
     // Desktop Kit 1.0: while music plays the bar takes its artwork's accent, cross-fading from one track to the next
     val music = media.type == MediaWrapper.TYPE_AUDIO
@@ -422,7 +419,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
  * (S-304). A tap on the artwork or the words opens the full player. On a phone it is a card over
  * the content's edge. With a pointer, hovering it (or tabbing into it) brings out the previous and
  * stop buttons and a seek bar in place of the second line. [transparent]: it lies in the shell's
- * floating glass bar of a tablet (Desktop Kit 1.0), its progress along the bottom.
+ * floating bar of a tablet (Desktop Kit 1.0), its progress along the bottom.
  */
 @Composable
 fun MiniPlayer(
@@ -454,10 +451,10 @@ fun MiniPlayer(
             Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                // a phone's card is glass over the content passing under it (Desktop Kit 1.0)
+                // a phone's card: solid, whatever passes under it (1.0.1)
                 .then(
                     when {
-                        floating -> Modifier.glass(NagGlass.raised(colors, GlassThickness.Thin), shape)
+                        floating -> Modifier.background(colors.surfaceRaised, shape)
                         transparent -> Modifier
                         else -> Modifier.background(colors.chrome)
                     },
@@ -595,7 +592,7 @@ private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat:
  * Large windows: the transport bar of the mockups across the bottom of every screen (S-304). The
  * artwork and words open the full player; in the middle the transport and the seek bar, which
  * shows the time under the pointer; at the end the format, the volume and the player.
- * [transparent]: it lies in the shell's floating glass bar (Desktop Kit 1.0), without a surface or a rule.
+ * [transparent]: it lies in the shell's floating bar (Desktop Kit 1.0), without a surface or a rule.
  */
 @Composable
 fun TransportBar(

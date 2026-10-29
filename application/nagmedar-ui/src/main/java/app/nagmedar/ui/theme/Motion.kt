@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import app.nagmedar.ui.shell.WidthClass
 import kotlin.math.roundToInt
 
@@ -181,6 +182,62 @@ class NagMotion private constructor(val reduced: Boolean) {
             fadeOut(tween(COLOR, easing = StandardAccelerate))
     }
 
+    /**
+     * 1.0.1: a page opened from another (Settings from "Daha fazla", the equaliser from the player): it comes in
+     * from the end edge over the page it leaves ([pageExit]), on the shared axis. On a phone it moves on the
+     * [gesture] spring, wider windows take [LONG] on the emphasized curve; nothing moves with reduced motion.
+     * [rtl] mirrors the side. Back plays it in reverse ([pagePopEnter], [pagePopExit]), with the predictive gesture.
+     */
+    fun pageEnter(tier: MotionTier, rtl: Boolean): EnterTransition {
+        if (reduced || tier == MotionTier.Reduced) return EnterTransition.None
+        val end = if (rtl) -1 else 1
+        return slideInHorizontally(pageSlide(tier)) { it * end }
+    }
+
+    /** The page [pageEnter] covers: it moves a quarter of the way towards the start ([PAGE_SHIFT]) and stays drawn. */
+    fun pageExit(tier: MotionTier, rtl: Boolean): ExitTransition {
+        if (reduced || tier == MotionTier.Reduced) return ExitTransition.None
+        val end = if (rtl) -1 else 1
+        return slideOutHorizontally(pageSlide(tier)) { -(it * PAGE_SHIFT).roundToInt() * end }
+    }
+
+    /** Back: the page under comes back from a quarter of the way towards the start. */
+    fun pagePopEnter(tier: MotionTier, rtl: Boolean): EnterTransition {
+        if (reduced || tier == MotionTier.Reduced) return EnterTransition.None
+        val end = if (rtl) -1 else 1
+        return slideInHorizontally(pageSlide(tier)) { -(it * PAGE_SHIFT).roundToInt() * end }
+    }
+
+    /** Back: the page leaves over the end edge. */
+    fun pagePopExit(tier: MotionTier, rtl: Boolean): ExitTransition {
+        if (reduced || tier == MotionTier.Reduced) return ExitTransition.None
+        val end = if (rtl) -1 else 1
+        return slideOutHorizontally(pageSlide(tier)) { it * end }
+    }
+
+    private fun pageSlide(tier: MotionTier): FiniteAnimationSpec<IntOffset> =
+        if (tier == MotionTier.Gesture) gesture() else tween(LONG, easing = Emphasized)
+
+    /**
+     * The top bar's title, back arrow and search button changing with the page: the old ones fade out in
+     * [FADE_OUT], then the new ones fade in, so two titles never show at once; at once with reduced motion.
+     */
+    fun topBarChange(): ContentTransform = if (reduced) {
+        ContentTransform(EnterTransition.None, ExitTransition.None, sizeTransform = null)
+    } else {
+        ContentTransform(
+            targetContentEnter = fadeIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate)),
+            initialContentExit = fadeOut(tween(FADE_OUT, easing = EmphasizedAccelerate)),
+            sizeTransform = null,
+        )
+    }
+
+    /**
+     * 1.0.1: a dialog's card arriving: opaque from its first frame, it grows from [DIALOG_SCALE] over [MEDIUM];
+     * only the dim behind it fades. At once with reduced motion.
+     */
+    fun <T> dialogEnter(): FiniteAnimationSpec<T> = if (reduced) snap() else tween(MEDIUM, easing = EmphasizedDecelerate)
+
     override fun equals(other: Any?): Boolean = other is NagMotion && other.reduced == reduced
 
     override fun hashCode(): Int = reduced.hashCode()
@@ -205,6 +262,12 @@ class NagMotion private constructor(val reduced: Boolean) {
 
         /** How far a page over the window travels ([detailEnter]): a tenth of the width. */
         const val DETAIL_SHIFT = 0.1f
+
+        /** How far the page under a page opened over it moves towards the start ([pageExit]): a quarter of the width. */
+        const val PAGE_SHIFT = 0.25f
+
+        /** Where a dialog's card grows from ([dialogEnter]). */
+        const val DIALOG_SCALE = 0.94f
 
         /** A page over the window starts fading in this long after it starts moving. */
         const val DETAIL_FADE_DELAY = 50

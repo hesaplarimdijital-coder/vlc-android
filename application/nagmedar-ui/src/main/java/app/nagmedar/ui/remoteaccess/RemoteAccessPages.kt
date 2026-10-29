@@ -42,9 +42,8 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.copyToClipboard
@@ -142,7 +141,7 @@ private fun AddressesDialog(onDismiss: () -> Unit) {
     val connections by RemoteAccessUtils.connectionsFlow.collectAsState()
     val state = ServerState.of(status)
     var qrFor by rememberSaveable { mutableStateOf<String?>(null) }
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_ra_addresses_title), Modifier.testTag("ra-addresses-page"), cardWidth = 520.dp) {
                 Column(Modifier.heightIn(max = 600.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -242,7 +241,7 @@ private val HOW_STEPS = listOf(
 private fun HowItWorksDialog(onDismiss: () -> Unit) {
     var step by rememberSaveable { mutableIntStateOf(0) }
     val current = HOW_STEPS[step.coerceIn(0, HOW_STEPS.lastIndex)]
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_ra_how_title), Modifier.testTag("ra-how-page"), cardWidth = 460.dp) {
                 Text(stringResource(R.string.nag_ra_how_step, step + 1, HOW_STEPS.size), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary)
@@ -266,7 +265,7 @@ private fun HowItWorksDialog(onDismiss: () -> Unit) {
 /** The six digits a new browser asks for, with "It is not me", which turns that browser away. */
 @Composable
 private fun OneTimeCodeDialog(code: String, onNotMe: () -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(stringResource(R.string.nag_ra_code_title), Modifier.testTag("ra-code"), cardWidth = 400.dp) {
                 Text(stringResource(R.string.nag_ra_code_hint), style = NagTheme.type.body, color = NagTheme.colors.textSecondary)
