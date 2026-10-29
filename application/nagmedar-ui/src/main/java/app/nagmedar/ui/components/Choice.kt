@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,10 @@ import app.nagmedar.ui.theme.NagTheme
 /**
  * Row of mutually exclusive options (theme, density, view mode); [fill], the options share the
  * row's width equally (the player panel's). Not [enabled], it shows its choice faded and takes none.
+ *
+ * 1.0.1: options that do not fit the width side by side go on as many lines as they need
+ * ([segmentLines]), each line filling the width, and a label longer than the whole width wraps
+ * onto a second line: no option is ever cut (a phone at 320 dp, One UI's largest font).
  */
 @Composable
 fun <T> SegmentedChoice(
@@ -56,46 +61,113 @@ fun <T> SegmentedChoice(
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val outer = RoundedCornerShape(dimens.radiusControl + 2.dp)
-    Row(
+    val gap = 2.dp
+    Layout(
         modifier = modifier
             .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .background(colors.surface, outer)
             .border(1.dp, colors.border, outer)
             .padding(2.dp)
             .selectableGroup(),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        options.forEach { (value, label) ->
-            val interaction = remember { MutableInteractionSource() }
-            val state = interaction.collectState()
-            val isSelected = value == selected
-            val shape = RoundedCornerShape(dimens.radiusControl)
-            Box(
-                modifier = (if (fill) Modifier.weight(1f) else Modifier)
-                    // by touch a 48 dp target either way (S-310)
-                    .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
-                    .widthIn(min = dimens.minTarget)
-                    .pressScale(state.pressed)
-                    .focusRing(state, shape)
-                    .background(stateBackground(state, isSelected), shape)
-                    .pointerHoverIcon(PointerIcon.Hand)
-                    .selectable(selected = isSelected, interactionSource = interaction, indication = null, enabled = enabled, role = Role.RadioButton) {
-                        onSelect(value)
-                    }
-                    .padding(horizontal = dimens.gapM),
-                contentAlignment = Alignment.Center,
-            ) {
-                // as the kit has it, no "…": a label too long for a narrow window keeps the words that fit ("USB" of
-                // "USB DAC" on a phone), which reads better in an option than a cut word
-                Text(
-                    label,
-                    style = NagTheme.type.label,
-                    color = animateStateColor(if (isSelected) colors.onSelection else colors.textSecondary, "segmentLabel"),
-                    maxLines = 1,
-                )
+        content = {
+            options.forEach { (value, label) ->
+                val interaction = remember { MutableInteractionSource() }
+                val state = interaction.collectState()
+                val isSelected = value == selected
+                val shape = RoundedCornerShape(dimens.radiusControl)
+                Box(
+                    modifier = Modifier
+                        // by touch a 48 dp target either way (S-310)
+                        .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
+                        .widthIn(min = dimens.minTarget)
+                        .pressScale(state.pressed)
+                        .focusRing(state, shape)
+                        .background(stateBackground(state, isSelected), shape)
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .selectable(selected = isSelected, interactionSource = interaction, indication = null, enabled = enabled, role = Role.RadioButton) {
+                            onSelect(value)
+                        }
+                        .padding(horizontal = dimens.gapM),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // as the kit has it, no "…": the options take more lines instead, and a label wider than the whole
+                    // width wraps within its option
+                    Text(
+                        label,
+                        style = NagTheme.type.label,
+                        color = animateStateColor(if (isSelected) colors.onSelection else colors.textSecondary, "segmentLabel"),
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                    )
+                }
+            }
+        },
+    ) { measurables, constraints ->
+        val gapPx = gap.roundToPx()
+        val bounded = constraints.hasBoundedWidth
+        val natural = measurables.map { it.maxIntrinsicWidth(Constraints.Infinity) }
+        val lines = if (bounded) segmentLines(natural, constraints.maxWidth, gapPx) else listOf(natural.indices)
+        val single = lines.size == 1
+        // one line keeps the options' own widths (or shares the width, [fill]); more lines each fill the width
+        val stretch = bounded && (!single || fill)
+        val widths = IntArray(measurables.size)
+        for (line in lines) {
+            val count = line.last - line.first + 1
+            val room = if (bounded) constraints.maxWidth - gapPx * (count - 1) else 0
+            when {
+                !stretch -> line.forEach { widths[it] = minOf(natural[it], if (bounded) room else natural[it]) }
+                fill && single -> line.forEach { widths[it] = room / count }
+                else -> {
+                    // the width left over goes to the options of the line evenly; one alone wider than the width takes it all
+                    val used = line.sumOf { natural[it] }
+                    val extra = (room - used).coerceAtLeast(0)
+                    line.forEachIndexed { n, i -> widths[i] = minOf(natural[i], room) + extra / count + if (n < extra % count) 1 else 0 }
+                }
+            }
+        }
+        val heights = lines.map { line -> line.maxOf { measurables[it].maxIntrinsicHeight(widths[it]) } }
+        val placeables = measurables.mapIndexed { i, m ->
+            val h = heights[lines.indexOfFirst { i in it }]
+            m.measure(Constraints.fixed(widths[i], h))
+        }
+        val lineWidths = lines.map { line -> line.sumOf { widths[it] } + gapPx * (line.last - line.first) }
+        val width = (lineWidths.maxOrNull() ?: 0).coerceIn(constraints.minWidth, constraints.maxWidth)
+        val height = (heights.sum() + gapPx * (lines.size - 1).coerceAtLeast(0)).coerceIn(constraints.minHeight, constraints.maxHeight)
+        layout(width, height) {
+            var y = 0
+            lines.forEachIndexed { l, line ->
+                var x = 0
+                line.forEach { i ->
+                    placeables[i].placeRelative(x, y)
+                    x += widths[i] + gapPx
+                }
+                y += heights[l] + gapPx
             }
         }
     }
+}
+
+/**
+ * The options of a [SegmentedChoice] by line (1.0.1): in order, as many on a line as fit in
+ * [maxWidth] with [gap] between them; an option wider than [maxWidth] on a line of its own. All
+ * on one line when they fit.
+ */
+internal fun segmentLines(widths: List<Int>, maxWidth: Int, gap: Int): List<IntRange> {
+    if (widths.isEmpty()) return emptyList()
+    val lines = mutableListOf<IntRange>()
+    var start = 0
+    var used = widths[0]
+    for (i in 1 until widths.size) {
+        if (used + gap + widths[i] <= maxWidth) {
+            used += gap + widths[i]
+        } else {
+            lines += start until i
+            start = i
+            used = widths[i]
+        }
+    }
+    lines += start until widths.size
+    return lines
 }
 
 /** Colour swatches for the accent choice. */

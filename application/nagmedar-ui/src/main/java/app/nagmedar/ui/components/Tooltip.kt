@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import kotlinx.coroutines.delay
+import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 
@@ -146,9 +147,11 @@ internal fun TooltipBubble(text: String, shortcut: String?, modifier: Modifier =
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(text, style = NagTheme.type.labelSmall, color = colors.text, maxLines = 2)
-        if (shortcut != null) {
+        // 1.0.1: the keys with a keyboard only (a mouse alone has none to press)
+        val keys = keyHint(shortcut)
+        if (keys != null) {
             Spacer(Modifier.width(8.dp))
-            Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(keys, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

@@ -9,8 +9,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.audio.SignalPath
@@ -68,6 +71,7 @@ class MusicSettingsScreenshotTest {
         device: String? = null,
         scan: ReplayGainScan.Progress = ReplayGainScan.Progress(),
         prefs: SharedPreferences.Editor.() -> Unit = {},
+        fontScale: Float? = null,
     ) {
         // the settings the section reads, as a user left them
         val settings = compose.activity.getSharedPreferences("music-shot-$name", Context.MODE_PRIVATE)
@@ -75,16 +79,20 @@ class MusicSettingsScreenshotTest {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
-                Box(Modifier.fillMaxSize().background(NagTheme.colors.background).padding(top = 16.dp)) {
-                    MusicSection(
-                        engineAvailable = available,
-                        settings = settings,
-                        usbDacs = usbDacs,
-                        signalPath = signalPath,
-                        outputDevice = device,
-                        scan = scan,
-                        onOpenEqualizer = {},
-                    )
+                // 1.0.1: One UI's largest font, as the phone's settings would have it
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides if (fontScale != null) Density(density.density, fontScale) else density) {
+                    Box(Modifier.fillMaxSize().background(NagTheme.colors.background).padding(top = 16.dp)) {
+                        MusicSection(
+                            engineAvailable = available,
+                            settings = settings,
+                            usbDacs = usbDacs,
+                            signalPath = signalPath,
+                            outputDevice = device,
+                            scan = scan,
+                            onOpenEqualizer = {},
+                        )
+                    }
                 }
             }
         }
@@ -121,6 +129,17 @@ class MusicSettingsScreenshotTest {
         putFloat(NAGMEDAR_AUDIO_BALANCE, -0.3f)
         putBoolean(NAGMEDAR_AUDIO_MONO, true)
     }
+
+    /** 1.0.1: the S24's width in Turkish: "Çıkış"'s four options go on two lines, none cut. */
+    @Test @Config(qualifiers = "tr-w384dp-h1900dp-hdpi-nokeys")
+    fun phone() = capture("settings-music-phone-dark", ThemeMode.Dark, InputMode.Touch, available = true, signalPath = replayGainOnAAudio)
+
+    /** 1.0.1: the narrowest phone with the largest font: every option whole, a long one on two lines of its own. */
+    @Test @Config(qualifiers = "tr-w320dp-h2400dp-hdpi-nokeys")
+    fun narrowLargestFont() = capture(
+        "settings-music-phone-narrow-large-light", ThemeMode.Light, InputMode.Touch, available = true,
+        signalPath = replayGainOnAAudio, fontScale = 1.3f,
+    )
 
     @Test @Config(qualifiers = "tr-w800dp-h460dp-mdpi")
     fun withoutTheEngine() = capture("settings-music-tablet-dark-missing", ThemeMode.Dark, InputMode.Touch, available = false)

@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -158,11 +159,13 @@ fun NagButton(
             // by touch a 48 dp target either way (S-310)
             .defaultMinSize(minWidth = dimens.minTarget, minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
             .pressScale(state.pressed)
+            // a button that cannot be pressed now looks so, fill and border too (1.0.1: faded after the fill, only its
+            // label faded, so a disabled primary button looked pressable); the layer is always there, so a button
+            // turning enabled changes no modifier of the chain and nothing has to be drawn anew but its alpha
+            .graphicsLayer { alpha = if (enabled) 1f else DISABLED_ALPHA }
             .focusRing(state, shape)
             .background(background, shape)
             .then(if (primary) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))
-            // a button that cannot be pressed now looks so
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .nagClickable(interaction, onClick, enabled = enabled, role = Role.Button)
             .padding(horizontal = dimens.gapM),
         verticalAlignment = Alignment.CenterVertically,

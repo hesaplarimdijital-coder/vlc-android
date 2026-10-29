@@ -205,8 +205,9 @@ fun NagmedarShell(
     val floating = floatingPlayer && navKind != NavKind.BottomBar
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
-    // the phone's player covers the window: only its end, not every frame of the drag, re-measures the overlays
-    val playerOver by remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f } }
+    // the phone's player covers the window: only its end, not every frame of the drag, re-measures the overlays;
+    // as does a page of the screen's overlay over the whole window, once it is open (1.0.1: Sıradaki on a phone)
+    val playerOver by remember(overlayHost) { derivedStateOf { overlayHost.expandProgress() >= 1f || overlayHost.windowCovered } }
     SideEffect {
         scroll.enabled = navKind == NavKind.BottomBar
         scroll.hideOnScroll = showBottomNav
@@ -341,9 +342,10 @@ fun NagmedarShell(
                     Box(Modifier.fillMaxSize()) { overlay() }
                 }
             },
-            // over the phone's expanded player, the screen's overlays take the whole window
-            screenOverlayTop = { if (playerOver) 0 else metrics.topPadPx },
-            screenOverlayBottom = { if (playerOver) 0 else metrics.bottomPadPx },
+            // over the phone's expanded player, the screen's overlays take the whole window; with a page over the whole
+            // window too, from its first frame (1.0.1)
+            screenOverlayTop = { if (playerOver || overlayHost.windowPageShown) 0 else metrics.topPadPx },
+            screenOverlayBottom = { if (playerOver || overlayHost.windowPageShown) 0 else metrics.bottomPadPx },
             playerLayer = {
                 Box(Modifier.fillMaxSize().onGloballyPositioned { overlayHost.coordinates = it }) {
                     overlayHost.layers.forEach { layer -> if (layer.z == ShellOverlayHost.PLAYER) key(layer) { layer.content() } }
