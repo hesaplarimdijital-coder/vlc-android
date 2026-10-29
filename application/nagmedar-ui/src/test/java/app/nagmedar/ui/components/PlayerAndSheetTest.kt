@@ -280,11 +280,13 @@ class PlayerAndSheetTest {
             assertEquals(0, host.layers.size)
         }
         compose.onNodeWithContentDescription("Parça 3 için diğer işlemler").assertExists()
-        open = true
-        compose.mainClock.advanceTimeBy(1_000)
+        // opened, it takes the overlay; closed and down, it lets it go
+        compose.mainClock.autoAdvance = true
+        compose.runOnIdle { open = true }
+        compose.waitForIdle()
         assertEquals(1, host.layers.size)
-        open = false
-        compose.mainClock.advanceTimeBy(1_000)
+        compose.runOnIdle { open = false }
+        compose.waitForIdle()
         assertEquals(0, host.layers.size)
     }
 
