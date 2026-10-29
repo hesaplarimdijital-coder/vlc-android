@@ -26,7 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -60,6 +62,12 @@ import kotlin.math.roundToInt
 
 /** Navigation chrome around the current screen; screens show their own title only in [NavKind.Sidebar]. */
 val LocalNavKind = compositionLocalOf { NavKind.Sidebar }
+
+/**
+ * Desktop Kit 1.0: the player bar lies in the shell's floating glass bar (tablet, DeX), which draws
+ * the surface: the bar's content draws no background or top rule of its own.
+ */
+val LocalFloatingPlayer = staticCompositionLocalOf { false }
 
 /** Navigation entry point handed to screens. */
 @Stable
@@ -265,10 +273,13 @@ fun NagmedarShell(
                         .onSizeChanged { metrics.playerPx = it.height }
                         .then(
                             if (!floating) Modifier else Modifier
+                                .clip(shape)
                                 .glass(NagGlass.raised(colors, GlassThickness.Thin), shape)
                                 .border(1.dp, colors.borderStrong, shape),
                         ),
-                ) { player(navKind) }
+                ) {
+                    CompositionLocalProvider(LocalFloatingPlayer provides floating) { player(navKind) }
+                }
             },
             content = {
                 Box(
@@ -312,6 +323,8 @@ fun NagmedarShell(
             },
             floatingPlayer = floating,
             floatingMargin = floatingMargin,
+            // the transport bar of a desktop window needs the room of its three parts; a tablet's mini player less
+            floatingMaxWidth = if (navKind == NavKind.Sidebar) 1180.dp else 760.dp,
         )
     }
 }

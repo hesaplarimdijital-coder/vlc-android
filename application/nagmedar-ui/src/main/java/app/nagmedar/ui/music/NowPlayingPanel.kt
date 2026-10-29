@@ -137,6 +137,8 @@ fun NowPlayingPanel(
     onSeekToMs: (Long) -> Unit = {},
     onOpenArtist: (() -> Unit)? = null,
     onOpenAlbum: (() -> Unit)? = null,
+    /** Desktop Kit 1.0: more under what plays, in the same scroll (the inspector's tags of the track). */
+    below: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -184,6 +186,7 @@ fun NowPlayingPanel(
             }
             else -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
                 Playing(info, progress, waveform, upNext, onSeek, onPlayUpNext, artwork, onRate, visualizer.takeIf { visualizerShown }, onStepChapter, onSeekToMs, links)
+                below?.invoke()
             }
         }
     }
@@ -306,10 +309,17 @@ private fun UpNextRow(entry: QueueEntry, onPlay: () -> Unit) {
 /**
  * The panel on the playback service: what plays, its progress over its waveform, the queue after it; or its lyrics
  * (S-1004), which [onFullScreenLyrics] opens over the window; its visualiser (S-611), which
- * [onFullScreenVisualizer] does.
+ * [onFullScreenVisualizer] does. In the music view's inspector (Desktop Kit 1.0) the queue and the lyrics have tabs
+ * of their own ([withQueue], [withLyrics] false) and [below] adds the track's tags.
  */
 @Composable
-fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisualizer: (() -> Unit)? = null) {
+fun MusicNowPlaying(
+    onFullScreenLyrics: (() -> Unit)? = null,
+    onFullScreenVisualizer: (() -> Unit)? = null,
+    withQueue: Boolean = true,
+    withLyrics: Boolean = true,
+    below: (@Composable () -> Unit)? = null,
+) {
     val context = LocalContext.current
     val prefs = rememberNagmedarPreferences()
     val nowPlaying = rememberNowPlaying()
@@ -322,7 +332,7 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
     val waveform = rememberWaveform(media?.uri?.toString())
     val queue = rememberPlayQueue()
     val path = rememberSignalPath()
-    val upNext = if (queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
+    val upNext = if (withQueue && queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
     // S-1004: the lyrics in place of the artwork and the queue, until turned off
     var lyricsShown by rememberSaveable { mutableStateOf(false) }
     val coverMenu = rememberCoverMenu(remember(media) { media?.let(CoverTrack::of) })
@@ -355,7 +365,7 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
             ContextMenuArea(coverMenu, accessibilityLabel = coverLabel) { Artwork(media, size, corner = 8.dp, video = false) }
         },
         onRate = key?.let { k -> { stars -> TrackStatsIndex.rate(context, k, stars) } },
-        lyrics = { lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) },
+        lyrics = if (withLyrics) ({ lyricsModifier -> PlayingLyrics(lyricsModifier, onFullScreen = onFullScreenLyrics) }) else null,
         lyricsShown = lyricsShown,
         onLyricsShown = { lyricsShown = it },
         canCast = rememberCastingEnabled(),
@@ -371,6 +381,7 @@ fun MusicNowPlaying(onFullScreenLyrics: (() -> Unit)? = null, onFullScreenVisual
         // the music view beside the pane opens the artist's or the album's tracks; the pane stays
         onOpenArtist = artistLink?.let { link -> { MusicLinks.open(link) } },
         onOpenAlbum = albumLink?.let { link -> { MusicLinks.open(link) } },
+        below = below,
     )
 }
 

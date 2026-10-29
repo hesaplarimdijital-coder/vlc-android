@@ -1,7 +1,24 @@
 package app.nagmedar.ui.music
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Text
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.rightClick
+import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.shell.LocalPaneWidths
+import app.nagmedar.ui.shell.PaneWidths
+import app.nagmedar.ui.shell.WORKSTATION_PANE
+import androidx.compose.ui.input.InputMode as ComposeInputMode
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.hasText
@@ -27,7 +44,11 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.util.Locale
 
-/** S-803, S-1001: the ways through the music library, its filter, its table's columns. */
+/**
+ * S-803, S-1001: the ways through the music library, its filter, its table's columns; Desktop Kit
+ * 1.0: the inspector following the selection, its tabs and its keeping, Shift+arrows and the
+ * selection's menu.
+ */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w420dp-h900dp-mdpi")
@@ -37,13 +58,16 @@ class MusicBrowserTest {
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     private val played = mutableListOf<Pair<List<String>, Int>>()
+    private val queued = mutableListOf<List<String>>()
 
     private val actions = object : MusicActions {
         override fun play(tracks: List<Track>, index: Int) {
             played += tracks.map { it.title } to index
         }
 
-        override fun queue(tracks: List<Track>) = Unit
+        override fun queue(tracks: List<Track>) {
+            queued += tracks.map { it.title }
+        }
 
         override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> = emptyList()
     }
@@ -124,7 +148,9 @@ class MusicBrowserTest {
     fun columnsAreKeptAsText() {
         assertEquals(MusicColumn.DEFAULT, MusicColumn.parse(null))
         assertEquals(listOf(MusicColumn.Title, MusicColumn.Rate, MusicColumn.Depth), MusicColumn.parse("rate,depth,nope"))
-        assertEquals(listOf(MusicColumn.Title, MusicColumn.Artist), MusicColumn.parse("artist,title"))
+        // Desktop Kit 1.0: the order the user put them in; the title among them, first when it was missing
+        assertEquals(listOf(MusicColumn.Artist, MusicColumn.Title), MusicColumn.parse("artist,title"))
+        assertEquals("nagmedar_music_columns_albums", columnsKey(MusicView.Albums))
         assertEquals("title,artist,format", MusicColumn.format(listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Format)))
     }
 
@@ -146,5 +172,109 @@ class MusicBrowserTest {
         // Turkish order: "Çağla" after "Cemre"
         val byArtist = sortTracks(tracks, MusicSort(MusicColumn.Artist, true), tr).map { it.artist }.distinct()
         assertEquals(listOf("Cemre Kaya", "Çağla Akın", "Deniz Su", "Ece Duru", "Kadri Erdem"), byArtist)
+    }
+
+    // ------------------------------------------------------------ Desktop Kit 1.0: the workstation
+
+    /** Panes kept in a map, as the preferences keep them. */
+    private class MapPaneWidths : PaneWidths {
+        val widths = mutableMapOf<String, Float>()
+        val hidden = mutableMapOf<String, Boolean>()
+
+        override fun paneWidth(key: String): Float? = widths[key]
+
+        override fun savePaneWidth(key: String, widthDp: Float) {
+            widths[key] = widthDp
+        }
+
+        override fun paneCollapsed(key: String): Boolean = hidden[key] ?: false
+
+        override fun savePaneCollapsed(key: String, collapsed: Boolean) {
+            hidden[key] = collapsed
+        }
+    }
+
+    /** Each tab says what it is about: "etiketler Neva Kâr 1", "etiketler çalan 0". */
+    private val tabs = MusicInspectorContent(
+        tags = { subject -> Text("etiketler ${subject.track?.title ?: "çalan"} ${subject.selected}") },
+        signal = { _ -> Text("sinyal") },
+        lyrics = { _ -> Text("sözler") },
+        queue = { Text("sıra") },
+    )
+
+    private lateinit var inputModes: InputModeManager
+
+    private fun workstation(store: PaneWidths) {
+        val itri = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
+        val state = MusicBrowserState(view = MusicView.Albums, group = itri, columns = listOf(MusicColumn.Title, MusicColumn.Duration))
+        compose.setContent {
+            inputModes = LocalInputModeManager.current
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                CompositionLocalProvider(LocalWidthClass provides WidthClass.Large, LocalPaneWidths provides store) {
+                    MusicBrowser(library, state, actions, Modifier, inspector = tabs)
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    private fun row(title: String) = compose.onNode(hasText(title) and hasClickAction())
+
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun theInspectorFollowsTheSelectionAndItsTabs() {
+        val store = MapPaneWidths()
+        workstation(store)
+        // nothing selected: what plays
+        compose.onNodeWithText("etiketler çalan 0").assertExists()
+        row("Neva Kâr").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("etiketler Neva Kâr 1").assertExists()
+        // a tab clicked, the next one with the arrow key
+        compose.onNodeWithTag("inspector-tab-lyrics").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("sözler").assertExists()
+        compose.runOnIdle { inputModes.requestInputMode(ComposeInputMode.Keyboard) }
+        compose.onNodeWithTag("inspector-tab-lyrics").requestFocus()
+        compose.onNodeWithTag("inspector-tab-lyrics").performKeyInput { pressKey(Key.DirectionRight) }
+        compose.waitForIdle()
+        compose.onNodeWithText("sıra").assertExists()
+        // hidden, and kept so
+        compose.onNodeWithTag("inspector-hide").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("inspector").assertDoesNotExist()
+        assertEquals(true, store.hidden[WORKSTATION_PANE])
+    }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun aHiddenInspectorStaysHidden() {
+        workstation(MapPaneWidths().apply { hidden[WORKSTATION_PANE] = true })
+        compose.onNodeWithTag("inspector").assertDoesNotExist()
+        compose.onNodeWithText("etiketler çalan 0").assertDoesNotExist()
+    }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun theInspectorComesBackAsWide() {
+        workstation(MapPaneWidths().apply { widths[WORKSTATION_PANE] = 420f })
+        compose.onNodeWithTag("inspector").assertWidthIsEqualTo(420.dp)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun shiftArrowsGrowTheSelectionAndItsMenuTakesThemAll() {
+        workstation(MapPaneWidths())
+        row("Segâh Tekbîr").performClick()
+        compose.waitForIdle()
+        compose.runOnIdle { inputModes.requestInputMode(ComposeInputMode.Keyboard) }
+        row("Segâh Tekbîr").requestFocus()
+        row("Segâh Tekbîr").performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionDown) } }
+        compose.waitForIdle()
+        // the anchor's track, one of the two selected
+        compose.onNodeWithText("etiketler Segâh Tekbîr 2").assertExists()
+        // a right click on a selected row: the menu is the selection's
+        row("Neva Kâr").performMouseInput { rightClick(center) }
+        compose.waitForIdle()
+        compose.onNodeWithText("Sıraya ekle").performClick()
+        compose.waitForIdle()
+        assertEquals(listOf(listOf("Segâh Tekbîr", "Neva Kâr")), queued)
     }
 }

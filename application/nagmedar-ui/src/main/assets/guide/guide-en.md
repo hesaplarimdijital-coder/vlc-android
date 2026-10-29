@@ -77,16 +77,18 @@ Local music files are played by Nağmedar's own **music engine**: an FFmpeg-deco
 
 ## The music library and lists {music-library}
 
-On the Music page, filter, sort and make lists. A large window has three panes (groups, track table, now playing); on a phone, touching the mini player opens the full-screen player (swipe the cover left for the next track; swiping it right works like Previous).
+On the Music page, filter, sort and make lists. On a tablet and in DeX there are three panes (groups, track table, the inspector on the right) and the player bar floats over the content as frosted glass; on a phone, touching the mini player opens the full-screen player (swipe the cover left for the next track; swiping it right works like Previous).
 
-- **Toolbar:** Artists, Albums, Genres… on the left (a menu showing the current view in a narrow window and on a phone), Play, Shuffle, Columns and Filter on the right. You choose the table's columns with “Columns” or from the right-click menu of its header.
+- **Toolbar:** Artists, Albums, Genres… on the left (a menu showing the current view in a narrow window and on a phone), Play, Shuffle, Columns and Filter on the right. You choose the table's columns with “Columns” or from the right-click menu of its header; a column title's menu moves that column left or right, and “Reset columns” brings back the first ones. Each view (Albums, Genres…) remembers its own columns.
+- **Inspector** ({key:ToggleInspector}): tabs for the track selected in the table, or the one playing when none is: Tags and spectrum (tags, format, waveform, the visualiser while it plays), Signal path, Lyrics and Queue. Drag its edge to widen it; its width and whether it is hidden are remembered. ← and → move between the tabs.
+- **Selection:** Ctrl+click adds or removes a track, Shift+click and Shift+↑/↓ select a range, {key:SelectAll} selects everything, Esc lets go. A right click on one of the selected rows opens a menu for all of them.
 - **Filters:** “Filter” opens the bit depth (16, 24, 32 bit, DSD, lossy) and sample rate filters in a panel; while a filter is on, a dot shows on the button, and “Clear the filters” turns them all off.
 - **Up next** ({key:PlayQueue}): “Play next” in a track's menu puts it right after the one playing, “Add to queue” at the end. Drag by the handle to reorder, or use Alt+↑/↓.
 - **Playlists:** every list, smart lists too, shows as a card: cover, name, track count, length and last play. Search the lists; sort them by name, last play or creation. Pressing the open list's name changes it in place (Enter keeps it, Esc leaves it); its menu has rename, duplicate, Play next, Add to queue, export and delete.
 - **Import and export:** M3U, M3U8, PLS and XSPF are imported and exported; files of lists made on another computer are found from their names.
 - **Smart list:** make a list that fills itself by rules (artist, genre, rating, play count, date added…) with Playlists › Smart list; change it with “Edit rules…”.
 - **CUE sheet:** a single-file album with a CUE sheet (.cue) of the same name beside it shows in the library with its tracks and plays sample-accurately; there is nothing to do.
-- **Rating:** give 1–5 stars in the table, in the now playing pane or with “Rate…”. A track counts as played when half of it or four minutes has been heard, and as skipped if you move on before.
+- **Rating:** give 1–5 stars in the table, in the inspector or with “Rate…”. A track counts as played when half of it or four minutes has been heard, and as skipped if you move on before.
 
 ### While it plays
 - Behind the progress bar (the now playing pane, the phone's player, the bar at the bottom) the track's waveform shows faintly, with the elapsed and remaining time. While you drag the thumb a time bubble shows, and letting go seeks there; with the bar focused, ← and → seek 5 s, Home and End go to the start and the end.
@@ -195,7 +197,7 @@ In a wide window (DeX, an external display) Nağmedar works like a desktop app: 
 - **Command palette** ({key:CommandPalette}): commands, screens, appearance settings and the library's tracks are searched in one box.
 - **Mouse:** a right click (or the Menu key) opens context menus; Ctrl or Shift with a click selects several items; dragging on an empty area selects with a rubber band. The mouse's back and forward buttons move between screens.
 - **Drag and drop:** dropping a file from outside plays it, dropping media on the player bar adds it to the queue.
-- **Windows:** {key:ToggleSidebar} collapses the sidebar, {key:OpenInNewWindow} opens the same screen in a new window. The window's place and size are remembered.
+- **Windows:** {key:ToggleSidebar} collapses the sidebar, {key:ToggleInspector} hides or shows Music's inspector, {key:OpenInNewWindow} opens the same screen in a new window. The window's place and size are remembered.
 - **Shortcuts:** the shortcut card ({key:ShortcutList}) lists them all; to change one, click it in Settings › Keyboard shortcuts and press the new keys. There are VLC and mpv presets, export and import, and a keyboard map that shows where the keys are on a Turkish Q keyboard.
 - Settings › Input: interface density and tooltip delay.
 

@@ -32,6 +32,7 @@ import app.nagmedar.ui.playback.TransportBar
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
@@ -66,6 +67,8 @@ fun TestShell(
     caption: CaptionBar? = null,
     /** What the bars show (S-1302: casting). */
     playerInfo: PlayerBarInfo = samplePlayerInfo,
+    /** Desktop Kit 1.0: the player bar floats over a tablet's and a desktop window's content as glass, as in the app. */
+    floatingPlayer: Boolean = false,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, _ -> SampleScreen(destination) },
 ) {
     val navController = rememberNavController()
@@ -93,6 +96,7 @@ fun TestShell(
         overlay = overlay,
         caption = caption,
         screen = screen,
+        floatingPlayer = floatingPlayer,
     )
 }
 
@@ -158,9 +162,11 @@ object NoPlayerActions : PlayerBarActions {
 @Composable
 fun SamplePlayerBar(kind: NavKind, info: PlayerBarInfo = samplePlayerInfo, actions: PlayerBarActions = NoPlayerActions, queueOpen: Boolean = false) {
     val artwork: @Composable (Dp) -> Unit = { size -> Artwork(media = null, size = size, video = info.isVideo) }
+    // in the shell's floating glass bar, as the app's bars are
+    val transparent = LocalFloatingPlayer.current
     if (kind == NavKind.Sidebar) {
-        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen)
+        TransportBar(info, { 0.42f }, actions, artwork, queueOpen = queueOpen, transparent = transparent)
     } else {
-        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen)
+        MiniPlayer(info, { 0.42f }, actions, artwork, floating = kind == NavKind.BottomBar, queueOpen = queueOpen, transparent = transparent)
     }
 }

@@ -82,7 +82,7 @@ import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.music.MusicLinks
-import app.nagmedar.ui.music.MusicNowPlaying
+import app.nagmedar.ui.music.rememberMusicInspector
 import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
@@ -412,6 +412,8 @@ private fun NagmedarMain(
                 navController = navController,
                 caption = caption,
                 contentOnly = playerOverWindow,
+                // Desktop Kit 1.0: on tablet and DeX the player bar floats over the content as glass
+                floatingPlayer = true,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -485,11 +487,16 @@ private fun NagmedarMain(
                 screen = { destination, shellNavigator ->
                     val page: @Composable () -> Unit = {
                         when (destination) {
-                            // S-803, S-1001: on a desktop window the now playing pane, with the waveform, beside the table
+                            // S-803, S-1001, Desktop Kit 1.0: on tablet and DeX windows the inspector beside the table (what plays
+                            // with its waveform, the signal path, the lyrics, the queue)
                             Destination.Music -> MusicScreen(
                                 repository,
                                 onAddFolder = { sourcesFor = LibrarySection.Music },
-                                nowPlaying = { MusicNowPlaying(onFullScreenLyrics = { lyricsOpen = true }, onFullScreenVisualizer = { visualizerOpen = true }) },
+                                inspector = rememberMusicInspector(
+                                    onFullScreenLyrics = { lyricsOpen = true },
+                                    onFullScreenVisualizer = { visualizerOpen = true },
+                                    undo = undo,
+                                ),
                             )
                             // S-804: the medialibrary's playlists, a tab each
                             Destination.Playlists -> PlaylistsScreen(repository, undo = undo, onBrowseMusic = { shellNavigator.navigate(Destination.Music) })
@@ -813,6 +820,8 @@ class AppActions(
             }
             ShortcutId.ToggleSidebar -> prefs.updateSidebarCollapsed(!prefs.sidebarCollapsed)
             ShortcutId.PlayQueue -> queuePanel.toggle()
+            // Desktop Kit 1.0: the music view's inspector, where the window shows one
+            ShortcutId.ToggleInspector -> return screenCommands.toggleInspector()
             // S-1504: the card of keys; its button leads to the editor in Settings
             ShortcutId.ShortcutList -> navigator.navigate(Destination.ShortcutCard)
             ShortcutId.UserGuide -> navigator.navigate(Destination.Guide)

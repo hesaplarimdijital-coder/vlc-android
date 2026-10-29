@@ -98,6 +98,7 @@ internal fun MusicToolbar(
     val shuffleLabel = stringResource(R.string.nag_shuffle)
     val columnsLabel = stringResource(R.string.nag_music_columns)
     val labels = MusicColumn.entries.associateWith { stringResource(it.label) }
+    val words = rememberColumnMenuWords()
     val ready = tracks.isNotEmpty()
     BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs).testTag("music-toolbar")) {
         val segments = maxWidth >= SEGMENTS_FROM
@@ -119,7 +120,7 @@ internal fun MusicToolbar(
                 NagButton(shuffleLabel, { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = ready)
                 if (showColumns) {
                     Spacer(Modifier.width(dimens.gapS))
-                    MenuButton(columnsLabel, { columnMenu(state, labels) })
+                    MenuButton(columnsLabel, { columnMenu(state, labels, words) })
                 }
             } else {
                 NagIconButton(NagIcons.Play, playLabel, { actions.play(tracks, 0) }, enabled = ready, tint = NagTheme.colors.accent)

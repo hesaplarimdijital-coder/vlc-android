@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,11 +15,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.NoPlayerActions
 import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
+import app.nagmedar.audio.AbSide
+import app.nagmedar.audio.EngineState
+import app.nagmedar.audio.ReplayGainMode
+import app.nagmedar.audio.SignalPath
+import app.nagmedar.ui.audio.SignalPathCard
+import app.nagmedar.ui.components.InspectorState
+import app.nagmedar.ui.components.InspectorToggleButton
+import app.nagmedar.ui.components.rememberInspectorState
 import app.nagmedar.ui.lyrics.LyricLine
 import app.nagmedar.ui.lyrics.LyricsLoad
 import app.nagmedar.ui.lyrics.LyricsPane
@@ -28,6 +40,7 @@ import app.nagmedar.ui.music.MusicActions
 import app.nagmedar.ui.music.MusicBrowser
 import app.nagmedar.ui.music.MusicBrowserState
 import app.nagmedar.ui.music.MusicColumn
+import app.nagmedar.ui.music.MusicInspectorContent
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.MusicSamples
 import app.nagmedar.ui.music.MusicView
@@ -37,13 +50,19 @@ import app.nagmedar.ui.music.PhonePlayer
 import app.nagmedar.ui.music.RatingSurface
 import app.nagmedar.ui.music.TechFilter
 import app.nagmedar.ui.music.Track
+import app.nagmedar.ui.music.TrackInspector
+import app.nagmedar.ui.music.TrackTags
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
+import app.nagmedar.ui.playback.FakeQueue
 import app.nagmedar.ui.playback.QueueEntry
+import app.nagmedar.ui.playback.QueuePanel
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.UnderShellBars
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -57,8 +76,9 @@ import java.util.Locale
 
 /**
  * S-803, S-1001, S-1002, for approval: the music library in DeX as three panes (the albums, an
- * album's table with its format columns, now playing with its waveform), on a phone by artist in
- * English, on a tablet by genre with the 24-bit filter, and the phone's player.
+ * album's table with its format columns and, Desktop Kit 1.0, the inspector on what plays with its
+ * waveform, or on a selected track; its lyrics), on a phone by artist in English, on a tablet by
+ * genre with the 24-bit filter (the inspector's queue) and by album (its signal path), and the phone's player.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -91,7 +111,7 @@ class MusicScreenshotTest {
         QueueEntry("c#1", "Yağmur", "Cemre Kaya", 231_000),
     )
 
-    private fun capture(name: String, theme: ThemeMode, input: InputMode, content: @Composable () -> Unit) {
+    private fun capture(name: String, theme: ThemeMode, input: InputMode, act: () -> Unit = {}, content: @Composable () -> Unit) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
@@ -99,81 +119,141 @@ class MusicScreenshotTest {
             }
         }
         compose.waitForIdle()
+        act()
+        compose.waitForIdle()
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }
         ShellScreenshotTest.save(name, bitmap)
     }
 
+    /**
+     * The music page as the app has it: its header (with the inspector's button on tablet and DeX) and the browser;
+     * with [inspector] (Desktop Kit 1.0) laid out under a floating player bar, as the app's music page is.
+     */
     @Composable
-    private fun Library(library: MusicLibrary, state: MusicBrowserState, nowPlaying: (@Composable () -> Unit)? = null) {
-        Column(Modifier.fillMaxSize()) {
-            PageHeader(
-                title = stringResource(R.string.nag_nav_music),
-                subtitle = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size),
-            )
-            MusicBrowser(library, state, NoMusicActions, nowPlaying = nowPlaying, stats = MusicSamples.stats)
+    private fun Library(library: MusicLibrary, state: MusicBrowserState, inspector: MusicInspectorContent? = null, inspectorState: InspectorState? = null) {
+        val panel = inspectorState ?: rememberInspectorState()
+        val page = @Composable {
+            Column(Modifier.fillMaxSize()) {
+                PageHeader(
+                    title = stringResource(R.string.nag_nav_music),
+                    subtitle = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size),
+                ) {
+                    if (inspector != null && currentWidthClass() >= WidthClass.Expanded) InspectorToggleButton(panel)
+                }
+                MusicBrowser(library, state, NoMusicActions, inspector = inspector, inspectorState = panel, stats = MusicSamples.stats)
+            }
         }
+        if (inspector != null) UnderShellBars(content = page) else page()
     }
 
+    private val neva = MusicSamples.tracks.first { it.title == "Neva Kâr" }
+
+    /** A 24/96 FLAC to the USB DAC, untouched: bit-perfect. */
+    private val usbPath = SignalPath(
+        state = EngineState.Playing,
+        source = SignalPath.Source(1, "file:///music/neva.flac", "flac", "flac", 96_000, 2, 24, false, 498_000, 0, 0, false),
+        output = SignalPath.Output("usb", 96_000, 2, "s24", 24, true),
+        volume = 1.0,
+        crossfadeMs = 0,
+        replayGain = SignalPath.ReplayGainStage(ReplayGainMode.Off, 0.0, 0.0, true, false),
+        tempo = 1.0,
+        pitch = 0.0,
+        balance = 0.0,
+        mono = false,
+        dsp = listOf(SignalPath.DspStage("bypass", null, null, null, null, null)),
+        dspActive = false,
+        dspLevelDb = 0.0,
+        abSide = AbSide.A,
+        abGainDb = 0.0,
+        bitPerfect = true,
+        reason = SignalPath.Reason.None,
+    )
+
+    private val queue = FakeQueue(
+        listOf(QueueEntry("n#1", "Neva Kâr", "Kadri Erdem", 498_000)) + upNext,
+        current = 0,
+    )
+
+    /** The inspector's tabs on samples, as the app's on the playback service: what plays is [playing] ("Neva Kâr"). */
+    private val inspector = MusicInspectorContent(
+        tags = { subject ->
+            val track = subject.track
+            if (track == null || track.uri == neva.uri) {
+                NowPlayingPanel(
+                    info = playing,
+                    progress = { 0.38f },
+                    waveform = MusicSamples.waveform,
+                    upNext = emptyList(),
+                    onSeek = {},
+                    onPlayUpNext = {},
+                    artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
+                    onRate = {},
+                    below = { TrackTags(neva, MusicSamples.stats, Modifier.padding(top = 12.dp)) },
+                )
+            } else {
+                TrackInspector(
+                    track = track,
+                    selected = subject.selected,
+                    waveform = MusicSamples.waveform,
+                    rating = MusicSamples.stats[track.statsKey]?.rating ?: 0,
+                    onRate = {},
+                    stats = MusicSamples.stats,
+                    cover = { size -> Artwork(null, size, corner = 8.dp, video = false) },
+                )
+            }
+        },
+        signal = { _ -> Column(Modifier.fillMaxSize().padding(16.dp)) { SignalPathCard(usbPath, "USB DAC") } },
+        lyrics = { _ ->
+            LyricsPane(
+                load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.synced.copy(offsetMs = 300)),
+                timeMs = { 23_500L },
+                onSeek = {},
+                onDelay = {},
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                onFullScreen = {},
+            )
+        },
+        queue = { QueuePanel(queue.entries, queue.current, queue, onClose = null, modifier = Modifier.fillMaxSize(), background = NagTheme.colors.surface) },
+    )
+
+    private fun itri(library: MusicLibrary) = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
+
+    private val dexColumns = listOf(MusicColumn.Title, MusicColumn.Number, MusicColumn.Composer, MusicColumn.Format, MusicColumn.Duration, MusicColumn.Rating, MusicColumn.Plays)
+
+    /** Desktop Kit 1.0: DeX as MusicBee: the albums, an album's table, the inspector on what plays; the bar floats. */
     @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
     fun dex() {
         val library = library("tr")
-        val itri = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
-        val state = MusicBrowserState(
-            view = MusicView.Albums,
-            group = itri,
-            columns = listOf(MusicColumn.Title, MusicColumn.Number, MusicColumn.Composer, MusicColumn.Format, MusicColumn.Duration, MusicColumn.Rating, MusicColumn.Plays),
-        )
+        val state = MusicBrowserState(view = MusicView.Albums, group = itri(library), columns = dexColumns)
         capture("music-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Music) { _, _ ->
-                Library(library, state) {
-                    NowPlayingPanel(
-                        info = playing,
-                        progress = { 0.38f },
-                        waveform = MusicSamples.waveform,
-                        upNext = upNext,
-                        onSeek = {},
-                        onPlayUpNext = {},
-                        artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
-                        onRate = {},
-                    )
-                }
+            TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
+                Library(library, state, inspector)
             }
         }
     }
 
-    /** S-1004: the now playing pane with the lyrics, the line sung lit, a delay set. */
+    /** The inspector on a track clicked in the table, which is not what plays: its tags, waveform and stars. */
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
+    fun dexLight() {
+        val library = library("tr")
+        val state = MusicBrowserState(view = MusicView.Albums, group = itri(library), columns = dexColumns)
+        capture("music-dex-light", ThemeMode.Light, InputMode.Pointer, act = { compose.onAllNodesWithText("Segâh Tekbîr").onFirst().performClick() }) {
+            TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
+                Library(library, state, inspector)
+            }
+        }
+    }
+
+    /** S-1004 in the inspector's lyrics tab: the line sung lit, a delay set. */
     @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi")
     fun lyricsDex() {
         val library = library("tr")
         val album = library.groups(MusicView.Albums).first { it.title == "Gece Yolcusu" }.key
         capture("music-lyrics-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Music) { _, _ ->
-                Library(library, MusicBrowserState(view = MusicView.Albums, group = album)) {
-                    NowPlayingPanel(
-                        info = playing.copy(title = "Sabaha Kadar", artist = "Ada Karan", album = "Gece Mavisi", lengthMs = 241_600, format = "FLAC 24/48 · AAudio · 48 kHz"),
-                        progress = { 0.12f },
-                        waveform = MusicSamples.waveform,
-                        upNext = upNext,
-                        onSeek = {},
-                        onPlayUpNext = {},
-                        artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
-                        onRate = {},
-                        lyrics = { modifier ->
-                            LyricsPane(
-                                load = LyricsLoad.Found(LyricsSamples.track, LyricsSamples.synced.copy(offsetMs = 300)),
-                                timeMs = { 23_500L },
-                                onSeek = {},
-                                onDelay = {},
-                                modifier = modifier,
-                                onFullScreen = {},
-                            )
-                        },
-                        lyricsShown = true,
-                        onLyricsShown = {},
-                    )
-                }
+            TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = album), inspector, InspectorState(340f, initialTab = 2))
             }
         }
     }
@@ -188,12 +268,24 @@ class MusicScreenshotTest {
         }
     }
 
+    /** A tablet by genre with the 24-bit filter; the inspector on its queue tab, the mini player floating. */
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun tabletGenres() {
         val library = library("tr")
         capture("music-tablet-dark-genres", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Expanded, startDestination = Destination.Music) { _, _ ->
-                Library(library, MusicBrowserState(view = MusicView.Genres, filter = TechFilter(depths = setOf(Depth.Bits24))))
+            TestShell(WidthClass.Expanded, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Genres, filter = TechFilter(depths = setOf(Depth.Bits24))), inspector, InspectorState(340f, initialTab = 3))
+            }
+        }
+    }
+
+    /** A tablet held upright in the light: the albums, the inspector on the signal path of what plays. */
+    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
+    fun tabletLight() {
+        val library = library("tr")
+        capture("music-tablet-light", ThemeMode.Light, InputMode.Touch) {
+            TestShell(WidthClass.Expanded, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = itri(library)), inspector, InspectorState(340f, initialTab = 1))
             }
         }
     }

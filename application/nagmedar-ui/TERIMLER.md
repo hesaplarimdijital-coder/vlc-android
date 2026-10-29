@@ -137,6 +137,7 @@ Sözlüğü testler denetler:
 | kodlayıcı | encoder | | | Dönüştürmede yazan taraf (Opus, LAME, AAC) |
 | bit derinliği, örnekleme hızı | bit depth, sample rate | | | Kütüphanenin filtreleri ve sütunları: “24 bit”, “96 kHz”; teknik gösterim “24/96” iki dilde de noktalı |
 | filtre, Filtrele | filter | süzgeç | | Müzik kütüphanesinin araç çubuğundaki düğme ve açtığı panel; başlıklar altında (Bit derinliği, Örnekleme hızı) seçilir, düğmede açık filtre bir noktayla görünür |
+| ayrıntı paneli | inspector | | | Tablette ve DeX'te Müzik'in sağındaki panel (Desktop Kit 1.0): seçili parçanın, seçili yoksa çalanın sekmeleri “Etiketler ve spektrum”, “Sinyal yolu”, “Sözler”, “Sıra”; Ctrl+I ve başlıktaki düğme gizler ya da gösterir |
 | en-boy oranı | aspect ratio | | | “2,39:1” / “2.39:1”; “Doldur” görüntüyü kırparak ekranı doldurur |
 | ton eşleme | tone mapping | | | HDR görüntüyü SDR ekrana uyarlar |
 | geçmeli tarama | deinterlacing | | | |
