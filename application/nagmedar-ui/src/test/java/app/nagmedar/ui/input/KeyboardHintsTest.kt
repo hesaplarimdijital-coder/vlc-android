@@ -1,6 +1,7 @@
 package app.nagmedar.ui.input
 
 import android.content.res.Configuration
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,12 +18,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /**
  * 1.0.1: keycaps and shortcut labels show with a hardware keyboard only (the S24 by touch showed
  * "Ctrl+Z" on its undo bars); with one attached (DeX, a keyboard cover) they stay.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class KeyboardHintsTest {
 
     @get:Rule
@@ -53,25 +56,28 @@ class KeyboardHintsTest {
         assertNull(keyHint(" ", keyboard = true))
     }
 
-    private fun undoBar() {
+    private fun undoBar(keyboard: Boolean) {
         val undo = UndoBarState()
         undo.show("Fener sıradan kaldırıldı", "Geri al", "Ctrl+Z") {}
         compose.setContent {
-            NagmedarTheme(themeMode = ThemeMode.Light, inputMode = InputMode.Touch) { UndoBarHost(undo) }
+            // as the window's configuration would say it (a qualifier would stay on for the tests after these)
+            CompositionLocalProvider(LocalHardwareKeyboard provides keyboard) {
+                NagmedarTheme(themeMode = ThemeMode.Light, inputMode = InputMode.Touch) { UndoBarHost(undo) }
+            }
         }
         compose.waitForIdle()
     }
 
-    @Test @Config(qualifiers = "tr-w411dp-h891dp-mdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-mdpi")
     fun theUndoBarOfATouchPhoneHasNoKeycap() {
-        undoBar()
+        undoBar(keyboard = false)
         compose.onNodeWithText("Geri al").assertExists()
         compose.onNodeWithText("Ctrl+Z").assertDoesNotExist()
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi")
     fun theUndoBarWithAKeyboardKeepsItsKeycap() {
-        undoBar()
+        undoBar(keyboard = true)
         compose.onNodeWithText("Ctrl+Z").assertExists()
     }
 }

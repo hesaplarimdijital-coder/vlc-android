@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
+import app.nagmedar.ui.input.LocalHardwareKeyboard
 import app.nagmedar.ui.playback.FakeQueue
 import app.nagmedar.ui.playback.QueueEntry
 import app.nagmedar.ui.playback.QueuePage
@@ -86,12 +88,15 @@ class TouchScreenshotTest {
                 removed?.let { title -> show(res.getString(R.string.nag_queue_removed, title), res.getString(R.string.nag_sc_undo), "Ctrl+Z") {} }
             }
         }
-        TestShell(WidthClass.Compact, startDestination = Destination.Music, queueOpen = true, overlay = {
-            QueuePage(open = true, onClose = {}, undo = undo) { pageModifier ->
-                QueuePanel(queue.entries, queue.current, queue, {}, pageModifier, undo, NagTheme.colors.background, page = true)
-            }
-            Column(Modifier.align(Alignment.BottomCenter).padding(16.dp)) { UndoBarHost(undo) }
-        })
+        // a touch phone: no keyboard at hand
+        CompositionLocalProvider(LocalHardwareKeyboard provides false) {
+            TestShell(WidthClass.Compact, startDestination = Destination.Music, queueOpen = true, overlay = {
+                QueuePage(open = true, onClose = {}, undo = undo) { pageModifier ->
+                    QueuePanel(queue.entries, queue.current, queue, {}, pageModifier, undo, NagTheme.colors.background, page = true)
+                }
+                Column(Modifier.align(Alignment.BottomCenter).padding(16.dp)) { UndoBarHost(undo) }
+            })
+        }
     }
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
@@ -118,19 +123,19 @@ class TouchScreenshotTest {
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi")
     fun queueEmptyDexEnglish() = capture("queue-empty-dex-dark-en", ThemeMode.Dark, InputMode.Pointer) { QueueShell(WidthClass.Large, emptyList(), -1) }
 
-    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun queuePhone() = capture("queue-phone-light", ThemeMode.Light, InputMode.Touch) { QueuePhone() }
 
     /** S-1501: Sıradaki in English (Up next). */
-    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi-nokeys")
+    @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")
     fun queuePhoneEnglish() = capture("queue-phone-light-en", ThemeMode.Light, InputMode.Touch) { QueuePhone() }
 
     /** 1.0.1: nothing plays and nothing is queued: the page is the empty state's, over the whole window. */
-    @Test @Config(qualifiers = "tr-w384dp-h832dp-xhdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w384dp-h832dp-xhdpi")
     fun queueEmptyPhone() = capture("queue-empty-phone-dark", ThemeMode.Dark, InputMode.Touch) { QueuePhone(emptyList(), -1) }
 
     /** 1.0.1: a row taken off on a touch phone: its undo bar has no keycap. */
-    @Test @Config(qualifiers = "tr-w384dp-h832dp-xhdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w384dp-h832dp-xhdpi")
     fun queueUndoPhone() = capture("queue-undo-phone-dark", ThemeMode.Dark, InputMode.Touch) {
         QueuePhone(FakeQueue.sample.filter { it.title != "Fener" }, 0, removed = "Fener")
     }

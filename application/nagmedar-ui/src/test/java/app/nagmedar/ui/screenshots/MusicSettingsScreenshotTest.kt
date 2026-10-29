@@ -131,11 +131,11 @@ class MusicSettingsScreenshotTest {
     }
 
     /** 1.0.1: the S24's width in Turkish: "Çıkış"'s four options go on two lines, none cut. */
-    @Test @Config(qualifiers = "tr-w384dp-h1900dp-hdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w384dp-h1900dp-hdpi")
     fun phone() = capture("settings-music-phone-dark", ThemeMode.Dark, InputMode.Touch, available = true, signalPath = replayGainOnAAudio)
 
     /** 1.0.1: the narrowest phone with the largest font: every option whole, a long one on two lines of its own. */
-    @Test @Config(qualifiers = "tr-w320dp-h2400dp-hdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w320dp-h2400dp-hdpi")
     fun narrowLargestFont() = capture(
         "settings-music-phone-narrow-large-light", ThemeMode.Light, InputMode.Touch, available = true,
         signalPath = replayGainOnAAudio, fontScale = 1.3f,

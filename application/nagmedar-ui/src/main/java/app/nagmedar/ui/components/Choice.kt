@@ -35,7 +35,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -96,7 +95,6 @@ fun <T> SegmentedChoice(
                         label,
                         style = NagTheme.type.label,
                         color = animateStateColor(if (isSelected) colors.onSelection else colors.textSecondary, "segmentLabel"),
-                        textAlign = TextAlign.Center,
                         maxLines = 2,
                     )
                 }
@@ -116,7 +114,8 @@ fun <T> SegmentedChoice(
             val room = if (bounded) constraints.maxWidth - gapPx * (count - 1) else 0
             when {
                 !stretch -> line.forEach { widths[it] = minOf(natural[it], if (bounded) room else natural[it]) }
-                fill && single -> line.forEach { widths[it] = room / count }
+                // the width shared as a Row's weights share it: the pixels left over go to the first ones
+                fill && single -> line.forEachIndexed { n, i -> widths[i] = room / count + if (n < room % count) 1 else 0 }
                 else -> {
                     // the width left over goes to the options of the line evenly; one alone wider than the width takes it all
                     val used = line.sumOf { natural[it] }
@@ -148,26 +147,32 @@ fun <T> SegmentedChoice(
 }
 
 /**
- * The options of a [SegmentedChoice] by line (1.0.1): in order, as many on a line as fit in
- * [maxWidth] with [gap] between them; an option wider than [maxWidth] on a line of its own. All
- * on one line when they fit.
+ * The options of a [SegmentedChoice] by line (1.0.1): in order, all on one line when they fit in
+ * [maxWidth] with [gap] between them. Otherwise on as few lines as they need, as even as they fit
+ * (four options two by two rather than three and one); an option wider than [maxWidth] on a line
+ * of its own.
  */
 internal fun segmentLines(widths: List<Int>, maxWidth: Int, gap: Int): List<IntRange> {
     if (widths.isEmpty()) return emptyList()
-    val lines = mutableListOf<IntRange>()
+    val greedy = mutableListOf<IntRange>()
     var start = 0
     var used = widths[0]
     for (i in 1 until widths.size) {
         if (used + gap + widths[i] <= maxWidth) {
             used += gap + widths[i]
         } else {
-            lines += start until i
+            greedy += start until i
             start = i
             used = widths[i]
         }
     }
-    lines += start until widths.size
-    return lines
+    greedy += start until widths.size
+    if (greedy.size == 1) return greedy
+    // the same number of lines, the options shared out evenly, where each line still fits
+    val perLine = (widths.size + greedy.size - 1) / greedy.size
+    val even = widths.indices.chunked(perLine).map { it.first()..it.last() }
+    val fits = even.size == greedy.size && even.all { line -> line.sumOf { widths[it] } + gap * (line.last - line.first) <= maxWidth }
+    return if (fits) even else greedy
 }
 
 /** Colour swatches for the accent choice. */

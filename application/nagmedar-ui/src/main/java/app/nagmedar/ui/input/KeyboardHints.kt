@@ -2,6 +2,7 @@ package app.nagmedar.ui.input
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 
 /**
@@ -15,12 +16,19 @@ fun hasHardwareKeyboard(configuration: Configuration): Boolean =
         configuration.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
 
 /**
+ * Whether a hardware keyboard is at hand where the window's configuration should not decide: the
+ * screenshots and tests of a touch phone (Robolectric keeps a keyboard qualifier from one test to
+ * the next). Null, the configuration says.
+ */
+val LocalHardwareKeyboard = compositionLocalOf<Boolean?> { null }
+
+/**
  * [hasHardwareKeyboard] for the window this is drawn in. The activity handles a keyboard that
  * comes or goes itself (configChanges keyboard|keyboardHidden), so the configuration read here
  * changes with it and whatever reads this follows at once.
  */
 @Composable
-fun hardwareKeyboard(): Boolean = hasHardwareKeyboard(LocalConfiguration.current)
+fun hardwareKeyboard(): Boolean = LocalHardwareKeyboard.current ?: hasHardwareKeyboard(LocalConfiguration.current)
 
 /** [keys] when they are worth showing: with a hardware keyboard; null by touch alone. */
 fun keyHint(keys: String?, keyboard: Boolean): String? = keys?.takeIf { keyboard && it.isNotBlank() }

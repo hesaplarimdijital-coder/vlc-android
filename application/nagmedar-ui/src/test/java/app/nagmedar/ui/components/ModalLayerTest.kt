@@ -24,12 +24,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /**
  * 1.0.1: what lies over a page keeps it still. An empty layer over a list lets a drag through to
  * it (the user's "scroll yapınca müzikler kayıyor"); with [blockPointerBelow] it does not.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w411dp-h891dp-mdpi")
 class ModalLayerTest {
 

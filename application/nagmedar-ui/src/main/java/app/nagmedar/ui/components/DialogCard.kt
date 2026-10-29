@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -43,7 +42,7 @@ import app.nagmedar.ui.theme.NagTheme
 @Composable
 internal fun DialogFrame(
     onDismiss: () -> Unit,
-    dismissStyle: DismissStyle = dismissStyleFor(LocalConfiguration.current),
+    dismissStyle: DismissStyle = if (hardwareKeyboard()) DismissStyle.EscKey else DismissStyle.CloseButton,
     content: @Composable () -> Unit,
 ) {
     val dismiss = remember(dismissStyle, onDismiss) { DialogDismiss(dismissStyle, onDismiss) }

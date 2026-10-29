@@ -13,10 +13,13 @@ class SegmentLinesTest {
 
     @Test
     fun theOutputRowOfAPhoneWraps() {
-        // "Otomatik · AAudio · Bit-perfect · USB DAC" at a phone's width: the last one on a line of its own
-        assertEquals(listOf(0..2, 3..3), segmentLines(listOf(96, 80, 104, 92), maxWidth = 300, gap = 2))
-        // at 320 dp with the largest font, two by two
-        assertEquals(listOf(0..1, 2..3), segmentLines(listOf(120, 100, 130, 110), maxWidth = 240, gap = 2))
+        // "Otomatik · AAudio · Bit-perfect · USB DAC" at a phone's width: two by two, not three and one
+        assertEquals(listOf(0..1, 2..3), segmentLines(listOf(96, 80, 104, 92), maxWidth = 300, gap = 2))
+        assertEquals(listOf(0..1, 2..3), segmentLines(listOf(120, 100, 130, 110), maxWidth = 250, gap = 2))
+        // two by two would not fit: as many on each line as fit
+        assertEquals(listOf(0..1, 2..2, 3..3), segmentLines(listOf(120, 100, 130, 110), maxWidth = 240, gap = 2))
+        // three options on two lines: two, then one
+        assertEquals(listOf(0..1, 2..2), segmentLines(listOf(90, 120, 110), maxWidth = 260, gap = 2))
     }
 
     @Test

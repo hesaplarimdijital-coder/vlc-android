@@ -61,7 +61,7 @@ class DeveloperRowScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w384dp-h400dp-xhdpi-nokeys")
+    @Test @Config(qualifiers = "tr-w384dp-h400dp-xhdpi")
     fun phone() = capture("settings-developer-phone-light", ThemeMode.Light, InputMode.Touch)
 
     @Test @Config(qualifiers = "en-w1280dp-h360dp-mdpi")
