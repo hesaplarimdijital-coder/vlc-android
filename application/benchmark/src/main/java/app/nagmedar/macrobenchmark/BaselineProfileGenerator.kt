@@ -216,20 +216,25 @@ private fun UiDevice.subscribeOnce(feed: String) {
         if (add != null) break
         executeShellCommand("am force-stop $TARGET")
     }
-    val followed = waitFor(3_000) { findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
-    if (followed == null) passOver {
-        add?.click() ?: missing("podcast-add")
-        // the dialog is a window of its own, whose test tags may not be resource ids: its text field
-        // is then the screen's one EditText, and Enter in it subscribes
-        val field: UiObject2? = waitFor { findObject(By.res("podcast-add-field")) ?: findObject(By.clazz("android.widget.EditText")) }
-        if (field != null) {
-            field.setText(feed)
-            findObject(By.res("podcast-add-submit"))?.click() ?: pressEnter()
-            val done = waitFor(30_000) { findObject(By.res("podcast-page")) ?: findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
-            if (done != null) trace("subscribed to $feed") else missing("podcast-subscribed")
-        } else {
-            missing("podcast-add-field")
+    // twice at most: a first try that the window lost (it was redrawn meanwhile) saves nothing
+    var done: UiObject2? = waitFor(3_000) { findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
+    for (attempt in 1..2) {
+        if (done != null) break
+        passOver {
+            (add ?: waitFor(8_000) { findObject(By.res("podcast-add")) })?.click() ?: missing("podcast-add")
+            // the dialog is a window of its own, whose test tags may not be resource ids: its text field
+            // is then the screen's one EditText, and Enter in it subscribes
+            val field: UiObject2? = waitFor { findObject(By.res("podcast-add-field")) ?: findObject(By.clazz("android.widget.EditText")) }
+            if (field != null) {
+                field.setText(feed)
+                findObject(By.res("podcast-add-submit"))?.click() ?: pressEnter()
+                done = waitFor(60_000) { findObject(By.res("podcast-page")) ?: findObject(By.res("podcast-row")) ?: findObject(By.res("podcast-tile")) }
+                if (done != null) trace("subscribed to $feed") else missing("podcast-subscribed")
+            } else {
+                missing("podcast-add-field")
+            }
         }
+        add = null
     }
     pressHome()
 }
