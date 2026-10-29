@@ -1694,6 +1694,7 @@
     <string name="nag_pod_ep_resume">Resume · %s</string>
     <string name="nag_pod_dropout_gave_up">The connection dropped and the episode could not go on. Its place is kept: play it to resume.</string>
     <string name="nag_live_dropout_gave_up">The stream dropped and could not be reconnected.</string>
+    <string name="nag_live_dropout_paused">The stream dropped and could not be reconnected. Play it to connect again.</string>
     <string name="nag_pod_ep_offline_text">The episode plays only if it is downloaded. Its chapters and transcript come when you are connected.</string>
     <string name="nag_pod_dl_queued_title">Waiting to download</string>
     <string name="nag_pod_dl_queued_text">It starts when the network allows; automatic downloads wait for Wi-Fi and a charged battery.</string>
@@ -1751,6 +1752,7 @@
     <string name="nag_pod_whisper_queued_title">Transcript waiting</string>
     <string name="nag_pod_whisper_queued_text">It starts when the job before it is done.</string>
     <string name="nag_pod_whisper_queued_auto">It starts while the device is charging and idle.</string>
+    <string name="nag_pod_whisper_queued_app">It goes on when you open the app: Android stopped the job in the background at its time limit.</string>
     <string name="nag_pod_set_language">Transcript language</string>
     <string name="nag_pod_set_language_hint">The language Whisper hears this show\'s episodes in.</string>
     <string name="nag_pod_set_language_feed">The feed\'s: %1$s</string>
@@ -2001,7 +2003,7 @@
     <string name="nag_whisper_model_small_hint">Recommended: a good balance of speed and accuracy in Turkish.</string>
     <string name="nag_whisper_model_turbo_hint">The most accurate and the slowest: it may take longer than the episode.</string>
     <string name="nag_whisper_cancel">Cancel</string>
-    <string name="nag_whisper_restarted">Starting again from the beginning…</string>
+    <string name="nag_whisper_restarted">Starting again…</string>
     <string name="nag_whisper_starting">Starting…</string>
     <string name="nag_whisper_transcribing">Transcribing the speech…</string>
     <string name="nag_whisper_downloading">Model: %1$d / %2$d MB</string>
@@ -2014,6 +2016,8 @@
     <string name="nag_whisper_running_title">Making the transcript · %1$s</string>
     <string name="nag_whisper_done_title">Transcript ready · %1$s</string>
     <string name="nag_whisper_failed_title">No transcript · %1$s</string>
+    <string name="nag_whisper_held_title">Transcript waiting · %1$s</string>
+    <string name="nag_whisper_held_text">Android stopped the job in the background at its time limit. It goes on from where it stopped when you open the app.</string>
     <plurals name="nag_whisper_ready">
         <item quantity="one">Transcript ready · %d passage</item>
         <item quantity="other">Transcript ready · %d passages</item>
@@ -2034,7 +2038,7 @@
     <string name="nag_whisper_fail_engine">Whisper stopped on the episode\'s audio.</string>
     <string name="nag_whisper_fail_empty">No speech was heard in the episode.</string>
     <string name="nag_whisper_fail_output">The transcript could not be written in the app\'s storage.</string>
-    <string name="nag_whisper_fail_timeout">Android ended the job: a job in the background may run for six hours a day at most. Ask for it again; it begins from the start. The jobs waiting go on when you open the app again.</string>
+    <string name="nag_whisper_fail_timeout">Android ended the job: a job in the background may run for six hours a day at most. Ask for it again; it goes on from where it stopped. The jobs waiting go on when you open the app again.</string>
     <string name="nag_whisper_acceleration">Acceleration</string>
     <string name="nag_whisper_accel_auto">Automatic (GPU if any)</string>
     <string name="nag_whisper_accel_cpu">CPU only</string>

@@ -7,6 +7,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.MainThread
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -27,6 +31,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 import org.videolan.tools.AppScope
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * What is asked of a Whisper job: the transcript of the podcast episode [episodeId] ([name] its title, for the
@@ -190,7 +195,8 @@ sealed interface WhisperStatus {
  * The podcast transcripts' Whisper jobs, one at a time: the requests wait in [WhisperQueueStore], and one WorkManager
  * job of its own name ([WORK]) takes the first, transcribes it and leaves the next to a job after it. A job is started
  * with what its request needs ([JobNeeds]); one that finds the first request needing more starts the one that waits for
- * it and ends. Cancelling a job takes its request out of the queue, and the next one starts.
+ * it and ends. Cancelling a job takes its request out of the queue, and the next one starts. While the first request
+ * waits for the app ([WhisperQueue.waitsForApp]), none starts; the app coming to the front takes it up ([followApp]).
  */
 object WhisperJobs {
     const val WORK = "nagmedar-whisper"
@@ -228,6 +234,8 @@ object WhisperJobs {
             first = queue.head?.episodeId == episodeId || queue.running == episodeId
             queue.remove(episodeId)
         }
+        // what a job of it kept goes with it
+        AppScope.launch(Dispatchers.IO) { runCatching { WhisperProgress.delete(app, episodeId) } }
         if (!first) return
         runCatching { WorkManager.getInstance(app).cancelUniqueWork(WORK) }
         kick(app)
@@ -241,6 +249,36 @@ object WhisperJobs {
 
     /** The queue taken up again (the app starts, the settings change): a job for its first request when none waits or runs. */
     fun resume(context: Context) = kick(context.applicationContext)
+
+    private val following = AtomicBoolean(false)
+
+    /** Each time the app comes to the front, the requests that wait for it go on ([appInFront]). Main thread; once a process. */
+    @MainThread
+    fun followApp(context: Context) {
+        if (!following.compareAndSet(false, true)) return
+        val app = context.applicationContext
+        try {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onStart(owner: LifecycleOwner) = appInFront(app)
+                },
+            )
+        } catch (e: RuntimeException) {
+            following.set(false)
+        }
+    }
+
+    /** The app is in front: the requests held for it go on, in the foreground the app's window allows ([WhisperQueue.release]). */
+    fun appInFront(context: Context) {
+        val app = context.applicationContext
+        AppScope.launch(Dispatchers.IO) {
+            runCatching {
+                if (WhisperQueueStore.state(app).value.held.isEmpty()) return@runCatching
+                WhisperQueueStore.update(app) { it.release() }
+                start(app, after = false)
+            }
+        }
+    }
 
     /** The requests waiting and the failures, as every page follows them. */
     fun queue(context: Context) = WhisperQueueStore.state(context.applicationContext)
@@ -259,6 +297,8 @@ object WhisperJobs {
             val queue = WhisperQueueStore.state(app).value
             val manager = WorkManager.getInstance(app)
             val running = after || manager.getWorkInfosForUniqueWork(WORK).get().any { it.state == WorkInfo.State.RUNNING }
+            // the first waits for the app to be opened: nothing starts in the background
+            if (!running && queue.waitsForApp) return
             val first = (if (running) queue.next else queue.head) ?: return
             // one asked for while a job runs starts after it with no needs: it looks at what its request needs when it starts
             val wanted = needs ?: if (running) JobNeeds() else needsOf(app, first)

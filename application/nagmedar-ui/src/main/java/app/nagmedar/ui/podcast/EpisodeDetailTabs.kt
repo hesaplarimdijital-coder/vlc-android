@@ -414,7 +414,13 @@ private fun TranscribeCard(job: TranscribeUi, ui: EpisodeDetailUi, actions: Podc
             StateTone.Neutral,
             NagIcons.Subtitle,
             stringResource(R.string.nag_pod_whisper_queued_title),
-            stringResource(if (job.auto) R.string.nag_pod_whisper_queued_auto else R.string.nag_pod_whisper_queued_text),
+            stringResource(
+                when {
+                    job.waitsForApp -> R.string.nag_pod_whisper_queued_app
+                    job.auto -> R.string.nag_pod_whisper_queued_auto
+                    else -> R.string.nag_pod_whisper_queued_text
+                },
+            ),
             "episode-transcribe-queued",
             action = cancel,
         )

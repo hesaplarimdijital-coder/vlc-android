@@ -66,6 +66,14 @@ abstract class PodcastDao {
     @Update
     abstract fun updateFeed(feed: PodcastFeed)
 
+    /** A refresh the server answered "not modified": the time it was read, and nothing else (a choice made meanwhile stays). */
+    @Query("UPDATE podcast_feed SET refreshed_at = :at WHERE id = :feedId")
+    abstract fun setRefreshedAt(feedId: Long, at: Long)
+
+    /** A "not modified" refresh of a feed that moved for good: its new address, the old ones it answers to, the time it was read. */
+    @Query("UPDATE podcast_feed SET feed_url = :url, alias_keys = :aliasKeys, refreshed_at = :at WHERE id = :feedId")
+    abstract fun setMovedRefreshedAt(feedId: Long, url: String, aliasKeys: String, at: Long)
+
     /** Removes the feed and, through the foreign key, its episodes. */
     @Delete
     abstract fun unsubscribe(feed: PodcastFeed)

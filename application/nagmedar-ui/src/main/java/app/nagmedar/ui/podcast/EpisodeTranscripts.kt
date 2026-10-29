@@ -11,9 +11,11 @@ import app.nagmedar.ui.transcribe.WhisperJobs
 import app.nagmedar.ui.transcribe.WhisperModel
 import app.nagmedar.ui.transcribe.WhisperModels
 import app.nagmedar.ui.transcribe.WhisperPrefs
+import app.nagmedar.ui.transcribe.WhisperProgress
 import app.nagmedar.ui.transcribe.WhisperQueue
 import app.nagmedar.ui.transcribe.WhisperRequest
 import app.nagmedar.ui.transcribe.WhisperStatus
+import app.nagmedar.ui.transcribe.WhisperWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.videolan.tools.Settings
 import java.io.File
+import java.io.FileOutputStream
 
 /**
  * Podcast transcripts by Whisper: an episode's own transcript, a WebVTT file in the app's storage beside the podcasts'
@@ -41,11 +44,20 @@ object EpisodeTranscripts {
         listOf("Nagmedar", "whisper.cpp ${model.key}", language).filter { it.isNotBlank() }.joinToString(" · ")
 
     /** [bytes] as [episodeId]'s transcript, in place of the one before only once they are all written. Writes the disk. */
-    fun write(context: Context, episodeId: Long, bytes: ByteArray): Boolean = runCatching {
-        val target = file(context, episodeId)
+    fun write(context: Context, episodeId: Long, bytes: ByteArray): Boolean = writeSynced(file(context, episodeId), bytes)
+
+    /**
+     * [bytes] into [target], in place of what was there only once they are all on the disk: written beside it, synced
+     * (a power cut right after the rename leaves the whole file, not an empty one on f2fs), then renamed. Writes the disk.
+     */
+    internal fun writeSynced(target: File, bytes: ByteArray): Boolean = runCatching {
         target.parentFile?.mkdirs()
         val part = File(target.path + ".part")
-        part.writeBytes(bytes)
+        FileOutputStream(part).use { out ->
+            out.write(bytes)
+            out.flush()
+            out.fd.sync()
+        }
         if (!part.renameTo(target)) {
             part.delete()
             error("not moved")
@@ -110,8 +122,11 @@ sealed interface TranscribeUi {
     /** No job: one can be asked for, with [model] ([downloadMb] when it is downloaded first); [failure] why the last try gave none. */
     data class Idle(val model: WhisperModel = WhisperModel.Default, val downloadMb: Int? = null, val failure: WhisperFailure? = null) : TranscribeUi
 
-    /** Asked for and waiting: after the job under way, or ([auto]) for the charger and an idle device. */
-    data class Queued(val auto: Boolean) : TranscribeUi
+    /**
+     * Asked for and waiting: after the job under way, or ([auto]) for the charger and an idle device, or ([waitsForApp])
+     * for the app to be opened (Android stopped its job in the background).
+     */
+    data class Queued(val auto: Boolean, val waitsForApp: Boolean = false) : TranscribeUi
 
     /** The job under way. */
     data class Running(val status: WhisperStatus.Running) : TranscribeUi
@@ -123,7 +138,7 @@ sealed interface TranscribeUi {
         fun of(episodeId: Long, state: TranscribeState?): TranscribeUi {
             if (state == null || !state.native) return Unavailable
             state.running?.takeIf { it.episodeId == episodeId }?.let { return Running(it) }
-            state.queue.requests.firstOrNull { it.episodeId == episodeId }?.let { return Queued(it.auto) }
+            state.queue.requests.firstOrNull { it.episodeId == episodeId }?.let { return Queued(it.auto, episodeId in state.queue.held) }
             return Idle(state.model, state.downloadMb, state.queue.failures[episodeId])
         }
     }
@@ -184,10 +199,18 @@ class WhisperTranscriber(context: Context) : EpisodeTranscriber {
             }
         }
 
-        /** The jobs taken up again and the transcripts of episodes gone removed: at each start of the app. Reads and writes the disk. */
+        /**
+         * The jobs taken up again, the transcripts of episodes gone and the checkpoints of jobs no longer asked for
+         * removed, the jobs' channel named as it is now: at each start of the app. Reads and writes the disk.
+         */
         fun resume(context: Context) {
             val app = context.applicationContext
             runCatching { EpisodeTranscripts.tidy(app, NagmedarDatabase.get(app).podcasts().whisperEpisodes().toSet()) }
+            runCatching {
+                val queue = WhisperJobs.queue(app).value
+                WhisperProgress.tidy(app, queue.requests.map { it.episodeId }.toSet() + queue.failures.keys)
+            }
+            runCatching { WhisperWorker.renameChannel(app) }
             WhisperJobs.resume(app)
         }
     }

@@ -2,6 +2,7 @@ package app.nagmedar.ui.podcast
 
 import android.content.Context
 import android.net.Uri
+import android.os.Looper
 import app.nagmedar.data.DownloadState
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastEpisode
@@ -9,6 +10,7 @@ import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.BuildConfig as UiBuildConfig
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.PlaybackRules
+import app.nagmedar.ui.transcribe.WhisperJobs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,11 +137,12 @@ object PodcastCenter {
 
     /**
      * S-1103: the refresh job as the subscriptions and Settings › Podcasts ask for it: scheduled while there is a show to
-     * read, not at all without; and the transcripts' Whisper jobs that wait taken up again. Cheap and safe to call again
-     * and again; the work is off the main thread.
+     * read, not at all without; and the transcripts' Whisper jobs that wait taken up again, now and each time the app
+     * comes to the front. Cheap and safe to call again and again; the work is off the main thread.
      */
     fun schedule(context: Context, scope: CoroutineScope = AppScope) {
         val app = context.applicationContext
+        if (Looper.myLooper() == Looper.getMainLooper()) WhisperJobs.followApp(app)
         scope.launch(Dispatchers.IO) {
             runCatching {
                 if (NagmedarDatabase.get(app).podcasts().feedList().isEmpty()) RefreshSchedule.cancel(app) else RefreshSchedule.apply(app, settingsStore(app).read())

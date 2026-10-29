@@ -17,6 +17,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -44,6 +45,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.videolan.tools.NAGMEDAR_EXTRA_DESTINATION
 import org.videolan.tools.Settings
+import org.videolan.tools.isAppStarted
 import java.io.File
 import java.text.NumberFormat
 import java.util.Collections
@@ -61,10 +63,13 @@ import kotlin.coroutines.resume
  * was stopped); the audio is transcribed on the GPU through Vulkan where the device has one and Settings allows it,
  * else on the processor's performance cores, in the show's language ([TranscriptLanguage]). The passages are written
  * as a WebVTT file in the app's storage ([EpisodeTranscripts]) and the episode's row says so; a notification tells what
- * came of it. Then the next request's job starts. If Android stops the app, WorkManager starts the job again, from the
- * beginning; if Android's time limit for a foreground job ends it, it fails for good and says so, and the rest of the
- * queue waits for the app to be opened again. If the app stopped while the GPU worked (a driver can take it down), the
- * jobs after it run on the processor until Settings tries the GPU again.
+ * came of it. Then the next request's job starts. The passages whisper has finished are kept as it goes
+ * ([WhisperProgress]): if Android stops the app, WorkManager starts the job again, and it goes on after them. If
+ * Android's time limit for a foreground job ends it, it fails for good and says so, and the rest of the queue waits for
+ * the app to be opened again. A job Android would not let into the foreground (started in the background: an automatic
+ * one, or one after another on Android 12 and later) runs as a plain job, which Android stops after about ten minutes;
+ * stopped so a second time, it waits for the app to be opened ([WhisperStop.Hold]) and says so. If the app stopped while
+ * the GPU worked (a driver can take it down), the jobs after it run on the processor until Settings tries the GPU again.
  */
 class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     private val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -81,9 +86,16 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     @Volatile
     private var feedId: Long? = null
 
+    /** Whether Android let the job into the foreground; a plain job is stopped after about ten minutes. */
+    @Volatile
+    private var foreground = false
+
     override suspend fun doWork(): Result {
         val app = applicationContext
-        val request = WhisperQueueStore.state(app).value.head ?: return Result.success()
+        val queue = WhisperQueueStore.state(app).value
+        val request = queue.head ?: return Result.success()
+        // the first waits for the app to be opened ([WhisperStop.Hold]): the app coming to the front starts it
+        if (queue.waitsForApp) return Result.success()
         // a job started with less than its request needs (one asked for while another ran) leaves it to one that waits for it
         val needs = withContext(Dispatchers.IO) { WhisperJobs.needsOf(app, request) }
         if (!WhisperJobs.needsIn(inputData).covers(needs)) {
@@ -92,8 +104,8 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         }
         WhisperQueueStore.update(app) { it.begin(request.episodeId) }
         tell(request, WhisperStage.Waiting, force = true)
-        // a foreground start can be refused (Android 12+, from the background): the job then runs as it can
-        runCatching { setForeground(foregroundInfo(notification(request, null))) }
+        // a foreground start can be refused (Android 12+, from the background): the job then runs as a plain one
+        foreground = runCatching { setForeground(foregroundInfo(notification(request, null))) }.isSuccess
         val outcome = try {
             withContext(Dispatchers.IO) { produce(request) }
         } catch (e: CancellationException) {
@@ -105,6 +117,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         when (outcome) {
             is Outcome.Saved -> {
                 WhisperQueueStore.update(app) { it.remove(request.episodeId) }
+                WhisperProgress.delete(app, request.episodeId)
                 finished(request, outcome.passages, outcome.engine)
             }
             is Outcome.Failed -> {
@@ -119,18 +132,36 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     /**
      * The job stopped before its end: by Android's time limit (it fails for good), by the user (its request is out of
-     * the queue: the next one starts), or by the system (it stays first, and WorkManager starts it again).
+     * the queue: the next one starts), by the system (it stays first, and WorkManager starts it again), or, run without
+     * the foreground, by the system a second time (it waits for the app). [WhisperStop] decides.
      */
     private fun stopped(request: WhisperRequest) {
         val app = applicationContext
-        when {
-            TimeLimit.reached(this) -> {
+        val stop = WhisperStop.of(
+            foregroundTimeLimit = TimeLimit.reached(this),
+            queued = WhisperQueueStore.state(app).value.has(request.episodeId),
+            foreground = foreground,
+            jobTimeLimit = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && stopReason == WorkInfo.STOP_REASON_TIMEOUT,
+            attempt = runAttemptCount,
+            appInFront = runCatching { isAppStarted() }.getOrDefault(false),
+        )
+        when (stop) {
+            WhisperStop.Fail -> {
                 WhisperQueueStore.update(app) { it.failed(request.episodeId, WhisperFailure.Timeout) }
                 runCatching { WorkManager.getInstance(app).cancelWorkById(id) }
                 say(app, app.getString(R.string.nag_whisper_failed_title, request.name), app.getString(failureText(WhisperFailure.Timeout)))
             }
-            !WhisperQueueStore.state(app).value.has(request.episodeId) -> WhisperJobs.kick(app)
-            else -> WhisperQueueStore.update(app) { it.paused(request.episodeId) }
+            WhisperStop.Next -> {
+                WhisperProgress.delete(app, request.episodeId)
+                WhisperJobs.kick(app)
+            }
+            WhisperStop.Hold -> {
+                WhisperQueueStore.update(app) { it.hold(request.episodeId) }
+                // not again in the background: WorkManager would start it over and over
+                runCatching { WorkManager.getInstance(app).cancelWorkById(id) }
+                say(app, app.getString(R.string.nag_whisper_held_title, request.name), app.getString(R.string.nag_whisper_held_text))
+            }
+            WhisperStop.Retry -> WhisperQueueStore.update(app) { it.paused(request.episodeId) }
         }
     }
 
@@ -198,21 +229,38 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             ?: Opened.Failed(WhisperFailure.Fetch)
     }
 
-    /** The transcription of [input] in [language] ("auto" for whisper's own guess), and its file. */
+    /**
+     * The transcription of [input] in [language] ("auto" for whisper's own guess), and its file. A job taken up again goes
+     * on after the passages the one before it kept ([WhisperProgress]); each piece whisper finishes is kept the same way.
+     */
     private suspend fun transcribed(request: WhisperRequest, episodeId: Long, model: File, input: ParcelFileDescriptor, language: String): Outcome {
         val app = applicationContext
         val prefs = WhisperPrefs(Settings.getInstance(app))
         tell(request, WhisperStage.Transcribing, force = true)
-        val segments = Collections.synchronizedList(ArrayList<SpeechSegment>())
-        var heard: String? = null
+        val saved = WhisperProgress.read(app, episodeId, request.model, language)
+        val fromMs = saved?.resumeAtMs ?: 0L
+        val fromSeconds = fromMs / 1000.0
+        val segments = Collections.synchronizedList(ArrayList<SpeechSegment>(saved?.segments.orEmpty()))
+        var heard: String? = saved?.heard
+        // the rest in the language the passages before were heard in
+        val asked = if (language == WhisperLanguage.Auto.code) heard ?: language else language
+        var keptCount = segments.size
         val startedAt = SystemClock.elapsedRealtime()
         val listener = object : NativeLab.Transcription {
             override fun onProgress(doneSeconds: Double, totalSeconds: Double) {
                 val elapsed = (SystemClock.elapsedRealtime() - startedAt) / 1000.0
-                val eta = if (totalSeconds > 0 && doneSeconds >= ETA_AFTER_S) (elapsed * (totalSeconds - doneSeconds) / doneSeconds).toLong() else null
+                // what this job did, not what the one before it kept
+                val doneHere = doneSeconds - fromSeconds
+                val eta = if (totalSeconds > 0 && doneHere >= ETA_AFTER_S) (elapsed * (totalSeconds - doneSeconds) / doneHere).toLong() else null
                 // the speed so far, once there is enough of the audio to tell it by
-                if (doneSeconds >= ETA_AFTER_S && elapsed > 0) engine = engine?.copy(speed = doneSeconds / elapsed)
+                if (doneHere >= ETA_AFTER_S && elapsed > 0) engine = engine?.copy(speed = doneHere / elapsed)
                 tell(request, WhisperStage.Transcribing, done = doneSeconds, total = totalSeconds, eta = eta)
+                // a piece is done when its passages came: they are kept, for a job started again to go on after them
+                val now = synchronized(segments) { ArrayList(segments) }
+                if (now.size != keptCount) {
+                    keptCount = now.size
+                    WhisperProgress.write(app, episodeId, WhisperCheckpoint(request.model.key, language, heard, now))
+                }
             }
 
             override fun onSegment(startMs: Long, endMs: Long, text: String) {
@@ -230,7 +278,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 tell(request, WhisperStage.Transcribing, force = true)
             }
         }
-        val result = runCatching { JSONObject(transcribe(model.absolutePath, input, language, prefs, listener)) }.getOrNull()
+        val result = runCatching { JSONObject(transcribe(model.absolutePath, input, asked, fromMs, prefs, listener)) }.getOrNull()
             ?: return Outcome.Failed(WhisperFailure.Engine)
         when (result.optString("error")) {
             "" -> Unit
@@ -243,7 +291,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             }
             else -> return Outcome.Failed(WhisperFailure.Engine)
         }
-        val cues = WhisperLines.cues(segments.toList())
+        val cues = WhisperLines.cues(synchronized(segments) { segments.toList() })
         if (cues.isEmpty()) return Outcome.Failed(WhisperFailure.Empty)
         val spoken = (if (language != WhisperLanguage.Auto.code) language else heard ?: result.optString("language")).takeIf { it != WhisperLanguage.Auto.code }.orEmpty()
         val bytes = WhisperLines.vtt(cues, EpisodeTranscripts.note(request.model, spoken))
@@ -254,7 +302,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             return Outcome.Failed(WhisperFailure.Input)
         }
         // how fast it went, the model's load included: seconds of the audio a second
-        val audio = result.optDouble("audio_seconds")
+        val audio = result.optDouble("audio_seconds") - fromSeconds
         val took = result.optDouble("seconds").takeIf { it > 0 } ?: ((SystemClock.elapsedRealtime() - startedAt) / 1000.0)
         val ran = engine?.copy(speed = if (audio > 0 && took > 0) audio / took else null)
         return Outcome.Saved(cues.size, ran)
@@ -271,7 +319,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
      * GPU worked on a job before ([WhisperPrefs.gpuRunning] still there once that job is over):
      * then on the processor until Settings tries the GPU again.
      */
-    private suspend fun transcribe(model: String, input: ParcelFileDescriptor, language: String, prefs: WhisperPrefs, listener: NativeLab.Transcription): String =
+    private suspend fun transcribe(model: String, input: ParcelFileDescriptor, language: String, fromMs: Long, prefs: WhisperPrefs, listener: NativeLab.Transcription): String =
         suspendCancellableCoroutine { continuation ->
             val cancelled = AtomicBoolean(false)
             val watched = object : NativeLab.Transcription {
@@ -306,7 +354,7 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                             if (gpu) prefs.gpuRunning = id.toString()
                             try {
                                 // the best audio track (-1), not into English; threads 0: the performance cores, as the native side counts them
-                                NativeLab.transcribe(model, "/proc/self/fd/${input.fd}", -1, language, false, 0, gpu, watched)
+                                NativeLab.transcribe(model, "/proc/self/fd/${input.fd}", -1, language, false, 0, gpu, fromMs, watched)
                             } finally {
                                 if (gpu) prefs.gpuRunning = null
                             }
@@ -462,13 +510,27 @@ class WhisperWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         /** One transcription at a time in the process: the native side has one cancel flag. */
         private val nativeLock = ReentrantLock()
 
+        /**
+         * The jobs' channel, made or renamed each time: a device updated from 0.5 still had it as "Altyazı üretimi"
+         * (Subtitle generation), and creating a channel that exists gives it the name it is created with. Once a process.
+         */
         private fun channel(context: Context) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || channelMade) return
             val manager = context.getSystemService(NotificationManager::class.java) ?: return
-            if (manager.getNotificationChannel(CHANNEL) != null) return
             manager.createNotificationChannel(
                 NotificationChannel(CHANNEL, context.getString(R.string.nag_whisper_channel), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) },
             )
+            channelMade = true
+        }
+
+        @Volatile
+        private var channelMade = false
+
+        /** The jobs' channel renamed at the app's start when an earlier version made it (none is made for nothing). */
+        internal fun renameChannel(context: Context) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+            val manager = context.getSystemService(NotificationManager::class.java) ?: return
+            if (manager.getNotificationChannel(CHANNEL) != null) channel(context)
         }
 
         /** The notification's Cancel: the job of [episodeId] taken out of the queue ([WhisperCancelReceiver]). */

@@ -97,7 +97,7 @@ JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_cancelTranscription(JNIEn
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_transcribe(JNIEnv *env, jclass cls, jstring model, jstring input,
                                                                       jint audio_track, jstring language, jboolean translate,
-                                                                      jint threads, jboolean gpu, jobject listener)
+                                                                      jint threads, jboolean gpu, jlong start_ms, jobject listener)
 {
     (void)cls;
     g_transcribe_cancel = 0;
@@ -119,7 +119,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_transcribe(JNIEnv *env
     const char *in = (*env)->GetStringUTFChars(env, input, NULL);
     const char *lang = (*env)->GetStringUTFChars(env, language, NULL);
     WsCallbacks callbacks = {&l, on_progress, on_segment, on_language, on_engine};
-    char *json = whisper_subs_run(m, in, audio_track, lang, translate == JNI_TRUE, threads, gpu == JNI_TRUE, &callbacks, &g_transcribe_cancel);
+    char *json = whisper_subs_run(m, in, audio_track, lang, translate == JNI_TRUE, threads, gpu == JNI_TRUE, (int64_t)start_ms, &callbacks, &g_transcribe_cancel);
     (*env)->ReleaseStringUTFChars(env, model, m);
     (*env)->ReleaseStringUTFChars(env, input, in);
     (*env)->ReleaseStringUTFChars(env, language, lang);
