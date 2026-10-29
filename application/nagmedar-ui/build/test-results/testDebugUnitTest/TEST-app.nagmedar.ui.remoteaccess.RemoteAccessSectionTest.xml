@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:08.890Z" hostname="runnervmnwato" time="0.542">
+  <properties/>
+  <testcase name="theBrowsersAndTheLogsAreSwitched" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.233"/>
+  <testcase name="theDefaultsAreShown" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.071"/>
+  <testcase name="theAddressesNeedItOn" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.085"/>
+  <testcase name="theSecurityIsSaidNotSet" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.046"/>
+  <testcase name="theSwitchStartsAndStopsIt" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.052"/>
+  <testcase name="aLibraryPartIsTakenOut" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.055"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

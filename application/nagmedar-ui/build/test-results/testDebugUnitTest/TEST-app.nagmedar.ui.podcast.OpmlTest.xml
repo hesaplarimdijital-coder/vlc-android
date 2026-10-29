@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.OpmlTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:59.074Z" hostname="runnervmnwato" time="0.321">
+  <properties/>
+  <testcase name="gzipAndByteOrderMark" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.022"/>
+  <testcase name="podcastAddictWritesXmlUrlInAnyCaseAndFeedScheme" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.014"/>
+  <testcase name="aListCutShortKeepsWhatCameBefore" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.014"/>
+  <testcase name="whatIsNoOpml" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.02"/>
+  <testcase name="pocketCastsKeepsItsFeedsInAFolder" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.022"/>
+  <testcase name="quirks" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.014"/>
+  <testcase name="aFileLargerThanTheLimitIsTooLarge" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.112"/>
+  <testcase name="antennaPod" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.016"/>
+  <testcase name="aDoctypeFullOfEntitiesExpandsNothing" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.015"/>
+  <testcase name="charactersXmlCannotHoldAreDropped" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.012"/>
+  <testcase name="aFeedListedTwiceIsListedOnce" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.016"/>
+  <testcase name="whatWeWriteWeRead" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.015"/>
+  <testcase name="theRealWorldFilesRoundTrip" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.015"/>
+  <testcase name="overcastListsEpisodesToo" classname="app.nagmedar.ui.podcast.OpmlTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

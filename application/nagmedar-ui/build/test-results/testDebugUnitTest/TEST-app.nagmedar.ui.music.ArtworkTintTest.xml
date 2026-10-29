@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.ArtworkTintTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:50.664Z" hostname="runnervmnwato" time="0.019">
+  <properties/>
+  <testcase name="theLivelyColourWinsOverGreys" classname="app.nagmedar.ui.music.ArtworkTintTest" time="0.002"/>
+  <testcase name="aPictureOfGreysHasNoColour" classname="app.nagmedar.ui.music.ArtworkTintTest" time="0.001"/>
+  <testcase name="theHueMostOfThePictureSharesWins" classname="app.nagmedar.ui.music.ArtworkTintTest" time="0.009"/>
+  <testcase name="theBackdropIsTinted" classname="app.nagmedar.ui.music.ArtworkTintTest" time="0.003"/>
+  <testcase name="theBackdropKeepsTheTextReadable" classname="app.nagmedar.ui.music.ArtworkTintTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:34.909Z" hostname="runnervmnwato" time="3.36">
+  <properties/>
+  <testcase name="theSpeakersShareComesOffAnotherDevice" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="0.435"/>
+  <testcase name="aMeasurementEndsInItsResult" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="0.366"/>
+  <testcase name="aDeviceWithoutTimestampsGivesAFigureThatIsNotSaved" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="0.728"/>
+  <testcase name="silenceAndTooFewTonesFail" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="1.101"/>
+  <testcase name="tonesThatDisagreeAreUncertainAndAStrayIsDropped" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="0.729"/>
+  <testcase name="aStreamThatWillNotOpenFails" classname="app.nagmedar.ui.audio.latency.LatencyMeasureSessionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

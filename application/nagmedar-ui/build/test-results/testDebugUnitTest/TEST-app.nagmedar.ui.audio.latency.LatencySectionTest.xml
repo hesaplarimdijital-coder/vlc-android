@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.audio.latency.LatencySectionTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:38.278Z" hostname="runnervmnwato" time="1.144">
+  <properties/>
+  <testcase name="anUncertainResultWarns" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.072"/>
+  <testcase name="theSpeakersMeasurementIsTheReferenceNotItsDelay" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.61"/>
+  <testcase name="theOutputNowAndItsDelay" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.075"/>
+  <testcase name="aRefusedMicrophoneSaysSo" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.073"/>
+  <testcase name="theResultIsSavedToTheProfile" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.057"/>
+  <testcase name="aProfileIsDeleted" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.062"/>
+  <testcase name="theStepperMovesByTenAndStaysInRange" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.071"/>
+  <testcase name="theMeasurementsWindowOpensWithItsExplanation" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.073"/>
+  <testcase name="withoutAnOutputThereIsNothingToMeasure" classname="app.nagmedar.ui.audio.latency.LatencySectionTest" time="0.049"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.notify.NotificationIdsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:53.915Z" hostname="runnervmnwato" time="0.136">
+  <properties/>
+  <testcase name="vlcsIdsAsItsServicesHaveThem" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.001"/>
+  <testcase name="anItemsIdStaysInItsRange" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.0"/>
+  <testcase name="theRegistryIsRead" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.0"/>
+  <testcase name="noTwoRangesMeet" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.0"/>
+  <testcase name="aShowsNewsAndTheQuestionNoLongerMeet" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.001"/>
+  <testcase name="noFixedIdFallsInARange" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.0"/>
+  <testcase name="noTwoFixedIdsAreEqual" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.0"/>
+  <testcase name="theIdsAreTakenFromTheRegistry" classname="app.nagmedar.ui.notify.NotificationIdsTest" time="0.134"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

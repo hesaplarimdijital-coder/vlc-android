@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.ColumnSortTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:41.775Z" hostname="runnervmnwato" time="0.006">
+  <properties/>
+  <testcase name="theSortFollowsItsColumnAcrossWidths" classname="app.nagmedar.ui.components.ColumnSortTest" time="0.004"/>
+  <testcase name="theSortIsKeptByItsColumnsId" classname="app.nagmedar.ui.components.ColumnSortTest" time="0.0"/>
+  <testcase name="aColumnNotShownSortsNothingUntilItIsBack" classname="app.nagmedar.ui.components.ColumnSortTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

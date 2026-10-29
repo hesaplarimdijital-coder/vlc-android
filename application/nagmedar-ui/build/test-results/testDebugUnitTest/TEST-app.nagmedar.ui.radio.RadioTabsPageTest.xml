@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioTabsPageTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:06.598Z" hostname="runnervmnwato" time="0.725">
+  <properties/>
+  <testcase name="theStripShowsTheStationAsLiveWhenTheStreamSendsNoTitle" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.058"/>
+  <testcase name="thereIsNoStripUntilSomethingPlays" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.073"/>
+  <testcase name="theEmptyListsOfferTheSearchAndTheImport" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.068"/>
+  <testcase name="theTabsAreThereAndSearchIsFirst" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.048"/>
+  <testcase name="anImportOfKnownStationsSaysTheyWereAlreadyThere" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.07"/>
+  <testcase name="emptyListsSayWhatTheyAreFor" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.067"/>
+  <testcase name="importedStationsAreListedWithTheImportButtonAndRemovedFromTheMenu" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.08"/>
+  <testcase name="theRecentTabListsWhatPlayedAndTheMenuForgetsIt" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.083"/>
+  <testcase name="theStripPausesAndEndsWithTheStream" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.054"/>
+  <testcase name="theStripFollowsTheTitleTheStreamSends" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.053"/>
+  <testcase name="theStarPutsAStationInFavourites" classname="app.nagmedar.ui.radio.RadioTabsPageTest" time="0.07"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

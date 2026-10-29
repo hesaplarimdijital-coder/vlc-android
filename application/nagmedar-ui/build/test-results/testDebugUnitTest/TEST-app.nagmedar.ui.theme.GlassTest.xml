@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.GlassTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:41.051Z" hostname="runnervmnwato" time="0.038">
+  <properties/>
+  <testcase name="thickerGlassIsMoreOpaque" classname="app.nagmedar.ui.theme.GlassTest" time="0.014"/>
+  <testcase name="textOnGlassOverTheWorstContent" classname="app.nagmedar.ui.theme.GlassTest" time="0.015"/>
+  <testcase name="paletteCrossFadeEndsAtTheTarget" classname="app.nagmedar.ui.theme.GlassTest" time="0.005"/>
+  <testcase name="theArtworkAccentIsTheWallpaperAccentsTones" classname="app.nagmedar.ui.theme.GlassTest" time="0.004"/>
+  <testcase name="solidIsTheOpaqueSurface" classname="app.nagmedar.ui.theme.GlassTest" time="0.0"/>
+  <testcase name="modeFollowsTheDevice" classname="app.nagmedar.ui.theme.GlassTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.e2e.KeyboardOnlyFlowsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:44.097Z" hostname="runnervmnwato" time="0.752">
+  <properties/>
+  <testcase name="theMenuBarFromAlt" classname="app.nagmedar.ui.e2e.KeyboardOnlyFlowsTest" time="0.197"/>
+  <testcase name="escapeGoesBackNeverOut" classname="app.nagmedar.ui.e2e.KeyboardOnlyFlowsTest" time="0.116"/>
+  <testcase name="settingsFromTheirShortcut" classname="app.nagmedar.ui.e2e.KeyboardOnlyFlowsTest" time="0.134"/>
+  <testcase name="theCommandPaletteFindsAScreen" classname="app.nagmedar.ui.e2e.KeyboardOnlyFlowsTest" time="0.303"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

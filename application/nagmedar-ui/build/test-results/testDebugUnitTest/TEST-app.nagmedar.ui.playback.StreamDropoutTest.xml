@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.StreamDropoutTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:56.689Z" hostname="runnervmnwato" time="0.002">
+  <properties/>
+  <testcase name="withoutAKnownLengthOrFromAFileEveryEndIsTheEnd" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamThatStillSoundsOrReadsIsNoStallWhileItsTimeIsFrozen" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.001"/>
+  <testcase name="theWaitGrowsAndTheThirdFailureGivesUp" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamWithNoLengthThatEndsWhereItEndedIsAFileThatEnded" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="anEndInTheMiddleIsADropoutOpenedAgainAFewSecondsEarlier" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="progressAPauseOrASeekIsNoStall" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="theLastSecondsAreTheEnd" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="theStallTimeFollowsTheNetworkCaching" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aLiveStreamThatDropsIsConnectedToAgainAtItsLiveEdge" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamThatEndsAgainWhereItEndedIsTheEnd" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="withNoCountersALiveStreamWaitsLongerOnItsTimeAlone" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamWhoseTimeStandsStillWhilePlayingHasStalled" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamThatNeverMovedIsStillOpening" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamThatIsNoEpisodeButHasALengthIsNotOurs" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aStreamWhoseCountersAndTimeStandStillHasStalled" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.0"/>
+  <testcase name="aLiveStreamThatNeverPlayedEndsAsItAlwaysDid" classname="app.nagmedar.ui.playback.StreamDropoutTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

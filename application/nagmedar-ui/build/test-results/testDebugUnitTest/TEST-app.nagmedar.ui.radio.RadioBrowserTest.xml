@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioBrowserTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:02.944Z" hostname="runnervmnwato" time="0.458">
+  <properties/>
+  <testcase name="theSearchAsksForWhatWasTyped" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.026"/>
+  <testcase name="theListsAreRead" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.018"/>
+  <testcase name="theServerThatFailedIsRememberedAndLeftAsideForAWhile" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.028"/>
+  <testcase name="retryAfterIsInSeconds" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.016"/>
+  <testcase name="aTimeoutIsAFailureToo" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.016"/>
+  <testcase name="theClickIsTheDirectorysUrlRequestAndGivesTheAddressToPlay" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.015"/>
+  <testcase name="everyRequestSendsTheUserAgentAndUsesHttps" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.018"/>
+  <testcase name="aVoteIsTheDirectorysVoteRequest" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.017"/>
+  <testcase name="serversThatAnswerWithAnErrorAreTheServerFailure" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.016"/>
+  <testcase name="theUserAgentNamesTheAppAndItsVersionAndNoOneElse" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.014"/>
+  <testcase name="theListsAreAskedForBrokenStationsHidden" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.014"/>
+  <testcase name="withoutAnyServerItIsOffline" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.016"/>
+  <testcase name="stationsAreReadAsTheDirectoryGivesThem" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.043"/>
+  <testcase name="tooManyRequestsWaitInsteadOfTryingTheOthers" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.018"/>
+  <testcase name="clickAndVoteAnswersAreRead" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.016"/>
+  <testcase name="anAnswerThatIsNotJsonIsTheServersFailure" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.022"/>
+  <testcase name="aPlainSearchLeavesOutWhatIsNotSet" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.031"/>
+  <testcase name="anAnswerThatCannotBeReadHandsOverToo" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.031"/>
+  <testcase name="whenAllAreDownTheAnswerIsThatAndTheyAreLookedForAgain" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.022"/>
+  <testcase name="aServerThatIsDownHandsOverToTheNext" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.043"/>
+  <testcase name="aRefusalThatWouldBeTheSameEverywhereIsNotRetried" classname="app.nagmedar.ui.radio.RadioBrowserTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

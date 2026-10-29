@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.StartWaitTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:02.774Z" hostname="runnervmnwato" time="0.001">
+  <properties/>
+  <testcase name="itWaitsUntilThePlayerPlaysAtThePlaceForTwoLooks" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <testcase name="anotherPageEndsIt" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <testcase name="itWaitsTwentySecondsAtMost" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <testcase name="nothingWaitsWithoutAStartOrAfterClearing" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <testcase name="anErrorAnEndOrAStopOfTheEpisodeEndsTheWaitAtOnce" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <testcase name="anEarlierHaltDoesNotEndIt" classname="app.nagmedar.ui.podcast.StartWaitTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

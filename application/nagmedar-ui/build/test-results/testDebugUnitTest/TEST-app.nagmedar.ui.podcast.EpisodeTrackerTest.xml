@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.EpisodeTrackerTest" tests="24" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:02:57.325Z" hostname="runnervmnwato" time="0.003">
+  <properties/>
+  <testcase name="theOutroFinishesTheEpisode" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.001"/>
+  <testcase name="thePlaceIsSavedWhenAnotherMediaStarts" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="noCommandWhenTheSpeedIsAlreadyRight" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theReturnToNormalSpeedAtTheStartIsThePlayersAndIsUndone" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.001"/>
+  <testcase name="theShowsSpeedIsSetOnceTheEpisodeHasStarted" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="thePlaceIsSavedWhenItPauses" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="anEpisodeStartedFromTheBeginningSkipsItsIntro" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="aSpeedTheListenerSetsBecomesTheShows" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="thePlaceIsSavedEveryFewSeconds" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="anEpisodeOpenedAgainAfterADropoutKeepsItsPlaceUntilItPlays" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theServiceGoingWhileItIsOpenedAgainKeepsThePlaceItReached" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theContextArrivingLaterStillApplies" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="thePlaceIsSavedWhenTheServiceGoes" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="anEpisodeStartedFromTheBeginningFindsItsPlace" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theReturnToNormalIsUndoneThreeTimesAtMost" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="anEpisodeThatWasNeverStartedSavesNothingWhenLeft" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.001"/>
+  <testcase name="anEpisodeAlreadyStartedAfterTheIntroIsNotSoughtAgain" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theReturnToNormalSpeedLaterIsTheListeners" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="aResetToZeroAfterTheEndIsNotAPlace" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theLastFiveShareMarksItPlayedOnce" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="aMediaThatIsNoEpisodeIsLeftAlone" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="theOutroIsNotActedOnWhilePaused" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="leavingNearTheEndMarksItPlayed" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <testcase name="nothingHappensBeforeTheLengthIsKnown" classname="app.nagmedar.ui.podcast.EpisodeTrackerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

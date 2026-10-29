@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.transcribe.WhisperQueueTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-29T01:03:41.642Z" hostname="runnervmnwato" time="0.107">
+  <properties/>
+  <testcase name="theOnesAskedByHandComeBeforeTheAutomaticOnes" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.014"/>
+  <testcase name="nothingIsPutBeforeTheJobUnderWay" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.011"/>
+  <testcase name="aRemovedJobLeavesTheQueue" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.01"/>
+  <testcase name="aFailureIsKeptForItsPageUntilTheEpisodeIsAskedAgain" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.012"/>
+  <testcase name="aJobStartedWithMoreRunsWhatNeedsLess" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.012"/>
+  <testcase name="aJobNeedsANetworkOnlyForWhatItDownloads" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.014"/>
+  <testcase name="theQueueIsKeptWithoutTheJobUnderWay" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.018"/>
+  <testcase name="anEpisodeIsQueuedOnce" classname="app.nagmedar.ui.transcribe.WhisperQueueTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
