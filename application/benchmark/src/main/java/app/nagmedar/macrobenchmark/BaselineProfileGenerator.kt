@@ -108,10 +108,10 @@ class BaselineProfileGenerator {
         // the phone's mini player opens the phone player (its first clickable part, the track's
         // title, does); a tablet shows the track in its inspector
         passOver {
-            val mini = waitFor(5_000) { device.findObject(By.res("mini-player")) }
+            val mini = waitFor(15_000) { device.findObject(By.res("mini-player")) }
             (mini?.findObject(By.clickable(true)) ?: mini)?.click()
         }
-        if (waitFor(5_000) { device.findObject(By.res("phone-player")) } != null) {
+        if (waitFor(10_000) { device.findObject(By.res("phone-player")) } != null) {
             trace("music: the phone player")
             device.waitForIdle()
             device.pressBack()
