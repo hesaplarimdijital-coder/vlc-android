@@ -21,11 +21,15 @@ sealed interface DeviceLocation {
 
     data class Document(val tree: String, val documentId: String) : DeviceLocation
 
-    /** The address the playback service is given. */
+    /**
+     * The address the playback service is given, unique to the location: also the key of its row
+     * (1.0.1). A tree that is not one (a kept setting gone wrong) still gives a text, never a crash.
+     */
     val uri: String
         get() = when (this) {
             is Path -> Uri.fromFile(File(path)).toString()
-            is Document -> DocumentsContract.buildDocumentUriUsingTree(Uri.parse(tree), documentId).toString()
+            is Document -> runCatching { DocumentsContract.buildDocumentUriUsingTree(Uri.parse(tree), documentId).toString() }
+                .getOrElse { "$tree#$documentId" }
         }
 }
 

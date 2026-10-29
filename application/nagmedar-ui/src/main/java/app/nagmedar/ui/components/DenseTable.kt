@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import android.os.Parcelable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -214,6 +215,8 @@ fun <T> DenseTable(
         if (glassHeader) HeaderPadding(contentPadding, headerPx, density) else contentPadding
     }
     val scrolled by remember(state) { derivedStateOf { state.firstVisibleItemIndex > 0 || state.firstVisibleItemScrollOffset > 0 } }
+    // the list's own keys: kept in a Bundle and unique; the caller's keys still say what is selected
+    val itemKeys = remember(rows, key) { lazyKeys(rows.map(key)) }
     val list = @Composable { modifier: Modifier ->
         LazyColumn(
             state = state,
@@ -224,9 +227,11 @@ fun <T> DenseTable(
                 item(key = LEADING_KEY, contentType = LEADING_KEY) { lead() }
                 stickyHeader(key = HEADER_KEY, contentType = HEADER_KEY) { header(Modifier.fillMaxWidth().background(colors.background)) }
             }
-            itemsIndexed(rows, key = { _, item -> key(item) }) { index, item ->
+            itemsIndexed(rows, key = { index, _ -> itemKeys[index] }) { index, item ->
+                // the reorder state finds its rows among the list's items: by the list's keys
+                val itemKey = itemKeys[index]
                 // the dragged row rises over the others: its outermost layout carries it
-                val place = if (reorder != null) Modifier.reorderItem(reorder, key(item), index) else Modifier
+                val place = if (reorder != null) Modifier.reorderItem(reorder, itemKey, index) else Modifier
                 val tracked = if (onExtendSelection == null) Modifier else Modifier.onFocusChanged { focus ->
                     if (focus.isFocused) focused.item = item else if (focused.item == item) focused.item = null
                 }
@@ -239,7 +244,7 @@ fun <T> DenseTable(
                         onClick = { onRowClick(item, index) },
                         onDoubleClick = onRowDoubleClick?.let { open -> { open(item, index) } },
                         modifier = outer.then(rowModifier(item)).then(tracked),
-                        handle = reorder?.let { Modifier.reorderHandle(it, key(item)) },
+                        handle = reorder?.let { Modifier.reorderHandle(it, itemKey) },
                         handleLabel = if (reorder != null) handleLabel(item) else "",
                         trailing = if (more && rowMenu != null) ({
                             MoreButton(groups = { rowMenu(item, index).toActionGroups() }, title = rowMoreTitle(item))
@@ -292,6 +297,40 @@ fun <T> DenseTable(
 /** The keys of a table's leading item and of its column titles in the list (saved with the list's state, so strings). */
 private const val LEADING_KEY = "\u0000leading"
 private const val HEADER_KEY = "\u0000header"
+
+/**
+ * 1.0.1: the lazy list's keys for rows of the caller's [keys], in order. A lazy list keeps its items'
+ * state in the window's Bundle under their keys and ends the app on a key a Bundle cannot hold (a
+ * plain data class: Bu cihaz's locations) or on one used twice. A key a Bundle holds as it is (a
+ * string, a number, an enum, a Parcelable) stays; another becomes its text ("\u0001" first, so no
+ * caller's string or the table's own keys are the same); a key met again becomes its text with how
+ * many times it was met ("\u0002"…). The same keys in the same order give the same list.
+ */
+internal fun lazyKeys(keys: List<Any>): List<Any> {
+    val used = HashSet<Any>(keys.size * 2)
+    val seen = HashMap<Any, Int>()
+    return keys.map { key ->
+        val kept = if (bundleKey(key)) key else "\u0001$key"
+        if (used.add(kept)) {
+            kept
+        } else {
+            var n = seen[kept] ?: 1
+            var unique: String
+            do {
+                n++
+                unique = "\u0002$n\u0002$kept"
+            } while (!used.add(unique))
+            seen[kept] = n
+            unique
+        }
+    }
+}
+
+/** A key a Bundle holds as it is, and equal again once restored. */
+private fun bundleKey(key: Any): Boolean = when (key) {
+    is String, is Int, is Long, is Short, is Byte, is Char, is Boolean, is Float, is Double, is Enum<*>, is Parcelable -> true
+    else -> false
+}
 
 /** The row with the keyboard's focus, for Shift+↑ and Shift+↓; plain, nothing redraws from it. */
 private class FocusedRow<T> {

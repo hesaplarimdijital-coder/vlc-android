@@ -537,9 +537,10 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
     DenseTable(
         columns = if (compact) listOf(name) else listOf(name, size, modified),
         rows = entries,
-        key = { it.location },
+        // a lazy list keeps its rows' keys in the window's Bundle: the location's address, a string
+        key = { it.location.uri },
         state = listState,
-        selectedKey = selected,
+        selectedKey = selected?.uri,
         sort = if (compact) null else TableSort(sortColumn, model.sort.ascending),
         onSortChange = if (compact) {
             null
