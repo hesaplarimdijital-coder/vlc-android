@@ -54,6 +54,20 @@ class BaselineProfileGenerator {
     }
 
     @Test
+    fun diagSubscribeLoop() {
+        repeat(8) { round ->
+            screen(TABLET)
+            trace("diag: round $round")
+            device.executeShellCommand("pm clear $TARGET")
+            device.executeShellCommand("pm grant $TARGET android.permission.READ_MEDIA_AUDIO")
+            device.executeShellCommand("pm grant $TARGET android.permission.POST_NOTIFICATIONS")
+            device.pastFirstRun()
+            device.waitForLibrary()
+            Arguments.feed?.let { device.subscribeOnce(it) }
+        }
+    }
+
+    @Test
     fun startup() = rule.collect(
         packageName = TARGET,
         maxIterations = ITERATIONS,

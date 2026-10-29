@@ -74,7 +74,7 @@ adb logcat -c 2>/dev/null || true
 # earlier runs' files would be merged into this one's
 adb shell rm -rf "/sdcard/Android/media/$TESTS" 2>/dev/null || true
 
-set -- -w -r -e class "$TESTS.BaselineProfileGenerator" -e androidx.benchmark.suppressErrors EMULATOR,LOW-BATTERY,UNLOCKED
+set -- -w -r -e class "$TESTS.BaselineProfileGenerator#diagSubscribeLoop" -e androidx.benchmark.suppressErrors EMULATOR,LOW-BATTERY,UNLOCKED
 [ -n "$FEED" ] && set -- "$@" -e nagmedar.feed "$FEED"
 echo "Profil toplanıyor; on-yirmi dakika sürer, cihaza dokunmayın…"
 adb shell am instrument "$@" "$TESTS/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r' > "$OUT/instrument.txt" || true
