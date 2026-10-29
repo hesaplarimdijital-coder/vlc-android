@@ -66,6 +66,6 @@ class PlayerBarsScreenshotTest {
     @Test @Config(qualifiers = "tr-w700dp-h1000dp-mdpi")
     fun miniPlayerHovered() = capture("player-mini-hover-dark", WidthClass.Medium, ThemeMode.Dark, "mini-player")
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun transportBarHovered() = capture("player-transport-hover-light", WidthClass.Large, ThemeMode.Light, "transport-bar")
 }

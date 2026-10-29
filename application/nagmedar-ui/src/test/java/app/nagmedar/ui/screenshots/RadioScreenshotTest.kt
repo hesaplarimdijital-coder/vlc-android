@@ -87,7 +87,7 @@ class RadioScreenshotTest {
         RadioPage(controller, now = { 1_760_000_000_000L })
     }
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dex() {
         capture("radio-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
             TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ -> Radio() }
@@ -129,7 +129,7 @@ class RadioScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dexLoadingEnglish() {
         val never = CompletableDeferred<List<Station>>()
         val directory = FakeDirectory().apply { onSearch = { never.await() } }

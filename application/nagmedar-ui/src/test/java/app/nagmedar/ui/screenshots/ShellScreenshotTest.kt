@@ -94,23 +94,23 @@ class ShellScreenshotTest {
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun expandedLight() = capture("expanded-light", WidthClass.Expanded, ThemeMode.Light, InputMode.Touch)
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun largeDark() = capture("large-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer)
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun largeLight() = capture("large-light", WidthClass.Large, ThemeMode.Light, InputMode.Pointer)
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-keysexposed-qwerty")
     fun extraLargeDark() = capture("xlarge-dark", WidthClass.ExtraLarge, ThemeMode.Dark, InputMode.Pointer)
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-keysexposed-qwerty")
     fun extraLargeLight() = capture("xlarge-light", WidthClass.ExtraLarge, ThemeMode.Light, InputMode.Pointer)
 
-    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1920dp-h1080dp-mdpi-keysexposed-qwerty")
     fun extraLargeOled() = capture("xlarge-oled-podcasts", WidthClass.ExtraLarge, ThemeMode.Oled, InputMode.Pointer, Destination.Podcasts)
 
     /** S-1501: the shell in English, in a DeX window and on a phone. */
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun largeDarkEnglish() = capture("large-dark-en", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer)
 
     @Test @Config(qualifiers = "en-w411dp-h891dp-hdpi")

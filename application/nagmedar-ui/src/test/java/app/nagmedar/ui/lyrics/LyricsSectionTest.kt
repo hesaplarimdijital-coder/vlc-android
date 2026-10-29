@@ -22,7 +22,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1003: Settings › Lyrics: LRCLIB turned off and on, what is kept for offline use counted and cleared. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class LyricsSectionTest {
 
     @get:Rule

@@ -99,7 +99,7 @@ class PlaylistsScreenshotTest {
         "Itrî" to listOf(0, 1, 2),
     )
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dex() {
         val store = lists()
         capture("playlists-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
@@ -123,7 +123,7 @@ class PlaylistsScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun smartDex() {
         val smart = smartLists()
         capture("playlists-smart-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
@@ -131,7 +131,7 @@ class PlaylistsScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun smartEditor() {
         val forgotten = SmartTemplate.Forgotten.build("Unutulan sevilenler").let {
             it.copy(rules = it.rules + SmartRule(SmartField.Genre, SmartOp.Contains, "klasik"), limit = 25)
@@ -152,7 +152,7 @@ class PlaylistsScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun addToPlaylist() {
         val playlists = listOf(
             PlaylistSummary(1, "Akşam", 5, 1_401_000),

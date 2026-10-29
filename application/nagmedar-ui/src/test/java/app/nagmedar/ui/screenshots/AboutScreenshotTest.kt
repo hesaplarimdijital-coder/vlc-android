@@ -64,7 +64,7 @@ class AboutScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("about-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, open = "FFmpeg")
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")

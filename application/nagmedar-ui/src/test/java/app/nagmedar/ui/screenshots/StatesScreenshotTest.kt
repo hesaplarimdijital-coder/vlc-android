@@ -18,7 +18,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-308: the "Durumlar" board (twelve states in a 4 x 3 grid) in the dark and light themes. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1480dp-h925dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1480dp-h925dp-mdpi-keysexposed-qwerty")
 class StatesScreenshotTest {
 
     @get:Rule

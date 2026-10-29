@@ -81,7 +81,7 @@ class AccessibilityGateTest {
         assertTrue("${unnamed.size} clickables without a name: ${unnamed.map { it.id }}", unnamed.isEmpty())
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun pointerTargetsAndNames() {
         render(WidthClass.Large, InputMode.Pointer, Destination.Music)
         checkTargets(24.dp)
@@ -103,7 +103,7 @@ class AccessibilityGateTest {
     }
 
     @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun tabMovesFocusThroughControls() {
         render(WidthClass.Large, InputMode.Pointer, Destination.Music)
         // A hardware Tab first takes the window out of touch mode (ViewRootImpl does this before

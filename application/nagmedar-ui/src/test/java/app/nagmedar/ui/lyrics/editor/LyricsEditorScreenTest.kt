@@ -31,7 +31,7 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class LyricsEditorScreenTest {
 
     @get:Rule

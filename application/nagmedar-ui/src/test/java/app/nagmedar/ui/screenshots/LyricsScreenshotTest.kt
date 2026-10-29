@@ -58,7 +58,7 @@ class LyricsScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun settingsDex() = capture("settings-lyrics-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) { LyricsSection(online = true, kept = 214, onOnlineChange = {}, onClear = {}) }
     }
@@ -78,7 +78,7 @@ class LyricsScreenshotTest {
         rating = 4,
     )
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun fullScreenDex() = capture("lyrics-full-screen-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         LyricsFullScreen(
             title = "Sabaha Kadar",

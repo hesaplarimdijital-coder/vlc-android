@@ -51,7 +51,7 @@ class WindowSizesTest {
         assertEquals(NagDimens.Touch, dimens)
     }
 
-    @Test @Config(qualifiers = "w1280dp-h800dp-qwerty")
+    @Test @Config(qualifiers = "w1280dp-h800dp-keysexposed-qwerty")
     fun deXGetsOneStepNotTwo() {
         val (type, dimens, _) = read(InputMode.Pointer)
         assertEquals(1f, type.step)

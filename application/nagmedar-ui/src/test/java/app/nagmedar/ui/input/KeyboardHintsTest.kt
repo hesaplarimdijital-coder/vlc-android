@@ -1,9 +1,11 @@
 package app.nagmedar.ui.input
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.components.UndoBarHost
 import app.nagmedar.ui.components.UndoBarState
@@ -56,6 +58,16 @@ class KeyboardHintsTest {
         assertNull(keyHint(" ", keyboard = true))
     }
 
+    /** A DeX-sized test window says it has a keyboard at hand, as the DeX tests' qualifiers ask. */
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
+    fun theDexTestsHaveAKeyboard() {
+        val configuration = ApplicationProvider.getApplicationContext<Context>().resources.configuration
+        assertTrue(
+            "keyboard ${configuration.keyboard}, hidden ${configuration.hardKeyboardHidden}/${configuration.keyboardHidden}",
+            hasHardwareKeyboard(configuration),
+        )
+    }
+
     private fun undoBar(keyboard: Boolean) {
         val undo = UndoBarState()
         undo.show("Fener sıradan kaldırıldı", "Geri al", "Ctrl+Z") {}
@@ -75,7 +87,7 @@ class KeyboardHintsTest {
         compose.onNodeWithText("Ctrl+Z").assertDoesNotExist()
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theUndoBarWithAKeyboardKeepsItsKeycap() {
         undoBar(keyboard = true)
         compose.onNodeWithText("Ctrl+Z").assertExists()

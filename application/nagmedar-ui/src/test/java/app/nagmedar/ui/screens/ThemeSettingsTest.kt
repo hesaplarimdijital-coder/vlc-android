@@ -32,7 +32,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-204: theme and accent choices apply at once, system bar icons included; the wallpaper accent is offered. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class ThemeSettingsTest {
 
     @get:Rule

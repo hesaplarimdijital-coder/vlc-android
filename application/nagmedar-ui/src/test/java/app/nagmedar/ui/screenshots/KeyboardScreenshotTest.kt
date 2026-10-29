@@ -61,7 +61,7 @@ class KeyboardScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("keyboard-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer) {
         compose.onNode(hasText("Gece Yolcusu") and hasClickAction())
     }

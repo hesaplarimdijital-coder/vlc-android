@@ -35,7 +35,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-805: smart lists in the playlists screen: made from a template, changed, played, deleted and brought back. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
 class SmartPlaylistsTest {
 
     @get:Rule

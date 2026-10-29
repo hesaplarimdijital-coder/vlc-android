@@ -78,7 +78,7 @@ class RemoteAccessScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h720dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("settings-remote-access-dex-dark", ThemeMode.Dark, InputMode.Pointer, on = true)
 
     @Test @Config(qualifiers = "tr-w800dp-h800dp-mdpi")

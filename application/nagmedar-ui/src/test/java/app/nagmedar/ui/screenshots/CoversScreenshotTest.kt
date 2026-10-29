@@ -45,7 +45,7 @@ class CoversScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun settingsDex() = capture("settings-covers-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) { CoversSection(online = true, kept = 58, onOnlineChange = {}, onClear = {}) }
     }

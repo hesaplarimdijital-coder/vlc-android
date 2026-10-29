@@ -59,7 +59,7 @@ class ScrobbleScreenshotTest {
     private val lastFmOut = ScrobbleRow(ScrobbleServiceId.LastFm, available = true, account = null, enabled = false, waiting = 0, held = false)
     private val brainzOut = ScrobbleRow(ScrobbleServiceId.ListenBrainz, available = true, account = null, enabled = false, waiting = 0, held = false)
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("settings-scrobble-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
         Box(Modifier.padding(top = 16.dp)) { ScrobbleContent(listOf(lastFmIn, brainzHeld), SignInState.Closed, ScrobbleActions()) }
     }

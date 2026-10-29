@@ -103,7 +103,7 @@ class MusicSettingsScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h1100dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h1100dp-mdpi-keysexposed-qwerty")
     fun dex() = capture(
         "settings-music-dex-dark", ThemeMode.Dark, InputMode.Pointer, available = true,
         signalPath = bitPerfectUsb,

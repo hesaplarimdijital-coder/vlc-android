@@ -134,7 +134,7 @@ class MusicBrowserTest {
         compose.onNodeWithText("Yağmur").assertExists()
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun aDesktopShowsTheGroupsBesideTheTableAndItsColumns() {
         val state = show(WidthClass.Large, InputMode.Pointer, MusicBrowserState(view = MusicView.Genres))
         // the first genre is open beside the list: its name in the list and over the table
@@ -228,7 +228,7 @@ class MusicBrowserTest {
 
     private fun row(title: String) = compose.onNode(hasText(title) and hasClickAction())
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun theInspectorFollowsTheSelectionAndItsTabs() {
         val store = MapPaneWidths()
         workstation(store)
@@ -253,20 +253,20 @@ class MusicBrowserTest {
         assertEquals(true, store.hidden[WORKSTATION_PANE])
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun aHiddenInspectorStaysHidden() {
         workstation(MapPaneWidths().apply { hidden[WORKSTATION_PANE] = true })
         compose.onNodeWithTag("inspector").assertDoesNotExist()
         compose.onNodeWithText("etiketler çalan 0").assertDoesNotExist()
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun theInspectorComesBackAsWide() {
         workstation(MapPaneWidths().apply { widths[WORKSTATION_PANE] = 420f })
         compose.onNodeWithTag("inspector").assertWidthIsEqualTo(420.dp)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun shiftArrowsGrowTheSelectionAndItsMenuTakesThemAll() {
         workstation(MapPaneWidths())
         row("Segâh Tekbîr").performClick()

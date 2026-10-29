@@ -41,7 +41,7 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w600dp-h400dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w600dp-h400dp-mdpi-keysexposed-qwerty")
 class TooltipTest {
 
     @get:Rule

@@ -26,7 +26,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-1008: Settings › Scrobble: the accounts, the switches, the queue, signing in with the form of each service. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h1400dp-mdpi-keysexposed-qwerty")
 class ScrobbleSectionTest {
 
     @get:Rule

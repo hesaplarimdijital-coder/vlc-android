@@ -33,7 +33,7 @@ import org.robolectric.annotation.GraphicsMode
 /** S-613: Settings › Latency profiles: the output now, the stepper, the delete, and the measurement's window. */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class LatencySectionTest {
 
     @get:Rule

@@ -51,7 +51,7 @@ class InputSettingsScreenshotTest {
         ShellScreenshotTest.save(name, bitmap)
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h520dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h520dp-mdpi-keysexposed-qwerty")
     fun dex() = capture("settings-input-dex-dark", ThemeMode.Dark, InputMode.Pointer, changed = true)
 
     @Test @Config(qualifiers = "tr-w800dp-h560dp-mdpi")

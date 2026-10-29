@@ -42,7 +42,7 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+@Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class CommandPaletteTest {
 
     @get:Rule
@@ -136,7 +136,7 @@ class CommandPaletteTest {
     }
 
     /** S-1501: in English the groups' titles are English capitals: MEDIA, not MEDİA. */
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun inEnglishTheTitlesAreEnglishCapitals() {
         palette()
         compose.onNodeWithContentDescription("Search commands, screens, settings or media").performTextInput("kuzey")

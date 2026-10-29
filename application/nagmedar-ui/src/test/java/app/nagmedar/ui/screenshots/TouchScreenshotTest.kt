@@ -112,7 +112,7 @@ class TouchScreenshotTest {
         },
     ) { QueueShell(WidthClass.Expanded) }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun queueDex() = capture("queue-dex-dark", ThemeMode.Dark, InputMode.Pointer) { QueueShell(WidthClass.Large) }
 
     /** 1.0.1: nothing queued beside a tablet's music, by touch. */
@@ -120,7 +120,7 @@ class TouchScreenshotTest {
     fun queueEmptyTablet() = capture("queue-empty-tablet-light", ThemeMode.Light, InputMode.Touch) { QueueShell(WidthClass.Expanded, emptyList(), -1) }
 
     /** 1.0.1: nothing queued beside DeX's music, in English. */
-    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun queueEmptyDexEnglish() = capture("queue-empty-dex-dark-en", ThemeMode.Dark, InputMode.Pointer) { QueueShell(WidthClass.Large, emptyList(), -1) }
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")

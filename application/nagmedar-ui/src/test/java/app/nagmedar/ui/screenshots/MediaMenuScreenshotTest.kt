@@ -96,7 +96,7 @@ class MediaMenuScreenshotTest {
         }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun trackMenuDex() = capture("media-menu-dex-dark", ThemeMode.Dark)
 
     @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")

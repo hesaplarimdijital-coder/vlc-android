@@ -119,7 +119,7 @@ class PanesTest {
     private val divider get() = compose.onNodeWithContentDescription("Ayrıntılar bölmesinin genişliği")
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun besideTheListInLargeWindows() {
         panes()
         compose.onNodeWithTag("pane").assertDoesNotExist()
@@ -144,7 +144,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun keysAndScreenReadersSetTheWidthAndItIsKept() {
         val store = Store()
         panes(store)
@@ -167,7 +167,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun draggingTheEdgeResizesAndSavesOnRelease() {
         val store = Store()
         panes(store)
@@ -188,7 +188,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theRememberedWidthComesBackAndFitsTheWindow() {
         panes(Store(INSPECTOR_PANE to 420f))
         detail = "Satır 1"
@@ -197,7 +197,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun aWidthTooLargeForTheWindowLeavesRoomForTheList() {
         panes(Store(INSPECTOR_PANE to 2000f))
         detail = "Satır 1"
@@ -207,7 +207,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun rightToLeftThePaneIsOnTheLeft() {
         val store = Store()
         panes(store, rtl = true)
@@ -222,7 +222,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun escapeClosesTheDetails() {
         panes()
         detail = "Satır 1"
@@ -268,7 +268,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theListKeepsItsPlaceAcrossWidthClasses() {
         var widthClass by mutableStateOf(WidthClass.Large)
         compose.setContent {
@@ -302,7 +302,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun theSidebarIsDraggedToAKeptWidth() {
         val store = Store(SIDEBAR_PANE to 300f)
         compose.setContent {
@@ -325,7 +325,7 @@ class PanesTest {
     }
 
     @Test
-    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-qwerty")
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun aCollapsedSidebarCannotBeDragged() {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {

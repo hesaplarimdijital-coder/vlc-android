@@ -239,7 +239,7 @@ class RecordingsScreenshotTest {
 
     // --- a recording going on
 
-    @Test @Config(qualifiers = "tr-$DEX-qwerty")
+    @Test @Config(qualifiers = "tr-$DEX-keysexposed-qwerty")
     fun dexRecording() = shot(
         "recordings-dex-dark-recording", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer,
         Scene(tracks, schedules, live(), gone = setOf(tracks[6].fileUri)), air(sabah.asStation(), "Tarkan - Hepsi Senin Mi"),
@@ -265,7 +265,7 @@ class RecordingsScreenshotTest {
 
     // --- what was recorded
 
-    @Test @Config(qualifiers = "tr-$DEX-qwerty")
+    @Test @Config(qualifiers = "tr-$DEX-keysexposed-qwerty")
     fun dexDone() = shot(
         "recordings-dex-light-done", WidthClass.Large, ThemeMode.Light, InputMode.Pointer,
         Scene(tracks, gone = setOf(tracks[6].fileUri)),
@@ -299,7 +299,7 @@ class RecordingsScreenshotTest {
 
     // --- room
 
-    @Test @Config(qualifiers = "tr-$DEX-qwerty")
+    @Test @Config(qualifiers = "tr-$DEX-keysexposed-qwerty")
     fun dexNearLimit() = shot(
         "recordings-dex-dark-limit", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer,
         Scene(tracks, emptyList(), live(warning = SpaceIssue.LimitReached), limits = StorageLimits(maxTotalBytes = 150L * StorageLimits.MB)),
@@ -323,7 +323,7 @@ class RecordingsScreenshotTest {
     @Test @Config(qualifiers = "tr-$PHONE")
     fun phoneEmpty() = shot("recordings-phone-dark-empty", WidthClass.Compact, ThemeMode.Dark, InputMode.Touch, Scene())
 
-    @Test @Config(qualifiers = "en-$DEX-qwerty")
+    @Test @Config(qualifiers = "en-$DEX-keysexposed-qwerty")
     fun dexEmptyEnglish() = shot("recordings-dex-light-empty-en", WidthClass.Large, ThemeMode.Light, InputMode.Pointer, Scene())
 
     @Test @Config(qualifiers = "tr-$TABLET")
@@ -348,7 +348,7 @@ class RecordingsScreenshotTest {
     @Test @Config(qualifiers = "en-$PHONE")
     fun phoneEditorEnglish() = editor("recordings-phone-light-editor-en", WidthClass.Compact, ThemeMode.Light, InputMode.Touch, ScheduleDraft(), Scene(tracks, schedules.take(2)))
 
-    @Test @Config(qualifiers = "tr-$DEX-qwerty")
+    @Test @Config(qualifiers = "tr-$DEX-keysexposed-qwerty")
     fun dexEditorMeetingAnother() = editor(
         "recordings-dex-light-editor-conflict", WidthClass.Large, ThemeMode.Light, InputMode.Pointer,
         newDraft.copy(station = haber, hour = 22, minute = 30, repeat = Repeat.Daily), Scene(tracks, schedules.take(2)),
@@ -365,7 +365,7 @@ class RecordingsScreenshotTest {
         capture(name, theme, input) { Box(Modifier.fillMaxSize().padding(top = 16.dp)) { RadioRecordingSection(prefs) } }
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun settingsDex() = settings("settings-radio-recording-dex-dark", ThemeMode.Dark, InputMode.Pointer, chosen = true)
 
     @Test @Config(qualifiers = "tr-w800dp-h900dp-mdpi")

@@ -161,7 +161,7 @@ class EqualizerScreenshotTest {
         return ab
     }
 
-    @Test @Config(qualifiers = "tr-w1280dp-h1700dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h1700dp-mdpi-keysexposed-qwerty")
     fun dex() = capture(
         "equalizer-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, chain,
         DspMeter(frames = 48_000L * 95, clipped = 0, peak = 1.31, reductionDb = 1.9),

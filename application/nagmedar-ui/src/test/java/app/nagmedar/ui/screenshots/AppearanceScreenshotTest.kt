@@ -56,6 +56,6 @@ class AppearanceScreenshotTest {
     @Test @Config(qualifiers = "tr-w800dp-h360dp-mdpi")
     fun tabletLight() = capture("appearance-tablet-light", ThemeMode.Light, Accent.Coral, InputMode.Touch)
 
-    @Test @Config(qualifiers = "tr-w1280dp-h360dp-mdpi-qwerty")
+    @Test @Config(qualifiers = "tr-w1280dp-h360dp-mdpi-keysexposed-qwerty")
     fun dexOledWallpaper() = capture("appearance-dex-oled", ThemeMode.Oled, Accent.System, InputMode.Pointer)
 }
