@@ -231,12 +231,12 @@ class Smoke:
             if "Error" in out:
                 self.warnings.append("am start: " + out[:300])
             time.sleep(2)
-            # the app's window in front; else the system was busy (an emulator's system server may
-            # restart under load): it is waited for and the app started again
-            if any(n.pkg == self.pkg for n in self.nodes(self.dump())):
-                return
+            # the app's activity resumed on top; else the system was busy: it is waited for and the
+            # app started again
             top = [l.strip() for l in self.sh("dumpsys activity activities", timeout=60).splitlines()
                    if re.search(r"(topResumedActivity|mResumedActivity|ResumedActivity:)", l)][:2]
+            if any(self.pkg + "/" in l for l in top):
+                return
             self.warnings.append("[%s] the app was not in front after it was started (attempt %d): am start said %s; resumed: %s"
                                  % (self.cur_pass, attempt + 1, " ".join(out.split())[:300], " / ".join(top)[:300]))
             self.wait_boot(timeout=180)
@@ -818,7 +818,11 @@ class Smoke:
     def close_more_sheet(self):
         """Back while the bottom bar's ⋯ sheet is open (the destination loop ends with it open)."""
         s = self.strings[self.lang]
-        seen = self.texts(self.nodes(self.dump()))
+        nodes = self.nodes(self.dump())
+        # a phone's screen only: a tablet's sidebar always lists these pages, and Back would leave the app
+        if self.screen_size(nodes)[0] >= 1600:
+            return
+        seen = self.texts(nodes)
         if all(x in seen for x in (s["nag_nav_downloads"], s["nag_nav_settings"], s["nag_nav_playlists"])):
             self.key(4)
             time.sleep(1)
