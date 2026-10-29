@@ -21018,5 +21018,4 @@ SPLorg/videolan/vlc/util/VersionMigration;->migrateVersionAfterLibVLC(Landroid/c
 Lorg/videolan/vlc/util/VersionMigration$migrateVersion$1;
 SPLorg/videolan/vlc/util/VersionMigration$migrateVersion$1;-><init>(Lorg/videolan/vlc/util/VersionMigration;Lkotlin/coroutines/Continuation;)V
 Lvideolan/org/commontools/LiveEvent;
-SPLvideolan/org/commontools/LiveEvent;-><init>()VLandroidx/activity/Cancellable;
 SPLvideolan/org/commontools/LiveEvent;-><init>()V

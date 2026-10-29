@@ -88,9 +88,10 @@ adb logcat -d -s NagmedarProfile:V | tr -d '\r' > "$OUT/steps.txt" || true
 # cold start's test alone
 DEST="$OUT/application/app/src/main/baselineProfiles"
 mkdir -p "$DEST"
+# (awk, not cat: a profile file may end without a newline, and cat would join two rules)
 { find "$OUT/device" -name '*-startup-prof*.txt' | sort; find "$OUT/device" -name '*-baseline-prof*.txt' | sort; } \
-    | xargs -r cat | awk 'NF && !seen[$0]++' > "$DEST/baseline-prof.txt"
-find "$OUT/device" -name '*-startup-prof*.txt' | sort | xargs -r cat | awk 'NF && !seen[$0]++' > "$DEST/startup-prof.txt"
+    | tr '\n' '\0' | xargs -0 -r awk 'NF && !seen[$0]++' > "$DEST/baseline-prof.txt"
+find "$OUT/device" -name '*-startup-prof*.txt' | sort | tr '\n' '\0' | xargs -0 -r awk 'NF && !seen[$0]++' > "$DEST/startup-prof.txt"
 [ -s "$DEST/startup-prof.txt" ] || rm -f "$DEST/startup-prof.txt"
 
 RULES=$(wc -l < "$DEST/baseline-prof.txt" | tr -d ' ')

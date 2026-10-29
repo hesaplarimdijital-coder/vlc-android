@@ -21018,8 +21018,8 @@ SPLorg/videolan/vlc/util/VersionMigration;->migrateVersionAfterLibVLC(Landroid/c
 Lorg/videolan/vlc/util/VersionMigration$migrateVersion$1;
 SPLorg/videolan/vlc/util/VersionMigration$migrateVersion$1;-><init>(Lorg/videolan/vlc/util/VersionMigration;Lkotlin/coroutines/Continuation;)V
 Lvideolan/org/commontools/LiveEvent;
-SPLvideolan/org/commontools/LiveEvent;-><init>()VLandroidx/activity/Cancellable;
-SPLvideolan/org/commontools/LiveEvent;-><init>()VPLandroid/support/v4/media/MediaBrowserCompat;-><clinit>()V
+SPLvideolan/org/commontools/LiveEvent;-><init>()V
+PLandroid/support/v4/media/MediaBrowserCompat;-><clinit>()V
 PLandroid/support/v4/media/MediaBrowserCompat;-><init>(Landroid/content/Context;Landroid/content/ComponentName;Landroid/support/v4/media/MediaBrowserCompat$ConnectionCallback;Landroid/os/Bundle;)V
 PLandroid/support/v4/media/MediaBrowserCompat;->connect()V
 PLandroid/support/v4/media/MediaBrowserCompat$CallbackHandler;-><init>(Landroid/support/v4/media/MediaBrowserCompat$MediaBrowserServiceCallbackImpl;)V
@@ -35899,11 +35899,10 @@ PLretrofit2/Platform$$ExternalSyntheticApiModelOutline0;->m(Ljavax/net/ssl/SSLPa
 PLretrofit2/Platform$$ExternalSyntheticApiModelOutline0;->m(Ljavax/net/ssl/SSLSocket;)Ljava/lang/String;
 PLretrofit2/Platform$$ExternalSyntheticApiModelOutline0;->m(Ljavax/net/ssl/SSLSocket;)Z
 PLretrofit2/Platform$$ExternalSyntheticApiModelOutline0;->m(Ljavax/net/ssl/SSLSocket;Z)V
-SPLvideolan/org/commontools/LiveEvent;-><init>()V
 PLvideolan/org/commontools/LiveEvent;->observe(Landroidx/lifecycle/LifecycleOwner;Landroidx/lifecycle/Observer;)V
 PLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda2;-><init>(Lvideolan/org/commontools/LiveEvent;Landroidx/lifecycle/Observer;)V
-PLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;-><init>(Lkotlin/jvm/functions/Function1;)VPLandroid/support/v4/media/MediaBrowserCompat;-><clinit>()V
-PLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;-><init>(Lkotlin/jvm/functions/Function1;)VLandroid/support/v4/media/MediaBrowserCompat;
+PLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;-><init>(Lkotlin/jvm/functions/Function1;)V
+Landroid/support/v4/media/MediaBrowserCompat;
 SPLandroid/support/v4/media/MediaBrowserCompat;-><clinit>()V
 SPLandroid/support/v4/media/MediaBrowserCompat;-><init>(Landroid/content/Context;Landroid/content/ComponentName;Landroid/support/v4/media/MediaBrowserCompat$ConnectionCallback;Landroid/os/Bundle;)V
 SPLandroid/support/v4/media/MediaBrowserCompat;->connect()V
@@ -41336,5 +41335,4 @@ SPLvideolan/org/commontools/LiveEvent;->observe(Landroidx/lifecycle/LifecycleOwn
 Lvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda2;
 SPLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda2;-><init>(Lvideolan/org/commontools/LiveEvent;Landroidx/lifecycle/Observer;)V
 Lvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;
-SPLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;-><init>(Lkotlin/jvm/functions/Function1;)VLandroid/support/v4/media/MediaBrowserCompat;
 SPLvideolan/org/commontools/LiveEvent$$ExternalSyntheticLambda3;-><init>(Lkotlin/jvm/functions/Function1;)V
