@@ -37,7 +37,8 @@ import kotlin.concurrent.thread
 /**
  * Nağmedar 1.0: what the removed features left on an install upgraded from 0.5 goes at the next start, once: TV Lab's
  * queued work, night alarm and folders, the dropped tables' permissions, and the video features' work, files and
- * folders, while what 1.0 still uses stays.
+ * folders, while what 1.0 still uses stays. 1.0.2: so do the podcast transcripts' Whisper jobs, models, files and
+ * settings, while the podcasts' downloads and the feeds' own transcripts stay.
  */
 @RunWith(AndroidJUnit4::class)
 class RetiredWorkTest {
@@ -105,9 +106,6 @@ class RetiredWorkTest {
             file(app.cacheDir, "overlays/logo-1.png"),
         )
         val kept = listOf(
-            file(app.noBackupFilesDir, "whisper-models/ggml-small.bin"),
-            file(app.noBackupFilesDir, "whisper-models/ggml-base.bin.part"),
-            file(app.filesDir, "podcast-transcripts/12.vtt"),
             file(app.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), "Bolum 12.mp3"),
             file(app.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Radio/TRT Nagme/kayit.mp3"),
             file(app.filesDir, "covers/a.user"),
@@ -133,16 +131,72 @@ class RetiredWorkTest {
             queued("nagmedar-translate-model-other", "app.nagmedar.ui.player.subtitles.translate.ModelDownloadWorker"),
             queued("nagmedar-remux", "app.nagmedar.ui.tvlab.remux.RemuxWorker"),
         )
-        // 0.5's Whisper job, under the name 1.0's still uses: its old class finds it, and 1.0's own job is left
+        // 0.5's Whisper job, under the name 1.0 used too: its old class finds it
         val oldWhisper = queued("nagmedar-whisper", "app.nagmedar.ui.player.subtitles.whisper.WhisperWorker")
-        val whisper = queued(null, "app.nagmedar.ui.transcribe.WhisperWorker")
         val podcasts = queued(null, "app.nagmedar.ui.podcast.PodcastRefreshWorker")
         removed.forEach { assertEquals(WorkInfo.State.ENQUEUED, state(it)) }
 
         start()
         (removed + oldWhisper).forEach { assertEquals(WorkInfo.State.CANCELLED, state(it)) }
-        assertEquals(WorkInfo.State.ENQUEUED, state(whisper))
         assertEquals(WorkInfo.State.ENQUEUED, state(podcasts))
+    }
+
+    @Test
+    fun theTranscriptsJobsGoAndThePodcastsWorkStays() {
+        // 1.0's: the unique job (an automatic one waits for the charger and an idle device), one appended after it, and
+        // a request of its worker under no name
+        val unique = queued("nagmedar-whisper", "app.nagmedar.ui.transcribe.WhisperWorker")
+        val tagged = OneTimeWorkRequestBuilder<StandInWorker>().addTag("nagmedar-whisper").setInitialDelay(1, TimeUnit.DAYS).build()
+        WorkManager.getInstance(app).enqueue(tagged).result.get()
+        val worker = queued(null, "app.nagmedar.ui.transcribe.WhisperWorker")
+        val refresh = queued("nagmedar-podcast-refresh", "app.nagmedar.ui.podcast.PodcastRefreshWorker")
+        val download = queued(null, "app.nagmedar.ui.podcast.EpisodeDownloadWorker")
+
+        start()
+        listOf(unique, tagged.id, worker).forEach { assertEquals(WorkInfo.State.CANCELLED, state(it)) }
+        listOf(refresh, download).forEach { assertEquals(WorkInfo.State.ENQUEUED, state(it)) }
+    }
+
+    @Test
+    fun theTranscriptsModelsFilesAndSettingsGoAndThePodcastsStay() {
+        val gone = listOf(
+            file(app.noBackupFilesDir, "whisper-models/ggml-small-q5_1.bin"),
+            file(app.noBackupFilesDir, "whisper-models/ggml-large-v3-turbo-q5_0.bin.part"),
+            file(app.noBackupFilesDir, "whisper-models/ggml-large-v3-turbo-q5_0.bin.part.json"),
+            file(app.filesDir, "podcast-transcripts/12.vtt"),
+            file(app.filesDir, "podcast-transcripts/13.vtt.part"),
+            file(app.filesDir, "whisper-progress/12.json"),
+            file(app.cacheDir, "whisper-audio/14-0b7c.part"),
+            // the Lab's SP-05 models: in the external files' folder, or in the app's files without one
+            file(app.getExternalFilesDir(null), "whisper/ggml-base-q5_1.bin"),
+            file(app.filesDir, "ggml-small-q5_1.bin"),
+            file(app.filesDir, "ggml-base-q5_1.bin.part"),
+        )
+        val kept = listOf(
+            file(app.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), "Bolum 12.mp3"),
+            file(app.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), "Bolum 13.mp3.part"),
+            // the feeds' own transcripts and chapters, as the episode pages keep them
+            file(app.cacheDir, "podcast/transcript-12.txt"),
+            file(app.cacheDir, "podcast/chapters-12.json"),
+            file(app.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Radio/TRT Nagme/kayit.mp3"),
+            file(app.filesDir, "covers/a.user"),
+            file(app.filesDir, "notes.bin"),
+        )
+        val settings = Settings.getInstance(app)
+        settings.edit().apply {
+            RetiredWork.TRANSCRIPTION_KEYS.forEach { putString(it, "x") }
+            putInt(PodcastSettingsStore.KEY_SKIP_BACK, 10)
+        }.commit()
+
+        start()
+        gone.forEach { assertFalse("$it goes", it.exists()) }
+        listOf("whisper-models").forEach { assertFalse(File(app.noBackupFilesDir, it).exists()) }
+        listOf("podcast-transcripts", "whisper-progress").forEach { assertFalse(File(app.filesDir, it).exists()) }
+        assertFalse(File(app.cacheDir, "whisper-audio").exists())
+        kept.forEach { assertTrue("$it stays", it.exists()) }
+        RetiredWork.TRANSCRIPTION_KEYS.forEach { assertFalse("$it goes", settings.contains(it)) }
+        assertEquals(10, settings.getInt(PodcastSettingsStore.KEY_SKIP_BACK, 0))
+        settings.edit().remove(PodcastSettingsStore.KEY_SKIP_BACK).commit()
     }
 
     @Test
@@ -214,6 +268,7 @@ class RetiredWorkTest {
         val profile = "nagmedar_tvlab_profile"
         val note = NagmedarDatabase.retiredGrants(app).apply { writeText("content://docs/document/later.mkv\n") }
         val models = file(app.noBackupFilesDir, "translate-models/later/model.bin")
+        val transcript = file(app.filesDir, "podcast-transcripts/later.vtt")
         val folder = "nagmedar_subtitle_folder"
         Settings.getInstance(app).edit().putString(profile, "later").putString(folder, tree("RetiredSonra")).commit()
         val work = queued("nagmedar-transcode", "app.nagmedar.ui.transcode.TranscodeWorker")
@@ -222,6 +277,7 @@ class RetiredWorkTest {
         assertTrue(tvLab.exists())
         assertTrue(note.exists())
         assertTrue(models.exists())
+        assertTrue(transcript.exists())
         assertTrue(Settings.getInstance(app).contains(profile))
         assertTrue(Settings.getInstance(app).contains(folder))
         assertEquals(WorkInfo.State.ENQUEUED, state(work))

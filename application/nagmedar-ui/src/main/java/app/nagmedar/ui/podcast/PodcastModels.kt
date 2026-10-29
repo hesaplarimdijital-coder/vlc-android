@@ -108,8 +108,6 @@ data class EpisodeDetailUi(
     val skipForwardSeconds: Int = 30,
     /** The device has no network: what is not downloaded cannot be played or read. */
     val offline: Boolean = false,
-    /** Whisper: the transcript the app can write for the episode, waiting or under way. */
-    val transcribe: TranscribeUi = TranscribeUi.Unavailable,
 )
 
 /** Everything the Podcasts screen draws. */
@@ -184,10 +182,4 @@ class PodcastActions(
     val onSetPlayback: (Long, Float, Int, Int) -> Unit = { _, _, _, _ -> },
     /** S-1104: the show's volume boost ([VolumeBoost]). */
     val onSetVolumeBoost: (Long, Int) -> Unit = { _, _ -> },
-    /** Whisper: the episode's transcript asked for (again), its job cancelled, its own transcript removed. */
-    val onTranscribe: (PodcastEpisode) -> Unit = {},
-    val onCancelTranscribe: (Long) -> Unit = {},
-    val onDeleteTranscript: (Long) -> Unit = {},
-    /** Whisper: the language the show is heard in ([TranscriptLanguage]): a code, "auto", or null for the feed's. */
-    val onSetTranscriptLanguage: (Long, String?) -> Unit = { _, _ -> },
 )

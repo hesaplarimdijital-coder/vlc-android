@@ -52,10 +52,6 @@
         <receiver
             android:name="app.nagmedar.ui.podcast.DownloadCancelReceiver"
             android:exported="false" />
-        <!-- Whisper: the podcast transcript job notification's Cancel -->
-        <receiver
-            android:name="app.nagmedar.ui.transcribe.WhisperCancelReceiver"
-            android:exported="false" />
         <!-- S-1107: radio recording: the app kept in the foreground while stations are recorded (their
              notification has the time, the size, the track and a stop action), and the alarms of the
              scheduled recordings (set again after a restart by AlarmRescheduler below) -->

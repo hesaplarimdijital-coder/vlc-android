@@ -238,30 +238,11 @@ private fun TopBar(ui: EpisodeDetailUi, fullScreen: Boolean, actions: PodcastAct
                 listOf(
                     MenuEntry.Item(res.getString(R.string.nag_pod_show_settings), { actions.onShowSettings(ui.feed.id) }, icon = NagIcons.Settings),
                     MenuEntry.Item(res.getString(R.string.nag_pod_copy_episode_address), { actions.onCopy(ui.episode.audioUrl) }),
-                ) + transcribeEntries(res, ui, actions)
+                )
             },
             modifier = Modifier.testTag("episode-more"),
         )
     }
-}
-
-/**
- * Whisper in the episode's menu: a transcript made (again, when the episode has one, the feed's or its own), its job
- * cancelled while it waits or runs, and the episode's own transcript removed.
- */
-internal fun transcribeEntries(res: Resources, ui: EpisodeDetailUi, actions: PodcastActions): List<MenuEntry> {
-    val shown = (ui.transcript as? ExtraUi.Ready)?.value
-    val job = when (ui.transcribe) {
-        is TranscribeUi.Idle -> MenuEntry.Item(
-            res.getString(if (shown != null) R.string.nag_pod_whisper_again else R.string.nag_pod_whisper_create),
-            { actions.onTranscribe(ui.episode) },
-            icon = NagIcons.Subtitle,
-        )
-        is TranscribeUi.Queued, is TranscribeUi.Running -> MenuEntry.Item(res.getString(R.string.nag_pod_whisper_cancel), { actions.onCancelTranscribe(ui.episode.id) }, icon = NagIcons.Close)
-        TranscribeUi.Unavailable -> null
-    }
-    val delete = shown?.whisperModel?.let { MenuEntry.Item(res.getString(R.string.nag_pod_whisper_delete), { actions.onDeleteTranscript(ui.episode.id) }, icon = NagIcons.Delete, destructive = true) }
-    return listOfNotNull(job, delete)
 }
 
 @Composable
@@ -490,7 +471,7 @@ private fun DownloadStatus(ui: EpisodeDetailUi, actions: PodcastActions) {
 
 /** A line of the page with a tone: its icon, a title, what it says, and what can be done about it. */
 @Composable
-internal fun StatusCard(
+private fun StatusCard(
     tone: StateTone,
     icon: ImageVector,
     title: String,

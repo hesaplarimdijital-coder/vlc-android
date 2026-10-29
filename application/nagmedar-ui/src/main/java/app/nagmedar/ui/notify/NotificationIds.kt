@@ -37,9 +37,6 @@ object NotificationIds {
 
     // ------------------------------------------------------------ Nağmedar
 
-    /** S-709: the transcription from speech: the job under way. */
-    const val WHISPER = 709
-
     /** The widget's tap: not a notification, the request code of the PendingIntent that opens the window. */
     const val WIDGET_TAP = 1000
 
@@ -58,10 +55,6 @@ object NotificationIds {
     /** S-1107: the radio recordings under way (the foreground service's), and how one ended: one per station, its tag. */
     const val RADIO_RECORDING = 6110
     const val RADIO_RECORDING_ALERT = 6111
-
-    /** S-709: what came of the transcription from speech. */
-    const val WHISPER_DONE = 7090
-
 
     /** S-1103: a show's news, one per show (its feed's id). */
     @JvmField
@@ -103,12 +96,15 @@ class IdRange(val first: Int, val size: Int) {
 /**
  * 1.0: the notification channels of the video features 0.5 had (the player's recordings, the
  * subtitles' extraction and translation, the conversions and the HLS stream) and of TV Lab's
- * remux queue. Android keeps a
- * channel until the app deletes it: [delete] takes them out of the system's settings (a no-op
- * once they are gone). A binder call each: off the main thread.
+ * remux queue; 1.0.2: the podcast transcripts' jobs. Android keeps a channel until the app
+ * deletes it: [delete] takes them out of the system's settings (a no-op once they are gone). A
+ * binder call each: off the main thread.
  */
 object RemovedChannels {
-    internal val ids = listOf("nagmedar_recordings", "nagmedar_subtitle_extract", "nagmedar_translate", "nagmedar_hls", "nagmedar_transcode", "nagmedar_remux")
+    internal val ids = listOf(
+        "nagmedar_recordings", "nagmedar_subtitle_extract", "nagmedar_translate", "nagmedar_hls", "nagmedar_transcode", "nagmedar_remux",
+        "nagmedar_whisper",
+    )
 
     fun delete(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return

@@ -1,8 +1,5 @@
 package app.nagmedar.ui.lab
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,7 +47,7 @@ private class Running(val tool: LabTool) {
 
 /**
  * Settings > Lab: the MVP0 spike experiments that need the real device (the audio output, the
- * USB DAC, whisper). Each one produces a text report to copy or share. [section] is the
+ * USB DAC). Each one produces a text report to copy or share. [section] is the
  * settings card the tools sit in.
  */
 @Composable
@@ -62,11 +59,10 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
     var running by remember { mutableStateOf<Running?>(null) }
     var result by remember { mutableStateOf<Pair<String, String>?>(null) }
     val choices = remember { mutableStateMapOf<String, String>() }
-    var pending by remember { mutableStateOf<LabTool?>(null) }
 
     fun options(tool: LabTool) = tool.options.associate { it.key to (choices["${tool.title}:${it.key}"] ?: it.default) }
 
-    fun start(tool: LabTool, input: Uri?) {
+    fun start(tool: LabTool) {
         val activity = context.findActivity() ?: return
         val title = context.getString(tool.title)
         val state = Running(tool)
@@ -79,7 +75,7 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
                 }
             }
             val report = try {
-                tool.run(LabRun(activity, input, options(tool), progress))
+                tool.run(LabRun(activity, options(tool), progress))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
@@ -90,12 +86,6 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
                 result = title to report
             }
         }
-    }
-
-    val openInput = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        val tool = pending
-        pending = null
-        if (tool != null && uri != null) start(tool, uri)
     }
 
     val tools = rememberLabAvailable()
@@ -122,15 +112,7 @@ fun LabSection(section: @Composable (title: String, content: @Composable ColumnS
                     } else {
                         NagButton(
                             text = stringResource(if (current?.tool === tool) R.string.nag_lab_running else R.string.nag_lab_run),
-                            onClick = {
-                                when (tool.input) {
-                                    LabInput.None -> start(tool, null)
-                                    LabInput.Media -> {
-                                        pending = tool
-                                        openInput.launch(arrayOf("video/*", "audio/*", "application/octet-stream"))
-                                    }
-                                }
-                            },
+                            onClick = { start(tool) },
                             enabled = current == null,
                         )
                     }

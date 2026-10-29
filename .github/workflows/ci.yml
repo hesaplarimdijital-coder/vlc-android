@@ -1,13 +1,10 @@
 # Nağmedar CI
 #
-# lab-native: the native lab library (FFmpeg for the media probe, whisper.cpp with ggml's
-#            Vulkan backend, libusb; SP-02/05, S-709, S-802) and the music engine (S-901, native/audio)
-#            for arm64. Cached until native/lab, native/audio or buildsystem/nagmedar-native
-#            changes; glslc, which build.sh builds for the runner to compile the Vulkan shaders,
-#            is kept until versions.env changes.
-# native-host: the host tests of the media probe, the
-#            whisper pipeline and the engine's bit-exact decoding, on every run that runs the
-#            tests, whether lab-native's libraries came from the cache or not.
+# lab-native: the native lab library (FFmpeg for the media probe, libusb; SP-02/03, S-802) and
+#            the music engine (S-901, native/audio) for arm64. Cached until native/lab, native/audio
+#            or buildsystem/nagmedar-native changes.
+# native-host: the host tests of the media probe and the engine's bit-exact decoding, on every
+#            run that runs the tests, whether lab-native's libraries came from the cache or not.
 # app      : every push / PR. Builds the arm64 debug APK, the arm64 personal build (R8, the
 #            release-type build personal_release delivers) and the macrobenchmarks with the
 #            benchmark build they measure (S-1404), none uploaded, against the published libVLC 4
@@ -85,7 +82,7 @@ env:
 
 jobs:
   lab-native:
-    name: Laboratuvar native (SP-02/03/05)
+    name: Laboratuvar native (SP-02/03)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -107,15 +104,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-
-      # S-709: glslc for the Vulkan shaders (shaderc of the Vulkan SDK; Ubuntu's lacks the 8-bit
-      # integer dot product), built by build.sh into native/.work/tools on the first run
-      - name: Önbellek · glslc
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          path: native/.work/tools
-          key: glslc-${{ runner.os }}-${{ hashFiles('buildsystem/nagmedar-native/versions.env') }}
 
       - name: Araçlar
         if: steps.cache.outputs.cache-hit != 'true'
@@ -173,8 +161,8 @@ jobs:
           # S-1003: the lyrics tests write SYLT frames with it
           pip install --quiet --break-system-packages mutagen
 
-      # S-802, SP-05 (test-host.sh) and the music engine's (test-audio.sh)
-      - name: Host derlemesi ve testleri (S-802, SP-05)
+      # S-802 (test-host.sh) and the music engine's (test-audio.sh)
+      - name: Host derlemesi ve testleri (S-802)
         if: env.NAGMEDAR_RUN_TESTS == '1'
         env:
           NAGMEDAR_TEST_DIR: ${{ runner.temp }}/host-test

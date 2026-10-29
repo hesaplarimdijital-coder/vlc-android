@@ -2,25 +2,15 @@ package app.nagmedar.ui.lab
 
 import android.app.Activity
 import android.content.res.Resources
-import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.core.os.ConfigurationCompat
 import app.nagmedar.lab.NativeLab
 import app.nagmedar.lab.UsbAudioLab
-import app.nagmedar.lab.WhisperLab
 import app.nagmedar.ui.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
-
-/** What a tool needs picked before it runs. */
-enum class LabInput {
-    None,
-
-    /** a video or audio file to read */
-    Media,
-}
 
 /** A value of an option, and how its button names it in the interface's language (S-1501). */
 class LabChoice(val value: String, val label: (Resources) -> String)
@@ -49,10 +39,9 @@ private fun kiloHertz(hertz: Int) = LabChoice("$hertz") { res ->
 /** A name that is the same in every language: "24 bit". */
 private fun fixed(value: String, name: String) = LabChoice(value) { name }
 
-/** Everything a running tool gets: the picked file, the chosen options and a progress sink. */
+/** Everything a running tool gets: the chosen options and a progress sink. */
 class LabRun(
     val activity: Activity,
-    val input: Uri?,
     val options: Map<String, String>,
     val progress: NativeLab.Progress,
 ) {
@@ -70,7 +59,6 @@ class LabTool(
     val spike: String,
     @StringRes val title: Int,
     @StringRes val description: Int,
-    val input: LabInput = LabInput.None,
     val options: List<LabOption> = emptyList(),
     val cancellable: Boolean = false,
     val run: suspend (LabRun) -> String,
@@ -78,14 +66,6 @@ class LabTool(
 
 object LabTools {
 
-    private val whisperModel = LabOption("model", R.string.nag_lab_option_model, WhisperLab.Model.entries.map { fixed(it.name, it.label) })
-    private val whisperDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(minutes(1), minutes(10)))
-
-    /** S-709: the GPU through Vulkan where the device has one, or the processor alone: the same file both ways compares them. */
-    private val whisperAcceleration = LabOption(
-        "accel", R.string.nag_whisper_acceleration,
-        listOf(LabChoice("auto") { it.getString(R.string.nag_whisper_accel_auto) }, LabChoice("cpu") { it.getString(R.string.nag_whisper_accel_cpu) }),
-    )
     private val usbRate = LabOption("rate", R.string.nag_lab_option_rate, listOf(kiloHertz(96000), kiloHertz(44100), kiloHertz(192000)))
     private val usbBits = LabOption("bits", R.string.nag_lab_option_bits, listOf(fixed("24", "24 bit"), fixed("16", "16 bit"), fixed("32", "32 bit")))
     private val usbDuration = LabOption("seconds", R.string.nag_lab_option_duration, listOf(seconds(10), minutes(10)))
@@ -105,15 +85,6 @@ object LabTools {
             options = listOf(usbRate, usbBits, usbDuration), cancellable = true,
         ) { run ->
             UsbAudioLab.tone(run.activity, run.option("rate").toInt(), run.option("bits").toInt(), run.option("seconds").toDouble(), run.progress)
-        },
-        LabTool(
-            "SP-05", R.string.nag_lab_whisper, R.string.nag_lab_whisper_desc, input = LabInput.Media,
-            options = listOf(whisperModel, whisperDuration, whisperAcceleration), cancellable = true,
-        ) { run ->
-            WhisperLab.run(
-                run.activity, run.input!!, WhisperLab.Model.valueOf(run.option("model")), run.option("seconds").toDouble(),
-                gpu = run.option("accel") == "auto", progress = run.progress,
-            )
         },
     )
 }

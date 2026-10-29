@@ -12,6 +12,7 @@ import app.nagmedar.ui.music.PlaylistEntry
 import app.nagmedar.ui.radio.record.RecordingSchedule
 import app.nagmedar.ui.radio.record.RecordingStation
 import app.nagmedar.ui.radio.record.Repeat
+import app.nagmedar.ui.work.RetiredWork
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -235,5 +236,17 @@ class BackupCodecTest {
         assertTrue(prefs.getBoolean(KEY_RESTRICT_SETTINGS, false))
         assertFalse(prefs.contains(KEY_SAFE_MODE))
         assertEquals("Light", prefs.getString("nagmedar_theme", null))
+    }
+
+    @Test
+    fun aBackupMadeBeforeTheTranscriptsWentRestoresWithoutTheirSettings() {
+        // 1.0.1's settings: the model, the acceleration, the queue, the automatic transcription of new downloads
+        val values = RetiredWork.TRANSCRIPTION_KEYS.map { SettingValue(it, if (it.endsWith("auto_transcribe")) true else "small") } +
+            SettingValue("nagmedar_theme", "Dark")
+        assertEquals(listOf("nagmedar_theme"), BackupSettings.collect(values.associate { it.key to it.value }).map { it.key })
+        val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("backup-transcripts", Context.MODE_PRIVATE)
+        BackupSettings.write(values, prefs.edit()).commit()
+        RetiredWork.TRANSCRIPTION_KEYS.forEach { assertFalse(it, prefs.contains(it)) }
+        assertEquals("Dark", prefs.getString("nagmedar_theme", null))
     }
 }

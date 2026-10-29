@@ -139,7 +139,7 @@ The Podcasts screen keeps your subscriptions, new episodes and downloads. No acc
 
 1. **Finding:** type in the search box ({key:PodcastSearch}); results come from Podcast Index, and from iTunes if they fall short. “Subscribe” adds one with a single tap (there is an Undo bar). If you have an RSS address, use “Add by RSS address…” in the three-dot menu.
 2. **Moving:** “Import OPML…” brings in the list of another app; AntennaPod, Pocket Casts, Podcast Addict and Overcast read the same file. “Export OPML…” gives you your list of subscriptions.
-3. **Listening:** press the Play button on an episode's row; touching the row itself opens the episode page. Each episode resumes where you stopped (or after the intro) and counts as played near the end or at 95%; you are not asked “Resume where you stopped?”. An episode page has chapters, a transcript (it follows playback and can be searched), notes and the download.
+3. **Listening:** press the Play button on an episode's row; touching the row itself opens the episode page. Each episode resumes where you stopped (or after the intro) and counts as played near the end or at 95%; you are not asked “Resume where you stopped?”. An episode page has chapters, a transcript (when the show gives one; it follows playback and can be searched), notes and the download.
 4. **Chapters:** the playing episode's chapters are marked on the bar at the bottom, in the mini player, in the now playing pane, and in the phone's player; pointing at a mark shows the chapter's name. The “Previous chapter” and “Next chapter” buttons and the list of chapters are there; {key:PodcastPreviousChapter} and {key:PodcastNextChapter} move between chapters too.
 5. **Downloading:** “Download” puts the episode on the device; Tools › Downloads shows the downloads running, waiting, done and failed. In Settings › Podcasts you set how often to refresh (every 1, 3, 6, 12 or 24 hours), Wi-Fi only, notifications, the storage limit and the days after which played episodes are deleted.
 6. **Show settings:** each podcast's “Podcast settings” window has automatic download, speed (0.5–3×), skipping the intro and the outro, and volume boost. Volume boost (Off, Light, Strong) plays a quietly recorded show's episodes louder than your volume; other media play as usual. While a boosted episode plays, the volume slider and keys show and change your own volume, and the episode stays boosted over it.
@@ -210,7 +210,7 @@ Nağmedar is based on VLC for Android, but VLC's classic screens no longer open:
 - **VLC's settings:** Settings › About › “All settings”, in Nağmedar's design. The search on the first page looks through every page; the command palette ({key:CommandPalette}) finds each setting by its name.
 - **Network stream:** Sources › Streams. Type the address or press “Paste”, and Enter plays it; the streams played before stay below. {key:OpenNetwork} takes you there.
 - **Files:** Sources › This device opens the internal storage, SD cards and USB disks as a folder table; from a folder's menu, play it, add it to the queue or make it a source folder of the music.
-- **Downloads:** Tools › Downloads shows podcast episodes and the Whisper models; a running download can be cancelled, a failed one tried again, and a file is deleted only after you confirm.
+- **Downloads:** Tools › Downloads shows podcast episodes; a running download can be cancelled, a failed one tried again, and a file is deleted only after you confirm.
 - **Media information:** “Media information” in a menu opens Nağmedar's window: the tags, the file's location (“Copy the location”) and the technical facts.
 - **Notices and questions:** short notices such as “Copied” show at the bottom of the window for a few seconds. A server's sign-in and certificate questions come in Nağmedar's window; with no window open, tap the “Nağmedar is asking: …” notification. When a new external drive is connected, a notice with a “Library folders” button comes.
 - **Resuming:** the “Resume where you stopped?” question comes in Nağmedar's window for music, radio and streams too: “Resume” or “Start over”, and if you like “The same for the rest of the list”.
@@ -252,7 +252,6 @@ Nağmedar has no account, no ads and no tracking. Scanning happens on the device
 - **Covers:** if there is no cover in the file or the folder, the album's name and artist go to MusicBrainz, and the cover comes from the Cover Art Archive (turn it off in Settings › Covers).
 - **Podcasts and radio:** the word you search for goes to Podcast Index, iTunes or Radio Browser; the shows you subscribe to are read from their own servers. Radio Browser is told of each play as a “click”, and of your vote if you vote.
 - **Scrobbling:** only if you sign in, the tracks you play go to Last.fm and ListenBrainz.
-- **Models:** the Whisper models are downloaded once; after that, speech does not leave the device.
 - **Inside the same network:** casting and remote access talk only to devices on this network.
 - **Passwords and tokens:** server passwords, the ListenBrainz token and the Last.fm session key are encrypted with an Android Keystore key; the Last.fm password is never kept.
 

@@ -152,33 +152,6 @@ class NagmedarDatabaseTest {
         assertTrue(podcasts.episodesById(emptyList()).isEmpty())
     }
 
-    /** Version 21: a refresh keeps the language chosen for Whisper and the episode's own transcript; a gone episode changes nothing. */
-    @Test
-    fun anEpisodesOwnTranscriptAndTheShowsLanguageOutliveARefresh() {
-        val podcasts = db.podcasts()
-        val id = podcasts.subscribeWith(
-            PodcastFeed(feedUrl = "https://example.org/a.xml", title = "Gece Yayını", language = "tr"),
-            listOf(PodcastEpisode(feedId = 0, guid = "a", title = "Bölüm 1", audioUrl = "https://example.org/1.mp3")),
-        )
-        val episode = podcasts.episodeList(id).single()
-        podcasts.setTranscriptLanguage(id, "en")
-        assertEquals(1, podcasts.setWhisperModel(episode.id, "small"))
-        assertEquals(0, podcasts.setWhisperModel(999, "small"))
-        // the feed is read again: its language may change, the choice for Whisper and the transcript stay
-        podcasts.refreshFeed(
-            podcasts.feed(id)!!.copy(language = "tr-tr", transcriptLanguage = null),
-            listOf(PodcastEpisode(feedId = 0, guid = "a", title = "Bölüm 1", audioUrl = "https://example.org/1.mp3")),
-        )
-        podcasts.feed(id)!!.let {
-            assertEquals("tr-tr", it.language)
-            assertEquals("en", it.transcriptLanguage)
-        }
-        assertEquals("small", podcasts.episode(episode.id)!!.whisperModel)
-        assertEquals(listOf(episode.id), podcasts.whisperEpisodes())
-        podcasts.setWhisperModel(episode.id, null)
-        assertTrue(podcasts.whisperEpisodes().isEmpty())
-    }
-
     @Test
     fun radioStationsAreSavedOncePerDirectoryEntry() {
         val radio = db.radio()
@@ -743,14 +716,14 @@ class NagmedarDatabaseMigrationTest {
     @Test
     fun aTwentyOneLosesOnlyTheRemovedFeaturesTables() {
         assumeTrue("schema 21 not exported yet", schemaExported(21))
-        assumeTrue("schema ${NagmedarDatabase.VERSION} not exported yet", schemaExported(NagmedarDatabase.VERSION))
+        assumeTrue("schema 22 not exported yet", schemaExported(22))
         helper.createDatabase(TEST_DB, 21).use { db ->
             feed(db)
             db.execSQL("UPDATE podcast_feed SET language = 'tr', transcript_language = 'en' WHERE id = 1")
             db.execSQL("INSERT INTO media_settings (media_uri, audio_delay_ms, updated_at) VALUES ('file:///film.mkv', -120, 1)")
             remuxJob(db, 3)
         }
-        helper.runMigrationsAndValidate(TEST_DB, NagmedarDatabase.VERSION, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+        helper.runMigrationsAndValidate(TEST_DB, 22, true, *NagmedarDatabase.MIGRATIONS).use { db ->
             assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_feed WHERE language = 'tr' AND transcript_language = 'en'"))
             assertEquals(emptyList<String>(), tables(db).filter { it in NagmedarDatabase.RETIRED_TABLES })
         }
@@ -956,6 +929,74 @@ class NagmedarDatabaseMigrationTest {
                 assertEquals(1500L, c.getLong(0))
                 assertTrue(c.isNull(1))
             }
+        }
+    }
+
+    /**
+     * 22 → 23 (1.0.2, the transcripts made on the device removed): the shows and their episodes keep every row and
+     * everything else they had, the three columns go, the indices are made again, and no id of a show or an episode
+     * removed before is given again.
+     */
+    @Test
+    fun aTwentyTwoLosesTheTranscriptColumnsAndKeepsThePodcasts() {
+        assumeTrue("schema 22 not exported yet", schemaExported(22))
+        assumeTrue("schema 23 not exported yet", schemaExported(23))
+        helper.createDatabase(TEST_DB, 22).use { db ->
+            feed(db)
+            db.execSQL(
+                "UPDATE podcast_feed SET language = 'tr', transcript_language = 'en', speed = 1.5, volume_boost = 2, notify = 0, " +
+                    "alias_keys = 'example.org/eski' WHERE id = 1",
+            )
+            // a show subscribed after it and given up: its id is not to come back
+            db.execSQL("INSERT INTO podcast_feed (id, feed_url, title, refreshed_at, auto_download, subscribed_at) VALUES (9, 'https://example.org/b.xml', 'B', 5, 0, 7)")
+            db.execSQL("DELETE FROM podcast_feed WHERE id = 9")
+            db.execSQL(
+                "INSERT INTO podcast_episode (id, feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, " +
+                    "download_path, download_state, transcript_url, transcript_type, whisper_model) " +
+                    "VALUES (4, 1, 'ep-1', 'Bölüm 1', 'https://example.org/1.mp3', 60000, 9, 1500, 1, " +
+                    "'content://tree/podcasts/1.mp3', 3, 'https://example.org/1.vtt', 'text/vtt', 'small')",
+            )
+            db.execSQL(
+                "INSERT INTO podcast_episode (id, feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, download_state) " +
+                    "VALUES (30, 1, 'ep-2', 'Bölüm 2', 'https://example.org/2.mp3', 60000, 10, 0, 0, 0)",
+            )
+            db.execSQL("DELETE FROM podcast_episode WHERE id = 30")
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 23, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            fun columns(table: String) = db.query("PRAGMA table_info(`$table`)").use { c -> buildList { while (c.moveToNext()) add(c.getString(1)) } }
+            assertTrue(columns("podcast_feed").none { it in listOf("language", "transcript_language") })
+            assertTrue("whisper_model" !in columns("podcast_episode"))
+            db.query("SELECT title, speed, volume_boost, notify, alias_keys FROM podcast_feed WHERE id = 1").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("Nağmedar Podcast", c.getString(0))
+                assertEquals(1.5, c.getDouble(1), 0.0)
+                assertEquals(2, c.getInt(2))
+                assertEquals(0, c.getInt(3))
+                assertEquals("example.org/eski", c.getString(4))
+            }
+            db.query("SELECT position_ms, played, download_path, download_state, transcript_url, transcript_type FROM podcast_episode WHERE id = 4").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(1500L, c.getLong(0))
+                assertEquals(1, c.getInt(1))
+                assertEquals("content://tree/podcasts/1.mp3", c.getString(2))
+                assertEquals(3, c.getInt(3))
+                assertEquals("https://example.org/1.vtt", c.getString(4))
+                assertEquals("text/vtt", c.getString(5))
+            }
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_episode"))
+            // the ids go on after the removed ones
+            db.execSQL("INSERT INTO podcast_feed (feed_url, title, refreshed_at, auto_download, subscribed_at) VALUES ('https://example.org/c.xml', 'C', 5, 0, 7)")
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_feed WHERE id = 10"))
+            db.execSQL(
+                "INSERT INTO podcast_episode (feed_id, guid, title, audio_url, duration_ms, published_at, position_ms, played, download_state) " +
+                    "VALUES (1, 'ep-3', 'Bölüm 3', 'https://example.org/3.mp3', 60000, 11, 0, 0, 0)",
+            )
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM podcast_episode WHERE guid = 'ep-3' AND id = 31"))
+            // the address is still one show's, and the episodes still go with their show
+            assertTrue(runCatching { db.execSQL("INSERT INTO podcast_feed (feed_url, title, refreshed_at, auto_download, subscribed_at) VALUES ('https://example.org/feed.xml', 'D', 5, 0, 7)") }.isFailure)
+            db.execSQL("PRAGMA foreign_keys = ON")
+            db.execSQL("DELETE FROM podcast_feed WHERE id = 1")
+            assertEquals(0, count(db, "SELECT COUNT(*) FROM podcast_episode"))
         }
     }
 

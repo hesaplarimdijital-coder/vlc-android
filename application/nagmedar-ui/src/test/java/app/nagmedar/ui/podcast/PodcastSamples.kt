@@ -3,11 +3,6 @@ package app.nagmedar.ui.podcast
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.data.PodcastFeedSummary
-import app.nagmedar.ui.transcribe.WhisperEngine
-import app.nagmedar.ui.transcribe.WhisperModel
-import app.nagmedar.ui.transcribe.WhisperRequest
-import app.nagmedar.ui.transcribe.WhisperStage
-import app.nagmedar.ui.transcribe.WhisperStatus
 
 /** S-1101: shows and episodes for screenshots and screen tests; no network, no database. */
 internal object PodcastSamples {
@@ -81,8 +76,8 @@ internal object PodcastSamples {
         listening = listening,
     )
 
-    /** Whisper's transcript of the newest episode, as the app wrote it with the small model. */
-    val whisperTranscript = Transcript(
+    /** The newest episode's transcript as its feed gives it (WebVTT: timed). */
+    val feedTranscript = Transcript(
         listOf(
             TranscriptCue(0, 4_200, null, "Merhaba, Gece Yayını'nın üçüncü gecesine hoş geldiniz."),
             TranscriptCue(4_200, 9_800, null, "Bu akşam Neva Kâr'ı dinliyor, Itrî'nin bestelerinin izini sürüyoruz."),
@@ -93,18 +88,6 @@ internal object PodcastSamples {
             TranscriptCue(36_400, 42_000, null, "Itrî'nin Neva Kâr'ı bunun en güzel örneklerinden biri."),
         ),
         timed = true,
-        whisperModel = WhisperModel.Small.key,
-    )
-
-    /** Whisper's job on the newest episode under way: half of it heard, on the GPU at 4,2× real time. */
-    val transcribing = WhisperStatus.Running(
-        id = "whisper-1",
-        request = WhisperRequest(10, episodes[0].title),
-        stage = WhisperStage.Transcribing,
-        doneSeconds = 1_860.0,
-        totalSeconds = 3_723.0,
-        etaSeconds = 440,
-        engine = WhisperEngine(gpu = true, device = "Mali-G925", threads = 4, speed = 4.2),
     )
 
     fun model(

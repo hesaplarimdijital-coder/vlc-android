@@ -238,7 +238,7 @@ fun SettingsScreen(
                 SettingsItem.Lyrics -> LyricsSection()
                 // S-1006: where album covers come from
                 SettingsItem.Covers -> CoversSection()
-                // S-1103, S-1104: refreshing the podcasts, their downloads, the skip buttons and Whisper's transcripts
+                // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
                 SettingsItem.Podcasts -> PodcastSection()
                 // S-1304: the web page that browses and plays from another device
                 SettingsItem.RemoteAccess -> RemoteAccessSection()

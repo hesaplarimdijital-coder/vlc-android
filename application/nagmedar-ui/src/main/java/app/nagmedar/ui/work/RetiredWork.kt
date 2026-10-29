@@ -25,6 +25,8 @@ import java.io.File
  * what TV Lab kept under files/tvlab (its profiles, the charts it shared, its bitrate cache).
  * 0.5's other video features (the subtitle tools, the conversion and the HLS stream, the player's
  * screenshots and recordings) leave their queued work, their files and their folders ([videoFeatures]).
+ * 1.0.2: the podcast transcripts made with Whisper (removed) leave their queued jobs, the models, the
+ * transcripts and the audio the jobs fetched, and their settings ([whisper]).
  * Off the main thread: it reads preferences, the databases and the disk.
  */
 object RetiredWork {
@@ -32,6 +34,7 @@ object RetiredWork {
     private const val TV_LAB_DONE = "tv_lab"
     private const val TABLES_DONE = "video_tables"
     private const val VIDEO_DONE = "video_features"
+    private const val WHISPER_DONE = "whisper"
 
     /** What TV Lab kept in the app's files: its profiles, the charts it shared, its bitrate cache. */
     private const val TV_LAB_FILES = "tvlab"
@@ -59,6 +62,7 @@ object RetiredWork {
         if (!prefs.getBoolean(TV_LAB_DONE, false)) tvLab(app, prefs)
         if (!prefs.getBoolean(TABLES_DONE, false)) tables(app, prefs)
         if (!prefs.getBoolean(VIDEO_DONE, false)) videoFeatures(app, prefs)
+        if (!prefs.getBoolean(WHISPER_DONE, false)) whisper(app, prefs)
     }
 
     private fun tvLab(app: Context, prefs: SharedPreferences) {
@@ -124,6 +128,59 @@ object RetiredWork {
         settings.edit().apply { VIDEO_FOLDERS.forEach { remove(it) } }.apply()
         prefs.edit().putBoolean(VIDEO_DONE, true).apply()
     }
+
+    /**
+     * 1.0.2, Whisper: its queued jobs first (one waiting for the charger and an idle device is what kept the tablet busy;
+     * 1.0.2 cannot load their worker), then what they kept in the app's storage: the models (up to 800 MB), the
+     * transcripts they wrote and their checkpoints, the episodes' audio fetched for a job, the Lab's SP-05 models; then
+     * its settings. The podcasts' downloads and the transcripts the feeds give (the cache's "podcast") are not touched:
+     * only these folders and the Lab's model files by their names go.
+     */
+    private fun whisper(app: Context, prefs: SharedPreferences) {
+        runCatching {
+            val work = WorkManager.getInstance(app)
+            work.cancelUniqueWork(WHISPER_WORK)
+            work.cancelAllWorkByTag(WHISPER_WORK)
+            work.cancelAllWorkByTag(WHISPER_WORKER)
+        }
+        val external = runCatching { app.getExternalFilesDir(null) }.getOrNull()
+        val files = listOf(
+            File(app.noBackupFilesDir, "whisper-models"),
+            File(app.filesDir, "podcast-transcripts"),
+            File(app.filesDir, "whisper-progress"),
+            File(app.cacheDir, "whisper-audio"),
+        ) + listOfNotNull(external?.let { File(it, "whisper") }) +
+            LAB_MODELS.flatMap { listOf(File(app.filesDir, it), File(app.filesDir, "$it.part")) }
+        files.forEach { runCatching { it.deleteRecursively() } }
+        runCatching { Settings.getInstance(app).edit().apply { TRANSCRIPTION_KEYS.forEach { remove(it) } }.apply() }
+        prefs.edit().putBoolean(WHISPER_DONE, true).apply()
+    }
+
+    /** Whisper's unique work, which also tagged each of its requests. */
+    private const val WHISPER_WORK = "nagmedar-whisper"
+
+    /** Whisper's worker class (WorkManager's tag of each request), as 1.0 named it. */
+    private const val WHISPER_WORKER = "app.nagmedar.ui.transcribe.WhisperWorker"
+
+    /** SP-05's models, in the app's files where the device had no external files folder (else in its "whisper"). */
+    private val LAB_MODELS = listOf("ggml-base-q5_1.bin", "ggml-small-q5_1.bin", "ggml-large-v3-turbo-q5_0.bin")
+
+    /**
+     * Whisper's settings: the model and the acceleration, this device's GPU state and job queue, the automatic
+     * transcription of new downloads, and 0.5's language and last job. A backup leaves them out
+     * ([app.nagmedar.ui.backup.BackupSettings]): one made before 1.0.2 restores without them.
+     */
+    val TRANSCRIPTION_KEYS = listOf(
+        "nagmedar_whisper_model",
+        "nagmedar_whisper_acceleration",
+        "nagmedar_whisper_gpu_running",
+        "nagmedar_whisper_gpu_stopped",
+        "nagmedar_whisper_queue",
+        "nagmedar_whisper_language",
+        "nagmedar_whisper_seen",
+        "nagmedar_whisper_timed_out",
+        "nagmedar_podcast_auto_transcribe",
+    )
 
     /** The video features' unique works: the conversion's queue, the subtitle tools' extraction and translation, the models' downloads. */
     private val VIDEO_WORK = listOf(

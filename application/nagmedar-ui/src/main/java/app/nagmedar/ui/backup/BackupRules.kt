@@ -8,7 +8,7 @@ import app.nagmedar.ui.onboarding.FolderGrants
 import app.nagmedar.ui.podcast.PodcastSettingsStore
 import app.nagmedar.ui.radio.record.RecordingPrefs
 import app.nagmedar.ui.scrobble.ScrobbleSettings
-import app.nagmedar.ui.transcribe.WhisperPrefs
+import app.nagmedar.ui.work.RetiredWork
 import org.videolan.tools.KEY_CURRENT_MAJOR_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION_AFTER_LIBVLC_INSTANTIATION
@@ -66,11 +66,8 @@ object BackupSettings {
         KEY_OPEN_SUBTITLES_LIMIT,
         // what the video features of 0.5 left in an updated device's preferences: its folders, a quota, its jobs
         *REMOVED_FEATURES,
-        // this device's: the transcripts' jobs waiting and what its GPU did (S-709), the old keys of 0.5's subtitles
-        WhisperPrefs.KEY_QUEUE,
-        *WhisperPrefs.REMOVED_KEYS,
-        WhisperPrefs.KEY_GPU_RUNNING,
-        WhisperPrefs.KEY_GPU_STOPPED,
+        // what the podcast transcripts made on the device (removed in 1.0.2) left: their settings, their queue, 0.5's keys
+        *RetiredWork.TRANSCRIPTION_KEYS.toTypedArray(),
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
         *ScrobbleSettings.keys.toTypedArray(),
         // a TV's: VLC's TV interface and its language, which a phone, a tablet or DeX ignores

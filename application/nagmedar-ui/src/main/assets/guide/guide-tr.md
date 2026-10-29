@@ -139,7 +139,7 @@ Podcastler ekranı abonelikleri, yeni bölümleri ve indirmeleri tutar. Hesap ge
 
 1. **Bulmak:** arama kutusuna yazın ({key:PodcastSearch}); sonuçlar Podcast Index'ten, yetmezse iTunes'tan gelir. “Abone ol” tek dokunuşla ekler (Geri al çubuğu vardır). Elinizde bir RSS adresi varsa üç noktalı menüden “RSS adresiyle ekle…”.
 2. **Taşımak:** başka uygulamalardan “OPML içe aktar…”; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı dosyayı okur. “OPML dışa aktar…” abonelik listenizi verir.
-3. **Dinlemek:** bölümün satırındaki Oynat düğmesine basın; satırın kendisine dokunmak bölüm sayfasını açar. Her bölüm kaldığı yerden (ya da girişten sonra) sürer, kapanışa ya da %95'e gelince dinlendi sayılır; “Kaldığınız yerden devam edilsin mi?” diye sorulmaz. Bölüm sayfasında kısımlar, döküm (oynatmayı izler, içinde aranır), notlar ve indirme vardır.
+3. **Dinlemek:** bölümün satırındaki Oynat düğmesine basın; satırın kendisine dokunmak bölüm sayfasını açar. Her bölüm kaldığı yerden (ya da girişten sonra) sürer, kapanışa ya da %95'e gelince dinlendi sayılır; “Kaldığınız yerden devam edilsin mi?” diye sorulmaz. Bölüm sayfasında kısımlar, döküm (yayın veriyorsa; oynatmayı izler, içinde aranır), notlar ve indirme vardır.
 4. **Kısımlar:** çalan bölümün kısımları alttaki çubukta, mini oynatıcıda, şimdi çalıyor bölmesinde, ve telefonun oynatıcısında işaretlidir; işaretin üstüne gelince kısmın adı yazar. “Önceki kısım” ve “Sonraki kısım” düğmeleri ve kısım listesi oradadır; {key:PodcastPreviousChapter} ve {key:PodcastNextChapter} de kısımlar arasında geçer.
 5. **İndirmek:** “İndir” bölümü cihaza alır; Araçlar › İndirmeler süren, bekleyen, inmiş ve inemeyen indirmeleri gösterir. Ayarlar › Podcastler'de yenileme sıklığı (1, 3, 6, 12 ya da 24 saat), yalnızca Wi-Fi, bildirimler, depolama sınırı ve dinlenenleri silme günü ayarlanır.
 6. **Program ayarları:** her podcast'in “Podcast ayarları” penceresinde otomatik indirme, hız (0,5–3×), girişi ve kapanışı atlama ve ses yükseltme vardır. Ses yükseltme (Kapalı, Hafif, Güçlü) kısık kayıtlı bir programın bölümlerini ses düzeyinizden yüksek çalar; diğer medya her zamanki gibi çalar. Güçlendirilmiş bir bölüm çalarken ses kaydırıcısı ve tuşları sizin kendi ses düzeyinizi gösterir ve değiştirir, bölüm onun üstünde güçlendirilmiş çalmayı sürdürür.
@@ -210,7 +210,7 @@ Nağmedar VLC for Android'e dayanır, ama VLC'nin klasik ekranları artık açı
 - **VLC'nin ayarları:** Ayarlar › Hakkında › “Tüm ayarlar”, Nağmedar'ın tasarımında. İlk sayfadaki arama bütün sayfalarda arar; komut paleti ({key:CommandPalette}) her ayarı adıyla bulur.
 - **Ağ akışı:** Kaynaklar › Akışlar. Adresi yazın ya da “Yapıştır” deyin, Enter oynatır; daha önce oynatılan akışlar altta durur. {key:OpenNetwork} oraya götürür.
 - **Dosyalar:** Kaynaklar › Bu cihaz dahili depolamayı, SD kartları ve USB diskleri klasör tablosu olarak açar; bir klasörü menüsünden oynatın, sıraya ekleyin ya da müziğin kaynak klasörü yapın.
-- **İndirmeler:** Araçlar › İndirmeler podcast bölümlerini ve Whisper modellerini gösterir; süren indirme iptal edilir, inemeyen yeniden denenir, dosya onayınızla silinir.
+- **İndirmeler:** Araçlar › İndirmeler podcast bölümlerini gösterir; süren indirme iptal edilir, inemeyen yeniden denenir, dosya onayınızla silinir.
 - **Medya bilgisi:** menüdeki “Medya bilgisi” Nağmedar'ın penceresini açar: etiketler, dosyanın konumu (“Konumu kopyala”) ve teknik bilgiler.
 - **Kısa haberler ve sorular:** “Kopyalandı” gibi kısa haberler pencerenin altında birkaç saniye görünür. Sunucunun oturum ve sertifika soruları Nağmedar penceresinde gelir; pencere açık değilse “Nağmedar bir soru soruyor: …” bildirimine dokunun. Yeni bir harici disk takılınca “Kütüphane klasörleri” düğmeli bir haber çıkar.
 - **Kaldığınız yerden:** “Kaldığınız yerden devam edilsin mi?” sorusu müzikte, radyoda ve akışlarda da Nağmedar penceresinde gelir: “Devam et” ya da “Baştan başla”, isterseniz “Listenin kalanında da böyle yap”.
@@ -252,7 +252,6 @@ Nağmedar'da hesap, reklam ve izleme yoktur. Taramalar cihazda yapılır, medyan
 - **Kapaklar:** dosyada ve klasörde kapak yoksa albümün adı ve sanatçısı MusicBrainz'e, kapak için Cover Art Archive'a gider (Ayarlar › Kapaklar'dan kapatılır).
 - **Podcastler ve radyo:** aradığınız sözcük Podcast Index'e, iTunes'a ya da Radio Browser'a gider; abone olduğunuz yayınlar kendi sunucularından okunur. Radio Browser'a her çalmada bir “tıklama” bildirilir, oy verirseniz oy gider.
 - **Scrobble:** yalnızca giriş yaparsanız, çaldığınız parçalar Last.fm ve ListenBrainz'e gider.
-- **Modeller:** Whisper modelleri bir kez indirilir; sonra konuşma cihazdan çıkmaz.
 - **Aynı ağ içinde:** yayınlama ve uzaktan erişim yalnızca bu ağdaki cihazlarla konuşur.
 - **Parolalar ve belirteçler:** sunucu parolaları, ListenBrainz belirteci ve Last.fm oturum anahtarı Android Keystore'un anahtarıyla şifrelenir; Last.fm parolası hiç saklanmaz.
 
