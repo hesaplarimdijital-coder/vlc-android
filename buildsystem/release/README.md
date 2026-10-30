@@ -58,7 +58,7 @@ R8 bütün release türü derlemelerde açıktır (release, signedRelease, bench
 
 - Adlar değiştirilmez (`-dontobfuscate`): cihazdaki bir çökme kaydı eşleme dosyası olmadan okunur (CI'dan şifreli APK'dan başka bir şey çıkmaz) ve debug derlemesinin adla yazdığı şeyler (WorkManager'ın iş sınıfları, Moshi'nin JSON alanları, bekleyen alarmlardaki Parcelable'lar) güncellemeden sonra da aynı okunur. R8 yine de kullanılmayanı atar, satır içine alır ve iyileştirir.
 - libVLC (`org.videolan.libvlc.**`) ve medya kütüphanesi (`org.videolan.medialibrary.**`, yerel koddan kurulan sınıflarıyla) bütünüyle korunur: JNI adları silinirse uygulama ancak çalışırken çöker.
-- Müzik motorunun (`app.nagmedar.audio.NativeAudio`, olay ve ilerleme geri çağrıları) ve laboratuvarın (`app.nagmedar.lab.NativeLab`: medya incelemesi, whisper, USB ses) yerel yöntemleri ve yerel koddan adıyla çağrılan arayüzleri.
+- Müzik motorunun (`app.nagmedar.audio.NativeAudio`, olay ve ilerleme geri çağrıları) ve laboratuvarın (`app.nagmedar.lab.NativeLab`: medya incelemesi, USB ses) yerel yöntemleri ve yerel koddan adıyla çağrılan arayüzleri.
 - Oynatma hizmetinin adıyla bulduğu gözlemciler, WorkManager'ın işçileri, Moshi'nin yansımayla okuduğu sınıfların alanları (ayar yedeği, ekolayzer dışa aktarımı, uzaktan erişimin JSON'u ve oturumları, lisanslar), Retrofit'in arayüzleri, Ktor'un Netty motoru, Parcelable ve Serializable sınıfları.
 - Room, WorkManager, Media3, Compose, OkHttp ve androidx kitaplıkları kendi kurallarını getirir.
 - Kaynak küçültücü uzaktan erişim sayfasının adıyla istediği simgeleri korur (`application/app/src/main/res/raw/nagmedar_keep.xml`).

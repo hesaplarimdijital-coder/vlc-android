@@ -38,7 +38,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "nagmedar.db"
-        const val VERSION = 22
+        const val VERSION = 23
 
         /** 1 → 2 (S-802): the media probe cache. */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -259,7 +259,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
             }
         }
 
-        /** 20 → 21 (podcast transcripts by Whisper): the show's language from its feed and for Whisper, the episode's own transcript. */
+        /** 20 → 21 (podcast transcripts by Whisper, removed in 23): the show's language from its feed and for Whisper, the episode's own transcript. */
         private val MIGRATION_20_21 = object : Migration(20, 21) {
             override fun migrate(db: SupportSQLiteDatabase) = transcripts(db)
         }
@@ -301,6 +301,74 @@ abstract class NagmedarDatabase : RoomDatabase() {
                 val earlier = if (file.exists()) file.readLines().filter { it.isNotBlank() } else emptyList()
                 file.writeText((earlier + uris).distinct().joinToString("\n", postfix = "\n"))
             }
+        }
+
+        /**
+         * 22 → 23 (Nağmedar 1.0.2, the transcripts made on the device removed): the columns 20 → 21 added for them go,
+         * podcast_feed's `language` and `transcript_language` and podcast_episode's `whisper_model`; every show and
+         * episode stays with all else it had (places, downloads, the feeds' transcript addresses). SQLite before 3.35
+         * (minSdk 23) has no DROP COLUMN: each table is made again without them, its rows copied, its indices made
+         * again, and its AUTOINCREMENT counter kept, so that no id of a removed show or episode is given again (its
+         * notifications and its cached chapters and transcript are by id). Foreign keys are off while a migration runs,
+         * so dropping the old podcast_feed takes no episode with it.
+         */
+        private val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.recreate(
+                    "podcast_feed",
+                    "CREATE TABLE IF NOT EXISTS `_new_podcast_feed` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`feed_url` TEXT NOT NULL, `title` TEXT NOT NULL, `author` TEXT, `description` TEXT, `image_url` TEXT, " +
+                        "`podcast_index_id` INTEGER, `etag` TEXT, `last_modified` TEXT, `refreshed_at` INTEGER NOT NULL, " +
+                        "`auto_download` INTEGER NOT NULL, `subscribed_at` INTEGER NOT NULL, `link` TEXT, `podcast_guid` TEXT, " +
+                        "`funding_url` TEXT, `funding_message` TEXT, `alias_keys` TEXT NOT NULL DEFAULT '', " +
+                        "`notify` INTEGER NOT NULL DEFAULT 1, `auto_download_count` INTEGER NOT NULL DEFAULT 3, " +
+                        "`keep_latest` INTEGER NOT NULL DEFAULT 0, `speed` REAL NOT NULL DEFAULT 1.0, " +
+                        "`skip_intro_s` INTEGER NOT NULL DEFAULT 0, `skip_outro_s` INTEGER NOT NULL DEFAULT 0, " +
+                        "`volume_boost` INTEGER NOT NULL DEFAULT 0)",
+                    listOf("CREATE UNIQUE INDEX IF NOT EXISTS `index_podcast_feed_feed_url` ON `podcast_feed` (`feed_url`)"),
+                )
+                db.recreate(
+                    "podcast_episode",
+                    "CREATE TABLE IF NOT EXISTS `_new_podcast_episode` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`feed_id` INTEGER NOT NULL, `guid` TEXT NOT NULL, `title` TEXT NOT NULL, `audio_url` TEXT NOT NULL, " +
+                        "`mime_type` TEXT, `duration_ms` INTEGER NOT NULL, `published_at` INTEGER NOT NULL, `description` TEXT, " +
+                        "`position_ms` INTEGER NOT NULL, `played` INTEGER NOT NULL, `download_path` TEXT, " +
+                        "`download_state` INTEGER NOT NULL, `added_at` INTEGER NOT NULL DEFAULT 0, " +
+                        "`size_bytes` INTEGER NOT NULL DEFAULT 0, `image_url` TEXT, `season` INTEGER, `episode_number` INTEGER, " +
+                        "`chapters_url` TEXT, `transcript_url` TEXT, `transcript_type` TEXT, " +
+                        "`download_bytes` INTEGER NOT NULL DEFAULT 0, `played_at` INTEGER NOT NULL DEFAULT 0, `notes_html` TEXT, " +
+                        "FOREIGN KEY(`feed_id`) REFERENCES `podcast_feed`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                    listOf(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS `index_podcast_episode_feed_id_guid` ON `podcast_episode` (`feed_id`, `guid`)",
+                        "CREATE INDEX IF NOT EXISTS `index_podcast_episode_published_at` ON `podcast_episode` (`published_at`)",
+                    ),
+                )
+            }
+        }
+
+        /**
+         * [table] made again by [create] (as `_new_<table>`, with the columns it keeps), the rows of the columns both have
+         * copied, the old table dropped, the new one renamed, [indices] made, and the table's AUTOINCREMENT counter where
+         * it was.
+         */
+        private fun SupportSQLiteDatabase.recreate(table: String, create: String, indices: List<String>) {
+            val counter = query("SELECT seq FROM sqlite_sequence WHERE name = ?", arrayOf(table)).use { if (it.moveToFirst()) it.getLong(0) else null }
+            execSQL(create)
+            val kept = columns("_new_$table").filter { it in columns(table) }.joinToString { "`$it`" }
+            execSQL("INSERT INTO `_new_$table` ($kept) SELECT $kept FROM `$table`")
+            execSQL("DROP TABLE `$table`")
+            execSQL("ALTER TABLE `_new_$table` RENAME TO `$table`")
+            indices.forEach { execSQL(it) }
+            if (counter != null) {
+                val now = query("SELECT seq FROM sqlite_sequence WHERE name = ?", arrayOf(table)).use { if (it.moveToFirst()) it.getLong(0) else 0L }
+                execSQL("DELETE FROM sqlite_sequence WHERE name = ?", arrayOf(table))
+                execSQL("INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)", arrayOf(table, maxOf(counter, now)))
+            }
+        }
+
+        private fun SupportSQLiteDatabase.columns(table: String): List<String> = query("PRAGMA table_info(`$table`)").use { c ->
+            val name = c.getColumnIndexOrThrow("name")
+            buildList { while (c.moveToNext()) add(c.getString(name)) }
         }
 
         /** The tables 21 → 22 drops. */
@@ -377,7 +445,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
         fun migrations(grants: (() -> File)? = null): Array<Migration> = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
             MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20, MIGRATION_20_21, Migration21To22(grants),
+            MIGRATION_19_20, MIGRATION_20_21, Migration21To22(grants), MIGRATION_22_23,
         )
 
         /** Schema migrations, oldest first. */

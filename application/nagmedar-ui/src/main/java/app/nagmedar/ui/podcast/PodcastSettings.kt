@@ -6,8 +6,7 @@ import app.nagmedar.ui.playback.PlaybackRules
 
 /**
  * S-1103, S-1104: Settings › Podcasts, the choices that are for all shows: how often feeds are read and on what
- * network, notifications, the storage downloads may take and where they are put, the skip buttons' seconds, and
- * whether new downloads are transcribed by themselves. What
+ * network, notifications, the storage downloads may take and where they are put, and the skip buttons' seconds. What
  * belongs to one show (its speed, intro and outro, notifications, automatic download) is in its row in Room.
  */
 @Immutable
@@ -27,8 +26,6 @@ data class PodcastSettings(
     /** The seconds the skip back and skip forward buttons go. */
     val skipBackSeconds: Int = 15,
     val skipForwardSeconds: Int = 30,
-    /** New downloads are transcribed by Whisper by themselves, while the device charges and is idle ([AutoTranscribe]). */
-    val autoTranscribe: Boolean = false,
 ) {
     val storageLimitBytes: Long get() = storageLimitGb * BYTES_PER_GB
 
@@ -56,7 +53,6 @@ class PodcastSettingsStore(private val prefs: SharedPreferences) {
             downloadFolder = prefs.getString(KEY_FOLDER, null).orEmpty(),
             skipBackSeconds = PodcastSettings.nearest(prefs.getInt(KEY_SKIP_BACK, defaults.skipBackSeconds), PlaybackRules.BACK_SECONDS),
             skipForwardSeconds = PodcastSettings.nearest(prefs.getInt(KEY_SKIP_FORWARD, defaults.skipForwardSeconds), PlaybackRules.FORWARD_SECONDS),
-            autoTranscribe = prefs.getBoolean(KEY_AUTO_TRANSCRIBE, defaults.autoTranscribe),
         )
     }
 
@@ -70,7 +66,6 @@ class PodcastSettingsStore(private val prefs: SharedPreferences) {
             .putString(KEY_FOLDER, settings.downloadFolder)
             .putInt(KEY_SKIP_BACK, settings.skipBackSeconds)
             .putInt(KEY_SKIP_FORWARD, settings.skipForwardSeconds)
-            .putBoolean(KEY_AUTO_TRANSCRIBE, settings.autoTranscribe)
             .apply()
     }
 
@@ -83,6 +78,5 @@ class PodcastSettingsStore(private val prefs: SharedPreferences) {
         const val KEY_FOLDER = "nagmedar_podcast_download_folder"
         const val KEY_SKIP_BACK = "nagmedar_podcast_skip_back"
         const val KEY_SKIP_FORWARD = "nagmedar_podcast_skip_forward"
-        const val KEY_AUTO_TRANSCRIBE = "nagmedar_podcast_auto_transcribe"
     }
 }

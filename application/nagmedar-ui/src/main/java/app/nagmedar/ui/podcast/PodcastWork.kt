@@ -139,10 +139,6 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) : Corout
             // the foreground (after the daily limit, say) is the app's own and would stay, ongoing
             notifier.cancelDownload()
         }
-        // the new downloads transcribed by themselves, when Settings › Podcasts says so (they wait for the charger and an idle device)
-        withContext(Dispatchers.IO) {
-            runCatching { WhisperTranscriber.downloaded(applicationContext, outcome.completed, PodcastCenter.settingsStore(applicationContext).read().autoTranscribe) }
-        }
         val cleanup = PodcastCenter.cleaner(applicationContext).clean(PodcastCenter.playingEpisodes())
         when {
             outcome.diskFull -> notifier.showDiskFull()

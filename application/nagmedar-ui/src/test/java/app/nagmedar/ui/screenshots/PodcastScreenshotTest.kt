@@ -39,14 +39,12 @@ import app.nagmedar.ui.podcast.SearchFailure
 import app.nagmedar.ui.podcast.SearchNotice
 import app.nagmedar.ui.podcast.SearchUi
 import app.nagmedar.ui.podcast.SubscribeUi
-import app.nagmedar.ui.podcast.TranscribeUi
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
-import app.nagmedar.ui.transcribe.WhisperModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,8 +55,8 @@ import org.robolectric.annotation.GraphicsMode
  * S-1101, S-1102, for approval: the subscriptions as covers (DeX, tablet) and as a list (phone), the
  * search results with every state of the Subscribe button and the notice that iTunes answered alone,
  * the podcast page with its episodes, the empty, offline and no-result screens, "RSS adresiyle ekle"
- * with the reason a feed was refused, and the OPML import's summary; Whisper's transcript of an episode offered, under
- * way, and made.
+ * with the reason a feed was refused, and the OPML import's summary; an episode's transcript tab with the feed's
+ * transcript and without one.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -181,46 +179,33 @@ class PodcastScreenshotTest {
 
     private fun episodeModel(ui: EpisodeDetailUi) = PodcastSamples.model(page = PodcastSamples.page).copy(episodeId = 10, episode = ui)
 
-    /** Whisper on a phone: no transcript from the feed, the button, the model downloaded first, the audio into the cache. */
+    /** A show that gives no transcript, on a phone: the tab says so, and offers nothing. */
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
-    fun transcribeOfferPhone() = capture(
-        "podcasts-transcribe-offer-phone-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-none"),
-        shell(WidthClass.Compact, episodeModel(PodcastSamples.episodePage().copy(transcribe = TranscribeUi.Idle(WhisperModel.Small, downloadMb = 181)))),
+    fun transcriptNonePhone() = capture(
+        "podcasts-transcript-none-phone-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-none"),
+        shell(WidthClass.Compact, episodeModel(PodcastSamples.episodePage())),
     )
 
-    /** Whisper's job under way beside the episodes: how far, the time left, the GPU and its speed, Cancel. */
-    @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun transcribeRunningTablet() = capture(
-        "podcasts-transcribe-running-tablet-dark", ThemeMode.Dark, InputMode.Touch, transcriptTab("Döküm", "episode-transcribe-running"),
-        shell(
-            WidthClass.Expanded,
-            episodeModel(PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000)).copy(transcribe = TranscribeUi.Running(PodcastSamples.transcribing))),
-        ),
-    )
-
-    /** The transcript Whisper made, followed while the episode plays, marked as Whisper's (English, phone). */
+    /** The feed's transcript, followed while the episode plays (English, phone). */
     @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
-    fun transcribeDonePhoneEnglish() = capture(
-        "podcasts-transcribe-done-phone-dark-en", ThemeMode.Dark, InputMode.Touch, transcriptTab("Transcript", "episode-transcript-whisper"),
+    fun transcriptPhoneEnglish() = capture(
+        "podcasts-transcript-phone-dark-en", ThemeMode.Dark, InputMode.Touch, transcriptTab("Transcript", "episode-transcript-search"),
         shell(
             WidthClass.Compact,
             episodeModel(
                 PodcastSamples.episodePage(listening = Listening(positionMs = 17_000, lengthMs = 62 * 60_000L + 3_000, playing = true))
-                    .copy(transcript = ExtraUi.Ready(PodcastSamples.whisperTranscript), transcribe = TranscribeUi.Idle()),
+                    .copy(transcript = ExtraUi.Ready(PodcastSamples.feedTranscript)),
             ),
         ),
     )
 
-    /** The transcript Whisper made, beside the episodes, while it is made again with another model (waiting for the charger). */
+    /** The feed's transcript beside the episodes. */
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun transcribeDoneTablet() = capture(
-        "podcasts-transcribe-done-tablet-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-whisper"),
+    fun transcriptTablet() = capture(
+        "podcasts-transcript-tablet-light", ThemeMode.Light, InputMode.Touch, transcriptTab("Döküm", "episode-transcript-search"),
         shell(
             WidthClass.Expanded,
-            episodeModel(
-                PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000))
-                    .copy(transcript = ExtraUi.Ready(PodcastSamples.whisperTranscript), transcribe = TranscribeUi.Queued(auto = true)),
-            ),
+            episodeModel(PodcastSamples.episodePage(download = DownloadUi.Done(58_000_000)).copy(transcript = ExtraUi.Ready(PodcastSamples.feedTranscript))),
         ),
     )
 

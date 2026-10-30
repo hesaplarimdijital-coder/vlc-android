@@ -22,7 +22,6 @@ class FeedParserTest {
         assertEquals("https://example.org/nagmedar/cover.png", feed.imageUrl)
         assertEquals("https://example.org/nagmedar", feed.link)
         assertEquals("6a1b6e2b-8f1c-5c4e-9f4a-6d2b1f0e5a11", feed.podcastGuid)
-        assertEquals("tr", feed.language)
         assertEquals(0, feed.skipped)
         val episode = feed.episodes.single()
         assertEquals("nagmedar-ep-1", episode.guid)
@@ -243,25 +242,6 @@ class FeedParserTest {
         }
         val ids = FeedParser.parse(ByteArrayInputStream(text.toByteArray())).episodes.map { it.guid }
         assertEquals((12_999 downTo 10_000).map { "g$it" } + (0 until 2_000).map { "g$it" }, ids)
-    }
-
-    /** The show's language for Whisper: RSS's (as a lower-case tag), Dublin Core's, Atom's xml:lang; nothing for what is no tag. */
-    @Test
-    fun theShowsLanguageIsATag() {
-        assertEquals("tr-tr", Fixtures.parse("feed-full.xml").language)
-        fun rss(language: String) = FeedParser.parse(
-            ByteArrayInputStream(
-                ("<rss version=\"2.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"><channel><title>Gece</title>$language" +
-                    "<item><title>Bölüm</title><guid>a</guid><enclosure url=\"https://example.org/a.mp3\" type=\"audio/mpeg\"/></item></channel></rss>").toByteArray(),
-            ),
-        ).language
-        assertEquals("en-us", rss("<dc:language>en_US</dc:language>"))
-        assertEquals("de", rss("<language> DE </language>"))
-        assertNull(rss("<language>Türkçe</language>"))
-        assertNull(rss(""))
-        val atom = """<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="tr"><title>Gece</title>
-            <entry><id>a</id><title>Bölüm</title><link rel="enclosure" type="audio/mpeg" href="https://example.org/a.mp3"/></entry></feed>"""
-        assertEquals("tr", FeedParser.parse(ByteArrayInputStream(atom.toByteArray())).language)
     }
 
     private fun parseText(text: String): ParsedFeed? = try {

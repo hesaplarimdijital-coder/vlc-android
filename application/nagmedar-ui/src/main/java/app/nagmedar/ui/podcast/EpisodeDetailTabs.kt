@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -51,7 +49,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -62,7 +59,6 @@ import app.nagmedar.ui.components.LoadingState
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
-import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
@@ -71,10 +67,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
-import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.theme.NagTheme
-import app.nagmedar.ui.transcribe.WhisperModel
-import app.nagmedar.ui.transcribe.WhisperWorker
 
 // ---------------------------------------------------------------- the show notes
 
@@ -307,49 +300,20 @@ internal fun LazyListScope.transcriptItems(
         }
         ExtraUi.None -> item(key = "transcript-none") {
             Frame {
-                when (val job = ui.transcribe) {
-                    is TranscribeUi.Idle -> StatePanel(
-                        tone = StateTone.Neutral,
-                        icon = NagIcons.Subtitle,
-                        title = stringResource(R.string.nag_pod_transcript_none_title),
-                        description = stringResource(R.string.nag_pod_transcript_none_whisper),
-                        primary = StateAction(stringResource(R.string.nag_pod_whisper_create)) { actions.onTranscribe(ui.episode) },
-                        modifier = Modifier.testTag("episode-transcript-none"),
-                    ) { TranscribeNotes(job, downloaded = ui.download is DownloadUi.Done) }
-                    is TranscribeUi.Queued, is TranscribeUi.Running -> TranscribeCard(job, ui, actions)
-                    TranscribeUi.Unavailable -> StatePanel(
-                        tone = StateTone.Neutral,
-                        icon = NagIcons.Subtitle,
-                        title = stringResource(R.string.nag_pod_transcript_none_title),
-                        description = stringResource(R.string.nag_pod_transcript_none_text),
-                        modifier = Modifier.testTag("episode-transcript-none"),
-                    )
-                }
+                StatePanel(
+                    tone = StateTone.Neutral,
+                    icon = NagIcons.Subtitle,
+                    title = stringResource(R.string.nag_pod_transcript_none_title),
+                    description = stringResource(R.string.nag_pod_transcript_none_text),
+                    modifier = Modifier.testTag("episode-transcript-none"),
+                )
             }
         }
         ExtraUi.Offline -> item(key = "transcript-offline") { Frame { ExtraOffline(R.string.nag_pod_transcript_offline, actions.onRetryExtras, "episode-transcript-offline") } }
         is ExtraUi.Ready -> {
             val value = transcript.value
             val found = if (query.isBlank()) null else value.find(query)
-            item(key = "transcript-search") {
-                Frame {
-                    // a transcript made again: its job above the one shown until it is done
-                    val job = ui.transcribe
-                    if (job is TranscribeUi.Queued || job is TranscribeUi.Running) {
-                        TranscribeCard(job, ui, actions)
-                        Spacer(Modifier.height(NagTheme.dimens.gapS))
-                    }
-                    TranscriptSearch(query, onQuery, found?.size, value.timed)
-                    value.whisperModel?.let { model ->
-                        Text(
-                            stringResource(R.string.nag_pod_transcript_whisper, stringResource(WhisperModel.of(model).label)),
-                            style = NagTheme.type.labelSmall,
-                            color = NagTheme.colors.textSecondary,
-                            modifier = Modifier.padding(top = 6.dp).testTag("episode-transcript-whisper"),
-                        )
-                    }
-                }
-            }
+            item(key = "transcript-search") { Frame { TranscriptSearch(query, onQuery, found?.size, value.timed) } }
             val shown = found ?: value.cues.indices.toList()
             if (shown.isEmpty()) {
                 item(key = "transcript-no-match") {
@@ -371,75 +335,6 @@ internal fun LazyListScope.transcriptItems(
                 }
             }
         }
-    }
-}
-
-/**
- * Under the "no transcript" panel's words: the model Whisper works with (and its size when it is downloaded first),
- * that the audio of an episode not downloaded comes into the cache for the job, why the last try gave none.
- */
-@Composable
-private fun TranscribeNotes(job: TranscribeUi.Idle, downloaded: Boolean) {
-    val colors = NagTheme.colors
-    val model = stringResource(job.model.label)
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        val size = job.downloadMb
-        Text(
-            if (size != null) stringResource(R.string.nag_pod_whisper_model_download, model, size) else stringResource(R.string.nag_pod_whisper_model_ready, model),
-            style = NagTheme.type.labelSmall,
-            color = colors.textSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.testTag("episode-transcribe-model"),
-        )
-        if (!downloaded) Text(stringResource(R.string.nag_pod_whisper_fetch_note), style = NagTheme.type.labelSmall, color = colors.textSecondary, textAlign = TextAlign.Center)
-        job.failure?.let { reason ->
-            Text(
-                stringResource(R.string.nag_pod_whisper_failed, stringResource(WhisperWorker.failureText(reason))),
-                style = NagTheme.type.labelSmall,
-                color = toneColors(StateTone.Warning).content,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.testTag("episode-transcribe-failed"),
-            )
-        }
-    }
-}
-
-/** Whisper's job for the episode: waiting (after the job before it, or for the charger), or under way with how far it is, what it runs on and how fast; Cancel. */
-@Composable
-private fun TranscribeCard(job: TranscribeUi, ui: EpisodeDetailUi, actions: PodcastActions) {
-    val context = LocalContext.current
-    val cancel = StateAction(stringResource(R.string.nag_whisper_cancel)) { actions.onCancelTranscribe(ui.episode.id) }
-    when (job) {
-        is TranscribeUi.Queued -> StatusCard(
-            StateTone.Neutral,
-            NagIcons.Subtitle,
-            stringResource(R.string.nag_pod_whisper_queued_title),
-            stringResource(
-                when {
-                    job.waitsForApp -> R.string.nag_pod_whisper_queued_app
-                    job.auto -> R.string.nag_pod_whisper_queued_auto
-                    else -> R.string.nag_pod_whisper_queued_text
-                },
-            ),
-            "episode-transcribe-queued",
-            action = cancel,
-        )
-        is TranscribeUi.Running -> {
-            val status = job.status
-            val title = stringResource(R.string.nag_pod_whisper_running_title)
-            StatusCard(StateTone.Info, NagIcons.Subtitle, title, WhisperWorker.progressLine(context, status), "episode-transcribe-running", action = cancel) {
-                NagProgressBar(status.fraction, title, Modifier.padding(top = 6.dp))
-                status.engine?.let { engine ->
-                    Text(
-                        WhisperWorker.engineLine(context, engine),
-                        style = NagTheme.type.labelSmall,
-                        color = NagTheme.colors.textSecondary,
-                        modifier = Modifier.padding(top = 4.dp).testTag("episode-transcribe-engine"),
-                    )
-                }
-            }
-        }
-        is TranscribeUi.Idle, TranscribeUi.Unavailable -> Unit
     }
 }
 

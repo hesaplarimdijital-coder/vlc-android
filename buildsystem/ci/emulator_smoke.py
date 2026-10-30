@@ -66,8 +66,9 @@ PERMISSIONS_MEDIA = ["android.permission.READ_MEDIA_AUDIO", "android.permission.
 NAV_SKIP = {"nag_nav_settings", "nag_nav_more", "nag_nav_search", "nag_nav_back"}
 LOG_RE = re.compile(r"^(\S+ \S+)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.+?)\s*: (.*)$")
 BOUNDS_RE = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
-# what 1.0 deleted (films, series, videos, the Home page, TV Lab) must not be named on the app's screens
-GONE_RE = re.compile(r"(?<!\w)(Filmler|Diziler|Videolar|Ana sayfa|TV Lab|Films|Movies|TV shows|Videos)(?!\w)")
+# what 1.0 deleted (films, series, videos, the Home page, TV Lab) and 1.0.2 (Whisper's transcripts, the Lab's SP-05)
+# must not be named on the app's screens
+GONE_RE = re.compile(r"(?<!\w)(Filmler|Diziler|Videolar|Ana sayfa|TV Lab|Films|Movies|TV shows|Videos|Whisper|SP-05)(?!\w)")
 
 
 class Node:
@@ -1625,7 +1626,7 @@ class Smoke:
             self.warnings.append("dropbox could not be read: %s" % e)
         # the words of what 1.0 deleted, over every dump of the walk
         self.cur_pass = "all"
-        self.check("no film, series, video, Home or TV Lab words on the app's screens", not self.gone,
+        self.check("no film, series, video, Home, TV Lab or Whisper words on the app's screens", not self.gone,
                    "; ".join("%s (%s)" % kv for kv in self.gone.items()))
         if self.a.build == "debug":
             self.check("no StrictMode violation of the app (debug build)", self.strict_total == 0 and not self.strict_dropbox_count,

@@ -208,7 +208,6 @@ object FeedParser {
         private var guid: String? = null
         private var fundingUrl: String? = null
         private var fundingMessage: String? = null
-        private var language: String? = null
 
         fun read(): ParsedFeed {
             val root = findRoot()
@@ -235,7 +234,6 @@ object FeedParser {
                 podcastGuid = guid,
                 fundingUrl = fundingUrl,
                 fundingMessage = fundingMessage,
-                language = language,
                 episodes = sorted.take(MAX_EPISODES),
                 skipped = skipped + trimmed + (sorted.size - minOf(sorted.size, MAX_EPISODES)),
             )
@@ -287,7 +285,6 @@ object FeedParser {
                     "image" -> readRssImage()
                     "itunes:owner" -> readOwner()
                     "podcast:guid" -> guid = keep(guid) { readText().trim().takeIf { it.isNotEmpty() } }
-                    "language", "dc:language" -> language = keep(language) { languageTag(readText()) }
                     "podcast:funding" -> {
                         val url = attr("url")?.let { FeedUrl.resolve(baseUrl, it) }
                         val message = HtmlText.line(readText())
@@ -315,8 +312,6 @@ object FeedParser {
         }
 
         private fun readAtomFeed() {
-            // the feed's language is its root's xml:lang
-            language = attr("lang")?.let { languageTag(it) }
             forEachChild(parser.depth) { name ->
                 when (name) {
                     "title" -> title = keep(title) { HtmlText.line(readText()) }
@@ -584,11 +579,6 @@ object FeedParser {
             return "$space:$local"
         }
     }
-
-    /** "tr-TR", "en_us", " TR " → "tr-tr", "en-us", "tr": a feed's language as a tag; null for what is none. */
-    internal fun languageTag(text: String): String? = text.trim().replace('_', '-').lowercase(Locale.ROOT).takeIf { LANGUAGE_TAG.matches(it) }
-
-    private val LANGUAGE_TAG = Regex("[a-z]{2,3}(-[a-z0-9]{1,8})*")
 
     /** More text than this in one element is cut: no description is that long. */
     private const val MAX_TEXT = 200_000

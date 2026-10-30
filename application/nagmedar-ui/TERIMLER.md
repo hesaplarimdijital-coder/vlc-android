@@ -43,11 +43,6 @@ Sözlüğü testler denetler:
 | kodlama | encoding | karakter seti, kod sayfası | charset | Bir metin dosyasının (söz dosyası) karakter seti: UTF-8, Türkçe · Windows-1254 |
 | kare hızı | frame rate | | framerate | Filmin ve altyazının hızı (23,976 · 24 · 25 · 29,97 · 30 kare/sn); ekranın hızı “yenileme hızı” |
 | bayt sırası işareti | byte order mark | | | Kısaca BOM; yeni altyazı dosyasının başına yazılır ya da yazılmaz (UTF-8 dosyalar işaretsiz de okunur) |
-| döküm oluşturmak | create a transcript | altyazı üretmek | generate subtitles | Bir podcast bölümünün konuşmasını bu cihazda Whisper ile yazıya dökmek: “Whisper ile döküm oluştur”, dökümü olanda “Whisper ile yeniden oluştur”; iş “sırada”, “oluşturuluyor”, bitince “Döküm hazır”. Döküm uygulamanın deposunda WebVTT olarak durur, altında “Whisper ile oluşturuldu · small”. Ayarlar'daki yeri “Ayarlar › Podcastler › Döküm (Whisper)” |
-| model | model | | | Whisper'ın konuşmayı tanıyan dosyası: base, small, large-v3-turbo (adları İngilizce kalır); bir iş gerektirince, boyutu bölümün sayfasında görüldükten sonra bir kez indirilir, Ayarlar › Podcastler › Döküm (Whisper)'dan silinir |
-| hızlandırma | acceleration | | | Dökümün nerede oluşturulduğu (Ayarlar › Podcastler › Döküm (Whisper)): “Otomatik (GPU varsa)” cihazın GPU'sunu Vulkan ile kullanır, GPU yoksa ya da durursa işlemci devralır; “Yalnız işlemci” GPU'ya dokunmaz. İşin bildiriminde “GPU (Vulkan)” ya da “İşlemci · 4 çekirdek” |
-| işlemci | CPU | | processor | Kısa yerlerde: “İşlemci · 4 çekirdek”, “İşlemci yükü”; İngilizcede “CPU · 4 cores”, “CPU load” |
-| gerçek zamanın N katı | N× real time | | | Bir işin hızı: oynatma süresinin işin süresine oranı; “gerçek zamanın 4,2 katı” bir saatlik filmi yaklaşık 14 dakikada bitirir |
 | sağlama toplamı | checksum | | hash | İndirilen dosyanın doğru geldiğini gösteren özet (SHA-256); “parmak izi” OpenSubtitles'ın dosya kimliğidir |
 | ekran yönü | screen orientation | | | Otomatik, Yatay, Dikey, Ters yatay |
 | ses izi | audio track | ses parçası | sound track | Videodaki ses; müzikteki “parça”dan ayrı |
@@ -180,7 +175,7 @@ Sözlüğü testler denetler:
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |
-| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara”. Yayın vermiyorsa Whisper bu cihazda oluşturur (“döküm oluşturmak”); programın “Döküm dili” Whisper'ın duyacağı dildir (“Yayındaki: Türkçe”, “Otomatik”) |
+| döküm | transcript | | | Bir podcast bölümünde söylenenlerin yazılı hali (SRT, VTT, JSON, HTML); zamanlıysa oynatmayı izler: “Döküm” sekmesi, “Dökümde ara” |
 | indirmek, indirme | download | | | Podcast bölümünü cihaza almak: “İndir”, “İndirileni sil”; süren indirmeyi durdurmak “İptal” |
 | depolama sınırı | storage limit | | | Ayarlar › Podcastler: indirmelerin kaplayabileceği yer, GB ile |
 | ses yükseltme | volume boost | | | Podcast programının kısık kayıtlarını ses düzeyinizin üstüne çıkarmak (kapalı, hafif, güçlü); diğer medya etkilenmez: “Ses yükseltme” (program ayarlarında) |
@@ -238,7 +233,7 @@ Bu adlar olduğu gibi yazılır; yukarıdaki tablo onları denetlemez.
 
 ## İstisnalar
 
-- Laboratuvar (Ayarlar › Laboratuvar) raporlarının gövdesi: MVP0 deneylerinin (SP-01…SP-05)
+- Laboratuvar (Ayarlar › Laboratuvar) raporlarının gövdesi: MVP0 deneylerinin (SP-01, SP-02)
   tanı çıktısıdır, kopyalanıp deneyin karar notuna yapıştırılır; Türkçe kalır. Araçların adları,
   açıklamaları ve seçenekleri iki dildedir.
 - Lisans metinleri ve kütüphanelerin telif satırları özgün dillerinde (İngilizce) kalır;

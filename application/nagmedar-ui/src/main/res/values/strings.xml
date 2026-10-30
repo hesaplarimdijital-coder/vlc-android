@@ -298,7 +298,7 @@
     <string name="nag_coming_radio">Internet radio directory, favourites and recordings.</string>
     <string name="nag_coming_device">Folders on this device and on external drives.</string>
     <string name="nag_coming_streams">Network streams and saved addresses.</string>
-    <string name="nag_coming_downloads">Podcast episodes, models and other downloads.</string>
+    <string name="nag_coming_downloads">The podcast episodes you download.</string>
 
     <!-- Library -->
     <plurals name="nag_tracks_count">
@@ -669,17 +669,14 @@
     <string name="nag_lab_media3_legacy">Classic</string>
     <string name="nag_lab_media3_on">Media3</string>
     <string name="nag_lab_stop">Stop</string>
-    <string name="nag_lab_native_missing">This build has no native lab library (USB, Dolby Vision and whisper tools). Use the APK from CI.</string>
+    <string name="nag_lab_native_missing">This build has no native lab library (the USB tools). Use the APK from CI.</string>
     <string name="nag_lab_option_duration">Duration</string>
-    <string name="nag_lab_option_model">Model</string>
     <string name="nag_lab_option_rate">Sample rate</string>
     <string name="nag_lab_option_bits">Bit depth</string>
     <string name="nag_lab_usb_describe">USB DAC formats</string>
     <string name="nag_lab_usb_describe_desc">Reads the DAC\'s USB Audio Class descriptors directly: formats, clock and sample rates.</string>
     <string name="nag_lab_usb_tone">Direct USB output test</string>
     <string name="nag_lab_usb_tone_desc">Plays a 1 kHz tone straight to the DAC with libusb, around the Android mixer. Android\'s own USB output pauses meanwhile.</string>
-    <string name="nag_lab_whisper">Transcription from speech (whisper)</string>
-    <string name="nag_lab_whisper_desc">Transcribes the start of a file in Turkish on this device and reports the speed. The model is downloaded once.</string>
     <string name="nag_lab_run">Run</string>
     <string name="nag_lab_running">Running…</string>
     <string name="nag_lab_copy">Copy</string>
@@ -1744,30 +1741,6 @@
     <string name="nag_pod_transcript_matches">Found: %d</string>
     <string name="nag_pod_transcript_no_match">Nothing found for “%s”</string>
     <string name="nag_pod_transcript_untimed">This transcript has no times: it does not follow the playback.</string>
-    <!-- Whisper's transcripts of the episodes: the episode's page, the show's settings, Settings › Podcasts -->
-    <string name="nag_pod_transcript_none_whisper">The show gives no transcript for this episode. Whisper can make one on this device; nothing of the episode leaves it.</string>
-    <string name="nag_pod_transcript_whisper">Made with Whisper · %1$s</string>
-    <string name="nag_pod_whisper_create">Create a transcript with Whisper</string>
-    <string name="nag_pod_whisper_again">Create again with Whisper</string>
-    <string name="nag_pod_whisper_cancel">Cancel the transcript job</string>
-    <string name="nag_pod_whisper_delete">Delete Whisper\'s transcript</string>
-    <string name="nag_pod_whisper_model_download">The %1$s model (%2$d MB) is downloaded first, once, from Hugging Face.</string>
-    <string name="nag_pod_whisper_model_ready">With the %1$s model, on this device.</string>
-    <string name="nag_pod_whisper_fetch_note">The episode is not downloaded: its audio is downloaded into the cache for the job and deleted after it.</string>
-    <string name="nag_pod_whisper_failed">Last try: %1$s</string>
-    <string name="nag_pod_whisper_running_title">Whisper is making the transcript</string>
-    <string name="nag_pod_whisper_queued_title">Transcript waiting</string>
-    <string name="nag_pod_whisper_queued_text">It starts when the job before it is done.</string>
-    <string name="nag_pod_whisper_queued_auto">It starts while the device is charging and idle.</string>
-    <string name="nag_pod_whisper_queued_app">It goes on when you open the app: Android stopped the job in the background at its time limit.</string>
-    <string name="nag_pod_set_language">Transcript language</string>
-    <string name="nag_pod_set_language_hint">The language Whisper hears this show\'s episodes in.</string>
-    <string name="nag_pod_set_language_feed">The feed\'s: %1$s</string>
-    <string name="nag_pod_set_language_feed_none">The feed\'s (none given: automatic)</string>
-    <string name="nag_pod_settings_transcripts">Transcripts (Whisper)</string>
-    <string name="nag_pod_settings_transcripts_hint">Transcripts of the episodes whose show gives none, made on this device with whisper.cpp: nothing of the episode leaves it. A model is downloaded from Hugging Face when a job first needs it, once you have seen its size on the episode\'s page.</string>
-    <string name="nag_pod_settings_auto_transcribe">Transcribe downloaded episodes by themselves</string>
-    <string name="nag_pod_settings_auto_transcribe_hint">New downloads without a transcript, only while the device is charging and idle, and once the model is on this device.</string>
     <string name="nag_pod_set_speed">Speed</string>
     <string name="nag_pod_set_speed_hint">This show\'s episodes play at this speed; a change while playing is kept here.</string>
     <string name="nag_pod_set_intro">Skip the intro</string>
@@ -1795,7 +1768,7 @@
     <string name="nag_pod_settings_refresh">Look for new episodes</string>
     <string name="nag_pod_settings_refresh_hint">In the background, with a network and a battery that is not low.</string>
     <string name="nag_pod_settings_wifi">Only on Wi-Fi</string>
-    <string name="nag_pod_settings_wifi_hint">The refresh waits for a network that is not metered, and so does the audio Whisper downloads for an episode that is not downloaded. Automatic downloads always do.</string>
+    <string name="nag_pod_settings_wifi_hint">The refresh waits for a network that is not metered. Automatic downloads always do.</string>
     <string name="nag_pod_settings_notify">Notifications of new episodes</string>
     <string name="nag_pod_settings_notify_hint">One notification per show; each show\'s settings can turn it off.</string>
     <string name="nag_pod_settings_notify_blocked">Notifications are off for Nağmedar in the system settings.</string>
@@ -1998,69 +1971,6 @@
     <string name="nag_ra_addresses">Addresses and connections…</string>
     <string name="nag_ra_how">How it works…</string>
 
-    <!-- S-709: transcription from speech, made on the device with Whisper: the podcast transcripts' jobs, Settings › Podcasts -->
-    <string name="nag_whisper_lang_auto">Automatic</string>
-    <string name="nag_whisper_lang_tr">Turkish</string>
-    <string name="nag_whisper_lang_en">English</string>
-    <string name="nag_whisper_model">Model</string>
-    <string name="nag_whisper_model_base">base</string>
-    <string name="nag_whisper_model_small">small</string>
-    <string name="nag_whisper_model_turbo">large-v3-turbo</string>
-    <string name="nag_whisper_model_base_hint">The quickest and the roughest: names and quiet speech go wrong more often.</string>
-    <string name="nag_whisper_model_small_hint">Recommended: a good balance of speed and accuracy in Turkish.</string>
-    <string name="nag_whisper_model_turbo_hint">The most accurate and the slowest: it may take longer than the episode.</string>
-    <string name="nag_whisper_cancel">Cancel</string>
-    <string name="nag_whisper_restarted">Starting again…</string>
-    <string name="nag_whisper_starting">Starting…</string>
-    <string name="nag_whisper_transcribing">Transcribing the speech…</string>
-    <string name="nag_whisper_downloading">Model: %1$d / %2$d MB</string>
-    <string name="nag_whisper_downloading_unknown">Model: %1$d MB</string>
-    <string name="nag_whisper_fetching">Episode: %1$d / %2$d MB</string>
-    <string name="nag_whisper_fetching_unknown">Episode: %1$d MB</string>
-    <string name="nag_whisper_fail_fetch">The episode\'s audio could not be downloaded; check the connection and try again.</string>
-    <string name="nag_whisper_eta">%1$s · about %2$s left</string>
-    <string name="nag_whisper_channel">Transcripts (Whisper)</string>
-    <string name="nag_whisper_running_title">Making the transcript · %1$s</string>
-    <string name="nag_whisper_done_title">Transcript ready · %1$s</string>
-    <string name="nag_whisper_failed_title">No transcript · %1$s</string>
-    <string name="nag_whisper_held_title">Transcript waiting · %1$s</string>
-    <string name="nag_whisper_held_text">Android stopped the job in the background at its time limit. It goes on from where it stopped when you open the app.</string>
-    <plurals name="nag_whisper_ready">
-        <item quantity="one">Transcript ready · %d passage</item>
-        <item quantity="other">Transcript ready · %d passages</item>
-    </plurals>
-    <string name="nag_whisper_model_ready">On this device · %1$d MB</string>
-    <string name="nag_whisper_model_partial">%1$d of %2$d MB downloaded; the next job goes on from there</string>
-    <string name="nag_whisper_model_absent">Not on this device · %1$d MB to download</string>
-    <string name="nag_whisper_delete">Delete</string>
-    <string name="nag_whisper_delete_running">Models cannot be deleted while a job is running.</string>
-    <string name="nag_whisper_fail_native">This build has no native lab library, so no transcript can be made.</string>
-    <string name="nag_whisper_fail_offline">No connection: the model could not be downloaded.</string>
-    <string name="nag_whisper_fail_server">Hugging Face did not send the model; try again later.</string>
-    <string name="nag_whisper_fail_checksum">What came down is not the model (its size or checksum differ); it was removed.</string>
-    <string name="nag_whisper_fail_storage">There is not enough space on this device for the model or the episode\'s audio.</string>
-    <string name="nag_whisper_fail_input">The episode could not be opened, or it is gone.</string>
-    <string name="nag_whisper_fail_decoder">The episode\'s audio format cannot be decoded.</string>
-    <string name="nag_whisper_fail_model">The model could not be read; it was removed and is downloaded again next time.</string>
-    <string name="nag_whisper_fail_engine">Whisper stopped on the episode\'s audio.</string>
-    <string name="nag_whisper_fail_empty">No speech was heard in the episode.</string>
-    <string name="nag_whisper_fail_output">The transcript could not be written in the app\'s storage.</string>
-    <string name="nag_whisper_fail_timeout">Android ended the job: a job in the background may run for six hours a day at most. Ask for it again; it goes on from where it stopped. The jobs waiting go on when you open the app again.</string>
-    <string name="nag_whisper_acceleration">Acceleration</string>
-    <string name="nag_whisper_accel_auto">Automatic (GPU if any)</string>
-    <string name="nag_whisper_accel_cpu">CPU only</string>
-    <string name="nag_whisper_accel_auto_hint">On the GPU through Vulkan where this device has one; on the CPU otherwise, or when the GPU stops.</string>
-    <string name="nag_whisper_accel_cpu_hint">On the CPU\'s performance cores; the GPU is not used.</string>
-    <string name="nag_whisper_gpu_stopped">The app stopped while the GPU worked</string>
-    <string name="nag_whisper_gpu_stopped_hint">Jobs run on the CPU until you try the GPU again.</string>
-    <string name="nag_whisper_gpu_retry">Try the GPU again</string>
-    <string name="nag_whisper_engine_gpu">GPU (Vulkan)</string>
-    <plurals name="nag_whisper_engine_cpu">
-        <item quantity="one">CPU · %d core</item>
-        <item quantity="other">CPU · %d cores</item>
-    </plurals>
-    <string name="nag_whisper_engine_fallback">%1$s (the GPU could not be used)</string>
-    <string name="nag_whisper_engine_speed">%1$s · %2$s× real time</string>
     <!-- S-1008: scrobbling (Settings › Scrobble) -->
     <string name="nag_scrobble_title">Scrobbling</string>
     <string name="nag_scrobble_intro">Sends the music you play to Last.fm and ListenBrainz. A track counts once you have heard half of it or four minutes, whichever comes first; tracks under 30 s, podcasts and streams are not sent. While you are offline, scrobbles wait on this device and are sent later.</string>
@@ -2313,29 +2223,24 @@
     <string name="nag_device_not_media">Not a media file</string>
     <string name="nag_device_add_to_section">Add to the library: %1$s</string>
     <string name="nag_device_folder_added">%1$s added to the library</string>
-    <!-- Tools › Downloads: podcast episodes, whisper and translation models -->
+    <!-- Tools › Downloads: podcast episodes -->
     <plurals name="nag_downloads_count">
         <item quantity="one">%d download</item>
         <item quantity="other">%d downloads</item>
     </plurals>
     <string name="nag_downloads_empty_title">Nothing downloaded</string>
-    <string name="nag_downloads_empty_desc">Podcast episodes you download, and the Whisper models, show here.</string>
+    <string name="nag_downloads_empty_desc">Podcast episodes you download show here.</string>
     <string name="nag_downloads_episodes">Podcast episodes</string>
-    <string name="nag_downloads_models">Models</string>
     <string name="nag_downloads_progress">%1$s of %2$s · %3$s</string>
     <string name="nag_downloads_running">Downloading · %1$s</string>
     <string name="nag_downloads_queued">Waiting to download</string>
     <string name="nag_downloads_done">Downloaded · %1$s</string>
     <string name="nag_downloads_failed">The download failed</string>
-    <string name="nag_downloads_partial">Half way · %1$s</string>
     <string name="nag_downloads_delete">Delete</string>
     <string name="nag_downloads_retry">Try again</string>
     <string name="nag_downloads_dismiss">Take off the list</string>
-    <string name="nag_downloads_stop_job">Stop the job</string>
-    <string name="nag_downloads_whisper_model">Speech recognition model</string>
     <string name="nag_downloads_delete_title">Delete the downloaded file?</string>
     <string name="nag_downloads_delete_episode">The episode stays in its show\'s list and can be downloaded again.</string>
-    <string name="nag_downloads_delete_model">The model is downloaded again when a job needs it.</string>
     <!-- The media information window of the menus without a details pane -->
     <string name="nag_info_close">Close</string>
     <string name="nag_info_album_artist">Album artist</string>

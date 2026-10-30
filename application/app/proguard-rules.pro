@@ -133,10 +133,6 @@
 # Nağmedar (1.0): the playback service finds Android Auto's catalog by name
 -keep class app.nagmedar.ui.auto.CarCatalogObserver { <init>(); }
 
-# Nağmedar (S-709): libnagmedar_lab.so calls the transcription's listener by its methods' names
--keep interface app.nagmedar.lab.NativeLab$Transcription { *; }
--keepclassmembers class * implements app.nagmedar.lab.NativeLab$Transcription { *; }
-
 # ---------------------------------------------------------------- Nağmedar 1.0: R8 on release builds
 # Names stay as written. A crash on the devices reads without a mapping file (none leaves CI: the
 # personal build's only output is its ciphertext), and what the debug build it replaces wrote by
@@ -152,8 +148,8 @@
 -keepclassmembers class * implements app.nagmedar.audio.NativeAudio$Listener { *; }
 -keepclassmembers class * implements app.nagmedar.audio.NativeAudio$ConvertListener { *; }
 
-# libnagmedar_lab.so (native/lab): NativeLab's natives (the media probe, whisper's transcription,
-# the USB audio tools) and its progress callback, by name
+# libnagmedar_lab.so (native/lab): NativeLab's natives (the media probe, the USB audio tools) and
+# its progress callback, by name
 -keep class app.nagmedar.lab.NativeLab { native <methods>; }
 -keep interface app.nagmedar.lab.NativeLab$Progress { *; }
 -keepclassmembers class * implements app.nagmedar.lab.NativeLab$Progress { *; }

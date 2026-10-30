@@ -11,9 +11,6 @@
 
 #include "mediaprobe.h"
 #include "usb_audio.h"
-#include "whisper_lab.h"
-
-#define WHISPER_LABEL "whisper.cpp 1.9.5"
 
 static volatile int g_cancel;
 
@@ -25,7 +22,7 @@ typedef struct Callback {
 
 static jstring utf8(JNIEnv *env, const char *text)
 {
-    /* NewStringUTF wants modified UTF-8; transcripts may hold 4-byte characters */
+    /* NewStringUTF wants modified UTF-8; tags and file names may hold 4-byte characters */
     if (!text)
         text = "";
     size_t len = strlen(text);
@@ -77,11 +74,6 @@ static void report(Callback *cb, double fraction, const char *message)
         (*env)->ExceptionClear(env);
 }
 
-static void whisper_progress(void *opaque, double fraction, const char *stage)
-{
-    report(opaque, fraction, stage);
-}
-
 static void usb_progress(void *opaque, double fraction, int64_t frames, int64_t errors)
 {
     char msg[96];
@@ -94,7 +86,7 @@ JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_version(JNIEnv *env, j
     (void)cls;
     const struct libusb_version *usb = libusb_get_version();
     char text[256];
-    snprintf(text, sizeof(text), "FFmpeg %s · %s · libusb %u.%u.%u", FFMPEG_VERSION, WHISPER_LABEL,
+    snprintf(text, sizeof(text), "FFmpeg %s · libusb %u.%u.%u", FFMPEG_VERSION,
              usb->major, usb->minor, usb->micro);
     return utf8(env, text);
 }
@@ -104,23 +96,6 @@ JNIEXPORT void JNICALL Java_app_nagmedar_lab_NativeLab_cancel(JNIEnv *env, jclas
     (void)env;
     (void)cls;
     g_cancel = 1;
-}
-
-JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_whisper(JNIEnv *env, jclass cls, jstring model, jstring input,
-                                                                   jstring language, jdouble max_seconds, jint threads,
-                                                                   jboolean gpu, jobject listener)
-{
-    (void)cls;
-    g_cancel = 0;
-    const char *m = (*env)->GetStringUTFChars(env, model, NULL);
-    const char *in = (*env)->GetStringUTFChars(env, input, NULL);
-    const char *lang = (*env)->GetStringUTFChars(env, language, NULL);
-    Callback cb = callback(env, listener);
-    jstring result = take(env, whisper_lab_run(m, in, lang, max_seconds, threads, gpu == JNI_TRUE, whisper_progress, &cb, &g_cancel));
-    (*env)->ReleaseStringUTFChars(env, model, m);
-    (*env)->ReleaseStringUTFChars(env, input, in);
-    (*env)->ReleaseStringUTFChars(env, language, lang);
-    return result;
 }
 
 JNIEXPORT jstring JNICALL Java_app_nagmedar_lab_NativeLab_usbDescribe(JNIEnv *env, jclass cls, jint fd)
