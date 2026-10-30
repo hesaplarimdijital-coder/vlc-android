@@ -1049,7 +1049,14 @@ class Smoke:
             self.frames_read(what)
 
         nodes = self.step("Drag the mini player up", lambda: drag("player drag up", cx, cy, cx, int(h * 0.12)), wait=0.5)
-        self.check("dragged up, the full player shows", bool(self.by_id(nodes, "phone-player")))
+        nodes, up = self.wait_for(lambda ns: self.by_id(ns, "phone-player"), 4)
+        tries = 1
+        if not up:
+            # 1.0.2: once more, should a slow emulator (API 37's frames are mostly late) have lost the first drag
+            tries = 2
+            nodes = self.step("Drag the mini player up again", lambda: drag("player drag up (again)", cx, cy, cx, int(h * 0.12)), wait=0.5)
+            nodes, up = self.wait_for(lambda ns: self.by_id(ns, "phone-player"), 4)
+        self.check("dragged up, the full player shows", bool(up), "drags: %d" % tries)
         nodes = self.step("Drag the full player down", lambda: drag("player drag down", w // 2, int(h * 0.3), w // 2, int(h * 0.95)), wait=0.5)
         self.animations(False)
         self.check("dragged down, the mini player again", not self.by_id(nodes, "phone-player") and bool(self.by_id(nodes, "mini-player")))
@@ -1329,8 +1336,11 @@ class Smoke:
         self.step("The big player (screenshot)", wait=0.5)
         self.key(4)
         nodes = self.step("Back: the big player closes", wait=1.2)
-        nodes, bar = self.wait_for(lambda ns: not self.by_id(ns, "phone-player") and self.by_id(ns, "transport-bar"), 6)
-        self.check("Back closes the big player, the bar is back", bool(bar))
+        nodes, closed = self.wait_for(lambda ns: not self.by_id(ns, "phone-player"), 6)
+        self.check("Back closes the big player", bool(closed))
+        # the bar is back while something plays (the walk's tone is 30 s long and may have ended by now)
+        if closed and not self.by_id(nodes, "transport-bar") and self.device_playing(nodes):
+            self.check("the bar is back after the big player", False, "something plays and no transport bar shows")
         return nodes
 
     def tap_until(self, title, node, find, seconds=8.0):
