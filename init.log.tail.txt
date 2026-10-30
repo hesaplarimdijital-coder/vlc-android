@@ -1,0 +1,79 @@
+*** No ANDROID_ABI defined architecture: using arm64-v8a
+libvlcjni sources: not found, cloning
+Cloning into 'libvlcjni'...
+HEAD is now at 3cf6461 Nağmedar: the subtitles' text scale, the next frame, colours, deinterlacing and audio devices from Java
+gradlew not found
+
+Welcome to Gradle 9.3.1!
+
+Here are the highlights of this release:
+ - Test reporting improvements
+ - Error and warning improvements
+ - Build authoring improvements
+
+For more details see https://docs.gradle.org/9.3.1/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :medialibrary
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.r8.optimizedResourceShrinking=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.nonFinalResIds=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :wrapper
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10s
+1 actionable task: 1 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+------------------------------------------------------------
+Gradle 9.3.1
+------------------------------------------------------------
+
+Build time:    2026-01-29 14:15:01 UTC
+Revision:      44f4e8d3122ee6e7cbf5a248d7e20b4ca666bda3
+
+Kotlin:        2.2.21
+Groovy:        4.0.29
+Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+Launcher JVM:  17.0.21 (Eclipse Adoptium 17.0.21+9)
+Daemon JVM:    /usr/lib/jvm/temurin-17-jdk-amd64 (no Daemon JVM specified, using current Java home)
+OS:            Linux 7.0.0-1017-azure amd64
+
+VLC sources: not found, cloning
+Cloning into 'vlc'...
+VLC sources: resetting to the VLC_TESTED_HASH commit (c84ef1eda4f14f8b57a5b266b51c843cf51ed28b)
+HEAD is now at c84ef1eda4 CI: update the Android Docker image to use NDK29
+VLC sources: applying custom patches
+Applying: compat: Workaround sendmsg bug on android
+Applying: network: tls: Handle errors from older kernels
+Applying: access_output: file: Add error dialog for write/open
+Applying: input: es_out: set video exclusive
+Applying: stream_ReadLine: increase line length limit
+Applying: input: display discoverer/preparsers logs
+VLC sources: Checking VLC_TESTED_HASH and patches presence
+NOTE: checks can be bypass by adding '-b' option to this script.
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0001-compat-Workaround-sendmsg-bug-on-android.patch
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0002-network-tls-Handle-errors-from-older-kernels.patch
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0003-access_output-file-Add-error-dialog-for-write-open.patch
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0004-input-es_out-set-video-exclusive.patch
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0005-stream_ReadLine-increase-line-length-limit.patch
+Checking presence of patch /home/runner/work/vlc-android/vlc-android/libvlcjni/buildsystem/../libvlc/patches/0006-input-display-discoverer-preparsers-logs.patch
