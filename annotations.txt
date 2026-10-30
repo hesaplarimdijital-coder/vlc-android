@@ -1,0 +1,2 @@
+::error title=Emulator check (phone-en, step 96)::a drag down from the sheet's middle closes it from y=1423 of 2400
+::notice title=Emulator Ekran görüntüleri ve rapor::FAILED: 245 steps, 0 crash/ANR, 0 StrictMode, 1/118 checks failed, 8 warnings, 47 min. Evidence: branch ci/emulator-api37.0-personal, report.md

@@ -1,0 +1,9 @@
+2668 s, 240 steps, pass phone-tr, 0 crashes
+233 phone-tr Settings ok
+234 phone-tr Settings scroll 1 ok
+235 phone-tr Settings scroll 2 ok
+236 phone-tr Settings scroll 3 ok
+237 phone-tr Settings scroll 4 ok
+238 phone-tr Settings scroll 5 ok
+239 phone-tr Settings scroll 6 ok
+240 phone-tr Settings scroll 7 ok
