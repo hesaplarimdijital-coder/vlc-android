@@ -87,6 +87,9 @@ class RecompositionTest {
         compose.waitForIdle()
         compositions = 0
         seed = second
+        // the test's write reaches the composition once the window is next idle: before 1.0.2 the mini player's hairline,
+        // gliding on every frame, kept the frames coming that carried it; the phone's bar (the tablet's seek bar) does not
+        compose.waitForIdle()
         compose.waitUntil(5_000) { accent == AccentTones.fromSeed(second).base }
         // what was left of a cross-fade, had it been composed
         compose.mainClock.advanceTimeBy(1_000)

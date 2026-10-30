@@ -36,7 +36,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -92,6 +100,7 @@ import app.nagmedar.ui.music.rememberMusicInspector
 import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
+import app.nagmedar.ui.music.WindowPlayer
 import app.nagmedar.ui.network.LibVlcDialogHost
 import app.nagmedar.ui.network.NetworkScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
@@ -148,7 +157,6 @@ import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
-import app.nagmedar.ui.shell.DetailBackHandler
 import app.nagmedar.ui.shell.rememberCaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.DropOverlay
@@ -160,7 +168,6 @@ import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.UnderShellBars
 import app.nagmedar.ui.shell.WidthClass
-import app.nagmedar.ui.shell.rememberDetailMotion
 import app.nagmedar.ui.streams.StreamsCenter
 import app.nagmedar.ui.streams.StreamsScreen
 import app.nagmedar.ui.sleep.SleepTimerDialog
@@ -172,7 +179,6 @@ import app.nagmedar.ui.widget.PlayerWidgetMigration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
@@ -246,8 +252,8 @@ private fun NagmedarMain(
     val screenCommands = remember { ScreenCommands() }
     val dropTargets = remember { DropTargets() }
     val queuePanel = rememberQueuePanelState()
-    // S-1002: the music player over a tablet's window (the rail's layout)
-    var phonePlayer by rememberSaveable { mutableStateOf(false) }
+    // S-1002, 1.0.2: the big music player over a tablet's and a desktop's window (the rail's and the sidebar's layouts)
+    var windowPlayer by rememberSaveable { mutableStateOf(false) }
     // Desktop Kit 1.0: on a phone the mini player grows into it
     val expandingPlayer = rememberExpandablePlayerState()
     val scope = rememberCoroutineScope()
@@ -282,6 +288,20 @@ private fun NagmedarMain(
                 val open = visualizerOpen
                 visualizerOpen = false
                 open
+            },
+            // 1.0.2: Esc closes the big player (and the phone's, opened with a keyboard)
+            closePlayer = {
+                when {
+                    windowPlayer -> {
+                        windowPlayer = false
+                        true
+                    }
+                    expandingPlayer.currentValue == PlayerValue.Expanded -> {
+                        scope.launch { expandingPlayer.collapse() }
+                        true
+                    }
+                    else -> false
+                }
             },
         )
     }
@@ -368,18 +388,17 @@ private fun NagmedarMain(
         val openNowPlaying: (NavKind) -> Unit = { navKind ->
             val page = PlaybackActions.nowPlayingDestination()
             if (page == Destination.Music) {
-                // on a desktop window the music view with its now playing pane, on a phone the mini player grown, else the player over the window
+                // on a phone the mini player grown; 1.0.2: on a tablet and a desktop window the big player over the window
                 when (navKind) {
-                    NavKind.Sidebar -> navigator.navigate(Destination.Music)
                     NavKind.BottomBar -> scope.launch { expandingPlayer.expand() }
-                    NavKind.Rail -> phonePlayer = true
+                    NavKind.Rail, NavKind.Sidebar -> windowPlayer = true
                 }
             } else if (page != null) {
                 navigator.navigate(page)
             }
         }
         val closePlayer: () -> Unit = {
-            phonePlayer = false
+            windowPlayer = false
             scope.launch { expandingPlayer.collapse() }
         }
         // a player's artist or album link: the music view takes it (the phone's player closes for it)
@@ -401,10 +420,10 @@ private fun NagmedarMain(
             when {
                 navKindNow != NavKind.BottomBar && expandingPlayer.currentValue == PlayerValue.Expanded -> {
                     expandingPlayer.snapTo(PlayerValue.Collapsed)
-                    if (navKindNow == NavKind.Rail) phonePlayer = true
+                    windowPlayer = true
                 }
-                navKindNow == NavKind.BottomBar && phonePlayer -> {
-                    phonePlayer = false
+                navKindNow == NavKind.BottomBar && windowPlayer -> {
+                    windowPlayer = false
                     expandingPlayer.snapTo(PlayerValue.Expanded)
                 }
             }
@@ -415,8 +434,9 @@ private fun NagmedarMain(
                 nowPlayingRequested = false
             }
         }
-        // S-1002: a tablet's player has the whole window, the bars stand aside; a desktop window keeps its caption bar
-        val playerOverWindow = phonePlayer && navKindNow == NavKind.Rail && caption == null
+        // S-1002, 1.0.2: the big player of a tablet and a desktop window; it has the whole window (below a desktop
+        // window's caption bar) and the bars stand aside once it covers it (the shell's WindowPage)
+        val windowPlayerShown = windowPlayer && navKindNow != NavKind.BottomBar
         CompositionLocalProvider(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,
@@ -444,8 +464,9 @@ private fun NagmedarMain(
                         },
                         queueOpen = queuePanel.open,
                         onQueue = queuePanel::toggle,
-                        // what is not a video opens here: music in the music view (the phone's player), radio, podcasts, streams on their pages
-                        onOpenAudio = { openNowPlaying(navKind) },
+                        // what is not a video opens here: music in the player (1.0.2: the bar's button closes the big
+                        // player again), radio, podcasts, streams on their pages
+                        onOpenAudio = { if (windowPlayerShown) windowPlayer = false else openNowPlaying(navKind) },
                         // Desktop Kit 1.0: on a phone the mini player grows into the player itself
                         phonePlayer = expandingPlayer,
                         fullPlayer = {
@@ -468,7 +489,6 @@ private fun NagmedarMain(
                 navController = navController,
                 navigator = navigator,
                 caption = caption,
-                contentOnly = playerOverWindow,
                 // Desktop Kit 1.0: on tablet and DeX the player bar floats over the content (a solid card since 1.0.1)
                 floatingPlayer = true,
                 // 1.0.1: bars, menus and sheets are solid surfaces; nothing changes colour with what passes beneath
@@ -480,28 +500,24 @@ private fun NagmedarMain(
                     Casting.request?.let { request -> CastPickerDialog(request, Casting::closePicker) }
                     val motion = NagTheme.motion
                     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-                    // a tablet's player comes up from the mini player and goes down again; kept composed while it goes
-                    val phonePlayerShown = phonePlayer && navKindNow == NavKind.Rail
-                    AnimatedVisibility(phonePlayerShown, enter = motion.sheetEnter(), exit = motion.sheetExit()) {
-                        // the predictive Back gesture shrinks it as it does a detail; let go, it goes down from there
-                        val back = rememberDetailMotion(open = true)
+                    // 1.0.2: the big player of a tablet and a desktop window, from the bar; ← and → seek in it
+                    WindowPlayer(windowPlayerShown, onClose = { windowPlayer = false }, onKey = { event -> playerKey(event, actions) }) { playerModifier, drop ->
                         PhonePlayerHost(
-                            onClose = { phonePlayer = false },
+                            onClose = { windowPlayer = false },
                             onQueue = queuePanel::toggle,
-                            // 1.0.1: nothing under it takes a touch, a scroll or a key
-                            modifier = Modifier.graphicsLayer { with(back) { detailLayer(size.width.roundToInt(), if (rtl) -1f else 1f) } }.blockInputBelow(),
+                            modifier = playerModifier,
                             onFullScreenLyrics = { lyricsOpen = true },
                             onFullScreenVisualizer = { visualizerOpen = true },
                             // the equaliser's page is the shell's: the player closes for it
                             onEqualizer = {
-                                phonePlayer = false
+                                windowPlayer = false
                                 navigator.open(Destination.Equalizer)
                             },
                             // as while it shows, also while it goes down
                             fullWindow = caption == null,
+                            drop = drop,
+                            captionAbove = caption?.height ?: 0.dp,
                         )
-                        // after the player's own: this one goes first; the player's windows opened later go before it
-                        DetailBackHandler(enabled = phonePlayerShown, state = back, onBack = { phonePlayer = false })
                     }
                     AnimatedVisibility(lyricsOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
                         PlayingLyricsFullScreen(onClose = { lyricsOpen = false }, modifier = Modifier.blockInputBelow())
@@ -677,6 +693,22 @@ private fun NagmedarMain(
     }
 }
 
+/**
+ * 1.0.2: the big player's own keys: ← and → seek five seconds back and on (with a modifier they are the window's
+ * shortcuts). Space plays and pauses, Esc closes it, as everywhere ([AppActions]).
+ */
+private fun playerKey(event: KeyEvent, actions: AppActions): Boolean {
+    if (event.type != KeyEventType.KeyDown || event.isCtrlPressed || event.isAltPressed || event.isShiftPressed || event.isMetaPressed) return false
+    return when (event.key) {
+        Key.DirectionLeft -> actions.seekBy(-PLAYER_KEY_STEP_MS)
+        Key.DirectionRight -> actions.seekBy(PLAYER_KEY_STEP_MS)
+        else -> false
+    }
+}
+
+/** How far ← and → seek in the big player: as far as the seek bar's own keys. */
+private const val PLAYER_KEY_STEP_MS = 5_000L
+
 /** The pages laid out under a phone's bars (Desktop Kit 1.0); the others are kept clear of them by the shell. */
 private val UnderBars = setOf(
     Destination.Music, Destination.Podcasts, Destination.Radio, Destination.Playlists, Destination.Device, Destination.Network,
@@ -721,6 +753,8 @@ class AppActions(
     private val openRadioSearch: () -> Unit = {},
     /** S-207: the radio screen's Recordings tab. */
     private val openRadioRecordings: () -> Unit = {},
+    /** 1.0.2: the big player (or the phone's full player) closed; whether it was open. */
+    private val closePlayer: () -> Boolean = { false },
 ) {
     private var volumeBeforeMute = 100
 
@@ -775,8 +809,11 @@ class AppActions(
     /** The mouse's forward button (S-408). */
     fun forward(): Boolean = navigator.forward()
 
-    /** An Esc nothing else used: "Sıradaki" closes (S-310), else the screen lets go of its selection (S-405). */
-    fun escape(): Boolean = closeVisualizer() || closeLyrics() || queuePanel.close() || screenCommands.escape()
+    /**
+     * An Esc nothing else used: what lies over the player closes, then "Sıradaki" (S-310), then the player itself (1.0.2),
+     * else the screen lets go of its selection (S-405).
+     */
+    fun escape(): Boolean = closeVisualizer() || closeLyrics() || queuePanel.close() || closePlayer() || screenCommands.escape()
 
     fun leaveMenuBar() {
         if (menuBar.hasKeyboard) menuBar.leave()
@@ -941,9 +978,11 @@ class AppActions(
         Notices.show(context, message)
     }
 
-    private fun seekBy(deltaMs: Long) {
-        val service = PlaybackService.instance ?: return
+    /** What plays [deltaMs] on (back when negative); false when nothing plays. */
+    fun seekBy(deltaMs: Long): Boolean {
+        val service = PlaybackService.instance ?: return false
         service.seek((service.getTime() + deltaMs).coerceAtLeast(0L), fromUser = true)
+        return true
     }
 
     private companion object {

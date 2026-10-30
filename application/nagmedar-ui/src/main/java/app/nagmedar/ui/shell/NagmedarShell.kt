@@ -78,7 +78,9 @@ val LocalFloatingPlayer = staticCompositionLocalOf { false }
  * navigation graph lives in the content slot of [ShellLayout] and survives width changes;
  * [overlay] is drawn over the current screen where the bars leave it (undo bars). [contentOnly]:
  * the screen and its overlay take the whole window, the bars stand aside (S-1002: the player over
- * a tablet's window).
+ * a tablet's window). 1.0.2: on tablet and DeX a [WindowPage] in the overlay (the big player) has
+ * the whole window from its first frame, below the [caption] bar, and once it covers it the bars
+ * stand aside as with [contentOnly].
  *
  * As Desktop Kit 0.2.0 has it: tabs change with Android's fade-through on phones and tablets and a
  * still cross-fade on a desktop; on a phone the bottom bar and the player strip make way while the
@@ -181,6 +183,8 @@ fun NagmedarShell(
     val floating = floatingPlayer && navKind != NavKind.BottomBar
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
+    // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
+    val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)
     // the tab lit: the one whose pages are on screen (none on the search page)
     val selected = NavRules.highlighted(current, navigator::inStack, navKind)
     // Settings and its pages on a phone: the bottom bar and the mini player slide away, the page takes their room
@@ -208,7 +212,7 @@ fun NagmedarShell(
         metrics.underTop = phone
         metrics.underBottom = phone
         metrics.barsHidden = barsHidden
-        metrics.underFloatingPlayer = floating && !contentOnly
+        metrics.underFloatingPlayer = floating && !chromeAway
         metrics.floatingMarginPx = with(density) { floatingMargin.roundToPx() }
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         overlayHost.onExpandStart = { scroll.showBars() }
@@ -216,7 +220,7 @@ fun NagmedarShell(
         overlayHost.rootView = view.rootView
     }
     // every screen starts with the bars shown
-    LaunchedEffect(current, navKind, showBottomNav, contentOnly) { scroll.reset() }
+    LaunchedEffect(current, navKind, showBottomNav, chromeAway) { scroll.reset() }
     // the top bar's arrow does what Back does: a detail open in the page closes first, as with the key
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val onBack: () -> Unit = {
@@ -239,7 +243,7 @@ fun NagmedarShell(
         ShellLayout(
             navKind = navKind,
             modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
-            contentOnly = contentOnly,
+            contentOnly = chromeAway,
             navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset().roundToInt() else 0 },
             topBar = {
                 if (navKind == NavKind.Sidebar) {
@@ -290,20 +294,13 @@ fun NagmedarShell(
                 }
             },
             player = {
-                val shape = RoundedCornerShape(NagTheme.dimens.radiusCard.coerceAtLeast(12.dp))
-                val colors = NagTheme.colors
                 Box(
                     Modifier
                         .onSizeChanged { metrics.playerPx = it.height }
                         .underPlayer(playerOver)
                         .then(if (barsHidden && navKind == NavKind.BottomBar) Modifier.clearAndSetSemantics {} else Modifier)
-                        .then(
-                            // a solid card with its border, whatever passes beneath (1.0.1)
-                            if (!floating) Modifier else Modifier
-                                .clip(shape)
-                                .background(colors.surfaceRaised, shape)
-                                .border(1.dp, colors.borderStrong, shape),
-                        ),
+                        // a solid card with its border, whatever passes beneath (1.0.1)
+                        .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
                 ) {
                     CompositionLocalProvider(LocalFloatingPlayer provides floating) { player(navKind) }
                 }
@@ -356,6 +353,9 @@ fun NagmedarShell(
             // window too, from its first frame (1.0.1)
             screenOverlayTop = { if (playerOver || overlayHost.windowPageShown) 0 else metrics.topPadPx },
             screenOverlayBottom = { if (playerOver || overlayHost.windowPageShown) 0 else metrics.bottomPadPx },
+            // 1.0.2: on tablet and DeX the same page has the whole window, under a desktop window's caption bar
+            screenOverlayWindow = { overlayHost.windowPageShown },
+            windowTop = caption?.height ?: 0.dp,
             playerLayer = {
                 Box(Modifier.fillMaxSize().onGloballyPositioned { overlayHost.coordinates = it }) {
                     overlayHost.layers.forEach { layer -> if (layer.z == ShellOverlayHost.PLAYER) key(layer) { layer.content() } }
@@ -372,6 +372,18 @@ fun NagmedarShell(
             floatingMaxWidth = if (navKind == NavKind.Sidebar) 1180.dp else 760.dp,
         )
     }
+}
+
+/**
+ * The floating player's card (Desktop Kit 1.0, solid since 1.0.1): the surface, the border and
+ * the corners of the tablet's and the desktop's floating bar. 1.0.2: the phone's bar is the same
+ * card ([app.nagmedar.ui.playback.CompactTransportBar]).
+ */
+@Composable
+fun Modifier.floatingPlayerCard(): Modifier {
+    val colors = NagTheme.colors
+    val shape = RoundedCornerShape(NagTheme.dimens.radiusCard.coerceAtLeast(12.dp))
+    return clip(shape).background(colors.surfaceRaised, shape).border(1.dp, colors.borderStrong, shape)
 }
 
 /**

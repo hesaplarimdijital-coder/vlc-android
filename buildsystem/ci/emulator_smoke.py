@@ -11,13 +11,16 @@ violations). The walk, in passes (a size and a language each):
                and nothing else), 1.0.1's pages (⋯ opens the "More" page, Settings is a page of its
                own without the bottom bar and with a back arrow, Back returns to "More", the top
                bar's colour the same at rest, during and after a scroll), a track's ⋯ sheet, a
-               track played, the mini player dragged up into the full player and down again, a
-               sideways swipe on it to the next track, a podcast followed (--feed) and an
+               track played, the mini player (1.0.2: the tablet's bar, two rows) dragged up into the
+               full player and down again, a sideways swipe on its first row to the next track and
+               one along its seek bar that must not change it, a podcast followed (--feed) and an
                episode's page whose play button must not move after it opened, the Radio; then a
                music file opened from outside, the command palette (Ctrl+K), the shortcut list,
                rotation, background and foreground
   workstation  the tablet's Music: the inspector shown, Ctrl+I hides and shows it, the table's
-               column chooser (a title's long press) opens and Escape closes it
+               column chooser (a title's long press) opens and Escape closes it; 1.0.2: with a file
+               of Bu cihaz playing, the transport bar's "open the player" opens the big player over
+               the window and Back closes it
   phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
 
 1.0.1 (the user's crash in Bu cihaz): phone-en, phone-tr and workstation also walk This device /
@@ -1016,8 +1019,16 @@ class Smoke:
         if not mini:
             return None
         b = mini[0].b
-        inside = [n for n in self.app_nodes(nodes) if n.text.strip() and b[0] <= n.center[0] <= b[2] and b[1] <= n.center[1] <= b[3]]
+        # 1.0.2: the words only, not the times either side of the bar's seek bar (they change every second)
+        seek = [n.b for n in self.by_id(nodes, "mini-player-seek")]
+        inside = [n for n in self.app_nodes(nodes) if n.text.strip() and b[0] <= n.center[0] <= b[2] and b[1] <= n.center[1] <= b[3]
+                  and not any(self.inside(n, sb) for sb in seek)]
         return " / ".join(n.text.strip() for n in inside)
+
+    @staticmethod
+    def first_row(bounds):
+        """1.0.2: the y of the phone's bar's first row (the artwork, the words, the transport); its seek bar is the second."""
+        return bounds[1] + int((bounds[3] - bounds[1]) * 0.28)
 
     def player_drag(self):
         """The mini player dragged up into the full player and down again; then swiped sideways."""
@@ -1026,7 +1037,8 @@ class Smoke:
         if not self.check("a mini player to drag", bool(mini)):
             return
         w, h = self.screen_size(nodes)
-        cx, cy = mini[0].center
+        # from the words of its first row: the seek bar under them takes a drag of its own
+        cx, cy = mini[0].center[0], self.first_row(mini[0].b)
         # each drag's frames alone: counted from just before the finger goes down to a moment after it settles
         self.animations(True)
 
@@ -1037,7 +1049,14 @@ class Smoke:
             self.frames_read(what)
 
         nodes = self.step("Drag the mini player up", lambda: drag("player drag up", cx, cy, cx, int(h * 0.12)), wait=0.5)
-        self.check("dragged up, the full player shows", bool(self.by_id(nodes, "phone-player")))
+        nodes, up = self.wait_for(lambda ns: self.by_id(ns, "phone-player"), 4)
+        tries = 1
+        if not up:
+            # 1.0.2: once more, should a slow emulator (API 37's frames are mostly late) have lost the first drag
+            tries = 2
+            nodes = self.step("Drag the mini player up again", lambda: drag("player drag up (again)", cx, cy, cx, int(h * 0.12)), wait=0.5)
+            nodes, up = self.wait_for(lambda ns: self.by_id(ns, "phone-player"), 4)
+        self.check("dragged up, the full player shows", bool(up), "drags: %d" % tries)
         nodes = self.step("Drag the full player down", lambda: drag("player drag down", w // 2, int(h * 0.3), w // 2, int(h * 0.95)), wait=0.5)
         self.animations(False)
         self.check("dragged down, the mini player again", not self.by_id(nodes, "phone-player") and bool(self.by_id(nodes, "mini-player")))
@@ -1046,7 +1065,7 @@ class Smoke:
         if not mini:
             return
         b = mini[0].b
-        y = (b[1] + b[3]) // 2
+        y = self.first_row(b)
         # from the title's middle towards the start edge (past the 30 % threshold), clear of the buttons
         x0, x1 = b[0] + int((b[2] - b[0]) * 0.5), b[0] + int((b[2] - b[0]) * 0.03)
         changed = lambda ns: (lambda t: t if t and t != before else None)(self.mini_title(ns))
@@ -1067,7 +1086,23 @@ class Smoke:
         if self.by_id(nodes, "phone-player"):
             # the walk goes on from the mini player
             self.key(4)
-            self.step("Back: the full player closed")
+            nodes = self.step("Back: the full player closed")
+        # 1.0.2: along the bar's seek bar the same swipe seeks, the track stays
+        seek = self.by_id(nodes, "mini-player-seek")
+        if self.check("the bar's seek bar", bool(seek)):
+            time.sleep(1.5)
+            nodes = self.nodes(self.dump())
+            before = self.mini_title(nodes)
+            sb = self.by_id(nodes, "mini-player-seek")[0].b if self.by_id(nodes, "mini-player-seek") else seek[0].b
+            sy = (sb[1] + sb[3]) // 2
+            sx0, sx1 = sb[0] + int((sb[2] - sb[0]) * 0.8), sb[0] + int((sb[2] - sb[0]) * 0.2)
+            nodes = self.step("Swipe along the bar's seek bar", lambda: self.sh("input swipe %d %d %d %d 300" % (sx0, sy, sx1, sy)), wait=2)
+            after = self.mini_title(nodes)
+            self.check("a swipe along the seek bar does not change the track", after == before and not self.by_id(nodes, "phone-player"),
+                       "%s → %s" % (before, after))
+            if self.by_id(nodes, "phone-player"):
+                self.key(4)
+                self.step("Back: the full player closed")
 
     def follow_podcast(self, nodes):
         """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
@@ -1281,6 +1316,33 @@ class Smoke:
             return "media session playing"
         return None
 
+    def big_player(self):
+        """1.0.2: the transport bar's "open the player" opens the big player over the window (not the Music page);
+        Back closes it and the bar is there again."""
+        nodes = self.nodes(self.dump())
+        # the sidebar's transport bar has the button; a rail's mini player opens it from its words
+        button = self.by_id(nodes, "transport-open-player") or self.by_id(nodes, "mini-player")
+        if not self.check("the transport bar's open button", bool(button)):
+            return nodes
+        nodes, shown = self.tap_until("The bar's open button", button[0], lambda ns: self.by_id(ns, "phone-player"))
+        self.check("the bar's open button opens the big player", bool(shown))
+        if not shown:
+            return nodes
+        player = self.by_id(nodes, "phone-player")[0].b
+        w, h = self.screen_size(nodes)
+        self.check("the big player covers the window", player[2] - player[0] >= w * 0.9 and player[3] - player[1] >= h * 0.8,
+                   "player %s in %dx%d" % (player, w, h))
+        self.check("the bars stand aside under it", not self.by_id(nodes, "transport-bar"))
+        self.step("The big player (screenshot)", wait=0.5)
+        self.key(4)
+        nodes = self.step("Back: the big player closes", wait=1.2)
+        nodes, closed = self.wait_for(lambda ns: not self.by_id(ns, "phone-player"), 6)
+        self.check("Back closes the big player", bool(closed))
+        # the bar is back while something plays (the walk's tone is 30 s long and may have ended by now)
+        if closed and not self.by_id(nodes, "transport-bar") and self.device_playing(nodes):
+            self.check("the bar is back after the big player", False, "something plays and no transport bar shows")
+        return nodes
+
     def tap_until(self, title, node, find, seconds=8.0):
         """Taps [node] (once more if nothing came of it: a first touch may only switch the input mode) until find(nodes)."""
         nodes = self.step(title, lambda: self.tap(node), wait=1.0)
@@ -1311,6 +1373,8 @@ class Smoke:
             return
         nodes, playing = self.tap_until("Play %s from the folder" % tone, files[0], self.device_playing, 10)
         self.check("a file of the folder plays", bool(playing), playing or "no mini player, no session playing")
+        if wide and playing:
+            nodes = self.big_player()
         # back to the drive: Back on a phone, the trail's first folder beside the places
         if wide:
             crumb = self.in_tag(nodes, "device-trail", internal)

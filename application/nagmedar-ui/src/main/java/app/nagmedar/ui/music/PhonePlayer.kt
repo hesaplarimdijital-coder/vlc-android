@@ -7,6 +7,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,6 +16,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,10 +24,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -34,6 +38,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,6 +69,8 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -150,10 +157,15 @@ import org.videolan.vlc.media.PlaylistManager
  * them; under them where it plays (casting, the format and the output), sharing and the queue. Nothing in it is a word
  * that could wrap. The artwork swiped left plays the next track and right the previous; swiped down, or Back, closes
  * the player: in the phone's expanding sheet ([LocalPlayerSheet]) the sheet's own drag and Back do, so that the
- * player goes down with the finger in one piece (1.0); standing alone (a tablet's overlay) its own. Held sideways,
- * the artwork is on the left and the rest beside it. The artist and the album open their tracks in the music view
- * ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock screen's,
+ * player goes down with the finger in one piece (1.0); standing alone (a tablet's overlay) its own, from anywhere on
+ * it ([drop]). Held sideways, the artwork is on the left and the rest beside it. The artist and the album open their
+ * tracks in the music view ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock screen's,
  * from the same media session.
+ *
+ * 1.0.2, the big player of a tablet and a desktop window (both sides at least [BIG_MIN]): wider than high, the artwork
+ * as large as the height allows on the left and the words and the controls in a column of a reading width beside it,
+ * the pair centred under the top row; upright, the phone's composition scaled up. Larger words and controls, for a
+ * screen seen from further away.
  */
 @Composable
 fun PhonePlayer(
@@ -197,14 +209,20 @@ fun PhonePlayer(
     onEqualizer: (() -> Unit)? = null,
     /** The player has the whole window: its backdrop goes on under the system's bars. */
     edgeToEdge: Boolean = false,
+    /** Standing alone, how far it is pulled down to close; given by a window that watches it (1.0.2). */
+    drop: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
+    /** 1.0.2: a desktop window's caption bar is this high above the player: its backdrop goes on under it. */
+    captionAbove: Dp = 0.dp,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val motion = NagTheme.motion
     val res = LocalContext.current.resources
+    val scope = rememberCoroutineScope()
     // in the phone's sheet, a drag down and Back are the sheet's (1.0); standing alone, the player's own
     val hosted = LocalPlayerSheet.current != null
-    val drop = remember { Animatable(0f) }
     if (!hosted) BackHandler(onBack = onClose)
+    val latestClose by rememberUpdatedState(onClose)
     // S-1007: the sleep timer's window, from the menu
     var sleepOpen by rememberSaveable { mutableStateOf(false) }
     val top = remember(colors, tint) { tint?.let { backdropTop(colors, it) } }
@@ -237,29 +255,16 @@ fun PhonePlayer(
             onRate?.let { MenuEntry.Item(res.getString(R.string.nag_rate), it, icon = NagIcons.Star) },
         )
     }
-    val parts = PlayerParts(
-        info = info,
-        actions = actions,
-        onClose = onClose,
-        drop = drop,
-        hosted = hosted,
-        artwork = artwork,
-        stage = when {
-            lyrics != null && lyricsShown -> lyrics
-            visualizer != null && visualizerShown -> visualizer
-            else -> null
-        },
-        lyricLine = lyricLine.takeIf { !(lyrics != null && lyricsShown) },
-        links = Links(onOpenArtist, onOpenAlbum),
-        onAddToPlaylist = onAddToPlaylist,
-    )
     BoxWithConstraints(
         modifier
             .fillMaxSize()
             .offset { IntOffset(0, drop.value.roundToInt()) }
+            // standing alone, pulled down from anywhere (what in it moves by a drag of its own keeps it) it closes
+            .then(if (hosted) Modifier else Modifier.pointerInput(drop) { pullDown(drop, scope, motion.spatial()) { latestClose() } })
             .drawBehind {
-                // with the whole window, under the system's bars too: the backdrop has no seam
-                val above = if (edgeToEdge) insets.getTop(this).toFloat() else 0f
+                // with the whole window, under the system's bars too: the backdrop has no seam; a desktop window's
+                // caption bar over it has it too
+                val above = (if (edgeToEdge) insets.getTop(this).toFloat() else 0f) + captionAbove.toPx()
                 val below = if (edgeToEdge) insets.getBottom(this).toFloat() else 0f
                 val left = if (edgeToEdge) insets.getLeft(this, layoutDirection).toFloat() else 0f
                 val right = if (edgeToEdge) insets.getRight(this, layoutDirection).toFloat() else 0f
@@ -278,9 +283,42 @@ fun PhonePlayer(
             .testTag("phone-player"),
     ) {
         val sideways = maxWidth > maxHeight && maxHeight < SIDEWAYS_MAX_HEIGHT && maxWidth >= SIDEWAYS_MIN_WIDTH
+        // 1.0.2: a tablet's and a desktop's window, wider than high or upright
+        val big = minOf(maxWidth, maxHeight) >= BIG_MIN
+        val wide = big && maxWidth > maxHeight
         val narrow = maxWidth < NARROW_WIDTH
-        val gutter = if (narrow) dimens.gapL else dimens.gapXl
-        val transport = if (narrow || sideways) TransportSize.Narrow else TransportSize.Phone
+        val gutter = when {
+            big -> BIG_GUTTER
+            narrow -> dimens.gapL
+            else -> dimens.gapXl
+        }
+        val transport = when {
+            big -> TransportSize.Large
+            narrow || sideways -> TransportSize.Narrow
+            else -> TransportSize.Phone
+        }
+        val parts = PlayerParts(
+            info = info,
+            actions = actions,
+            onClose = onClose,
+            drop = drop,
+            hosted = hosted,
+            artwork = artwork,
+            stage = when {
+                lyrics != null && lyricsShown -> lyrics
+                visualizer != null && visualizerShown -> visualizer
+                else -> null
+            },
+            lyricLine = lyricLine.takeIf { !(lyrics != null && lyricsShown) },
+            links = Links(onOpenArtist, onOpenAlbum),
+            onAddToPlaylist = onAddToPlaylist,
+            big = big,
+            artworkMax = when {
+                wide -> WIDE_ARTWORK_MAX
+                big -> BIG_ARTWORK_MAX
+                else -> ARTWORK_MAX
+            },
+        )
         val topRow: @Composable () -> Unit = {
             Row(Modifier.fillMaxWidth().padding(vertical = dimens.gapXs), verticalAlignment = Alignment.CenterVertically) {
                 NagIconButton(NagIcons.ChevronDown, stringResource(R.string.nag_player_close), onClose, modifier = Modifier.testTag("phone-player-close"))
@@ -312,19 +350,42 @@ fun PhonePlayer(
             )
             BottomRow(info.format, actions, canCast || casting != null, casting, onShare)
         }
-        if (sideways) {
-            // held sideways: the artwork on the left, as high as the window, the rest beside it, keeping its width
+        if (wide) {
+            // 1.0.2: the top row across the window; under it the artwork as large as the height allows and the words
+            // and the controls beside it at a reading width, the pair in the middle
+            Column(Modifier.fillMaxSize().padding(horizontal = gutter)) {
+                topRow()
+                BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).padding(bottom = dimens.gapXl), contentAlignment = Alignment.Center) {
+                    val column = (maxWidth * WIDE_CONTROLS_SHARE).coerceIn(WIDE_CONTROLS_MIN, WIDE_CONTROLS_MAX)
+                    val gap = (maxWidth * WIDE_GAP_SHARE).coerceIn(dimens.gapXl, WIDE_GAP_MAX)
+                    val side = minOf(maxHeight, maxWidth - column - gap, WIDE_ARTWORK_MAX).coerceAtLeast(0.dp)
+                    val high = maxHeight
+                    Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
+                        Stage(parts, Modifier.size(side))
+                        // a window too low for all of it scrolls
+                        Column(Modifier.width(column).heightIn(max = high).verticalScroll(rememberScrollState()).testTag("player-controls")) {
+                            parts.lyricLine?.invoke(Modifier.fillMaxWidth())
+                            TitleRow(parts)
+                            Spacer(Modifier.height(dimens.gapL))
+                            controls()
+                        }
+                    }
+                }
+            }
+        } else if (sideways) {
+            // held sideways: the artwork on the left, as high as the window, the rest beside it, keeping its width (at
+            // most a reading width: the pair in the middle of a wide and low desktop window)
             val high = maxHeight - dimens.gapS * 2
             val side = minOf(high, maxWidth - gutter * 2 - dimens.gapXl - SIDEWAYS_CONTROLS_WIDTH).coerceAtLeast(0.dp)
             Row(
                 Modifier.fillMaxSize().padding(horizontal = gutter, vertical = dimens.gapS),
-                horizontalArrangement = Arrangement.spacedBy(dimens.gapXl),
+                horizontalArrangement = Arrangement.spacedBy(dimens.gapXl, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Stage(parts, Modifier.size(side))
                 // spread over the height; a window too low for it scrolls
                 Column(
-                    Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).heightIn(min = high),
+                    Modifier.weight(1f, fill = false).widthIn(max = WIDE_CONTROLS_MAX).fillMaxHeight().verticalScroll(rememberScrollState()).heightIn(min = high),
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
                     topRow()
@@ -342,7 +403,7 @@ fun PhonePlayer(
             ) {
                 topRow()
                 Stage(parts, Modifier.fillMaxWidth().weight(1f).padding(vertical = dimens.gapS))
-                Column(Modifier.widthIn(max = CONTENT_MAX_WIDTH).fillMaxWidth().padding(bottom = dimens.gapS)) {
+                Column(Modifier.widthIn(max = if (big) BIG_ARTWORK_MAX else CONTENT_MAX_WIDTH).fillMaxWidth().padding(bottom = if (big) dimens.gapXl else dimens.gapS)) {
                     parts.lyricLine?.invoke(Modifier.fillMaxWidth())
                     TitleRow(parts)
                     controls()
@@ -367,6 +428,10 @@ private class PlayerParts(
     val lyricLine: (@Composable (Modifier) -> Unit)?,
     val links: Links,
     val onAddToPlaylist: (() -> Unit)?,
+    /** A tablet's or a desktop's big player (1.0.2): larger words. */
+    val big: Boolean,
+    /** The artwork grows no larger than this. */
+    val artworkMax: Dp,
 )
 
 /** "Albümden çalınıyor" over the album's name; "Şimdi çalıyor" alone when the queue does not say where from. */
@@ -466,7 +531,11 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                         }
                     } else {
                         scope.launch {
-                            if (!horizontal && dy >= down) latestClose()
+                            // closing, it goes down from where it was let go
+                            if (!horizontal && dy >= down) {
+                                latestClose()
+                                return@launch
+                            }
                             // back to rest on the spatial spring, both at once
                             launch { swipe.animateTo(0f, settle) }
                             drop.animateTo(0f, settle)
@@ -499,7 +568,7 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
             },
         contentAlignment = Alignment.Center,
     ) {
-        val side = minOf(maxWidth, maxHeight, ARTWORK_MAX)
+        val side = minOf(maxWidth, maxHeight, parts.artworkMax)
         val widthPx = with(density) { maxWidth.toPx() }.coerceAtLeast(1f)
         // playing, the artwork comes forward; paused, it settles back a little
         val scale by animateFloatAsState(if (parts.info.playing) 1f else PAUSED_SCALE, motion.emphasized(), label = "artwork")
@@ -557,13 +626,18 @@ private fun TitleRow(parts: PlayerParts) {
             Column {
                 Text(
                     title,
-                    style = NagTheme.type.headline,
+                    style = if (parts.big) NagTheme.type.display.copy(fontSize = NagTheme.type.size(BIG_TITLE_SP), lineHeight = NagTheme.type.size(BIG_TITLE_SP * 1.25f)) else NagTheme.type.headline,
                     color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("phone-title"),
                 )
-                PlayingArtistAlbum(parts.info.copy(artist = artist, album = album), parts.links, NagTheme.type.body)
+                val words = if (parts.big) {
+                    NagTheme.type.body.copy(fontSize = NagTheme.type.size(BIG_ARTIST_SP), lineHeight = NagTheme.type.size(BIG_ARTIST_SP * 1.35f))
+                } else {
+                    NagTheme.type.body
+                }
+                PlayingArtistAlbum(parts.info.copy(artist = artist, album = album), parts.links, words)
             }
         }
         parts.onAddToPlaylist?.let { add ->
@@ -651,12 +725,68 @@ private const val SWIPE_FADE = 0.6f
 /** A sideways swipe this long changes the track. */
 private val SWIPE = 80.dp
 
-/** A swipe down this long closes the player. */
+/** A swipe down this long closes the player; or this fast. */
 private val CLOSE = 140.dp
+private val CLOSE_FLING = 1_000.dp
 
-/** The artwork and the rows under it grow no larger than this (a tablet held upright). */
+/**
+ * The big player standing alone (1.0.2) pulled down from anywhere on it: it follows the finger ([drop]) and closes
+ * ([close]) past [CLOSE] or flung down; let go before, it springs back on [settle]. What moves by a drag of its own (the
+ * seek bar, the lyrics, the artwork) keeps it: a drag it took is not this one's.
+ */
+private suspend fun PointerInputScope.pullDown(
+    drop: Animatable<Float, AnimationVector1D>,
+    scope: CoroutineScope,
+    settle: AnimationSpec<Float>,
+    close: () -> Unit,
+) {
+    val tracker = VelocityTracker()
+    // the player moves with the finger: the way it went, not where it is on the player, gives the speed
+    var pulled = 0f
+    detectVerticalDragGestures(
+        onDragStart = {
+            tracker.resetTracking()
+            pulled = drop.value
+        },
+        onDragEnd = {
+            val velocity = tracker.calculateVelocity().y
+            if (drop.value >= CLOSE.toPx() || (velocity >= CLOSE_FLING.toPx() && drop.value > 0f)) {
+                close()
+            } else {
+                scope.launch { drop.animateTo(0f, settle, initialVelocity = velocity) }
+            }
+        },
+        onDragCancel = { scope.launch { drop.animateTo(0f, settle) } },
+    ) { change, amount ->
+        change.consume()
+        pulled = (pulled + amount).coerceAtLeast(0f)
+        tracker.addPosition(change.uptimeMillis, Offset(0f, pulled))
+        scope.launch { drop.snapTo(pulled) }
+    }
+}
+
+/** The artwork and the rows under it grow no larger than this (a phone, a small tablet held upright). */
 private val ARTWORK_MAX = 560.dp
 private val CONTENT_MAX_WIDTH = 560.dp
+
+/** 1.0.2: a window at least this wide and high has the big player (a tablet's, a desktop's), its gutters this wide. */
+private val BIG_MIN = 600.dp
+private val BIG_GUTTER = 48.dp
+
+/** The big player's title and its artist and album, in sp (and the window's step): read from a few steps away. */
+private const val BIG_TITLE_SP = 32f
+private const val BIG_ARTIST_SP = 20f
+
+/** The big player upright: the artwork and the rows under it grow no larger than this. */
+private val BIG_ARTWORK_MAX = 680.dp
+
+/** The big player wider than high: the artwork's largest side; the column beside it, its share of the width between these; the gap between them. */
+private val WIDE_ARTWORK_MAX = 760.dp
+private const val WIDE_CONTROLS_SHARE = 0.38f
+private val WIDE_CONTROLS_MIN = 360.dp
+private val WIDE_CONTROLS_MAX = 520.dp
+private const val WIDE_GAP_SHARE = 0.05f
+private val WIDE_GAP_MAX = 96.dp
 
 /** Narrower than this, the gutters and the controls are smaller. */
 private val NARROW_WIDTH = 360.dp
@@ -676,6 +806,8 @@ private val RING = 1.5.dp
  * The phone player on the playback service; [onQueue] opens "Sıradaki" over it, [onFullScreenLyrics] the lyrics over
  * the whole window (S-1004; the line under the artwork too), [onFullScreenVisualizer] the visualiser (S-611),
  * [onEqualizer] the equaliser's page; [fullWindow]: the player has the whole window (a phone's). Nothing without music.
+ * 1.0.2: also the big player of a tablet and a desktop window, which watches how far it is pulled down ([drop]) and
+ * has a desktop window's caption bar above it ([captionAbove]).
  */
 @Composable
 fun PhonePlayerHost(
@@ -686,6 +818,8 @@ fun PhonePlayerHost(
     onFullScreenVisualizer: (() -> Unit)? = null,
     onEqualizer: (() -> Unit)? = null,
     fullWindow: Boolean = false,
+    drop: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
+    captionAbove: Dp = 0.dp,
 ) {
     val context = LocalContext.current
     val prefs = rememberNagmedarPreferences()
@@ -776,6 +910,8 @@ fun PhonePlayerHost(
             onShare = { share(context, scope, media) },
             onEqualizer = onEqualizer,
             edgeToEdge = fullWindow,
+            drop = drop,
+            captionAbove = captionAbove,
         )
     }
     if (adding) AddToPlaylistHost(listOf(track), scope) { adding = false }

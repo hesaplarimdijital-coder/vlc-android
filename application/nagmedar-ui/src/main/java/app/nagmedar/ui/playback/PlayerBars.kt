@@ -12,6 +12,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,10 +42,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -87,11 +89,13 @@ import app.nagmedar.ui.podcast.Chapter
 import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NavKind
+import app.nagmedar.ui.shell.floatingPlayerCard
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.ArtworkAccent
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.animatedAccent
 import kotlin.math.roundToInt
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -229,6 +233,8 @@ data class PlayerBarInfo(
     val repeatOne: Boolean = false,
     /** The playing speed: the timelines move at it between the service's readings. */
     val rate: Float = 1f,
+    /** 1.0.2: a stream without a length (a station on the air): the bars show it live instead of a seek bar. */
+    val live: Boolean = false,
 )
 
 /** What the bars ask of playback: the playback service in the app, a recorder in tests. */
@@ -335,10 +341,11 @@ class ServicePlayerBarActions(
 
 /**
  * The bar of the shell (S-304), for every screen: the transport bar with a sidebar, the mini player
- * otherwise. On a phone, given [phonePlayer] and its [fullPlayer], the mini player grows into the
- * full player when dragged up or tapped (Desktop Kit 1.0's ExpandablePlayer) while music plays, and
- * a sideways swipe on it skips to the previous or next track; a station's or an episode's opens its
- * page as before ([onOpenAudio]) and does not skip (the transport has no seek steps for them).
+ * with a rail, and on a phone the transport bar laid out for it (1.0.2, [CompactTransportBar]).
+ * On a phone, given [phonePlayer] and its [fullPlayer], the bar grows into the full player when
+ * dragged up or tapped (Desktop Kit 1.0's ExpandablePlayer) while music plays, and a sideways swipe
+ * on it (not on its seek bar) skips to the previous or next track; a station's or an episode's opens
+ * its page as before ([onOpenAudio]) and does not skip (the transport has no seek steps for them).
  */
 @Composable
 fun PlayerBar(
@@ -373,14 +380,15 @@ fun PlayerBar(
             navKind == NavKind.Sidebar -> TransportBar(info, { progress }, actions, artwork, modifier, queueOpen, transparent = transparent)
             navKind == NavKind.BottomBar && phonePlayer != null && fullPlayer != null -> ExpandablePlayer(
                 state = phonePlayer,
-                mini = { MiniPlayer(info, { progress }, actions, artwork, floating = true, queueOpen = queueOpen) },
+                mini = { CompactTransportBar(info, { progress }, actions, artwork) },
                 full = fullPlayer,
                 modifier = modifier,
                 expandable = music,
                 onPrevious = if (music) actions::previous else null,
                 onNext = if (music) actions::next else null,
             )
-            else -> MiniPlayer(info, { progress }, actions, artwork, modifier, floating = navKind == NavKind.BottomBar, queueOpen = queueOpen, transparent = transparent)
+            navKind == NavKind.BottomBar -> CompactTransportBar(info, { progress }, actions, artwork, modifier)
+            else -> MiniPlayer(info, { progress }, actions, artwork, modifier, queueOpen = queueOpen, transparent = transparent)
         }
     }
 }
@@ -411,15 +419,21 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         linked = links.first != null && !artist.isNullOrBlank(),
         repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
         rate = playbackRate(),
+        live = media.length <= 0L && isStream(media.uri?.scheme),
     )
 }
 
+/** An address played from the network (a station, a stream), not a file of this device. */
+internal fun isStream(scheme: String?): Boolean = scheme != null && scheme.lowercase() !in LocalSchemes
+
+private val LocalSchemes = setOf("file", "content", "android.resource")
+
 /**
- * Compact, medium and expanded windows: what is playing, above the navigation of every screen
- * (S-304). A tap on the artwork or the words opens the full player. On a phone it is a card over
- * the content's edge. With a pointer, hovering it (or tabbing into it) brings out the previous and
- * stop buttons and a seek bar in place of the second line. [transparent]: it lies in the shell's
- * floating bar of a tablet (Desktop Kit 1.0), its progress along the bottom.
+ * Medium and expanded windows: what is playing, beside the rail of every screen (S-304). A tap on
+ * the artwork or the words opens the full player. With a pointer, hovering it (or tabbing into it)
+ * brings out the previous and stop buttons and a seek bar in place of the second line.
+ * [transparent]: it lies in the shell's floating bar of a tablet (Desktop Kit 1.0), its progress
+ * along the bottom. (1.0.2: a phone has [CompactTransportBar].)
  */
 @Composable
 fun MiniPlayer(
@@ -428,7 +442,6 @@ fun MiniPlayer(
     actions: PlayerBarActions,
     artwork: @Composable (Dp) -> Unit,
     modifier: Modifier = Modifier,
-    floating: Boolean = false,
     queueOpen: Boolean = false,
     transparent: Boolean = false,
 ) {
@@ -443,33 +456,23 @@ fun MiniPlayer(
     val open = remember { MutableInteractionSource() }
     val openState = open.collectState()
     var titleHeight by remember { mutableIntStateOf(0) }
-    val shape = if (floating) RoundedCornerShape(dimens.radiusCard) else RectangleShape
-    val artSize = dimens.miniPlayerHeight - if (floating) 28.dp else 20.dp
+    val artSize = dimens.miniPlayerHeight - 20.dp
     val marks = rememberChapterMarks(info.chapters, info.lengthMs)
-    Box(modifier.fillMaxWidth().then(if (floating) Modifier.padding(horizontal = 8.dp, vertical = 6.dp) else Modifier)) {
+    Box(modifier.fillMaxWidth()) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .clip(shape)
-                // a phone's card: solid, whatever passes under it (1.0.1)
-                .then(
-                    when {
-                        floating -> Modifier.background(colors.surfaceRaised, shape)
-                        transparent -> Modifier
-                        else -> Modifier.background(colors.chrome)
-                    },
-                )
-                .then(if (floating) Modifier.border(1.dp, colors.border, shape) else Modifier)
+                .then(if (transparent) Modifier else Modifier.background(colors.chrome))
                 .hoverable(hover)
                 .onFocusChanged { focusInside = it.hasFocus }
                 .testTag("mini-player"),
         ) {
-            if (!floating && !transparent) {
+            if (!transparent) {
                 HorizontalRule()
                 ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
             }
             Row(
-                Modifier.fillMaxWidth().height(dimens.miniPlayerHeight - if (floating) 8.dp else 0.dp).padding(horizontal = if (floating) 8.dp else dimens.gapM),
+                Modifier.fillMaxWidth().height(dimens.miniPlayerHeight).padding(horizontal = dimens.gapM),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -530,21 +533,28 @@ fun MiniPlayer(
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
                 if (extras) NagIconButton(NagIcons.Close, stringResource(R.string.nag_stop), actions::stop, shortcut = ShortcutId.Stop)
             }
-            if (floating || transparent) ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
+            if (transparent) ProgressHairline(progress, info.lengthMs, info.playing, rate = info.rate)
         }
     }
 }
 
 private val SeekRowHeight = 24.dp
 
-/** "1:42 ━━━●──── −2:36": seeking from a bar, the times either side in even figures. */
+/** "1:42 ━━━●──── −2:36": seeking from a bar, the times either side in even figures; [height] the row's. */
 @Composable
-private fun SeekRow(info: PlayerBarInfo, progress: () -> Float, onSeek: (Float) -> Unit, modifier: Modifier = Modifier, marks: List<SliderMark> = emptyList()) {
+private fun SeekRow(
+    info: PlayerBarInfo,
+    progress: () -> Float,
+    onSeek: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    marks: List<SliderMark> = emptyList(),
+    height: Dp = SeekRowHeight,
+) {
     ProgressTimeline(
         progress,
         info.lengthMs,
         onSeek,
-        modifier.height(SeekRowHeight),
+        modifier.height(height),
         playing = info.playing,
         rate = info.rate,
         marks = marks,
@@ -590,9 +600,10 @@ private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat:
 
 /**
  * Large windows: the transport bar of the mockups across the bottom of every screen (S-304). The
- * artwork and words open the full player; in the middle the transport and the seek bar, which
- * shows the time under the pointer; at the end the format, the volume and the player.
- * [transparent]: it lies in the shell's floating bar (Desktop Kit 1.0), without a surface or a rule.
+ * artwork and words open the full player (1.0.2: the big player over the window); in the middle the
+ * transport and the seek bar, which shows the time under the pointer; at the end the format, the
+ * volume and the player. [transparent]: it lies in the shell's floating bar (Desktop Kit 1.0),
+ * without a surface or a rule.
  */
 @Composable
 fun TransportBar(
@@ -606,8 +617,6 @@ fun TransportBar(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val open = remember { MutableInteractionSource() }
-    val openState = open.collectState()
     val openLabel = stringResource(R.string.nag_open_player)
     Column(modifier.fillMaxWidth().then(if (transparent) Modifier else Modifier.background(colors.chrome)).testTag("transport-bar")) {
         if (!transparent) HorizontalRule()
@@ -616,30 +625,11 @@ fun TransportBar(
             modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp).padding(horizontal = dimens.gapL),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRing(openState, RoundedCornerShape(dimens.radiusControl))
-                    .background(if (openState.hovered) colors.hover else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
-                    .nagClickable(open, actions::openPlayer, onClickLabel = openLabel)
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                artwork(48.dp)
-                Spacer(Modifier.width(dimens.gapM))
-                Column(Modifier.weight(1f)) {
-                    Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    if (info.casting != null) {
-                        CastingLine(info.casting)
-                    } else {
-                        SubtitleLine(info, progress, withFormat = false, actions = actions)
-                    }
-                }
-            }
+            NowPlayingWords(info, progress, actions, artwork, 48.dp, Modifier.weight(1f), withFormat = false, links = true)
             Spacer(Modifier.width(dimens.gapL))
             Column(Modifier.widthIn(min = 360.dp, max = 640.dp).weight(1.4f), horizontalAlignment = Alignment.CenterHorizontally) {
                 TransportControls(info.playing, info.shuffling, info.repeating, actions, repeatOne = info.repeatOne, horizontalArrangement = Arrangement.spacedBy(8.dp))
-                SeekRow(info, progress, actions::seekTo, Modifier.fillMaxWidth(), marks = rememberChapterMarks(info.chapters, info.lengthMs))
+                BarTimeline(info, progress, actions, Modifier.fillMaxWidth())
             }
             Spacer(Modifier.width(dimens.gapL))
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
@@ -653,9 +643,153 @@ fun TransportBar(
                 SleepTimerButton(onlyWhileRunning = true)
                 if (info.canCast || info.casting != null) CastButton(info.casting, actions::cast)
                 NagIconButton(NagIcons.Queue, stringResource(R.string.nag_queue_title), actions::openQueue, selected = queueOpen, shortcut = ShortcutId.PlayQueue)
-                NagIconButton(NagIcons.OpenWindow, openLabel, actions::openPlayer)
+                NagIconButton(NagIcons.OpenWindow, openLabel, actions::openPlayer, modifier = Modifier.testTag("transport-open-player"))
             }
         }
+    }
+}
+
+/**
+ * 1.0.2: the phone's bar is the tablet's [TransportBar] laid out for a phone ("the same bar"): the
+ * same floating card, the artwork and the words that open the player (on a phone the full player
+ * grows from the bar), the transport, and under them the tablet's seek bar in the artwork's colour
+ * between the time played and the time left, which a finger drags to seek with the time following
+ * it; a station on the air is shown live instead ([BarTimeline]). Shuffle and repeat join the
+ * transport where the window leaves the words room for them ([showsModes]); while casting the
+ * second line names the device, as the tablet's does.
+ */
+@Composable
+fun CompactTransportBar(
+    info: PlayerBarInfo,
+    progress: () -> Float,
+    actions: PlayerBarActions,
+    artwork: @Composable (Dp) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = NagTheme.dimens
+    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = 6.dp)) {
+        val button = TransportSize.Compact.button.coerceAtLeast(dimens.minTarget)
+        val modes = showsModes(maxWidth, button, dimens.gapM)
+        Column(Modifier.fillMaxWidth().floatingPlayerCard().testTag("mini-player")) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = COMPACT_INSET - 4.dp, end = 4.dp, top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                NowPlayingWords(info, progress, actions, artwork, COMPACT_ARTWORK, Modifier.weight(1f), withFormat = true, links = false)
+                TransportControls(
+                    info.playing, info.shuffling, info.repeating, actions,
+                    size = TransportSize.Compact,
+                    repeatOne = info.repeatOne,
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
+                    modes = modes,
+                )
+            }
+            // its own node: the times with the seek bar, apart from the card that opens the player; a finger's height
+            BarTimeline(
+                info, progress, actions,
+                Modifier.fillMaxWidth().padding(horizontal = COMPACT_INSET).semantics(mergeDescendants = true) {}.testTag("mini-player-seek"),
+                height = dimens.minTarget.coerceAtLeast(SeekRowHeight),
+            )
+        }
+    }
+}
+
+/**
+ * Whether a phone's bar whose card is [width] wide has room for shuffle and repeat beside previous, play and next ([button] each):
+ * only if the artwork and the words keep [WORDS_MIN] after them; on a phone held upright they do not (1.0.2).
+ */
+internal fun showsModes(width: Dp, button: Dp, gap: Dp): Boolean =
+    width - COMPACT_INSET - 4.dp - 8.dp - COMPACT_ARTWORK - gap - button * 5 >= WORDS_MIN
+
+/** The phone's bar: its margin to the window's edges, the room inside its card, the artwork. */
+private val COMPACT_MARGIN = 8.dp
+private val COMPACT_INSET = 12.dp
+private val COMPACT_ARTWORK = 40.dp
+
+/** The least the words of a phone's bar keep when shuffle and repeat join the transport. */
+private val WORDS_MIN = 160.dp
+
+/**
+ * The artwork with the title and the second line (the artist, or the device cast to), which open the player: the
+ * transport bar's start and the phone's bar's. With [links] the library's artist and album open their tracks; with
+ * [withFormat] the second line ends with the format.
+ */
+@Composable
+private fun NowPlayingWords(
+    info: PlayerBarInfo,
+    progress: () -> Float,
+    actions: PlayerBarActions,
+    artwork: @Composable (Dp) -> Unit,
+    artSize: Dp,
+    modifier: Modifier,
+    withFormat: Boolean,
+    links: Boolean,
+) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val open = remember { MutableInteractionSource() }
+    val openState = open.collectState()
+    Row(
+        modifier = modifier
+            .focusRing(openState, RoundedCornerShape(dimens.radiusControl))
+            .background(if (openState.hovered) colors.hover else Color.Transparent, RoundedCornerShape(dimens.radiusControl))
+            .nagClickable(open, actions::openPlayer, onClickLabel = stringResource(R.string.nag_open_player))
+            .padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        artwork(artSize)
+        Spacer(Modifier.width(dimens.gapM))
+        Column(Modifier.weight(1f)) {
+            Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (info.casting != null) {
+                CastingLine(info.casting)
+            } else {
+                SubtitleLine(info, progress, withFormat = withFormat, actions = actions.takeIf { links })
+            }
+        }
+    }
+}
+
+/**
+ * The bars' seek bar with the times either side ([SeekRow]), [height] high; for a stream on the air, that it is live
+ * ([LiveLine]).
+ */
+@Composable
+private fun BarTimeline(info: PlayerBarInfo, progress: () -> Float, actions: PlayerBarActions, modifier: Modifier, height: Dp = SeekRowHeight) {
+    if (info.live) {
+        LiveLine(modifier, height)
+    } else {
+        SeekRow(info, progress, actions::seekTo, modifier, marks = rememberChapterMarks(info.chapters, info.lengthMs), height = height)
+    }
+}
+
+/**
+ * 1.0.2: a station on the air has nothing to seek: "● Canlı yayın" where the time played would be, and the track
+ * whole in the accent, as tall as the seek bar it stands for ([height]) so that the bar does not change its height.
+ */
+@Composable
+private fun LiveLine(modifier: Modifier, height: Dp) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val accent = animatedAccent(colors.accent, "liveAccent")
+    Row(modifier.height(height), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(8.dp).drawBehind { drawCircle(accent.value) })
+        Spacer(Modifier.width(dimens.gapS))
+        Text(
+            stringResource(R.string.nag_radio_live),
+            style = NagTheme.type.caption,
+            color = colors.accentText,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.testTag("bar-live"),
+        )
+        Spacer(Modifier.width(dimens.gapS))
+        Box(
+            Modifier
+                .weight(1f)
+                .height(3.dp)
+                .drawBehind { drawRoundRect(accent.value.copy(alpha = 0.45f), cornerRadius = CornerRadius(size.height / 2)) },
+        )
     }
 }
 
