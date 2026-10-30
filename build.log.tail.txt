@@ -1,0 +1,300 @@
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:79:23 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:80:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:83:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:84:50 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:87:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:93:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:97:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:47:14 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:48:52 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:49:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:55:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:60:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:63:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:67:56 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:68:17 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:71:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:80:36 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:90:81 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:67:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:72:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:77:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:78:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:79:9 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:84:73 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:85:22 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:86:23 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:97:49 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:100:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:107:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:116:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:118:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:125:17 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:74:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:78:20 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:86:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:87:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:91:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:92:15 'fun onResume(): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:93:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:95:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:96:79 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:97:78 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:98:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:105:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:110:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:118:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:129:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:138:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:145:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:151:35 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:156:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:159:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:161:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:167:44 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:172:40 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:176:93 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:177:18 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:5:8 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:6:8 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:16:50 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:18:52 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:17 'static fun instantiate(p0: Context!, p1: String!, p2: Bundle?): Fragment!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:29 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:20:11 'fun setTargetFragment(p0: Fragment!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:18 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:45 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:79:49 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:89:61 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:100:65 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/viewmodel/MainTvModel.kt:141:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+
+> Task :application:television:compileReleaseJavaWithJavac
+> Task :application:television:bundleLibRuntimeToJarRelease
+> Task :application:app:dataBindingMergeDependencyArtifactsBenchmark
+> Task :application:television:bundleLibCompileToJarRelease
+> Task :application:television:processReleaseJavaRes
+> Task :application:app:dataBindingGenBaseClassesBenchmark
+
+> Task :application:nagmedar-ui:compileReleaseKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:250:48 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/ShortcutBindings.kt:118:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:131:26 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:179:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:19:34 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:60:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:61:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/library/TechLabels.kt:98:16 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lyrics/SubtitleEncoding.kt:15:81 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/MusicScreen.kt:772:29 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/MusicTable.kt:30:41 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/network/ServerDialog.kt:61:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/onboarding/FirstRun.kt:82:25 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/equalizer/EqualizerPreset.kt:10:45 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/search/PaletteResults.kt:9:24 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:9:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:21:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/visual/VisualizerSettings.kt:13:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+
+> Task :application:nagmedar-ui:compileReleaseJavaWithJavac
+> Task :application:nagmedar-ui:processReleaseJavaRes
+> Task :application:nagmedar-ui:bundleLibRuntimeToJarRelease
+> Task :application:nagmedar-ui:bundleLibCompileToJarRelease
+> Task :application:app:compileBenchmarkKotlin
+> Task :application:app:compileBenchmarkJavaWithJavac
+> Task :application:app:dexBuilderBenchmark
+> Task :application:app:processBenchmarkJavaRes
+> Task :application:app:mergeBenchmarkJavaResource
+> Task :application:app:mergeBenchmarkGlobalSynthetics
+
+> Task :application:app:mergeDexBenchmark
+WARNING: /home/runner/work/vlc-android/vlc-android/application/app/build/intermediates/merged_startup_profile/benchmark/mergeBenchmarkStartupProfile/startup-prof.txt: D8: Startup method not found: int app.nagmedar.audio.DspMeter$$ExternalSyntheticBackport0.m(boolean)
+Startup method not found: int app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.ApplicationStartInfo)
+Startup method not found: android.app.NotificationChannel app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.NotificationManager, java.lang.String)
+Startup method not found: android.content.Intent app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.content.Context, android.content.BroadcastReceiver, android.content.IntentFilter, java.lang.String, android.os.Handler, int)
+Startup method not found: android.content.pm.PackageInfo app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.content.pm.PackageManager, java.lang.String, android.content.pm.PackageManager$PackageInfoFlags)
+Startup method not found: android.content.pm.PackageManager$PackageInfoFlags app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(long)
+Startup method not found: android.view.WindowInsetsController app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.view.Window)
+Startup method not found: java.lang.String app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m()
+Startup method not found: java.util.Map app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.ApplicationStartInfo)
+Startup method not found: java.util.concurrent.Executor app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.Activity)
+Startup method not found: void app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.ActivityManager, java.util.concurrent.Executor, java.util.function.Consumer)
+Startup method not found: void app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.NotificationManager, java.lang.String)
+Startup method not found: void app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.Service, int)
+Startup method not found: void app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.app.Service, int, android.app.Notification, int)
+Startup method not found: void app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m(android.view.WindowInsetsController, int, int)
+Startup method not found: boolean app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m()
+Startup method not found: int app.nagmedar.ui.AppActions$$ExternalSyntheticApiModelOutline0.m$1(android.app.ApplicationStartInfo)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarActivity$$ExternalSyntheticLambda10.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarActivity$$ExternalSyntheticLambda6.invoke(java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda10.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda13.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda21.<init>()
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda22.<init>(app.nagmedar.ui.shell.WidthClass, app.nagmedar.ui.AppActions, app.nagmedar.ui.shell.ShellNavigator)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda26.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda27.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda28.<init>(app.nagmedar.ui.components.ExpandablePlayerState, kotlinx.coroutines.CoroutineScope, androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda29.<init>(android.content.Context)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda30.<init>(app.nagmedar.ui.shell.ShellNavigator, androidx.compose.runtime.MutableIntState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda31.<init>(app.nagmedar.ui.shell.ShellNavigator, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableIntState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda32.<init>(kotlinx.coroutines.CoroutineScope, app.nagmedar.ui.components.ExpandablePlayerState, androidx.compose.runtime.MutableState, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.library.LibraryAccess, app.nagmedar.ui.NagmedarPreferences, app.nagmedar.ui.components.ScreenCommands, app.nagmedar.ui.input.DropTargets, androidx.compose.runtime.MutableState, app.nagmedar.ui.AppActions, androidx.navigation.NavHostController, app.nagmedar.ui.shell.CaptionBar, androidx.compose.runtime.State, android.content.Context, app.nagmedar.ui.components.MenuBarState, app.nagmedar.ui.playback.QueuePanelState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.library.MediaRepository, androidx.compose.runtime.MutableState, app.nagmedar.ui.components.UndoBarState, androidx.compose.runtime.MutableState, androidx.compose.foundation.lazy.LazyListState, app.nagmedar.ui.screens.SettingsReveal, kotlin.jvm.functions.Function1, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda32.invoke(java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda33.<init>(android.content.Context, app.nagmedar.ui.AppActions, app.nagmedar.ui.components.MenuBarState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda34.<init>()
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda39.<init>(app.nagmedar.ui.NagmedarPreferences, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, java.lang.String, kotlin.jvm.functions.Function0, app.nagmedar.ui.shell.CaptionBar, int)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda41.<init>()
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda41.invoke()
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda42.<init>()
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda42.invoke()
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda43.<init>()
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda44.<init>(app.nagmedar.ui.playback.NowPlaying, app.nagmedar.ui.AppActions, app.nagmedar.ui.playback.QueuePanelState, boolean, androidx.compose.runtime.MutableState, kotlin.jvm.functions.Function1, app.nagmedar.ui.components.ExpandablePlayerState, kotlin.jvm.functions.Function0, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.shell.CaptionBar)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda44.invoke(java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda45.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda46.<init>(androidx.compose.runtime.MutableIntState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda47.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda48.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda53.<init>(kotlinx.coroutines.CoroutineScope, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.components.ExpandablePlayerState, androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda54.<init>(kotlinx.coroutines.CoroutineScope, androidx.compose.runtime.MutableState, app.nagmedar.ui.components.ExpandablePlayerState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda55.<init>(app.nagmedar.ui.library.MediaRepository, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.components.UndoBarState, androidx.compose.runtime.MutableState, android.content.Context, app.nagmedar.ui.NagmedarPreferences, androidx.compose.foundation.lazy.LazyListState, app.nagmedar.ui.screens.SettingsReveal, kotlin.jvm.functions.Function1, app.nagmedar.ui.AppActions, app.nagmedar.ui.shell.WidthClass, androidx.compose.runtime.MutableState, app.nagmedar.ui.playback.QueuePanelState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda55.invoke(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda56.<init>(app.nagmedar.ui.NagmedarPreferences, app.nagmedar.ui.shell.WidthClass, app.nagmedar.ui.AppActions, app.nagmedar.ui.shell.ShellNavigator, androidx.navigation.NavHostController, app.nagmedar.ui.shell.CaptionBar, androidx.compose.runtime.State, android.content.Context, app.nagmedar.ui.components.MenuBarState, app.nagmedar.ui.playback.NowPlaying, app.nagmedar.ui.playback.QueuePanelState, boolean, androidx.compose.runtime.MutableState, kotlin.jvm.functions.Function1, app.nagmedar.ui.components.ExpandablePlayerState, kotlin.jvm.functions.Function0, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.library.MediaRepository, androidx.compose.runtime.MutableState, app.nagmedar.ui.components.UndoBarState, androidx.compose.runtime.MutableState, androidx.compose.foundation.lazy.LazyListState, app.nagmedar.ui.screens.SettingsReveal, kotlin.jvm.functions.Function1, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.input.DropTargets)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda56.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda57.<init>()
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda57.invoke(java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda58.<init>(app.nagmedar.ui.NagmedarPreferences, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, java.lang.String, kotlin.jvm.functions.Function0, app.nagmedar.ui.shell.CaptionBar)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda58.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda60.<init>(app.nagmedar.ui.AppActions)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda61.<init>(boolean, kotlin.jvm.functions.Function1, app.nagmedar.ui.shell.NavKind, androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda62.<init>(kotlin.jvm.functions.Function0, app.nagmedar.ui.playback.QueuePanelState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.shell.CaptionBar)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda66.<init>(androidx.compose.runtime.MutableState, boolean, androidx.compose.runtime.MutableState, app.nagmedar.ui.AppActions, app.nagmedar.ui.shell.WidthClass, app.nagmedar.ui.playback.QueuePanelState, app.nagmedar.ui.components.UndoBarState, app.nagmedar.ui.input.DropTargets, androidx.compose.runtime.MutableState, app.nagmedar.ui.NagmedarPreferences, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.shell.CaptionBar)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda66.invoke(java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda71.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda72.<init>(androidx.compose.runtime.MutableState, app.nagmedar.ui.playback.QueuePanelState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.shell.ShellNavigator, app.nagmedar.ui.shell.CaptionBar)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda75.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda76.<init>(app.nagmedar.ui.playback.QueuePanelState)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda77.<init>(app.nagmedar.ui.shell.Destination, app.nagmedar.ui.library.MediaRepository, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, app.nagmedar.ui.components.UndoBarState, app.nagmedar.ui.shell.ShellNavigator, androidx.compose.runtime.MutableState, android.content.Context, app.nagmedar.ui.NagmedarPreferences, androidx.compose.foundation.lazy.LazyListState, app.nagmedar.ui.screens.SettingsReveal, kotlin.jvm.functions.Function1, app.nagmedar.ui.AppActions, app.nagmedar.ui.shell.WidthClass, androidx.compose.runtime.MutableState, app.nagmedar.ui.playback.QueuePanelState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda77.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda81.<init>(app.nagmedar.ui.NagmedarPreferences, app.nagmedar.ui.input.InputModeState, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, java.lang.String, kotlin.jvm.functions.Function0)
+Startup method not found: java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda81.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda82.<init>(kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, java.lang.String, kotlin.jvm.functions.Function0, int, int)
+Startup method not found: void app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda83.<init>(androidx.compose.runtime.MutableState)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda11.<init>()
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda12.<init>(app.nagmedar.ui.theme.NagDimens, app.nagmedar.ui.components.ReorderState, boolean, app.nagmedar.ui.theme.NagColors, java.util.List, boolean, kotlin.jvm.functions.Function1, java.util.List, java.lang.String, app.nagmedar.ui.components.TableSort, kotlin.jvm.functions.Function1)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda12.invoke(java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda13.<init>(androidx.compose.foundation.lazy.LazyListState)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda14.<init>(app.nagmedar.ui.components.ReorderState, androidx.compose.foundation.lazy.LazyListState, androidx.compose.foundation.layout.PaddingValues, kotlin.jvm.functions.Function2, app.nagmedar.ui.theme.NagColors, java.util.List, java.util.List, kotlin.jvm.functions.Function2, app.nagmedar.ui.components.FocusedRow, java.util.List, java.util.List, java.util.Set, kotlin.jvm.functions.Function1, java.lang.Object, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, boolean, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function1, java.lang.String, boolean, kotlin.jvm.functions.Function3)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda16.<init>(java.util.List, java.util.List, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function2, androidx.compose.ui.Modifier, androidx.compose.foundation.lazy.LazyListState, java.lang.Object, java.util.Set, app.nagmedar.ui.components.TableSort, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function2, java.lang.String, boolean, androidx.compose.foundation.layout.PaddingValues, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, java.lang.String, app.nagmedar.ui.components.ReorderState, kotlin.jvm.functions.Function1, boolean, kotlin.jvm.functions.Function1, boolean, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, int, int, int, int)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda16.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda17.<init>(boolean)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda2.<init>(java.util.List, java.util.List, java.lang.Object, boolean, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.ui.Modifier, java.lang.String, kotlin.jvm.functions.Function2, int, int)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda3.<init>(kotlin.jvm.functions.Function2, java.util.List, kotlin.jvm.functions.Function3, app.nagmedar.ui.theme.NagColors, java.util.List, app.nagmedar.ui.components.ReorderState, kotlin.jvm.functions.Function2, app.nagmedar.ui.components.FocusedRow, kotlin.jvm.functions.Function2, java.lang.String, boolean, java.util.List, java.util.List, java.util.Set, kotlin.jvm.functions.Function1, java.lang.Object, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, boolean, kotlin.jvm.functions.Function1)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda4.<init>(kotlin.jvm.functions.Function2)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda5.<init>(kotlin.jvm.functions.Function3, app.nagmedar.ui.theme.NagColors)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda5.invoke(java.lang.Object, java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda6.<init>(java.util.List)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda6.invoke(java.lang.Object, java.lang.Object)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda7.<init>(kotlin.jvm.functions.Function1, int, boolean, app.nagmedar.ui.components.TableSort)
+Startup method not found: void app.nagmedar.ui.components.DenseTableKt$$ExternalSyntheticLambda8.<init>(app.nagmedar.ui.components.TableColumn, int, app.nagmedar.ui.components.TableSort, kotlin.jvm.functions.Function1, long, androidx.compose.ui.Modifier, int)
+Startup method not found: void app.nagmedar.ui.components.ExpandablePlayerKt$$ExternalSyntheticLambda18.<init>(app.nagmedar.ui.components.PlayerValue, androidx.compose.ui.unit.Density)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.ExpandablePlayerKt$$ExternalSyntheticLambda18.invoke()
+Startup method not found: void app.nagmedar.ui.components.ExpandablePlayerKt$$ExternalSyntheticLambda4.<init>()
+Startup method not found: void app.nagmedar.ui.components.FilterChipsKt$$ExternalSyntheticLambda4.<init>(androidx.compose.runtime.MutableIntState)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.FilterChipsKt$$ExternalSyntheticLambda4.invoke(java.lang.Object)
+Startup method not found: void app.nagmedar.ui.components.FilterChipsKt$$ExternalSyntheticLambda5.<init>(androidx.compose.ui.input.InputModeManager, app.nagmedar.ui.components.MenuState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableIntState)
+Startup method not found: void app.nagmedar.ui.components.FilterChipsKt$$ExternalSyntheticLambda6.<init>(java.lang.String, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.ui.graphics.vector.ImageVector, int, int)
+Startup method not found: void app.nagmedar.ui.components.InspectorKt$$ExternalSyntheticLambda5.<init>(app.nagmedar.ui.shell.PaneWidths, java.lang.String)
+Startup method not found: void app.nagmedar.ui.components.InspectorKt$$ExternalSyntheticLambda6.<init>()
+Startup method not found: void app.nagmedar.ui.components.InspectorKt$$ExternalSyntheticLambda7.<init>(kotlin.jvm.functions.Function2)
+Startup method not found: void app.nagmedar.ui.components.InspectorKt$$ExternalSyntheticLambda8.<init>(app.nagmedar.ui.shell.PaneWidths, java.lang.String, float, kotlin.jvm.functions.Function2)
+Startup method not found: java.lang.Object app.nagmedar.ui.components.InspectorKt$$ExternalSyntheticLambda8.invoke()
+Startup method not found: void app.nagmedar.ui.components.MenusKt$$ExternalSyntheticLambda5.<init>(androidx.compose.animation.core.MutableTransitionState, boolean)
+Found 183 other missing startup classes and methods
+
+> Task :application:app:l8DexDesugarLibBenchmark
+> Task :application:app:compileBenchmarkArtProfile
+> Task :application:app:packageBenchmark
+> Task :application:app:createBenchmarkApkListingFileRedirect
+> Task :application:app:assembleBenchmark
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 6m 7s
+416 actionable tasks: 416 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

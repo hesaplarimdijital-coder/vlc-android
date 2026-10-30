@@ -1,0 +1,61 @@
+--------- beginning of main
+10-30 03:38:41.469  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:38:58.276  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:39:01.735  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:39:02.050  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:39:07.091  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:39:33.299  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:39:49.887  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:39:52.543  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:39:52.838  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:39:56.966  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:40:22.763  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:40:39.168  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:40:41.995  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:40:42.273  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:40:47.222  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:41:13.795  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:41:30.454  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:41:33.271  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:41:33.797  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:41:38.127  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:42:05.331  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:42:22.134  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:42:24.964  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:42:25.596  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:42:30.709  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:42:56.772  3456  3495 I NagmedarProfile: tablet: music: the table
+10-30 03:43:13.958  3456  3495 I NagmedarProfile: tablet: music: the phone player
+10-30 03:43:16.842  3456  3495 I NagmedarProfile: tablet: podcasts: the podcast's page
+10-30 03:43:17.411  3456  3495 I NagmedarProfile: tablet: podcasts: the episode's page
+10-30 03:43:21.680  3456  3495 I NagmedarProfile: tablet: radio: the stations
+10-30 03:44:17.765  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:44:34.745  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:44:38.011  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:44:38.216  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:44:42.696  3456  3495 I NagmedarProfile: phone: radio: the stations
+10-30 03:45:05.606  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:45:22.687  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:45:25.802  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:45:25.976  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:45:30.694  3456  3495 I NagmedarProfile: phone: radio: the stations
+10-30 03:45:55.945  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:46:12.205  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:46:15.355  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:46:15.642  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:46:20.161  3456  3495 I NagmedarProfile: phone: radio: the stations
+10-30 03:46:43.098  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:46:59.648  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:47:02.530  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:47:02.716  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:47:07.481  3456  3495 I NagmedarProfile: phone: radio: the stations
+10-30 03:47:31.271  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:47:47.455  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:47:50.418  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:47:50.614  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:47:55.281  3456  3495 I NagmedarProfile: phone: radio: the stations
+10-30 03:48:18.390  3456  3495 I NagmedarProfile: phone: music: the table
+10-30 03:48:34.560  3456  3495 I NagmedarProfile: phone: music: the phone player
+10-30 03:48:37.825  3456  3495 I NagmedarProfile: phone: podcasts: the podcast's page
+10-30 03:48:38.325  3456  3495 I NagmedarProfile: phone: podcasts: the episode's page
+10-30 03:48:43.009  3456  3495 I NagmedarProfile: phone: radio: the stations
