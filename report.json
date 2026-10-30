@@ -1,0 +1,3599 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "tablet-en",
+   "title": "Launch (first run)",
+   "status": "ok",
+   "shot": "shots/001-tablet-en-launch-first-run.png",
+   "dump": "dumps/001-tablet-en-launch-first-run.xml",
+   "changed": true,
+   "seconds": 8.4,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "tablet-en",
+   "title": "First run step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-tablet-en-first-run-step-1-continue.png",
+   "dump": "dumps/002-tablet-en-first-run-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.4,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "tablet-en",
+   "title": "First run step 2 (Continue \u00b7 1 source)",
+   "status": "ok",
+   "shot": "shots/003-tablet-en-first-run-step-2-continue-1-source.png",
+   "dump": "dumps/003-tablet-en-first-run-step-2-continue-1-source.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "tablet-en",
+   "title": "First run step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-tablet-en-first-run-step-3-continue.png",
+   "dump": "dumps/004-tablet-en-first-run-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "tablet-en",
+   "title": "First run step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-tablet-en-first-run-step-4-start.png",
+   "dump": "dumps/005-tablet-en-first-run-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "tablet-en",
+   "title": "After the first run",
+   "status": "ok",
+   "shot": "shots/006-tablet-en-after-the-first-run.png",
+   "dump": "dumps/006-tablet-en-after-the-first-run.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "tablet-en",
+   "title": "Open Music",
+   "status": "ok",
+   "shot": "shots/007-tablet-en-open-music.png",
+   "dump": "dumps/007-tablet-en-open-music.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "tablet-en",
+   "title": "Open Podcasts",
+   "status": "ok",
+   "shot": "shots/008-tablet-en-open-podcasts.png",
+   "dump": "dumps/008-tablet-en-open-podcasts.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "tablet-en",
+   "title": "Open Radio",
+   "status": "ok",
+   "shot": "shots/009-tablet-en-open-radio.png",
+   "dump": "dumps/009-tablet-en-open-radio.xml",
+   "changed": true,
+   "seconds": 9.6,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "tablet-en",
+   "title": "Open This device",
+   "status": "ok",
+   "shot": "shots/010-tablet-en-open-this-device.png",
+   "dump": "dumps/010-tablet-en-open-this-device.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "tablet-en",
+   "title": "Open Network",
+   "status": "ok",
+   "shot": "shots/011-tablet-en-open-network.png",
+   "dump": "dumps/011-tablet-en-open-network.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "tablet-en",
+   "title": "Open Streams",
+   "status": "ok",
+   "shot": "shots/012-tablet-en-open-streams.png",
+   "dump": "dumps/012-tablet-en-open-streams.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "tablet-en",
+   "title": "Open Downloads",
+   "status": "ok",
+   "shot": "shots/013-tablet-en-open-downloads.png",
+   "dump": "dumps/013-tablet-en-open-downloads.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "tablet-en",
+   "title": "Open Playlists",
+   "status": "ok",
+   "shot": "shots/014-tablet-en-open-playlists.png",
+   "dump": "dumps/014-tablet-en-open-playlists.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "tablet-en",
+   "title": "Settings",
+   "status": "ok",
+   "shot": "shots/015-tablet-en-settings.png",
+   "dump": "dumps/015-tablet-en-settings.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "tablet-en",
+   "title": "Settings scroll 1",
+   "status": "ok",
+   "shot": "shots/016-tablet-en-settings-scroll-1.png",
+   "dump": "dumps/016-tablet-en-settings-scroll-1.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "tablet-en",
+   "title": "Settings scroll 2",
+   "status": "ok",
+   "shot": "shots/017-tablet-en-settings-scroll-2.png",
+   "dump": "dumps/017-tablet-en-settings-scroll-2.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "tablet-en",
+   "title": "Settings scroll 3",
+   "status": "ok",
+   "shot": "shots/018-tablet-en-settings-scroll-3.png",
+   "dump": "dumps/018-tablet-en-settings-scroll-3.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "tablet-en",
+   "title": "Settings scroll 4",
+   "status": "ok",
+   "shot": "shots/019-tablet-en-settings-scroll-4.png",
+   "dump": "dumps/019-tablet-en-settings-scroll-4.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "tablet-en",
+   "title": "Settings scroll 5",
+   "status": "ok",
+   "shot": "shots/020-tablet-en-settings-scroll-5.png",
+   "dump": "dumps/020-tablet-en-settings-scroll-5.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "tablet-en",
+   "title": "Settings scroll 6",
+   "status": "ok",
+   "shot": "shots/021-tablet-en-settings-scroll-6.png",
+   "dump": "dumps/021-tablet-en-settings-scroll-6.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "tablet-en",
+   "title": "Settings scroll 7",
+   "status": "ok",
+   "shot": "shots/022-tablet-en-settings-scroll-7.png",
+   "dump": "dumps/022-tablet-en-settings-scroll-7.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "tablet-en",
+   "title": "Settings scroll 8",
+   "status": "ok",
+   "shot": "shots/023-tablet-en-settings-scroll-8.png",
+   "dump": "dumps/023-tablet-en-settings-scroll-8.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "tablet-en",
+   "title": "Settings scroll 9",
+   "status": "ok",
+   "shot": "shots/024-tablet-en-settings-scroll-9.png",
+   "dump": "dumps/024-tablet-en-settings-scroll-9.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "tablet-en",
+   "title": "Settings scroll 10",
+   "status": "ok",
+   "shot": "shots/025-tablet-en-settings-scroll-10.png",
+   "dump": "dumps/025-tablet-en-settings-scroll-10.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "tablet-en",
+   "title": "Settings scroll 11",
+   "status": "ok",
+   "shot": "shots/026-tablet-en-settings-scroll-11.png",
+   "dump": "dumps/026-tablet-en-settings-scroll-11.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "tablet-en",
+   "title": "Settings scroll 12",
+   "status": "ok",
+   "shot": "shots/027-tablet-en-settings-scroll-12.png",
+   "dump": "dumps/027-tablet-en-settings-scroll-12.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "tablet-en",
+   "title": "Settings scroll 13",
+   "status": "ok",
+   "shot": "shots/028-tablet-en-settings-scroll-13.png",
+   "dump": "dumps/028-tablet-en-settings-scroll-13.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "tablet-en",
+   "title": "Settings scroll 14",
+   "status": "ok",
+   "shot": "shots/029-tablet-en-settings-scroll-14.png",
+   "dump": "dumps/029-tablet-en-settings-scroll-14.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "tablet-en",
+   "title": "Settings scroll 15",
+   "status": "ok",
+   "shot": "shots/030-tablet-en-settings-scroll-15.png",
+   "dump": "dumps/030-tablet-en-settings-scroll-15.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "tablet-en",
+   "title": "Settings scroll 16",
+   "status": "ok",
+   "shot": "shots/031-tablet-en-settings-scroll-16.png",
+   "dump": "dumps/031-tablet-en-settings-scroll-16.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 32,
+   "pass": "tablet-en",
+   "title": "Settings scroll 17",
+   "status": "ok",
+   "shot": "shots/032-tablet-en-settings-scroll-17.png",
+   "dump": "dumps/032-tablet-en-settings-scroll-17.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 33,
+   "pass": "tablet-en",
+   "title": "Settings scroll 18",
+   "status": "ok",
+   "shot": "shots/033-tablet-en-settings-scroll-18.png",
+   "dump": "dumps/033-tablet-en-settings-scroll-18.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 34,
+   "pass": "tablet-en",
+   "title": "Settings scroll 19",
+   "status": "ok",
+   "shot": "shots/034-tablet-en-settings-scroll-19.png",
+   "dump": "dumps/034-tablet-en-settings-scroll-19.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 35,
+   "pass": "tablet-en",
+   "title": "Settings scroll 20",
+   "status": "ok",
+   "shot": "shots/035-tablet-en-settings-scroll-20.png",
+   "dump": "dumps/035-tablet-en-settings-scroll-20.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 36,
+   "pass": "tablet-en",
+   "title": "Settings scroll 21",
+   "status": "ok",
+   "shot": "shots/036-tablet-en-settings-scroll-21.png",
+   "dump": "dumps/036-tablet-en-settings-scroll-21.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 37,
+   "pass": "tablet-en",
+   "title": "Settings scroll 22",
+   "status": "ok",
+   "shot": "shots/037-tablet-en-settings-scroll-22.png",
+   "dump": "dumps/037-tablet-en-settings-scroll-22.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 38,
+   "pass": "tablet-en",
+   "title": "Settings scroll 23",
+   "status": "ok",
+   "shot": "shots/038-tablet-en-settings-scroll-23.png",
+   "dump": "dumps/038-tablet-en-settings-scroll-23.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 39,
+   "pass": "tablet-en",
+   "title": "Settings scroll 24",
+   "status": "ok",
+   "shot": "shots/039-tablet-en-settings-scroll-24.png",
+   "dump": "dumps/039-tablet-en-settings-scroll-24.xml",
+   "changed": false,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 40,
+   "pass": "tablet-en",
+   "title": "Open About",
+   "status": "ok",
+   "shot": "shots/040-tablet-en-open-about.png",
+   "dump": "dumps/040-tablet-en-open-about.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 41,
+   "pass": "tablet-en",
+   "title": "Back from About",
+   "status": "ok",
+   "shot": "shots/041-tablet-en-back-from-about.png",
+   "dump": "dumps/041-tablet-en-back-from-about.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 42,
+   "pass": "phone-en",
+   "title": "Launch (phone)",
+   "status": "ok",
+   "shot": "shots/042-phone-en-launch-phone.png",
+   "dump": "dumps/042-phone-en-launch-phone.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 43,
+   "pass": "phone-en",
+   "title": "Open Music",
+   "status": "ok",
+   "shot": "shots/043-phone-en-open-music.png",
+   "dump": "dumps/043-phone-en-open-music.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 44,
+   "pass": "phone-en",
+   "title": "Open Podcast",
+   "status": "ok",
+   "shot": "shots/044-phone-en-open-podcast.png",
+   "dump": "dumps/044-phone-en-open-podcast.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 45,
+   "pass": "phone-en",
+   "title": "Open Podcasts",
+   "status": "ok",
+   "shot": "shots/045-phone-en-open-podcasts.png",
+   "dump": "dumps/045-phone-en-open-podcasts.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 46,
+   "pass": "phone-en",
+   "title": "Open Radio",
+   "status": "ok",
+   "shot": "shots/046-phone-en-open-radio.png",
+   "dump": "dumps/046-phone-en-open-radio.xml",
+   "changed": true,
+   "seconds": 9.4,
+   "note": ""
+  },
+  {
+   "n": 47,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/047-phone-en-open-more-overflow.png",
+   "dump": "dumps/047-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 48,
+   "pass": "phone-en",
+   "title": "Open This device",
+   "status": "ok",
+   "shot": "shots/048-phone-en-open-this-device.png",
+   "dump": "dumps/048-phone-en-open-this-device.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 49,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/049-phone-en-open-more-overflow.png",
+   "dump": "dumps/049-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 50,
+   "pass": "phone-en",
+   "title": "Open Network",
+   "status": "ok",
+   "shot": "shots/050-phone-en-open-network.png",
+   "dump": "dumps/050-phone-en-open-network.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 51,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/051-phone-en-open-more-overflow.png",
+   "dump": "dumps/051-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 52,
+   "pass": "phone-en",
+   "title": "Open Streams",
+   "status": "ok",
+   "shot": "shots/052-phone-en-open-streams.png",
+   "dump": "dumps/052-phone-en-open-streams.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 53,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/053-phone-en-open-more-overflow.png",
+   "dump": "dumps/053-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 54,
+   "pass": "phone-en",
+   "title": "Open Downloads",
+   "status": "ok",
+   "shot": "shots/054-phone-en-open-downloads.png",
+   "dump": "dumps/054-phone-en-open-downloads.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 55,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/055-phone-en-open-more-overflow.png",
+   "dump": "dumps/055-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 56,
+   "pass": "phone-en",
+   "title": "Open Playlists",
+   "status": "ok",
+   "shot": "shots/056-phone-en-open-playlists.png",
+   "dump": "dumps/056-phone-en-open-playlists.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 57,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/057-phone-en-open-more-overflow.png",
+   "dump": "dumps/057-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 58,
+   "pass": "phone-en",
+   "title": "Settings",
+   "status": "ok",
+   "shot": "shots/058-phone-en-settings.png",
+   "dump": "dumps/058-phone-en-settings.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 59,
+   "pass": "phone-en",
+   "title": "Settings scroll 1",
+   "status": "ok",
+   "shot": "shots/059-phone-en-settings-scroll-1.png",
+   "dump": "dumps/059-phone-en-settings-scroll-1.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 60,
+   "pass": "phone-en",
+   "title": "Settings scroll 2",
+   "status": "ok",
+   "shot": "shots/060-phone-en-settings-scroll-2.png",
+   "dump": "dumps/060-phone-en-settings-scroll-2.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 61,
+   "pass": "phone-en",
+   "title": "Settings scroll 3",
+   "status": "ok",
+   "shot": "shots/061-phone-en-settings-scroll-3.png",
+   "dump": "dumps/061-phone-en-settings-scroll-3.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 62,
+   "pass": "phone-en",
+   "title": "Settings scroll 4",
+   "status": "ok",
+   "shot": "shots/062-phone-en-settings-scroll-4.png",
+   "dump": "dumps/062-phone-en-settings-scroll-4.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 63,
+   "pass": "phone-en",
+   "title": "Settings scroll 5",
+   "status": "ok",
+   "shot": "shots/063-phone-en-settings-scroll-5.png",
+   "dump": "dumps/063-phone-en-settings-scroll-5.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 64,
+   "pass": "phone-en",
+   "title": "Settings scroll 6",
+   "status": "ok",
+   "shot": "shots/064-phone-en-settings-scroll-6.png",
+   "dump": "dumps/064-phone-en-settings-scroll-6.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 65,
+   "pass": "phone-en",
+   "title": "Settings scroll 7",
+   "status": "ok",
+   "shot": "shots/065-phone-en-settings-scroll-7.png",
+   "dump": "dumps/065-phone-en-settings-scroll-7.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 66,
+   "pass": "phone-en",
+   "title": "Settings scroll 8",
+   "status": "ok",
+   "shot": "shots/066-phone-en-settings-scroll-8.png",
+   "dump": "dumps/066-phone-en-settings-scroll-8.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 67,
+   "pass": "phone-en",
+   "title": "Settings scroll 9",
+   "status": "ok",
+   "shot": "shots/067-phone-en-settings-scroll-9.png",
+   "dump": "dumps/067-phone-en-settings-scroll-9.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 68,
+   "pass": "phone-en",
+   "title": "Settings scroll 10",
+   "status": "ok",
+   "shot": "shots/068-phone-en-settings-scroll-10.png",
+   "dump": "dumps/068-phone-en-settings-scroll-10.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 69,
+   "pass": "phone-en",
+   "title": "Open About",
+   "status": "ok",
+   "shot": "shots/069-phone-en-open-about.png",
+   "dump": "dumps/069-phone-en-open-about.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 70,
+   "pass": "phone-en",
+   "title": "Back from About",
+   "status": "ok",
+   "shot": "shots/070-phone-en-back-from-about.png",
+   "dump": "dumps/070-phone-en-back-from-about.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 71,
+   "pass": "phone-en",
+   "title": "Show the first run again",
+   "status": "ok",
+   "shot": "shots/071-phone-en-show-the-first-run-again.png",
+   "dump": "dumps/071-phone-en-show-the-first-run-again.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 72,
+   "pass": "phone-en",
+   "title": "First run again step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/072-phone-en-first-run-again-step-1-continue.png",
+   "dump": "dumps/072-phone-en-first-run-again-step-1-continue.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 73,
+   "pass": "phone-en",
+   "title": "First run again step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/073-phone-en-first-run-again-step-2-continue-2-sources.png",
+   "dump": "dumps/073-phone-en-first-run-again-step-2-continue-2-sources.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 74,
+   "pass": "phone-en",
+   "title": "First run again step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/074-phone-en-first-run-again-step-3-continue.png",
+   "dump": "dumps/074-phone-en-first-run-again-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 75,
+   "pass": "phone-en",
+   "title": "First run again step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/075-phone-en-first-run-again-step-4-start.png",
+   "dump": "dumps/075-phone-en-first-run-again-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 76,
+   "pass": "phone-en",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/076-phone-en-after-the-scan.png",
+   "dump": "dumps/076-phone-en-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 77,
+   "pass": "phone-en",
+   "title": "Reopen Music",
+   "status": "ok",
+   "shot": "shots/077-phone-en-reopen-music.png",
+   "dump": "dumps/077-phone-en-reopen-music.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 78,
+   "pass": "phone-en",
+   "title": "Reopen Podcast",
+   "status": "ok",
+   "shot": "shots/078-phone-en-reopen-podcast.png",
+   "dump": "dumps/078-phone-en-reopen-podcast.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 79,
+   "pass": "phone-en",
+   "title": "Reopen Podcasts",
+   "status": "ok",
+   "shot": "shots/079-phone-en-reopen-podcasts.png",
+   "dump": "dumps/079-phone-en-reopen-podcasts.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 80,
+   "pass": "phone-en",
+   "title": "Reopen Radio",
+   "status": "ok",
+   "shot": "shots/080-phone-en-reopen-radio.png",
+   "dump": "dumps/080-phone-en-reopen-radio.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 81,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/081-phone-en-open-more-overflow.png",
+   "dump": "dumps/081-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 82,
+   "pass": "phone-en",
+   "title": "Reopen This device",
+   "status": "ok",
+   "shot": "shots/082-phone-en-reopen-this-device.png",
+   "dump": "dumps/082-phone-en-reopen-this-device.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 83,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/083-phone-en-open-more-overflow.png",
+   "dump": "dumps/083-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 84,
+   "pass": "phone-en",
+   "title": "Reopen Network",
+   "status": "ok",
+   "shot": "shots/084-phone-en-reopen-network.png",
+   "dump": "dumps/084-phone-en-reopen-network.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 85,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/085-phone-en-open-more-overflow.png",
+   "dump": "dumps/085-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 86,
+   "pass": "phone-en",
+   "title": "Reopen Streams",
+   "status": "ok",
+   "shot": "shots/086-phone-en-reopen-streams.png",
+   "dump": "dumps/086-phone-en-reopen-streams.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 87,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/087-phone-en-open-more-overflow.png",
+   "dump": "dumps/087-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 88,
+   "pass": "phone-en",
+   "title": "Reopen Downloads",
+   "status": "ok",
+   "shot": "shots/088-phone-en-reopen-downloads.png",
+   "dump": "dumps/088-phone-en-reopen-downloads.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 89,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/089-phone-en-open-more-overflow.png",
+   "dump": "dumps/089-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 90,
+   "pass": "phone-en",
+   "title": "Reopen Playlists",
+   "status": "ok",
+   "shot": "shots/090-phone-en-reopen-playlists.png",
+   "dump": "dumps/090-phone-en-reopen-playlists.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 91,
+   "pass": "phone-en",
+   "title": "Open More (overflow)",
+   "status": "ok",
+   "shot": "shots/091-phone-en-open-more-overflow.png",
+   "dump": "dumps/091-phone-en-open-more-overflow.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 92,
+   "pass": "phone-en",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/092-phone-en-music.png",
+   "dump": "dumps/092-phone-en-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 93,
+   "pass": "phone-en",
+   "title": "A track's \u22ef (More actions for Profile track 1.1)",
+   "status": "ok",
+   "shot": "shots/093-phone-en-a-track-s-more-actions-for-profile-track-1-1.png",
+   "dump": "dumps/093-phone-en-a-track-s-more-actions-for-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 94,
+   "pass": "phone-en",
+   "title": "Back from the track's sheet",
+   "status": "ok",
+   "shot": "shots/094-phone-en-back-from-the-track-s-sheet.png",
+   "dump": "dumps/094-phone-en-back-from-the-track-s-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 95,
+   "pass": "phone-en",
+   "title": "A track's \u22ef again",
+   "status": "ok",
+   "shot": "shots/095-phone-en-a-track-s-again.png",
+   "dump": "dumps/095-phone-en-a-track-s-again.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 96,
+   "pass": "phone-en",
+   "title": "Drag the sheet down from its middle",
+   "status": "ok",
+   "shot": "shots/096-phone-en-drag-the-sheet-down-from-its-middle.png",
+   "dump": "dumps/096-phone-en-drag-the-sheet-down-from-its-middle.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 97,
+   "pass": "phone-en",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/097-phone-en-music.png",
+   "dump": "dumps/097-phone-en-music.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 98,
+   "pass": "phone-en",
+   "title": "Music scrolled (top bar)",
+   "status": "ok",
+   "shot": "shots/098-phone-en-music-scrolled-top-bar.png",
+   "dump": "dumps/098-phone-en-music-scrolled-top-bar.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 99,
+   "pass": "phone-en",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/099-phone-en-music.png",
+   "dump": "dumps/099-phone-en-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 100,
+   "pass": "phone-en",
+   "title": "Bottom bar \u22ef",
+   "status": "ok",
+   "shot": "shots/100-phone-en-bottom-bar.png",
+   "dump": "dumps/100-phone-en-bottom-bar.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 101,
+   "pass": "phone-en",
+   "title": "Settings from More",
+   "status": "ok",
+   "shot": "shots/101-phone-en-settings-from-more.png",
+   "dump": "dumps/101-phone-en-settings-from-more.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 102,
+   "pass": "phone-en",
+   "title": "Back from Settings",
+   "status": "ok",
+   "shot": "shots/102-phone-en-back-from-settings.png",
+   "dump": "dumps/102-phone-en-back-from-settings.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 103,
+   "pass": "phone-en",
+   "title": "Settings from More again",
+   "status": "ok",
+   "shot": "shots/103-phone-en-settings-from-more-again.png",
+   "dump": "dumps/103-phone-en-settings-from-more-again.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 104,
+   "pass": "phone-en",
+   "title": "The back arrow",
+   "status": "ok",
+   "shot": "shots/104-phone-en-the-back-arrow.png",
+   "dump": "dumps/104-phone-en-the-back-arrow.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 105,
+   "pass": "phone-en",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/105-phone-en-music.png",
+   "dump": "dumps/105-phone-en-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 106,
+   "pass": "phone-en",
+   "title": "Music list scroll (after the scroll)",
+   "status": "ok",
+   "shot": "shots/106-phone-en-music-list-scroll-after-the-scroll.png",
+   "dump": "dumps/106-phone-en-music-list-scroll-after-the-scroll.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 107,
+   "pass": "phone-en",
+   "title": "Play Profile track 1.1",
+   "status": "ok",
+   "shot": "shots/107-phone-en-play-profile-track-1-1.png",
+   "dump": "dumps/107-phone-en-play-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 15.8,
+   "note": ""
+  },
+  {
+   "n": 108,
+   "pass": "phone-en",
+   "title": "Drag the mini player up",
+   "status": "ok",
+   "shot": "shots/108-phone-en-drag-the-mini-player-up.png",
+   "dump": "dumps/108-phone-en-drag-the-mini-player-up.xml",
+   "changed": true,
+   "seconds": 16.8,
+   "note": ""
+  },
+  {
+   "n": 109,
+   "pass": "phone-en",
+   "title": "Drag the full player down",
+   "status": "ok",
+   "shot": "shots/109-phone-en-drag-the-full-player-down.png",
+   "dump": "dumps/109-phone-en-drag-the-full-player-down.xml",
+   "changed": true,
+   "seconds": 16.6,
+   "note": ""
+  },
+  {
+   "n": 110,
+   "pass": "phone-en",
+   "title": "Swipe the mini player sideways",
+   "status": "ok",
+   "shot": "shots/110-phone-en-swipe-the-mini-player-sideways.png",
+   "dump": "dumps/110-phone-en-swipe-the-mini-player-sideways.xml",
+   "changed": true,
+   "seconds": 16.2,
+   "note": ""
+  },
+  {
+   "n": 111,
+   "pass": "phone-en",
+   "title": "Swipe along the bar's seek bar",
+   "status": "ok",
+   "shot": "shots/111-phone-en-swipe-along-the-bar-s-seek-bar.png",
+   "dump": "dumps/111-phone-en-swipe-along-the-bar-s-seek-bar.xml",
+   "changed": true,
+   "seconds": 16.2,
+   "note": ""
+  },
+  {
+   "n": 112,
+   "pass": "phone-en",
+   "title": "Podcasts",
+   "status": "ok",
+   "shot": "shots/112-phone-en-podcasts.png",
+   "dump": "dumps/112-phone-en-podcasts.xml",
+   "changed": true,
+   "seconds": 14.5,
+   "note": ""
+  },
+  {
+   "n": 113,
+   "pass": "phone-en",
+   "title": "Add a podcast by its address",
+   "status": "ok",
+   "shot": "shots/113-phone-en-add-a-podcast-by-its-address.png",
+   "dump": "dumps/113-phone-en-add-a-podcast-by-its-address.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 114,
+   "pass": "phone-en",
+   "title": "The feed's address typed",
+   "status": "ok",
+   "shot": "shots/114-phone-en-the-feed-s-address-typed.png",
+   "dump": "dumps/114-phone-en-the-feed-s-address-typed.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 115,
+   "pass": "phone-en",
+   "title": "Subscribe",
+   "status": "ok",
+   "shot": "shots/115-phone-en-subscribe.png",
+   "dump": "dumps/115-phone-en-subscribe.xml",
+   "changed": true,
+   "seconds": 15.7,
+   "note": ""
+  },
+  {
+   "n": 116,
+   "pass": "phone-en",
+   "title": "Followed",
+   "status": "ok",
+   "shot": "shots/116-phone-en-followed.png",
+   "dump": "dumps/116-phone-en-followed.xml",
+   "changed": true,
+   "seconds": 14.6,
+   "note": ""
+  },
+  {
+   "n": 117,
+   "pass": "phone-en",
+   "title": "Episode page (the play button watched)",
+   "status": "ok",
+   "shot": "shots/117-phone-en-episode-page-the-play-button-watched.png",
+   "dump": "dumps/117-phone-en-episode-page-the-play-button-watched.xml",
+   "changed": true,
+   "seconds": 14.5,
+   "note": ""
+  },
+  {
+   "n": 118,
+   "pass": "phone-en",
+   "title": "Back from the episode",
+   "status": "ok",
+   "shot": "shots/118-phone-en-back-from-the-episode.png",
+   "dump": "dumps/118-phone-en-back-from-the-episode.xml",
+   "changed": true,
+   "seconds": 14.5,
+   "note": ""
+  },
+  {
+   "n": 119,
+   "pass": "phone-en",
+   "title": "Back from the podcast",
+   "status": "ok",
+   "shot": "shots/119-phone-en-back-from-the-podcast.png",
+   "dump": "dumps/119-phone-en-back-from-the-podcast.xml",
+   "changed": true,
+   "seconds": 14.4,
+   "note": ""
+  },
+  {
+   "n": 120,
+   "pass": "phone-en",
+   "title": "Radio",
+   "status": "ok",
+   "shot": "shots/120-phone-en-radio.png",
+   "dump": "dumps/120-phone-en-radio.xml",
+   "changed": true,
+   "seconds": 15.0,
+   "note": ""
+  },
+  {
+   "n": 121,
+   "pass": "phone-en",
+   "title": "Open This device",
+   "status": "ok",
+   "shot": "shots/121-phone-en-open-this-device.png",
+   "dump": "dumps/121-phone-en-open-this-device.xml",
+   "changed": true,
+   "seconds": 14.4,
+   "note": ""
+  },
+  {
+   "n": 122,
+   "pass": "phone-en",
+   "title": "Open Internal storage",
+   "status": "ok",
+   "shot": "shots/122-phone-en-open-internal-storage.png",
+   "dump": "dumps/122-phone-en-open-internal-storage.xml",
+   "changed": true,
+   "seconds": 14.8,
+   "note": ""
+  },
+  {
+   "n": 123,
+   "pass": "phone-en",
+   "title": "Open its Music folder",
+   "status": "ok",
+   "shot": "shots/123-phone-en-open-its-music-folder.png",
+   "dump": "dumps/123-phone-en-open-its-music-folder.xml",
+   "changed": true,
+   "seconds": 14.7,
+   "note": ""
+  },
+  {
+   "n": 124,
+   "pass": "phone-en",
+   "title": "Play tone.mp3 from the folder",
+   "status": "ok",
+   "shot": "shots/124-phone-en-play-tone-mp3-from-the-folder.png",
+   "dump": "dumps/124-phone-en-play-tone-mp3-from-the-folder.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 125,
+   "pass": "phone-en",
+   "title": "Back (up to Internal storage)",
+   "status": "ok",
+   "shot": "shots/125-phone-en-back-up-to-internal-storage.png",
+   "dump": "dumps/125-phone-en-back-up-to-internal-storage.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 126,
+   "pass": "phone-en",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/126-phone-en-sort-menu.png",
+   "dump": "dumps/126-phone-en-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 127,
+   "pass": "phone-en",
+   "title": "Sort menu: By size",
+   "status": "ok",
+   "shot": "shots/127-phone-en-sort-menu-by-size.png",
+   "dump": "dumps/127-phone-en-sort-menu-by-size.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 128,
+   "pass": "phone-en",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/128-phone-en-sort-menu.png",
+   "dump": "dumps/128-phone-en-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 129,
+   "pass": "phone-en",
+   "title": "Sort menu: By name",
+   "status": "ok",
+   "shot": "shots/129-phone-en-sort-menu-by-name.png",
+   "dump": "dumps/129-phone-en-sort-menu-by-name.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 130,
+   "pass": "phone-en",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/130-phone-en-sort-menu.png",
+   "dump": "dumps/130-phone-en-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 131,
+   "pass": "phone-en",
+   "title": "Sort menu: Show hidden files",
+   "status": "ok",
+   "shot": "shots/131-phone-en-sort-menu-show-hidden-files.png",
+   "dump": "dumps/131-phone-en-sort-menu-show-hidden-files.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 132,
+   "pass": "phone-en",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/132-phone-en-sort-menu.png",
+   "dump": "dumps/132-phone-en-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 133,
+   "pass": "phone-en",
+   "title": "Sort menu: Show hidden files",
+   "status": "ok",
+   "shot": "shots/133-phone-en-sort-menu-show-hidden-files.png",
+   "dump": "dumps/133-phone-en-sort-menu-show-hidden-files.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 134,
+   "pass": "phone-en",
+   "title": "Back (to the places)",
+   "status": "ok",
+   "shot": "shots/134-phone-en-back-to-the-places.png",
+   "dump": "dumps/134-phone-en-back-to-the-places.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 135,
+   "pass": "phone-en",
+   "title": "Open Internal storage again",
+   "status": "ok",
+   "shot": "shots/135-phone-en-open-internal-storage-again.png",
+   "dump": "dumps/135-phone-en-open-internal-storage-again.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 136,
+   "pass": "phone-en",
+   "title": "Open the Music folder again",
+   "status": "ok",
+   "shot": "shots/136-phone-en-open-the-music-folder-again.png",
+   "dump": "dumps/136-phone-en-open-the-music-folder-again.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 137,
+   "pass": "phone-en",
+   "title": "Home with the folder open",
+   "status": "warn",
+   "shot": "shots/137-phone-en-home-with-the-folder-open.png",
+   "dump": "dumps/137-phone-en-home-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 13.5,
+   "note": "the app is not in the foreground (windows: com.google.android.apps.nexuslauncher, com.google.android.deskclock, com.google.android.googlequicksearchbox)"
+  },
+  {
+   "n": 138,
+   "pass": "phone-en",
+   "title": "Back in the app with the folder open",
+   "status": "ok",
+   "shot": "shots/138-phone-en-back-in-the-app-with-the-folder-open.png",
+   "dump": "dumps/138-phone-en-back-in-the-app-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 139,
+   "pass": "phone-en",
+   "title": "Rotated with the folder open",
+   "status": "ok",
+   "shot": "shots/139-phone-en-rotated-with-the-folder-open.png",
+   "dump": "dumps/139-phone-en-rotated-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 140,
+   "pass": "phone-en",
+   "title": "Rotated back with the folder open",
+   "status": "ok",
+   "shot": "shots/140-phone-en-rotated-back-with-the-folder-open.png",
+   "dump": "dumps/140-phone-en-rotated-back-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 141,
+   "pass": "phone-en",
+   "title": "Back (up to the drive)",
+   "status": "ok",
+   "shot": "shots/141-phone-en-back-up-to-the-drive.png",
+   "dump": "dumps/141-phone-en-back-up-to-the-drive.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 142,
+   "pass": "phone-en",
+   "title": "Back (to the places)",
+   "status": "ok",
+   "shot": "shots/142-phone-en-back-to-the-places.png",
+   "dump": "dumps/142-phone-en-back-to-the-places.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 143,
+   "pass": "phone-en",
+   "title": "Open the audio file",
+   "status": "ok",
+   "shot": "shots/143-phone-en-open-the-audio-file.png",
+   "dump": "dumps/143-phone-en-open-the-audio-file.xml",
+   "changed": true,
+   "seconds": 11.3,
+   "note": "Starting: Intent { act=android.intent.action.VIEW dat=file:///... typ=audio/mpeg pkg=app.nagmedar.debug }"
+  },
+  {
+   "n": 144,
+   "pass": "phone-en",
+   "title": "Playing the audio file",
+   "status": "ok",
+   "shot": "shots/144-phone-en-playing-the-audio-file.png",
+   "dump": "dumps/144-phone-en-playing-the-audio-file.xml",
+   "changed": false,
+   "seconds": 9.2,
+   "note": ""
+  },
+  {
+   "n": 145,
+   "pass": "phone-en",
+   "title": "Back from the audio file",
+   "status": "ok",
+   "shot": "shots/145-phone-en-back-from-the-audio-file.png",
+   "dump": "dumps/145-phone-en-back-from-the-audio-file.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 146,
+   "pass": "phone-en",
+   "title": "Home during playback",
+   "status": "warn",
+   "shot": "shots/146-phone-en-home-during-playback.png",
+   "dump": "dumps/146-phone-en-home-during-playback.xml",
+   "changed": true,
+   "seconds": 16.3,
+   "note": "the app is not in the foreground (windows: com.google.android.apps.nexuslauncher, com.google.android.deskclock, com.google.android.googlequicksearchbox)"
+  },
+  {
+   "n": 147,
+   "pass": "phone-en",
+   "title": "Back to the app after playback",
+   "status": "ok",
+   "shot": "shots/147-phone-en-back-to-the-app-after-playback.png",
+   "dump": "dumps/147-phone-en-back-to-the-app-after-playback.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 148,
+   "pass": "phone-en",
+   "title": "Command palette (Ctrl+K)",
+   "status": "ok",
+   "shot": "shots/148-phone-en-command-palette-ctrl-k.png",
+   "dump": "dumps/148-phone-en-command-palette-ctrl-k.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 149,
+   "pass": "phone-en",
+   "title": "Palette query",
+   "status": "ok",
+   "shot": "shots/149-phone-en-palette-query.png",
+   "dump": "dumps/149-phone-en-palette-query.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 150,
+   "pass": "phone-en",
+   "title": "Palette: select the first result",
+   "status": "ok",
+   "shot": "shots/150-phone-en-palette-select-the-first-result.png",
+   "dump": "dumps/150-phone-en-palette-select-the-first-result.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 151,
+   "pass": "phone-en",
+   "title": "Escape",
+   "status": "ok",
+   "shot": "shots/151-phone-en-escape.png",
+   "dump": "dumps/151-phone-en-escape.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 152,
+   "pass": "phone-en",
+   "title": "Shortcut list (Ctrl+/)",
+   "status": "ok",
+   "shot": "shots/152-phone-en-shortcut-list-ctrl.png",
+   "dump": "dumps/152-phone-en-shortcut-list-ctrl.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 153,
+   "pass": "phone-en",
+   "title": "Settings (Ctrl+,)",
+   "status": "ok",
+   "shot": "shots/153-phone-en-settings-ctrl.png",
+   "dump": "dumps/153-phone-en-settings-ctrl.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 154,
+   "pass": "phone-en",
+   "title": "Rotated to landscape",
+   "status": "ok",
+   "shot": "shots/154-phone-en-rotated-to-landscape.png",
+   "dump": "dumps/154-phone-en-rotated-to-landscape.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 155,
+   "pass": "phone-en",
+   "title": "Rotated back",
+   "status": "ok",
+   "shot": "shots/155-phone-en-rotated-back.png",
+   "dump": "dumps/155-phone-en-rotated-back.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 156,
+   "pass": "phone-en",
+   "title": "In the background (home screen)",
+   "status": "warn",
+   "shot": "shots/156-phone-en-in-the-background-home-screen.png",
+   "dump": "dumps/156-phone-en-in-the-background-home-screen.xml",
+   "changed": true,
+   "seconds": 13.5,
+   "note": "the app is not in the foreground (windows: com.google.android.apps.nexuslauncher, com.google.android.deskclock, com.google.android.googlequicksearchbox)"
+  },
+  {
+   "n": 157,
+   "pass": "phone-en",
+   "title": "Foreground again",
+   "status": "ok",
+   "shot": "shots/157-phone-en-foreground-again.png",
+   "dump": "dumps/157-phone-en-foreground-again.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 158,
+   "pass": "phone-en",
+   "title": "After a memory-trim request",
+   "status": "ok",
+   "shot": "shots/158-phone-en-after-a-memory-trim-request.png",
+   "dump": "dumps/158-phone-en-after-a-memory-trim-request.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 159,
+   "pass": "phone-en",
+   "title": "Cold start after the process was killed",
+   "status": "ok",
+   "shot": "shots/159-phone-en-cold-start-after-the-process-was-killed.png",
+   "dump": "dumps/159-phone-en-cold-start-after-the-process-was-killed.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 160,
+   "pass": "workstation",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/160-workstation-music.png",
+   "dump": "dumps/160-workstation-music.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 161,
+   "pass": "workstation",
+   "title": "Ctrl+I (hide the inspector)",
+   "status": "ok",
+   "shot": "shots/161-workstation-ctrl-i-hide-the-inspector.png",
+   "dump": "dumps/161-workstation-ctrl-i-hide-the-inspector.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 162,
+   "pass": "workstation",
+   "title": "Ctrl+I (show the inspector)",
+   "status": "ok",
+   "shot": "shots/162-workstation-ctrl-i-show-the-inspector.png",
+   "dump": "dumps/162-workstation-ctrl-i-show-the-inspector.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 163,
+   "pass": "workstation",
+   "title": "Long press on the column title Artist",
+   "status": "ok",
+   "shot": "shots/163-workstation-long-press-on-the-column-title-artist.png",
+   "dump": "dumps/163-workstation-long-press-on-the-column-title-artist.xml",
+   "changed": true,
+   "seconds": 7.8,
+   "note": ""
+  },
+  {
+   "n": 164,
+   "pass": "workstation",
+   "title": "Escape closes the column chooser",
+   "status": "ok",
+   "shot": "shots/164-workstation-escape-closes-the-column-chooser.png",
+   "dump": "dumps/164-workstation-escape-closes-the-column-chooser.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 165,
+   "pass": "workstation",
+   "title": "Music table scroll (tablet) (after the scroll)",
+   "status": "ok",
+   "shot": "shots/165-workstation-music-table-scroll-tablet-after-the-scroll.png",
+   "dump": "dumps/165-workstation-music-table-scroll-tablet-after-the-scroll.xml",
+   "changed": false,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 166,
+   "pass": "workstation",
+   "title": "Open This device",
+   "status": "ok",
+   "shot": "shots/166-workstation-open-this-device.png",
+   "dump": "dumps/166-workstation-open-this-device.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 167,
+   "pass": "workstation",
+   "title": "Open Internal storage",
+   "status": "ok",
+   "shot": "shots/167-workstation-open-internal-storage.png",
+   "dump": "dumps/167-workstation-open-internal-storage.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 168,
+   "pass": "workstation",
+   "title": "Open its Music folder",
+   "status": "ok",
+   "shot": "shots/168-workstation-open-its-music-folder.png",
+   "dump": "dumps/168-workstation-open-its-music-folder.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 169,
+   "pass": "workstation",
+   "title": "Play tone.mp3 from the folder",
+   "status": "ok",
+   "shot": "shots/169-workstation-play-tone-mp3-from-the-folder.png",
+   "dump": "dumps/169-workstation-play-tone-mp3-from-the-folder.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 170,
+   "pass": "workstation",
+   "title": "The bar's open button",
+   "status": "ok",
+   "shot": "shots/170-workstation-the-bar-s-open-button.png",
+   "dump": "dumps/170-workstation-the-bar-s-open-button.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 171,
+   "pass": "workstation",
+   "title": "The big player (screenshot)",
+   "status": "ok",
+   "shot": "shots/171-workstation-the-big-player-screenshot.png",
+   "dump": "dumps/171-workstation-the-big-player-screenshot.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 172,
+   "pass": "workstation",
+   "title": "Back: the big player closes",
+   "status": "ok",
+   "shot": "shots/172-workstation-back-the-big-player-closes.png",
+   "dump": "dumps/172-workstation-back-the-big-player-closes.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 173,
+   "pass": "workstation",
+   "title": "The trail back to Internal storage",
+   "status": "ok",
+   "shot": "shots/173-workstation-the-trail-back-to-internal-storage.png",
+   "dump": "dumps/173-workstation-the-trail-back-to-internal-storage.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 174,
+   "pass": "workstation",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/174-workstation-sort-menu.png",
+   "dump": "dumps/174-workstation-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 175,
+   "pass": "workstation",
+   "title": "Sort menu: By size",
+   "status": "ok",
+   "shot": "shots/175-workstation-sort-menu-by-size.png",
+   "dump": "dumps/175-workstation-sort-menu-by-size.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 176,
+   "pass": "workstation",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/176-workstation-sort-menu.png",
+   "dump": "dumps/176-workstation-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 177,
+   "pass": "workstation",
+   "title": "Sort menu: By name",
+   "status": "ok",
+   "shot": "shots/177-workstation-sort-menu-by-name.png",
+   "dump": "dumps/177-workstation-sort-menu-by-name.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 178,
+   "pass": "workstation",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/178-workstation-sort-menu.png",
+   "dump": "dumps/178-workstation-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 179,
+   "pass": "workstation",
+   "title": "Sort menu: Show hidden files",
+   "status": "ok",
+   "shot": "shots/179-workstation-sort-menu-show-hidden-files.png",
+   "dump": "dumps/179-workstation-sort-menu-show-hidden-files.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 180,
+   "pass": "workstation",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/180-workstation-sort-menu.png",
+   "dump": "dumps/180-workstation-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 181,
+   "pass": "workstation",
+   "title": "Sort menu: Show hidden files",
+   "status": "ok",
+   "shot": "shots/181-workstation-sort-menu-show-hidden-files.png",
+   "dump": "dumps/181-workstation-sort-menu-show-hidden-files.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 182,
+   "pass": "workstation",
+   "title": "Open the Music folder again",
+   "status": "ok",
+   "shot": "shots/182-workstation-open-the-music-folder-again.png",
+   "dump": "dumps/182-workstation-open-the-music-folder-again.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 183,
+   "pass": "workstation",
+   "title": "Home with the folder open",
+   "status": "warn",
+   "shot": "shots/183-workstation-home-with-the-folder-open.png",
+   "dump": "dumps/183-workstation-home-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 10.4,
+   "note": "the app is not in the foreground (windows: com.google.android.apps.nexuslauncher, com.google.android.deskclock, com.google.android.googlequicksearchbox)"
+  },
+  {
+   "n": 184,
+   "pass": "workstation",
+   "title": "Back in the app with the folder open",
+   "status": "ok",
+   "shot": "shots/184-workstation-back-in-the-app-with-the-folder-open.png",
+   "dump": "dumps/184-workstation-back-in-the-app-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 185,
+   "pass": "workstation",
+   "title": "Rotated with the folder open",
+   "status": "ok",
+   "shot": "shots/185-workstation-rotated-with-the-folder-open.png",
+   "dump": "dumps/185-workstation-rotated-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 186,
+   "pass": "workstation",
+   "title": "Rotated back with the folder open",
+   "status": "ok",
+   "shot": "shots/186-workstation-rotated-back-with-the-folder-open.png",
+   "dump": "dumps/186-workstation-rotated-back-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 187,
+   "pass": "phone-tr",
+   "title": "Launch (Turkish)",
+   "status": "ok",
+   "shot": "shots/187-phone-tr-launch-turkish.png",
+   "dump": "dumps/187-phone-tr-launch-turkish.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 188,
+   "pass": "phone-tr",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/188-phone-tr-music.png",
+   "dump": "dumps/188-phone-tr-music.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 189,
+   "pass": "phone-tr",
+   "title": "Music scrolled (top bar)",
+   "status": "ok",
+   "shot": "shots/189-phone-tr-music-scrolled-top-bar.png",
+   "dump": "dumps/189-phone-tr-music-scrolled-top-bar.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 190,
+   "pass": "phone-tr",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/190-phone-tr-music.png",
+   "dump": "dumps/190-phone-tr-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 191,
+   "pass": "phone-tr",
+   "title": "Bottom bar \u22ef",
+   "status": "ok",
+   "shot": "shots/191-phone-tr-bottom-bar.png",
+   "dump": "dumps/191-phone-tr-bottom-bar.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 192,
+   "pass": "phone-tr",
+   "title": "Settings from More",
+   "status": "ok",
+   "shot": "shots/192-phone-tr-settings-from-more.png",
+   "dump": "dumps/192-phone-tr-settings-from-more.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 193,
+   "pass": "phone-tr",
+   "title": "Back from Settings",
+   "status": "ok",
+   "shot": "shots/193-phone-tr-back-from-settings.png",
+   "dump": "dumps/193-phone-tr-back-from-settings.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 194,
+   "pass": "phone-tr",
+   "title": "Settings from More again",
+   "status": "ok",
+   "shot": "shots/194-phone-tr-settings-from-more-again.png",
+   "dump": "dumps/194-phone-tr-settings-from-more-again.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 195,
+   "pass": "phone-tr",
+   "title": "The back arrow",
+   "status": "ok",
+   "shot": "shots/195-phone-tr-the-back-arrow.png",
+   "dump": "dumps/195-phone-tr-the-back-arrow.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 196,
+   "pass": "phone-tr",
+   "title": "Open Bu cihaz",
+   "status": "ok",
+   "shot": "shots/196-phone-tr-open-bu-cihaz.png",
+   "dump": "dumps/196-phone-tr-open-bu-cihaz.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 197,
+   "pass": "phone-tr",
+   "title": "Open Dahili depolama",
+   "status": "ok",
+   "shot": "shots/197-phone-tr-open-dahili-depolama.png",
+   "dump": "dumps/197-phone-tr-open-dahili-depolama.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 198,
+   "pass": "phone-tr",
+   "title": "Open its Music folder",
+   "status": "ok",
+   "shot": "shots/198-phone-tr-open-its-music-folder.png",
+   "dump": "dumps/198-phone-tr-open-its-music-folder.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 199,
+   "pass": "phone-tr",
+   "title": "Play tone.mp3 from the folder",
+   "status": "ok",
+   "shot": "shots/199-phone-tr-play-tone-mp3-from-the-folder.png",
+   "dump": "dumps/199-phone-tr-play-tone-mp3-from-the-folder.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 200,
+   "pass": "phone-tr",
+   "title": "Back (up to Dahili depolama)",
+   "status": "ok",
+   "shot": "shots/200-phone-tr-back-up-to-dahili-depolama.png",
+   "dump": "dumps/200-phone-tr-back-up-to-dahili-depolama.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 201,
+   "pass": "phone-tr",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/201-phone-tr-sort-menu.png",
+   "dump": "dumps/201-phone-tr-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 202,
+   "pass": "phone-tr",
+   "title": "Sort menu: Boyuta g\u00f6re",
+   "status": "ok",
+   "shot": "shots/202-phone-tr-sort-menu-boyuta-g-re.png",
+   "dump": "dumps/202-phone-tr-sort-menu-boyuta-g-re.xml",
+   "changed": true,
+   "seconds": 8.7,
+   "note": ""
+  },
+  {
+   "n": 203,
+   "pass": "phone-tr",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/203-phone-tr-sort-menu.png",
+   "dump": "dumps/203-phone-tr-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 204,
+   "pass": "phone-tr",
+   "title": "Sort menu: Ada g\u00f6re",
+   "status": "ok",
+   "shot": "shots/204-phone-tr-sort-menu-ada-g-re.png",
+   "dump": "dumps/204-phone-tr-sort-menu-ada-g-re.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 205,
+   "pass": "phone-tr",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/205-phone-tr-sort-menu.png",
+   "dump": "dumps/205-phone-tr-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 206,
+   "pass": "phone-tr",
+   "title": "Sort menu: Gizli dosyalar\u0131 g\u00f6ster",
+   "status": "ok",
+   "shot": "shots/206-phone-tr-sort-menu-gizli-dosyalar-g-ster.png",
+   "dump": "dumps/206-phone-tr-sort-menu-gizli-dosyalar-g-ster.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 207,
+   "pass": "phone-tr",
+   "title": "Sort menu",
+   "status": "ok",
+   "shot": "shots/207-phone-tr-sort-menu.png",
+   "dump": "dumps/207-phone-tr-sort-menu.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 208,
+   "pass": "phone-tr",
+   "title": "Sort menu: Gizli dosyalar\u0131 g\u00f6ster",
+   "status": "ok",
+   "shot": "shots/208-phone-tr-sort-menu-gizli-dosyalar-g-ster.png",
+   "dump": "dumps/208-phone-tr-sort-menu-gizli-dosyalar-g-ster.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 209,
+   "pass": "phone-tr",
+   "title": "Back (to the places)",
+   "status": "ok",
+   "shot": "shots/209-phone-tr-back-to-the-places.png",
+   "dump": "dumps/209-phone-tr-back-to-the-places.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 210,
+   "pass": "phone-tr",
+   "title": "Open Dahili depolama again",
+   "status": "ok",
+   "shot": "shots/210-phone-tr-open-dahili-depolama-again.png",
+   "dump": "dumps/210-phone-tr-open-dahili-depolama-again.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 211,
+   "pass": "phone-tr",
+   "title": "Open the Music folder again",
+   "status": "ok",
+   "shot": "shots/211-phone-tr-open-the-music-folder-again.png",
+   "dump": "dumps/211-phone-tr-open-the-music-folder-again.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 212,
+   "pass": "phone-tr",
+   "title": "Home with the folder open",
+   "status": "warn",
+   "shot": "shots/212-phone-tr-home-with-the-folder-open.png",
+   "dump": "dumps/212-phone-tr-home-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 13.4,
+   "note": "the app is not in the foreground (windows: com.google.android.apps.nexuslauncher, com.google.android.deskclock, com.google.android.googlequicksearchbox)"
+  },
+  {
+   "n": 213,
+   "pass": "phone-tr",
+   "title": "Back in the app with the folder open",
+   "status": "ok",
+   "shot": "shots/213-phone-tr-back-in-the-app-with-the-folder-open.png",
+   "dump": "dumps/213-phone-tr-back-in-the-app-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 214,
+   "pass": "phone-tr",
+   "title": "Rotated with the folder open",
+   "status": "ok",
+   "shot": "shots/214-phone-tr-rotated-with-the-folder-open.png",
+   "dump": "dumps/214-phone-tr-rotated-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 215,
+   "pass": "phone-tr",
+   "title": "Rotated back with the folder open",
+   "status": "ok",
+   "shot": "shots/215-phone-tr-rotated-back-with-the-folder-open.png",
+   "dump": "dumps/215-phone-tr-rotated-back-with-the-folder-open.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 216,
+   "pass": "phone-tr",
+   "title": "Back (up to the drive)",
+   "status": "ok",
+   "shot": "shots/216-phone-tr-back-up-to-the-drive.png",
+   "dump": "dumps/216-phone-tr-back-up-to-the-drive.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 217,
+   "pass": "phone-tr",
+   "title": "Back (to the places)",
+   "status": "ok",
+   "shot": "shots/217-phone-tr-back-to-the-places.png",
+   "dump": "dumps/217-phone-tr-back-to-the-places.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 218,
+   "pass": "phone-tr",
+   "title": "Open M\u00fczik",
+   "status": "ok",
+   "shot": "shots/218-phone-tr-open-m-zik.png",
+   "dump": "dumps/218-phone-tr-open-m-zik.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 219,
+   "pass": "phone-tr",
+   "title": "Open Podcast",
+   "status": "ok",
+   "shot": "shots/219-phone-tr-open-podcast.png",
+   "dump": "dumps/219-phone-tr-open-podcast.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 220,
+   "pass": "phone-tr",
+   "title": "Open Podcastler",
+   "status": "ok",
+   "shot": "shots/220-phone-tr-open-podcastler.png",
+   "dump": "dumps/220-phone-tr-open-podcastler.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 221,
+   "pass": "phone-tr",
+   "title": "Open Radyo",
+   "status": "ok",
+   "shot": "shots/221-phone-tr-open-radyo.png",
+   "dump": "dumps/221-phone-tr-open-radyo.xml",
+   "changed": true,
+   "seconds": 9.0,
+   "note": ""
+  },
+  {
+   "n": 222,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/222-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/222-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 223,
+   "pass": "phone-tr",
+   "title": "Open Bu cihaz",
+   "status": "ok",
+   "shot": "shots/223-phone-tr-open-bu-cihaz.png",
+   "dump": "dumps/223-phone-tr-open-bu-cihaz.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 224,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/224-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/224-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 225,
+   "pass": "phone-tr",
+   "title": "Open A\u011f",
+   "status": "ok",
+   "shot": "shots/225-phone-tr-open-a.png",
+   "dump": "dumps/225-phone-tr-open-a.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 226,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/226-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/226-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 227,
+   "pass": "phone-tr",
+   "title": "Open Ak\u0131\u015flar",
+   "status": "ok",
+   "shot": "shots/227-phone-tr-open-ak-lar.png",
+   "dump": "dumps/227-phone-tr-open-ak-lar.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 228,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/228-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/228-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 229,
+   "pass": "phone-tr",
+   "title": "Open \u0130ndirmeler",
+   "status": "ok",
+   "shot": "shots/229-phone-tr-open-ndirmeler.png",
+   "dump": "dumps/229-phone-tr-open-ndirmeler.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 230,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/230-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/230-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 231,
+   "pass": "phone-tr",
+   "title": "Open \u00c7alma listeleri",
+   "status": "ok",
+   "shot": "shots/231-phone-tr-open-alma-listeleri.png",
+   "dump": "dumps/231-phone-tr-open-alma-listeleri.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 232,
+   "pass": "phone-tr",
+   "title": "Open Daha fazla (overflow)",
+   "status": "ok",
+   "shot": "shots/232-phone-tr-open-daha-fazla-overflow.png",
+   "dump": "dumps/232-phone-tr-open-daha-fazla-overflow.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 233,
+   "pass": "phone-tr",
+   "title": "Settings",
+   "status": "ok",
+   "shot": "shots/233-phone-tr-settings.png",
+   "dump": "dumps/233-phone-tr-settings.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 234,
+   "pass": "phone-tr",
+   "title": "Settings scroll 1",
+   "status": "ok",
+   "shot": "shots/234-phone-tr-settings-scroll-1.png",
+   "dump": "dumps/234-phone-tr-settings-scroll-1.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 235,
+   "pass": "phone-tr",
+   "title": "Settings scroll 2",
+   "status": "ok",
+   "shot": "shots/235-phone-tr-settings-scroll-2.png",
+   "dump": "dumps/235-phone-tr-settings-scroll-2.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 236,
+   "pass": "phone-tr",
+   "title": "Settings scroll 3",
+   "status": "ok",
+   "shot": "shots/236-phone-tr-settings-scroll-3.png",
+   "dump": "dumps/236-phone-tr-settings-scroll-3.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 237,
+   "pass": "phone-tr",
+   "title": "Settings scroll 4",
+   "status": "ok",
+   "shot": "shots/237-phone-tr-settings-scroll-4.png",
+   "dump": "dumps/237-phone-tr-settings-scroll-4.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 238,
+   "pass": "phone-tr",
+   "title": "Settings scroll 5",
+   "status": "ok",
+   "shot": "shots/238-phone-tr-settings-scroll-5.png",
+   "dump": "dumps/238-phone-tr-settings-scroll-5.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 239,
+   "pass": "phone-tr",
+   "title": "Settings scroll 6",
+   "status": "ok",
+   "shot": "shots/239-phone-tr-settings-scroll-6.png",
+   "dump": "dumps/239-phone-tr-settings-scroll-6.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 240,
+   "pass": "phone-tr",
+   "title": "Settings scroll 7",
+   "status": "ok",
+   "shot": "shots/240-phone-tr-settings-scroll-7.png",
+   "dump": "dumps/240-phone-tr-settings-scroll-7.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 241,
+   "pass": "phone-tr",
+   "title": "Settings scroll 8",
+   "status": "ok",
+   "shot": "shots/241-phone-tr-settings-scroll-8.png",
+   "dump": "dumps/241-phone-tr-settings-scroll-8.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 242,
+   "pass": "phone-tr",
+   "title": "Settings scroll 9",
+   "status": "ok",
+   "shot": "shots/242-phone-tr-settings-scroll-9.png",
+   "dump": "dumps/242-phone-tr-settings-scroll-9.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 243,
+   "pass": "phone-tr",
+   "title": "Settings scroll 10",
+   "status": "ok",
+   "shot": "shots/243-phone-tr-settings-scroll-10.png",
+   "dump": "dumps/243-phone-tr-settings-scroll-10.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 244,
+   "pass": "phone-tr",
+   "title": "Open About",
+   "status": "ok",
+   "shot": "shots/244-phone-tr-open-about.png",
+   "dump": "dumps/244-phone-tr-open-about.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 245,
+   "pass": "phone-tr",
+   "title": "Back from About",
+   "status": "ok",
+   "shot": "shots/245-phone-tr-back-from-about.png",
+   "dump": "dumps/245-phone-tr-back-from-about.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [
+  "[tablet-en] labels never seen in the UI: Podcast",
+  "[tablet-en] no 'Open the equaliser' control found in Settings",
+  "[phone-en] no 'Open the equaliser' control found in Settings",
+  "[phone-en] Music list scroll: 76.5 % janky frames (over 40 %; informational on an emulator)",
+  "[phone-en] player drag up: 94.6 % janky frames (over 40 %; informational on an emulator)",
+  "[phone-en] player drag down: 88.2 % janky frames (over 40 %; informational on an emulator)",
+  "[workstation] Music table scroll (tablet): 97.6 % janky frames (over 40 %; informational on an emulator)",
+  "[phone-tr] no 'Ekolayzeri a\u00e7' control found in Settings"
+ ],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "phone-en",
+   "name": "bottom bar is Music \u00b7 Podcast \u00b7 Radio \u00b7 More",
+   "ok": true,
+   "detail": "seen: Music \u00b7 Podcast \u00b7 Radio \u00b7 More",
+   "step": 42
+  },
+  {
+   "pass": "phone-en",
+   "name": "a track's \u22ef button",
+   "ok": true,
+   "detail": "",
+   "step": 92
+  },
+  {
+   "pass": "phone-en",
+   "name": "a track's \u22ef opens its sheet",
+   "ok": true,
+   "detail": "",
+   "step": 93
+  },
+  {
+   "pass": "phone-en",
+   "name": "Back closes the track's sheet",
+   "ok": true,
+   "detail": "",
+   "step": 94
+  },
+  {
+   "pass": "phone-en",
+   "name": "the track's sheet opens again",
+   "ok": true,
+   "detail": "",
+   "step": 95
+  },
+  {
+   "pass": "phone-en",
+   "name": "a drag down from the sheet's middle closes it",
+   "ok": true,
+   "detail": "from y=1423 of 2400",
+   "step": 96
+  },
+  {
+   "pass": "phone-en",
+   "name": "bottom bar is Music \u00b7 Podcast \u00b7 Radio \u00b7 More",
+   "ok": true,
+   "detail": "seen: Music \u00b7 Podcast \u00b7 Radio \u00b7 More",
+   "step": 97
+  },
+  {
+   "pass": "phone-en",
+   "name": "the top bar keeps its colour while the list scrolls",
+   "ok": true,
+   "detail": "at rest (250, 251, 252), while dragged (250, 251, 252), after (250, 251, 252)",
+   "step": 98
+  },
+  {
+   "pass": "phone-en",
+   "name": "\u22ef in the bottom bar",
+   "ok": true,
+   "detail": "",
+   "step": 99
+  },
+  {
+   "pass": "phone-en",
+   "name": "\u22ef opens the More page",
+   "ok": true,
+   "detail": "seen: Downloads, Settings, Playlists",
+   "step": 100
+  },
+  {
+   "pass": "phone-en",
+   "name": "Settings on the More page",
+   "ok": true,
+   "detail": "",
+   "step": 100
+  },
+  {
+   "pass": "phone-en",
+   "name": "Settings is a page of its own: no bottom bar",
+   "ok": true,
+   "detail": "bottom bar: none",
+   "step": 101
+  },
+  {
+   "pass": "phone-en",
+   "name": "Settings has a back arrow",
+   "ok": true,
+   "detail": "",
+   "step": 101
+  },
+  {
+   "pass": "phone-en",
+   "name": "Back from Settings shows More",
+   "ok": true,
+   "detail": "title: Library, More",
+   "step": 102
+  },
+  {
+   "pass": "phone-en",
+   "name": "the back arrow returns to More",
+   "ok": true,
+   "detail": "",
+   "step": 104
+  },
+  {
+   "pass": "phone-en",
+   "name": "a track in the Music's list",
+   "ok": true,
+   "detail": "",
+   "step": 106
+  },
+  {
+   "pass": "phone-en",
+   "name": "the mini player shows the track",
+   "ok": true,
+   "detail": "",
+   "step": 107
+  },
+  {
+   "pass": "phone-en",
+   "name": "a mini player to drag",
+   "ok": true,
+   "detail": "",
+   "step": 107
+  },
+  {
+   "pass": "phone-en",
+   "name": "dragged up, the full player shows",
+   "ok": true,
+   "detail": "drags: 1",
+   "step": 108
+  },
+  {
+   "pass": "phone-en",
+   "name": "dragged down, the mini player again",
+   "ok": true,
+   "detail": "",
+   "step": 109
+  },
+  {
+   "pass": "phone-en",
+   "name": "a sideways swipe changes the track",
+   "ok": true,
+   "detail": "Profile track 1.1 / Nagmedar Artist 1 \u2192 Profile track 1.2 / Nagmedar Artist 1 (swipes: 1)",
+   "step": 110
+  },
+  {
+   "pass": "phone-en",
+   "name": "the bar's seek bar",
+   "ok": true,
+   "detail": "",
+   "step": 110
+  },
+  {
+   "pass": "phone-en",
+   "name": "a swipe along the seek bar does not change the track",
+   "ok": true,
+   "detail": "Profile track 1.2 / Nagmedar Artist 1 \u2192 Profile track 1.2 / Nagmedar Artist 1",
+   "step": 111
+  },
+  {
+   "pass": "phone-en",
+   "name": "the Podcasts open",
+   "ok": true,
+   "detail": "",
+   "step": 112
+  },
+  {
+   "pass": "phone-en",
+   "name": "the podcast address field",
+   "ok": true,
+   "detail": "",
+   "step": 113
+  },
+  {
+   "pass": "phone-en",
+   "name": "the feed is followed",
+   "ok": true,
+   "detail": "",
+   "step": 115
+  },
+  {
+   "pass": "phone-en",
+   "name": "an episode on the podcast's page",
+   "ok": true,
+   "detail": "",
+   "step": 116
+  },
+  {
+   "pass": "phone-en",
+   "name": "the episode's play button",
+   "ok": true,
+   "detail": "",
+   "step": 116
+  },
+  {
+   "pass": "phone-en",
+   "name": "the episode's play button does not move",
+   "ok": true,
+   "detail": "first (42, 643, 708, 769) at 2.1 s; then (42, 643, 708, 769) at +3.6 s; (42, 643, 708, 769) at +6.7 s",
+   "step": 117
+  },
+  {
+   "pass": "phone-en",
+   "name": "the Radio opens",
+   "ok": true,
+   "detail": "",
+   "step": 120
+  },
+  {
+   "pass": "phone-en",
+   "name": "This device is found (\u22ef or the sidebar)",
+   "ok": true,
+   "detail": "",
+   "step": 120
+  },
+  {
+   "pass": "phone-en",
+   "name": "This device lists the places, the internal storage first",
+   "ok": true,
+   "detail": "",
+   "step": 121
+  },
+  {
+   "pass": "phone-en",
+   "name": "Internal storage opens and lists its folders (Music among them)",
+   "ok": true,
+   "detail": "rows: 0:44, Alarms, Android, Audiobooks, DCIM, Documents, Download, Movies, Music, Nagmedar Artist 1, Name, Notifications",
+   "step": 122
+  },
+  {
+   "pass": "phone-en",
+   "name": "the Music folder lists the walk's files (tone.mp3)",
+   "ok": true,
+   "detail": "",
+   "step": 123
+  },
+  {
+   "pass": "phone-en",
+   "name": "a file of the folder plays",
+   "ok": true,
+   "detail": "mini player",
+   "step": 124
+  },
+  {
+   "pass": "phone-en",
+   "name": "back up at the drive, its folders listed",
+   "ok": true,
+   "detail": "",
+   "step": 125
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 125
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 126
+  },
+  {
+   "pass": "phone-en",
+   "name": "after 'By size' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 127
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 127
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 128
+  },
+  {
+   "pass": "phone-en",
+   "name": "after 'By name' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 129
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 129
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 130
+  },
+  {
+   "pass": "phone-en",
+   "name": "after 'Show hidden files' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 131
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 131
+  },
+  {
+   "pass": "phone-en",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 132
+  },
+  {
+   "pass": "phone-en",
+   "name": "after 'Show hidden files' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 133
+  },
+  {
+   "pass": "phone-en",
+   "name": "Back goes on to the places",
+   "ok": true,
+   "detail": "",
+   "step": 134
+  },
+  {
+   "pass": "phone-en",
+   "name": "after Home the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 138
+  },
+  {
+   "pass": "phone-en",
+   "name": "rotated, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 139
+  },
+  {
+   "pass": "phone-en",
+   "name": "rotated back, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 140
+  },
+  {
+   "pass": "workstation",
+   "name": "the Music shows the inspector",
+   "ok": true,
+   "detail": "",
+   "step": 160
+  },
+  {
+   "pass": "workstation",
+   "name": "Ctrl+I hides the inspector",
+   "ok": true,
+   "detail": "",
+   "step": 161
+  },
+  {
+   "pass": "workstation",
+   "name": "Ctrl+I shows the inspector again",
+   "ok": true,
+   "detail": "",
+   "step": 162
+  },
+  {
+   "pass": "workstation",
+   "name": "the table's column titles",
+   "ok": true,
+   "detail": "Title, Artist, Album, Year, Duration",
+   "step": 162
+  },
+  {
+   "pass": "workstation",
+   "name": "the column chooser opens",
+   "ok": true,
+   "detail": "",
+   "step": 163
+  },
+  {
+   "pass": "workstation",
+   "name": "Escape closes the column chooser",
+   "ok": true,
+   "detail": "",
+   "step": 164
+  },
+  {
+   "pass": "workstation",
+   "name": "This device is found (\u22ef or the sidebar)",
+   "ok": true,
+   "detail": "",
+   "step": 165
+  },
+  {
+   "pass": "workstation",
+   "name": "This device lists the places, the internal storage first",
+   "ok": true,
+   "detail": "",
+   "step": 166
+  },
+  {
+   "pass": "workstation",
+   "name": "Internal storage opens and lists its folders (Music among them)",
+   "ok": true,
+   "detail": "rows: Alarms, Android, Audiobooks, Changed, DCIM, Documents, Download, Movies, Music, Name, Notifications, Oct 30, 2026 1:22 AM",
+   "step": 167
+  },
+  {
+   "pass": "workstation",
+   "name": "the Music folder lists the walk's files (tone.mp3)",
+   "ok": true,
+   "detail": "",
+   "step": 168
+  },
+  {
+   "pass": "workstation",
+   "name": "a file of the folder plays",
+   "ok": true,
+   "detail": "transport bar: Smoke tone",
+   "step": 169
+  },
+  {
+   "pass": "workstation",
+   "name": "the transport bar's open button",
+   "ok": true,
+   "detail": "",
+   "step": 169
+  },
+  {
+   "pass": "workstation",
+   "name": "the bar's open button opens the big player",
+   "ok": true,
+   "detail": "",
+   "step": 170
+  },
+  {
+   "pass": "workstation",
+   "name": "the big player covers the window",
+   "ok": true,
+   "detail": "player (0, 48, 2560, 1536) in 2560x1600",
+   "step": 170
+  },
+  {
+   "pass": "workstation",
+   "name": "the bars stand aside under it",
+   "ok": true,
+   "detail": "",
+   "step": 170
+  },
+  {
+   "pass": "workstation",
+   "name": "Back closes the big player",
+   "ok": true,
+   "detail": "",
+   "step": 172
+  },
+  {
+   "pass": "workstation",
+   "name": "the trail names the drive",
+   "ok": true,
+   "detail": "",
+   "step": 172
+  },
+  {
+   "pass": "workstation",
+   "name": "back up at the drive, its folders listed",
+   "ok": true,
+   "detail": "",
+   "step": 173
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 173
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 174
+  },
+  {
+   "pass": "workstation",
+   "name": "after 'By size' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 175
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 175
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 176
+  },
+  {
+   "pass": "workstation",
+   "name": "after 'By name' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 177
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 177
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 178
+  },
+  {
+   "pass": "workstation",
+   "name": "after 'Show hidden files' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 179
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 179
+  },
+  {
+   "pass": "workstation",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 180
+  },
+  {
+   "pass": "workstation",
+   "name": "after 'Show hidden files' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 181
+  },
+  {
+   "pass": "workstation",
+   "name": "the places stay beside the folder",
+   "ok": true,
+   "detail": "",
+   "step": 181
+  },
+  {
+   "pass": "workstation",
+   "name": "after Home the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 184
+  },
+  {
+   "pass": "workstation",
+   "name": "rotated, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 185
+  },
+  {
+   "pass": "workstation",
+   "name": "rotated back, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 186
+  },
+  {
+   "pass": "phone-tr",
+   "name": "bottom bar is M\u00fczik \u00b7 Podcast \u00b7 Radyo \u00b7 Daha fazla",
+   "ok": true,
+   "detail": "seen: M\u00fczik \u00b7 Podcast \u00b7 Radyo \u00b7 Daha fazla",
+   "step": 188
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the top bar keeps its colour while the list scrolls",
+   "ok": true,
+   "detail": "at rest (250, 251, 252), while dragged (250, 251, 252), after (250, 251, 252)",
+   "step": 189
+  },
+  {
+   "pass": "phone-tr",
+   "name": "\u22ef in the bottom bar",
+   "ok": true,
+   "detail": "",
+   "step": 190
+  },
+  {
+   "pass": "phone-tr",
+   "name": "\u22ef opens the More page",
+   "ok": true,
+   "detail": "seen: \u0130ndirmeler, Ayarlar, \u00c7alma listeleri",
+   "step": 191
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Settings on the More page",
+   "ok": true,
+   "detail": "",
+   "step": 191
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Settings is a page of its own: no bottom bar",
+   "ok": true,
+   "detail": "bottom bar: none",
+   "step": 192
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Settings has a back arrow",
+   "ok": true,
+   "detail": "",
+   "step": 192
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Back from Settings shows More",
+   "ok": true,
+   "detail": "title: K\u00fct\u00fcphane, Daha fazla",
+   "step": 193
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the back arrow returns to More",
+   "ok": true,
+   "detail": "",
+   "step": 195
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Bu cihaz is found (\u22ef or the sidebar)",
+   "ok": true,
+   "detail": "",
+   "step": 195
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Bu cihaz lists the places, the internal storage first",
+   "ok": true,
+   "detail": "",
+   "step": 196
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Dahili depolama opens and lists its folders (Music among them)",
+   "ok": true,
+   "detail": "rows: 30 Eki 2026 01:22, 30 Eki 2026 01:31, Ad, Alarms, Android, Audiobooks, DCIM, Documents, Download, Movies, Music, Notifications",
+   "step": 197
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the Music folder lists the walk's files (tone.mp3)",
+   "ok": true,
+   "detail": "",
+   "step": 198
+  },
+  {
+   "pass": "phone-tr",
+   "name": "a file of the folder plays",
+   "ok": true,
+   "detail": "mini player",
+   "step": 199
+  },
+  {
+   "pass": "phone-tr",
+   "name": "back up at the drive, its folders listed",
+   "ok": true,
+   "detail": "",
+   "step": 200
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 200
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 201
+  },
+  {
+   "pass": "phone-tr",
+   "name": "after 'Boyuta g\u00f6re' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 202
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 202
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 203
+  },
+  {
+   "pass": "phone-tr",
+   "name": "after 'Ada g\u00f6re' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 204
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 204
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 205
+  },
+  {
+   "pass": "phone-tr",
+   "name": "after 'Gizli dosyalar\u0131 g\u00f6ster' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 206
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu's button",
+   "ok": true,
+   "detail": "",
+   "step": 206
+  },
+  {
+   "pass": "phone-tr",
+   "name": "the sort menu lists the orders and the hidden files",
+   "ok": true,
+   "detail": "",
+   "step": 207
+  },
+  {
+   "pass": "phone-tr",
+   "name": "after 'Gizli dosyalar\u0131 g\u00f6ster' the drive still lists its folders",
+   "ok": true,
+   "detail": "",
+   "step": 208
+  },
+  {
+   "pass": "phone-tr",
+   "name": "Back goes on to the places",
+   "ok": true,
+   "detail": "",
+   "step": 209
+  },
+  {
+   "pass": "phone-tr",
+   "name": "after Home the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 213
+  },
+  {
+   "pass": "phone-tr",
+   "name": "rotated, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 214
+  },
+  {
+   "pass": "phone-tr",
+   "name": "rotated back, the folder is still open",
+   "ok": true,
+   "detail": "",
+   "step": 215
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 245
+  },
+  {
+   "pass": "all",
+   "name": "no StrictMode violation of the app (debug build)",
+   "ok": true,
+   "detail": "0 in the log, 0 in the dropbox",
+   "step": 245
+  }
+ ],
+ "frames": [
+  {
+   "pass": "phone-en",
+   "what": "Music list scroll",
+   "step": 105,
+   "frames": 81.0,
+   "janky": 76.54,
+   "janky_n": 62.0,
+   "p50": 61.0,
+   "p90": 109.0,
+   "p95": 113.0,
+   "p99": 150.0
+  },
+  {
+   "pass": "phone-en",
+   "what": "player drag up",
+   "step": 108,
+   "frames": 37.0,
+   "janky": 94.59,
+   "janky_n": 35.0,
+   "p50": 81.0,
+   "p90": 129.0,
+   "p95": 150.0,
+   "p99": 150.0
+  },
+  {
+   "pass": "phone-en",
+   "what": "player drag down",
+   "step": 109,
+   "frames": 34.0,
+   "janky": 88.24,
+   "janky_n": 30.0,
+   "p50": 69.0,
+   "p90": 129.0,
+   "p95": 133.0,
+   "p99": 150.0
+  },
+  {
+   "pass": "workstation",
+   "what": "Music table scroll (tablet)",
+   "step": 164,
+   "frames": 42.0,
+   "janky": 97.62,
+   "janky_n": 41.0,
+   "p50": 105.0,
+   "p90": 150.0,
+   "p95": 250.0,
+   "p99": 250.0
+  }
+ ],
+ "seconds": 2799
+}
