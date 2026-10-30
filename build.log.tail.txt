@@ -1,0 +1,300 @@
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:239:37 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:254:37 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:270:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:274:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:276:47 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:280:44 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:280:54 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:290:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:292:44 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:300:40 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:300:50 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:308:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:309:60 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:315:47 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:317:17 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:321:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:333:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:337:26 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:340:40 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:352:38 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:359:58 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:362:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:363:52 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:366:25 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:367:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAdvanced.kt:378:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAudio.kt:92:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesAudio.kt:152:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:70:10 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:71:49 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:73:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:80:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:89:63 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:96:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:97:23 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:103:25 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:109:21 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:110:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:115:22 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:116:60 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:117:21 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:119:30 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:122:17 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:127:39 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:130:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:132:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:142:25 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:151:38 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:157:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:162:58 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:165:27 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:173:21 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesFragment.kt:174:21 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:55:22 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:57:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:58:59 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:59:26 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:68:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:73:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:79:23 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:80:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:83:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:84:50 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:87:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:93:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesOptional.kt:97:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:47:14 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:48:52 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:49:13 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:55:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:60:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:63:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:67:56 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:68:17 'fun startActivityForResult(p0: Intent!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:71:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:80:36 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesParentalControl.kt:90:81 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:61:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:67:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:72:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:77:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:78:41 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:79:9 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:84:73 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:85:22 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:86:23 'val resources: Resources!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:97:49 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:100:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:102:43 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:13 'fun startActivity(p0: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:105:75 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:107:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:116:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:118:21 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesRemoteAccess.kt:125:17 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:74:30 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:78:20 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:86:41 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:87:32 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:91:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:92:15 'fun onResume(): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:93:46 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:95:33 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:96:79 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:97:78 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:98:13 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:105:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:110:9 'var preferenceScreen: PreferenceScreen!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:118:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:129:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:138:34 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:145:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:151:35 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:156:18 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:159:32 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:161:22 'fun onPreferenceTreeClick(p0: Preference): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:167:44 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:172:40 'fun getString(p0: Int, vararg p1: Any!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:176:93 'fun getString(p0: Int): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/PreferencesUi.kt:177:18 'fun <T : Preference!> findPreference(p0: CharSequence): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:5:8 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:6:8 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:16:50 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:18:52 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:17 'static fun instantiate(p0: Context!, p1: String!, p2: Bundle?): Fragment!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:19:29 'val activity: Activity!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:20:11 'fun setTargetFragment(p0: Fragment!, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:18 'class PreferenceFragment : Fragment, PreferenceManager.OnPreferenceTreeClickListener, PreferenceManager.OnDisplayPreferenceDialogListener, PreferenceManager.OnNavigateToScreenListener, DialogPreference.TargetFragment' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/ui/preferences/TvSettings.kt:21:45 'class PreferenceDialogFragment : DialogFragment, DialogInterface.OnClickListener' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:79:49 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:89:61 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/util/TVSearchProvider.kt:100:65 Type argument for reified type parameter 'T' was inferred to the intersection of ['Comparable<*>' & 'Serializable']. Reification of an intersection type results in the common supertype being used. This may lead to subtle issues and an explicit type argument is encouraged. This will become an error in a future release.
+w: file:///home/runner/work/vlc-android/vlc-android/application/television/src/main/java/org/videolan/television/viewmodel/MainTvModel.kt:141:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+
+> Task :application:remote-access-server:lintVitalAnalyzeRelease
+> Task :application:moviepedia:mergeReleaseGeneratedProguardFiles
+> Task :application:moviepedia:exportReleaseConsumerProguardFiles
+> Task :application:moviepedia:bundleLibRuntimeToJarRelease
+> Task :application:moviepedia:processReleaseJavaRes
+> Task :application:moviepedia:createFullJarRelease
+> Task :application:moviepedia:generateReleaseLintModel
+> Task :application:moviepedia:extractReleaseAnnotations
+> Task :application:moviepedia:mergeReleaseConsumerProguardFiles
+> Task :application:moviepedia:mergeReleaseJavaResource
+> Task :application:moviepedia:syncReleaseLibJars
+> Task :application:moviepedia:bundleReleaseLocalLintAar
+> Task :application:television:compileReleaseJavaWithJavac
+> Task :application:television:mergeReleaseGeneratedProguardFiles
+> Task :application:television:exportReleaseConsumerProguardFiles
+> Task :application:app:dataBindingMergeDependencyArtifactsPersonal
+> Task :application:app:dataBindingGenBaseClassesPersonal
+> Task :application:television:bundleLibCompileToJarRelease
+> Task :application:television:bundleLibRuntimeToJarRelease
+> Task :application:television:processReleaseJavaRes
+> Task :application:television:createFullJarRelease
+> Task :application:television:generateReleaseLintModel
+> Task :application:television:extractReleaseAnnotations
+> Task :application:television:mergeReleaseConsumerProguardFiles
+> Task :application:television:mergeReleaseJavaResource
+> Task :application:television:syncReleaseLibJars
+> Task :application:television:bundleReleaseLocalLintAar
+> Task :application:moviepedia:lintVitalAnalyzeRelease
+> Task :application:moviepedia:generateReleaseLintVitalModel
+> Task :application:remote-access-server:generateReleaseLintVitalModel
+> Task :application:television:generateReleaseLintVitalModel
+> Task :application:vlc-android:generatePersonalLintVitalModel
+> Task :application:television:lintVitalAnalyzeRelease
+
+> Task :application:nagmedar-ui:compileReleaseKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:250:48 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/ShortcutBindings.kt:118:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:131:26 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/input/Shortcuts.kt:179:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:19:34 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:60:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lab/LabTools.kt:61:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/library/TechLabels.kt:98:16 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/lyrics/SubtitleEncoding.kt:15:81 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/MusicScreen.kt:772:29 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/MusicTable.kt:30:41 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/network/ServerDialog.kt:61:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/onboarding/FirstRun.kt:82:25 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/player/equalizer/EqualizerPreset.kt:10:45 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/search/PaletteResults.kt:9:24 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:9:23 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/shell/Destinations.kt:21:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/visual/VisualizerSettings.kt:13:27 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+
+> Task :application:nagmedar-ui:compileReleaseJavaWithJavac
+> Task :application:nagmedar-ui:mergeReleaseGeneratedProguardFiles
+> Task :application:nagmedar-ui:exportReleaseConsumerProguardFiles
+> Task :application:nagmedar-ui:processReleaseJavaRes
+> Task :application:nagmedar-ui:bundleLibCompileToJarRelease
+> Task :application:nagmedar-ui:bundleLibRuntimeToJarRelease
+> Task :application:nagmedar-ui:generateReleaseLintModel
+> Task :application:nagmedar-ui:createFullJarRelease
+> Task :application:nagmedar-ui:extractReleaseAnnotations
+> Task :application:nagmedar-ui:mergeReleaseConsumerProguardFiles
+> Task :application:nagmedar-ui:mergeReleaseJavaResource
+> Task :application:app:compilePersonalKotlin
+> Task :application:app:compilePersonalJavaWithJavac
+> Task :application:app:mergePersonalGeneratedProguardFiles
+> Task :application:app:processPersonalJavaRes
+> Task :application:app:generatePersonalLintVitalReportModel
+> Task :application:nagmedar-ui:syncReleaseLibJars
+> Task :application:nagmedar-ui:bundleReleaseLocalLintAar
+> Task :application:app:expandPersonalArtProfileWildcards
+> Task :application:nagmedar-ui:generateReleaseLintVitalModel
+> Task :application:app:mergePersonalJavaResource
+> Task :application:nagmedar-ui:lintVitalAnalyzeRelease
+> Task :application:app:minifyPersonalWithR8
+> Task :application:app:lintVitalAnalyzePersonal
+> Task :application:app:lintVitalReportPersonal
+> Task :application:app:lintVitalPersonal
+> Task :application:app:convertShrunkResourcesToBinaryPersonal
+> Task :application:app:optimizePersonalResources
+> Task :application:app:l8DexDesugarLibPersonal
+> Task :application:app:compilePersonalArtProfile
+> Task :application:app:packagePersonal
+> Task :application:app:createPersonalApkListingFileRedirect
+> Task :application:app:assemblePersonal
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13m 40s
+667 actionable tasks: 667 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
