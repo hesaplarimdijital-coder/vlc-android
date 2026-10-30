@@ -11,17 +11,18 @@ Nağmedar 1.0 yalnızca sizin iki cihazınız (Galaxy S24, Galaxy Tab S11 Ultra;
 
 ### Sürüm numaraları
 
-Kök `build.gradle`: `versionName = '1.0.1'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010001. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
+Kök `build.gradle`: `versionName = '1.0.2'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010002. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
 
 | Derleme | versionName | versionCode |
 | --- | --- | --- |
 | Cihazlarınızdaki CI debug derlemesi (arm64, bölünmemiş) | 0.1.0 | 14000100 |
 | Kişisel sürüm 1.0.0, arm64 | 1.0.0 | 14010006 |
-| Kişisel sürüm 1.0.1, arm64 | 1.0.1 | **14010007** |
-| Kişisel sürüm 1.0.1, x86_64 (yalnızca CI emülatörü) | 1.0.1 | 14010009 |
-| 1.0.1'den derlenen debug | 1.0.1 | 14010001 |
+| Kişisel sürüm 1.0.1, arm64 | 1.0.1 | 14010007 |
+| Kişisel sürüm 1.0.2, arm64 | 1.0.2 | **14010008** |
+| Kişisel sürüm 1.0.2, x86_64 (yalnızca CI emülatörü) | 1.0.2 | 14010010 |
+| 1.0.2'den derlenen debug | 1.0.2 | 14010002 |
 
-Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.1 kuruluyken aynı sürümden bir debug derlemesi (14010001) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.2: 4010002, kişisel APK'sı 14010008). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
+Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.2 kuruluyken aynı sürümden bir debug derlemesi (14010002) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.3: 4010003, kişisel APK'sı 14010009). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
 
 ### Bir kez: teslim anahtarı
 
@@ -43,14 +44,14 @@ CI APK'yı sizin teslim anahtarınızın açık yarısıyla ([`delivery.pub`](de
    git fetch origin ci/personal-release
    git worktree add /tmp/nagmedar-teslim origin/ci/personal-release
    cat /tmp/nagmedar-teslim/README.md
-   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.1.apk
+   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.2.apk
    git worktree remove /tmp/nagmedar-teslim
    ```
 
    Betik APK'nın SHA-256'sını zarftakiyle karşılaştırır; tutmazsa dosyayı siler.
-4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.1.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
+4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.2.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
 
-Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır (1.0.1, 1.0.0).
+Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. 1.0.2'ye güncellemede veritabanı 23'e geçer (yalnız Whisper'ın sütunları çıkar; programlar, bölümler, dinleme yerleri ve indirmeler kalır) ve Whisper'ın bekleyen işleri, indirilmiş modelleri ve ürettiği dökümler bir kez silinir; yayınların kendi dökümlerine dokunulmaz. Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır (1.0.2, 1.0.1, 1.0.0).
 
 ### R8 ve kurallar
 

@@ -2,6 +2,23 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.2 (30 Ekim 2026)
+
+Tabletteki çubuğun telefona gelişi, tablette büyük oynatıcı, Whisper'sız podcastler.
+
+### Oynatıcı
+- Tablette büyük oynatıcı: tabletin ve DeX'in alt çubuğundaki “Oynatıcıyı aç” düğmesi Müzik sayfasına değil, telefondaki gibi büyük kapaklı oynatıcıya geçer: yatay ekranda kapak solda, bilgiler ve düğmeler sağda, arka plan kapağın renginde. ⌄ düğmesi, Geri, Esc, geri hareketi ve aşağı kaydırmak kapatır. Radyo istasyonu ve podcast bölümü eskisi gibi kendi sayfasını açar.
+- Telefonda tabletin çubuğu: mini oynatıcı tablettekiyle aynı yüzen kart; kapak, başlık, önceki · oynat · sonraki ve altında süreleriyle, kapağın renginde ilerleme çubuğu. Çubuğu sürükleyerek parçada ileri geri gidilir. Dokunmak ya da yukarı çekmek oynatıcıyı açar, kartı yana kaydırmak parçayı değiştirir (ilerleme çubuğunun üstünde değil).
+
+### Alt sayfalar
+- Alt sayfalar her yerinden aşağı çekilince kapanır: bir parçanın, albümün, bölümün ya da istasyonun ⋯ sayfası (ve uzun basışla açılan sayfalar) yalnız üstteki tutamaçtan değil, satırların üstü dahil her yerinden aşağı çekilince parmağı izler; yüksekliğinin üçte birini geçince ya da hızla aşağı atılınca kapanır, daha azında yaylanarak yerine oturur. Kaydırılmış uzun bir sayfada aşağı çekmek önce listeyi başa kaydırır, sonra sayfayı indirir. Bir satıra dokunmak onu çalıştırır; sürükleme başladığı satırı çalıştırmaz.
+- Telefonda Sıradaki listenin başındayken aşağı çekilince kapanır; tutamaçla sıralama ve sola kaydırarak kaldırma eskisi gibi çalışır.
+
+### Podcast
+- Whisper kaldırıldı: bölümlerin cihazda metne dökülmesi (Döküm sekmesindeki “Whisper ile döküm oluştur”, menüdeki “Whisper ile yeniden oluştur” ve “Whisper dökümünü sil”), programın ayarlarındaki “Döküm dili”, Ayarlar › Podcastler › Döküm (Whisper), İndirmeler'deki modeller ve Laboratuvar'daki SP-05 çıktı; uygulamanın içindeki whisper.cpp ve GPU (Vulkan) desteği de. Yayının kendi dökümü olan bölümlerin Döküm sekmesi eskisi gibi çalışır; dökümü olmayanda “Döküm yok” yazar.
+- Güncellemeden sonra bir kez: kuyrukta bekleyen döküm işleri iptal edilir (tableti yoran bunlardı), indirilmiş Whisper modelleri (en çok yaklaşık 800 MB), Whisper'ın yazdığı dökümler ve işlerin bıraktığı ses önbelleği silinir; veritabanı 23'e geçer, yalnız Whisper'ın sütunları çıkar. Programlar, bölümler, dinleme yerleri, indirmeler, programların ayarları ve yayınların dökümleri yerinde kalır. Eski bir yedekteki Whisper ayarları yok sayılır.
+- APK 38 MB küçüldü (126,8 MB → 88,2 MB).
+
 ## 1.0.1 (29 Ekim 2026)
 
 S24'teki bir kullanım denemesinin bulduklarıyla: çöken bir sayfa, renk değiştiren üst çubuk, yarım açılan sayfalar.
