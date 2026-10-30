@@ -1333,7 +1333,12 @@ class Smoke:
         self.check("the big player covers the window", player[2] - player[0] >= w * 0.9 and player[3] - player[1] >= h * 0.8,
                    "player %s in %dx%d" % (player, w, h))
         self.check("the bars stand aside under it", not self.by_id(nodes, "transport-bar"))
-        self.step("The big player (screenshot)", wait=0.5)
+        nodes = self.step("The big player (screenshot)", wait=0.5)
+        if not self.by_id(nodes, "phone-player"):
+            # the walk's tone (30 s) ended meanwhile and the player went down with it, as it does when music stops:
+            # Back now would leave the page under it (1.0.2's personal walk on API 35 did)
+            self.check("the big player goes down when the music stops", not self.device_playing(nodes), "the tone ended")
+            return nodes
         self.key(4)
         nodes = self.step("Back: the big player closes", wait=1.2)
         nodes, closed = self.wait_for(lambda ns: not self.by_id(ns, "phone-player"), 6)

@@ -111,10 +111,15 @@ class BaselineProfileGenerator {
             }?.click()
         }
         // the phone's mini player opens the phone player (its first clickable part, the track's
-        // title, does); a tablet shows the track in its inspector
+        // title, does); 1.0.2: a tablet's transport bar opens the big player over the window
+        // with its "open the player" button
         passOver {
-            val mini = waitFor(15_000) { device.findObject(By.res("mini-player")) }
-            (mini?.findObject(By.clickable(true)) ?: mini)?.click()
+            val open = waitFor(15_000) { device.findObject(By.res("transport-open-player")) ?: device.findObject(By.res("mini-player")) }
+            if (open?.resourceName?.endsWith("transport-open-player") == true) {
+                open.click()
+            } else {
+                (open?.findObject(By.clickable(true)) ?: open)?.click()
+            }
         }
         if (waitFor(10_000) { device.findObject(By.res("phone-player")) } != null) {
             trace("music: the phone player")
