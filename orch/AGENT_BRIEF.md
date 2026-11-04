@@ -5,6 +5,46 @@ You implement one or two backlog stories of **Nağmedar**, a fork of VLC for And
 your task prompt. The orchestrator (who launched you) merges your work; you never merge to
 master yourself.
 
+## 0000. THE 1.0.3 SESSION (from 5 Nov 2026) — overrides everything below where they differ
+
+- **Attribution (replaces §2.5):** commits end with exactly these two lines (after a blank line):
+  ```
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+  Claude-Session: https://claude.ai/code/session_01CCjCQf9dHq1sPdX5uoz8qa
+  ```
+  PR bodies end with:
+  ```
+  🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+  https://claude.ai/code/session_01CCjCQf9dHq1sPdX5uoz8qa
+  ```
+- **Paths in this session:** `SCRATCH=/tmp/claude-0/-home-claude/ef20efb0-c7e1-5e3e-8eb6-1762a74320b1/scratchpad`,
+  `ORCH=$SCRATCH/orch`, `REPO=/home/claude/vlc-android` (the orchestrator's clone: never check out, commit or push in it),
+  `WT=/home/claude/wt` (your worktree is `$WT/<id>`, branch `story/<id>`), `KIT=/home/claude/hesaplarimdijital-coder/desktop-kit`
+  (read only; 1.0.0 = `8ca85ad`, 2.3.0 = `bef6b9f` = `main`). `. $SCRATCH/env.sh` sets them in a shell. Your scratch:
+  `$SCRATCH/agents/<id>/`, never inside the worktree.
+- **No local Kotlin toolchain this time:** `$SCRATCH/kt` (stub compiler) and `$SCRATCH/i18nout` were not handed over, and no
+  Maven/Google/Gradle host is reachable from the machine. CI is the only compiler and test runner: §4.2's local checks do
+  not exist; read your diff twice before each push instead (imports, names, nullability, threads). `python3 $ORCH/dupstr.py
+  <worktree>` still works (strings.xml duplicates and broken tags) and must pass before every push.
+- **Master moved to 1.0.2** (0ed1076d): read orch/notes/{nav-pages,polish-1.0.1,crash-sweep,sheet-drag,big-player,whisper-out}.md
+  for what the shell, sheets and players are now. The delivery key was replaced (PR #96); never touch `buildsystem/release/`.
+- **The session's main work is porting Desktop Kit 2.0.0–2.3.0** (`$KIT/CHANGELOG.md`, `$KIT/MIGRATION.md`) into the app's own
+  copies (theme/, shell/, components/…). The app does not depend on the kit. The map of what goes where:
+  `$ORCH/notes/kit-2.3-map.md`. Never replace an app implementation with the kit's wholesale: take the kit's fix or behaviour
+  into the app's file, keep the app's names and its 1.0.1–1.0.2 behaviour.
+- **The user's standing decisions (1.0.1–1.0.2), kept by every story:** Settings and every page opened from a page are
+  full-screen pages with a back arrow; the top bar never changes colour on touch or scroll; bars, menus, sheets and dialogs
+  are opaque (GlassMode Solid) until the user decides otherwise; keycaps/shortcut hints only while a hardware keyboard is
+  connected; the phone's Sıradaki is a full-window page; sheets close when dragged down anywhere; on the tablet "open
+  player" opens the big artwork player; the phone's mini player is the tablet's bar (artwork-tinted seek bar).
+- **Ask the orchestrator (in your final report, not by guessing) before:** raising minSdk, raising targetSdk, bringing back
+  any glass, removing a user-visible feature, adding a dependency.
+- Tests are on again (`NAGMEDAR_RUN_TESTS: '1'`): §0's "no new tests" is void. New logic gets tests; changed screenshots are
+  looked at one by one and committed in a separate "Screenshots: …" commit (§4.5). The emulator walk must stay green on
+  phone and tablet; it is close to its 50 min limit, so new walk steps must be few and fast.
+- Do not edit CHANGELOG.md, the version or `buildsystem/release/README.md` (the orchestrator writes them).
+
 ## 000. NAĞMEDAR 1.0.2 (30 Oct 01:14, the user's decisions) — overrides everything below
 
 - 1.0.1 shipped (master c2e49fe4): ⋯ is a "Daha fazla" page, pages pushed with back arrows (ShellNavigator selectTab/open/

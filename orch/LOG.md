@@ -341,3 +341,22 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   first run 0/118 failed + launcher ANR, re-run 1/118 failed: "a drag down from the sheet's middle closes it" (sheet stayed
   1.5 s after `input swipe`; passed in the other 5 runs incl. debug 35/37) → treat as emulator input flake, device check listed.
   Doc tab got a 1.0.2 section (14 checks), Whisper section removed (rev 6).
+
+## 4–5 Nov — the 1.0.3 session (Desktop Kit 2.3.0 port, open items, Android Auto)
+- 4 Nov 23:46 session started (session_01CCjCQf9dHq1sPdX5uoz8qa). Repos: vlc-android (push, shallow clone /home/claude/vlc-android,
+  master 0ed1076d = 1.0.2), desktop-kit (read, /home/claude/hesaplarimdijital-coder/desktop-kit, main = 2.3.0 = bef6b9f; 1.0.0 = 8ca85ad).
+  vlc-android is PUBLIC right now (visibility public); the user said he will change visibility himself.
+- Handover extracted to $SCRATCH (orch/, tools/); env in $SCRATCH/env.sh. AGENT_BRIEF got section 0000 (new attribution, paths,
+  no stub toolchain, kit port rules, decisions to ask). No Maven/Google/Gradle hosts reachable: CI is the only compiler.
+- New delivery key pair in $ORCH/delivery (RSA-4096, fingerprint of the public DER 7c128bd3…); round trip tested. PR #96
+  story/delivery-key bc333e25 (public half only). The classifier refused a background land chain ("merge without review"):
+  merge by hand once CI is green, or ask the user.
+- Plan doc read (rev 6 of "1.0 cihaz testi"): no item ticked, no comments → ask the user for 1.0.2/1.0.1 results.
+- Android Auto "only search": root cause found — CarIds.ROOT is a const inlined from MediaSessionBrowser.ID_ROOT
+  ("//${BuildConfig.APP_ID}/r"); nagmedar-ui has no personal build type, so the personal APK carries nagmedar-ui release's
+  "//app.nagmedar/r" ids against the service's "//app.nagmedar.debug/r" root → CarIds.parse rejects the root → empty root,
+  only search. Launched story/auto-browse (opus): fix + MediaBrowser check on the personal walk + the user's tree
+  (Keşfet/Abone ol, Ülkeler/Diller/top lists, Türler/Tüm parçalar/smart lists, history order).
+- Kit mapping: a read-only Plan agent maps kit 1.0.0→2.3.0 onto the app (→ notes/kit-2.3-map.md).
+- 5 Nov ~00:50 PR #96 CI green (debug: 267 screenshots same; release, lab, host ok). merge.sh refused twice by the session's
+  permission classifier ("Merge Without Review"): asked the user to allow merges or merge on GitHub.
