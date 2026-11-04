@@ -1,0 +1,8 @@
+# video-podcast (PR #64, story/video-podcast, 254a22a7): notes for the next story
+
+- Play button: `PlaybackRules.playButton(savedMs, played, now: Listening?, starting)` returns `PlayButton` (Play / Resume(ms) / Pause / Starting). It is the one rule for the episode page (`playChoice` in EpisodeDetailView) and the rows (`playLabel(res, …)` in PodcastPageView, with now = null). `shownPositionMs` gives the place the page shows (timeline, "… kaldı" badge): the saved place while the player has the episode loaded below 5 s and not playing (restored playlist), or while it is starting.
+- Starting state: `PodcastController.startingId/startTarget`, set in `togglePlay`/`playAt` and ended by `followStart` in the 400 ms listening loop (2 looks playing at target − 2 s, or 50 looks, or the page closed). It reaches the view as `EpisodeDetailUi.starting`. A press on an episode loaded at 0 with a saved place calls `player.play` (start-time), not `togglePlay`.
+- `EpisodeTracker.sample` decides nothing (speed, intro/resume seek) until the media plays with time > 0. Why: `PlayerController.playbackState` is static and goes stale across media, and the old media's Stopped zeroes the progress.
+- The badge slot in Header is always reserved (an invisible ToneBadge).
+- `components/copyToClipboard(context, label, text, @StringRes notice)`: shows the app's notice only below API 33. Every address copy now goes through it (podcast, radio, streams, HLS, remote access, media info).
+- CI note: Maven Central 429s can fail every Robolectric test ("Failed to fetch maven artifact android-all-instrumented"). Fix: `gh api -X POST …/actions/runs/<id>/rerun-failed-jobs`.

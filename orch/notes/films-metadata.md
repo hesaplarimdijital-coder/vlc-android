@@ -1,0 +1,7 @@
+
+## story/films-metadata (PR #30): film information, poster/list views, watched episodes
+- Package `app.nagmedar.ui.library.metadata`: `FilmNameParser` (title+year from file name), `FilmQuery` (key "m:<title>:<year>" / "tv:<showKey>"), `TmdbClient`/`OmdbClient` (FilmServices.kt), `FilmInfoCenter` (settings keys nagmedar_film_info*, background queue, refresh/choose/search/clear, `active` flag set in NagmedarActivity), `FilmImages` (cacheDir/film-images, 200 MB LRU, `FilmImage` composable), `FilmViews` (PosterCard, PosterThumb, FilmHero, WatchMark, CountBadge, rememberFilmInfo/EpisodeMeta), `FilmDetails` (FilmAbout, EpisodeAbout, FilmSearchDialog, rememberFilmActions), `FilmSettings` (FilmInfoSection, FilmAttribution), `LibraryViews` (per-section view prefs, SeriesView, filmMenuEntries), `WatchMarks` (mark watched/unwatched via medialibrary; `changes` flow reloads screens).
+- Room: FilmInfoEntry (film_info), FilmEpisodeEntry (film_episode), FilmInfoDao; migration 15→16.
+- Keys: NAGMEDAR_TMDB_API_KEY (v3 key or v4 bearer token), NAGMEDAR_OMDB_API_KEY → BuildConfig TMDB_API_KEY / OMDB_API_KEY.
+- MoviesView gained Poster; Table = "Liste" (DenseTable with poster cell, year, IMDb, RT, length, video, audio; width-dependent). MediaDetailsPanel/VideoDetailsPanes take info/episode/about slots.
+- Not done: no tests; no WorkManager (lookups resume on next library visit); show page has no cast list.

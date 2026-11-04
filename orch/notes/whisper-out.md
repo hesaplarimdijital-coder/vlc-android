@@ -1,0 +1,10 @@
+# whisper-out (PR #93, story/whisper-out) — notes for the next story of this track
+
+- Whisper is gone from app, native and CI. Kept: the feeds' own transcripts (Transcripts.kt, EpisodeExtras, cache/podcast/transcript-<id>.txt); EpisodeDetailTabs' Döküm tab shows "Döküm yok" with no action when a feed gives none. EpisodeExtras has no `own` source any more; Transcript has no whisperModel; ParsedFeed/PodcastFeed have no language.
+- DB 23 (MIGRATION_22_23, manual): podcast_feed.language/transcript_language and podcast_episode.whisper_model dropped by re-creating both tables (`SupportSQLiteDatabase.recreate(table, create, indices)` in NagmedarDatabase: copies the shared columns, keeps the AUTOINCREMENT counter in sqlite_sequence so removed ids never return). Reuse it for later column drops. schemas/23.json committed from ci/shots-pr-93.
+- RetiredWork flag `whisper`: cancels unique work/tag `nagmedar-whisper` + tag `app.nagmedar.ui.transcribe.WhisperWorker`; deletes noBackupFilesDir/whisper-models, files/podcast-transcripts, files/whisper-progress, cache/whisper-audio, externalFiles/whisper, files/ggml-*.bin(.part); removes `RetiredWork.TRANSCRIPTION_KEYS` from Settings prefs. BackupSettings.LEFT_OUT uses TRANSCRIPTION_KEYS (old backups restore without them). RemovedChannels has `nagmedar_whisper`.
+- Native: native/lab is C only (lab_jni.c, mediaprobe.c, usb_audio.c) + libusb + FFmpeg; no CXX in CMake; versions.env has no whisper/Vulkan/shaderc lines; CI has no glslc cache step; test-host.sh has no SP-05. FFmpeg lost avi/mpegps demuxers. NativeLab: version/cancel/usbDescribe/usbTone/probe only.
+- Lab: LabInput and LabRun.input are gone (no tool picks a file); a future file-input tool must bring them back.
+- emulator_smoke.py GONE_RE includes Whisper|SP-05 (check name "... TV Lab or Whisper words ...").
+- APK (Uygulama · release, personal arm64): 126,755,138 → 88,200,713 bytes (6a58c951).
+- Expected `git grep -i whisper` hits: CHANGELOG, RetiredWork(+Test), NotificationIds RemovedChannels id, emulator_smoke.py GONE_RE, the DB migrations/test/schemas.

@@ -1,0 +1,616 @@
+
+# Nağmedar (VLC Android fork) — Araştırma, Backlog ve MVP Planı
+ · 
+## Özet ve kapsam
+Hedef: VLC Android fork'unu, VLC masaüstünün özelliklerini ve AIMP seviyesinde müzik deneyimini taşıyan bir oynatıcıya dönüştürmek. Uygulama telefonda dokunmatik, Samsung DeX'te tam klavye ve fare desteğiyle çalışacak. Birincil cihaz Galaxy Tab S11 Ultra.
+Plan üç çıktıdan oluşur:
+Bu doküman: araştırma bulguları, mimari kararlar, ajan kadrosu ve MVP yol haritası.
+Backlog sekmesi: epik ve story'ler, kabul kriterleri, sorumlu ajan ve MVP etiketi.
+Mockup'lar: Nağmedar UI Mockup'ları tuvalinde 27 pano: 15 DeX ve tablet ekranı, 5 telefon ekranı, 3 oynatıcı paneli, durum ve etkileşim sayfaları, sistem yüzeyleri ve app ikonu. Test sonuçları: .
+Varsayımlar:
+Temel depo hesaplarimdijital-coder/vlc-android (videolan/vlc-android fork'u). libVLC çekirdeği değişeceği zaman hesaplarimdijital-coder/vlc fork'u kullanılır.
+"VLC" adı ve koni logosu VideoLAN'ın markasıdır. Uygulamanın adı Nağmedar; kodda ve paket adlarında ASCII karşılığı nagmedar kullanılır.
+LG B4'te filmler, harici disk TV'nin USB portuna takılarak TV'nin yerleşik oynatıcısıyla açılıyor.
+## Mevcut durum: kod tabanı
+Fork'unuz Android uygulaması değil, VLC çekirdeği (videolan/vlc, 4.0.0-dev, son commit 9 Ekim 2026). Android uygulaması için hesabınızdaki vlc-android fork'u (hesaplarimdijital-coder/vlc-android) kullanılacak. Native zincir şöyle: vlc-android → libvlcjni → vlc.
+ | 
+Depo | 
+Rol | 
+Durum (10 Ekim 2026)
+ | 
+hesaplarimdijital-coder/vlc | 
+libVLC çekirdeği (C, meson + autotools, bazı Rust parçaları) | 
+4.0.0-dev, VLC 4 henüz yayınlanmadı
+ | 
+videolan/vlc-android | 
+Android uygulaması (Kotlin, XML + DataBinding) | 
+3.7.2 Beta 3, varsayılan libVLC 3.7.7, forceVlc4 ile 4.0.0-eap29, targetSdk 36
+ | 
+libvlcjni (code.videolan.org) | 
+JNI köprüsü, VLC commit'ini sabitler | 
+compile.sh belirli bir hash'e kilitli
+ | 
+medialibrary | 
+C++ medya kütüphanesi + Java bağlamaları | 
+0.13.24 (VLC 3), 0.13.22-vlc4
+Uygulama büyüklüğü: ana modül 359 dosya, yaklaşık 71 bin satır, 166 layout. TV modülü yaklaşık 10,7 bin satır. Debug ve release derlemeleri Maven'daki hazır libvlc-all ve medialibrary-all AAR'larını kullanıyor. Bu yüzden UI işleri native derleme gerektirmez.
+VLC 4 çekirdeğinde hazır olan ama Android arayüzüne taşınmamış yetenekler:
+Çift altyazı seçimi, zorunlu altyazı dili, altyazıyı siyah bantlarda gösterme
+Önceki kareye gitme (kare kare geri)
+Sesin sürdüğü çıkış saati: ses geç ya da erken kalınca yeniden örnekleme yapılmaz
+Android AAudio düşük gecikme çıkışı, AImage/ASurfaceControl video çıkışı
+libplacebo/Vulkan video çıkışı, yerel HDR ton eşleme
+Radio Browser keşfi (radio.c, radio.videolan.org) ve podcast keşfi
+MP3 içindeki senkron şarkı sözlerini (SYLT) okuma
+Parametrik EQ, limiter, noise gate, EBU R128 ölçer, RNNoise, merkez kanal upmix
+HLS çıkışı, UPnP/DLNA renderer çıkışı, UPnP sunucu, projectM v4
+vlc-android'in bugünkü durumu:
+Var: A-B tekrar, yer imleri, ekran görüntüsü, yeni ekolayzer (3.7), ReplayGain, uyku zamanlayıcı, hız, OpenSubtitles arama, altyazı kodlaması, Chromecast, PiP, passthrough, uzaktan erişim (web), Android TV arayüzü.
+Kısmen var: 8 adaptörde sağ tık, oynatıcıda bazı VLC kısayolları (G/H altyazı gecikmesi, J/K ses gecikmesi, M, Space, oklar), tek bir isDex() kontrolü.
+Yok: Compose, Media3, WorkManager, üzerine gelme (hover) ve imleç değişimi, sistem kısayol yardımcısı, şarkı sözleri, radyo dizini, çift altyazı arayüzü, deinterlace arayüzü, bit-perfect ses API'si.
+Gizli fırsat: medialibrary'de podcast abonelikleri için MlService ve Subscription bağlamaları var, uygulama bunları hiç çağırmıyor.
+## Hedef platform: Tab S11 Ultra, DeX ve Android 16
+One UI 8 ile gelen yeni DeX, Android 16 masaüstü modunun üzerine kurulu ve uygulamaları yeniden boyutlandırılabilir pencerelerde açıyor (Android Authority). Bu yüzden ayrı bir "DeX modu" yazmak yerine, her pencere boyutuna ve hassas işaretçiye uyum sağlayan tek bir uygulama yazılmalı.
+ | 
+Özellik | 
+Tab S11 Ultra | 
+Tasarıma etkisi
+ | 
+Ekran | 
+14,6", 2960×1848, 120 Hz, HDR10+ | 
+Large/XL düzen, HDR10 ve HDR10+ doğrudan; Dolby Vision ekranda yok
+ | 
+İşlemci | 
+Dimensity 9400+, Immortalis-G925, 12/16 GB RAM | 
+Cihazda Whisper altyazı ve libplacebo shader'ları mümkün
+ | 
+Bağlantı | 
+USB-C 3.2, 3,5 mm jak yok, Bluetooth 5.4 | 
+Kayıpsız ses için USB DAC gerekli
+ | 
+Yazılım | 
+Android 16, One UI 8 | 
+targetSdk 36 kuralları geçerli
+ | 
+DeX | 
+4 çalışma alanı, harici monitörle genişletilmiş mod | 
+Çoklu pencere ve sürükle-bırak şart
+Kaynak: Samsung Newsroom, GSMArena.
+Android 16 kuralları: API 36 hedefleyen uygulamalarda büyük ekranlarda (en kısa kenar 600 dp ve üzeri) screenOrientation, resizeableActivity ve en-boy oranı sınırları yok sayılıyor. API 37'de çıkış yolu da kalkacak. Google Play, Ağustos 2026'dan itibaren API 36 hedefini zorunlu tutuyor (Android Developers Blog). Yani oynatıcıyı yatay moda kilitlemek artık çözüm değil.
+Düzen kararları pencere genişliği sınıflarına göre verilir, cihaz tipine göre değil (window size classes):
+ | 
+Genişlik sınıfı | 
+Aralık | 
+Nağmedar düzeni
+ | 
+Compact | 
+< 600 dp | 
+Telefon: alt gezinme, tam ekran oynatıcı, mini oynatıcı çubuğu
+ | 
+Medium | 
+600–840 dp | 
+Gezinme rayı + liste
+ | 
+Expanded | 
+840–1200 dp | 
+Ray + liste/detay iki bölme
+ | 
+Large | 
+1200–1600 dp | 
+Kenar çubuğu + içerik + inceleme bölmesi, menü çubuğu
+ | 
+Extra-large | 
+≥ 1600 dp | 
+DeX ve harici monitör: üç bölme, yoğun tablo görünümleri
+Giriş ve pencere gereksinimleri (desktop windowing rehberi, pointer interactions):
+Masaüstü arayüzüne geçiş, WindowManager'ın PRECISE_POINTER etkileşim modu algılandığında yapılır. Dokunmaya dönülünce arayüz geri esner.
+Sağ tık ve iki parmakla dokunma bağlam menüsü açar. Uzun basma yalnızca dokunmatikte kalır. Her ana iş yine sol tıkla yapılabilir olmalı.
+Üzerine gelme durumları, imleç değişimi, kısayolu gösteren ipuçları. İşaretçi hedefleri 48 dp dokunma hedefinden küçük olabilir.
+Klavye: VLC masaüstü kısayol haritası, Ctrl+K komut paleti, Tab ile odak sırası, Meta+/ sistem kısayol listesi için onProvideKeyboardShortcuts.
+Sürükle-bırak: Dosyalar uygulamasından çalma listesine ve oynatıcıya, altyazı dosyasını videonun üzerine, pencereler arasında (DRAG_FLAG_GLOBAL_SAME_APPLICATION).
+Başlık çubuğu: şeffaf caption bar, sekmeler ve arama caption alanına çizilir (getBoundingRects, setSystemGestureExclusionRects).
+Çoklu örnek: kütüphane bir pencerede, video başka pencerede (PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI). Oynatıcı için requestFullScreenMode.
+Not: Yeni DeX eski görev çubuğunu ve uygulama çekmecesini kaldırdı. Klavye-fare verimliliğini uygulama içindeki menü çubuğu ve komut paleti telafi etmeli.
+## Özellik farkı: VLC Desktop ve VLC Android
+En büyük açıklar altyazı araçlarında, video ve ses efektlerinde, medya bilgisinde ve internet servislerinde. Bu yeteneklerin çoğu VLC 4 çekirdeğinde zaten var. Asıl iş, onları Android arayüzüne ve libVLC API'sine taşımak.
+ | 
+Alan | 
+VLC Desktop (4.0-dev) | 
+VLC Android (3.7) | 
+Nağmedar hedefi
+ | 
+Altyazı | 
+Dosya ekleme, çift altyazı, zorunlu dil, stil, kodlama, VLsub | 
+Tek iz, gecikme, stil, kodlama, OpenSubtitles | 
+Çift altyazı, sürükle-bırak, senkron asistanı, cihazda yapay zekâ altyazısı ve çeviri
+ | 
+Senkronizasyon | 
+Ses ve altyazı gecikmesi, altyazı hızı ve süre çarpanı, Shift+H/J/K işaretleme | 
+Gecikme ayarı | 
+Tam senkron paneli, dosya başına kayıtlı gecikme
+ | 
+Video efektleri | 
+Renk ayarı, kırpma, döndürme, deinterlace modları, keskinleştirme, banding giderme, logo, yazı | 
+En-boy oranı ve yakınlaştırma | 
+GPU tabanlı efekt paneli (OpenGL/libplacebo)
+ | 
+Ses efektleri | 
+10 bant EQ, compressor, spatializer, stereo genişletici, pitch, parametrik EQ, limiter | 
+Yeni ekolayzer, ses yükseltme | 
+Grafik + parametrik EQ, compressor, limiter, kulaklık profilleri
+ | 
+Oynatma | 
+Kare kare ileri ve geri, A-B, kayıt, ekran görüntüsü, zamana atla, başlık ve program seçimi | 
+A-B, hız, yer imi, ekran görüntüsü, bölümler | 
+Kare kare geri, kayıt, zamana atla diyaloğu
+ | 
+Medya bilgisi | 
+Codec ayrıntıları, canlı istatistik (bit hızı, kayıp kare), meta düzenleyici | 
+Temel bilgi | 
+Canlı istatistik katmanı + TV Lab analizörü
+ | 
+Çalma listesi | 
+XSPF/M3U kaydet ve aç, sıralama, arama, sürükle-bırak | 
+Listeler ve sıra | 
+Sekmeli çoklu listeler, akıllı listeler, sıra paneli
+ | 
+İnternet | 
+Podcast aboneliği, Radio Browser, ağ akışı | 
+Ağ akışı, SMB/FTP/SFTP/NFS/UPnP | 
+Podcast, radyo dizini, radyo kaydı
+ | 
+Dönüştür ve yayınla | 
+Convert/Save, HTTP/RTSP/HLS yayın, DLNA renderer | 
+Chromecast | 
+Kayıpsız remux, DLNA renderer, HLS çıkışı
+ | 
+Arayüz | 
+Menü çubuğu, kısayol düzenleyici, kenar çubuğu, mini arayüz, kaplamalar | 
+Dokunmatik, sınırlı kısayol | 
+Menü çubuğu, kısayol düzenleyici, komut paleti, temalar
+ | 
+Görselleştirme | 
+projectM v4, spektrum | 
+Yok | 
+Spektrum, VU, projectM
+Kapsam dışı (şimdilik): Lua uzantıları, skins2 kaplamaları, yakalama aygıtları, DVB ve VLM. DVD/Blu-ray menüleri sonraki bir sürüme bırakıldı.
+## 4K remux ve LG OLED B4 takılması
+Bir Android uygulaması TV'nin yerleşik oynatıcısına yeni codec ekleyemez. Kalite kaybı olmadan gerçek çözüm şu: dosyayı ölçmek, B4'ün takıldığı parçayı bulmak ve yalnızca kapsayıcıyı, metadatayı ve ses/altyazı izlerini yeniden yazmak. Video akışı bit bit aynı kalır.
+B4 için doğrulanan bilgiler: α8 işlemci, webOS 24, HDR10, HLG ve Dolby Vision (HDR10+ yok), 2 adet USB 2.0, eARC HDMI 3'te. LG'nin resmi ses listesinde AC-4, AC-3, E-AC-3, AAC, MP3 ve PCM var; DTS, DTS:X ve TrueHD yok (LG OLED65B4 özellikleri). LG, DTS'yi 2023 OLED'lerde geri getirmiş, 2025 modellerinde yeniden kaldırmış (SVC). 2024 için kesin bilgi yok; sizin TV'nizde test edilene kadar desteklenmiyor sayılmalı. UHD Blu-ray toplam bit hızı 50, 66 ve 100 GB disklerde sırasıyla 82, 108 ve 128 Mbps'e kadar çıkar (VideoHelp).
+ | 
+Olası neden | 
+Uygulama nasıl ölçer | 
+Kalite kaybı olmadan çözüm
+ | 
+Dolby Vision Profil 7 (UHD BD çift katman) | 
+HEVC akışında EL birimleri ve RPU profili, MEL/FEL ayrımı | 
+P7 → P8.1: RPU dönüştürülür, EL atılır, temel katman kopyalanır (MakeMKV forumu)
+ | 
+B4'ün listelemediği ses (TrueHD, DTS, DTS-HD MA) | 
+Ses izlerinin codec'i ve varsayılan iz | 
+Orijinal iz eARC için korunur, yanına LPCM (kayıpsız, büyük) ya da E-AC-3 (küçük) uyumluluk izi eklenir, varsayılan iz değişir
+ | 
+Tepe bit hızı + USB 2.0 + HDD | 
+Paket düzeyinde 1 ve 5 saniyelik tepe bit hızı grafiği, diskten sıralı okuma testi | 
+Kullanılmayan ses ve altyazı izleri çıkarılır, MKV interleave düzeltilir, HDD yerine USB SSD önerilir
+ | 
+PGS (Blu-ray resim) altyazı | 
+Altyazı izi türü | 
+İsteğe bağlı OCR ile harici SRT üretilir; PGS izi ayrı tutulur
+ | 
+24p kare hızı (yalnızca tabletten HDMI ile oynatırken) | 
+İçerik fps ile ekran modu | 
+Surface.setFrameRate ve mod değişimi; desteklenmiyorsa TV oynatıcısı önerilir
+Dürüst sınırlar: MEL içeren filmlerde P8.1 dönüşümü pratikte kayıpsızdır. FEL içeren filmlerde 12-bit iyileştirme katmanı kaybolur. TrueHD'yi LPCM'e çevirmek 7.1 yatağı kayıpsız tutar ama Atmos nesnelerini atar. Bu yüzden orijinal iz her zaman dosyada kalır.
+"TV Lab" özelliği dört adımda çalışır:
+Analiz: kapsayıcı, codec profili ve seviyesi, HDR türü (HDR10, HDR10+, DV profili), ses ve altyazı izleri, bit hızı grafiği. Hedef profil: "LG OLED B4, webOS 24, USB".
+Plan: sorunları renkli bir raporla listeler ve her düzeltmenin kayıpsız olup olmadığını yazar.
+Kayıpsız remux: kendi derlediğimiz FFmpeg ve Rust'tan derlenmiş dovi_tool. İş kuyruğu ön planda çalışır ve harici diske SAF ile yazar. FFmpegKit Temmuz 2026'da arşivlendiği için hazır paket kullanılmaz (FFmpegKit).
+Doğrulama: video paketlerinin öncesi ve sonrası hash'i karşılaştırılır. Eşleşirse dosyaya "video bit bit aynı" rozeti verilir. DV metadatası ayrıca kontrol edilir.
+Tabletten TV'ye HDMI ile oynatma ikincil yoldur. Tab S11 Ultra Dolby Vision desteklemiyor; USB-C üzerinden HDR çıkışı ve 24p mod değişimi ayrı bir spike ile ölçülmeli.
+## Hi-Fi müzik: kayıpsız çıkış, lyrics ve AIMP seti
+Tab S11 Ultra'da kulaklık jakı olmadığı için kayıpsız dinleme USB DAC demek. Android normalde tüm sesleri karıştırır, yeniden örnekler ve yazılım sesi uygular. 16 ve 24-bit FLAC'ı değiştirmeden DAC'a ulaştırmanın iki yolu var; ikisi de yapılmalı ve çalışma anında seçilmeli.
+ | 
+Çıkış modu | 
+Nasıl çalışır | 
+Bit-perfect | 
+Not
+ | 
+Android 14+ bit-perfect API | 
+getSupportedMixerAttributes → setPreferredMixerAttributes (BIT_PERFECT), aynı formatta AudioTrack | 
+Evet, cihaz destekliyorsa | 
+Yalnızca USB. Ses DAC'ın donanım sesiyle ayarlanır. DSD için DoP açılır.
+ | 
+Kendi USB sürücüsü (UAPP yaklaşımı) | 
+UsbManager izni, libusb ile UAC1/UAC2 izokronik aktarım | 
+Evet | 
+Android ses sistemini tamamen atlar. Büyük native iş.
+ | 
+Yüksek çözünürlüklü AAudio/AudioTrack | 
+Kaynak örnekleme hızında 24/32-bit PCM | 
+Hayır, mikser devrede | 
+Yedek yol.
+ | 
+Bluetooth (LDAC vb.) | 
+Sistem codec'i | 
+Hayır | 
+Arayüz "kayıplı bağlantı" diye gösterir.
+Resmi bit-perfect yolu Android 14'te geldi ama üreticiler için isteğe bağlı (AOSP, Android Developers). Symfonium geliştiricisine göre Eylül 2024'te bunu yalnızca Pixel 9 uygulamıştı (Symfonium forumu). Samsung desteği doğrulanmadı; ilk spike bunu Tab S11 Ultra'da ölçecek. UAPP gibi uygulamalar kendi USB sürücüleriyle Android ses sistemini tamamen atlıyor (Audiophile Style).
+Bit-perfect koşulları: kaynak ve çıkış hızı aynı, yeniden örnekleme yok, EQ/ReplayGain/crossfade kapalı, yazılım sesi %100, karıştırma yok. Arayüzdeki "Sinyal yolu" paneli her aşamayı gösterir ve zincir bozulunca nedenini yazar.
+AIMP özellik seti ve Nağmedar karşılığı (AIMP Android, AIMP Windows):
+ | 
+Alan | 
+AIMP | 
+Nağmedar
+ | 
+Formatlar | 
+APE, FLAC, WV, MPC, TTA, OPUS, DSF/DFF, MOD/XM/IT/S3M, CUE | 
+Aynısı (FFmpeg/libVLC, tracker için libopenmpt)
+ | 
+Çıkış | 
+OpenSL, AudioTrack, AAudio; Windows'ta WASAPI Exclusive ve ASIO | 
+Bunlara ek olarak bit-perfect API ve USB doğrudan mod
+ | 
+DSP | 
+20 bant EQ (otomatik ayar), crossfade, ReplayGain ve tepe normalizasyonu, denge, 0,5–3× hız; Windows'ta reverb, flanger, chorus, pitch, tempo, echo | 
+20 bant grafik + parametrik EQ, kulaklık profilleri, gapless + crossfade, ReplayGain tarayıcı, efekt paketi
+ | 
+Listeler | 
+Çoklu liste, XSPF/M3U/M3U8/PLS, klasör listeleri, gruplama ve filtre, sıra, yer imleri; Windows'ta akıllı liste | 
+Aynısı + kural tabanlı akıllı listeler
+ | 
+Kütüphane | 
+Sanatçı, albüm, tür, klasör, istatistik, geçmiş; Windows'ta puanlama | 
+Aynısı + bit derinliği ve örnekleme hızı filtresi
+ | 
+Etiketler | 
+Etiket düzenleyici (kapak ve söz dahil); Windows'ta toplu düzenleme, dosya adından etiket, ReplayGain/BPM hesabı | 
+Kapsam dışı: etiketler başka bir uygulamayla düzenlenir (S-807 çıkarıldı, 14 Ekim 2026 kararı)
+ | 
+Ağ | 
+SMB v2/v3, WebDAV, FTP, radyo linkleri; Windows'ta podcast | 
+Aynısı + radyo dizini ve podcast aboneliği
+ | 
+Diğer | 
+Uyku zamanlayıcı, zil sesi kesici, Android Auto, widget, kaplamalar; Windows'ta dönüştürücü, alarm, kısayollar, Last.fm/ListenBrainz | 
+Aynısı + temalar ve tablet widget'ları
+Lyrics kaynakları öncelik sırasıyla: gömülü etiketler (USLT, SYLT, Vorbis LYRICS), dosyanın yanındaki .lrc, sonra LRCLIB (ücretsiz, MIT lisanslı, senkron söz veritabanı). VLC 4 çekirdeği MP3 içindeki SYLT'yi zaten okuyor. Görünüm: senkron satır vurgusu, satıra tıklayınca o ana atlama, ofset ayarı, kelime zamanlı LRC, dokunarak LRC oluşturma ve kaydetme. Musixmatch gibi ticari kaynaklar lisans gerektirdiği için kullanılmaz.
+## Altyazı, podcast ve radyo servisleri
+Tüm servisler ücretsiz ya da ücretsiz anahtarla kullanılabiliyor; tek ciddi kısıt OpenSubtitles'ın günlük indirme kotası. Radyo ve podcast için VLC 4 çekirdeği ve medialibrary'de hazır parçalar var.
+ | 
+Servis | 
+Nağmedar'da kullanım | 
+Erişim ve kurallar
+ | 
+OpenSubtitles.com REST API | 
+Hash, IMDb ve isimle altyazı arama ve indirme | 
+API anahtarı + kullanıcı girişi; ücretsiz hesapta günlük kota (forumda 20/gün bildirildi, Jellyfin forumu)
+ | 
+Cihazda Whisper (whisper.cpp) | 
+Konuşmadan altyazı üretme, ardından çeviri | 
+İnternet gerekmez. VideoLAN benzer bir özelliği CES 2025'te gösterdi, yayın tarihi yok (Notebookcheck)
+ | 
+Radio Browser | 
+İstasyon dizini: ülke, dil, tür, codec ve bit hızına göre arama | 
+Ücretsiz ve açık. Sunucu DNS ile seçilir, açıklayıcı User-Agent gönderilir, her dinlemede tık bildirimi yapılır
+ | 
+Podcast Index | 
+Birincil podcast arama, Podcasting 2.0 bölümleri ve transkriptleri | 
+Ücretsiz API anahtarı
+ | 
+iTunes Search API | 
+İkincil podcast arama | 
+Anahtar yok, dakikada yaklaşık 20 çağrı. Kapak görselleri için kullanım şartları kısıtlı
+ | 
+medialibrary MlService / Subscription | 
+RSS aboneliklerini saklama ve yenileme | 
+Bağlamalar mevcut, uygulama henüz kullanmıyor
+Altyazı özellikleri (Türkçe kullanım öncelikli):
+Windows-1254 / ISO-8859-9 otomatik algılama. Türkçe SRT'lerde ş, ğ ve ı bozulmasının ana nedeni bu.
+Çift altyazı (VLC 4 çekirdeği), siyah bantta gösterim, zorunlu altyazı dili.
+Senkron asistanı: sesi işaretle, altyazıyı işaretle, farkı uygula. Gecikme dosya başına hatırlanır.
+Videonun üzerine bırakılan altyazı dosyası anında yüklenir.
+Stil ön ayarları (yazı tipi, boyut, kontur, arka plan), SDH etiketlerini temizleme, ASS stilini zorlama ya da yok sayma.
+Radyo özellikleri: favoriler, son dinlenenler, ICY "şimdi çalıyor" bilgisi, akışı parçalara bölerek kayıt, radyoyla alarm, M3U/PLS içe aktarma.
+Podcast özellikleri: RSS ve OPML ile abonelik, Wi-Fi'de otomatik indirme, yeni bölüm bildirimi, podcast başına hız ve giriş atlama, bölüm ve transkript görünümü, kaldığı yerden devam.
+## Mimari kararlar (ADR)
+Temel karar: mevcut oynatma servisi ve medialibrary korunur, üzerine yeni bir Compose arayüzü ve müzik için ayrı bir native ses motoru eklenir. Video, radyo ve podcast libVLC 4'te kalır.
+ | 
+No | 
+Karar | 
+Gerekçe | 
+Alternatif
+ | 
+ADR-01 | 
+vlc-android fork'u, libVLC 4 hedefi (forceVlc4), test edilmiş commit'e sabitleme | 
+Çift altyazı, ses saati, AAudio, libplacebo, radyo ve SYLT yalnızca VLC 4'te | 
+libVLC 3.7: daha kararlı ama özellikler eksik
+ | 
+ADR-02 | 
+Yeni Compose modülü (:application:nagmedar-ui), ekranlar tek tek taşınır | 
+166 XML layout'u masaüstü sınıfına çevirmek daha pahalı | 
+Mevcut XML'i uyarlamak
+ | 
+ADR-03 | 
+Tek uyarlanabilir kabuk: genişlik sınıfı + PRECISE_POINTER ile yoğunluk seçimi | 
+DeX artık Android 16 pencerelemesi; ayrı DeX modu gereksiz | 
+Cihaz tipine göre ayrı arayüzler
+ | 
+ADR-04 | 
+Ortak giriş katmanı: ShortcutRegistry tek kaynak, bağlam menüsü modifier'ı, hover ve imleç, komut paleti | 
+Kısayol, menü etiketi, ipucu ve Meta+/ listesi aynı tablodan beslenir | 
+Ekran başına elle kısayol
+ | 
+ADR-05 | 
+PlaybackEngine arayüzü ve Media3 MediaSession'a geçiş | 
+İki motoru tek servis ve tek oturumla yönetmek, Android Auto ve kilit ekranı | 
+MediaSessionCompat'ta kalmak
+ | 
+ADR-06 | 
+Müzik için Nağmedar Ses Motoru (C++): FFmpeg/libFLAC çözücü, gapless, crossfade, DSP bypass, üç çıkış arka ucu | 
+Crossfade, gerçek gapless ve bit-perfect kontrolü libVLC'nin tek oynatıcı modelinde zor | 
+libVLC + özel Android aout modülü; spike sonucuna göre yedek
+ | 
+ADR-07 | 
+Medya araçları: kendi FFmpeg derlememiz + dovi_tool (Rust, cargo-ndk), WorkManager iş kuyruğu, SAF | 
+FFmpegKit arşivlendi; video akışına dokunmadan remux | 
+libVLC sout ile remux: DV metadatası zayıf
+ | 
+ADR-08 | 
+Veri: medialibrary (medya dizini), Room (podcast, radyo, lyrics önbelleği, dosya başına gecikme, akıllı liste kuralları), DataStore (ayarlar) | 
+Her veri türü doğru araçta | 
+Hepsini medialibrary'ye eklemek
+ | 
+ADR-09 | 
+Ağ istemcisi: OkHttp/Ktor, Nagmedar/x.y User-Agent, önbellek ve hız sınırı, API anahtarları derleme gizlisinde | 
+Radio Browser ve LRCLIB kurallarına uyum | 
+—
+ | 
+ADR-10 | 
+Yeni ad, applicationId ve ikon; GPLv2+ kaynak yayını | 
+VLC adı ve koni logosu VideoLAN markası | 
+—
+ | 
+ADR-11 | 
+CI: UI derlemeleri Maven AAR'larıyla, native derleme VideoLAN Docker imajında; telefon, tablet ve DeX genişliklerinde ekran görüntüsü testleri | 
+Hızlı geri bildirim, native derleme yalnızca gerektiğinde | 
+Her derlemede native
+Podcast ve radyo akışları da oynatma servisi üzerinden libVLC 4'te çalar; çevrim içi servisler yalnızca arama, abonelik ve metadata sağlar. Nağmedar Ses Motoru yalnızca yerel müzik kütüphanesini çalar.
+## Ajan kadrosu ve iş bölümü
+İşi 13 uzman ajan yapar; her biri .claude/agents/ altında tanımlanır, kendi git worktree'sinde çalışır ve story başına bir PR açar. Orkestratör sırayı yönetir; kodu yazan ajan kendi işini onaylamaz.
+ | 
+Ajan | 
+Sorumluluk | 
+Sahip olduğu epikler | 
+Model
+ | 
+orchestrator | 
+Backlog sırası, bağımlılıklar, iş dağıtımı, birleştirme kararı | 
+Tümü (koordinasyon) | 
+Opus
+ | 
+android-architect | 
+Modül sınırları, ADR'ler, PlaybackEngine ve Media3 geçişi | 
+E01, E05 | 
+Opus
+ | 
+native-libvlc | 
+libvlcjni ve VLC 4 çekirdeği, yeni JNI API'leri, native derleme | 
+E05, E06 ve E07 (çekirdek kısmı), E13 | 
+Opus
+ | 
+audio-engine | 
+Nağmedar Ses Motoru, bit-perfect API, USB sürücüsü, DSP, gapless, crossfade | 
+E09, S-613 (E06) | 
+Opus
+ | 
+ui-compose | 
+Tasarım sistemi, uyarlanabilir kabuk, tüm Compose ekranları | 
+E02, E03, E06, E10 (arayüz) | 
+Sonnet
+ | 
+desktop-input | 
+Kısayollar, sağ tık, hover, sürükle-bırak, çoklu pencere, caption bar | 
+E04 | 
+Sonnet
+ | 
+subtitles | 
+Altyazı araçları, OpenSubtitles, Whisper ve çeviri, kodlama algılama | 
+E07 | 
+Sonnet
+ | 
+media-lab | 
+TV Lab analizörü, FFmpeg ve dovi_tool derlemesi, remux ve doğrulama, cihaz profilleri | 
+E12 | 
+Opus
+ | 
+online-services | 
+Podcast, radyo, lyrics, MusicBrainz, scrobble | 
+E10 (lyrics), E11, E13 (ağ) | 
+Sonnet
+ | 
+library-data | 
+medialibrary entegrasyonu, Room şemaları, akıllı listeler | 
+E08 | 
+Sonnet
+ | 
+qa-perf | 
+Birim, UI ve ekran görüntüsü testleri, Macrobenchmark, bit-exact ses testleri, medya test seti | 
+E14 | 
+Sonnet
+ | 
+reviewer | 
+Bağımsız kod incelemesi, güvenlik ve lisans kontrolü; işi yazmamış olmalı | 
+Tüm PR'lar | 
+Opus
+ | 
+release-l10n | 
+Yeniden markalama, CI/CD, imzalama, Türkçe ve İngilizce metinler, sürüm notları | 
+E01, E15 | 
+Haiku
+Çalışma kuralları:
+Kod doğrudan fork'un master dalına gider; her story ayrı bir commit'tir. CI her push'tan sonra çalışır; kırmızı CI bir sonraki commit ile düzeltilir. Ekran görüntüleri ci/screenshots dalında incelenir, onaylananlar referans olarak commit'lenir. Cihaz gerektiren kabul ölçütleri (Tab S11 Ultra, LG B4, USB DAC) CI'da denenemez; bu story'ler cihazda doğrulanana kadar İncelemede kalır.
+Bitti tanımı: testler yeşil, telefon, tablet ve DeX genişliklerinde ekran görüntüsü testi, yeni lint uyarısı yok, kısayollar ShortcutRegistry'de kayıtlı.
+Native ve arayüz arası sözleşme önce Kotlin arayüzü ve sahte (stub) uygulama olarak yazılır. Böylece arayüz ajanları native işi beklemez.
+Paralel izler: arayüz ve giriş, oynatma ve native, ses motoru, çevrim içi servisler, TV Lab. QA sürekli çalışır.
+## MVP yol haritası
+Altı MVP var; ilk kullanılabilir sürüm MVP1 ve TV analizi de bu sürümde geliyor. Kayıpsız remux MVP3'te tamamlanıyor.
+Kapılar bir sonraki MVP'ye geçiş ölçütüdür. Ajan izleri paralel çalıştığı için bir MVP'nin işi öncekinin kapısından önce başlayabilir; örneğin ses motoru MVP0'daki spike'larla başlar.
+## Backlog özeti
+Backlog 15 epik ve 134 story'den oluşuyor; tüm story'ler, kabul kriterleri, sorumlu ajan ve durum sütunuyla  sekmesinde. MVP'lere dağılım: MVP0 22, MVP1 52, MVP2 26, MVP3 8, MVP4 14, MVP5 12 story.
+ | 
+Epik | 
+Ajanlar | 
+Story | 
+MVP
+ | 
+E01 Temel, markalama, spike'lar | 
+native-libvlc, release-l10n, android-architect, audio-engine, media-lab, subtitles | 
+11 | 
+MVP0
+ | 
+E02 Tasarım sistemi | 
+ui-compose | 
+9 | 
+MVP0–4
+ | 
+E03 Uyarlanabilir kabuk | 
+ui-compose, desktop-input, android-architect | 
+11 | 
+MVP0–1
+ | 
+E04 Masaüstü giriş | 
+desktop-input | 
+10 | 
+MVP0–1
+ | 
+E05 Oynatma çekirdeği | 
+android-architect, native-libvlc | 
+8 | 
+MVP0–1
+ | 
+E06 Video oynatıcı | 
+ui-compose, native-libvlc, desktop-input, audio-engine | 
+13 | 
+MVP1, MVP5
+ | 
+E07 Altyazı | 
+subtitles | 
+10 | 
+MVP1, MVP5
+ | 
+E08 Kütüphane, listeler, etiketler | 
+library-data | 
+9 | 
+MVP0–2
+ | 
+E09 Hi-Fi ses motoru | 
+audio-engine, ui-compose | 
+12 | 
+MVP2
+ | 
+E10 Müzik deneyimi ve lyrics | 
+ui-compose, online-services, media-lab | 
+10 | 
+MVP2, MVP4–5
+ | 
+E11 Podcast ve radyo | 
+online-services | 
+7 | 
+MVP4
+ | 
+E12 TV Lab | 
+media-lab | 
+10 | 
+MVP1, MVP3, MVP5
+ | 
+E13 Ağ, yayın, pro araçlar | 
+online-services, native-libvlc | 
+4 | 
+MVP4–5
+ | 
+E14 Kalite ve test | 
+qa-perf | 
+7 | 
+MVP0–3
+ | 
+E15 Yayın ve yerelleştirme | 
+release-l10n | 
+4 | 
+MVP1–3
+MVP1 en büyük paket; gerekirse "kütüphane + giriş" ve "oynatıcı + altyazı" diye ikiye bölünebilir.
+## Riskler, lisans ve açık sorular
+En büyük iki teknik risk, Samsung'da bit-perfect API'nin bulunmaması ve libVLC 4'ün henüz yayınlanmamış olması. İkisi de MVP0 spike'larıyla erken ölçülüyor.
+ | 
+Risk | 
+Etki | 
+Önlem
+ | 
+libVLC 4 henüz 4.0.0-dev | 
+Beklenmeyen regresyonlar | 
+Test edilmiş commit'e sabitleme, regresyon seti, bilinçli yükseltme
+ | 
+Tab S11 Ultra'da bit-perfect API yok | 
+Mikser yolunda ses değişir | 
+SP-01 ile ölç, SP-02 ile USB sürücüsünü dene, sinyal yolunda durumu açıkça göster
+ | 
+Kendi USB sürücüsü | 
+Büyük native iş; sürücü açıkken sistem sesleri DAC'tan gelmez | 
+Yalnızca kullanıcı açarsa; uyarı metni; DAC ayrılınca güvenli düşüş
+ | 
+FEL içeren DV filmler | 
+P8.1 dönüşümü tam kayıpsız değil | 
+Raporda açıkça yazmak, orijinali saklamak
+ | 
+B4'te DTS ve TrueHD durumu belirsiz | 
+Yanlış ses stratejisi | 
+Sizin TV'nizde test; cihaz profili düzenlenebilir
+ | 
+Uzun remux işleri | 
+Isınma, pil, SAF yazma hızı | 
+Ön plan iş, pil eşiği, kaldığı yerden devam, "yalnızca şarjda" seçeneği
+ | 
+Marka ve lisans | 
+VLC adı ve koni logosu kullanılamaz; uygulama GPLv2+ | 
+Yeniden markalama (S-002), lisans ekranı ve kaynak yayını (S-005)
+ | 
+API kotaları ve şartları | 
+OpenSubtitles kotası, iTunes görsel şartları | 
+Kendi anahtarlarımız, önbellek, kota göstergesi, Podcast Index birincil
+ | 
+Kapsam (134 story) | 
+Gecikme | 
+MVP kapıları; MVP1 ikiye bölünebilir
+Açık sorular:
+LG B4'te filmleri hep TV'nin kendi USB oynatıcısıyla mı açıyorsunuz, yoksa bazen tabletten HDMI ile mi?
+TV'ye eARC ile bağlı bir soundbar ya da AV alıcı var mı? Ses stratejisini bu belirler.
+Harici disk HDD mi SSD mi, dosya sistemi NTFS mi exFAT mı?
+Takılan 2–3 dosyanın MediaInfo çıktısı paylaşılabilir mi?
+Hangi USB DAC'ları kullanacaksınız? SP-01 için en az iki model gerekiyor.
+Uygulama adı ve dağıtım: Nağmedar, kişisel APK (karar 10 Ekim 2026).
+## Kaynaklar
+Kod: hesaplarimdijital-coder/vlc ve videolan/vlc-android, 10 Ekim 2026'da klonlanarak incelendi.
+Android Authority: One UI 8 ile yeni DeX
+Samsung Newsroom: Galaxy Tab S11 serisi
+GSMArena: Galaxy Tab S11 Ultra
+Android Developers Blog: Android 16 yönlendirme ve boyutlandırma
+Window size classes
+Support desktop windowing
+Design for desktop ve pointer interactions
+LG OLED65B4 özellikleri
+SVC: LG OLED'lerde DTS
+VideoHelp: UHD Blu-ray bit hızları
+MakeMKV forumu: dovi_tool ile P7 → P8
+FFmpegKit depo notu
+libplacebo: Dolby Vision desteği
+AOSP: USB için tercih edilen mikser özellikleri
+Android Developers: ses oynatmayı iyileştirme
+Symfonium forumu: USB DAC desteği
+Audiophile Style: USB Audio Player PRO
+AIMP Android özellikleri ve AIMP Windows özellikleri
+LRCLIB
+Radio Browser API
+Podcast Index API
+iTunes Search API
+Jellyfin forumu: OpenSubtitles kısıtları
+Notebookcheck: VLC yapay zekâ altyazıları
