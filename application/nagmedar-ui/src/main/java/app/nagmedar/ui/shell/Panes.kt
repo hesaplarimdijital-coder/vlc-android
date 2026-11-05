@@ -46,6 +46,7 @@ import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /** The window's width class, provided by the shell; outside it (previews, tests) it follows the configuration. */
 val LocalWidthClass = compositionLocalOf<WidthClass?> { null }
@@ -165,7 +166,8 @@ fun <K : Any> ListDetailPanes(
         if (open) retained = detail
         when {
             side -> {
-                depth.stand(open)
+                // the phone's transition stands where this one goes, without holding it up (it waits for a composition)
+                launch { depth.stand(open) }
                 progress.animateTo(if (open) 1f else 0f, if (open) motion.emphasized() else motion.emphasizedExit())
             }
             phone -> {
@@ -173,7 +175,7 @@ fun <K : Any> ListDetailPanes(
                 depth.drive(open, animated)
             }
             else -> {
-                depth.stand(open)
+                launch { depth.stand(open) }
                 state.show(open = open, motion, tier)
             }
         }

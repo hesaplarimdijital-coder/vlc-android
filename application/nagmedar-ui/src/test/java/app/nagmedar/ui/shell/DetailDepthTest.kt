@@ -197,29 +197,38 @@ class DetailDepthTest {
         }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        assertTrue("the way runs back from where it was, no jump: $before → $lefts", lefts.isNotEmpty() && abs(lefts.first() - before) < 8f)
+        // (the opening moves on in the frame the change arrives in, about 8 dp at that speed, then it turns)
+        assertTrue("the way runs back from where it was, no jump: $before → $lefts", lefts.isNotEmpty() && abs(lefts.first() - before) < 12f)
         assertTrue("it runs back towards the end: $lefts", lefts.zipWithNext().all { (a, b) -> b >= a - 0.5f })
         compose.onNodeWithTag("detail").assertDoesNotExist()
         assertEquals(0f, bounds("list").left.value, 0.5f)
         assertEquals(411f, bounds("list").let { (it.right - it.left).value }, 0.5f)
     }
 
+    /** A list whose row has a cover, and a detail with the same cover larger and lower. */
+    private val coverList: @Composable () -> Unit = {
+        Column(Modifier.fillMaxSize()) {
+            Box(Modifier.detailSharedElement("cover").size(56.dp).background(Color.Red).testTag("row-cover"))
+        }
+    }
+
+    private val coverDetail: @Composable (String) -> Unit = {
+        Column(Modifier.fillMaxSize().testTag("detail")) {
+            Spacer(Modifier.height(120.dp))
+            Box(Modifier.detailSharedElement("cover").size(200.dp).background(Color.Blue).testTag("page-cover"))
+        }
+    }
+
+    /** The node tagged [tag] in dp (left, top, width), while it is there. */
+    private fun rect(tag: String): Triple<Float, Float, Float>? =
+        compose.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()?.boundsInWindow?.let {
+            val d = compose.density.density
+            Triple(it.left / d, it.top / d, it.width / d)
+        }
+
     @Test
     fun theCoverFliesFromTheRowToItsPlaceInTheDetail() {
-        show(
-            shared = true,
-            list = {
-                Column(Modifier.fillMaxSize()) {
-                    Box(Modifier.detailSharedElement("cover").size(56.dp).background(Color.Red).testTag("row-cover"))
-                }
-            },
-            content = {
-                Column(Modifier.fillMaxSize().testTag("detail")) {
-                    Spacer(Modifier.height(120.dp))
-                    Box(Modifier.detailSharedElement("cover").size(200.dp).background(Color.Blue).testTag("page-cover"))
-                }
-            },
-        )
+        show(shared = true, list = coverList, content = coverDetail)
         compose.mainClock.autoAdvance = false
         compose.runOnIdle { detail = "Albüm" }
         val widths = mutableListOf<Float>()
@@ -233,16 +242,54 @@ class DetailDepthTest {
         assertEquals(200f, place("page-cover")!!.second, 0.5f)
     }
 
+    /** The strips showed it: after a gesture given up, the detail's cover stayed at the row's place and size. */
+    @Test
+    fun aGestureGivenUpPutsTheCoverBackAndASecondOneStillCloses() {
+        detail = "Albüm"
+        show(shared = true, list = coverList, content = coverDetail)
+        val rest = rect("page-cover")!!
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        compose.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(back(0f))
+            dispatcher.dispatchOnBackProgressed(back(0.3f))
+        }
+        compose.waitForIdle()
+        compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(0.6f)) }
+        compose.waitForIdle()
+        compose.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        compose.waitForIdle()
+        assertEquals("Albüm", detail)
+        val again = rect("page-cover")!!
+        assertEquals("the cover's size is its own again", rest.third, again.third, 0.5f)
+        assertEquals("the cover is back in its place", rest.first, again.first, 0.5f)
+        assertEquals("the cover is back in its place", rest.second, again.second, 0.5f)
+        compose.onNodeWithTag("list").assertDoesNotExist()
+        // the same gesture again, let go: it closes, and the row's cover is the row's
+        compose.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(back(0f))
+            dispatcher.dispatchOnBackProgressed(back(0.3f))
+        }
+        compose.waitForIdle()
+        compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(0.6f)) }
+        compose.waitForIdle()
+        compose.runOnUiThread { dispatcher.onBackPressed() }
+        compose.waitForIdle()
+        assertNull(detail)
+        compose.onNodeWithTag("detail").assertDoesNotExist()
+        assertEquals(56f, rect("row-cover")!!.third, 0.5f)
+        assertEquals(0f, rect("row-cover")!!.second, 0.5f)
+    }
+
     @Test
     fun withReducedMotionTheDetailSimplyAppears() {
         show(tier = null, reduced = true)
         compose.mainClock.autoAdvance = false
         compose.runOnIdle { detail = "Albüm" }
-        repeat(3) { frame() }
+        repeat(4) { frame() }
         assertEquals(0f, bounds("detail").left.value, 0.5f)
         compose.onNodeWithTag("list").assertDoesNotExist()
         compose.runOnIdle { detail = null }
-        repeat(3) { frame() }
+        repeat(4) { frame() }
         compose.onNodeWithTag("detail").assertDoesNotExist()
         compose.mainClock.autoAdvance = true
     }

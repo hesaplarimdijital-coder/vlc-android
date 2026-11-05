@@ -344,6 +344,13 @@ internal class DepthState(open: Boolean) {
     var undoing by mutableStateOf<Job?>(null)
 
     /**
+     * A run back is on its way. Observable, unlike [undoing]'s job: once it is over the depth leaves the
+     * shared elements' layout (a job's end alone recomposes nothing, and the layout stayed with its sides'
+     * transitions gone stale: the detail's cover drawn at the list's place).
+     */
+    var runningBack by mutableStateOf(false)
+
+    /**
      * At the end of a run back the side that was on its way lets its shared elements go before the transition
      * stands still: in between, their partners would wait for an overlay that no longer draws them.
      */
@@ -361,7 +368,7 @@ internal class DepthState(open: Boolean) {
     /** Something moves, or is about to: [open] is where the app wants the detail. */
     fun moving(open: Boolean): Boolean =
         open != seekable.currentState || seekable.targetState != seekable.currentState || transition.isRunning ||
-            gestureClose || dropped || undoing?.isActive == true
+            gestureClose || dropped || runningBack
 
     /** [side] was on its way when the transition was run back, and lets its shared elements go. */
     fun held(side: DetailSide): Boolean = dropped && (side == DetailSide.Detail) != seekable.currentState
@@ -405,6 +412,7 @@ internal class DepthState(open: Boolean) {
 
     /** The transition run back to where it came from on [spec]; then the side on its way lets go, and it stands still. */
     suspend fun undo(spec: FiniteAnimationSpec<Float>) {
+        runningBack = true
         try {
             seekable.runBack(spec)
             dropped = true
@@ -414,10 +422,10 @@ internal class DepthState(open: Boolean) {
             seekable.snapTo(seekable.currentState)
             // the content that was on its way leaves with this composition; only then may the next transition share
             withFrameNanos { }
+        } finally {
+            // together: the layout is left in the composition that would let the dropped side's elements back
             dropped = false
-        } catch (e: CancellationException) {
-            dropped = false
-            throw e
+            runningBack = false
         }
     }
 
@@ -831,7 +839,8 @@ fun <T : Any> DetailTransition(
             state.stand(open)
             depth.drive(open, animated)
         } else {
-            depth.stand(open)
+            // the phone's transition stands where this one goes, without holding it up (it waits for a composition)
+            launch { depth.stand(open) }
             state.show(open, motion, tier)
         }
         if (!open) {
