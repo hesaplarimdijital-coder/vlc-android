@@ -419,3 +419,13 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
 - 15:20 PR #98 landed: master 1e6a657 (walk split tablet/phone per API + summary, system ANRs skipped, drag(), audio-only
   test media). Evidence on 1e6a657: debug 35/37.0 4 jobs 0 failed, personal 35 both jobs 0 failed (Auto check ok). Brief 0000
   got the new evidence branch names. Told platform, library-fast, auto-radio agents to merge master.
+- 15:55 PR #99 platform landed: master 6d8c86e. TV + moviepedia out; minSdk 34; AGP 9.4.1, Gradle 9.8.2, Kotlin 2.4.20,
+  Compose BOM 2026.09.00, navigation 2.10.2 (predictivePop* = page pops), Haze 2.0.1, Robolectric 4.17; Java 17 bytecode;
+  263/267 screenshots identical (4 About refs: libraries 73 → 71); 8 walk jobs green; frames no regression (list scroll p50
+  38 vs 48 ms). Decided myself: keep uncompressed dex (minSdk 34 default; personal APK 87.6 → 97.2 MB download, smaller
+  installed, faster load). Note: Compose 1.12 dropped the fling speed setting: player flick threshold now 125 dp/s (kit's).
+- 16:05 launched (opus) story/motion-base (2a: #44 #45 #46 #47 #60 + MotionStripsTest frame strips), story/shell-chrome
+  (2b-1: #5 #6 #7 #24 #25 #29 + #62 glass modes off by default with real emulator screenshots A/B/C, phone walk in 3-button
+  nav), story/components (3: #8 #10 #22 #26 #27 #33 #37 #38 #39 #53 #55 #56 #64 #65 + DeX Ctrl+A / Tab focus behind layers).
+  Next after 2a + 2b-1: 2b-2 (player single surface #52 #48 #35, sheet carry-out #49 #50, detail depth #51, listAppear #54,
+  tab predictive Back #59, WindowPlayer drag + lyrics, "0:00"), then 3's #31/#63, Part 4, Android 17.

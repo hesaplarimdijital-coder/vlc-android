@@ -59,3 +59,33 @@
   "… eklendi" diyor, program Programlarım'da çıkıyor  - [ ] Arama "Yeni podcastler" başlığı altında abone olunmamış programları
   gösteriyor  - [ ] Devam eden bölümler en son dinlenen başta
 - Next: radio piece (Ülkeler, Diller, top lists, Favorilere ekle as a browse action: reuse CarCatalog.act/CarActions).
+
+## auto-radio, Radio piece (agent 6, 5 Nov 17:55) — story/auto-radio, PR #102 (draft), HEAD 8a928f22
+- Radyo tab = Favoriler (Grid) · Son dinlenenler (Grid, string nag_auto_recent_stations) · Ülkeler (CarIds.RADIO_COUNTRIES) ·
+  Diller (LANGUAGES) · Kategoriler (TAGS, now rows) · En çok dinlenenler (MOST_LISTENED, clickcount) · En çok beğenilenler
+  (MOST_LIKED, votes). Country → CarIds.radioCountry(ISO) (CarKind.Country), language → CarIds.language(directory name).
+- Ülkeler: RadioDirectory.countries() (merged by ISO code), device's first (AppCarData.homeCountry: network → SIM → language
+  region → default), then Collator of the UI locale; count subtitle (plural nag_auto_stations, TR "radyo"). Diller: the app's
+  language first (RadioLabels.languageCode), ≤100, one per localized name.
+- Station lists = CarTree.listed(): StationQuery(order Popularity|Votes, filters), page of 100 asked as limit 101 →
+  last row "Daha fazla radyo" = CarIds.page(list, p+1). AppCarData.stations(query) keeps pages 30 min (≤40), countries/
+  languages/tags 6 h, every station seen by UUID (≤5000) for knownStation(); marks (favourite, row) via RadioLibrary.marks.
+- Empty/offline/busy lines: NoFavourites, NoRecentStations, NoStations (nag_radio_*_title reused), RadioOffline, RadioBusy.
+- Favourites: CarActions.FAVOURITE / UNFAVOURITE (both in the root list; a station carries one of them by Station.favourite).
+  AppCarCatalog.act → CarTree.favourite(id, on) → CarData.favourite → RadioLibrary.favourite (the Radio page's path, keeps the
+  directory's data); message nag_auto_favourite_added/removed, tells FAVOURITES, RESULT_REFRESH_ITEM (CarTree.item reads a
+  station under the same id). DB failure → nag_radio_failed message.
+- Station ids: directory stations are ALWAYS CarIds.directoryStation(uuid,n,u,l) now (CarTree.stationId), so an entry survives
+  pruneUnused(); imported ones stay CarIds.station(row). Old $RADIO/station/<id> ids still play. Playing a directory station:
+  CarPlay.Radio(knownStation ?: what the id carries) → RadioPlayer.start (click counted as before). STATIONS_RECENT told on play.
+- Rows in a country's list omit the country; in a category the category (subtitle = other tag).
+- Tests: CarRadioTest (17: tab, countries order, paging, languages, top lists, empty/offline/busy, favourites both ways, ids,
+  search groups), CarTreeTest updated; harness $SCRATCH/agents/auto-radio/harness (85 OK). AutoBrowseTest: root has the 3
+  actions, Radio's 7 lists + first country answer, stations offer a favourite action. Personal walk run 42037664381 (3b05165,
+  API 35): phone + tablet + summary GREEN, Auto check step 87 OK (43 s). CI 3b05165 all green (267 screenshots same).
+- Device checks: - [ ] Auto › Radyo'da yedi liste: Favoriler, Son dinlenenler, Ülkeler, Diller, Kategoriler, En çok dinlenenler,
+  En çok beğenilenler  - [ ] Ülkeler'de Türkiye başta, istasyon sayılarıyla; Türkiye'den bir radyo çalıyor  - [ ] Bir ülkenin
+  listesi en çok dinlenenle başlıyor, sonunda "Daha fazla radyo" sonraki sayfayı açıyor  - [ ] Bir radyodaki yıldız simgesi
+  "… favorilere eklendi" diyor, radyo Favoriler'de çıkıyor; yeniden basınca çıkarıyor  - [ ] Diller'de Türkçe başta
+  - [ ] Arama gruplu: müzik, programlar, yeni podcastler, radyolar; "Hey Google, Radyo Eksen'i aç" çalıyor
+- Left of Auto: nothing of the prompt's §2; TV's TVSearchProvider still inlines APP_ID (TV only, noted in #97).

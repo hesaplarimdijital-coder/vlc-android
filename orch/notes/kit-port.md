@@ -46,3 +46,45 @@ PR A ready: #74 ee7d6785 (all CI jobs green; screenshots 251 same — Robolectri
 - `moreActionsLabel(name)` = "<ad> için diğer işlemler" (nag_more_actions_for); MoreButton's default.
 - ViewAnimators.kt and SystemMotion deleted (no View animators left).
 - Tests: components/PlayerAndSheetTest (composed once, drag from artwork, lyrics overscroll, closed sheets no overlay), perf/RecompositionTest, MusicLibraryTest Recent.
+
+
+## 2.3 port — Part 1 (platform) (story/platform, PR #99) - NOTES FOR THE NEXT PARTS
+- Platform now = Desktop Kit 2.3.0's: AGP 9.4.1 (+ settings.gradle com.android.settings), Gradle 9.8.2 (compile.sh sha
+  21bd5da2…9607; CI caches gradle-9.8.2), Kotlin 2.4.20 (+ Compose compiler plugin), KSP 2.3.11, coroutines 1.11.0, Compose
+  BOM 2026.09.00 (1.12.1), activity-compose 1.13.0, navigation-compose 2.10.2, lifecycle-compose 2.11.0, Haze 2.0.1
+  (haze + haze-blur), Robolectric 4.17 (tests still sdk=34; `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED` in ui,
+  data, session, audio). builtInKotlin/newDsl still false; VLC modules keep their own AndroidX versions. Java/Kotlin
+  bytecode 17 (build.gradle targetJVM): Compose 1.12 inlines Java 11 bytecode, 1.8 cannot.
+- minSdk 34 for both libVLC branches; the ~60 now-dead SDK checks are still there: delete the ones you touch.
+- Gone: application/television, application/moviepedia (+ Retrofit, colour picker, leanback-preference, the TV search
+  provider and its authority, 62 drawables, 52 strings). RetiredWork flag "moviepedia" deletes moviepedia_database and the
+  sort keys (MOVIEPEDIA_KEYS, also left out of backups). leanback (base lib) stays for the classic player's options panel.
+- Kotlin 2.4 turns "always false is-check" and "reified intersection" into errors (fixed: NagmedarDatabase.recreate's
+  arrayOf<Any>, HeaderMediaListActivity, BaseBrowserFragment). Expect the same in new code.
+- theme/Glass.kt: `glass()` uses Haze 2's `hazeBlur(HazeInput.Sources(source), style)`, `GlassMaterial.blurStyle()`
+  (one HazeBlurStyle per material, remembered). HazeState()/hazeSource unchanged. App still GlassMode.Solid.
+- components/ExpandablePlayer.kt: `AnchoredDraggableState(initialValue)`; release rules = `playerFlingBehavior(state)`
+  (AnchoredDraggableDefaults.flingBehavior, half way, NagMotion.gesture()) passed to both anchoredDraggable modifiers;
+  expand()/collapse() animate with NagMotion.gesture() explicitly; PlayerSheetScope.fling + private settle(velocity)
+  (anchoredDrag + ScrollScope + performFling, as the kit's PlayerPull). Fling speed is Compose's own (125 dp/s,
+  AnchoredDraggableMinFlingVelocity) instead of the old 400 dp/s: no API sets it any more. Part 2's #44/#48/#52/#66 build here.
+- shell/NagmedarShell.kt: NavHost `predictivePopEnterTransition/ExitTransition` = the shell's popEnter/popExit (swipe edge
+  ignored); without it navigation 2.10 plays its own scale-to-70 %. Part 2's phone gesture (#59) replaces these lambdas.
+- Compose 1.12 deprecations fixed: LocalClipboardManager → platform ClipboardManager (lab report, lyrics import),
+  focusProperties `exit` → `onExit { cancelFocusChange() }` (ModalLayer). Other UI warnings are the old ones.
+- Screenshots: Compose 1.12 + Robolectric 4.17 draw all 267 exactly as master's own run (ci/screenshots of 60fd901). 91
+  references differ from master's own rendering by < 0.1 % (stale since before this part, e.g. the floating player card
+  #F8F9FA vs surfaceRaised #FFFFFF): a part that needs a clean baseline should take ci/screenshots of master once.
+- APK: minSdk ≥ 28 makes AGP store dex uncompressed: personal arm64 87.6 → 97.2 MB (install size smaller, download
+  same). The delivery splits at 90 MB, so fine; `packaging { dex { useLegacyPackaging true } }` would restore the old size.
+- Baseline Profile regenerated (ci/baseline-profile 9513466): 45,966 rules, startup 22,571; phone player 5/6 as in 1.0.2.
+- Walks of 6d8c86e (the split walk, master 1e6a657 merged): debug and personal, API 35 and 37.0, tablet and phone: all
+  8 jobs passed (0 app crash, every check ok; Auto's AutoBrowseTest OK on both personal walks; the system's gms ANRs only
+  recorded). Frames are noisy on swiftshader (same app, list p50 38-57 ms on API 35): a paired phone-en API 35 run,
+  branch vs master's app via inputs[ref], gave list 38 ms/31.6 % janky vs 48/55.4, drag up 81/76.3 vs 77/84.6, down
+  46/69.1 vs 61/81.1. Compare frames only within one dispatch, never across runners.
+- The old walk's two failures on this branch were the walk's, not the app's: "the trail names the drive" (debug 37.0,
+  9a4328e) = the 30 s tone ended between the dump that saw the big player and Back, so Back left This device (the guard
+  reads the dump before the screenshot; the tone plays ~28-36 s before Back on every runner); "a drag down from the
+  sheet's middle" (personal 37.0, d343c65) = 1.0.2's input-swipe stall (release.md "## 1.0.3 walk"). Both passed on the
+  split walk. A longer tone.mp3 (60 s) would remove the first race for good.
