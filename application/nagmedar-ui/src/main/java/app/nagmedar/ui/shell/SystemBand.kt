@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -61,6 +63,19 @@ fun rememberWindowRootInsets(belowCaption: Boolean, shellDrawsNavigation: Boolea
 
 /** The root's insets, for the shell (the band, the bottom padding) and the full-window players' backdrops; null outside the app's root. */
 val LocalWindowRootInsets = staticCompositionLocalOf<WindowRootInsets?> { null }
+
+/**
+ * The app's window root (1.0.3): pads the window's insets ([rememberWindowRootInsets]) around
+ * [content]; with [shell] the navigation bar at the window's bottom is left to the shell inside
+ * ([LocalWindowRootInsets]), without it (the first run) it is padded as well.
+ */
+@Composable
+fun WindowRoot(shell: Boolean, belowCaption: Boolean, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val insets = rememberWindowRootInsets(belowCaption = belowCaption, shellDrawsNavigation = shell)
+    Box(modifier.windowInsetsPadding(insets.padding)) {
+        if (shell) CompositionLocalProvider(LocalWindowRootInsets provides insets, content = content) else content()
+    }
+}
 
 /** [safe] without the [navigationBottom] the shell draws behind. */
 private class RootPadding(private val safe: WindowInsets, private val navigationBottom: WindowInsets) : WindowInsets {

@@ -209,9 +209,8 @@ fun NagmedarShell(
     // the phone's one bottom glass, for the user's decision: behind the mini player, the bottom bar and the band
     val colors = NagTheme.colors
     val onBottomGlass = chromeGlass != ChromeGlass.Solid && navKind == NavKind.BottomBar && !contentOnly
-    val bottomGlass: (@Composable () -> Modifier)? = if (!onBottomGlass) null else {
-        { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
-    }
+    val glassSurface: @Composable () -> Modifier = { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
+    val bottomGlass = glassSurface.takeIf { onBottomGlass }
     // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
     val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)
     // the tab lit: the one whose pages are on screen (none on the search page)
@@ -303,8 +302,7 @@ fun NagmedarShell(
                         BottomNavBar(
                             selected,
                             navigator::selectTab,
-                            onGlass = onBottomGlass,
-                            Modifier
+                            modifier = Modifier
                                 .onSizeChanged {
                                     scroll.maxOffsetPx = it.height.toFloat()
                                     metrics.navPx = it.height
@@ -315,6 +313,7 @@ fun NagmedarShell(
                                     alpha = if (playerOver) 0f else 1f
                                 }
                                 .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier),
+                            onGlass = onBottomGlass,
                         )
                     }
                     NavKind.Rail -> NavRail(selected, navigator::selectTab)

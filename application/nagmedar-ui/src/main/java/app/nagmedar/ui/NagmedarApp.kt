@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -155,9 +154,8 @@ import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.DebugChrome
-import app.nagmedar.ui.shell.LocalWindowRootInsets
+import app.nagmedar.ui.shell.WindowRoot
 import app.nagmedar.ui.shell.rememberCaptionBar
-import app.nagmedar.ui.shell.rememberWindowRootInsets
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.DropOverlay
 import app.nagmedar.ui.shell.LocalPaneWidths
@@ -212,22 +210,20 @@ fun NagmedarApp(
         // 1.0.3 (Desktop Kit 2.0): the shell draws behind the navigation bar at the window's bottom (the three buttons, the
         // gesture handle) and keeps its controls above it; the first run, outside the shell, stays above it as before.
         // Decided here, in composition, so the shell's first frame already sits on the bar (no gap under it at first launch)
-        val rootInsets = rememberWindowRootInsets(belowCaption = caption != null, shellDrawsNavigation = prefs.firstRunDone)
-        Box(
-            Modifier
+        WindowRoot(
+            shell = prefs.firstRunDone,
+            belowCaption = caption != null,
+            modifier = Modifier
                 .fillMaxSize()
                 .background(NagTheme.colors.background)
                 // the test tags as resource ids, for UI Automator and the macrobenchmarks (S-1404)
                 .semantics { testTagsAsResourceId = true }
-                .trackInputMode(inputMode)
-                .windowInsetsPadding(rootInsets.padding),
+                .trackInputMode(inputMode),
         ) {
             if (prefs.firstRunDone) {
                 // Ctrl and Shift held with a click select several items (S-405)
-                CompositionLocalProvider(LocalWindowRootInsets provides rootInsets) {
-                    TrackClickModifiers {
-                        NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown, caption)
-                    }
+                TrackClickModifiers {
+                    NagmedarMain(prefs, onOpenFile, onActionsReady, requestedDestination, onDestinationShown, caption)
                 }
             } else {
                 FirstRunHost(prefs, onDone = {})
