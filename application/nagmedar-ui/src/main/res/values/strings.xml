@@ -1267,6 +1267,13 @@
     <string name="nag_alarm_exact_off">Android does not let Nağmedar ring at the exact minute: the alarm may come a few minutes late.</string>
     <string name="nag_alarm_exact_allow">Allow</string>
     <string name="nag_alarm_try">Try it now</string>
+    <!-- Android 17: the alarm's page over the lock screen, which starts the music -->
+    <string name="nag_alarm_channel">Alarm</string>
+    <string name="nag_alarm_ringing">The alarm is ringing. Tap to start the music.</string>
+    <string name="nag_alarm_stop_music">Stop the music</string>
+    <string name="nag_alarm_keep_playing">Keep playing</string>
+    <string name="nag_alarm_page_notifications">On Android 17 the alarm\'s music is started by its page, which comes with a notification: allow Nağmedar\'s notifications.</string>
+    <string name="nag_alarm_page_full_screen">Without full-screen notifications the alarm\'s page does not open over the lock screen by itself: the alarm waits for your tap.</string>
     <!-- S-808: ratings and play counts -->
     <string name="nag_column_rating">Rating</string>
     <string name="nag_column_skips">Skips</string>

@@ -5,6 +5,8 @@
     <!-- S-1007: the alarm rings at its minute; Android 13 and later grant this to an alarm clock -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Android 17: the alarm's page opens over the lock screen at its time (sleep/AlarmScreen.kt) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <!-- S-1010: the converter runs as a foreground job: media processing on Android 15 and later, data sync before -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -68,6 +70,18 @@
         <receiver
             android:name="app.nagmedar.ui.sleep.AlarmReceiver"
             android:exported="false" />
+        <!-- Android 17: the alarm's page, over the lock screen, which starts the music (an app that targets 17 makes no
+             sound from the background the user did not start); its own task, out of the recent apps -->
+        <activity
+            android:name="app.nagmedar.ui.sleep.AlarmActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|keyboard|keyboardHidden|navigation|uiMode|fontScale"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Nagmedar"
+            android:turnScreenOn="true" />
         <receiver
             android:name="app.nagmedar.ui.sleep.AlarmRescheduler"
             android:exported="false">

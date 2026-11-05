@@ -37,6 +37,15 @@ object Alarms {
     private const val REQUEST = 1007
     const val ACTION_RING = "app.nagmedar.action.ALARM"
 
+    /** On the alarm page's intent: it was opened by the alarm ringing, and starts its music. */
+    const val EXTRA_RING = "app.nagmedar.extra.ALARM_RING"
+
+    /**
+     * Android 17, an app that targets it ([sdk], [targetSdk] 37 or later): music started from the background without
+     * the user is silenced, and an alarm's is: it rings through its page ([AlarmActivity]), which starts the music.
+     */
+    fun ringsThroughPage(sdk: Int, targetSdk: Int): Boolean = sdk >= 37 && targetSdk >= 37
+
     fun load(context: Context): Alarm = Alarm.decode(Settings.getInstance(context).getString(NAGMEDAR_ALARM, null))
 
     /** [alarm] kept and set (or taken off the system's clock when it is off). */
@@ -88,10 +97,11 @@ object Alarms {
         }
     }
 
-    /** The alarm rings: the next one set first, then the music. */
+    /** The alarm rings: the next one set first, then the music (Android 17: its page, which starts the music). */
     fun ring(context: Context) {
         val alarm = load(context)
         if (alarm.days.isEmpty()) save(context, alarm.copy(enabled = false)) else schedule(context, alarm)
+        if (ringsThroughPage(Build.VERSION.SDK_INT, context.applicationInfo.targetSdkVersion) && AlarmNotification.post(context)) return
         play(context, alarm)
     }
 
