@@ -269,13 +269,14 @@ class PlayerMotionTest {
             if (p <= 0f || p >= 1f) return@repeat
             val surface = PlayerSurface.bounds(p, player.collapsedTop, rest.height, window.width.toFloat(), window.height.toFloat(), CARD_X * density, CARD_Y * density)
                 .translate(rest.left, overlayTop + player.collapsedTop * (1f - p))
-            if (surface.right + 4f >= window.width - 1) return@repeat
+            // across its top edge: above it the screen (beside the card, at the strip's height, the shell's own bottom glass
+            // lies: the card on the glass is that glass, its rule apart)
+            if (surface.top - 4f <= overlayTop) return@repeat
             val bitmap = shot()
-            val middle = surface.top + surface.height / 2f
-            val beside = bitmap.at(surface.right + 4f, middle)
+            val above = bitmap.at(surface.center.x, surface.top - 4f)
             assertFalse(
-                "frame $frame (p=$p): the glass under the page's colour stands out from the screen beside it, at $surface",
-                near(bitmap.at(surface.right - 4f, middle), Color(beside)),
+                "frame $frame (p=$p): the glass under the page's colour stands out from the screen above it, at $surface",
+                near(bitmap.at(surface.center.x, surface.top + 4f), Color(above)),
             )
             checked++
         }
