@@ -18,8 +18,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,6 +44,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +55,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -126,8 +125,11 @@ class ExpandablePlayerState(initialValue: PlayerValue, @Suppress("unused") densi
             else (1f - top / collapsedTop).coerceIn(0f, 1f)
         }
 
-    /** Set by the player: brings the bars back and measures where the mini player rests, before it expands. */
-    internal var beforeExpand: () -> Unit = {}
+    /**
+     * Set by the player (1.0.3, Desktop Kit 2.3.0): measures where the strip is drawn now, the bars'
+     * slide included, so that the sheet opens from there and lands there again.
+     */
+    internal var measureAnchor: () -> Unit = {}
 
     /** 1.0.3: the motion tier of the shell around the player; set by [ExpandablePlayer], so [expand] jumps with reduced motion. */
     internal var tier: MotionTier = MotionTier.Gesture
@@ -137,12 +139,15 @@ class ExpandablePlayerState(initialValue: PlayerValue, @Suppress("unused") densi
 
     /** Opens the full player on the gesture spring (from a tap, the notification, a link). */
     suspend fun expand() {
-        beforeExpand()
+        measureAnchor()
         draggable.animateTo(PlayerValue.Expanded, settle())
     }
 
-    /** Back to the mini player. */
-    suspend fun collapse() = draggable.animateTo(PlayerValue.Collapsed, settle())
+    /** Back to the mini player, where its strip is drawn now. */
+    suspend fun collapse() {
+        measureAnchor()
+        draggable.animateTo(PlayerValue.Collapsed, settle())
+    }
 
     /** Jumps to [value] without animation. */
     suspend fun snapTo(value: PlayerValue) = draggable.snapTo(value)
@@ -154,7 +159,7 @@ class ExpandablePlayerState(initialValue: PlayerValue, @Suppress("unused") densi
     }
 
     internal fun updateCollapsedTop(top: Float) {
-        // the bars' slide is taken out of the position again: a float's rounding is no move
+        // a float's rounding is no move
         if (top <= 0f || abs(top - collapsedTop) < 0.5f) return
         collapsedTop = top
         draggable.updateAnchors(
@@ -218,20 +223,25 @@ fun ExpandablePlayer(
     val canExpand = expandable && host != null
     var miniCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var miniHeight by remember { mutableIntStateOf(0) }
-    // where the strip rests with the bars shown: the bars' slide is a layer translation the position includes
+    val sheet = remember(state) { PlayerSheetScope(state) }
+    // 1.0.3 (Desktop Kit 2.3.0): the sheet opens from where the strip is drawn and lands there again, the bars' slide (a
+    // layer translation) included: with the bars hidden by a scroll they stay where they are (the sheet covers them).
+    // The strip's top as laid out, without the slide, is measured on every press, since a moved bar moves the strip
+    // without laying it out again; while the sheet is out its landing place follows the bars (a page opened from the
+    // player shows them again)
+    var restTop by remember { mutableFloatStateOf(Float.NaN) }
     fun measureAnchor() {
         val shell = host ?: return
         val coordinates = miniCoordinates ?: return
         val overlay = shell.coordinates ?: return
         if (!coordinates.isAttached || !overlay.isAttached) return
-        state.updateCollapsedTop(overlay.localPositionOf(coordinates, Offset.Zero).y - shell.navigationOffset())
+        val slide = shell.navigationOffset()
+        val drawnTop = overlay.localPositionOf(coordinates, Offset.Zero).y
+        restTop = drawnTop - slide
+        state.updateCollapsedTop(drawnTop)
     }
-    val beforeExpand: () -> Unit = {
-        measureAnchor()
-        host?.onExpandStart?.invoke()
-    }
-    val latestBeforeExpand by rememberUpdatedState(beforeExpand)
-    SideEffect { state.beforeExpand = beforeExpand }
+    val latestMeasure by rememberUpdatedState<() -> Unit>(newValue = { measureAnchor() })
+    SideEffect { state.measureAnchor = { latestMeasure() } }
     val fling = playerFlingBehavior(state)
     if (host != null) {
         val progressOf = remember(state, canExpand) { if (canExpand) ({ state.progress }) else ({ 0f }) }
@@ -241,6 +251,10 @@ fun ExpandablePlayer(
         DisposableEffect(host) { onDispose { host.expandProgress = { 0f } } }
         // the overlay and the strip are positioned in the same pass, in no fixed order
         LaunchedEffect(host.coordinates, miniCoordinates) { measureAnchor() }
+        LaunchedEffect(host, state, sheet) {
+            snapshotFlow { if (sheet.shown && !restTop.isNaN()) restTop + host.navigationOffset() else Float.NaN }
+                .collect { top -> if (!top.isNaN()) state.updateCollapsedTop(top) }
+        }
     }
     // what plays has no full player any more (a station took over): back to the strip
     LaunchedEffect(canExpand) { if (!canExpand && state.currentValue != PlayerValue.Collapsed) state.snapTo(PlayerValue.Collapsed) }
@@ -253,12 +267,17 @@ fun ExpandablePlayer(
                 measureAnchor()
             }
             // hidden while the sheet (which starts with the same strip) is out
-            .graphicsLayer { alpha = if (canExpand && state.progress > 0.001f) 0f else 1f }
+            .graphicsLayer { alpha = if (canExpand && state.progress > SHEET_OUT) 0f else 1f }
             .then(
                 if (!canExpand) Modifier else Modifier
-                    // a drag up brings the bars back first, so the sheet starts from where the strip rests; a press
-                    // (Play, the start of a sideways swipe) leaves them where they are (a click expands through expand())
-                    .pointerInput(Unit) { awaitVerticalDragStart { latestBeforeExpand() } }
+                    // the anchor where the strip is drawn, before the press's drag or click moves anything (watched only)
+                    .pointerInput(state) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                if (awaitPointerEvent(PointerEventPass.Initial).type == PointerEventType.Press) latestMeasure()
+                            }
+                        }
+                    }
                     .anchoredDraggable(state.draggable, Orientation.Vertical, enabled = state.collapsedTop > 0f, flingBehavior = fling)
                     .semantics {
                         customActions = listOf(CustomAccessibilityAction(expandLabel) { scope.launch { state.expand() }; true })
@@ -274,7 +293,6 @@ fun ExpandablePlayer(
     if (host != null && canExpand) {
         // 1.0: composed for as long as there is a full player to show, so that an expand never composes it on its
         // first frame; while the mini player rests it is neither drawn, read out, focused nor touched
-        val sheet = remember(state) { PlayerSheetScope(state) }
         // the collapse runs in this scope: the Back handler's own one ends once the player is no longer expanded
         OverlayLayer(host, ShellOverlayHost.PLAYER) { PlayerSheet(state, sheet, miniHeight, mini, full, collapse = { scope.launch { state.collapse() } }) }
     }
@@ -291,7 +309,7 @@ fun ExpandablePlayer(
 @OptIn(ExperimentalFoundationApi::class)
 @Stable
 class PlayerSheetScope internal constructor(private val state: ExpandablePlayerState) {
-    private val out = derivedStateOf { state.progress > 0f || state.targetValue == PlayerValue.Expanded }
+    private val out = derivedStateOf { state.progress > SHEET_OUT || state.targetValue == PlayerValue.Expanded }
 
     /** The full player is out: dragged, opening, open or closing. */
     val shown: Boolean get() = out.value
@@ -345,26 +363,11 @@ class PlayerSheetScope internal constructor(private val state: ExpandablePlayerS
 val LocalPlayerSheet = staticCompositionLocalOf<PlayerSheetScope?> { null }
 
 /**
- * Waits, gesture by gesture, for a press that moves past the touch slop mostly up or down, and calls
- * [onStart] then, before the drag that follows moves anything; only watches, never consumes.
+ * 1.0.3 (Desktop Kit 2.3.0): below this progress the sheet is back on the strip: the strip shows and
+ * the sheet goes, without waiting for the spring's last fraction of a pixel (which kept the page over
+ * the bottom bar under the strip).
  */
-private suspend fun PointerInputScope.awaitVerticalDragStart(onStart: () -> Unit) {
-    val slop = viewConfiguration.touchSlop
-    awaitEachGesture {
-        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-        var moved = Offset.Zero
-        while (true) {
-            val change = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id } ?: break
-            if (!change.pressed) break
-            moved += change.position - change.previousPosition
-            if (abs(moved.y) > slop && abs(moved.y) > abs(moved.x)) {
-                onStart()
-                break
-            }
-            if (abs(moved.x) > slop) break
-        }
-    }
-}
+internal const val SHEET_OUT = 0.001f
 
 /**
  * The full part, drawn in the shell's overlay from the mini player's place to the top. While the

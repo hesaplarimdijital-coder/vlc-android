@@ -246,7 +246,6 @@ fun NagmedarShell(
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         metrics.systemBottomPx = systemBottom
         overlayHost.systemBottomPx = systemBottom
-        overlayHost.onExpandStart = { scroll.showBars() }
         overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset() else 0f }
         overlayHost.rootView = view.rootView
     }

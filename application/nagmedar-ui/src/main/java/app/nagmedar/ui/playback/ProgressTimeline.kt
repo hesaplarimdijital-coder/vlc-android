@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -147,7 +148,7 @@ fun ProgressTimeline(
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
-    val smooth = remember { SmoothProgress() }
+    val smooth = rememberSmoothProgress(progress, lengthMs)
     val latestProgress = rememberUpdatedState(progress)
     val latestLength by rememberUpdatedState(lengthMs)
     var widthPx by remember { mutableFloatStateOf(1f) }
@@ -466,6 +467,16 @@ internal fun softLevels(waveform: Waveform, count: Int): FloatArray {
 private const val RMS_SCALE = 2.2f
 
 /**
+ * 1.0.3: a [SmoothProgress] that starts at the latest reading, not at 0: a copy composed while the track plays (the
+ * phone's player opening over its strip) shows the time played from its first frame, not "0:00" with the whole length
+ * left until its first reading arrives. The reading is taken without observing it (no recomposition per reading).
+ */
+@Composable
+internal fun rememberSmoothProgress(progress: () -> Float, lengthMs: Long): SmoothProgress = remember {
+    SmoothProgress().apply { report(Snapshot.withoutReadObservation { progress() }.coerceIn(0f, 1f), lengthMs) }
+}
+
+/**
  * The position between the service's readings: the last reading, carried on by the time since at the playing speed,
  * at most [AHEAD_MS] ahead (a stream that stalls stops there). A seek holds its target until the service reads near
  * it, so that the thumb does not jump back to where the track was.
@@ -546,7 +557,7 @@ fun ProgressHairline(progress: () -> Float, lengthMs: Long, playing: Boolean, mo
     val colors = NagTheme.colors
     val reduced = NagTheme.motion.reduced
     val label = stringResource(R.string.nag_position)
-    val smooth = remember { SmoothProgress() }
+    val smooth = rememberSmoothProgress(progress, lengthMs)
     val latestProgress = rememberUpdatedState(progress)
     val latestLength by rememberUpdatedState(lengthMs)
     var widthPx by remember { mutableFloatStateOf(1f) }
