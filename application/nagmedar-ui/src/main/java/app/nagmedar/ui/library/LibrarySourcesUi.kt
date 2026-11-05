@@ -44,6 +44,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.onboarding.MediaAccess
 import app.nagmedar.ui.onboarding.StorageSource
 import app.nagmedar.ui.onboarding.folderName
 import app.nagmedar.ui.onboarding.storageSources
@@ -55,6 +56,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.tools.AppScope
+import org.videolan.tools.Notices
+import org.videolan.vlc.reloadLibrary
 
 /** The section's name as the navigation writes it. */
 @Composable
@@ -64,10 +67,15 @@ internal fun sectionLabel(section: LibrarySection): String = stringResource(
     },
 )
 
-/** Settings › Library: the folders of each section (since 1.0 the music's), each with its own list. */
+/**
+ * Settings › Library: the folders of each section (since 1.0 the music's), each with its own list;
+ * 1.0.3: and the whole library scanned again on demand ("Kütüphaneyi yeniden tara"), its progress
+ * shown above the list without hiding it.
+ */
 @Composable
 fun LibrarySourcesSection(prefs: NagmedarPreferences) {
     val sources = rememberSourceActions(prefs)
+    val context = LocalContext.current
     SettingsSection(stringResource(R.string.nag_section_library)) {
         Text(stringResource(R.string.nag_lib_sources_hint), style = NagTheme.type.body, color = NagTheme.colors.textSecondary)
         LibrarySection.entries.forEach { section ->
@@ -75,7 +83,28 @@ fun LibrarySourcesSection(prefs: NagmedarPreferences) {
             HorizontalRule()
             SectionSourcesEditor(section, prefs.librarySources, sources)
         }
+        Spacer(Modifier.height(NagTheme.dimens.gapS))
+        HorizontalRule()
+        SettingRow(stringResource(R.string.nag_lib_rescan), subtitle = stringResource(R.string.nag_lib_rescan_hint)) {
+            NagButton(
+                stringResource(R.string.nag_lib_rescan),
+                { rescanLibrary(context) },
+                icon = NagIcons.Repeat,
+                modifier = Modifier.testTag("library-rescan"),
+            )
+        }
     }
+}
+
+/**
+ * 1.0.3: the whole library looked over again: every folder of the medialibrary (its reload, with its progress on the
+ * library's screens) and every picked folder's tree, in the background.
+ */
+internal fun rescanLibrary(context: Context) {
+    val app = context.applicationContext
+    if (MediaAccess.hasMediaAccess(app)) app.reloadLibrary()
+    SafLibrary.rescan(app)
+    Notices.show(app, app.getString(R.string.nag_lib_rescan_started))
 }
 
 /**

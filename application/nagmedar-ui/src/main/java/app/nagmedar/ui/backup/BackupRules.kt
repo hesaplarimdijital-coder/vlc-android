@@ -18,6 +18,8 @@ import org.videolan.tools.KEY_RESTRICT_SETTINGS
 import org.videolan.tools.KEY_SAFE_MODE
 import org.videolan.tools.KEY_SAFE_MODE_PIN
 import org.videolan.tools.KEY_SET_LOCALE
+import org.videolan.tools.NAGMEDAR_LIBRARY_CHECKED_AT
+import org.videolan.tools.NAGMEDAR_LIBRARY_STAMP
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.PREF_TV_UI
@@ -56,6 +58,9 @@ object BackupSettings {
         RecordingPrefs.KEY_FOLDER,
         // this device's: the folders each section of the library shows (paths and picked trees)
         *LibrarySources.keys.toTypedArray(),
+        // this device's: its media index when the library was last looked over (1.0.3)
+        NAGMEDAR_LIBRARY_STAMP,
+        NAGMEDAR_LIBRARY_CHECKED_AT,
         // this device's: the picked folders the lyrics editor was given
         *FolderGrants.keptKeys.toTypedArray(),
         // this session's: what was run lately, the last backup

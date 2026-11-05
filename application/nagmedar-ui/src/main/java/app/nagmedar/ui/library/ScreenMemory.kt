@@ -40,11 +40,12 @@ class ScreenMemory {
  * [read]'s value for a screen: what it last read under [name] in [memory] from the first frame
  * (null only the first time, or without a [memory]), then each new value [read] gives, which
  * [memory] keeps in turn. [keys] restart [read], as `produceState`'s do; the value on screen stays
- * until the new one comes.
+ * until the new one comes. 1.0.3: [kept] is what the screen shows first when [memory] has nothing
+ * yet (what was kept on the device from the last time); it must answer at once.
  */
 @Composable
-fun <T : Any> rememberRead(memory: ScreenMemory?, name: String, vararg keys: Any?, read: suspend ProduceStateScope<T?>.() -> Unit): State<T?> {
-    val state = produceState(memory?.get<T>(name), *keys, producer = read)
+fun <T : Any> rememberRead(memory: ScreenMemory?, name: String, vararg keys: Any?, kept: (() -> T?)? = null, read: suspend ProduceStateScope<T?>.() -> Unit): State<T?> {
+    val state = produceState(memory?.get<T>(name) ?: kept?.invoke(), *keys, producer = read)
     val value = state.value
     SideEffect { if (value != null) memory?.set(name, value) }
     return state
