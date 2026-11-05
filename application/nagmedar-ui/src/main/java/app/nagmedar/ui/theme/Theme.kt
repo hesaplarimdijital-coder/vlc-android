@@ -18,6 +18,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -31,7 +32,13 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-val LocalNagColors = staticCompositionLocalOf { NagPalette.dark(Accent.Blue) }
+/**
+ * The colour tokens. 1.0.3 (Desktop Kit 2.3.0): dynamic, not static. An accent or theme change cross-fades over
+ * 150 ms, and a static local that changes recomposes everything under it on each of those frames (it turns
+ * skipping off for the whole subtree: the screens, the lists, the player); a dynamic one recomposes only what
+ * reads the colours.
+ */
+val LocalNagColors = compositionLocalOf { NagPalette.dark(Accent.Blue) }
 val LocalNagType = staticCompositionLocalOf { NagType.Pointer }
 val LocalNagDimens = staticCompositionLocalOf { NagDimens.Pointer }
 val LocalInputMode = staticCompositionLocalOf { InputMode.Pointer }
@@ -71,6 +78,11 @@ object NagTheme {
  * As Desktop Kit 1.0 has it, a new accent or theme cross-fades over [colorChangeMillis] (150 ms;
  * glass tints follow, as they are made from these colours), at once with reduced motion; and the
  * window's [MotionTier] is provided ([LocalMotionTier]: springs on a phone's window).
+ *
+ * 1.0.3 (Desktop Kit 2.3.0): only what reads [NagTheme.colors] recomposes on the cross-fade's frames.
+ * Material's colour scheme (and the text selection colours) take the new palette at once: Material
+ * provides its scheme through a static local, and a new scheme on each frame recomposed the whole
+ * window nine times; the typography is made once for its styles.
  */
 @Composable
 fun NagmedarTheme(
@@ -93,8 +105,10 @@ fun NagmedarTheme(
         NagType.forMode(inputMode).let { if (largeWindow) it.grow(largeWindowTextStep) else it }
     }
     val dimens = NagDimens.forMode(inputMode).let { if (compactSizes && !largeWindow) it.forCompactWindow() else it }
-    val scheme = remember(colors) { colors.toMaterialScheme() }
-    val selection = remember(colors) { TextSelectionColors(handleColor = colors.accent, backgroundColor = colors.accent.copy(alpha = 0.35f)) }
+    // from the target palette, not from each frame of the cross-fade: Material provides its scheme through a static local
+    val scheme = remember(target) { target.toMaterialScheme() }
+    val selection = remember(target) { TextSelectionColors(handleColor = target.accent, backgroundColor = target.accent.copy(alpha = 0.35f)) }
+    val typography = remember(type) { type.toMaterialTypography() }
     val tier = when {
         motion.reduced -> MotionTier.Reduced
         largeWindow -> MotionTier.Timed
@@ -109,7 +123,7 @@ fun NagmedarTheme(
         LocalLargeWindow provides largeWindow,
         LocalMotionTier provides tier,
     ) {
-        MaterialTheme(colorScheme = scheme, typography = type.toMaterialTypography()) {
+        MaterialTheme(colorScheme = scheme, typography = typography) {
             CompositionLocalProvider(
                 LocalContentColor provides colors.text,
                 LocalTextSelectionColors provides selection,

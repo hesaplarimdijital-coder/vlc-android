@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -139,7 +140,7 @@ fun SwipeToRemove(
                                 // a list that keeps the item (nothing was removed) shows it again
                                 offset.snapTo(0f)
                             } else {
-                                offset.animateTo(0f, motion.spatial())
+                                offset.animateTo(0f, motion.spatial(NagMotion.PIXEL))
                             }
                         }
                     }
