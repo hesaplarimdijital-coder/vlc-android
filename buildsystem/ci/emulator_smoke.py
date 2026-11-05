@@ -1794,6 +1794,10 @@ class Smoke:
                     break
                 self.sh("am start -n %s --activity-single-top --activity-clear-top --es %s %s" % (activity, CHROME_GLASS_EXTRA, mode), timeout=60)
                 time.sleep(2)
+                # a page change once the mode changed: the glass switched on at run time over a still page draws only after
+                # the page is drawn anew (Haze 2.0.1: the content records itself after the bar's last draw)
+                self.open_label(s["nag_nav_podcasts_short"], via_more=False)
+                time.sleep(1.5)
                 nodes = self.open_music()
                 self.glass_top(nodes)
                 nodes = self.step("Music (%s, %s)" % (letter, theme), wait=1.0)
@@ -1813,8 +1817,13 @@ class Smoke:
                 if search:
                     self.tap(search[0])
                     time.sleep(1.5)
-                    self.sh("input text Profile")
-                    time.sleep(1.5)
+                    # the page keeps its words: cleared first, then one word every walk track has
+                    clear = [n for n in self.app_nodes(self.nodes(self.dump())) if n.desc.strip() == s["nag_search_clear"]]
+                    if clear:
+                        self.tap(clear[0], record=False)
+                        time.sleep(0.8)
+                    self.sh("input text track")
+                    time.sleep(2.0)
                     # the on-screen keyboard away (the bars come back); a Back without one would leave the page
                     if self.keyboard_shown():
                         self.key(4, record=False)
