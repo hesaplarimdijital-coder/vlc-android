@@ -172,6 +172,7 @@ Sözlüğü testler denetler:
 | yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
 | devam eden bölüm | continue listening | | | Android Auto'nun Podcast sekmesinde yarıda bırakılmış, dinlenmemiş bölümler, en son dinlenen başta: “Devam eden bölümler” |
 | kategori | category | | | Android Auto'nun Radyo sekmesinde radyo rehberinin en çok kullanılan etiketleri: “Kategoriler”; altında o etiketin istasyonları |
+| karıştırarak çalmak | shuffle | | | Parçaları rastgele sırayla çalmak: Müzik sayfasında “Karıştır”; Android Auto'nun Müzik sekmesinin ilk satırı “Tüm müziği karıştırarak çal”, son satırı A'dan Z'ye “Tüm parçalar” |
 | dinlendi, dinlenmedi | played, unplayed | | | Podcast bölümünün durumu: “Dinlendi olarak işaretle” |
 | OPML | OPML | | | Podcast listesi dosyası; AntennaPod, Pocket Casts, Podcast Addict ve Overcast aynı biçimi okur ve yazar: “OPML içe aktar…”, “OPML dışa aktar…” |
 | kısım (podcast'te) | chapter | | | Bir podcast bölümünün içindeki başlıklı aralıklar; bölüm (episode) ile karışmasın diye: “Kısımlar” sekmesi, “Sonraki kısım” |

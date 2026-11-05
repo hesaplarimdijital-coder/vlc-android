@@ -263,18 +263,20 @@ internal class MediaSessionCallback(private val playbackService: PlaybackService
      * nothing and, with nothing loaded, says again what it says (Auto's Now Playing is not left empty).
      */
     override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
+        // 1.0.3: an id kept from 1.0–1.0.2 (its root named the build type) plays the same entry today
+        val target = MediaSessionBrowser.canonical(mediaId)
         playbackService.lifecycleScope.launch {
             try {
                 when {
-                    MediaSessionBrowser.isNoMedia(mediaId) -> if (!playbackService.hasMedia()) {
-                        playbackService.displayPlaybackError(CarHook.catalog?.nothingText(playbackService, mediaId) ?: playbackService.getString(R.string.search_no_result))
+                    MediaSessionBrowser.isNoMedia(target) -> if (!playbackService.hasMedia()) {
+                        playbackService.displayPlaybackError(CarHook.catalog?.nothingText(playbackService, target) ?: playbackService.getString(R.string.search_no_result))
                     }
-                    mediaId.startsWith("${MediaSessionBrowser.ID_MEDIA}/") -> {
-                        val id = ContentUris.parseId(mediaId.toUri())
+                    target.startsWith("${MediaSessionBrowser.ID_MEDIA}/") -> {
+                        val id = ContentUris.parseId(target.toUri())
                         val tracks = playbackService.applicationContext.getFromMl { getMedia(id)?.tracks }
                         if (isActive) tracks?.let { loadMedia(it.toList()) }
                     }
-                    CarHook.catalog?.play(playbackService, mediaId) != true -> throw IllegalStateException("Failed to load: $mediaId")
+                    CarHook.catalog?.play(playbackService, target) != true -> throw IllegalStateException("Failed to load: $target")
                 }
             } catch (e: CancellationException) {
                 throw e

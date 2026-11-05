@@ -1080,6 +1080,9 @@
         <item quantity="one">%d istasyon</item>
         <item quantity="other">%d istasyon</item>
     </plurals>
+    <string name="nag_auto_shuffle_all">Tüm müziği karıştırarak çal</string>
+    <string name="nag_auto_all_tracks">Tüm parçalar</string>
+    <string name="nag_auto_smart_list">Akıllı liste</string>
     <string name="nag_music_unknown_album">Bilinmeyen albüm</string>
     <string name="nag_music_unknown_genre">Türü yok</string>
     <string name="nag_music_unknown_composer">Bestecisi yok</string>
