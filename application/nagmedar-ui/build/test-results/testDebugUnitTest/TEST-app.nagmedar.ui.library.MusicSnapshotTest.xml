@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.MusicSnapshotTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:02:30.528Z" hostname="runnervmwuk1x" time="0.115">
+  <properties/>
+  <testcase name="aListKeptForOtherFoldersIsNotShown" classname="app.nagmedar.ui.library.MusicSnapshotTest" time="0.028"/>
+  <testcase name="theKeptListReadsBackAsWritten" classname="app.nagmedar.ui.library.MusicSnapshotTest" time="0.025"/>
+  <testcase name="aKnownListStaysOnScreenWhileTheLibraryIsScanned" classname="app.nagmedar.ui.library.MusicSnapshotTest" time="0.036"/>
+  <testcase name="aRetaggedTrackIsAChange" classname="app.nagmedar.ui.library.MusicSnapshotTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

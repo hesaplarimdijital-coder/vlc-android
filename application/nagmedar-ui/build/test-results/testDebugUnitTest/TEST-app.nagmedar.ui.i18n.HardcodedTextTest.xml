@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.i18n.HardcodedTextTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:02:29.270Z" hostname="runnervmwuk1x" time="0.478">
+  <properties/>
+  <testcase name="noWordsHandedToTheInterface" classname="app.nagmedar.ui.i18n.HardcodedTextTest" time="0.243"/>
+  <testcase name="translationsAreCasedInTheirLanguage" classname="app.nagmedar.ui.i18n.HardcodedTextTest" time="0.11"/>
+  <testcase name="noTurkishInTheCode" classname="app.nagmedar.ui.i18n.HardcodedTextTest" time="0.045"/>
+  <testcase name="theSourcesAreReadAsKotlin" classname="app.nagmedar.ui.i18n.HardcodedTextTest" time="0.08"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

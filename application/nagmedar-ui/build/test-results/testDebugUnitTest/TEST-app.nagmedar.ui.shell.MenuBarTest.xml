@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.MenuBarTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:03:12.490Z" hostname="runnervmwuk1x" time="0.216">
+  <properties/>
+  <testcase name="aPointerHasTheMenuBar" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.028"/>
+  <testcase name="altAndTheArrowsWalkTheMenus" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.04"/>
+  <testcase name="theBarLeavesWhenItGoes" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.02"/>
+  <testcase name="touchHasNoMenuBarButKeepsTheSearch" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.024"/>
+  <testcase name="theBarTakesOnlyItsKeys" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.019"/>
+  <testcase name="escapeReturnsToTheTitleAndAltLeaves" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.036"/>
+  <testcase name="theMenusComeFromTheShortcutTable" classname="app.nagmedar.ui.shell.MenuBarTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

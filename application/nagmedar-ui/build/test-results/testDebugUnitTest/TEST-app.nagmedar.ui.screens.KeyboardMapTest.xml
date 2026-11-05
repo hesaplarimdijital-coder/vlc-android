@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screens.KeyboardMapTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:02:50.795Z" hostname="runnervmwuk1x" time="0.177">
+  <properties/>
+  <testcase name="withoutAKeyboardTheKeysAreAUsKeyboards" classname="app.nagmedar.ui.screens.KeyboardMapTest" time="0.033"/>
+  <testcase name="aTurkishKeyboardsKeysAndTheirShortcuts" classname="app.nagmedar.ui.screens.KeyboardMapTest" time="0.038"/>
+  <testcase name="byTouchTheChipsChooseTheLayerAndTheKeysAreNoTargets" classname="app.nagmedar.ui.screens.KeyboardMapTest" time="0.036"/>
+  <testcase name="aKeyPressedSaysWhereItIsAndWhatItDoes" classname="app.nagmedar.ui.screens.KeyboardMapTest" time="0.037"/>
+  <testcase name="twoShortcutsOnAKeyAreAConflict" classname="app.nagmedar.ui.screens.KeyboardMapTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

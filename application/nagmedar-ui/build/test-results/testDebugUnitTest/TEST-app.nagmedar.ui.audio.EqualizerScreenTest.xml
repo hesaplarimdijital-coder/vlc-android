@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.audio.EqualizerScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:02:16.678Z" hostname="runnervmwuk1x" time="0.67">
+  <properties/>
+  <testcase name="aGraphicBandMoves" classname="app.nagmedar.ui.audio.EqualizerScreenTest" time="0.201"/>
+  <testcase name="aBandIsAddedAndRemoved" classname="app.nagmedar.ui.audio.EqualizerScreenTest" time="0.126"/>
+  <testcase name="aProfileIsPasted" classname="app.nagmedar.ui.audio.EqualizerScreenTest" time="0.153"/>
+  <testcase name="vlcsPresetsAndTheBypass" classname="app.nagmedar.ui.audio.EqualizerScreenTest" time="0.188"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

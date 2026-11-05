@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.visual.VisualizerViewsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T18:03:14.635Z" hostname="runnervmwuk1x" time="0.117">
+  <properties/>
+  <testcase name="thePaneChoosesTheKindAndGoesFullScreen" classname="app.nagmedar.ui.visual.VisualizerViewsTest" time="0.029"/>
+  <testcase name="itSaysWhyItCannotDraw" classname="app.nagmedar.ui.visual.VisualizerViewsTest" time="0.027"/>
+  <testcase name="theFullScreenViewClosesAndChooses" classname="app.nagmedar.ui.visual.VisualizerViewsTest" time="0.025"/>
+  <testcase name="theSettingsKeepTheirChoices" classname="app.nagmedar.ui.visual.VisualizerViewsTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
