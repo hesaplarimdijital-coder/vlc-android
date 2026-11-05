@@ -171,7 +171,8 @@ Sözlüğü testler denetler:
 | yayın, RSS adresi | feed, RSS address | besleme | | Bir podcast'in RSS ya da Atom dosyası ve adresi: “RSS adresiyle ekle…”, “Bu adres bir podcast yayını değil” |
 | yeni bölüm | new episode | | | Aboneliğin ardından listeye giren, dinlenmemiş bölüm: kapakta “3 yeni” |
 | devam eden bölüm | continue listening | | | Android Auto'nun Podcast sekmesinde yarıda bırakılmış, dinlenmemiş bölümler, en son dinlenen başta: “Devam eden bölümler” |
-| kategori | category | | | Android Auto'nun Radyo sekmesinde radyo rehberinin en çok kullanılan etiketleri: “Kategoriler”; altında o etiketin istasyonları |
+| kategori | category | | | Android Auto'nun Radyo sekmesinde radyo rehberinin en çok kullanılan etiketleri: “Kategoriler”; altında o etiketin radyoları, en çok dinlenen başta |
+| en çok dinlenenler, en çok beğenilenler | most listened, most liked | | | Android Auto'nun Radyo sekmesinde radyo rehberinin bütün dünyadaki radyoları: dinlenme sayısına göre “En çok dinlenenler”, oylara göre “En çok beğenilenler”; “Ülkeler” (cihazın ülkesi başta, sonra adına göre) ve “Diller” de en çok dinlenen radyodan başlar. Uzun liste sayfa sayfa gelir, son satırı “Daha fazla radyo”. Çalınan radyolar “Son dinlenenler”de; her radyoda “Favorilere ekle” ya da “Favorilerden çıkar” |
 | karıştırarak çalmak | shuffle | | | Parçaları rastgele sırayla çalmak: Müzik sayfasında “Karıştır”; Android Auto'nun Müzik sekmesinin ilk satırı “Tüm müziği karıştırarak çal”, son satırı A'dan Z'ye “Tüm parçalar” |
 | keşfetmek | discover | | | Android Auto'nun Podcast sekmesinde abone olunmamış programları bulmak: “Keşfet”; altında “Popüler programlar” (cihazın ülkesinde en çok dinlenenler, Apple Podcasts'in listesinden), “Kategoriler”, “Ülkeler” |
 | programlarım | my shows | | | Android Auto'nun Podcast sekmesinde abone olunan programlar: “Programlarım”; aramada abone olunmamış olanlar “Yeni podcastler” başlığı altında |

@@ -10,7 +10,7 @@ import java.net.URLEncoder
  * list plays from, "n", "u", "l" a directory station's name, address and logo, "t" why a list is empty ([nothing]).
  * 1.0.3: the Music tab's genres, smart lists, every track and its shuffle; the Podcast tab's Keşfet ("c" a chart's
  * country), a directory's shows ("n", "a", "l" their title, author and cover), their episodes ("u" the feed) and their
- * row "Abone ol".
+ * row "Abone ol"; the Radio tab's countries and languages of the directory, its most listened and most liked stations.
  */
 object CarIds {
     const val ROOT = MediaSessionBrowser.ID_ROOT
@@ -56,7 +56,18 @@ object CarIds {
     const val FAVOURITES = "$RADIO/favourites"
     const val STATIONS_RECENT = "$RADIO/recent"
     const val TAGS = "$RADIO/tags"
+
+    /**
+     * 1.0.3: the radio directory's countries and languages (each opens on its stations, the most listened first), its
+     * most listened and its most liked stations.
+     */
+    const val RADIO_COUNTRIES = "$RADIO/countries"
+    const val LANGUAGES = "$RADIO/languages"
+    const val MOST_LISTENED = "$RADIO/listened"
+    const val MOST_LIKED = "$RADIO/liked"
     private const val TAG = "$RADIO/tag/"
+    private const val COUNTRY = "$RADIO/country/"
+    private const val LANGUAGE = "$RADIO/language/"
     private const val STATION = "$RADIO/station/"
     private const val DIRECTORY = "$RADIO/dir/"
 
@@ -108,6 +119,12 @@ object CarIds {
         "?n=" + encode(title) + (author?.let { "&a=" + encode(it) } ?: "") + (image?.let { "&l=" + encode(it) } ?: "")
 
     fun tag(name: String) = TAG + encode(name)
+
+    /** 1.0.3: the radio directory's stations of a country, by its ISO 3166-1 code. */
+    fun radioCountry(code: String) = COUNTRY + encode(code)
+
+    /** 1.0.3: the radio directory's stations in a language, by its name as the directory spells it ("turkish"). */
+    fun language(name: String) = LANGUAGE + encode(name)
     fun station(id: Long) = "$STATION$id"
 
     /** A station of the directory, not kept: what plays it is in its id. */
@@ -142,7 +159,7 @@ object CarIds {
         FOLDER to CarKind.Folder, GENRE to CarKind.Genre, SMART to CarKind.Smart, SHOW to CarKind.Show, EPISODE to CarKind.Episode, TAG to CarKind.Tag, STATION to CarKind.Station,
         DIRECTORY to CarKind.DirectoryStation, SEARCH to CarKind.Search,
         CHART to CarKind.Chart, CATEGORY to CarKind.Category, DIRECTORY_SHOW to CarKind.DirectoryShow, DIRECTORY_EPISODE to CarKind.DirectoryEpisode,
-        SUBSCRIBE to CarKind.Subscribe,
+        SUBSCRIBE to CarKind.Subscribe, COUNTRY to CarKind.Country, LANGUAGE to CarKind.Language,
     )
 
     private fun encode(text: String): String = URLEncoder.encode(text, Charsets.UTF_8.name())
@@ -160,6 +177,9 @@ enum class CarKind {
 
     /** 1.0.3: Keşfet's charts and categories, a directory's show, its episodes, its row "Abone ol". */
     Chart, Category, DirectoryShow, DirectoryEpisode, Subscribe,
+
+    /** 1.0.3: the radio directory's stations of a country, of a language. */
+    Country, Language,
 }
 
 /** An id read ([CarIds.parse]): [path] without the parameters, the [kind] and [key] of an entry with one. */

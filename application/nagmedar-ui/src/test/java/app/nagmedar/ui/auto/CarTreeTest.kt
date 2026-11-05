@@ -60,8 +60,12 @@ class CarTreeTest {
         // 1.0.3: Keşfet last (CarPodcastTest)
         assertEquals(listOf(CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.DISCOVER), ids(children(data, CarIds.PODCASTS)))
         assertEquals(listOf(CarStyle.List, CarStyle.Grid, CarStyle.List, CarStyle.List), children(data, CarIds.PODCASTS).map { it.children })
-        assertEquals(listOf(CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS), ids(children(data, CarIds.RADIO)))
-        assertEquals(listOf(CarStyle.Grid, CarStyle.Grid, CarStyle.List), children(data, CarIds.RADIO).map { it.children })
+        // 1.0.3: the directory by country, language and category, its most listened and liked (CarRadioTest)
+        assertEquals(
+            listOf(CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.RADIO_COUNTRIES, CarIds.LANGUAGES, CarIds.TAGS, CarIds.MOST_LISTENED, CarIds.MOST_LIKED),
+            ids(children(data, CarIds.RADIO)),
+        )
+        assertEquals(listOf(CarStyle.Grid, CarStyle.Grid) + List(5) { CarStyle.List }, children(data, CarIds.RADIO).map { it.children })
     }
 
     @Test
@@ -73,7 +77,8 @@ class CarTreeTest {
     @Test
     fun anEmptyListSaysSoInOneLineThatPlaysNothing() {
         val data = FakeCarData()
-        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.GENRES, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS, CarIds.RECENT, CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS)) {
+        // 1.0.3: the radio's own lists say what they lack (CarRadioTest)
+        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.GENRES, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS, CarIds.RECENT, CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.TAGS, CarIds.RADIO_COUNTRIES, CarIds.LANGUAGES)) {
             val list = children(data, id)
             assertEquals(id, listOf(CarIds.nothing("Empty")), ids(list))
             assertEquals(id, "Empty", list.single().title)
@@ -269,25 +274,30 @@ class CarTreeTest {
 
     @Test
     fun theRadiosStationsPlayAtOneTap() {
-        val eksen = station(1, "Radyo Eksen")
+        val eksen = station(1, "Radyo Eksen", favourite = true)
         val data = FakeCarData(favourites = listOf(eksen), recentStations = listOf(station(2, "Açık Radyo"), eksen))
         val favourites = children(data, CarIds.FAVOURITES)
-        assertEquals(listOf(CarIds.station(1)), ids(favourites))
+        // 1.0.3: a station of the directory is its entry by what plays it, kept or not
+        assertEquals(listOf(CarIds.directoryStation("uuid-1", "Radyo Eksen", eksen.streamUrl, eksen.logoUrl)), ids(favourites))
         assertTrue(favourites.single().playable)
         assertEquals("Türkiye · pop", favourites.single().subtitle)
         assertEquals("web:https://radio.example.org/logo/1.png", favourites.single().iconUri)
         assertEquals(listOf("Açık Radyo", "Radyo Eksen"), titles(children(data, CarIds.STATIONS_RECENT)))
+        assertEquals(CarPlay.Radio(eksen), runBlocking { tree(data).play(favourites.single().id) })
+        // an entry of 1.0–1.0.2 (the station's row) still plays
         assertEquals(CarPlay.Radio(eksen), runBlocking { tree(data).play(CarIds.station(1)) })
     }
 
     @Test
     fun theCategoriesAreTheDirectorysTagsAndTheirStations() {
-        val jazz = station(0, "Jazz FM", uuid = "u-jazz")
-        val data = FakeCarData(tags = listOf(DirectoryTag("pop", 900), DirectoryTag("jazz", 300)), tagged = mapOf("jazz" to listOf(jazz)))
+        val jazz = station(0, "Jazz FM", uuid = "u-jazz", tags = listOf("jazz"))
+        val data = FakeCarData(tags = listOf(DirectoryTag("pop", 900), DirectoryTag("jazz", 300)), directory = listOf(jazz))
         val tags = children(data, CarIds.TAGS)
         assertEquals(listOf(CarIds.tag("pop"), CarIds.tag("jazz")), ids(tags))
         assertEquals(listOf("Pop", "Jazz"), titles(tags))
         assertEquals("300 Stations", tags[1].subtitle)
+        // 1.0.3: a category's stations are rows, the most listened first (CarRadioTest)
+        assertEquals(CarStyle.List, tags[1].children)
         val stations = children(data, CarIds.tag("jazz"))
         assertEquals(listOf("Jazz FM"), titles(stations))
         // a station of the directory that is not kept plays from what its id carries

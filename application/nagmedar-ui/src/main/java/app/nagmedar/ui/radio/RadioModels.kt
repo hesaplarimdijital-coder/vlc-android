@@ -31,6 +31,13 @@ data class Station(
 
     /** Whether the station is the user's own (imported), not the directory's. */
     val isUser: Boolean get() = uuid == null
+
+    /**
+     * The station as the directory gives it, with what the user did with it: [kept]'s (its row's) id, favourite, vote
+     * and play; itself when it is not kept.
+     */
+    fun withMarks(kept: Station?): Station =
+        kept?.let { copy(id = it.id, favourite = it.favourite, lastVotedAt = it.lastVotedAt, lastPlayedAt = it.lastPlayedAt) } ?: this
 }
 
 /** How the directory orders a search. */
