@@ -5,11 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,30 +28,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
+import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.SegmentedChoice
-import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.theme.NagTheme
 
 /** What the add-server form finds wrong: an address's faults, or a password without its user. */
@@ -422,7 +410,8 @@ internal fun FormGroup(title: String, content: @Composable () -> Unit) {
 
 /**
  * A one-line text field with its name, and its fault under it (a red border, read out at once).
- * [password] hides what is typed.
+ * [password] hides what is typed. 1.0.3: the app's own text field ([NagTextField], Desktop Kit 2.0's
+ * error and supporting line) on the form's surface.
  */
 @Composable
 internal fun FormField(
@@ -438,49 +427,28 @@ internal fun FormField(
     onDone: () -> Unit = {},
     tag: String? = null,
 ) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusControl)
-    val focusManager = LocalFocusManager.current
     val message = error?.let { stringResource(it.message) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, style = NagTheme.type.labelSmall, color = colors.textSecondary)
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(min = dimens.minTarget.coerceAtLeast(40.dp))
-                .background(colors.surface, shape)
-                .border(if (error != null) 1.5.dp else 1.dp, if (error != null) colors.danger else colors.borderStrong, shape)
-                .padding(horizontal = 12.dp),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            if (value.isEmpty() && hint.isNotEmpty()) Text(hint, style = NagTheme.type.body, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            BasicTextField(
-                value = value,
-                onValueChange = onValue,
-                singleLine = true,
-                textStyle = NagTheme.type.body.copy(color = colors.text),
-                cursorBrush = SolidColor(colors.accent),
-                visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, autoCorrectEnabled = false),
-                keyboardActions = KeyboardActions(onDone = { onDone() }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .tabMovesFocus(focusManager)
-                    .semantics {
-                        contentDescription = title
-                        if (message != null) error(message)
-                    }
-                    .then(if (tag != null) Modifier.testTag(tag) else Modifier),
-            )
-        }
-        if (message != null) {
-            Text(
-                message,
-                style = NagTheme.type.labelSmall,
-                color = colors.danger,
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        }
+        Text(title, style = NagTheme.type.labelSmall, color = NagTheme.colors.textSecondary)
+        NagTextField(
+            value = value,
+            onValueChange = onValue,
+            label = title,
+            showLabel = false,
+            placeholder = hint.ifEmpty { null },
+            secret = password,
+            onDone = onDone,
+            error = message != null,
+            supportingText = message,
+            keyboardType = keyboardType,
+            imeAction = imeAction,
+            autoCorrect = false,
+            filled = true,
+            // the form's 40 dp fields, as before
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            modifier = Modifier
+                .heightIn(min = NagTheme.dimens.minTarget.coerceAtLeast(40.dp))
+                .then(if (tag != null) Modifier.testTag(tag) else Modifier),
+        )
     }
 }

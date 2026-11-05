@@ -49,8 +49,10 @@ import org.videolan.tools.Notices
  * The window's notices ([Notices]): what the app, the playback service or the library says in a
  * word ("Added to the queue", "Copied", "Loading the playlist…"), at the bottom of the window in
  * front, as the undo bars are. Of the windows up, the one started last shows them; a plain notice
- * leaves after a few seconds (later while the pointer rests on it or it has the keyboard), a
- * progress when what it waits for is done.
+ * leaves after a few seconds (later while the pointer rests on it or it has the keyboard, and as
+ * late as the system recommends when TalkBack asks for more time), a progress when what it waits
+ * for is done. By touch a sideways swipe takes a plain notice away (Desktop Kit 2.0, at the
+ * finger's speed since 2.3); the newer ones stay stacked as they were.
  */
 @Composable
 fun NoticeHost(modifier: Modifier = Modifier) {
@@ -76,7 +78,8 @@ private fun NoticeBar(notice: Notices.Notice) {
     val hovered by interaction.collectIsHoveredAsState()
     var focused by remember { mutableStateOf(false) }
     val paused = hovered || focused
-    var remaining by remember(notice.id) { mutableLongStateOf(if (notice.long) LONG_MILLIS else SHORT_MILLIS) }
+    val visible = recommendedTimeout(if (notice.long) LONG_MILLIS else SHORT_MILLIS, controls = notice.action != null)
+    var remaining by remember(notice.id) { mutableLongStateOf(visible) }
     if (!notice.progress) {
         LaunchedEffect(notice.id, paused) {
             while (!paused && remaining > 0) {
@@ -89,6 +92,8 @@ private fun NoticeBar(notice: Notices.Notice) {
     val shape = RoundedCornerShape(9.dp)
     Column(
         Modifier
+            // a progress stays while its work goes on: it is not swiped away
+            .then(if (notice.progress) Modifier else Modifier.swipeToDismiss(notice.id) { Notices.dismiss(notice.id) })
             .shadow(10.dp, shape)
             .background(colors.inverseSurface, shape)
             .then(if (notice.error) Modifier.border(1.dp, colors.danger, shape) else Modifier)

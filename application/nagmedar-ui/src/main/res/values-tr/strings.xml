@@ -731,6 +731,7 @@
     <!-- Arama sayfası (S-311) -->
     <string name="nag_search_placeholder">Parça, sanatçı ya da albüm ara</string>
     <string name="nag_search_clear">Aramayı temizle</string>
+    <string name="nag_field_clear">Metni temizle</string>
     <plurals name="nag_search_count">
         <item quantity="one">“%1$s” için %2$d sonuç</item>
         <item quantity="other">“%1$s” için %2$d sonuç</item>

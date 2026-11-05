@@ -56,12 +56,14 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.rememberNagHaptics
 import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /**
  * A filter that is on or off (S-801): "4K", "Dolby Vision", "İzlenmedi". On, it takes the
  * selection colour and a check mark slides in (Desktop Kit 0.2.0); screen readers hear a checkbox.
- * The pill is 28 dp with a pointer and 36 dp by touch, in a 48 dp target (S-310).
+ * The pill is 28 dp with a pointer and 36 dp by touch, in a 48 dp target (S-310). By touch it
+ * vibrates as it turns on or off ([app.nagmedar.ui.theme.NagHaptics.toggle], Desktop Kit 2.0).
  */
 @Composable
 fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier) {
@@ -72,6 +74,7 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(50)
+    val haptics = rememberNagHaptics()
     val content = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "chipText")
     val border = animateStateColor(if (selected) colors.selection else colors.borderStrong, "chipBorder")
     // the target: by touch 48 dp either way, "4K" too (S-310); the pill is drawn inside it
@@ -82,7 +85,10 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
             .pressScale(state.pressed)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interaction)
-            .toggleable(value = selected, interactionSource = interaction, indication = null, role = Role.Checkbox, onValueChange = onToggle),
+            .toggleable(value = selected, interactionSource = interaction, indication = null, role = Role.Checkbox) { on ->
+                haptics.toggle(on)
+                onToggle(on)
+            },
         contentAlignment = Alignment.Center,
     ) {
         Row(

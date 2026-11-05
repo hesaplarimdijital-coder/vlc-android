@@ -60,6 +60,8 @@ import app.nagmedar.ui.components.InspectorToggleButton
 import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.components.WorkstationLayout
 import app.nagmedar.ui.components.rememberInspectorState
+import app.nagmedar.ui.components.ClearSelectionOnBack
+import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MoreButton
@@ -1025,7 +1027,8 @@ private fun TrackPane(
     val keys = remember(shown) { shown.map { it.uri } }
     LaunchedEffect(keys) { selection.retain(keys) }
     SelectionCommands(selection, keys)
-    BackHandler(enabled = selection.selecting) { selection.clear() }
+    // 1.0.3 (Desktop Kit 2.2): Back clears a selection being made: any by touch or in "Seç", several with a mouse
+    ClearSelectionOnBack(selection, touchLayout = !pointer)
     Column(Modifier.fillMaxSize()) {
         // a group's name and line; the way back on a phone; an album's cover; the group's conversion
         if (state.view.grouped) {
@@ -1074,14 +1077,15 @@ private fun TrackPane(
             selectedKeys = selection.keys,
             sort = sort?.let { s -> columns.indexOf(s.column).takeIf { it >= 0 }?.let { TableSort(it, s.ascending) } },
             onSortChange = { s -> state.sort = MusicSort(columns[s.column], s.ascending) },
+            // 1.0.3 (Desktop Kit 2.1): the press decides, not the layout: a finger's tap plays, a mouse's click selects
             onRowClick = { track, index ->
-                when {
-                    selection.selecting -> selection.toggle(track.uri)
-                    pointer -> {
+                when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
+                    ListClick.Toggle -> selection.toggle(track.uri)
+                    ListClick.Select -> {
                         val (ctrl, shift) = modifiers.take()
                         selection.click(track.uri, keys, ctrl, shift)
                     }
-                    else -> actions.play(shown, index)
+                    ListClick.Open -> actions.play(shown, index)
                 }
             },
             onRowDoubleClick = if (pointer && !selection.selecting) ({ _, index -> actions.play(shown, index) }) else null,

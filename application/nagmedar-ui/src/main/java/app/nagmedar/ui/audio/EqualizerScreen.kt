@@ -81,6 +81,7 @@ import app.nagmedar.ui.components.gainText
 import app.nagmedar.ui.player.equalizer.EqualizerPreset
 import app.nagmedar.ui.components.DropButton
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import org.videolan.tools.NAGMEDAR_DSP
@@ -173,7 +174,8 @@ fun EqualizerScreen(
     val dimens = NagTheme.dimens
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 1000.dp
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        // 1.0.3: under a phone's bars (UnderShellBars) the page scrolls beneath them and its end rests clear of them
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(LocalShellBottomPadding.current)) {
             PageHeader(title = stringResource(R.string.nag_eq_title), subtitle = stringResource(R.string.nag_eq_subtitle))
             Column(Modifier.padding(horizontal = dimens.pagePadding), verticalArrangement = Arrangement.spacedBy(dimens.gapM)) {
                 ChainBar(state, meter)
@@ -719,7 +721,17 @@ private fun LabelledSlider(
             Text(label, style = NagTheme.type.label, color = colors.textSecondary, modifier = Modifier.weight(1f))
             Text(valueText, style = NagTheme.type.mono, color = colors.text)
         }
-        NagSlider(value = fraction.coerceIn(0f, 1f), onValueChange = onFraction, keyStep = keyStep, wheelStep = keyStep, enabled = enabled, modifier = Modifier.fillMaxWidth())
+        // TalkBack reads the label and the value written beside it (Desktop Kit 2.0)
+        NagSlider(
+            value = fraction.coerceIn(0f, 1f),
+            onValueChange = onFraction,
+            keyStep = keyStep,
+            wheelStep = keyStep,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+            label = label,
+            valueText = { valueText },
+        )
     }
 }
 
