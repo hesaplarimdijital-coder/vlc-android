@@ -110,25 +110,76 @@ object PodcastIndexJson {
 
 /** iTunes Search's answers, read. */
 object ITunesJson {
-    fun hits(text: String): List<PodcastHit> {
+    fun hits(text: String): List<PodcastHit> = results(text).mapNotNull(::hit)
+
+    /** 1.0.3: a lookup's shows by Apple's id (`collectionId`), each read as the search reads it. */
+    fun lookup(text: String): Map<Long, PodcastHit> {
+        val found = LinkedHashMap<Long, PodcastHit>()
+        results(text).forEach { item ->
+            val id = item.optLong("collectionId", -1).takeIf { it > 0 } ?: return@forEach
+            hit(item)?.let { found[id] = it }
+        }
+        return found
+    }
+
+    private fun results(text: String): List<JSONObject> {
         val results = try {
             JSONObject(text).optJSONArray("results")
         } catch (e: JSONException) {
             throw DirectoryFailure.Server(HTTP_OK_BAD_BODY)
         } ?: return emptyList()
+        return (0 until results.length()).mapNotNull { results.optJSONObject(it) }
+    }
+
+    private fun hit(item: JSONObject): PodcastHit? {
+        val feed = item.optString("feedUrl").trim().takeIf { it.isNotEmpty() && !item.isNull("feedUrl") } ?: return null
+        val title = HtmlText.line(item.optString("collectionName").ifEmpty { item.optString("trackName") }) ?: return null
+        return PodcastHit(
+            feedUrl = feed,
+            title = title,
+            author = HtmlText.line(item.optString("artistName")),
+            imageUrl = listOf("artworkUrl600", "artworkUrl100", "artworkUrl60").firstNotNullOfOrNull { name -> item.optString(name).takeIf { it.startsWith("http") } },
+            episodeCount = item.optInt("trackCount", -1).takeIf { it >= 0 },
+            source = HitSource.ITunes,
+        )
+    }
+
+    private const val HTTP_OK_BAD_BODY = 200
+}
+
+/**
+ * 1.0.3: Apple's chart of a storefront's most listened shows (rss.marketingtools.apple.com, "Top Shows"), read: Apple's
+ * id of each show, its name, artist, cover and top-level categories, in the chart's order. It gives no feed address: a
+ * lookup does ([ITunesJson.lookup]).
+ */
+object AppleChartJson {
+    fun entries(text: String): List<ChartEntry> {
+        val results = try {
+            JSONObject(text).optJSONObject("feed")?.optJSONArray("results")
+        } catch (e: JSONException) {
+            throw DirectoryFailure.Server(HTTP_OK_BAD_BODY)
+        } ?: return emptyList()
         return (0 until results.length()).mapNotNull { index ->
             val item = results.optJSONObject(index) ?: return@mapNotNull null
-            val feed = item.optString("feedUrl").trim().takeIf { it.isNotEmpty() && !item.isNull("feedUrl") } ?: return@mapNotNull null
-            val title = HtmlText.line(item.optString("collectionName").ifEmpty { item.optString("trackName") }) ?: return@mapNotNull null
-            PodcastHit(
-                feedUrl = feed,
-                title = title,
-                author = HtmlText.line(item.optString("artistName")),
-                imageUrl = listOf("artworkUrl600", "artworkUrl100", "artworkUrl60").firstNotNullOfOrNull { name -> item.optString(name).takeIf { it.startsWith("http") } },
-                episodeCount = item.optInt("trackCount", -1).takeIf { it >= 0 },
-                source = HitSource.ITunes,
+            val id = item.optString("id").trim().toLongOrNull()?.takeIf { it > 0 } ?: return@mapNotNull null
+            val name = HtmlText.line(item.optString("name")) ?: return@mapNotNull null
+            val genres = item.optJSONArray("genres")?.let { list -> (0 until list.length()).mapNotNull { list.optJSONObject(it)?.let(::genre) } }.orEmpty()
+            ChartEntry(
+                id = id,
+                name = name,
+                artist = HtmlText.line(item.optString("artistName")),
+                artworkUrl = item.optString("artworkUrl100").takeIf { it.startsWith("http") },
+                genres = genres.distinctBy { it.id },
             )
         }
+    }
+
+    /** A category of the chart (its id comes as a text); the root "Podcasts" is none. */
+    private fun genre(item: JSONObject): ChartGenre? {
+        val id = item.opt("genreId")?.toString()?.trim()?.toIntOrNull() ?: return null
+        if (id == ApplePodcasts.ROOT_GENRE) return null
+        val name = item.optString("name").trim().takeIf { it.isNotEmpty() } ?: return null
+        return ChartGenre(id, name)
     }
 
     private const val HTTP_OK_BAD_BODY = 200

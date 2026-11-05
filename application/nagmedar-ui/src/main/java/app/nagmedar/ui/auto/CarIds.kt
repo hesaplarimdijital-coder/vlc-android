@@ -8,7 +8,9 @@ import java.net.URLEncoder
  * 1.0: the ids of Android Auto's entries: under the browser's root ([MediaSessionBrowser.ID_ROOT]) a path, a key in it
  * encoded (an album's, a folder's path, a tag) and parameters after "?": "p" the page of a long list, "i" the track a
  * list plays from, "n", "u", "l" a directory station's name, address and logo, "t" why a list is empty ([nothing]).
- * 1.0.3: the Music tab's genres, smart lists, every track and its shuffle.
+ * 1.0.3: the Music tab's genres, smart lists, every track and its shuffle; the Podcast tab's Keşfet ("c" a chart's
+ * country), a directory's shows ("n", "a", "l" their title, author and cover), their episodes ("u" the feed) and their
+ * row "Abone ol".
  */
 object CarIds {
     const val ROOT = MediaSessionBrowser.ID_ROOT
@@ -39,6 +41,16 @@ object CarIds {
     const val NEW = "$PODCASTS/new"
     private const val SHOW = "$PODCASTS/show/"
     private const val EPISODE = "$PODCASTS/episode/"
+
+    /** 1.0.3: Keşfet: Apple's popular shows of the device's country, its categories, the other countries. */
+    const val DISCOVER = "$PODCASTS/discover"
+    const val CATEGORIES = "$PODCASTS/categories"
+    const val COUNTRIES = "$PODCASTS/countries"
+    private const val CHART = "$PODCASTS/chart/"
+    private const val CATEGORY = "$PODCASTS/category/"
+    private const val DIRECTORY_SHOW = "$PODCASTS/dshow/"
+    private const val DIRECTORY_EPISODE = "$PODCASTS/dep/"
+    private const val SUBSCRIBE = "$PODCASTS/subscribe/"
 
     const val RADIO = MediaSessionBrowser.ID_RADIO
     const val FAVOURITES = "$RADIO/favourites"
@@ -74,6 +86,27 @@ object CarIds {
     fun smart(id: Long) = "$SMART$id"
     fun show(feedId: Long) = "$SHOW$feedId"
     fun episode(id: Long) = "$EPISODE$id"
+    /** 1.0.3: Apple's popular shows of [country] (a two-letter code, lower case). */
+    fun chart(country: String) = CHART + encode(country)
+
+    /** 1.0.3: the popular shows of [country] in Apple's category [genre]. */
+    fun category(country: String, genre: Int) = "$CATEGORY$genre?c=" + encode(country)
+
+    /**
+     * 1.0.3: a show of a directory, followed or not: its feed's address, and its [title], [author] and [image] as the
+     * directory gave them (what subscribing to it keeps when the feed leaves them out).
+     */
+    fun directoryShow(feedUrl: String, title: String, author: String?, image: String?) = DIRECTORY_SHOW + encode(feedUrl) + show(title, author, image)
+
+    /** 1.0.3: an episode of a show not followed, by its guid in the feed at [feedUrl]. */
+    fun directoryEpisode(feedUrl: String, guid: String) = DIRECTORY_EPISODE + encode(guid) + "?u=" + encode(feedUrl)
+
+    /** 1.0.3: the row "Abone ol" of a show not followed: tapped, it subscribes to the feed at [feedUrl]. */
+    fun subscribe(feedUrl: String, title: String, author: String?, image: String?) = SUBSCRIBE + encode(feedUrl) + show(title, author, image)
+
+    private fun show(title: String, author: String?, image: String?) =
+        "?n=" + encode(title) + (author?.let { "&a=" + encode(it) } ?: "") + (image?.let { "&l=" + encode(it) } ?: "")
+
     fun tag(name: String) = TAG + encode(name)
     fun station(id: Long) = "$STATION$id"
 
@@ -108,6 +141,8 @@ object CarIds {
         ALBUM to CarKind.Album, ARTIST to CarKind.Artist, PLAYLIST to CarKind.Playlist, DECADE to CarKind.Decade, YEAR to CarKind.Year,
         FOLDER to CarKind.Folder, GENRE to CarKind.Genre, SMART to CarKind.Smart, SHOW to CarKind.Show, EPISODE to CarKind.Episode, TAG to CarKind.Tag, STATION to CarKind.Station,
         DIRECTORY to CarKind.DirectoryStation, SEARCH to CarKind.Search,
+        CHART to CarKind.Chart, CATEGORY to CarKind.Category, DIRECTORY_SHOW to CarKind.DirectoryShow, DIRECTORY_EPISODE to CarKind.DirectoryEpisode,
+        SUBSCRIBE to CarKind.Subscribe,
     )
 
     private fun encode(text: String): String = URLEncoder.encode(text, Charsets.UTF_8.name())
@@ -120,7 +155,12 @@ object CarIds {
 }
 
 /** The entries with a key in their id. */
-enum class CarKind { Album, Artist, Playlist, Decade, Year, Folder, Genre, Smart, Show, Episode, Tag, Station, DirectoryStation, Search }
+enum class CarKind {
+    Album, Artist, Playlist, Decade, Year, Folder, Genre, Smart, Show, Episode, Tag, Station, DirectoryStation, Search,
+
+    /** 1.0.3: Keşfet's charts and categories, a directory's show, its episodes, its row "Abone ol". */
+    Chart, Category, DirectoryShow, DirectoryEpisode, Subscribe,
+}
 
 /** An id read ([CarIds.parse]): [path] without the parameters, the [kind] and [key] of an entry with one. */
 data class CarRef(val path: String, val kind: CarKind?, val key: String?, val params: Map<String, String>) {

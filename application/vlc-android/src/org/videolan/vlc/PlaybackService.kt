@@ -1513,6 +1513,21 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         mediaSession.setPlaybackState(playbackState)
     }
 
+    /**
+     * 1.0.3: a message for Android Auto that stops nothing (what "Abone ol" came to): with a media loaded, the session's
+     * state as it is, the message as a non-fatal error (the next state it publishes is without it); with none, the
+     * session's error state ([displayPlaybackError]).
+     */
+    fun displayCarMessage(message: String) {
+        if (!this@PlaybackService::mediaSession.isInitialized) initMediaSession()
+        val current = mediaSession.controller?.playbackState
+        if (!hasMedia() || current == null) {
+            displayPlaybackError(message)
+            return
+        }
+        mediaSession.setPlaybackState(PlaybackStateCompat.Builder(current).setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, message).build())
+    }
+
     fun displaySubtitleMessage(vararg messages: String?) {
         var endTime = System.currentTimeMillis()
         subtitleMessage.clear()

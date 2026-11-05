@@ -40,6 +40,9 @@ object PodcastCenter {
     @Volatile
     private var index: PodcastIndexDirectory? = null
 
+    @Volatile
+    private var itunes: ITunesDirectory? = null
+
     private val focusPending = MutableStateFlow(false)
 
     /** The OPML import in progress or just done, which outlives the screen. */
@@ -147,7 +150,15 @@ object PodcastCenter {
     }
 
     fun search(): PodcastSearch = search ?: synchronized(this) {
-        search ?: PodcastSearch(podcastIndex(), ITunesDirectory(userAgent(), Locale.getDefault().country)).also { search = it }
+        search ?: PodcastSearch(podcastIndex(), itunes()).also { search = it }
+    }
+
+    /**
+     * 1.0.3: the one iTunes client of the app: the search's second directory and Android Auto's charts (Keşfet) share its
+     * pace, Apple's limit of about twenty requests a minute.
+     */
+    fun itunes(): ITunesDirectory = itunes ?: synchronized(this) {
+        itunes ?: ITunesDirectory(userAgent(), Locale.getDefault().country).also { itunes = it }
     }
 
     private fun podcastIndex(): PodcastIndexDirectory = index ?: synchronized(this) {

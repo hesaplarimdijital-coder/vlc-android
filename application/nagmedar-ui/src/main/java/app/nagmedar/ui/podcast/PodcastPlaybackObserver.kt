@@ -106,6 +106,8 @@ class PodcastPlaybackObserver : PlaybackObserver {
     private suspend fun publish(app: Context, context: EpisodeContext?) {
         PodcastCenter.setPlaying(context?.let { PlayingEpisode(it.episodeId, it.feedId) })
         if (context == null) return
+        // 1.0.3: Android Auto's "Devam eden bölümler" lists the episodes in the order they were last listened to
+        withContext(Dispatchers.IO) { ListenedEpisodes(app).heard(context.episodeId) }
         val episode = withContext(Dispatchers.IO) { NagmedarDatabase.get(app).podcasts().episode(context.episodeId) } ?: return
         val chapters = (PodcastCenter.extras(app).chapters(episode) as? ExtraLoad.Ready)?.value.orEmpty()
         // only if it is still the one that plays
