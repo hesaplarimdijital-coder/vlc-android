@@ -1070,7 +1070,6 @@
     <string name="nag_auto_continue">Continue listening</string>
     <string name="nag_auto_subscriptions">My shows</string>
     <string name="nag_auto_new_episodes">New episodes</string>
-    <string name="nag_auto_favourite_stations">Favourite stations</string>
     <string name="nag_auto_categories">Categories</string>
     <string name="nag_auto_found_tracks">Tracks</string>
     <string name="nag_auto_found_episodes">Podcast episodes</string>
@@ -1115,6 +1114,15 @@
     <string name="nag_auto_genre_technology">Technology</string>
     <string name="nag_auto_genre_true_crime">True crime</string>
     <string name="nag_auto_genre_tv">TV and film</string>
+    <!-- 1.0.3: Android Auto's Radio tab: the radio directory by country, by language, its most listened and most liked stations -->
+    <string name="nag_auto_recent_stations">Recent stations</string>
+    <string name="nag_auto_languages">Languages</string>
+    <string name="nag_auto_most_listened">Most listened</string>
+    <string name="nag_auto_most_liked">Most liked</string>
+    <string name="nag_auto_more_stations">More stations</string>
+    <string name="nag_auto_radio_busy">The radio directory is busy. Try again in a minute.</string>
+    <string name="nag_auto_favourite_added">“%1$s” added to favourites</string>
+    <string name="nag_auto_favourite_removed">“%1$s” removed from favourites</string>
     <string name="nag_music_unknown_album">Unknown album</string>
     <string name="nag_music_unknown_genre">No genre</string>
     <string name="nag_music_unknown_composer">No composer</string>

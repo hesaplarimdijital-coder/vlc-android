@@ -14,9 +14,14 @@ import app.nagmedar.ui.podcast.FeedFailure
 import app.nagmedar.ui.podcast.ParsedEpisode
 import app.nagmedar.ui.podcast.ParsedFeed
 import app.nagmedar.ui.podcast.PodcastHit
+import app.nagmedar.ui.radio.DirectoryCountry
+import app.nagmedar.ui.radio.DirectoryLanguage
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioFailure
+import app.nagmedar.ui.radio.RadioLabels
 import app.nagmedar.ui.radio.Station
+import app.nagmedar.ui.radio.StationOrder
+import app.nagmedar.ui.radio.StationQuery
 import app.nagmedar.ui.stats.TrackStats
 import java.util.Locale
 
@@ -45,10 +50,15 @@ class FakeCarData(
     var favourites: List<Station> = emptyList(),
     var recentStations: List<Station> = emptyList(),
     var tags: List<DirectoryTag> = emptyList(),
-    var tagged: Map<String, List<Station>> = emptyMap(),
+    /** The directory's stations: a list's are those of its country, language or tag, in its order. */
     var directory: List<Station> = emptyList(),
-    /** The directory cannot be reached. */
+    /** 1.0.3: the directory's countries and languages; the device's country. */
+    var radioCountries: List<DirectoryCountry> = emptyList(),
+    var languages: List<DirectoryLanguage> = emptyList(),
+    var homeCountry: String? = "TR",
+    /** The directory cannot be reached; 1.0.3: it asks to wait. */
     var offline: Boolean = false,
+    var busy: Boolean = false,
     /** The medialibrary does not answer in time. */
     var musicUnavailable: Boolean = false,
 ) : CarData {
@@ -123,16 +133,66 @@ class FakeCarData(
 
     override suspend fun tags(): List<DirectoryTag> = directory { tags }
 
-    override suspend fun tagged(tag: String): List<Station> = directory { tagged[tag].orEmpty() }
+    override fun homeCountry() = homeCountry
+
+    override suspend fun radioCountries(): List<DirectoryCountry> = directory { radioCountries }
+
+    override suspend fun languages(): List<DirectoryLanguage> = directory { languages }
+
+    /** 1.0.3: the queries the directory was asked for stations by, in order. */
+    val listQueries = ArrayList<StationQuery>()
+
+    /**
+     * 1.0.3: as radio-browser's search: the stations of the country, the language and the tag asked for (exactly, the
+     * country in any case), most listened first (their [Station.bitrate] stands for the clicks here: the fixtures have
+     * none) or most voted first, the page asked for; the kept ones with their marks.
+     */
+    override suspend fun stations(query: StationQuery): List<Station> = directory {
+        listQueries += query
+        val filters = query.filters
+        val matching = directory.filter { station ->
+            (filters.countryCode == null || station.countryCode.equals(filters.countryCode, ignoreCase = true)) &&
+                (filters.language == null || station.language == filters.language) &&
+                (filters.tag == null || filters.tag in station.tags)
+        }
+        val ordered = when (query.order) {
+            StationOrder.Votes -> matching.sortedByDescending { it.votes }
+            else -> matching.sortedByDescending { it.bitrate }
+        }
+        ordered.drop(query.offset).take(query.limit).map(::marked)
+    }
 
     /** As radio-browser's name search: the name has the words as they are, in any case; nothing is folded ("ş" is no "s"). */
     override suspend fun findStations(query: String): List<Station> = directory {
         stationQueries += query
-        directory.filter { it.name.contains(query, ignoreCase = true) }
+        directory.filter { it.name.contains(query, ignoreCase = true) }.map(::marked)
+    }
+
+    /** 1.0.3: the stations the app keeps: the favourites and those played, by their key. */
+    private fun kept(): Map<String, Station> = (favourites + recentStations).associateBy { it.key }
+
+    private fun marked(station: Station) = station.withMarks(kept()[station.key])
+
+    /** 1.0.3: a station of a list, else one kept. */
+    override suspend fun knownStation(uuid: String): Station? =
+        directory.firstOrNull { it.uuid == uuid }?.let(::marked) ?: kept().values.firstOrNull { it.uuid == uuid }
+
+    /** 1.0.3: the favourites made, in order: the station and on or off. */
+    val favouritesMade = ArrayList<Pair<Station, Boolean>>()
+
+    /** 1.0.3: as the Radio page's library: kept (a row of its own), its favourite mark set; the favourites by name. */
+    override suspend fun favourite(station: Station, on: Boolean): Station {
+        favouritesMade += station to on
+        val known = kept()[station.key]
+        val made = (known ?: station).copy(id = known?.id ?: (100L + favouritesMade.size), favourite = on)
+        favourites = (favourites.filter { it.key != station.key } + listOfNotNull(made.takeIf { on })).sortedBy { it.name }
+        recentStations = recentStations.map { if (it.key == station.key) made else it }
+        return made
     }
 
     private fun <T> directory(answer: () -> T): T {
         directoryAsked++
+        if (busy) throw RadioFailure.Busy(60_000)
         if (offline) throw RadioFailure.Offline()
         return answer()
     }
@@ -162,7 +222,10 @@ object FakeCarLook : CarLook {
     override val locale: Locale = Locale.ROOT
 
     /** "country:tr". */
-    override fun country(code: String) = "country:$code"
+    override fun country(code: String, name: String?) = "country:$code"
+
+    /** As the app names it, in English: "Turkish". */
+    override fun language(name: String, code: String?) = RadioLabels.language(name, code, Locale.ENGLISH)
 
     /** Apple's English name, as the app shows one it does not know. */
     override fun category(genre: ChartGenre) = genre.name
@@ -248,12 +311,28 @@ fun parsedFeed(title: String, episodes: Int = 2, image: String? = "https://examp
     },
 )
 
-fun station(id: Long, name: String, uuid: String? = "uuid-$id", tags: List<String> = listOf("pop")) = Station(
+fun station(
+    id: Long,
+    name: String,
+    uuid: String? = "uuid-$id",
+    tags: List<String> = listOf("pop"),
+    countryCode: String? = null,
+    language: String? = null,
+    /** 1.0.3: how often it was listened to (the fake directory orders by it), and its votes. */
+    clicks: Int = 0,
+    votes: Int = 0,
+    favourite: Boolean = false,
+) = Station(
     uuid = uuid,
     name = name,
     streamUrl = "https://radio.example.org/$id",
     id = id,
     logoUrl = "https://radio.example.org/logo/$id.png",
+    countryCode = countryCode,
     country = "Türkiye",
+    language = language,
     tags = tags,
+    bitrate = clicks,
+    votes = votes,
+    favourite = favourite,
 )
