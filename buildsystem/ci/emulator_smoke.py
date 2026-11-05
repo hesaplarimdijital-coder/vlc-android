@@ -337,8 +337,8 @@ class Smoke:
             self.warnings.append("[%s] the band behind the buttons was not read (%s)" % (self.cur_pass, what))
             return
         rel = self.steps[-1]["shot"]
-        # the bar's own colour beside the label (between the tabs), and behind the buttons near the window's bottom
-        bar = self.pixel(rel, w // 4 + w // 8, more[0].center[1], w)
+        # the bar's own colour between its first two tabs' labels, and behind the buttons near the window's bottom
+        bar = self.pixel(rel, w // 4, more[0].center[1], w)
         band = self.pixel(rel, w // 8, h - 6, w)
         self.check("the bottom bar's colour continues behind the three buttons (%s)" % what, bar is not None and bar == band,
                    "bar %s, behind the buttons %s" % (bar, band))
@@ -1778,6 +1778,8 @@ class Smoke:
         os.makedirs(os.path.join(self.out, "glass"), exist_ok=True)
         shots = []
         nodes = self.open_music()
+        # the scan may still be going: the walk's tracks are waited for
+        nodes, _ = self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 40)
         self.play_track(nodes)
         time.sleep(2)
         # paused: the strip and the lists stand still for the pictures
@@ -1795,6 +1797,8 @@ class Smoke:
                 self.glass_top(nodes)
                 nodes = self.step("Music (%s, %s)" % (letter, theme), wait=1.0)
                 self.check("the mini player shows (%s, %s)" % (letter, theme), bool(self.by_id(nodes, "mini-player")))
+                if letter == "A":
+                    self.band_check(nodes, "%s theme" % theme)
                 shots += self.glass_shots(nodes, letter, theme, "music")
                 if self.open_label(s["nag_nav_playlists"]):
                     time.sleep(1.5)
@@ -1802,6 +1806,20 @@ class Smoke:
                     self.glass_top(nodes)
                     nodes = self.step("Playlists (%s, %s)" % (letter, theme), wait=1.0)
                     shots += self.glass_shots(nodes, letter, theme, "playlists")
+                # the search page's results, the phone's list that scrolls beneath the top bar as well (C's top bar)
+                nodes = self.open_music()
+                search = [n for n in self.app_nodes(nodes) if n.desc.strip() == s["nag_search"]]
+                if search:
+                    self.tap(search[0])
+                    time.sleep(1.5)
+                    self.sh("input text Profile")
+                    time.sleep(1.5)
+                    self.key(4, record=False)  # the keyboard away: the bars come back
+                    time.sleep(1.0)
+                    nodes = self.step("Search (%s, %s)" % (letter, theme), wait=1.0)
+                    shots += self.glass_shots(nodes, letter, theme, "search")
+                    self.key(4, record=False)
+                    self.step("Back from the search page")
                 self.back_to_tabs()
         self.sh("cmd uimode night no")
         self.animations(False)
@@ -1810,7 +1828,9 @@ class Smoke:
                     "Real emulator screenshots (API %s, %s, 1080x2400 at 420 dpi, three-button navigation, the debug build), "
                     "switched with the debug-only extra `%s`. A = all opaque (the product today); B = the mini player, the "
                     "bottom bar and the band behind the buttons on one glass, the top bar opaque and never changing colour; "
-                    "C = the kit's: B and a top bar that fades to glass while content passes under it. The track is paused.\n\n"
+                    "C = the kit's: B and a top bar that fades to glass while content passes under it. The track is paused. "
+                    "On the Music and Playlists pages the page's own header stays under the top bar (only the search page's "
+                    "list scrolls beneath it on a phone), so C's top bar shows its glass over that header there.\n\n"
                     "| file | mode | theme | what |\n|---|---|---|---|\n"
                     % (getattr(self, "device", {}).get("sdk", "?"), getattr(self, "device", {}).get("model", "?"), CHROME_GLASS_EXTRA))
             for name, letter, theme, what in shots:
@@ -1863,6 +1883,13 @@ class Smoke:
             self.drag(w // 2, int(h * 0.30), w // 2, int(h * 0.75), moves=6)
         time.sleep(0.8)
 
+    def glass_drag(self, x, y0, y1, moves=16):
+        """A drag that stops before it lifts: the list moves by the drag alone, no fling after it (so the three modes'
+        screenshots show the list at the same place)."""
+        pts = [(x, y0 + (y1 - y0) * i // moves) for i in range(1, moves + 1)]
+        self.sh(" ; ".join(["input motionevent DOWN %d %d" % (x, y0)] + ["input motionevent MOVE %d %d" % p for p in pts]
+                           + ["sleep 0.4", "input motionevent UP %d %d" % (x, y1)]), timeout=90)
+
     def glass_shots(self, nodes, letter, theme, what):
         """The page as it is (its top) and scrolled so its content lies under the bars, the bars shown again over it; each
         screenshot copied to glass/<mode>-<theme>-<what>-<n>-<state>.png."""
@@ -1872,9 +1899,9 @@ class Smoke:
             if i == 2:
                 # down the list (the bars slide away), then a little back up: they return over the rows beneath them
                 for _ in range(2):
-                    self.drag(w // 2, int(h * 0.66), w // 2, int(h * 0.40))
+                    self.glass_drag(w // 2, int(h * 0.66), int(h * 0.38))
                     time.sleep(0.5)
-                self.drag(w // 2, int(h * 0.45), w // 2, int(h * 0.53))
+                self.glass_drag(w // 2, int(h * 0.45), int(h * 0.53))
                 time.sleep(1.5)
             self.step("Glass %s %s %s (%s)" % (letter, theme, what, label), wait=0.8)
             shot = self.steps[-1]["shot"]

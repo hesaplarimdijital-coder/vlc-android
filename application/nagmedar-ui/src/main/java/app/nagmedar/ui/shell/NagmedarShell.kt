@@ -210,7 +210,7 @@ fun NagmedarShell(
     val colors = NagTheme.colors
     val onBottomGlass = chromeGlass != ChromeGlass.Solid && navKind == NavKind.BottomBar && !contentOnly
     val glassSurface: @Composable () -> Modifier = { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
-    val bottomGlass = glassSurface.takeIf { onBottomGlass }
+    val bottomGlass: (@Composable () -> Modifier)? = if (onBottomGlass) glassSurface else null
     // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
     val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)
     // the tab lit: the one whose pages are on screen (none on the search page)
