@@ -81,8 +81,9 @@ import kotlin.math.roundToInt
  * 1.0.3 (Desktop Kit 2.3.0's strips): the phone's transitions frame by frame, as the app plays them in the
  * real shell: the tab switch's fade-through, a page pushed and popped, Back from another tab's first page
  * (the key, and the predictive gesture let go or given up), the player's expand and collapse (a tap's
- * spring and Back's), a sheet's open, close and fling, the phone's "Sıradaki" flung down. Each test plays one with the clock advanced a
- * frame at a time and saves the frames side by side as build/outputs/screenshots/motion/<name>.png,
+ * spring and Back's), a sheet's open, close and fling, the phone's "Sıradaki" flung down. Each test
+ * plays one with the clock advanced a frame at a time and saves the frames side by side as
+ * build/outputs/screenshots/motion/<name>.png,
  * which CI pushes with the screenshots to ci/shots-pr-<n> (motion/). Nothing is asserted beyond the strip
  * being made: the strips are there to be looked at, before and after a change of motion. The frames are
  * those of the frame clock (16 ms apart); each frame lists the milliseconds since the change, with a "•"
