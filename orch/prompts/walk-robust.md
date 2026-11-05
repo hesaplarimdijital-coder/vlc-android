@@ -4,6 +4,8 @@ First read fully $ORCH/AGENT_BRIEF.md (section 0000 first), then $ORCH/notes/rel
 
 Worktree: $WT/walk-robust, branch `story/walk-robust` (from origin/master). Scratch: $SCRATCH/agents/walk-robust/. Force-pushes are refused: never rewrite pushed commits; `git merge origin/master` when master moves.
 
+**The machine restarts about every two hours and kills you with it.** Keep `$SCRATCH/agents/walk-robust/progress.md` current (done / next / decisions / run ids and results) after every push, read it first if it exists (a predecessor left it), and push at least every 40 minutes of work (WIP commits are fine; never force-push). The user wants testing done well ("test yapılması"): this story is what makes the walk a trustworthy test.
+
 ## 1. The flaky check
 On the 1.0.2 personal walk (API 37.0) "a drag down from the sheet's middle closes it" failed once in six runs: the ⋯ sheet stayed 1.5 s after `input swipe` (it passed in the other five, debug 35/37 included). Find out whether it is the app (a race in `components/Sheets.kt`'s SheetDrag / `rememberSheetDrag`: e.g. the swipe arriving before the sheet's layout or its `held` watch, the fling settling, a recomposition dropping the drag) or the emulator's injected input (timing of `input swipe` on API 37, the frame it lands on). Prove it with evidence (logcat, the dump around the step, a few repeated runs of only that step if you can make one), then fix what is wrong: in the app if the app races (with a test), in the walk if the walk asks too early or reads too soon (wait for the sheet to be idle, swipe with a realistic duration, re-read with a deadline). Do not just retry blindly.
 

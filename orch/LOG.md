@@ -375,3 +375,16 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   05:45 the orchestrator committed the root fix itself: b4ccaf3 (ID_ROOT "//app.nagmedar/r" fixed; canonical() for the old
   debug/benchmark roots in browse/isNoMedia/onPlayFromMediaId; CarRootTest incl. a guard on public consts from APP_ID),
   pushed story/auto-browse, draft PR #97. Third auto agent launched for the walk check + the tree, told to push every 30–40 min.
+- 5 Nov ~07:30 third container restart (restarts every ~2–2.5 h). Agent 3 had pushed a56b9ab (personal walk reads Auto's
+  tree: benchmark `personal` build type + AutoBrowseTest + emulator_smoke auto_tree()); CI of b4ccaf3 and a56b9ab green
+  (walks of a56b9ab running). Its Music edits were uncommitted (saved as agents/auto-browse/wip-music-0730.patch).
+  07:35 agent 4 launched for the Music piece only (finish WIP, tests, push, CI). Plan: one short agent per piece.
+
+## 5 Nov 08:28 — the user's priorities
+- "Nağmedar saf bir müzik oynatıcı. VLC'nin video özelliklerini istemiyorum. İstediklerim: UI kit güncellenmesi, test
+  yapılması, geçiş animasyonlarının pürüssüz yapılması." Read as: go ahead with the kit port (parts 1, 2a, 2b, 3, 4), the
+  testing (walk robustness, tests), smooth transitions first; no video. Not answered: minSdk 34 (going 24, the forced
+  floor), Sıradaki button (keep as is), old branches (leave), merge permission (re-asked), device results (testing is ours).
+- 08:40 launched story/platform (opus; prompts/platform.md: TV + moviepedia modules out first, versions, minSdk 24, forced
+  code, screenshots reviewed, walks) and story/walk-robust (opus; prompts/walk-robust.md). Auto agent 4 (music piece) running
+  (story/auto-browse at 4ec2e2c). Doc tab: Platform/CI rows "Çalışıyor", priorities line.
