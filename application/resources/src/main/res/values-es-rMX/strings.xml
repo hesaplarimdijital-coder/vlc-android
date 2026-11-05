@@ -103,16 +103,6 @@
         <item quantity="many">%d vídeos</item>
         <item quantity="other">%d vídeos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 película</item>
-        <item quantity="many">%d películas</item>
-        <item quantity="other">%d películas</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 programa de TV</item>
-        <item quantity="many">%d programas de TV</item>
-        <item quantity="other">%d programas de TV</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 pista</item>
         <item quantity="many">%d pistas</item>
@@ -136,7 +126,6 @@
     <string name="nosubfolder">Sin subcarpetas</string>
     <string name="directorynotfound">La ruta del directorio \'%1$s\' no ha sido encontrada</string>
     <string name="nohistory">No tiene historial de reproducción todavía.</string>
-    <string name="cover_art">Portada</string>
     <string name="shuffle_all_title">Todo aleatorio</string>
     <string name="shuffle_title">Modo aleatorio</string>
     <string name="shuffle">Aleatorio Apagado</string>
@@ -182,7 +171,6 @@
     <string name="sleep_title">Temporizador</string>
     <string name="sleep_in">Apagar en</string>
     <string name="jump_to_time">Ir al tiempo</string>
-    <string name="server_add_title">Agregar un nuevo servidor a favoritos</string>
     <string name="server_folder_hint">Ruta de carpeta (opcional)</string>
     <string name="server_username_hint">Nombre de usuario</string>
     <string name="server_port">Puerto:</string>
@@ -193,8 +181,6 @@
     <string name="favorites_add">Agregar a favoritos</string>
     <string name="favorites_remove">Eliminar de favoritos</string>
     <string name="favorites_edit">Editar</string>
-    <string name="favorite_added">Guardado en favoritos</string>
-    <string name="favorite_removed">Eliminado de favoritos</string>
 
     <string name="streams">Transmisiones</string>
     <string name="search">Busqueda</string>
@@ -278,8 +264,6 @@
     <string name="subtitle_decoration_none">Ninguno</string>
     <string name="subtitle_decoration_shadow">Sombra</string>
     <string name="subtitle_decoration_outline">Borde</string>
-    <string name="previous_color">Color anterior</string>
-    <string name="new_color">Color nuevo</string>
 
     <string name="audio_prefs_category">Audio</string>
     <string name="lockscreen_cover_title">Portada de medio en pantalla de bloqueo</string>
@@ -361,8 +345,6 @@
     <string name="blurred_cover_background_summary">Portada borrosa de fondo en reproductor de audio</string>
     <string name="quit">Cerrar y reiniciar aplicación</string>
     <string name="restart_message">Los cambios se aplicaran al reiniciar.\n\n¿Desea reiniciar ahora?</string>
-    <string name="restart_message_OK">Aceptar</string>
-    <string name="restart_message_Later">Más tarde</string>
     <string name="developer_prefs_category">Desarrollador</string>
     <string name="enable_verbose_mode">Nivel de detalle</string>
     <string name="enable_verbose_mode_summary">Incrementar el nivel de detalle (logcat)</string>
@@ -386,10 +368,7 @@
     <string name="sending_log">Enviando el registro…</string>
 
 
-    <string name="no_result">Sin resultados</string>
-    <string name="no_internet_connection">Verificar tu conexión a internet</string>
     <string name="network_browsing">Red local</string>
-    <string name="browsing">Explorando</string>
 
     <string name="file_size">Tamaño de archivo</string>
 
@@ -444,8 +423,6 @@
     <string name="add_to_playlist">Agregar a la lista</string>
     <string name="popup_playback_title">Reproducir vídeo en ventana emergente</string>
     <string name="browse_folder">Examinar carpeta</string>
-    <string name="listen">Escuchar</string>
-    <string name="videos_all">Todos los videos</string>
     <string name="clear_playback_history">Borar historial de reproducción</string>
     <string name="ml_scanning">Escanear archivos multimedia</string>
     <string name="ml_parse_media">Analizando medio</string>
@@ -537,7 +514,6 @@
     <string name="add_to_new_playlist">Agregar a nueva lista</string>
     <string name="resume_card_message">¿Reanudar reproducción de %1$s?</string>
     <string name="misc">Miscelánea</string>
-    <string name="device_default">Predeterminado por dispositivo</string>
     <string name="track_number">%d pistas</string>
     <string name="jump_to">Saltar a</string>
     <string name="show_video_thumbnails">Vista previa de vídeos</string>
@@ -556,11 +532,8 @@
         <item quantity="other">%d Pistas adjuntadas</item>
     </plurals>
     <string name="remove_current">Borrar actual</string>
-    <string name="validation_delete_playlist">¿Realmente quiere borrar la lista?</string>
-    <string name="validation_delete_playlist_text">Esta acción no se puede deshacer</string>
     <string name="display_in_list">Ver en lista</string>
     <string name="display_in_grid">Ver en cuadricula</string>
-    <string name="dump_db_succes">Base de datos exportada a la raíz del almacenamiento</string>
     <string name="dump_db_failure">Error al exportar base de datos</string>
     <string name="send_crash_title">Reportador de errores de VLC</string>
     <string name="send_crash_description">Enviar reportes ayuda a VLC a ser más estable.</string>
@@ -588,25 +561,6 @@
     <string name="invalid_file">Archivo no válido. No se puede compartir.</string>
     <string name="share_file">Compartir %s</string>
     <string name="share_message">Aquí está %s</string>
-    <string name="find_metadata">Encontrar metadatos</string>
-    <string name="moviepedia_hint">Buscar metadatos</string>
-    <string name="moviepedia_result">Resultados de vídeo</string>
-    <string name="directed_by">Director</string>
-    <string name="casting">Reparto</string>
-    <string name="produced_by">Productor</string>
-    <string name="written_by">Escrito por</string>
-    <string name="music_by">Música por</string>
-    <string name="posters">Póster</string>
-    <string name="backdrops">Fondos</string>
-    <string name="header_tvshows">Programas de TV</string>
-    <string name="header_movies">Películas</string>
-    <string name="season_number">Temporada %s</string>
-    <string name="resume_episode">Reanudar (%s)</string>
-    <string name="start_over">Comenzar de nuevo</string>
-    <string name="next_episode">Siguiente episodio</string>
-    <string name="open_network_settings">Abrir opciones de red?</string>
-    <string name="recently_played">Reproducido recientemente</string>
-    <string name="recently_added">Agregado recientemente</string>
     <string name="playback_multiple_errors">No se pueden ver múltiples medios </string>
     <string name="abrepeat_add_first_marker">Establecer punto inicial</string>
     <string name="abrepeat_add_second_marker">Establecer punto final</string>
@@ -649,7 +603,6 @@
     <string name="subscription_cancel">Puedes cancelar suscripción en Play Store</string>
     <string name="subscription_cancel_tv">Cómo cancelar suscripción</string>
     <string name="donate_unsubscribe_tv">Para cancelar suscripción, por favor abre %s en tu teléfono o PC o escanea el código:</string>
-    <string name="tip_jar">Ayuda de VLC</string>
     <string name="thank_you">Gracias a ti</string>
     <string name="thank_you_desc">¡Gracias por tu patrocinio!\n¡Nos ayudará mucho a mejorar VLC!</string>
     <string name="donate_again">Patrocinar la app nuevamente</string>
@@ -660,7 +613,6 @@
     <string name="allow_otg">Permitir acceso OTG</string>
     <string name="allow_otg_description">Por favor, selecciona tu unidad OTG para que VLC pueda acceder</string>
     <string name="video_hud_timeout">Tiempo para ocultar controles del reproductor de vídeo</string>
-    <string name="remove_from_history">Quitar del historial</string>
     <string name="prefersmbv1">Preferir SMB 1</string>
     <string name="prefersmbv1_summary">Desactivar esto si tiene problemas para encontrar su servidor SMB</string>
     <string name="audio_delay_global">Retraso de audio de %s ms para todos los vídeos</string>

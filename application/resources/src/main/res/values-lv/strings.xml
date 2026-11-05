@@ -100,7 +100,6 @@
     <string name="directorynotfound">Direktorijas ceļš \'%1$s\' netika atrasts.</string>
     <string name="nohistory">Jums nav atskaņošanas vēstures vēl.</string>
 
-    <string name="cover_art">Pārklāšanas māksla</string>
     <string name="shuffle_all_title">Sakārtot visu nejaušā secībā</string>
     <string name="shuffle_title">Secības režīms</string>
     <string name="shuffle">Pēc kārtas</string>
@@ -139,7 +138,6 @@
     <string name="sleep_title">Miega taimeris</string>
     <string name="sleep_in">Iemigt pēc</string>
     <string name="jump_to_time">Pārlēkt uz laiku</string>
-    <string name="server_add_title">Pievienot izlasei jaunu serveri</string>
     <string name="server_domain_hint">Servera adrese (domēna vārds vai IP)</string>
     <string name="server_username_hint">Lietotājvārds</string>
     <string name="server_port">Ports:</string>
@@ -150,8 +148,6 @@
     <string name="favorites_add">Pievienot izlasei</string>
     <string name="favorites_remove">Izņemt no izlases</string>
     <string name="favorites_edit">Rediģēt</string>
-    <string name="favorite_added">Saglabāts izlasē</string>
-    <string name="favorite_removed">Izņemts no izlases</string>
 
     <string name="open_mrl_dialog_msg">Ievadiet tīkla adresi: piemēram, http://, mms:// vai rtsp://</string>
     <string name="encountered_error_title">Atskaņošanas kļūda</string>
@@ -220,8 +216,6 @@
     <string name="set_locale">noteikt darbības vietu</string>
     <string name="network_caching">Tīkla kešdarbes vērtība</string>
     <string name="quit">Iziet un restartēt programmu</string>
-    <string name="restart_message_OK">Labi</string>
-    <string name="restart_message_Later">Vēlāk</string>
     <string name="browser_show_all_title">Rādīt visus failus</string>
 
     <string name="developer_prefs_category">Izstrādātājs</string>
@@ -237,9 +231,6 @@
     <string name="dump_logcat_success">Logcat veiksmīgi izgāza uz %1$s!</string>
     <string name="dump_logcat_failure">Neizdevās izgāzt logcat.</string>
     <string name="restart_vlc">Pārstartēt VLC</string>
-    <string name="no_result">Rezultātu nav</string>
-    <string name="no_internet_connection">Pārbaudiet savu interneta savienojumu</string>
-    <string name="browsing">Pārlūkot</string>
 
     <string name="file_size">Datnes izmērs</string>
 
@@ -266,8 +257,6 @@
     <string name="network_shared_folders">Koplietotās mapes</string>
     <string name="store_password">Atcerēties paroli</string>
     <string name="add_to_playlist">Pievienot atskaņošanas sarakstam</string>
-    <string name="listen">Klausīties</string>
-    <string name="videos_all">Visi video</string>
     <string name="clear_playback_history">Tīrīt atskaņošanas vēsturi</string>
     <string name="resume">Atsākt</string>
     <string name="length">Ilgums</string>

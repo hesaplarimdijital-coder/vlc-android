@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Esteu segur que voleu suprimir aquesta configuració predefinida?</string>
     <string name="confirm_delete_vlc_eq">Esteu segur que voleu amagar aquesta configuració predefinida?\nLa podeu restaurar a la configuració de l\'equalitzador.</string>
     <string name="confirm_replace_playlist">Esteu segur que voleu substituir la llista de reproducció \'%1$s\'?</string>
-    <string name="invalid_settings_file">El fitxer de configuració no és vàlid</string>
     <string name="confirm_delete_message">Això és permanent i no es pot desfer.</string>
     <string name="confirm_delete_album">Voleu suprimir l\'àlbum «%1$s»?</string>
     <string name="confirm_delete_several_media">Voleu esborrar aquests %1$d medis?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 vídeo</item>
         <item quantity="other">%d vídeos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 pel·lícula</item>
-        <item quantity="other">%d pel·lícules</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 programa de tele</item>
-        <item quantity="other">%d programes de TV</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 pista</item>
         <item quantity="other">%d pistes</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Encara no teniu historial de reproducció</string>
     <string name="cant_ban_root">No es pot prohibir una carpeta arrel</string>
 
-    <string name="cover_art">Art de la portada</string>
     <string name="shuffle_all_title">Aleatori a tot</string>
     <string name="shuffle_title">Mode aleatori</string>
     <string name="shuffle">Apaga aleatori</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Reproductor de vídeo remot</string>
     <string name="remote_keyboard_navigation">Navegació amb teclat</string>
 
-    <string name="server_add_title">Afegeix un servidor als preferits</string>
     <string name="server_domain_hint">Adreça del servidor (nom d\'amfitrió o adreça IP)</string>
     <string name="server_share_hint">Adreça del servidor (nom d\'amfitrió o adreça IP)</string>
     <string name="server_folder_hint">Ruta del directori (opcional)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Afegeix als preferits</string>
     <string name="favorites_remove">Suprimeix dels favorits</string>
     <string name="favorites_edit">Edita</string>
-    <string name="favorite_added">Desat als preferits</string>
-    <string name="favorite_removed">Suprimit dels preferits</string>
 
     <string name="streams">Fluxos de dades</string>
     <string name="open_mrl_dialog_msg">Introduïu una adreça de xarxa, com ara http://, mms:// o rtsp://</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Cap</string>
     <string name="subtitle_decoration_shadow">Ombra</string>
     <string name="subtitle_decoration_outline">Contorn</string>
-    <string name="previous_color">Color anterior</string>
-    <string name="new_color">Nou color</string>
 
     <string name="audio_prefs_category">Àudio</string>
     <string name="lockscreen_cover_title">Portada del multimèdia a la pantalla de bloqueig</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Informació d\'accés remot</string>
     <string name="remote_access_content">Contingut</string>
     <string name="remote_access_medialibrary_content">Contingut de la mediateca</string>
-    <string name="remote_access_medialibrary_content_summary">Habilitat: %1$s\nInhabilitat: %2$s</string>
     <string name="remote_access_file_browser_content">Explorador de fitxers</string>
     <string name="remote_access_network_browser_content">Navegador de xarxa</string>
     <string name="remote_access_playback_control">Controla la reproducció</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Aquest valor ha de ser entre 0 i 60000 ms</string>
     <string name="quit">Tanca i reinicia l\'aplicació</string>
     <string name="restart_message">Els canvis s\'aplicaran quan es reiniciï l\'aplicació.\n\nReinici ara mateix?</string>
-    <string name="restart_message_OK">D\'acord</string>
-    <string name="restart_message_Later">Després</string>
     <string name="browser_show_all_title">Mostra només els fitxers multimèdia</string>
 
     <string name="developer_prefs_category">Desenvolupador</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Enviat el fitxer de registre…</string>
 
 
-    <string name="no_result">No s\'ha trobat cap resultat</string>
-    <string name="no_internet_connection">Comproveu la connexió a internet</string>
     <string name="retry">Tornar a provar</string>
 
     <string name="network_browsing">Xarxa local</string>
-    <string name="browsing">Navegació</string>
 
     <string name="file_size">Mida del fitxer</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Obre al navegador web</string>
     <string name="install">Instal·la</string>
     <string name="install_nightly">Instal·la la versió nocturna</string>
-    <string name="install_nightly_alert">Els muntatges nocturns són versions experimentals que s\'actualitzen diàriament.\n\nPodeu esperar noves funcions però també nous errors!</string>
     <string name="nightly_version">Versió trobada: %2$s - %1$s</string>
     <string name="update_nightly_alert">Esteu executant una versió nocturna. Voleu buscar actualitzacions periòdicament?</string>
     <string name="update_nightly">Actualització automàtica</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Reprodueix el vídeo en un pop-up</string>
     <string name="open_subtitles_vip">Sou usuari VIP de OpenSubtitles</string>
     <string name="browse_folder">Explora la carpeta</string>
-    <string name="listen">Escolta</string>
     <string name="episodes">episodis</string>
     <string name="movies">pel·lícules</string>
     <string name="videos">vídeos</string>
     <string name="default_action_videos">Vídeos</string>
-    <string name="videos_all">Tots els vídeos</string>
     <string name="clear_playback_history">Esborra la història de reproducció</string>
     <string name="ml_scanning">Escanejant fitxers multimèdia</string>
     <string name="ml_parse_media">Analitzant els fitxers multimèdia</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Sentiu-vos com a casa</string>
     <string name="done">Fet</string>
     <string name="onboarding_scan_title">Cerca automàtica de fitxers</string>
-    <string name="onboarding_all_set">El VLC està del tot preparat!</string>
-    <string name="onboarding_permission_given">Ara ja podeu auto-descobrir els vostres multimèdia i utilitzar subtítols externs, així com reproduir fluxos o multimèdia de la xarxa</string>
     <string name="daynight_system_explanation">El VLC commutarà automàticament al mode fosc, segons la configuració del sistema</string>
     <string name="daynight_legacy_explanation">El VLC commutarà automàticament al mode nocturn a l\'hora adient</string>
     <string name="onboarding_scanning_enable">Deixa que el VLC escanegi el meu dispositiu cercant contingut multimèdia</string>
@@ -737,7 +711,6 @@
     <string name="create">Crea</string>
     <string name="resume_card_message">Voleu reprendre la reproducció de %1$s?</string>
     <string name="misc">Miscel·lània</string>
-    <string name="device_default">Dispositiu per defecte</string>
     <string name="track_number">%d pistes</string>
     <string name="jump_to">Salta a</string>
     <string name="show_video_thumbnails">Miniatures de vídeo</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d pistes afegides</item>
     </plurals>
     <string name="remove_current">Elimina actual</string>
-    <string name="validation_delete_playlist">Estàs segur que vols esborrar aquesta llista de reproducció?</string>
-    <string name="validation_delete_playlist_text">Aquesta acció no es pot desfer</string>
     <string name="display_settings">Ajustaments de la visualització</string>
     <string name="incognito_mode">Mode incògnit</string>
     <string name="persistent_incognito_mode">Mode d\'incògnit persistent</string>
     <string name="persistent_incognito_mode_summary">Mantenir el mode d\'incògnit activat encara que l\'aplicació es reiniciï</string>
     <string name="display_in_list">Mostra en forma de llista</string>
     <string name="display_in_grid">Mostra en forma de graella</string>
-    <string name="dump_db_succes">Base de dades bolcada a l’arrel de l’emmagatzematge intern</string>
     <string name="dump_db_failure">Error en bolcar la base de dades</string>
     <string name="send_crash_title">Informador d\'error al VLC</string>
     <string name="send_crash_description">Enviant-nos l\'error ens ajudareu a millorar l\'estabilitat del VLC</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Aquí és %s</string>
     <string name="share_track_info">Comparteix la informació de la pista</string>
     <string name="share_track">Actualment escoltant %s</string>
-    <string name="find_metadata">Trobar metadades</string>
-    <string name="moviepedia_hint">Buscar metadades</string>
-    <string name="moviepedia_result">Resultats del vídeo</string>
-    <string name="directed_by">Dirigit per</string>
-    <string name="casting">Casting</string>
-    <string name="produced_by">Produït</string>
-    <string name="written_by">Escrit per</string>
-    <string name="music_by">Música per</string>
-    <string name="posters">Cartells</string>
-    <string name="backdrops">Fons de pantalla</string>
-    <string name="header_tvshows">Programes de TV</string>
-    <string name="header_movies">Pel·lícules</string>
-    <string name="season_number">Temporada %s</string>
-    <string name="resume_episode">Reprèn (%s)</string>
-    <string name="start_over">Comença de nou</string>
-    <string name="next_episode">Episodi següent</string>
-    <string name="open_network_settings">Obrir paràmetres de la xarxa?</string>
-    <string name="recently_played">Reproduït ara mateix</string>
-    <string name="recently_added">Acabat d\'afegir</string>
     <string name="playback_multiple_errors">No es poden reproduir múltiples multimèdia</string>
     <string name="clear_media_db_message">Perdreu els progressos, els preferits i les llistes de reproducció que hàgiu creat però mantindreu la configuració del VLC per a Android</string>
     <string name="clear_app_data_message">Perdreu els progressos, els preferits, les llistes de reproducció i la configuració completa del VLC</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">Podeu donar-vos de baixa a Play Store</string>
     <string name="subscription_cancel_tv">Com donar-se de baixa</string>
     <string name="donate_unsubscribe_tv">Per donar-se de baixa, si us plau obriu el %s en un telèfon o ordinador o escanejar aquest codi:</string>
-    <string name="tip_jar">Ajut VLC</string>
     <string name="thank_you">Gràcies</string>
     <string name="thank_you_desc">Gràcies pel vostre patrocini! \nIt ens ajudarà molt a millorar VLC!</string>
     <string name="donate_again">Patrocinen l\'aplicació de nou</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">Permeteu l\'accés a la memòria externa</string>
     <string name="allow_otg_description">Seleccioneu la unitat OTG per permetre l\'accés al VLC.</string>
     <string name="video_hud_timeout">Retard per amagar els controls de vídeo</string>
-    <string name="remove_from_history">Suprimeix de l\'historial</string>
     <string name="prefersmbv1">Preferit SMB 1</string>
     <string name="prefersmbv1_summary">Desmarqueu aquesta opció si teniu problemes en accedir al servidor SMB</string>
     <string name="audio_delay_global">El retard d\'àudio s\'ha definit a %sms per a tots els vídeos</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Desbloquejar</string>
     <string name="lock_with_pin">Reactiva el bloqueig amb PIN</string>
     <string name="unlock_with_pin">Desbloqueja el mode segur</string>
-    <string name="lock_with_pin_short">Bloqueig PIN</string>
     <string name="restrict_settings">Restringeix l\'accés a la configuració</string>
     <string name="search_prefs">Configuració de cerca</string>
     <string name="stop_unpaubale">Aquest fitxer multimèdia no es pot posar en pausa. L\'aturo?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Aquesta característica està en fase de proves beta i pot provocar penjades i inestabilitats</string>
     <string name="network_indexing">Indexació de la xarxa</string>
     <string name="network_indexing_warning">Actualment la indexació de xarxa està en fase beta.\nProblemes coneguts:\n• Baix rendimentn\nSi trobeu altres problemes, reporteu-los sisplau al nostre fòrum. </string>
-    <string name="start_vlc">Inicia el VLC</string>
     <string name="jump_delay">Retard d\'endavant/enrere</string>
     <string name="long_jump_delay">Retard del toc llarg endavant/enrere</string>
     <string name="jump_delay_summary">%s segons</string>
-    <string name="move_up">Moure amunt</string>
-    <string name="move_down">Moure avall</string>
-    <string name="remove_from_playlist">Treure de la llista de reproducció</string>
-    <string name="play_media">Reprodueix %s</string>
     <string name="edit_eq_preset">Edita la configuració predefinida de l\'equalitzador</string>
     <string name="edit_eq_name_not_allowed">Aquest nom no està permès</string>
     <string name="export_equalizer">Exporta l\'equalitzador</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Baixant</string>
     <string name="talkback_action_rewind">Enrere %s segons</string>
     <string name="talkback_action_forward">Endavant %s segons</string>
-    <string name="talkback_display_settings">Ajustaments de la visualització</string>
     <string name="talkback_already_played">Ja s\'ha reproduït</string>
     <string name="show_only_favs">Mostra només els preferits</string>
     <string name="ignore_headset_media_button_presses">Ignorar les pressions dels botons multimèdia dels auriculars</string>

@@ -2,6 +2,8 @@
 
 package app.nagmedar.ui.lyrics.editor
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -49,7 +51,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -467,11 +468,15 @@ private fun MessageLine(message: EditorMessage, onPickFolder: () -> Unit) {
     }
 }
 
+/** The clipboard's text, as the platform gives it (an item that is no text reads as its text form). */
+private fun pasted(context: Context): String? =
+    context.getSystemService(ClipboardManager::class.java)?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()
+
 @Composable
 private fun ImportDialog(controller: LyricsEditorController) {
     val colors = NagTheme.colors
     var text by remember { mutableStateOf("") }
-    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
     // the keys are the editor's again when the box goes
     DisposableEffect(Unit) { onDispose { controller.typing = false } }
     NagDialog(onDismissRequest = { controller.importing = false }) {
@@ -486,7 +491,7 @@ private fun ImportDialog(controller: LyricsEditorController) {
                     modifier = Modifier.onFocusChanged { controller.typing = it.isFocused }.testTag("lrc-import-text"),
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NagButton(stringResource(R.string.nag_lrc_import_paste), { clipboard.getText()?.text?.let { text = it } }, modifier = Modifier.testTag("lrc-import-paste"))
+                    NagButton(stringResource(R.string.nag_lrc_import_paste), { pasted(context)?.let { text = it } }, modifier = Modifier.testTag("lrc-import-paste"))
                     if (controller.current != null) {
                         NagButton(stringResource(R.string.nag_lrc_import_current), { controller.useCurrent() }, modifier = Modifier.testTag("lrc-import-current"))
                     }

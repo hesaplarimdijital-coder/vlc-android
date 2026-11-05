@@ -71,7 +71,6 @@
     <string name="directorynotfound">Putanja direktorija \'%1$s\' nije pronađena.</string>
     <string name="nohistory">Nemate historiju reproduciranja.</string>
 
-    <string name="cover_art">Omot</string>
     <string name="previous">Prethodno</string>
     <string name="stop">Zaustavi</string>
     <string name="unseekable_stream">Nepotraživo stujanje</string>

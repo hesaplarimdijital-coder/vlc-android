@@ -18,7 +18,6 @@
     <color name="orange600">#ff7d00</color>
     <color name="orange700">#ff7200</color>
     <color name="orange800">#ff610a</color>
-    <color name="orange900">#ff5014</color>
 
     <color name="red500transparent_10">#1aff0000</color>
     <color name="red500transparent25">#40ff0000</color>
@@ -65,21 +64,18 @@
     <color name="whitetransparent_ea">#eaffffff</color>
 
     <color name="grey50transparent">#b9fafafa</color>
-    <color name="grey50transparent_ea">#eafafafa</color>
     <color name="grey300transparent">#80e0e0e0</color>
     <color name="grey400transparent">#80bdbdbd</color>
     <color name="grey600transparent">#80757575</color>
     <color name="grey700transparent">#80616161</color>
     <color name="grey900transparent_bb">#bb212121</color>
     <color name="grey900transparent_dd">#dd212121</color>
-    <color name="grey900transparent">#80212121</color>
     <color name="grey200_transparent_20">#33eeeeee</color>
 
     <color name="mini_player_dark">#121212</color>
     <color name="mini_visualizer">#BF141414</color>
 
     <color name="blacktransparent">#b4000000</color>
-    <color name="whitetransparent">#b4ffffff</color>
     <color name="white_less_transparent">#ccffffff</color>
     <color name="ripple_white">#44ffffff</color>
     <color name="white_more_transparent">#33ffffff</color>
@@ -111,14 +107,8 @@
     <color name="orange_800_transparent_20">#33ff610a</color>
     <color name="orange_500_transparent_20">#33FF8800</color>
 
-    <color name="tv_bg">#34434e</color>
-    <color name="tv_card_content">#34434e</color>
     <color name="tv_card_content_dark">#1a2c38</color>
-    <color name="tv_card_content_darker">#011422</color>
 
-    <!--test with onboarding colors-->
-    <!--<color name="tv_bg">#1c313a</color>-->
-    <!--<color name="tv_card_content">#396375</color>-->
     <color name="onboarding_grey">#011422</color>
     <color name="onboarding_grey_transparent_20">#33011422</color>
     <color name="onboarding_grey_transparent_75">#BF011422</color>

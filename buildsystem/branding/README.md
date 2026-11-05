@@ -20,8 +20,7 @@ python3 buildsystem/branding/gen_icons.py application/nagmedar-ui/src/main/java/
 
 Colours: blue `#8AB0FF` (upper half), coral `#FF7A6E` (lower half), background `#12161B`.
 
-The TV banner (`drawable-*/banner.png`) uses IBM Plex Sans SemiBold (SIL OFL 1.1). The widget
-previews and the sample cover (`drawable-nodpi/vlc_widget_*.png`, `vlc_fake_cover.png`) are the
+The widget previews and the sample cover (`drawable-nodpi/vlc_widget_*.png`, `vlc_fake_cover.png`) are the
 upstream images with the VLC wordmark removed.
 
 Attribution stays: Nağmedar is based on VLC for Android by VideoLAN (GPLv2 or later). The About

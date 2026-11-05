@@ -46,9 +46,7 @@ import org.videolan.resources.AppContextProvider
 import org.videolan.resources.CRASH_HAPPENED
 import org.videolan.resources.CRASH_ML_CTX
 import org.videolan.resources.CRASH_ML_MSG
-import org.videolan.resources.TV_PREFERENCE_ACTIVITY
 import org.videolan.resources.util.applyOverscanMargin
-import org.videolan.tools.Settings
 import org.videolan.tools.isVisible
 import org.videolan.tools.setGone
 import org.videolan.tools.setVisible
@@ -58,7 +56,6 @@ import org.videolan.vlc.R
 import org.videolan.vlc.databinding.AboutFeedbackActivityBinding
 import org.videolan.vlc.gui.helpers.FeedbackUtil
 import org.videolan.vlc.gui.helpers.UiTools
-import org.videolan.vlc.gui.preferences.EXTRA_PREF_END_POINT
 import org.videolan.vlc.gui.preferences.openNagmedarSettings
 import org.videolan.vlc.util.FileUtils
 import org.videolan.vlc.util.Permissions
@@ -188,15 +185,7 @@ class FeedbackActivity : BaseActivity(), DebugLogService.Client.Callback {
             updateFormIncludesVisibility()
         }
         binding.openSettings.setOnClickListener {
-            lifecycleScope.launch {
-                if (Settings.tvUI) {
-                    val intent = Intent(Intent.ACTION_VIEW).setClassName(this@FeedbackActivity, TV_PREFERENCE_ACTIVITY)
-                    intent.putExtra(EXTRA_PREF_END_POINT, "remote_access_category")
-                    startActivity(intent)
-                }
-                else
-                    openNagmedarSettings("enable_remote_access")
-            }
+            openNagmedarSettings("enable_remote_access")
         }
         binding.emailSupportCard.setOnClickListener {
             if (!isMailClientPresent()) {

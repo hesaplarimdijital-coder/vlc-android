@@ -61,13 +61,11 @@
         <Preference
                 android:title="@string/interface_prefs_screen"
                 android:key="ui_category"
-                android:icon="@drawable/ic_ui"
-                android:fragment="org.videolan.television.ui.preferences.PreferencesUi"/>
+                android:icon="@drawable/ic_ui"/>
         <Preference
                 android:title="@string/audio_prefs_category"
                 android:key="audio_category"
-                android:icon="@drawable/ic_pref_audio"
-                android:fragment="org.videolan.television.ui.preferences.PreferencesAudio"/>
+                android:icon="@drawable/ic_pref_audio"/>
 
         <Preference
                 android:title="@string/equalizer"
@@ -81,24 +79,20 @@
         <PreferenceScreen
                 android:key="parental_control"
                 android:singleLine="false"
-                android:fragment="org.videolan.television.ui.preferences.PreferencesParentalControl"
                 android:icon="@drawable/ic_pref_parental_control"
                 android:title="@string/parental_control"/>
         <Preference
                 android:title="@string/remote_access"
                 android:key="remote_access_category"
-                android:icon="@drawable/ic_pref_remote_access"
-                android:fragment="org.videolan.television.ui.preferences.PreferencesRemoteAccess"/>
+                android:icon="@drawable/ic_pref_remote_access"/>
         <Preference
             android:title="@string/android_auto"
             android:key="android_auto_category"
-                android:icon="@drawable/ic_pref_android_auto"
-            android:fragment="org.videolan.television.ui.preferences.PreferencesAndroidAuto"/>
+                android:icon="@drawable/ic_pref_android_auto"/>
         <Preference
                 android:title="@string/advanced_prefs_category"
                 android:key="adv_category"
-                android:icon="@drawable/ic_pref_advanced_settings"
-                android:fragment="org.videolan.television.ui.preferences.PreferencesAdvanced"/>
+                android:icon="@drawable/ic_pref_advanced_settings"/>
         <Preference
                 android:title="@string/libraries"
                 android:key="licenses"

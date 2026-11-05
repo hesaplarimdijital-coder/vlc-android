@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Är du säker på att du vill radera denna förinställning?</string>
     <string name="confirm_delete_vlc_eq">Är du säker på att du vill dölja denna förinställning?\nDu kan återställa den i equalizerinställningarna.</string>
     <string name="confirm_replace_playlist">Är du säker på att du vill ersätta spellistan \"%1$s\"?</string>
-    <string name="invalid_settings_file">Ogiltig inställningsfil</string>
     <string name="confirm_delete_message">Detta är permanent och kan inte ångras.</string>
     <string name="confirm_delete_album">Radera albumet \"%1$s\"?</string>
     <string name="confirm_delete_several_media">Radera dessa %1$d mediafiler?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 video</item>
         <item quantity="other">%d videor</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="other">%d filmer</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV-program</item>
-        <item quantity="other">%d TV-program</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 spår</item>
         <item quantity="other">%d spår</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Du har ännu ingen uppspelningshistorik.</string>
     <string name="cant_ban_root">Rotmappen kan inte uteslutas</string>
 
-    <string name="cover_art">Omslagsbild</string>
     <string name="shuffle_all_title">Blanda allt</string>
     <string name="shuffle_title">Blandningsläge</string>
     <string name="shuffle">Blanda av</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Fjärrkontroll för videospelare</string>
     <string name="remote_keyboard_navigation">Tangentbordsnavigering</string>
 
-    <string name="server_add_title">Lägg till en ny server i favoriter</string>
     <string name="server_domain_hint">Serveradress</string>
     <string name="server_share_hint">Nätverksresurs (valfritt)</string>
     <string name="server_folder_hint">Mappnamn (valfritt)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Lägg till i favoriter</string>
     <string name="favorites_remove">Ta bort från favoriter</string>
     <string name="favorites_edit">Redigera</string>
-    <string name="favorite_added">Sparades i favoriter</string>
-    <string name="favorite_removed">Togs bort från favoriter</string>
 
     <string name="streams">Strömmar</string>
     <string name="open_mrl_dialog_msg">Ange en nätverksadress</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Ingen</string>
     <string name="subtitle_decoration_shadow">Skugga</string>
     <string name="subtitle_decoration_outline">Kontur</string>
-    <string name="previous_color">Föregående färg</string>
-    <string name="new_color">Ny färg</string>
 
     <string name="audio_prefs_category">Ljud</string>
     <string name="lockscreen_cover_title">Mediaomslag på låsskärmen</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Info om fjärråtkomst</string>
     <string name="remote_access_content">Innehåll</string>
     <string name="remote_access_medialibrary_content">Innehåll i mediabiblioteket</string>
-    <string name="remote_access_medialibrary_content_summary">Aktiverad: %1$s\nInaktiverad: %2$s</string>
     <string name="remote_access_file_browser_content">Filväljare</string>
     <string name="remote_access_network_browser_content">Nätverksväljare</string>
     <string name="remote_access_playback_control">Styr uppspelning</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Detta värde måste vara mellan 0 och 60000 ms</string>
     <string name="quit">Avsluta och starta om applikationen</string>
     <string name="restart_message">Ändringarna kommer att träda i kraft när applikationen har startats om.\n\nStarta om nu?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Senare</string>
     <string name="browser_show_all_title">Visa endast multimediafiler</string>
 
     <string name="developer_prefs_category">Utvecklare</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Skickar loggen…</string>
 
 
-    <string name="no_result">Inga resultat hittades</string>
-    <string name="no_internet_connection">Kontrollera din Internetanslutning</string>
     <string name="retry">Försök igen</string>
 
     <string name="network_browsing">Lokalt nätverk</string>
-    <string name="browsing">Bläddring</string>
 
     <string name="file_size">Filstorlek</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Öppna i webbläsaren</string>
     <string name="install">Installera</string>
     <string name="install_nightly">Installera nightly-versionen</string>
-    <string name="install_nightly_alert">Nightly-byggen är experimentversioner som uppdateras varje dag.\n\nNy funktionalitet kan man förvänta sig, men även nya buggar.</string>
     <string name="nightly_version">Version som hittades: %2$s - %1$s</string>
     <string name="update_nightly_alert">Du kör en nightly-version. Vill du söka efter uppdateringar regelbundet?</string>
     <string name="update_nightly">Uppdatera automatiskt</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Spela video i ett popup-fönster</string>
     <string name="open_subtitles_vip">Du är en VIP-användare på OpenSubtitles</string>
     <string name="browse_folder">Bläddra mapp</string>
-    <string name="listen">Lyssna</string>
     <string name="episodes">episoder</string>
     <string name="movies">filmer</string>
     <string name="videos">videor</string>
     <string name="default_action_videos">Videor</string>
-    <string name="videos_all">Alla videor</string>
     <string name="clear_playback_history">Rensa uppspelningshistorik</string>
     <string name="ml_scanning">Skannar för mediafiler</string>
     <string name="ml_parse_media">Läser media</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Känn dig som hemma</string>
     <string name="done">Färdig</string>
     <string name="onboarding_scan_title">Upptäck din media automatiskt</string>
-    <string name="onboarding_all_set">VLC är redo!</string>
-    <string name="onboarding_permission_given">Du kan nu upptäcka din media automatiskt, använda externa undertexter såväl som spela upp strömmar eller nätverksmedia</string>
     <string name="daynight_system_explanation">VLC kommer automatisk byta till mörkt läge enligt systeminställningarna</string>
     <string name="daynight_legacy_explanation">VLC kommer automatisk byta till nattläge vid lämplig tid</string>
     <string name="onboarding_scanning_enable">Låt VLC skanna min enhet för mediainnehåll</string>
@@ -737,7 +711,6 @@
     <string name="create">Skapa</string>
     <string name="resume_card_message">Återuppta uppspelning av %1$s?</string>
     <string name="misc">Övrigt</string>
-    <string name="device_default">Enhetsstandard</string>
     <string name="track_number">%d spår</string>
     <string name="jump_to">Hoppa till</string>
     <string name="show_video_thumbnails">Videominiatyrer</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d spår lades till i slutet</item>
     </plurals>
     <string name="remove_current">Ta bort nuvarande</string>
-    <string name="validation_delete_playlist">Är du säker på att du vill radera denna spellista?</string>
-    <string name="validation_delete_playlist_text">Denna handling kan inte ångras.</string>
     <string name="display_settings">Visningsinställningar</string>
     <string name="incognito_mode">Inkognitoläge</string>
     <string name="persistent_incognito_mode">Beständigt inkognitoläge</string>
     <string name="persistent_incognito_mode_summary">Låt inkognitoläget vara aktiverat även om appen startas om</string>
     <string name="display_in_list">Visa som lista</string>
     <string name="display_in_grid">Visa som rutnät</string>
-    <string name="dump_db_succes">Databasen sparades på den interna lagringens rotmapp</string>
     <string name="dump_db_failure">Misslyckades att spara databas</string>
     <string name="send_crash_title">VLC-kraschrapportering</string>
     <string name="send_crash_description">Genom att skicka din krasch kommer du att hjälpa oss att förbättra VLC:s stabilitet</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Här är %s</string>
     <string name="share_track_info">Dela spårinformation</string>
     <string name="share_track">Lyssnar nu på %s</string>
-    <string name="find_metadata">Hitta metadata</string>
-    <string name="moviepedia_hint">Sök metadata</string>
-    <string name="moviepedia_result">Videoresultat</string>
-    <string name="directed_by">Regissör</string>
-    <string name="casting">Rollsättare</string>
-    <string name="produced_by">Producerad av</string>
-    <string name="written_by">Skriven av</string>
-    <string name="music_by">Musik av</string>
-    <string name="posters">Affischer</string>
-    <string name="backdrops">Bakgrunder</string>
-    <string name="header_tvshows">TV-program</string>
-    <string name="header_movies">Filmer</string>
-    <string name="season_number">Säsong %s</string>
-    <string name="resume_episode">Återuppta (%s)</string>
-    <string name="start_over">Börja om</string>
-    <string name="next_episode">Nästa avsnitt</string>
-    <string name="open_network_settings">Öppna nätverksinställningar?</string>
-    <string name="recently_played">Senast uppspelade</string>
-    <string name="recently_added">Senast tillagda</string>
     <string name="playback_multiple_errors">Flera mediafiler kan inte spelas upp</string>
     <string name="clear_media_db_message">Du kommer att förlora dina framsteg, bokmärken och spellistor du har skapat men du kommer att behålla dina inställningar för VLC for Android.</string>
     <string name="clear_app_data_message">Du kommer att förlora dina framsteg, bokmärken, spellistor och alla VLC-inställningar</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">Du kan avsluta din prenumeration på Play Butik</string>
     <string name="subscription_cancel_tv">Hur man avslutar prenumerationen</string>
     <string name="donate_unsubscribe_tv">Öppna %s på en telefon eller dator eller skanna denna kod för att avsluta prenumerationen:</string>
-    <string name="tip_jar">Hjälp VLC</string>
     <string name="thank_you">Tack</string>
     <string name="thank_you_desc">Tack för din sponsring!/nDen kommer hjälpa oss att förbättra VLC!</string>
     <string name="donate_again">Sponsra appen igen</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">Tillåt OTG-åtkomst</string>
     <string name="allow_otg_description">Välj din OTG-enhet att ge åtkomst till VLC.</string>
     <string name="video_hud_timeout">Fördröjning innan videospelarens kontroller döljs</string>
-    <string name="remove_from_history">Ta bort från historiken</string>
     <string name="prefersmbv1">Föredra SMB 1</string>
     <string name="prefersmbv1_summary">Avmarkera denna inställning om du har problem med att bläddra i din SMB-server</string>
     <string name="audio_delay_global">Ljudfördröjningen ändrades till%s ms för alla videor</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Lås upp</string>
     <string name="lock_with_pin">Återaktivera PIN-lås</string>
     <string name="unlock_with_pin">Lås upp säkert läge</string>
-    <string name="lock_with_pin_short">PIN-lås</string>
     <string name="restrict_settings">Begränsa åtkomst till inställningar</string>
     <string name="search_prefs">Sök efter inställningar</string>
     <string name="stop_unpaubale">Denna mediafil kan inte pausas. Ska den stoppas istället?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Denna funktion är i betastadiet och kan orsaka kraschar och instabilitet.</string>
     <string name="network_indexing">Nätverksindexering</string>
     <string name="network_indexing_warning">Nätverksindexering är för tillfället i betastadiet.\nKända fel:\n• Långsam prestanda\n\nRapportera problem på vårt forum om du stöter på andra problem.</string>
-    <string name="start_vlc">Starta VLC</string>
     <string name="jump_delay">Tidsfördröjning av framåt/bakåt</string>
     <string name="long_jump_delay">Tidsfördröjning när framåt/bakåt hålls ned</string>
     <string name="jump_delay_summary">%s sekunder</string>
-    <string name="move_up">Flytta upp</string>
-    <string name="move_down">Flytta ned</string>
-    <string name="remove_from_playlist">Ta bort från spellistan</string>
-    <string name="play_media">Spela upp %s</string>
     <string name="edit_eq_preset">Redigera förinställningar för equalizer</string>
     <string name="edit_eq_name_not_allowed">Namnet är inte tillåtet</string>
     <string name="export_equalizer">Exportera equalizer</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Laddar ned</string>
     <string name="talkback_action_rewind">Spola tillbaka %s sekunder</string>
     <string name="talkback_action_forward">Sök framåt %s sekunder</string>
-    <string name="talkback_display_settings">Visningsinställningar</string>
     <string name="talkback_already_played">Redan uppspelad</string>
     <string name="show_only_favs">Visa endast favoriter</string>
     <string name="ignore_headset_media_button_presses">Ignorera tryck på headsetets mediaknappar</string>

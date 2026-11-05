@@ -73,7 +73,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.MenuItemCompat
 import androidx.core.view.WindowCompat
 import androidx.databinding.BindingAdapter
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -127,7 +126,6 @@ import org.videolan.resources.ID_REMOTE_ACCESS
 import org.videolan.resources.ID_SETTINGS
 import org.videolan.resources.ID_SPONSOR
 import org.videolan.resources.TAG_ITEM
-import org.videolan.resources.TV_CONFIRMATION_ACTIVITY
 import org.videolan.resources.util.launchForeground
 import org.videolan.tools.BitmapCache
 import org.videolan.tools.KEY_APP_THEME
@@ -184,8 +182,6 @@ object UiTools {
     private var DEFAULT_COVER_ARTIST_DRAWABLE: BitmapDrawable? = null
     private var DEFAULT_COVER_PLAYLIST_DRAWABLE: BitmapDrawable? = null
     private var DEFAULT_COVER_GENRE_DRAWABLE: BitmapDrawable? = null
-    private var DEFAULT_COVER_MOVIE_DRAWABLE: BitmapDrawable? = null
-    private var DEFAULT_COVER_TVSHOW_DRAWABLE: BitmapDrawable? = null
     private var DEFAULT_COVER_FOLDER_DRAWABLE: BitmapDrawable? = null
 
     private var DEFAULT_COVER_VIDEO_DRAWABLE_BIG: BitmapDrawable? = null
@@ -194,8 +190,6 @@ object UiTools {
     private var DEFAULT_COVER_ARTIST_DRAWABLE_BIG: BitmapDrawable? = null
     private var DEFAULT_COVER_PLAYLIST_DRAWABLE_BIG: BitmapDrawable? = null
     private var DEFAULT_COVER_GENRE_DRAWABLE_BIG: BitmapDrawable? = null
-    private var DEFAULT_COVER_MOVIE_DRAWABLE_BIG: BitmapDrawable? = null
-    private var DEFAULT_COVER_TVSHOW_DRAWABLE_BIG: BitmapDrawable? = null
     private var DEFAULT_COVER_FOLDER_DRAWABLE_BIG: BitmapDrawable? = null
 
     private val sHandler = Handler(Looper.getMainLooper())
@@ -257,20 +251,6 @@ object UiTools {
         return DEFAULT_COVER_GENRE_DRAWABLE!!
     }
 
-    fun getDefaultMovieDrawable(context: Context): BitmapDrawable {
-        if (DEFAULT_COVER_MOVIE_DRAWABLE == null) {
-            DEFAULT_COVER_MOVIE_DRAWABLE = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_browser_movie))
-        }
-        return DEFAULT_COVER_MOVIE_DRAWABLE!!
-    }
-
-    fun getDefaultTvshowDrawable(context: Context): BitmapDrawable {
-        if (DEFAULT_COVER_TVSHOW_DRAWABLE == null) {
-            DEFAULT_COVER_TVSHOW_DRAWABLE = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_browser_tvshow))
-        }
-        return DEFAULT_COVER_TVSHOW_DRAWABLE!!
-    }
-
     fun getDefaultVideoDrawableBig(context: Context): BitmapDrawable {
         if (DEFAULT_COVER_VIDEO_DRAWABLE_BIG == null) {
             DEFAULT_COVER_VIDEO_DRAWABLE_BIG = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_video_big))
@@ -311,20 +291,6 @@ object UiTools {
             DEFAULT_COVER_GENRE_DRAWABLE_BIG = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_genre_big))
         }
         return DEFAULT_COVER_GENRE_DRAWABLE_BIG!!
-    }
-
-    fun getDefaultMovieDrawableBig(context: Context): BitmapDrawable {
-        if (DEFAULT_COVER_MOVIE_DRAWABLE_BIG == null) {
-            DEFAULT_COVER_MOVIE_DRAWABLE_BIG = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_browser_movie_big))
-        }
-        return DEFAULT_COVER_MOVIE_DRAWABLE_BIG!!
-    }
-
-    fun getDefaultTvshowDrawableBig(context: Context): BitmapDrawable {
-        if (DEFAULT_COVER_TVSHOW_DRAWABLE_BIG == null) {
-            DEFAULT_COVER_TVSHOW_DRAWABLE_BIG = BitmapDrawable(context.resources, getBitmapFromDrawable(context, R.drawable.ic_browser_tvshow_big))
-        }
-        return DEFAULT_COVER_TVSHOW_DRAWABLE_BIG!!
     }
 
     fun getDefaultFolderDrawableBig(context: Context): BitmapDrawable {
@@ -888,42 +854,6 @@ object UiTools {
     }
 
 
-    fun restartDialog(
-        activity: Activity,
-        fromLeanback: Boolean = false,
-        leanbackResultCode: Int = 0,
-        leanbackCaller: Any? = null
-    ) {
-
-        if (fromLeanback) {
-            val intent = Intent(Intent.ACTION_VIEW).setClassName(activity, TV_CONFIRMATION_ACTIVITY)
-
-            intent.putExtra(
-                "confirmation_dialog_title",
-                activity.getString(R.string.restart_vlc)
-            )
-            intent.putExtra(
-                "confirmation_dialog_text",
-                activity.getString(R.string.restart_message)
-            )
-            when (leanbackCaller) {
-                is Activity -> leanbackCaller.startActivityForResult(intent, leanbackResultCode)
-                is Fragment -> leanbackCaller.startActivityForResult(intent, leanbackResultCode)
-                is android.app.Fragment -> leanbackCaller.startActivityForResult(intent, leanbackResultCode)
-                else -> throw IllegalStateException("Invalid caller")
-            }
-
-            return
-        }
-
-        AlertDialog.Builder(activity)
-                .setTitle(activity.resources.getString(R.string.restart_vlc))
-                .setMessage(activity.resources.getString(R.string.restart_message))
-                .setPositiveButton(R.string.restart_message_OK) { _, _ -> android.os.Process.killProcess(android.os.Process.myPid()) }
-                .setNegativeButton(R.string.restart_message_Later, null)
-                .create()
-                .show()
-    }
 
 
 

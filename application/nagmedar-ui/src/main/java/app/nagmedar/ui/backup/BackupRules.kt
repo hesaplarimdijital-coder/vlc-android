@@ -68,6 +68,8 @@ object BackupSettings {
         *REMOVED_FEATURES,
         // what the podcast transcripts made on the device (removed in 1.0.2) left: their settings, their queue, 0.5's keys
         *RetiredWork.TRANSCRIPTION_KEYS.toTypedArray(),
+        // what the TV interface's film metadata (removed in 1.0.3) left: its film and series lists' sort
+        *RetiredWork.MOVIEPEDIA_KEYS.toTypedArray(),
         // an account: the scrobbling's sign-ins (their secrets are sealed by this device's keystore) and switches
         *ScrobbleSettings.keys.toTypedArray(),
         // a TV's: VLC's TV interface and its language, which a phone, a tablet or DeX ignores

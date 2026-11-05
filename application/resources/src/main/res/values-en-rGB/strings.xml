@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Are you sure you want to delete this preset?</string>
     <string name="confirm_delete_vlc_eq">Are you sure you want to hide this preset?\nYou can restore it in the equaliser settings.</string>
     <string name="confirm_replace_playlist">Are you sure you want to replace the playlist \'%1$s\'?</string>
-    <string name="invalid_settings_file">Invalid settings file</string>
     <string name="confirm_delete_message">This is permanent and cannot be undone.</string>
     <string name="confirm_delete_album">Delete the album \'%1$s\'?</string>
     <string name="confirm_delete_several_media">Delete these %1$d media?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 video</item>
         <item quantity="other">%d videos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 movie</item>
-        <item quantity="other">%d movies</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV show</item>
-        <item quantity="other">%d TV shows</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 track</item>
         <item quantity="other">%d tracks</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">You have no playback history yet.</string>
     <string name="cant_ban_root">You can\'t ban a root folder</string>
 
-    <string name="cover_art">Cover art</string>
     <string name="shuffle_all_title">Shuffle all</string>
     <string name="shuffle_title">Shuffle mode</string>
     <string name="shuffle">Shuffle Off</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Video player remote</string>
     <string name="remote_keyboard_navigation">Keyboard navigation</string>
 
-    <string name="server_add_title">Add a new server to favourites</string>
     <string name="server_domain_hint">Server address (host name or IP address)</string>
     <string name="server_share_hint">Server address (host name or IP address)</string>
     <string name="server_folder_hint">Folder path (optional)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Add to favourites</string>
     <string name="favorites_remove">Remove from favourites</string>
     <string name="favorites_edit">Edit</string>
-    <string name="favorite_added">Saved to favourites</string>
-    <string name="favorite_removed">Removed from favourites</string>
 
     <string name="streams">Streams</string>
     <string name="open_mrl_dialog_msg">Enter a network address, such as http://, mms://, or rtsp://</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">None</string>
     <string name="subtitle_decoration_shadow">Shadow</string>
     <string name="subtitle_decoration_outline">Outline</string>
-    <string name="previous_color">Previous colour</string>
-    <string name="new_color">New colour</string>
 
     <string name="audio_prefs_category">Audio</string>
     <string name="lockscreen_cover_title">Media cover on Lockscreen</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Remote access info</string>
     <string name="remote_access_content">Content</string>
     <string name="remote_access_medialibrary_content">Media library content</string>
-    <string name="remote_access_medialibrary_content_summary">Enabled: %1$s\nDisabled: %2$s</string>
     <string name="remote_access_file_browser_content">File browser</string>
     <string name="remote_access_network_browser_content">Network browser</string>
     <string name="remote_access_playback_control">Control playback</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">This value must be between 0 and 60000 ms</string>
     <string name="quit">Quit and restart application</string>
     <string name="restart_message">Changes will take effect once application has restarted.\n\nRestart now?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Later</string>
     <string name="browser_show_all_title">Show only multimedia files</string>
 
     <string name="developer_prefs_category">Developer</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Sending the log…</string>
 
 
-    <string name="no_result">No results found</string>
-    <string name="no_internet_connection">Check your Internet connection</string>
     <string name="retry">Retry</string>
 
     <string name="network_browsing">Local Network</string>
-    <string name="browsing">Browsing</string>
 
     <string name="file_size">File size</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Open in browser</string>
     <string name="install">Install</string>
     <string name="install_nightly">Install the nightly version</string>
-    <string name="install_nightly_alert">Nightly builds are experimental versions updated everyday.\n\nExpect new features but also new bugs!</string>
     <string name="nightly_version">Found version: %2$s - %1$s</string>
     <string name="update_nightly_alert">You are running a nightly version. Would you like to periodically look for updates?</string>
     <string name="update_nightly">Auto update</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Play video in a Pop-Up window</string>
     <string name="open_subtitles_vip">You are a VIP OpenSubtitles user</string>
     <string name="browse_folder">Browse folder</string>
-    <string name="listen">Listen</string>
     <string name="episodes">episodes</string>
     <string name="movies">movies</string>
     <string name="videos">videos</string>
     <string name="default_action_videos">Videos</string>
-    <string name="videos_all">All videos</string>
     <string name="clear_playback_history">Clear playback history</string>
     <string name="ml_scanning">Scanning for media files</string>
     <string name="ml_parse_media">Parsing media</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Make yourself at home</string>
     <string name="done">Done</string>
     <string name="onboarding_scan_title">Auto-discover your media</string>
-    <string name="onboarding_all_set">VLC is all set!</string>
-    <string name="onboarding_permission_given">You can now auto-discover your media, use external subtitles as well as play streams or network media </string>
     <string name="daynight_system_explanation">VLC will automatically switch to dark mode accordingly with system setting</string>
     <string name="daynight_legacy_explanation">VLC will automatically switch to night mode at appropriate time</string>
     <string name="onboarding_scanning_enable">Let VLC scan my device for media content</string>
@@ -737,7 +711,6 @@
     <string name="create">Create</string>
     <string name="resume_card_message">Resume playback of %1$s?</string>
     <string name="misc">Miscellaneous</string>
-    <string name="device_default">Device default</string>
     <string name="track_number">%d tracks</string>
     <string name="jump_to">Jump to</string>
     <string name="show_video_thumbnails">Video thumbnails</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d Tracks appended</item>
     </plurals>
     <string name="remove_current">Remove current</string>
-    <string name="validation_delete_playlist">Are you sure you want to delete this playlist?</string>
-    <string name="validation_delete_playlist_text">This action cannot be undone.</string>
     <string name="display_settings">Display settings</string>
     <string name="incognito_mode">Incognito mode</string>
     <string name="persistent_incognito_mode">Persistent incognito mode</string>
     <string name="persistent_incognito_mode_summary">Keep the incognito mode enabled even if the app is restarted</string>
     <string name="display_in_list">Display in list</string>
     <string name="display_in_grid">Display in grid</string>
-    <string name="dump_db_succes">Database dumped on internal storage root</string>
     <string name="dump_db_failure">Failed to dump database</string>
     <string name="send_crash_title">VLC crash reporter</string>
     <string name="send_crash_description">By sending your crash, you will help us improve VLC stability.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Here is %s</string>
     <string name="share_track_info">Share the track info</string>
     <string name="share_track">Currently listening to %s</string>
-    <string name="find_metadata">Find metadata</string>
-    <string name="moviepedia_hint">Search metadata</string>
-    <string name="moviepedia_result">Video results</string>
-    <string name="directed_by">Directed by</string>
-    <string name="casting">Casting</string>
-    <string name="produced_by">Produced by</string>
-    <string name="written_by">Written by</string>
-    <string name="music_by">Music by</string>
-    <string name="posters">Posters</string>
-    <string name="backdrops">Backdrops</string>
-    <string name="header_tvshows">TV shows</string>
-    <string name="header_movies">Movies</string>
-    <string name="season_number">Season %s</string>
-    <string name="resume_episode">Resume (%s)</string>
-    <string name="start_over">Start over</string>
-    <string name="next_episode">Next episode</string>
-    <string name="open_network_settings">Open network settings?</string>
-    <string name="recently_played">Recently played</string>
-    <string name="recently_added">Recently added</string>
     <string name="playback_multiple_errors">Multiple media cannot be played</string>
     <string name="clear_media_db_message">You will lose your progresses, bookmarks and the playlists you created but you will keep your VLC for Android settings</string>
     <string name="clear_app_data_message">You will lose your progresses, bookmarks, playlists and all VLC settings</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">You can unsubscribe in the Play Store</string>
     <string name="subscription_cancel_tv">How to unsubscribe</string>
     <string name="donate_unsubscribe_tv">To unsubscribe, please open %s on a phone or a computer or scan this code:</string>
-    <string name="tip_jar">Help VLC</string>
     <string name="thank_you">Thank you</string>
     <string name="thank_you_desc">Thank you for your sponsorship!\nIt will help us a lot improving VLC!</string>
     <string name="donate_again">Sponsor the app again</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">Allow OTG access</string>
     <string name="allow_otg_description">Please select your OTG drive to allow access to VLC.</string>
     <string name="video_hud_timeout">Video player controls hiding delay</string>
-    <string name="remove_from_history">Remove from history</string>
     <string name="prefersmbv1">Prefer SMB 1</string>
     <string name="prefersmbv1_summary">Uncheck this setting if you have some difficulties browsing your SMB server</string>
     <string name="audio_delay_global">Audio delay set to %s ms for all videos</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Unlock</string>
     <string name="lock_with_pin">Re-enable PIN lock</string>
     <string name="unlock_with_pin">Unlock safe mode</string>
-    <string name="lock_with_pin_short">PIN lock</string>
     <string name="restrict_settings">Restrict settings access</string>
     <string name="search_prefs">Search settings</string>
     <string name="stop_unpaubale">This media cannot be paused. Stop it instead?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">This feature is in beta and may cause crashes and instabilities</string>
     <string name="network_indexing">Network indexing</string>
     <string name="network_indexing_warning">Network indexing is currently in beta.\nKnown issues:\n• Slow performance\n\nIf you encounter some other issues, please report them on our forum.</string>
-    <string name="start_vlc">Start VLC</string>
     <string name="jump_delay">Forward/backward time delay</string>
     <string name="long_jump_delay">Long tap forward/backward time delay</string>
     <string name="jump_delay_summary">%s seconds</string>
-    <string name="move_up">Move up</string>
-    <string name="move_down">Move down</string>
-    <string name="remove_from_playlist">Remove from playlist</string>
-    <string name="play_media">Play %s</string>
     <string name="edit_eq_preset">Edit equaliser preset</string>
     <string name="edit_eq_name_not_allowed">This name is not allowed</string>
     <string name="export_equalizer">Export equaliser</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Downloading</string>
     <string name="talkback_action_rewind">Rewind %s seconds</string>
     <string name="talkback_action_forward">Seek forward %s seconds</string>
-    <string name="talkback_display_settings">Display settings</string>
     <string name="talkback_already_played">Already played</string>
     <string name="show_only_favs">Show only favourites</string>
     <string name="ignore_headset_media_button_presses">Ignore headset media button presses</string>

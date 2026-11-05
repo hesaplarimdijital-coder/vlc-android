@@ -117,18 +117,6 @@
         <item quantity="many">%d vaizdo įrašų</item>
         <item quantity="other">%d vaizdo įrašų</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 vaizdo įrašas</item>
-        <item quantity="few">%d vaizdo įrašai</item>
-        <item quantity="many">%d vaizdo įrašų</item>
-        <item quantity="other">%d vaizdo įrašų</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 serialas</item>
-        <item quantity="few">%d serialai</item>
-        <item quantity="many">%d serialų</item>
-        <item quantity="other">%d serialų</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 takelis</item>
         <item quantity="few">%d takeliai</item>
@@ -157,7 +145,6 @@
     <string name="nohistory">Kol kas grojimo žurnalas tuščias.</string>
     <string name="cant_ban_root">Šakninio aplanko uždrausti negalima</string>
 
-    <string name="cover_art">Viršelis</string>
     <string name="shuffle_all_title">Viską maišyti</string>
     <string name="shuffle_title">Maišymo veiksena</string>
     <string name="shuffle">Nemaišyti</string>
@@ -206,7 +193,6 @@
     <string name="video_player_remote">Nuotolinio valdymo pultas</string>
     <string name="remote_keyboard_navigation">Naršymas klaviatūra</string>
 
-    <string name="server_add_title">Pridėti naują mėgst. serverį</string>
     <string name="server_folder_hint">Aplanko kelias (nebūtinas)</string>
     <string name="server_username_hint">Naudotojo vardas</string>
     <string name="server_port">Prievadas:</string>
@@ -217,8 +203,6 @@
     <string name="favorites_add">Pažymėti kaip mėgstamiausią</string>
     <string name="favorites_remove">Pašalinti iš mėgstamiausių</string>
     <string name="favorites_edit">Keisti</string>
-    <string name="favorite_added">Įsimintas kaip mėgstamiausias</string>
-    <string name="favorite_removed">Pašalintas iš mėgstamiausių</string>
 
     <string name="streams">Srautai</string>
     <string name="search">Paieška</string>
@@ -319,8 +303,6 @@
     <string name="subtitle_decoration_none">Nenaudoti</string>
     <string name="subtitle_decoration_shadow">Šešėlis</string>
     <string name="subtitle_decoration_outline">Kontūras</string>
-    <string name="previous_color">Ankstesnė spalva</string>
-    <string name="new_color">Nauja spalva</string>
 
     <string name="audio_prefs_category">Garsas</string>
     <string name="lockscreen_cover_title">Kūrinio viršelis užrakinimo ekrane</string>
@@ -374,7 +356,6 @@
     <string name="remote_access_info">Nuotolinės prieigos informacija</string>
     <string name="remote_access_content">Turinys</string>
     <string name="remote_access_medialibrary_content">Mediatekos turinys</string>
-    <string name="remote_access_medialibrary_content_summary">Įjungta: %1$s\nIšjungta: %2$s</string>
     <string name="remote_access_file_browser_content">Rinkmenų naršyklė</string>
     <string name="remote_access_network_browser_content">Tinklo naršyklė</string>
     <string name="remote_access_playback_control">Atkūrimo valdymas</string>
@@ -437,8 +418,6 @@
     <string name="network_caching_popup">Ši reikšmė turi būti nuo 0 iki 60000 ms</string>
     <string name="quit">Baigti ir paleisti iš naujo</string>
     <string name="restart_message">Pasikeitimai įsigalios iš naujo paleidus programą.\n\nPaleisti programą iš naujo?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Vėliau</string>
     <string name="browser_show_all_title">Rodyti tik įv. terpės rinkmenas</string>
 
     <string name="developer_prefs_category">Programuotojams</string>
@@ -466,11 +445,8 @@
     <string name="sending_log">Siunčiamas žurnalas…</string>
 
 
-    <string name="no_result">Nerasta</string>
-    <string name="no_internet_connection">Patikrinkite interneto ryšį</string>
     <string name="retry">Pakartoti</string>
     <string name="network_browsing">Vietinis tinklas</string>
-    <string name="browsing">Naršymas</string>
 
     <string name="file_size">Rinkmenos dydis</string>
 
@@ -505,7 +481,6 @@
     <string name="open_in_browser">Atidaryti naršyklėje</string>
     <string name="install">Įdiegti</string>
     <string name="install_nightly">„Naktinės“ versijos diegimas</string>
-    <string name="install_nightly_alert">Naktinės versijos yra eksperimentinės ir atnaujinamos kasdien.\n\nTikėkitės ne tik naujų funkcijų, bet ir naujų klaidų!</string>
     <string name="nightly_version">Rasta versija: %2$s – %1$s</string>
     <string name="update_nightly_alert">Jūs naudojate naktinę versiją. Ar norėtumėte periodiškai ieškoti atnaujinimų?</string>
     <string name="update_nightly">Automatinis naujinimas</string>
@@ -573,11 +548,9 @@
     <string name="popup_playback_title">Groti vaizdo įrašą iškylančiame lange</string>
     <string name="open_subtitles_vip">Esate VIP „OpenSubtitles“ naudotojas</string>
     <string name="browse_folder">Atverti aplanką</string>
-    <string name="listen">Perklausyti</string>
     <string name="episodes">epizodai</string>
     <string name="movies">filmai</string>
     <string name="videos">vaizdo įr.</string>
-    <string name="videos_all">Visi vaizdo įrašai</string>
     <string name="clear_playback_history">Išvalyti grojimo žurnalą</string>
     <string name="ml_scanning">Žvalgomasi kūrinių</string>
     <string name="ml_parse_media">Žvalgomi kūriniai</string>
@@ -672,8 +645,6 @@
     <string name="onboarding_theme_title">Pritaikykite VLC</string>
     <string name="done">Atlikta</string>
     <string name="onboarding_scan_title">Automatinis kūrinių aptikimas</string>
-    <string name="onboarding_all_set">VLC yra paruoštas darbui!</string>
-    <string name="onboarding_permission_given">Dabar galite naudotis automatiniu kūrinių aptikimu, išorinių subtitrų prijungimu, taip pat groti srautus bei kūrinius per tinklą</string>
     <string name="daynight_system_explanation">VLC automatiškai persijungs į naktinę veikseną priklausomai nuo sistemos nuostatų</string>
     <string name="daynight_legacy_explanation">VLC automatiškai persijungs į naktinę veikseną</string>
     <string name="onboarding_scanning_enable">Leisti VLC nuskaityti mano įrenginį</string>
@@ -686,7 +657,6 @@
     <string name="create">Sukurti</string>
     <string name="resume_card_message">Tęsti „%1$s“ grojimą?</string>
     <string name="misc">Įvairūs</string>
-    <string name="device_default">Įrenginio numatytoji</string>
     <string name="track_number">%d takeliai</string>
     <string name="jump_to">Šokti į</string>
     <string name="show_video_thumbnails">Vaizdo miniatiūros</string>
@@ -707,13 +677,10 @@
         <item quantity="other">Pridėta %d takelių</item>
     </plurals>
     <string name="remove_current">Pašalinti dabartinį</string>
-    <string name="validation_delete_playlist">Ar tikrai norite pašalinti šį grojaraštį?</string>
-    <string name="validation_delete_playlist_text">Šio veiksmo nebus galima anuliuoti.</string>
     <string name="display_settings">Ekrano nuostatos</string>
     <string name="incognito_mode">Inkognito veiksena</string>
     <string name="display_in_list">Rodyti sąraše</string>
     <string name="display_in_grid">Rodyti tinklelyje</string>
-    <string name="dump_db_succes">Duombazė iškelta į vidinę atmintį</string>
     <string name="dump_db_failure">Nepavyko iškelti duombazės</string>
     <string name="send_crash_title">Pranešti apie VLC lūžimą</string>
     <string name="send_crash_description">Nusiųsdami pranešimą apie lūžimą, padėsite pagerinti VLC stabilumą.</string>
@@ -743,25 +710,6 @@
     <string name="share_message">Čia yra %s</string>
     <string name="share_track_info">Bendrinti takelio informaciją</string>
     <string name="share_track">Šiuo metu klausausi: „%s“.</string>
-    <string name="find_metadata">Rasti „meta“ žymenis</string>
-    <string name="moviepedia_hint">Ieškoti „meta“ žymių</string>
-    <string name="moviepedia_result">Paieškos rezultatai</string>
-    <string name="directed_by">Režisierius</string>
-    <string name="casting">Aktorių kolektyvas</string>
-    <string name="produced_by">Išleista</string>
-    <string name="written_by">Scenarijaus autorius</string>
-    <string name="music_by">Muzikos autorius</string>
-    <string name="posters">Plakatai</string>
-    <string name="backdrops">Fonas</string>
-    <string name="header_tvshows">Serialai</string>
-    <string name="header_movies">Filmai</string>
-    <string name="season_number">Sezonas %s</string>
-    <string name="resume_episode">Tęsti (%s)</string>
-    <string name="start_over">Pradėti iš naujo</string>
-    <string name="next_episode">Kitas epizodas</string>
-    <string name="open_network_settings">Atverti tinklo nuostatas?</string>
-    <string name="recently_played">Neseniai grota</string>
-    <string name="recently_added">Neseniai pridėta</string>
     <string name="playback_multiple_errors">Kai kurių rinkmenų nepavyko atkurti</string>
     <string name="clear_media_db_message">Prarasite peržiūrėtų kūrinių istoriją, žymeles ir sukurtus grojaraščius, tačiau išlaikysite savo VLC nuostatas</string>
     <string name="clear_app_data_message">Prarasite peržiūrėtų kūrinių istoriją, žymeles, sukurtus grojaraščius ir VLC nuostatas</string>
@@ -809,7 +757,6 @@
     <string name="subscription_cancel">Galite atsisakyti prenumeratos „Play“ parduotuvėje</string>
     <string name="subscription_cancel_tv">Kaip atsisakyti prenumeratos</string>
     <string name="donate_unsubscribe_tv">Norėdami atsisakyti prenumeratos, atidarykite %s telefone ar kompiuteryje arba nuskaitykite šį kodą:</string>
-    <string name="tip_jar">Padėti VLC</string>
     <string name="thank_you">Ačiū Jums</string>
     <string name="thank_you_desc">Dėkojame už rėmimą!\nTai mums padės tobulinant VLC!</string>
     <string name="donate_again">Paremti programą pakartotinai</string>
@@ -822,7 +769,6 @@
     <string name="allow_otg">Leisti OTG prieigą</string>
     <string name="allow_otg_description">Pasirinkti žvalgytiną OTG diską.</string>
     <string name="video_hud_timeout">Vaizdo grotuvo valdiklių slėpimo laikas</string>
-    <string name="remove_from_history">Pašalinti iš istorijos</string>
     <string name="prefersmbv1">Pirmenybė SMB 1</string>
     <string name="prefersmbv1_summary">Panaikinkite šios nuostatos pasirinkimą, jei kyla sunkumų naršant SMB serverį</string>
     <string name="audio_delay_global">Pritaikyti vėlinimą %s ms visiems įrašams</string>
@@ -857,7 +803,6 @@
     <string name="unlock">Atrakinti</string>
     <string name="lock_with_pin">Iš naujo įgalinti PIN užraktą</string>
     <string name="unlock_with_pin">Atrakinti ribotąją veikseną</string>
-    <string name="lock_with_pin_short">PIN užraktas</string>
     <string name="restrict_settings">Riboti nuostatų prieigą</string>
     <string name="search_prefs">Ieškoti nuostatose</string>
     <string name="stop_unpaubale">Šio kūrinio negalima pristabdyti. Nutraukti jo grojimą?</string>
@@ -875,14 +820,9 @@
     <string name="optional_features_warning">Ši funkcija yra dar tik testuojama ir gali veikti nestabiliai ar sukelti gedimų</string>
     <string name="network_indexing">Tinklo indeksavimas</string>
     <string name="network_indexing_warning">Tinklo indeksavimas šiuo metu yra beta versijos.\nŽinomos problemos:\n• Lėtas veikimas.\n\nJei susiduriate su kitomis problemomis, praneškite apie jas mūsų forume. </string>
-    <string name="start_vlc">Paleisti VLC</string>
     <string name="jump_delay">Mygtukų „pirmyn / atgal“ peršokimo intervalas</string>
     <string name="long_jump_delay">Ilgo paspaudimo mygtukų „pirmyn / atgal“ peršokimo intervalas</string>
     <string name="jump_delay_summary">%s sek.</string>
-    <string name="move_up">Pakelti aukštyn</string>
-    <string name="move_down">Nuleisti žemyn</string>
-    <string name="remove_from_playlist">Pašalinti iš grojaraščio</string>
-    <string name="play_media">Groti: %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Pridėti pasikartojančius?</string>
     <string name="add_button">Pridėti</string>
@@ -1001,7 +941,6 @@
     <string name="downloading">Atsisiunčiama</string>
     <string name="talkback_action_rewind">Atsukti %s sek.</string>
     <string name="talkback_action_forward">Peršokti į priekį %s sek.</string>
-    <string name="talkback_display_settings">Ekrano nuostatos</string>
     <string name="talkback_already_played">Jau peržiūrėtas</string>
     <string name="show_only_favs">Rodyti tik mėgstamiausius</string>
     <string name="ignore_headset_media_button_presses">Nepaisyti ausinių medijos mygtukų paspaudimų</string>

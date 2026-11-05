@@ -14,8 +14,10 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/> <!-- STORAGE -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- Internet -->
-    <uses-permission android:name="android.permission.INTERNET"/> <!-- Launch recommendations service once device is booted -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/> <!-- Audio search on TV -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- S-1007: the alarm is set again after a restart (sleep/AlarmRescheduler) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- the visualiser and the output latency measurement listen to what plays -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/> <!-- USe foreground services -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/> <!-- normal -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
@@ -32,8 +34,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="${applicationId}.permission.READ_EXTENSION_DATA"/>
-    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA"/>
-    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- Custom permissions for our content provider -->
@@ -44,9 +44,6 @@
     <!-- Declare permissions used by our app -->
     <uses-permission android:name="${applicationId}.MEDIA" />
 
-    <uses-feature
-        android:name="android.software.leanback"
-        android:required="false"/>
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false"/>
@@ -103,7 +100,6 @@
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
 
             <meta-data

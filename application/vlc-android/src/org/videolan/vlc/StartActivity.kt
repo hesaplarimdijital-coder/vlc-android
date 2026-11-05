@@ -322,7 +322,6 @@ class StartActivity : FragmentActivity() {
         // If not should check for permission, and ask them if we don't have them
         if ((intent.data != null && intent.data!!.scheme == "content" && FileUtils.getUri(intent.data) != null)
             || (Permissions.canReadStorage(applicationContext) || askStoragePermission())) when {
-            intent.data?.authority == getString(R.string.tv_provider_authority) -> MediaUtils.openMediaNoUiFromTvContent(this@StartActivity, intent.data)
             intent.data?.authority == "skip_to" -> PlaybackService.instance?.playIndex(intent.getIntExtra("index", 0))
             else -> withContext(Dispatchers.IO) { FileUtils.getUri(intent.data)}?.let {
                 // Some media might not be properly labeled

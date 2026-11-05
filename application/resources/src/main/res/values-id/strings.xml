@@ -89,12 +89,6 @@
     <plurals name="videos_quantity">
         <item quantity="other">%d video</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="other">%d film</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="other">%dTayangan TV</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="other">%d trek</item>
     </plurals>
@@ -118,7 +112,6 @@
     <string name="nosubfolder">Subfolder tidak ditemukan</string>
     <string name="directorynotfound">Jalur direktori \'%1$s\' tidak ditemukan.</string>
     <string name="nohistory">Anda belum memiliki riwayat pemutaran.</string>
-    <string name="cover_art">Sampul album</string>
     <string name="shuffle_all_title">Acak semua</string>
     <string name="shuffle_title">Mode acak</string>
     <string name="shuffle">Matikan Acak</string>
@@ -158,7 +151,6 @@
     <string name="sleep_in">Tidur dalam</string>
     <string name="jump_to_time">Lompat ke Waktu</string>
     <string name="wait_before_sleep">Tunggu hingga butir media saat ini selesai terlebih dahulu</string>
-    <string name="server_add_title">Tambahkan server baru ke favorit</string>
     <string name="server_folder_hint">Letak direktori (opsional)</string>
     <string name="server_username_hint">Username</string>
     <string name="server_port">Port: </string>
@@ -169,8 +161,6 @@
     <string name="favorites_add">Tambahkan ke favorit</string>
     <string name="favorites_remove">Hapus dari favorit</string>
     <string name="favorites_edit">Sunting</string>
-    <string name="favorite_added">Simpan ke favorit</string>
-    <string name="favorite_removed">Dihapus dari favorit</string>
 
     <string name="streams">Lansiran (stream)</string>
     <string name="search">Cari</string>
@@ -265,8 +255,6 @@
     <string name="subtitle_decoration_none">Tidak ada</string>
     <string name="subtitle_decoration_shadow">Bayangan</string>
     <string name="subtitle_decoration_outline">Garis tepi</string>
-    <string name="previous_color">Warna sebelumnya</string>
-    <string name="new_color">Warna baru</string>
 
     <string name="audio_prefs_category">Audio</string>
     <string name="lockscreen_cover_title">Tampilkan cover media di layar kunci</string>
@@ -374,8 +362,6 @@
     <string name="network_caching_popup">Waktu ini harus berada di antara 0 dan 60000 ms</string>
     <string name="quit">Keluar dan restart aplikasi</string>
     <string name="restart_message">Perubahan akan berlaku setelah aplikasi dimulai ulang.\nMulai ulang sekarang?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Nanti</string>
     <string name="developer_prefs_category">Pengembang</string>
     <string name="enable_verbose_mode">Tampilkan</string>
     <string name="enable_verbose_mode_summary">Tingkatkan verbositas (logcat)</string>
@@ -400,11 +386,8 @@
     <string name="sending_log">Mengirim catatan…</string>
 
 
-    <string name="no_result">Hasil tidak ditemukan</string>
-    <string name="no_internet_connection">Cek koneksi internet Anda</string>
     <string name="retry">Coba lagi</string>
     <string name="network_browsing">Jaringan Lokal</string>
-    <string name="browsing">Telusuri</string>
 
     <string name="file_size">Ukuran file</string>
 
@@ -485,11 +468,9 @@
     <string name="add_to_playlist">Tambahkan ke playlist</string>
     <string name="popup_playback_title">Putar video di jendela Pop-up</string>
     <string name="browse_folder">Telusuri berkas</string>
-    <string name="listen">Dengar</string>
     <string name="episodes">episode</string>
     <string name="movies">film</string>
     <string name="videos">video</string>
-    <string name="videos_all">Semua video</string>
     <string name="clear_playback_history">Hapus riwayat pemutaran</string>
     <string name="ml_scanning">Memindai berkas media</string>
     <string name="ml_parse_media">Media Parsing</string>
@@ -578,8 +559,6 @@
     <string name="onboarding_theme_title">Anggap saja seperti dirumah sendiri</string>
     <string name="done">Selesai</string>
     <string name="onboarding_scan_title">Temukan media Anda secara otomatis</string>
-    <string name="onboarding_all_set">VLC sudah siap!</string>
-    <string name="onboarding_permission_given">Sekarang Anda dapat menemukan media Anda secara otomatis, menggunakan subtitle eksternal dan juga memutar stream dan media network</string>
     <string name="daynight_system_explanation">VLC secara otomatis akan beralih ke mode gelap sesuai dengan pengaturan sistem</string>
     <string name="daynight_legacy_explanation">VLC secara otomatis akan beralih ke mode terang sesuai dengan pengaturan sistem</string>
     <string name="onboarding_scanning_enable">Biarkan VLC memindai perangkat saya untuk konten media</string>
@@ -590,7 +569,6 @@
     <string name="add_to_new_playlist">Tambah ke daftar putar baru</string>
     <string name="resume_card_message">Lanjutkan pemutaran %1$s?</string>
     <string name="misc">Bermacam-lainnya</string>
-    <string name="device_default">Perangkat bawaan</string>
     <string name="track_number">trek %d</string>
     <string name="jump_to">Lompat ke</string>
     <string name="show_video_thumbnails">Gambar mini video</string>
@@ -605,12 +583,9 @@
         <item quantity="other">%d trek ditambahkan</item>
     </plurals>
     <string name="remove_current">Hapus saat ini</string>
-    <string name="validation_delete_playlist">Apakah anda yakin ingin menghapus daftar putar ini?</string>
-    <string name="validation_delete_playlist_text">Aksi ini tidak dapat terlepas.</string>
     <string name="display_settings">Pengaturan tampilan</string>
     <string name="display_in_list">Tampil dalam daftar</string>
     <string name="display_in_grid">Tampil dalam kisi</string>
-    <string name="dump_db_succes">Database dibuang di akar penyimpanan internal</string>
     <string name="dump_db_failure">Gagal untuk mengumpulkan basis data</string>
     <string name="send_crash_title">Pelapor kerusakan VLC</string>
     <string name="send_crash_description">Dengan mengirimkan kerusakan anda, anda telah membantu kami mengembangkan stabilitas VLC.</string>
@@ -638,25 +613,6 @@
     <string name="invalid_file">File tidak valid. Tidak dapat dibagikan.</string>
     <string name="share_file">Bagikan %s</string>
     <string name="share_message">Disini %s</string>
-    <string name="find_metadata">Temukan metadata</string>
-    <string name="moviepedia_hint">Cari metadata</string>
-    <string name="moviepedia_result">Hasil video</string>
-    <string name="directed_by">Disutradarai oleh</string>
-    <string name="casting">Pemeran</string>
-    <string name="produced_by">Diproduser oleh</string>
-    <string name="written_by">Ditulis oleh</string>
-    <string name="music_by">Musik oleh</string>
-    <string name="posters">Poster</string>
-    <string name="backdrops">Latar</string>
-    <string name="header_tvshows">Acara TV</string>
-    <string name="header_movies">Film</string>
-    <string name="season_number">Musim %s</string>
-    <string name="resume_episode">Lanjut (%s)</string>
-    <string name="start_over">Mulai ulang</string>
-    <string name="next_episode">Episode selanjutnya</string>
-    <string name="open_network_settings">Buka pengaturan jaringan?</string>
-    <string name="recently_played">Terakhir diputar</string>
-    <string name="recently_added">Terakhir ditambahkan</string>
     <string name="playback_multiple_errors">Banyak media tidak dapat diputar</string>
     <string name="clear_media_db_message">Anda akan kehilangan kemajuan Anda, bookmark dan juga daftar putar yang telah Anda buat tetapi pengaturan VLC untuk Android Anda akan disimpan</string>
     <string name="clear_app_data_message">Anda akan kehilangan kemajuan Anda, boomark, daftar putar dan juga seluruh pengaturan VLC</string>
@@ -703,7 +659,6 @@
     <string name="subscription_cancel">Anda dapat berhenti berlangganan di Play Store</string>
     <string name="subscription_cancel_tv">Cara berhenti berlangganan</string>
     <string name="donate_unsubscribe_tv">Untuk berhenti berlangganan, silahkan buka %s di ponsel atau komputer atau pindai kode ini:</string>
-    <string name="tip_jar">Bantu VLC</string>
     <string name="thank_you">Terima kasih</string>
     <string name="thank_you_desc">Terima kasih untuk dukungan anda!\nIni sangat membantu kami meningkatkan VLC!</string>
     <string name="donate_again">Sponsor aplikasi lagi</string>
@@ -715,7 +670,6 @@
     <string name="allow_otg">Izinkan akses OTG</string>
     <string name="allow_otg_description">Silahkan pilih OTG drive anda untuk mengizinkan akses ke VLC.</string>
     <string name="video_hud_timeout">Kontrol pemutar video menyembunyikan penundaan</string>
-    <string name="remove_from_history">Hapus dari riwayat</string>
     <string name="prefersmbv1">Pilih SMB 1</string>
     <string name="prefersmbv1_summary">Hapus cek pengaturan ini jika anda telah memiliki kesulitan telusuri server SMB anda</string>
     <string name="audio_delay_global">Penundaan audio diset ke %s ms untuk semua video</string>
@@ -742,14 +696,9 @@
     <string name="optional_features_warning">Fitur ini masih dalam beta dan mungkin akan menyebabkan crash dan ketidakstabilan</string>
     <string name="network_indexing">Pengindeksan jaringan</string>
     <string name="network_indexing_warning">Pengindeksan jaringan saat ini sedang berada dalam beta.\nMasalah yang diketahui:\n• Performa yang lambat\n\nJika anda menemukan masalah lain, tolong laporkan masalah tersebut pada forum kami.</string>
-    <string name="start_vlc">Mulai VLC</string>
     <string name="jump_delay">Maju/mundur delay waktu</string>
     <string name="long_jump_delay">Ketuk lama maju/mundur delay waktu</string>
     <string name="jump_delay_summary">%s detik</string>
-    <string name="move_up">Ke atas</string>
-    <string name="move_down">Ke bawah</string>
-    <string name="remove_from_playlist">Hapus dari playlist</string>
-    <string name="play_media">Mulai %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Tambahkan item duplikat?</string>
     <string name="add_button">Tambahkan</string>
@@ -837,7 +786,6 @@
     <string name="downloading">Mengunduh</string>
     <string name="talkback_action_rewind">Mundur %s detik</string>
     <string name="talkback_action_forward">Maju %s detik</string>
-    <string name="talkback_display_settings">Pengaturan tampilan</string>
     <string name="talkback_already_played">Sudah diputar</string>
     <string name="show_only_favs">Tampilkan hanya favorit</string>
     <string name="ignore_headset_media_button_presses">Abaikan penekanan tombol media headset</string>

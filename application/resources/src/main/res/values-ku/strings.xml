@@ -79,14 +79,6 @@
         <item quantity="one">vîdyoyek</item>
         <item quantity="other">%d vîdyo</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">filîmek</item>
-        <item quantity="other">%d filîm</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">Rêzefilîmek</item>
-        <item quantity="other">%d Rêzefilîm</item>
-    </plurals>
     <string name="internal_memory">bîrdanka navxweyî</string>
     <string name="audio">Deng</string>
     <string name="video">Vîdyo</string>
@@ -105,7 +97,6 @@
     <string name="directorynotfound">Rêya peldanka \'%1$s\'ê nehat dîtin.</string>
     <string name="nohistory">Heta niha te li ti muzîkê guhdarî nekiriyê.</string>
 
-    <string name="cover_art">Wêneyê bergê</string>
     <string name="shuffle_all_title">Gişî tevlihev bike</string>
     <string name="shuffle_title">Moda tevlihevkirinê</string>
     <string name="shuffle">Tevlihevkirin Girtî</string>
@@ -144,7 +135,6 @@
     <string name="sleep_title">Demjimêrê xewê</string>
     <string name="sleep_in">Di xew de</string>
     <string name="jump_to_time">Pêşve bibe</string>
-    <string name="server_add_title">Servereke nû tevlî favoriyan bike</string>
     <string name="server_domain_hint">Navnîşana serverê (navê domainê an jî IP)</string>
     <string name="server_share_hint">Navê parvekirina torê (an jî navnîşana IP\'ê)</string>
     <string name="server_folder_hint">Rêya peldankê (li gorî daxwazê)</string>
@@ -157,8 +147,6 @@
     <string name="favorites_add">Tevlî favoriyan bike</string>
     <string name="favorites_remove">Ji favoriyan rake</string>
     <string name="favorites_edit">Sererast bike</string>
-    <string name="favorite_added">Tevlî favoriyan bû</string>
-    <string name="favorite_removed">Ji favoriyan hate rakirin</string>
 
     <string name="streams">Herik</string>
     <string name="open_mrl_dialog_msg">Navnîşana torê bikevê: mînak http://, mms:// an jî rtsp://</string>
@@ -235,8 +223,6 @@
     <string name="advanced_prefs_category">Pêşketî</string>
     <string name="clear_history">Raboriyê paqij bike</string>
     <string name="set_locale">Ziman</string>
-    <string name="restart_message_OK">Baş e</string>
-    <string name="restart_message_Later">Piştre</string>
     <string name="browser_show_all_title">Hemû dosyeyan nîşan bide</string>
 
     <string name="developer_prefs_category">Pêşvebir</string>
@@ -254,8 +240,6 @@
     <string name="sending_log">Tomargeh tê şandin...</string>
 
 
-    <string name="no_result">Ti encam nehat dîtin</string>
-    <string name="no_internet_connection">Înterneta xwe kontrol bike</string>
     <string name="subs_download_error">Xizmet nayê bikaranîn. Paşê dîsa biceribîne</string>
 
     <string name="network_browsing">Tora Xwecihî</string>
@@ -289,8 +273,6 @@
     <string name="store_password">Pêborînê bi bîr bixe</string>
     <string name="add_to_playlist">Tevlî lîsteya lêdanê bike</string>
     <string name="browse_folder">Peldankê bibîne</string>
-    <string name="listen">Guhdarî bike</string>
-    <string name="videos_all">Hemû vîdyo</string>
     <string name="clear_playback_history">Raboriya lêdanê paqij bike</string>
     <string name="resume">Bidomîne</string>
     <string name="length">Dirêjî</string>
@@ -352,21 +334,6 @@
     <string name="share">Parve bike</string>
     <string name="share_file">%s\'ê parve bike</string>
     <string name="share_message">%s li vir e</string>
-    <string name="moviepedia_result">Encamên vîdyoyê</string>
-    <string name="directed_by">Derhêner</string>
-    <string name="casting">Veguheztina medyayê</string>
-    <string name="produced_by">Çêker</string>
-    <string name="written_by">Nivîskar</string>
-    <string name="music_by">Muzîk ji aliyê</string>
-    <string name="posters">Poster</string>
-    <string name="backdrops">Paşxan</string>
-    <string name="header_tvshows">TV show</string>
-    <string name="header_movies">Filîm</string>
-    <string name="season_number">Sezona %sem</string>
-    <string name="resume_episode">Bidomîne (%s)</string>
-    <string name="start_over">Ji serî ve dest pê bike</string>
-    <string name="next_episode">Beşa din</string>
-    <string name="open_network_settings">Sazkariyên torê veke?</string>
 
     <string name="channels">Kanal</string>
     <string name="resolution">Averûtî</string>
@@ -391,6 +358,5 @@
     <string name="no_favorite">Favorî tune</string>
     <string name="empty_directory">Vala</string>
     <string name="video_hud_timeout">Lêdera vîdyo derengmayîna maskekirin kontrol dike</string>
-    <string name="remove_from_history">Ji raboriyê rake</string>
     <string name="prefersmbv1_summary">Heke hûn di lêgerîna pêşkêşkera SMB-ya xwe de zehmetiyê dikişînin vê mîhengê vebijêre</string>
     </resources>

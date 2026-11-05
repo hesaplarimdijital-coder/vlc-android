@@ -88,7 +88,6 @@
     <string name="loading">በ መጫን ላይ</string>
     <string name="please_wait">እባክዎን ይቆዩ…</string>
     <string name="noplaylist">የ ማጫወቻ ዝርዝር የለም</string>
-    <string name="cover_art">የ ሽፋን ኪነት</string>
     <string name="shuffle_title">መበወዣ ዘዴ</string>
     <string name="shuffle">መበወዣ ማጥፊያ</string>
     <string name="shuffle_on">መበወዣ ማብሪያ</string>
@@ -120,8 +119,6 @@
     <string name="favorites_add">ወደ የምወዳቸው ውስጥ መጨመሪያ</string>
     <string name="favorites_remove">እኔ ከምወዳቸው ውስጥ ማስወገጃ</string>
     <string name="favorites_edit">ማረሚያ</string>
-    <string name="favorite_added">ወደ የምወዳቸው ውስጥ ማስቀመጫ</string>
-    <string name="favorite_removed">እኔ ከምወዳቸው ውስጥ ማስወገጃ</string>
 
     <string name="encountered_error_title">በድጋሚ ማጫወቻ ስህተት</string>
     <string name="search">መፈለጊያ</string>
@@ -175,7 +172,6 @@
     <string name="set_locale">ቋንቋ ማሰናጃ</string>
     <string name="restart_vlc">ቪኤልሲ እንደገና ማስጀመሪያ</string>
     <string name="network_browsing">የ አካባቢ ኔትዎርክ</string>
-    <string name="browsing">በ መቃኘት ላይ</string>
 
     <string name="network_empty">ይህ ዳይሬክቶሪ ባዶ ነው</string>
     <string name="search_hint">መገናኛ መፈለጊያ</string>
@@ -196,8 +192,6 @@
     <string name="store_password">የ መግቢያ ቃል አስታውስ</string>
     <string name="add_to_playlist">ወደ ማጫወቻ ዝርዝር መጨመሪያ</string>
     <string name="browse_folder">ፎልደር ውስጥ መቃኛ</string>
-    <string name="listen">ያዳምጡ</string>
-    <string name="videos_all">ሁሉንም ቪዲዮዎች</string>
     <string name="resume">ይቀጥሉ</string>
     <string name="length">እርዝመት</string>
     <string name="ml_external_storage_accept">አዎ</string>

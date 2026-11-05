@@ -91,14 +91,6 @@
         <item quantity="one">1 ویدیو</item>
         <item quantity="other">%d ویدیو</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 فیلم</item>
-        <item quantity="other">%d فیلم</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 نمایش تلویزیونی</item>
-        <item quantity="other">%d نمایش تلویزیونی</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 قطعه</item>
         <item quantity="other">%d صدا</item>
@@ -122,7 +114,6 @@
     <string name="nosubfolder">هیچ زیر پوشه ای وجود ندارد</string>
     <string name="directorynotfound">مسیر پوشه \'%1$s\' یافت نشد</string>
     <string name="nohistory">شما هنوز تاریخچه پخش ندارید</string>
-    <string name="cover_art">جلد هنری</string>
     <string name="shuffle_all_title">پخش تصادفی همه</string>
     <string name="shuffle_title">حالت تصادفی</string>
     <string name="shuffle">پخش تصادفی خاموش</string>
@@ -162,7 +153,6 @@
     <string name="sleep_in">خوابیدن در</string>
     <string name="jump_to_time">پرش به زمان</string>
     <string name="wait_before_sleep">لطفا صبر کنید تا رسانه فعلی تمام شود</string>
-    <string name="server_add_title">یک سرور جدید به موارد دلخواه اضافه کنید</string>
     <string name="server_folder_hint">مسیر پوشه (اختیاری)</string>
     <string name="server_username_hint">نام کاربری</string>
     <string name="server_port">درگاه :</string>
@@ -173,8 +163,6 @@
     <string name="favorites_add">افزودن به موارد دلخواه</string>
     <string name="favorites_remove">حذف از موارد دلخواه</string>
     <string name="favorites_edit">ویرایش</string>
-    <string name="favorite_added">به موارد دلخواه اضافه شده</string>
-    <string name="favorite_removed">از موارد دلخواه حذف شده</string>
 
     <string name="streams">جریان‌ها</string>
     <string name="search">جستجو</string>
@@ -273,8 +261,6 @@
     <string name="subtitle_decoration_none">هیچ‌کدام</string>
     <string name="subtitle_decoration_shadow">سایه</string>
     <string name="subtitle_decoration_outline">خط دور</string>
-    <string name="previous_color">رنگ قبلی</string>
-    <string name="new_color">رنگ بعدی</string>
 
     <string name="audio_prefs_category">صدا</string>
     <string name="lockscreen_cover_title">نمایش جلد رسانه در قفل صفحه</string>
@@ -351,8 +337,6 @@
     <string name="network_caching_popup">این مقدار باید بین 0 و 60000 میلی ثانیه باشد</string>
     <string name="quit">خروج و شروع دوباره برنامه</string>
     <string name="restart_message">تغییرات پس از بستن کامل برنامه و اجرای دوباره آن انجام می شود آیا این کار الان انجام شود؟</string>
-    <string name="restart_message_OK">تایید</string>
-    <string name="restart_message_Later">فعلا نه</string>
     <string name="developer_prefs_category">توسعه دهنده</string>
     <string name="enable_verbose_mode">گزارش کامل</string>
     <string name="enable_verbose_mode_summary">اطلاعات بیشتری را برای (گزارش) ارائه می دهد</string>
@@ -377,11 +361,8 @@
     <string name="sending_log">در حال ارسال گزارش…</string>
 
 
-    <string name="no_result">هیچ نتیجه‌ ای یافت نشد</string>
-    <string name="no_internet_connection">اتصال اینترنت خود را بررسی کنید</string>
     <string name="retry">تلاش مجدد</string>
     <string name="network_browsing">شبکه محلی</string>
-    <string name="browsing">در حال جستجو</string>
 
     <string name="file_size">اندازه فایل</string>
 
@@ -451,11 +432,9 @@
     <string name="add_to_playlist">افزودن به لیست پخش</string>
     <string name="popup_playback_title">پخش ویدیو در یک پنجره پاپ آپ</string>
     <string name="browse_folder">جستجوی پوشه</string>
-    <string name="listen">گوش دادن</string>
     <string name="episodes">قسمت‌ها</string>
     <string name="movies">فیلم‌ها</string>
     <string name="videos">ویدیوها</string>
-    <string name="videos_all">همه ویدیو ها</string>
     <string name="clear_playback_history">پاک کردن تاریخچه پخش</string>
     <string name="ml_scanning">در حال بررسی فایل های رسانه ای</string>
     <string name="ml_parse_media">در حال تجزیه و تحلیل رسانه</string>
@@ -537,7 +516,6 @@
     <string name="onboarding_theme_title">راحت باش انگار که خونه خودته</string>
     <string name="done">انجام شد</string>
     <string name="onboarding_scan_title">یافتن خودکار رسانه شما</string>
-    <string name="onboarding_all_set">پخش کننده VLC آماده شده</string>
     <string name="daynight_system_explanation">پخش کننده VLC با توجه به تنظیمات سیستم به طور خودکار به حالت تاریک تغییر می یابد</string>
     <string name="daynight_legacy_explanation">پخش کننده VLC به طور خودکار در زمان مناسب به حالت شب تغییر می کند</string>
     <string name="onboarding_scanning_enable">به پخش کننده VLC اجازه دهید دستگاه شما را برای یافتن محتوای رسانه بررسی کند</string>
@@ -548,7 +526,6 @@
     <string name="add_to_new_playlist">افزودن به لیست پخش جدید</string>
     <string name="resume_card_message">پخش %1$s ادامه داده شود؟</string>
     <string name="misc">متفرقه</string>
-    <string name="device_default">پیش فرض دستگاه</string>
     <string name="track_number">%d</string>
     <string name="jump_to">پرش به</string>
     <string name="show_video_thumbnails">عکس های کوچک ویدیو ها</string>
@@ -556,7 +533,6 @@
     <string name="preamp">تقویت کننده</string>
     <string name="reset">بازنشانی</string>
     <string name="remove_current">حذف کنونی</string>
-    <string name="validation_delete_playlist">آیا می‌خواهید این فهرست پخش را حذف کنید؟</string>
     <string name="display_in_list">نمایش به صورت لیست</string>
     <string name="display_in_grid">نمایش به صورت شبکه</string>
     <string name="dump_db_failure">استخراج پایگاه داده انجام نشد</string>
@@ -583,25 +559,6 @@
     <string name="invalid_file">فایل نامعتبر است و نمی توانید آن را به اشتراک بگذارید</string>
     <string name="share_file">اشتراک گذاری %s</string>
     <string name="share_message">%sآماده است</string>
-    <string name="find_metadata">یافتن فراداده</string>
-    <string name="moviepedia_hint">جستجوی فراداده</string>
-    <string name="moviepedia_result">نتیجه‌ های ویدیو</string>
-    <string name="directed_by">کارگردان</string>
-    <string name="casting">بازیگران</string>
-    <string name="produced_by">تهیه کننده</string>
-    <string name="written_by">نویسنده</string>
-    <string name="music_by">آهنگساز</string>
-    <string name="posters">پوستر ها</string>
-    <string name="backdrops">پس زمینه‌ها</string>
-    <string name="header_tvshows">برنامه های تلویزیونی</string>
-    <string name="header_movies">فیلم‌ ها</string>
-    <string name="season_number">فصل %s</string>
-    <string name="resume_episode">ادامه (%s)</string>
-    <string name="start_over">شروع دوباره</string>
-    <string name="next_episode">قسمت بعدی</string>
-    <string name="open_network_settings">آیا تنظیمات شبکه باز شود؟</string>
-    <string name="recently_played">آخرین پخش شده ها</string>
-    <string name="recently_added">به تازگی افزوده شده</string>
     <string name="playback_multiple_errors">چند رسانه قابل پحش نیست</string>
     <string name="clear">پاک‌کردن</string>
     <string name="abrepeat_add_first_marker">تنظیم نقطه آغاز</string>
@@ -643,7 +600,6 @@
     <string name="subscription_purchased">شما مشترک حمایت مالی ماهانه هستید</string>
     <string name="subscription_cancel">می‌توانید اشتراک خود را در فروشگاه پلی لغو کنید</string>
     <string name="subscription_cancel_tv">چگونه اشتراک را لغو کنیم</string>
-    <string name="tip_jar">کمک به وی‌ال‌سی</string>
     <string name="thank_you">ممنون</string>
     <string name="thank_you_desc">برای حمایت مالیتان متشکریم!\n این در بهبود وی‌ال‌سی به ما بسیار کمک خواهد کرد!</string>
     <string name="donate_again">حمایت مالی دوباره از برنامه</string>
@@ -653,7 +609,6 @@
 
     <string name="allow_otg">مجوز دسترسی به OTG را فعال کنید</string>
     <string name="allow_otg_description">لطفا درایو OTG خود را انتخاب کنید تا مجوز دسترسی به OTG برای وی‌ال‌سی فعال شود</string>
-    <string name="remove_from_history">حذف از تاریخچه</string>
     <string name="prefersmbv1">SMB 1 را ترجیح بده</string>
     <string name="go_to_folder">مرور بالایی</string>
     <string name="browser_show_missing_media">رسانه‌های گم‌شده را نشان بده</string>
@@ -664,12 +619,7 @@
     <string name="bookmark_name">%s نشانک</string>
     <string name="show">نمایش</string>
     <string name="optional_features">امکانات اختیاری</string>
-    <string name="start_vlc">شروع وی‌ال‌سی</string>
     <string name="jump_delay_summary">%sثانیه</string>
-    <string name="move_up">بالا ببر</string>
-    <string name="move_down">پایین ببر</string>
-    <string name="remove_from_playlist">از فهرست پخش حذف کن</string>
-    <string name="play_media">%sرا پخش کن</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">موارد تکراری اضافه شوند؟</string>
     <string name="add_button">افزودن</string>
@@ -723,6 +673,5 @@
     <string name="downloading">در حال بارگذاری ...</string>
     <string name="talkback_action_rewind">%sثانیه به عقب برگرد</string>
     <string name="talkback_action_forward">%sثانیه به جلو برو</string>
-    <string name="talkback_display_settings">تنظیمات نمایش</string>
     <string name="talkback_already_played">قبلا پخش شده است</string>
     </resources>

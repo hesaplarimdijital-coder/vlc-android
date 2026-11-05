@@ -122,22 +122,6 @@
         <item quantity="many">%d ڤديوها</item>
         <item quantity="other">%d ڤديو</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="zero">%d أفلام </item>
-        <item quantity="one">1 فلم</item>
-        <item quantity="two">%d أفلام </item>
-        <item quantity="few">%d أفلام </item>
-        <item quantity="many">%d أفلام  </item>
-        <item quantity="other">%d أفلام </item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="zero">%d برنامج تلفاز</item>
-        <item quantity="one">1 برنامج تلفاز</item>
-        <item quantity="two">%d برامج تلفاز</item>
-        <item quantity="few">%d برامج تلفاز</item>
-        <item quantity="many">%d برامج تلفاز</item>
-        <item quantity="other">%d برامج تلفاز</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="zero">%d مسارات</item>
         <item quantity="one">1 مسار</item>
@@ -168,7 +152,6 @@
     <string name="nohistory">من من شيء شغّلته في التأريخ.</string>
     <string name="cant_ban_root">لا يمكنك حظر مجلد الجذر</string>
 
-    <string name="cover_art">الغلاف الفني</string>
     <string name="shuffle_all_title">اخلطها كلها</string>
     <string name="shuffle_title">وضع الخلط</string>
     <string name="shuffle">الخلط معطّل</string>
@@ -218,7 +201,6 @@
     <string name="video_player_remote">مشغل الفيديو عن بعد</string>
     <string name="remote_keyboard_navigation">التنقل عبر لوحة المفاتيح</string>
 
-    <string name="server_add_title">أضِف خادوما جديدا إلى المفضلة</string>
     <string name="server_folder_hint">مسار المجلد (اختياري)</string>
     <string name="server_username_hint">اسم المستخدم</string>
     <string name="server_port">المنفذ:</string>
@@ -229,8 +211,6 @@
     <string name="favorites_add">أضِف إلى المفضلة</string>
     <string name="favorites_remove">أزِل من المفضلة</string>
     <string name="favorites_edit">حرّر</string>
-    <string name="favorite_added">حُفظت في المفضلة</string>
-    <string name="favorite_removed">أُزيلت من المفضلة</string>
 
     <string name="streams">دفق</string>
     <string name="search">ابحث</string>
@@ -317,8 +297,6 @@
     <string name="subtitle_decoration_none">لا شيء</string>
     <string name="subtitle_decoration_shadow">ظل</string>
     <string name="subtitle_decoration_outline">مخطط تفصيلي</string>
-    <string name="previous_color">اللون السابق</string>
-    <string name="new_color">لون جديد</string>
 
     <string name="audio_prefs_category">صوت</string>
     <string name="lockscreen_cover_title">غلاف الوسائط على شاشة القفل</string>
@@ -410,8 +388,6 @@
     <string name="network_caching_popup">يجب أن تتراوح هذه القيمة بين 0 و 60000 ملي ثانية</string>
     <string name="quit">أغلق وأعِدْ تشغيل التّطبيق</string>
     <string name="restart_message">ستسري التغييرات بمجرد إعادة تشغيل التطبيق.\n\n إعادة التشغيل الآن؟</string>
-    <string name="restart_message_OK">حسنًا</string>
-    <string name="restart_message_Later">لاحقًا</string>
     <string name="browser_show_all_title">إظهار ملفات الوسائط المتعددة فقط</string>
 
     <string name="developer_prefs_category">مطوِّر</string>
@@ -439,11 +415,8 @@
     <string name="sending_log">يجري إرسال التقرير…</string>
 
 
-    <string name="no_result">ليس هناك نتائج</string>
-    <string name="no_internet_connection">تحقق من اتصال الإنترنت</string>
     <string name="retry">إعادة</string>
     <string name="network_browsing">الشبكة المحلية</string>
-    <string name="browsing">تصفح</string>
 
     <string name="file_size">حجم الملف</string>
 
@@ -470,7 +443,6 @@
     <string name="open_in_browser">افتح في المتصفح </string>
     <string name="install">ثبّت</string>
     <string name="install_nightly">قم بتثبيت الإصدار الليلي</string>
-    <string name="install_nightly_alert">الإصدارات الليلية هي إصدارات تجريبية يتم تحديثها يوميًا.\n\nتوقع ميزات جديدة ولكن أيضًا أخطاء جديدة!</string>
     <string name="update_nightly_alert">تقوم بتشغيل إصدار ليلي. هل ترغب في البحث عن التحديثات بشكل دوري؟</string>
     <string name="update_nightly">تحديث تلقائي</string>
     <string name="update_nightly_summary">إبحث عن تحديثات  للإصدار الليلي بشكل دوري</string>
@@ -522,11 +494,9 @@
     <string name="add_to_playlist">أضف إلى قائمة التشغيل</string>
     <string name="popup_playback_title">شغّل الفيديو في نافذة منبثقة</string>
     <string name="browse_folder">تصفح المجلد</string>
-    <string name="listen">استمع</string>
     <string name="episodes">الحلقات</string>
     <string name="movies">أفلام</string>
     <string name="videos">فيديوهات</string>
-    <string name="videos_all">كل الفيديوهات</string>
     <string name="clear_playback_history">امسح تاريخ التشغيل</string>
     <string name="ml_scanning">مسح من أجل العثور على ملفات الوسائط</string>
     <string name="ml_parse_media">جارٍ جلب الوسائط</string>
@@ -615,8 +585,6 @@
     <string name="onboarding_theme_title">اشعر وكأنك في بيتك</string>
     <string name="done">تمّ</string>
     <string name="onboarding_scan_title">استكشف تلقائيا وسائطك</string>
-    <string name="onboarding_all_set">تم إعداد VLC بالكامل!</string>
-    <string name="onboarding_permission_given">يمكنك الآن اكتشاف الوسائط الخاصة بك تلقائيًا واستخدام ترجمات خارجية بالإضافة إلى تشغيل التدفقات أو وسائط الشبكة</string>
     <string name="daynight_system_explanation">سيتحول VLC تلقائيًا إلى الوضع المظلم وفقًا لإعدادات النظام</string>
     <string name="daynight_legacy_explanation">سينتقل VLC تلقائيًا إلى الوضع الليلي في الوقت المحدّد</string>
     <string name="onboarding_scanning_enable">دع VLC يتفحّص الجهاز بحثًا عن محتوى للوسائط</string>
@@ -628,7 +596,6 @@
     <string name="create_new_playlist">قم بإنشاء قائمة تشغيل جديدة</string>
     <string name="resume_card_message">استئناف تشغيل %1$s؟</string>
     <string name="misc">متفرّقات</string>
-    <string name="device_default">الجهاز الافتراضي</string>
     <string name="track_number">%d مقطوعات</string>
     <string name="jump_to">اقفز إلى</string>
     <string name="show_video_thumbnails">الصور المصغرة للفيديو</string>
@@ -653,13 +620,10 @@
         <item quantity="other">%d مسار مُلحق</item>
     </plurals>
     <string name="remove_current">إزالة الحالي</string>
-    <string name="validation_delete_playlist">هل أنت متأكد أنك تريد حذف قائمة التشغيل هذه؟</string>
-    <string name="validation_delete_playlist_text">لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="display_settings">إعدادات العرض</string>
     <string name="incognito_mode">وضع التصفح المتخفي</string>
     <string name="display_in_list">عرض على شكل قائمة</string>
     <string name="display_in_grid">عرض على شكل شبكة</string>
-    <string name="dump_db_succes">قاعدة البيانات ملقاة على جذر التخزين الداخلي</string>
     <string name="dump_db_failure">فشل في تفريغ قاعدة البيانات</string>
     <string name="send_crash_title">فني تقرير اعطال VLC</string>
     <string name="send_crash_description">ارسالك لتقرير العطل يساهم في مساعدتنا في تحسين حالة استقرار VLC.</string>
@@ -687,25 +651,6 @@
     <string name="invalid_file">ملف غير صالح: لا يمكن المشاركة</string>
     <string name="share_file">مشاركة %s</string>
     <string name="share_message">ها هو %s</string>
-    <string name="find_metadata">البحث عن الوصف</string>
-    <string name="moviepedia_hint">وصف البحث</string>
-    <string name="moviepedia_result">نتائج الفيديو</string>
-    <string name="directed_by">إخراج</string>
-    <string name="casting">يتم الآن التحويل</string>
-    <string name="produced_by">انتجت من</string>
-    <string name="written_by">كتبت من</string>
-    <string name="music_by">موسيقى من</string>
-    <string name="posters">ملصقات</string>
-    <string name="backdrops">الخلفيات المسرحية</string>
-    <string name="header_tvshows">برامج تلفاز</string>
-    <string name="header_movies">أفلام</string>
-    <string name="season_number">الموسم %s</string>
-    <string name="resume_episode">استئناف (%s)</string>
-    <string name="start_over">أعد من بداية</string>
-    <string name="next_episode">الحلقة التالية</string>
-    <string name="open_network_settings">تريد فتح إعدادات الشبكة؟</string>
-    <string name="recently_played">مشغل حديثا</string>
-    <string name="recently_added">أُضيف حديثًا</string>
     <string name="playback_multiple_errors">لا يمكن تشغيل وسائط متعددة</string>
     <string name="clear_media_db_message">ستفقد تقدمك والإشارات المرجعية وقوائم التشغيل التي أنشأتها ولكنك ستحتفظ بإعدادات VLC لنظام Android</string>
     <string name="clear_app_data_message">ستفقد تقدمك والإشارات المرجعية وقوائم التشغيل وجميع إعدادات VLC</string>
@@ -752,7 +697,6 @@
     <string name="subscription_cancel">يمكنك إلغاء الاشتراك في متجر Play</string>
     <string name="subscription_cancel_tv">كيفية إلغاء الاشتراك</string>
     <string name="donate_unsubscribe_tv">لإلغاء الاشتراك ، يرجى فتح %s على الهاتف أو الكمبيوتر أو مسح هذا الرمز:</string>
-    <string name="tip_jar">مساعدة VLC</string>
     <string name="thank_you">شكرًا لك</string>
     <string name="thank_you_desc">شكرًا لك على رعايتك!\n  سيساعدنا ذلك كثيرًا في تحسين VLC!</string>
     <string name="donate_again">رعاية التطبيق مرة أخرى</string>
@@ -764,7 +708,6 @@
     <string name="allow_otg">السماح بالوصول إلى OTG</string>
     <string name="allow_otg_description">يرجى تحديد محرك OTG الخاص بك للسماح بالوصول إلى VLC.</string>
     <string name="video_hud_timeout">مشغل الفيديو يتحكم في إخفاء التأخير</string>
-    <string name="remove_from_history">أزِل من التاريخ</string>
     <string name="prefersmbv1">تفضل SMB 1</string>
     <string name="prefersmbv1_summary">قم بإلغاء تحديد هذا الإعداد إذا واجهت بعض الصعوبات في تصفح خادم SMB الخاص بك</string>
     <string name="audio_delay_global">تم ضبط تأخير الصوت على %s مللي ثانية لكل الفيديوهات</string>
@@ -788,7 +731,6 @@
     <string name="unlock">افتح القفل</string>
     <string name="lock_with_pin">أعد تمكين قفل رقم التعريف الشخصي</string>
     <string name="unlock_with_pin">افتح الوضع الآمن</string>
-    <string name="lock_with_pin_short">قفل رقم التعريف الشخصي</string>
     <string name="search_prefs">إعدادات البحث</string>
     <string name="stop_unpaubale">لا يمكن إيقاف هذه الوسائط مؤقتًا. أوقفه بدلا من ذلك؟</string>
     <string name="delete_forever">حذف للأبد</string>
@@ -800,11 +742,7 @@
     <string name="optional_features">ميزات اختيارية</string>
     <string name="optional_features_summary">الميزات التجريبية التي يتم اختبارها حاليًا وقد لا تكون مستقرة</string>
     <string name="optional_features_warning">هذه الميزة في مرحلة تجريبية وقد تتسبب في حدوث أعطال وعدم استقرار</string>
-    <string name="start_vlc">ابدأ تشغيل VLC</string>
     <string name="jump_delay_summary"> %s ثانية</string>
-    <string name="move_up">تحرك للأعلى</string>
-    <string name="move_down">تحرك للأسفل</string>
-    <string name="play_media">تشغيل%s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">هل تريد إضافة عنصر (عناصر) مكررة؟</string>
     <string name="add_button">أضِف</string>

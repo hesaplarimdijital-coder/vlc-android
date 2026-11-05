@@ -39,7 +39,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.videolan.libvlc.util.AndroidUtil
 import org.videolan.medialibrary.Tools
-import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.AppContextProvider
@@ -51,7 +50,6 @@ import org.videolan.tools.addTrailingSlashIfNeeded
 import org.videolan.tools.removeFileScheme
 import org.videolan.tools.runIO
 import org.videolan.vlc.BuildConfig
-import org.videolan.vlc.R
 import org.videolan.vlc.VlcMigrationHelper
 import org.videolan.vlc.media.MediaUtils
 import java.io.BufferedInputStream
@@ -436,10 +434,6 @@ object FileUtils {
                     }
                 } else if (data.authority == "media") {
                     uri = MediaUtils.getContentMediaUri(data)
-                } else if (data.authority == ctx.getString(R.string.tv_provider_authority)) {
-                    val medialibrary = Medialibrary.getInstance()
-                    val media = medialibrary.getMedia(data.lastPathSegment!!.toLong())
-                    uri = media.uri
                 } else {
                     uri = MediaUtils.getContentMediaUri(data)
                     if (uri != null && uri != data)

@@ -249,4 +249,19 @@ class BackupCodecTest {
         RetiredWork.TRANSCRIPTION_KEYS.forEach { assertFalse(it, prefs.contains(it)) }
         assertEquals("Dark", prefs.getString("nagmedar_theme", null))
     }
+
+    @Test
+    fun aBackupMadeBeforeTheTvInterfaceWentRestoresWithoutItsListsSort() {
+        // 1.0.2's, from a device whose TV interface had sorted its films
+        val values = listOf(
+            SettingValue("MediaScrapingMovieProvider", 1),
+            SettingValue("MediaScrapingMovieProvider_desc", true),
+            SettingValue("nagmedar_theme", "Dark"),
+        )
+        assertEquals(listOf("nagmedar_theme"), BackupSettings.collect(values.associate { it.key to it.value }).map { it.key })
+        val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("backup-moviepedia", Context.MODE_PRIVATE)
+        BackupSettings.write(values, prefs.edit()).commit()
+        RetiredWork.MOVIEPEDIA_KEYS.forEach { assertFalse(it, prefs.contains(it)) }
+        assertEquals("Dark", prefs.getString("nagmedar_theme", null))
+    }
 }
