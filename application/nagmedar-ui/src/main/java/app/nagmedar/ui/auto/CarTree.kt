@@ -22,9 +22,15 @@ import app.nagmedar.ui.podcast.ParsedEpisode
 import app.nagmedar.ui.podcast.ParsedFeed
 import app.nagmedar.ui.podcast.PodcastHit
 import app.nagmedar.ui.podcast.addressKeys
+import app.nagmedar.ui.radio.DirectoryCountry
+import app.nagmedar.ui.radio.DirectoryLanguage
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioFailure
+import app.nagmedar.ui.radio.RadioLabels
 import app.nagmedar.ui.radio.Station
+import app.nagmedar.ui.radio.StationFilters
+import app.nagmedar.ui.radio.StationOrder
+import app.nagmedar.ui.radio.StationQuery
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -101,11 +107,32 @@ interface CarData {
     /** The directory's tags, the most used first. Throws [RadioFailure]. */
     suspend fun tags(): List<DirectoryTag>
 
-    /** The directory's stations with [tag], the most voted first. Throws [RadioFailure]. */
-    suspend fun tagged(tag: String): List<Station>
+    /** 1.0.3: the device's country (its mobile network's, its SIM's, the region of its language), an ISO 3166-1 code; null when none is known. */
+    fun homeCountry(): String?
+
+    /** 1.0.3: the radio directory's countries with their station counts. Throws [RadioFailure]. */
+    suspend fun radioCountries(): List<DirectoryCountry>
+
+    /** 1.0.3: the radio directory's languages with their station counts, the most used. Throws [RadioFailure]. */
+    suspend fun languages(): List<DirectoryLanguage>
+
+    /**
+     * 1.0.3: the directory's stations for [query] (a country's, a language's, a tag's, the most listened or liked), in
+     * the directory's order; those the app keeps carry the user's marks (a favourite, the row). Throws [RadioFailure].
+     */
+    suspend fun stations(query: StationQuery): List<Station>
 
     /** The directory's stations whose name has [query]. Throws [RadioFailure]. */
     suspend fun findStations(query: String): List<Station>
+
+    /**
+     * 1.0.3: the directory's station [uuid] as the app knows it: as a list of the directory gave it lately (its country,
+     * tags, codec), with the user's marks when it is kept; the kept row alone else; null when it knows none.
+     */
+    suspend fun knownStation(uuid: String): Station?
+
+    /** 1.0.3: [station] made a favourite ([on]) or no longer one, as the Radio page's star does; returns it as kept. */
+    suspend fun favourite(station: Station, on: Boolean): Station
 }
 
 /** 1.0: the medialibrary did not answer in time: the music cannot be listed now; the podcasts and the radio still can. */
@@ -119,6 +146,7 @@ enum class CarText {
     Continue, Subscriptions, NewEpisodes,
     Discover, PopularShows, Countries, Subscribe, Subscribed, FoundNewShows, PodcastsOffline, ShowUnavailable,
     FavouriteStations, RecentStations, Categories,
+    Languages, MostListened, MostLiked, MoreStations, NoFavourites, NoRecentStations, NoStations, RadioBusy,
     UnknownAlbum, UnknownArtist, UnknownYear, UnknownFolder,
     FoundTracks, FoundAlbums, FoundArtists, FoundEpisodes, FoundShows, FoundStations,
     Empty, RadioOffline, NoResult, MusicUnavailable,
@@ -132,6 +160,7 @@ enum class CarIcon {
     Music, Podcasts, Radio, Recent, Albums, Artists, Playlists, Years, Folders, Continue, New, Favourites, Categories, NoCover,
     Genres, Tracks, Shuffle, Smart,
     Discover, Popular, Countries, Subscribe,
+    Languages, Listened, Liked, More, Star,
 }
 
 /** How Android Auto's entries read and look: the texts in the app's language, the artwork's addresses. */
@@ -151,8 +180,11 @@ interface CarLook {
     /** 1.0.3: the language of the texts: lists of names are sorted in it. */
     val locale: Locale
 
-    /** 1.0.3: a country by its two-letter code, in the app's language ("Türkiye"). */
-    fun country(code: String): String
+    /** 1.0.3: a country by its two-letter code, in the app's language ("Türkiye"); [name] (a directory's) when the code is not known. */
+    fun country(code: String, name: String? = null): String
+
+    /** 1.0.3: a language of the radio directory ([name] as it spells it, [code] its ISO 639 code) in the app's language ("Türkçe"). */
+    fun language(name: String, code: String?): String
 
     /** 1.0.3: one of Apple's podcast categories in the app's language; its own (English) name when it is not known. */
     fun category(genre: ChartGenre): String
@@ -183,6 +215,10 @@ sealed interface CarPlay {
 object CarActions {
     /** "Abone ol" on a show of the directory not followed. */
     const val SUBSCRIBE = "app.nagmedar.auto.SUBSCRIBE"
+
+    /** "Favorilere ekle" on a station that is no favourite, "Favorilerden çıkar" on one that is: one of the two at a time. */
+    const val FAVOURITE = "app.nagmedar.auto.FAVOURITE"
+    const val UNFAVOURITE = "app.nagmedar.auto.UNFAVOURITE"
 }
 
 /** 1.0: how a decade's name ends in Turkish: "1990'lar", "2000'ler", by the vowel of its last spoken word. */
@@ -235,12 +271,18 @@ object CarPodcasts {
  * artists, genres when the music has some, playlists and smart lists, years, the Music section's folders, every track
  * A–Z), Podcast (the episodes left in the middle, the subscriptions, the new episodes; 1.0.3: Keşfet, Apple's popular
  * shows of the device's country, by category and of the other countries, whose shows not followed open on their feed's
- * episodes under a row "Abone ol"), Radyo (the favourite stations, those played last, the directory's categories) and
- * Son çalınanlar (the music played last). Long lists are cut into pages of [pageSize]; an empty list says so in one
- * line, as does music the medialibrary does not give in time ([MusicUnavailable]) and a directory that cannot be
- * reached. Also the search, what an entry plays ([play]) and the show a browse action subscribes to ([subscription]).
+ * episodes under a row "Abone ol"), Radyo (the favourite stations, those played last; 1.0.3: the whole world's radio
+ * directory by country, by language and by category, its most listened and its most liked stations, each list a page
+ * of the most listened first with a last row to the next; every station offers "Favorilere ekle" or "Favorilerden
+ * çıkar") and Son çalınanlar (the music played last). Long lists are cut into pages of [pageSize]; an empty list says
+ * so in one line, as does music the medialibrary does not give in time ([MusicUnavailable]) and a directory that
+ * cannot be reached. Also the search, what an entry plays ([play]), the show a browse action subscribes to
+ * ([subscription]) and the station it makes a favourite ([favourite]).
  */
 class CarTree(private val data: CarData, private val look: CarLook, private val pageSize: Int = PAGE) {
+
+    /** 1.0.3: the stations a page of the directory's lists shows: [STATION_PAGE], fewer when the tree's pages are smaller. */
+    private val stationPage = minOf(pageSize, STATION_PAGE)
 
     /** The entries under [id]; null when it is none of the tree's. */
     suspend fun children(id: String): List<CarItem>? {
@@ -275,9 +317,13 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 CarIds.CATEGORIES -> data.country().let { country -> charted { categories(country, data.chart(country)) } }
                 CarIds.COUNTRIES -> countries()
                 CarIds.RADIO -> radio()
-                CarIds.FAVOURITES -> filled(data.favouriteStations().map(::station))
-                CarIds.STATIONS_RECENT -> filled(data.recentStations().map(::station))
+                CarIds.FAVOURITES -> data.favouriteStations().map(::station).ifEmpty { listOf(nothing(CarText.NoFavourites)) }
+                CarIds.STATIONS_RECENT -> data.recentStations().map(::station).ifEmpty { listOf(nothing(CarText.NoRecentStations)) }
+                CarIds.RADIO_COUNTRIES -> directory { radioCountries(data.radioCountries()) }
+                CarIds.LANGUAGES -> directory { languages(data.languages()) }
                 CarIds.TAGS -> directory { data.tags().take(MAX_TAGS).map(::tag) }
+                CarIds.MOST_LISTENED -> listed(ref, StationQuery(order = StationOrder.Popularity))
+                CarIds.MOST_LIKED -> listed(ref, StationQuery(order = StationOrder.Votes))
                 else -> null
             }
             CarKind.Album -> groupTracks(ref, MusicView.Albums, album = true)
@@ -304,7 +350,15 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
             CarKind.DirectoryShow -> directoryShowEntries(hitOf(ref) ?: return emptyList())
             CarKind.Tag -> {
                 val tag = ref.key?.takeIf { it.isNotEmpty() } ?: return emptyList()
-                directory { data.tagged(tag).map(::station) }
+                listed(ref, StationQuery(filters = StationFilters(tag = tag), order = StationOrder.Popularity))
+            }
+            CarKind.Country -> {
+                val code = ref.key?.trim()?.takeIf { it.length == 2 }?.uppercase(Locale.ROOT) ?: return emptyList()
+                listed(ref, StationQuery(filters = StationFilters(countryCode = code), order = StationOrder.Popularity))
+            }
+            CarKind.Language -> {
+                val language = ref.key?.takeIf { it.isNotBlank() } ?: return emptyList()
+                listed(ref, StationQuery(filters = StationFilters(language = language), order = StationOrder.Popularity))
             }
             CarKind.Search -> {
                 val tracks = searchTracks(ref.key.orEmpty()).take(pageSize)
@@ -368,11 +422,9 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
             CarKind.DirectoryEpisode -> directoryEpisode(ref)
             CarKind.Subscribe -> hitOf(ref)?.let(CarPlay::Subscribe)
             CarKind.Station -> data.station(ref.number ?: return null)?.let(CarPlay::Radio)
-            CarKind.DirectoryStation -> {
-                val url = ref.params["u"]?.takeIf { it.isNotBlank() } ?: return null
-                CarPlay.Radio(Station(uuid = ref.key?.takeIf { it.isNotEmpty() }, name = ref.params["n"].orEmpty().ifBlank { url }, streamUrl = url, logoUrl = ref.params["l"]))
-            }
-            CarKind.Decade, CarKind.Show, CarKind.Tag, CarKind.Chart, CarKind.Category, CarKind.DirectoryShow -> null
+            // 1.0.3: as the app knows it, so that playing it keeps its country and tags; the player reports its click
+            CarKind.DirectoryStation -> directoryStation(ref)?.let(CarPlay::Radio)
+            CarKind.Decade, CarKind.Show, CarKind.Tag, CarKind.Chart, CarKind.Category, CarKind.DirectoryShow, CarKind.Country, CarKind.Language -> null
         }?.takeUnless { it is CarPlay.Tracks && it.tracks.isEmpty() }
     }
 
@@ -395,15 +447,44 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
 
     /**
      * 1.0.3: the entry [id] alone, as a list shows it: a show of the directory (followed or not, with its browse action
-     * while it is not) or a show followed; null for any other. Auto reads one again after a browse action changed it.
+     * while it is not), a show followed, a station (with "Favorilere ekle" or "Favorilerden çıkar"); null for any other.
+     * Auto reads one again after a browse action changed it.
      */
     suspend fun item(id: String): CarItem? {
         val ref = CarIds.parse(id) ?: return null
         return when (ref.kind) {
             CarKind.DirectoryShow -> hitOf(ref)?.let { hit -> directoryShow(hit, followed(hit.feedUrl)) }
             CarKind.Show -> data.feeds().firstOrNull { it.id == ref.number }?.let(::show)
+            // the same id as the list gave it, even when the station has been kept since
+            CarKind.Station -> data.station(ref.number ?: return null)?.let { station(it).copy(id = id) }
+            CarKind.DirectoryStation -> directoryStation(ref)?.let { station(it).copy(id = id) }
             else -> null
         }
+    }
+
+    /**
+     * 1.0.3: the station the entry [id] plays, made a favourite ([on]) or no longer one through the app's own path (the
+     * Radio page's star): returned as kept; null for an entry that is no station.
+     */
+    suspend fun favourite(id: String, on: Boolean): Station? {
+        val ref = CarIds.parse(id) ?: return null
+        val station = when (ref.kind) {
+            CarKind.Station -> data.station(ref.number ?: return null)
+            CarKind.DirectoryStation -> directoryStation(ref)
+            else -> null
+        } ?: return null
+        return data.favourite(station, on)
+    }
+
+    /**
+     * 1.0.3: the station of the directory an entry names: as the app knows it ([CarData.knownStation]: its country, its
+     * tags, the user's marks), else as its id carries it (its name, address and logo).
+     */
+    private suspend fun directoryStation(ref: CarRef): Station? {
+        val url = ref.params["u"]?.takeIf { it.isNotBlank() } ?: return null
+        val uuid = ref.key?.takeIf { it.isNotEmpty() }
+        uuid?.let { data.knownStation(it) }?.let { return it }
+        return Station(uuid = uuid, name = ref.params["n"].orEmpty().ifBlank { url }, streamUrl = url, logoUrl = ref.params["l"])
     }
 
     /**
@@ -632,10 +713,86 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         listOf(nothing(CarText.PodcastsOffline))
     }
 
+    /**
+     * The Radio tab: the favourite stations and those played last (tiles); 1.0.3: the directory's countries, languages
+     * and categories, its most listened and its most liked stations (rows).
+     */
     private fun radio() = listOf(
         tab(CarIds.FAVOURITES, CarText.FavouriteStations, CarIcon.Favourites, CarStyle.Grid),
         tab(CarIds.STATIONS_RECENT, CarText.RecentStations, CarIcon.Recent, CarStyle.Grid),
+        tab(CarIds.RADIO_COUNTRIES, CarText.Countries, CarIcon.Countries, CarStyle.List),
+        tab(CarIds.LANGUAGES, CarText.Languages, CarIcon.Languages, CarStyle.List),
         tab(CarIds.TAGS, CarText.Categories, CarIcon.Categories, CarStyle.List),
+        tab(CarIds.MOST_LISTENED, CarText.MostListened, CarIcon.Listened, CarStyle.List),
+        tab(CarIds.MOST_LIKED, CarText.MostLiked, CarIcon.Liked, CarStyle.List),
+    )
+
+    /**
+     * 1.0.3: the radio directory's countries with their station counts: the device's first, then by name in the app's
+     * language (a name the app does not know is the directory's); one with no ISO code cannot be asked for, and is left out.
+     */
+    private fun radioCountries(countries: List<DirectoryCountry>): List<CarItem> {
+        val home = data.homeCountry()?.trim()?.uppercase(Locale.ROOT)
+        val collator = Collator.getInstance(look.locale)
+        val (first, others) = countries.filter { it.code.length == 2 }.map { it to look.country(it.code, it.name) }
+            .partition { it.first.code.equals(home, ignoreCase = true) }
+        return (first + others.sortedWith { a, b -> collator.compare(a.second, b.second) }).map { (country, name) ->
+            CarItem(
+                id = CarIds.radioCountry(country.code),
+                title = name,
+                subtitle = look.count(CarCount.Stations, country.stations),
+                iconUri = look.icon(CarIcon.Countries),
+                browsable = true,
+                children = CarStyle.List,
+            )
+        }
+    }
+
+    /**
+     * 1.0.3: the radio directory's [MAX_LANGUAGES] most used languages with their station counts, named in the app's
+     * language (one the directory spells several ways once, its most used spelling): the app's own first, then by name.
+     */
+    private fun languages(languages: List<DirectoryLanguage>): List<CarItem> {
+        val home = look.locale.language.lowercase(Locale.ROOT)
+        val collator = Collator.getInstance(look.locale)
+        val named = languages.sortedByDescending { it.stations }
+            .map { it to look.language(it.name, it.code) }
+            .distinctBy { it.second.lowercase(look.locale) }
+            .take(MAX_LANGUAGES)
+        val (first, others) = named.partition { home.isNotEmpty() && RadioLabels.languageCode(it.first.name, it.first.code) == home }
+        return (first + others.sortedWith { a, b -> collator.compare(a.second, b.second) }).map { (language, name) ->
+            CarItem(
+                id = CarIds.language(language.name),
+                title = name,
+                subtitle = look.count(CarCount.Stations, language.stations),
+                iconUri = look.icon(CarIcon.Languages),
+                browsable = true,
+                children = CarStyle.List,
+            )
+        }
+    }
+
+    /**
+     * 1.0.3: a page of the directory's stations for [query], in its order (the most listened first, but for the most
+     * liked): [stationPage] of them from the page [ref] asks for, with a last row that opens the next page when the
+     * directory has more. One line says when it has none, or cannot be reached.
+     */
+    private suspend fun listed(ref: CarRef, query: StationQuery): List<CarItem> = directory(CarText.NoStations) {
+        val page = (ref.page ?: 0).coerceAtLeast(0)
+        // one more than a page: whether there is a next one
+        val found = data.stations(query.copy(offset = page * stationPage, limit = stationPage + 1))
+        // what the list itself says (its country, its category) is not said again on each row
+        val shown = found.take(stationPage).map { station(it, placed = query.filters.countryCode == null, listTag = query.filters.tag) }
+        if (found.size > stationPage) shown + more(ref, page + 1) else shown
+    }
+
+    /** 1.0.3: the last row of a page of stations: it opens the [next] page of the same list. */
+    private fun more(ref: CarRef, next: Int) = CarItem(
+        id = CarIds.page(ref.path, next),
+        title = look.text(CarText.MoreStations),
+        iconUri = look.icon(CarIcon.More),
+        browsable = true,
+        children = CarStyle.List,
     )
 
     private fun tab(id: String, text: CarText, icon: CarIcon, style: CarStyle) =
@@ -834,32 +991,43 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         children = CarStyle.List,
     )
 
-    private fun station(station: Station): CarItem {
-        val id = when {
-            station.id != 0L -> CarIds.station(station.id)
-            else -> CarIds.directoryStation(station.uuid.orEmpty(), station.name, station.streamUrl, station.logoUrl)
-        }
+    /**
+     * A station ([stationId]); its country (1.0.3: named in the app's language; not in a country's own list: [placed]
+     * false) and first tag (1.0.3: not the category [listTag] it is listed under) under it. 1.0.3: it offers "Favorilere
+     * ekle", or "Favorilerden çıkar" when it is a favourite.
+     */
+    private fun station(station: Station, placed: Boolean = true, listTag: String? = null): CarItem {
+        val id = stationId(station)
+        val country = if (!placed) null else station.countryCode?.takeIf { it.isNotBlank() }?.let { look.country(it, station.country) } ?: station.country
+        val tag = station.tags.firstOrNull { !it.equals(listTag, ignoreCase = true) }
         return CarItem(
             id = id,
             title = station.name,
-            subtitle = listOfNotNull(station.country ?: station.countryCode, station.tags.firstOrNull()).joinToString(" · ").ifEmpty { null },
+            subtitle = listOfNotNull(country, tag).joinToString(" · ").ifEmpty { null },
             iconUri = look.webImage(station.logoUrl),
             playable = true,
+            actions = listOf(if (station.favourite) CarActions.UNFAVOURITE else CarActions.FAVOURITE),
         )
     }
 
+    /** A category: the directory's tag; 1.0.3: it opens on its stations as rows, the most listened first. */
     private fun tag(tag: DirectoryTag) = CarItem(
         id = CarIds.tag(tag.name),
         title = tag.name.replaceFirstChar { it.titlecase() },
         subtitle = look.count(CarCount.Stations, tag.stations),
         iconUri = look.icon(CarIcon.Categories),
         browsable = true,
-        children = CarStyle.Grid,
+        children = CarStyle.List,
     )
 
-    /** The directory's answer, or one line saying it cannot be reached. */
-    private suspend fun directory(read: suspend () -> List<CarItem>): List<CarItem> = try {
-        filled(read())
+    /**
+     * The directory's answer, or one line saying it cannot be reached; 1.0.3: or that it asked to wait, or ([empty]) that
+     * it has nothing.
+     */
+    private suspend fun directory(empty: CarText = CarText.Empty, read: suspend () -> List<CarItem>): List<CarItem> = try {
+        read().ifEmpty { listOf(nothing(empty)) }
+    } catch (e: RadioFailure.Busy) {
+        listOf(nothing(CarText.RadioBusy))
     } catch (e: RadioFailure) {
         listOf(nothing(CarText.RadioOffline))
     }
@@ -884,6 +1052,12 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         /** The directory's categories listed: its most used tags. */
         const val MAX_TAGS = 60
 
+        /** 1.0.3: the stations one page of the directory's lists shows (a country's, a category's…); a last row opens the next. */
+        const val STATION_PAGE = 100
+
+        /** 1.0.3: the languages listed: the directory's most used. */
+        const val MAX_LANGUAGES = 100
+
         const val MAX_FOUND = 30
         const val MAX_FOUND_GROUPS = 10
 
@@ -896,6 +1070,16 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
          */
         internal fun initial(title: String, locale: Locale): String =
             title.trim().firstOrNull()?.takeIf { it.isLetter() }?.toString()?.uppercase(locale) ?: "#"
+
+        /**
+         * A station's entry: 1.0.3: one of the directory always by what plays it (its UUID, name, address and logo), so
+         * that the entry stays good when the app stops keeping the station (no longer a favourite, never played); the
+         * user's own (imported) by its row.
+         */
+        internal fun stationId(station: Station): String = when {
+            station.uuid == null && station.id != 0L -> CarIds.station(station.id)
+            else -> CarIds.directoryStation(station.uuid.orEmpty(), station.name, station.streamUrl, station.logoUrl)
+        }
 
         /** [block]'s answer, or null when the directory could not give one. */
         internal suspend fun <T> quietly(block: suspend () -> T): T? = try {

@@ -35,11 +35,18 @@ object RadioLabels {
      * directory's English [name]; the name, capitalised, when neither is a language known.
      */
     fun language(name: String, code: String?, locale: Locale): String {
-        val known = code?.takeIf { it.length in 2..3 } ?: codesByEnglishName[name.trim().lowercase(Locale.ROOT)]
+        val known = languageCode(name, code)
         val named = known?.let { Locale.forLanguageTag(it).getDisplayLanguage(locale) }.orEmpty()
         val shown = named.takeIf { it.isNotBlank() && !it.equals(known, ignoreCase = true) } ?: name
         return shown.replaceFirstChar { it.uppercase(locale) }
     }
+
+    /**
+     * 1.0.3: a language's ISO 639 code: its own [code] when it has one, else the one of its English [name] ("turkish":
+     * "tr"); null when neither is a language known.
+     */
+    fun languageCode(name: String, code: String?): String? =
+        code?.trim()?.takeIf { it.length in 2..3 }?.lowercase(Locale.ROOT) ?: codesByEnglishName[name.trim().lowercase(Locale.ROOT)]
 
     /**
      * One entry for each country. The directory lists a country under several names ("Turkey",
