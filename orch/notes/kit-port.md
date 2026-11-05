@@ -88,3 +88,172 @@ PR A ready: #74 ee7d6785 (all CI jobs green; screenshots 251 same — Robolectri
   reads the dump before the screenshot; the tone plays ~28-36 s before Back on every runner); "a drag down from the
   sheet's middle" (personal 37.0, d343c65) = 1.0.2's input-swipe stall (release.md "## 1.0.3 walk"). Both passed on the
   split walk. A longer tone.mp3 (60 s) would remove the first race for good.
+
+## 2.3 port — Part 2a (motion base) (story/motion-base, PR #104) - NOTES FOR THE NEXT PARTS
+- theme/Motion.kt: `NagMotion.PIXEL` (0.5f) and `NagMotion.FRACTION` (0.001f); `NagMotion.gesture(visibilityThreshold)`
+  = spring 0.92/600 (was no bounce/400); new `NagMotion.open(visibilityThreshold)` = 0.9/700 (unused so far: Part 2b's
+  detail depth #51 and sheet are its users); `NagMotion.spatial(tier, timed, visibilityThreshold)`; the instance
+  `motion.spatial(threshold)`/`fastSpatial(threshold)` take one too. Rule: px value -> PIXEL, IntOffset/Rect ->
+  `VisibilityThreshold`, Dp -> `Dp.VisibilityThreshold`, 0..1 progress -> FRACTION. Every spring of the app passes one
+  except Interaction.kt pressScale, Slider.kt, Choice.kt's switch thumb (#56) and the nav pill: Part 3's files.
+- screenEnter: the phone's Gesture branch is gone; phone and tablet both grow with the delayed emphasized tween (#46).
+- ExpandablePlayerState.tier (set by ExpandablePlayer from LocalMotionTier) -> expand()/collapse() = spatial(tier,
+  gesture(PIXEL), PIXEL); playerFlingBehavior too; Back's shrink = fade(tier, …), its cancel = spatial(…, FRACTION).
+- DetailMotion.ARRIVED = 0.02f: the phone's detail spring stops a fiftieth from its end (frames are a function of the
+  progress; < 0.05 px left on 1440 px). DetailBackHandler's cancel = spatial(tier, motion.spatial(), FRACTION). Part 2b
+  replaces DetailMotion.frame (#51): keep a threshold where < 0.5 px is left.
+- Equalizer is in NagmedarApp's UnderBars; EqualizerScreen pads `LocalShellBottomPadding` at its Column's end.
+- theme/Theme.kt: `LocalNagColors` is `compositionLocalOf` (dynamic); scheme/selection from `target`; typography
+  remembered. Material components now take an accent at once; NagTheme.colors readers still fade.
+- Tests: motion/MotionStripsTest (8 strips -> build/outputs/screenshots/motion/, CI puts them in ci/shots-pr-<n>/motion/;
+  each frame label "•" while the recomposer has pending work, last label "durdu: N ms"); motion/SpringSettleTest;
+  perf/AccentRecompositionTest; theme/MotionTierTest. Frame-by-frame tests: mainClock.autoAdvance=false, then
+  advanceTimeByFrame + waitForIdle per frame; `Recomposer.runningRecomposers.value.any { it.hasPendingWork }` = something
+  still animates. Every Compose test needs @GraphicsMode(NATIVE) (ComposeSandboxTest).
+- Strips before -> after ("durdu"): page push/pop 752 -> 400 ms, player expand 736 -> 400, collapse/Back 752 -> 416,
+  sheet open/close 384/400 -> 400/352, tab 368 -> 368 (growth now visible with the fade). Copies:
+  $SCRATCH/agents/motion-base/{before2,after}/.
+- Seen in the strips, NOT fixed here (Part 2b): on the expand's first frame the sheet's copy of the mini player shows
+  "0:00 / −4:18" (a fresh SmoothProgress/PlayerBar copy starts at 0 until its LaunchedEffect reports).
+- 270 screenshot references identical (master's own 270 at 2a859324). CI of ff7ad1d0 all green.
+- Walks of ff7ad1d0: debug (run 42081165624) and personal (42081170464), API 35 and 37.0, tablet and phone: all 8 jobs
+  passed, 0 app crash, every check ok, Auto ok (system ANRs only recorded). Paired phone-en API 35 debug, one dispatch
+  each with the same driver: master app 2a85932 (42081778052) list 57 ms/62.5 % janky, drag up 81/88.9, down 65/84.6;
+  branch app (42081782304) 57/68.8, 32/90.3, 73/95.0: within swiftshader's noise (frames are not the emulator's
+  strength; the strips' timing is the measure of this part).
+
+## 2.3 port — Part 3 (components) (story/components, PR #103) - NOTES FOR THE NEXT PARTS
+- Menus (components/Menus.kt): `MenuPopup` holds entries AND offset while fading (`MenuEntriesHolder`); a press outside
+  is swallowed and a right click is replayed into the anchor's window (`OutsidePressHandler` on the pop-up's root view);
+  Esc without a focused item via `EscapeListener` (unhandled-key listener, acts on key UP like the menu's own Esc; uses
+  `onEscape ?: onDismiss`, so the menu bar's Esc still returns to its title). `ClampedOffsetPositionProvider` is internal
+  with `origin` (TransformOrigin read in the layer) and the drop-down rule (offset.y >= anchor height → above the
+  button). Scale is a graphicsLayer driven by `transition.animateFloat` (0.92 in, 0.96 out); origin = provider.origin
+  on MotionTier.Gesture, top-start (top-end RTL) wider up. `MenuState.generation`; `ContextMenuArea` wraps its MenuPopup
+  in `key(menu.generation)` (not the MenuSheet branch).
+- Interaction.kt: `stateBackground` (same signature, now a `Color`) goes through `animateInteractionColor(target,
+  selected, spec, instant = pointer, label)`: pointer hover/press snap, a change of `selected` eases, to/from clear only
+  alpha (InteractionFade). `animateStateColor` always eases (instant = false) as before. NagButton, NagPlayButton and
+  the navigation pill (NavIndicator) use `animateInteractionColor`. `pressScale`: phone (Gesture, not reduced) presses
+  to `phonePressScale(scale)` (¾ depth) and releases on spring(0.75, 1200, 0.001); wider up unchanged.
+- theme/Haptics.kt: `NagHaptics` (toggle/tick/threshold/confirm/reject; silent unless InputMode.Touch),
+  `rememberNagHaptics()`. Used by NagSwitch, NagCheckbox, FilterChip (toggle) and SegmentedChoice (tick on a new
+  option). NOT yet: the sheet's close threshold (Sheets.kt SheetDrag: arm when offset crosses height/3, call
+  haptics.threshold() once per crossing, as the kit's SheetPull.onThreshold) — do it with #31/#63 after Part 2b.
+  ExpandablePlayer's own threshold haptic (View.performHapticFeedback) is untouched.
+- TextFields.kt: `NagTextField(String…)` gains clearable, error, supportingText (live region + semantics error),
+  keyboardType, imeAction (Next moves focus), autoCorrect, filled, textStyle, contentPadding, contentAlignment,
+  showLabel, interactionSource; a `NagTextField(TextFieldValue…)` overload adds fillWidth. String `nag_field_clear`
+  ("Metni temizle"/"Clear the text"). network/ServerDialog.kt `FormField` and sleep/AlarmSettings.kt `TimePart` use it
+  (looks identical to 1.0.2: verified network-add-dex-dark "same").
+- States.kt: `Modifier.swipeToDismiss(key, onDismiss)` (touch only; `SwipeDismissRules`: CarryOut on Gesture, Dismiss
+  wider up/reduced, Back short of NOTICE_DISMISS 0.3 / NOTICE_FLING 1200 px/s) and `recommendedTimeout(millis,
+  controls)` (LocalAccessibilityManager); UndoBar and NoticeBar (not progress notices) use both. Stacking unchanged.
+  Beware: ExpandablePlayer.kt has file-private SWIPE_FLING/SWIPE_THRESHOLD; package-level names clash at compile time.
+- Slider.kt: `NagSlider(label, valueText)`; volume (PlayerBars VolumeControl, localized percent), equaliser's
+  LabelledSlider, pitch, balance, alarm loudness pass them. GainSlider already had both.
+- Choice.kt: SwatchChoice is a FlowRow; NagSwitch thumb `motion.fastSpatial(PIXEL as Dp)`. After Part 2a merged, every
+  spring in Part 3's files has its unit's threshold: pressScale + PressRelease and the slider's thumb FRACTION, the
+  slider's track Dp.VisibilityThreshold, the nav pill FRACTION, swiped notices `NagMotion.gesture(PIXEL)`.
+  NavigationChrome: KeyCap border `colors.border`, SearchField `borderStrong` outline unless focused (13 light
+  references updated in "Screenshots: …" ac4e1391).
+- Selection.kt: `ClickModifiers` records the press's pointer (`takeFinger()`; a key forgets it via
+  TrackClickModifiers' onPreviewKeyEvent); `ListClick.of(selecting, finger, touchLayout)` (Toggle/Select/Open);
+  `ClearSelectionOnBack(selection, touchLayout)` + `SelectionRules.backClears(count, selecting, touch)`. MusicScreen
+  TrackPane and PlaylistsScreen use them (DenseTable unchanged: the rule lives in the screens' onRowClick).
+- Keyboard behind layers: components/ModalLayer.kt `Modifier.coveredByLayer(covered)` = CoveredNode (a
+  FocusPropertiesModifierNode: `onEnter = cancelFocusChange()` while covered, invalidateFocusProperties on change;
+  clears the focus that was inside when it becomes covered; registers with `ScreenCommands.cover/uncover`) + focusGroup.
+  NagmedarShell's `underPlayer()` and the bottom bar use it (2 lines). `blockInputBelow()` also covers the screen's
+  commands while composed (QueuePage, WindowPlayer, lyrics, visualiser, lyrics editor). `ScreenCommands.selectAll/
+  escape/up/refresh/toggleInspector` return false while `covered`.
+- Tests: components/ComponentRulesTest (pure), components/ComponentsBehaviourTest (frame by frame: colours, press,
+  haptics, undo-bar carry-out, slider/field semantics), components/CoveredFocusTest, input/ContextMenuDismissTest
+  (window-level injection via ShadowUiAutomation, as the kit's).
+- Screenshot references on master were already stale vs master's own run (TV Lab entry, a disabled button's border):
+  compare a PR's PNGs with origin/ci/screenshots (master's run), not the committed references.
+
+## 2.3 port — Part 4 (tablet and DeX) (story/tablet-dex, PR #107) - NOTES FOR THE NEXT STORY
+- #20 input/InputModeTracker.kt: `PointerDevices(ids, isPrecise)` (internal, pure): added/removed/changed → InputMode? (null = no
+  change); only switched-on devices count (`InputDevice.isEnabled`), the cover's layout/key-map changes and keyboards say nothing.
+  The listener now handles onInputDeviceChanged. Test: input/PointerDevicesTest.
+- #16 input/DragSource.kt: `fileDragSource` keeps the URI design (FileProvider, NAGMEDAR_DRAG, window drop targets) but starts via
+  internal `AwaitPointerEventScope.awaitHeldDrag()`: Mouse (touchpad = Mouse in Compose) / Stylus / Eraser, primary button,
+  rest within touch slop for longPressTimeoutMillis, then move past slop (that move consumed: the row's click cancels). Fingers
+  never (long press = menu). Shadow = `DragCardShadow(DragCard)`: Compose TextMeasurer + CanvasDrawScope onto the View shadow
+  canvas; label (bodyStrong, ≤ 240 dp, ellipsis) on surfaceRaised with border + soft shadow, count badge (≥ 2 files, "99+")
+  in accent on the end corner (RTL aware); pointer under the card's middle, 14 dp below it. Test: input/DragStartTest (timing
+  through performMouseInput + mainClock, card geometry/accent pixels, pictures drag-card-{one,many}-{dark,light}).
+  NOT done: NavDrop (drop tracks on "Çalma listeleri"): the window drop targets (input/Drops.kt `dropTarget(key, accepts,
+  shape) { files -> }`) can take it: a sidebar entry target for own drags (`NAGMEDAR_DRAG`) whose onDrop maps the URIs back
+  to tracks and opens the add-to-playlist window. Optional Ctrl+Enter in the palette (#14) not done either.
+- #17 shell/CaptionBar.kt: `CaptionBar.showsAppChip(direction)` (system room at the bar's start: left LTR, right RTL) and
+  `@Composable CaptionBar?.showsAppChip()`; MenuBarChrome hides BrandMark + "Nağmedar" then. rememberCaptionBar() already
+  measured the chip as `left` (bounding rects at the start), so no platform change. Test: CaptionBarTest (+ caption-dex-chip-light).
+- #67 NavigationChrome.kt sidebar footer: `badge = badges[Destination.Settings]` (nothing provides one today; NagmedarApp's
+  counts only has Music). Test: shell/SidebarBadgeTest.
+- Inspector ReplayGain: AudioTechEntry + track_gain_db/track_peak/album_gain_db/album_peak (REAL, null) — DATABASE 24
+  (MIGRATION_23_24 ALTER TABLE ×4; schema 24.json committed; NagmedarDatabaseMigrationTest
+  aTwentyThreeKeepsItsProbesAndGainsTheReplayGainColumns). TrackTechIndex.PROBE_VERSION 2 (REPLAY_GAIN_SINCE 2): every file
+  re-probed once in the background; `toTech()` accepts rows of 1..PROBE_VERSION (table stays filled, TrackTech unchanged so the
+  music list is not rebuilt); gains live in their own `TrackTechIndex.gains` StateFlow (`AudioTechEntry.gains()`), and
+  `readGains(context, fileUri)` probes the inspected file at once (IO). music/MusicLibrary.kt `ReplayGainTags`;
+  MusicInspector `TrackTags(..., replayGain)`, `TrackInspector(replayGain =)`, `replayGainLines(tags, locale, none)` ("−6,6 dB",
+  "0,988 · −0,1 dBFS", "—" = nag_inspector_none, translatable=false). Test: music/ReplayGainTagsTest (+ inspector-replaygain-*).
+  MusicSamples.gains: Itrî tagged, Gece Yolcusu read without tags.
+- Gotchas met: every Compose test needs @GraphicsMode(NATIVE) (ComposeSandboxTest); `Int * Dp` does not compile (write
+  `14.dp * 2`); screenshot_report's "same" allows < 0.1 % changed pixels (> 24 levels): a new text row at the bottom of
+  music-dex-* stays "same", so changes there need their own screenshot.
+
+## 2.3 port — Part 2b-1 (shell chrome) (story/shell-chrome, PR #105) - NOTES FOR THE NEXT STORY
+- Root: `shell/SystemBand.kt` `WindowRoot(shell, belowCaption)` pads `safeDrawing` (minus the caption bar when the app draws
+  in it); with `shell` it leaves the bottom navigation bar (`navigationBars.bottom - ime`) to the shell and provides
+  `LocalWindowRootInsets` (`padding`, `navigationBottom`). Decided in composition (no first-launch gap). The first run
+  (`prefs.firstRunDone == false`) is padded as before. NagmedarApp uses it; tests use it (SystemBandTest).
+- Shell: `NagmedarShell` reads `systemBottom` from `LocalWindowRootInsets` and hands it to `ShellLayout(systemBottom, systemBand)`,
+  `ShellChromeMetrics.systemBottomPx` (in `bottomPadPx(bars)` on a phone only, full pages too) and
+  `ShellOverlayHost.systemBottomPx`. `SystemBand(navKind, hidden, onGlass)`: phone = `colors.chrome` + a 1 dp `border` rule
+  as far as the bars slid away; Rail/Sidebar = `colors.chrome`. No band while the keyboard is up (navigationBottom minus ime = 0).
+- ShellLayout: slots placed in reading order with zIndex for drawing (content 0, glass 0.5, chrome 1, band 2, playerLayer 3,
+  screenOverlay 4, overlay 5) + `readingOrder()` traversal groups (top 0, content 1, player 2, phone nav 3 / rail 0.5, then
+  overlays). The bars stop above the band; `slideDown` cuts them where the band begins. The screen overlay between the bars
+  consumes `BottomInsets` (the bars + band below it), so a page in it that calls `navigationBarsPadding()` pads only when it
+  reaches the window's bottom (WindowPage). The playerLayer/overlay reach the window's bottom (behind the buttons).
+- What keeps its controls above the buttons: GlassBottomSheet's SheetSurface (`bottomInsetPadding(host.systemBottomPx)`, new
+  public helper in ShellPadding.kt), the phone player (PhonePlayer's own `navigationBarsPadding`, backdrop insets from
+  `LocalWindowRootInsets.padding`), QueuePage (`background + navigationBarsPadding` on the panel), lyrics/visualiser/editor
+  (their own `navigationBarsPadding`, full window), notices column (`navigationBarsPadding`), CastPicker sheet (unchanged).
+- theme/SystemBars.kt: transparent nav bar scrims, `isNavigationBarContrastEnforced = false`, `isStatusBarContrastEnforced = false`.
+- BottomNavBar: `height(IntrinsicSize.Min)` + items `heightIn(min = bottomBarHeight)`; `onGlass` drops its surface.
+- Glass decision (#62), OFF by default: `shell/ChromeGlass.kt` `ChromeGlass {Solid, Bottom, Kit}`, `DebugChrome.glass` set only by a
+  debuggable build's intent extra `app.nagmedar.debug.CHROME_GLASS` (solid|bottom|kit or a|b|c; NagmedarActivity onCreate and
+  onNewIntent). NagmedarShell(chromeGlass): Bottom/Kit draw `ShellLayout(bottomGlass)` (one `NagGlass.chrome` surface from the
+  mini player's top to the window bottom, placed with `offset {}` by the bars' offset), `LocalOnBottomGlass` makes
+  `floatingPlayerCard()` and BottomNavBar transparent; Kit also gives `PageTopBar(glass, scrolled)` (alpha-only fade to glass +
+  rule once `ShellScrollState.scrolled`). The content is a Haze source while chromeMode != Solid. Haze 2.0.1 quirk: switching
+  the mode at run time over a page that does not redraw shows the bottom glass unblurred until the page draws again.
+- Walk: `three_button_navigation()` (cmd overlay enable-exclusive …navbar.threebutton) at the start of phone-en and glass;
+  `band_check(nodes, what)` (pixel between the first two tabs == pixel behind the buttons). On-demand pass `glass`
+  (debug build): album folders with cover.jpg + an M3U each (`glass_media`), A/B/C × dark/light × Music/Playlists/Search, top
+  and scrolled; `glass/README.md` + PNGs on ci/emulator-glass. Dispatch: `-f inputs[passes]=glass`.
+- Tests: shell/SystemBandTest (band colour, padding incl. buttons, unpadded screens, keyboard, tablet chrome, first run,
+  first launch, theme buttons, reading order, 4 screenshot refs), shell/ChromeGlassTest. References: compact-{dark,light,
+  large-text}-three-button-navigation, medium-dark-three-button-navigation; player-bar-phone-narrow-large-light changed
+  (bar grows with 200 % text).
+- Robolectric dispatches no navigation-bar insets by default: the existing 269 references did not move; only tests that
+  dispatch insets (SystemBandTest) show the band.
+- Part 3 final: PR #103, HEAD f0e90c66 (master ff7ad1d0 merged); CI green; walks 42095640470 (debug) and 42095653654
+  (personal), API 35 + 37.0, tablet + phone: 8/8 passed. Left for after Part 2b: the sheet's close-threshold haptic,
+  #31 (switch rows in sheets), #63 (focus return), and the kit's NumberField (the app has no K1 number field: the two
+  ad-hoc fields now use NagTextField).
+- Final state (6 Nov 00:50): PR #105 HEAD 3c7d7524 (master f0e90c66 merged), debug + release green, screenshots 274 same.
+  Walks of 3c7d7524 all green: debug API 35/37.0 and personal API 35/37.0, phone (three-button navigation on, band check
+  ok) and tablet. Glass screenshots (run 42105231110 of d0f3e764, ci/emulator-glass): 36 PNGs + README copied to
+  $SCRATCH/agents/shell-chrome/glass/. The user decides A/B/C; nothing to change in the product until he does. If he picks
+  B or C: make `ChromeGlass` the shell's default (NagmedarApp `chromeGlass =`), keep it Solid under battery saver / reduced
+  motion (chromeMode already follows rememberSystemGlassMode), and drop DebugChrome's extra or keep it debug-only.
+- Device checks (Part 2b-1): S24 three-button: bar colour behind Back/Home/Recents, no strip (light, dark); bars hidden on
+  scroll leave the band with a hairline; Settings' last row above the buttons; keyboard up: no band, mini player on the
+  keyboard; full player, Sıradaki, lyrics, visualiser, ⋯ sheets reach behind the buttons, controls above them; first launch
+  without a gap; buttons dark on light theme; Tab S11: chrome colour behind the taskbar/buttons; 200 % text: bar grows,
+  labels end in "…"; TalkBack: top bar → content → mini player → bottom bar.

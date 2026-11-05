@@ -453,3 +453,31 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   background audio, widget bitmap; proven on a 37 commit then reverted to 36). Remaining after these: 2b-2b (player single
   surface #52 #48 #35, sheet carry-out #49 #50, tab predictive Back #59, WindowPlayer drag + lyrics, "0:00"), 3's #31/#63,
   release 1.0.3. Estimate told to the user: ~%55, APK 7–8 Nov.
+- 21:10 PR #104 motion-base landed: master ff7ad1d0. Springs stop within half a pixel; gesture 0.92/600; open() 0.9/700 (no
+  users yet); reduced motion covers the player; phone fade-through growth with the fade; Equalizer under bars; accent change
+  recomposes only colour readers. Strips (window still): page push/pop 752 → 400 ms, player open 736 → 400, close 752 → 416,
+  sheet close 400 → 352, tab 368. 270 screenshots identical; 8 walk jobs green. For 2b-2b: the sheet's mini copy shows
+  "0:00 / −4:18" on the player's first opening frame. Told components (use PIXEL in Interaction/Slider/Choice), detail-lists
+  (open(), MotionStripsTest), shell-chrome (merge; glass shots first).
+- 23:56 PR #103 components landed: master f0e90c66 (menus keep place/grow from point/open above near the bottom, instant
+  pointer colours, phone press, NagHaptics, fields, swipe-away notices, selection by pointer type + Back clears, slider
+  names, keycap/search outline, Ctrl+A and Tab blocked behind full-window layers; 13 light DeX/tablet refs changed at the
+  outline only; 8 walk jobs green). Waits for 2b-2b (Sheets.kt): sheet threshold haptic, #31 switch rows, #63 focus return.
+
+## 6 Nov 00:05 — "Neden bu kadar uzun sürüyor?"
+- Told the user: every compile/test is a GitHub round (~1 h with 8 walk jobs; a failure costs another), 3 restarts lost
+  ~6 h, scope grew (Auto ×3, library start; kit 2.0's surface + 0.2.x fixes; Compose 1.7→1.12), shared-file order.
+- To shorten the critical path: launched story/player-motion (2b-2b: #52 #48 #35 #57/#66, WindowPlayer pull via
+  rememberSheetDrag, unknown length, "0:00/−4:18") and story/sheets-back (2b-2c: #49 #50 #31 #63, sheet threshold haptic,
+  #59 tab Back) both FROM story/shell-chrome 3c7d7524 (PR #105, green, walks running) instead of waiting for it to land.
+  Now 6 agents: shell-chrome #105, detail-lists #106, tablet-dex #107, android17, player-motion, sheets-back.
+- Glass shots (first run, 32 PNGs) in agents/shell-chrome/glass; second run (B music, search with results) running: show
+  the user a montage when it lands.
+- 00:40 PR #105 shell-chrome landed: master 3c7d7524 (bottom bar behind the 3 buttons, band + rule, tablet chrome colour,
+  reading order, large-text bottom bar, root insets moved into the shell; glass modes A/B/C internal, default A; phone walk
+  job in 3-button navigation; 274 screenshots same + 4 new; 8 walk jobs green). player-motion and sheets-back are based on it.
+  Sent the user glass comparison sheets (scratchpad/glass/cam-secenekleri-{yakin,tam-ekran}.png) and asked A/B/C.
+- 01:05 the user: "B olsun" (glass option B). Brief 0000 updated; story/glass-b launched (ChromeGlass.Bottom default for the
+  product incl. the personal build; top bar/menus/sheets/dialogs opaque; tablets unchanged; fallbacks opaque; references
+  updated; one walk check). player-motion told (#52 starts from the card on the glass; page glass off when up);
+  sheets-back told (sheets opaque above the glass). Doc decision row updated.

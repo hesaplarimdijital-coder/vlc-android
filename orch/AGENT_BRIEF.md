@@ -35,7 +35,8 @@ master yourself.
   into the app's file, keep the app's names and its 1.0.1–1.0.2 behaviour.
 - **The user's standing decisions (1.0.1–1.0.2), kept by every story:** Settings and every page opened from a page are
   full-screen pages with a back arrow; the top bar never changes colour on touch or scroll; bars, menus, sheets and dialogs
-  are opaque (GlassMode Solid) until the user decides otherwise; keycaps/shortcut hints only while a hardware keyboard is
+  are opaque (GlassMode Solid) — EXCEPT, by the user's decision of 6 Nov 01:05 ("B olsun"), the phone's bottom chrome
+  (mini player card, bottom bar, band behind the system buttons) on one glass (ChromeGlass.Bottom, story/glass-b); keycaps/shortcut hints only while a hardware keyboard is
   connected; the phone's Sıradaki is a full-window page; sheets close when dragged down anywhere; on the tablet "open
   player" opens the big artwork player; the phone's mini player is the tablet's bar (artwork-tinted seek bar).
 - **Decided 5 Nov 08:33:** minSdk is 34 (the platform story sets it; new code needs no checks below API 34). The user is a
