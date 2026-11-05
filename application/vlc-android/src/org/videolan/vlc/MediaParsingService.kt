@@ -44,6 +44,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
+import app.nagmedar.library.LibraryRecheck
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -90,6 +91,8 @@ import org.videolan.resources.util.stopForegroundCompat
 import org.videolan.tools.KEY_MEDIALIBRARY_AUTO_RESCAN
 import org.videolan.tools.KEY_MEDIALIBRARY_SCAN
 import org.videolan.tools.ML_SCAN_OFF
+import org.videolan.tools.NAGMEDAR_LIBRARY_CHECKED_AT
+import org.videolan.tools.NAGMEDAR_LIBRARY_STAMP
 import org.videolan.tools.Settings
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.localBroadcastManager
@@ -98,6 +101,7 @@ import org.videolan.vlc.gui.FeedbackActivity
 import org.videolan.vlc.gui.helpers.NotificationHelper
 import org.videolan.vlc.repository.DirectoryRepository
 import org.videolan.vlc.util.FileUtils
+import org.videolan.vlc.util.MediaIndexStamp
 import org.videolan.vlc.util.TextUtils
 import org.videolan.vlc.util.Util
 import org.videolan.vlc.util.scanAllowed
@@ -115,6 +119,19 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     private var currentDiscovery: String? = null
     @Volatile private var lastNotificationTime = 0L
     @Volatile private var scanActivated = false
+
+    /**
+     * Nağmedar 1.0.3: the start's look over the folders runs without showing itself: no scan strip on
+     * the library's screens and no progress in the notification. Over when that look ends, or as soon
+     * as something the user asked for (a folder added, a rescan) starts work of its own.
+     */
+    @Volatile private var quiet = false
+
+    /** 1.0.3: the media index's stamp when the full look asked for started; kept as the last look's once it ends. */
+    @Volatile private var fullLook: String? = null
+
+    /** 1.0.3: the medialibrary began that look (its reload or discovery started): an idle moment before it is not its end. */
+    @Volatile private var looking = false
 
     private val settings by lazy { Settings.getInstance(this) }
 
@@ -185,6 +202,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 if (!running) {
                     delay(1000L)
                     if (!medialibrary.isWorking) {
+                        // Nağmedar 1.0.3: the look and the parsing of what it found are over
+                        lookOver()
                         exitCommand()
                         // Nağmedar: the library's scan strip ends with the work, whatever still holds the service
                         if (::notificationActor.isInitialized) notificationActor.trySend(Idle)
@@ -201,7 +220,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         actions = lifecycleScope.actor(context = Dispatchers.IO, capacity = Channel.UNLIMITED) { processAction() }
         notificationActor = lifecycleScope.actor(capacity = Channel.UNLIMITED) {
             for (update in channel) when (update) {
-                is Show -> showNotification(update.done, update.scheduled)
+                // Nağmedar 1.0.3: the start's quiet look shows no progress, here or on the library's screens
+                is Show -> if (!quiet) showNotification(update.done, update.scheduled)
                 is Error -> discoveryError.value = DiscoveryError(update.entryPoint)
                 Hide -> hideNotification()
                 Idle -> showProgress(-1F, "")
@@ -233,10 +253,23 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 val removeDevices = intent.getBooleanExtra(EXTRA_REMOVE_DEVICE, false)
                 setupMedialibrary(upgrade, parse, removeDevices)
             }
-            ACTION_RELOAD -> actions.trySend(Reload(intent.getStringExtra(EXTRA_PATH)))
-            ACTION_FORCE_RELOAD -> actions.trySend(ForceReload)
-            ACTION_DISCOVER -> intent.getStringExtra(EXTRA_PATH)?.let { discover(it) }
-            ACTION_DISCOVER_DEVICE -> intent.getStringExtra(EXTRA_PATH)?.let { discoverStorage(it) }
+            // Nağmedar 1.0.3: what the user asks for shows its progress, even over the start's quiet look
+            ACTION_RELOAD -> {
+                quiet = false
+                actions.trySend(Reload(intent.getStringExtra(EXTRA_PATH)))
+            }
+            ACTION_FORCE_RELOAD -> {
+                quiet = false
+                actions.trySend(ForceReload)
+            }
+            ACTION_DISCOVER -> intent.getStringExtra(EXTRA_PATH)?.let {
+                quiet = false
+                discover(it)
+            }
+            ACTION_DISCOVER_DEVICE -> intent.getStringExtra(EXTRA_PATH)?.let {
+                quiet = false
+                discoverStorage(it)
+            }
             ACTION_CHECK_STORAGES -> if (settings.getInt(KEY_MEDIALIBRARY_SCAN, -1) != ML_SCAN_OFF) actions.trySend(UpdateStorages) else exitCommand()
             else -> {
                 exitCommand()
@@ -249,7 +282,9 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
 
     @TargetApi(Build.VERSION_CODES.O)
     private fun forceForeground() {
-        val notification = NotificationHelper.createScanNotification(applicationContext, getString(R.string.loading_medialibrary), scanPaused, -1, -1)
+        // Nağmedar 1.0.3: without its pause button the system holds this notification back for its first seconds, so the
+        // start's quick look at the library never shows one; a scan with progress shows it with the button
+        val notification = NotificationHelper.createScanNotification(applicationContext, getString(R.string.loading_medialibrary), scanPaused, -1, -1, pauseButton = false)
         try {
             startForegroundCompat(NotificationIds.MEDIA_PARSING, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } catch (e: Exception) {
@@ -358,6 +393,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
             shouldInit -> {
                 for (folder in Medialibrary.getBanList())
                     medialibrary.banFolder(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY + folder)
+                // 1.0.3: the first scan's end is the first full look (a later start trusts it)
+                fullLook = MediaIndexStamp.read(applicationContext)
                 if (preselectedStorages.isEmpty()) {
                     medialibrary.discover(AndroidDevices.EXTERNAL_PUBLIC_DIRECTORY)
                 }
@@ -372,9 +409,51 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 //refresh has already be done in [MediaParsingService.initMedialib]
                 exitCommand()
             }
-            settings.getBoolean(KEY_MEDIALIBRARY_AUTO_RESCAN, true) -> reload(null)
+            settings.getBoolean(KEY_MEDIALIBRARY_AUTO_RESCAN, true) -> recheckOnStart()
             else -> exitCommand()
         }
+    }
+
+    /**
+     * Nağmedar 1.0.3: an ordinary start does not walk every folder again. The system's media index
+     * is asked (one query per volume) and compared with what it was after the last full look; the
+     * folders are looked over only when it changed or that look is a day old ([LibraryRecheck]),
+     * and then quietly: the library's screens keep their list, without a scan strip, and what the
+     * look finds (a new album, a deleted file) reaches them as the medialibrary reports it.
+     */
+    private fun recheckOnStart() {
+        val stamp = MediaIndexStamp.read(applicationContext)
+        val last = settings.getString(NAGMEDAR_LIBRARY_STAMP, null)
+        val lastAt = settings.getLong(NAGMEDAR_LIBRARY_CHECKED_AT, 0L)
+        if (!LibraryRecheck.needed(stamp, last, lastAt, System.currentTimeMillis())) {
+            exitCommand()
+            return
+        }
+        // a look already under way (asked from elsewhere) ends as its own
+        if (reload > 0) return
+        quiet = true
+        fullLook = stamp
+        reload(null)
+    }
+
+    /**
+     * 1.0.3: the medialibrary went over every folder of the full look asked for: the media index as it
+     * was when the look started is what the next start compares with. A change made since moves the
+     * index again, so nothing is missed.
+     */
+    private fun fullLookDone() {
+        val stamp = fullLook ?: return
+        if (!looking) return
+        fullLook = null
+        settings.edit().putString(NAGMEDAR_LIBRARY_STAMP, stamp).putLong(NAGMEDAR_LIBRARY_CHECKED_AT, System.currentTimeMillis()).apply()
+    }
+
+    /** 1.0.3: the medialibrary is idle after the look it began: kept as done, and the next work shows its progress again. */
+    private fun lookOver() {
+        if (!looking) return
+        fullLookDone()
+        looking = false
+        quiet = false
     }
 
     private fun showStorageNotification(device: String) {
@@ -461,6 +540,7 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     override fun onDiscoveryStarted() {
         discoverTriggered = false
         inDiscovery =  true
+        if (fullLook != null) looking = true
     }
 
     override fun onDiscoveryProgress(entryPoint: String) {
@@ -471,6 +551,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
 
     override fun onDiscoveryCompleted() {
         inDiscovery = false
+        // Nağmedar 1.0.3: the first scan went over every folder
+        fullLookDone()
         // Nağmedar: the progress leaves "discovering" at once: parsing (with its counts when there are any), or nothing
         if (!::notificationActor.isInitialized) return
         notificationActor.trySend(when {
@@ -496,11 +578,14 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     override fun onReloadStarted(entryPoint: String) {
         if (BuildConfig.DEBUG) Log.v(TAG, "onReloadStarted: $entryPoint")
         if (entryPoint.isEmpty()) ++reload
+        if (entryPoint.isEmpty() && fullLook != null) looking = true
     }
 
     override fun onReloadCompleted(entryPoint: String) {
         if (BuildConfig.DEBUG) Log.v(TAG, "onReloadCompleted $entryPoint")
         if (entryPoint.isEmpty()) --reload
+        // Nağmedar 1.0.3: every folder was looked over; what it found is parsed next, still without a strip when quiet
+        if (entryPoint.isEmpty() && reload <= 0) fullLookDone()
         if (reload <= 0) exitCommand()
         // Nağmedar: nothing more to do: the library's scan strip goes
         if (!medialibrary.isWorking && ::notificationActor.isInitialized) notificationActor.trySend(Idle)
@@ -586,7 +671,11 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 startScan(false, action.upgrade)
             }
             UpdateStorages -> updateStorages()
-            is Reload -> reload(action.path)
+            is Reload -> {
+                // Nağmedar 1.0.3: a look over every folder ("Kitaplığı yeniden tara") is the one the next start compares with
+                if (action.path.isNullOrEmpty() && reload <= 0) fullLook = MediaIndexStamp.read(this@MediaParsingService)
+                reload(action.path)
+            }
             ForceReload -> medialibrary.forceRescan()
         }
     }
