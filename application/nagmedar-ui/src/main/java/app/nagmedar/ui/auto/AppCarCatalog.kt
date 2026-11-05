@@ -37,12 +37,13 @@ import app.nagmedar.ui.podcast.PodcastCenter
 import app.nagmedar.ui.podcast.PodcastHit
 import app.nagmedar.ui.podcast.SubscribeResult
 import app.nagmedar.ui.podcast.describe
-import app.nagmedar.ui.radio.RadioLabels
+import app.nagmedar.ui.radio.DirectoryCountry
+import app.nagmedar.ui.radio.DirectoryLanguage
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioCenter
+import app.nagmedar.ui.radio.RadioLabels
 import app.nagmedar.ui.radio.RadioSession
 import app.nagmedar.ui.radio.Station
-import app.nagmedar.ui.radio.StationFilters
 import app.nagmedar.ui.radio.StationOrder
 import app.nagmedar.ui.radio.StationQuery
 import app.nagmedar.ui.radio.toStation
@@ -145,17 +146,51 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
         return start(service, what, mediaId)
     }
 
-    /** 1.0.3: "Abone ol", the browse action Auto offers on a show of the directory not followed. */
-    override fun browseActions(context: Context): List<CarAction> =
-        listOf(CarAction(CarActions.SUBSCRIBE, context.getString(R.string.nag_pod_subscribe), AppCarLook(context, data::media).icon(CarIcon.Subscribe)))
+    /**
+     * 1.0.3: the browse actions Auto offers: "Abone ol" on a show of the directory not followed, "Favorilere ekle" on a
+     * station that is no favourite and "Favorilerden çıkar" on one that is (the Radio page's star, empty and filled).
+     */
+    override fun browseActions(context: Context): List<CarAction> {
+        val look = AppCarLook(context, data::media)
+        return listOf(
+            CarAction(CarActions.SUBSCRIBE, context.getString(R.string.nag_pod_subscribe), look.icon(CarIcon.Subscribe)),
+            CarAction(CarActions.FAVOURITE, context.getString(R.string.nag_radio_favourite), look.icon(CarIcon.Star)),
+            CarAction(CarActions.UNFAVOURITE, context.getString(R.string.nag_radio_unfavourite), look.icon(CarIcon.Favourites)),
+        )
+    }
 
     override suspend fun item(context: Context, mediaId: String): CarItem? = withContext(Dispatchers.IO) { tree(context).item(mediaId) }
 
-    /** 1.0.3: "Abone ol" on a show of the directory: subscribed as the Podcasts page subscribes; Auto reads the show again. */
-    override suspend fun act(context: Context, action: String, mediaId: String): CarActionResult? {
-        if (action != CarActions.SUBSCRIBE) return null
-        val show = tree(context).subscription(mediaId) ?: return null
-        return CarActionResult(subscribe(context, show).message, refresh = mediaId)
+    /**
+     * 1.0.3: "Abone ol" on a show of the directory: subscribed as the Podcasts page subscribes; Auto reads the show again.
+     * "Favorilere ekle" and "Favorilerden çıkar" on a station ([favourite]).
+     */
+    override suspend fun act(context: Context, action: String, mediaId: String): CarActionResult? = when (action) {
+        CarActions.SUBSCRIBE -> tree(context).subscription(mediaId)?.let { show -> CarActionResult(subscribe(context, show).message, refresh = mediaId) }
+        CarActions.FAVOURITE -> favourite(context, mediaId, on = true)
+        CarActions.UNFAVOURITE -> favourite(context, mediaId, on = false)
+        else -> null
+    }
+
+    /**
+     * 1.0.3: the station of the entry [mediaId] made a favourite ([on]) or no longer one, as the Radio page's star does:
+     * Auto says so, is told that the favourites changed (a station taken out leaves that list), and reads the entry again
+     * (its star turns). A database that cannot be written is said, not crashed on. Null for an entry that is no station.
+     */
+    private suspend fun favourite(context: Context, mediaId: String, on: Boolean): CarActionResult? {
+        val tree = tree(context)
+        val res = context.resources
+        val station = try {
+            withContext(Dispatchers.IO) { tree.favourite(mediaId, on) } ?: return null
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return CarActionResult(res.getString(R.string.nag_radio_failed))
+        }
+        tellNow(listOf(CarIds.FAVOURITES))
+        val message = res.getString(if (on) R.string.nag_auto_favourite_added else R.string.nag_auto_favourite_removed, station.name)
+        val shown = withContext(Dispatchers.IO) { tree.item(mediaId) }
+        return CarActionResult(message, refresh = mediaId.takeIf { shown != null })
     }
 
     /**
@@ -250,7 +285,7 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
         if (location == null) return null
         played[location]?.let { return it }
         PodcastCenter.playing.value?.let { return CarIds.episode(it.episodeId) }
-        return RadioSession.playing.value?.takeIf { it.url == location }?.station?.takeIf { it.id != 0L }?.let { CarIds.station(it.id) }
+        return RadioSession.playing.value?.takeIf { it.url == location }?.station?.let { CarTree.stationId(it) }
     }
 
     /** The catalog's work stops: the service is going. */
@@ -295,9 +330,11 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
                 // the station plays even when it could not be noted as played
                 null
             }
-            val id = mediaId ?: kept?.takeIf { it.id != 0L }?.let { CarIds.station(it.id) }
+            val id = mediaId ?: kept?.let { CarTree.stationId(it) }
             val url = kept?.streamUrl ?: RadioSession.playing.value?.url
             if (id != null && url != null) played = mapOf(url to id)
+            // 1.0.3: the station is the latest of those listened to
+            tellNow(listOf(CarIds.STATIONS_RECENT))
             true
         }
     }
@@ -313,8 +350,8 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
 /**
  * [CarData] in the app: the Music page's tracks read once and kept until the medialibrary changes (or for
  * [MUSIC_KEEP_MS]), the playlists of the medialibrary (1.0.3: and the smart lists, their tracks chosen once from the
- * music kept), the podcasts in Room, the stations kept and the radio directory,
- * whose categories are kept for [TAGS_KEEP_MS] and their stations for [TAGGED_KEEP_MS]. What the medialibrary answers
+ * music kept), the podcasts in Room, the stations kept and the radio directory, whose categories (1.0.3: countries and
+ * languages) are kept for [TAGS_KEEP_MS] and its pages of stations for [LISTED_KEEP_MS]. What the medialibrary answers
  * is waited for [ML_WAIT_MS] at most ([MusicUnavailable]); the music goes on being read in [scope] and [musicLate] is
  * called once it is, when a wait gave up on it.
  */
@@ -344,7 +381,15 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
 
     @Volatile
     private var tags: Kept<List<DirectoryTag>>? = null
-    private val tagged = ConcurrentHashMap<String, Kept<List<Station>>>()
+
+    /** 1.0.3: the directory's countries and languages, its pages of stations by query, the stations it gave by UUID. */
+    @Volatile
+    private var radioCountries: Kept<List<DirectoryCountry>>? = null
+
+    @Volatile
+    private var languages: Kept<List<DirectoryLanguage>>? = null
+    private val listed = ConcurrentHashMap<StationQuery, Kept<List<Station>>>()
+    private val seen = ConcurrentHashMap<String, Station>()
 
     /** 1.0.3: Keşfet's charts by country, and the feeds of shows not followed by address, each kept a while. */
     private val charts = ConcurrentHashMap<String, Kept<List<ChartShow>>>()
@@ -461,15 +506,22 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
      * 1.0.3: the device's country, as the Podcasts page's search asks iTunes: the mobile network's, else the SIM's, else
      * the region of the language; the United States when none is a storefront Keşfet offers.
      */
-    override fun country(): String {
+    override fun country(): String =
+        deviceCountries().firstNotNullOfOrNull { code -> ApplePodcasts.storefront(code)?.takeIf { it in ApplePodcasts.COUNTRIES } } ?: DEFAULT_COUNTRY
+
+    /** 1.0.3: the device's country for the radio directory: the first of [deviceCountries] that is a country's code. */
+    override fun homeCountry(): String? =
+        deviceCountries().firstNotNullOfOrNull { code -> code?.trim()?.takeIf { it.length == 2 && it.all(Char::isLetter) }?.uppercase(Locale.ROOT) }
+
+    /** The countries the device names, the likeliest first: its mobile network's, its SIM's, its language's region, the default's. */
+    private fun deviceCountries(): List<String?> {
         val phone = runCatching { context.getSystemService(TelephonyManager::class.java) }.getOrNull()
-        val candidates = listOf(
+        return listOf(
             runCatching { phone?.networkCountryIso }.getOrNull(),
             runCatching { phone?.simCountryIso }.getOrNull(),
             context.resources.locale().country,
             Locale.getDefault().country,
         )
-        return candidates.firstNotNullOfOrNull { code -> ApplePodcasts.storefront(code)?.takeIf { it in ApplePodcasts.COUNTRIES } } ?: DEFAULT_COUNTRY
     }
 
     /** 1.0.3: Apple's popular shows of [country], kept for [CHART_KEEP_MS]; through the app's one iTunes client and its pace. */
@@ -524,17 +576,62 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
         return RadioCenter.directory(context).tags().also { tags = Kept(it, System.currentTimeMillis()) }
     }
 
-    override suspend fun tagged(tag: String): List<Station> {
-        tagged[tag]?.takeIf { System.currentTimeMillis() - it.at < TAGGED_KEEP_MS }?.let { return it.value }
-        val query = StationQuery(filters = StationFilters(tag = tag), order = StationOrder.Votes, limit = MAX_TAGGED)
-        return RadioCenter.directory(context).search(query).also {
-            if (tagged.size >= MAX_TAGS_KEPT) tagged.clear()
-            tagged[tag] = Kept(it, System.currentTimeMillis())
-        }
+    /** 1.0.3: the directory's countries, kept for [TAGS_KEEP_MS] as its tags are. */
+    override suspend fun radioCountries(): List<DirectoryCountry> {
+        radioCountries?.takeIf { System.currentTimeMillis() - it.at < TAGS_KEEP_MS }?.let { return it.value }
+        return RadioCenter.directory(context).countries().also { radioCountries = Kept(it, System.currentTimeMillis()) }
+    }
+
+    /** 1.0.3: the directory's most used languages, kept for [TAGS_KEEP_MS] as its tags are. */
+    override suspend fun languages(): List<DirectoryLanguage> {
+        languages?.takeIf { System.currentTimeMillis() - it.at < TAGS_KEEP_MS }?.let { return it.value }
+        return RadioCenter.directory(context).languages().also { languages = Kept(it, System.currentTimeMillis()) }
+    }
+
+    /**
+     * 1.0.3: a page of the directory's stations for [query], kept for [LISTED_KEEP_MS] (a list and the station tapped in
+     * it are the same), each with what the user did with it (the Radio page's marks), noted as seen ([knownStation]).
+     */
+    override suspend fun stations(query: StationQuery): List<Station> {
+        val found = listed[query]?.takeIf { System.currentTimeMillis() - it.at < LISTED_KEEP_MS }?.value
+            ?: RadioCenter.directory(context).search(query).also {
+                if (listed.size >= MAX_LISTED_KEPT) listed.clear()
+                listed[query] = Kept(it, System.currentTimeMillis())
+            }
+        return marked(found)
     }
 
     override suspend fun findStations(query: String): List<Station> =
-        RadioCenter.directory(context).search(StationQuery(text = query, order = StationOrder.Votes, limit = MAX_FOUND_STATIONS))
+        marked(RadioCenter.directory(context).search(StationQuery(text = query, order = StationOrder.Votes, limit = MAX_FOUND_STATIONS)))
+
+    /** 1.0.3: the directory's [stations] noted as seen, with the marks of those kept. */
+    private suspend fun marked(stations: List<Station>): List<Station> {
+        if (seen.size + stations.size > MAX_SEEN) seen.clear()
+        stations.forEach { station -> station.uuid?.let { seen[it] = station } }
+        val marks = marks(stations.mapNotNull { it.uuid })
+        return stations.map { it.withMarks(it.uuid?.let(marks::get)) }
+    }
+
+    /**
+     * 1.0.3: the directory's station [uuid] as a list gave it lately, with its marks; its row alone when no list did (the
+     * app kept it); null when neither knows it. What playing it or making it a favourite keeps of it.
+     */
+    override suspend fun knownStation(uuid: String): Station? {
+        val kept = marks(listOf(uuid))[uuid]
+        return seen[uuid]?.withMarks(kept) ?: kept
+    }
+
+    /** 1.0.3: the stations kept among [uuids], by UUID; none when the database cannot be read (the marks are an extra). */
+    private suspend fun marks(uuids: List<String>): Map<String, Station> = try {
+        RadioCenter.library(context).marks(uuids)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyMap()
+    }
+
+    /** 1.0.3: through the Radio page's library: kept with what the directory said of it, its marks kept. */
+    override suspend fun favourite(station: Station, on: Boolean): Station = RadioCenter.library(context).favourite(station, on)
 
     private companion object {
         const val MUSIC_KEEP_MS = 10 * 60_000L
@@ -542,10 +639,12 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
         /** How long a list or a search waits for the medialibrary. */
         const val ML_WAIT_MS = 5_000L
         const val TAGS_KEEP_MS = 6 * 60 * 60_000L
-        const val TAGGED_KEEP_MS = 30 * 60_000L
-        const val MAX_TAGS_KEPT = 30
-        const val MAX_TAGGED = 50
         const val MAX_FOUND_STATIONS = 20
+
+        /** 1.0.3: how long a page of the directory's stations is kept, how many pages, how many stations seen. */
+        const val LISTED_KEEP_MS = 30 * 60_000L
+        const val MAX_LISTED_KEPT = 40
+        const val MAX_SEEN = 5_000
         const val MAX_NEW = 100
 
         /** 1.0.3: how long a chart and a feed not followed are kept, and how many of each. */
@@ -590,9 +689,17 @@ class AppCarLook(private val context: Context, private val media: (Track) -> Med
             CarText.FoundNewShows -> R.string.nag_auto_found_new_shows
             CarText.PodcastsOffline -> R.string.nag_auto_podcasts_offline
             CarText.ShowUnavailable -> R.string.nag_auto_show_unavailable
-            CarText.FavouriteStations -> R.string.nag_auto_favourite_stations
-            CarText.RecentStations -> R.string.nag_radio_tab_recent
+            CarText.FavouriteStations -> R.string.nag_radio_tab_favourites
+            CarText.RecentStations -> R.string.nag_auto_recent_stations
             CarText.Categories -> R.string.nag_auto_categories
+            CarText.Languages -> R.string.nag_auto_languages
+            CarText.MostListened -> R.string.nag_auto_most_listened
+            CarText.MostLiked -> R.string.nag_auto_most_liked
+            CarText.MoreStations -> R.string.nag_auto_more_stations
+            CarText.NoFavourites -> R.string.nag_radio_fav_empty_title
+            CarText.NoRecentStations -> R.string.nag_radio_recent_empty_title
+            CarText.NoStations -> R.string.nag_radio_none_title
+            CarText.RadioBusy -> R.string.nag_auto_radio_busy
             CarText.UnknownAlbum -> R.string.nag_music_unknown_album
             CarText.UnknownArtist -> R.string.nag_unknown_artist
             CarText.UnknownYear -> R.string.nag_music_unknown_year
@@ -650,13 +757,20 @@ class AppCarLook(private val context: Context, private val media: (Track) -> Med
             CarIcon.Popular -> org.videolan.resources.R.drawable.nagmedar_auto_popular
             CarIcon.Countries -> org.videolan.resources.R.drawable.nagmedar_auto_countries
             CarIcon.Subscribe -> org.videolan.resources.R.drawable.nagmedar_auto_subscribe
+            CarIcon.Languages -> org.videolan.resources.R.drawable.nagmedar_auto_languages
+            CarIcon.Listened -> org.videolan.resources.R.drawable.nagmedar_auto_listened
+            CarIcon.Liked -> org.videolan.resources.R.drawable.nagmedar_auto_liked
+            CarIcon.More -> org.videolan.resources.R.drawable.nagmedar_auto_more
+            CarIcon.Star -> org.videolan.resources.R.drawable.nagmedar_auto_star
             CarIcon.NoCover -> ArtworkProvider.noCover(MediaWrapper.TYPE_AUDIO)
         },
     ).toString()
 
     override val locale: Locale get() = res.locale()
 
-    override fun country(code: String): String = RadioLabels.country(code.uppercase(Locale.ROOT), null, locale)
+    override fun country(code: String, name: String?): String = RadioLabels.country(code.uppercase(Locale.ROOT), name, locale)
+
+    override fun language(name: String, code: String?): String = RadioLabels.language(name, code, locale)
 
     /** 1.0.3: Apple's top-level categories in the app's language; one Apple adds later keeps its English name. */
     override fun category(genre: ChartGenre): String = when (genre.id) {
