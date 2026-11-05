@@ -155,6 +155,8 @@ class Smoke:
         self.system_events = []
         self.dialogs_seen = []  # what dump() dealt with: "permission", "notice", "app" or "system", in order
         self.step_mark = 0  # len(dialogs_seen) when the last step began
+        self.system_waited = set()  # the system processes whose "not responding" was waited for once
+        self.last_input = None  # (function, argument, len(dialogs_seen), the step before it): remember_input()
         self.last_app_sig = None  # the app's part of the screen at the end of the last step
         self.library_ready = False  # the walk's media pushed and granted, and scanned (the first run with them)
         self.sheet_trials = []  # the sheet-drag pass's trials
@@ -210,7 +212,7 @@ class Smoke:
             self.sh("settings put global %s 0" % k)
         self.sh("settings put global stay_on_while_plugged_in 7")
         self.sh("svc power stayon true")
-        self.sh("input keyevent 82")
+        self.unlock()
         self.sh("settings put system accelerometer_rotation 0")
         self.sh("settings put system user_rotation 0")
         info = {k: self.sh("getprop " + p) for k, p in (("model", "ro.product.model"), ("sdk", "ro.build.version.sdk"),
@@ -268,9 +270,15 @@ class Smoke:
             self.warnings.append("[%s] the app was not in front after it was started (attempt %d): am start said %s; resumed: %s"
                                  % (self.cur_pass, attempt + 1, " ".join(out.split())[:300], " / ".join(top)[:300]))
             self.wait_boot(timeout=180)
-            self.sh("input keyevent 82")
+            self.unlock()
             # 1.0.3: a system dialog in front (the launcher's ANR) is dealt with by reading the screen
             self.dump()
+
+    def unlock(self):
+        """The screen on and the keyguard away. 1.0.3: without the menu key the walk used to send for it, which an
+        emulator's focused app without a window (the SDK setup app) never handled: its ANR came back all walk long."""
+        self.sh("input keyevent KEYCODE_WAKEUP")
+        self.sh("wm dismiss-keyguard")
 
     def set_display(self, size=None, density=None):
         self.sh("wm size %s" % (size or "reset"))
@@ -287,10 +295,18 @@ class Smoke:
         if rc != 0 or "rror" in out or "nknown" in out:
             self.warnings.append("input keycombination %s failed: %s" % (codes, out.strip()[:200]))
             return False
+        self.remember_input(lambda c: self.combo(*c), codes)
         return True
 
-    def key(self, code):
+    def key(self, code, record=True):
         self.sh("input keyevent %s" % code)
+        if record:
+            self.remember_input(self.key, code)
+
+    def remember_input(self, fn, arg):
+        """1.0.3: the walk's last tap or key, made for the next step: step() sends it once more when a system dialog came
+        after it and the app's screen stayed as it was (the dialog took it)."""
+        self.last_input = (fn, arg, len(self.dialogs_seen), self.n)
 
     def set_locale(self, tag):
         """tr-TR for the app (Android 13+ per-app language); the system's as a rooted fallback."""
@@ -307,7 +323,7 @@ class Smoke:
         if not self.wait_boot(first_sleep=15):
             self.errors.append("the emulator did not come back after the system locale change")
             return False
-        self.sh("input keyevent 82")
+        self.unlock()
         self.launch()
         return self.ui_in_language("tr" if tag.startswith("tr") else "en")
 
@@ -396,9 +412,11 @@ class Smoke:
                 best, best_score = n, score
         return best
 
-    def tap(self, node):
+    def tap(self, node, record=True):
         x, y = node.center
         self.sh("input tap %d %d" % (x, y))
+        if record:
+            self.remember_input(self.tap, node)
 
     def screen_size(self, nodes):
         w = max((n.b[2] for n in nodes), default=1080)
@@ -421,12 +439,12 @@ class Smoke:
         for n in nodes:
             if n.rid.endswith("permission_allow_button") or n.rid.endswith("permission_allow_foreground_only_button"):
                 self.warnings.append("[%s] a permission dialog was shown and allowed" % self.cur_pass)
-                self.tap(n)
+                self.tap(n, record=False)
                 time.sleep(1)
                 return "permission"
         for n in nodes:
             if n.text == "Got it" and n.pkg in ("android", "com.android.systemui"):  # the full-screen notice of the player
-                self.tap(n)
+                self.tap(n, record=False)
                 time.sleep(1)
                 return "notice"
         sysnodes = [n for n in nodes if n.pkg in ("android", "com.android.systemui")]
@@ -442,21 +460,27 @@ class Smoke:
             kind = "ANR dialog" if anr else "crash dialog"
             self.add_crash(kind, "The system showed: " + text, "dialog")
             if "android:id/aerr_close" in ids:
-                self.tap(ids["android:id/aerr_close"])
+                self.tap(ids["android:id/aerr_close"], record=False)
             else:
-                self.key(4)
+                self.key(4, record=False)
             time.sleep(1)
             return "app"
-        # the system's own: recorded; an ANR is waited out (closing System UI or the launcher restarts it), a crash closed
-        button = ids.get("android:id/aerr_wait") if anr else None
-        button = button or ids.get("android:id/aerr_close")
+        # the system's own: recorded; an ANR is waited out the first time (closing System UI or the launcher restarts it),
+        # closed when the same process is not responding again (1.0.3's phone job: the emulator's SDK setup app, without
+        # a window, said so every few seconds however often it was waited for); a crash is closed
+        again = who in self.system_waited
+        wait = ids.get("android:id/aerr_wait") if anr and not again else None
+        button = wait or ids.get("android:id/aerr_close")
+        how = "Wait" if wait else ("Close app" + (" (not responding again)" if anr else "")) if button else "Back"
         self.system_events.append({"pass": self.cur_pass, "step": self.n + 1, "kind": "ANR" if anr else "crash",
-                                   "who": who, "seen": text, "how": "dialog, %s" % ("Wait" if button is ids.get("android:id/aerr_wait") and button else "Close" if button else "Back")})
-        self.log("system %s dialog (%s): %s" % ("ANR" if anr else "crash", who, text))
+                                   "who": who, "seen": text, "how": "dialog, " + how})
+        self.log("system %s dialog (%s): %s; %s" % ("ANR" if anr else "crash", who, text, how))
+        if wait:
+            self.system_waited.add(who)
         if button:
-            self.tap(button)
+            self.tap(button, record=False)
         else:
-            self.key(4)
+            self.key(4, record=False)
         time.sleep(1.5)
         return "system"
 
@@ -598,8 +622,10 @@ class Smoke:
         name = "%03d-%s-%s" % (n, self.cur_pass, slug(title))
         t = time.time()
         note = []
-        mark = self.step_mark = len(self.dialogs_seen)
         before = self.last_app_sig
+        # the tap or key the walk made for this step before calling it (open_label() then step("Music")), if any
+        pending = self.last_input if self.last_input and self.last_input[3] == n - 1 else None
+        mark = self.step_mark = min(len(self.dialogs_seen), pending[2]) if pending else len(self.dialogs_seen)
         for attempt in (1, 2):
             try:
                 if action:
@@ -615,13 +641,17 @@ class Smoke:
             came = [d for d in self.dialogs_seen[mark:] if d == "system"]
             if not came or attempt == 2:
                 break
-            # 1.0.3: a dialog of the system's own (the emulator's) came during the step and was waited out: the step once
-            # more when it left the app's screen as it was (the dialog took the action)
+            # 1.0.3: a dialog of the system's own (the emulator's) came during the step and was dealt with: the step once
+            # more when it left the app's screen as it was (the dialog took the step's tap, or the one made for it)
             mark = len(self.dialogs_seen)
-            if action is None or self.app_signature(nodes) != before:
-                note.append("a system dialog came and was waited out")
+            redo = action if action is not None else (pending and (lambda p=pending: p[0](p[1])))
+            if not redo or self.app_signature(nodes) != before:
+                note.append("a system dialog came and was dealt with")
                 break
-            note.append("a system dialog came and was waited out: the step once more")
+            note.append("a system dialog came and was dealt with: the step once more")
+            if action is None:
+                redo()
+        self.last_input = None
         sig = self.signature(nodes) if nodes else None
         self.last_app_sig = self.app_signature(nodes) if nodes else None
         self.gone_words(nodes, name)
