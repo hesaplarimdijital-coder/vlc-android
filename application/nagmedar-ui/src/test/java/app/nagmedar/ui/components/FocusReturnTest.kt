@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.platform.LocalInputModeManager
@@ -40,6 +41,7 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
  * was when a sheet, a page over the whole window or the command palette closes, so Tab goes on from
  * there instead of from the window's first control.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
