@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.motion.MotionStripsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:51:11.472Z" hostname="runnervmwuk1x" time="2.681">
+  <properties/>
+  <testcase name="sheetClose" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.487"/>
+  <testcase name="pagePop" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.377"/>
+  <testcase name="playerExpand" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.329"/>
+  <testcase name="playerCollapse" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.317"/>
+  <testcase name="pagePush" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.285"/>
+  <testcase name="tabSwitch" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.317"/>
+  <testcase name="sheetOpen" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.273"/>
+  <testcase name="playerBack" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.292"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

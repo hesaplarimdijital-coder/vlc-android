@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.theme.WindowSizesTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:52:09.662Z" hostname="runnervmwuk1x" time="0.054">
+  <properties/>
+  <testcase name="aPhoneKeepsItsTextAndTightensItsSizes" classname="app.nagmedar.ui.theme.WindowSizesTest" time="0.019"/>
+  <testcase name="aTabletReadsOneSpLarger" classname="app.nagmedar.ui.theme.WindowSizesTest" time="0.017"/>
+  <testcase name="deXGetsOneStepNotTwo" classname="app.nagmedar.ui.theme.WindowSizesTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

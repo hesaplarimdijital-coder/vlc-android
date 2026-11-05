@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.MusicBrowserTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:51:14.420Z" hostname="runnervmwuk1x" time="0.857">
+  <properties/>
+  <testcase name="formatsAndSorts" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.036"/>
+  <testcase name="theInspectorComesBackAsWide" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.146"/>
+  <testcase name="aHiddenInspectorStaysHidden" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.05"/>
+  <testcase name="aDesktopShowsTheGroupsBesideTheTableAndItsColumns" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.11"/>
+  <testcase name="theDepthFilter" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.128"/>
+  <testcase name="aTapPlaysTheAlbumFromThatTrack" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.042"/>
+  <testcase name="columnsAreKeptAsText" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.028"/>
+  <testcase name="shiftArrowsGrowTheSelectionAndItsMenuTakesThemAll" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.094"/>
+  <testcase name="theInspectorFollowsTheSelectionAndItsTabs" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.106"/>
+  <testcase name="aPhoneOpensAnAlbumAndComesBack" classname="app.nagmedar.ui.music.MusicBrowserTest" time="0.111"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

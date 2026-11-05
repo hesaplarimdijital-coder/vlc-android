@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.DenseTableHeaderTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:50:58.554Z" hostname="runnervmwuk1x" time="0.263">
+  <properties/>
+  <testcase name="aLongPressOnATitleOpensTheColumnChooser" classname="app.nagmedar.ui.components.DenseTableHeaderTest" time="0.116"/>
+  <testcase name="aFixedColumnIsAsWideAsItsTitle" classname="app.nagmedar.ui.components.DenseTableHeaderTest" time="0.067"/>
+  <testcase name="aLongPressBesideTheTitlesIsNoRowsPress" classname="app.nagmedar.ui.components.DenseTableHeaderTest" time="0.076"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
