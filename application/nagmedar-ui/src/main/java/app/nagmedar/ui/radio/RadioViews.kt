@@ -81,6 +81,8 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.components.toActionGroups
+import app.nagmedar.ui.components.listAppear
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
@@ -617,6 +619,8 @@ private fun StationList(
     val locale = currentLocale()
     val dimens = NagTheme.dimens
     val moreActions = stringResource(R.string.nag_more_actions)
+    // 1.0.3: on a phone a list's first stations arrive in turn (another tab's list arrives anew)
+    val appear = rememberListAppear(tab)
     LazyColumn(
         modifier.fillMaxSize().testTag("radio-list"),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = dimens.pagePadding - 8.dp, vertical = dimens.gapXs) + LocalShellBottomPadding.current,
@@ -624,7 +628,7 @@ private fun StationList(
         // 1.0.1: one key each, though a list holds a station twice (two imported rows of one address, a directory's
         // page repeating one): a key used twice would end the app
         val keys = lazyKeys(stations.map { it.key })
-        itemsIndexed(stations, key = { index, _ -> keys[index] }) { _, station ->
+        itemsIndexed(stations, key = { index, _ -> keys[index] }) { index, station ->
             val actions = StationActions(
                 onPlay = { controller.play(station) },
                 onFavourite = { controller.toggleFavourite(station) },
@@ -634,7 +638,7 @@ private fun StationList(
                 onRecord = onRecord?.let { record -> { record(station) } },
             )
             val menu = { stationMenu(res, station, now(), tab, actions) }
-            Box(Modifier.widthIn(max = ContentWidth)) {
+            Box(Modifier.listAppear(appear, index).widthIn(max = ContentWidth)) {
                 StationRow(station, compact, locale, menu, moreActions, actions)
             }
         }
