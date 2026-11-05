@@ -46,7 +46,10 @@ class LocalNetworkTest {
         assertEquals("fe80::1%wlan0", LocalNetwork.hostOf("http://[fe80::1%wlan0]:8080/stream"))
         assertEquals("radio.example.com", LocalNetwork.hostOf("https://radio.example.com/live?x=1#y"))
         assertNull(LocalNetwork.hostOf("file:///sdcard/Music/a.flac"))
+        // a content provider's authority is no host: "media" would read as a name on the network
         assertNull(LocalNetwork.hostOf("content://media/external/audio/media/12"))
+        assertNull(LocalNetwork.hostOf("content://com.android.externalstorage.documents/tree/primary%3AMusic"))
+        assertNull(LocalNetwork.hostOf("android.resource://app.nagmedar/raw/tone"))
         assertNull(LocalNetwork.hostOf("/sdcard/Music/a.flac"))
         assertNull(LocalNetwork.hostOf(null))
     }

@@ -55,12 +55,13 @@ object LocalNetwork {
 
     /**
      * The host of [url], VLC's addresses too: "upnp://http://192.168.1.10:8200/rootDesc.xml" is 192.168.1.10's,
-     * "smb://user@nas.local/Music" nas.local's, "http://[fe80::1]:8080/" fe80::1's; null for a file or a content address.
+     * "smb://user@nas.local/Music" nas.local's, "http://[fe80::1]:8080/" fe80::1's; null for a file, a content
+     * provider's ("content://media/…" names no host on the network) or another address of this device.
      */
     fun hostOf(url: String?): String? {
         if (url == null) return null
         val scheme = url.indexOf("://")
-        if (scheme <= 0) return null
+        if (scheme <= 0 || url.substring(0, scheme).lowercase(Locale.ROOT) in DEVICE_SCHEMES) return null
         var rest = url.substring(scheme + 3)
         // VLC's UPnP addresses carry the device's own address after their scheme
         if (rest.indexOf("://").let { it > 0 && rest.substring(0, it).all { c -> c.isLetter() } }) return hostOf(rest)
@@ -90,6 +91,9 @@ object LocalNetwork {
     fun isLocalUrl(url: String?): Boolean = isLocalHost(hostOf(url))
 
     private val LOCAL_SUFFIXES = listOf(".local", ".lan", ".home", ".home.arpa", ".internal", ".localdomain")
+
+    /** The schemes of what is on this device: their "host" is a provider's or a package's name. */
+    private val DEVICE_SCHEMES = setOf("file", "content", "android.resource", "android-app", "fd", "data", "jar")
 
     private fun ipv4(name: String): IntArray? {
         val parts = name.split('.')
