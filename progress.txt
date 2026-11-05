@@ -1,0 +1,9 @@
+1054 s, 80 steps, pass glass, 0 crashes
+73 glass Playlists (C, light) ok
+74 glass Glass C light playlists (top) ok
+75 glass Glass C light playlists (scrolled) ok
+76 glass Music ok
+77 glass Search (C, light) ok
+78 glass Glass C light search (top) ok
+79 glass Glass C light search (scrolled) ok
+80 glass Back from the search page ok
