@@ -278,15 +278,20 @@ class NagmedarDatabaseTest {
     fun musicProbesAreCachedPerFile() {
         val tech = db.audioTech()
         val uri = "file:///storage/emulated/0/Music/Itrî/Neva Kâr.flac"
-        fun entry(bits: Int, composer: String?) = AudioTechEntry(
+        fun entry(bits: Int, composer: String?, gain: Double? = null) = AudioTechEntry(
             uri, fileSize = 31_200_000, modifiedAt = 1_700_000_000_000, probeVersion = 1, codec = "flac", container = "flac",
             rate = 96_000, channels = 2, bits = bits, isFloat = false, dsdRate = 0, bitrate = 2_600_000, durationMs = 412_000,
-            composer = composer, probedAt = 5,
+            composer = composer, probedAt = 5, trackGainDb = gain, albumPeak = gain?.let { 0.999451 },
         )
         tech.save(listOf(entry(16, null)))
-        tech.save(listOf(entry(24, "Buhûrîzâde Mustafa Itrî")))
+        assertNull(tech.get(uri)!!.trackGainDb)
+        tech.save(listOf(entry(24, "Buhûrîzâde Mustafa Itrî", gain = -6.62)))
         assertEquals(24, tech.get(uri)!!.bits)
         assertEquals("Buhûrîzâde Mustafa Itrî", tech.get(uri)!!.composer)
+        // 1.0.3: the ReplayGain tags, the ones the file has not left empty
+        assertEquals(-6.62, tech.get(uri)!!.trackGainDb!!, 0.0)
+        assertEquals(0.999451, tech.get(uri)!!.albumPeak!!, 0.0)
+        assertNull(tech.get(uri)!!.trackPeak)
         assertEquals(listOf(uri), tech.all().map { it.mediaUri })
         tech.forget(uri)
         assertNull(tech.get(uri))
@@ -997,6 +1002,39 @@ class NagmedarDatabaseMigrationTest {
             db.execSQL("PRAGMA foreign_keys = ON")
             db.execSQL("DELETE FROM podcast_feed WHERE id = 1")
             assertEquals(0, count(db, "SELECT COUNT(*) FROM podcast_episode"))
+        }
+    }
+
+    /**
+     * 23 → 24 (1.0.3, the inspector's ReplayGain): the music files' probes keep their rows and gain the four tags,
+     * empty until the probe's next version reads each file again.
+     */
+    @Test
+    fun aTwentyThreeKeepsItsProbesAndGainsTheReplayGainColumns() {
+        assumeTrue("schema 23 not exported yet", schemaExported(23))
+        assumeTrue("schema 24 not exported yet", schemaExported(24))
+        helper.createDatabase(TEST_DB, 23).use { db ->
+            db.execSQL(
+                "INSERT INTO audio_tech (media_uri, file_size, modified_at, probe_version, codec, container, rate, channels, bits, " +
+                    "is_float, dsd_rate, bitrate, duration_ms, composer, probed_at) " +
+                    "VALUES ('file:///Music/Neva Kâr.flac', 31200000, 1700000000000, 1, 'flac', 'flac', 96000, 2, 24, 0, 0, 2620000, 498000, 'Itrî', 5)",
+            )
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 24, true, *NagmedarDatabase.MIGRATIONS).use { db ->
+            db.query("SELECT bits, composer, probe_version, track_gain_db, track_peak, album_gain_db, album_peak FROM audio_tech").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(24, c.getInt(0))
+                assertEquals("Itrî", c.getString(1))
+                assertEquals(1, c.getInt(2))
+                for (column in 3..6) assertTrue("no tag read yet", c.isNull(column))
+            }
+            db.execSQL("UPDATE audio_tech SET probe_version = 2, track_gain_db = -6.62, track_peak = 0.988312")
+            db.query("SELECT track_gain_db, track_peak, album_gain_db FROM audio_tech").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(-6.62, c.getDouble(0), 0.0)
+                assertEquals(0.988312, c.getDouble(1), 0.0)
+                assertTrue(c.isNull(2))
+            }
         }
     }
 

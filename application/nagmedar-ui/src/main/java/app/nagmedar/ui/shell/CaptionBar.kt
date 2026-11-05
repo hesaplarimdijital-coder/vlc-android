@@ -9,20 +9,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 
 /**
  * The window's caption bar in desktop windowing (S-306). From Android 15 the system draws only the
- * window's buttons (minimise, maximise, close) over a transparent caption, and the app draws the
- * bar: the menu bar and the search field go up into it. [left] and [right] are what the system's
- * buttons take at each end; the rest of the bar still moves the window, but what the app put
- * there to be clicked takes its clicks ([captionTarget]).
+ * window's buttons (minimise, maximise, close) and, on DeX and Android 16's desktop windows, its app
+ * chip over a transparent caption, and the app draws the bar: the menu bar and the search field go
+ * up into it. [left] and [right] are what the system's elements take at each end; the rest of the
+ * bar still moves the window, but what the app put there to be clicked takes its clicks
+ * ([captionTarget]).
  */
 @Immutable
-data class CaptionBar(val height: Dp, val left: Dp = 0.dp, val right: Dp = 0.dp)
+data class CaptionBar(val height: Dp, val left: Dp = 0.dp, val right: Dp = 0.dp) {
+    /**
+     * 1.0.3 (Desktop Kit 2.3): whether the system draws its app chip (the app's icon and name, the
+     * window's menu) at the bar's start, as DeX and Android's desktop windows do: something of the
+     * system's takes room there. The menu bar then leaves out its own mark and name.
+     */
+    fun showsAppChip(direction: LayoutDirection): Boolean = (if (direction == LayoutDirection.Ltr) left else right) > 0.dp
+}
 
 /**
  * The caption bar the app draws in; null when the window has none, or when the system draws the
@@ -47,6 +57,10 @@ fun rememberCaptionBar(): CaptionBar? {
     }
     return with(density) { CaptionBar(top.toDp(), left.toDp(), right.toDp()) }
 }
+
+/** 1.0.3: whether the system's app chip shows at the start of this caption bar, in the window's direction; false without one. */
+@Composable
+fun CaptionBar?.showsAppChip(): Boolean = this?.showsAppChip(LocalLayoutDirection.current) == true
 
 /** Keeps clear of the system's buttons in the caption bar. */
 fun Modifier.captionPadding(caption: CaptionBar?): Modifier =
