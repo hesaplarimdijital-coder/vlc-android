@@ -16,7 +16,9 @@ violations). The walk, in passes (a size and a language each):
                one along its seek bar that must not change it, a podcast followed (--feed) and an
                episode's page whose play button must not move after it opened, the Radio; then a
                music file opened from outside, the command palette (Ctrl+K), the shortcut list,
-               rotation, background and foreground
+               rotation, background and foreground; 1.0.3, with --auto-apk (the personal build):
+               Android Auto's tree read by a MediaBrowserCompat (application/benchmark's
+               AutoBrowseTest): the four tabs, the walk's music and podcast, the radio's lists
   workstation  the tablet's Music: the inspector shown, Ctrl+I hides and shows it, the table's
                column chooser (a title's long press) opens and Escape closes it; 1.0.2: with a file
                of Bu cihaz playing, the transport bar's "open the player" opens the big player over
@@ -1598,6 +1600,7 @@ class Smoke:
         self.library_ready = True
         self.visit_destinations("Reopen")
         self.phone_player()
+        self.auto_tree()
         self.device_walk(wide=False)
         self.playback()
         self.palette()
@@ -1676,6 +1679,43 @@ class Smoke:
         self.step("Home during playback")
         self.launch(force=False)
         self.step("Back to the app after playback")
+
+    def auto_tree(self):
+        """1.0.3: Android Auto's tree as a car reads it, by application/benchmark's AutoBrowseTest (--auto-apk, the
+        personal build's): a MediaBrowserCompat bound to the app's PlaybackService finds the four tabs, the walk's
+        tracks under Albums, its feed under the shows and an answer in every list (the radio's: stations or one line)."""
+        apk = self.a.auto_apk
+        if not apk or self.over_time():
+            return
+        if os.path.isdir(apk):
+            apk = next(iter(sorted(glob.glob(os.path.join(apk, "**", "*.apk"), recursive=True))), None)
+        if not apk or not os.path.isfile(apk):
+            self.check("Android Auto's tree (AutoBrowseTest)", False, "no test APK under %s" % self.a.auto_apk)
+            return
+        rc, out = self.adb("install", "-r", "-t", apk, timeout=180)
+        if rc != 0 or "Success" not in out:
+            self.check("Android Auto's tree (AutoBrowseTest)", False, "install: " + out.strip()[-300:])
+            return
+        tracks = len(glob.glob(os.path.join(self.a.music, "*.mp3"))) if self.a.music and os.path.isdir(self.a.music) else 0
+        args = ["-e class app.nagmedar.macrobenchmark.AutoBrowseTest", "-e nagmedar.package %s" % self.pkg]
+        if tracks:
+            args.append("-e nagmedar.tracks %d" % tracks)
+        if self.a.feed:
+            args.append("-e nagmedar.feed %s" % self.a.feed)
+        result = {}
+
+        def run():
+            _, result["out"] = self.adb("shell", "am instrument -w %s app.nagmedar.macrobenchmark/androidx.test.runner.AndroidJUnitRunner"
+                                        % " ".join(args), timeout=240)
+            return "AutoBrowseTest: " + " ".join(result["out"].split())[-160:]
+
+        self.step("Android Auto's tree read by a MediaBrowserCompat", run, wait=0.5)
+        out = result.get("out", "").replace("\r", "")
+        with open(os.path.join(self.out, "auto-browse.txt"), "w", encoding="utf-8") as f:
+            f.write(out)
+        why = re.search(r"^\d+\) .*?(?=^\s+at |\Z)", out, re.M | re.S)
+        self.check("Android Auto: the four tabs, the walk's %d tracks under Albums, its podcast, every list answers" % tracks,
+                   "OK (1 test)" in out, (why.group(0) if why else out[-400:]).strip())
 
     def palette(self):
         s = self.strings["en"]
@@ -1984,6 +2024,7 @@ def main():
     p.add_argument("--media", default="", help="directory with tone.mp3 to push to the device")
     p.add_argument("--music", default="", help="directory of tagged .mp3 tracks (\"Profile track …\") pushed to the device's Music")
     p.add_argument("--feed", default="", help="a podcast feed's address the walk follows (the emulator's view of it)")
+    p.add_argument("--auto-apk", default="", help="application/benchmark's APK (file or directory) whose AutoBrowseTest reads Android Auto's tree")
     p.add_argument("--build", default="debug", help="the build walked (debug: StrictMode violations fail the run)")
     p.add_argument("--passes", default="tablet-en,phone-en,workstation,phone-tr")
     p.add_argument("--adb", default="adb")

@@ -10,7 +10,8 @@
 # player's drag counted; a music file opened from outside, the command palette, rotation,
 # background / foreground; 1.0.1: This device / Bu cihaz on the phone (both languages) and the
 # tablet: the internal storage, its Music folder, a file played from it, back up, the sort menu,
-# Home and rotation with the folder open. Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
+# Home and rotation with the folder open; 1.0.3, personal build only: Android Auto's tree read from the app by a
+# MediaBrowserCompat (application/benchmark's AutoBrowseTest). Each step leaves a screenshot, the UI hierarchy and a logcat verdict; a
 # crash or ANR of the app, a failed 1.0 check or (debug build) a StrictMode violation fails the job.
 #
 # Baseline Profile (baseline_profile=true): builds the app's benchmark build (without R8, so that the
@@ -211,8 +212,10 @@ jobs:
               -PnagmedarAbis=x86_64 -PnagmedarProfileSource --console=plain 2>&1 | tee build.log
             echo "APK_DIR=application" >> "$GITHUB_ENV"
           elif [ "$BUILD" = personal ]; then
-            ./gradlew :application:app:assemblePersonal -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
+            # 1.0.3: with application/benchmark's AutoBrowseTest, which reads Android Auto's tree from it
+            ./gradlew :application:app:assemblePersonal :application:benchmark:assemblePersonal -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
             echo "APK_DIR=application/app/build/outputs/apk/personal" >> "$GITHUB_ENV"
+            echo "AUTO_APK=application/benchmark/build/outputs/apk/personal" >> "$GITHUB_ENV"
           else
             ./gradlew :application:app:assembleDebug -PnagmedarAbis=x86_64 --console=plain 2>&1 | tee build.log
             echo "APK_DIR=application/app/build/outputs/apk/debug" >> "$GITHUB_ENV"
@@ -278,7 +281,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
-          script: python3 buildsystem/ci/emulator_smoke.py --apk ${{ env.APK_DIR }} --out ${{ runner.temp }}/emulator-out --media ${{ runner.temp }}/media --music ${{ runner.temp }}/music --feed http://10.0.2.2:8765/feed.xml --build ${{ env.BUILD }} --passes ${{ matrix.run.passes }} --deadline-min 38 --branch ${{ env.EVIDENCE }} --source "${{ env.SOURCE_SHA }} (${{ inputs.ref || github.ref_name }}, ${{ env.BUILD }} build, API ${{ matrix.run.api }}, ${{ matrix.run.group }}), run ${{ github.run_id }}"
+          script: python3 buildsystem/ci/emulator_smoke.py --apk ${{ env.APK_DIR }} --out ${{ runner.temp }}/emulator-out --media ${{ runner.temp }}/media --music ${{ runner.temp }}/music --feed http://10.0.2.2:8765/feed.xml --auto-apk "${{ env.AUTO_APK }}" --build ${{ env.BUILD }} --passes ${{ matrix.run.passes }} --deadline-min 38 --branch ${{ env.EVIDENCE }} --source "${{ env.SOURCE_SHA }} (${{ inputs.ref || github.ref_name }}, ${{ env.BUILD }} build, API ${{ matrix.run.api }}, ${{ matrix.run.group }}), run ${{ github.run_id }}"
 
       - name: Emülatör ve Baseline Profile
         id: profile

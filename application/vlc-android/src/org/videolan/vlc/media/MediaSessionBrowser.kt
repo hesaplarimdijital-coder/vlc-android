@@ -37,7 +37,6 @@ import org.videolan.resources.CONTENT_STYLE_GRID_ITEM_HINT_VALUE
 import org.videolan.resources.CONTENT_STYLE_LIST_ITEM_HINT_VALUE
 import org.videolan.resources.CONTENT_STYLE_PLAYABLE_HINT
 import org.videolan.resources.EXTRA_CONTENT_STYLE_GROUP_TITLE_HINT
-import org.videolan.vlc.BuildConfig
 
 /**
  * The media session's browse tree, Android Auto's library. The mediaId is an opaque string token; it is kept as a
@@ -53,7 +52,13 @@ class MediaSessionBrowser {
     companion object {
         // Root item
         // MediaIds are all strings. Maintain in uri parsable format.
-        const val ID_ROOT = "//${BuildConfig.APP_ID}/r"
+        /**
+         * 1.0.3: one root for every build. It was "//" + BuildConfig.APP_ID + "/r", a constant that each module inlines with
+         * the build type it was compiled as: nagmedar-ui has no personal build type, so the personal APK's catalog
+         * (nagmedar-ui's release classes) made "//app.nagmedar/r/…" ids under the "//app.nagmedar.debug/r" root the service
+         * gave, and Android Auto found no tabs, only its search. Ids of those builds are read through [canonical].
+         */
+        const val ID_ROOT = "//app.nagmedar/r"
         const val ID_MEDIA = "$ID_ROOT/media"
         const val ID_SUGGESTED = "$ID_ROOT/suggested"
         const val ID_NO_MEDIA = "$ID_ROOT/error/media"
@@ -67,6 +72,23 @@ class MediaSessionBrowser {
         /** The root's entries, Auto's tabs, in their order. */
         val ROOT_TABS = listOf(ID_MUSIC, ID_PODCASTS, ID_RADIO, ID_RECENT)
 
+        /** 1.0.3: the roots the debug, benchmark and personal builds of 1.0–1.0.2 gave Android Auto and the system. */
+        private val EARLIER_ROOTS = listOf("//app.nagmedar.debug/r", "//app.nagmedar.benchmark/r")
+
+        /**
+         * 1.0.3: [mediaId] under today's [ID_ROOT]. An id of 1.0–1.0.2 whose root named the build type's application id
+         * (what Auto or the system's media resumption kept from then) is read as the same entry today; any other id is
+         * returned as it is.
+         */
+        fun canonical(mediaId: String): String {
+            for (earlier in EARLIER_ROOTS) {
+                if (mediaId == earlier || mediaId.startsWith("$earlier/") || mediaId.startsWith("$earlier?")) {
+                    return ID_ROOT + mediaId.substring(earlier.length)
+                }
+            }
+            return mediaId
+        }
+
         /**
          * The entries under [parentId], as the catalog makes them; none without it (a build without the new interface).
          * The suggestions (the system's media resumption, the quick search box) are the tracks played last.
@@ -74,7 +96,7 @@ class MediaSessionBrowser {
         @WorkerThread
         suspend fun browse(context: Context, parentId: String): List<MediaBrowserCompat.MediaItem> {
             val catalog = CarHook.catalog ?: return emptyList()
-            val id = if (parentId == ID_SUGGESTED) ID_RECENT else parentId
+            val id = canonical(parentId).let { if (it == ID_SUGGESTED) ID_RECENT else it }
             return catalog.children(context, id)?.map(::toMediaItem).orEmpty()
         }
 
@@ -130,7 +152,7 @@ class MediaSessionBrowser {
         }
 
         /** Whether [mediaId] is a line that plays nothing (an empty list's): [ID_NO_MEDIA], with the reason it gives after "?". */
-        fun isNoMedia(mediaId: String): Boolean = mediaId == ID_NO_MEDIA || mediaId.startsWith("$ID_NO_MEDIA?")
+        fun isNoMedia(mediaId: String): Boolean = canonical(mediaId).let { it == ID_NO_MEDIA || it.startsWith("$ID_NO_MEDIA?") }
 
         /** The id a medialibrary media is known by in the session's metadata and queue. */
         fun generateMediaId(libraryItem: MediaLibraryItem): String = "$ID_MEDIA/${libraryItem.id}"

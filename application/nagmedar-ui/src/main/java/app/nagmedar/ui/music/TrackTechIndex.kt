@@ -47,15 +47,31 @@ object TrackTechIndex {
     val remaining: StateFlow<Int> = _remaining.asStateFlow()
 
     private val lock = Mutex()
+
+    @Volatile
     private var known: MutableMap<String, AudioTechEntry>? = null
+
+    /**
+     * 1.0.3: what the probe has read, for a reader without the Music page (Android Auto's music): [tech] once an update
+     * has loaded it, else the database's rows as they are. Nothing is probed or kept, and an update under way (which
+     * holds its lock for as long as it probes) is never waited for.
+     */
+    suspend fun read(context: Context): Map<String, TrackTech> {
+        if (known != null) return _tech.value
+        return withContext(Dispatchers.IO) {
+            runCatching { NagmedarDatabase.get(context).audioTech().all() }.getOrNull().orEmpty()
+                .mapNotNull { row -> row.toTech()?.let { row.mediaUri to it } }.toMap()
+        }
+    }
 
     /** Loads what is known, then probes the [uris] that are new or changed. */
     suspend fun update(context: Context, uris: List<String>) = withContext(Dispatchers.IO) {
         lock.withLock {
             val dao = runCatching { NagmedarDatabase.get(context).audioTech() }.getOrNull() ?: return@withLock
             val cache = known ?: dao.all().associateByTo(HashMap()) { it.mediaUri }.also { rows ->
-                known = rows
+                // published before it is known: a reader that finds it known finds it published ([known])
                 _tech.value = rows.values.mapNotNull { row -> row.toTech()?.let { row.mediaUri to it } }.toMap()
+                known = rows
             }
             if (!MusicEngine.available) return@withLock
             val stale = uris.mapNotNull { uri ->

@@ -278,6 +278,8 @@ AUTO_ICONS = (
     ('music', 'Music'), ('podcasts', 'Podcasts'), ('radio', 'Radio'), ('recent', 'History'),
     ('albums', 'Albums'), ('artists', 'Artists'), ('playlists', 'ListView'), ('years', 'Chapters'), ('folders', 'Folder'),
     ('continue', 'Resume'), ('new', 'Plus'), ('favourites', 'StarFilled'), ('categories', 'Grid'),
+    # 1.0.3: the Music tab's shuffle, genres, every track and the smart lists
+    ('shuffle', 'Shuffle'), ('genres', 'Visualizer'), ('tracks', 'Music'), ('smart', 'SmartList'),
 )
 
 
