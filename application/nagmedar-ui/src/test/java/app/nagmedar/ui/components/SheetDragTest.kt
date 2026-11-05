@@ -94,6 +94,26 @@ class SheetDragTest {
         compose.onNodeWithTag("sheet").assertDoesNotExist()
     }
 
+    /**
+     * 1.0.3 (the walk's flaky drag on API 37): the finger lifted in the same frame as the move
+     * that carried the drag (`input swipe` on a slow emulator delivers it so). The pointer's
+     * release used to reach the sheet before the scroll's move did, and the move was dropped.
+     */
+    @Test
+    fun aDragLiftedWithItsLastMoveStillCloses() {
+        sheet()
+        val height = sheetHeight()
+        compose.onNodeWithText("Sıraya ekle").performTouchInput {
+            down(center)
+            moveBy(Offset(0f, height * 0.6f * density))
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(1, dismisses)
+        assertFalse(open)
+        assertEquals(emptyList<String>(), ran)
+    }
+
     @Test
     fun aShortDragSpringsBack() {
         sheet()
