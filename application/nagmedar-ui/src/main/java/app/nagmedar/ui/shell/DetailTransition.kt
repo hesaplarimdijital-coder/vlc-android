@@ -2,35 +2,71 @@ package app.nagmedar.ui.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.BoundsTransform
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.ExperimentalTransitionApi
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.SeekableTransitionState
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.createChildTransition
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.GraphicsLayerScope
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.LocalMotionTier
@@ -38,6 +74,8 @@ import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -47,11 +85,12 @@ import kotlin.math.roundToInt
 data class DetailFrame(val listShift: Float, val listAlpha: Float, val detailShift: Float, val detailAlpha: Float)
 
 /**
- * Android's screen transition between a list and the detail opened from it (Desktop Kit 0.2.0,
- * Material's shared axis; on a phone the progress runs on the gesture spring, Desktop Kit 1.0): opening, the detail comes a tenth of the width from the end while it
- * fades in and the list goes the other way fading out; closing is the same backwards. The frames
- * are a function of the progress (0 the list, 1 the detail) run linearly over [NagMotion.LONG];
- * each part keeps its own curve and timing within it.
+ * Android's screen transition between a list and the detail opened from it on tablet and DeX
+ * windows (Desktop Kit 0.2.0, Material's shared axis): opening, the detail comes a tenth of the
+ * width from the end while it fades in and the list goes the other way fading out; closing is the
+ * same backwards. The frames are a function of the progress (0 the list, 1 the detail) run linearly
+ * over [NagMotion.LONG]; each part keeps its own curve and timing within it. A phone's window has
+ * the depth of [DetailDepth] instead (1.0.3).
  */
 object DetailMotion {
     /** How far the parts travel: a tenth of the width. */
@@ -133,6 +172,13 @@ class DetailMotionState internal constructor(open: Boolean) {
         if (!open) back.snapTo(0f)
     }
 
+    /** 1.0.3: the detail at rest, open or closed, at once (a phone's [DetailDepth] took over, or gave the window back). */
+    suspend fun stand(open: Boolean) {
+        opening = open
+        progress.snapTo(if (open) 1f else 0f)
+        back.snapTo(0f)
+    }
+
     /** The list's layer in this frame; [direction] is -1 in right-to-left layouts. */
     internal fun GraphicsLayerScope.listLayer(widthPx: Int, direction: Float) {
         val frame = DetailMotion.frame(progress.value, opening)
@@ -200,16 +246,557 @@ fun Modifier.detailShade(state: DetailMotionState): Modifier {
     }
 }
 
+// ------------------------------------------------------------------ the phone's depth (1.0.3, Desktop Kit 2.3.0)
+
+/**
+ * 1.0.3 (Desktop Kit 2.3.0, "Ayrıntı derinlikte açılır"): on a phone the detail comes in [SHIFT] of the width
+ * from the end edge on the opening spring ([NagMotion.open]) and fades in at once, while the list sinks to
+ * [LIST_SCALE] and fades under it; closing is the same way back, the list rising under the leaving detail.
+ *
+ * The predictive Back gesture seeks the closing up to [GESTURE_END] with the finger ([gestureFrame]): the list
+ * is really there behind the detail and rises from [GESTURE_LIST_SCALE], the detail shrinks towards
+ * [DetailMotion.BACK_SCALE], rounds its corners and leans away from the edge the swipe came from. Let go, the
+ * rest of the way runs from where the finger left it in [COMMIT_MS]: the detail slides [WAY_OUT] of the width on
+ * and fades. A swipe given up runs everything back the way it came.
+ */
+object DetailDepth {
+    /** How far the detail comes from: 12 % of the width, from the end edge. */
+    const val SHIFT = 0.12f
+
+    /** What the list sinks to under an open detail. */
+    const val LIST_SCALE = 0.95f
+
+    /** Where the list rises from behind the detail while a Back gesture closes it. */
+    const val GESTURE_LIST_SCALE = 0.94f
+
+    /** How far the finger seeks the closing; the rest is the detail's way out once let go. */
+    const val GESTURE_END = 0.85f
+
+    /** How far the detail goes on its way out once the finger lets go, as a share of the width. */
+    const val WAY_OUT = 0.4f
+
+    /** The way out after the finger lets go, from wherever it was. */
+    const val COMMIT_MS = 220
+
+    /** The Back gesture's frame at [fraction] of the closing (0 the detail open, 1 the list). */
+    fun gestureFrame(fraction: Float): DepthGestureFrame {
+        val f = fraction.coerceIn(0f, 1f)
+        val lean = (f / GESTURE_END).coerceIn(0f, 1f)
+        val out = NagMotion.EmphasizedAccelerate.transform(((f - GESTURE_END) / (1f - GESTURE_END)).coerceIn(0f, 1f))
+        val rise = NagMotion.Standard.transform(f)
+        return DepthGestureFrame(
+            detailScale = 1f - (1f - DetailMotion.BACK_SCALE) * lean,
+            lean = lean,
+            out = out,
+            detailAlpha = 1f - out,
+            listScale = GESTURE_LIST_SCALE + (1f - GESTURE_LIST_SCALE) * rise,
+            listAlpha = rise,
+        )
+    }
+}
+
+/** One frame of [DetailDepth.gestureFrame]. */
+@Immutable
+data class DepthGestureFrame(
+    val detailScale: Float,
+    /** How far the detail leans and rounds its corners: 0 to 1 of [DetailMotion.BACK_LEAN_DP] and [DetailMotion.BACK_CORNER_DP]. */
+    val lean: Float,
+    /** How far the detail is on its way out: 0 to 1 of [DetailDepth.WAY_OUT]. */
+    val out: Float,
+    val detailAlpha: Float,
+    val listScale: Float,
+    val listAlpha: Float,
+)
+
+/** The transition's own values of the phone's depth: what a tap's opening and closing play. */
+internal class DepthValues(
+    /** 1: [DetailDepth.SHIFT] towards the end; 0: in place. */
+    val detailShift: State<Float>,
+    val detailAlpha: State<Float>,
+    /** The detail's fade when a [detailSharedCard] carries the way: after the card. */
+    val cardAlpha: State<Float>,
+    val listScale: State<Float>,
+    val listAlpha: State<Float>,
+)
+
+/**
+ * The phone's depth between a list and its detail: a [SeekableTransitionState] (false the list, true the
+ * detail) that a tap animates and the predictive Back gesture seeks, and what the gesture and the turns of
+ * mind leave on it.
+ */
+@Stable
+internal class DepthState(open: Boolean) {
+    val seekable = SeekableTransitionState(open)
+
+    /** The transition of [seekable], set where it is composed. */
+    lateinit var transition: Transition<Boolean>
+
+    /** Its values, set where it is composed. */
+    var values: DepthValues? = null
+
+    /** A closing driven by the Back gesture: the detail shrinks with the finger, the list rises behind it. */
+    var gestureClose by mutableStateOf(false)
+
+    var swipeEdge by mutableIntStateOf(BackEventCompat.EDGE_LEFT)
+
+    /** The run back after a gesture given up or a change of mind; a change of the detail takes over from it. */
+    var undoing by mutableStateOf<Job?>(null)
+
+    /**
+     * At the end of a run back the side that was on its way lets its shared elements go before the transition
+     * stands still: in between, their partners would wait for an overlay that no longer draws them.
+     */
+    var dropped by mutableStateOf(false)
+
+    /** The open detail was opened with a [detailSharedCard]: the card carried the way, the detail did not slide. */
+    var withCard by mutableStateOf(false)
+
+    /** The cards composed in the list. */
+    val cards = DetailCards()
+
+    /** The detail covers the list and nothing moves: the list is neither measured, drawn nor read out. */
+    val covered: Boolean get() = seekable.currentState && seekable.targetState && !gestureClose && !dropped
+
+    /** Something moves, or is about to: [open] is where the app wants the detail. */
+    fun moving(open: Boolean): Boolean =
+        open != seekable.currentState || seekable.targetState != seekable.currentState || transition.isRunning ||
+            gestureClose || dropped || undoing?.isActive == true
+
+    /** [side] was on its way when the transition was run back, and lets its shared elements go. */
+    fun held(side: DetailSide): Boolean = dropped && (side == DetailSide.Detail) != seekable.currentState
+
+    /** At rest at once: reduced motion, or a wider window's motion took over. */
+    suspend fun stand(open: Boolean) {
+        undoing?.cancel()
+        undoing = null
+        gestureClose = false
+        dropped = false
+        seekable.snapTo(open)
+    }
+
+    /** Where the app wants the detail ([open]): the way there, a Back gesture's way out or a run back. */
+    suspend fun drive(open: Boolean, animated: Boolean) {
+        undoing?.cancel()
+        undoing = null
+        when {
+            !animated -> {
+                gestureClose = false
+                dropped = false
+                seekable.snapTo(open)
+            }
+            gestureClose && !open -> {
+                // let go early: the finger's part of the way is played first, quickly, then the way out
+                val rest = (DetailDepth.COMMIT_MS * (DetailDepth.GESTURE_END - seekable.fraction) / DetailDepth.GESTURE_END).roundToInt()
+                seekable.seekOn(DetailDepth.GESTURE_END, rest)
+                seekable.animateTo(false, tween(DetailDepth.COMMIT_MS, easing = NagMotion.EmphasizedAccelerate))
+                gestureClose = false
+            }
+            // a change of mind on the way (Back right after the tap, the tap again right after Back): the way is run
+            // back from where it is, not retargeted (a retargeted seekable transition dropped the shared elements' match)
+            seekable.targetState != seekable.currentState && seekable.currentState == open -> undo(NagMotion.gesture(NagMotion.FRACTION))
+            else -> {
+                gestureClose = false
+                if (open && !seekable.currentState) withCard = cards.registered > 0
+                seekable.animateTo(open)
+            }
+        }
+    }
+
+    /** The transition run back to where it came from on [spec]; then the side on its way lets go, and it stands still. */
+    suspend fun undo(spec: FiniteAnimationSpec<Float>) {
+        try {
+            seekable.runBack(spec)
+            dropped = true
+            withFrameNanos { }
+            withFrameNanos { }
+            gestureClose = false
+            seekable.snapTo(seekable.currentState)
+            // the content that was on its way leaves with this composition; only then may the next transition share
+            withFrameNanos { }
+            dropped = false
+        } catch (e: CancellationException) {
+            dropped = false
+            throw e
+        }
+    }
+
+    /** The list's layer in this frame. */
+    fun GraphicsLayerScope.listLayer() {
+        if (gestureClose) {
+            val frame = DetailDepth.gestureFrame(seekable.fraction)
+            scaleX = frame.listScale
+            scaleY = frame.listScale
+            alpha = frame.listAlpha
+        } else {
+            val v = values ?: return
+            scaleX = v.listScale.value
+            scaleY = v.listScale.value
+            alpha = v.listAlpha.value
+        }
+    }
+
+    /** The detail's layer in this frame; [direction] is -1 in right-to-left layouts (the gesture's lean is the finger's). */
+    fun GraphicsLayerScope.detailLayer(widthPx: Int, direction: Float) {
+        if (gestureClose) {
+            val frame = DetailDepth.gestureFrame(seekable.fraction)
+            val away = if (swipeEdge == BackEventCompat.EDGE_RIGHT) -1f else 1f
+            scaleX = frame.detailScale
+            scaleY = frame.detailScale
+            translationX = away * (DetailMotion.BACK_LEAN_DP.dp.toPx() * frame.lean + DetailDepth.WAY_OUT * widthPx * frame.out)
+            alpha = frame.detailAlpha
+            if (frame.lean > 0f) {
+                shape = RoundedCornerShape((DetailMotion.BACK_CORNER_DP * frame.lean).dp)
+                clip = true
+            }
+        } else {
+            val v = values ?: return
+            translationX = if (withCard) 0f else v.detailShift.value * DetailDepth.SHIFT * widthPx * direction
+            alpha = if (withCard) v.cardAlpha.value else v.detailAlpha.value
+        }
+    }
+}
+
+/** The phone's depth of a list and its detail; [open] is where it starts. */
+@Composable
+internal fun rememberDepth(open: Boolean): DepthState {
+    val depth = remember { DepthState(open) }
+    val transition = rememberTransition(depth.seekable, label = "detailDepth")
+    val detailShift = transition.animateFloat(transitionSpec = { NagMotion.open(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
+    val detailAlpha = transition.animateFloat(
+        transitionSpec = {
+            if (targetState) tween(NagMotion.MEDIUM, easing = NagMotion.StandardDecelerate) else tween(NagMotion.SHORT + 20, easing = NagMotion.StandardAccelerate)
+        },
+        label = "detailAlpha",
+    ) { if (it) 1f else 0f }
+    val cardAlpha = transition.animateFloat(
+        transitionSpec = {
+            if (targetState) {
+                tween(NagMotion.MEDIUM + 20, delayMillis = 60, easing = NagMotion.StandardDecelerate)
+            } else {
+                tween(NagMotion.SHORT + 20, easing = NagMotion.StandardAccelerate)
+            }
+        },
+        label = "cardAlpha",
+    ) { if (it) 1f else 0f }
+    val listScale = transition.animateFloat(transitionSpec = { tween(NagMotion.LONG, easing = NagMotion.Emphasized) }, label = "listScale") {
+        if (it) DetailDepth.LIST_SCALE else 1f
+    }
+    val listAlpha = transition.animateFloat(
+        transitionSpec = {
+            if (targetState) tween(NagMotion.SHORT + 60, easing = NagMotion.StandardAccelerate) else tween(NagMotion.MEDIUM, easing = NagMotion.StandardDecelerate)
+        },
+        label = "listAlpha",
+    ) { if (it) 0f else 1f }
+    depth.transition = transition
+    if (depth.values == null) depth.values = DepthValues(detailShift, detailAlpha, cardAlpha, listScale, listAlpha)
+    return depth
+}
+
+/**
+ * The phone's predictive Back on an open detail: the finger seeks the closing of [depth]; let go, [onBack] is
+ * called and the closing finishes from there (an app that keeps its detail, [isOpen] still, gets it run back);
+ * given up, everything runs back. A gesture while the opening is still on its way leaves it be: letting go runs
+ * the opening back. Back without the gesture (the three buttons) plays only the way out.
+ */
+@Composable
+internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boolean, isOpen: () -> Boolean, onBack: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val latestOnBack by rememberUpdatedState(onBack)
+    val latestOpen by rememberUpdatedState(isOpen)
+    PredictiveBackHandler(enabled = enabled) { events ->
+        try {
+            events.collectLatest { event ->
+                depth.swipeEdge = event.swipeEdge
+                if (animated && depth.seekable.currentState) {
+                    depth.gestureClose = true
+                    depth.seekable.seekTo(event.progress * DetailDepth.GESTURE_END, false)
+                }
+            }
+            latestOnBack()
+            if (animated) {
+                depth.undoing = scope.launch {
+                    // the app's answer reaches the composition first
+                    withFrameNanos { }
+                    withFrameNanos { }
+                    if (latestOpen() && depth.gestureClose) depth.undo(NagMotion.gesture(NagMotion.FRACTION))
+                }
+            }
+        } catch (e: CancellationException) {
+            if (animated && depth.gestureClose) depth.undoing = scope.launch { depth.undo(NagMotion.gesture(NagMotion.FRACTION)) }
+            throw e
+        }
+    }
+}
+
+/**
+ * A transition turned around on its way: its fraction runs back to 0 on [spec], the target held. Retargeted at
+ * its own current state instead, a seekable transition drops the shared elements' match for a frame.
+ */
+private suspend fun <S> SeekableTransitionState<S>.runBack(spec: FiniteAnimationSpec<Float>) {
+    val held = targetState
+    if (held == currentState || fraction <= 0f) return
+    val way = TargetBasedAnimation(spec, Float.VectorConverter, fraction, 0f)
+    val start = withFrameNanos { it }
+    while (true) {
+        val played = withFrameNanos { it } - start
+        seekTo(way.getValueFromNanos(played).coerceIn(0f, 1f), held)
+        if (way.isFinishedFromNanos(played)) break
+    }
+}
+
+/** The fraction run on to [to] over [millis], the target held: a Back gesture let go of early finishes the finger's part. */
+private suspend fun <S> SeekableTransitionState<S>.seekOn(to: Float, millis: Int) {
+    val held = targetState
+    if (fraction >= to || millis <= 0) return
+    val way = TargetBasedAnimation(tween<Float>(millis, easing = NagMotion.StandardAccelerate), Float.VectorConverter, fraction, to)
+    val start = withFrameNanos { it }
+    while (true) {
+        val played = withFrameNanos { it } - start
+        seekTo(way.getValueFromNanos(played).coerceIn(0f, 1f), held)
+        if (way.isFinishedFromNanos(played)) break
+    }
+}
+
+/** Places [listPlaceable] and [detailPlaceable] as the phone's [depth] has them; a covered list is left out by the caller. */
+internal fun Placeable.PlacementScope.placeDepth(
+    depth: DepthState,
+    listPlaceable: Placeable?,
+    detailPlaceable: Placeable?,
+    widthPx: Int,
+    direction: Float,
+) {
+    if (listPlaceable != null) {
+        if (detailPlaceable == null) {
+            listPlaceable.placeRelative(0, 0)
+        } else {
+            listPlaceable.placeRelativeWithLayer(0, 0) { with(depth) { listLayer() } }
+        }
+    }
+    detailPlaceable?.placeRelativeWithLayer(0, 0) { with(depth) { detailLayer(widthPx, direction) } }
+}
+
+// ------------------------------------------------------------------ shared elements (1.0.3, Desktop Kit 2.0–2.3)
+
+/** The two sides of a list and its detail. */
+internal enum class DetailSide {
+    List,
+    Detail;
+
+    /** This side's visibility when the detail is [open]. */
+    fun state(open: Boolean): EnterExitState = when (this) {
+        List -> if (open) EnterExitState.PostExit else EnterExitState.Visible
+        Detail -> if (open) EnterExitState.Visible else EnterExitState.PostExit
+    }
+}
+
+/** What a shared element needs: the layout it flies in and the side it is on. */
+internal class DetailSharedScopes(
+    val transition: SharedTransitionScope,
+    val visibility: AnimatedVisibilityScope,
+    val side: DetailSide,
+)
+
+/** Both sides' scopes while the phone's depth moves. */
+internal class DepthShared(val list: DetailSharedScopes, val detail: DetailSharedScopes) {
+    fun of(side: DetailSide): DetailSharedScopes = if (side == DetailSide.List) list else detail
+}
+
+/** A side's visibility, a child of the depth's transition. */
+private class SideVisibility(override val transition: Transition<EnterExitState>) : AnimatedVisibilityScope
+
+/** The cards composed in a list right now (their count, also while nothing moves). */
+internal class DetailCards {
+    var registered = 0
+}
+
+/**
+ * The scopes of the side composed under it: null while nothing moves (no lookahead pass), outside a phone's
+ * [DetailTransition] and with reduced motion, so a shared element is then a plain one. Dynamic: only the marked
+ * elements recompose when a transition starts and ends.
+ */
+internal val LocalDetailSharedScopes = compositionLocalOf<DetailSharedScopes?> { null }
+
+/** The list side's cards of a phone's [DetailTransition], also while nothing moves. */
+internal val LocalDetailCards = compositionLocalOf<DetailCards?> { null }
+
+/** Bounds of a shared element on the opening spring, arrived within half a pixel. */
+private val DepthBounds = BoundsTransform { _, _ -> NagMotion.open(Rect.VisibilityThreshold) }
+
+/**
+ * The list and the detail of [depth] in [modifier]'s place: in a plain box while nothing moves, moved (state
+ * and all: scroll places, text, effects) into a [SharedTransitionLayout] while something does when [shared], so a
+ * list scrolled at rest is measured once a frame (Desktop Kit 2.3.0, "Lookahead"). [content] gets the sides'
+ * scopes then.
+ */
+@Composable
+internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifier: Modifier, content: @Composable (DepthShared?) -> Unit) {
+    val latestContent by rememberUpdatedState(content)
+    val body = remember { movableContentOf { scopes: DepthShared? -> latestContent(scopes) } }
+    val latestOpen by rememberUpdatedState(open)
+    val moving by remember(depth) { derivedStateOf { depth.moving(latestOpen) } }
+    if (shared && moving) {
+        SharedTransitionLayout(modifier) {
+            val list = sideScopes(this, depth.transition, DetailSide.List)
+            val detail = sideScopes(this, depth.transition, DetailSide.Detail)
+            body(remember(list, detail) { DepthShared(list, detail) })
+        }
+    } else {
+        Box(modifier) { body(null) }
+    }
+}
+
+@OptIn(ExperimentalTransitionApi::class)
+@Composable
+private fun sideScopes(shared: SharedTransitionScope, transition: Transition<Boolean>, side: DetailSide): DetailSharedScopes {
+    val child = transition.createChildTransition(label = side.name) { open -> side.state(open) }
+    return remember(shared, child) { DetailSharedScopes(shared, SideVisibility(child), side) }
+}
+
+/**
+ * [content] of [side] with its shared-element scopes from [scopes] when [shared] (none for the side a run back
+ * lets go of), the list side's cards too; without [shared] what is around it passes through.
+ */
+@Composable
+internal fun DepthSide(scopes: DepthShared?, side: DetailSide, depth: DepthState, shared: Boolean, content: @Composable () -> Unit) {
+    val own = if (shared) scopes?.of(side)?.takeUnless { depth.held(side) } else LocalDetailSharedScopes.current
+    val cards = if (shared) depth.cards.takeIf { side == DetailSide.List } else LocalDetailCards.current
+    CompositionLocalProvider(LocalDetailSharedScopes provides own, LocalDetailCards provides cards, content = content)
+}
+
+/**
+ * Inside a phone's [DetailTransition] (or [ListDetailPanes]) with shared elements, this element and the element
+ * with the same [key] on the other side (the list's row and the detail) are one: opening the detail moves it
+ * from the row to its place in the detail, closing moves it back, and the Back gesture moves it with the
+ * finger. For things that look the same at both sizes: a cover. Put it first in the element's modifiers, before
+ * its size, so all of it flies; [shape] rounds it in place and in flight (a clip inside it does too). Elsewhere,
+ * and with reduced motion, nothing flies.
+ */
+@Composable
+fun Modifier.detailSharedElement(key: Any, shape: Shape? = null): Modifier {
+    val clip = if (shape == null) Modifier else Modifier.clip(shape)
+    val scopes = LocalDetailSharedScopes.current ?: return this.then(clip)
+    return with(scopes.transition) {
+        this@detailSharedElement.sharedElement(
+            sharedContentState = rememberSharedContentState(key),
+            animatedVisibilityScope = scopes.visibility,
+            boundsTransform = DepthBounds,
+            // above a card flying with it
+            zIndexInOverlay = 1f,
+        )
+    }.then(clip)
+}
+
+/**
+ * Like [detailSharedElement] for things that differ in size between the two sides, such as a title set larger
+ * in the detail: the bounds move and the content scales with them instead of reflowing, cross-fading from one
+ * side's look to the other's.
+ */
+@Composable
+fun Modifier.detailSharedBounds(key: Any): Modifier {
+    val scopes = LocalDetailSharedScopes.current ?: return this
+    return with(scopes.transition) {
+        this@detailSharedBounds.sharedBounds(
+            sharedContentState = rememberSharedContentState(key),
+            animatedVisibilityScope = scopes.visibility,
+            boundsTransform = DepthBounds,
+            resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds(ContentScale.Fit, Alignment.CenterStart),
+            zIndexInOverlay = 1f,
+        )
+    }
+}
+
+/**
+ * Inside a phone's [DetailTransition] (or [ListDetailPanes]) with shared elements, the card of a list item and
+ * the header of its detail (the block holding the big cover and the title) marked with the same [key] open into
+ * each other (Desktop Kit 2.3.0): the card grows into the header, its corners straightening from [shape] and its
+ * surface turning into the page, while the header's content fades in over the card's; on the way back the header
+ * shrinks into the card's place. The detail then does not slide: it fades in after the card. A
+ * [detailSharedElement] cover inside both still flies on its own, above the card. Put it first in the modifiers of
+ * both. Elsewhere, and with reduced motion, nothing changes.
+ */
+@Composable
+fun Modifier.detailSharedCard(key: Any, shape: CornerBasedShape = RoundedCornerShape(NagTheme.dimens.radiusCard)): Modifier {
+    val cards = LocalDetailCards.current
+    if (cards != null) {
+        DisposableEffect(cards) {
+            cards.registered++
+            onDispose { cards.registered-- }
+        }
+    }
+    val scopes = LocalDetailSharedScopes.current ?: return this
+    val colors = NagTheme.colors
+    val list = scopes.side == DetailSide.List
+    val density = LocalDensity.current
+    // the corners: the card's at rest in the list, none at rest in the detail, moving with the transition
+    val rested = with(density) { shape.topStart.toPx(Size(100f, 100f), this) }
+    val corner by scopes.visibility.transition.animateDp(
+        transitionSpec = { tween(NagMotion.LONG, easing = NagMotion.Emphasized) },
+        label = "cardCorners",
+    ) { state ->
+        val atRest = state == EnterExitState.Visible
+        with(density) { if (atRest == list) rested.toDp() else 0.dp }
+    }
+    val cornerPx: () -> Float = { with(density) { corner.toPx() } }
+    val surface = if (list) colors.surface else colors.background
+    val clip = remember(scopes) { CornerClip(cornerPx) }
+    return with(scopes.transition) {
+        val state = rememberSharedContentState(key)
+        this@detailSharedCard
+            .sharedBounds(
+                sharedContentState = state,
+                animatedVisibilityScope = scopes.visibility,
+                enter = fadeIn(tween(NagMotion.MEDIUM + 10, delayMillis = NagMotion.SHORT - 10, easing = NagMotion.StandardDecelerate)),
+                exit = fadeOut(tween(NagMotion.SHORT - 10, easing = NagMotion.StandardAccelerate)),
+                boundsTransform = DepthBounds,
+                resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds(ContentScale.FillWidth, Alignment.TopStart),
+                clipInOverlayDuringTransition = clip,
+            )
+            // a surface only while this card flies (the others in the list stay as they are)
+            .drawBehind {
+                if (isTransitionActive && state.isMatchFound) drawRoundRect(surface, cornerRadius = CornerRadius(cornerPx()))
+            }
+    }
+}
+
+/** The overlay clip of a flying card: a rounded rectangle whose radius [cornerPx] gives per draw. */
+private class CornerClip(private val cornerPx: () -> Float) : SharedTransitionScope.OverlayClip {
+    private val path = Path()
+
+    override fun getClipPath(
+        sharedContentState: SharedTransitionScope.SharedContentState,
+        bounds: Rect,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Path? {
+        path.reset()
+        path.addRoundRect(RoundRect(bounds, CornerRadius(cornerPx())))
+        return path
+    }
+}
+
+// ------------------------------------------------------------------ the transition
+
 private const val LIST = "list"
 private const val DETAIL = "detail"
 
+/** The detail last given, kept while it closes; plain, so keeping it never redraws anything. */
+private class DetailHold<T : Any> {
+    var last: T? = null
+}
+
 /**
  * A list and the detail opened from it, on one place of the screen (Desktop Kit 0.2.0's
- * DetailTransition): [detail] non-null opens it with [DetailMotion], null closes it, and Back
- * (the predictive gesture on Android 14 and later) calls [onBack] while it is open, unless
- * [handleBack] is false. Unlike the kit's, the list stays composed under the detail, so it keeps
- * its scroll position and selection; once covered it is neither drawn nor read out. [detailKey]
- * tells details apart; the detail's content stays while it closes.
+ * DetailTransition): [detail] non-null opens it, null closes it, and Back (the predictive gesture)
+ * calls [onBack] while it is open, unless [handleBack] is false. Unlike the kit's, the list stays
+ * composed under the detail, so it keeps its scroll position and selection; once covered it is
+ * neither measured, drawn nor read out. [detailKey] tells details apart; the detail's content stays
+ * while it closes and shows the latest object given under its key.
+ *
+ * 1.0.3 (Desktop Kit 2.3.0): on a phone the detail opens in depth ([DetailDepth]), Back is the
+ * gesture seeking the closing with the list really behind, and a change of mind runs the way back;
+ * with [sharedElements] the elements marked with [detailSharedElement], [detailSharedBounds] and
+ * [detailSharedCard] fly between the two sides (a lookahead pass only while something moves). Tablet
+ * and DeX windows keep [DetailMotion]; with reduced motion the detail simply appears.
  */
 @Composable
 fun <T : Any> DetailTransition(
@@ -218,45 +805,75 @@ fun <T : Any> DetailTransition(
     modifier: Modifier = Modifier,
     handleBack: Boolean = true,
     detailKey: (T) -> Any = { it },
+    sharedElements: Boolean = false,
     list: @Composable () -> Unit,
     detailContent: @Composable (T) -> Unit,
 ) {
     val motion = NagTheme.motion
     val tier = LocalMotionTier.current
-    val state = rememberDetailMotion(detail != null)
-    var retained by remember { mutableStateOf(detail) }
+    val phone = tier == MotionTier.Gesture
+    val animated = !motion.reduced && tier != MotionTier.Reduced
+    val open = detail != null
+    val state = rememberDetailMotion(open)
+    val depth = rememberDepth(open)
+    val hold = remember { DetailHold<T>() }
+    if (detail != null) hold.last = detail
+    // the wider windows' detail still drawn while it closes
+    var lingering by remember { mutableStateOf(open) }
+    val latestDetail by rememberUpdatedState(detail)
     // registered before the detail's own handlers: those (a selection inside it) go first
-    DetailBackHandler(enabled = handleBack && detail != null, state = state, onBack = onBack)
-    LaunchedEffect(detail?.let(detailKey)) {
-        if (detail != null) {
-            retained = detail
-            state.show(open = true, motion, tier)
+    DetailBackHandler(enabled = handleBack && open && !phone, state = state, onBack = onBack)
+    DepthBackHandler(enabled = handleBack && open && phone, depth = depth, animated = animated, isOpen = { latestDetail != null }, onBack = onBack)
+    LaunchedEffect(open, phone, animated) {
+        if (open) lingering = true
+        if (phone) {
+            state.stand(open)
+            depth.drive(open, animated)
         } else {
-            state.show(open = false, motion, tier)
-            retained = null
+            depth.stand(open)
+            state.show(open, motion, tier)
+        }
+        if (!open) {
+            lingering = false
+            hold.last = null
         }
     }
-    val shown = detail ?: retained
+    val slot = open || (if (phone) depth.seekable.currentState || depth.seekable.targetState else lingering)
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
-    val covered by remember(state) { derivedStateOf { state.covered } }
-    Layout(
-        modifier = modifier.fillMaxSize().clipToBounds().detailShade(state),
-        content = {
-            Box(
-                Modifier.layoutId(LIST).then(if (shown != null && covered) Modifier.clearAndSetSemantics {} else Modifier),
-                propagateMinConstraints = true,
-            ) { list() }
-            if (shown != null) Box(Modifier.layoutId(DETAIL), propagateMinConstraints = true) { detailContent(shown) }
-        },
-    ) { measurables, constraints ->
-        val w = constraints.maxWidth
-        val h = constraints.maxHeight
-        val fixed = Constraints.fixed(w, h)
-        val paneM = measurables.firstOrNull { it.layoutId == DETAIL }
-        // a covered list stays composed but is not measured
-        val list = if (paneM != null && covered) null else measurables.first { it.layoutId == LIST }.measure(fixed)
-        val pane = paneM?.measure(fixed)
-        layout(w, h) { placeListAndDetail(state, list, pane, w, direction) }
+    val covered by remember(state, depth, phone) { derivedStateOf { if (phone) depth.covered else state.covered } }
+    val shared = sharedElements && phone && animated
+    DepthHost(
+        depth,
+        open,
+        shared,
+        modifier.fillMaxSize().clipToBounds().then(if (phone) Modifier else Modifier.detailShade(state)),
+    ) { scopes ->
+        val shown = detail ?: hold.last
+        Layout(
+            modifier = Modifier.fillMaxSize(),
+            content = {
+                Box(
+                    Modifier.layoutId(LIST).then(if (slot && covered) Modifier.clearAndSetSemantics {} else Modifier),
+                    propagateMinConstraints = true,
+                ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
+                if (slot && shown != null) {
+                    Box(Modifier.layoutId(DETAIL), propagateMinConstraints = true) {
+                        DepthSide(scopes, DetailSide.Detail, depth, shared) { detailContent(shown) }
+                    }
+                }
+            },
+        ) { measurables, constraints ->
+            val w = constraints.maxWidth
+            val h = constraints.maxHeight
+            val fixed = Constraints.fixed(w, h)
+            val paneM = measurables.firstOrNull { it.layoutId == DETAIL }
+            // a covered list stays composed but is not measured
+            val listPlaceable = if (paneM != null && covered) null else measurables.first { it.layoutId == LIST }.measure(fixed)
+            val pane = paneM?.measure(fixed)
+            layout(w, h) {
+                if (phone) placeDepth(depth, listPlaceable, pane, w, direction) else placeListAndDetail(state, listPlaceable, pane, w, direction)
+            }
+        }
     }
 }
 
