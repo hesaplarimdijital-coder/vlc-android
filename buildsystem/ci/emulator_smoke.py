@@ -1046,19 +1046,47 @@ class Smoke:
             self.sheet_drag(b)
 
     def sheet_drag(self, button):
-        """1.0.2: the track's sheet again, dragged down from its middle (over its rows, not its handle): it goes."""
+        """1.0.2: the track's sheet again, dragged down from its middle (over its rows, not its handle): it goes.
+        1.0.3: dragged once it stands still, by drag() (every point a move of its own), and read until it has gone."""
         s = self.strings[self.lang]
         nodes = self.step("A track's ⋯ again", lambda: self.tap(button))
         rows = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_add_to_queue"]]
         if not self.check("the track's sheet opens again", bool(rows)):
             return
         w, h = self.screen_size(nodes)
-        sheet = self.by_id(nodes, "sheet")
-        box = sheet[0].b if sheet else (0, rows[0].b[1], w, h)
+        box = self.sheet_still(nodes) or (0, rows[0].b[1], w, h)
         x, y = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
-        nodes = self.step("Drag the sheet down from its middle", lambda: self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97))), wait=1.5)
-        self.check("a drag down from the sheet's middle closes it",
-                   s["nag_add_to_queue"] not in self.texts(nodes) and not self.by_id(nodes, "sheet"), "from y=%d of %d" % (y, h))
+        how = {}
+        nodes = self.step("Drag the sheet down from its middle", lambda: how.update(self.drag(x, y, x, int(h * 0.97))), wait=0.5)
+        gone = lambda ns: s["nag_add_to_queue"] not in self.texts(ns) and not self.by_id(ns, "sheet")
+        if not gone(nodes):
+            nodes, _ = self.wait_for(gone, 4)
+        self.check("a drag down from the sheet's middle closes it", gone(nodes),
+                   "from y=%d of %d, %d moves in %d ms" % (y, h, how.get("moves", 0), how.get("ms", 0)))
+
+    def sheet_still(self, nodes, seconds=3.0):
+        """The sheet's bounds once two readings agree (it has finished sliding up), or None without a sheet."""
+        prev = self.by_id(nodes, "sheet")
+        end = time.time() + seconds
+        while prev and time.time() < end:
+            cur = self.by_id(self.nodes(self.dump()), "sheet")
+            if cur and cur[0].b == prev[0].b:
+                return cur[0].b
+            prev = cur
+        return prev[0].b if prev else None
+
+    def drag(self, x0, y0, x1, y1, moves=12):
+        """1.0.3: a finger's slow drag from (x0, y0) to (x1, y1): down, [moves] moves, up where the last move ended.
+        `input swipe` waits for each move to be handled before it sends the next and stops sending moves when its time
+        is up: on an emulator whose frames take 100 ms and more it can send one move and then lift the finger at the far
+        end, and no drag takes the way the lift carries (1.0.2's flaky sheet check). Here each point is a move of its
+        own and the finger lifts where the last one ended. Returns {"moves", "ms"}."""
+        pts = [(x0 + (x1 - x0) * i // moves, y0 + (y1 - y0) * i // moves) for i in range(1, moves + 1)]
+        cmds = ["input motionevent DOWN %d %d" % (x0, y0)] + ["input motionevent MOVE %d %d" % p for p in pts] \
+            + ["input motionevent UP %d %d" % (x1, y1)]
+        t = time.time()
+        self.sh(" ; ".join(cmds), timeout=90)
+        return {"moves": moves, "ms": int((time.time() - t) * 1000)}
 
     def music_list(self, nodes):
         """The Music's scrolling list (its biggest scrollable view) or None."""
